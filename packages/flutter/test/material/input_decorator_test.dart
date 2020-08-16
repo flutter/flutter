@@ -1451,44 +1451,155 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
   });
 
-  testWidgets('InputDecorator disabledColor should be set', (WidgetTester tester) async {
-    const Color expectedColor = Color(0xFF123456);
+  group('DecorationIconColors', (){
+    testWidgets('should use default color if decorationIconColors is not set', (WidgetTester tester) async{
+      await tester.pumpWidget(
+          buildInputDecorator(
+              isFocused: false,
+              decoration: const InputDecoration(
+                icon: Icon(Icons.baby_changing_station),
+              )
+          )
+      );
 
-    await tester.pumpWidget(
-      buildInputDecorator(
-        disabledColor: expectedColor,
-        isFocused: false,
-        decoration: const InputDecoration(
-          icon: Icon(Icons.add_circle),
-          enabled: false,
-        )
-      )
-    );
+      final Element icon = tester.element(find.byIcon(Icons.baby_changing_station));
+      final IconTheme iconTheme = icon.findAncestorWidgetOfExactType<IconTheme>();
 
-    final IconTheme iconTheme = tester.firstWidget(
-        find.ancestor(
-          of: find.byIcon(Icons.add_circle),
-          matching: find.byType(IconTheme),
-        )) as IconTheme;
+      expect(iconTheme.data.color, Colors.black45);
+    });
 
-    expect(iconTheme.data.color, expectedColor);
-  });
+    testWidgets('should take the active color into account', (WidgetTester tester) async {
+      const Color expectedColor = Color(0xFF654321);
 
-  testWidgets('InputDecorator should take iconColor into account', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      buildInputDecorator(
-        decoration: const InputDecoration(
-          icon: Icon(Icons.do_not_disturb),
-          iconColor: Color(0xFF654321),
-        )
-      )
-    );
+      await tester.pumpWidget(
+          buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                  enabled: true,
+                  icon: Icon(Icons.baby_changing_station_rounded),
+                  decorationIconColors: DecorationIconColors(
+                      active: expectedColor
+                  )
+              )
+          )
+      );
 
-    final IconTheme iconTheme = tester.firstWidget(find.ancestor(
-            of: find.byIcon(Icons.do_not_disturb),
-            matching: find.byType(IconTheme))) as IconTheme;
+      final Element icon = tester.element(find.byIcon(Icons.baby_changing_station_rounded));
+      final IconTheme iconTheme = icon.findAncestorWidgetOfExactType<IconTheme>();
 
-    expect(iconTheme.data.color, const Color(0xFF654321));
+      expect(iconTheme.data.color, expectedColor);
+    });
+
+    testWidgets('should use the default color if decorationIconColors is not set', (WidgetTester tester) async {
+      await tester.pumpWidget(
+          buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                icon: Icon(Icons.archive_rounded),
+              )
+          )
+      );
+
+      final Element icon = tester.element(find.byIcon(Icons.archive_rounded));
+      final IconTheme iconTheme = icon.findAncestorWidgetOfExactType<IconTheme>();
+
+      expect(iconTheme.data.color, Colors.black45);
+    });
+
+    testWidgets('should take the hover icon color into account', (WidgetTester tester) async {
+      const Color expectedColor = Color(0xFF362271);
+      await tester.pumpWidget(
+          buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                  icon: Icon(Icons.archive_rounded),
+                  decorationIconColors: DecorationIconColors(
+                    hover:expectedColor,
+                  )
+              )
+          )
+      );
+
+      final Element icon = tester.element(find.byIcon(Icons.archive_rounded));
+      final IconTheme iconTheme = icon.findAncestorWidgetOfExactType<IconTheme>();
+
+      expect(iconTheme.data.color, expectedColor);
+    });
+
+    testWidgets('should take primaryColor if decorationIconColors is not set', (WidgetTester tester) async {
+      await tester.pumpWidget(
+          buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                enabled: true,
+                icon: Icon(Icons.baby_changing_station_sharp),
+              )
+          )
+      );
+
+      final Element icon = tester.element(find.byIcon(Icons.baby_changing_station_sharp));
+      final IconTheme iconTheme = icon.findAncestorWidgetOfExactType<IconTheme>();
+      final Theme theme = icon.findAncestorWidgetOfExactType<Theme>();
+
+      expect(iconTheme.data.color, theme.data.primaryColor);
+    });
+
+    testWidgets('should take disabledColor into account', (WidgetTester tester) async {
+      const Color expectedColor = Color(0xFF123456);
+
+      await tester.pumpWidget(
+          buildInputDecorator(
+              disabledColor: expectedColor,
+              isFocused: false,
+              decoration: const InputDecoration(
+                icon: Icon(Icons.add_circle),
+                enabled: false,
+              )
+          )
+      );
+
+      final Element icon = tester.element(find.byIcon(Icons.add_circle));
+      final IconTheme iconTheme = icon.findAncestorWidgetOfExactType<IconTheme>();
+
+      expect(iconTheme.data.color, expectedColor);
+    });
+
+    testWidgets('should take default iconColor into account', (WidgetTester tester) async {
+      await tester.pumpWidget(
+          buildInputDecorator(
+              decoration: const InputDecoration(
+                icon: Icon(Icons.do_not_disturb),
+                decorationIconColors: DecorationIconColors(
+                  iconColor: Color(0xFF654321),
+                ),
+              )
+          )
+      );
+
+      final Element icon = tester.element(find.byIcon(Icons.do_not_disturb));
+      final IconTheme iconTheme = icon.findAncestorWidgetOfExactType<IconTheme>();
+
+      expect(iconTheme.data.color, const Color(0xFF654321));
+    });
+
+    testWidgets('should take disabled icon color into account', (WidgetTester tester) async {
+      await tester.pumpWidget(
+          buildInputDecorator(
+              decoration: const InputDecoration(
+                icon: Icon(Icons.zoom_in),
+                enabled: false,
+                decorationIconColors: DecorationIconColors(
+                  disabled: Color(0xFF123456),
+                ),
+              )
+          )
+      );
+
+      final Element icon = tester.element(find.byIcon(Icons.zoom_in));
+      final IconTheme iconTheme = icon.findAncestorWidgetOfExactType<IconTheme>();
+
+      expect(iconTheme.data.color, const Color(0xFF123456));
+    });
   });
 
   testWidgets('InputDecorator prefixIconConstraints/suffixIconConstraints', (WidgetTester tester) async {

@@ -468,6 +468,30 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 }
 
+// TODO: Add Documentation
+/// Defines the different IconColor states that the InputDecoration provides.
+class DecorationIconColors {
+  // TODO: Add more documentation
+  /// Builds ...
+  const DecorationIconColors({
+        this.iconColor,
+        this.hover,
+        this.disabled,
+        this.active,
+      });
+  /// This iconColor is the default fallback color that is shown if the TextField
+  final Color iconColor;
+  /// The color of the focus highlight for the icon shown if the container
+  /// is being hovered over by a mouse.
+  final Color hover;
+  /// The color of the focus highlight for the icon shown if the container
+  /// is being disabled.
+  final Color disabled;
+  /// The color of the focus highlight for the icon shown if the container
+  /// is being active.
+  final Color active;
+}
+
 /// Defines the behavior of the floating label.
 enum FloatingLabelBehavior {
   /// The label will always be positioned within the content, or hidden.
@@ -2073,11 +2097,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   Color _getDefaultIconColor(ThemeData themeData) {
     if (!decoration.enabled && !isFocused)
-      return themeData.disabledColor;
+      return decoration.decorationIconColors?.disabled ?? themeData.disabledColor;
 
-    if(decoration.iconColor != null){
-      return decoration.iconColor;
-    }
+    if (isHovering)
+      return decoration.decorationIconColors?.hover ?? Colors.black45;
+
+    if (decoration.decorationIconColors?.iconColor != null)
+      return decoration.decorationIconColors.iconColor;
 
     switch (themeData.brightness) {
       case Brightness.dark:
@@ -2249,7 +2275,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Color activeColor = _getActiveColor(themeData);
     final bool decorationIsDense = decoration.isDense == true; // isDense == null, same as false
     final double iconSize = decorationIsDense ? 18.0 : 24.0;
-    final Color iconColor = isFocused ? activeColor : _getDefaultIconColor(themeData);
+    final Color iconColor = isFocused ?
+      decoration.decorationIconColors?.active ?? activeColor :
+      _getDefaultIconColor(themeData);
 
     final Widget icon = decoration.icon == null ? null :
       Padding(
@@ -2516,7 +2544,7 @@ class InputDecoration {
   /// Similarly, only one of [suffix] and [suffixText] can be specified.
   const InputDecoration({
     this.icon,
-    this.iconColor,
+    this.decorationIconColors,
     this.labelText,
     this.labelStyle,
     this.helperText,
@@ -2591,7 +2619,7 @@ class InputDecoration {
        assert(!(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
               'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always'),
        icon = null,
-       iconColor = null,
+       decorationIconColors = null,
        labelText = null,
        labelStyle = null,
        helperText = null,
@@ -2642,8 +2670,11 @@ class InputDecoration {
   /// See [Icon], [ImageIcon].
   final Widget icon;
 
-  /// If specified, the icon color used for the default [icon] color
-  final Color iconColor;
+  /// Color of the icon
+  ///
+  /// When the input field is unfocused the icon of the Textfield receives this color.
+  /// This does not apply to if the TextField is active, inactive or hovered.
+  final DecorationIconColors decorationIconColors;
 
   /// Text that describes the input field.
   ///
@@ -3329,7 +3360,7 @@ class InputDecoration {
   /// by the new values.
   InputDecoration copyWith({
     Widget icon,
-    Color iconColor,
+    DecorationIconColors decorationIconColors,
     String labelText,
     TextStyle labelStyle,
     String helperText,
@@ -3375,7 +3406,7 @@ class InputDecoration {
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
-      iconColor: iconColor ?? this.iconColor,
+      decorationIconColors: decorationIconColors ?? this.decorationIconColors,
       labelText: labelText ?? this.labelText,
       labelStyle: labelStyle ?? this.labelStyle,
       helperText: helperText ?? this.helperText,
@@ -3464,7 +3495,7 @@ class InputDecoration {
       return false;
     return other is InputDecoration
         && other.icon == icon
-        && other.iconColor == iconColor
+        && other.decorationIconColors == decorationIconColors
         && other.labelText == labelText
         && other.labelStyle == labelStyle
         && other.helperText == helperText
@@ -3513,7 +3544,7 @@ class InputDecoration {
   int get hashCode {
     final List<Object> values = <Object>[
       icon,
-      iconColor,
+      decorationIconColors,
       labelText,
       labelStyle,
       helperText,
@@ -3566,7 +3597,7 @@ class InputDecoration {
   String toString() {
     final List<String> description = <String>[
       if (icon != null) 'icon: $icon',
-      if (iconColor != null) 'iconColor: $iconColor',
+      if (decorationIconColors != null) 'decorationIconColors: $decorationIconColors',
       if (labelText != null) 'labelText: "$labelText"',
       if (helperText != null) 'helperText: "$helperText"',
       if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
