@@ -761,7 +761,7 @@ void main() {
         ],
       ),
     ));
-    
+
     expect((tester.firstWidget(find.byKey(first)) as Dismissible).hitTestBehavior, HitTestBehavior.opaque);
     expect((tester.firstWidget(find.byKey(second)) as Dismissible).hitTestBehavior, HitTestBehavior.translucent);
     expect((tester.firstWidget(find.byKey(third)) as Dismissible).hitTestBehavior, HitTestBehavior.deferToChild);
