@@ -490,7 +490,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 /// }
 /// ```
 /// {@end-tool}
-/// 
+///
 /// See also:
 ///
 /// * [InputDecoration] where it is used
