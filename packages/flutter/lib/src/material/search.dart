@@ -175,7 +175,7 @@ abstract class SearchDelegate<T> {
   /// clear the query and show the suggestions again (via [showSuggestions]) if
   /// the results are currently shown.
   ///
-  /// Returns null if no widget should be shown
+  /// Returns null if no widget should be shown.
   ///
   /// See also:
   ///
@@ -264,12 +264,14 @@ abstract class SearchDelegate<T> {
 
   /// The hint text that is shown in the search field when it is empty.
   ///
-  /// If this value is set to null, the value of MaterialLocalizations.of(context).searchFieldLabel will be used instead.
+  /// If this value is set to null, the value of
+  /// `MaterialLocalizations.of(context).searchFieldLabel` will be used instead.
   final String searchFieldLabel;
 
   /// The style of the [searchFieldLabel].
   ///
-  /// If this value is set to null, the value of the ambient [Theme]'s [ThemeData.inputDecorationTheme.hintStyle] will be used instead.
+  /// If this value is set to null, the value of the ambient [Theme]'s
+  /// [InputDecorationTheme.hintStyle] will be used instead.
   final TextStyle searchFieldStyle;
 
   /// The type of action button to use for the keyboard.

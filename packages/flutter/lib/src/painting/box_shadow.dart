@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:math' as math;
 import 'dart:ui' as ui show Shadow, lerpDouble;
@@ -79,19 +78,19 @@ class BoxShadow extends ui.Shadow {
   /// offset and a zero blurRadius.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BoxShadow lerp(BoxShadow a, BoxShadow b, double t) {
+  static BoxShadow? lerp(BoxShadow? a, BoxShadow? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return b.scale(t);
+      return b!.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
     return BoxShadow(
-      color: Color.lerp(a.color, b.color, t),
-      offset: Offset.lerp(a.offset, b.offset, t),
-      blurRadius: ui.lerpDouble(a.blurRadius, b.blurRadius, t),
-      spreadRadius: ui.lerpDouble(a.spreadRadius, b.spreadRadius, t),
+      color: Color.lerp(a.color, b.color, t)!,
+      offset: Offset.lerp(a.offset, b.offset, t)!,
+      blurRadius: ui.lerpDouble(a.blurRadius, b.blurRadius, t)!,
+      spreadRadius: ui.lerpDouble(a.spreadRadius, b.spreadRadius, t)!,
     );
   }
 
@@ -100,7 +99,7 @@ class BoxShadow extends ui.Shadow {
   /// If the lists differ in length, excess items are lerped with null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static List<BoxShadow> lerpList(List<BoxShadow> a, List<BoxShadow> b, double t) {
+  static List<BoxShadow>? lerpList(List<BoxShadow>? a, List<BoxShadow>? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
@@ -108,7 +107,7 @@ class BoxShadow extends ui.Shadow {
     b ??= <BoxShadow>[];
     final int commonLength = math.min(a.length, b.length);
     return <BoxShadow>[
-      for (int i = 0; i < commonLength; i += 1) BoxShadow.lerp(a[i], b[i], t),
+      for (int i = 0; i < commonLength; i += 1) BoxShadow.lerp(a[i], b[i], t)!,
       for (int i = commonLength; i < a.length; i += 1) a[i].scale(1.0 - t),
       for (int i = commonLength; i < b.length; i += 1) b[i].scale(t),
     ];

@@ -316,7 +316,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// [handleDoubleTap], and [handleLongPress].
   ///
   /// If there are any gesture recognizers in the text span, the [handleEvent]
-  /// will still propagate pointer events to those recognizers
+  /// will still propagate pointer events to those recognizers.
   ///
   /// The default value of this property is false.
   bool ignorePointer;

@@ -253,7 +253,7 @@ class MediaQueryData {
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// For apps that might be deployed on Android Q devices with full gesture
-  /// navigation enabled, use [MediaQuery.systemGestureInsets] with [Padding]
+  /// navigation enabled, use [systemGestureInsets] with [Padding]
   /// to avoid having the left and right edges of the [Slider] from appearing
   /// within the area reserved for system gesture navigation.
   ///
@@ -309,7 +309,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [Window.accessibilityFeatures], where the setting originates.
   final bool accessibleNavigation;
 
   /// Whether the device is inverting the colors of the platform.
@@ -318,7 +318,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [Window.accessibilityFeatures], where the setting originates.
   final bool invertColors;
 
   /// Whether the user requested a high contrast between foreground and background
@@ -333,7 +333,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [Window.accessibilityFeatures], where the setting originates.
   final bool disableAnimations;
 
   /// Whether the platform is requesting that text be drawn with a bold font
@@ -341,7 +341,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [Window.accessibilityFeatures], where the setting originates.
   final bool boldText;
 
   /// Describes the navigation mode requested by the platform.
@@ -843,6 +843,17 @@ class MediaQuery extends InheritedWidget {
     return MediaQuery.of(context, nullOk: true)?.platformBrightness ?? Brightness.light;
   }
 
+  /// Returns highContrast for the nearest MediaQuery ancestor or false, if no
+  /// such ancestor exists.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQueryData.highContrast], which indicates the platform's
+  ///    desire to increase contrast.
+  static bool highContrastOf(BuildContext context) {
+    return MediaQuery.of(context, nullOk: true)?.highContrast ?? false;
+  }
+
   /// Returns the boldText accessibility setting for the nearest MediaQuery
   /// ancestor, or false if no such ancestor exists.
   static bool boldTextOverride(BuildContext context) {
@@ -859,7 +870,7 @@ class MediaQuery extends InheritedWidget {
   }
 }
 
-/// Describes the navigation mode to be set by a [MediaQuery] widget
+/// Describes the navigation mode to be set by a [MediaQuery] widget.
 ///
 /// The different modes indicate the type of navigation to be used in a widget
 /// subtree for those widgets sensitive to it.

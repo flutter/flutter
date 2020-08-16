@@ -1117,17 +1117,25 @@ void main() {
         Scaffold(
           resizeToAvoidBottomInset: false,
           body: const Placeholder(),
-          bottomNavigationBar: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.add),
-                title: Text('test'),
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.add),
-                title: Text('test'),
-              ),
-            ],
+          bottomNavigationBar: Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  return BottomNavigationBar(
+                    items: const <BottomNavigationBarItem>[
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.add),
+                        title: Text('test'),
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.add),
+                        title: Text('test'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
           ),
         ),
       );

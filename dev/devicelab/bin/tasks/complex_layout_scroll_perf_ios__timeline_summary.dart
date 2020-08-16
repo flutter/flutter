@@ -10,5 +10,5 @@ import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createComplexLayoutScrollPerfTest());
+  await task(createComplexLayoutScrollPerfTest(needsMeasureCpuGpu: true));
 }

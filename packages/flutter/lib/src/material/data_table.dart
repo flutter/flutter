@@ -166,12 +166,12 @@ class DataRow {
   ///
   /// ```dart
   /// DataRow(
-  ///   color: MaterialStateProperty.resolveWith<Color>(Set<MaterialState> states) {
+  ///   color: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.selected))
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     return null;  // Use the default value.
-  ///   },
-  ///)
+  ///   }),
+  /// )
   /// ```
   ///
   /// See also:
@@ -370,6 +370,11 @@ class DataCell {
 /// ```
 /// {@end-tool}
 ///
+/// [DataTable] can be sorted on the basis of any column in [columns] in
+/// ascending or descending order. If [sortColumnIndex] is non-null, then the
+/// table will be sorted by the values in the specified column. The boolean
+/// [sortAscending] flag controls the sort order.
+///
 /// See also:
 ///
 ///  * [DataColumn], which describes a column in the data table.
@@ -498,11 +503,11 @@ class DataTable extends StatelessWidget {
   /// {@template flutter.material.dataTable.showCheckboxColumn}
   /// Whether the widget should display checkboxes for selectable rows.
   ///
-  /// If true, a [CheckBox] will be placed at the beginning of each row that is
+  /// If true, a [Checkbox] will be placed at the beginning of each row that is
   /// selectable. However, if [DataRow.onSelectChanged] is not set for any row,
   /// checkboxes will not be placed, even if this value is true.
   ///
-  /// If false, all rows will not display a [CheckBox].
+  /// If false, all rows will not display a [Checkbox].
   /// {@endtemplate}
   final bool showCheckboxColumn;
 
@@ -605,7 +610,7 @@ class DataTable extends StatelessWidget {
       return onSort == null ? const <Widget>[] : <Widget>[
         _SortArrow(
           visible: sorted,
-          down: sorted ? ascending : null,
+          up: sorted ? ascending : null,
           duration: _sortArrowAnimationDuration,
         ),
         const SizedBox(width: _sortArrowPadding),
@@ -919,13 +924,13 @@ class _SortArrow extends StatefulWidget {
   const _SortArrow({
     Key key,
     this.visible,
-    this.down,
+    this.up,
     this.duration,
   }) : super(key: key);
 
   final bool visible;
 
-  final bool down;
+  final bool up;
 
   final Duration duration;
 
@@ -942,7 +947,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
   Animation<double> _orientationAnimation;
   double _orientationOffset = 0.0;
 
-  bool _down;
+  bool _up;
 
   static final Animatable<double> _turnTween = Tween<double>(begin: 0.0, end: math.pi)
     .chain(CurveTween(curve: Curves.easeIn));
@@ -967,7 +972,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
       ..addListener(_rebuild)
       ..addStatusListener(_resetOrientationAnimation);
     if (widget.visible)
-      _orientationOffset = widget.down ? 0.0 : math.pi;
+      _orientationOffset = widget.up ? 0.0 : math.pi;
   }
 
   void _rebuild() {
@@ -988,12 +993,12 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
   void didUpdateWidget(_SortArrow oldWidget) {
     super.didUpdateWidget(oldWidget);
     bool skipArrow = false;
-    final bool newDown = widget.down ?? _down;
+    final bool newUp = widget.up ?? _up;
     if (oldWidget.visible != widget.visible) {
       if (widget.visible && (_opacityController.status == AnimationStatus.dismissed)) {
         _orientationController.stop();
         _orientationController.value = 0.0;
-        _orientationOffset = newDown ? 0.0 : math.pi;
+        _orientationOffset = newUp ? 0.0 : math.pi;
         skipArrow = true;
       }
       if (widget.visible) {
@@ -1002,14 +1007,14 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
         _opacityController.reverse();
       }
     }
-    if ((_down != newDown) && !skipArrow) {
+    if ((_up != newUp) && !skipArrow) {
       if (_orientationController.status == AnimationStatus.dismissed) {
         _orientationController.forward();
       } else {
         _orientationController.reverse();
       }
     }
-    _down = newDown;
+    _up = newUp;
   }
 
   @override
@@ -1031,7 +1036,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
                              ..setTranslationRaw(0.0, _arrowIconBaselineOffset, 0.0),
         alignment: Alignment.center,
         child: Icon(
-          Icons.arrow_downward,
+          Icons.arrow_upward,
           size: _arrowIconSize,
           color: (Theme.of(context).brightness == Brightness.light) ? Colors.black87 : Colors.white70,
         ),

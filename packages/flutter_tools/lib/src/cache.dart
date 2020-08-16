@@ -25,7 +25,7 @@ class DevelopmentArtifact {
 
   /// The name of the artifact.
   ///
-  /// This should match the flag name in precache.dart
+  /// This should match the flag name in precache.dart.
   final String name;
 
   /// A feature to control the visibility of this artifact.

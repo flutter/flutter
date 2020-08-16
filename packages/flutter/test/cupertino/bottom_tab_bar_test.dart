@@ -78,6 +78,29 @@ void main() {
     expect(actualActive.text.style.color, const Color(0xFF123456));
   });
 
+
+  testWidgets('BottomNavigationBar.label will create a text widget', (WidgetTester tester) async {
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoTabBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            label: 'Tab 1',
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            label: 'Tab 2',
+          ),
+        ],
+        currentIndex: 1,
+      ),
+    ));
+
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsOneWidget);
+  });
+
   testWidgets('Active and inactive colors dark mode', (WidgetTester tester) async {
     const CupertinoDynamicColor dynamicActiveColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF000000),

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:typed_data';
 
@@ -25,12 +24,12 @@ abstract class MessageCodec<T> {
   /// Encodes the specified [message] in binary.
   ///
   /// Returns null if the message is null.
-  ByteData encodeMessage(T message);
+  ByteData? encodeMessage(T message);
 
   /// Decodes the specified [message] from binary.
   ///
   /// Returns null if the message is null.
-  T decodeMessage(ByteData message);
+  T decodeMessage(ByteData? message);
 }
 
 /// An command object representing the invocation of a named method.
@@ -68,7 +67,7 @@ abstract class MethodCodec {
   ByteData encodeMethodCall(MethodCall methodCall);
 
   /// Decodes the specified [methodCall] from binary.
-  MethodCall decodeMethodCall(ByteData methodCall);
+  MethodCall decodeMethodCall(ByteData? methodCall);
 
   /// Decodes the specified result [envelope] from binary.
   ///
@@ -83,7 +82,7 @@ abstract class MethodCodec {
   ///
   /// The specified error [code], human-readable error [message], and error
   /// [details] correspond to the fields of [PlatformException].
-  ByteData encodeErrorEnvelope({ @required String code, String message, dynamic details });
+  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details });
 }
 
 
@@ -105,7 +104,7 @@ class PlatformException implements Exception {
   /// [message], and with the optional error [details] which must be a valid
   /// value for the [MethodCodec] involved in the interaction.
   PlatformException({
-    @required this.code,
+    required this.code,
     this.message,
     this.details,
   }) : assert(code != null);
@@ -114,7 +113,7 @@ class PlatformException implements Exception {
   final String code;
 
   /// A human-readable error message, possibly null.
-  final String message;
+  final String? message;
 
   /// Error details, possibly null.
   final dynamic details;
@@ -139,7 +138,7 @@ class MissingPluginException implements Exception {
   MissingPluginException([this.message]);
 
   /// A human-readable error message, possibly null.
-  final String message;
+  final String? message;
 
   @override
   String toString() => 'MissingPluginException($message)';

@@ -329,6 +329,7 @@ Future<void> _runToolTests() async {
       } else {
         await _pubRunTest(
           toolsPath,
+          forceSingleCore: true,
           testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
           enableFlutterToolAsserts: true,
         );

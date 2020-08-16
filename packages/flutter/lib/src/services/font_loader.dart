@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 import 'dart:typed_data';
@@ -64,7 +63,7 @@ class FontLoader {
             (Uint8List list) => loadFont(list, family)
         )
     );
-    return Future.wait(loadFutures.toList());
+    await Future.wait(loadFutures.toList());
   }
 
   /// Hook called to load a font asset into the engine.

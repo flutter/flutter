@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:ui' as ui show ParagraphBuilder;
 
@@ -71,10 +70,10 @@ class InlineSpanSemanticsInformation {
   final String text;
 
   /// The semanticsLabel, if any.
-  final String semanticsLabel;
+  final String? semanticsLabel;
 
   /// The gesture recognizer, if any, for this span.
-  final GestureRecognizer recognizer;
+  final GestureRecognizer? recognizer;
 
   /// Whether this is for a placeholder span.
   final bool isPlaceholder;
@@ -155,7 +154,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// The [style] is also applied to any child spans when this is an instance
   /// of [TextSpan].
-  final TextStyle style;
+  final TextStyle? style;
 
   // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
   /// Returns the text associated with this span if this is an instance of [TextSpan],
@@ -164,7 +163,7 @@ abstract class InlineSpan extends DiagnosticableTree {
     'InlineSpan does not innately have text. Use TextSpan.text instead. '
     'This feature was deprecated after v1.7.3.'
   )
-  String get text => null;
+  String? get text => null;
 
   // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
   /// Returns the [InlineSpan] children list associated with this span if this is an
@@ -173,7 +172,7 @@ abstract class InlineSpan extends DiagnosticableTree {
     'InlineSpan does not innately have children. Use TextSpan.children instead. '
     'This feature was deprecated after v1.7.3.'
   )
-  List<InlineSpan> get children => null;
+  List<InlineSpan>? get children => null;
 
   /// Returns the [GestureRecognizer] associated with this span if this is an
   /// instance of [TextSpan], otherwise returns null.
@@ -181,7 +180,7 @@ abstract class InlineSpan extends DiagnosticableTree {
     'InlineSpan does not innately have a recognizer. Use TextSpan.recognizer instead. '
     'This feature was deprecated after v1.7.3.'
   )
-  GestureRecognizer get recognizer => null;
+  GestureRecognizer? get recognizer => null;
 
   /// Apply the properties of this object to the given [ParagraphBuilder], from
   /// which a [Paragraph] can be obtained.
@@ -195,7 +194,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// in the same order as defined in the [InlineSpan] tree.
   ///
   /// [Paragraph] objects can be drawn on [Canvas] objects.
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions });
+  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions });
 
   // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
   /// Walks this [TextSpan] and any descendants in pre-order and calls `visitor`
@@ -217,10 +216,10 @@ abstract class InlineSpan extends DiagnosticableTree {
   bool visitChildren(InlineSpanVisitor visitor);
 
   /// Returns the [InlineSpan] that contains the given position in the text.
-  InlineSpan getSpanForPosition(TextPosition position) {
+  InlineSpan? getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
     final Accumulator offset = Accumulator();
-    InlineSpan result;
+    InlineSpan? result;
     visitChildren((InlineSpan span) {
       result = span.getSpanForPositionVisitor(position, offset);
       return result == null;
@@ -237,7 +236,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// This method should not be directly called. Use [getSpanForPosition] instead.
   @protected
-  InlineSpan getSpanForPositionVisitor(TextPosition position, Accumulator offset);
+  InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset);
 
   /// Flattens the [InlineSpan] tree into a single string.
   ///
@@ -297,11 +296,11 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpan]s.
   ///
   /// Returns null if the `index` is out of bounds.
-  int codeUnitAt(int index) {
+  int? codeUnitAt(int index) {
     if (index < 0)
       return null;
     final Accumulator offset = Accumulator();
-    int result;
+    int? result;
     visitChildren((InlineSpan span) {
       result = span.codeUnitAtVisitor(index, offset);
       return result == null;
@@ -318,7 +317,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// This method should not be directly called. Use [codeUnitAt] instead.
   @protected
-  int codeUnitAtVisitor(int index, Accumulator offset);
+  int? codeUnitAtVisitor(int index, Accumulator offset);
 
   /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data
   /// to be able to construct a [SemanticsNode].
@@ -375,7 +374,7 @@ abstract class InlineSpan extends DiagnosticableTree {
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
 
     if (style != null) {
-      style.debugFillProperties(properties);
+      style!.debugFillProperties(properties);
     }
   }
 }
