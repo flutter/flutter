@@ -475,18 +475,69 @@ TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
 #if !defined(OS_FUCHSIA)
 // TODO(sanjayc77): https://github.com/flutter/flutter/issues/53179. Add
 // support for raster thread merger for Fuchsia.
+TEST_F(ShellTest, ExternalEmbedderNoThreadMerger) {
+  auto settings = CreateSettingsForFixture();
+  fml::AutoResetWaitableEvent endFrameLatch;
+  bool end_frame_called = false;
+  auto end_frame_callback =
+      [&](bool should_resubmit_frame,
+          fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+        ASSERT_TRUE(raster_thread_merger.get() == nullptr);
+        ASSERT_FALSE(should_resubmit_frame);
+        end_frame_called = true;
+        endFrameLatch.Signal();
+      };
+  auto external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
+      end_frame_callback, PostPrerollResult::kResubmitFrame, false);
+  auto shell = CreateShell(std::move(settings), GetTaskRunnersForFixture(),
+                           false, external_view_embedder);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  LayerTreeBuilder builder = [&](std::shared_ptr<ContainerLayer> root) {
+    SkPictureRecorder recorder;
+    SkCanvas* recording_canvas =
+        recorder.beginRecording(SkRect::MakeXYWH(0, 0, 80, 80));
+    recording_canvas->drawRect(SkRect::MakeXYWH(0, 0, 80, 80),
+                               SkPaint(SkColor4f::FromColor(SK_ColorRED)));
+    auto sk_picture = recorder.finishRecordingAsPicture();
+    fml::RefPtr<SkiaUnrefQueue> queue = fml::MakeRefCounted<SkiaUnrefQueue>(
+        this->GetCurrentTaskRunner(), fml::TimeDelta::FromSeconds(0));
+    auto picture_layer = std::make_shared<PictureLayer>(
+        SkPoint::Make(10, 10),
+        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false);
+    root->Add(picture_layer);
+  };
+
+  PumpOneFrame(shell.get(), 100, 100, builder);
+  endFrameLatch.Wait();
+
+  ASSERT_TRUE(end_frame_called);
+
+  DestroyShell(std::move(shell));
+}
+
 TEST_F(ShellTest,
        ExternalEmbedderEndFrameIsCalledWhenPostPrerollResultIsResubmit) {
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent endFrameLatch;
   bool end_frame_called = false;
-  auto end_frame_callback = [&](bool should_resubmit_frame) {
-    ASSERT_TRUE(should_resubmit_frame);
-    end_frame_called = true;
-    endFrameLatch.Signal();
-  };
+  auto end_frame_callback =
+      [&](bool should_resubmit_frame,
+          fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+        ASSERT_TRUE(raster_thread_merger.get() != nullptr);
+        ASSERT_TRUE(should_resubmit_frame);
+        end_frame_called = true;
+        endFrameLatch.Signal();
+      };
   auto external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
-      end_frame_callback, PostPrerollResult::kResubmitFrame);
+      end_frame_callback, PostPrerollResult::kResubmitFrame, true);
   auto shell = CreateShell(std::move(settings), GetTaskRunnersForFixture(),
                            false, external_view_embedder);
 
