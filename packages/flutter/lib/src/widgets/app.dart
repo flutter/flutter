@@ -615,6 +615,7 @@ class WidgetsApp extends StatefulWidget {
   /// displayed when the user presses the "recent apps" button. On iOS this
   /// value cannot be used. `CFBundleDisplayName` from the app's `Info.plist` is
   /// referred to instead whenever present, `CFBundleName` otherwise.
+  /// On Web it appears as the Page title shown on the tab.
   ///
   /// To provide a localized title instead, use [onGenerateTitle].
   /// {@endtemplate}
