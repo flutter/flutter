@@ -986,15 +986,26 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _handleTabControllerAnimationStatusChanged(AnimationStatus status) {
-    setState(() {
-      // Rebuild the tabs after a (potentially animated) index change
-      // has completed.
-    });
+    switch(status) {
+      case AnimationStatus.completed:
+        setState(() {
+          // Rebuild the tabs after a (potentially animated) index change has
+          // completed to update the tab animation back to _DragAnimation.
+        });
+        return;
+      case AnimationStatus.reverse:
+      case AnimationStatus.dismissed:
+      case AnimationStatus.forward:
+        return;
+    }
   }
 
   void _handleTabControllerIndexChangeStarted(int index, Duration duration, Curve curve) {
     if (index != _currentIndex) {
-      _currentIndex = index;
+      setState(() {
+        // Updates the the tab animation to _ChangeAnimation.
+        _currentIndex = index;
+      });
       if (widget.isScrollable)
         _scrollToCurrentIndex(duration, curve);
     }
