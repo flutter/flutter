@@ -119,11 +119,6 @@ FlutterDesktopPluginRegistrarRef FlutterDesktopEngineGetPluginRegistrar(
   return EngineFromHandle(engine)->GetRegistrar();
 }
 
-FlutterDesktopMessengerRef FlutterDesktopEngineGetMessenger(
-    FlutterDesktopEngineRef engine) {
-  return EngineFromHandle(engine)->messenger();
-}
-
 HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view_ref) {
   return std::get<HWND>(*view_ref->view->GetRenderTarget());
 }
@@ -156,7 +151,7 @@ void FlutterDesktopResyncOutputStreams() {
 
 FlutterDesktopMessengerRef FlutterDesktopRegistrarGetMessenger(
     FlutterDesktopPluginRegistrarRef registrar) {
-  return registrar->messenger;
+  return registrar->messenger.get();
 }
 
 void FlutterDesktopRegistrarSetDestructionHandler(
