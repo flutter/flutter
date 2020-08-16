@@ -219,9 +219,25 @@ FLUTTER_EXPORT bool FlutterDesktopShutDownEngine(
     FlutterDesktopEngineRef engine);
 
 // Returns the window associated with this registrar's engine instance.
+//
 // This is a GLFW shell-specific extension to flutter_plugin_registrar.h
 FLUTTER_EXPORT FlutterDesktopWindowRef
 FlutterDesktopRegistrarGetWindow(FlutterDesktopPluginRegistrarRef registrar);
+
+// Enables input blocking on the given channel.
+//
+// If set, then the Flutter window will disable input callbacks
+// while waiting for the handler for messages on that channel to run. This is
+// useful if handling the message involves showing a modal window, for instance.
+//
+// This must be called after FlutterDesktopSetMessageHandler, as setting a
+// handler on a channel will reset the input blocking state back to the
+// default of disabled.
+//
+// This is a GLFW shell-specific extension to flutter_plugin_registrar.h
+FLUTTER_EXPORT void FlutterDesktopRegistrarEnableInputBlocking(
+    FlutterDesktopPluginRegistrarRef registrar,
+    const char* channel);
 
 #if defined(__cplusplus)
 }  // extern "C"

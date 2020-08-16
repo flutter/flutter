@@ -8,7 +8,8 @@ import("core_wrapper_files.gni")
 # Client library build for internal use by the shell implementation.
 source_set("client_wrapper") {
   sources = core_cpp_client_wrapper_sources
-  public = core_cpp_client_wrapper_includes
+  public = core_cpp_client_wrapper_includes +
+           core_cpp_client_wrapper_internal_headers
 
   deps = [ "//flutter/shell/platform/common/cpp:common_cpp_library_headers" ]
 
