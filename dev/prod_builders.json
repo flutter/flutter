@@ -3,7 +3,7 @@
       {
          "name": "Linux build_tests",
          "repo": "flutter",
-         "task_name": "build_tests",
+         "task_name": "linux_build_tests",
          "flaky": false
       },
       {
@@ -15,19 +15,19 @@
       {
          "name": "Linux hostonly_devicelab_tests",
          "repo": "flutter",
-         "task_name": "hostonly_devicelab_tests",
+         "task_name": "linux_hostonly_devicelab_tests",
          "flaky": false
       },
       {
          "name": "Linux tool_tests",
          "repo": "flutter",
-         "task_name": "tool_tests",
+         "task_name": "linux_tool_tests",
          "flaky": false
       },
       {
          "name": "Linux web_tests",
          "repo": "flutter",
-         "task_name": "web_tests",
+         "task_name": "linux_web_tests",
          "flaky": false
       },
       {
