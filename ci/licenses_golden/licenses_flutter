@@ -1359,6 +1359,9 @@ FILE: ../../../flutter/shell/platform/windows/public/flutter_windows.h
 FILE: ../../../flutter/shell/platform/windows/string_conversion.cc
 FILE: ../../../flutter/shell/platform/windows/string_conversion.h
 FILE: ../../../flutter/shell/platform/windows/string_conversion_unittests.cc
+FILE: ../../../flutter/shell/platform/windows/system_utils.h
+FILE: ../../../flutter/shell/platform/windows/system_utils_unittests.cc
+FILE: ../../../flutter/shell/platform/windows/system_utils_win32.cc
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin.cc
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin.h
 FILE: ../../../flutter/shell/platform/windows/win32_dpi_utils.cc
