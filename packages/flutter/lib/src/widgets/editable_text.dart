@@ -445,6 +445,7 @@ class EditableText extends StatefulWidget {
     ),
     this.autofillHints,
     this.clipBehavior = Clip.hardEdge,
+    this.restorationId,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1217,6 +1218,25 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
+
+  /// Restoration ID to save and restore the scroll offset of the
+  /// [EditableText].
+  ///
+  /// If a restoration id is provided, the [EditableText] will persist its
+  /// current scroll offset and restore it during state restoration.
+  ///
+  /// The scroll offset is persisted in a [RestorationBucket] claimed from
+  /// the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// Persisting and restoring the content of the [EditableText] is the
+  /// responsibilility of the owner of the [controller], who may use a
+  /// [RestorableTextEditingController] for that purpose.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  final String restorationId;
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
@@ -2323,6 +2343,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         controller: _scrollController,
         physics: widget.scrollPhysics,
         dragStartBehavior: widget.dragStartBehavior,
+        restorationId: widget.restorationId,
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return CompositedTransformTarget(
             link: _toolbarLayerLink,
