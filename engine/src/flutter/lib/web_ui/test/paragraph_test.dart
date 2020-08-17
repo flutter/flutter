@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
+import 'package:test/bootstrap/browser.dart';
+import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide window;
 
-import 'package:test/test.dart';
 
 void testEachMeasurement(String description, VoidCallback body, {bool skip}) {
   test('$description (dom measurement)', () async {
@@ -31,7 +32,11 @@ void testEachMeasurement(String description, VoidCallback body, {bool skip}) {
   }, skip: skip);
 }
 
-void main() async {
+void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() async {
   await webOnlyInitializeTestDomRenderer();
 
   // Ahem font uses a constant ideographic/alphabetic baseline ratio.

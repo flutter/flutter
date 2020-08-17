@@ -3,11 +3,16 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/src/engine.dart';
 
-Future<void> main() async {
+void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() async {
   await ui.webOnlyInitializeTestDomRenderer();
   group('HtmCodec', () {
     test('loads sample image', () async {

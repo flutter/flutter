@@ -5,6 +5,7 @@
 // @dart = 2.6
 import 'dart:math' as math;
 
+import 'package:test/bootstrap/browser.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
@@ -12,7 +13,11 @@ import 'scuba.dart';
 
 typedef PaintTest = void Function(RecordingCanvas recordingCanvas);
 
-void main() async {
+void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() async {
   // Scuba doesn't give us viewport smaller than 472px wide.
   final EngineScubaTester scuba = await EngineScubaTester.initialize(
     viewportSize: const Size(600, 600),

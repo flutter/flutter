@@ -8,9 +8,14 @@ import 'dart:html' as html;
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   group('Surface', () {
     setUp(() {
       SurfaceSceneBuilder.debugForgetFrameScene();

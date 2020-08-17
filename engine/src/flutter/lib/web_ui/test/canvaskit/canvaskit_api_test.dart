@@ -5,6 +5,7 @@
 // @dart = 2.6
 import 'dart:typed_data';
 
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
@@ -14,6 +15,10 @@ import 'common.dart';
 import 'test_data.dart';
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   group('CanvasKit API', () {
     setUpAll(() async {
       await ui.webOnlyInitializePlatform();

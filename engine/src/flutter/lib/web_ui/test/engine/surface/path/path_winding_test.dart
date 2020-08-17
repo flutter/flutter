@@ -5,12 +5,17 @@
 // @dart = 2.10
 
 import 'dart:math' as math;
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart' hide window;
 import 'package:ui/src/engine.dart';
 
-/// Test winding and convexity of a path.
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+/// Test winding and convexity of a path.
+void testMain() {
   group('Convexity', () {
     test('Empty path should be convex', () {
       final SurfacePath path = SurfacePath();

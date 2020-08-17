@@ -4,9 +4,14 @@
 
 // @dart = 2.6
 import 'package:ui/src/engine.dart';
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   group('CrossFrameCache', () {
     test('Reuse returns no object when cache empty', () {
       final CrossFrameCache<TestItem> cache = CrossFrameCache();

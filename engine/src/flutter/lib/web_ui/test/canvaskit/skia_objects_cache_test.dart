@@ -5,6 +5,7 @@
 // @dart = 2.6
 
 import 'package:mockito/mockito.dart';
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
 import 'package:ui/ui.dart' as ui;
@@ -13,6 +14,10 @@ import 'package:ui/src/engine.dart';
 import 'common.dart';
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   group('skia_objects_cache', () {
     _tests();
     // TODO: https://github.com/flutter/flutter/issues/60040
