@@ -195,7 +195,7 @@ void main() {
     expect(_value, false);
 
     // Enable tristate
-    setState((){_tristate = true;});
+    setState(()=> _tristate = true);
     await tester.pumpAndSettle();
 
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, false);
