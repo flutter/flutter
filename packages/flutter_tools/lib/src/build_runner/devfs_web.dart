@@ -179,7 +179,7 @@ class WebAssetServer implements AssetReader {
       if (testMode) {
         return server;
       }
-      
+
       // In release builds deploy a simpler proxy server.
       if (buildInfo.mode != BuildMode.debug) {
         final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
