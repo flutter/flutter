@@ -54,6 +54,8 @@ source_set("flutter_windows_source") {
     "keyboard_hook_handler.h",
     "string_conversion.cc",
     "string_conversion.h",
+    "system_utils.h",
+    "system_utils_win32.cc",
     "text_input_plugin.cc",
     "text_input_plugin.h",
     "win32_dpi_utils.cc",
@@ -118,6 +120,7 @@ executable("flutter_windows_unittests") {
 
   sources = [
     "string_conversion_unittests.cc",
+    "system_utils_unittests.cc",
     "testing/win32_flutter_window_test.cc",
     "testing/win32_flutter_window_test.h",
     "testing/win32_window_test.cc",
