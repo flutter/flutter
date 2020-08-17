@@ -69,6 +69,12 @@ class FlutterWindowsEngine {
   void HandlePlatformMessage(const FlutterPlatformMessage*);
 
  private:
+  // Sends system settings (e.g., locale) to the engine.
+  //
+  // Should be called just after the engine is run, and after any relevant
+  // system changes.
+  void SendSystemSettings();
+
   // The handle to the embedder.h engine instance.
   FLUTTER_API_SYMBOL(FlutterEngine) engine_ = nullptr;
 
