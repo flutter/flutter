@@ -162,8 +162,8 @@ Future<void> main() async {
 
   test('Error reporting - NoSuchMethodError', () async {
     expect(console, isEmpty);
-    final dynamic exception = new NoSuchMethodError.withInvocation(5,
-        new Invocation.method(#foo, <dynamic>[2, 4]));
+    final dynamic exception = NoSuchMethodError.withInvocation(5,
+        Invocation.method(#foo, <dynamic>[2, 4]));
 
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: exception,
