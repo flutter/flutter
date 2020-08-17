@@ -100,9 +100,11 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 ///
 /// See also:
 ///
-///  * [debugProfilePaintsEnabled], which does something similar but for
-///    painting, and [debugPrintRebuildDirtyWidgets], which does something similar
-///    but reporting the builds to the console.
+///  * [debugPrintRebuildDirtyWidgets], which does something similar but
+///    reporting the builds to the console.
+///  * [debugProfileLayoutsEnabled], which does something similar for layout,
+///    and [debugPrintLayouts], its console equivalent.
+///  * [debugProfilePaintsEnabled], which does something similar for painting.
 bool debugProfileBuildsEnabled = false;
 
 /// Show banners for deprecated widgets.
