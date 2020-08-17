@@ -8,28 +8,30 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Test FrameTimingSummarizer', () {
+    List<int> vsyncTimes = <int>[
+      for (int i = 0; i < 100; i += 1) 100 * (i + 1),
+    ];
     List<int> buildTimes = <int>[
-      for (int i = 1; i <= 100; i += 1) 1000 * i,
+      for (int i = 0; i < 100; i += 1) vsyncTimes[i] + 1000 * (i + 1),
     ];
-    buildTimes = buildTimes.reversed.toList();
     List<int> rasterTimes = <int>[
-      for (int i = 1; i <= 100; i += 1) 1000 * i + 1000,
+      for (int i = 0; i < 100; i += 1) 1000 * (i + 1) + 1000,
     ];
+    // reversed to make sure sort is working.
+    buildTimes = buildTimes.reversed.toList();
     rasterTimes = rasterTimes.reversed.toList();
-    List<int> vsyncStarts = <int>[
-      for (int i = 1; i <= 100; i += 1) -100 * i,
-    ];
-    vsyncStarts = vsyncStarts.reversed.toList();
+    vsyncTimes = vsyncTimes.reversed.toList();
     final List<FrameTiming> inputData = <FrameTiming>[
       for (int i = 0; i < 100; i += 1)
         FrameTiming(
-          vsyncStart: vsyncStarts[i],
-          buildStart: 0,
+          vsyncStart: 0,
+          buildStart: vsyncTimes[i],
           buildFinish: buildTimes[i],
           rasterStart: 500,
           rasterFinish: rasterTimes[i],
         ),
     ];
+
     final FrameTimingSummarizer summary = FrameTimingSummarizer(inputData);
     expect(summary.averageFrameBuildTime.inMicroseconds, 50500);
     expect(summary.p90FrameBuildTime.inMicroseconds, 90000);
