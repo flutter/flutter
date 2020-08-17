@@ -85,15 +85,15 @@ FlutterWindowsEngine::FlutterWindowsEngine(const FlutterProjectBundle& project)
         }
       });
 
-  // Set up the structure of the state/handle objects; engine and view paramater
-  // will be filled in late.
-  auto messenger = std::make_unique<FlutterDesktopMessenger>();
+  // Set up the structure of the state/handle objects; engine and view
+  // paramaters will be filled in later.
+  messenger_ = std::make_unique<FlutterDesktopMessenger>();
   message_dispatcher_ =
-      std::make_unique<IncomingMessageDispatcher>(messenger.get());
-  messenger->dispatcher = message_dispatcher_.get();
+      std::make_unique<IncomingMessageDispatcher>(messenger_.get());
+  messenger_->dispatcher = message_dispatcher_.get();
 
   plugin_registrar_ = std::make_unique<FlutterDesktopPluginRegistrar>();
-  plugin_registrar_->messenger = std::move(messenger);
+  plugin_registrar_->messenger = messenger_.get();
   plugin_registrar_->view = std::make_unique<FlutterDesktopView>();
 }
 

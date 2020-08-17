@@ -93,4 +93,14 @@ TEST(FlutterEngineTest, ProcessMessages) {
   EXPECT_EQ(next_event_time.count(), 99);
 }
 
+TEST(FlutterEngineTest, GetMessenger) {
+  DartProject project(L"data");
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
+      std::make_unique<TestFlutterWindowsApi>());
+  auto test_api = static_cast<TestFlutterWindowsApi*>(scoped_api_stub.stub());
+
+  FlutterEngine engine(DartProject(L"fake/project/path"));
+  EXPECT_NE(engine.messenger(), nullptr);
+}
+
 }  // namespace flutter

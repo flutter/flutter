@@ -38,9 +38,6 @@ class StubFlutterApi {
   virtual void RegistrarSetDestructionHandler(
       FlutterDesktopOnRegistrarDestroyed callback) {}
 
-  // Called for FlutterDesktopRegistrarEnableInputBlocking.
-  virtual void RegistrarEnableInputBlocking(const char* channel) {}
-
   // Called for FlutterDesktopMessengerSend.
   virtual bool MessengerSend(const char* channel,
                              const uint8_t* message,

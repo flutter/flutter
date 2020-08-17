@@ -182,3 +182,11 @@ FlutterDesktopPluginRegistrarRef FlutterDesktopGetPluginRegistrar(
   // The stub ignores this, so just return an arbitrary non-zero value.
   return reinterpret_cast<FlutterDesktopPluginRegistrarRef>(2);
 }
+
+void FlutterDesktopRegistrarEnableInputBlocking(
+    FlutterDesktopPluginRegistrarRef registrar,
+    const char* channel) {
+  if (s_stub_implementation) {
+    s_stub_implementation->RegistrarEnableInputBlocking(channel);
+  }
+}
