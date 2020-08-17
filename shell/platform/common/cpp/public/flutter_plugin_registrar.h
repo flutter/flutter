@@ -31,19 +31,6 @@ FLUTTER_EXPORT void FlutterDesktopRegistrarSetDestructionHandler(
     FlutterDesktopPluginRegistrarRef registrar,
     FlutterDesktopOnRegistrarDestroyed callback);
 
-// Enables input blocking on the given channel.
-//
-// If set, then the Flutter window will disable input callbacks
-// while waiting for the handler for messages on that channel to run. This is
-// useful if handling the message involves showing a modal window, for instance.
-//
-// This must be called after FlutterDesktopSetMessageHandler, as setting a
-// handler on a channel will reset the input blocking state back to the
-// default of disabled.
-FLUTTER_EXPORT void FlutterDesktopRegistrarEnableInputBlocking(
-    FlutterDesktopPluginRegistrarRef registrar,
-    const char* channel);
-
 #if defined(__cplusplus)
 }  // extern "C"
 #endif

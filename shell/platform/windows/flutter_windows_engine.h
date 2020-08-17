@@ -60,6 +60,8 @@ class FlutterWindowsEngine {
 
   FLUTTER_API_SYMBOL(FlutterEngine) engine() { return engine_; }
 
+  FlutterDesktopMessengerRef messenger() { return messenger_.get(); }
+
   Win32TaskRunner* task_runner() { return task_runner_.get(); }
 
   // Callback passed to Flutter engine for notifying window of platform
@@ -80,6 +82,9 @@ class FlutterWindowsEngine {
 
   // Task runner for tasks posted from the engine.
   std::unique_ptr<Win32TaskRunner> task_runner_;
+
+  // The plugin messenger handle given to API clients.
+  std::unique_ptr<FlutterDesktopMessenger> messenger_;
 
   // Message dispatch manager for messages from engine_.
   std::unique_ptr<IncomingMessageDispatcher> message_dispatcher_;
