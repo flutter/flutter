@@ -93,12 +93,3 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     --build-outputs="${build_outputs_path}"                                 \
     --output="${ephemeral_dir}"                                             \
    "${build_mode}_macos_bundle_flutter_assets"
-
-if [[ $? -ne 0 ]]; then
-  EchoError "Failed to build ${project_path}."
-  exit -1
-fi
-
-# Ensure that Xcode dependency analysis does not incorrectly skip the flutter step if
-# its configuration (build mode, defines) changes without an input file changing.
-touch macos/Flutter/ephemeral/tripwire

@@ -14,6 +14,8 @@ import '../ios/xcodeproj.dart';
 import '../project.dart';
 import 'cocoapod_utils.dart';
 
+final RegExp _anyOutput = RegExp('.*');
+
 /// Builds the macOS project through xcodebuild.
 // TODO(jonahwilliams): refactor to share code with the existing iOS code.
 Future<void> buildMacOS({
@@ -92,7 +94,10 @@ Future<void> buildMacOS({
         '-quiet',
       'COMPILER_INDEX_STORE_ENABLE=NO',
       ...environmentVariablesAsXcodeBuildSettings(globals.platform)
-    ], trace: false);
+    ],
+    trace: true,
+    stdoutErrorMatcher: _anyOutput,
+  );
   } finally {
     status.cancel();
   }
