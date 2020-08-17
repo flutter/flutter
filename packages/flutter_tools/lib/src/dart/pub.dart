@@ -191,8 +191,9 @@ class _DefaultPub implements Pub {
     }
 
     final DateTime originalPubspecYamlModificationTime = pubSpecYaml.lastModifiedSync();
+    print('running PUB GET');
 
-    if (!checkLastModified || _shouldRunPubGet(
+    if (!checkLastModified || generateSyntheticPackage || _shouldRunPubGet(
       pubSpecYaml: pubSpecYaml,
       packageConfigFile: packageConfigFile,
     )) {
@@ -202,6 +203,8 @@ class _DefaultPub implements Pub {
         timeout: const TimeoutConfiguration().slowOperation,
       );
       final bool verbose = _logger.isVerbose;
+      print('\nrunning pub get');
+      // Maybe it's not generating here when it should
       final List<String> args = <String>[
         if (verbose)
           '--verbose'
@@ -215,6 +218,8 @@ class _DefaultPub implements Pub {
           '--offline',
       ];
       try {
+        print(directory);
+        print(args);
         await batch(
           args,
           context: context,
@@ -291,6 +296,8 @@ class _DefaultPub implements Pub {
     int code;
     loop: while (true) {
       attempts += 1;
+      print('running pub command:');
+      print(arguments);
       code = await _processUtils.stream(
         _pubCommand(arguments),
         workingDirectory: directory,

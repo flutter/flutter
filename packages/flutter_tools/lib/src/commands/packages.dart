@@ -117,6 +117,7 @@ class PackagesGetCommand extends FlutterCommand {
   }
 
   Future<void> _runPubGet(String directory, FlutterProject flutterProject) async {
+    print('_runPubGet was executed');
     final Stopwatch pubGetTimer = Stopwatch()..start();
     try {
       await pub.get(context: PubContext.pubGet,
@@ -138,6 +139,7 @@ class PackagesGetCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    print('running command');
     if (argResults.rest.length > 1) {
       throwToolExit('Too many arguments.\n$usage');
     }
@@ -188,6 +190,7 @@ class PackagesGetCommand extends FlutterCommand {
         // synthetic-package is null.
         final bool isSyntheticL10nPackage = value as bool ?? true;
         if (isSyntheticL10nPackage) {
+          print('attempting to generate synthetic package');
           await generateLocalizationsSyntheticPackage(rootProject);
         }
       }
