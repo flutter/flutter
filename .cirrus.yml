@@ -332,7 +332,7 @@ task:
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
     - flutter doctor -v
-    - IF "%SHOULD_UPDATE_PACKAGES%" EQU "TRUE" flutter update-packages
+    - CMD /C IF "%SHOULD_UPDATE_PACKAGES%" EQU "TRUE" flutter update-packages
     - git fetch origin master
   matrix:
     - name: tool_tests-general-windows
