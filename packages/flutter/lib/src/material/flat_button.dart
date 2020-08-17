@@ -98,6 +98,7 @@ import 'theme_data.dart';
 ///  * [InkWell], which implements the ink splash part of a flat button.
 ///  * [RawMaterialButton], the widget this widget is based on.
 ///  * <https://material.io/design/components/buttons.html>
+///  * Cookbook: [Build a form with validation](https://flutter.dev/docs/cookbook/forms/validation)
 class FlatButton extends MaterialButton {
   /// Create a simple text button.
   ///
@@ -126,10 +127,14 @@ class FlatButton extends MaterialButton {
     bool autofocus = false,
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget child,
+    double height,
+    double minWidth,
   }) : assert(clipBehavior != null),
        assert(autofocus != null),
        super(
          key: key,
+         height: height,
+         minWidth: minWidth,
          onPressed: onPressed,
          onLongPress: onLongPress,
          onHighlightChanged: onHighlightChanged,
@@ -185,6 +190,8 @@ class FlatButton extends MaterialButton {
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
+    double minWidth,
+    double height,
   }) = _FlatButtonWithIcon;
 
   @override
@@ -209,7 +216,10 @@ class FlatButton extends MaterialButton {
       disabledElevation: buttonTheme.getDisabledElevation(this),
       padding: buttonTheme.getPadding(this),
       visualDensity: visualDensity ?? theme.visualDensity,
-      constraints: buttonTheme.getConstraints(this),
+      constraints: buttonTheme.getConstraints(this).copyWith(
+        minWidth: minWidth,
+        minHeight: height,
+      ),
       shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior,
       focusNode: focusNode,
@@ -250,6 +260,8 @@ class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
+    double minWidth,
+    double height,
   }) : assert(icon != null),
        assert(label != null),
        assert(clipBehavior != null),
@@ -284,6 +296,8 @@ class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
              label,
            ],
          ),
+         minWidth: minWidth,
+         height: height,
        );
 
 }

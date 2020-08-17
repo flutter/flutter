@@ -41,10 +41,13 @@ enum StretchMode {
 /// The part of a material design [AppBar] that expands, collapses, and
 /// stretches.
 ///
-/// Most commonly used in in the [SliverAppBar.flexibleSpace] field, a flexible
+/// Most commonly used in the [SliverAppBar.flexibleSpace] field, a flexible
 /// space bar expands and contracts as the app scrolls so that the [AppBar]
 /// reaches from the top of the app to the top of the scrolling contents of the
-/// app. Furthermore is included functionality for stretch behavior. When
+/// app. When using [SliverAppBar.flexibleSpace], the [SliverAppBar.expandedHeight]
+/// must be large enough to accommodate the [SliverAppBar.flexibleSpace] widget.
+///
+/// Furthermore is included functionality for stretch behavior. When
 /// [SliverAppBar.stretch] is true, and your [ScrollPhysics] allow for
 /// overscroll, this space will stretch with the overscroll.
 ///
@@ -176,7 +179,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// Defaults to [CollapseMode.parallax].
   final CollapseMode collapseMode;
 
-  /// Stretch effect while over-scrolling,
+  /// Stretch effect while over-scrolling.
   ///
   /// Defaults to include [StretchMode.zoomBackground].
   final List<StretchMode> stretchModes;
@@ -300,42 +303,42 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           const double fadeEnd = 1.0;
           assert(fadeStart <= fadeEnd);
           final double opacity = 1.0 - Interval(fadeStart, fadeEnd).transform(t);
-          if (opacity > 0.0) {
-            double height = settings.maxExtent;
+          double height = settings.maxExtent;
 
-            // StretchMode.zoomBackground
-            if (widget.stretchModes.contains(StretchMode.zoomBackground) &&
-              constraints.maxHeight > height) {
-              height = constraints.maxHeight;
-            }
+          // StretchMode.zoomBackground
+          if (widget.stretchModes.contains(StretchMode.zoomBackground) &&
+            constraints.maxHeight > height) {
+            height = constraints.maxHeight;
+          }
+          children.add(Positioned(
+            top: _getCollapsePadding(t, settings),
+            left: 0.0,
+            right: 0.0,
+            height: height,
+            child: Opacity(
+              // IOS is relying on this semantics node to correctly traverse
+              // through the app bar when it is collapsed.
+              alwaysIncludeSemantics: true,
+              opacity: opacity,
+              child: widget.background,
+            ),
+          ));
 
-            children.add(Positioned(
-              top: _getCollapsePadding(t, settings),
-              left: 0.0,
-              right: 0.0,
-              height: height,
-              child: Opacity(
-                opacity: opacity,
-                child: widget.background,
-              ),
-            ));
-
-            // StretchMode.blurBackground
-            if (widget.stretchModes.contains(StretchMode.blurBackground) &&
-              constraints.maxHeight > settings.maxExtent) {
-              final double blurAmount = (constraints.maxHeight - settings.maxExtent) / 10;
-              children.add(Positioned.fill(
-                child: BackdropFilter(
-                  child: Container(
-                    color: Colors.transparent,
-                  ),
-                  filter: ui.ImageFilter.blur(
-                    sigmaX: blurAmount,
-                    sigmaY: blurAmount,
-                  )
+          // StretchMode.blurBackground
+          if (widget.stretchModes.contains(StretchMode.blurBackground) &&
+            constraints.maxHeight > settings.maxExtent) {
+            final double blurAmount = (constraints.maxHeight - settings.maxExtent) / 10;
+            children.add(Positioned.fill(
+              child: BackdropFilter(
+                child: Container(
+                  color: Colors.transparent,
+                ),
+                filter: ui.ImageFilter.blur(
+                  sigmaX: blurAmount,
+                  sigmaY: blurAmount,
                 )
-              ));
-            }
+              )
+            ));
           }
         }
 

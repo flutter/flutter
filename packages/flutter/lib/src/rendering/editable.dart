@@ -316,7 +316,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// [handleDoubleTap], and [handleLongPress].
   ///
   /// If there are any gesture recognizers in the text span, the [handleEvent]
-  /// will still propagate pointer events to those recognizers
+  /// will still propagate pointer events to those recognizers.
   ///
   /// The default value of this property is false.
   bool ignorePointer;
@@ -330,7 +330,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsTextLayout();
   }
 
-  /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
+  /// {@macro flutter.painting.textPainter.textWidthBasis}
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
     assert(value != null);
@@ -1936,10 +1936,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   Offset _getPixelPerfectCursorOffset(Rect caretRect) {
     final Offset caretPosition = localToGlobal(caretRect.topLeft);
     final double pixelMultiple = 1.0 / _devicePixelRatio;
-    final int quotientX = (caretPosition.dx / pixelMultiple).round();
-    final int quotientY = (caretPosition.dy / pixelMultiple).round();
-    final double pixelPerfectOffsetX = quotientX * pixelMultiple - caretPosition.dx;
-    final double pixelPerfectOffsetY = quotientY * pixelMultiple - caretPosition.dy;
+    final double pixelPerfectOffsetX = caretPosition.dx.isFinite
+      ? (caretPosition.dx / pixelMultiple).round() * pixelMultiple - caretPosition.dx
+      : caretPosition.dx;
+    final double pixelPerfectOffsetY = caretPosition.dy.isFinite
+      ? (caretPosition.dy / pixelMultiple).round() * pixelMultiple - caretPosition.dy
+      : caretPosition.dy;
     return Offset(pixelPerfectOffsetX, pixelPerfectOffsetY);
   }
 

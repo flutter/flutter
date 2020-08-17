@@ -62,6 +62,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     @required this.pageBuilder,
     this.transitionsBuilder = _defaultTransitionsBuilder,
     this.transitionDuration = const Duration(milliseconds: 300),
+    this.reverseTransitionDuration = const Duration(milliseconds: 300),
     this.opaque = true,
     this.barrierDismissible = false,
     this.barrierColor,
@@ -92,6 +93,9 @@ class PageRouteBuilder<T> extends PageRoute<T> {
 
   @override
   final Duration transitionDuration;
+
+  @override
+  final Duration reverseTransitionDuration;
 
   @override
   final bool opaque;
@@ -134,6 +138,7 @@ class TransitionBuilderPage<T> extends Page<T> {
     @required this.pageBuilder,
     this.transitionsBuilder = _defaultTransitionsBuilder,
     this.transitionDuration = const Duration(milliseconds: 300),
+    this.reverseTransitionDuration = const Duration(milliseconds: 300),
     this.opaque = true,
     this.barrierDismissible = false,
     this.barrierColor,
@@ -159,6 +164,9 @@ class TransitionBuilderPage<T> extends Page<T> {
 
   /// {@macro flutter.widgets.transitionRoute.transitionDuration}
   final Duration transitionDuration;
+
+  /// {@macro flutter.widgets.transitionRoute.reverseTransitionDuration}
+  final Duration reverseTransitionDuration;
 
   /// {@macro flutter.widgets.transitionRoute.opaque}
   final bool opaque;
@@ -196,6 +204,9 @@ class _PageBasedPageRouteBuilder<T> extends PageRoute<T>{
 
   @override
   Duration get transitionDuration => _page.transitionDuration;
+
+  @override
+  Duration get reverseTransitionDuration => _page.reverseTransitionDuration;
 
   @override
   bool get opaque => _page.opaque;

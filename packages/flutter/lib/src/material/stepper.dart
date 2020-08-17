@@ -6,14 +6,16 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'button_theme.dart';
+import 'button_style.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
-import 'flat_button.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
+import 'text_button.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
@@ -191,7 +193,7 @@ class Stepper extends StatefulWidget {
   ///
   /// If null, the default controls from the current theme will be used.
   ///
-  /// This callback which takes in a context and two functions,[onStepContinue]
+  /// This callback which takes in a context and two functions: [onStepContinue]
   /// and [onStepCancel]. These can be used to control the stepper.
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
@@ -201,14 +203,14 @@ class Stepper extends StatefulWidget {
   /// Widget build(BuildContext context) {
   ///   return Stepper(
   ///     controlsBuilder:
-  ///       (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
+  ///       (BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel }) {
   ///          return Row(
   ///            children: <Widget>[
-  ///              FlatButton(
+  ///              TextButton(
   ///                onPressed: onStepContinue,
   ///                child: const Text('NEXT'),
   ///              ),
-  ///              FlatButton(
+  ///              TextButton(
   ///                onPressed: onStepCancel,
   ///                child: const Text('CANCEL'),
   ///              ),
@@ -407,27 +409,44 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     assert(cancelColor != null);
 
     final ThemeData themeData = Theme.of(context);
+    final ColorScheme colorScheme = themeData.colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+
+    const OutlinedBorder buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2)));
+    const EdgeInsets buttonPadding = EdgeInsets.symmetric(horizontal: 16.0);
 
     return Container(
       margin: const EdgeInsets.only(top: 16.0),
       child: ConstrainedBox(
         constraints: const BoxConstraints.tightFor(height: 48.0),
         child: Row(
+          // The Material spec no longer includes a Stepper widget. The continue
+          // and cancel button styles have been configured to match the original
+          // version of this widget.
           children: <Widget>[
-            FlatButton(
+            TextButton(
               onPressed: widget.onStepContinue,
-              color: _isDark() ? themeData.backgroundColor : themeData.primaryColor,
-              textColor: Colors.white,
-              textTheme: ButtonTextTheme.normal,
+              style: ButtonStyle(
+                foregroundColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                  return states.contains(MaterialState.disabled) ? null : (_isDark() ? colorScheme.onSurface : colorScheme.onPrimary);
+                }),
+                backgroundColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                  return _isDark() || states.contains(MaterialState.disabled) ? null : colorScheme.primary;
+                }),
+                padding: MaterialStateProperty.all<EdgeInsetsGeometry>(buttonPadding),
+                shape: MaterialStateProperty.all<OutlinedBorder>(buttonShape),
+              ),
               child: Text(localizations.continueButtonLabel),
             ),
             Container(
               margin: const EdgeInsetsDirectional.only(start: 8.0),
-              child: FlatButton(
+              child: TextButton(
                 onPressed: widget.onStepCancel,
-                textColor: cancelColor,
-                textTheme: ButtonTextTheme.normal,
+                style: TextButton.styleFrom(
+                  primary: cancelColor,
+                  padding: buttonPadding,
+                  shape: buttonShape,
+                ),
                 child: Text(localizations.cancelButtonLabel),
               ),
             ),

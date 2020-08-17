@@ -221,7 +221,7 @@ abstract class WebGoldenComparator {
 /// updates the files on disk to match the rendering.
 ///
 /// When using `flutter run`, the default comparator
-/// ([_TrivialWebGoldenComparator]) is used. It prints a message to the console
+/// (`_TrivialWebGoldenComparator`) is used. It prints a message to the console
 /// but otherwise does nothing. This allows tests to be developed visually on a
 /// web browser.
 ///

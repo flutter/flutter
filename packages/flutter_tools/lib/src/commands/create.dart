@@ -612,7 +612,9 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       );
     }
 
-    if (willAddPlatforms) {
+    final bool addPlatformsToExistingPlugin = willAddPlatforms && existingPlatforms.isNotEmpty;
+
+    if (addPlatformsToExistingPlugin) {
       // If adding new platforms to an existing plugin project, prints
       // a help message containing the platforms maps need to be added to the `platforms` key in the pubspec.
       platformsToAdd.removeWhere(existingPlatforms.contains);
@@ -747,13 +749,18 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
     final String pluginClassSnakeCase = snakeCase(pluginClass);
     final String pluginClassCapitalSnakeCase = pluginClassSnakeCase.toUpperCase();
     final String appleIdentifier = _createUTIIdentifier(organization, projectName);
+    final String androidIdentifier = _createAndroidIdentifier(organization, projectName);
+    // Linux uses the same scheme as the Android identifier.
+    // https://developer.gnome.org/gio/stable/GApplication.html#g-application-id-is-valid
+    final String linuxIdentifier = androidIdentifier;
 
     return <String, dynamic>{
       'organization': organization,
       'projectName': projectName,
-      'androidIdentifier': _createAndroidIdentifier(organization, projectName),
+      'androidIdentifier': androidIdentifier,
       'iosIdentifier': appleIdentifier,
       'macosIdentifier': appleIdentifier,
+      'linuxIdentifier': linuxIdentifier,
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidMinApiLevel': android_common.minApiLevel,

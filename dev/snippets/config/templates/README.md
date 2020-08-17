@@ -58,13 +58,13 @@ additional burden, since all code will also be compiled to be sure it compiles).
 
 ## Available Templates
 
-The templates available for using as an argument to the snippets tool are as
+The templates available for use as an argument to the snippets tool are as
 follows:
 
 - [`freeform`](freeform.tmpl) :
   This is a simple template for which you provide everything.  It has no code of
   its own, just the sections for `imports`, `main`, and `preamble`. You must
-  provide the `main` section in order to have a `main()`.
+  provide the `main` section to have a `main()`.
   
 ### WidgetsApp Templates
 
@@ -74,14 +74,14 @@ the widgets library.
 - [`stateful_widget`](stateful_widget.tmpl) :
   The default code block will be placed as the body of the `State` object of a
   `StatefulWidget` subclass. Because the default code block is placed as the body
-  of a stateful widget, you will need to implement the `build()` method, and any
+  of a stateful widget, you will need to implement the `build()` method and any
   state variables. It also has a `preamble` in addition to the default code
   block, which will be placed at the top level of the Dart file, so bare
   method calls are not allowed in the preamble. The default code block is
   placed as the body of a stateful widget, so you will need to implement the
   `build()` method, and any state variables. It also has an `imports`
   section to import additional packages. Please only import things that are part
-  of flutter or part of default dependencies for a `flutter create` project.
+  of Flutter or part of default dependencies for a `flutter create` project.
   
 - [`stateful_widget_ticker`](stateful_widget_ticker.tmpl) : Identical to the
   `stateful_widget` template, with the addition of the `TickerProviderStateMixin`
@@ -91,12 +91,12 @@ the widgets library.
   `stateful_widget` template, except that the default code block is
   inserted as a method (which should be the `build` method) in a
   `StatelessWidget`. The `@override` before the build method is added by
-  the template, so must be omitted from the sample code.
+  the template so must be omitted from the sample code.
 
 ### MaterialApp Templates
 
-These templates follow the same conventions as the `WidgetsApp` templates above, but use a
-`MaterialApp` instead. These templates import the  material library.
+These templates follow the same conventions as the `WidgetsApp` templates above but use a
+`MaterialApp` instead. These templates import the material library.
 
 - [`stateful_widget_material`](stateful_widget_material.tmpl)
   
@@ -125,8 +125,8 @@ These templates follow the same conventions as the `WidgetsApp` templates above,
 
 ### CupertinoApp Templates
 
-These templates follow the same conventions as the `WidgetsApp` templates above, but use a
-`CupertinoApp` instead. These templates import the  cupertino library.
+These templates follow the same conventions as the `WidgetsApp` templates above but use a
+`CupertinoApp` instead. These templates import the Cupertino library.
   
 - [`stateful_widget_cupertino`](stateful_widget_cupertino.tmpl)
   

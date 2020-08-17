@@ -29,7 +29,7 @@ and saved in the `.generated` directory. The markdown file contains
 the text taken from the Sample Catalog comment found in the app's source
 file, followed by the source code itself.
 
-This `sample_page.dart` command line app must be run from the `examples/catalog`
+This `sample_page.dart` command-line app must be run from the `examples/catalog`
 directory. It relies on templates also found in the bin directory, and it
 generates and executes `test_driver` apps to collect the screenshots:
 

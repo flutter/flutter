@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -127,5 +129,22 @@ void main() {
 
     // Only printed by verbose tool.
     expect(result.stdout, isNot(contains('exiting with code 0')));
+  });
+
+  test('flutter --version --machine outputs JSON with flutterRoot', () async {
+    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
+      flutterBin,
+      '--version',
+      '--machine',
+    ]);
+
+    final Map<String, Object> versionInfo = json.decode(result.stdout
+      .toString()
+      .replaceAll('Building flutter tool...', '')
+      .replaceAll('Waiting for another flutter command to release the startup lock...', '')
+      .trim()) as Map<String, Object>;
+
+    expect(versionInfo, containsPair('flutterRoot', isNotNull));
   });
 }

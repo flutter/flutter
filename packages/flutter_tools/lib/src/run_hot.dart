@@ -376,10 +376,19 @@ class HotRunner extends ResidentRunner {
       asyncScanning: hotRunnerConfig.asyncScanning,
       packageConfig: flutterDevices[0].devFS.lastPackageConfig,
     );
+    final File entrypointFile = globals.fs.file(mainPath);
+    if (!entrypointFile.existsSync()) {
+      globals.printError(
+        'The entrypoint file (i.e. the file with main()) ${entrypointFile.path} '
+        'cannot be found. Moving or renaming this file will prevent changes to '
+        'its contents from being discovered during hot reload/restart until '
+        'flutter is restarted or the file is restored.'
+      );
+    }
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (final FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
-        mainUri: globals.fs.file(mainPath).absolute.uri,
+        mainUri: entrypointFile.absolute.uri,
         target: target,
         bundle: assetBundle,
         firstBuildTime: firstBuildTime,
@@ -500,7 +509,19 @@ class HotRunner extends ResidentRunner {
           .getIsolateOrNull(view.uiIsolate.id);
         operations.add(reloadIsolate.then((vm_service.Isolate isolate) async {
           if ((isolate != null) && isPauseEvent(isolate.pauseEvent.kind)) {
-            // Resume the isolate so that it can be killed by the embedder.
+            // The embedder requires that the isolate is unpaused, because the
+            // runInView method requires interaction with dart engine APIs that
+            // are not thread-safe, and thus must be run on the same thread that
+            // would be blocked by the pause. Simply unpausing is not sufficient,
+            // because this does not prevent the isolate from immediately hitting
+            // a breakpoint, for example if the breakpoint was placed in a loop
+            // or in a frequently called method. Instead, all breakpoints are first
+            // disabled and then the isolate resumed.
+            final List<Future<void>> breakpointRemoval = <Future<void>>[
+              for (final vm_service.Breakpoint breakpoint in isolate.breakpoints)
+                device.vmService.removeBreakpoint(isolate.id, breakpoint.id)
+            ];
+            await Future.wait(breakpointRemoval);
             await device.vmService.resume(view.uiIsolate.id);
           }
         }));

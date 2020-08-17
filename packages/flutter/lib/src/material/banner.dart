@@ -7,8 +7,6 @@
 import 'package:flutter/widgets.dart';
 
 import 'banner_theme.dart';
-import 'button_bar.dart';
-import 'button_theme.dart';
 import 'divider.dart';
 import 'theme.dart';
 
@@ -59,16 +57,13 @@ class MaterialBanner extends StatelessWidget {
   /// Style for the text in the [content] of the [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.contentTextStyle] is used. If that is
-  /// also `null`, [ThemeData.textTheme.bodyText2] is used.
+  /// also `null`, [TextTheme.bodyText2] of [ThemeData.textTheme] is used.
   final TextStyle contentTextStyle;
 
   /// The set of actions that are displayed at the bottom or trailing side of
   /// the [MaterialBanner].
   ///
-  /// Typically this is a list of [FlatButton] widgets.
-  ///
-  /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
-  /// of padding on each side.
+  /// Typically this is a list of [TextButton] widgets.
   final List<Widget> actions;
 
   /// The (optional) leading widget of the [MaterialBanner].
@@ -79,7 +74,7 @@ class MaterialBanner extends StatelessWidget {
   /// The color of the surface of this [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.backgroundColor] is used. If that is
-  /// also `null`, [ThemeData.colorScheme.surface] is used.
+  /// also `null`, [ColorScheme.surface] of [ThemeData.colorScheme] is used.
   final Color backgroundColor;
 
   /// The amount of space by which to inset the [content].
@@ -99,10 +94,10 @@ class MaterialBanner extends StatelessWidget {
   /// An override to force the [actions] to be below the [content] regardless of
   /// how many there are.
   ///
-  /// If this is `true`, the [actions] will be placed below the [content]. If
-  /// this is `false`, the [actions] will be placed on the trailing side of the
-  /// [content] if [actions.length] is `1` and below the [content] if greater
-  /// than `1`.
+  /// If this is true, the [actions] will be placed below the [content]. If
+  /// this is false, the [actions] will be placed on the trailing side of the
+  /// [content] if [actions]'s length is 1 and below the [content] if greater
+  /// than 1.
   final bool forceActionsBelow;
 
   @override
@@ -117,12 +112,17 @@ class MaterialBanner extends StatelessWidget {
         ? const EdgeInsetsDirectional.only(start: 16.0, top: 2.0)
         : const EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0));
     final EdgeInsetsGeometry leadingPadding = this.leadingPadding
-        ?? bannerTheme.padding
+        ?? bannerTheme.leadingPadding
         ?? const EdgeInsetsDirectional.only(end: 16.0);
 
-    final Widget buttonBar = ButtonBar(
-      layoutBehavior: ButtonBarLayoutBehavior.constrained,
-      children: actions,
+    final Widget buttonBar = Container(
+      alignment: AlignmentDirectional.centerEnd,
+      constraints: const BoxConstraints(minHeight: 52.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: OverflowBar(
+        spacing: 8,
+        children: actions,
+      ),
     );
 
     final Color backgroundColor = this.backgroundColor

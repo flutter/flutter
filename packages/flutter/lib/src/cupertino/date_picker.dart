@@ -303,7 +303,7 @@ class CupertinoDatePicker extends StatefulWidget {
   /// The minimum selectable date that the picker can settle on.
   ///
   /// When non-null, the user can still scroll the picker to [DateTime]s earlier
-  /// than [minimumDate], but the [onDateChangeCallback] will not be called on
+  /// than [minimumDate], but the [onDateTimeChanged] will not be called on
   /// these [DateTime]s. Once let go, the picker will scroll back to [minimumDate].
   ///
   /// In [CupertinoDatePickerMode.time] mode, a time becomes unselectable if the
@@ -318,7 +318,7 @@ class CupertinoDatePicker extends StatefulWidget {
   /// The maximum selectable date that the picker can settle on.
   ///
   /// When non-null, the user can still scroll the picker to [DateTime]s later
-  /// than [maximumDate], but the [onDateChangeCallback] will not be called on
+  /// than [maximumDate], but the [onDateTimeChanged] will not be called on
   /// these [DateTime]s. Once let go, the picker will scroll back to [maximumDate].
   ///
   /// In [CupertinoDatePickerMode.time] mode, a time becomes unselectable if the
@@ -948,10 +948,11 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       _getEstimatedColumnWidth(_PickerColumnType.hour),
       _getEstimatedColumnWidth(_PickerColumnType.minute),
     ];
-    final List<_ColumnBuilder> pickerBuilders = <_ColumnBuilder>[
-      _buildHourPicker,
-      _buildMinutePicker,
-    ];
+
+    // Swap the hours and minutes if RTL to ensure they are in the correct position.
+    final List<_ColumnBuilder> pickerBuilders = Directionality.of(context) == TextDirection.rtl
+      ? <_ColumnBuilder>[_buildMinutePicker, _buildHourPicker]
+      : <_ColumnBuilder>[_buildHourPicker, _buildMinutePicker];
 
     // Adds am/pm column if the picker is not using 24h format.
     if (!widget.use24hFormat) {

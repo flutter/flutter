@@ -186,8 +186,8 @@ class IconButton extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
-  ///    within a [Theme].
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
+  ///    widgets within a [Theme].
   final VisualDensity visualDensity;
 
   /// The padding around the button's icon. The entire padded icon will react
@@ -278,7 +278,7 @@ class IconButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// {@macro flutter.material.inkwell.mousecursor}
+  /// {@macro flutter.material.button.mouseCursor}
   ///
   /// Defaults to [SystemMouseCursors.click].
   final MouseCursor mouseCursor;
