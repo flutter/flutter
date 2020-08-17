@@ -1000,6 +1000,10 @@ class MockAccessibilityFeature implements AccessibilityFeatures {
 
   @override
   bool get reduceMotion => true;
+
+  @override
+  // ignore: override_on_non_overriding_member
+  bool get switchControl => true;
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
