@@ -5,12 +5,12 @@
 # See https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html
 
 windows_shard_template: &WINDOWS_SHARD_TEMPLATE
-  only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') && $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+  only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
   script:
     - dart --enable-asserts ./dev/bots/test.dart
 
 macos_shard_template: &MACOS_SHARD_TEMPLATE
-  only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') && $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+  only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
   script:
     - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
     - dart --enable-asserts ./dev/bots/test.dart
@@ -291,41 +291,6 @@ task:
     - flutter update-packages
     - git fetch origin master
   matrix:
-    - name: tool_tests-general-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') || $CIRRUS_PR == ''"
-      environment:
-        # As of December 2019, the tool_tests-general-windows shard required 2 CPUs and 8 GB RAM to
-        # pass. Raising that to 4 CPUs sped it up to ~30 minutes, with further provisioning yielding
-        # no gain.
-        CPU: 4
-        MEMORY: 8G
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: tool_tests-commands-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') || $CIRRUS_PR == ''"
-      environment:
-        # As of December 2019, the tool_tests-commands-windows shard needed 4 CPUs and 8 GB RAM to
-        # reliably pass and not be the long pole, running in about 25 minutes. Bumping beyond these
-        # numbers yielded no extra gain.
-        CPU: 4
-        MEMORY: 8G
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: tool_tests-integration-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') || $CIRRUS_PR == ''"
-      environment:
-        # As of December 2019, the tool_tests-integration-windows shard required 6 GB RAM to pass.
-        # Emperically, 4 CPUs and 10 GB RAM yielded optimal results (~22 minutes); bumping beyond
-        # these amounts yielded no extra gain.
-        CPU: 4
-        MEMORY: 10G
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    # TODO(ianh): Enable Web tests on Windows
-
     - name: hostonly_devicelab_tests-0-windows
       << : *WINDOWS_SHARD_TEMPLATE
       environment:
