@@ -60,7 +60,7 @@ void main() {
     });
     expect(tested, isTrue);
     expect(events.length, 2);
-    expect(events[0].runtimeType, equals(PointerDownEvent));
-    expect(events[1].runtimeType, equals(PointerUpEvent));
+    expect(events[0] is PointerDownEvent, isTrue);
+    expect(events[1] is PointerUpEvent, isTrue);
   });
 }
