@@ -52,14 +52,6 @@ void FlutterDesktopRegistrarSetDestructionHandler(
   }
 }
 
-void FlutterDesktopRegistrarEnableInputBlocking(
-    FlutterDesktopPluginRegistrarRef registrar,
-    const char* channel) {
-  if (s_stub_implementation) {
-    s_stub_implementation->RegistrarEnableInputBlocking(channel);
-  }
-}
-
 bool FlutterDesktopMessengerSend(FlutterDesktopMessengerRef messenger,
                                  const char* channel,
                                  const uint8_t* message,

@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include "binary_messenger_impl.h"
+
 namespace flutter {
 
 FlutterEngine::FlutterEngine(const DartProject& project) {
@@ -25,6 +27,9 @@ FlutterEngine::FlutterEngine(const DartProject& project) {
   }
 
   engine_ = FlutterDesktopEngineCreate(c_engine_properties);
+
+  auto core_messenger = FlutterDesktopEngineGetMessenger(engine_);
+  messenger_ = std::make_unique<BinaryMessengerImpl>(core_messenger);
 }
 
 FlutterEngine::~FlutterEngine() {

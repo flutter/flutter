@@ -35,7 +35,7 @@ struct FlutterDesktopView {
 // State associated with the plugin registrar.
 struct FlutterDesktopPluginRegistrar {
   // The plugin messenger handle given to API clients.
-  std::unique_ptr<FlutterDesktopMessenger> messenger;
+  FlutterDesktopMessenger* messenger;
 
   // The handle for the view associated with this registrar.
   std::unique_ptr<FlutterDesktopView> view;
