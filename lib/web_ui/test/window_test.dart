@@ -8,6 +8,7 @@ import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
@@ -16,6 +17,10 @@ const MethodCodec codec = JSONMethodCodec();
 void emptyCallback(ByteData date) {}
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   test('window.defaultRouteName should not change', () {
     window.locationStrategy = TestLocationStrategy.fromEntry(TestHistoryEntry('initial state', null, '/initial'));
     expect(window.defaultRouteName, '/initial');

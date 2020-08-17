@@ -8,12 +8,16 @@ import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
 import 'package:quiver/testing/async.dart';
+import 'package:test/bootstrap/browser.dart';
+import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'package:test/test.dart';
-
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   group('Keyboard', () {
     /// Used to save and restore [ui.window.onPlatformMessage] after each test.
     ui.PlatformMessageCallback savedCallback;

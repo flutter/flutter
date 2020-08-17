@@ -5,11 +5,16 @@
 // @dart = 2.6
 import 'dart:html';
 
+import 'package:test/bootstrap/browser.dart';
+import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-import 'package:test/test.dart';
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   const MethodCodec codec = JSONMethodCodec();
 
   group('Title', () {

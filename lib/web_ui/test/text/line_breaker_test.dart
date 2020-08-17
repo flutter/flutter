@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // @dart = 2.10
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
@@ -11,6 +12,10 @@ import 'package:ui/ui.dart';
 import 'line_breaker_test_data.dart';
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   group('nextLineBreak', () {
     test('Does not go beyond the ends of a string', () {
       expect(split('foo'), <Line>[

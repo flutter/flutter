@@ -5,6 +5,7 @@
 // @dart = 2.6
 import 'dart:typed_data';
 
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' as engine;
 
@@ -15,6 +16,10 @@ const engine.MethodCodec codec = engine.JSONMethodCodec();
 void emptyCallback(ByteData date) {}
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   setUp(() {
     engine.window.locationStrategy = _strategy = engine.TestLocationStrategy();
   });

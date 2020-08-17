@@ -57,15 +57,15 @@ IF %orTempValue%==0 (
 :: TODO(nurhan): The batch script does not support snanphot option.
 :: Support snapshot option.
 CALL :installdeps
-IF %1==test (%DART_SDK_DIR%\bin\dart "%DEV_DIR%\felt.dart" %* --browser=edge) ELSE ( %DART_SDK_DIR%\bin\dart "%DEV_DIR%\felt.dart" %* )
+IF %1==test (%DART_SDK_DIR%\bin\dart "%DEV_DIR%\felt.dart" %* --browser=chrome) ELSE ( %DART_SDK_DIR%\bin\dart "%DEV_DIR%\felt.dart" %* )
 
-EXIT /B 0
+EXIT /B %ERRORLEVEL%
 
 :installdeps
 ECHO "Running \`pub get\` in 'engine/src/flutter/web_sdk/web_engine_tester'"
 cd "%FLUTTER_DIR%web_sdk\web_engine_tester"
 CALL %PUB_DIR% get
 ECHO "Running \`pub get\` in 'engine/src/flutter/lib/web_ui'"
-cd %WEB_UI_DIR% 
+cd %WEB_UI_DIR%
 CALL %PUB_DIR% get
 EXIT /B 0

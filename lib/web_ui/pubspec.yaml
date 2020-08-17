@@ -9,6 +9,7 @@ dependencies:
 
 dev_dependencies:
   analyzer: 0.39.15
+  archive: 2.0.13
   http: 0.12.1
   image: 2.1.13
   js: 0.6.1+1
