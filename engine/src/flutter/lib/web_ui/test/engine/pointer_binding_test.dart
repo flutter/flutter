@@ -6,10 +6,10 @@
 import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 
+import 'package:test/bootstrap/browser.dart';
+import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import 'package:test/test.dart';
 
 const int _kNoButtonChange = -1;
 const PointerSupportDetector _defaultSupportDetector = PointerSupportDetector();
@@ -40,6 +40,10 @@ bool get isIosSafari => (browserEngine == BrowserEngine.webkit &&
     operatingSystem == OperatingSystem.iOs);
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   html.Element glassPane = domRenderer.glassPaneElement;
 
   setUp(() {

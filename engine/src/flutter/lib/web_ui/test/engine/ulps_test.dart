@@ -3,10 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   group('Float Int conversions', (){
     test('Should convert signbit to 2\'s compliment', () {
       expect(signBitTo2sCompliment(0), 0);

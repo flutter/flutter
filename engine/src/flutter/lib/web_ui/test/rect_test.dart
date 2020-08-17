@@ -3,11 +3,15 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
+import 'package:test/bootstrap/browser.dart';
+import 'package:test/test.dart';
 import 'package:ui/ui.dart';
 
-import 'package:test/test.dart';
-
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   test('rect accessors', () {
     const Rect r = Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
     expect(r.left, equals(1.0));

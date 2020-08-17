@@ -3,12 +3,17 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
+import 'package:test/bootstrap/browser.dart';
 import 'package:ui/ui.dart';
 import 'package:ui/src/engine.dart';
 
 import 'scuba.dart';
 
-void main() async {
+void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() async {
   final EngineScubaTester scuba = await EngineScubaTester.initialize(
     viewportSize: const Size(800, 800),
   );

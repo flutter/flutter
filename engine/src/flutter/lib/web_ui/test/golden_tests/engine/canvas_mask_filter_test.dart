@@ -7,13 +7,18 @@ import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:test/bootstrap/browser.dart';
+import 'package:test/test.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/src/engine.dart';
-import 'package:test/test.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
 
-void main() async {
+void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() async {
   // Commit a recording canvas to a bitmap, and compare with the expected
   Future<void> _checkScreenshot(RecordingCanvas rc, String fileName, ui.Rect screenRect, {bool write = false}) async {
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect);

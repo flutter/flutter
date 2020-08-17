@@ -6,8 +6,9 @@
 import 'dart:async' show Future;
 import 'dart:html';
 
-import 'package:ui/src/engine.dart';
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/src/engine.dart';
 
 const MessageCodec<dynamic> codec = StandardMessageCodec();
 const String testMessage = 'This is an tooltip.';
@@ -16,6 +17,10 @@ const Map<dynamic, dynamic> testInput = <dynamic, dynamic>{
 };
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   AccessibilityAnnouncements accessibilityAnnouncements;
 
   group('$AccessibilityAnnouncements', () {

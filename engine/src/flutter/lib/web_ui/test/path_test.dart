@@ -7,6 +7,7 @@
 import 'dart:js_util' as js_util;
 import 'dart:html' as html;
 import 'dart:typed_data';
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart' hide window;
 import 'package:ui/src/engine.dart';
@@ -14,6 +15,10 @@ import 'package:ui/src/engine.dart';
 import 'matchers.dart';
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   group('Path', () {
     test('Should have no subpaths when created', () {
       final SurfacePath path = SurfacePath();

@@ -5,9 +5,9 @@
 // @dart = 2.6
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart';
-
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/src/engine.dart';
 
 final Float32List identityTransform = Matrix4.identity().storage;
 final Float32List xTranslation = (Matrix4.identity()..translate(10)).storage;
@@ -17,6 +17,10 @@ final Float32List scaleAndTranslate2d = (Matrix4.identity()..scale(2, 3, 1)..tra
 final Float32List rotation2d = (Matrix4.identity()..rotateZ(0.2)).storage;
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   test('transformKindOf and isIdentityFloat32ListTransform identify matrix kind', () {
     expect(transformKindOf(identityTransform), TransformKind.identity);
     expect(isIdentityFloat32ListTransform(identityTransform), isTrue);

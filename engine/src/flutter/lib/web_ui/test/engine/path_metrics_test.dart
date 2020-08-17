@@ -4,14 +4,19 @@
 
 import 'dart:math' as math;
 
-import 'package:ui/ui.dart';
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/ui.dart';
 
 import '../matchers.dart';
 
 const double kTolerance = 0.001;
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   group('PathMetric length', () {
     test('empty path', () {
       Path path = Path();

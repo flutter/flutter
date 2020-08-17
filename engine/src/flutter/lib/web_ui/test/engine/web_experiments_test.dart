@@ -6,12 +6,17 @@
 import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
 const bool _defaultUseCanvasText = true;
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   setUp(() {
     WebExperiments.ensureInitialized();
   });

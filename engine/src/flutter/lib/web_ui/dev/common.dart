@@ -59,11 +59,11 @@ class _WindowsBinding implements PlatformBinding {
 
   @override
   String getChromeDownloadUrl(String version) =>
-      'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Win%2F${version}%2Fchrome-win32.zip?alt=media';
+      'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Win%2F${version}%2Fchrome-win.zip?alt=media';
 
   @override
   String getChromeExecutablePath(io.Directory versionDir) =>
-      path.join(versionDir.path, 'chrome-win32', 'chrome');
+      path.join(versionDir.path, 'chrome-win', 'chrome.exe');
 
   @override
   String getFirefoxDownloadUrl(String version) =>

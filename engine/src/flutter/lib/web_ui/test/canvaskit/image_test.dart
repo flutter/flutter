@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
@@ -11,6 +12,10 @@ import 'common.dart';
 import 'test_data.dart';
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   group('CanvasKit image', () {
     setUpAll(() async {
       await ui.webOnlyInitializePlatform();

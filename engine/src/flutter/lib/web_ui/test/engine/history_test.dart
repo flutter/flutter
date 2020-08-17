@@ -10,6 +10,7 @@ import 'dart:async';
 import 'dart:html' as html;
 import 'dart:typed_data';
 
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
@@ -29,6 +30,10 @@ const MethodCodec codec = JSONMethodCodec();
 void emptyCallback(ByteData date) {}
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   group('$BrowserHistory', () {
     final PlatformMessagesSpy spy = PlatformMessagesSpy();
 

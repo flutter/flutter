@@ -41,9 +41,7 @@ felt build [-w] -j 100
 
 If you are a Google employee, you can use an internal instance of Goma to parallelize your builds. Because Goma compiles code on remote servers, this option is effective even on low-powered laptops.
 
-By default, when compiling Dart code to JavaScript, we use 4 `dart2js` workers.
-If you need to increase or reduce the number of workers, set the `BUILD_MAX_WORKERS_PER_TASK`
-environment variable to the desired number.
+By default, when compiling Dart code to JavaScript, we use 8 `dart2js` workers.
 
 ## Running web engine tests
 

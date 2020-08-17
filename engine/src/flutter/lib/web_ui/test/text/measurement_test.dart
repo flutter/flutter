@@ -5,10 +5,12 @@
 // @dart = 2.6
 @TestOn('chrome || firefox')
 
+import 'package:test/bootstrap/browser.dart';
+import 'package:test/test.dart';
+
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/src/engine.dart';
 
-import 'package:test/test.dart';
 
 final ui.ParagraphStyle ahemStyle = ui.ParagraphStyle(
   fontFamily: 'ahem',
@@ -47,8 +49,11 @@ void testMeasurements(String description, MeasurementTestBody body, {
     skip: skipCanvas,
   );
 }
+void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
 
-void main() async {
+void testMain()  async {
   await ui.webOnlyInitializeTestDomRenderer();
 
   group('$RulerManager', () {

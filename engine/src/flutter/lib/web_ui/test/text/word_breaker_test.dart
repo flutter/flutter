@@ -3,11 +3,16 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   group('$WordBreaker', () {
     test('Does not go beyond the ends of a string', () {
       expect(WordBreaker.prevBreakIndex('foo', 0), 0);

@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
+import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:archive/archive.dart';
+import 'package:archive/archive_io.dart';
 import 'package:args/args.dart';
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
@@ -186,7 +189,7 @@ class ChromeInstaller {
     } else if (versionDir.existsSync() && isLuci) {
       print('INFO: Chrome version directory in LUCI: '
           '${versionDir.path}');
-    } else if(!versionDir.existsSync() && isLuci) {
+    } else if (!versionDir.existsSync() && isLuci) {
       // Chrome should have been deployed as a CIPD package on LUCI.
       // Throw if it does not exists.
       throw StateError('Failed to locate Chrome on LUCI on path:'
@@ -195,6 +198,8 @@ class ChromeInstaller {
       // If the directory does not exists and felt is not running on LUCI.
       versionDir.createSync(recursive: true);
     }
+
+    print('INFO: Starting Chrome download.');
 
     final String url = PlatformBinding.instance.getChromeDownloadUrl(version);
     final StreamedResponse download = await client.send(Request(
@@ -206,17 +211,50 @@ class ChromeInstaller {
         io.File(path.join(versionDir.path, 'chrome.zip'));
     await download.stream.pipe(downloadedFile.openWrite());
 
-    final io.ProcessResult unzipResult = await io.Process.run('unzip', <String>[
-      downloadedFile.path,
-      '-d',
-      versionDir.path,
-    ]);
+    /// Windows LUCI bots does not have a `unzip`. Instead we are
+    /// using `archive` pub package.
+    ///
+    /// We didn't use `archieve` on Mac/Linux since the new files have
+    /// permission issues. For now we are not able change file permissions
+    /// from dart.
+    /// See: https://github.com/dart-lang/sdk/issues/15078.
+    if (io.Platform.isWindows) {
+      final Stopwatch stopwatch = Stopwatch()..start();
 
-    if (unzipResult.exitCode != 0) {
-      throw BrowserInstallerException(
-          'Failed to unzip the downloaded Chrome archive ${downloadedFile.path}.\n'
-          'With the version path ${versionDir.path}\n'
-          'The unzip process exited with code ${unzipResult.exitCode}.');
+      // Read the Zip file from disk.
+      final bytes = downloadedFile.readAsBytesSync();
+
+      final Archive archive = ZipDecoder().decodeBytes(bytes);
+
+      // Extract the contents of the Zip archive to disk.
+      for (final ArchiveFile file in archive) {
+        final String filename = file.name;
+        if (file.isFile) {
+          final data = file.content as List<int>;
+          io.File(path.join(versionDir.path, filename))
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(data);
+        } else {
+          io.Directory(path.join(versionDir.path, filename))
+            ..create(recursive: true);
+        }
+      }
+
+      stopwatch.stop();
+      print('INFO: The unzip took ${stopwatch.elapsedMilliseconds ~/ 1000} seconds.');
+    } else {
+      final io.ProcessResult unzipResult =
+          await io.Process.run('unzip', <String>[
+        downloadedFile.path,
+        '-d',
+        versionDir.path,
+      ]);
+      if (unzipResult.exitCode != 0) {
+        throw BrowserInstallerException(
+            'Failed to unzip the downloaded Chrome archive ${downloadedFile.path}.\n'
+            'With the version path ${versionDir.path}\n'
+            'The unzip process exited with code ${unzipResult.exitCode}.');
+      }
     }
 
     downloadedFile.deleteSync();

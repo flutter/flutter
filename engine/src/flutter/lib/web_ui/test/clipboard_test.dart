@@ -7,11 +7,16 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:mockito/mockito.dart';
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/src/engine.dart';
 
-Future<void> main() async {
+void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() async {
   await ui.webOnlyInitializeTestDomRenderer();
   group('message handler', () {
     const String testText = 'test text';

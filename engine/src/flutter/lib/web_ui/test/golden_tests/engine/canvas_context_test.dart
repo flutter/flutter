@@ -5,14 +5,19 @@
 // @dart = 2.6
 import 'dart:html' as html;
 
+import 'package:test/bootstrap/browser.dart';
+import 'package:test/test.dart';
 import 'package:ui/ui.dart' hide TextStyle;
 import 'package:ui/src/engine.dart' as engine;
-import 'package:test/test.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
 
+void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
 /// Tests context save/restore.
-void main() async {
+void testMain() async {
   const double screenWidth = 600.0;
   const double screenHeight = 800.0;
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);

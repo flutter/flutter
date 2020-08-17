@@ -9,6 +9,7 @@ import 'dart:io' as io;
 import 'package:args/command_runner.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:pool/pool.dart';
 import 'package:test_core/src/runner/hack_register_platform.dart'
     as hack; // ignore: implementation_imports
 import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
@@ -99,6 +100,9 @@ class TestCommand extends Command<bool> with ArgUtils {
 
   TestTypesRequested testTypesRequested = null;
 
+  /// How many dart2js build tasks are running at the same time.
+  final Pool _pool = Pool(8);
+
   /// Check the flags to see what type of tests are requested.
   TestTypesRequested findTestType() {
     if (boolArg('unit-tests-only') && boolArg('integration-tests-only')) {
@@ -130,6 +134,7 @@ class TestCommand extends Command<bool> with ArgUtils {
       /// Collect information on the bot.
       final MacOSInfo macOsInfo = new MacOSInfo();
       await macOsInfo.printInformation();
+
       /// Tests may fail on the CI, therefore exit test_runner.
       if (isLuci) {
         return true;
@@ -142,9 +147,7 @@ class TestCommand extends Command<bool> with ArgUtils {
       case TestTypesRequested.integration:
         return runIntegrationTests();
       case TestTypesRequested.all:
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/53322
-        // TODO(nurhan): Expand browser matrix for felt integration tests.
-        if (runAllTests && (isChrome || isSafariOnMacOS || isFirefox)) {
+        if (runAllTests && isIntegrationTestsAvailable) {
           bool unitTestResult = await runUnitTests();
           bool integrationTestResult = await runIntegrationTests();
           if (integrationTestResult != unitTestResult) {
@@ -240,12 +243,35 @@ class TestCommand extends Command<bool> with ArgUtils {
     }
 
     if (htmlTargets.isNotEmpty) {
-      await _buildTests(targets: htmlTargets, forCanvasKit: false);
+      await _buildTestsInParallel(targets: htmlTargets, forCanvasKit: false);
     }
 
+    // Currently iOS Safari tests are running on simulator, which does not
+    // support canvaskit backend.
     if (canvasKitTargets.isNotEmpty) {
-      await _buildTests(targets: canvasKitTargets, forCanvasKit: true);
+      await _buildTestsInParallel(
+          targets: canvasKitTargets, forCanvasKit: true);
     }
+
+    // Copy image files from test/ to build/test/.
+    // A side effect is this file copies all the images even when only one
+    // target test is asked to run.
+    final List<io.FileSystemEntity> contents =
+        environment.webUiTestDir.listSync(recursive: true);
+    contents.whereType<io.File>().forEach((final io.File entity) {
+      final String directoryPath = path.relative(path.dirname(entity.path),
+          from: environment.webUiRootDir.path);
+      final io.Directory directory = io.Directory(
+          path.join(environment.webUiBuildDir.path, directoryPath));
+      if (!directory.existsSync()) {
+        directory.createSync(recursive: true);
+      }
+      final String pathRelativeToWebUi = path.relative(entity.absolute.path,
+          from: environment.webUiRootDir.path);
+      entity.copySync(
+          path.join(environment.webUiBuildDir.path, pathRelativeToWebUi));
+    });
+
     stopwatch.stop();
     print('The build took ${stopwatch.elapsedMilliseconds ~/ 1000} seconds.');
   }
@@ -279,8 +305,40 @@ class TestCommand extends Command<bool> with ArgUtils {
   bool get isFirefox => browser == 'firefox';
 
   /// Whether [browser] is set to "safari".
-  bool get isSafariOnMacOS => browser == 'safari'
-      && io.Platform.isMacOS;
+  bool get isSafariOnMacOS => browser == 'safari' && io.Platform.isMacOS;
+
+  /// Due to lack of resources Chrome integration tests only run on Linux on
+  /// LUCI.
+  ///
+  /// They run on all platforms for local.
+  bool get isChromeIntegrationTestAvailable =>
+      (isChrome && isLuci && io.Platform.isLinux) || (isChrome && !isLuci);
+
+  /// Due to efficiancy constraints, Firefox integration tests only run on
+  /// Linux on LUCI.
+  ///
+  /// For now Firefox integration tests only run on Linux and Mac on local.
+  ///
+  // TODO: https://github.com/flutter/flutter/issues/63832
+  bool get isFirefoxIntegrationTestAvailable =>
+      (isFirefox && isLuci && io.Platform.isLinux) ||
+      (isFirefox && !isLuci && !io.Platform.isWindows);
+
+  /// Latest versions of Safari Desktop are only available on macOS.
+  ///
+  /// Integration testing on LUCI is not supported at the moment.
+  // TODO: https://github.com/flutter/flutter/issues/63710
+  bool get isSafariIntegrationTestAvailable => isSafariOnMacOS && !isLuci;
+
+  /// Due to various factors integration tests might be missing on a given
+  /// platform and given environment.
+  /// See: [isChromeIntegrationTestAvailable]
+  /// See: [isSafariIntegrationTestAvailable]
+  /// See: [isFirefoxIntegrationTestAvailable]
+  bool get isIntegrationTestsAvailable =>
+      isChromeIntegrationTestAvailable ||
+      isFirefoxIntegrationTestAvailable ||
+      isSafariIntegrationTestAvailable;
 
   /// Use system flutter instead of cloning the repository.
   ///
@@ -308,8 +366,10 @@ class TestCommand extends Command<bool> with ArgUtils {
       'test',
     ));
 
-    // Screenshot tests and smoke tests only run in Chrome.
-    if (isChrome) {
+    // Screenshot tests and smoke tests only run on: "Chrome locally" or
+    // "Chrome on a Linux bot". We can remove the Linux bot restriction after:
+    // TODO: https://github.com/flutter/flutter/issues/63710
+    if ((isChrome && isLuci && io.Platform.isLinux) || (isChrome && !isLuci)) {
       // Separate screenshot tests from unit-tests. Screenshot tests must run
       // one at a time. Otherwise, they will end up screenshotting each other.
       // This is not an issue for unit-tests.
@@ -448,69 +508,69 @@ class TestCommand extends Command<bool> with ArgUtils {
     timestampFile.writeAsStringSync(timestamp);
   }
 
+  Future<void> _buildTestsInParallel(
+      {List<FilePath> targets, bool forCanvasKit = false}) async {
+    final List<TestBuildInput> buildInputs = targets
+        .map((FilePath f) => TestBuildInput(f, forCanvasKit: forCanvasKit))
+        .toList();
+
+    final results = _pool.forEach(
+      buildInputs,
+      _buildTest,
+    );
+    await for (final bool isSuccess in results) {
+      if (!isSuccess) {
+        throw ToolException('Failed to compile tests.');
+      }
+    }
+  }
+
   /// Builds the specific test [targets].
   ///
   /// [targets] must not be null.
   ///
-  /// When building for CanvasKit we have to use a separate `build.canvaskit.yaml`
-  /// config file. Otherwise, `build.html.yaml` is used. Because `build_runner`
-  /// overwrites the output directories, we redirect the CanvasKit output to a
-  /// separate directory, then copy the files back to `build/test`.
-  Future<void> _buildTests({List<FilePath> targets, bool forCanvasKit}) async {
-    print(
-        'Building ${targets.length} targets for ${forCanvasKit ? 'CanvasKit' : 'HTML'}');
-    final String canvasKitOutputRelativePath =
-        path.join('.dart_tool', 'canvaskit_tests');
+  /// Uses `dart2js` for building the test.
+  ///
+  /// When building for CanvasKit we have to use extra argument
+  /// `DFLUTTER_WEB_USE_SKIA=true`.
+  Future<bool> _buildTest(TestBuildInput input) async {
+    final targetFileName =
+        '${input.path.relativeToWebUi}.browser_test.dart.js';
+    final String targetPath = path.join('build', targetFileName);
+
+    final io.Directory directoryToTarget = io.Directory(path.join(
+        environment.webUiBuildDir.path,
+        path.dirname(input.path.relativeToWebUi)));
+
+    if (!directoryToTarget.existsSync()) {
+      directoryToTarget.createSync(recursive: true);
+    }
+
     List<String> arguments = <String>[
-      'run',
-      'build_runner',
-      'build',
+      '--no-minify',
+      '--disable-inlining',
+      '--enable-asserts',
       '--enable-experiment=non-nullable',
-      'test',
+      '--no-sound-null-safety',
+      if (input.forCanvasKit) '-DFLUTTER_WEB_USE_SKIA=true',
+      '-O2',
       '-o',
-      forCanvasKit ? canvasKitOutputRelativePath : 'build',
-      '--config',
-      // CanvasKit uses `build.canvaskit.yaml`, which HTML Uses `build.html.yaml`.
-      forCanvasKit ? 'canvaskit' : 'html',
-      for (FilePath path in targets) ...[
-        '--build-filter=${path.relativeToWebUi}.js',
-        '--build-filter=${path.relativeToWebUi}.browser_test.dart.js',
-      ],
+      targetPath, // target path.
+      '${input.path.relativeToWebUi}', // current path.
     ];
 
     final int exitCode = await runProcess(
-      environment.pubExecutable,
+      environment.dart2jsExecutable,
       arguments,
       workingDirectory: environment.webUiRootDir.path,
-      environment: <String, String>{
-        // This determines the number of concurrent dart2js processes.
-        //
-        // By default build_runner uses 4 workers.
-        //
-        // In a testing on a 32-core 132GB workstation increasing this number to
-        // 32 sped up the build from ~4min to ~1.5min.
-        if (io.Platform.environment.containsKey('BUILD_MAX_WORKERS_PER_TASK'))
-          'BUILD_MAX_WORKERS_PER_TASK':
-              io.Platform.environment['BUILD_MAX_WORKERS_PER_TASK'],
-      },
     );
 
     if (exitCode != 0) {
-      throw ToolException(
-          'Failed to compile tests. Compiler exited with exit code $exitCode');
-    }
-
-    if (forCanvasKit) {
-      final io.Directory canvasKitTemporaryOutputDirectory = io.Directory(
-          path.join(environment.webUiRootDir.path, canvasKitOutputRelativePath,
-              'test', 'canvaskit'));
-      final io.Directory canvasKitOutputDirectory = io.Directory(
-          path.join(environment.webUiBuildDir.path, 'test', 'canvaskit'));
-      if (await canvasKitOutputDirectory.exists()) {
-        await canvasKitOutputDirectory.delete(recursive: true);
-      }
-      await canvasKitTemporaryOutputDirectory
-          .rename(canvasKitOutputDirectory.path);
+      io.stderr.writeln('ERROR: Failed to compile test ${input.path}. '
+          'Dart2js exited with exit code $exitCode');
+      return false;
+    } else {
+      return true;
     }
   }
 
@@ -581,4 +641,17 @@ void _copyTestFontsIntoWebUi() {
         path.join(environment.webUiRootDir.path, 'lib', 'assets', fontFile);
     sourceTtf.copySync(destinationTtfPath);
   }
+}
+
+/// Used as an input message to the PoolResources that are building a test.
+class TestBuildInput {
+  /// Test to build.
+  final FilePath path;
+
+  /// Whether these tests should be build for CanvasKit.
+  ///
+  /// `-DFLUTTER_WEB_USE_SKIA=true` is passed to dart2js for CanvasKit.
+  final bool forCanvasKit;
+
+  TestBuildInput(this.path, {this.forCanvasKit = false});
 }

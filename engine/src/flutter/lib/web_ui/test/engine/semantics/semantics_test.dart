@@ -12,6 +12,7 @@ import 'dart:typed_data';
 
 import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
@@ -24,6 +25,10 @@ DateTime _testTime = DateTime(2018, 12, 17);
 EngineSemanticsOwner semantics() => EngineSemanticsOwner.instance;
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   setUp(() {
     EngineSemanticsOwner.debugResetSemantics();
   });

@@ -5,7 +5,7 @@ chrome:
   # is not working with chrome.binary option.
   Linux: 741412
   Mac: 735194
-  Win: 735105
+  Win: 768975
 firefox:
   version: '72.0'
 edge:

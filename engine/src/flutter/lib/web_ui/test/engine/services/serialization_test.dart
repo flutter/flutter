@@ -5,11 +5,16 @@
 // @dart = 2.6
 import 'dart:typed_data';
 
+import 'package:test/test.dart';
+import 'package:test/bootstrap/browser.dart';
 import 'package:ui/ui.dart';
 import 'package:ui/src/engine.dart';
-import 'package:test/test.dart';
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
   group('Write and read buffer round-trip', () {
     test('of single byte', () {
       final WriteBuffer write = WriteBuffer();
