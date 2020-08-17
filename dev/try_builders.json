@@ -73,9 +73,21 @@
          "enabled":true
       },
       {
+         "name": "Windows docs",
+         "repo": "flutter",
+         "task_name": "win_docs",
+         "enabled":true
+      },
+      {
          "name": "Windows framework_tests",
          "repo": "flutter",
          "task_name": "win_framework_tests",
+         "enabled":true
+      },
+      {
+         "name": "Windows tool_tests",
+         "repo": "flutter",
+         "task_name": "win_tool_tests",
          "enabled":true
       }
    ]

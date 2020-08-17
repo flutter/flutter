@@ -67,15 +67,21 @@
          "flaky": false
       },
       {
+         "name": "Windows build_tests",
+         "repo": "flutter",
+         "task_name": "win_build_tests",
+         "flaky": false
+      },
+      {
          "name": "Windows customer_testing",
          "repo": "flutter",
          "task_name": "win_customer_testing",
          "flaky": false
       },
       {
-         "name": "Windows build_tests",
+         "name": "Windows docs",
          "repo": "flutter",
-         "task_name": "win_build_tests",
+         "task_name": "win_docs",
          "flaky": false
       },
       {
@@ -83,6 +89,12 @@
          "repo": "flutter",
          "task_name": "win_framework_tests",
          "flaky": false
+      },
+      {
+         "name": "Windows tool_tests",
+         "repo": "flutter",
+         "task_name": "win_tool_tests",
+         "enabled":true
       }
    ]
 }
