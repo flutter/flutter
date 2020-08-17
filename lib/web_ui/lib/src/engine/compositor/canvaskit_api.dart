@@ -21,6 +21,7 @@ late CanvasKit canvasKit;
 external set windowFlutterCanvasKit(CanvasKit value);
 
 @JS()
+@anonymous
 class CanvasKit {
   external SkBlendModeEnum get BlendMode;
   external SkPaintStyleEnum get PaintStyle;
@@ -130,6 +131,7 @@ class SkSurface {
 }
 
 @JS()
+@anonymous
 class SkGrContext {
   external void setResourceCacheLimitBytes(int limit);
   external void releaseResourcesAndAbandonContext();
@@ -622,6 +624,7 @@ SkTileMode toSkTileMode(ui.TileMode mode) {
 }
 
 @JS()
+@anonymous
 class SkAnimatedImage {
   external int getFrameCount();
 
@@ -639,6 +642,7 @@ class SkAnimatedImage {
 }
 
 @JS()
+@anonymous
 class SkImage {
   external void delete();
   external int width();
@@ -696,6 +700,7 @@ class SkShaderNamespace {
 }
 
 @JS()
+@anonymous
 class SkShader {
   external void delete();
 }
@@ -725,6 +730,7 @@ class SkPaint {
 }
 
 @JS()
+@anonymous
 class SkMaskFilter {
   external void delete();
 }
@@ -740,6 +746,7 @@ class SkColorFilterNamespace {
 }
 
 @JS()
+@anonymous
 class SkColorFilter {
   external void delete();
 }
@@ -761,6 +768,7 @@ class SkImageFilterNamespace {
 }
 
 @JS()
+@anonymous
 class SkImageFilter {
   external void delete();
 }
@@ -1405,6 +1413,7 @@ class SkCanvasSaveLayerWithFilterOverload {
 }
 
 @JS()
+@anonymous
 class SkPicture {
   external void delete();
 }
@@ -1423,6 +1432,7 @@ class SkParagraphBuilderNamespace {
 }
 
 @JS()
+@anonymous
 class SkParagraphBuilder {
   external void addText(String text);
   external void pushStyle(SkTextStyle textStyle);
@@ -1503,6 +1513,7 @@ class SkFontStyle {
 }
 
 @JS()
+@anonymous
 class SkFontMgr {
   external String? getFamilyName(int fontId);
   external void delete();
@@ -1515,6 +1526,7 @@ class TypefaceFontProvider extends SkFontMgr {
 }
 
 @JS()
+@anonymous
 class SkParagraph {
   external double getAlphabeticBaseline();
   external bool didExceedMaxLines();
@@ -1552,6 +1564,7 @@ class SkTextRange {
 }
 
 @JS()
+@anonymous
 class SkVertices {
   external void delete();
 }
@@ -1618,6 +1631,7 @@ typedef SkObjectFinalizer<T> = void Function(T key);
 
 /// Any Skia object that has a `delete` method.
 @JS()
+@anonymous
 class SkDeletable {
   /// Deletes the C++ side object.
   external void delete();
