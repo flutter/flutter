@@ -1,16 +1,26 @@
 #!/bin/bash
+#
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 set -e
 
-if [[ ! -f $1 ]]; then
-  echo "File $1 not found."
-  exit -1
+APP="$1"
+if [[ -z "$APP" ]]; then
+  echo "Application must be specified as the first argument to the script."
+  exit 255
 fi
 
-GIT_REVISION=${2:-$(git rev-parse HEAD)}
-BUILD_ID=${3:-$CIRRUS_BUILD_ID}
+if [[ ! -f "$APP" ]]; then
+  echo "File '$APP' not found."
+  exit 255
+fi
 
-if [[ ! -z $GCLOUD_FIREBASE_TESTLAB_KEY ]]; then
+GIT_REVISION="${2:-$(git rev-parse HEAD)}"
+BUILD_ID="${3:-$CIRRUS_BUILD_ID}"
+
+if [[ -n $GCLOUD_FIREBASE_TESTLAB_KEY ]]; then
   # New contributors will not have permissions to run this test - they won't be
   # able to access the service account information. We should just mark the test
   # as passed - it will run fine on post submit, where it will still catch
@@ -21,8 +31,8 @@ if [[ ! -z $GCLOUD_FIREBASE_TESTLAB_KEY ]]; then
     exit 0
   fi
 
-  echo $GCLOUD_FIREBASE_TESTLAB_KEY > ${HOME}/gcloud-service-key.json
-  gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+  echo "$GCLOUD_FIREBASE_TESTLAB_KEY" > "${HOME}/gcloud-service-key.json"
+  gcloud auth activate-service-account --key-file="${HOME}/gcloud-service-key.json"
 fi
 
 # Run the test.
@@ -32,8 +42,8 @@ fi
 # See https://firebase.google.com/docs/test-lab/android/game-loop
 gcloud --project flutter-infra firebase test android run \
   --type game-loop \
-  --app $1 \
+  --app "$APP" \
   --timeout 2m \
   --results-bucket=gs://flutter_firebase_testlab \
-  --results-dir=engine_scenario_test/$GIT_REVISION/$BUILD_ID \
+  --results-dir="engine_scenario_test/$GIT_REVISION/$BUILD_ID" \
   --no-auto-google-login

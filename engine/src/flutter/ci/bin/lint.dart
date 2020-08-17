@@ -1,9 +1,13 @@
-/// Runs clang-tidy on files with changes.
-///
-/// usage:
-/// dart lint.dart <path to compile_commands.json> <path to git repository> [clang-tidy checks]
-///
-/// User environment variable FLUTTER_LINT_ALL to run on all files.
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Runs clang-tidy on files with changes.
+//
+// usage:
+// dart lint.dart <path to compile_commands.json> <path to git repository> [clang-tidy checks]
+//
+// User environment variable FLUTTER_LINT_ALL to run on all files.
 
 import 'dart:async' show Completer;
 import 'dart:convert' show jsonDecode, utf8, LineSplitter;
