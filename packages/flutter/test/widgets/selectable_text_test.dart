@@ -2710,7 +2710,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'long press moves cursor to the exact long press position and shows toolbar',
+    'long press selects word and shows toolbar (iOS)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -2730,13 +2730,16 @@ void main() {
       final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
       final TextEditingController controller = editableTextWidget.controller;
 
-      // Collapsed cursor for iOS long press.
+      // The longpressed word is selected.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 4, affinity: TextAffinity.upstream),
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 7,
+        ),
       );
 
-      // Collapsed toolbar shows 2 buttons.
+      // Toolbar shows one button.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
@@ -2828,10 +2831,14 @@ void main() {
       final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
       final TextEditingController controller = editableTextWidget.controller;
 
-      // Long press on iOS shows collapsed selection cursor.
+      // The longpressed word is selected.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 4, affinity: TextAffinity.upstream),
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 7,
+          affinity: TextAffinity.downstream,
+        ),
       );
       // Cursor move doesn't trigger a toolbar initially.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -2842,7 +2849,11 @@ void main() {
       // The selection position is now moved with the drag.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.downstream),
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 8,
+          affinity: TextAffinity.downstream,
+        ),
       );
       // Still no toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -2853,7 +2864,11 @@ void main() {
       // The selection position is now moved with the drag.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream),
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 12,
+          affinity: TextAffinity.downstream,
+        ),
       );
       // Still no toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -2864,7 +2879,11 @@ void main() {
       // The selection isn't affected by the gesture lift.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream),
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 12,
+          affinity: TextAffinity.downstream,
+        ),
       );
       // The toolbar now shows up.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
@@ -2906,7 +2925,7 @@ void main() {
 
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 21),
+      const TextSelection(baseOffset: 13, extentOffset: 23),
     );
     expect(find.byType(CupertinoButton), findsNothing);
 
@@ -2915,21 +2934,33 @@ void main() {
     await tester.pump();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 64, affinity: TextAffinity.downstream),
+      const TextSelection(
+        baseOffset: 13,
+        extentOffset: 66,
+        affinity: TextAffinity.downstream,
+      ),
     );
     // Keep moving out.
     await gesture.moveBy(const Offset(1, 0));
     await tester.pump();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
+      const TextSelection(
+        baseOffset: 13,
+        extentOffset: 66,
+        affinity: TextAffinity.downstream,
+      ),
     );
     await gesture.moveBy(const Offset(1, 0));
     await tester.pump();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
-    ); // We're at the edge now.
+      const TextSelection(
+        baseOffset: 13,
+        extentOffset: 66,
+        affinity: TextAffinity.downstream,
+      ),
+    );
     expect(find.byType(CupertinoButton), findsNothing);
 
     await gesture.up();
@@ -2938,7 +2969,11 @@ void main() {
     // The selection isn't affected by the gesture lift.
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
+      const TextSelection(
+        baseOffset: 13,
+        extentOffset: 66,
+        affinity: TextAffinity.downstream,
+      ),
     );
     // The toolbar now shows up.
     expect(find.byType(CupertinoButton), findsNWidgets(1));
@@ -2949,6 +2984,7 @@ void main() {
 
     expect(lastCharEndpoint.length, 1);
     // The last character is now on screen near the right edge.
+    // TODO(justinmc): Why isn't edge scrolling working?
     expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
 
     final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
@@ -2960,7 +2996,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'long tap after a double tap select is not affected',
+    'long tap still selects after a double tap select',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -2991,10 +3027,10 @@ void main() {
       await tester.longPressAt(selectableTextStart + const Offset(100.0, 5.0));
       await tester.pump();
 
-      // Plain collapsed selection at the exact tap position.
+      // Selected the "word" where the tap happened, which is the first space.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 7),
+        const TextSelection(baseOffset: 7, extentOffset: 8),
       );
 
       // Long press toolbar.
@@ -3948,6 +3984,7 @@ void main() {
     await tester.longPressAt(ePos);
     await tester.pumpAndSettle();
 
+    // TODO(justinmc): Should Select All be showing now?
     expect(find.text('Select All'), findsOneWidget);
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Paste'), findsNothing);
