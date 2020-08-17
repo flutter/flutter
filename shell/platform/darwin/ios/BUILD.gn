@@ -208,6 +208,7 @@ shared_library("ios_test_flutter") {
   ]
   sources = [
     "framework/Source/FlutterBinaryMessengerRelayTest.mm",
+    "framework/Source/FlutterDartProjectTest.mm",
     "framework/Source/FlutterEngineTest.mm",
     "framework/Source/FlutterPluginAppLifeCycleDelegateTest.m",
     "framework/Source/FlutterTextInputPluginTest.m",
