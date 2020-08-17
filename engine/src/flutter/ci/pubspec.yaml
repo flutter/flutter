@@ -1,9 +1,13 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 name: ci_scripts
 
 dependencies:
   args: ^1.6.0
   path: ^1.7.0
-  process_runner: ^2.0.3
+  process_runner: ^3.0.0
 
 environment:
   sdk: '>=2.8.0 <3.0.0'

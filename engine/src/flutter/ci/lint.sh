@@ -1,9 +1,10 @@
 #!/bin/bash
+#
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 set -e
-SCRIPT_DIR=`realpath $(dirname "${BASH_SOURCE[0]}")`
-DART="${SCRIPT_DIR}/../../third_party/dart/tools/sdks/dart-sdk/bin/dart"
-PUB="${SCRIPT_DIR}/../../third_party/dart/tools/sdks/dart-sdk/bin/pub"
 
 # Needed because if it is set, cd may print the path it changed to.
 unset CDPATH
@@ -11,15 +12,6 @@ unset CDPATH
 # On Mac OS, readlink -f doesn't work, so follow_links traverses the path one
 # link at a time, and then cds into the link destination and find out where it
 # ends up.
-#
-# The returned filesystem path must be a format usable by Dart's URI parser,
-# since the Dart command line tool treats its argument as a file URI, not a
-# filename. For instance, multiple consecutive slashes should be reduced to a
-# single slash, since double-slashes indicate a URI "authority", and these are
-# supposed to be filenames. There is an edge case where this will return
-# multiple slashes: when the input resolves to the root directory. However, if
-# that were the case, we wouldn't be running this shell, so we don't do anything
-# about it.
 #
 # The function is enclosed in a subshell to avoid changing the working directory
 # of the caller.
@@ -34,17 +26,20 @@ function follow_links() (
   done
   echo "$file"
 )
-PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
-CI_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
-SRC_DIR="$(cd "$CI_DIR/../.."; pwd -P)"
+
+SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
+SRC_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
+DART_BIN="${SRC_DIR}/third_party/dart/tools/sdks/dart-sdk/bin"
+DART="${DART_BIN}/dart"
+PUB="${DART_BIN}/pub"
 
 COMPILE_COMMANDS="$SRC_DIR/out/compile_commands.json"
 if [ ! -f "$COMPILE_COMMANDS" ]; then
-  (cd $SRC_DIR; ./flutter/tools/gn)
+  (cd "$SRC_DIR"; ./flutter/tools/gn)
 fi
 
-cd "$CI_DIR"
-$PUB get && $DART \
+cd "$SCRIPT_DIR"
+"$PUB" get && "$DART" \
   --disable-dart-dev \
   bin/lint.dart \
   --compile-commands="$COMPILE_COMMANDS" \
