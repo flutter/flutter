@@ -23,6 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
                                               libraryOrNil:(nullable NSString*)dartLibraryOrNil;
 
 + (NSString*)flutterAssetsName:(NSBundle*)bundle;
++ (NSString*)domainNetworkPolicy:(NSDictionary*)appTransportSecurity;
++ (bool)allowsArbitraryLoads:(NSDictionary*)appTransportSecurity;
 
 /**
  * The embedder can specify data that the isolate can request synchronously on launch. Engines
