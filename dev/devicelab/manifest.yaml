@@ -769,6 +769,22 @@ tasks:
     required_agent_capabilities: ["linux/android"]
     flaky: true
 
+  flutter_gallery__transition_perf_e2e_ios32:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      Android with e2e.
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios32"]
+    flaky: true
+
+  flutter_gallery__transition_perf_e2e_ios:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      Android with e2e.
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
+
   flutter_gallery__transition_perf_hybrid:
     description: >
       Measures the performance of screen transitions in Flutter Gallery on
