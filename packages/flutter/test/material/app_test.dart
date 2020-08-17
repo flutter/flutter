@@ -1001,6 +1001,8 @@ class MockAccessibilityFeature implements AccessibilityFeatures {
   @override
   bool get reduceMotion => true;
 
+  // TODO(chunhtai): remove this ignore once engine side is merged,
+  // https://github.com/flutter/flutter/issues/37974.
   @override
   // ignore: override_on_non_overriding_member
   bool get switchControl => true;
