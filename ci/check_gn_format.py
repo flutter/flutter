@@ -8,8 +8,6 @@ import sys
 import subprocess
 import os
 import argparse
-import errno
-import shutil
 
 def GetGNFiles(directory):
   directory = os.path.abspath(directory)
