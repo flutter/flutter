@@ -6,9 +6,19 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
+class ErroringMockClipboard {
+  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
+    switch (methodCall.method) {
+      case 'Clipboard.getData':
+        throw Error();
+    }
+  }
+}
 
 void main() {
   int tapCount;
@@ -608,6 +618,26 @@ void main() {
     expect(hitRect.size.width, lessThan(textFieldRect.size.width));
     expect(hitRect.size.height, lessThan(textFieldRect.size.height));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  group('ClipboardStatusNotifier', () {
+    setUp(() {
+      final ErroringMockClipboard mockClipboard = ErroringMockClipboard();
+      SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+    });
+
+    tearDown(() {
+      SystemChannels.platform.setMockMethodCallHandler(null);
+    });
+
+    test('Clipboard API failure is gracefully recovered from', () {
+      final ClipboardStatusNotifier notifier = ClipboardStatusNotifier();
+      expect(notifier.value, ClipboardStatus.unknown);
+
+      notifier.update();
+      expect(notifier.update, returnsNormally);
+      expect(notifier.value, ClipboardStatus.unknown);
+    });
+  });
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {
