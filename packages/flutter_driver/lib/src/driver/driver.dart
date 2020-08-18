@@ -675,6 +675,8 @@ abstract class FlutterDriver {
   /// With frame sync disabled, it's the responsibility of the test author to
   /// ensure that no action is performed while the app is undergoing a
   /// transition to avoid flakiness.
+  ///
+  /// See also [waitFor].
   Future<T> runUnsynchronized<T>(Future<T> action(), { Duration timeout }) async {
     await sendCommand(SetFrameSync(false, timeout: timeout));
     T result;
