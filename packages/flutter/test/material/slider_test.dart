@@ -2331,7 +2331,7 @@ void main() {
                     child: Slider.adaptive(
                       mouseCursor: SystemMouseCursors.text,
                       value: 0.5,
-                      thumbColor: thumbColor,
+                      cupertinoThumbColor: thumbColor,
                       onChanged: (double newValue) {},
                     ),
                   ),
@@ -2347,11 +2347,11 @@ void main() {
       return tester.widget(cupertinoSliderFinder);
     }
 
-    // When not provided, CupertinoSlider.thumbColor should default to [CupertinoColor.white].
+    // When not provided, CupertinoSlider.thumbColor defaults to [CupertinoColor.white].
     await buildWidget();
     expect(cupertinoSliderWidget().thumbColor, equals(CupertinoColors.white));
 
-    // When provided, CupertinoSlider.thumbColor should contains the provided color.
+    // When provided, CupertinoSlider.thumbColor defaults to [CupertinoColor.white].
     const Color thumbColor = Colors.amber;
     await buildWidget(thumbColor: thumbColor);
     expect(cupertinoSliderWidget().thumbColor, equals(thumbColor));

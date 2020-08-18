@@ -159,7 +159,7 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
-    this.thumbColor,
+    this.cupertinoThumbColor,
   }) : _sliderType = _SliderType.material,
        assert(value != null),
        assert(min != null),
@@ -192,7 +192,7 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
-    this.thumbColor,
+    this.cupertinoThumbColor,
   }) : _sliderType = _SliderType.adaptive,
        assert(value != null),
        assert(min != null),
@@ -437,7 +437,7 @@ class Slider extends StatefulWidget {
   ///
   /// Used if this slider is created with [Slider.adaptive] and
   /// running in a cupertino style platform.
-  final Color thumbColor;
+  final Color cupertinoThumbColor;
 
   final _SliderType _sliderType ;
 
@@ -764,7 +764,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         max: widget.max,
         divisions: widget.divisions,
         activeColor: widget.activeColor,
-        thumbColor: widget.thumbColor ?? CupertinoColors.white,
+        thumbColor: widget.cupertinoThumbColor ?? CupertinoColors.white,
       ),
     );
   }

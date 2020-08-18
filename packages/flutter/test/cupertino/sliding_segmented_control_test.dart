@@ -353,7 +353,7 @@ void main() {
       matching: find.byType(Container),
     )).decoration as BoxDecoration;
 
-    expect(getRenderSegmentedControl(tester).thumbColor.value, CupertinoColors.systemGreen.color.value);
+    expect(getRenderSegmentedControl(tester).cupertinoThumbColor.value, CupertinoColors.systemGreen.color.value);
     expect(decoration.color.value, CupertinoColors.systemRed.color.value);
 
     setState(() { brightness = Brightness.dark; });
@@ -365,7 +365,7 @@ void main() {
     )).decoration as BoxDecoration;
 
 
-    expect(getRenderSegmentedControl(tester).thumbColor.value, CupertinoColors.systemGreen.darkColor.value);
+    expect(getRenderSegmentedControl(tester).cupertinoThumbColor.value, CupertinoColors.systemGreen.darkColor.value);
     expect(decorationDark.color.value, CupertinoColors.systemRed.darkColor.value);
   });
 
