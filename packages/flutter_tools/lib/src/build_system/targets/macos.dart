@@ -205,6 +205,11 @@ class CompileMacOSFramework extends Target {
         .directory(codeSizeDirectory)
         .childFile('snapshot.${getNameForDarwinArch(DarwinArch.x86_64)}.json');
       extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
+      final File precompilerTraceFile = environment.fileSystem
+        .directory(codeSizeDirectory)
+        .childFile('trace.${getNameForDarwinArch(DarwinArch.x86_64)}.json');
+      extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
+      extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
     }
 
     final AOTSnapshotter snapshotter = AOTSnapshotter(

@@ -304,7 +304,11 @@ abstract class AotElfBase extends Target {
       final File codeSizeFile = environment.fileSystem
         .directory(codeSizeDirectory)
         .childFile('snapshot.${environment.defines[kTargetPlatform]}.json');
+      final File precompilerTraceFile = environment.fileSystem
+        .directory(codeSizeDirectory)
+        .childFile('snapshot.${environment.defines[kTargetPlatform]}.json');
       extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
+      extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
     }
 
     final int snapshotExitCode = await snapshotter.build(

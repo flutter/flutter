@@ -96,9 +96,15 @@ void main() {
     final File aotSizeJson = fileSystem.file('test.json')
       ..createSync()
       ..writeAsStringSync(aotSizeOutput);
-    final Map<String, dynamic> result = await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(apk: apk, aotSnapshot: aotSizeJson);
+    final File precompilerTrace = fileSystem.file('trace.json')
+      ..writeAsStringSync('{}');
+    final Map<String, dynamic> result = await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(
+      apk: apk,
+      aotSnapshot: aotSizeJson,
+      precompilerTrace: precompilerTrace,
+    );
 
-    expect(result['type'], contains('apk'));
+    expect(result['type'], 'apk');
 
     final Map<String, dynamic> androidManifestMap = result['children'][0] as Map<String, dynamic>;
     expect(androidManifestMap['n'], equals('AndroidManifest.xml'));
@@ -142,6 +148,8 @@ void main() {
     final Map<String, dynamic> libFlutterMap = arm64Map['children'][1] as Map<String, dynamic>;
     expect(libFlutterMap['n'], equals('libflutter.so (Flutter Engine)'));
     expect(libFlutterMap['value'], equals(14530));
+
+    expect(result['precompiler-trace'], <String, Object>{});
   });
 
   test('outputs summary to command line correctly', () async {
@@ -157,9 +165,14 @@ void main() {
 
     final File apk = fileSystem.file('test.apk')..createSync();
     final File aotSizeJson = fileSystem.file('test.json')
-      ..createSync()
       ..writeAsStringSync(aotSizeOutput);
-    await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(apk: apk, aotSnapshot: aotSizeJson);
+    final File precompilerTrace = fileSystem.file('trace.json')
+      ..writeAsStringSync('{}');
+    await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(
+      apk: apk,
+      aotSnapshot: aotSizeJson,
+      precompilerTrace: precompilerTrace,
+    );
 
     final List<String> stdout = logger.statusText.split('\n');
     expect(
@@ -198,12 +211,15 @@ void main() {
       ..createSync()
       ..writeAsStringSync('goodbye');
     final File aotSizeJson = fileSystem.file('test.json')
-      ..createSync()
       ..writeAsStringSync(aotSizeOutput);
-    await sizeAnalyzer.analyzeAotSnapshot(
+    final File precompilerTrace = fileSystem.file('trace.json')
+      ..writeAsStringSync('{}');
+
+    final Map<String, Object> result = await sizeAnalyzer.analyzeAotSnapshot(
       outputDirectory: outputDirectory,
       aotSnapshot: aotSizeJson,
-      silent: false,
+      precompilerTrace: precompilerTrace,
+      type: 'linux',
     );
 
     final List<String> stdout = logger.statusText.split('\n');
@@ -215,25 +231,7 @@ void main() {
         '    foo.app/libapp.so (Dart AOT)                                             7 B',
       ]),
     );
-  });
-
-  test('quiet = true silences output', () async {
-    final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
-      fileSystem: fileSystem,
-      logger: logger,
-      processUtils: ProcessUtils(
-        processManager: processManager,
-        logger: logger,
-      ),
-      appFilenamePattern: RegExp(r'lib.*app\.so'),
-    );
-
-    final File apk = fileSystem.file('test.apk')..createSync();
-    final File aotSizeJson = fileSystem.file('test.json')
-      ..createSync()
-      ..writeAsStringSync(aotSizeOutput);
-    await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(apk: apk, aotSnapshot: aotSizeJson, silent: true);
-
-    expect(logger.statusText, isEmpty);
+    expect(result['type'], 'linux');
+    expect(result['precompiler-trace'], <String, Object>{});
   });
 }

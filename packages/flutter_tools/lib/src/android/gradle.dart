@@ -512,23 +512,22 @@ Future<void> buildGradleApp({
       logger: globals.logger,
       processUtils: ProcessUtils.instance,
     );
-    bool silent = false;
-    for (final File file in globals.fs.directory(buildInfo.codeSizeDirectory)
-      .listSync()
-      .whereType<File>()) {
-      final Map<String, Object> output = await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(
-        apk: apkFile,
-        aotSnapshot: file,
-        silent: silent,
-      );
-      silent = true;
-      final File outputFile = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'apk-analysis', 'json')
-        ..writeAsStringSync(jsonEncode(output));
+    final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
+    final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
+      .childFile('snapshot.$archName.json');
+    final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
+      .childFile('trace.$archName.json');
+    final Map<String, Object> output = await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(
+      apk: apkFile,
+      aotSnapshot: aotSnapshot,
+      precompilerTrace: precompilerTrace,
+    );
+    final File outputFile = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'apk-analysis', 'json')
+      ..writeAsStringSync(jsonEncode(output));
       // This message is used as a sentinel in analyze_apk_size_test.dart
       globals.printStatus(
         'A summary of your APK analysis can be found at: ${outputFile.path}',
       );
-    }
   }
 }
 

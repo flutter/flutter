@@ -34,13 +34,12 @@ class SizeAnalyzer {
   Future<Map<String, dynamic>> analyzeAotSnapshot({
     @required Directory outputDirectory,
     @required File aotSnapshot,
-    @required bool silent,
+    @required File precompilerTrace,
+    @required String type,
     String excludePath,
   }) async {
-    if (!silent) {
-      logger.printStatus('▒' * tableWidth);
-      logger.printStatus('━' * tableWidth);
-    }
+    logger.printStatus('▒' * tableWidth);
+    logger.printStatus('━' * tableWidth);
     final _SymbolNode aotAnalysisJson = _parseDirectory(
       outputDirectory,
       outputDirectory.parent.path,
@@ -53,27 +52,30 @@ class SizeAnalyzer {
     );
     final _SymbolNode aotSnapshotJsonRoot = _parseAotSnapshot(processedAotSnapshotJson);
 
-    if (!silent) {
-      for (final _SymbolNode firstLevelPath in aotAnalysisJson.children) {
-        _printEntitySize(
-          firstLevelPath.name,
-          byteSize: firstLevelPath.byteSize,
-          level: 1,
-        );
-        // Print the expansion of lib directory to show more info for `appFilename`.
-        if (firstLevelPath.name == fileSystem.path.basename(outputDirectory.path)) {
-          _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot);
-        }
+    for (final _SymbolNode firstLevelPath in aotAnalysisJson.children) {
+      _printEntitySize(
+        firstLevelPath.name,
+        byteSize: firstLevelPath.byteSize,
+        level: 1,
+      );
+      // Print the expansion of lib directory to show more info for `appFilename`.
+      if (firstLevelPath.name == fileSystem.path.basename(outputDirectory.path)) {
+        _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot);
       }
     }
 
-    if (!silent) {
-      logger.printStatus('▒' * tableWidth);
-    }
+    logger.printStatus('▒' * tableWidth);
 
-    final Map<String, dynamic> apkAnalysisJson = aotAnalysisJson.toJson();
+    Map<String, dynamic> apkAnalysisJson = aotAnalysisJson.toJson();
 
-    apkAnalysisJson['type'] = 'snapshot';
+    apkAnalysisJson['type'] = type; // one of ios, macos, windows, or linux.
+
+    apkAnalysisJson = _addAotSnapshotDataToAnalysis(
+      apkAnalysisJson: apkAnalysisJson,
+      path: _locatedAotFilePath,
+      aotSnapshotJson: processedAotSnapshotJson,
+      precompilerTrace: json.decode(precompilerTrace.readAsStringSync()) as Map<String, Object>,
+    );
 
     assert(_appFilename != null);
     return apkAnalysisJson;
@@ -87,18 +89,16 @@ class SizeAnalyzer {
   Future<Map<String, dynamic>> analyzeApkSizeAndAotSnapshot({
     @required File apk,
     @required File aotSnapshot,
-    bool silent = false,
+    @required File precompilerTrace,
   }) async {
-    if (!silent) {
-      logger.printStatus('▒' * tableWidth);
-      _printEntitySize(
-        '${apk.basename} (total compressed)',
-        byteSize: apk.lengthSync(),
-        level: 0,
-        showColor: false,
-      );
-      logger.printStatus('━' * tableWidth);
-    }
+    logger.printStatus('▒' * tableWidth);
+    _printEntitySize(
+      '${apk.basename} (total compressed)',
+      byteSize: apk.lengthSync(),
+      level: 0,
+      showColor: false,
+    );
+    logger.printStatus('━' * tableWidth);
     final Directory tempApkContent = fileSystem.systemTempDirectory.createTempSync('flutter_tools.');
     // TODO(peterdjlee): Implement a way to unzip the APK for Windows. See issue #62603.
     String unzipOut;
@@ -126,31 +126,29 @@ class SizeAnalyzer {
       json.decode(aotSnapshot.readAsStringSync()),
     );
     final _SymbolNode aotSnapshotJsonRoot = _parseAotSnapshot(processedAotSnapshotJson);
-
-    if (!silent) {
-      for (final _SymbolNode firstLevelPath in apkAnalysisRoot.children) {
-        _printEntitySize(
-          firstLevelPath.name,
-          byteSize: firstLevelPath.byteSize,
-          level: 1,
-        );
-        // Print the expansion of lib directory to show more info for `appFilename`.
-        if (firstLevelPath.name == 'lib') {
-          _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot);
-        }
+    for (final _SymbolNode firstLevelPath in apkAnalysisRoot.children) {
+      _printEntitySize(
+        firstLevelPath.name,
+        byteSize: firstLevelPath.byteSize,
+        level: 1,
+      );
+      // Print the expansion of lib directory to show more info for `appFilename`.
+      if (firstLevelPath.name == 'lib') {
+        _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot);
       }
-      logger.printStatus('▒' * tableWidth);
     }
+    logger.printStatus('▒' * tableWidth);
 
     Map<String, dynamic> apkAnalysisJson = apkAnalysisRoot.toJson();
 
     apkAnalysisJson['type'] = 'apk';
 
     assert(_appFilename != null);
-    apkAnalysisJson = _addAotSnapshotDataToApkAnalysis(
+    apkAnalysisJson = _addAotSnapshotDataToAnalysis(
       apkAnalysisJson: apkAnalysisJson,
-      path: 'lib/arm64-v8a/$_appFilename (Dart AOT)'.split('/'), // Pass in a list of paths by splitting with '/'.
+      path: _locatedAotFilePath,
       aotSnapshotJson: processedAotSnapshotJson,
+      precompilerTrace: json.decode(precompilerTrace.readAsStringSync()) as Map<String, Object>,
     );
 
     return apkAnalysisJson;
@@ -197,6 +195,17 @@ class SizeAnalyzer {
     return _buildSymbolTree(pathsToSize);
   }
 
+  List<String> _locatedAotFilePath;
+
+  List<String> _buildNodeName(_SymbolNode start, _SymbolNode parent) {
+    final List<String> results = <String>[start.name];
+    while (parent != null && parent.name != 'Root') {
+      results.insert(0, parent.name);
+      parent = parent.parent;
+    }
+    return results;
+  }
+
   _SymbolNode _buildSymbolTree(Map<List<String>, int> pathsToSize) {
      final _SymbolNode rootNode = _SymbolNode('Root');
     _SymbolNode currentNode = rootNode;
@@ -210,6 +219,7 @@ class SizeAnalyzer {
           if (matchesPattern(path, pattern: appFilenamePattern) != null) {
             _appFilename = path;
             childWithPathAsName.name += ' (Dart AOT)';
+            _locatedAotFilePath = _buildNodeName(childWithPathAsName, currentNode);
           } else if (path == 'libflutter.so') {
             childWithPathAsName.name += ' (Flutter Engine)';
           }
@@ -242,12 +252,7 @@ class SizeAnalyzer {
     } else {
       // Print total path and size if currentNode does not have any chilren.
       _printEntitySize(totalPath, byteSize: currentNode.byteSize, level: 2);
-
-      // We picked this file because arm64-v8a is likely the most popular
-      // architecture. Other architecture sizes should be similar.
-      final String libappPath = 'lib/arm64-v8a/$_appFilename';
-      // TODO(peterdjlee): Analyze aot size for all platforms.
-      if (totalPath.contains(libappPath)) {
+      if (totalPath.contains(_locatedAotFilePath.join('/'))) {
         _printAotSnapshotSummary(aotSnapshotJsonRoot);
       }
     }
@@ -270,12 +275,14 @@ class SizeAnalyzer {
   }
 
   /// Adds breakdown of aot snapshot data as the children of the node at the given path.
-  Map<String, dynamic> _addAotSnapshotDataToApkAnalysis({
+  Map<String, dynamic> _addAotSnapshotDataToAnalysis({
     @required Map<String, dynamic> apkAnalysisJson,
     @required List<String> path,
     @required Map<String, dynamic> aotSnapshotJson,
+    @required Map<String, dynamic> precompilerTrace,
   }) {
     Map<String, dynamic> currentLevel = apkAnalysisJson;
+    currentLevel['precompiler-trace'] = precompilerTrace;
     while (path.isNotEmpty) {
       final List<Map<String, dynamic>> children = currentLevel['children'] as List<Map<String, dynamic>>;
       final Map<String, dynamic> childWithPathAsName = children.firstWhere(

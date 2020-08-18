@@ -10,6 +10,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../project.dart';
@@ -100,10 +101,11 @@ Future<void> buildMacOS({
     throwToolExit('Build process failed');
   }
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
-    final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
-      .listSync()
-      .whereType<File>()
-      .first;
+    final String arch = getNameForDarwinArch(DarwinArch.x86_64);
+    final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
+      .childFile('snapshot.$arch.json');
+    final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
+      .childFile('trace.$arch.json');
 
     // This analysis is only supported for release builds.
     // Attempt to guess the correct .app by picking the first one.
@@ -115,12 +117,19 @@ Future<void> buildMacOS({
       .firstWhere((Directory directory) {
       return globals.fs.path.extension(directory.path) == '.app';
     });
-    await sizeAnalyzer.analyzeAotSnapshot(
-      aotSnapshot: codeSizeFile,
+    final Map<String, Object> output = await sizeAnalyzer.analyzeAotSnapshot(
+      aotSnapshot: aotSnapshot,
+      precompilerTrace: precompilerTrace,
       outputDirectory: appDirectory,
+      type: 'macos',
       excludePath: 'Versions', // Avoid double counting caused by symlinks
-      silent: false,
     );
+    final File outputFile = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'macos-analysis', 'json')
+      ..writeAsStringSync(jsonEncode(output));
+      // This message is used as a sentinel in analyze_apk_size_test.dart
+      globals.printStatus(
+        'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
+      );
   }
   globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 }

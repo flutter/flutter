@@ -77,7 +77,11 @@ abstract class AotAssemblyBase extends Target {
         final File codeSizeFile = environment.fileSystem
           .directory(codeSizeDirectory)
           .childFile('snapshot.${getNameForDarwinArch(darwinArch)}.json');
+        final File precompilerTraceFile = environment.fileSystem
+          .directory(codeSizeDirectory)
+          .childFile('trace.${getNameForDarwinArch(darwinArch)}.json');
         archExtraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
+        archExtraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
       pending.add(snapshotter.build(
         platform: targetPlatform,

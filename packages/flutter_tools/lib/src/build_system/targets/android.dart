@@ -238,7 +238,11 @@ class AndroidAot extends AotElfBase {
       final File codeSizeFile = environment.fileSystem
         .directory(codeSizeDirectory)
         .childFile('snapshot.$_androidAbiName.json');
+      final File precompilerTraceFile = environment.fileSystem
+        .directory(codeSizeDirectory)
+        .childFile('trace.$_androidAbiName.json');
       extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
+      extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
     }
 
     final int snapshotExitCode = await snapshotter.build(
