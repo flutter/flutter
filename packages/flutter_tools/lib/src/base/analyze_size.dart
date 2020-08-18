@@ -295,6 +295,8 @@ class SizeAnalyzer {
     return apkAnalysisJson;
   }
 
+  List<String> _leadingPaths = <String>[];
+
   /// Print an entity's name with its size on the same line.
   void _printEntitySize(
     String entityName, {
@@ -311,16 +313,28 @@ class SizeAnalyzer {
     } else if (formattedSize.endsWith('KB')) {
       color = TerminalColor.yellow;
     }
-    if (entityName.length >= 70) {
-      entityName = '(...) ${fileSystem.path.basename(entityName)}';
+    final List<String> localSegments = fileSystem.path.split(entityName)
+        ..removeLast();
+    int i = 0;
+    while (i < _leadingPaths.length && i < localSegments.length && _leadingPaths[i] == localSegments[i]) {
+      i += 1;
     }
+    for (; i < localSegments.length; i += 1) {
+      logger.printStatus(
+        localSegments[i] + fileSystem.path.separator,
+        indent: (level + i) * 2,
+        emphasis: true,
+      );
+    }
+    _leadingPaths = localSegments;
 
-    final int spaceInBetween = tableWidth - level * 2 - entityName.length - formattedSize.length;
+    final String baseName = fileSystem.path.basename(entityName);
+    final int spaceInBetween = tableWidth - (level + i) * 2 - baseName.length - formattedSize.length;
     logger.printStatus(
-      entityName + ' ' * spaceInBetween,
+      baseName + ' ' * spaceInBetween,
       newline: false,
       emphasis: emphasis,
-      indent: level * 2,
+      indent: (level + i) * 2,
     );
     logger.printStatus(formattedSize, color: showColor ? color : null);
   }
