@@ -185,7 +185,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         _updateScaffolds();
         break;
       case AnimationStatus.forward:
-//        _updateScaffolds();
         break;
       case AnimationStatus.reverse:
         break;
@@ -1920,8 +1919,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///   }
   /// ```
   /// {@end-tool}
-  @Deprecated('Use ScaffoldMessenger.showSnackBar')
+  @Deprecated(
+    'Use ScaffoldMessenger.showSnackBar. '
+    'This feature was deprecated after TBD.'
+  )
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
+    assert(_scaffoldMessenger != null);
     return _scaffoldMessenger.showSnackBar(snackbar);
   }
 
@@ -1929,16 +1932,24 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// The removed snack bar does not run its normal exit animation. If there are
   /// any queued snack bars, they begin their entrance animation immediately.
-  @Deprecated('Use ScaffoldMessenger.removeCurrentSnackBar')
+  @Deprecated(
+    'Use ScaffoldMessenger.removeCurrentSnackBar. '
+    'This feature was deprecated after TBD.'
+  )
   void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
+    assert(_scaffoldMessenger != null);
     _scaffoldMessenger.removeCurrentSnackBar(reason: reason);
   }
 
   /// Removes the current [SnackBar] by running its normal exit animation.
   ///
   /// The closed completer is called after the animation is complete.
-  @Deprecated('Use ScaffoldMessenger.hideCurrentSnackBar')
+  @Deprecated(
+    'Use ScaffoldMessenger.hideCurrentSnackBar.'
+    'This feature was deprecated after TBD.'
+  )
   void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
+    assert(_scaffoldMessenger != null);
     _scaffoldMessenger.hideCurrentSnackBar(reason: reason);
   }
 
@@ -2377,7 +2388,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
-    _scaffoldMessenger._unregister(this);
+    _scaffoldMessenger?._unregister(this);
     super.dispose();
   }
 
@@ -2491,24 +2502,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
-
-//    if (_snackBar != null) {
-//      final ModalRoute<dynamic> route = ModalRoute.of(context);
-//      if (route == null || route.isCurrent) {
-//        if (_scaffoldMessenger._snackBarController.isCompleted && _scaffoldMessenger._snackBarTimer == null) {
-//          final SnackBar snackBar = _snackBar._widget;
-//          _scaffoldMessenger._snackBarTimer = Timer(snackBar.duration, () {
-//            assert(_scaffoldMessenger._snackBarController.status == AnimationStatus.forward ||
-//              _scaffoldMessenger._snackBarController.status == AnimationStatus.completed);
-//            // Check the accessible navigation setting of the serving
-//            // ScaffoldMessenger in case it has changed.
-//            if (_scaffoldMessenger._accessibleNavigation && snackBar.action != null)
-//              return;
-//            _scaffoldMessenger.hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
-//          });
-//        }
-//      }
-//    }
 
     final List<LayoutId> children = <LayoutId>[];
     _addIfNonNull(
