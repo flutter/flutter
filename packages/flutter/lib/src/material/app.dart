@@ -169,6 +169,7 @@ class MaterialApp extends StatefulWidget {
   const MaterialApp({
     Key key,
     this.navigatorKey,
+    this.scaffoldMessengerKey,
     this.home,
     this.routes = const <String, WidgetBuilder>{},
     this.initialRoute,
@@ -216,6 +217,7 @@ class MaterialApp extends StatefulWidget {
   /// Creates a [MaterialApp] that uses the [Router] instead of a [Navigator].
   const MaterialApp.router({
     Key key,
+    this.scaffoldMessengerKey,
     this.routeInformationProvider,
     @required this.routeInformationParser,
     @required this.routerDelegate,
@@ -263,6 +265,14 @@ class MaterialApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.navigatorKey}
   final GlobalKey<NavigatorState> navigatorKey;
+
+  /// A key to use when building the [ScaffoldMessenger].
+  ///
+  /// If a [scaffoldMessengerKey] is specified, the [ScaffoldMessenger] can be
+  /// directly manipulated without first obtaining it from a [BuildContext] via
+  /// [ScaffoldMessenger.of]: from the [scaffoldMessengerKey], use the
+  /// [GlobalKey.currentState] getter.
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey;
 
   /// {@macro flutter.widgets.widgetsApp.home}
   final Widget home;
@@ -724,6 +734,7 @@ class _MaterialAppState extends State<MaterialApp> {
     theme ??= widget.theme ?? ThemeData.light();
 
     return ScaffoldMessenger(
+      key: widget.scaffoldMessengerKey,
       child: AnimatedTheme(
         data: theme,
         isMaterialAppTheme: true,

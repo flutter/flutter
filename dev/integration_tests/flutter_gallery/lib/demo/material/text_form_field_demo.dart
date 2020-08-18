@@ -86,11 +86,12 @@ class _PasswordFieldState extends State<PasswordField> {
 
 class TextFormFieldDemoState extends State<TextFormFieldDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   PersonData person = PersonData();
 
   void showInSnackBar(String value) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
+    _scaffoldMessengerKey.currentState.showSnackBar(SnackBar(
       content: Text(value),
     ));
   }
@@ -168,7 +169,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final Widget scaffold = Scaffold(
       drawerDragStartBehavior: DragStartBehavior.down,
       key: _scaffoldKey,
       appBar: AppBar(
@@ -298,6 +299,10 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           ),
         ),
       ),
+    );
+    return ScaffoldMessenger(
+      key: _scaffoldMessengerKey,
+      child: scaffold,
     );
   }
 }

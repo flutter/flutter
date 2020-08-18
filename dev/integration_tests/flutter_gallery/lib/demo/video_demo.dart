@@ -267,11 +267,13 @@ class ConnectivityOverlay extends StatefulWidget {
     this.child,
     this.connectedCompleter,
     this.scaffoldKey,
+    this.scaffoldMessengerKey,
   });
 
   final Widget child;
   final Completer<void> connectedCompleter;
   final GlobalKey<ScaffoldState> scaffoldKey;
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey;
 
   @override
   _ConnectivityOverlayState createState() => _ConnectivityOverlayState();
@@ -321,7 +323,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
           return;
         }
         if (connectivityResult == ConnectivityResult.none) {
-          widget.scaffoldKey.currentState.showSnackBar(errorSnackBar);
+          widget.scaffoldMessengerKey.currentState.showSnackBar(errorSnackBar);
         } else {
           if (!widget.connectedCompleter.isCompleted) {
             widget.connectedCompleter.complete(null);
@@ -369,6 +371,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
   final VideoPlayerController beeController = VideoPlayerController.network(beeUri);
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final Completer<void> connectedCompleter = Completer<void>();
   bool isSupported = true;
   bool isDisposed = false;
@@ -409,7 +412,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final Widget scaffold = Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
         title: const Text('Videos'),
@@ -434,12 +437,17 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
             ),
             connectedCompleter: connectedCompleter,
             scaffoldKey: scaffoldKey,
+            scaffoldMessengerKey: scaffoldMessengerKey,
           )
         : const Center(
             child: Text(
               'Video playback not supported on the iOS Simulator.',
             ),
           ),
+    );
+    return ScaffoldMessenger(
+      key: scaffoldMessengerKey,
+      child: scaffold,
     );
   }
 }

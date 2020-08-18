@@ -17,6 +17,7 @@ class MenuDemo extends StatefulWidget {
 
 class MenuDemoState extends State<MenuDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   final String _simpleValue1 = 'Menu item value one';
   final String _simpleValue2 = 'Menu item value two';
@@ -37,7 +38,7 @@ class MenuDemoState extends State<MenuDemo> {
   }
 
   void showInSnackBar(String value) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
+    _scaffoldMessengerKey.currentState.showSnackBar(SnackBar(
      content: Text(value),
     ));
   }
@@ -61,7 +62,7 @@ class MenuDemoState extends State<MenuDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final Widget scaffold =  Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Menus'),
@@ -219,6 +220,10 @@ class MenuDemoState extends State<MenuDemo> {
           ],
         ),
       ),
+    );
+    return ScaffoldMessenger(
+      key: _scaffoldMessengerKey,
+      child: scaffold,
     );
   }
 }

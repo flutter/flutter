@@ -814,13 +814,13 @@ void main() {
     });
 
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     bool actionPressed = false;
     SnackBarClosedReason closedReason;
 
     await tester.pumpWidget(MaterialApp(
+      scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
-        key: scaffoldKey,
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
@@ -870,14 +870,14 @@ void main() {
     // Pop up the snack bar and then remove it.
     await tester.tap(find.text('X'));
     await tester.pump(const Duration(milliseconds: 750));
-    scaffoldKey.currentState.removeCurrentSnackBar();
+    scaffoldMessengerKey.currentState.removeCurrentSnackBar();
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(closedReason, equals(SnackBarClosedReason.remove));
 
     // Pop up the snack bar and then hide it.
     await tester.tap(find.text('X'));
     await tester.pump(const Duration(milliseconds: 750));
-    scaffoldKey.currentState.hideCurrentSnackBar();
+    scaffoldMessengerKey.currentState.hideCurrentSnackBar();
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(closedReason, equals(SnackBarClosedReason.hide));
 

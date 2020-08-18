@@ -64,6 +64,7 @@ class StockHome extends StatefulWidget {
 
 class StockHomeState extends State<StockHome> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final TextEditingController _searchQuery = TextEditingController();
   bool _isSearching = false;
   bool _autorefresh = false;
@@ -247,7 +248,7 @@ class StockHomeState extends State<StockHome> {
       stock.percentChange = 100.0 * (1.0 / stock.lastSale);
       stock.lastSale += 1.0;
     });
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
+    _scaffoldMessengerKey.currentState.showSnackBar(SnackBar(
       content: Text('Purchased ${stock.symbol} for ${stock.lastSale}'),
       action: SnackBarAction(
         label: 'BUY MORE',
@@ -317,7 +318,7 @@ class StockHomeState extends State<StockHome> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
+    final Widget widget = DefaultTabController(
       length: 2,
       child: Scaffold(
         drawerDragStartBehavior: DragStartBehavior.down,
@@ -333,6 +334,10 @@ class StockHomeState extends State<StockHome> {
           ],
         ),
       ),
+    );
+    return ScaffoldMessenger(
+      key: _scaffoldMessengerKey,
+      child: widget,
     );
   }
 }

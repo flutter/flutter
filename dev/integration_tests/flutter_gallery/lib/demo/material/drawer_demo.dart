@@ -21,6 +21,7 @@ class DrawerDemo extends StatefulWidget {
 
 class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   static const List<String> _drawerContents = <String>[
     'A', 'B', 'C', 'D', 'E',
@@ -75,14 +76,14 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
 
   void _showNotImplementedMessage() {
     Navigator.pop(context); // Dismiss the drawer.
-    _scaffoldKey.currentState.showSnackBar(const SnackBar(
+    _scaffoldMessengerKey.currentState.showSnackBar(const SnackBar(
       content: Text("The drawer's items don't do anything"),
     ));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final Widget scaffold = Scaffold(
       drawerDragStartBehavior: DragStartBehavior.down,
       key: _scaffoldKey,
       appBar: AppBar(
@@ -244,6 +245,10 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
           ),
         ),
       ),
+    );
+    return ScaffoldMessenger(
+      key: _scaffoldMessengerKey,
+      child: scaffold,
     );
   }
 

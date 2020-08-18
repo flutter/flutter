@@ -13,12 +13,13 @@ class BottomAppBarDemo extends StatefulWidget {
   State createState() => _BottomAppBarDemoState();
 }
 
-// Flutter generally frowns upon abbrevation however this class uses two
-// abbrevations extensively: "fab" for floating action button, and "bab"
+// Flutter generally frowns upon abbreviation however this class uses two
+// abbreviations extensively: "fab" for floating action button, and "bab"
 // for bottom application bar.
 
 class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   // FAB shape
 
@@ -92,7 +93,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
       "When the Scaffold's floating action button location changes, "
       'the floating action button animates to its new position. '
       'The BottomAppBar adapts its shape appropriately.';
-    _scaffoldKey.currentState.showSnackBar(
+    _scaffoldMessengerKey.currentState.showSnackBar(
       const SnackBar(content: Text(text)),
     );
   }
@@ -139,7 +140,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final Widget scaffold = Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Bottom app bar'),
@@ -194,6 +195,10 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         fabLocation: _fabLocation.value,
         shape: _selectNotch(),
       ),
+    );
+    return ScaffoldMessenger(
+      child: scaffold,
+      key: _scaffoldMessengerKey,
     );
   }
 
@@ -364,7 +369,7 @@ class _DemoBottomAppBar extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.search, semanticLabel: 'show search action',),
           onPressed: () {
-            Scaffold.of(context).showSnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('This is a dummy search action.')),
             );
           },
@@ -377,7 +382,7 @@ class _DemoBottomAppBar extends StatelessWidget {
             semanticLabel: 'Show menu actions',
           ),
           onPressed: () {
-            Scaffold.of(context).showSnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('This is a dummy menu action.')),
             );
           },

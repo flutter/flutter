@@ -21,6 +21,7 @@ class OverscrollDemo extends StatefulWidget {
 
 class OverscrollDemoState extends State<OverscrollDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   static final List<String> _items = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
@@ -30,7 +31,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
     final Completer<void> completer = Completer<void>();
     Timer(const Duration(seconds: 3), () { completer.complete(); });
     return completer.future.then<void>((_) {
-      _scaffoldKey.currentState?.showSnackBar(SnackBar(
+      _scaffoldMessengerKey.currentState?.showSnackBar(SnackBar(
         content: const Text('Refresh complete'),
         action: SnackBarAction(
           label: 'RETRY',
@@ -44,7 +45,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final Widget scaffold = Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Pull to refresh'),
@@ -78,6 +79,10 @@ class OverscrollDemoState extends State<OverscrollDemo> {
           ),
         ),
       ),
+    );
+    return ScaffoldMessenger(
+      key: _scaffoldMessengerKey,
+      child: scaffold,
     );
   }
 }
