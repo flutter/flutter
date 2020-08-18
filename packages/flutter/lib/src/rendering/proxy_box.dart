@@ -2353,7 +2353,7 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   bool _fitAffectsLayout(BoxFit fit) {
-    switch(fit) {
+    switch (fit) {
       case BoxFit.scaleDown:
         return true;
       default:
@@ -2364,13 +2364,13 @@ class RenderFittedBox extends RenderProxyBox {
   /// How to inscribe the child into the space allocated during layout.
   BoxFit get fit => _fit;
   BoxFit _fit;
-  set fit(BoxFit newFit) {
-    assert(newFit != null);
-    final BoxFit lastFit = _fit;
-    if (lastFit == newFit)
+  set fit(BoxFit value) {
+    assert(value != null);
+    if (_fit == value)
       return;
-    _fit = newFit;
-    if (_fitAffectsLayout(lastFit) || _fitAffectsLayout(newFit)) {
+    final BoxFit lastFit = _fit;
+    _fit = value;
+    if (_fitAffectsLayout(lastFit) || _fitAffectsLayout(value)) {
       markNeedsLayout();
     } else {
       _clearPaintData();
@@ -2417,7 +2417,6 @@ class RenderFittedBox extends RenderProxyBox {
   void performLayout() {
     if (child != null) {
       child.layout(const BoxConstraints(), parentUsesSize: true);
-
       switch (fit) {
         case BoxFit.scaleDown:
           final BoxConstraints sizeConstraints = constraints.loosen();
@@ -2428,7 +2427,6 @@ class RenderFittedBox extends RenderProxyBox {
           size = constraints.constrainSizeAndAttemptToPreserveAspectRatio(child.size);
           break;
       }
-
       _clearPaintData();
     } else {
       size = constraints.smallest;
