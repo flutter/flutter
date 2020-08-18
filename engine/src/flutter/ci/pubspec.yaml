@@ -7,6 +7,7 @@ name: ci_scripts
 dependencies:
   args: ^1.6.0
   path: ^1.7.0
+  isolate: ^2.0.3
   process_runner: ^3.0.0
 
 environment:

@@ -42,7 +42,7 @@ def RemoveIfExists(path):
 
 def main():
   parser = argparse.ArgumentParser();
-  
+
   parser.add_argument('-t', '--tests', nargs='+', dest='tests',
       required=True, help='The unit tests to run and gather coverage data on.')
   parser.add_argument('-o', '--output', dest='output',
@@ -64,19 +64,19 @@ def main():
   # Run all unit tests and collect raw profiles.
   for test in args.tests:
     absolute_test_path = os.path.abspath(test)
-    
+
     if not os.path.exists(absolute_test_path):
       print("Path %s does not exist." % absolute_test_path)
       return -1
 
     binaries.append(absolute_test_path)
-    
+
     raw_profile = absolute_test_path + ".rawprofile"
 
     RemoveIfExists(raw_profile)
 
     print "Running test %s to gather profile." % os.path.basename(absolute_test_path)
-    
+
     subprocess.check_call([absolute_test_path], env={
       "LLVM_PROFILE_FILE":  raw_profile
     })
