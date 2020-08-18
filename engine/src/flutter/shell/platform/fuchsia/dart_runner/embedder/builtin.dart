@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 library fuchsia_builtin;
 
 import 'dart:async';
@@ -25,7 +24,7 @@ class _Logger {
 }
 
 @pragma('vm:entry-point')
-String _rawScript;
+late String _rawScript;
 
 Uri _scriptUri() {
   if (_rawScript.startsWith('http:') ||

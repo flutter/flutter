@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 part of zircon;
 
 // ignore_for_file: native_function_body_in_non_sdk_code
@@ -16,12 +15,12 @@ class _Namespace { // ignore: unused_element
   // Library private variable set by the embedder used to cache the
   // namespace (as an fdio_ns_t*).
   @pragma('vm:entry-point')
-  static int _namespace; // ignore: unused_field
+  static int? _namespace; // ignore: unused_field
 }
 
 /// An exception representing an error returned as an zx_status_t.
 class ZxStatusException implements Exception {
-  final String message;
+  final String? message;
   final int status;
 
   ZxStatusException(this.status, [this.message]);
@@ -35,6 +34,9 @@ class ZxStatusException implements Exception {
   }
 }
 
+/// Users of the [_Result] subclasses should check the status before
+/// trying to read any data. Attempting to use a value stored in a result
+/// when the status in not OK will result in an exception.
 class _Result {
   final int status;
   const _Result(this.status);
@@ -42,78 +44,107 @@ class _Result {
 
 @pragma('vm:entry-point')
 class HandleResult extends _Result {
-  final Handle handle;
+  final Handle? _handle;
+  Handle get handle => _handle!;
+
   @pragma('vm:entry-point')
-  const HandleResult(final int status, [this.handle]) : super(status);
+  const HandleResult(final int status, [this._handle]) : super(status);
   @override
-  String toString() => 'HandleResult(status=$status, handle=$handle)';
+  String toString() => 'HandleResult(status=$status, handle=$_handle)';
 }
 
 @pragma('vm:entry-point')
 class HandlePairResult extends _Result {
-  final Handle first;
-  final Handle second;
+  final Handle? _first;
+  final Handle? _second;
+
+  Handle get first => _first!;
+  Handle get second => _second!;
+
   @pragma('vm:entry-point')
-  const HandlePairResult(final int status, [this.first, this.second])
+  const HandlePairResult(final int status, [this._first, this._second])
       : super(status);
   @override
   String toString() =>
-      'HandlePairResult(status=$status, first=$first, second=$second)';
+      'HandlePairResult(status=$status, first=$_first, second=$_second)';
 }
 
 @pragma('vm:entry-point')
 class ReadResult extends _Result {
-  final ByteData bytes;
-  final int numBytes;
-  final List<Handle> handles;
+  final ByteData? _bytes;
+  final int? _numBytes;
+  final List<Handle>? _handles;
+
+  ByteData get bytes => _bytes!;
+  int get numBytes => _numBytes!;
+  List<Handle> get handles => _handles!;
+
   @pragma('vm:entry-point')
-  const ReadResult(final int status, [this.bytes, this.numBytes, this.handles])
+  const ReadResult(final int status, [this._bytes, this._numBytes, this._handles])
       : super(status);
-  Uint8List bytesAsUint8List() =>
-      bytes.buffer.asUint8List(bytes.offsetInBytes, numBytes);
+
+  /// Returns the bytes as a Uint8List. If status != OK this will throw
+  /// an exception.
+  Uint8List bytesAsUint8List() {
+    return _bytes!.buffer.asUint8List(_bytes!.offsetInBytes, _numBytes!);
+  }
+
+  /// Returns the bytes as a String. If status != OK this will throw
+  /// an exception.
   String bytesAsUTF8String() => utf8.decode(bytesAsUint8List());
+
   @override
   String toString() =>
-      'ReadResult(status=$status, bytes=$bytes, numBytes=$numBytes, handles=$handles)';
+      'ReadResult(status=$status, bytes=$_bytes, numBytes=$_numBytes, handles=$_handles)';
 }
 
 @pragma('vm:entry-point')
 class WriteResult extends _Result {
-  final int numBytes;
+  final int? _numBytes;
+  int get numBytes => _numBytes!;
+
   @pragma('vm:entry-point')
-  const WriteResult(final int status, [this.numBytes]) : super(status);
+  const WriteResult(final int status, [this._numBytes]) : super(status);
   @override
-  String toString() => 'WriteResult(status=$status, numBytes=$numBytes)';
+  String toString() => 'WriteResult(status=$status, numBytes=$_numBytes)';
 }
 
 @pragma('vm:entry-point')
 class GetSizeResult extends _Result {
-  final int size;
+  final int? _size;
+  int get size => _size!;
+
   @pragma('vm:entry-point')
-  const GetSizeResult(final int status, [this.size]) : super(status);
+  const GetSizeResult(final int status, [this._size]) : super(status);
   @override
-  String toString() => 'GetSizeResult(status=$status, size=$size)';
+  String toString() => 'GetSizeResult(status=$status, size=$_size)';
 }
 
 @pragma('vm:entry-point')
 class FromFileResult extends _Result {
-  final Handle handle;
-  final int numBytes;
+  final Handle? _handle;
+  final int? _numBytes;
+
+  Handle get handle => _handle!;
+  int get numBytes => _numBytes!;
+
   @pragma('vm:entry-point')
-  const FromFileResult(final int status, [this.handle, this.numBytes])
+  const FromFileResult(final int status, [this._handle, this._numBytes])
       : super(status);
   @override
   String toString() =>
-      'FromFileResult(status=$status, handle=$handle, numBytes=$numBytes)';
+      'FromFileResult(status=$status, handle=$_handle, numBytes=$_numBytes)';
 }
 
 @pragma('vm:entry-point')
 class MapResult extends _Result {
-  final Uint8List data;
+  final Uint8List? _data;
+  Uint8List get data => _data!;
+
   @pragma('vm:entry-point')
-  const MapResult(final int status, [this.data]) : super(status);
+  const MapResult(final int status, [this._data]) : super(status);
   @override
-  String toString() => 'MapResult(status=$status, data=$data)';
+  String toString() => 'MapResult(status=$status, data=$_data)';
 }
 
 @pragma('vm:entry-point')
