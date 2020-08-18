@@ -17,7 +17,7 @@ late CanvasKit canvasKit;
 /// static APIs.
 ///
 /// See, e.g. [SkPaint].
-@JS('window.flutter_canvas_kit')
+@JS('window.flutterCanvasKit')
 external set windowFlutterCanvasKit(CanvasKit value);
 
 @JS()
@@ -105,7 +105,7 @@ class CanvasKitInitPromise {
   external void then(CanvasKitInitCallback callback);
 }
 
-@JS('window.flutter_canvas_kit.SkColorSpace.SRGB')
+@JS('window.flutterCanvasKit.SkColorSpace.SRGB')
 external SkColorSpace get SkColorSpaceSRGB;
 
 @JS()
@@ -709,7 +709,7 @@ class SkShader {
 // with `new`. Also in Dart you can't write this:
 //
 //     external SkPaint SkPaint();
-@JS('window.flutter_canvas_kit.SkPaint')
+@JS('window.flutterCanvasKit.SkPaint')
 class SkPaint {
   // TODO(yjbanov): implement invertColors, see paint.cc
   external SkPaint();
@@ -845,7 +845,7 @@ external _NativeFloat32ArrayType get _nativeFloat32ArrayType;
 @JS()
 class _NativeFloat32ArrayType {}
 
-@JS('window.flutter_canvas_kit.Malloc')
+@JS('window.flutterCanvasKit.Malloc')
 external SkFloat32List _mallocFloat32List(
   _NativeFloat32ArrayType float32ListType,
   int size,
@@ -864,7 +864,7 @@ SkFloat32List mallocFloat32List(int size) {
 /// The [list] is no longer usable after calling this function.
 ///
 /// Use this function to free lists owned by the engine.
-@JS('window.flutter_canvas_kit.Free')
+@JS('window.flutterCanvasKit.Free')
 external void freeFloat32List(SkFloat32List list);
 
 /// Wraps a [Float32List] backed by WASM memory.
@@ -960,7 +960,7 @@ List<Float32List> encodeRawColorList(Int32List rawColors) {
   return toSkFloatColorList(colors);
 }
 
-@JS('window.flutter_canvas_kit.SkPath')
+@JS('window.flutterCanvasKit.SkPath')
 class SkPath {
   external SkPath([SkPath? other]);
   external void setFillType(SkFillType fillType);
@@ -1092,7 +1092,7 @@ class SkPath {
   );
 }
 
-@JS('window.flutter_canvas_kit.SkContourMeasureIter')
+@JS('window.flutterCanvasKit.SkContourMeasureIter')
 class SkContourMeasureIter {
   external SkContourMeasureIter(SkPath path, bool forceClosed, int startIndex);
   external SkContourMeasure? next();
@@ -1246,7 +1246,7 @@ Uint16List toUint16List(List<int> ints) {
   return result;
 }
 
-@JS('window.flutter_canvas_kit.SkPictureRecorder')
+@JS('window.flutterCanvasKit.SkPictureRecorder')
 class SkPictureRecorder {
   external SkPictureRecorder();
   external SkCanvas beginRecording(SkRect bounds);
@@ -1519,7 +1519,7 @@ class SkFontMgr {
   external void delete();
 }
 
-@JS('window.flutter_canvas_kit.TypefaceFontProvider')
+@JS('window.flutterCanvasKit.TypefaceFontProvider')
 class TypefaceFontProvider extends SkFontMgr {
   external TypefaceFontProvider();
   external void registerFont(Uint8List font, String family);
