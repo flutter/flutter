@@ -132,13 +132,13 @@ class AutocompleteController<T> {
     this.filter,
     TextEditingController textEditingController,
   }) : assert(
-        filter == null || options == null,
-        "It's unnecessary to pass options if you've passed a custom filter.",
-      ),
-      assert(
-        filter != null || options != null,
-        'Must pass either options or filter.',
-      ),
+         filter == null || options == null,
+         "It's unnecessary to pass options if you've passed a custom filter.",
+       ),
+       assert(
+         filter != null || options != null,
+         'Must pass either options or filter.',
+       ),
        _ownsTextEditingController = textEditingController == null,
        textEditingController = textEditingController ?? TextEditingController() {
     this.textEditingController.addListener(_onQueryChanged);
