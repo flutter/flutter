@@ -43,6 +43,7 @@ void main() {
       'build',
       'ios',
       '--analyze-size',
+      '--no-codesign',
     ], workingDirectory: globals.fs.path.join(getFlutterRoot(), 'examples', 'hello_world'));
 
     print(result.stdout);
@@ -56,4 +57,22 @@ void main() {
     expect(globals.fs.file(globals.fs.path.join(line.split(iosDebugMessage).last.trim())).existsSync(), true);
     expect(result.exitCode, 0);
   }, skip: !const LocalPlatform().isMacOS); // Only supported on macOS
+
+  test('--analyze-size is only supported in release mode', () async {
+    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
+      flutterBin,
+      'build',
+      'apk',
+      '--analyze-size',
+      '--target-platform=android-arm64',
+      '--debug',
+    ], workingDirectory: globals.fs.path.join(getFlutterRoot(), 'examples', 'hello_world'));
+
+    print(result.stdout);
+    print(result.stderr);
+    expect(result.stderr.toString(), contains('--analyze-size can only be used on release builds'));
+
+    expect(result.exitCode, 1);
+  });
 }

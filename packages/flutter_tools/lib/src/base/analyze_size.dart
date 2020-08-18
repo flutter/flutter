@@ -311,6 +311,9 @@ class SizeAnalyzer {
     } else if (formattedSize.endsWith('KB')) {
       color = TerminalColor.yellow;
     }
+    if (entityName.length >= 70) {
+      entityName = '(...) ${fileSystem.path.basename(entityName)}';
+    }
 
     final int spaceInBetween = tableWidth - level * 2 - entityName.length - formattedSize.length;
     logger.printStatus(
