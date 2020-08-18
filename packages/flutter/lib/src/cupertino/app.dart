@@ -94,6 +94,7 @@ class CupertinoApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
     this.shortcuts,
     this.actions,
+    this.restorationScopeId,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -132,6 +133,7 @@ class CupertinoApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
     this.shortcuts,
     this.actions,
+    this.restorationScopeId,
   }) : assert(title != null),
        assert(showPerformanceOverlay != null),
        assert(checkerboardRasterCacheImages != null),
@@ -315,6 +317,9 @@ class CupertinoApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.actions.seeAlso}
   final Map<Type, Action<Intent>>? actions;
 
+  /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
+  final String restorationScopeId;
+
   @override
   _CupertinoAppState createState() => _CupertinoAppState();
 
@@ -400,6 +405,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
+        restorationScopeId: widget.restorationScopeId,
       );
     }
     return WidgetsApp(
@@ -433,6 +439,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
       inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
+      restorationScopeId: widget.restorationScopeId,
     );
   }
 

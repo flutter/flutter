@@ -333,6 +333,7 @@ class RestorationManager extends ChangeNotifier {
       bucket.finalize();
     }
     _bucketsNeedingSerialization.clear();
+    // print(_rootBucket!._rawData); // TODO(goderbauer): revert this debug print before submission.
     sendToEngine(_encodeRestorationData(_rootBucket!._rawData));
 
     assert(() {
