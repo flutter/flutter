@@ -196,6 +196,8 @@ abstract class FlutterDriver {
   }
 
   /// Waits until [finder] locates the target.
+  ///
+  /// See also [runUnsynchronized]
   Future<void> waitFor(SerializableFinder finder, { Duration timeout }) async {
     await sendCommand(WaitFor(finder, timeout: timeout));
   }
