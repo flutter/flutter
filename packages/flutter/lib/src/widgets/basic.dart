@@ -2666,7 +2666,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///
 /// {@tool snippet}
 ///
-/// Difference in painting can be easily compared by the following sections of with Offstage where we don't bring 
+/// Difference in painting can be easily compared by the following sections of with Offstage where we don't bring
 /// the widget on screen and without Offstage where we bring the widget on screen.
 ///
 /// ### Without Offstage
