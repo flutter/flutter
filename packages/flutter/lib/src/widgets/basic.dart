@@ -2653,7 +2653,21 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// painting anything, without making the child available for hit testing, and
 /// without taking any room in the parent.
 ///
-/// Difference in painting can be easily compared by the following sections of with and without Offstage.
+/// Offstage children are still active: they can receive focus and have keyboard
+/// input directed to them, you can also find them in the widget tree.
+///
+/// Animations continue to run in offstage children, and therefore use battery
+/// and CPU time, regardless of whether the animations end up being visible.
+///
+/// [Offstage] can be used to measure the dimensions of a widget without
+/// bringing it on screen (yet). To hide a widget from view while it is not
+/// needed, prefer removing the widget from the tree entirely rather than
+/// keeping it alive in an [Offstage] subtree.
+///
+/// {@tool snippet}
+///
+/// Difference in painting can be easily compared by the following sections of with Offstage where we don't bring 
+/// the widget on screen and without Offstage where we bring the widget on screen.
 ///
 /// ### Without Offstage
 ///
@@ -2709,16 +2723,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// }
 /// ```
 ///
-/// Offstage children are still active: they can receive focus and have keyboard
-/// input directed to them, you can also find them in the widget tree.
-///
-/// Animations continue to run in offstage children, and therefore use battery
-/// and CPU time, regardless of whether the animations end up being visible.
-///
-/// [Offstage] can be used to measure the dimensions of a widget without
-/// bringing it on screen (yet). To hide a widget from view while it is not
-/// needed, prefer removing the widget from the tree entirely rather than
-/// keeping it alive in an [Offstage] subtree.
+/// {@end-tool}
 ///
 /// See also:
 ///
