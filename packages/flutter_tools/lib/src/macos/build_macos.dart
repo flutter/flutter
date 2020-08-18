@@ -124,12 +124,13 @@ Future<void> buildMacOS({
       type: 'macos',
       excludePath: 'Versions', // Avoid double counting caused by symlinks
     );
-    final File outputFile = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'macos-analysis', 'json')
-      ..writeAsStringSync(jsonEncode(output));
-      // This message is used as a sentinel in analyze_apk_size_test.dart
-      globals.printStatus(
-        'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
-      );
+    final File outputFile = globals.fsUtils.getUniqueFile(
+      globals.fs.directory(getBuildDirectory()),'macos-analysis', 'json',
+    )..writeAsStringSync(jsonEncode(output));
+    // This message is used as a sentinel in analyze_apk_size_test.dart
+    globals.printStatus(
+      'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
+    );
   }
   globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 }

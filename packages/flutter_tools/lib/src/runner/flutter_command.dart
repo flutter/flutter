@@ -653,7 +653,10 @@ abstract class FlutterCommand extends Command<void> {
 
     String codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) && boolArg(FlutterOptions.kAnalyzeSize)) {
-      final Directory directory = globals.fsUtils.getUniqueDirectory(globals.fs.currentDirectory, 'flutter_size');
+      final Directory directory = globals.fsUtils.getUniqueDirectory(
+        globals.fs.directory(getBuildDirectory()),
+        'flutter_size',
+      );
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
     }

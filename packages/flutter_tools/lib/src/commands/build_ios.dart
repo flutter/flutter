@@ -138,8 +138,9 @@ class BuildIOSCommand extends BuildSubCommand {
         outputDirectory: appDirectory,
         type: 'ios',
       );
-      final File outputFile = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'ios-analysis', 'json')
-        ..writeAsStringSync(jsonEncode(output));
+      final File outputFile = globals.fsUtils.getUniqueFile(
+        globals.fs.directory(getBuildDirectory()),'ios-analysis', 'json',
+      )..writeAsStringSync(jsonEncode(output));
       // This message is used as a sentinel in analyze_apk_size_test.dart
       globals.printStatus(
         'A summary of your iOS bundle analysis can be found at: ${outputFile.path}',

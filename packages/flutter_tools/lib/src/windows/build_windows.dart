@@ -93,12 +93,13 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       precompilerTrace: precompilerTrace,
       type: 'windows',
     );
-    final File outputFile = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'windows-analysis', 'json')
-      ..writeAsStringSync(jsonEncode(output));
-      // This message is used as a sentinel in analyze_apk_size_test.dart
-      globals.printStatus(
-        'A summary of your Windows bundle analysis can be found at: ${outputFile.path}',
-      );
+    final File outputFile = globals.fsUtils.getUniqueFile(
+      globals.fs.directory(getBuildDirectory()),'windows-analysis', 'json',
+    )..writeAsStringSync(jsonEncode(output));
+    // This message is used as a sentinel in analyze_apk_size_test.dart
+    globals.printStatus(
+      'A summary of your Windows bundle analysis can be found at: ${outputFile.path}',
+    );
   }
 }
 

@@ -522,12 +522,13 @@ Future<void> buildGradleApp({
       aotSnapshot: aotSnapshot,
       precompilerTrace: precompilerTrace,
     );
-    final File outputFile = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'apk-analysis', 'json')
-      ..writeAsStringSync(jsonEncode(output));
-      // This message is used as a sentinel in analyze_apk_size_test.dart
-      globals.printStatus(
-        'A summary of your APK analysis can be found at: ${outputFile.path}',
-      );
+    final File outputFile = globals.fsUtils.getUniqueFile(
+      globals.fs.directory(getBuildDirectory()),'apk-analysis', 'json',
+    )..writeAsStringSync(jsonEncode(output));
+    // This message is used as a sentinel in analyze_apk_size_test.dart
+    globals.printStatus(
+      'A summary of your APK analysis can be found at: ${outputFile.path}',
+    );
   }
 }
 
