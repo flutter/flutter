@@ -139,7 +139,7 @@ void main() {
     log.clear();
   });
 
-  test('During notifyListeners, a listener was added and removed immediatly', () {
+  test('During notifyListeners, a listener was added and removed immediately', () {
     final TestNotifier source = TestNotifier();
     final List<String> log = <String>[];
 
