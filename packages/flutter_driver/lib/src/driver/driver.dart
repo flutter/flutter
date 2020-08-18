@@ -665,6 +665,7 @@ abstract class FlutterDriver {
   /// in the app under test before executing an action. This mechanism is called
   /// "frame sync". It greatly reduces flakiness because Flutter Driver will not
   /// execute an action while the app under test is undergoing a transition.
+  /// See [FlutterDriver.waitFor] method
   ///
   /// Having said that, sometimes it is necessary to disable the frame sync
   /// mechanism (e.g. if there is an ongoing animation in the app, it will
