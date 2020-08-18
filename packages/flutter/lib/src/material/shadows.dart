@@ -14,7 +14,7 @@ import 'package:flutter/painting.dart';
 
 /// Map of elevation offsets used by material design to [BoxShadow] definitions.
 ///
-/// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+/// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24.
 ///
 /// Each entry has three shadows which must be combined to obtain the defined
 /// effect for that elevation.

@@ -1097,7 +1097,7 @@ class ThemeData with Diagnosticable {
   final TextButtonThemeData textButtonTheme;
 
   /// A theme for customizing the appearance and internal layout of
-  /// [ElevatedButton]s
+  /// [ElevatedButton]s.
   final ElevatedButtonThemeData elevatedButtonTheme;
 
   /// A theme for customizing the appearance and internal layout of

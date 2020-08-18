@@ -129,10 +129,11 @@ void main() {
 
   group('Tap', () {
     final ButtonVariant buttonVariant = ButtonVariant(
-      values: <int>[kPrimaryButton, kSecondaryButton],
+      values: <int>[kPrimaryButton, kSecondaryButton, kTertiaryButton],
       descriptions: <int, String>{
         kPrimaryButton: 'primary',
         kSecondaryButton: 'secondary',
+        kTertiaryButton: 'tertiary',
       },
     );
 
@@ -164,6 +165,9 @@ void main() {
                       didTap = true;
                     } : null,
                     onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
+                      didTap = true;
+                    } : null,
+                    onTertiaryTapDown: ButtonVariant.button == kTertiaryButton ? (_) {
                       didTap = true;
                     } : null,
                     behavior: behavior,
@@ -215,6 +219,9 @@ void main() {
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
               didTap = true;
             } : null,
+            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (_) {
+              didTap = true;
+            } : null,
           ),
         ),
       );
@@ -234,6 +241,9 @@ void main() {
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
               didTap = true;
             } : null,
+            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (_) {
+              didTap = true;
+            } : null,
             child: Container(),
           ),
         ),
@@ -251,6 +261,7 @@ void main() {
           child: GestureDetector(
             onTap: ButtonVariant.button == kPrimaryButton ? inputCallback : null,
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? inputCallback : null,
+            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (_) => inputCallback() : null,
             child: Container(),
           ),
         ),
@@ -263,6 +274,7 @@ void main() {
           child: GestureDetector(
             onTap: ButtonVariant.button == kPrimaryButton ? inputCallback : null,
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? inputCallback : null,
+            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (_) => inputCallback() : null,
             child: Container(),
           ),
         ),
@@ -286,31 +298,64 @@ void main() {
             alignment: Alignment.center,
             height: 100.0,
             color: const Color(0xFF00FF00),
-            child: GestureDetector(
-              onTapDown: ButtonVariant.button == kPrimaryButton ? (TapDownDetails details) {
-                tapDown += 1;
-              } : null,
-              onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (TapDownDetails details) {
-                tapDown += 1;
-              } : null,
-              onTap: ButtonVariant.button == kPrimaryButton ? () {
-                tap += 1;
-              } : null,
-              onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
-                tap += 1;
-              } : null,
-              onTapCancel: ButtonVariant.button == kPrimaryButton ? () {
-                tapCancel += 1;
-              } : null,
-              onSecondaryTapCancel: ButtonVariant.button == kSecondaryButton ? () {
-                tapCancel += 1;
-              } : null,
-              onLongPress: ButtonVariant.button == kPrimaryButton ? () {
-                longPress += 1;
-              } : null,
-              onSecondaryLongPress: ButtonVariant.button == kSecondaryButton ? () {
-                longPress += 1;
-              } : null,
+            child: RawGestureDetector(
+              behavior: HitTestBehavior.translucent,
+              // Adding long press callbacks here will cause the on*TapDown callbacks to be executed only after
+              // kPressTimeout has passed. Without the long press callbacks, there would be no press pointers
+              // competing in the arena. Hence, we add them to the arena to test this behavior.
+              //
+              // We use a raw gesture detector directly here because gesture detector does
+              // not expose callbacks for the tertiary variant of long presses, i.e. no onTertiaryLongPress*
+              // callbacks are exposed in GestureDetector.
+              //
+              // The primary and secondary long press callbacks could also be put into the gesture detector below,
+              // however, it is clearer when they are all in one place.
+              gestures: <Type, GestureRecognizerFactory>{
+                LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+                  () => LongPressGestureRecognizer(),
+                  (LongPressGestureRecognizer instance) {
+                    instance
+                      ..onLongPress = ButtonVariant.button == kPrimaryButton ? () {
+                        longPress += 1;
+                      } : null
+                      ..onSecondaryLongPress = ButtonVariant.button == kSecondaryButton ? () {
+                        longPress += 1;
+                      } : null
+                      ..onTertiaryLongPress = ButtonVariant.button == kTertiaryButton ? () {
+                        longPress += 1;
+                      } : null;
+                  },
+                ),
+              },
+              child: GestureDetector(
+                onTapDown: ButtonVariant.button == kPrimaryButton ? (TapDownDetails details) {
+                  tapDown += 1;
+                } : null,
+                onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (TapDownDetails details) {
+                  tapDown += 1;
+                } : null,
+                onTertiaryTapDown: ButtonVariant.button == kTertiaryButton ? (TapDownDetails details) {
+                  tapDown += 1;
+                } : null,
+                onTap: ButtonVariant.button == kPrimaryButton ? () {
+                  tap += 1;
+                } : null,
+                onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
+                  tap += 1;
+                } : null,
+                onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (TapUpDetails details) {
+                  tap += 1;
+                } : null,
+                onTapCancel: ButtonVariant.button == kPrimaryButton ? () {
+                  tapCancel += 1;
+                } : null,
+                onSecondaryTapCancel: ButtonVariant.button == kSecondaryButton ? () {
+                  tapCancel += 1;
+                } : null,
+                onTertiaryTapCancel: ButtonVariant.button == kTertiaryButton ? () {
+                  tapCancel += 1;
+                } : null,
+              ),
             ),
           ),
         ),
@@ -358,13 +403,30 @@ void main() {
             alignment: Alignment.center,
             height: 100.0,
             color: const Color(0xFF00FF00),
-            child: GestureDetector(
-              onLongPressUp: ButtonVariant.button == kPrimaryButton ? () {
-                longPressUp += 1;
-              } : null,
-              onSecondaryLongPressUp: ButtonVariant.button == kSecondaryButton ? () {
-                longPressUp += 1;
-              } : null,
+            child: RawGestureDetector(
+              // We use a raw gesture detector directly here because gesture detector does
+              // not expose callbacks for the tertiary variant of long presses, i.e. no onTertiaryLongPress*
+              // callbacks are exposed in GestureDetector, and we want to test all three variants.
+              //
+              // The primary and secondary long press callbacks could also be put into the gesture detector below,
+              // however, it is more convenient to have them all in one place.
+              gestures: <Type, GestureRecognizerFactory>{
+                LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+                      () => LongPressGestureRecognizer(),
+                      (LongPressGestureRecognizer instance) {
+                    instance
+                      ..onLongPressUp = ButtonVariant.button == kPrimaryButton ? () {
+                        longPressUp += 1;
+                      } : null
+                      ..onSecondaryLongPressUp = ButtonVariant.button == kSecondaryButton ? () {
+                        longPressUp += 1;
+                      } : null
+                      ..onTertiaryLongPressUp = ButtonVariant.button == kTertiaryButton ? () {
+                        longPressUp += 1;
+                      } : null;
+                  },
+                ),
+              },
             ),
           ),
         ),
@@ -439,12 +501,12 @@ void main() {
         ),
       ),
     );
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
 
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -453,31 +515,73 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.3,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
 
     expect(forcePressStart, 0);
     expect(forcePressPeaked, 0);
     expect(forcePressUpdate, 0);
     expect(forcePressEnded, 0);
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
 
     expect(forcePressStart, 1);
     expect(forcePressPeaked, 0);
     expect(forcePressUpdate, 1);
     expect(forcePressEnded, 0);
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.6, pressureMin: 0, pressureMax: 1));
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.7, pressureMin: 0, pressureMax: 1));
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.2, pressureMin: 0, pressureMax: 1));
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.6,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.7,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.2,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.3,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
 
     expect(forcePressStart, 1);
     expect(forcePressPeaked, 0);
     expect(forcePressUpdate, 5);
     expect(forcePressEnded, 0);
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.9, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.9,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
 
     expect(forcePressStart, 1);
     expect(forcePressPeaked, 1);
@@ -511,14 +615,14 @@ void main() {
       ),
     );
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     const double maxPressure = 6.0;
 
     final TestGesture gesture = await tester.createGesture();
 
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -527,7 +631,13 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.3, pressureMin: 0, pressureMax: maxPressure));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(400.0, 50.0),
+      pressure: 0.3,
+      pressureMin: 0,
+      pressureMax: maxPressure
+    ));
 
     expect(forcePressStart, 0);
     expect(longPressTimes, 0);
@@ -539,7 +649,13 @@ void main() {
     expect(forcePressStart, 0);
 
     // Failed attempt to trigger the force press.
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.5, pressureMin: 0, pressureMax: maxPressure));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(400.0, 50.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: maxPressure
+    ));
 
     expect(longPressTimes, 1);
     expect(forcePressStart, 0);
@@ -564,13 +680,13 @@ void main() {
       ),
     );
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
 
     final TestGesture gesture = await tester.createGesture();
 
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -579,7 +695,13 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.3,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
 
     expect(forcePressStart, 0);
     expect(horizontalDragStart, 0);
@@ -591,7 +713,13 @@ void main() {
     expect(forcePressStart, 0);
 
     // Failed attempt to trigger the force press.
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
 
     expect(horizontalDragStart, 1);
     expect(forcePressStart, 0);

@@ -38,7 +38,7 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
     this.checkerboardOffscreenLayers = false,
   }) : super(key: key);
 
-  /// Create a performance overlay that displays all available statistics
+  /// Create a performance overlay that displays all available statistics.
   PerformanceOverlay.allEnabled({
     Key key,
     this.rasterizerThreshold = 0,

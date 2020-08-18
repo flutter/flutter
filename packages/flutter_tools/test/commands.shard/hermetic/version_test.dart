@@ -43,7 +43,10 @@ void main() {
         '--no-pub',
       ]);
       expect(testLogger.statusText, equals(
-        '[!] The "version" command is deprecated and will be removed in a future version of Flutter.\n\n'
+        '[!] The "version" command is deprecated '
+            'and will be removed in a future version of Flutter. '
+            'See https://flutter.dev/docs/development/tools/sdk/releases '
+            'for previous releases of Flutter.\n\n'
         'v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\r\n31.0.0-0.0.pre\n'
       ));
     }, overrides: <Type, Generator>{

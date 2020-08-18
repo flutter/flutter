@@ -168,13 +168,11 @@ class RawKeyEventDataWindows extends RawKeyEventData {
         return KeyboardSide.left;
       } else if (combined == rightMask) {
         return KeyboardSide.right;
-      } else if (combined == combinedMask) {
-        return KeyboardSide.all;
-      } else if (modifiers & (combinedMask | anyMask) == anyMask) {
+      } else if (combined == combinedMask || modifiers & (combinedMask | anyMask) == anyMask) {
         // Handles the case where Windows supplies just the "either" modifier
         // flag, but not the left/right flag. (e.g. modifierShift but not
         // modifierLeftShift).
-        return KeyboardSide.any;
+        return KeyboardSide.all;
       }
       return null;
     }

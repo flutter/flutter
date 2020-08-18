@@ -139,7 +139,7 @@ class FileSystemUtils {
         && referenceFile.statSync().modified.isAfter(entity.statSync().modified);
   }
 
-  /// Return the absolute path of the user's home directory
+  /// Return the absolute path of the user's home directory.
   String get homeDirPath {
     String path = _platform.isWindows
       ? _platform.environment['USERPROFILE']

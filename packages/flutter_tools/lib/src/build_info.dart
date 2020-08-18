@@ -82,7 +82,7 @@ class BuildInfo {
   /// A "x.y.z" string used as the version number shown to users.
   /// For each new version of your app, you will provide a version number to differentiate it from previous versions.
   /// On Android it is used as versionName.
-  /// On Xcode builds it is used as CFBundleShortVersionString,
+  /// On Xcode builds it is used as CFBundleShortVersionString.
   final String buildName;
 
   /// An optional directory path to save debugging information from dwarf stack
@@ -93,7 +93,7 @@ class BuildInfo {
   /// Whether to apply dart source code obfuscation.
   final bool dartObfuscation;
 
-  /// An optional path to a JSON containing object SkSL shaders
+  /// An optional path to a JSON containing object SkSL shaders.
   ///
   /// Currently this is only supported for Android builds.
   final String bundleSkSLPath;

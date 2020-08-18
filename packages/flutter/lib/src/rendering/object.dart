@@ -676,7 +676,7 @@ abstract class Constraints {
   /// const constructors so that they can be used in const expressions.
   const Constraints();
 
-  /// Whether there is exactly one size possible given these constraints
+  /// Whether there is exactly one size possible given these constraints.
   bool get isTight;
 
   /// Whether the constraint is expressed in a consistent manner.
@@ -1674,6 +1674,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
+    if (!kReleaseMode && debugProfileLayoutsEnabled)
+      Timeline.startSync('$runtimeType',  arguments: timelineArgumentsIndicatingLandmarkEvent);
+
     assert(constraints != null);
     assert(constraints.debugAssertIsValid(
       isAppliedConstraint: true,
@@ -1727,6 +1730,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         _debugDoingThisResize = false;
         return true;
       }());
+
+      if (!kReleaseMode && debugProfileLayoutsEnabled)
+        Timeline.finishSync();
       return;
     }
     _constraints = constraints;
@@ -1789,6 +1795,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }());
     _needsLayout = false;
     markNeedsPaint();
+
+    if (!kReleaseMode && debugProfileLayoutsEnabled)
+      Timeline.finishSync();
   }
 
   /// If a subclass has a "size" (the state controlled by `parentUsesSize`,
@@ -2421,6 +2430,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// semantics tree to implement implicit accessibility scrolling on iOS where
   /// the viewport scrolls implicitly when moving the accessibility focus from
   /// a the last visible node in the viewport to the first hidden one.
+  ///
+  /// See also:
+  ///
+  /// * [RenderViewportBase.cacheExtent], used by viewports to extend their
+  ///   semantics clip beyond their approximate paint clip.
   Rect describeSemanticsClip(covariant RenderObject child) => null;
 
   // SEMANTICS
@@ -2906,6 +2920,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// The `duration` parameter can be set to a non-zero value to bring the
   /// target object on screen in an animation defined by `curve`.
+  ///
+  /// See also:
+  ///
+  /// * [RenderViewportBase.showInViewport], which [RenderViewportBase] and
+  ///   [SingleChildScrollView] delegate this method to.
   void showOnScreen({
     RenderObject descendant,
     Rect rect,
@@ -2987,7 +3006,7 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
   }
 
   ChildType _child;
-  /// The render object's unique child
+  /// The render object's unique child.
   ChildType get child => _child;
   set child(ChildType value) {
     if (_child != null)
@@ -3805,6 +3824,12 @@ class _SemanticsGeometry {
   /// Value for [SemanticsNode.rect].
   Rect get rect => _rect;
 
+  /// Computes values, ensuring `rect` is properly bounded by ancestor clipping rects.
+  ///
+  /// See also:
+  ///
+  /// * [RenderObject.describeSemanticsClip], typically used to determine `parentSemanticsClipRect`.
+  /// * [RenderObject.describeApproximatePaintClip], typically used to determine `parentPaintClipRect`.
   void _computeValues(Rect parentSemanticsClipRect, Rect parentPaintClipRect, List<RenderObject> ancestors) {
     assert(ancestors.length > 1);
 
