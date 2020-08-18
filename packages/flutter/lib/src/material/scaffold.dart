@@ -108,17 +108,32 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   Timer _snackBarTimer;
   bool _accessibleNavigation;
 
-  void _updateAccessibleNavigation(bool value) {
-    if (_accessibleNavigation != value)
-      setState((){
-        _accessibleNavigation = value;
-      });
+  @override
+  void didChangeDependencies() {
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    // If we transition from accessible navigation to non-accessible navigation
+    // and there is a SnackBar that would have timed out that has already
+    // completed its timer, dismiss that SnackBar. If the timer hasn't finished
+    // yet, let it timeout as normal.
+    if (_accessibleNavigation == true
+      && !mediaQuery.accessibleNavigation
+      && _snackBarTimer != null
+      && !_snackBarTimer.isActive) {
+      hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
+    }
+    _accessibleNavigation = mediaQuery.accessibleNavigation;
+    super.didChangeDependencies();
   }
 
   void _register(ScaffoldState scaffold) {
     _scaffolds.add(scaffold);
-    if (_snackBars.isNotEmpty)
-      scaffold._setSnackBar(_snackBars.first);
+    if (_snackBars.isNotEmpty) {
+      setState(() {
+        _snackBarTimer.cancel();
+        _snackBarTimer = null;
+      });
+      scaffold._updateSnackBar();
+    }
   }
 
   void _unregister(ScaffoldState scaffold) {
@@ -147,11 +162,9 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       },
       null, // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
     );
-
-    _snackBars.addLast(controller);
-    for (final ScaffoldState scaffold in _scaffolds) {
-      scaffold._setSnackBar(controller);
-    }
+    setState(() {
+      _snackBars.addLast(controller);
+    });
     return controller;
   }
 
@@ -159,23 +172,32 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     switch (status) {
       case AnimationStatus.dismissed:
         assert(_snackBars.isNotEmpty);
-        _snackBars.removeFirst();
-        for (final ScaffoldState scaffold in _scaffolds) {
-          scaffold._clearSnackBar();
-        }
+        setState(() {
+          _snackBars.removeFirst();
+        });
+        _updateScaffolds();
         if (_snackBars.isNotEmpty) {
           _snackBarController.forward();
         }
         break;
       case AnimationStatus.completed:
-        assert(_snackBarTimer == null);
-        for (final ScaffoldState scaffold in _scaffolds) {
-          scaffold._completeSnackBar();
-        }
+        setState(() {
+          assert(_snackBarTimer == null);
+          // build will create a new timer if necessary to dismiss the snackBar.
+        });
+        _updateScaffolds();
         break;
       case AnimationStatus.forward:
+        _updateScaffolds();
+        break;
       case AnimationStatus.reverse:
         break;
+    }
+  }
+
+  void _updateScaffolds() {
+    for (final ScaffoldState scaffold in _scaffolds) {
+      scaffold._updateSnackBar();
     }
   }
 
@@ -219,6 +241,27 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMediaQuery(context));
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    _accessibleNavigation = mediaQuery.accessibleNavigation;
+
+    if (_snackBars.isNotEmpty) {
+      final ModalRoute<dynamic> route = ModalRoute.of(context);
+      if (route == null || route.isCurrent) {
+        if (_snackBarController.isCompleted && _snackBarTimer == null) {
+          final SnackBar snackBar = _snackBars.first._widget;
+          _snackBarTimer = Timer(snackBar.duration, () {
+            assert(_snackBarController.status == AnimationStatus.forward || _snackBarController.status == AnimationStatus.completed);
+            // Look up MediaQuery again in case the setting changed.
+            final MediaQueryData mediaQuery = MediaQuery.of(context);
+            if (mediaQuery.accessibleNavigation && snackBar.action != null)
+              return;
+            hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
+          });
+        }
+      }
+    }
+
     return _ScaffoldMessengerScope(
       scaffoldMessengerState: this,
       child: widget.child,
@@ -1844,7 +1887,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // SNACKBAR API
 
   ScaffoldMessengerState _scaffoldMessenger;
-  bool _accessibleNavigation;
 
   /// Shows a [SnackBar] at the bottom of the scaffold.
   ///
@@ -1905,20 +1947,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> _snackBar;
 
-  void _setSnackBar(ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBar) {
+  void _updateSnackBar() {
     setState(() {
-      _snackBar = snackBar;
-    });
-  }
-
-  void _clearSnackBar() {
-    setState(() {
-      _snackBar = null;
-    });
-  }
-
-  void _completeSnackBar() {
-    setState(() {
+        _snackBar = _scaffoldMessenger._snackBars.isNotEmpty
+          ? _scaffoldMessenger._snackBars.first
+          : null;
     });
   }
 
@@ -2332,19 +2365,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   void didChangeDependencies() {
     _scaffoldMessenger = ScaffoldMessenger.of(context);
     _scaffoldMessenger?._register(this);
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-    _accessibleNavigation = mediaQuery.accessibleNavigation;
-    _scaffoldMessenger._updateAccessibleNavigation(_accessibleNavigation);
-    // If we transition from accessible navigation to non-accessible navigation
-    // and there is a SnackBar that would have timed out that has already
-    // completed its timer, dismiss that SnackBar. If the timer hasn't finished
-    // yet, let it timeout as normal.
-    if (_accessibleNavigation == true
-      && !mediaQuery.accessibleNavigation
-      && _scaffoldMessenger._snackBarTimer != null
-      && !_scaffoldMessenger._snackBarTimer.isActive) {
-      hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
-    }
     _maybeBuildPersistentBottomSheet();
     super.didChangeDependencies();
   }
@@ -2474,25 +2494,24 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
-    _accessibleNavigation = mediaQuery.accessibleNavigation;
-    _scaffoldMessenger._updateAccessibleNavigation(_accessibleNavigation);
 
-    if (_snackBar != null) {
-      final ModalRoute<dynamic> route = ModalRoute.of(context);
-      if (route == null || route.isCurrent) {
-        if (_scaffoldMessenger._snackBarController.isCompleted && _scaffoldMessenger._snackBarTimer == null) {
-          final SnackBar snackBar = _snackBar._widget;
-          _scaffoldMessenger._snackBarTimer = Timer(snackBar.duration, () {
-            assert(_scaffoldMessenger._snackBarController.status == AnimationStatus.forward ||
-              _scaffoldMessenger._snackBarController.status == AnimationStatus.completed);
-            // Look up MediaQuery again in case the setting changed.
-            if (_accessibleNavigation && snackBar.action != null)
-              return;
-            _scaffoldMessenger.hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
-          });
-        }
-      }
-    }
+//    if (_snackBar != null) {
+//      final ModalRoute<dynamic> route = ModalRoute.of(context);
+//      if (route == null || route.isCurrent) {
+//        if (_scaffoldMessenger._snackBarController.isCompleted && _scaffoldMessenger._snackBarTimer == null) {
+//          final SnackBar snackBar = _snackBar._widget;
+//          _scaffoldMessenger._snackBarTimer = Timer(snackBar.duration, () {
+//            assert(_scaffoldMessenger._snackBarController.status == AnimationStatus.forward ||
+//              _scaffoldMessenger._snackBarController.status == AnimationStatus.completed);
+//            // Check the accessible navigation setting of the serving
+//            // ScaffoldMessenger in case it has changed.
+//            if (_scaffoldMessenger._accessibleNavigation && snackBar.action != null)
+//              return;
+//            _scaffoldMessenger.hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
+//          });
+//        }
+//      }
+//    }
 
     final List<LayoutId> children = <LayoutId>[];
     _addIfNonNull(
