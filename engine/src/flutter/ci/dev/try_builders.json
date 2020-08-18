@@ -1,16 +1,6 @@
 {
    "builders":[
       {
-         "name":"Linux Host Engine",
-         "repo":"engine",
-         "enabled": true
-      },
-      {
-         "name":"Linux Fuchsia",
-         "repo":"engine",
-         "enabled": true
-      },
-      {
          "name":"Linux Android AOT Engine",
          "repo":"engine",
          "enabled": true
@@ -21,12 +11,22 @@
          "enabled": true
       },
       {
-         "name":"Linux Web Engine",
+         "name":"Linux Android Scenarios",
          "repo":"engine",
          "enabled": true
       },
       {
-         "name":"Mac Host Engine",
+         "name":"Linux Fuchsia",
+         "repo":"engine",
+         "enabled": true
+      },
+      {
+         "name":"Linux Host Engine",
+         "repo":"engine",
+         "enabled": true
+      },
+      {
+         "name":"Linux Web Engine",
          "repo":"engine",
          "enabled": true
       },
@@ -41,12 +41,17 @@
          "enabled": true
       },
       {
+         "name":"Mac Host Engine",
+         "repo":"engine",
+         "enabled": true
+      },
+      {
          "name":"Mac iOS Engine",
          "repo":"engine",
          "enabled": true
       },
       {
-         "name":"Windows Host Engine",
+         "name":"Mac Web Engine",
          "repo":"engine",
          "enabled": true
       },
@@ -56,12 +61,12 @@
          "enabled": true
       },
       {
-         "name":"Windows Web Engine",
+         "name":"Windows Host Engine",
          "repo":"engine",
          "enabled": true
       },
       {
-         "name":"Mac Web Engine",
+         "name":"Windows Web Engine",
          "repo":"engine",
          "enabled": true
       }
