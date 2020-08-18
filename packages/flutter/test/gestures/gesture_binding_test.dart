@@ -47,8 +47,8 @@ void main() {
 
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
-    expect(events[0].runtimeType, equals(PointerDownEvent));
-    expect(events[1].runtimeType, equals(PointerUpEvent));
+    expect(events[0], isA<PointerDownEvent>());
+    expect(events[1], isA<PointerUpEvent>());
   });
 
   test('Pointer move events', () {
@@ -65,9 +65,9 @@ void main() {
 
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 3);
-    expect(events[0].runtimeType, equals(PointerDownEvent));
-    expect(events[1].runtimeType, equals(PointerMoveEvent));
-    expect(events[2].runtimeType, equals(PointerUpEvent));
+    expect(events[0], isA<PointerDownEvent>());
+    expect(events[1], isA<PointerMoveEvent>());
+    expect(events[2], isA<PointerUpEvent>());
   });
 
   test('Pointer hover events', () {
@@ -92,12 +92,12 @@ void main() {
     expect(events.length, 0);
     expect(pointerRouterEvents.length, 6,
         reason: 'pointerRouterEvents contains: $pointerRouterEvents');
-    expect(pointerRouterEvents[0].runtimeType, equals(PointerAddedEvent));
-    expect(pointerRouterEvents[1].runtimeType, equals(PointerHoverEvent));
-    expect(pointerRouterEvents[2].runtimeType, equals(PointerHoverEvent));
-    expect(pointerRouterEvents[3].runtimeType, equals(PointerRemovedEvent));
-    expect(pointerRouterEvents[4].runtimeType, equals(PointerAddedEvent));
-    expect(pointerRouterEvents[5].runtimeType, equals(PointerHoverEvent));
+    expect(pointerRouterEvents[0], isA<PointerAddedEvent>());
+    expect(pointerRouterEvents[1], isA<PointerHoverEvent>());
+    expect(pointerRouterEvents[2], isA<PointerHoverEvent>());
+    expect(pointerRouterEvents[3], isA<PointerRemovedEvent>());
+    expect(pointerRouterEvents[4], isA<PointerAddedEvent>());
+    expect(pointerRouterEvents[5], isA<PointerHoverEvent>());
   });
 
   test('Pointer cancel events', () {
@@ -113,8 +113,8 @@ void main() {
 
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
-    expect(events[0].runtimeType, equals(PointerDownEvent));
-    expect(events[1].runtimeType, equals(PointerCancelEvent));
+    expect(events[0], isA<PointerDownEvent>());
+    expect(events[1], isA<PointerCancelEvent>());
   });
 
   test('Can cancel pointers', () {
@@ -134,8 +134,8 @@ void main() {
 
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
-    expect(events[0].runtimeType, equals(PointerDownEvent));
-    expect(events[1].runtimeType, equals(PointerCancelEvent));
+    expect(events[0], isA<PointerDownEvent>());
+    expect(events[1], isA<PointerCancelEvent>());
   });
 
   test('Can expand add and hover pointers', () {
@@ -153,11 +153,11 @@ void main() {
       packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
-    expect(events[0].runtimeType, equals(PointerAddedEvent));
-    expect(events[1].runtimeType, equals(PointerHoverEvent));
-    expect(events[2].runtimeType, equals(PointerRemovedEvent));
-    expect(events[3].runtimeType, equals(PointerAddedEvent));
-    expect(events[4].runtimeType, equals(PointerHoverEvent));
+    expect(events[0], isA<PointerAddedEvent>());
+    expect(events[1], isA<PointerHoverEvent>());
+    expect(events[2], isA<PointerRemovedEvent>());
+    expect(events[3], isA<PointerAddedEvent>());
+    expect(events[4], isA<PointerHoverEvent>());
   });
 
   test('Can expand pointer scroll events', () {
@@ -172,8 +172,8 @@ void main() {
       packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 2);
-    expect(events[0].runtimeType, equals(PointerAddedEvent));
-    expect(events[1].runtimeType, equals(PointerScrollEvent));
+    expect(events[0], isA<PointerAddedEvent>());
+    expect(events[1], isA<PointerScrollEvent>());
   });
 
   test('Should synthesize kPrimaryButton for touch', () {
@@ -193,15 +193,15 @@ void main() {
       packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
-    expect(events[0].runtimeType, equals(PointerAddedEvent));
+    expect(events[0], isA<PointerAddedEvent>());
     expect(events[0].buttons, equals(0));
-    expect(events[1].runtimeType, equals(PointerHoverEvent));
+    expect(events[1], isA<PointerHoverEvent>());
     expect(events[1].buttons, equals(0));
-    expect(events[2].runtimeType, equals(PointerDownEvent));
+    expect(events[2], isA<PointerDownEvent>());
     expect(events[2].buttons, equals(kPrimaryButton));
-    expect(events[3].runtimeType, equals(PointerMoveEvent));
+    expect(events[3], isA<PointerMoveEvent>());
     expect(events[3].buttons, equals(kPrimaryButton));
-    expect(events[4].runtimeType, equals(PointerUpEvent));
+    expect(events[4], isA<PointerUpEvent>());
     expect(events[4].buttons, equals(0));
   });
 
@@ -226,15 +226,15 @@ void main() {
         packet.data, ui.window.devicePixelRatio).toList();
 
       expect(events.length, 5);
-      expect(events[0].runtimeType, equals(PointerAddedEvent));
+      expect(events[0], isA<PointerAddedEvent>());
       expect(events[0].buttons, equals(0));
-      expect(events[1].runtimeType, equals(PointerHoverEvent));
+      expect(events[1], isA<PointerHoverEvent>());
       expect(events[1].buttons, equals(0));
-      expect(events[2].runtimeType, equals(PointerDownEvent));
+      expect(events[2], isA<PointerDownEvent>());
       expect(events[2].buttons, equals(kPrimaryButton));
-      expect(events[3].runtimeType, equals(PointerMoveEvent));
+      expect(events[3], isA<PointerMoveEvent>());
       expect(events[3].buttons, equals(kPrimaryButton | kSecondaryStylusButton));
-      expect(events[4].runtimeType, equals(PointerUpEvent));
+      expect(events[4], isA<PointerUpEvent>());
       expect(events[4].buttons, equals(0));
     }
   });
@@ -256,15 +256,15 @@ void main() {
       packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
-    expect(events[0].runtimeType, equals(PointerAddedEvent));
+    expect(events[0], isA<PointerAddedEvent>());
     expect(events[0].buttons, equals(0));
-    expect(events[1].runtimeType, equals(PointerHoverEvent));
+    expect(events[1], isA<PointerHoverEvent>());
     expect(events[1].buttons, equals(0));
-    expect(events[2].runtimeType, equals(PointerDownEvent));
+    expect(events[2], isA<PointerDownEvent>());
     expect(events[2].buttons, equals(kPrimaryButton));
-    expect(events[3].runtimeType, equals(PointerMoveEvent));
+    expect(events[3], isA<PointerMoveEvent>());
     expect(events[3].buttons, equals(kPrimaryButton));
-    expect(events[4].runtimeType, equals(PointerUpEvent));
+    expect(events[4], isA<PointerUpEvent>());
     expect(events[4].buttons, equals(0));
   });
 
@@ -287,15 +287,15 @@ void main() {
         packet.data, ui.window.devicePixelRatio).toList();
 
       expect(events.length, 5);
-      expect(events[0].runtimeType, equals(PointerAddedEvent));
+      expect(events[0], isA<PointerAddedEvent>());
       expect(events[0].buttons, equals(0));
-      expect(events[1].runtimeType, equals(PointerHoverEvent));
+      expect(events[1], isA<PointerHoverEvent>());
       expect(events[1].buttons, equals(0));
-      expect(events[2].runtimeType, equals(PointerDownEvent));
+      expect(events[2], isA<PointerDownEvent>());
       expect(events[2].buttons, equals(kMiddleMouseButton));
-      expect(events[3].runtimeType, equals(PointerMoveEvent));
+      expect(events[3], isA<PointerMoveEvent>());
       expect(events[3].buttons, equals(kMiddleMouseButton | kSecondaryMouseButton));
-      expect(events[4].runtimeType, equals(PointerUpEvent));
+      expect(events[4], isA<PointerUpEvent>());
       expect(events[4].buttons, equals(0));
     }
   });
