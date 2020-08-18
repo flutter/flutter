@@ -164,6 +164,8 @@ void main() {
       '     _InheritedTheme\n'
       '     Theme\n'
       '     AnimatedTheme\n'
+      '     _ScaffoldMessengerScope\n'
+      '     ScaffoldMessenger\n'
       '     Builder\n'
       '     DefaultTextStyle\n'
       '     CustomPaint\n'
