@@ -231,6 +231,7 @@ void main() {
       ),
       '--deterministic',
       '--write-v8-snapshot-profile-to=code_size_1/snapshot.arm64-v8a.json',
+      '--trace-precompiler-to=code_size_1/trace.arm64-v8a.json',
       '--snapshot_kind=app-aot-elf',
       '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
       '--strip',

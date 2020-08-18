@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 
 import '../../../src/common.dart';
@@ -31,10 +30,6 @@ void main() {
   Artifacts artifacts;
   FileSystem fileSystem;
   Logger logger;
-
-  setUpAll(() {
-    Cache.disableLocking();
-  });
 
   setUp(() {
     processManager = FakeProcessManager.list(<FakeCommand>[]);
@@ -371,6 +366,7 @@ void main() {
         ),
         '--deterministic',
         '--write-v8-snapshot-profile-to=code_size_1/snapshot.android-arm.json',
+        '--trace-precompiler-to=code_size_1/trace.android-arm.json',
         kElfAot,
         '--elf=$build/app.so',
         '--strip',
@@ -653,6 +649,7 @@ void main() {
         'Artifact.genSnapshot.TargetPlatform.ios.profile_arm64',
         '--deterministic',
         '--write-v8-snapshot-profile-to=code_size_1/snapshot.arm64.json',
+        '--trace-precompiler-to=code_size_1/trace.arm64.json',
         kAssemblyAot,
         '--assembly=$build/arm64/snapshot_assembly.S',
         '--strip',
