@@ -280,7 +280,8 @@ class AttachCommand extends FlutterCommand {
             devicePort: deviceVmservicePort,
             hostPort: hostVmservicePort,
           );
-        globals.printStatus('Waiting for a connection from Flutter on ${device.name}...');
+        globals.printStatus('If your app is already running, please restart it (or pass --debug-uri <observatory_url>)');
+        globals.printStatus('Waiting for a connection from Flutter app running on ${device.name}...');
         observatoryUri = observatoryDiscovery.uris;
         // Determine ipv6 status from the scanned logs.
         usesIpv6 = observatoryDiscovery.ipv6;
