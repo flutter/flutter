@@ -128,10 +128,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   void _register(ScaffoldState scaffold) {
     _scaffolds.add(scaffold);
     if (_snackBars.isNotEmpty) {
-      setState(() {
-        _snackBarTimer.cancel();
-        _snackBarTimer = null;
-      });
       scaffold._updateSnackBar();
     }
   }
@@ -165,6 +161,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     setState(() {
       _snackBars.addLast(controller);
     });
+    _updateScaffolds();
     return controller;
   }
 
@@ -188,7 +185,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         _updateScaffolds();
         break;
       case AnimationStatus.forward:
-        _updateScaffolds();
+//        _updateScaffolds();
         break;
       case AnimationStatus.reverse:
         break;

@@ -723,27 +723,29 @@ class _MaterialAppState extends State<MaterialApp> {
     }
     theme ??= widget.theme ?? ThemeData.light();
 
-    return AnimatedTheme(
-      data: theme,
-      isMaterialAppTheme: true,
-      child: widget.builder != null
-        ? Builder(
-            builder: (BuildContext context) {
-              // Why are we surrounding a builder with a builder?
-              //
-              // The widget.builder may contain code that invokes
-              // Theme.of(), which should return the theme we selected
-              // above in AnimatedTheme. However, if we invoke
-              // widget.builder() directly as the child of AnimatedTheme
-              // then there is no Context separating them, and the
-              // widget.builder() will not find the theme. Therefore, we
-              // surround widget.builder with yet another builder so that
-              // a context separates them and Theme.of() correctly
-              // resolves to the theme we passed to AnimatedTheme.
-              return widget.builder(context, child);
-            },
-          )
-        : child,
+    return ScaffoldMessenger(
+      child: AnimatedTheme(
+        data: theme,
+        isMaterialAppTheme: true,
+        child: widget.builder != null
+          ? Builder(
+              builder: (BuildContext context) {
+                // Why are we surrounding a builder with a builder?
+                //
+                // The widget.builder may contain code that invokes
+                // Theme.of(), which should return the theme we selected
+                // above in AnimatedTheme. However, if we invoke
+                // widget.builder() directly as the child of AnimatedTheme
+                // then there is no Context separating them, and the
+                // widget.builder() will not find the theme. Therefore, we
+                // surround widget.builder with yet another builder so that
+                // a context separates them and Theme.of() correctly
+                // resolves to the theme we passed to AnimatedTheme.
+                return widget.builder(context, child);
+              },
+            )
+          : child,
+      )
     );
   }
 
@@ -839,9 +841,7 @@ class _MaterialAppState extends State<MaterialApp> {
       behavior: _MaterialScrollBehavior(),
       child: HeroControllerScope(
         controller: _heroController,
-        child: ScaffoldMessenger(
-          child: result,
-        )
+        child: result,
       )
     );
   }
