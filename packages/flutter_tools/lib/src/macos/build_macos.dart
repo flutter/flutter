@@ -14,6 +14,8 @@ import '../ios/xcodeproj.dart';
 import '../project.dart';
 import 'cocoapod_utils.dart';
 
+/// When run in -quiet mode, Xcode only prints from the underlying tasks to stdout.
+/// Passing this regexp to trace moves the stdout output to stderr.
 final RegExp _anyOutput = RegExp('.*');
 
 /// Builds the macOS project through xcodebuild.
@@ -96,7 +98,7 @@ Future<void> buildMacOS({
       ...environmentVariablesAsXcodeBuildSettings(globals.platform)
     ],
     trace: true,
-    stdoutErrorMatcher: _anyOutput,
+    stdoutErrorMatcher: verboseLogging ? null : _anyOutput,
   );
   } finally {
     status.cancel();
