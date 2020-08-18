@@ -98,10 +98,9 @@ class CustomSemanticsAction {
   /// Creates a new [CustomSemanticsAction].
   ///
   /// The [label] must not be null or the empty string.
-  const CustomSemanticsAction({required String label})
+  const CustomSemanticsAction({required String this.label})
     : assert(label != null),
       assert(label != ''),
-      label = label,
       hint = null,
       action = null;
 
@@ -109,13 +108,11 @@ class CustomSemanticsAction {
   /// action.
   ///
   /// The [hint] must not be null or the empty string.
-  const CustomSemanticsAction.overridingAction({required String hint, required SemanticsAction action})
+  const CustomSemanticsAction.overridingAction({required String this.hint, required SemanticsAction this.action})
     : assert(hint != null),
       assert(hint != ''),
       assert(action != null),
-      label = null,
-      hint = hint,
-      action = action;
+      label = null;
 
   /// The user readable name of this custom semantics action.
   final String? label;
@@ -517,7 +514,10 @@ class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
     if (value != null)
       return value.debugDescribeChildren(childOrder: childOrder);
 
-    return const <DiagnosticsNode>[];
+    // `value` has a non-nullable return type, but might be null when
+    // running with weak checking, so we need to null check it above (and
+    // ignore the warning below that the null-handling logic is dead code).
+    return const <DiagnosticsNode>[]; // ignore: dead_code
   }
 }
 
