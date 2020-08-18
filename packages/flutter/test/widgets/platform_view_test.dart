@@ -2506,7 +2506,7 @@ void main() {
     await gesture.moveTo(const Offset(400, 300));
     expect(logs, <String>['enter1']);
     expect(controller.dispatchedPointerEvents, hasLength(1));
-    expect(controller.dispatchedPointerEvents[0].runtimeType, PointerHoverEvent);
+    expect(controller.dispatchedPointerEvents[0], isA<PointerHoverEvent>());
     logs.clear();
     controller.dispatchedPointerEvents.clear();
 
@@ -2536,7 +2536,7 @@ void main() {
     await gesture.moveBy(const Offset(1, 1));
     expect(logs, isEmpty);
     expect(controller.dispatchedPointerEvents, hasLength(1));
-    expect(controller.dispatchedPointerEvents[0].runtimeType, PointerHoverEvent);
+    expect(controller.dispatchedPointerEvents[0], isA<PointerHoverEvent>());
     expect(controller.dispatchedPointerEvents[0].position, const Offset(401, 301));
     expect(controller.dispatchedPointerEvents[0].localPosition, const Offset(101, 101));
     controller.dispatchedPointerEvents.clear();
@@ -2571,6 +2571,6 @@ void main() {
     await gesture.moveBy(const Offset(1, 1));
     expect(logs, isEmpty);
     expect(controller.dispatchedPointerEvents, hasLength(1));
-    expect(controller.dispatchedPointerEvents[0].runtimeType, PointerHoverEvent);
+    expect(controller.dispatchedPointerEvents[0], isA<PointerHoverEvent>());
   });
 }
