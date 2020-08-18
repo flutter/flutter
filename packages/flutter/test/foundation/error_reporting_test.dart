@@ -178,7 +178,8 @@ Future<void> main() async {
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: exception,
     ));
-    expect(console.join('\n'), 'Another exception was thrown: NoSuchMethodError: int has no foo method accepting arguments (_, _)');
+    expect(console.join('\n'),
+      'Another exception was thrown: NoSuchMethodError: int has no foo method accepting arguments (_, _)');
     console.clear();
     FlutterError.resetErrorCount();
   });
