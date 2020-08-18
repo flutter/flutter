@@ -11,11 +11,26 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-class ErroringMockClipboard {
+class MockClipboard {
+  MockClipboard({
+    this.getDataThrows = false,
+  });
+
+  final bool getDataThrows;
+
+  Object _clipboardData = <String, dynamic>{
+    'text': null,
+  };
+
   Future<dynamic> handleMethodCall(MethodCall methodCall) async {
     switch (methodCall.method) {
       case 'Clipboard.getData':
-        throw Error();
+        if (getDataThrows) {
+          throw Exception();
+        }
+        return _clipboardData;
+      case 'Clipboard.setData':
+        _clipboardData = methodCall.arguments;
     }
   }
 }
@@ -620,22 +635,52 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   group('ClipboardStatusNotifier', () {
-    setUp(() {
-      final ErroringMockClipboard mockClipboard = ErroringMockClipboard();
-      SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+    group('when Clipboard fails', () {
+      setUp(() {
+        final MockClipboard mockClipboard = MockClipboard(getDataThrows: true);
+        SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+      });
+
+      tearDown(() {
+        SystemChannels.platform.setMockMethodCallHandler(null);
+      });
+
+      test('Clipboard API failure is gracefully recovered from', () async {
+        final ClipboardStatusNotifier notifier = ClipboardStatusNotifier();
+        expect(notifier.value, ClipboardStatus.unknown);
+
+        await expectLater(notifier.update(), completes);
+        expect(notifier.value, ClipboardStatus.unknown);
+      });
     });
 
-    tearDown(() {
-      SystemChannels.platform.setMockMethodCallHandler(null);
-    });
+    group('when Clipboard succeeds', () {
+      final MockClipboard mockClipboard = MockClipboard();
 
-    test('Clipboard API failure is gracefully recovered from', () {
-      final ClipboardStatusNotifier notifier = ClipboardStatusNotifier();
-      expect(notifier.value, ClipboardStatus.unknown);
+      setUp(() {
+        SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+      });
 
-      notifier.update();
-      expect(notifier.update, returnsNormally);
-      expect(notifier.value, ClipboardStatus.unknown);
+      tearDown(() {
+        SystemChannels.platform.setMockMethodCallHandler(null);
+      });
+
+      test('update sets value based on clipboard contents', () async {
+        final ClipboardStatusNotifier notifier = ClipboardStatusNotifier();
+        expect(notifier.value, ClipboardStatus.unknown);
+
+        await expectLater(notifier.update(), completes);
+        expect(notifier.value, ClipboardStatus.notPasteable);
+
+        mockClipboard.handleMethodCall(const MethodCall(
+          'Clipboard.setData',
+          <String, dynamic>{
+            'text': 'pasteablestring',
+          },
+        ));
+        await expectLater(notifier.update(), completes);
+        expect(notifier.value, ClipboardStatus.pasteable);
+      });
     });
   });
 }

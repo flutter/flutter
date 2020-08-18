@@ -1512,7 +1512,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   bool get disposed => _disposed;
 
   /// Check the [Clipboard] and update [value] if needed.
-  void update() async {
+  Future<void> update() async {
     // iOS 14 added a notification that appears when an app accesses the
     // clipboard. To avoid the notification, don't access the clipboard on iOS,
     // and instead always shown the paste button, even when the clipboard is
