@@ -12,7 +12,7 @@ const int _kNumIters = 10000;
 class TrackerBenchmark {
   TrackerBenchmark({ this.name, this.tracker });
 
-  final VelcocityTracker tracker;
+  final VelocityTracker tracker;
   final String name;
 }
 
@@ -20,8 +20,8 @@ void main() {
   assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   final List<TrackerBenchmark> benchmarks = <TrackerBenchmark>[
-    TrackerBenchmark(name: 'velocity_tracker_iteration', VelocityTracker()),
-    TrackerBenchmark(name: 'velocity_tracker_iteration_ios_fling', IOSScrollViewFlingVelocityTracker()),
+    TrackerBenchmark(name: 'velocity_tracker_iteration', tracker: VelocityTracker()),
+    TrackerBenchmark(name: 'velocity_tracker_iteration_ios_fling', tracker: IOSScrollViewFlingVelocityTracker()),
   ];
   final Stopwatch watch = Stopwatch();
 
