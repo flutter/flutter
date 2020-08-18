@@ -197,7 +197,7 @@ class CupertinoSlider extends StatefulWidget {
   /// Defaults to the [CupertinoTheme]'s primary color if null.
   final Color activeColor;
 
-  ///{@template flutter.cupertino.slider.thumbColor}
+  /// {@template flutter.cupertino.slider.thumbColor}
   /// The color to use for the thumb of the slider.
   ///
   /// Thumb color must not be null.
