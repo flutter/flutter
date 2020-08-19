@@ -443,9 +443,14 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     final bool queryIsOnlyResult = results != null && results.length == 1
         && query == results[0].toString();
     if (queryIsOnlyResult) {
-      setState(() {
-        _selection = results[0];
-      });
+      if (_selection != results[0]) {
+        setState(() {
+            _selection = results[0];
+            if (widget.onSelected != null) {
+              widget.onSelected(_selection);
+            }
+        });
+      }
     }
     _updateOverlay();
   }
@@ -461,7 +466,11 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   }
 
   void _onSelected (T result) {
+    if (result == _selection) {
+      return;
+    }
     setState(() {
+      _selection = result;
       final String resultString = result.toString();
       _autocompleteController.textEditingController.value = TextEditingValue(
         selection: TextSelection.collapsed(offset: resultString.length),
@@ -470,7 +479,6 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
       if (widget.onSelected != null) {
         widget.onSelected(result);
       }
-      _selection = result;
     });
   }
 
