@@ -111,8 +111,11 @@ FlutterWindowsEngine::FlutterWindowsEngine(const FlutterProjectBundle& project)
   messenger_->dispatcher = message_dispatcher_.get();
 
   plugin_registrar_ = std::make_unique<FlutterDesktopPluginRegistrar>();
-  plugin_registrar_->messenger = messenger_.get();
+  plugin_registrar_->engine = this;
   plugin_registrar_->view = std::make_unique<FlutterDesktopView>();
+
+  window_proc_delegate_manager_ =
+      std::make_unique<Win32WindowProcDelegateManager>();
 }
 
 FlutterWindowsEngine::~FlutterWindowsEngine() {
@@ -190,7 +193,6 @@ bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
     return false;
   }
 
-  plugin_registrar_->messenger->engine = engine_;
   SendSystemSettings();
 
   return true;

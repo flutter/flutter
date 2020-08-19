@@ -1376,6 +1376,9 @@ FILE: ../../../flutter/shell/platform/windows/win32_task_runner.cc
 FILE: ../../../flutter/shell/platform/windows/win32_task_runner.h
 FILE: ../../../flutter/shell/platform/windows/win32_window.cc
 FILE: ../../../flutter/shell/platform/windows/win32_window.h
+FILE: ../../../flutter/shell/platform/windows/win32_window_proc_delegate_manager.cc
+FILE: ../../../flutter/shell/platform/windows/win32_window_proc_delegate_manager.h
+FILE: ../../../flutter/shell/platform/windows/win32_window_proc_delegate_manager_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/win32_window_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/window_binding_handler.h
 FILE: ../../../flutter/shell/platform/windows/window_binding_handler_delegate.h

@@ -5,13 +5,16 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOWS_ENGINE_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOWS_ENGINE_H_
 
+#include <map>
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/win32_task_runner.h"
+#include "flutter/shell/platform/windows/win32_window_proc_delegate_manager.h"
 #include "flutter/shell/platform/windows/window_state.h"
 
 namespace flutter {
@@ -64,6 +67,10 @@ class FlutterWindowsEngine {
 
   Win32TaskRunner* task_runner() { return task_runner_.get(); }
 
+  Win32WindowProcDelegateManager* window_proc_delegate_manager() {
+    return window_proc_delegate_manager_.get();
+  }
+
   // Callback passed to Flutter engine for notifying window of platform
   // messages.
   void HandlePlatformMessage(const FlutterPlatformMessage*);
@@ -97,6 +104,9 @@ class FlutterWindowsEngine {
 
   // The plugin registrar handle given to API clients.
   std::unique_ptr<FlutterDesktopPluginRegistrar> plugin_registrar_;
+
+  // The manager for WindowProc delegate registration and callbacks.
+  std::unique_ptr<Win32WindowProcDelegateManager> window_proc_delegate_manager_;
 };
 
 }  // namespace flutter

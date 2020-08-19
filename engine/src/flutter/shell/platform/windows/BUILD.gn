@@ -68,6 +68,8 @@ source_set("flutter_windows_source") {
     "win32_task_runner.h",
     "win32_window.cc",
     "win32_window.h",
+    "win32_window_proc_delegate_manager.cc",
+    "win32_window_proc_delegate_manager.h",
     "window_binding_handler.h",
     "window_binding_handler_delegate.h",
     "window_state.h",
@@ -127,6 +129,7 @@ executable("flutter_windows_unittests") {
     "testing/win32_window_test.h",
     "win32_dpi_utils_unittests.cc",
     "win32_flutter_window_unittests.cc",
+    "win32_window_proc_delegate_manager_unittests.cc",
     "win32_window_unittests.cc",
   ]
 
