@@ -1014,6 +1014,55 @@ void testMain() {
     });
 
     test(
+        'singleTextField Autofill setEditableSizeAndTransform preserves'
+        'editing state', () {
+      // Create a configuration with focused element has autofil hint.
+      final Map<String, dynamic> flutterSingleAutofillElementConfig =
+          createFlutterConfig('text', autofillHint: 'username');
+      final MethodCall setClient = MethodCall('TextInput.setClient',
+          <dynamic>[123, flutterSingleAutofillElementConfig]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const MethodCall setEditingState1 =
+          MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
+
+      const MethodCall show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      // The second [setEditingState] should override the first one.
+      checkInputEditingState(
+          textEditing.editingElement.domElement, 'abcd', 2, 3);
+
+      // The transform is changed. For example after a validation error, red
+      // line appeared under the input field.
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      // Check the element still has focus. User can keep editing.
+      expect(document.activeElement, textEditing.editingElement.domElement);
+
+      // Check the cursor location is the same.
+      checkInputEditingState(
+          textEditing.editingElement.domElement, 'abcd', 2, 3);
+
+      const MethodCall clearClient = MethodCall('TextInput.clearClient');
+      sendFrameworkMessage(codec.encodeMethodCall(clearClient));
+
+      // Confirm that [HybridTextEditing] didn't send any messages.
+      expect(spy.messages, isEmpty);
+      // Form stays on the DOM until autofill context is finalized.
+      expect(document.getElementsByTagName('form'), isNotEmpty);
+      expect(formsOnTheDom, hasLength(1));
+    });
+
+    test(
         'multiTextField Autofill: setClient, setEditingState, show, '
         'setEditingState, clearClient', () {
       // Create a configuration with an AutofillGroup of four text fields.
