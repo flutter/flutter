@@ -1,9 +1,27 @@
 {
    "builders":[
       {
+         "name":"Linux analyze",
+         "repo":"flutter",
+         "taskName":"linux_analyze",
+         "enabled":true
+      },
+      {
+         "name":"Linux customer_testing",
+         "repo":"flutter",
+         "taskName":"linux_customer_testing",
+         "enabled":true
+      },
+      {
          "name":"Linux build_tests",
          "repo":"flutter",
-         "taskName":"build_tests",
+         "taskName":"linux_build_tests",
+         "enabled":true
+      },
+      {
+         "name":"Linux docs",
+         "repo":"flutter",
+         "taskName":"linux_docs",
          "enabled":true
       },
       {
@@ -13,21 +31,33 @@
          "enabled":true
       },
       {
+         "name":"Linux fuchsia_precache",
+         "repo":"flutter",
+         "taskName":"linux_fuchsia_precache",
+         "enabled":true
+      },
+      {
          "name":"Linux hostonly_devicelab_tests",
          "repo":"flutter",
-         "taskName":"hostonly_devicelab_tests",
+         "taskName":"linux_hostonly_devicelab_tests",
          "enabled":true
       },
       {
          "name":"Linux tool_tests",
          "repo":"flutter",
-         "taskName":"tool_tests",
+         "taskName":"linux_tool_tests",
          "enabled":true
       },
       {
          "name":"Linux web_tests",
          "repo":"flutter",
-         "taskName":"web_tests",
+         "taskName":"linux_web_tests",
+         "enabled":true
+      },
+      {
+         "name":"Linux web_integration_tests",
+         "repo":"flutter",
+         "taskName":"linux_web_integration_tests",
          "enabled":true
       },
       {
@@ -37,9 +67,27 @@
          "enabled":true
       },
       {
+         "name": "Windows customer_testing",
+         "repo": "flutter",
+         "task_name": "win_customer_testing",
+         "enabled":true
+      },
+      {
+         "name": "Windows docs",
+         "repo": "flutter",
+         "task_name": "win_docs",
+         "enabled":true
+      },
+      {
          "name": "Windows framework_tests",
          "repo": "flutter",
          "task_name": "win_framework_tests",
+         "enabled":true
+      },
+      {
+         "name": "Windows tool_tests",
+         "repo": "flutter",
+         "task_name": "win_tool_tests",
          "enabled":true
       }
    ]
