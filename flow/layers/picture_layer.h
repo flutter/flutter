@@ -18,7 +18,8 @@ class PictureLayer : public Layer {
   PictureLayer(const SkPoint& offset,
                SkiaGPUObject<SkPicture> picture,
                bool is_complex,
-               bool will_change);
+               bool will_change,
+               size_t external_size);
 
   SkPicture* picture() const { return picture_.get().get(); }
 

@@ -50,7 +50,7 @@ class Rasterizer final : public SnapshotDelegate {
   ///             are made on the GPU task runner. Any delegate must ensure that
   ///             they can handle the threading implications.
   ///
-  class Delegate {
+  class Delegate : public CompositorContext::Delegate {
    public:
     //--------------------------------------------------------------------------
     /// @brief      Notifies the delegate that a frame has been rendered. The

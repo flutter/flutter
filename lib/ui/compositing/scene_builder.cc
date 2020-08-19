@@ -220,7 +220,7 @@ void SceneBuilder::addPicture(double dx,
   pictureRect.offset(offset.x(), offset.y());
   auto layer = std::make_unique<flutter::PictureLayer>(
       offset, UIDartState::CreateGPUObject(picture->picture()), !!(hints & 1),
-      !!(hints & 2));
+      !!(hints & 2), picture->GetAllocationSize());
   AddLayer(std::move(layer));
 }
 

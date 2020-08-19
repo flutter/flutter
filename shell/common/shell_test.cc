@@ -106,6 +106,40 @@ void ShellTest::VSyncFlush(Shell* shell, bool& will_draw_new_frame) {
   latch.Wait();
 }
 
+void ShellTest::SetViewportMetrics(Shell* shell, double width, double height) {
+  flutter::ViewportMetrics viewport_metrics = {
+      1,       // device pixel ratio
+      width,   // physical width
+      height,  // physical height
+      0,       // padding top
+      0,       // padding right
+      0,       // padding bottom
+      0,       // padding left
+      0,       // view inset top
+      0,       // view inset right
+      0,       // view inset bottom
+      0,       // view inset left
+      0,       // gesture inset top
+      0,       // gesture inset right
+      0,       // gesture inset bottom
+      0        // gesture inset left
+  };
+  // Set viewport to nonempty, and call Animator::BeginFrame to make the layer
+  // tree pipeline nonempty. Without either of this, the layer tree below
+  // won't be rasterized.
+  fml::AutoResetWaitableEvent latch;
+  shell->GetTaskRunners().GetUITaskRunner()->PostTask(
+      [&latch, engine = shell->weak_engine_, viewport_metrics]() {
+        engine->SetViewportMetrics(std::move(viewport_metrics));
+        const auto frame_begin_time = fml::TimePoint::Now();
+        const auto frame_end_time =
+            frame_begin_time + fml::TimeDelta::FromSecondsF(1.0 / 60.0);
+        engine->animator_->BeginFrame(frame_begin_time, frame_end_time);
+        latch.Signal();
+      });
+  latch.Wait();
+}
+
 void ShellTest::PumpOneFrame(Shell* shell,
                              double width,
                              double height,
