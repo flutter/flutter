@@ -85,21 +85,22 @@ class SizeAnalyzer {
   /// under 'lib/arm64-v8a/$_appFilename'.
   ///
   /// The [aotSnapshot] can be either instruction sizes snapshot or v8 snapshot.
-  Future<Map<String, dynamic>> analyzeApkSizeAndAotSnapshot({
-    @required File apk,
+  Future<Map<String, dynamic>> analyzeZipSizeAndAotSnapshot({
+    @required File zipFile,
     @required File aotSnapshot,
     @required File precompilerTrace,
+    @required String kind,
   }) async {
     logger.printStatus('▒' * tableWidth);
     _printEntitySize(
-      '${apk.basename} (total compressed)',
-      byteSize: apk.lengthSync(),
+      '${zipFile.basename} (total compressed)',
+      byteSize: zipFile.lengthSync(),
       level: 0,
       showColor: false,
     );
     logger.printStatus('━' * tableWidth);
 
-    final _SymbolNode apkAnalysisRoot = _parseUnzipFile(apk);
+    final _SymbolNode apkAnalysisRoot = _parseUnzipFile(zipFile);
 
     // Convert an AOT snapshot file into a map.
     final Map<String, dynamic> processedAotSnapshotJson = treemapFromJson(
@@ -107,22 +108,13 @@ class SizeAnalyzer {
     );
     final _SymbolNode aotSnapshotJsonRoot = _parseAotSnapshot(processedAotSnapshotJson);
     for (final _SymbolNode firstLevelPath in apkAnalysisRoot.children) {
-      // Print the expansion of lib directory to show more info for `appFilename`.
-      if (firstLevelPath.name == 'lib') {
-        _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot);
-      } else {
-        _printEntitySize(
-          firstLevelPath.name,
-          byteSize: firstLevelPath.byteSize,
-          level: 1,
-        );
-      }
+      _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot);
     }
     logger.printStatus('▒' * tableWidth);
 
     Map<String, dynamic> apkAnalysisJson = apkAnalysisRoot.toJson();
 
-    apkAnalysisJson['type'] = 'apk';
+    apkAnalysisJson['type'] = kind;
 
     assert(_appFilename != null);
     apkAnalysisJson = _addAotSnapshotDataToAnalysis(
@@ -135,8 +127,8 @@ class SizeAnalyzer {
     return apkAnalysisJson;
   }
 
-  _SymbolNode _parseUnzipFile(File apk) {
-    final Archive archive = ZipDecoder().decodeBytes(apk.readAsBytesSync());
+  _SymbolNode _parseUnzipFile(File zipFile) {
+    final Archive archive = ZipDecoder().decodeBytes(zipFile.readAsBytesSync());
     final Map<List<String>, int> pathsToSize = <List<String>, int>{};
 
     for (final ArchiveFile archiveFile in archive.files) {

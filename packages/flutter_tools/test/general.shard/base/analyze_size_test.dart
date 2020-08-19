@@ -79,10 +79,11 @@ void main() {
       ..writeAsStringSync(aotSizeOutput);
     final File precompilerTrace = fileSystem.file('trace.json')
       ..writeAsStringSync('{}');
-    final Map<String, dynamic> result = await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(
-      apk: apk,
+    final Map<String, dynamic> result = await sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
+      zipFile: apk,
       aotSnapshot: aotSizeJson,
       precompilerTrace: precompilerTrace,
+      kind: 'apk',
     );
 
     expect(result['type'], 'apk');
@@ -153,10 +154,11 @@ void main() {
       ..writeAsStringSync(aotSizeOutput);
     final File precompilerTrace = fileSystem.file('trace.json')
       ..writeAsStringSync('{}');
-    await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(
-      apk: apk,
+    await sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
+      zipFile: apk,
       aotSnapshot: aotSizeJson,
       precompilerTrace: precompilerTrace,
+      kind: 'apk',
     );
 
     final List<String> stdout = logger.statusText.split('\n');
@@ -166,7 +168,9 @@ void main() {
         'test.apk (total compressed)                                                644 B',
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
         '  AndroidManifest.xml                                                        6 B',
-        '  META-INF                                                                  10 B',
+        '  META-INF/',
+        '    CERT.RSA                                                                 5 B',
+        '    CERT.SF                                                                  5 B',
         '  lib/',
         '    arm64-v8a/',
         '      libxyzzyapp.so (Dart AOT)                                              6 B',

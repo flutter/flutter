@@ -470,6 +470,10 @@ Future<void> buildGradleApp({
       ? '' // Don't display the size when building a debug variant.
       : ' (${getSizeAsMB(bundleFile.lengthSync())})';
 
+    if (buildInfo.codeSizeDirectory != null) {
+      await _performCodeSizeAnalysis('aab', bundleFile, androidBuildInfo);
+    }
+
     globals.printStatus(
       '$successMark Built ${globals.fs.path.relative(bundleFile.path)}$appSize.',
       color: TerminalColor.green,
@@ -506,28 +510,38 @@ Future<void> buildGradleApp({
   );
 
   if (buildInfo.codeSizeDirectory != null) {
-    final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-    );
-    final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
-    final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
-      .childFile('snapshot.$archName.json');
-    final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
-      .childFile('trace.$archName.json');
-    final Map<String, Object> output = await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(
-      apk: apkFile,
-      aotSnapshot: aotSnapshot,
-      precompilerTrace: precompilerTrace,
-    );
-    final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs.directory(getBuildDirectory()),'apk-analysis', 'json',
-    )..writeAsStringSync(jsonEncode(output));
-    // This message is used as a sentinel in analyze_apk_size_test.dart
-    globals.printStatus(
-      'A summary of your APK analysis can be found at: ${outputFile.path}',
-    );
+    await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
   }
+}
+
+Future<void> _performCodeSizeAnalysis(
+  String kind,
+  File zipFile,
+  AndroidBuildInfo androidBuildInfo,
+) async {
+  final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+  );
+  final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
+  final BuildInfo buildInfo = androidBuildInfo.buildInfo;
+  final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
+    .childFile('snapshot.$archName.json');
+  final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
+    .childFile('trace.$archName.json');
+  final Map<String, Object> output = await sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
+    zipFile: zipFile,
+    aotSnapshot: aotSnapshot,
+    precompilerTrace: precompilerTrace,
+    kind: kind,
+  );
+  final File outputFile = globals.fsUtils.getUniqueFile(
+    globals.fs.directory(getBuildDirectory()),'$kind-analysis', 'json',
+  )..writeAsStringSync(jsonEncode(output));
+  // This message is used as a sentinel in analyze_apk_size_test.dart
+  globals.printStatus(
+    'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
+  );
 }
 
 /// Builds AAR and POM files.
