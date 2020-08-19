@@ -200,6 +200,11 @@ abstract class FlutterDriver {
     await sendCommand(WaitFor(finder, timeout: timeout));
   }
 
+  /// See also:
+  ///
+  /// * [FlutterDriver.runUnsynchronized], which executes tests by disabling
+  ///   Frame sync.
+  ///
   /// Waits until [finder] can no longer locate the target.
   Future<void> waitForAbsent(SerializableFinder finder, { Duration timeout }) async {
     await sendCommand(WaitForAbsent(finder, timeout: timeout));
