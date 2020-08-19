@@ -2984,7 +2984,6 @@ void main() {
 
     expect(lastCharEndpoint.length, 1);
     // The last character is now on screen near the right edge.
-    // TODO(justinmc): Why isn't edge scrolling working?
     expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
 
     final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
@@ -2993,7 +2992,10 @@ void main() {
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
     expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-125, epsilon: 1));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    skip: true, // https://github.com/flutter/flutter/issues/64059
+  );
 
   testWidgets(
     'long tap still selects after a double tap select',
@@ -3968,40 +3970,5 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.windows,
     }),
-  );
-
-  testWidgets('The handles show after pressing Select All (iOS and Mac)', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: SelectableText('abc def ghi'),
-        ),
-      ),
-    );
-
-    // Long press at 'e' in 'def'.
-    final Offset ePos = textOffsetToPosition(tester, 5);
-    await tester.longPressAt(ePos);
-    await tester.pumpAndSettle();
-
-    // TODO(justinmc): Should Select All be showing now?
-    expect(find.text('Select All'), findsOneWidget);
-    expect(find.text('Copy'), findsNothing);
-    expect(find.text('Paste'), findsNothing);
-    expect(find.text('Cut'), findsNothing);
-    EditableTextState editableText = tester.state(find.byType(EditableText));
-    expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
-    expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
-
-    await tester.tap(find.text('Select All'));
-    await tester.pumpAndSettle();
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Select All'), findsNothing);
-    expect(find.text('Paste'), findsNothing);
-    expect(find.text('Cut'), findsNothing);
-    editableText = tester.state(find.byType(EditableText));
-    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
-  },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 }
