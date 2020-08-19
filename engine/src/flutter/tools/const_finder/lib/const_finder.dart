@@ -13,11 +13,11 @@ class _ConstVisitor extends RecursiveVisitor<void> {
     this.classLibraryUri,
     this.className,
   )  : assert(kernelFilePath != null),
-        assert(classLibraryUri != null),
-        assert(className != null),
-        _visitedInstances = <String>{},
-        constantInstances = <Map<String, dynamic>>[],
-        nonConstantLocations = <Map<String, dynamic>>[];
+       assert(classLibraryUri != null),
+       assert(className != null),
+       _visitedInstances = <String>{},
+       constantInstances = <Map<String, dynamic>>[],
+       nonConstantLocations = <Map<String, dynamic>>[];
 
   /// The path to the file to open.
   final String kernelFilePath;
@@ -32,9 +32,19 @@ class _ConstVisitor extends RecursiveVisitor<void> {
   final List<Map<String, dynamic>> constantInstances;
   final List<Map<String, dynamic>> nonConstantLocations;
 
+  // A cache of previously evaluated classes.
+  static Map<Class, bool> _classHeirarchyCache = <Class, bool>{};
   bool _matches(Class node) {
-    return node.enclosingLibrary.importUri.toString() == classLibraryUri &&
-      node.name == className;
+    assert(node != null);
+    final bool result = _classHeirarchyCache[node];
+    if (result != null) {
+      return result;
+    }
+    final bool exactMatch = node.name == className
+        && node.enclosingLibrary.importUri.toString() == classLibraryUri;
+    _classHeirarchyCache[node] = exactMatch
+        || node.supers.any((Supertype supertype) => _matches(supertype.classNode));
+    return _classHeirarchyCache[node];
   }
 
   // Avoid visiting the same constant more than once.
