@@ -5,7 +5,11 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_CLIENT_WRAPPER_INCLUDE_FLUTTER_FLUTTER_VIEW_CONTROLLER_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_CLIENT_WRAPPER_INCLUDE_FLUTTER_FLUTTER_VIEW_CONTROLLER_H_
 
+#include <Windows.h>
 #include <flutter_windows.h>
+
+#include <memory>
+#include <optional>
 
 #include "dart_project.h"
 #include "flutter_engine.h"
@@ -41,6 +45,16 @@ class FlutterViewController : public PluginRegistry {
 
   // Returns the view managed by this controller.
   FlutterView* view() { return view_.get(); }
+
+  // Allows the Flutter engine and any interested plugins an opportunity to
+  // handle the given message.
+  //
+  // If a result is returned, then the message was handled in such a way that
+  // further handling should not be done.
+  std::optional<LRESULT> HandleTopLevelWindowProc(HWND hwnd,
+                                                  UINT message,
+                                                  WPARAM wparam,
+                                                  LPARAM lparam);
 
   // DEPRECATED. Call engine()->ProcessMessages() instead.
   std::chrono::nanoseconds ProcessMessages();

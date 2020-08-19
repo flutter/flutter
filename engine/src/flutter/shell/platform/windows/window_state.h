@@ -34,8 +34,8 @@ struct FlutterDesktopView {
 
 // State associated with the plugin registrar.
 struct FlutterDesktopPluginRegistrar {
-  // The plugin messenger handle given to API clients.
-  FlutterDesktopMessenger* messenger;
+  // The engine that owns this state object.
+  flutter::FlutterWindowsEngine* engine = nullptr;
 
   // The handle for the view associated with this registrar.
   std::unique_ptr<FlutterDesktopView> view;

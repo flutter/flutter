@@ -93,6 +93,19 @@ FLUTTER_EXPORT FlutterDesktopEngineRef FlutterDesktopViewControllerGetEngine(
 FLUTTER_EXPORT FlutterDesktopViewRef
 FlutterDesktopViewControllerGetView(FlutterDesktopViewControllerRef controller);
 
+// Allows the Flutter engine and any interested plugins an opportunity to
+// handle the given message.
+//
+// If the WindowProc was handled and further handling should stop, this returns
+// true and |result| will be populated. |result| is not set if returning false.
+FLUTTER_EXPORT bool FlutterDesktopViewControllerHandleTopLevelWindowProc(
+    FlutterDesktopViewControllerRef controller,
+    HWND hwnd,
+    UINT message,
+    WPARAM wparam,
+    LPARAM lparam,
+    LRESULT* result);
+
 // ========== Engine ==========
 
 // Creates a Flutter engine with the given properties.
@@ -146,11 +159,37 @@ FlutterDesktopEngineGetMessenger(FlutterDesktopEngineRef engine);
 FLUTTER_EXPORT HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view);
 
 // ========== Plugin Registrar (extensions) ==========
+// These are Windows-specific extensions to flutter_plugin_registrar.h
 
-// Returns the view associated with this registrar's engine instance
-// This is a Windows-specific extension to flutter_plugin_registrar.h.
+// Function pointer type for top level WindowProc delegate registration.
+//
+// The user data will be whatever was passed to
+// FlutterDesktopRegisterTopLevelWindowProcHandler.
+//
+// Implementations should populate |result| and return true if the WindowProc
+// was handled and further handling should stop. |result| is ignored if the
+// function returns false.
+typedef bool (*FlutterDesktopWindowProcCallback)(HWND /* hwnd */,
+                                                 UINT /* uMsg */,
+                                                 WPARAM /*wParam*/,
+                                                 LPARAM /* lParam*/,
+                                                 void* /* user data */,
+                                                 LRESULT* result);
+
+// Returns the view associated with this registrar's engine instance.
 FLUTTER_EXPORT FlutterDesktopViewRef FlutterDesktopPluginRegistrarGetView(
     FlutterDesktopPluginRegistrarRef registrar);
+
+FLUTTER_EXPORT void
+FlutterDesktopPluginRegistrarRegisterTopLevelWindowProcDelegate(
+    FlutterDesktopPluginRegistrarRef registrar,
+    FlutterDesktopWindowProcCallback delegate,
+    void* user_data);
+
+FLUTTER_EXPORT void
+FlutterDesktopPluginRegistrarUnregisterTopLevelWindowProcDelegate(
+    FlutterDesktopPluginRegistrarRef registrar,
+    FlutterDesktopWindowProcCallback delegate);
 
 // ========== Freestanding Utilities ==========
 
