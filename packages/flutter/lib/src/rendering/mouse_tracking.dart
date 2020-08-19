@@ -398,8 +398,7 @@ abstract class BaseMouseTracker extends ChangeNotifier {
   /// given information, and call [handleDeviceUpdate] based on the state changes.
   void updateWithEvent(PointerEvent event, ValueGetter<HitTestResult> getResult) {
     assert(event != null);
-    final HitTestResult result = event is PointerRemovedEvent ?
-        HitTestResult() : getResult();
+    final HitTestResult result = event is PointerRemovedEvent ? HitTestResult() : getResult();
     assert(result != null);
     if (event.kind != PointerDeviceKind.mouse)
       return;

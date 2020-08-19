@@ -253,9 +253,12 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   @override // from GestureBinding
   void dispatchEvent(PointerEvent event, HitTestResult hitTestResult) {
-    if (hitTestResult != null || event is PointerAddedEvent || event is PointerRemovedEvent)
+    if (hitTestResult != null ||
+        event is PointerAddedEvent ||
+        event is PointerRemovedEvent) {
       _mouseTracker.updateWithEvent(event,
           () => hitTestResult ?? renderView.hitTestMouseTrackers(event.position));
+    }
     super.dispatchEvent(event, hitTestResult);
   }
 
