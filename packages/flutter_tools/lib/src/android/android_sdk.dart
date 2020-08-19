@@ -35,18 +35,9 @@ String getAdbPath(AndroidSdk existingSdk) {
   }
   if (existingSdk?.latestVersion == null) {
     return globals.os.which('adb')?.path;
-  } else {
-    return existingSdk?.adbPath;
   }
+  return existingSdk?.adbPath;
 }
-
-/// Locate 'avdmanager'. Prefer to use one from an Android SDK, if we can locate that.
-/// This should be used over accessing androidSdk.avdManagerPath directly because it
-/// will work for those users who have Android Tools installed but
-/// not the full SDK.
-// String getAvdManagerPath(AndroidSdk existingSdk) {
-//   return existingSdk?.avdManagerPath;
-// }
 
 // Android SDK layout:
 
