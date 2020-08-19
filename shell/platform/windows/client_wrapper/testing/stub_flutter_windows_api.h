@@ -38,6 +38,15 @@ class StubFlutterWindowsApi {
   // Called for FlutterDesktopViewControllerDestroy.
   virtual void ViewControllerDestroy() {}
 
+  // Called for FlutterDesktopViewControllerHandleTopLevelWindowProc.
+  virtual bool ViewControllerHandleTopLevelWindowProc(HWND hwnd,
+                                                      UINT message,
+                                                      WPARAM wparam,
+                                                      LPARAM lparam,
+                                                      LRESULT* result) {
+    return false;
+  }
+
   // Called for FlutterDesktopEngineCreate.
   virtual FlutterDesktopEngineRef EngineCreate(
       const FlutterDesktopEngineProperties& engine_properties) {
@@ -55,6 +64,16 @@ class StubFlutterWindowsApi {
 
   // Called for FlutterDesktopViewGetHWND.
   virtual HWND ViewGetHWND() { return reinterpret_cast<HWND>(1); }
+
+  // Called for FlutterDesktopPluginRegistrarRegisterTopLevelWindowProcDelegate.
+  virtual void PluginRegistrarRegisterTopLevelWindowProcDelegate(
+      FlutterDesktopWindowProcCallback delegate,
+      void* user_data) {}
+
+  // Called for
+  // FlutterDesktopPluginRegistrarUnregisterTopLevelWindowProcDelegate.
+  virtual void PluginRegistrarUnregisterTopLevelWindowProcDelegate(
+      FlutterDesktopWindowProcCallback delegate) {}
 };
 
 // A test helper that owns a stub implementation, making it the test stub for
