@@ -866,7 +866,8 @@ Future<void> _runWebDebugTest(String target, {
         ...<String>[
           '--enable-experiment',
           'non-nullable',
-          '--no-sound-null-safety'
+          '--no-sound-null-safety',
+          '--null-assertions',
         ],
       '-d',
       'chrome',
