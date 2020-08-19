@@ -37,7 +37,7 @@ class TextCapitalizationConfig {
   const TextCapitalizationConfig.defaultCapitalization()
       : textCapitalization = TextCapitalization.none;
 
-  TextCapitalizationConfig.fromInputConfiguration(String inputConfiguration)
+  const TextCapitalizationConfig.fromInputConfiguration(String inputConfiguration)
       : this.textCapitalization =
             inputConfiguration == 'TextCapitalization.words'
                 ? TextCapitalization.words
