@@ -66,11 +66,11 @@ typedef AutocompleteFieldBuilder = Widget Function(
 ///   AutocompleteController<String> _autocompleteController;
 ///   String _selection;
 ///
-///   void _onChangeResults() {
+///   void _onChangedResults() {
 ///     setState(() {});
 ///   }
 ///
-///   void _onChangeQuery() {
+///   void _onChangedQuery() {
 ///     if (_autocompleteController.textEditingController.value.text != _selection) {
 ///       setState(() {
 ///         _selection = null;
@@ -84,14 +84,14 @@ typedef AutocompleteFieldBuilder = Widget Function(
 ///     _autocompleteController = AutocompleteController<String>(
 ///       options: <String>['aardvark', 'baboon', 'chameleon'],
 ///     );
-///     _autocompleteController.textEditingController.addListener(_onChangeQuery);
-///     _autocompleteController.results.addListener(_onChangeResults);
+///     _autocompleteController.textEditingController.addListener(_onChangedQuery);
+///     _autocompleteController.results.addListener(_onChangedResults);
 ///   }
 ///
 ///   @override
 ///   void dispose() {
-///     _autocompleteController.textEditingController.removeListener(_onChangeQuery);
-///     _autocompleteController.results.removeListener(_onChangeResults);
+///     _autocompleteController.textEditingController.removeListener(_onChangedQuery);
+///     _autocompleteController.results.removeListener(_onChangedResults);
 ///     _autocompleteController.dispose();
 ///     super.dispose();
 ///   }
@@ -144,7 +144,7 @@ class AutocompleteController<T> {
        ),
        _ownsTextEditingController = textEditingController == null,
        textEditingController = textEditingController ?? TextEditingController() {
-    this.textEditingController.addListener(_onQueryChanged);
+    this.textEditingController.addListener(_onChangedQuery);
   }
 
   final bool _ownsTextEditingController;
@@ -176,14 +176,14 @@ class AutocompleteController<T> {
   /// Call this when the AutocompleteController is no longer needed, such as in
   // the dispose method of the widget it was created in.
   void dispose() {
-    textEditingController.removeListener(_onQueryChanged);
+    textEditingController.removeListener(_onChangedQuery);
     if (_ownsTextEditingController) {
       textEditingController.dispose();
     }
   }
 
   // Called when textEditingController reports a change in its value.
-  void _onQueryChanged() {
+  void _onChangedQuery() {
     final List<T> resultsValue = filter == null
         ? _filterByString(textEditingController.value.text)
         : filter(textEditingController.value.text);
@@ -431,22 +431,23 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     final List<T> results = _autocompleteController.results.value;
     final TextSelection selection =
         _autocompleteController.textEditingController.selection;
-    final bool isSelected = selection.baseOffset >= 0
+    final bool fieldIsFocused = selection.baseOffset >= 0
         && selection.extentOffset >= 0;
-    return isSelected && _selection == null && results != null && results.isNotEmpty;
+    return fieldIsFocused && _selection == null && results != null && results.isNotEmpty;
   }
 
-  void _onChangeResults() {
+  void _onChangedResults() {
     _updateOverlay();
   }
 
-  void _onChangeQuery() {
+  void _onChangedQuery() {
     if (_autocompleteController.textEditingController.text == _selection) {
       return;
     }
     setState(() {
       _selection = null;
     });
+    _updateOverlay();
   }
 
   void _onSelected (T result) {
@@ -476,13 +477,13 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   }
 
   void _listenToController(AutocompleteController<T> autocompleteController) {
-    autocompleteController.results.addListener(_onChangeResults);
-    autocompleteController.textEditingController.addListener(_onChangeQuery);
+    autocompleteController.results.addListener(_onChangedResults);
+    autocompleteController.textEditingController.addListener(_onChangedQuery);
   }
 
   void _unlistenToController(AutocompleteController<T> autocompleteController) {
-    autocompleteController.results.removeListener(_onChangeResults);
-    autocompleteController.textEditingController.removeListener(_onChangeQuery);
+    autocompleteController.results.removeListener(_onChangedResults);
+    autocompleteController.textEditingController.removeListener(_onChangedQuery);
   }
 
   @override
