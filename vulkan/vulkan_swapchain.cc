@@ -222,14 +222,12 @@ sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(
     return nullptr;
   }
 
-  const GrVkImageInfo image_info = {
-      image,                      // image
-      GrVkAlloc(),                // alloc
-      VK_IMAGE_TILING_OPTIMAL,    // tiling
-      VK_IMAGE_LAYOUT_UNDEFINED,  // layout
-      surface_format_.format,     // format
-      1,                          // level count
-  };
+  GrVkImageInfo image_info;
+  image_info.fImage = image;
+  image_info.fImageTiling = VK_IMAGE_TILING_OPTIMAL;
+  image_info.fImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  image_info.fFormat = surface_format_.format;
+  image_info.fLevelCount = 1;
 
   // TODO(chinmaygarde): Setup the stencil buffer and the sampleCnt.
   GrBackendRenderTarget backend_render_target(size.fWidth, size.fHeight, 0,
