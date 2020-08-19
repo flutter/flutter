@@ -127,14 +127,15 @@ class SizeAnalyzer {
     );
     final _SymbolNode aotSnapshotJsonRoot = _parseAotSnapshot(processedAotSnapshotJson);
     for (final _SymbolNode firstLevelPath in apkAnalysisRoot.children) {
-      _printEntitySize(
-        firstLevelPath.name,
-        byteSize: firstLevelPath.byteSize,
-        level: 1,
-      );
       // Print the expansion of lib directory to show more info for `appFilename`.
       if (firstLevelPath.name == 'lib') {
         _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot);
+      } else {
+        _printEntitySize(
+          firstLevelPath.name,
+          byteSize: firstLevelPath.byteSize,
+          level: 1,
+        );
       }
     }
     logger.printStatus('▒' * tableWidth);
@@ -251,26 +252,29 @@ class SizeAnalyzer {
       }
     } else {
       // Print total path and size if currentNode does not have any chilren.
-      _printEntitySize(totalPath, byteSize: currentNode.byteSize, level: 2);
+      _printEntitySize(totalPath, byteSize: currentNode.byteSize, level: 1);
       if (totalPath.contains(_locatedAotFilePath.join('/'))) {
-        _printAotSnapshotSummary(aotSnapshotJsonRoot);
+        _printAotSnapshotSummary(aotSnapshotJsonRoot, level: fileSystem.path.split(totalPath).length);
       }
     }
+    _leadingPaths = fileSystem.path.split(totalPath)
+      ..removeLast();
   }
 
   /// Go through the AOT gen snapshot size JSON and print out a collapsed summary
   /// for the first package level.
-  void _printAotSnapshotSummary(_SymbolNode aotSnapshotRoot, {int maxDirectoriesShown = 10}) {
+  void _printAotSnapshotSummary(_SymbolNode aotSnapshotRoot, {int maxDirectoriesShown = 10, @required int level}) {
     _printEntitySize(
       'Dart AOT symbols accounted decompressed size',
       byteSize: aotSnapshotRoot.byteSize,
-      level: 3,
+      level: level,
+      emphasis: true,
     );
 
     final List<_SymbolNode> sortedSymbols = aotSnapshotRoot.children.toList()
       ..sort((_SymbolNode a, _SymbolNode b) => b.byteSize.compareTo(a.byteSize));
     for (final _SymbolNode node in sortedSymbols.take(maxDirectoriesShown)) {
-      _printEntitySize(node.name, byteSize: node.byteSize, level: 4);
+      _printEntitySize(node.name, byteSize: node.byteSize, level: level + 1);
     }
   }
 
@@ -303,8 +307,9 @@ class SizeAnalyzer {
     @required int byteSize,
     @required int level,
     bool showColor = true,
+    bool emphasis = false,
   }) {
-    final bool emphasis = level <= 1;
+    // final bool emphasis = level <= 1;
     final String formattedSize = _prettyPrintBytes(byteSize);
 
     TerminalColor color = TerminalColor.green;
