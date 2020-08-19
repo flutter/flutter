@@ -140,7 +140,6 @@ class SizeAnalyzer {
     final Map<List<String>, int> pathsToSize = <List<String>, int>{};
 
     for (final ArchiveFile archiveFile in archive.files) {
-      print(archiveFile.name);
       pathsToSize[fileSystem.path.split(archiveFile.name)] = archiveFile.rawContent.length;
     }
     return _buildSymbolTree(pathsToSize);

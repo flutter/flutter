@@ -140,7 +140,15 @@ void main() {
       appFilenamePattern: RegExp(r'lib.*app\.so'),
     );
 
-    final File apk = fileSystem.file('test.apk')..createSync();
+    final Archive archive = Archive()
+      ..addFile(ArchiveFile('AndroidManifest.xml', 100,  List<int>.filled(100, 0)))
+      ..addFile(ArchiveFile('META-INF/CERT.RSA', 10,  List<int>.filled(10, 0)))
+      ..addFile(ArchiveFile('META-INF/CERT.SF', 10,  List<int>.filled(10, 0)))
+      ..addFile(ArchiveFile('lib/arm64-v8a/libxyzzyapp.so', 50,  List<int>.filled(50, 0)))
+      ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
+
+    final File apk = fileSystem.file('test.apk')
+      ..writeAsBytesSync(ZipEncoder().encode(archive));
     final File aotSizeJson = fileSystem.file('test.json')
       ..writeAsStringSync(aotSizeOutput);
     final File precompilerTrace = fileSystem.file('trace.json')
@@ -155,13 +163,13 @@ void main() {
     expect(
       stdout,
       containsAll(<String>[
-        'test.apk (total compressed)                                                  0 B',
+        'test.apk (total compressed)                                                644 B',
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-        '  AndroidManifest.xml                                                       3 KB',
-        '  META-INF                                                                 15 KB',
+        '  AndroidManifest.xml                                                        6 B',
+        '  META-INF                                                                  10 B',
         '  lib/',
         '    arm64-v8a/',
-        '      libxyzzyapp.so (Dart AOT)                                            14 KB',
+        '      libxyzzyapp.so (Dart AOT)                                              6 B',
         '      Dart AOT symbols accounted decompressed size                         14 KB',
         '        dart:_internal/',
         '          SubListIterable                                                   6 KB',
@@ -171,7 +179,7 @@ void main() {
         '              ArgumentError                                                 5 KB',
         '        dart:core/',
         '          RangeError                                                        4 KB',
-        '      libflutter.so (Flutter Engine)                                       14 KB',
+        '      libflutter.so (Flutter Engine)                                         6 B',
       ]),
     );
   });
