@@ -52,7 +52,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   void DestroyRenderSurface();
 
   // Return the currently configured WindowsRenderTarget.
-  WindowsRenderTarget* GetRenderTarget();
+  WindowsRenderTarget* GetRenderTarget() const;
 
   // Returns the engine backing this view.
   FlutterWindowsEngine* GetEngine();
@@ -62,6 +62,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   bool MakeCurrent();
   bool MakeResourceCurrent();
   bool SwapBuffers();
+
+  // Send initial bounds to embedder.  Must occur after engine has initialized.
+  void SendInitialBounds();
 
   // |WindowBindingHandlerDelegate|
   void OnWindowSizeChanged(size_t width, size_t height) const override;
