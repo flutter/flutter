@@ -4,11 +4,12 @@
 
 import 'package:meta/meta.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
+import 'package:archive/archive.dart';
+import 'package:archive/archive_io.dart';
 
 import '../base/file_system.dart';
 import '../convert.dart';
 import 'logger.dart';
-import 'process.dart';
 import 'terminal.dart';
 
 /// A class to analyze APK and AOT snapshot and generate a breakdown of the data.
@@ -16,13 +17,11 @@ class SizeAnalyzer {
   SizeAnalyzer({
     @required this.fileSystem,
     @required this.logger,
-    @required this.processUtils,
     this.appFilenamePattern = 'libapp.so',
   });
 
   final FileSystem fileSystem;
   final Logger logger;
-  final ProcessUtils processUtils;
   final Pattern appFilenamePattern;
   String _appFilename;
 
@@ -99,27 +98,8 @@ class SizeAnalyzer {
       showColor: false,
     );
     logger.printStatus('━' * tableWidth);
-    final Directory tempApkContent = fileSystem.systemTempDirectory.createTempSync('flutter_tools.');
-    // TODO(peterdjlee): Implement a way to unzip the APK for Windows. See issue #62603.
-    String unzipOut;
-    try {
-      // TODO(peterdjlee): Use zipinfo instead of unzip.
-      unzipOut = (await processUtils.run(<String>[
-        'unzip',
-        '-o',
-        '-v',
-        apk.path,
-        '-d',
-        tempApkContent.path
-      ])).stdout;
-    } on Exception catch (e) {
-      logger.printError(e.toString());
-    } finally {
-      // We just want the the stdout printout. We don't need the files.
-      tempApkContent.deleteSync(recursive: true);
-    }
 
-    final _SymbolNode apkAnalysisRoot = _parseUnzipFile(unzipOut);
+    final _SymbolNode apkAnalysisRoot = _parseUnzipFile(apk);
 
     // Convert an AOT snapshot file into a map.
     final Map<String, dynamic> processedAotSnapshotJson = treemapFromJson(
@@ -155,31 +135,13 @@ class SizeAnalyzer {
     return apkAnalysisJson;
   }
 
-  // Expression to match 'Size' column to group 1 and 'Name' column to group 2.
-  final RegExp _parseUnzipOutput = RegExp(r'^\s*\d+\s+[\w|:]+\s+(\d+)\s+.*  (.+)$');
-
-  // Parse the output of unzip -v which shows the zip's contents' compressed sizes.
-  // Example output of unzip -v:
-  //  Length   Method    Size  Cmpr    Date    Time   CRC-32   Name
-  // --------  ------  ------- ---- ---------- ----- --------  ----
-  //    11708  Defl:N     2592  78% 00-00-1980 00:00 07733eef  AndroidManifest.xml
-  //     1399  Defl:N     1092  22% 00-00-1980 00:00 f53d952a  META-INF/CERT.RSA
-  //    46298  Defl:N    14530  69% 00-00-1980 00:00 17df02b8  META-INF/CERT.SF
-  _SymbolNode _parseUnzipFile(String unzipOut) {
+  _SymbolNode _parseUnzipFile(File apk) {
+    final Archive archive = ZipDecoder().decodeBytes(apk.readAsBytesSync());
     final Map<List<String>, int> pathsToSize = <List<String>, int>{};
 
-    // Parse each path into pathsToSize so that the key is a list of
-    // path parts and the value is the size.
-    // For example:
-    // 'path/to/file' where file = 1500 => pathsToSize[['path', 'to', 'file']] = 1500
-    for (final String line in const LineSplitter().convert(unzipOut)) {
-      final RegExpMatch match = _parseUnzipOutput.firstMatch(line);
-      if (match == null) {
-        continue;
-      }
-      const int sizeGroupIndex = 1;
-      const int nameGroupIndex = 2;
-      pathsToSize[match.group(nameGroupIndex).split('/')] = int.parse(match.group(sizeGroupIndex));
+    for (final ArchiveFile archiveFile in archive.files) {
+      print(archiveFile.name);
+      pathsToSize[fileSystem.path.split(archiveFile.name)] = archiveFile.rawContent.length;
     }
     return _buildSymbolTree(pathsToSize);
   }

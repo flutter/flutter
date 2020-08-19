@@ -6,7 +6,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/analyze_size.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -62,12 +61,10 @@ const String aotSizeOutput = '''[
 void main() {
   MemoryFileSystem fileSystem;
   BufferLogger logger;
-  FakeProcessManager processManager;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
-    processManager = FakeProcessManager.list(<FakeCommand>[unzipCommmand]);
   });
 
   test('matchesPattern matches only entire strings', () {
@@ -85,10 +82,6 @@ void main() {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
-      processUtils: ProcessUtils(
-        processManager: processManager,
-        logger: logger,
-      ),
       appFilenamePattern: RegExp(r'lib.*app\.so'),
     );
 
@@ -156,10 +149,6 @@ void main() {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
-      processUtils: ProcessUtils(
-        processManager: processManager,
-        logger: logger,
-      ),
       appFilenamePattern: RegExp(r'lib.*app\.so'),
     );
 
@@ -203,10 +192,6 @@ void main() {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
-      processUtils: ProcessUtils(
-        processManager: processManager,
-        logger: logger,
-      ),
       appFilenamePattern: RegExp(r'lib.*app\.so'),
     );
 

@@ -10,7 +10,6 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
@@ -112,7 +111,6 @@ class BuildIOSCommand extends BuildSubCommand {
       final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
         fileSystem: globals.fs,
         logger: globals.logger,
-        processUtils: processUtils,
         appFilenamePattern: 'App'
       );
       // Only support 64bit iOS code size analysis.

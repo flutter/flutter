@@ -505,12 +505,10 @@ Future<void> buildGradleApp({
     color: TerminalColor.green,
   );
 
-  // Call size analyzer if --analyze-size flag was provided.
-  if (buildInfo.codeSizeDirectory != null && !globals.platform.isWindows) {
+  if (buildInfo.codeSizeDirectory != null) {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
       fileSystem: globals.fs,
       logger: globals.logger,
-      processUtils: ProcessUtils.instance,
     );
     final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
     final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)

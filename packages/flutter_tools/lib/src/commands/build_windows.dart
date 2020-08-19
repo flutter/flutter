@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
@@ -73,7 +72,6 @@ class BuildWindowsCommand extends BuildSubCommand {
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: globals.fs,
         logger: globals.logger,
-        processUtils: processUtils,
         appFilenamePattern: 'app.so',
       ),
     );

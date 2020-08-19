@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
@@ -66,7 +65,6 @@ class BuildLinuxCommand extends BuildSubCommand {
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: globals.fs,
         logger: globals.logger,
-        processUtils: processUtils,
       ),
     );
     return FlutterCommandResult.success();
