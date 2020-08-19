@@ -1092,25 +1092,30 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
 
   @override
   Widget build(BuildContext context) {
-    Widget child = MouseRegion(
-      onEnter: _handleMouseEnter,
-      onExit: _handleMouseExit,
-      cursor: widget.mouseCursor,
-      child: Focus(
-        focusNode: widget.focusNode,
-        autofocus: widget.autofocus,
-        canRequestFocus: _canRequestFocus,
-        onFocusChange: _handleFocusChange,
-        child: widget.child,
+    final Map<Type, Action<Intent>> actions = widget.enabled && widget.actions != null
+      ? widget.actions
+      : const <Type, Action<Intent>>{};
+    final Map<LogicalKeySet, Intent> shortcuts = widget.enabled && widget.shortcuts != null
+      ? widget.shortcuts
+      : const <LogicalKeySet, Intent>{};
+
+    return Actions(actions:  actions,
+      child: Shortcuts(
+        shortcuts: shortcuts,
+        child: MouseRegion(
+          onEnter: _handleMouseEnter,
+          onExit: _handleMouseExit,
+          cursor: widget.mouseCursor,
+          child: Focus(
+            focusNode: widget.focusNode,
+            autofocus: widget.autofocus,
+            canRequestFocus: _canRequestFocus,
+            onFocusChange: _handleFocusChange,
+            child: widget.child,
+          ),
+        ),
       ),
     );
-    if (widget.enabled && widget.actions != null && widget.actions.isNotEmpty) {
-      child = Actions(actions: widget.actions, child: child);
-    }
-    if (widget.enabled && widget.shortcuts != null && widget.shortcuts.isNotEmpty) {
-      child = Shortcuts(shortcuts: widget.shortcuts, child: child);
-    }
-    return child;
   }
 }
 
