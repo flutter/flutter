@@ -190,7 +190,8 @@ class SizeAnalyzer {
       if (excludePath != null && file.uri.pathSegments.contains(excludePath)) {
         continue;
       }
-      final List<String> path = fileSystem.path.split(fileSystem.path.relative(file.path, from: relativeTo));
+      final List<String> path = fileSystem.path.split(
+        fileSystem.path.relative(file.path, from: relativeTo));
       pathsToSize[path] = file.lengthSync();
     }
     return _buildSymbolTree(pathsToSize);
@@ -254,16 +255,16 @@ class SizeAnalyzer {
       // Print total path and size if currentNode does not have any chilren.
       _printEntitySize(totalPath, byteSize: currentNode.byteSize, level: 1);
       if (totalPath.contains(_locatedAotFilePath.join('/'))) {
-        _printAotSnapshotSummary(aotSnapshotJsonRoot, level: fileSystem.path.split(totalPath).length);
+        _printAotSnapshotSummary(aotSnapshotJsonRoot, level: totalPath.split('/').length);
       }
     }
-    _leadingPaths = fileSystem.path.split(totalPath)
+    _leadingPaths = totalPath.split('/')
       ..removeLast();
   }
 
   /// Go through the AOT gen snapshot size JSON and print out a collapsed summary
   /// for the first package level.
-  void _printAotSnapshotSummary(_SymbolNode aotSnapshotRoot, {int maxDirectoriesShown = 10, @required int level}) {
+  void _printAotSnapshotSummary(_SymbolNode aotSnapshotRoot, {int maxDirectoriesShown = 30, @required int level}) {
     _printEntitySize(
       'Dart AOT symbols accounted decompressed size',
       byteSize: aotSnapshotRoot.byteSize,
@@ -274,8 +275,22 @@ class SizeAnalyzer {
     final List<_SymbolNode> sortedSymbols = aotSnapshotRoot.children.toList()
       ..sort((_SymbolNode a, _SymbolNode b) => b.byteSize.compareTo(a.byteSize));
     for (final _SymbolNode node in sortedSymbols.take(maxDirectoriesShown)) {
-      _printEntitySize(node.name, byteSize: node.byteSize, level: level + 1);
+      // Node names will have an extra leading `package:*` name, remove it to
+      // avoid extra nesting.
+      _printEntitySize(_formatExtraLeadingPackages(node.name), byteSize: node.byteSize, level: level + 1);
     }
+  }
+
+  String _formatExtraLeadingPackages(String name) {
+    if (!name.startsWith('package')) {
+      return name;
+    }
+    final List<String> chunks = name.split('/');
+    if (chunks.length < 2) {
+      return name;
+    }
+    chunks.removeAt(0);
+    return chunks.join('/');
   }
 
   /// Adds breakdown of aot snapshot data as the children of the node at the given path.
@@ -318,7 +333,7 @@ class SizeAnalyzer {
     } else if (formattedSize.endsWith('KB')) {
       color = TerminalColor.yellow;
     }
-    final List<String> localSegments = fileSystem.path.split(entityName)
+    final List<String> localSegments = entityName.split('/')
         ..removeLast();
     int i = 0;
     while (i < _leadingPaths.length && i < localSegments.length && _leadingPaths[i] == localSegments[i]) {
@@ -326,7 +341,7 @@ class SizeAnalyzer {
     }
     for (; i < localSegments.length; i += 1) {
       logger.printStatus(
-        localSegments[i] + fileSystem.path.separator,
+        localSegments[i] + '/',
         indent: (level + i) * 2,
         emphasis: true,
       );
