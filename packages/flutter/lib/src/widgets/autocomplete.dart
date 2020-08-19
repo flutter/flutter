@@ -414,7 +414,6 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
           top: offset.dy + renderBox.size.height,
           left: offset.dx,
           width: renderBox.size.width,
-          height: 200.0,
           child: widget.buildResults(
             context,
             _onSelected,
