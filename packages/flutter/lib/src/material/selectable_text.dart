@@ -494,7 +494,6 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     if (willShowSelectionHandles != _showSelectionHandles) {
       setState(() {
         _showSelectionHandles = willShowSelectionHandles;
-
       });
     }
 
