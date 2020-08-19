@@ -12,15 +12,15 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
-TaskFunction createComplexLayoutScrollPerfTest() {
+TaskFunction createComplexLayoutScrollPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'complex_layout_scroll_perf',
+    needsMeasureCpuGpu: needsMeasureCpuGpu,
   ).run;
 }
 
@@ -95,8 +95,9 @@ TaskFunction createCubicBezierPerfTest() {
 TaskFunction createCubicBezierPerfSkSLWarmupTest() {
   return PerfTestWithSkSL(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/cubic_bezier_perf.dart',
+    'test_driver/run_app.dart',
     'cubic_bezier_perf',
+    testDriver: 'test_driver/cubic_bezier_perf_test.dart',
   ).run;
 }
 
@@ -154,6 +155,13 @@ TaskFunction createPictureCachePerfTest() {
     'test_driver/run_app.dart',
     'picture_cache_perf',
     testDriver: 'test_driver/picture_cache_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createPictureCachePerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/picture_cache_perf_e2e.dart',
   ).run;
 }
 
@@ -269,6 +277,13 @@ TaskFunction createsMultiWidgetConstructPerfTest() {
   ).run;
 }
 
+TaskFunction createsMultiWidgetConstructPerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/multi_widget_construction_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createFramePolicyIntegrationTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
@@ -357,6 +372,7 @@ class PerfTest {
     this.testDriver,
     this.needsFullTimeline = true,
     this.benchmarkScoreKeys,
+    this.dartDefine = '',
   });
 
   /// The directory where the app under test is defined.
@@ -389,11 +405,14 @@ class PerfTest {
   ///   'average_vsync_transitions_missed',
   ///   '90th_percentile_vsync_transitions_missed',
   ///   '99th_percentile_vsync_transitions_missed',
-  ///   if (needsMeasureCpuGpu) 'cpu_percentage',
-  ///   if (needsMeasureCpuGpu) 'gpu_percentage',
+  ///   if (needsMeasureCpuGpu) 'average_cpu_usage',
+  ///   if (needsMeasureCpuGpu) 'average_gpu_usage',
   /// ]
   /// ```
   final List<String> benchmarkScoreKeys;
+
+  /// Additional flags for `--dart-define` to control the test
+  final String dartDefine;
 
   Future<TaskResult> run() {
     return internalRun();
@@ -427,6 +446,8 @@ class PerfTest {
         if (writeSkslFileName != null)
           ...<String>['--write-sksl-on-exit', writeSkslFileName],
         if (cacheSkSL) '--cache-sksl',
+        if (dartDefine.isNotEmpty)
+          ...<String>['--dart-define', dartDefine],
         '-d',
         deviceId,
       ]);
@@ -439,12 +460,6 @@ class PerfTest {
           'Timeline contains too few frames: ${data['frame_count']}. Possibly '
           'trace events are not being captured.',
         );
-      }
-
-      if (needsMeasureCpuGpu) {
-        await inDirectory<void>('$testDirectory/build', () async {
-          data.addAll(await measureIosCpuGpu(deviceId: deviceId));
-        });
       }
 
       return TaskResult.success(
@@ -461,8 +476,8 @@ class PerfTest {
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
-          if (needsMeasureCpuGpu) 'cpu_percentage',
-          if (needsMeasureCpuGpu) 'gpu_percentage',
+          if (needsMeasureCpuGpu) 'average_cpu_usage',
+          if (needsMeasureCpuGpu) 'average_gpu_usage',
         ],
       );
     });

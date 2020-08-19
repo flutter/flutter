@@ -361,7 +361,6 @@ class Text extends StatelessWidget {
          'A non-null String must be provided to a Text widget.',
        ),
        textSpan = null,
-       _applyTextScaleFactorToWidgetSpan = true,
        super(key: key);
 
   /// Creates a text widget with a [InlineSpan].
@@ -401,7 +400,6 @@ class Text extends StatelessWidget {
          'A non-null TextSpan must be provided to a Text.rich widget.',
        ),
        data = null,
-       _applyTextScaleFactorToWidgetSpan = applyTextScaleFactorToWidgetSpan,
        super(key: key);
 
   /// The text to display.
@@ -504,8 +502,6 @@ class Text extends StatelessWidget {
   /// {@macro flutter.dart:ui.textHeightBehavior}
   final ui.TextHeightBehavior textHeightBehavior;
 
-  final bool _applyTextScaleFactorToWidgetSpan;
-
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -525,7 +521,6 @@ class Text extends StatelessWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
-      applyTextScaleFactorToWidgetSpan: _applyTextScaleFactorToWidgetSpan,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,

@@ -356,50 +356,6 @@ void main() {
     expect(rawData[childrenMapKey].containsKey('moving-child'), isTrue);
   });
 
-  testWidgets('decommission claims new bucket with data', (WidgetTester tester) async {
-    final MockRestorationManager manager = MockRestorationManager();
-    RestorationBucket root = RestorationBucket.root(manager: manager, rawData: <String, dynamic>{});
-
-    await tester.pumpWidget(
-      UnmanagedRestorationScope(
-        bucket: root,
-        child: const _TestRestorableWidget(
-          restorationId: 'child1',
-        ),
-      ),
-    );
-    manager.doSerialization();
-    final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
-    expect(state.bucket.restorationId, 'child1');
-    expect(state.property.value, 10);  // Initialized to default.
-    expect(state.bucket.read<int>('foo'), 10);
-    final RestorationBucket bucket = state.bucket;
-    state.property.log.clear();
-    state.restoreStateLog.clear();
-
-    // Replace root bucket.
-    root..decommission()..dispose();
-    root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
-
-    await tester.pumpWidget(
-      UnmanagedRestorationScope(
-        bucket: root,
-        child: const _TestRestorableWidget(
-          restorationId: 'child1',
-        ),
-      ),
-    );
-
-    // Bucket has been replaced.
-    expect(state.bucket, isNot(same(bucket)));
-    expect(state.bucket.restorationId, 'child1');
-    expect(state.property.value, 22);  // Restored value.
-    expect(state.bucket.read<int>('foo'), 22);
-    expect(state.restoreStateLog.single, bucket);
-    expect(state.toogleBucketLog, isEmpty);
-    expect(state.property.log, <String>['fromPrimitives', 'initWithValue']);
-  });
-
   testWidgets('restartAndRestore', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
@@ -711,7 +667,7 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
 
 
   @override
-  void restoreState(RestorationBucket oldBucket) {
+  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
     restoreStateLog.add(oldBucket);
     registerForRestoration(property, 'foo');
     if (_rerigisterAdditionalProperty && additionalProperty != null) {

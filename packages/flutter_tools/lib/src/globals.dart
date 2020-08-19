@@ -191,5 +191,5 @@ PlistParser get plistParser => context.get<PlistParser>() ?? (
 ));
 PlistParser _plistInstance;
 
-/// The global template renderer
+/// The global template renderer.
 TemplateRenderer get templateRenderer => context.get<TemplateRenderer>();

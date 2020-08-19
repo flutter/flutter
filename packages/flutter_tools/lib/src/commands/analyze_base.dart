@@ -144,7 +144,7 @@ abstract class AnalyzeBase {
     if (undocumentedMembers > 0) {
       errorsMessage.write(' (ran in ${seconds}s; $dartDocMessage)');
     } else {
-      errorsMessage.write(' (ran in ${seconds}s;)');
+      errorsMessage.write(' (ran in ${seconds}s)');
     }
     return errorsMessage.toString();
   }

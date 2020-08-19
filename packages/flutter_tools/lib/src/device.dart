@@ -557,7 +557,7 @@ abstract class Device {
     String userIdentifier,
   });
 
-  /// Check if the device is supported by Flutter
+  /// Check if the device is supported by Flutter.
   bool isSupported();
 
   // String meant to be displayed to the user indicating if the device is
@@ -734,7 +734,7 @@ abstract class Device {
     };
   }
 
-  /// Clean up resources allocated by device
+  /// Clean up resources allocated by device.
   ///
   /// For example log readers or port forwarders.
   Future<void> dispose();
@@ -790,6 +790,7 @@ class DebuggingOptions {
     this.webEnableExpressionEvaluation = false,
     this.vmserviceOutFile,
     this.fastStart = false,
+    this.nullAssertions = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -821,7 +822,8 @@ class DebuggingOptions {
       deviceVmServicePort = null,
       vmserviceOutFile = null,
       fastStart = false,
-      webEnableExpressionEvaluation = false;
+      webEnableExpressionEvaluation = false,
+      nullAssertions = false;
 
   final bool debuggingEnabled;
 
@@ -861,12 +863,14 @@ class DebuggingOptions {
   /// The port the browser should use for its debugging protocol.
   final int webBrowserDebugPort;
 
-  /// Enable expression evaluation for web target
+  /// Enable expression evaluation for web target.
   final bool webEnableExpressionEvaluation;
 
   /// A file where the vmservice URL should be written after the application is started.
   final String vmserviceOutFile;
   final bool fastStart;
+
+  final bool nullAssertions;
 
   bool get hasObservatoryPort => hostVmServicePort != null;
 }
@@ -925,7 +929,7 @@ abstract class DevicePortForwarder {
   /// Stops forwarding [forwardedPort].
   Future<void> unforward(ForwardedPort forwardedPort);
 
-  /// Cleanup allocated resources, like forwardedPorts
+  /// Cleanup allocated resources, like [forwardedPorts].
   Future<void> dispose();
 }
 
@@ -992,4 +996,15 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
 
   @override
   Future<void> dispose() async { }
+}
+
+/// Append --null_assertions to any existing Dart VM flags if
+/// [debuggingOptions.nullAssertions] is true.
+String computeDartVmFlags(DebuggingOptions debuggingOptions) {
+  return <String>[
+    if (debuggingOptions.dartFlags?.isNotEmpty ?? false)
+      debuggingOptions.dartFlags,
+    if (debuggingOptions.nullAssertions)
+      '--null_assertions',
+  ].join(',');
 }

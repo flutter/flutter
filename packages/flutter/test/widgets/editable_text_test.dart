@@ -13,9 +13,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
-import 'package:mockito/mockito.dart';
 import 'package:flutter/foundation.dart';
 
+import '../flutter_test_alternative.dart' show Fake;
 import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
@@ -1336,35 +1336,88 @@ void main() {
     expect(changedValue, clipboardContent);
   });
 
-  testWidgets('Does not lose focus by default when "next" action is pressed', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+  // The variants to test in the focus handling test.
+  final ValueVariant<TextInputAction> focusVariants = ValueVariant<
+      TextInputAction>(
+    TextInputAction.values.toSet(),
+  );
 
-    final Widget widget = MaterialApp(
-      home: EditableText(
-        backgroundCursorColor: Colors.grey,
-        controller: TextEditingController(),
-        focusNode: focusNode,
-        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
-        cursorColor: Colors.blue,
-        selectionControls: materialTextSelectionControls,
-        keyboardType: TextInputType.text,
-      ),
-    );
-    await tester.pumpWidget(widget);
+  testWidgets('Handles focus correctly when action is invoked', (WidgetTester tester) async {
+    // The expectations for each of the types of TextInputAction.
+    const Map<TextInputAction, bool> actionShouldLoseFocus = <TextInputAction, bool>{
+      TextInputAction.none: false,
+      TextInputAction.unspecified: false,
+      TextInputAction.done: true,
+      TextInputAction.go: true,
+      TextInputAction.search: true,
+      TextInputAction.send: true,
+      TextInputAction.continueAction: false,
+      TextInputAction.join: false,
+      TextInputAction.route: false,
+      TextInputAction.emergencyCall: false,
+      TextInputAction.newline: true,
+      TextInputAction.next: true,
+      TextInputAction.previous: true,
+    };
 
-    // Select EditableText to give it focus.
-    final Finder textFinder = find.byType(EditableText);
-    await tester.tap(textFinder);
-    await tester.pump();
+    final TextInputAction action = focusVariants.currentValue;
+    expect(actionShouldLoseFocus.containsKey(action), isTrue);
 
-    assert(focusNode.hasFocus);
+    Future<void> _ensureCorrectFocusHandlingForAction(
+        TextInputAction action, {
+          @required bool shouldLoseFocus,
+          bool shouldFocusNext = false,
+          bool shouldFocusPrevious = false,
+        }) async {
+      final FocusNode focusNode = FocusNode();
+      final GlobalKey previousKey = GlobalKey();
+      final GlobalKey nextKey = GlobalKey();
 
-    await tester.testTextInput.receiveAction(TextInputAction.next);
-    await tester.pump();
+      final Widget widget = MaterialApp(
+        home: Column(
+          children: <Widget>[
+            TextButton(
+                child: Text('Previous Widget', key: previousKey),
+                onPressed: () {}),
+            EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: TextEditingController(),
+              focusNode: focusNode,
+              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
+              cursorColor: Colors.blue,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+              autofocus: true,
+            ),
+            TextButton(
+                child: Text('Next Widget', key: nextKey), onPressed: () {}),
+          ],
+        ),
+      );
+      await tester.pumpWidget(widget);
 
-    // Still has focus after pressing "next".
-    expect(focusNode.hasFocus, true);
-  });
+      assert(focusNode.hasFocus);
+
+      await tester.testTextInput.receiveAction(action);
+      await tester.pump();
+
+      expect(Focus.of(nextKey.currentContext).hasFocus, equals(shouldFocusNext));
+      expect(Focus.of(previousKey.currentContext).hasFocus, equals(shouldFocusPrevious));
+      expect(focusNode.hasFocus, equals(!shouldLoseFocus));
+    }
+
+    try {
+      await _ensureCorrectFocusHandlingForAction(
+        action,
+        shouldLoseFocus: actionShouldLoseFocus[action],
+        shouldFocusNext: action == TextInputAction.next,
+        shouldFocusPrevious: action == TextInputAction.previous,
+      );
+    } on PlatformException {
+      // on Android, continueAction isn't supported.
+      expect(action, equals(TextInputAction.continueAction));
+    }
+  }, variant: focusVariants);
 
   testWidgets('Does not lose focus by default when "done" action is pressed and onEditingComplete is provided', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -2559,18 +2612,15 @@ void main() {
           TextSelection.collapsed(offset: controller.text.length);
 
       controls = MockTextSelectionControls();
-      when(controls.buildHandle(any, any, any)).thenReturn(Container());
-      when(controls.buildToolbar(any, any, any, any, any, any, any))
-          .thenReturn(Container());
     });
 
     testWidgets('are exposed', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       addTearDown(semantics.dispose);
 
-      when(controls.canCopy(any)).thenReturn(false);
-      when(controls.canCut(any)).thenReturn(false);
-      when(controls.canPaste(any)).thenReturn(false);
+      controls.testCanCopy = false;
+      controls.testCanCut = false;
+      controls.testCanPaste = false;
 
       await _buildApp(controls, tester);
       await tester.tap(find.byType(EditableText));
@@ -2588,7 +2638,7 @@ void main() {
         ),
       );
 
-      when(controls.canCopy(any)).thenReturn(true);
+      controls.testCanCopy = true;
       await _buildApp(controls, tester);
       expect(
         semantics,
@@ -2603,8 +2653,8 @@ void main() {
         ),
       );
 
-      when(controls.canCopy(any)).thenReturn(false);
-      when(controls.canPaste(any)).thenReturn(true);
+      controls.testCanCopy = false;
+      controls.testCanPaste = true;
       await _buildApp(controls, tester);
       await tester.pumpAndSettle();
       expect(
@@ -2620,8 +2670,8 @@ void main() {
         ),
       );
 
-      when(controls.canPaste(any)).thenReturn(false);
-      when(controls.canCut(any)).thenReturn(true);
+      controls.testCanPaste = false;
+      controls.testCanCut = true;
       await _buildApp(controls, tester);
       expect(
         semantics,
@@ -2636,9 +2686,9 @@ void main() {
         ),
       );
 
-      when(controls.canCopy(any)).thenReturn(true);
-      when(controls.canCut(any)).thenReturn(true);
-      when(controls.canPaste(any)).thenReturn(true);
+      controls.testCanCopy = true;
+      controls.testCanCut = true;
+      controls.testCanPaste = true;
       await _buildApp(controls, tester);
       expect(
         semantics,
@@ -2659,9 +2709,9 @@ void main() {
     testWidgets('can copy/cut/paste with a11y', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
-      when(controls.canCopy(any)).thenReturn(true);
-      when(controls.canCut(any)).thenReturn(true);
-      when(controls.canPaste(any)).thenReturn(true);
+      controls.testCanCopy = true;
+      controls.testCanCut = true;
+      controls.testCanPaste = true;
       await _buildApp(controls, tester);
       await tester.tap(find.byType(EditableText));
       await tester.pump();
@@ -2717,13 +2767,13 @@ void main() {
       );
 
       owner.performAction(expectedNodeId, SemanticsAction.copy);
-      verify(controls.handleCopy(any, any)).called(1);
+      expect(controls.copyCount, 1);
 
       owner.performAction(expectedNodeId, SemanticsAction.cut);
-      verify(controls.handleCut(any)).called(1);
+      expect(controls.cutCount, 1);
 
       owner.performAction(expectedNodeId, SemanticsAction.paste);
-      verify(controls.handlePaste(any)).called(1);
+      expect(controls.pasteCount, 1);
 
       semantics.dispose();
     });
@@ -5263,7 +5313,17 @@ class MockTextFormatter extends TextInputFormatter {
   }
 }
 
-class MockTextSelectionControls extends Mock implements TextSelectionControls {
+class MockTextSelectionControls extends Fake implements TextSelectionControls {
+  @override
+  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier clipboardStatus) {
+    return Container();
+  }
+
+  @override
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight) {
+    return Container();
+  }
+
   @override
   Size getHandleSize(double textLineHeight) {
     return Size.zero;
@@ -5272,6 +5332,44 @@ class MockTextSelectionControls extends Mock implements TextSelectionControls {
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
+  }
+
+  bool testCanCut = false;
+  bool testCanCopy = false;
+  bool testCanPaste = false;
+
+  int cutCount = 0;
+  int pasteCount = 0;
+  int copyCount = 0;
+
+  @override
+  void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier clipboardStatus) {
+    copyCount += 1;
+  }
+
+  @override
+  Future<void> handlePaste(TextSelectionDelegate delegate) async {
+    pasteCount += 1;
+  }
+
+  @override
+  void handleCut(TextSelectionDelegate delegate) {
+    cutCount += 1;
+  }
+
+  @override
+  bool canCut(TextSelectionDelegate delegate) {
+    return testCanCut;
+  }
+
+  @override
+  bool canCopy(TextSelectionDelegate delegate) {
+    return testCanCopy;
+  }
+
+  @override
+  bool canPaste(TextSelectionDelegate delegate) {
+    return testCanPaste;
   }
 }
 

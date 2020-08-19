@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:ui' as ui show lerpDouble, WindowPadding;
 
@@ -73,7 +72,6 @@ abstract class EdgeInsetsGeometry {
       case Axis.vertical:
         return vertical;
     }
-    return null;
   }
 
   /// The size that this [EdgeInsets] would occupy with an empty interior.
@@ -218,12 +216,12 @@ abstract class EdgeInsetsGeometry {
   /// into a concrete [EdgeInsets] using [resolve].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static EdgeInsetsGeometry lerp(EdgeInsetsGeometry a, EdgeInsetsGeometry b, double t) {
+  static EdgeInsetsGeometry? lerp(EdgeInsetsGeometry? a, EdgeInsetsGeometry? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return b * t;
+      return b! * t;
     if (b == null)
       return a * (1.0 - t);
     if (a is EdgeInsets && b is EdgeInsets)
@@ -231,12 +229,12 @@ abstract class EdgeInsetsGeometry {
     if (a is EdgeInsetsDirectional && b is EdgeInsetsDirectional)
       return EdgeInsetsDirectional.lerp(a, b, t);
     return _MixedEdgeInsets.fromLRSETB(
-      ui.lerpDouble(a._left, b._left, t),
-      ui.lerpDouble(a._right, b._right, t),
-      ui.lerpDouble(a._start, b._start, t),
-      ui.lerpDouble(a._end, b._end, t),
-      ui.lerpDouble(a._top, b._top, t),
-      ui.lerpDouble(a._bottom, b._bottom, t),
+      ui.lerpDouble(a._left, b._left, t)!,
+      ui.lerpDouble(a._right, b._right, t)!,
+      ui.lerpDouble(a._start, b._start, t)!,
+      ui.lerpDouble(a._end, b._end, t)!,
+      ui.lerpDouble(a._top, b._top, t)!,
+      ui.lerpDouble(a._bottom, b._bottom, t)!,
     );
   }
 
@@ -249,7 +247,7 @@ abstract class EdgeInsetsGeometry {
   ///  * [EdgeInsets], for which this is a no-op (returns itself).
   ///  * [EdgeInsetsDirectional], which flips the horizontal direction
   ///    based on the `direction` argument.
-  EdgeInsets resolve(TextDirection direction);
+  EdgeInsets resolve(TextDirection? direction);
 
   @override
   String toString() {
@@ -597,32 +595,32 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// If either is null, this function interpolates from [EdgeInsets.zero].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static EdgeInsets lerp(EdgeInsets a, EdgeInsets b, double t) {
+  static EdgeInsets? lerp(EdgeInsets? a, EdgeInsets? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return b * t;
+      return b! * t;
     if (b == null)
       return a * (1.0 - t);
     return EdgeInsets.fromLTRB(
-      ui.lerpDouble(a.left, b.left, t),
-      ui.lerpDouble(a.top, b.top, t),
-      ui.lerpDouble(a.right, b.right, t),
-      ui.lerpDouble(a.bottom, b.bottom, t),
+      ui.lerpDouble(a.left, b.left, t)!,
+      ui.lerpDouble(a.top, b.top, t)!,
+      ui.lerpDouble(a.right, b.right, t)!,
+      ui.lerpDouble(a.bottom, b.bottom, t)!,
     );
   }
 
   @override
-  EdgeInsets resolve(TextDirection direction) => this;
+  EdgeInsets resolve(TextDirection? direction) => this;
 
   /// Creates a copy of this EdgeInsets but with the given fields replaced
   /// with the new values.
   EdgeInsets copyWith({
-    double left,
-    double top,
-    double right,
-    double bottom,
+    double? left,
+    double? top,
+    double? right,
+    double? bottom,
   }) {
     return EdgeInsets.only(
       left: left ?? this.left,
@@ -822,32 +820,31 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   /// [EdgeInsetsGeometry.lerp] static method.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static EdgeInsetsDirectional lerp(EdgeInsetsDirectional a, EdgeInsetsDirectional b, double t) {
+  static EdgeInsetsDirectional? lerp(EdgeInsetsDirectional? a, EdgeInsetsDirectional? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return b * t;
+      return b! * t;
     if (b == null)
       return a * (1.0 - t);
     return EdgeInsetsDirectional.fromSTEB(
-      ui.lerpDouble(a.start, b.start, t),
-      ui.lerpDouble(a.top, b.top, t),
-      ui.lerpDouble(a.end, b.end, t),
-      ui.lerpDouble(a.bottom, b.bottom, t),
+      ui.lerpDouble(a.start, b.start, t)!,
+      ui.lerpDouble(a.top, b.top, t)!,
+      ui.lerpDouble(a.end, b.end, t)!,
+      ui.lerpDouble(a.bottom, b.bottom, t)!,
     );
   }
 
   @override
-  EdgeInsets resolve(TextDirection direction) {
+  EdgeInsets resolve(TextDirection? direction) {
     assert(direction != null);
-    switch (direction) {
+    switch (direction!) {
       case TextDirection.rtl:
         return EdgeInsets.fromLTRB(end, top, start, bottom);
       case TextDirection.ltr:
         return EdgeInsets.fromLTRB(start, top, end, bottom);
     }
-    return null;
   }
 }
 
@@ -943,14 +940,13 @@ class _MixedEdgeInsets extends EdgeInsetsGeometry {
   }
 
   @override
-  EdgeInsets resolve(TextDirection direction) {
+  EdgeInsets resolve(TextDirection? direction) {
     assert(direction != null);
-    switch (direction) {
+    switch (direction!) {
       case TextDirection.rtl:
         return EdgeInsets.fromLTRB(_end + _left, _top, _start + _right, _bottom);
       case TextDirection.ltr:
         return EdgeInsets.fromLTRB(_start + _left, _top, _end + _right, _bottom);
     }
-    return null;
   }
 }

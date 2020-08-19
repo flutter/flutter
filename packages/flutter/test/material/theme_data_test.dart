@@ -287,7 +287,9 @@ void main() {
       textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colors.red)),
       elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colors.green)),
       outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(primary: Colors.blue)),
+      textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
       fixTextFieldOutlineLabel: false,
+      useTextSelectionTheme: false,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -373,7 +375,9 @@ void main() {
       textButtonTheme: const TextButtonThemeData(),
       elevatedButtonTheme: const ElevatedButtonThemeData(),
       outlinedButtonTheme: const OutlinedButtonThemeData(),
+      textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.white),
       fixTextFieldOutlineLabel: true,
+      useTextSelectionTheme: true,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -445,7 +449,9 @@ void main() {
       textButtonTheme: otherTheme.textButtonTheme,
       elevatedButtonTheme: otherTheme.elevatedButtonTheme,
       outlinedButtonTheme: otherTheme.outlinedButtonTheme,
+      textSelectionTheme: otherTheme.textSelectionTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
+      useTextSelectionTheme: otherTheme.useTextSelectionTheme,
     );
 
     expect(themeDataCopy.brightness, equals(otherTheme.brightness));
@@ -516,7 +522,9 @@ void main() {
     expect(themeDataCopy.textButtonTheme, equals(otherTheme.textButtonTheme));
     expect(themeDataCopy.elevatedButtonTheme, equals(otherTheme.elevatedButtonTheme));
     expect(themeDataCopy.outlinedButtonTheme, equals(otherTheme.outlinedButtonTheme));
+    expect(themeDataCopy.textSelectionTheme, equals(otherTheme.textSelectionTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
+    expect(themeDataCopy.useTextSelectionTheme, equals(otherTheme.useTextSelectionTheme));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
