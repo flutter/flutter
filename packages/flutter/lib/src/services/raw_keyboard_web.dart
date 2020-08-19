@@ -36,7 +36,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   ///
   /// See <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key>
   /// for more information.
-  final String key;
+  final String? key;
 
   /// The modifiers that were present when the key event occurred.
   ///
@@ -56,7 +56,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   final int metaState;
 
   @override
-  String get keyLabel => key;
+  String? get keyLabel => key;
 
   @override
   PhysicalKeyboardKey get physicalKey {
