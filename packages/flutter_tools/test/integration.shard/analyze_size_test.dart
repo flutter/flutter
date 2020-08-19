@@ -36,7 +36,7 @@ void main() {
     final String outputFilePath = line.split(apkDebugMessage).last.trim();
     expect(globals.fs.file(globals.fs.path.join(woringDirectory, outputFilePath)), exists);
     expect(result.exitCode, 0);
-  }, skip: const LocalPlatform().isWindows); // Not yet supported on Windows
+  });
 
   test('--analyze-size flag produces expected output on hello_world for iOS', () async {
     final String woringDirectory = globals.fs.path.join(getFlutterRoot(), 'examples', 'hello_world');

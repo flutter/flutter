@@ -609,9 +609,8 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kAnalyzeSize,
       defaultsTo: false,
       help: 'Whether to produce additional profile information for artifact output size. '
-        'This flag is only supported on release builds. When building for Android, only '
-        'linux and macOS hosts are currently supported. In addition, a single ABI must be '
-        'specified at a time with the --target-platform flag. When building for iOS, '
+        'This flag is only supported on release builds. When building for Android, a single '
+        'ABI must be specified at a time with the --target-platform flag. When building for iOS, '
         'only the symbols from the arm64 architecture are used to analyze code size.'
     );
   }
