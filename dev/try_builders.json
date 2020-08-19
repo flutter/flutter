@@ -55,7 +55,8 @@
          "name":"Linux web_tests",
          "repo":"flutter",
          "taskName":"linux_web_tests",
-         "enabled":true
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter/", "packages/flutter_goldens_client/", "packages/flutter_goldens/", "packages/flutter_test/", "packages/flutter_tools/lib/src/test/", "packages/flutter_web_plugins/", "bin/"]
       },
       {
          "name":"Linux web_integration_tests",
@@ -68,7 +69,8 @@
          "name": "Windows build_tests",
          "repo": "flutter",
          "task_name": "win_build_tests",
-         "enabled":true
+         "enabled":true,
+         "run_if":["dev/", "bin/"]
       },
       {
          "name": "Windows customer_testing",
@@ -80,7 +82,8 @@
          "name": "Windows framework_tests",
          "repo": "flutter",
          "task_name": "win_framework_tests",
-         "enabled":true
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
       },
       {
         "name": "Windows tool_tests",
