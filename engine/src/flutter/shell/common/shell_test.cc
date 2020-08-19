@@ -49,6 +49,16 @@ void ShellTest::PlatformViewNotifyCreated(Shell* shell) {
   latch.Wait();
 }
 
+void ShellTest::PlatformViewNotifyDestroyed(Shell* shell) {
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(), [shell, &latch]() {
+        shell->GetPlatformView()->NotifyDestroyed();
+        latch.Signal();
+      });
+  latch.Wait();
+}
+
 void ShellTest::RunEngine(Shell* shell, RunConfiguration configuration) {
   fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
