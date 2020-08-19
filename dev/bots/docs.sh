@@ -43,8 +43,8 @@ function generate_docs() {
     # a custom index.html, placing everything into dev/docs/doc.
     (cd "$FLUTTER_ROOT/dev/tools" && "$FLUTTER" pub get)
     (cd "$FLUTTER_ROOT/dev/tools" && "$PUB" get)
-    (cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
-    (cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev "$FLUTTER_ROOT/dev/tools/java_and_objc_doc.dart")
+    (cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev --enable-asserts "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
+    (cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev --enable-asserts "$FLUTTER_ROOT/dev/tools/java_and_objc_doc.dart")
 }
 
 # Zip up the docs so people can download them for offline usage.
@@ -71,7 +71,7 @@ function create_docset() {
   dashing_pid=$!
   wait $dashing_pid && \
   cp ./doc/flutter/static-assets/favicon.png ./flutter.docset/icon.png && \
-  "$DART" --disable-dart-dev ./dashing_postprocess.dart && \
+  "$DART" --disable-dart-dev --enable-asserts ./dashing_postprocess.dart && \
   tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset
   if [[ $? -ne 0 ]]; then
       >&2 echo "Dashing docset generation failed"
