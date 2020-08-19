@@ -614,10 +614,15 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
 
   @override
   void placeElement() {
-    super.placeElement();
     if (hasAutofillGroup) {
       _geometry?.applyToDomElement(focusedFormElement!);
       placeForm();
+      // Set the last editing state if it exists, this is critical for a
+      // users ongoing work to continue uninterrupted when there is an update to
+      // the transform.
+      if (_lastEditingState != null) {
+        _lastEditingState!.applyToDomElement(domElement);
+      }
       // On Chrome, when a form is focused, it opens an autofill menu
       // immediately.
       // Flutter framework sends `setEditableSizeAndTransform` for informing
@@ -627,7 +632,9 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
       //  `setEditableSizeAndTransform` method is called and focus on the form
       // only after placing it to the correct position. Hence autofill menu
       // does not appear on top-left of the page.
+      // Refocus on the elements after applying the geometry.
       focusedFormElement!.focus();
+      domElement.focus();
     } else {
       _geometry?.applyToDomElement(domElement);
     }
@@ -663,6 +670,12 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
     _geometry?.applyToDomElement(domElement);
     if (hasAutofillGroup) {
       placeForm();
+      // Set the last editing state if it exists, this is critical for a
+      // users ongoing work to continue uninterrupted when there is an update to
+      // the transform.
+      if (_lastEditingState != null) {
+        _lastEditingState!.applyToDomElement(domElement);
+      }
       // On Safari Desktop, when a form is focused, it opens an autofill menu
       // immediately.
       // Flutter framework sends `setEditableSizeAndTransform` for informing
@@ -1236,6 +1249,12 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   void placeElement() {
     domElement.focus();
     _geometry?.applyToDomElement(domElement);
+    // Set the last editing state if it exists, this is critical for a
+    // users ongoing work to continue uninterrupted when there is an update to
+    // the transform.
+    if (_lastEditingState != null) {
+      _lastEditingState!.applyToDomElement(domElement);
+    }
   }
 }
 
