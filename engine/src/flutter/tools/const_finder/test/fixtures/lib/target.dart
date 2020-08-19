@@ -13,3 +13,39 @@ class Target {
     print('$stringValue $intValue');
   }
 }
+
+class ExtendsTarget extends Target {
+  const ExtendsTarget(String stringValue, int intValue, Target targetValue)
+      : super(stringValue, intValue, targetValue);
+}
+
+class ImplementsTarget implements Target {
+  const ImplementsTarget(this.stringValue, this.intValue, this.targetValue);
+
+  @override
+  final String stringValue;
+  @override
+  final int intValue;
+  @override
+  final Target targetValue;
+
+  @override
+  void hit() {
+    print('ImplementsTarget - $stringValue $intValue');
+  }
+}
+
+mixin MixableTarget {
+  String get val;
+
+  void hit() {
+    print(val);
+  }
+}
+
+class MixedInTarget with MixableTarget {
+  const MixedInTarget(this.val);
+
+  @override
+  final String val;
+}

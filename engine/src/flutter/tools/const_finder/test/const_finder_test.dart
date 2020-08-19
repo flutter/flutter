@@ -71,7 +71,24 @@ void _checkConsts() {
         <String, dynamic>{'stringValue': '10', 'intValue': 10, 'targetValue': null},
         <String, dynamic>{'stringValue': '9', 'intValue': 9},
         <String, dynamic>{'stringValue': '7', 'intValue': 7, 'targetValue': null},
+        <String, dynamic>{'stringValue': '11', 'intValue': 11, 'targetValue': null},
+        <String, dynamic>{'stringValue': '12', 'intValue': 12, 'targetValue': null},
         <String, dynamic>{'stringValue': 'package', 'intValue':-1, 'targetValue': null},
+      ],
+      'nonConstantLocations': <dynamic>[],
+    }),
+  );
+
+  final ConstFinder finder2 = ConstFinder(
+    kernelFilePath: constsDill,
+    classLibraryUri: 'package:const_finder_fixtures/target.dart',
+    className: 'MixedInTarget',
+  );
+  expect<String>(
+    jsonEncode(finder2.findInstances()),
+    jsonEncode(<String, dynamic>{
+      'constantInstances': <Map<String, dynamic>>[
+        <String, dynamic>{'val': '13'},
       ],
       'nonConstantLocations': <dynamic>[],
     }),
