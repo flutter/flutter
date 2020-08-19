@@ -466,6 +466,14 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   void BeginFrame(fml::TimePoint frame_time);
 
   //----------------------------------------------------------------------------
+  /// @brief      Notifies the engine that native bytes might be freed if a
+  ///             garbage collection ran now.
+  ///
+  /// @param[in]  size  The number of bytes freed.
+  ///
+  void HintFreed(size_t size);
+
+  //----------------------------------------------------------------------------
   /// @brief      Notifies the engine that the UI task runner is not expected to
   ///             undertake a new frame workload till a specified timepoint. The
   ///             timepoint is measured in microseconds against the system's
@@ -797,6 +805,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   FontCollection font_collection_;
   ImageDecoder image_decoder_;
   TaskRunners task_runners_;
+  size_t hint_freed_bytes_since_last_idle_ = 0;
   fml::WeakPtrFactory<Engine> weak_factory_;
 
   // |RuntimeDelegate|

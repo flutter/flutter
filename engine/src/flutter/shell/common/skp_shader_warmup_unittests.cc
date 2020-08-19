@@ -153,7 +153,8 @@ class SkpWarmupTest : public ShellTest {
             auto picture_layer = std::make_shared<PictureLayer>(
                 SkPoint::Make(0, 0), SkiaGPUObject<SkPicture>(picture, queue),
                 /* is_complex */ false,
-                /* will_change */ false);
+                /* will_change */ false,
+                /* external_size */ 0);
             root->Add(picture_layer);
           };
       PumpOneFrame(shell.get(), picture->cullRect().width(),
@@ -235,7 +236,8 @@ TEST_F(SkpWarmupTest, Image) {
     auto picture_layer = std::make_shared<PictureLayer>(
         SkPoint::Make(0, 0), SkiaGPUObject<SkPicture>(picture, queue),
         /* is_complex */ false,
-        /* will_change */ false);
+        /* will_change */ false,
+        /* external_size */ 0);
     root->Add(picture_layer);
   };
 

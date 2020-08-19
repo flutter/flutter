@@ -248,11 +248,16 @@ void Engine::ReportTimings(std::vector<int64_t> timings) {
   runtime_controller_->ReportTimings(std::move(timings));
 }
 
+void Engine::HintFreed(size_t size) {
+  hint_freed_bytes_since_last_idle_ += size;
+}
+
 void Engine::NotifyIdle(int64_t deadline) {
   auto trace_event = std::to_string(deadline - Dart_TimelineGetMicros());
   TRACE_EVENT1("flutter", "Engine::NotifyIdle", "deadline_now_delta",
                trace_event.c_str());
-  runtime_controller_->NotifyIdle(deadline);
+  runtime_controller_->NotifyIdle(deadline, hint_freed_bytes_since_last_idle_);
+  hint_freed_bytes_since_last_idle_ = 0;
 }
 
 std::pair<bool, uint32_t> Engine::GetUIIsolateReturnCode() {

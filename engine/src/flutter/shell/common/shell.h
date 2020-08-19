@@ -12,6 +12,7 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
+#include "flutter/flow/compositor_context.h"
 #include "flutter/flow/surface.h"
 #include "flutter/flow/texture.h"
 #include "flutter/fml/closure.h"
@@ -528,10 +529,14 @@ class Shell final : public PlatformView::Delegate,
   void OnFrameRasterized(const FrameTiming&) override;
 
   // |Rasterizer::Delegate|
-  fml::Milliseconds GetFrameBudget() override;
+  fml::TimePoint GetLatestFrameTargetTime() const override;
 
   // |Rasterizer::Delegate|
-  fml::TimePoint GetLatestFrameTargetTime() const override;
+  // |CompositorContext::Delegate|
+  fml::Milliseconds GetFrameBudget() override;
+
+  // |CompositorContext::Delegate|
+  void OnCompositorEndFrame(size_t freed_hint) override;
 
   // |ServiceProtocol::Handler|
   fml::RefPtr<fml::TaskRunner> GetServiceProtocolHandlerTaskRunner(

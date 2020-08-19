@@ -216,7 +216,7 @@ Engine::Engine(Delegate& delegate,
 
         std::unique_ptr<flutter_runner::CompositorContext> compositor_context =
             std::make_unique<flutter_runner::CompositorContext>(
-                session_connection_.value(), surface_producer_.value(),
+                shell, session_connection_.value(), surface_producer_.value(),
                 scene_update_context_.value());
 
         return std::make_unique<flutter::Rasterizer>(

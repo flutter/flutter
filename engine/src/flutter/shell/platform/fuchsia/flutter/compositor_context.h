@@ -21,7 +21,8 @@ namespace flutter_runner {
 // Fuchsia.
 class CompositorContext final : public flutter::CompositorContext {
  public:
-  CompositorContext(SessionConnection& session_connection,
+  CompositorContext(CompositorContext::Delegate& delegate,
+                    SessionConnection& session_connection,
                     VulkanSurfaceProducer& surface_producer,
                     flutter::SceneUpdateContext& scene_update_context);
 
