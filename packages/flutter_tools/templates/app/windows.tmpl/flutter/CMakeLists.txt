@@ -35,7 +35,7 @@ add_dependencies(flutter flutter_assemble)
 # === Wrapper ===
 list(APPEND CPP_WRAPPER_SOURCES_CORE
   "core_implementations.cc"
-	"standard_codec.cc"
+  "standard_codec.cc"
 )
 list(TRANSFORM CPP_WRAPPER_SOURCES_CORE PREPEND "${WRAPPER_ROOT}/")
 list(APPEND CPP_WRAPPER_SOURCES_PLUGIN
