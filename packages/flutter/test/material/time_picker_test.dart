@@ -760,6 +760,16 @@ void _testsInput() {
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 8, minute: 15)));
   });
+
+  // Fixes regression that was reverted in https://github.com/flutter/flutter/pull/64094#pullrequestreview-469836378.
+  testWidgets('Ensure hour/minute fields are top-aligned with the separator', (WidgetTester tester) async {
+    await startPicker(tester, (TimeOfDay time) { }, entryMode: TimePickerEntryMode.input);
+    final double hourFieldTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourTextField')).dy;
+    final double minuteFieldTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField')).dy;
+    final double separatorTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment')).dy;
+    expect(hourFieldTop, separatorTop);
+    expect(minuteFieldTop, separatorTop);
+  });
 }
 
 final Finder findDialPaint = find.descendant(
