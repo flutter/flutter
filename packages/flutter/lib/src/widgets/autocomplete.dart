@@ -429,7 +429,11 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   // True iff the state indicates that the results should be visible.
   bool get _shouldShowResults {
     final List<T> results = _autocompleteController.results.value;
-    return _selection == null && results != null && results.isNotEmpty;
+    final TextSelection selection =
+        _autocompleteController.textEditingController.selection;
+    final bool isSelected = selection.baseOffset >= 0
+        && selection.extentOffset >= 0;
+    return isSelected && _selection == null && results != null && results.isNotEmpty;
   }
 
   void _onChangeResults() {
