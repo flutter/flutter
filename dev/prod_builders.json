@@ -94,7 +94,7 @@
          "name": "Windows tool_tests",
          "repo": "flutter",
          "task_name": "win_tool_tests",
-         "enabled":true
+         "flaky": false
       }
    ]
 }
