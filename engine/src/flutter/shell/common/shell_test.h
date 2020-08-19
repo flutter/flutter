@@ -50,6 +50,8 @@ class ShellTest : public FixtureTest {
 
   static void PlatformViewNotifyCreated(
       Shell* shell);  // This creates the surface
+  static void PlatformViewNotifyDestroyed(
+      Shell* shell);  // This destroys the surface
   static void RunEngine(Shell* shell, RunConfiguration configuration);
   static void RestartEngine(Shell* shell, RunConfiguration configuration);
 
