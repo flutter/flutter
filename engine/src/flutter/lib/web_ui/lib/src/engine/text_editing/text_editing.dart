@@ -180,9 +180,9 @@ class EngineAutofillForm {
     // Add a seperator between element identifiers.
     for (final String id in ids) {
       if (idBuffer.length > 0) {
-          idBuffer.write('*');
-        }
-     idBuffer.write(id);
+        idBuffer.write('*');
+      }
+      idBuffer.write(id);
     }
 
     final String formIdentifier = idBuffer.toString();
@@ -490,11 +490,13 @@ class EditingState {
 /// This corresponds to Flutter's [TextInputConfiguration].
 class InputConfiguration {
   InputConfiguration({
-    required this.inputType,
-    required this.inputAction,
-    required this.obscureText,
-    required this.autocorrect,
-    required this.textCapitalization,
+    this.inputType = EngineInputType.text,
+    this.inputAction = 'TextInputAction.done',
+    this.obscureText = false,
+    this.readOnly = false,
+    this.autocorrect = true,
+    this.textCapitalization =
+        const TextCapitalizationConfig.defaultCapitalization(),
     this.autofill,
     this.autofillGroup,
   });
@@ -502,14 +504,17 @@ class InputConfiguration {
   InputConfiguration.fromFrameworkMessage(
       Map<String, dynamic> flutterInputConfiguration)
       : inputType = EngineInputType.fromName(
-            flutterInputConfiguration['inputType']['name'],
-            isDecimal:
-                flutterInputConfiguration['inputType']['decimal'] ?? false),
-        inputAction = flutterInputConfiguration['inputAction'],
-        obscureText = flutterInputConfiguration['obscureText'],
-        autocorrect = flutterInputConfiguration['autocorrect'],
+          flutterInputConfiguration['inputType']['name'],
+          isDecimal: flutterInputConfiguration['inputType']['decimal'] ?? false,
+        ),
+        inputAction =
+            flutterInputConfiguration['inputAction'] ?? 'TextInputAction.done',
+        obscureText = flutterInputConfiguration['obscureText'] ?? false,
+        readOnly = flutterInputConfiguration['readOnly'] ?? false,
+        autocorrect = flutterInputConfiguration['autocorrect'] ?? true,
         textCapitalization = TextCapitalizationConfig.fromInputConfiguration(
-            flutterInputConfiguration['textCapitalization']),
+          flutterInputConfiguration['textCapitalization'],
+        ),
         autofill = flutterInputConfiguration.containsKey('autofill')
             ? AutofillInfo.fromFrameworkMessage(
                 flutterInputConfiguration['autofill'])
@@ -522,7 +527,12 @@ class InputConfiguration {
   final EngineInputType inputType;
 
   /// The default action for the input field.
-  final String? inputAction;
+  final String inputAction;
+
+  /// Whether the text field can be edited or not.
+  ///
+  /// Defaults to false.
+  final bool readOnly;
 
   /// Whether to hide the text being edited.
   final bool? obscureText;
@@ -534,7 +544,7 @@ class InputConfiguration {
   ///
   /// For future manual tests, note that autocorrect is an attribute only
   /// supported by Safari.
-  final bool? autocorrect;
+  final bool autocorrect;
 
   final AutofillInfo? autofill;
 
@@ -742,6 +752,9 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
     this._inputConfiguration = inputConfig;
 
     _domElement = inputConfig.inputType.createDomElement();
+    if (inputConfig.readOnly) {
+      domElement.setAttribute('readonly', 'readonly');
+    }
     if (inputConfig.obscureText!) {
       domElement.setAttribute('type', 'password');
     }
