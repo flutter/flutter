@@ -433,10 +433,20 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
         _autocompleteController.textEditingController.selection;
     final bool fieldIsFocused = selection.baseOffset >= 0
         && selection.extentOffset >= 0;
-    return fieldIsFocused && _selection == null && results != null && results.isNotEmpty;
+    final bool hasResults = results != null && results.isNotEmpty;
+    return fieldIsFocused && _selection == null && hasResults;
   }
 
   void _onChangedResults() {
+    final String query = _autocompleteController.textEditingController.text;
+    final List<T> results = _autocompleteController.results.value;
+    final bool queryIsOnlyResult = results != null && results.length == 1
+        && query == results[0].toString();
+    if (queryIsOnlyResult) {
+      setState(() {
+        _selection = results[0];
+      });
+    }
     _updateOverlay();
   }
 
