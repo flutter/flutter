@@ -637,7 +637,14 @@ TEST_F(ShellTest, ReportTimingsIsCalledSoonerInNonReleaseMode) {
 #else
   // Our batch time is 100ms. Hopefully the 500ms limit is relaxed enough to
   // make it not too flaky.
+  //
+  // TODO(https://github.com/flutter/flutter/issues/64087): Fuchsia uses a
+  // 2000ms timeout to handle slowdowns in FEMU.
+#if OS_FUCHSIA
+  ASSERT_TRUE(elapsed <= fml::TimeDelta::FromMilliseconds(2000));
+#else
   ASSERT_TRUE(elapsed <= fml::TimeDelta::FromMilliseconds(500));
+#endif
 #endif
 }
 
