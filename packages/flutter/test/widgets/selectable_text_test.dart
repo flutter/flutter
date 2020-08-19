@@ -2876,7 +2876,7 @@ void main() {
         home: Material(
           child: Center(
             child: SelectableText(
-              'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sed pretium nisl. Proin tristique facilisis eros, vitae laoreet leo. Morbi venenatis sapien sem, in venenatis erat pretium sit amet. Integer varius urna eget orci faucibus volutpat. Nulla tempor at nibh eget condimentum. Duis porta in augue at fermentum. Proin volutpat tellus sem, vel posuere enim tincidunt a. Nam ullamcorper est eu orci suscipit, quis consectetur nulla vulputate. Nunc at odio in massa lobortis finibus sit amet ac libero. Aenean massa eros, lobortis quis egestas ac, ultricies id augue. Nunc laoreet magna eu ex aliquet cursus.',
               maxLines: 1,
             ),
           ),

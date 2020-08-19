@@ -1965,7 +1965,7 @@ void main() {
 
   testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
+      text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges' * 60,
     );
     await tester.pumpWidget(
       CupertinoApp(
