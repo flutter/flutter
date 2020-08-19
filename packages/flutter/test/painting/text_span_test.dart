@@ -6,7 +6,8 @@
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
+
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('TextSpan equals', () {
@@ -43,6 +44,7 @@ void main() {
             TextSpan(),
           ],
         ),
+        null,
         TextSpan(
           text: 'c',
         ),
@@ -57,6 +59,7 @@ void main() {
       '    "b"\n'
       '    TextSpan:\n'
       '      (empty)\n'
+      '  <null child>\n'
       '  TextSpan:\n'
       '    "c"\n'
     ));
@@ -242,7 +245,21 @@ void main() {
         null,
       ],
     );
-    expect(() => text.computeToPlainText(StringBuffer()), anyOf(throwsFlutterError, throwsAssertionError));
+    FlutterError error;
+    try {
+      text.computeToPlainText(StringBuffer());
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error.toStringDeep(),
+      'FlutterError\n'
+      '   TextSpan contains a null child.\n'
+      '   A TextSpan object with a non-null child list should not have any\n'
+      '   nulls in its child list.\n'
+      '   The full text in question was:\n'
+      '     TextSpan("foo bar")\n'
+    );
   });
 
 }
