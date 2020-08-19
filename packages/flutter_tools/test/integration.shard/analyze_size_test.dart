@@ -15,6 +15,7 @@ const String iosDebugMessage = 'A summary of your iOS bundle analysis can be fou
 
 void main() {
   test('--analyze-size flag produces expected output on hello_world for Android', () async {
+    final String woringDirectory = globals.fs.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await const LocalProcessManager().run(<String>[
       flutterBin,
@@ -32,11 +33,13 @@ void main() {
       .split('\n')
       .firstWhere((String line) => line.contains(apkDebugMessage));
 
-    expect(globals.fs.file(globals.fs.path.join(line.split(apkDebugMessage).last.trim())), exists);
+    final String outputFilePath = line.split(apkDebugMessage).last.trim();
+    expect(globals.fs.file(globals.fs.path.join(woringDirectory, outputFilePath)), exists);
     expect(result.exitCode, 0);
   }, skip: const LocalPlatform().isWindows); // Not yet supported on Windows
 
   test('--analyze-size flag produces expected output on hello_world for iOS', () async {
+    final String woringDirectory = globals.fs.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await const LocalProcessManager().run(<String>[
       flutterBin,
@@ -44,17 +47,18 @@ void main() {
       'ios',
       '--analyze-size',
       '--no-codesign',
-    ], workingDirectory: globals.fs.path.join(getFlutterRoot(), 'examples', 'hello_world'));
+    ], workingDirectory: woringDirectory);
 
     print(result.stdout);
     print(result.stderr);
-    expect(result.stdout.toString(), contains('Runner.app/Frameworks/App.framework/App (Dart AOT)'));
+    expect(result.stdout.toString(), contains('App (Dart AOT)'));
 
     final String line = result.stdout.toString()
       .split('\n')
       .firstWhere((String line) => line.contains(iosDebugMessage));
 
-    expect(globals.fs.file(globals.fs.path.join(line.split(iosDebugMessage).last.trim())).existsSync(), true);
+    final String outputFilePath = line.split(iosDebugMessage).last.trim();
+    expect(globals.fs.file(globals.fs.path.join(woringDirectory, outputFilePath)), exists);
     expect(result.exitCode, 0);
   }, skip: !const LocalPlatform().isMacOS); // Only supported on macOS
 
