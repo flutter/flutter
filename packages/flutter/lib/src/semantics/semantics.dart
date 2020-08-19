@@ -2781,7 +2781,7 @@ class SemanticsConfiguration {
   ///
   /// This setting is often used in combination with [isSemanticBoundary] to
   /// create semantic boundaries that are either writable or not for children.
-  bool? explicitChildNodes = false;
+  bool explicitChildNodes = false;
 
   /// Whether the owning [RenderObject] makes other [RenderObject]s previously
   /// painted within the same semantic boundary unreachable for accessibility
