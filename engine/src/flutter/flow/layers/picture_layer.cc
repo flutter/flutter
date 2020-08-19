@@ -11,8 +11,10 @@ namespace flutter {
 PictureLayer::PictureLayer(const SkPoint& offset,
                            SkiaGPUObject<SkPicture> picture,
                            bool is_complex,
-                           bool will_change)
-    : offset_(offset),
+                           bool will_change,
+                           size_t external_size)
+    : Layer(external_size),
+      offset_(offset),
       picture_(std::move(picture)),
       is_complex_(is_complex),
       will_change_(will_change) {}
@@ -26,6 +28,7 @@ void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 
   SkPicture* sk_picture = picture();
 
+  bool cached = false;
   if (auto* cache = context->raster_cache) {
     TRACE_EVENT0("flutter", "PictureLayer::RasterCache (Preroll)");
 
@@ -34,8 +37,13 @@ void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
     ctm = RasterCache::GetIntegralTransCTM(ctm);
 #endif
-    cache->Prepare(context->gr_context, sk_picture, ctm,
-                   context->dst_color_space, is_complex_, will_change_);
+    cached = cache->Prepare(context->gr_context, sk_picture, ctm,
+                            context->dst_color_space, is_complex_, will_change_,
+                            external_size());
+  }
+
+  if (!cached) {
+    context->uncached_external_size += external_size();
   }
 
   SkRect bounds = sk_picture->cullRect().makeOffset(offset_.x(), offset_.y());
