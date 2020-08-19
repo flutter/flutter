@@ -332,14 +332,19 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrDirectContext> context,
     return false;
   }
 
-  const GrVkImageInfo image_info = {
-      vulkan_image_.vk_image,                // image
-      {vk_memory_, 0, memory_reqs.size, 0},  // alloc
-      image_create_info.tiling,              // tiling
-      image_create_info.initialLayout,       // layout
-      image_create_info.format,              // format
-      image_create_info.mipLevels,           // level count
-  };
+  GrVkAlloc alloc;
+  alloc.fMemory = vk_memory_;
+  alloc.fOffset = 0;
+  alloc.fSize = memory_reqs.size;
+  alloc.fFlags = 0;
+
+  GrVkImageInfo image_info;
+  image_info.fImage = vulkan_image_.vk_image;
+  image_info.fAlloc = alloc;
+  image_info.fImageTiling = image_create_info.tiling;
+  image_info.fImageLayout = image_create_info.initialLayout;
+  image_info.fFormat = image_create_info.format;
+  image_info.fLevelCount = image_create_info.mipLevels;
 
   GrBackendRenderTarget sk_render_target(size.width(), size.height(), 0,
                                          image_info);
