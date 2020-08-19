@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.6
 import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
@@ -20,19 +21,44 @@ import 'utils.dart';
 ///
 /// This manager can be used for both macOS and Linux.
 class ChromeDriverManager extends DriverManager {
-  ChromeDriverManager(String browser) : super(browser);
+  /// Directory which contains the Chrome's major version.
+  ///
+  /// On LUCI we are using the CIPD packages to control Chrome binaries we use.
+  /// There will be multiple CIPD packages loaded at the same time. Yaml file
+  /// `driver_version.yaml` contains the version number we want to use.
+  ///
+  /// Initialized to the current first to avoid the `Non-nullable` error.
+  // TODO: https://github.com/flutter/flutter/issues/53179. Local integration
+  // tests are still using the system Chrome.
+  io.Directory _browserDriverDirWithVersion;
+
+  ChromeDriverManager(String browser) : super(browser) {
+    final io.File lockFile = io.File(pathlib.join(
+        environment.webUiRootDir.path, 'dev', 'browser_lock.yaml'));
+    final YamlMap _configuration =
+        loadYaml(lockFile.readAsStringSync()) as YamlMap;
+    final String requiredChromeDriverVersion =
+        _configuration['required_driver_version']['chrome'] as String;
+    print('INFO: Major version for Chrome Driver $requiredChromeDriverVersion');
+    _browserDriverDirWithVersion = io.Directory(pathlib.join(
+        environment.webUiDartToolDir.path,
+        'drivers',
+        browser,
+        requiredChromeDriverVersion,
+        '${browser}driver-${io.Platform.operatingSystem.toString()}'));
+  }
 
   @override
   Future<void> _installDriver() async {
-    if (_browserDriverDir.existsSync()) {
-      _browserDriverDir.deleteSync(recursive: true);
+    if (_browserDriverDirWithVersion.existsSync()) {
+      _browserDriverDirWithVersion.deleteSync(recursive: true);
     }
 
-    _browserDriverDir.createSync(recursive: true);
+    _browserDriverDirWithVersion.createSync(recursive: true);
     temporaryDirectories.add(_drivers);
 
     final io.Directory temp = io.Directory.current;
-    io.Directory.current = _browserDriverDir;
+    io.Directory.current = _browserDriverDirWithVersion;
 
     try {
       // TODO(nurhan): https://github.com/flutter/flutter/issues/53179
@@ -50,17 +76,17 @@ class ChromeDriverManager extends DriverManager {
   /// Driver should already exist on LUCI as a CIPD package.
   @override
   Future<void> _verifyDriverForLUCI() {
-    if (!_browserDriverDir.existsSync()) {
+    if (!_browserDriverDirWithVersion.existsSync()) {
       throw StateError('Failed to locate Chrome driver on LUCI on path:'
-          '${_browserDriverDir.path}');
+          '${_browserDriverDirWithVersion.path}');
     }
     return Future<void>.value();
   }
 
   @override
-  Future<void> _startDriver(String driverPath) async {
+  Future<void> _startDriver() async {
     await startProcess('./chromedriver/chromedriver', ['--port=4444'],
-        workingDirectory: driverPath);
+        workingDirectory: _browserDriverDirWithVersion.path);
     print('INFO: Driver started');
   }
 }
@@ -106,9 +132,9 @@ class FirefoxDriverManager extends DriverManager {
   }
 
   @override
-  Future<void> _startDriver(String driverPath) async {
+  Future<void> _startDriver() async {
     await startProcess('./firefoxdriver/geckodriver', ['--port=4444'],
-        workingDirectory: driverPath);
+        workingDirectory: _browserDriverDir.path);
     print('INFO: Driver started');
   }
 
@@ -144,7 +170,7 @@ class SafariDriverManager extends DriverManager {
   }
 
   @override
-  Future<void> _startDriver(String driverPath) async {
+  Future<void> _startDriver() async {
     final SafariDriverRunner safariDriverRunner = SafariDriverRunner();
 
     final io.Process process =
@@ -184,7 +210,7 @@ abstract class DriverManager {
     } else {
       await _verifyDriverForLUCI();
     }
-    await _startDriver(_browserDriverDir.path);
+    await _startDriver();
   }
 
   /// Always re-install since driver can change frequently.
@@ -198,7 +224,7 @@ abstract class DriverManager {
   Future<void> _verifyDriverForLUCI();
 
   @protected
-  Future<void> _startDriver(String driverPath);
+  Future<void> _startDriver();
 
   static DriverManager chooseDriver(String browser) {
     if (browser == 'chrome') {

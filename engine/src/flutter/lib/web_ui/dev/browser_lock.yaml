@@ -1,11 +1,21 @@
+## Driver version in use.
+## For an integration test to run, the browser's major version and the driver's
+## major version should be equal. Please make sure the major version of
+## the binary for `chrome` is the same with `required_driver_version`.
+## (Major version meaning: For a browser that has version 13.0.5, the major
+## version is 13.)
+## Please refer to README's `Upgrade Browser Version` section for more details
+## on how to update the version number.
+required_driver_version:
+  ## Make sure the major version of the binary in `browser_lock.yaml` is the
+  ## same for Chrome.
+  chrome: '84'
 chrome:
   # It seems Chrome can't always release from the same build for all operating
   # systems, so we specify per-OS build number.
-  # Note: 741412 binary is for Chrome Version 82. Driver for Chrome version 83
-  # is not working with chrome.binary option.
-  Linux: 741412
-  Mac: 735194
-  Win: 768975
+  Linux: 768968 # Major version 84
+  Mac: 768985 # Major version 84
+  Win: 768975 # Major version 84
 firefox:
   version: '72.0'
 edge:
