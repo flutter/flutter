@@ -1629,18 +1629,25 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // action; The newline is already inserted. Otherwise, finalize
         // editing.
         if (!_isMultiline)
-          _finalizeEditing(true);
+          _finalizeEditing(action, shouldUnfocus: true);
         break;
       case TextInputAction.done:
       case TextInputAction.go:
-      case TextInputAction.send:
+      case TextInputAction.next:
+      case TextInputAction.previous:
       case TextInputAction.search:
-        _finalizeEditing(true);
+      case TextInputAction.send:
+        _finalizeEditing(action, shouldUnfocus: true);
         break;
-      default:
+      case TextInputAction.continueAction:
+      case TextInputAction.emergencyCall:
+      case TextInputAction.join:
+      case TextInputAction.none:
+      case TextInputAction.route:
+      case TextInputAction.unspecified:
         // Finalize editing, but don't give up focus because this keyboard
         // action does not imply the user is done inputting information.
-        _finalizeEditing(false);
+        _finalizeEditing(action, shouldUnfocus: false);
         break;
     }
   }
@@ -1725,16 +1732,38 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _finalizeEditing(bool shouldUnfocus) {
+  void _finalizeEditing(TextInputAction action, {@required bool shouldUnfocus}) {
     // Take any actions necessary now that the user has completed editing.
     if (widget.onEditingComplete != null) {
       widget.onEditingComplete();
     } else {
       // Default behavior if the developer did not provide an
-      // onEditingComplete callback: Finalize editing and remove focus.
+      // onEditingComplete callback: Finalize editing and remove focus, or move
+      // it to the next/previous field, depending on the action.
       widget.controller.clearComposing();
-      if (shouldUnfocus)
-        widget.focusNode.unfocus();
+      if (shouldUnfocus) {
+        switch (action) {
+          case TextInputAction.none:
+          case TextInputAction.unspecified:
+          case TextInputAction.done:
+          case TextInputAction.go:
+          case TextInputAction.search:
+          case TextInputAction.send:
+          case TextInputAction.continueAction:
+          case TextInputAction.join:
+          case TextInputAction.route:
+          case TextInputAction.emergencyCall:
+          case TextInputAction.newline:
+            widget.focusNode.unfocus();
+            break;
+          case TextInputAction.next:
+            widget.focusNode.nextFocus();
+            break;
+          case TextInputAction.previous:
+            widget.focusNode.previousFocus();
+            break;
+        }
+      }
     }
 
     // Invoke optional callback with the user's submitted content.
@@ -1883,7 +1912,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection = null;
       _lastFormattedUnmodifiedTextEditingValue = null;
       _receivedRemoteTextEditingValue = null;
-      _finalizeEditing(true);
+      _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
     }
   }
 
