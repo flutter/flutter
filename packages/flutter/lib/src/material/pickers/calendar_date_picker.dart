@@ -165,17 +165,13 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   @override
   void initState() {
     super.initState();
-    _mode = widget.initialCalendarMode;
-    _currentDisplayedMonthDate = DateTime(widget.initialDate.year, widget.initialDate.month);
-    _selectedDate = widget.initialDate;
+    _initWidgetState();
   }
 
   @override
   void didUpdateWidget(CalendarDatePicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _mode = widget.initialCalendarMode;
-    _currentDisplayedMonthDate = DateTime(widget.initialDate.year, widget.initialDate.month);
-    _selectedDate = widget.initialDate;
+    _initWidgetState();
   }
 
   @override
@@ -183,6 +179,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     super.didChangeDependencies();
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasDirectionality(context));
     _localizations = MaterialLocalizations.of(context);
     _textDirection = Directionality.of(context);
     if (!_announcedInitialDate) {
@@ -192,6 +189,12 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         _textDirection,
       );
     }
+  }
+
+  void _initWidgetState() {
+    _mode = widget.initialCalendarMode;
+    _currentDisplayedMonthDate = DateTime(widget.initialDate.year, widget.initialDate.month);
+    _selectedDate = widget.initialDate;
   }
 
   void _vibrate() {
@@ -294,6 +297,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasDirectionality(context));
     return Stack(
       children: <Widget>[
         SizedBox(
