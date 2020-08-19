@@ -30,7 +30,7 @@ dependencies:
   usage: 3.4.2
   webdriver: 2.1.2
   webkit_inspection_protocol: 0.7.3
-  xml: 4.3.0
+  xml: 4.4.0
   yaml: 2.2.1
   native_stack_traces: 0.3.7
   build_daemon: 2.1.4
@@ -113,4 +113,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: bea6
+# PUBSPEC CHECKSUM: d9a7
