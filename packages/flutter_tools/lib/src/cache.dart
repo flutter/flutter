@@ -1047,7 +1047,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
         ],
         environment: gradleEnvironment);
       if (processResult.exitCode != 0) {
-        globals.printError('Failed to download the Android dependencies');
+        globals.printError('Failed to setup dependencies' '\nRun with --verbose for more details');
       }
     } finally {
       status.stop();
