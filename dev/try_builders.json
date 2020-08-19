@@ -79,10 +79,16 @@
          "enabled":true
       },
       {
-         "name": "Windows tool_tests",
-         "repo": "flutter",
-         "task_name": "win_tool_tests",
-         "enabled":true
+        "name": "Windows tool_tests",
+        "repo": "flutter",
+        "task_name": "win_tool_tests",
+        "enabled":true
+      },
+      {
+        "name": "testonly_devicelab_tests",
+        "repo": "flutter",
+        "taskName": "testonly_devicelab_tests",
+        "enabled": true
       }
    ]
 }
