@@ -194,7 +194,6 @@ tasks:
       Measures the runtime performance of raster caching many pictures on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   cubic_bezier_perf__timeline_summary:
     description: >
@@ -643,7 +642,6 @@ tasks:
       Measure CPU/GPU usage percentages of a simple animation.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   smoke_catalina_start_up_ios:
     description: >
@@ -782,7 +780,6 @@ tasks:
       Android with e2e.
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   flutter_gallery__transition_perf_hybrid:
     description: >
