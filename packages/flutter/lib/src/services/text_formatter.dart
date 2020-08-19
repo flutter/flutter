@@ -370,6 +370,10 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue, // unused.
     TextEditingValue newValue,
   ) {
+    // Always return new value when it's composing.
+    if (newValue.isComposingRangeValid) {
+      return newValue;
+    }
     if (maxLength != null && maxLength! > 0 && newValue.text.characters.length > maxLength!) {
       // If already at the maximum and tried to enter even more, keep the old
       // value.
