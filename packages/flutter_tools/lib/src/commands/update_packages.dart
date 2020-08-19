@@ -58,6 +58,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'test_core': '0.3.12-nullsafety.1',
   'typed_data': '1.3.0-nullsafety.2',
   'vector_math': '2.1.0-nullsafety.2',
+  'platform': '3.0.0-nullsafety.1',
   // https://github.com/dart-lang/build/issues/2772
   'build_runner_core': '5.2.0',
 };
