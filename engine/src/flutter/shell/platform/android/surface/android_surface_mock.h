@@ -48,7 +48,7 @@ class AndroidSurfaceMock final : public GPUSurfaceGLDelegate,
   bool GLContextPresent() override;
 
   // |GPUSurfaceGLDelegate|
-  intptr_t GLContextFBO() const override;
+  intptr_t GLContextFBO(GLFrameInfo frame_info) const override;
 
   // |GPUSurfaceGLDelegate|
   ExternalViewEmbedder* GetExternalViewEmbedder() override;

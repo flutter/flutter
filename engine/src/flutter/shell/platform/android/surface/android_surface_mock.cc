@@ -18,7 +18,7 @@ bool AndroidSurfaceMock::GLContextPresent() {
   return true;
 }
 
-intptr_t AndroidSurfaceMock::GLContextFBO() const {
+intptr_t AndroidSurfaceMock::GLContextFBO(GLFrameInfo frame_info) const {
   return 0;
 }
 

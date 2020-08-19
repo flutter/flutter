@@ -49,6 +49,12 @@ class EmbedderConfigBuilder {
 
   void SetOpenGLRendererConfig(SkISize surface_size);
 
+  // Used to explicitly set an `open_gl.fbo_callback`. Using this method will
+  // cause your test to fail since the ctor for this class sets
+  // `open_gl.fbo_callback_with_frame_info`. This method exists as a utility to
+  // explicitly test this behavior.
+  void SetOpenGLFBOCallBack();
+
   void SetAssetsPath();
 
   void SetSnapshots();

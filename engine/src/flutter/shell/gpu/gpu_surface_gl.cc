@@ -204,10 +204,12 @@ bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
 
   sk_sp<SkSurface> onscreen_surface;
 
+  GLFrameInfo frame_info = {static_cast<uint32_t>(size.width()),
+                            static_cast<uint32_t>(size.height())};
   onscreen_surface =
-      WrapOnscreenSurface(context_.get(),            // GL context
-                          size,                      // root surface size
-                          delegate_->GLContextFBO()  // window FBO ID
+      WrapOnscreenSurface(context_.get(),  // GL context
+                          size,            // root surface size
+                          delegate_->GLContextFBO(frame_info)  // window FBO ID
       );
 
   if (onscreen_surface == nullptr) {
@@ -287,13 +289,16 @@ bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
     auto current_size =
         SkISize::Make(onscreen_surface_->width(), onscreen_surface_->height());
 
+    GLFrameInfo frame_info = {static_cast<uint32_t>(current_size.width()),
+                              static_cast<uint32_t>(current_size.height())};
+
     // The FBO has changed, ask the delegate for the new FBO and do a surface
     // re-wrap.
-    auto new_onscreen_surface =
-        WrapOnscreenSurface(context_.get(),            // GL context
-                            current_size,              // root surface size
-                            delegate_->GLContextFBO()  // window FBO ID
-        );
+    auto new_onscreen_surface = WrapOnscreenSurface(
+        context_.get(),                      // GL context
+        current_size,                        // root surface size
+        delegate_->GLContextFBO(frame_info)  // window FBO ID
+    );
 
     if (!new_onscreen_surface) {
       return false;

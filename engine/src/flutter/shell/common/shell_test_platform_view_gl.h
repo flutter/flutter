@@ -56,7 +56,7 @@ class ShellTestPlatformViewGL : public ShellTestPlatformView,
   bool GLContextPresent() override;
 
   // |GPUSurfaceGLDelegate|
-  intptr_t GLContextFBO() const override;
+  intptr_t GLContextFBO(GLFrameInfo frame_info) const override;
 
   // |GPUSurfaceGLDelegate|
   GLProcResolver GetGLProcResolver() const override;

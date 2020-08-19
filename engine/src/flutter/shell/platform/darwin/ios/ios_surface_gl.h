@@ -43,7 +43,7 @@ class IOSSurfaceGL final : public IOSSurface, public GPUSurfaceGLDelegate {
   bool GLContextPresent() override;
 
   // |GPUSurfaceGLDelegate|
-  intptr_t GLContextFBO() const override;
+  intptr_t GLContextFBO(GLFrameInfo frame_info) const override;
 
   // |GPUSurfaceGLDelegate|
   bool SurfaceSupportsReadback() const override;
