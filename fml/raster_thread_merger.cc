@@ -17,23 +17,41 @@ RasterThreadMerger::RasterThreadMerger(fml::TaskQueueId platform_queue_id,
       gpu_queue_id_(gpu_queue_id),
       task_queues_(fml::MessageLoopTaskQueues::GetInstance()),
       lease_term_(kLeaseNotSet) {
-  is_merged_ = task_queues_->Owns(platform_queue_id_, gpu_queue_id_);
+  FML_CHECK(!task_queues_->Owns(platform_queue_id_, gpu_queue_id_));
 }
 
 void RasterThreadMerger::MergeWithLease(size_t lease_term) {
+  if (TaskQueuesAreSame()) {
+    return;
+  }
+
   FML_DCHECK(lease_term > 0) << "lease_term should be positive.";
-  if (!is_merged_) {
-    is_merged_ = task_queues_->Merge(platform_queue_id_, gpu_queue_id_);
+  std::scoped_lock lock(lease_term_mutex_);
+  if (!IsMergedUnSafe()) {
+    bool success = task_queues_->Merge(platform_queue_id_, gpu_queue_id_);
+    FML_CHECK(success) << "Unable to merge the raster and platform threads.";
     lease_term_ = lease_term;
   }
+  merged_condition_.notify_one();
+}
+
+void RasterThreadMerger::UnMergeNow() {
+  if (TaskQueuesAreSame()) {
+    return;
+  }
+
+  std::scoped_lock lock(lease_term_mutex_);
+  lease_term_ = 0;
+  bool success = task_queues_->Unmerge(platform_queue_id_);
+  FML_CHECK(success) << "Unable to un-merge the raster and platform threads.";
 }
 
 bool RasterThreadMerger::IsOnPlatformThread() const {
   return MessageLoop::GetCurrentTaskQueueId() == platform_queue_id_;
 }
 
-bool RasterThreadMerger::IsOnRasterizingThread() const {
-  if (is_merged_) {
+bool RasterThreadMerger::IsOnRasterizingThread() {
+  if (IsMergedUnSafe()) {
     return IsOnPlatformThread();
   } else {
     return !IsOnPlatformThread();
@@ -41,24 +59,45 @@ bool RasterThreadMerger::IsOnRasterizingThread() const {
 }
 
 void RasterThreadMerger::ExtendLeaseTo(size_t lease_term) {
-  FML_DCHECK(lease_term > 0) << "lease_term should be positive.";
+  if (TaskQueuesAreSame()) {
+    return;
+  }
+  std::scoped_lock lock(lease_term_mutex_);
+  FML_DCHECK(IsMergedUnSafe()) << "lease_term should be positive.";
   if (lease_term_ != kLeaseNotSet &&
       static_cast<int>(lease_term) > lease_term_) {
     lease_term_ = lease_term;
   }
 }
 
-bool RasterThreadMerger::IsMerged() const {
-  return is_merged_;
+bool RasterThreadMerger::IsMerged() {
+  std::scoped_lock lock(lease_term_mutex_);
+  return IsMergedUnSafe();
+}
+
+bool RasterThreadMerger::IsMergedUnSafe() {
+  return lease_term_ > 0 || TaskQueuesAreSame();
+}
+
+bool RasterThreadMerger::TaskQueuesAreSame() {
+  return platform_queue_id_ == gpu_queue_id_;
+}
+
+void RasterThreadMerger::WaitUntilMerged() {
+  if (TaskQueuesAreSame()) {
+    return;
+  }
+  FML_CHECK(IsOnPlatformThread());
+  std::unique_lock<std::mutex> lock(lease_term_mutex_);
+  merged_condition_.wait(lock, [&] { return IsMergedUnSafe(); });
 }
 
 RasterThreadStatus RasterThreadMerger::DecrementLease() {
-  if (!is_merged_) {
-    return RasterThreadStatus::kRemainsUnmerged;
+  if (TaskQueuesAreSame()) {
+    return RasterThreadStatus::kRemainsMerged;
   }
-
-  // we haven't been set to merge.
-  if (lease_term_ == kLeaseNotSet) {
+  std::unique_lock<std::mutex> lock(lease_term_mutex_);
+  if (!IsMergedUnSafe()) {
     return RasterThreadStatus::kRemainsUnmerged;
   }
 
@@ -66,9 +105,9 @@ RasterThreadStatus RasterThreadMerger::DecrementLease() {
       << "lease_term should always be positive when merged.";
   lease_term_--;
   if (lease_term_ == 0) {
-    bool success = task_queues_->Unmerge(platform_queue_id_);
-    FML_CHECK(success) << "Unable to un-merge the raster and platform threads.";
-    is_merged_ = false;
+    // |UnMergeNow| is going to acquire the lock again.
+    lock.unlock();
+    UnMergeNow();
     return RasterThreadStatus::kUnmergedNow;
   }
 

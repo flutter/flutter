@@ -20,12 +20,17 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
 
   ShellTestExternalViewEmbedder(const EndFrameCallBack& end_frame_call_back,
                                 PostPrerollResult post_preroll_result,
-                                bool support_thread_merging)
-      : end_frame_call_back_(end_frame_call_back),
-        post_preroll_result_(post_preroll_result),
-        support_thread_merging_(support_thread_merging) {}
+                                bool support_thread_merging);
 
   ~ShellTestExternalViewEmbedder() = default;
+
+  // Updates the post preroll result so the |PostPrerollAction| after always
+  // returns the new `post_preroll_result`.
+  void UpdatePostPrerollResult(PostPrerollResult post_preroll_result);
+
+  // Updates the post preroll result to `PostPrerollResult::kResubmitFrame` for
+  // only the next frame.
+  void SetResubmitOnce();
 
  private:
   // |ExternalViewEmbedder|
@@ -69,7 +74,8 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
   bool SupportsDynamicThreadMerging() override;
 
   const EndFrameCallBack end_frame_call_back_;
-  const PostPrerollResult post_preroll_result_;
+  PostPrerollResult post_preroll_result_;
+  bool resubmit_once_;
 
   bool support_thread_merging_;
 

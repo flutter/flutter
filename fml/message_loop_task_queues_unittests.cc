@@ -173,6 +173,13 @@ TEST(MessageLoopTaskQueue, NotifyObserversWhileCreatingQueues) {
   before_second_observer.Signal();
   notify_observers.join();
 }
+
+TEST(MessageLoopTaskQueue, QueueDoNotOwnItself) {
+  auto task_queue = fml::MessageLoopTaskQueues::GetInstance();
+  auto queue_id = task_queue->CreateTaskQueue();
+  ASSERT_FALSE(task_queue->Owns(queue_id, queue_id));
+}
+
 // TODO(chunhtai): This unit-test is flaky and sometimes fails asynchronizely
 // after the test has finished.
 // https://github.com/flutter/flutter/issues/43858
