@@ -104,7 +104,7 @@ class _RestorationScopeState extends State<RestorationScope> with RestorationMix
   String get restorationId => widget.restorationId;
 
   @override
-  void restoreState(RestorationBucket oldBucket) {
+  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
     // Nothing to do.
     // The bucket gets injected into the widget tree in the build method.
   }
@@ -648,7 +648,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 ///   String get restorationId => widget.restorationId;
 ///
 ///   @override
-///   void restoreState(RestorationBucket oldBucket) {
+///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
 ///     // All restorable properties must be registered with the mixin. After
 ///     // registration, the counter either has its old value restored or is
 ///     // initialized to its default value.
@@ -661,6 +661,12 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 ///       // the value getter and setter.
 ///       _counter.value++;
 ///     });
+///   }
+///
+///   @override
+///   void dispose() {
+///     _counter.dispose();
+///     super.dispose();
 ///   }
 ///
 ///   @override
@@ -777,7 +783,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// [bucket].
   @mustCallSuper
   @protected
-  void restoreState(RestorationBucket oldBucket);
+  void restoreState(RestorationBucket oldBucket, bool initialRestore);
 
   /// Called when [bucket] switches between null and non-null values.
   ///
@@ -798,8 +804,8 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   @mustCallSuper
   @protected
   void didToggleBucket(RestorationBucket oldBucket) {
-    // When restore is pending, restoreState must be called instead.
-    assert(!restorePending);
+    // When a bucket is replaced, must `restoreState` is called instead.
+    assert(_bucket?.isReplacing != true);
   }
 
   // Maps properties to their listeners.
@@ -894,8 +900,22 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// [restorationId] was caused by an updated widget.
   @protected
   void didUpdateRestorationId() {
-    if (_bucket?.restorationId != restorationId && !restorePending) {
-      _updateBucketIfNecessary();
+    // There's nothing to do if:
+    //  - We don't have a parent to claim a bucket from.
+    //  - Our current bucket already uses the provided restoration ID.
+    //  - There's a restore pending, which means that didUpdateDependencies
+    //    will be called and we handle the rename there.
+    if (_currentParent == null || _bucket?.restorationId == restorationId || restorePending) {
+      return;
+    }
+
+    final RestorationBucket oldBucket = _bucket;
+    assert(!restorePending);
+    final bool didReplaceBucket = _updateBucketIfNecessary(parent: _currentParent, restorePending: false);
+    if (didReplaceBucket) {
+      assert(oldBucket != _bucket);
+      assert(_bucket == null || oldBucket == null);
+      oldBucket?.dispose();
     }
   }
 
@@ -917,98 +937,105 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// While this is true, [bucket] will also still return the old bucket with
   /// the old restoration data. It will update to the new bucket with the new
   /// data just before [restoreState] is invoked.
-  bool get restorePending => _restorePending;
-  bool _restorePending = true;
+  bool get restorePending {
+    if (_firstRestorePending) {
+      return true;
+    }
+    if (restorationId == null) {
+      return false;
+    }
+    final RestorationBucket potentialNewParent = RestorationScope.of(context);
+    return potentialNewParent != _currentParent && potentialNewParent?.isReplacing == true;
+  }
 
   List<RestorableProperty<Object>> _debugPropertiesWaitingForReregistration;
   bool get _debugDoingRestore => _debugPropertiesWaitingForReregistration != null;
 
+  bool _firstRestorePending = true;
+  RestorationBucket _currentParent;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    RestorationBucket oldBucket;
-    if (_restorePending) {
-      oldBucket = _bucket;
-      // Throw away the old bucket so [_updateBucketIfNecessary] will claim a
-      // new one with the new restoration data.
-      _bucket = null;
+
+    final RestorationBucket oldBucket = _bucket;
+    final bool needsRestore = restorePending;
+    _currentParent = RestorationScope.of(context);
+
+    final bool didReplaceBucket = _updateBucketIfNecessary(parent: _currentParent, restorePending: needsRestore);
+
+    if (needsRestore) {
+      _doRestore(oldBucket);
     }
-    _updateBucketIfNecessary();
-    if (_restorePending) {
-      _restorePending = false;
-
-      assert(() {
-        _debugPropertiesWaitingForReregistration = _properties.keys.toList();
-        return true;
-      }());
-
-      restoreState(oldBucket);
-
-      assert(() {
-        if (_debugPropertiesWaitingForReregistration.isNotEmpty) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary(
-              'Previously registered RestorableProperties must be re-registered in "restoreState".',
-            ),
-            ErrorDescription(
-              'The RestorableProperties with the following IDs were not re-registered to $this when '
-              '"restoreState" was called:',
-            ),
-            ..._debugPropertiesWaitingForReregistration.map((RestorableProperty<Object> property) => ErrorDescription(
-              ' * ${property._restorationId}',
-            )),
-          ]);
-        }
-        _debugPropertiesWaitingForReregistration = null;
-        return true;
-      }());
-
+    if (didReplaceBucket) {
+      assert(oldBucket != _bucket);
       oldBucket?.dispose();
     }
   }
 
-  void _markNeedsRestore() {
-    _restorePending = true;
-    // [didChangeDependencies] will be called next because our bucket can only
-    // become invalid if our parent bucket ([RestorationScope.of]) is replaced
-    // with a new one.
+  void _doRestore(RestorationBucket oldBucket) {
+    assert(() {
+      _debugPropertiesWaitingForReregistration = _properties.keys.toList();
+      return true;
+    }());
+
+    restoreState(oldBucket, _firstRestorePending);
+    _firstRestorePending = false;
+
+    assert(() {
+      if (_debugPropertiesWaitingForReregistration.isNotEmpty) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'Previously registered RestorableProperties must be re-registered in "restoreState".',
+          ),
+          ErrorDescription(
+            'The RestorableProperties with the following IDs were not re-registered to $this when '
+                '"restoreState" was called:',
+          ),
+          ..._debugPropertiesWaitingForReregistration.map((RestorableProperty<Object> property) => ErrorDescription(
+            ' * ${property._restorationId}',
+          )),
+        ]);
+      }
+      _debugPropertiesWaitingForReregistration = null;
+      return true;
+    }());
   }
 
-  void _updateBucketIfNecessary() {
-    if (restorationId == null) {
-      _setNewBucketIfNecessary(newBucket: null);
+  // Returns true if `bucket` has been replaced with a new bucket. It's the
+  // responsibility of the caller to dispose the old bucket when this returns true.
+  bool _updateBucketIfNecessary({
+    @required RestorationBucket parent,
+    @required bool restorePending,
+  }) {
+    if (restorationId == null || parent == null) {
+      final bool didReplace = _setNewBucketIfNecessary(newBucket: null, restorePending: restorePending);
       assert(_bucket == null);
-      return;
+      return didReplace;
     }
-    final RestorationBucket newParent = RestorationScope.of(context);
-    if (newParent == null) {
-      _setNewBucketIfNecessary(newBucket: null);
-      assert(_bucket == null);
-      return;
-    }
-    if (_bucket == null) {
-      assert(newParent != null);
-      assert(restorationId != null);
-      final RestorationBucket newBucket = newParent.claimChild(restorationId, debugOwner: this)
-        ..addListener(_markNeedsRestore);
+    assert(restorationId != null);
+    assert(parent != null);
+    if (restorePending || _bucket == null) {
+      final RestorationBucket newBucket = parent.claimChild(restorationId, debugOwner: this);
       assert(newBucket != null);
-      _setNewBucketIfNecessary(newBucket: newBucket);
+      final bool didReplace = _setNewBucketIfNecessary(newBucket: newBucket, restorePending: restorePending);
       assert(_bucket == newBucket);
-      return;
+      return didReplace;
     }
     // We have an existing bucket, make sure it has the right parent and id.
     assert(_bucket != null);
-    assert(newParent != null);
-    assert(restorationId != null);
+    assert(!restorePending);
     _bucket.rename(restorationId);
-    newParent.adoptChild(_bucket);
+    parent.adoptChild(_bucket);
+    return false;
   }
 
-  void _setNewBucketIfNecessary({@required RestorationBucket newBucket}) {
+  // Returns true if `bucket` has been replaced with a new bucket. It's the
+  // responsibility of the caller to dispose the old bucket when this returns true.
+  bool _setNewBucketIfNecessary({@required RestorationBucket newBucket, @required bool restorePending}) {
     if (newBucket == _bucket) {
-      return;
+      return false;
     }
-    assert(newBucket == null || _bucket == null);
     final RestorationBucket oldBucket = _bucket;
     _bucket = newBucket;
     if (!restorePending) {
@@ -1018,7 +1045,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
       }
       didToggleBucket(oldBucket);
     }
-    oldBucket?.dispose();
+    return true;
   }
 
   void _updateProperty(RestorableProperty<Object> property) {

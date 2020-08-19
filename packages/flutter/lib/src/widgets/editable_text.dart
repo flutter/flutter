@@ -40,6 +40,9 @@ export 'package:flutter/services.dart' show TextEditingValue, TextSelection, Tex
 /// (including the cursor location).
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause cause);
 
+/// Signature for the callback that reports the app private command results.
+typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
+
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
 // to transparent, is twice this duration.
@@ -413,6 +416,7 @@ class EditableText extends StatefulWidget {
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
+    this.onAppPrivateCommand,
     this.onSelectionChanged,
     this.onSelectionHandleTapped,
     List<TextInputFormatter> inputFormatters,
@@ -441,6 +445,7 @@ class EditableText extends StatefulWidget {
     ),
     this.autofillHints,
     this.clipBehavior = Clip.hardEdge,
+    this.restorationId,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1030,6 +1035,11 @@ class EditableText extends StatefulWidget {
   /// {@end-tool}
   final ValueChanged<String> onSubmitted;
 
+  /// {@template flutter.widgets.editableText.onAppPrivateCommand}
+  /// Called when the result of an app private command is received.
+  /// {@endtemplate}
+  final AppPrivateCommandCallback onAppPrivateCommand;
+
   /// Called when the user changes the selection of text (including the cursor
   /// location).
   final SelectionChangedCallback onSelectionChanged;
@@ -1208,6 +1218,25 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
+
+  /// Restoration ID to save and restore the scroll offset of the
+  /// [EditableText].
+  ///
+  /// If a restoration id is provided, the [EditableText] will persist its
+  /// current scroll offset and restore it during state restoration.
+  ///
+  /// The scroll offset is persisted in a [RestorationBucket] claimed from
+  /// the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// Persisting and restoring the content of the [EditableText] is the
+  /// responsibilility of the owner of the [controller], who may use a
+  /// [RestorableTextEditingController] for that purpose.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  final String restorationId;
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
@@ -1600,20 +1629,32 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // action; The newline is already inserted. Otherwise, finalize
         // editing.
         if (!_isMultiline)
-          _finalizeEditing(true);
+          _finalizeEditing(action, shouldUnfocus: true);
         break;
       case TextInputAction.done:
       case TextInputAction.go:
-      case TextInputAction.send:
+      case TextInputAction.next:
+      case TextInputAction.previous:
       case TextInputAction.search:
-        _finalizeEditing(true);
+      case TextInputAction.send:
+        _finalizeEditing(action, shouldUnfocus: true);
         break;
-      default:
+      case TextInputAction.continueAction:
+      case TextInputAction.emergencyCall:
+      case TextInputAction.join:
+      case TextInputAction.none:
+      case TextInputAction.route:
+      case TextInputAction.unspecified:
         // Finalize editing, but don't give up focus because this keyboard
         // action does not imply the user is done inputting information.
-        _finalizeEditing(false);
+        _finalizeEditing(action, shouldUnfocus: false);
         break;
     }
+  }
+
+  @override
+  void performPrivateCommand(String action, Map<String, dynamic> data) {
+    widget.onAppPrivateCommand(action, data);
   }
 
   // The original position of the caret on FloatingCursorDragState.start.
@@ -1691,16 +1732,38 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _finalizeEditing(bool shouldUnfocus) {
+  void _finalizeEditing(TextInputAction action, {@required bool shouldUnfocus}) {
     // Take any actions necessary now that the user has completed editing.
     if (widget.onEditingComplete != null) {
       widget.onEditingComplete();
     } else {
       // Default behavior if the developer did not provide an
-      // onEditingComplete callback: Finalize editing and remove focus.
+      // onEditingComplete callback: Finalize editing and remove focus, or move
+      // it to the next/previous field, depending on the action.
       widget.controller.clearComposing();
-      if (shouldUnfocus)
-        widget.focusNode.unfocus();
+      if (shouldUnfocus) {
+        switch (action) {
+          case TextInputAction.none:
+          case TextInputAction.unspecified:
+          case TextInputAction.done:
+          case TextInputAction.go:
+          case TextInputAction.search:
+          case TextInputAction.send:
+          case TextInputAction.continueAction:
+          case TextInputAction.join:
+          case TextInputAction.route:
+          case TextInputAction.emergencyCall:
+          case TextInputAction.newline:
+            widget.focusNode.unfocus();
+            break;
+          case TextInputAction.next:
+            widget.focusNode.nextFocus();
+            break;
+          case TextInputAction.previous:
+            widget.focusNode.previousFocus();
+            break;
+        }
+      }
     }
 
     // Invoke optional callback with the user's submitted content.
@@ -1849,7 +1912,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection = null;
       _lastFormattedUnmodifiedTextEditingValue = null;
       _receivedRemoteTextEditingValue = null;
-      _finalizeEditing(true);
+      _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
     }
   }
 
@@ -2309,6 +2372,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         controller: _scrollController,
         physics: widget.scrollPhysics,
         dragStartBehavior: widget.dragStartBehavior,
+        restorationId: widget.restorationId,
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return CompositedTransformTarget(
             link: _toolbarLayerLink,

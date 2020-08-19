@@ -8,7 +8,6 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -113,6 +112,7 @@ class FlutterOptions {
   static const String kNullSafety = 'sound-null-safety';
   static const String kDeviceUser = 'device-user';
   static const String kAnalyzeSize = 'analyze-size';
+  static const String kNullAssertions = 'null-assertions';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -500,6 +500,12 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: null,
       hide: hide,
     );
+    argParser.addFlag(FlutterOptions.kNullAssertions,
+      help:
+        'Perform additional null assertions on the boundaries of migrated and '
+        'unmigrated code. This setting is not currently supported on desktop '
+        'devices.'
+    );
   }
 
   void usesExtraFrontendOptions() {
@@ -602,8 +608,8 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       FlutterOptions.kAnalyzeSize,
       defaultsTo: false,
-      help: 'Whether to produce additonal profile information for artifact output size. '
-        'This flag is only support on release builds on macOS/Linux hosts.'
+      help: 'Whether to produce additional profile information for artifact output size. '
+        'This flag is only supported on release builds on macOS/Linux hosts.'
     );
   }
 
@@ -789,7 +795,9 @@ abstract class FlutterCommand extends Command<void> {
   void _printDeprecationWarning() {
     if (deprecated) {
       globals.printStatus('$warningMark The "$name" command is deprecated and '
-          'will be removed in a future version of Flutter.');
+          'will be removed in a future version of Flutter. '
+          'See https://flutter.dev/docs/development/tools/sdk/releases '
+          'for previous releases of Flutter.');
       globals.printStatus('');
     }
   }
@@ -834,7 +842,7 @@ abstract class FlutterCommand extends Command<void> {
     ];
 
     final String label = labels
-        .where((String label) => !isBlank(label))
+        .where((String label) => !_isBlank(label))
         .join('-');
     globals.flutterUsage.sendTiming(
       'flutter',
@@ -1129,3 +1137,6 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
   }
   return null;
 }
+
+/// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
+bool _isBlank(String s) => s == null || s.trim().isEmpty;

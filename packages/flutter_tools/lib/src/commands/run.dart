@@ -423,6 +423,7 @@ class RunCommand extends RunCommandBase {
         fastStart: boolArg('fast-start')
           && !runningWithPrebuiltApplication
           && devices.every((Device device) => device.supportsFastStart),
+        nullAssertions: boolArg('null-assertions'),
       );
     }
   }

@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -257,11 +259,26 @@ class RestorableTextEditingController extends RestorableListenable<TextEditingCo
     return value.text;
   }
 
+  TextEditingController _controller;
+
+  @override
+  void initWithValue(TextEditingController value) {
+    _disposeControllerIfNecessary();
+    _controller = value;
+    super.initWithValue(value);
+  }
+
   @override
   void dispose() {
-    if (isRegistered) {
-      value.dispose();
-    }
     super.dispose();
+    _disposeControllerIfNecessary();
+  }
+
+  void _disposeControllerIfNecessary() {
+    if (_controller != null) {
+      // Scheduling a microtask for dispose to give other entities a chance
+      // to remove their listeners first.
+      scheduleMicrotask(_controller.dispose);
+    }
   }
 }

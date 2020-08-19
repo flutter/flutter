@@ -286,21 +286,10 @@ class GLFWKeyHelper with KeyHelper {
 
   @override
   KeyboardSide getModifierSide(ModifierKey key) {
-    switch (key) {
-      case ModifierKey.controlModifier:
-      case ModifierKey.shiftModifier:
-      case ModifierKey.altModifier:
-      case ModifierKey.metaModifier:
-        // Neither GLFW or X11 provide a distinction between left and right modifiers, so defaults to KeyboardSide.any.
-        // https://code.woboq.org/qt5/include/X11/X.h.html#_M/ShiftMask
-        return KeyboardSide.any;
-      case ModifierKey.capsLockModifier:
-      case ModifierKey.numLockModifier:
-      case ModifierKey.functionModifier:
-      case ModifierKey.symbolModifier:
-      case ModifierKey.scrollLockModifier:
-        return KeyboardSide.all;
-    }
+    // Neither GLFW nor X11 provide a distinction between left and right
+    // modifiers, so defaults to KeyboardSide.all.
+    // https://code.woboq.org/qt5/include/X11/X.h.html#_M/ShiftMask
+    return KeyboardSide.all;
   }
 
   @override
@@ -435,21 +424,10 @@ class GtkKeyHelper with KeyHelper {
 
   @override
   KeyboardSide getModifierSide(ModifierKey key) {
-    switch (key) {
-      case ModifierKey.controlModifier:
-      case ModifierKey.shiftModifier:
-      case ModifierKey.altModifier:
-      case ModifierKey.metaModifier:
-        // Neither GTK or X11 provide a distinction between left and right modifiers, so defaults to KeyboardSide.any.
-        // https://code.woboq.org/qt5/include/X11/X.h.html#_M/ShiftMask
-        return KeyboardSide.any;
-      case ModifierKey.capsLockModifier:
-      case ModifierKey.numLockModifier:
-      case ModifierKey.functionModifier:
-      case ModifierKey.symbolModifier:
-      case ModifierKey.scrollLockModifier:
-        return KeyboardSide.all;
-    }
+    // Neither GTK nor X11 provide a distinction between left and right
+    // modifiers, so defaults to KeyboardSide.all.
+    // https://code.woboq.org/qt5/include/X11/X.h.html#_M/ShiftMask
+    return KeyboardSide.all;
   }
 
   @override
