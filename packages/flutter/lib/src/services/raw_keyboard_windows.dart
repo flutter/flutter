@@ -104,10 +104,9 @@ class RawKeyEventDataWindows extends RawKeyEventData {
       return false;
     }
     // If only the "anyMask" bit is set, then we respond true for requests of
-    // whether either left or right is pressed.
-    // Handles the case where Windows supplies just the "either" modifier flag,
-    // but not the left/right flag. (e.g. modifierShift but not
-    // modifierLeftShift).
+    // whether either left or right is pressed. Handles the case where Windows
+    // supplies just the "either" modifier flag, but not the left/right flag.
+    // (e.g. modifierShift but not modifierLeftShift).
     final bool anyOnly = modifiers & (leftMask | rightMask | anyMask) == anyMask;
     switch (side) {
       case KeyboardSide.any:
