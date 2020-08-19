@@ -9,7 +9,7 @@ function deploy {
   local total_tries="$1"
   local remaining_tries=$(($total_tries - 1))
   shift
-  while [[ "$remaining_tries" > 0 ]]; do
+  while [[ "$remaining_tries" -gt 0 ]]; do
     (cd "$FLUTTER_ROOT/dev/docs" && firebase --debug deploy --token "$FIREBASE_TOKEN" --project "$@") && break
     remaining_tries=$(($remaining_tries - 1))
     echo "Error: Unable to deploy documentation to Firebase. Retrying in five seconds... ($remaining_tries tries left)"
@@ -160,10 +160,11 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
 fi
 
 generate_docs
-if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
-    (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
-    # TODO(tvolkert): re-enable (https://github.com/flutter/flutter/issues/60646)
-    # (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
-    (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
-    deploy_docs
+# Skip publishing docs for PRs and release candidate branches
+if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" && ! "$CIRRUS_BRANCH" =~ ^flutter-[0-9]+\.[0-9]+-candidate\.[0-9]+$ ]]; then
+  (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
+  # TODO(tvolkert): re-enable (https://github.com/flutter/flutter/issues/60646)
+  # (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
+  (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
+  deploy_docs
 fi
