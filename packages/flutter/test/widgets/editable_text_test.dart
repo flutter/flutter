@@ -1302,6 +1302,77 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
+  testWidgets('Handles the read-only flag correctly', (WidgetTester tester) async {
+    final TextEditingController controller =
+        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Select the first word "Lorem".
+    state.renderEditable.selectWordsInRange(
+      from: Offset.zero,
+      cause: SelectionChangedCause.tap,
+    );
+
+    if (kIsWeb) {
+      // On the web, a regular connection to the platform should've been made
+      // with the `readOnly` flag set to true.
+      expect(tester.testTextInput.hasAnyClients, isTrue);
+      expect(tester.testTextInput.setClientArgs['readOnly'], isTrue);
+      expect(tester.testTextInput.editingState['text'], equals('Lorem'));
+    } else {
+      // On non-web platforms, a read-only field doesn't need a connection with
+      // the platform.
+      expect(tester.testTextInput.hasAnyClients, isFalse);
+    }
+  });
+
+  testWidgets('Does not accept updates when read-only', (WidgetTester tester) async {
+    final TextEditingController controller =
+        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Select something.
+    state.renderEditable.selectWordsInRange(
+      from: Offset.zero,
+      cause: SelectionChangedCause.tap,
+    );
+
+    expect(tester.testTextInput.hasAnyClients, kIsWeb ? isTrue : isFalse);
+    if (kIsWeb) {
+      // On the web, the input connection exists, but text updates should be
+      // ignored.
+      tester.testTextInput.enterText('Foo bar');
+      // No change.
+      expect(controller.text, 'Lorem ipsum dolor sit amet');
+    }
+  });
+
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
     String changedValue;
     final Widget widget = MaterialApp(
