@@ -525,6 +525,49 @@ class SizeTransition extends AnimatedWidget {
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 ///
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/fade_transition.mp4}
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// The following code implements the [FadeTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// AnimationController _controller;
+/// Animation<double> _animation;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 2),
+///     vsync: this,
+///   )..repeat(reverse: true);
+///   _animation = CurvedAnimation(
+///     parent: controller,
+///     curve: Curves.easeIn
+///     );
+/// }
+///
+/// @override
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: Colors.white,
+///     child: FadeTransition(
+///       opacity: _animation,
+///       child: Padding(
+///         padding: const EdgeInsets.all(8),
+///         child: FlutterLogo()
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
