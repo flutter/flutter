@@ -388,8 +388,8 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// {@macro flutter.gestures.gestureRecognizer.kind}
   PrimaryPointerGestureRecognizer({
     this.deadline,
-    this.preAcceptSlopTolerance = kTouchSlop,
-    this.postAcceptSlopTolerance = kTouchSlop,
+    this.preAcceptSlopTolerance,
+    this.postAcceptSlopTolerance,
     Object? debugOwner,
     PointerDeviceKind? kind,
   }) : assert(
@@ -414,8 +414,12 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   ///
   /// Drifting past the allowed slop amount causes the gesture to be rejected.
   ///
-  /// Can be null to indicate that the gesture can drift for any distance.
-  /// Defaults to 18 logical pixels.
+  /// If null, will default to a distance that is appropriate for the pointer
+  /// device kind. This is 18 logical pixels for touch gestures and 2 logical
+  /// pixels for mouse gestures.
+  ///
+  /// To indicate that the gesture can drift for any distance, a value of 0
+  /// must be specified.
   final double? preAcceptSlopTolerance;
 
   /// The maximum distance in logical pixels the gesture is allowed to drift
@@ -424,8 +428,12 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// Drifting past the allowed slop amount causes the gesture to stop tracking
   /// and signaling subsequent callbacks.
   ///
-  /// Can be null to indicate that the gesture can drift for any distance.
-  /// Defaults to 18 logical pixels.
+  /// If null, will default to a distance that is appropriate for the pointer
+  /// device kind. This is 18 logical pixels for touch gestures and 2 logical
+  /// pixels for mouse gestures.
+  ///
+  /// To indicate that the gesture can drift for any distance, a value of 0
+  /// must be specified.
   final double? postAcceptSlopTolerance;
 
   /// The current state of the recognizer.
@@ -460,14 +468,14 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   void handleEvent(PointerEvent event) {
     assert(state != GestureRecognizerState.ready);
     if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
+      final double localPreAcceptSlopTolerance = preAcceptSlopTolerance ?? computeHitSlop(event.kind);
+      final double localPostAcceptSlopTolerance = postAcceptSlopTolerance ?? computeHitSlop(event.kind);
       final bool isPreAcceptSlopPastTolerance =
           !_gestureAccepted &&
-          preAcceptSlopTolerance != null &&
-          _getGlobalDistance(event) > preAcceptSlopTolerance!;
+          _getGlobalDistance(event) > localPreAcceptSlopTolerance;
       final bool isPostAcceptSlopPastTolerance =
           _gestureAccepted &&
-          postAcceptSlopTolerance != null &&
-          _getGlobalDistance(event) > postAcceptSlopTolerance!;
+          _getGlobalDistance(event) > localPostAcceptSlopTolerance;
 
       if (event is PointerMoveEvent && (isPreAcceptSlopPastTolerance || isPostAcceptSlopPastTolerance)) {
         resolve(GestureDisposition.rejected);

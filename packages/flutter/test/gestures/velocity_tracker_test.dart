@@ -38,7 +38,7 @@ void main() {
   ];
 
   test('Velocity tracker gives expected results', () {
-    final VelocityTracker tracker = VelocityTracker();
+    final VelocityTracker tracker = VelocityTracker(PointerDeviceKind.touch);
     int i = 0;
     for (final PointerEvent event in velocityEventData) {
       if (event is PointerDownEvent || event is PointerMoveEvent)
@@ -64,7 +64,7 @@ void main() {
 
   test('Interrupted velocity estimation', () {
     // Regression test for https://github.com/flutter/flutter/pull/7510
-    final VelocityTracker tracker = VelocityTracker();
+    final VelocityTracker tracker = VelocityTracker(PointerDeviceKind.touch);
     for (final PointerEvent event in interruptedVelocityEventData) {
       if (event is PointerDownEvent || event is PointerMoveEvent)
         tracker.addPosition(event.timeStamp, event.position);
@@ -75,12 +75,12 @@ void main() {
   });
 
   test('No data velocity estimation', () {
-    final VelocityTracker tracker = VelocityTracker();
+    final VelocityTracker tracker = VelocityTracker(PointerDeviceKind.touch);
     expect(tracker.getVelocity(), Velocity.zero);
   });
 
   test('FreeScrollStartVelocityTracker.getVelocity throws when no points', () {
-    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker();
+    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     AssertionError exception;
     try {
       tracker.getVelocity();
@@ -92,7 +92,7 @@ void main() {
   });
 
   test('FreeScrollStartVelocityTracker.getVelocity throws when the new point precedes the previous point', () {
-    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker();
+    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     AssertionError exception;
 
     tracker.addPosition(const Duration(hours: 1), Offset.zero);
@@ -107,7 +107,7 @@ void main() {
   });
 
   test('Estimate does not throw when there are more than 1 point', () {
-    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker();
+    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
     const Offset positionDelta = Offset(0, -1);
@@ -129,7 +129,7 @@ void main() {
   });
 
   test('Makes consistent velocity estimates with consistent velocity', () {
-    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker();
+    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
     const Offset positionDelta = Offset(0, -1);

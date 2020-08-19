@@ -167,7 +167,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     Object? debugOwner,
   }) : super(
           deadline: duration ?? kLongPressTimeout,
-          postAcceptSlopTolerance: postAcceptSlopTolerance,
+          postAcceptSlopTolerance: postAcceptSlopTolerance ?? 0,
           kind: kind,
           debugOwner: debugOwner,
         );
@@ -376,7 +376,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void handlePrimaryPointer(PointerEvent event) {
     if (!event.synthesized) {
       if (event is PointerDownEvent) {
-        _velocityTracker = VelocityTracker();
+        _velocityTracker = VelocityTracker(event.kind);
         _velocityTracker!.addPosition(event.timeStamp, event.localPosition);
       }
       if (event is PointerMoveEvent) {

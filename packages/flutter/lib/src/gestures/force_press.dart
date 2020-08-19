@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
@@ -254,7 +253,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
         if (pressure > startPressure) {
           _state = _ForceState.started;
           resolve(GestureDisposition.accepted);
-        } else if (event.delta.distanceSquared > kTouchSlop) {
+        } else if (event.delta.distanceSquared > computeHitSlop(event.kind)) {
           resolve(GestureDisposition.rejected);
         }
       }

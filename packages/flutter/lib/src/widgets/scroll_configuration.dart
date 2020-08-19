@@ -73,15 +73,15 @@ class ScrollBehavior {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        return (PointerEvent ev) => IOSScrollViewFlingVelocityTracker();
+        return (PointerEvent ev) => IOSScrollViewFlingVelocityTracker(ev.kind);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return (PointerEvent ev) => VelocityTracker();
+        return (PointerEvent ev) => VelocityTracker(ev.kind);
     }
     assert(false);
-    return (PointerEvent ev) => VelocityTracker();
+    return (PointerEvent ev) => VelocityTracker(ev.kind);
   }
 
   static const ScrollPhysics _bouncingPhysics = BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());

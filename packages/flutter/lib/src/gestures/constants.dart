@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 // Modeled after Android's ViewConfiguration:
 // https://github.com/android/platform_frameworks_base/blob/master/core/java/android/view/ViewConfiguration.java
+
+import 'events.dart';
 
 /// The time that must elapse before a tap gesture sends onTapDown, if there's
 /// any doubt that the gesture is a tap.
@@ -95,3 +96,51 @@ const double kMaxFlingVelocity = 8000.0; // Logical pixels / second
 /// tap in a jump-tap gesture.
 // TODO(ianh): Implement jump-tap gestures.
 const Duration kJumpTapTimeout = Duration(milliseconds: 500);
+
+/// Like [kTouchSlop], but for mouse pointers.
+const double kMouseHitSlop = 1.0; // Logical pixels;
+
+/// Like [kPanSlop], but for mouse pointers.
+const double kPanMouseSlop = kMouseHitSlop * 2.0; // Logical pixels
+
+/// Like [kScaleSlop], but for mouse pointers.
+const double kScaleMouseSlop = kMouseHitSlop; // Logical pixels
+
+/// Determine the approriate hit slop pixels based on the [kind] of pointer.
+double computeHitSlop(PointerDeviceKind kind) {
+  switch (kind) {
+    case PointerDeviceKind.mouse:
+    case PointerDeviceKind.stylus:
+    case PointerDeviceKind.invertedStylus:
+      return kMouseHitSlop;
+    case PointerDeviceKind.unknown:
+    case PointerDeviceKind.touch:
+      return kTouchSlop;
+  }
+}
+
+/// Determine the approriate pan slop pixels based on the [kind] of pointer.
+double computePanSlop(PointerDeviceKind kind) {
+  switch (kind) {
+    case PointerDeviceKind.mouse:
+    case PointerDeviceKind.stylus:
+    case PointerDeviceKind.invertedStylus:
+      return kPanMouseSlop;
+    case PointerDeviceKind.unknown:
+    case PointerDeviceKind.touch:
+      return kPanSlop;
+  }
+}
+
+/// Determine the approriate scale slop pixels based on the [kind] of pointer.
+double computeScaleSlop(PointerDeviceKind kind) {
+  switch (kind) {
+    case PointerDeviceKind.mouse:
+    case PointerDeviceKind.stylus:
+    case PointerDeviceKind.invertedStylus:
+      return kScaleMouseSlop;
+    case PointerDeviceKind.unknown:
+    case PointerDeviceKind.touch:
+      return kScaleSlop;
+  }
+}
