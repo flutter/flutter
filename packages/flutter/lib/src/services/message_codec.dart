@@ -80,10 +80,9 @@ abstract class MethodCodec {
 
   /// Encodes an error result into a binary envelope.
   ///
-  /// The specified error [code], human-readable error [message], error
-  /// [details] correspond to the fields of [PlatformException] and error
-  /// [stacktrace] correspond to stacktrace from native platforms.
-  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details, String? stacktrace});
+  /// The specified error [code], human-readable error [message] and error
+  /// [details] correspond to the fields of [PlatformException].
+  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details});
 }
 
 

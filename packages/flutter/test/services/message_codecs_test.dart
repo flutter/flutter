@@ -7,8 +7,10 @@
 // This files contains message codec tests that are supported both on the Web
 // and in the VM. For VM-only tests see message_codecs_vm_test.dart.
 
+import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show WriteBuffer;
 import 'package:flutter/services.dart';
 import 'package:matcher/matcher.dart';
 import '../flutter_test_alternative.dart';
@@ -47,6 +49,7 @@ void main() {
   });
   group('Standard method codec', () {
     const MethodCodec method = StandardMethodCodec();
+    const StandardMessageCodec messageCodec = StandardMessageCodec();
     test('should decode error envelope without native stacktrace', () {
       final ByteData errorData = method.encodeErrorEnvelope(
         code: 'errorCode',
@@ -62,12 +65,13 @@ void main() {
               e.details == 'errorDetails')));
     });
     test('should decode error envelope with native stacktrace.', () {
-      final ByteData errorData = method.encodeErrorEnvelope(
-        code: 'errorCode',
-        message: 'errorMessage',
-        details: 'errorDetails',
-        stacktrace: 'errorStacktrace',
-      );
+      final WriteBuffer buffer = WriteBuffer();
+      buffer.putUint8(1);
+      messageCodec.writeValue(buffer, 'errorCode');
+      messageCodec.writeValue(buffer, 'errorMessage');
+      messageCodec.writeValue(buffer, 'errorDetails');
+      messageCodec.writeValue(buffer, 'errorStacktrace');
+      final ByteData errorData = buffer.done();
       expect(
           () => method.decodeEnvelope(errorData),
           throwsA(predicate((PlatformException e) =>
@@ -75,15 +79,17 @@ void main() {
     });
   });
   group('Json method codec', () {
-    const JSONMethodCodec json = JSONMethodCodec();
+    const JsonCodec json = JsonCodec();
+    const StringCodec stringCodec = StringCodec();
+    const JSONMethodCodec jsonMethodCodec = JSONMethodCodec();
     test('should decode error envelope without native stacktrace', () {
-      final ByteData errorData = json.encodeErrorEnvelope(
+      final ByteData errorData = jsonMethodCodec.encodeErrorEnvelope(
         code: 'errorCode',
         message: 'errorMessage',
         details: 'errorDetails',
       );
       expect(
-          () => json.decodeEnvelope(errorData),
+          () => jsonMethodCodec.decodeEnvelope(errorData),
           throwsA(predicate((PlatformException e) =>
               e is PlatformException &&
               e.code == 'errorCode' &&
@@ -91,14 +97,15 @@ void main() {
               e.details == 'errorDetails')));
     });
     test('should decode error envelope with native stacktrace.', () {
-      final ByteData errorData = json.encodeErrorEnvelope(
-        code: 'errorCode',
-        message: 'errorMessage',
-        details: 'errorDetails',
-        stacktrace: 'errorStacktrace',
-      );
+      final ByteData errorData = stringCodec.encodeMessage(json
+          .encode(<dynamic>[
+        'errorCode',
+        'errorMessage',
+        'errorDetails',
+        'errorStacktrace'
+      ]));
       expect(
-          () => json.decodeEnvelope(errorData),
+          () => jsonMethodCodec.decodeEnvelope(errorData),
           throwsA(predicate((PlatformException e) =>
               e is PlatformException && e.stacktrace == 'errorStacktrace')));
     });

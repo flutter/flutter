@@ -171,9 +171,9 @@ class JSONMethodCodec implements MethodCodec {
   }
 
   @override
-  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details, String? stacktrace}) {
+  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details}) {
     assert(code != null);
-    return const JSONMessageCodec().encodeMessage(<dynamic>[code, message, details, stacktrace])!;
+    return const JSONMessageCodec().encodeMessage(<dynamic>[code, message, details])!;
   }
 }
 
@@ -557,13 +557,12 @@ class StandardMethodCodec implements MethodCodec {
   }
 
   @override
-  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details, String? stacktrace}) {
+  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details}) {
     final WriteBuffer buffer = WriteBuffer();
     buffer.putUint8(1);
     messageCodec.writeValue(buffer, code);
     messageCodec.writeValue(buffer, message);
     messageCodec.writeValue(buffer, details);
-    messageCodec.writeValue(buffer, stacktrace);
     return buffer.done();
   }
 
