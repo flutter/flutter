@@ -2817,10 +2817,7 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   @override
   PointerEnterEventListener onEnter;
 
-  /// Triggered when a pointer has moved onto or within the region without
-  /// buttons pressed.
-  ///
-  /// This callback is not triggered by the movement of the object.
+  @override
   PointerHoverEventListener onHover;
 
   @override
