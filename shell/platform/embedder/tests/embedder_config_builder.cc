@@ -35,8 +35,10 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
   opengl_renderer_config_.present = [](void* context) -> bool {
     return reinterpret_cast<EmbedderTestContext*>(context)->GLPresent();
   };
-  opengl_renderer_config_.fbo_callback = [](void* context) -> uint32_t {
-    return reinterpret_cast<EmbedderTestContext*>(context)->GLGetFramebuffer();
+  opengl_renderer_config_.fbo_with_frame_info_callback =
+      [](void* context, const FlutterFrameInfo* frame_info) -> uint32_t {
+    return reinterpret_cast<EmbedderTestContext*>(context)->GLGetFramebuffer(
+        *frame_info);
   };
   opengl_renderer_config_.make_resource_current = [](void* context) -> bool {
     return reinterpret_cast<EmbedderTestContext*>(context)
@@ -108,6 +110,21 @@ void EmbedderConfigBuilder::SetSoftwareRendererConfig(SkISize surface_size) {
   // Once this is no longer the case, don't setup the GL surface when using the
   // software renderer config.
   context_.SetupOpenGLSurface(surface_size);
+}
+
+void EmbedderConfigBuilder::SetOpenGLFBOCallBack() {
+  // SetOpenGLRendererConfig must be called before this.
+  FML_CHECK(renderer_config_.type == FlutterRendererType::kOpenGL);
+  renderer_config_.open_gl.fbo_callback = [](void* context) -> uint32_t {
+    FlutterFrameInfo frame_info = {};
+    // fbo_callback doesn't use the frame size information, only
+    // fbo_callback_with_frame_info does.
+    frame_info.struct_size = sizeof(FlutterFrameInfo);
+    frame_info.size.width = 0;
+    frame_info.size.height = 0;
+    return reinterpret_cast<EmbedderTestContext*>(context)->GLGetFramebuffer(
+        frame_info);
+  };
 }
 
 void EmbedderConfigBuilder::SetOpenGLRendererConfig(SkISize surface_size) {

@@ -44,7 +44,7 @@ std::unique_ptr<Surface> IOSSurfaceGL::CreateGPUSurface(GrDirectContext* gr_cont
 }
 
 // |GPUSurfaceGLDelegate|
-intptr_t IOSSurfaceGL::GLContextFBO() const {
+intptr_t IOSSurfaceGL::GLContextFBO(GLFrameInfo frame_info) const {
   return IsValid() ? render_target_->GetFramebuffer() : GL_NONE;
 }
 

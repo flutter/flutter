@@ -14,6 +14,13 @@
 
 namespace flutter {
 
+// A structure to represent the frame information which is passed to the
+// embedder when requesting a frame buffer object.
+struct GLFrameInfo {
+  uint32_t width;
+  uint32_t height;
+};
+
 class GPUSurfaceGLDelegate : public GPUSurfaceDelegate {
  public:
   ~GPUSurfaceGLDelegate() override;
@@ -33,13 +40,13 @@ class GPUSurfaceGLDelegate : public GPUSurfaceDelegate {
   virtual bool GLContextPresent() = 0;
 
   // The ID of the main window bound framebuffer. Typically FBO0.
-  virtual intptr_t GLContextFBO() const = 0;
+  virtual intptr_t GLContextFBO(GLFrameInfo frame_info) const = 0;
 
   // The rendering subsystem assumes that the ID of the main window bound
   // framebuffer remains constant throughout. If this assumption in incorrect,
   // embedders are required to return true from this method. In such cases,
-  // GLContextFBO() will be called again to acquire the new FBO ID for rendering
-  // subsequent frames.
+  // GLContextFBO(frame_info) will be called again to acquire the new FBO ID for
+  // rendering subsequent frames.
   virtual bool GLContextFBOResetAfterPresent() const;
 
   // Indicates whether or not the surface supports pixel readback as used in
