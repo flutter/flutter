@@ -519,6 +519,13 @@ public class PlatformViewsControllerTest {
     assertEquals(flutterView.getChildCount(), 1);
   }
 
+  @Test
+  public void checkInputConnectionProxy__falseIfViewIsNull() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+    boolean shouldProxying = platformViewsController.checkInputConnectionProxy(null);
+    assertFalse(shouldProxying);
+  }
+
   private static byte[] encodeMethodCall(MethodCall call) {
     final ByteBuffer buffer = StandardMethodCodec.INSTANCE.encodeMethodCall(call);
     buffer.rewind();

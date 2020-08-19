@@ -17,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.android.AndroidTouchProcessor;
@@ -531,7 +532,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    * if the view was created in a platform view's VD, delegates the decision to the platform view's
    * {@link View#checkInputConnectionProxy(View)} method. Else returns false.
    */
-  public boolean checkInputConnectionProxy(View view) {
+  public boolean checkInputConnectionProxy(@Nullable View view) {
+    // View can be null on some devices
+    // See: https://github.com/flutter/flutter/issues/36517
+    if (view == null) {
+      return false;
+    }
     if (!contextToPlatformView.containsKey(view.getContext())) {
       return false;
     }
