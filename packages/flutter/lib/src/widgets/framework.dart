@@ -5776,7 +5776,10 @@ abstract class RenderObjectElement extends Element {
   /// _not_ call `super.insertRenderObjectChild(...)`.
   @protected
   @mustCallSuper
-  @Deprecated('Override insertRenderObjectChild instead')
+  @Deprecated(
+    'Override insertRenderObjectChild instead. '
+    'This feature was deprecated after v1.21.0-9.0.pre.'
+  )
   void insertChildRenderObject(covariant RenderObject child, covariant dynamic slot) {
     assert(() {
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -5846,7 +5849,10 @@ abstract class RenderObjectElement extends Element {
   /// `super.moveRenderObjectChild(...)`.
   @protected
   @mustCallSuper
-  @Deprecated('Override moveRenderObjectChild instead')
+  @Deprecated(
+    'Override moveRenderObjectChild instead. '
+    'This feature was deprecated after v1.21.0-9.0.pre.'
+  )
   void moveChildRenderObject(covariant RenderObject child, covariant dynamic slot) {
     assert(() {
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -5910,7 +5916,10 @@ abstract class RenderObjectElement extends Element {
   /// `super.removeRenderObjectChild(...)`.
   @protected
   @mustCallSuper
-  @Deprecated('Override removeRenderObjectChild instead')
+  @Deprecated(
+    'Override removeRenderObjectChild instead. '
+    'This feature was deprecated after v1.21.0-9.0.pre.'
+  )
   void removeChildRenderObject(covariant RenderObject child) {
     assert(() {
       throw FlutterError.fromParts(<DiagnosticsNode>[

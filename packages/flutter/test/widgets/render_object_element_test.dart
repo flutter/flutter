@@ -1,4 +1,4 @@
-// Copyright 2020 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -356,7 +356,7 @@ void main() {
     expect(swapper.insertSlots.length, 2);
     expect(swapper.moveSlots.length, 1);
     expect(swapper.removeSlots.length, 2);
-    expect(swapper.removeSlots, [null,null]);
+    expect(swapper.removeSlots, <bool>[null,null]);
   });
 
   testWidgets('RenderObjectElement *ChildRenderObject methods fail with deprecation message', (WidgetTester tester) async {
