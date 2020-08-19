@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../color_scheme.dart';
+import '../debug.dart';
 import '../divider.dart';
 import '../icon_button.dart';
 import '../icons.dart';
@@ -164,14 +165,21 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   @override
   void initState() {
     super.initState();
-    _mode = widget.initialCalendarMode;
-    _currentDisplayedMonthDate = DateTime(widget.initialDate.year, widget.initialDate.month);
-    _selectedDate = widget.initialDate;
+    _initWidgetState();
+  }
+
+  @override
+  void didUpdateWidget(CalendarDatePicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _initWidgetState();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasDirectionality(context));
     _localizations = MaterialLocalizations.of(context);
     _textDirection = Directionality.of(context);
     if (!_announcedInitialDate) {
@@ -181,6 +189,12 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         _textDirection,
       );
     }
+  }
+
+  void _initWidgetState() {
+    _mode = widget.initialCalendarMode;
+    _currentDisplayedMonthDate = DateTime(widget.initialDate.year, widget.initialDate.month);
+    _selectedDate = widget.initialDate;
   }
 
   void _vibrate() {
@@ -281,6 +295,9 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasDirectionality(context));
     return Stack(
       children: <Widget>[
         SizedBox(
@@ -512,6 +529,14 @@ class _MonthPickerState extends State<_MonthPicker> {
     super.didChangeDependencies();
     _localizations = MaterialLocalizations.of(context);
     _textDirection = Directionality.of(context);
+  }
+
+  @override
+  void didUpdateWidget(_MonthPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialMonth != oldWidget.initialMonth) {
+      _showMonth(widget.initialMonth);
+    }
   }
 
   @override
