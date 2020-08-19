@@ -5,7 +5,6 @@
 // @dart = 2.10
 part of ui;
 
-/// Initializes the platform.
 Future<void> webOnlyInitializePlatform({
   engine.AssetManager? assetManager,
 }) {
@@ -51,11 +50,6 @@ engine.FontCollection? _fontCollection;
 
 bool _webOnlyIsInitialized = false;
 bool get webOnlyIsInitialized => _webOnlyIsInitialized;
-
-/// Specifies that the platform should use the given [AssetManager] to load
-/// assets.
-///
-/// The given asset manager is used to initialize the font collection.
 Future<void> webOnlySetAssetManager(engine.AssetManager assetManager) async {
   assert(assetManager != null, 'Cannot set assetManager to null'); // ignore: unnecessary_null_comparison
   if (assetManager == _assetManager) {
@@ -71,7 +65,6 @@ Future<void> webOnlySetAssetManager(engine.AssetManager assetManager) async {
     _fontCollection!.clear();
   }
 
-
   if (_assetManager != null) {
     if (engine.experimentalUseSkia) {
       await engine.skiaFontCollection.registerFonts(_assetManager!);
@@ -85,29 +78,16 @@ Future<void> webOnlySetAssetManager(engine.AssetManager assetManager) async {
   }
 }
 
-/// Flag that shows whether the Flutter Testing Behavior is enabled.
-///
-/// This flag can be used to decide if the code is running from a Flutter Test
-/// such as a Widget test.
-///
-/// For example in these tests we use a predictable-size font which makes widget
-/// tests less flaky.
-bool get debugEmulateFlutterTesterEnvironment =>
-    _debugEmulateFlutterTesterEnvironment;
+bool get debugEmulateFlutterTesterEnvironment => _debugEmulateFlutterTesterEnvironment;
 
 set debugEmulateFlutterTesterEnvironment(bool value) {
   _debugEmulateFlutterTesterEnvironment = value;
   if (_debugEmulateFlutterTesterEnvironment) {
     const Size logicalSize = Size(800.0, 600.0);
-    engine.window.webOnlyDebugPhysicalSizeOverride =
-        logicalSize * window.devicePixelRatio;
+    engine.window.webOnlyDebugPhysicalSizeOverride = logicalSize * window.devicePixelRatio;
   }
 }
 
 bool _debugEmulateFlutterTesterEnvironment = false;
-
-/// This class handles downloading assets over the network.
 engine.AssetManager get webOnlyAssetManager => _assetManager!;
-
-/// A collection of fonts that may be used by the platform.
 engine.FontCollection get webOnlyFontCollection => _fontCollection!;
