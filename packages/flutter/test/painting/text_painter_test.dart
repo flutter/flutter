@@ -149,7 +149,7 @@ void main() {
 
   test('TextPainter error test', () {
     final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
-    expect(() { painter.paint(null, Offset.zero); }, throwsFlutterError);
+    expect(() { painter.paint(null, Offset.zero); }, anyOf(throwsFlutterError, throwsAssertionError));
   });
 
   test('TextPainter requires textDirection', () {
