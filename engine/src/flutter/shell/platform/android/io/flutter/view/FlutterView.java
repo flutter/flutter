@@ -432,6 +432,7 @@ public class FlutterView extends SurfaceView
     if (!isAttached()) return;
 
     getHolder().removeCallback(mSurfaceCallback);
+    releaseAccessibilityNodeProvider();
 
     mNativeView.destroy();
     mNativeView = null;
@@ -749,9 +750,7 @@ public class FlutterView extends SurfaceView
   @Override
   protected void onDetachedFromWindow() {
     super.onDetachedFromWindow();
-
-    mAccessibilityNodeProvider.release();
-    mAccessibilityNodeProvider = null;
+    releaseAccessibilityNodeProvider();
   }
 
   // TODO(mattcarroll): Confer with Ian as to why we need this method. Delete if possible, otherwise
@@ -773,6 +772,13 @@ public class FlutterView extends SurfaceView
       // the a11y
       // tree.
       return null;
+    }
+  }
+
+  private void releaseAccessibilityNodeProvider() {
+    if (mAccessibilityNodeProvider != null) {
+      mAccessibilityNodeProvider.release();
+      mAccessibilityNodeProvider = null;
     }
   }
 
