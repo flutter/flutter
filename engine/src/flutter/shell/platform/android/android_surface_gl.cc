@@ -115,7 +115,7 @@ bool AndroidSurfaceGL::GLContextPresent() {
   return onscreen_surface_->SwapBuffers();
 }
 
-intptr_t AndroidSurfaceGL::GLContextFBO() const {
+intptr_t AndroidSurfaceGL::GLContextFBO(GLFrameInfo frame_info) const {
   FML_DCHECK(IsValid());
   // The default window bound framebuffer on Android.
   return 0;

@@ -197,9 +197,14 @@ bool EmbedderTestContext::GLPresent() {
   return true;
 }
 
-uint32_t EmbedderTestContext::GLGetFramebuffer() {
+uint32_t EmbedderTestContext::GLGetFramebuffer(FlutterFrameInfo frame_info) {
   FML_CHECK(gl_surface_) << "GL surface must be initialized.";
+  gl_surface_fbo_frame_infos_.push_back(frame_info);
   return gl_surface_->GetFramebuffer();
+}
+
+std::vector<FlutterFrameInfo> EmbedderTestContext::GetGLFBOFrameInfos() {
+  return gl_surface_fbo_frame_infos_;
 }
 
 bool EmbedderTestContext::GLMakeResourceCurrent() {

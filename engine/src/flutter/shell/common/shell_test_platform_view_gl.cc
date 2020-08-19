@@ -60,7 +60,7 @@ bool ShellTestPlatformViewGL::GLContextPresent() {
 }
 
 // |GPUSurfaceGLDelegate|
-intptr_t ShellTestPlatformViewGL::GLContextFBO() const {
+intptr_t ShellTestPlatformViewGL::GLContextFBO(GLFrameInfo frame_info) const {
   return gl_surface_.GetFramebuffer();
 }
 
