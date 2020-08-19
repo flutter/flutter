@@ -3852,7 +3852,7 @@ class SemanticsConfiguration {
   /// absorb other configurations and it is recommended to only absorb compatible
   /// configurations as determined by [isCompatibleWith].
   void absorb(SemanticsConfiguration child) {
-    assert(explicitChildNodes != true);
+    assert(!explicitChildNodes);
 
     if (!child.hasBeenAnnotated)
       return;
