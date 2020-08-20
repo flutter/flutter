@@ -248,7 +248,19 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @visibleForTesting
   void initMouseTracker([MouseTracker tracker]) {
     _mouseTracker?.dispose();
-    _mouseTracker = tracker ?? MouseTracker(pointerRouter, renderView.hitTestMouseTrackers);
+    _mouseTracker = tracker ?? MouseTracker();
+  }
+
+  @override // from GestureBinding
+  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult) {
+    if (hitTestResult != null ||
+        event is PointerHoverEvent ||
+        event is PointerAddedEvent ||
+        event is PointerRemovedEvent) {
+      _mouseTracker.updateWithEvent(event,
+          () => hitTestResult ?? renderView.hitTestMouseTrackers(event.position));
+    }
+    super.dispatchEvent(event, hitTestResult);
   }
 
   void _handleSemanticsEnabledChanged() {
@@ -284,7 +296,24 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
     drawFrame();
-    _mouseTracker.schedulePostFrameCheck();
+    _scheduleMouseTrackerUpdate();
+  }
+
+  bool _debugMouseTrackerUpdateScheduled = false;
+  void _scheduleMouseTrackerUpdate() {
+    assert(!_debugMouseTrackerUpdateScheduled);
+    assert(() {
+      _debugMouseTrackerUpdateScheduled = true;
+      return true;
+    }());
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+      assert(_debugMouseTrackerUpdateScheduled);
+      assert(() {
+        _debugMouseTrackerUpdateScheduled = false;
+        return true;
+      }());
+      _mouseTracker.updateAllDevices(renderView.hitTestMouseTrackers);
+    });
   }
 
   int _firstFrameDeferredCount = 0;
