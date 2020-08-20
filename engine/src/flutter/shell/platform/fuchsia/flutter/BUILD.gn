@@ -14,7 +14,7 @@ import("//flutter/tools/fuchsia/fuchsia_libs.gni")
 import("//flutter/vulkan/config.gni")
 
 # Fuchsia uses its own custom Surface implementation.
-shell_gpu_configuration("fuchsia_legacy_gpu_configuration") {
+shell_gpu_configuration("fuchsia_gpu_configuration") {
   enable_software = false
   enable_gl = false
   enable_vulkan = false
@@ -98,13 +98,13 @@ template("runner_sources") {
     # The use of these dependencies is temporary and will be moved behind the
     # embedder API.
     flutter_public_deps = [
-      "//flutter/flow:flow_fuchsia_legacy",
-      "//flutter/lib/ui:ui_fuchsia_legacy",
-      "//flutter/runtime:runtime_fuchsia_legacy",
-      "//flutter/shell/common:common_fuchsia_legacy",
+      "//flutter/flow",
+      "//flutter/lib/ui",
+      "//flutter/runtime",
+      "//flutter/shell/common",
     ]
     flutter_deps = [
-      ":fuchsia_legacy_gpu_configuration",
+      ":fuchsia_gpu_configuration",
       "//flutter/assets",
       "//flutter/common",
       "//flutter/fml",
@@ -452,9 +452,9 @@ executable("flutter_runner_unittests") {
   # The use of these dependencies is temporary and will be moved behind the
   # embedder API.
   flutter_deps = [
-    "//flutter/flow:flow_fuchsia_legacy",
-    "//flutter/lib/ui:ui_fuchsia_legacy",
-    "//flutter/shell/common:common_fuchsia_legacy",
+    "//flutter/flow",
+    "//flutter/lib/ui",
+    "//flutter/shell/common",
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/platform:libdart_platform_jit",
   ]
@@ -480,7 +480,7 @@ executable("flutter_runner_tzdata_unittests") {
   # The use of these dependencies is temporary and will be moved behind the
   # embedder API.
   flutter_deps = [
-    "//flutter/lib/ui:ui_fuchsia_legacy",
+    "//flutter/lib/ui",
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/platform:libdart_platform_jit",
   ]
@@ -505,7 +505,7 @@ executable("flutter_runner_scenic_unittests") {
   # The use of these dependencies is temporary and will be moved behind the
   # embedder API.
   flutter_deps = [
-    "//flutter/lib/ui:ui_fuchsia_legacy",
+    "//flutter/lib/ui",
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/platform:libdart_platform_jit",
   ]
@@ -641,30 +641,6 @@ fuchsia_test_archive("flow_tests") {
   ]
 }
 
-fuchsia_test_archive("flow_tests_next") {
-  deps = [ "//flutter/flow:flow_unittests_next" ]
-
-  binary = "flow_unittests_next"
-
-  resources = [
-    {
-      path = rebase_path(
-              "//flutter/testing/resources/performance_overlay_gold_60fps.png")
-      dest = "flutter/testing/resources/performance_overlay_gold_60fps.png"
-    },
-    {
-      path = rebase_path(
-              "//flutter/testing/resources/performance_overlay_gold_90fps.png")
-      dest = "flutter/testing/resources/performance_overlay_gold_90fps.png"
-    },
-    {
-      path = rebase_path(
-              "//flutter/testing/resources/performance_overlay_gold_120fps.png")
-      dest = "flutter/testing/resources/performance_overlay_gold_120fps.png"
-    },
-  ]
-}
-
 fuchsia_test_archive("runtime_tests") {
   deps = [
     "//flutter/runtime:runtime_fixtures",
@@ -684,25 +660,6 @@ fuchsia_test_archive("runtime_tests") {
   ]
 }
 
-fuchsia_test_archive("runtime_tests_next") {
-  deps = [
-    "//flutter/runtime:runtime_fixtures",
-    "//flutter/runtime:runtime_unittests_next",
-  ]
-
-  binary = "runtime_unittests_next"
-
-  # TODO(gw280): https://github.com/flutter/flutter/issues/50294
-  # Right now we need to manually specify all the fixtures that are
-  # declared in the test_fixtures() call above.
-  resources = [
-    {
-      path = "$root_gen_dir/flutter/runtime/assets/kernel_blob.bin"
-      dest = "assets/kernel_blob.bin"
-    },
-  ]
-}
-
 fuchsia_test_archive("shell_tests") {
   deps = [
     "//flutter/shell/common:shell_unittests",
@@ -710,33 +667,6 @@ fuchsia_test_archive("shell_tests") {
   ]
 
   binary = "shell_unittests"
-
-  # TODO(gw280): https://github.com/flutter/flutter/issues/50294
-  # Right now we need to manually specify all the fixtures that are
-  # declared in the test_fixtures() call above.
-  resources = [
-    {
-      path = "$root_gen_dir/flutter/shell/common/assets/kernel_blob.bin"
-      dest = "assets/kernel_blob.bin"
-    },
-    {
-      path =
-          "$root_gen_dir/flutter/shell/common/assets/shelltest_screenshot.png"
-      dest = "assets/shelltest_screenshot.png"
-    },
-  ]
-
-  libraries = vulkan_validation_libs
-  resources += vulkan_icds
-}
-
-fuchsia_test_archive("shell_tests_next") {
-  deps = [
-    "//flutter/shell/common:shell_unittests_fixtures",
-    "//flutter/shell/common:shell_unittests_next",
-  ]
-
-  binary = "shell_unittests_next"
 
   # TODO(gw280): https://github.com/flutter/flutter/issues/50294
   # Right now we need to manually specify all the fixtures that are
@@ -822,48 +752,6 @@ fuchsia_test_archive("ui_tests") {
   resources += vulkan_icds
 }
 
-fuchsia_test_archive("ui_tests_next") {
-  deps = [
-    "//flutter/lib/ui:ui_unittests_fixtures",
-    "//flutter/lib/ui:ui_unittests_next",
-  ]
-
-  binary = "ui_unittests_next"
-
-  # TODO(gw280): https://github.com/flutter/flutter/issues/50294
-  # Right now we need to manually specify all the fixtures that are
-  # declared in the test_fixtures() call above.
-  resources = [
-    {
-      path = "$root_gen_dir/flutter/lib/ui/assets/kernel_blob.bin"
-      dest = "assets/kernel_blob.bin"
-    },
-    {
-      path = "$root_gen_dir/flutter/lib/ui/assets/DashInNooglerHat.jpg"
-      dest = "assets/DashInNooglerHat.jpg"
-    },
-    {
-      path = "$root_gen_dir/flutter/lib/ui/assets/Horizontal.jpg"
-      dest = "assets/Horizontal.jpg"
-    },
-    {
-      path = "$root_gen_dir/flutter/lib/ui/assets/Horizontal.png"
-      dest = "assets/Horizontal.png"
-    },
-    {
-      path = "$root_gen_dir/flutter/lib/ui/assets/hello_loop_2.gif"
-      dest = "assets/hello_loop_2.gif"
-    },
-    {
-      path = "$root_gen_dir/flutter/lib/ui/assets/hello_loop_2.webp"
-      dest = "assets/hello_loop_2.webp"
-    },
-  ]
-
-  libraries = vulkan_validation_libs
-  resources += vulkan_icds
-}
-
 # When adding a new dep here, please also ensure the dep is added to
 # testing/fuchsia/run_tests.sh and testing/fuchsia/test_fars
 group("tests") {
@@ -871,18 +759,14 @@ group("tests") {
 
   deps = [
     ":flow_tests",
-    ":flow_tests_next",
     ":flutter_runner_scenic_tests",
     ":flutter_runner_tests",
     ":flutter_runner_tzdata_tests",
     ":fml_tests",
     ":runtime_tests",
-    ":runtime_tests_next",
     ":shell_tests",
-    ":shell_tests_next",
     ":testing_tests",
     ":txt_tests",
     ":ui_tests",
-    ":ui_tests_next",
   ]
 }
