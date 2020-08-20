@@ -6,9 +6,34 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
+class MockClipboard {
+  MockClipboard({
+    this.getDataThrows = false,
+  });
+
+  final bool getDataThrows;
+
+  Object _clipboardData = <String, dynamic>{
+    'text': null,
+  };
+
+  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
+    switch (methodCall.method) {
+      case 'Clipboard.getData':
+        if (getDataThrows) {
+          throw Exception();
+        }
+        return _clipboardData;
+      case 'Clipboard.setData':
+        _clipboardData = methodCall.arguments;
+    }
+  }
+}
 
 void main() {
   int tapCount;
@@ -198,13 +223,13 @@ void main() {
   testWidgets('a force press initiates a force press', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
 
     final TestGesture gesture = await tester.createGesture();
 
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -213,13 +238,19 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
     await gesture.up();
     await tester.pumpAndSettle();
 
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -227,13 +258,19 @@ void main() {
         pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
     await gesture.up();
     await tester.pump(const Duration(milliseconds: 20));
 
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -241,13 +278,19 @@ void main() {
         pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
     await gesture.up();
     await tester.pump(const Duration(milliseconds: 20));
 
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -255,7 +298,13 @@ void main() {
         pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
     await gesture.up();
 
     expect(forcePressStartCount, 4);
@@ -264,11 +313,11 @@ void main() {
   testWidgets('a tap and then force press initiates a force press and not a double tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
           pointer: pointerValue,
           position: forcePressOffset,
           pressure: 0.0,
@@ -279,9 +328,9 @@ void main() {
     );
     // Initiate a quick tap.
     await gesture.updateWithCustomEvent(
-      const PointerMoveEvent(
+      PointerMoveEvent(
         pointer: pointerValue,
-        position: Offset(0.0, 0.0),
+        position: const Offset(0.0, 0.0),
         pressure: 0.0,
         pressureMin: 0,
         pressureMax: 1,
@@ -293,7 +342,7 @@ void main() {
     // Initiate a force tap.
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -301,9 +350,9 @@ void main() {
         pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: Offset(0.0, 0.0),
+      position: const Offset(0.0, 0.0),
       pressure: 0.5,
       pressureMin: 0,
       pressureMax: 1,
@@ -321,7 +370,7 @@ void main() {
   testWidgets('a long press from a touch device is recognized as a long single tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,
@@ -340,7 +389,7 @@ void main() {
   testWidgets('a long press from a mouse is just a tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,
@@ -359,7 +408,7 @@ void main() {
   testWidgets('a touch drag is not recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,
@@ -382,7 +431,7 @@ void main() {
   testWidgets('a mouse drag is recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,
@@ -405,7 +454,7 @@ void main() {
   testWidgets('a slow mouse drag is still recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,
@@ -584,6 +633,56 @@ void main() {
     expect(hitRect.size.width, lessThan(textFieldRect.size.width));
     expect(hitRect.size.height, lessThan(textFieldRect.size.height));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  group('ClipboardStatusNotifier', () {
+    group('when Clipboard fails', () {
+      setUp(() {
+        final MockClipboard mockClipboard = MockClipboard(getDataThrows: true);
+        SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+      });
+
+      tearDown(() {
+        SystemChannels.platform.setMockMethodCallHandler(null);
+      });
+
+      test('Clipboard API failure is gracefully recovered from', () async {
+        final ClipboardStatusNotifier notifier = ClipboardStatusNotifier();
+        expect(notifier.value, ClipboardStatus.unknown);
+
+        await expectLater(notifier.update(), completes);
+        expect(notifier.value, ClipboardStatus.unknown);
+      });
+    });
+
+    group('when Clipboard succeeds', () {
+      final MockClipboard mockClipboard = MockClipboard();
+
+      setUp(() {
+        SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+      });
+
+      tearDown(() {
+        SystemChannels.platform.setMockMethodCallHandler(null);
+      });
+
+      test('update sets value based on clipboard contents', () async {
+        final ClipboardStatusNotifier notifier = ClipboardStatusNotifier();
+        expect(notifier.value, ClipboardStatus.unknown);
+
+        await expectLater(notifier.update(), completes);
+        expect(notifier.value, ClipboardStatus.notPasteable);
+
+        mockClipboard.handleMethodCall(const MethodCall(
+          'Clipboard.setData',
+          <String, dynamic>{
+            'text': 'pasteablestring',
+          },
+        ));
+        await expectLater(notifier.update(), completes);
+        expect(notifier.value, ClipboardStatus.pasteable);
+      });
+    });
+  });
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {

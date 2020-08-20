@@ -1004,7 +1004,33 @@ class Image extends StatefulWidget {
   final bool matchTextDirection;
 
   /// Whether to continue showing the old image (true), or briefly show nothing
-  /// (false), when the image provider changes.
+  /// (false), when the image provider changes. The default value is false.
+  ///
+  /// ## Design discussion
+  ///
+  /// ### Why is the default value of [gaplessPlayback] false?
+  ///
+  /// Having the default value of [gaplessPlayback] be false helps prevent
+  /// situations where stale or misleading information might be presented.
+  /// Consider the following case:
+  ///
+  /// We have constructed a 'Person' widget that displays an avatar [Image] of
+  /// the currently loaded person along with their name. We could request for a
+  /// new person to be loaded into the widget at any time. Suppose we have a
+  /// person currently loaded and the widget loads a new person. What happens
+  /// if the [Image] fails to load?
+  ///
+  /// * Option A ([gaplessPlayback] = false): The new person's name is coupled
+  /// with a blank image.
+  ///
+  /// * Option B ([gaplessPlayback] = true): The widget displays the avatar of
+  /// the previous person and the name of the newly loaded person.
+  ///
+  /// This is why the default value is false. Most of the time, when you change
+  /// the image provider you're not just changing the image, you're removing the
+  /// old widget and adding a new one and not expecting them to have any
+  /// relationship. With [gaplessPlayback] on you might accidentally break this
+  /// expectation and re-use the old widget.
   final bool gaplessPlayback;
 
   /// A Semantic description of the image.
