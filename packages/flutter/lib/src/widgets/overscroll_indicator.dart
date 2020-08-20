@@ -253,9 +253,8 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
     // scroll, e.g. when scrolling in the opposite direction again to hide
     // the glow. Otherwise, the glow would always stay in a fixed position,
     // even if the top of the content already scrolled away.
-    _leadingController._paintOffsetScrollPixels = -notification.metrics.pixels;
-    _trailingController._paintOffsetScrollPixels =
-        -(notification.metrics.maxScrollExtent - notification.metrics.pixels);
+    _leadingController._paintOffsetScrollPixels = -(notification.metrics.pixels - notification.metrics.minScrollExtent);
+    _trailingController._paintOffsetScrollPixels = -(notification.metrics.maxScrollExtent - notification.metrics.pixels);
 
     if (notification is OverscrollNotification) {
       _GlowController controller;
@@ -269,9 +268,6 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
       final bool isLeading = controller == _leadingController;
       if (_lastNotificationType != OverscrollNotification) {
         final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: isLeading);
-        // It is possible that the scroll extent starts at non-zero.
-        if (isLeading)
-          confirmationNotification.paintOffset = notification.metrics.minScrollExtent;
         confirmationNotification.dispatch(context);
         _accepted[isLeading] = confirmationNotification._accepted;
         if (_accepted[isLeading]) {
