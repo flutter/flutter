@@ -204,6 +204,7 @@ void main([List<String> args = const <String>[]]) {
       // 'Start Transition' event when a demo is launched (see GalleryItem).
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeSummaryToFile('transitions', pretty: true);
+      await summary.writeTimelineToFile('transitions', pretty: true);
       final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
       await saveDurationsHistogram(
           List<Map<String, dynamic>>.from(timeline.json['traceEvents'] as List<dynamic>),
