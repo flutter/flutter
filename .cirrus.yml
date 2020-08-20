@@ -192,7 +192,8 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: docs-linux # linux-only
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'bin/**') && $CIRRUS_PR != ''"
+      # TODO(fujino): Make this pre-submit only once #64212 is fixed
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'bin/**') || $CIRRUS_PR == ''"
       environment:
         # TODO(tvolkert): optimize CPU and MEMORY settings once #60646 is resolved.
         CPU: 4
