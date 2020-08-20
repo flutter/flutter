@@ -772,7 +772,6 @@ tasks:
       Android with e2e.
     stage: devicelab
     required_agent_capabilities: ["mac/ios32"]
-    flaky: true
 
   flutter_gallery__transition_perf_e2e_ios:
     description: >
