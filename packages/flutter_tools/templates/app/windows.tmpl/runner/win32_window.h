@@ -62,8 +62,8 @@ class Win32Window {
                                  LPARAM const lparam) noexcept;
 
   // Called when CreateAndShow is called, allowing subclass window-related
-  // setup.
-  virtual void OnCreate();
+  // setup. Subclasses should return false if setup fails.
+  virtual bool OnCreate();
 
   // Called when Destroy is called.
   virtual void OnDestroy();

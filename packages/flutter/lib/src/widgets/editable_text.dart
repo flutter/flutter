@@ -40,6 +40,9 @@ export 'package:flutter/services.dart' show TextEditingValue, TextSelection, Tex
 /// (including the cursor location).
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause cause);
 
+/// Signature for the callback that reports the app private command results.
+typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
+
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
 // to transparent, is twice this duration.
@@ -413,6 +416,7 @@ class EditableText extends StatefulWidget {
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
+    this.onAppPrivateCommand,
     this.onSelectionChanged,
     this.onSelectionHandleTapped,
     List<TextInputFormatter> inputFormatters,
@@ -441,6 +445,7 @@ class EditableText extends StatefulWidget {
     ),
     this.autofillHints,
     this.clipBehavior = Clip.hardEdge,
+    this.restorationId,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -479,6 +484,10 @@ class EditableText extends StatefulWidget {
        assert(dragStartBehavior != null),
        assert(toolbarOptions != null),
        assert(clipBehavior != null),
+       assert(
+         !readOnly || autofillHints == null,
+         "Read-only fields can't have autofill hints.",
+       ),
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
        inputFormatters = maxLines == 1
@@ -515,7 +524,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool obscureText;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior},
+  /// {@macro flutter.dart:ui.textHeightBehavior}
   final TextHeightBehavior textHeightBehavior;
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}
@@ -814,7 +823,7 @@ class EditableText extends StatefulWidget {
   /// See the examples in [maxLines] for the complete picture of how [maxLines],
   /// [minLines], and [expands] interact to produce various behaviors.
   ///
-  /// Input that matches the height of its parent
+  /// Input that matches the height of its parent:
   /// ```dart
   /// Expanded(
   ///   child: TextField(maxLines: null, expands: true),
@@ -1030,6 +1039,11 @@ class EditableText extends StatefulWidget {
   /// {@end-tool}
   final ValueChanged<String> onSubmitted;
 
+  /// {@template flutter.widgets.editableText.onAppPrivateCommand}
+  /// Called when the result of an app private command is received.
+  /// {@endtemplate}
+  final AppPrivateCommandCallback onAppPrivateCommand;
+
   /// Called when the user changes the selection of text (including the cursor
   /// location).
   final SelectionChangedCallback onSelectionChanged;
@@ -1064,7 +1078,7 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.cursorWidth}
   /// How thick the cursor will be.
   ///
-  /// Defaults to 2.0
+  /// Defaults to 2.0.
   ///
   /// The cursor will draw under the text. The cursor width will extend
   /// to the right of the boundary between characters for left-to-right text
@@ -1208,6 +1222,25 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
+
+  /// Restoration ID to save and restore the scroll offset of the
+  /// [EditableText].
+  ///
+  /// If a restoration id is provided, the [EditableText] will persist its
+  /// current scroll offset and restore it during state restoration.
+  ///
+  /// The scroll offset is persisted in a [RestorationBucket] claimed from
+  /// the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// Persisting and restoring the content of the [EditableText] is the
+  /// responsibilility of the owner of the [controller], who may use a
+  /// [RestorableTextEditingController] for that purpose.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  final String restorationId;
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
@@ -1408,6 +1441,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // Is this field in the current autofill context.
   bool _isInAutofillContext = false;
 
+  /// Whether to create an input connection with the platform for text editing
+  /// or not.
+  ///
+  /// Read-only input fields do not need a connection with the platform since
+  /// there's no need for text editing capabilities (e.g. virtual keyboard).
+  ///
+  /// On the web, we always need a connection because we want some browser
+  /// functionalities to continue to work on read-only input fields like:
+  ///
+  /// - Relevant context menu.
+  /// - cmd/ctrl+c shortcut to copy.
+  /// - cmd/ctrl+a to select all.
+  /// - Changing the selection using a physical keyboard.
+  bool get _shouldCreateInputConnection => kIsWeb || !widget.readOnly;
+
   // This value is an eyeball estimation of the time it takes for the iOS cursor
   // to ease in and out.
   static const Duration _fadeDuration = Duration(milliseconds: 250);
@@ -1502,7 +1550,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       widget.focusNode.addListener(_handleFocusChanged);
       updateKeepAlive();
     }
-    if (widget.readOnly) {
+    if (!_shouldCreateInputConnection) {
       _closeInputConnectionIfNeeded();
     } else {
       if (oldWidget.readOnly && _hasFocus)
@@ -1568,7 +1616,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void updateEditingValue(TextEditingValue value) {
     // Since we still have to support keyboard select, this is the best place
     // to disable text updating.
-    if (widget.readOnly) {
+    if (!_shouldCreateInputConnection) {
       return;
     }
     _receivedRemoteTextEditingValue = value;
@@ -1600,20 +1648,32 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // action; The newline is already inserted. Otherwise, finalize
         // editing.
         if (!_isMultiline)
-          _finalizeEditing(true);
+          _finalizeEditing(action, shouldUnfocus: true);
         break;
       case TextInputAction.done:
       case TextInputAction.go:
-      case TextInputAction.send:
+      case TextInputAction.next:
+      case TextInputAction.previous:
       case TextInputAction.search:
-        _finalizeEditing(true);
+      case TextInputAction.send:
+        _finalizeEditing(action, shouldUnfocus: true);
         break;
-      default:
+      case TextInputAction.continueAction:
+      case TextInputAction.emergencyCall:
+      case TextInputAction.join:
+      case TextInputAction.none:
+      case TextInputAction.route:
+      case TextInputAction.unspecified:
         // Finalize editing, but don't give up focus because this keyboard
         // action does not imply the user is done inputting information.
-        _finalizeEditing(false);
+        _finalizeEditing(action, shouldUnfocus: false);
         break;
     }
+  }
+
+  @override
+  void performPrivateCommand(String action, Map<String, dynamic> data) {
+    widget.onAppPrivateCommand(action, data);
   }
 
   // The original position of the caret on FloatingCursorDragState.start.
@@ -1623,7 +1683,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // cursor.
   TextPosition _lastTextPosition;
 
-  // The offset of the floating cursor as determined from the first update call.
+  // The offset of the floating cursor as determined from the start call.
   Offset _pointOffsetOrigin;
 
   // The most recent position of the floating cursor.
@@ -1642,22 +1702,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           _floatingCursorResetController.stop();
           _onFloatingCursorResetTick();
         }
+        // We want to send in points that are centered around a (0,0) origin, so
+        // we cache the position.
+        _pointOffsetOrigin = point.offset;
+
         final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);
         _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-        renderEditable.setFloatingCursor(point.state, _startCaretRect.center - _floatingCursorOffset, currentTextPosition);
+
+        _lastBoundedOffset = _startCaretRect.center - _floatingCursorOffset;
+        _lastTextPosition = currentTextPosition;
+        renderEditable.setFloatingCursor(point.state, _lastBoundedOffset, _lastTextPosition);
         break;
       case FloatingCursorDragState.Update:
-        // We want to send in points that are centered around a (0,0) origin, so we cache the
-        // position on the first update call.
-        if (_pointOffsetOrigin != null) {
-          final Offset centeredPoint = point.offset - _pointOffsetOrigin;
-          final Offset rawCursorOffset = _startCaretRect.center + centeredPoint - _floatingCursorOffset;
-          _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
-          _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset + _floatingCursorOffset));
-          renderEditable.setFloatingCursor(point.state, _lastBoundedOffset, _lastTextPosition);
-        } else {
-          _pointOffsetOrigin = point.offset;
-        }
+        final Offset centeredPoint = point.offset - _pointOffsetOrigin;
+        final Offset rawCursorOffset = _startCaretRect.center + centeredPoint - _floatingCursorOffset;
+
+        _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
+        _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset + _floatingCursorOffset));
+        renderEditable.setFloatingCursor(point.state, _lastBoundedOffset, _lastTextPosition);
         break;
       case FloatingCursorDragState.End:
         // We skip animation if no update has happened.
@@ -1689,16 +1751,38 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _finalizeEditing(bool shouldUnfocus) {
+  void _finalizeEditing(TextInputAction action, {@required bool shouldUnfocus}) {
     // Take any actions necessary now that the user has completed editing.
     if (widget.onEditingComplete != null) {
       widget.onEditingComplete();
     } else {
       // Default behavior if the developer did not provide an
-      // onEditingComplete callback: Finalize editing and remove focus.
+      // onEditingComplete callback: Finalize editing and remove focus, or move
+      // it to the next/previous field, depending on the action.
       widget.controller.clearComposing();
-      if (shouldUnfocus)
-        widget.focusNode.unfocus();
+      if (shouldUnfocus) {
+        switch (action) {
+          case TextInputAction.none:
+          case TextInputAction.unspecified:
+          case TextInputAction.done:
+          case TextInputAction.go:
+          case TextInputAction.search:
+          case TextInputAction.send:
+          case TextInputAction.continueAction:
+          case TextInputAction.join:
+          case TextInputAction.route:
+          case TextInputAction.emergencyCall:
+          case TextInputAction.newline:
+            widget.focusNode.unfocus();
+            break;
+          case TextInputAction.next:
+            widget.focusNode.nextFocus();
+            break;
+          case TextInputAction.previous:
+            widget.focusNode.previousFocus();
+            break;
+        }
+      }
     }
 
     // Invoke optional callback with the user's submitted content.
@@ -1781,7 +1865,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool get _shouldBeInAutofillContext => _needsAutofill && currentAutofillScope != null;
 
   void _openInputConnection() {
-    if (widget.readOnly) {
+    if (!_shouldCreateInputConnection) {
       return;
     }
     if (!_hasInputConnection) {
@@ -1847,7 +1931,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection = null;
       _lastFormattedUnmodifiedTextEditingValue = null;
       _receivedRemoteTextEditingValue = null;
-      _finalizeEditing(true);
+      _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
     }
   }
 
@@ -2240,6 +2324,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(needsAutofillConfiguration != null);
     return TextInputConfiguration(
       inputType: widget.keyboardType,
+      readOnly: widget.readOnly,
       obscureText: widget.obscureText,
       autocorrect: widget.autocorrect,
       smartDashesType: widget.smartDashesType ?? (widget.obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -2307,6 +2392,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         controller: _scrollController,
         physics: widget.scrollPhysics,
         dragStartBehavior: widget.dragStartBehavior,
+        restorationId: widget.restorationId,
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return CompositedTransformTarget(
             link: _toolbarLayerLink,

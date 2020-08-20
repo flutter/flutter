@@ -672,6 +672,63 @@ void main() {
       await tester.pumpAndSettle();
       expect(transformationController.value, equals(Matrix4.identity()));
     });
+
+    testWidgets('gesture can start as pan and become scale', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      const double boundaryMargin = 50.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(boundaryMargin),
+                transformationController: transformationController,
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      Vector3 translation = transformationController.value.getTranslation();
+      expect(translation.x, 0.0);
+      expect(translation.y, 0.0);
+
+      // Start a pan gesture.
+      final Offset childCenter = tester.getCenter(find.byType(Container));
+      final TestGesture gesture = await tester.createGesture();
+      await gesture.down(childCenter);
+      await tester.pump();
+      await gesture.moveTo(Offset(
+        childCenter.dx + 5.0,
+        childCenter.dy + 5.0,
+      ));
+      await tester.pump();
+      translation = transformationController.value.getTranslation();
+      expect(translation.x, greaterThan(0.0));
+      expect(translation.y, greaterThan(0.0));
+
+      // Put another finger down and turn it into a scale gesture.
+      final TestGesture gesture2 = await tester.createGesture();
+      await gesture2.down(Offset(
+        childCenter.dx - 5.0,
+        childCenter.dy - 5.0,
+      ));
+      await tester.pump();
+      await gesture.moveTo(Offset(
+        childCenter.dx + 25.0,
+        childCenter.dy + 25.0,
+      ));
+      await gesture2.moveTo(Offset(
+        childCenter.dx - 25.0,
+        childCenter.dy - 25.0,
+      ));
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
+    });
   });
 
   group('getNearestPointOnLine', () {

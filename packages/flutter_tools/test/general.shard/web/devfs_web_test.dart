@@ -462,6 +462,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      nullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
@@ -574,6 +575,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      nullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
@@ -689,6 +691,7 @@ void main() {
       testMode: true,
       expressionCompiler: null,
       chromiumLauncher: null,
+      nullAssertions: true,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -725,6 +728,7 @@ void main() {
       urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
+      nullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',

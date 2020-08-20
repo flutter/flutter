@@ -402,7 +402,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// The image filter to apply to the existing painted content before painting the child.
   ///
   /// For example, consider using [ImageFilter.blur] to create a backdrop
-  /// blur effect
+  /// blur effect.
   final ui.ImageFilter filter;
 
   @override
@@ -3951,6 +3951,11 @@ class Flex extends MultiChildRenderObjectWidget {
   ///
   /// Defaults to the ambient [Directionality].
   ///
+  /// If [textDirection] is [TextDirection.rtl], then the direction in which
+  /// text flows starts from right to left. Otherwise, if [textDirection] is
+  /// [TextDirection.ltr], then the direction in which text flows starts from
+  /// left to right.
+  ///
   /// If the [direction] is [Axis.horizontal], this controls the order in which
   /// the children are positioned (left-to-right or right-to-left), and the
   /// meaning of the [mainAxisAlignment] property's [MainAxisAlignment.start] and
@@ -4183,6 +4188,28 @@ class Flex extends MultiChildRenderObjectWidget {
 /// that width, and you end up with a paragraph split over several lines.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_fixed.png)
+///
+/// The [textDirection] property controls the direction that children are rendered in.
+/// [TextDirection.ltr] is the default [textDirection] of [Row] children, so the first
+/// child is rendered at the `start` of the [Row], to the left, with subsequent children
+/// following to the right. If you want to order children in the opposite
+/// direction (right to left), then [textDirection] can be set to
+/// [TextDirection.rtl]. This is shown in the example below
+///
+/// ```dart
+/// Row(
+///   textDirection: TextDirection.rtl,
+///   children: <Widget>[
+///     const FlutterLogo(),
+///     const Expanded(
+///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
+///     ),
+///     const Icon(Icons.sentiment_very_satisfied),
+///   ],
+/// )
+/// ```
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_textDirection.png)
 ///
 /// ## Layout algorithm
 ///
@@ -4496,7 +4523,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
     @required Widget child,
   }) : super(key: key, child: child);
 
-  /// The flex factor to use for this child
+  /// The flex factor to use for this child.
   ///
   /// If null or zero, the child is inflexible and determines its own size. If
   /// non-zero, the amount of space the child's can occupy in the main axis is
@@ -5187,13 +5214,6 @@ class RichText extends MultiChildRenderObjectWidget {
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
-    @Deprecated(
-      'This parameter is a temporary flag to migrate the internal tests and '
-      'should not be used in other contexts. For more details, see '
-      'https://github.com/flutter/flutter/issues/59316. '
-      'This feature was deprecated after v1.19.0.'
-    )
-    bool applyTextScaleFactorToWidgetSpan = false,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -6493,7 +6513,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that absorbs pointers during hit testing.
   ///
-  /// The [absorbing] argument must not be null
+  /// The [absorbing] argument must not be null.
   const AbsorbPointer({
     Key key,
     this.absorbing = true,
@@ -6557,7 +6577,7 @@ class MetaData extends SingleChildRenderObjectWidget {
     Widget child,
   }) : super(key: key, child: child);
 
-  /// Opaque meta data ignored by the render tree
+  /// Opaque meta data ignored by the render tree.
   final dynamic metaData;
 
   /// How to behave during hit testing.

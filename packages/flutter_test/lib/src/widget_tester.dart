@@ -271,6 +271,61 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   }
 }
 
+/// A [TestVariant] that runs separate tests with each of the given values.
+///
+/// To use this variant, define it before the test, and then access
+/// [currentValue] inside the test.
+///
+/// The values are typically enums, but they don't have to be. The `toString`
+/// for the given value will be used to describe the variant. Values will have
+/// their type name stripped from their `toString` output, so that enum values
+/// will only print the value, not the type.
+///
+/// {@tool snippet}
+/// This example shows how to set up the test to access the [currentValue]. In
+/// this example, two tests will be run, one with `value1`, and one with
+/// `value2`. The test with `value2` will fail. The names of the tests will be:
+///
+///   - `Test handling of TestScenario (value1)`
+///   - `Test handling of TestScenario (value2)`
+///
+/// ```dart
+/// enum TestScenario {
+///   value1,
+///   value2,
+///   value3,
+/// }
+///
+/// final ValueVariant<TestScenario> variants = ValueVariant<TestScenario>(
+///   <TestScenario>{value1, value2},
+/// );
+///
+/// testWidgets('Test handling of TestScenario', (WidgetTester tester) {
+///   expect(variants.currentValue, equals(value1));
+/// }, variant: variants);
+/// ```
+/// {@end-tool}
+class ValueVariant<T> extends TestVariant<T> {
+  /// Creates a [ValueVariant] that tests the given [values].
+  ValueVariant(this.values);
+
+  /// Returns the value currently under test.
+  T get currentValue => _currentValue;
+  T _currentValue;
+
+  @override
+  final Set<T> values;
+
+  @override
+  String describeValue(T value) => value.toString().replaceFirst('$T.', '');
+
+  @override
+  Future<T> setUp(T value) async => _currentValue = value;
+
+  @override
+  Future<void> tearDown(T value, T memento) async {}
+}
+
 /// The warning message to show when a benchmark is performed with assert on.
 const String kDebugWarning = '''
 ┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓
@@ -604,30 +659,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }
   }
 
-  /// Repeatedly calls [pump] with the given `duration` until there are no
-  /// longer any frames scheduled. This will call [pump] at least once, even if
-  /// no frames are scheduled when the function is called, to flush any pending
-  /// microtasks which may themselves schedule a frame.
-  ///
-  /// This essentially waits for all animations to have completed.
-  ///
-  /// If it takes longer that the given `timeout` to settle, then the test will
-  /// fail (this method will throw an exception). In particular, this means that
-  /// if there is an infinite animation in progress (for example, if there is an
-  /// indeterminate progress indicator spinning), this method will throw.
-  ///
-  /// The default timeout is ten minutes, which is longer than most reasonable
-  /// finite animations would last.
-  ///
-  /// If the function returns, it returns the number of pumps that it performed.
-  ///
-  /// In general, it is better practice to figure out exactly why each frame is
-  /// needed, and then to [pump] exactly as many frames as necessary. This will
-  /// help catch regressions where, for instance, an animation is being started
-  /// one frame later than it should.
-  ///
-  /// Alternatively, one can check that the return value from this function
-  /// matches the expected number of pumps.
+  @override
   Future<int> pumpAndSettle([
     Duration duration = const Duration(milliseconds: 100),
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
@@ -648,16 +680,17 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       }
       return true;
     }());
-    int count = 0;
-    return TestAsyncUtils.guard<void>(() async {
+    return TestAsyncUtils.guard<int>(() async {
       final DateTime endTime = binding.clock.fromNowBy(timeout);
+      int count = 0;
       do {
         if (binding.clock.now().isAfter(endTime))
           throw FlutterError('pumpAndSettle timed out');
         await binding.pump(duration, phase);
         count += 1;
       } while (binding.hasScheduledFrame);
-    }).then<int>((_) => count);
+      return count;
+    });
   }
 
   /// Repeatedly pump frames that render the `target` widget with a fixed time

@@ -23,6 +23,8 @@ export 'dart:ui' show Offset, PointerDeviceKind;
 ///
 ///  * [kSecondaryButton], which describes a cross-device behavior of
 ///    "secondary operation".
+///  * [kTertiaryButton], which describes a cross-device behavior of
+///    "tertiary operation".
 const int kPrimaryButton = 0x01;
 
 /// The bit of [PointerEvent.buttons] that corresponds to a cross-device
@@ -37,6 +39,8 @@ const int kPrimaryButton = 0x01;
 ///
 ///  * [kPrimaryButton], which describes a cross-device behavior of
 ///    "primary operation".
+///  * [kTertiaryButton], which describes a cross-device behavior of
+///    "tertiary operation".
 const int kSecondaryButton = 0x02;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the primary mouse button.
@@ -81,18 +85,46 @@ const int kStylusContact = kPrimaryButton;
 ///    concept.
 const int kPrimaryStylusButton = kSecondaryButton;
 
+/// The bit of [PointerEvent.buttons] that corresponds to a cross-device
+/// behavior of "tertiary operation".
+///
+/// It is equivalent to:
+///
+///  * [kMiddleMouseButton]: The tertiary mouseButton.
+///  * [kSecondaryStylusButton]: The secondary button on a stylus. This is considered
+///    a tertiary button as the primary button of a stylus already corresponds to a
+///    "secondary operation" (where stylus contact is the primary operation).
+///
+/// See also:
+///
+///  * [kPrimaryButton], which describes a cross-device behavior of
+///    "primary operation".
+///  * [kSecondaryButton], which describes a cross-device behavior of
+///    "secondary operation".
+const int kTertiaryButton = 0x04;
+
 /// The bit of [PointerEvent.buttons] that corresponds to the middle mouse button.
 ///
 /// The middle mouse button is typically between the left and right buttons on
 /// the top of the mouse but can be reconfigured to be a different physical
 /// button.
-const int kMiddleMouseButton = 0x04;
+///
+/// See also:
+///
+///  * [kTertiaryButton], which has the same value but describes its cross-device
+///    concept.
+const int kMiddleMouseButton = kTertiaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the secondary stylus button.
 ///
 /// The secondary stylus button is typically on the end of the stylus farthest
 /// from the tip but can be reconfigured to be a different physical button.
-const int kSecondaryStylusButton = 0x04;
+///
+/// See also:
+///
+///  * [kTertiaryButton], which has the same value but describes its cross-device
+///    concept.
+const int kSecondaryStylusButton = kTertiaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the back mouse button.
 ///
@@ -388,7 +420,7 @@ abstract class PointerEvent with Diagnosticable {
   ///
   /// The angle of the contact ellipse, in radians in the range:
   ///
-  ///    -pi/2 < orientation <= pi/2
+  ///     -pi/2 < orientation <= pi/2
   ///
   /// ...giving the angle of the major axis of the ellipse with the y-axis
   /// (negative angles indicating an orientation along the top-left /
@@ -400,7 +432,7 @@ abstract class PointerEvent with Diagnosticable {
   ///
   /// The angle of the stylus, in radians in the range:
   ///
-  ///    -pi < orientation <= pi
+  ///     -pi < orientation <= pi
   ///
   /// ...giving the angle of the axis of the stylus projected onto the input
   /// surface, relative to the positive y-axis of that surface (thus 0.0
@@ -417,7 +449,7 @@ abstract class PointerEvent with Diagnosticable {
   ///
   /// The angle of the stylus, in radians in the range:
   ///
-  ///    0 <= tilt <= pi/2
+  ///     0 <= tilt <= pi/2
   ///
   /// ...giving the angle of the axis of the stylus, relative to the axis
   /// perpendicular to the input surface (thus 0.0 indicates the stylus is
@@ -837,7 +869,7 @@ class PointerHoverEvent extends PointerEvent {
 ///  * [PointerExitEvent], which reports when the pointer has left an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
 ///    contact with the device.
-///  * [Listener.onPointerEnter], which allows callers to be notified of these
+///  * [MouseRegion.onEnter], which allows callers to be notified of these
 ///    events in a widget tree.
 class PointerEnterEvent extends PointerEvent {
   /// Creates a pointer enter event.
@@ -988,7 +1020,7 @@ class PointerEnterEvent extends PointerEvent {
 ///  * [PointerEnterEvent], which reports when the pointer has entered an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
 ///    contact with the device.
-///  * [Listener.onPointerExit], which allows callers to be notified of these
+///  * [MouseRegion.onExit], which allows callers to be notified of these
 ///    events in a widget tree.
 class PointerExitEvent extends PointerEvent {
   /// Creates a pointer exit event.

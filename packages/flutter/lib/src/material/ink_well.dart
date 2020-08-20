@@ -85,7 +85,7 @@ abstract class InteractiveInkFeature extends InkFeature {
   /// [clipCallback] is the callback used to obtain the [Rect] used for clipping the ink effect.
   /// If [clipCallback] is null, no clipping is performed on the ink circle.
   ///
-  /// Clipping can happen in 3 different ways -
+  /// Clipping can happen in 3 different ways:
   ///  1. If [customBorder] is provided, it is used to determine the path
   ///     for clipping.
   ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
@@ -782,7 +782,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void didUpdateWidget(_InkResponseStateWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
-      _handleHoverChange(_hovering);
+      if (enabled) {
+        // Don't call wigdet.onHover because many wigets, including the button
+        // widgets, apply setState to an ancestor context from onHover.
+        updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
+      }
       _updateFocusHighlights();
     }
   }
@@ -827,7 +831,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     return null;
   }
 
-  void updateHighlight(_HighlightType type, {@required bool value}) {
+  void updateHighlight(_HighlightType type, { @required bool value, bool callOnHover = true }) {
     final InkHighlight highlight = _highlights[type];
     void handleInkRemoval() {
       assert(_highlights[type] != null);
@@ -871,7 +875,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           widget.onHighlightChanged(value);
         break;
       case _HighlightType.hover:
-        if (widget.onHover != null)
+        if (callOnHover && widget.onHover != null)
           widget.onHover(value);
         break;
       case _HighlightType.focus:
@@ -1058,13 +1062,22 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   bool get enabled => _isWidgetEnabled(widget);
 
-  void _handleMouseEnter(PointerEnterEvent event) => _handleHoverChange(true);
-  void _handleMouseExit(PointerExitEvent event) => _handleHoverChange(false);
-  void _handleHoverChange(bool hovering) {
-    if (_hovering != hovering) {
-      _hovering = hovering;
-      updateHighlight(_HighlightType.hover, value: enabled && _hovering);
+  void _handleMouseEnter(PointerEnterEvent event) {
+    _hovering = true;
+    if (enabled) {
+      _handleHoverChange();
     }
+  }
+
+  void _handleMouseExit(PointerExitEvent event) {
+    _hovering = false;
+    // If the exit occurs after we've been disabled, we still
+    // want to take down the highlights and run widget.onHover.
+    _handleHoverChange();
+  }
+
+  void _handleHoverChange() {
+    updateHighlight(_HighlightType.hover, value: _hovering);
   }
 
   bool get _canRequestFocus {
@@ -1094,7 +1107,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
         if (!enabled) MaterialState.disabled,
-        if (_hovering) MaterialState.hovered,
+        if (_hovering && enabled) MaterialState.hovered,
         if (_hasFocus) MaterialState.focused,
       },
     );
@@ -1109,8 +1122,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           autofocus: widget.autofocus,
           child: MouseRegion(
             cursor: effectiveMouseCursor,
-            onEnter: enabled ? _handleMouseEnter : null,
-            onExit: enabled ? _handleMouseExit : null,
+            onEnter: _handleMouseEnter,
+            onExit: _handleMouseExit,
             child: GestureDetector(
               onTapDown: enabled ? _handleTapDown : null,
               onTapUp: enabled ? _handleTapUp : null,

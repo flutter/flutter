@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -93,6 +92,7 @@ FlutterPlatform installHook({
   List<String> extraFrontEndOptions,
   // Deprecated, use extraFrontEndOptions.
   List<String> dartExperiments,
+  bool nullAssertions = false,
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!startPaused && observatoryPort == null));
@@ -126,6 +126,7 @@ FlutterPlatform installHook({
     flutterProject: flutterProject,
     icudtlPath: icudtlPath,
     extraFrontEndOptions: extraFrontEndOptions,
+    nullAssertions: nullAssertions,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -269,6 +270,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
+    this.nullAssertions = false,
     @required this.extraFrontEndOptions,
   }) : assert(shellPath != null);
 
@@ -291,6 +293,7 @@ class FlutterPlatform extends PlatformPlugin {
   final FlutterProject flutterProject;
   final String icudtlPath;
   final List<String> extraFrontEndOptions;
+  final bool nullAssertions;
 
   Directory fontsDirectory;
 
@@ -528,7 +531,6 @@ class FlutterPlatform extends PlatformPlugin {
             globals.printTrace('test $ourTestCount: using observatory uri $detectedUri from pid ${process.pid}');
           }
           processObservatoryUri = detectedUri;
-          await DartDevelopmentService.startDartDevelopmentService(processObservatoryUri);
           {
             globals.printTrace('Connecting to service protocol: $processObservatoryUri');
             final Future<vm_service.VmService> localVmService = connectToVmService(processObservatoryUri,
@@ -846,6 +848,8 @@ class FlutterPlatform extends PlatformPlugin {
       '--non-interactive',
       '--use-test-fonts',
       '--packages=$packages',
+      if (nullAssertions)
+        '--dart-flags=--null_assertions',
       testPath,
     ];
 

@@ -13,7 +13,7 @@ void main() {
     home: Material(
       child: Builder(
         builder: (BuildContext context) {
-          return FlatButton(
+          return TextButton(
             child: const Text(
               'flutter drive lib/xxx.dart',
               textDirection: TextDirection.ltr,
