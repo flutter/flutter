@@ -4,12 +4,13 @@
 
 // @dart = 2.8
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import '../gestures/gesture_tester.dart';
 import '../services/fake_platform_views.dart';
 import 'rendering_tester.dart';
 
@@ -73,16 +74,33 @@ void main() {
       semanticsHandle.dispose();
     });
 
-    testGesture('hover events are dispatched via PlatformViewController.dispatchPointerEvent', (GestureTester tester) {
+    test('mouse hover events are dispatched via PlatformViewController.dispatchPointerEvent', () {
       layout(platformViewRenderBox);
       pumpFrame(phase: EnginePhase.flushSemantics);
 
-      final TestPointer pointer = TestPointer(1, PointerDeviceKind.mouse);
-      tester.route(pointer.addPointer());
-      tester.route(pointer.hover(const Offset(10, 10)));
+      ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+        _pointerData(ui.PointerChange.add, const Offset(0, 0)),
+        _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
+        _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
+      ]));
 
       expect(fakePlatformViewController.dispatchedPointerEvents, isNotEmpty);
     });
 
   }, skip: isBrowser); // TODO(yjbanov): fails on Web with obscured stack trace: https://github.com/flutter/flutter/issues/42770
+}
+
+ui.PointerData _pointerData(
+  ui.PointerChange change,
+  Offset logicalPosition, {
+  int device = 0,
+  PointerDeviceKind kind = PointerDeviceKind.mouse,
+}) {
+  return ui.PointerData(
+    change: change,
+    physicalX: logicalPosition.dx * ui.window.devicePixelRatio,
+    physicalY: logicalPosition.dy * ui.window.devicePixelRatio,
+    kind: kind,
+    device: device,
+  );
 }

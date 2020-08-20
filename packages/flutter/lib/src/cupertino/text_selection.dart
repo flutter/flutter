@@ -775,10 +775,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderObject child, dynamic slot) {
     if (slot is _CupertinoTextSelectionToolbarItemsSlot) {
       assert(child is RenderBox);
-      assert(slot is _CupertinoTextSelectionToolbarItemsSlot);
       _updateRenderObject(child as RenderBox, slot);
       assert(renderObject.childToSlot.containsKey(child));
       assert(renderObject.slotToChild.containsKey(slot));
@@ -794,9 +793,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   // This is not reachable for children that don't have an IndexedSlot.
   @override
-  void moveChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
+  void moveRenderObjectChild(RenderObject child, IndexedSlot<Element> oldSlot, IndexedSlot<Element> newSlot) {
     assert(child.parent == renderObject);
-    renderObject.move(child as RenderBox, after: slot?.value?.renderObject as RenderBox);
+    renderObject.move(child as RenderBox, after: newSlot?.value?.renderObject as RenderBox);
   }
 
   static bool _shouldPaint(Element child) {
@@ -804,18 +803,20 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, dynamic slot) {
     // Check if the child is in a slot.
-    if (renderObject.childToSlot.containsKey(child)) {
+    if (slot is _CupertinoTextSelectionToolbarItemsSlot) {
       assert(child is RenderBox);
+      assert(renderObject.slotToChild.containsKey(slot));
       assert(renderObject.childToSlot.containsKey(child));
-      _updateRenderObject(null, renderObject.childToSlot[child]);
+      _updateRenderObject(null, slot);
       assert(!renderObject.childToSlot.containsKey(child));
       assert(!renderObject.slotToChild.containsKey(slot));
       return;
     }
 
     // Otherwise look for it in the list of children.
+    assert(slot is IndexedSlot);
     assert(child.parent == renderObject);
     renderObject.remove(child as RenderBox);
   }
