@@ -868,6 +868,7 @@ class PositionedTransition extends AnimatedWidget {
 ///       return Stack(
 ///         children: [
 ///           RelativePositionedTransition(
+///             size: biggest,
 ///             rect: RectTween(
 ///               begin: Rect.fromLTWH(0, 0, bigLogo, bigLogo),
 ///               end: Rect.fromLTWH(biggest.width - smallLogo, biggest.height - smallLogo, smallLogo, smallLogo),
