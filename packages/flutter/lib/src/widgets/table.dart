@@ -303,16 +303,16 @@ class _TableElement extends RenderObjectElement {
   }
 
   @override
-  void insertRenderObjectChild(RenderObject child, IndexedSlot<Element> slot) {
+  void insertChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
     renderObject.setupParentData(child);
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, IndexedSlot<Element> oldSlot, IndexedSlot<Element> newSlot) {
+  void moveChildRenderObject(RenderObject child, dynamic slot) {
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, IndexedSlot<Element> slot) {
+  void removeChildRenderObject(RenderObject child) {
     final TableCellParentData childParentData = child.parentData as TableCellParentData;
     renderObject.setChild(childParentData.x, childParentData.y, null);
   }

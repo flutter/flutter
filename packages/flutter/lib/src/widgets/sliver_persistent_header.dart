@@ -236,18 +236,18 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
   }
 
   @override
-  void insertRenderObjectChild(covariant RenderBox child, dynamic slot) {
+  void insertChildRenderObject(covariant RenderBox child, dynamic slot) {
     assert(renderObject.debugValidateChild(child));
     renderObject.child = child;
   }
 
   @override
-  void moveRenderObjectChild(covariant RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveChildRenderObject(covariant RenderObject child, dynamic slot) {
     assert(false);
   }
 
   @override
-  void removeRenderObjectChild(covariant RenderObject child, dynamic slot) {
+  void removeChildRenderObject(covariant RenderObject child) {
     renderObject.child = null;
   }
 
