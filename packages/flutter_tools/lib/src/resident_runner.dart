@@ -1723,15 +1723,16 @@ class DevtoolsLauncher {
     }
   }
 
-  Future<io.HttpServer> serve() async {
+  Future<DevToolsServerAddress> serve() async {
     try {
       _devtoolsServer ??= await devtools_server.serveDevTools(
         enableStdinCommands: false,
       );
+      return DevToolsServerAddress(_devtoolsServer.address.host, _devtoolsServer.port);
     } on Exception catch (e, st) {
       globals.printTrace('Failed to serve DevTools: $e\n$st');
+      return null;
     }
-    return _devtoolsServer;
   }
 
   Future<void> close() async {
@@ -1740,4 +1741,11 @@ class DevtoolsLauncher {
   }
 
   static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>() ?? DevtoolsLauncher();
+}
+
+class DevToolsServerAddress {
+  DevToolsServerAddress(this.host, this.port);
+
+  final String host;
+  final int port;
 }
