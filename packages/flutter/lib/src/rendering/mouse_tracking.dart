@@ -145,7 +145,7 @@ class _MouseState {
   //
   // It uses [LinkedHashMap] to keep the insertion order.
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> get annotations => _annotations;
-  LinkedHashMap<MouseTrackerAnnotation, Matrix4> _annotations = LinkedHashMap<MouseTrackerAnnotation, Matrix4>();
+  LinkedHashMap<MouseTrackerAnnotation, Matrix4> _annotations = LinkedHashMap<MouseTrackerAnnotation, Matrix4/*?*/>();
 
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> replaceAnnotations(LinkedHashMap<MouseTrackerAnnotation, Matrix4> value) {
     assert(value != null);
@@ -170,10 +170,7 @@ class _MouseState {
 
   @override
   String toString() {
-    String describeEvent(PointerEvent event) {
-      return event == null ? 'null' : describeIdentity(event);
-    }
-    final String describeLatestEvent = 'latestEvent: ${describeEvent(latestEvent)}';
+    final String describeLatestEvent = 'latestEvent: ${describeIdentity(latestEvent)}';
     final String describeAnnotations = 'annotations: [list of ${annotations.length}]';
     return '${describeIdentity(this)}($describeLatestEvent, $describeAnnotations)';
   }
@@ -347,7 +344,7 @@ abstract class BaseMouseTracker extends ChangeNotifier {
 
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> _hitTestResultToAnnotations(HitTestResult result) {
     assert(result != null);
-    final LinkedHashMap<MouseTrackerAnnotation, Matrix4> annotations = <MouseTrackerAnnotation, Matrix4>{}
+    final LinkedHashMap<MouseTrackerAnnotation, Matrix4> annotations = <MouseTrackerAnnotation, Matrix4/*?*/>{}
         as LinkedHashMap<MouseTrackerAnnotation, Matrix4>;
     for (final HitTestEntry entry in result.path) {
       if (entry.target is MouseTrackerAnnotation) {

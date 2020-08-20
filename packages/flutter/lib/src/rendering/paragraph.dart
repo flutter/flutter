@@ -116,7 +116,7 @@ class RenderParagraph extends RenderBox
   final TextPainter _textPainter;
 
   /// The text to display.
-  InlineSpan get text => _textPainter.text;
+  InlineSpan get text => _textPainter.text/*!*/;
   set text(InlineSpan value) {
     assert(value != null);
     switch (_textPainter.text.compareTo(value)) {
@@ -173,8 +173,8 @@ class RenderParagraph extends RenderBox
   /// its left.
   ///
   /// This must not be null.
-  TextDirection get textDirection => _textPainter.textDirection;
-  set textDirection(TextDirection value) {
+  TextDirection/*!*/ get textDirection => _textPainter.textDirection;
+  set textDirection(TextDirection/*!*/ value) {
     assert(value != null);
     if (_textPainter.textDirection == value)
       return;
@@ -228,10 +228,10 @@ class RenderParagraph extends RenderBox
   /// An optional maximum number of lines for the text to span, wrapping if
   /// necessary. If the text exceeds the given number of lines, it will be
   /// truncated according to [overflow] and [softWrap].
-  int get maxLines => _textPainter.maxLines;
+  int/*?*/ get maxLines => _textPainter.maxLines;
   /// The value may be null. If it is not null, then it must be greater than
   /// zero.
-  set maxLines(int value) {
+  set maxLines(int/*?*/ value) {
     assert(value == null || value > 0);
     if (_textPainter.maxLines == value)
       return;
@@ -248,9 +248,9 @@ class RenderParagraph extends RenderBox
   /// on the locale. For example the '骨' character is rendered differently in
   /// the Chinese and Japanese locales. In these cases the [locale] may be used
   /// to select a locale-specific font.
-  Locale get locale => _textPainter.locale;
+  Locale/*?*/ get locale => _textPainter.locale;
   /// The value may be null.
-  set locale(Locale value) {
+  set locale(Locale/*?*/ value) {
     if (_textPainter.locale == value)
       return;
     _textPainter.locale = value;
@@ -259,9 +259,9 @@ class RenderParagraph extends RenderBox
   }
 
   /// {@macro flutter.painting.textPainter.strutStyle}
-  StrutStyle get strutStyle => _textPainter.strutStyle;
+  StrutStyle/*?*/ get strutStyle => _textPainter.strutStyle;
   /// The value may be null.
-  set strutStyle(StrutStyle value) {
+  set strutStyle(StrutStyle/*?*/ value) {
     if (_textPainter.strutStyle == value)
       return;
     _textPainter.strutStyle = value;
@@ -281,8 +281,8 @@ class RenderParagraph extends RenderBox
   }
 
   /// {@macro flutter.dart:ui.textHeightBehavior}
-  ui.TextHeightBehavior get textHeightBehavior => _textPainter.textHeightBehavior;
-  set textHeightBehavior(ui.TextHeightBehavior value) {
+  ui.TextHeightBehavior/*?*/ get textHeightBehavior => _textPainter.textHeightBehavior;
+  set textHeightBehavior(ui.TextHeightBehavior/*?*/ value) {
     if (_textPainter.textHeightBehavior == value)
       return;
     _textPainter.textHeightBehavior = value;
@@ -370,7 +370,7 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenWidthWithMaxIntrinsics(double height) {
     RenderBox child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     // Takes textScaleFactor into account because the content of the placeholder
     // span will be scale up when it paints.
@@ -391,7 +391,7 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenWidthWithMinIntrinsics(double height) {
     RenderBox child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     // Takes textScaleFactor into account because the content of the placeholder
     // span will be scale up when it paints.
@@ -412,7 +412,7 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenHeightWithMinIntrinsics(double width) {
     RenderBox child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     // Takes textScaleFactor into account because the content of the placeholder
     // span will be scale up when it paints.
@@ -435,7 +435,7 @@ class RenderParagraph extends RenderBox
   bool hitTestSelf(Offset position) => true;
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     RenderBox child = firstChild;
     while (child != null) {
       final TextParentData textParentData = child.parentData as TextParentData;
@@ -533,7 +533,7 @@ class RenderParagraph extends RenderBox
       return;
     }
     RenderBox child = firstChild;
-    _placeholderDimensions = List<PlaceholderDimensions>(childCount);
+    _placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     BoxConstraints boxConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
     // The content will be enlarged by textScaleFactor during painting phase.
@@ -634,7 +634,7 @@ class RenderParagraph extends RenderBox
           )..layout();
           if (didOverflowWidth) {
             double fadeEnd, fadeStart;
-            switch (textDirection) {
+            switch (textDirection/*!*/) {
               case TextDirection.rtl:
                 fadeEnd = 0.0;
                 fadeStart = fadeSizePainter.width;
@@ -807,6 +807,8 @@ class RenderParagraph extends RenderBox
   List<InlineSpanSemanticsInformation> _combineSemanticsInfo() {
     assert(_semanticsInfo != null);
     final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
+    // TODO(ianh): this algorithm is internally inconsistent. workingText
+    // never becomes null, but we check for it being so below.
     String workingText = '';
     String workingLabel;
     for (final InlineSpanSemanticsInformation info in _semanticsInfo) {
@@ -824,7 +826,7 @@ class RenderParagraph extends RenderBox
         workingText += info.text;
         workingLabel ??= '';
         if (info.semanticsLabel != null) {
-          workingLabel += info.semanticsLabel;
+          workingLabel += info.semanticsLabel/*!*/;
         } else {
           workingLabel += info.text;
         }

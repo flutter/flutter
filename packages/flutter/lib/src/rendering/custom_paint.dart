@@ -385,7 +385,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// The background custom paint delegate.
   ///
   /// This painter, if non-null, is called to paint behind the children.
-  CustomPainter get painter => _painter;
+  CustomPainter/*?*/ get painter => _painter;
   CustomPainter _painter;
   /// Set a new background custom paint delegate.
   ///
@@ -399,7 +399,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// delegate will be called.
   ///
   /// If the new value is null, then there is no background custom painter.
-  set painter(CustomPainter value) {
+  set painter(CustomPainter/*?*/ value) {
     if (_painter == value)
       return;
     final CustomPainter oldPainter = _painter;
@@ -410,8 +410,8 @@ class RenderCustomPaint extends RenderProxyBox {
   /// The foreground custom paint delegate.
   ///
   /// This painter, if non-null, is called to paint in front of the children.
-  CustomPainter get foregroundPainter => _foregroundPainter;
-  CustomPainter _foregroundPainter;
+  CustomPainter/*?*/ get foregroundPainter => _foregroundPainter;
+  CustomPainter/*?*/ _foregroundPainter;
   /// Set a new foreground custom paint delegate.
   ///
   /// If the new delegate is the same as the previous one, this does nothing.
@@ -424,7 +424,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// delegate will be called.
   ///
   /// If the new value is null, then there is no foreground custom painter.
-  set foregroundPainter(CustomPainter value) {
+  set foregroundPainter(CustomPainter/*?*/ value) {
     if (_foregroundPainter == value)
       return;
     final CustomPainter oldPainter = _foregroundPainter;
@@ -504,7 +504,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     if (_foregroundPainter != null && (_foregroundPainter.hitTest(position) ?? false))
       return true;
     return super.hitTestChildren(result, position: position);
@@ -677,8 +677,8 @@ class RenderCustomPaint extends RenderProxyBox {
   /// concept of a "forgotten" node in semantics, deactivated nodes, or global
   /// keys.
   static List<SemanticsNode/*!*/> _updateSemanticsChildren(
-    List<SemanticsNode> oldSemantics,
-    List<CustomPainterSemantics> newChildSemantics,
+    List<SemanticsNode>/*?*/ oldSemantics,
+    List<CustomPainterSemantics>/*?*/ newChildSemantics,
   ) {
     oldSemantics = oldSemantics ?? const <SemanticsNode>[];
     newChildSemantics = newChildSemantics ?? const <CustomPainterSemantics>[];
@@ -709,7 +709,7 @@ class RenderCustomPaint extends RenderProxyBox {
     int newChildrenBottom = newChildSemantics.length - 1;
     int oldChildrenBottom = oldSemantics.length - 1;
 
-    final List<SemanticsNode/*!*/> newChildren = List<SemanticsNode/*!*/>(newChildSemantics.length);
+    final List<SemanticsNode/*?*/> newChildren = List<SemanticsNode/*?*/>.filled(newChildSemantics.length, null);
 
     // Update the top of the list.
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
@@ -799,7 +799,7 @@ class RenderCustomPaint extends RenderProxyBox {
       return true;
     }());
 
-    return newChildren;
+    return newChildren.cast<SemanticsNode>();
   }
 
   /// Whether `oldChild` can be updated with properties from `newSemantics`.

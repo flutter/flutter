@@ -30,7 +30,7 @@ void main() {
     expect(transform, Matrix4.zero());
 
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
-    expect(fittedBox.hitTestChildren(hitTestResult), isFalse);
+    expect(fittedBox.hitTestChildren(hitTestResult, position: Offset.zero), isFalse);
   });
 
   test('RenderFittedBox does not paint with empty sizes', () {

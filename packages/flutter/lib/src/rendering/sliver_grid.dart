@@ -585,7 +585,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     for (int index = indexOf(trailingChildWithLayout) + 1; targetLastIndex == null || index <= targetLastIndex; ++index) {
       final SliverGridGeometry gridGeometry = layout.getGeometryForChildIndex(index);
       final BoxConstraints childConstraints = gridGeometry.getBoxConstraints(constraints);
-      RenderBox child = childAfter(trailingChildWithLayout);
+      RenderBox child = childAfter(trailingChildWithLayout/*!*/);
       if (child == null || indexOf(child) != index) {
         child = insertAndLayoutChild(childConstraints, after: trailingChildWithLayout);
         if (child == null) {

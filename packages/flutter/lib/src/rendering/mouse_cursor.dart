@@ -438,7 +438,7 @@ class SystemMouseCursors {
   static const SystemMouseCursor none = SystemMouseCursor._(kind: 'none');
 
 
-  //// STATUS ////
+  // STATUS
 
   /// The platform-dependent basic cursor.
   ///
@@ -550,7 +550,7 @@ class SystemMouseCursors {
   static const SystemMouseCursor help = SystemMouseCursor._(kind: 'help');
 
 
-  //// SELECTION ////
+  // SELECTION
 
   /// A cursor indicating selectable text.
   ///
@@ -604,7 +604,7 @@ class SystemMouseCursors {
   static const SystemMouseCursor precise = SystemMouseCursor._(kind: 'precise');
 
 
-  //// DRAG-AND-DROP ////
+  // DRAG-AND-DROP
 
   /// A cursor indicating moving something.
   ///
@@ -696,7 +696,7 @@ class SystemMouseCursors {
   static const SystemMouseCursor disappearing = SystemMouseCursor._(kind: 'disappearing');
 
 
-  //// RESIZING AND SCROLLING ////
+  // RESIZING AND SCROLLING
 
   /// A cursor indicating scrolling in any direction.
   ///
@@ -897,7 +897,7 @@ class SystemMouseCursors {
   static const SystemMouseCursor resizeRow = SystemMouseCursor._(kind: 'resizeRow');
 
 
-  //// OTHER OPERATIONS ////
+  // OTHER OPERATIONS
 
   /// A cursor indicating zooming in.
   ///

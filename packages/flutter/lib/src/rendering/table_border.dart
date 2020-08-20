@@ -150,7 +150,7 @@ class TableBorder {
   /// borders.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static TableBorder lerp(TableBorder a, TableBorder b, double t) {
+  static TableBorder lerp(TableBorder/*?*/ a, TableBorder/*?*/ b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;

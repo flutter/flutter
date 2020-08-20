@@ -184,7 +184,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// which is to say, in logical pixels. This is not necessarily the same
   /// coordinate system as that expected by the root [Layer], which will
   /// normally be in physical (device) pixels.
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(HitTestResult result, { @required Offset/*!*/ position }) {
     if (child != null)
       child.hitTest(BoxHitTestResult.wrap(result), position: position);
     result.add(HitTestEntry(this));

@@ -198,28 +198,33 @@ enum CrossAxisAlignment {
   baseline,
 }
 
-bool/*?*/ _startIsTopLeft(Axis direction, TextDirection textDirection, VerticalDirection verticalDirection) {
+bool/*?*/ _startIsTopLeft(Axis direction, TextDirection/*?*/ textDirection, VerticalDirection/*?*/ verticalDirection) {
   assert(direction != null);
   // If the relevant value of textDirection or verticalDirection is null, this returns null too.
+  // TODO(ianh): clean up once we can use 'case null'
   switch (direction) {
     case Axis.horizontal:
+      if (textDirection == null)
+        return null;
       switch (textDirection) {
         case TextDirection.ltr:
           return true;
         case TextDirection.rtl:
           return false;
       }
-      break;
+      break; // ignore: dead_code
     case Axis.vertical:
+      if (verticalDirection == null)
+        return null;
       switch (verticalDirection) {
         case VerticalDirection.down:
           return true;
         case VerticalDirection.up:
           return false;
       }
-      break;
+      break; // ignore: dead_code
   }
-  return null;
+  return null; // ignore: dead_code
 }
 
 typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
@@ -393,9 +398,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// If the [direction] is [Axis.vertical], and the [crossAxisAlignment] is
   /// either [CrossAxisAlignment.start] or [CrossAxisAlignment.end], then the
   /// [textDirection] must not be null.
-  TextDirection get textDirection => _textDirection;
+  TextDirection/*?*/ get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(TextDirection/*?*/ value) {
     if (_textDirection != value) {
       _textDirection = value;
       markNeedsLayout();
@@ -432,9 +437,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// If aligning items according to their baseline, which baseline to use.
   ///
   /// Must not be null if [crossAxisAlignment] is [CrossAxisAlignment.baseline].
-  TextBaseline get textBaseline => _textBaseline;
+  TextBaseline/*?*/ get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
-  set textBaseline(TextBaseline value) {
+  set textBaseline(TextBaseline/*?*/ value) {
     assert(_crossAxisAlignment != CrossAxisAlignment.baseline || value != null);
     if (_textBaseline != value) {
       _textBaseline = value;
@@ -641,24 +646,24 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return childParentData.fit ?? FlexFit.tight;
   }
 
-  double _getCrossSize(RenderBox child) {
+  double/*!*/ _getCrossSize(RenderBox child) {
     switch (_direction) {
       case Axis.horizontal:
         return child.size.height;
       case Axis.vertical:
         return child.size.width;
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
-  double _getMainSize(RenderBox child) {
+  double/*!*/ _getMainSize(RenderBox child) {
     switch (_direction) {
       case Axis.horizontal:
         return child.size.width;
       case Axis.vertical:
         return child.size.height;
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
@@ -746,7 +751,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             ),
           ]);
         }());
-        totalFlex += childParentData.flex;
+        totalFlex += flex;
         lastFlexChild = child;
       } else {
         BoxConstraints innerConstraints;
@@ -967,7 +972,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     return defaultHitTestChildren(result, position: position);
   }
 

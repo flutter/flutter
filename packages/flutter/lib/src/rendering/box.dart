@@ -634,7 +634,19 @@ class BoxConstraints extends Constraints {
 ///
 ///  * [RenderBox.hitTest], which documents more details around hit testing
 ///    [RenderBox]es.
-typedef BoxHitTest = bool Function(BoxHitTestResult result, Offset position);
+typedef BoxHitTest = bool Function(BoxHitTestResult result, Offset/*!*/ position);
+
+/// Method signature for hit testing a [RenderBox] with a manually
+/// managed position (one that is passed out-of-band).
+///
+/// Used by [RenderSliverSingleBoxAdapter.hitTestBoxChild] to hit test
+/// [RenderBox] children of a [RenderSliver].
+///
+/// See also:
+///
+///  * [RenderBox.hitTest], which documents more details around hit testing
+///    [RenderBox]es.
+typedef BoxHitTestWithOutOfBandPosition = bool Function(BoxHitTestResult result);
 
 /// The result of performing a hit test on [RenderBox]es.
 ///
@@ -726,10 +738,11 @@ class BoxHitTestResult extends HitTestResult {
   ///    used to transform the position without any pre-processing.
   bool addWithPaintTransform({
     @required Matrix4 transform,
-    @required Offset position,
-    @required BoxHitTest hitTest,
+    @required Offset/*!*/ position,
+    @required BoxHitTest/*!*/ hitTest,
   }) {
     assert(hitTest != null);
+    assert(position != null);
     if (transform != null) {
       transform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform));
       if (transform == null) {
@@ -764,13 +777,12 @@ class BoxHitTestResult extends HitTestResult {
   ///    documents the intended usage of this API in more detail.
   bool addWithPaintOffset({
     @required Offset offset,
-    @required Offset position,
-    @required BoxHitTest hitTest,
+    @required Offset/*!*/ position,
+    @required BoxHitTest/*!*/ hitTest,
   }) {
     assert(hitTest != null);
-    final Offset transformedPosition = position == null || offset == null
-        ? position
-        : position - offset;
+    assert(position != null);
+    final Offset transformedPosition = offset == null ? position : position - offset;
     if (offset != null) {
       pushOffset(-offset);
     }
@@ -807,13 +819,13 @@ class BoxHitTestResult extends HitTestResult {
   ///    _paint_ transform matrix.
   bool addWithRawTransform({
     @required Matrix4 transform,
-    @required Offset position,
-    @required BoxHitTest hitTest,
+    @required Offset/*!*/ position,
+    @required BoxHitTest/*!*/ hitTest,
   }) {
     assert(hitTest != null);
-    final Offset transformedPosition = position == null || transform == null
-        ? position
-        : MatrixUtils.transformPoint(transform, position);
+    assert(position != null);
+    final Offset transformedPosition = transform == null ?
+        position : MatrixUtils.transformPoint(transform, position);
     if (transform != null) {
       pushTransform(transform);
     }
@@ -821,6 +833,59 @@ class BoxHitTestResult extends HitTestResult {
     if (transform != null) {
       popTransform();
     }
+    return isHit;
+  }
+
+  /// Pass-through method for adding a hit test while manually managing
+  /// the position transformation logic.
+  ///
+  /// The actual hit testing of the child needs to be implemented in the
+  /// provided `hitTest` callback. The position needs to be handled by
+  /// the caller.
+  ///
+  /// The function returns the return value of the `hitTest` callback.
+  ///
+  /// A `paintOffset`, `paintTransform`, or `rawTransform` should be
+  /// passed to the method to update the hit test stack.
+  ///
+  ///  * `paintOffset` has the semantics of the `offset` passed to
+  ///    [addWithPaintOffset].
+  ///
+  ///  * `paintTransform` has the semantics of the `transform` passed to
+  ///    [addWithPaintTransform], except thit it must be invertible; it
+  ///    is the responsibility of the caller to ensure this.
+  ///
+  ///  * `rawTransform` has the semantics of the `transform` passed to
+  ///    [addWithRawTransform].
+  ///
+  /// Exactly one of these must be non-null.
+  ///
+  /// See also:
+  ///
+  ///  * [addWithPaintTransform], which takes a generic paint transform matrix and
+  ///    documents the intended usage of this API in more detail.
+  bool addWithOutOfBandPosition({
+    Offset/*?*/ paintOffset,
+    Matrix4/*?*/ paintTransform,
+    Matrix4/*?*/ rawTransform,
+    @required BoxHitTestWithOutOfBandPosition/*!*/ hitTest,
+  }) {
+    assert(hitTest != null);
+    assert((paintOffset == null && paintTransform == null && rawTransform != null) ||
+           (paintOffset == null && paintTransform != null && rawTransform == null) ||
+           (paintOffset != null && paintTransform == null && rawTransform == null));
+    if (paintOffset != null) {
+      pushOffset(-paintOffset);
+    } else if (rawTransform != null) {
+      pushTransform(rawTransform);
+    } else {
+      assert(paintTransform != null);
+      paintTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(paintTransform));
+      assert(paintTransform != null);
+      pushTransform(paintTransform);
+    }
+    final bool isHit = hitTest(this);
+    popTransform();
     return isHit;
   }
 }
@@ -1334,7 +1399,7 @@ abstract class RenderBox extends RenderObject {
   @mustCallSuper
   double getMinIntrinsicWidth(double/*!*/ height) {
     assert(() {
-      if (height == null) {
+      if (height == null) { // ignore: dead_code
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The height argument to getMinIntrinsicWidth was null.'),
           ErrorDescription('The argument to getMinIntrinsicWidth must not be negative or null.'),
@@ -1479,7 +1544,7 @@ abstract class RenderBox extends RenderObject {
   @mustCallSuper
   double getMaxIntrinsicWidth(double/*!*/ height) {
     assert(() {
-      if (height == null) {
+      if (height == null) { // ignore: dead_code
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The height argument to getMaxIntrinsicWidth was null.'),
           ErrorDescription('The argument to getMaxIntrinsicWidth must not be negative or null.'),
@@ -1558,7 +1623,7 @@ abstract class RenderBox extends RenderObject {
   @mustCallSuper
   double getMinIntrinsicHeight(double/*!*/ width) {
     assert(() {
-      if (width == null) {
+      if (width == null) { // ignore: dead_code
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The width argument to getMinIntrinsicHeight was null.'),
           ErrorDescription('The argument to getMinIntrinsicHeight must not be negative or null.'),
@@ -1636,7 +1701,7 @@ abstract class RenderBox extends RenderObject {
   @mustCallSuper
   double getMaxIntrinsicHeight(double/*!*/ width) {
     assert(() {
-      if (width == null) {
+      if (width == null) { // ignore: dead_code
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The width argument to getMaxIntrinsicHeight was null.'),
           ErrorDescription('The argument to getMaxIntrinsicHeight must not be negative or null.'),
@@ -2123,7 +2188,8 @@ abstract class RenderBox extends RenderObject {
   /// called. For example, a render object might be a child of a [RenderOpacity]
   /// object, which calls [hitTest] on its children when its opacity is zero
   /// even through it does not [paint] its children.
-  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
+    assert(position != null);
     assert(() {
       if (!hasSize) {
         if (debugNeedsLayout) {
@@ -2208,7 +2274,7 @@ abstract class RenderBox extends RenderObject {
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.
   @protected
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) => false;
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) => false;
 
   /// Multiply the transform from the parent's coordinate system to this box's
   /// coordinate system into the given transform.
@@ -2461,7 +2527,7 @@ abstract class RenderBox extends RenderObject {
 /// By convention, this class doesn't override any members of the superclass.
 /// Instead, it provides helpful functions that subclasses can call as
 /// appropriate.
-mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerBoxParentData<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
+mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerBoxParentData<ChildType>/*!*/> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
   /// Returns the baseline of the first child with a baseline.
   ///
   /// Useful when the children are displayed vertically in the same order they
@@ -2511,7 +2577,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   ///
   ///  * [defaultPaint], which paints the children appropriate for this
   ///    hit-testing strategy.
-  bool defaultHitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool defaultHitTestChildren(BoxHitTestResult result, { Offset/*!*/ position }) {
     // The x, y parameters have the top left of the node's box as the origin.
     ChildType child = lastChild;
     while (child != null) {

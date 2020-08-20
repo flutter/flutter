@@ -84,9 +84,9 @@ class RenderImage extends RenderBox {
   }
 
   /// The image to display.
-  ui.Image get image => _image;
+  ui.Image/*?*/ get image => _image;
   ui.Image _image;
-  set image(ui.Image value) {
+  set image(ui.Image/*?*/ value) {
     if (value == _image)
       return;
     _image = value;
@@ -102,9 +102,9 @@ class RenderImage extends RenderBox {
   ///
   /// If null, the image will pick a size that best preserves its intrinsic
   /// aspect ratio.
-  double get width => _width;
+  double/*?*/ get width => _width;
   double _width;
-  set width(double value) {
+  set width(double/*?*/ value) {
     if (value == _width)
       return;
     _width = value;
@@ -115,9 +115,9 @@ class RenderImage extends RenderBox {
   ///
   /// If null, the image will pick a size that best preserves its intrinsic
   /// aspect ratio.
-  double get height => _height;
+  double/*?*/ get height => _height;
   double _height;
-  set height(double value) {
+  set height(double/*?*/ value) {
     if (value == _height)
       return;
     _height = value;
@@ -147,9 +147,9 @@ class RenderImage extends RenderBox {
   }
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
-  Color get color => _color;
+  Color/*?*/ get color => _color;
   Color _color;
-  set color(Color value) {
+  set color(Color/*?*/ value) {
     if (value == _color)
       return;
     _color = value;
@@ -180,9 +180,9 @@ class RenderImage extends RenderBox {
   /// See also:
   ///
   ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
-  BlendMode get colorBlendMode => _colorBlendMode;
+  BlendMode/*?*/ get colorBlendMode => _colorBlendMode;
   BlendMode _colorBlendMode;
-  set colorBlendMode(BlendMode value) {
+  set colorBlendMode(BlendMode/*?*/ value) {
     if (value == _colorBlendMode)
       return;
     _colorBlendMode = value;
@@ -194,9 +194,9 @@ class RenderImage extends RenderBox {
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
-  BoxFit get fit => _fit;
+  BoxFit/*?*/ get fit => _fit;
   BoxFit _fit;
-  set fit(BoxFit value) {
+  set fit(BoxFit/*?*/ value) {
     if (value == _fit)
       return;
     _fit = value;
@@ -235,9 +235,9 @@ class RenderImage extends RenderBox {
   /// region of the image above and below the center slice will be stretched
   /// only horizontally and the region of the image to the left and right of
   /// the center slice will be stretched only vertically.
-  Rect get centerSlice => _centerSlice;
+  Rect/*?*/ get centerSlice => _centerSlice;
   Rect _centerSlice;
-  set centerSlice(Rect value) {
+  set centerSlice(Rect/*?*/ value) {
     if (value == _centerSlice)
       return;
     _centerSlice = value;
@@ -287,9 +287,9 @@ class RenderImage extends RenderBox {
   /// This may be changed to null, but only after the [alignment] and
   /// [matchTextDirection] properties have been changed to values that do not
   /// depend on the direction.
-  TextDirection get textDirection => _textDirection;
+  TextDirection/*?*/ get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(TextDirection/*?*/ value) {
     if (_textDirection == value)
       return;
     _textDirection = value;

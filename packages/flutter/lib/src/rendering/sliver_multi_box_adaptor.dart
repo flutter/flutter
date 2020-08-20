@@ -448,7 +448,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// during this layout pass. No child should be added during that call except
   /// for the one that is created and returned by `createChild`.
   @protected
-  RenderBox insertAndLayoutLeadingChild(
+  RenderBox/*?*/ insertAndLayoutLeadingChild(
     BoxConstraints childConstraints, {
     bool parentUsesSize = false,
   }) {
@@ -476,7 +476,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// Children after the `after` child may be removed in the process. Only the
   /// new child may be added.
   @protected
-  RenderBox insertAndLayoutChild(
+  RenderBox/*?*/ insertAndLayoutChild(
     BoxConstraints childConstraints, {
     @required RenderBox after,
     bool parentUsesSize = false,
@@ -542,7 +542,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// Returns the dimension of the given child in the main axis, as given by the
   /// child's [RenderBox.size] property. This is only valid after layout.
   @protected
-  double paintExtentOf(RenderBox child) {
+  double/*!*/ paintExtentOf(RenderBox child) {
     assert(child != null);
     assert(child.hasSize);
     switch (constraints.axis) {
@@ -551,7 +551,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       case Axis.vertical:
         return child.size.height;
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
@@ -661,8 +661,8 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   bool debugAssertChildListIsNonEmptyAndContiguous() {
     assert(() {
       assert(firstChild != null);
-      int index = indexOf(firstChild);
-      RenderBox child = childAfter(firstChild);
+      int/*!*/ index = indexOf(firstChild);
+      RenderBox child = childAfter(firstChild/*!*/);
       while (child != null) {
         index += 1;
         assert(indexOf(child) == index);

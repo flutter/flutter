@@ -62,7 +62,7 @@ abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChild
   }
 
   @override
-  bool hitTestChildren(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
+  bool hitTestChildren(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition}) {
     return child != null
       && child.geometry.hitTestExtent > 0
       && child.hitTest(
@@ -244,9 +244,9 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
   /// If null, defaults to value of [ignoring].
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
-  bool get ignoringSemantics => _ignoringSemantics;
+  bool/*?*/ get ignoringSemantics => _ignoringSemantics;
   bool _ignoringSemantics;
-  set ignoringSemantics(bool value) {
+  set ignoringSemantics(bool/*?*/ value) {
     if (value == _ignoringSemantics)
       return;
     final bool oldEffectiveValue = _effectiveIgnoringSemantics;
@@ -258,7 +258,7 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
   bool get _effectiveIgnoringSemantics => ignoringSemantics ?? ignoring;
 
   @override
-  bool hitTest(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
+  bool hitTest(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     return !ignoring
       && super.hitTest(
         result,
@@ -327,7 +327,7 @@ class RenderSliverOffstage extends RenderProxySliver {
   }
 
   @override
-  bool hitTest(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
+  bool hitTest(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     return !offstage && super.hitTest(
       result,
       mainAxisPosition: mainAxisPosition,
@@ -336,7 +336,7 @@ class RenderSliverOffstage extends RenderProxySliver {
   }
 
   @override
-  bool hitTestChildren(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
+  bool hitTestChildren(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     return !offstage
       && child != null
       && child.geometry.hitTestExtent > 0

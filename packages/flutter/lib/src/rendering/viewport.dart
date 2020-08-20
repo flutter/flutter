@@ -295,10 +295,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// viewport to an invisible item in the cache area, the framework will bring
   /// that item into view with an (implicit) scroll action.
   /// {@endtemplate}
-  double get cacheExtent => _cacheExtent;
-  double _cacheExtent;
-  set cacheExtent(double value) {
-    value = value ?? RenderAbstractViewport.defaultCacheExtent;
+  double/*!*/ get cacheExtent => _cacheExtent;
+  double/*!*/ _cacheExtent;
+  set cacheExtent(double/*!*/ value) {
     assert(value != null);
     if (value == _cacheExtent)
       return;
@@ -578,7 +577,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  Rect describeSemanticsClip(RenderSliver child) {
+  Rect/*!*/ describeSemanticsClip(RenderSliver child) {
     assert(axis != null);
 
     if (_calculatedCacheExtent == null) {
@@ -601,7 +600,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
           semanticBounds.bottom,
         );
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
@@ -651,7 +650,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     double mainAxisPosition, crossAxisPosition;
     switch (axis) {
       case Axis.vertical:
@@ -671,11 +670,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         continue;
       }
       final Matrix4 transform = Matrix4.identity();
-      applyPaintTransform(child, transform);
-      final bool isHit = result.addWithPaintTransform(
-        transform: transform,
-        position: null, // Manually adapting from box to sliver position below.
-        hitTest: (BoxHitTestResult result, Offset _) {
+      applyPaintTransform(child, transform); // must be invertible
+      final bool isHit = result.addWithOutOfBandPosition(
+        paintTransform: transform,
+        hitTest: (BoxHitTestResult result) {
           return child.hitTest(
             sliverResult,
             mainAxisPosition: computeChildMainAxisPosition(child, mainAxisPosition),
@@ -709,7 +707,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         pivot = child;
       }
       if (parent is RenderSliver) {
-        leadingScrollOffset += parent.childScrollOffset(child);
+        leadingScrollOffset += parent.childScrollOffset(child)/*!*/;
       } else {
         onlySlivers = false;
         leadingScrollOffset = 0.0;
@@ -848,7 +846,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ///  * [paintOffsetOf], which uses the layout offset and growth direction
   ///    computed for the child during layout.
   @protected
-  Offset computeAbsolutePaintOffset(RenderSliver child, double layoutOffset, GrowthDirection growthDirection) {
+  Offset/*!*/ computeAbsolutePaintOffset(RenderSliver child, double layoutOffset, GrowthDirection growthDirection) {
     assert(hasSize); // this is only usable once we have a size
     assert(axisDirection != null);
     assert(growthDirection != null);
@@ -864,7 +862,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       case AxisDirection.left:
         return Offset(size.width - (layoutOffset + child.geometry.paintExtent), 0.0);
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
@@ -1264,9 +1262,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   /// the [axisDirection] relative to the [center].
   ///
   /// The [center] must be a child of the viewport.
-  RenderSliver get center => _center;
+  RenderSliver/*?*/ get center => _center;
   RenderSliver _center;
-  set center(RenderSliver value) {
+  set center(RenderSliver/*?*/ value) {
     if (value == _center)
       return;
     _center = value;
@@ -1466,7 +1464,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     final double reverseDirectionRemainingCacheExtent = centerCacheOffset.clamp(0.0, fullCacheExtent) as double;
     final double forwardDirectionRemainingCacheExtent = (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent) as double;
 
-    final RenderSliver leadingNegativeChild = childBefore(center);
+    final RenderSliver leadingNegativeChild = childBefore(center/*!*/);
 
     if (leadingNegativeChild != null) {
       // negative scroll offsets
@@ -1533,7 +1531,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   }
 
   @override
-  double scrollOffsetOf(RenderSliver child, double scrollOffsetWithinChild) {
+  double/*!*/ scrollOffsetOf(RenderSliver child, double scrollOffsetWithinChild) {
     assert(child.parent == this);
     final GrowthDirection growthDirection = child.constraints.growthDirection;
     assert(growthDirection != null);
@@ -1548,18 +1546,18 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         return scrollOffsetToChild + scrollOffsetWithinChild;
       case GrowthDirection.reverse:
         double scrollOffsetToChild = 0.0;
-        RenderSliver current = childBefore(center);
+        RenderSliver current = childBefore(center/*!*/);
         while (current != child) {
           scrollOffsetToChild -= current.geometry.scrollExtent;
           current = childBefore(current);
         }
         return scrollOffsetToChild - scrollOffsetWithinChild;
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
-  double maxScrollObstructionExtentBefore(RenderSliver child) {
+  double/*!*/ maxScrollObstructionExtentBefore(RenderSliver child) {
     assert(child.parent == this);
     final GrowthDirection growthDirection = child.constraints.growthDirection;
     assert(growthDirection != null);
@@ -1574,18 +1572,19 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         return pinnedExtent;
       case GrowthDirection.reverse:
         double pinnedExtent = 0.0;
-        RenderSliver current = childBefore(center);
+        RenderSliver current = childBefore(center/*!*/);
         while (current != child) {
           pinnedExtent += current.geometry.maxScrollObstructionExtent;
           current = childBefore(current);
         }
         return pinnedExtent;
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    // Hit test logic relies on this always providing an invertible matrix.
     assert(child != null);
     final SliverPhysicalParentData childParentData = child.parentData as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
@@ -1606,7 +1605,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       case AxisDirection.left:
         return child.geometry.paintExtent - (parentMainAxisPosition - childParentData.paintOffset.dx);
     }
-    return 0.0;
+    return 0.0; // ignore: dead_code
   }
 
   @override
@@ -1618,7 +1617,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     RenderSliver child = center;
     while (child != firstChild) {
       count -= 1;
-      child = childBefore(child);
+      child = childBefore(child/*!*/);
     }
     return count;
   }
@@ -1657,7 +1656,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       yield child;
       child = childAfter(child);
     }
-    child = childBefore(center);
+    child = childBefore(center/*!*/);
     while (child != null) {
       yield child;
       child = childBefore(child);
@@ -1901,6 +1900,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    // Hit test logic relies on this always providing an invertible matrix.
     assert(child != null);
     final Offset offset = paintOffsetOf(child as RenderSliver);
     transform.translate(offset.dx, offset.dy);
@@ -1921,7 +1921,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
       case AxisDirection.left:
         return (size.width - parentMainAxisPosition) - childParentData.layoutOffset;
     }
-    return 0.0;
+    return 0.0; // ignore: dead_code
   }
 
   @override
