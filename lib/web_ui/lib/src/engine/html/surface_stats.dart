@@ -291,8 +291,8 @@ void _debugPrintSurfaceStats(PersistedScene scene, int frameNumber) {
     final int pixelCount = canvasElements
         .cast<html.CanvasElement>()
         .map<int>((html.CanvasElement e) {
-      final int pixels = e.width * e.height;
-      canvasInfo.writeln('    - ${e.width} x ${e.height} = $pixels pixels');
+      final int pixels = e.width! * e.height!;
+      canvasInfo.writeln('    - ${e.width!} x ${e.height!} = $pixels pixels');
       return pixels;
     }).fold(0, (int total, int pixels) => total + pixels);
     final double physicalScreenWidth =
