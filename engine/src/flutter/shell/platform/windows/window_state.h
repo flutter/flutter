@@ -9,48 +9,35 @@
 #include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
+// Structs backing the opaque references used in the C API.
+//
+// DO NOT ADD ANY NEW CODE HERE. These are legacy, and are being phased out
+// in favor of objects that own and manage the relevant functionality.
+
 namespace flutter {
 struct FlutterWindowsEngine;
 struct FlutterWindowsView;
 }  // namespace flutter
 
-// Struct for storing state within an instance of the windows native (HWND or
-// CoreWindow) Window.
+// Wrapper to distinguish the view controller ref from the view ref given out
+// in the C API.
 struct FlutterDesktopViewControllerState {
   // The view that backs this state object.
   std::unique_ptr<flutter::FlutterWindowsView> view;
-
-  // The window handle given to API clients.
-  std::unique_ptr<FlutterDesktopView> view_wrapper;
 };
 
-// Opaque reference for the native windows itself. This is separate from the
-// controller so that it can be provided to plugins without giving them access
-// to all of the controller-based functionality.
-struct FlutterDesktopView {
-  // The view that (indirectly) owns this state object.
-  flutter::FlutterWindowsView* view = nullptr;
-};
-
-// State associated with the plugin registrar.
+// Wrapper to distinguish the plugin registrar ref from the engine ref given out
+// in the C API.
 struct FlutterDesktopPluginRegistrar {
   // The engine that owns this state object.
   flutter::FlutterWindowsEngine* engine = nullptr;
-
-  // The handle for the view associated with this registrar.
-  std::unique_ptr<FlutterDesktopView> view;
-
-  // Callback to be called on registrar destruction.
-  FlutterDesktopOnRegistrarDestroyed destruction_handler;
 };
 
-// State associated with the messenger used to communicate with the engine.
+// Wrapper to distinguish the messenger ref from the engine ref given out
+// in the C API.
 struct FlutterDesktopMessenger {
-  // The Flutter engine this messenger sends outgoing messages to.
-  FLUTTER_API_SYMBOL(FlutterEngine) engine;
-
-  // The message dispatcher for handling incoming messages.
-  flutter::IncomingMessageDispatcher* dispatcher;
+  // The engine that owns this state object.
+  flutter::FlutterWindowsEngine* engine = nullptr;
 };
 
 #endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOW_STATE_H_
