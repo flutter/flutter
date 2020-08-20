@@ -753,12 +753,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child:
-          Container(
+          child: Container(
             width: 200,
             height: 75,
-            child:
-              Stepper(
+            child: Stepper(
                 type: StepperType.horizontal,
                 //horizontalElevation: ,
                 steps: const <Step>[
@@ -769,10 +767,10 @@ void main() {
                   ),
                 ],
               ),
-          ),
-        ),
-      ),
-    );
+           ),
+         ),
+       ),
+     );
 
     await tester.pump();
     final Stepper stepper = find.byType(Stepper).evaluate().first.widget as Stepper;
