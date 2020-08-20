@@ -851,9 +851,9 @@ class PipelineOwner {
   /// The unique object managed by this pipeline that has no parent.
   ///
   /// This object does not have to be a [RenderObject].
-  AbstractNode get rootNode => _rootNode;
+  AbstractNode/*?*/ get rootNode => _rootNode;
   AbstractNode _rootNode;
-  set rootNode(AbstractNode value) {
+  set rootNode(AbstractNode/*?*/ value) {
     if (_rootNode == value)
       return;
     _rootNode?.detach();
@@ -1295,7 +1295,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Only for use by subclasses when changing their child lists. Calling this
   /// in other cases will lead to an inconsistent tree and probably cause crashes.
   @override
-  void dropChild(RenderObject child) {
+  void dropChild(RenderObject/*!*/ child) {
     assert(_debugCanPerformMutations);
     assert(child != null);
     assert(child.parentData != null);
@@ -1316,7 +1316,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// The object responsible for creating this render object.
   ///
   /// Used in debug messages.
-  dynamic debugCreator;
+  Object/*?*/ debugCreator;
 
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
     FlutterError.reportError(FlutterErrorDetails(
@@ -2339,7 +2339,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// These are also the bounds used by [showOnScreen] to make a [RenderObject]
   /// visible on screen.
-  Rect get paintBounds;
+  Rect/*!*/ get paintBounds;
 
   /// Override this method to paint debugging information.
   void debugPaint(PaintingContext context, Offset offset) { }
@@ -2872,7 +2872,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// This includes the same information for this RenderObject as given by
   /// [toStringDeep], but does not recurse to any children.
   @override
-  String toStringShallow({
+  String/*!*/ toStringShallow({
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
@@ -2933,8 +2933,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// * [RenderViewportBase.showInViewport], which [RenderViewportBase] and
   ///   [SingleChildScrollView] delegate this method to.
   void showOnScreen({
-    RenderObject descendant,
-    Rect rect,
+    RenderObject/*?*/ descendant,
+    Rect/*?*/ rect,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
@@ -2970,7 +2970,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 ///
 /// This mixin is typically used to implement render objects created
 /// in a [SingleChildRenderObjectWidget].
-mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject {
+mixin RenderObjectWithChildMixin<ChildType extends RenderObject/*!*/> on RenderObject {
 
   /// Checks whether the given render object has the correct [runtimeType] to be
   /// a child of this render object.
@@ -3012,10 +3012,10 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
     return true;
   }
 
-  ChildType _child;
+  ChildType/*?*/ _child;
   /// The render object's unique child.
   ChildType get child => _child;
-  set child(ChildType value) {
+  set child(ChildType/*?*/ value) {
     if (_child != null)
       dropChild(_child);
     _child = value;
@@ -3061,11 +3061,11 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
 /// which can be called on the parent data of the render objects
 /// obtained via [ContainerRenderObjectMixin.firstChild] or
 /// [ContainerRenderObjectMixin.lastChild].
-mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
+mixin ContainerParentDataMixin<ChildType extends RenderObject/*!*/> on ParentData {
   /// The previous sibling in the parent's child list.
-  ChildType previousSibling;
+  ChildType/*?*/ previousSibling;
   /// The next sibling in the parent's child list.
-  ChildType nextSibling;
+  ChildType/*?*/ nextSibling;
 
   /// Clear the sibling pointers.
   @override
@@ -3094,7 +3094,7 @@ mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
 /// parent data.
 ///
 /// Moreover, this is a required mixin for render objects returned to [MultiChildRenderObjectWidget].
-mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> on RenderObject {
+mixin ContainerRenderObjectMixin<ChildType extends RenderObject/*!*/, ParentDataType extends ContainerParentDataMixin<ChildType>/*!*/> on RenderObject {
   bool _debugUltimatePreviousSiblingOf(ChildType child, { ChildType equals }) {
     ParentDataType childParentData = child.parentData as ParentDataType;
     while (childParentData.previousSibling != null) {
@@ -3336,13 +3336,13 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   }
 
   /// The first child in the child list.
-  ChildType get firstChild => _firstChild;
+  ChildType/*?*/ get firstChild => _firstChild;
 
   /// The last child in the child list.
-  ChildType get lastChild => _lastChild;
+  ChildType/*?*/ get lastChild => _lastChild;
 
   /// The previous child before the given child in the child list.
-  ChildType childBefore(ChildType child) {
+  ChildType/*?*/ childBefore(ChildType child) {
     assert(child != null);
     assert(child.parent == this);
     final ParentDataType childParentData = child.parentData as ParentDataType;
@@ -3350,7 +3350,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   }
 
   /// The next child after the given child in the child list.
-  ChildType childAfter(ChildType child) {
+  ChildType/*?*/ childAfter(ChildType child) {
     assert(child != null);
     assert(child.parent == this);
     final ParentDataType childParentData = child.parentData as ParentDataType;
@@ -3662,7 +3662,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   final List<_InterestingSemanticsFragment> _children = <_InterestingSemanticsFragment>[];
 
   @override
-  Iterable<SemanticsNode> compileChildren({ Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment }) sync* {
+  Iterable<SemanticsNode> compileChildren({ Rect parentSemanticsClipRect, Rect parentPaintClipRect, /*required*/ double/*!*/ elevationAdjustment }) sync* {
     if (!_isExplicit) {
       owner._semantics = null;
       for (final _InterestingSemanticsFragment fragment in _children) {

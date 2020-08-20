@@ -6,7 +6,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart'; // ignore: unused_import
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -92,7 +92,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     assert(_paintTransform != null || debugNeedsLayout || child == null);
     if (child == null || _paintTransform == null)
       return false;

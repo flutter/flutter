@@ -745,7 +745,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       service.setSelection(elementB.renderObject);
       expect(selectionChangedCount, equals(2));
       expect(service.selection.current, equals(elementB.renderObject));
-      expect(service.selection.currentElement, equals(elementB.renderObject.debugCreator.element));
+      expect(service.selection.currentElement, equals((elementB.renderObject.debugCreator as DebugCreator).element));
 
       service.setSelection('invalid selection');
       expect(selectionChangedCount, equals(2));
@@ -1186,7 +1186,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       service.setSelection(elementB.renderObject);
       expect(selectionChangedCount, equals(2));
       expect(service.selection.current, equals(elementB.renderObject));
-      expect(service.selection.currentElement, equals(elementB.renderObject.debugCreator.element));
+      expect(service.selection.currentElement, equals((elementB.renderObject.debugCreator as DebugCreator).element));
 
       service.setSelection('invalid selection');
       expect(selectionChangedCount, equals(2));

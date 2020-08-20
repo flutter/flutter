@@ -190,7 +190,7 @@ abstract class MultiChildLayoutDelegate {
           'There is no child with the id "$childId".'
         );
       }
-      if (offset == null) {
+      if (offset == null) { // ignore: dead_code
         throw FlutterError(
           'The $this custom multichild layout delegate provided a null position for the child with id "$childId".'
         );
@@ -339,20 +339,20 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
       markNeedsLayout();
     _delegate = newDelegate;
     if (attached) {
-      oldDelegate?._relayout?.removeListener(markNeedsLayout);
-      newDelegate?._relayout?.addListener(markNeedsLayout);
+      oldDelegate?._relayout?.removeListener(markNeedsLayout); // ignore: invalid_null_aware_operator
+      newDelegate?._relayout?.addListener(markNeedsLayout); // ignore: invalid_null_aware_operator
     }
   }
 
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _delegate?._relayout?.addListener(markNeedsLayout);
+    _delegate?._relayout?.addListener(markNeedsLayout); // ignore: invalid_null_aware_operator
   }
 
   @override
   void detach() {
-    _delegate?._relayout?.removeListener(markNeedsLayout);
+    _delegate?._relayout?.removeListener(markNeedsLayout); // ignore: invalid_null_aware_operator
     super.detach();
   }
 
@@ -409,7 +409,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     return defaultHitTestChildren(result, position: position);
   }
 }

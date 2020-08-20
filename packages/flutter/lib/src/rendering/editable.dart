@@ -90,13 +90,16 @@ class TextSelectionPoint {
 
   @override
   String toString() {
-    switch (direction) {
+    // TODO(ianh): clean up once we can use 'case null'
+    if (direction == null)
+      return '$point';
+    switch (direction/*!*/) {
       case TextDirection.ltr:
         return '$point-ltr';
       case TextDirection.rtl:
         return '$point-rtl';
     }
-    return '$point';
+    return null; // ignore: dead_code
   }
 }
 
@@ -322,8 +325,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool ignorePointer;
 
   /// {@macro flutter.dart:ui.textHeightBehavior}
-  TextHeightBehavior get textHeightBehavior => _textPainter.textHeightBehavior;
-  set textHeightBehavior(TextHeightBehavior value) {
+  TextHeightBehavior/*?*/ get textHeightBehavior => _textPainter.textHeightBehavior;
+  set textHeightBehavior(TextHeightBehavior/*?*/ value) {
     if (_textPainter.textHeightBehavior == value)
       return;
     _textPainter.textHeightBehavior = value;
@@ -908,8 +911,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// If this value is null, a system-dependent algorithm is used to select
   /// the font.
-  Locale get locale => _textPainter.locale;
-  set locale(Locale value) {
+  Locale/*?*/ get locale => _textPainter.locale;
+  set locale(Locale/*?*/ value) {
     if (_textPainter.locale == value)
       return;
     _textPainter.locale = value;
@@ -918,8 +921,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// The [StrutStyle] used by the renderer's internal [TextPainter] to
   /// determine the strut to use.
-  StrutStyle get strutStyle => _textPainter.strutStyle;
-  set strutStyle(StrutStyle value) {
+  StrutStyle/*?*/ get strutStyle => _textPainter.strutStyle;
+  set strutStyle(StrutStyle/*?*/ value) {
     if (_textPainter.strutStyle == value)
       return;
     _textPainter.strutStyle = value;
@@ -927,9 +930,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// The color to use when painting the cursor.
-  Color get cursorColor => _cursorColor;
+  Color/*?*/ get cursorColor => _cursorColor;
   Color _cursorColor;
-  set cursorColor(Color value) {
+  set cursorColor(Color/*?*/ value) {
     if (_cursorColor == value)
       return;
     _cursorColor = value;
@@ -940,9 +943,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// rendering the floating cursor.
   ///
   /// The default is light grey.
-  Color get backgroundCursorColor => _backgroundCursorColor;
+  Color/*?*/ get backgroundCursorColor => _backgroundCursorColor;
   Color _backgroundCursorColor;
-  set backgroundCursorColor(Color value) {
+  set backgroundCursorColor(Color/*?*/ value) {
     if (backgroundCursorColor == value)
       return;
     _backgroundCursorColor = value;
@@ -1029,10 +1032,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// {@macro flutter.widgets.editableText.minLines}
-  int get minLines => _minLines;
+  int/*?*/ get minLines => _minLines;
   int _minLines;
   /// The value may be null. If it is not null, then it must be greater than zero.
-  set minLines(int value) {
+  set minLines(int/*?*/ value) {
     assert(value == null || value > 0);
     if (minLines == value)
       return;
@@ -1052,9 +1055,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// The color to use when painting the selection.
-  Color get selectionColor => _selectionColor;
+  Color/*?*/ get selectionColor => _selectionColor;
   Color _selectionColor;
-  set selectionColor(Color value) {
+  set selectionColor(Color/*?*/ value) {
     if (_selectionColor == value)
       return;
     _selectionColor = value;
@@ -1082,9 +1085,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// If [selection] is null, there is no selection and attempts to
   /// manipulate the selection will throw.
-  TextSelection get selection => _selection;
+  TextSelection/*?*/ get selection => _selection;
   TextSelection _selection;
-  set selection(TextSelection value) {
+  set selection(TextSelection/*?*/ value) {
     if (_selection == value)
       return;
     _selection = value;
@@ -1123,9 +1126,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// How tall the cursor will be.
-  double get cursorHeight => _cursorHeight ?? preferredLineHeight;
+  ///
+  /// This can be null, in which case the getter will actually return [preferredLineHeight].
+  ///
+  /// Setting this to itself fixes the value to the current [preferredLineHeight]. Setting
+  /// this to null returns the behaviour of deferring to [preferredLineHeight].
+  // TODO(ianh): This is a confusing API. We should have a separate getter for the effective cursor height.
+  double/*?*/ get cursorHeight => _cursorHeight ?? preferredLineHeight;
   double _cursorHeight;
-  set cursorHeight(double value) {
+  set cursorHeight(double/*?*/ value) {
     if (_cursorHeight == value)
       return;
     _cursorHeight = value;
@@ -1155,9 +1164,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// platforms. The origin from where the offset is applied to is the arbitrary
   /// location where the cursor ends up being rendered from by default.
   /// {@endtemplate}
-  Offset get cursorOffset => _cursorOffset;
+  Offset/*?*/ get cursorOffset => _cursorOffset;
   Offset _cursorOffset;
-  set cursorOffset(Offset value) {
+  set cursorOffset(Offset/*?*/ value) {
     if (_cursorOffset == value)
       return;
     _cursorOffset = value;
@@ -1165,9 +1174,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// How rounded the corners of the cursor should be.
-  Radius get cursorRadius => _cursorRadius;
+  ///
+  /// A null value is the same as [Radius.zero].
+  Radius/*?*/ get cursorRadius => _cursorRadius;
   Radius _cursorRadius;
-  set cursorRadius(Radius value) {
+  set cursorRadius(Radius/*?*/ value) {
     if (_cursorRadius == value)
       return;
     _cursorRadius = value;
@@ -1417,8 +1428,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _handleMoveCursorForwardByWord(bool extentSelection) {
     assert(selection != null);
     final TextRange currentWord = _textPainter.getWordBoundary(selection.extent);
-    if (currentWord == null)
-      return;
     final TextRange nextWord = _getNextWord(currentWord.end);
     if (nextWord == null)
       return;
@@ -1435,8 +1444,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _handleMoveCursorBackwardByWord(bool extentSelection) {
     assert(selection != null);
     final TextRange currentWord = _textPainter.getWordBoundary(selection.extent);
-    if (currentWord == null)
-      return;
     final TextRange previousWord = _getPreviousWord(currentWord.start - 1);
     if (previousWord == null)
       return;
@@ -1522,7 +1529,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       case Axis.vertical:
         return Offset(0.0, -offset.pixels);
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   double/*!*/ get _viewportExtent {
@@ -1533,7 +1540,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       case Axis.vertical:
         return size.height;
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   double/*!*/ _getMaxScrollExtent(Size contentSize) {
@@ -1544,7 +1551,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       case Axis.vertical:
         return math.max(0.0, contentSize.height - size.height);
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   // We need to check the paint offset here because during animation, the start of

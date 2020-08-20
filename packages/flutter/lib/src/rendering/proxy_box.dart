@@ -120,7 +120,7 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     return child?.hitTest(result, position: position) ?? false;
   }
 
@@ -165,7 +165,7 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
   HitTestBehavior behavior;
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     bool hitTarget = false;
     if (size.contains(position)) {
       hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
@@ -587,9 +587,9 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   /// If non-null, force the child's width to be a multiple of this value.
   ///
   /// This value must be null or > 0.0.
-  double get stepWidth => _stepWidth;
+  double/*?*/ get stepWidth => _stepWidth;
   double _stepWidth;
-  set stepWidth(double value) {
+  set stepWidth(double/*?*/ value) {
     assert(value == null || value > 0.0);
     if (value == _stepWidth)
       return;
@@ -600,9 +600,9 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   /// If non-null, force the child's height to be a multiple of this value.
   ///
   /// This value must be null or > 0.0.
-  double get stepHeight => _stepHeight;
+  double/*?*/ get stepHeight => _stepHeight;
   double _stepHeight;
-  set stepHeight(double value) {
+  set stepHeight(double/*?*/ value) {
     assert(value == null || value > 0.0);
     if (value == _stepHeight)
       return;
@@ -821,9 +821,9 @@ class RenderOpacity extends RenderProxyBox {
   /// If false, semantics are excluded when [opacity] is 0.0.
   ///
   /// Defaults to false.
-  bool get alwaysIncludeSemantics => _alwaysIncludeSemantics;
-  bool _alwaysIncludeSemantics;
-  set alwaysIncludeSemantics(bool value) {
+  bool/*!*/ get alwaysIncludeSemantics => _alwaysIncludeSemantics;
+  bool/*!*/ _alwaysIncludeSemantics;
+  set alwaysIncludeSemantics(bool/*!*/ value) {
     if (value == _alwaysIncludeSemantics)
       return;
     _alwaysIncludeSemantics = value;
@@ -865,9 +865,9 @@ class RenderOpacity extends RenderProxyBox {
 
 /// Implementation of [RenderAnimatedOpacity] and [RenderSliverAnimatedOpacity].
 ///
-/// Use this mixin in situations where the proxying behavior
-/// of [RenderProxyBox] or [RenderProxySliver] is desired for animating opacity,
-/// but would like to use the same methods for both types of render objects.
+/// This mixin allows the logic of animating opacity to be used with different
+/// layout models, e.g. the way that [RenderAnimatedOpacity] uses it for [RenderBox]
+/// and [RenderSliverAnimatedOpacity] uses it for [RenderSliver].
 mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChildMixin<T> {
   int _alpha;
 
@@ -882,9 +882,12 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   ///
   /// To change the opacity of a child in a static manner, not animated,
   /// consider [RenderOpacity] instead.
-  Animation<double> get opacity => _opacity;
-  Animation<double> _opacity;
-  set opacity(Animation<double> value) {
+  ///
+  /// This getter cannot be read until the value has been set. It should be set
+  /// by the constructor of the class in which this mixin is included.
+  Animation<double>/*!*/ get opacity => _opacity/*!*/;
+  Animation<double>/*?*/ _opacity;
+  set opacity(Animation<double>/*!*/ value) {
     assert(value != null);
     if (_opacity == value)
       return;
@@ -900,10 +903,11 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   ///
   /// If false, semantics are excluded when [opacity] is 0.0.
   ///
-  /// Defaults to false.
-  bool get alwaysIncludeSemantics => _alwaysIncludeSemantics;
-  bool _alwaysIncludeSemantics;
-  set alwaysIncludeSemantics(bool value) {
+  /// This getter cannot be read until the value has been set. It should be set
+  /// by the constructor of the class in which this mixin is included.
+  bool/*!*/ get alwaysIncludeSemantics => _alwaysIncludeSemantics/*!*/;
+  bool/*?*/ _alwaysIncludeSemantics;
+  set alwaysIncludeSemantics(bool/*!*/ value) {
     if (value == _alwaysIncludeSemantics)
       return;
     _alwaysIncludeSemantics = value;
@@ -1057,7 +1061,7 @@ class RenderShaderMask extends RenderProxyBox {
     if (child != null) {
       assert(needsCompositing);
       layer ??= ShaderMaskLayer();
-      layer
+      layer/*!*/
         ..shader = _shaderCallback(Offset.zero & size)
         ..maskRect = offset & size
         ..blendMode = _blendMode;
@@ -1249,9 +1253,9 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
        super(child);
 
   /// If non-null, determines which clip to use on the child.
-  CustomClipper<T> get clipper => _clipper;
+  CustomClipper<T>/*?*/ get clipper => _clipper;
   CustomClipper<T> _clipper;
-  set clipper(CustomClipper<T> newClipper) {
+  set clipper(CustomClipper<T>/*?*/ newClipper) {
     if (_clipper == newClipper)
       return;
     final CustomClipper<T> oldClipper = _clipper;
@@ -1286,7 +1290,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  T get _defaultClip;
+  T/*!*/ get _defaultClip;
   T _clip;
 
   Clip get clipBehavior => _clipBehavior;
@@ -1367,10 +1371,10 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
-  Rect get _defaultClip => Offset.zero & size;
+  Rect/*!*/ get _defaultClip => Offset.zero & size;
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1426,15 +1430,13 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipRRect({
     RenderBox child,
-    BorderRadius borderRadius = BorderRadius.zero,
-    CustomClipper<RRect> clipper,
+    BorderRadius/*!*/ borderRadius = BorderRadius.zero,
+    CustomClipper<RRect>/*?*/ clipper,
     Clip clipBehavior = Clip.antiAlias,
   }) : assert(clipBehavior != null),
        assert(clipBehavior != Clip.none),
        _borderRadius = borderRadius,
-       super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
-    assert(_borderRadius != null || clipper != null);
-  }
+       super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   /// The border radius of the rounded corners.
   ///
@@ -1442,9 +1444,9 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   /// exceed width/height.
   ///
   /// This value is ignored if [clipper] is non-null.
-  BorderRadius get borderRadius => _borderRadius;
+  BorderRadius/*!*/ get borderRadius => _borderRadius;
   BorderRadius _borderRadius;
-  set borderRadius(BorderRadius value) {
+  set borderRadius(BorderRadius/*!*/ value) {
     assert(value != null);
     if (_borderRadius == value)
       return;
@@ -1453,10 +1455,10 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   }
 
   @override
-  RRect get _defaultClip => _borderRadius.toRRect(Offset.zero & size);
+  RRect/*!*/ get _defaultClip => _borderRadius.toRRect(Offset.zero & size);
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1527,10 +1529,10 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   }
 
   @override
-  Rect get _defaultClip => Offset.zero & size;
+  Rect/*!*/ get _defaultClip => Offset.zero & size;
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     _updateClip();
     assert(_clip != null);
     final Offset center = _clip.center;
@@ -1603,10 +1605,10 @@ class RenderClipPath extends _RenderCustomClip<Path> {
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
-  Path get _defaultClip => Path()..addRect(Offset.zero & size);
+  Path/*!*/ get _defaultClip => Path()..addRect(Offset.zero & size);
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1789,9 +1791,9 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   /// This property is ignored if the [shape] is not [BoxShape.rectangle].
   ///
   /// The value null is treated like [BorderRadius.zero].
-  BorderRadius get borderRadius => _borderRadius;
+  BorderRadius/*?*/ get borderRadius => _borderRadius;
   BorderRadius _borderRadius;
-  set borderRadius(BorderRadius value) {
+  set borderRadius(BorderRadius/*?*/ value) {
     if (borderRadius == value)
       return;
     _borderRadius = value;
@@ -1799,7 +1801,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   }
 
   @override
-  RRect get _defaultClip {
+  RRect/*!*/ get _defaultClip {
     assert(hasSize);
     assert(_shape != null);
     switch (_shape) {
@@ -1809,11 +1811,11 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         final Rect rect = Offset.zero & size;
         return RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1847,7 +1849,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         return true;
       }());
       layer ??= PhysicalModelLayer();
-      layer
+      layer/*!*/
         ..clipPath = offsetRRectAsPath
         ..clipBehavior = clipBehavior
         ..elevation = paintShadows ? elevation : 0.0
@@ -1910,10 +1912,10 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   PhysicalModelLayer get layer => super.layer as PhysicalModelLayer;
 
   @override
-  Path get _defaultClip => Path()..addRect(Offset.zero & size);
+  Path/*!*/ get _defaultClip => Path()..addRect(Offset.zero & size);
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1946,7 +1948,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
         return true;
       }());
       layer ??= PhysicalModelLayer();
-      layer
+      layer/*!*/
         ..clipPath = offsetPath
         ..clipBehavior = clipBehavior
         ..elevation = paintShadows ? elevation : 0.0
@@ -2263,7 +2265,7 @@ class RenderTransform extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     // RenderTransform objects don't check if they are
     // themselves hit, because it's confusing to think about
     // how the untransformed size and the child's transformed
@@ -2272,7 +2274,7 @@ class RenderTransform extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     assert(!transformHitTests || _effectiveTransform != null);
     return result.addWithPaintTransform(
       transform: transformHitTests ? _effectiveTransform : null,
@@ -2401,9 +2403,9 @@ class RenderFittedBox extends RenderProxyBox {
   ///
   /// This may be changed to null, but only after [alignment] has been changed
   /// to a value that does not depend on the direction.
-  TextDirection get textDirection => _textDirection;
+  TextDirection/*?*/ get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(TextDirection/*?*/ value) {
     if (_textDirection == value)
       return;
     _textDirection = value;
@@ -2504,8 +2506,8 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    if (size.isEmpty || child?.size?.isEmpty == true)
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
+    if (size.isEmpty || child?.size?.isEmpty == true) // ignore: invalid_null_aware_operator
       return false;
     _updatePaintData();
     return result.addWithPaintTransform(
@@ -2573,7 +2575,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     // RenderFractionalTranslation objects don't check if they are
     // themselves hit, because it's confusing to think about
     // how the untransformed size and the child's transformed
@@ -2590,7 +2592,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
   bool transformHitTests;
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     assert(!debugNeedsLayout);
     return result.addWithPaintOffset(
       offset: transformHitTests
@@ -2779,7 +2781,7 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   bool hitTestSelf(Offset position) => true;
 
   @override
-  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     return super.hitTest(result, position: position) && _opaque;
   }
 
@@ -3094,9 +3096,9 @@ class RenderIgnorePointer extends RenderProxyBox {
   /// If null, defaults to value of [ignoring].
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
-  bool get ignoringSemantics => _ignoringSemantics;
+  bool/*?*/ get ignoringSemantics => _ignoringSemantics;
   bool _ignoringSemantics;
-  set ignoringSemantics(bool value) {
+  set ignoringSemantics(bool/*?*/ value) {
     if (value == _ignoringSemantics)
       return;
     final bool oldEffectiveValue = _effectiveIgnoringSemantics;
@@ -3108,7 +3110,7 @@ class RenderIgnorePointer extends RenderProxyBox {
   bool get _effectiveIgnoringSemantics => ignoringSemantics ?? ignoring;
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     return !ignoring && super.hitTest(result, position: position);
   }
 
@@ -3218,7 +3220,7 @@ class RenderOffstage extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     return !offstage && super.hitTest(result, position: position);
   }
 
@@ -3300,9 +3302,9 @@ class RenderAbsorbPointer extends RenderProxyBox {
   /// If null, defaults to value of [absorbing].
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
-  bool get ignoringSemantics => _ignoringSemantics;
+  bool/*?*/ get ignoringSemantics => _ignoringSemantics;
   bool _ignoringSemantics;
-  set ignoringSemantics(bool value) {
+  set ignoringSemantics(bool/*?*/ value) {
     if (value == _ignoringSemantics)
       return;
     final bool oldEffectiveValue = _effectiveIgnoringSemantics;
@@ -3314,7 +3316,7 @@ class RenderAbsorbPointer extends RenderProxyBox {
   bool get _effectiveIgnoringSemantics => ignoringSemantics ?? absorbing;
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     return absorbing
         ? size.contains(position)
         : super.hitTest(result, position: position);
@@ -3399,9 +3401,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   /// if [onHorizontalDragUpdate] is set but [validActions] only contains
   /// [SemanticsAction.scrollLeft], then the [SemanticsAction.scrollRight]
   /// action will be omitted.
-  Set<SemanticsAction> get validActions => _validActions;
+  Set<SemanticsAction>/*?*/ get validActions => _validActions;
   Set<SemanticsAction> _validActions;
-  set validActions(Set<SemanticsAction> value) {
+  set validActions(Set<SemanticsAction>/*?*/ value) {
     if (setEquals<SemanticsAction>(value, _validActions))
       return;
     _validActions = value;
@@ -3409,9 +3411,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   }
 
   /// Called when the user taps on the render object.
-  GestureTapCallback get onTap => _onTap;
+  GestureTapCallback/*?*/ get onTap => _onTap;
   GestureTapCallback _onTap;
-  set onTap(GestureTapCallback value) {
+  set onTap(GestureTapCallback/*?*/ value) {
     if (_onTap == value)
       return;
     final bool hadHandler = _onTap != null;
@@ -3421,9 +3423,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   }
 
   /// Called when the user presses on the render object for a long period of time.
-  GestureLongPressCallback get onLongPress => _onLongPress;
+  GestureLongPressCallback/*?*/ get onLongPress => _onLongPress;
   GestureLongPressCallback _onLongPress;
-  set onLongPress(GestureLongPressCallback value) {
+  set onLongPress(GestureLongPressCallback/*?*/ value) {
     if (_onLongPress == value)
       return;
     final bool hadHandler = _onLongPress != null;
@@ -3433,9 +3435,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   }
 
   /// Called when the user scrolls to the left or to the right.
-  GestureDragUpdateCallback get onHorizontalDragUpdate => _onHorizontalDragUpdate;
+  GestureDragUpdateCallback/*?*/ get onHorizontalDragUpdate => _onHorizontalDragUpdate;
   GestureDragUpdateCallback _onHorizontalDragUpdate;
-  set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
+  set onHorizontalDragUpdate(GestureDragUpdateCallback/*?*/ value) {
     if (_onHorizontalDragUpdate == value)
       return;
     final bool hadHandler = _onHorizontalDragUpdate != null;
@@ -3445,9 +3447,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   }
 
   /// Called when the user scrolls up or down.
-  GestureDragUpdateCallback get onVerticalDragUpdate => _onVerticalDragUpdate;
+  GestureDragUpdateCallback/*?*/ get onVerticalDragUpdate => _onVerticalDragUpdate;
   GestureDragUpdateCallback _onVerticalDragUpdate;
-  set onVerticalDragUpdate(GestureDragUpdateCallback value) {
+  set onVerticalDragUpdate(GestureDragUpdateCallback/*?*/ value) {
     if (_onVerticalDragUpdate == value)
       return;
     final bool hadHandler = _onVerticalDragUpdate != null;
@@ -3718,9 +3720,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsFlag.hasCheckedState] semantic to true and
   /// the [SemanticsConfiguration.isChecked] semantic to the given value.
-  bool get checked => _checked;
+  bool/*?*/ get checked => _checked;
   bool _checked;
-  set checked(bool value) {
+  set checked(bool/*?*/ value) {
     if (checked == value)
       return;
     _checked = value;
@@ -3729,9 +3731,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsFlag.hasEnabledState] semantic to true and
   /// the [SemanticsConfiguration.isEnabled] semantic to the given value.
-  bool get enabled => _enabled;
+  bool/*?*/ get enabled => _enabled;
   bool _enabled;
-  set enabled(bool value) {
+  set enabled(bool/*?*/ value) {
     if (enabled == value)
       return;
     _enabled = value;
@@ -3740,9 +3742,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.isSelected] semantic to the
   /// given value.
-  bool get selected => _selected;
+  bool/*?*/ get selected => _selected;
   bool _selected;
-  set selected(bool value) {
+  set selected(bool/*?*/ value) {
     if (selected == value)
       return;
     _selected = value;
@@ -3751,9 +3753,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.isButton] semantic to the
   /// given value.
-  bool get button => _button;
+  bool/*?*/ get button => _button;
   bool _button;
-  set button(bool value) {
+  set button(bool/*?*/ value) {
     if (button == value)
       return;
     _button = value;
@@ -3762,9 +3764,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.isLink] semantic to the
   /// given value.
-  bool get link => _link;
+  bool/*?*/ get link => _link;
   bool _link;
-  set link(bool value) {
+  set link(bool/*?*/ value) {
     if (link == value)
       return;
     _link = value;
@@ -3773,9 +3775,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.isHeader] semantic to the
   /// given value.
-  bool get header => _header;
+  bool/*?*/ get header => _header;
   bool _header;
-  set header(bool value) {
+  set header(bool/*?*/ value) {
     if (header == value)
       return;
     _header = value;
@@ -3784,9 +3786,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.isTextField] semantic to the
   /// given value.
-  bool get textField => _textField;
+  bool/*?*/ get textField => _textField;
   bool _textField;
-  set textField(bool value) {
+  set textField(bool/*?*/ value) {
     if (textField == value)
       return;
     _textField = value;
@@ -3795,9 +3797,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.isReadOnly] semantic to the
   /// given value.
-  bool get readOnly => _readOnly;
+  bool/*?*/ get readOnly => _readOnly;
   bool _readOnly;
-  set readOnly(bool value) {
+  set readOnly(bool/*?*/ value) {
     if (readOnly == value)
       return;
     _readOnly = value;
@@ -3806,9 +3808,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.isFocusable] semantic to the
   /// given value.
-  bool get focusable => _focusable;
+  bool/*?*/ get focusable => _focusable;
   bool _focusable;
-  set focusable(bool value) {
+  set focusable(bool/*?*/ value) {
     if (focusable == value)
       return;
     _focusable = value;
@@ -3817,9 +3819,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.isFocused] semantic to the
   /// given value.
-  bool get focused => _focused;
+  bool/*?*/ get focused => _focused;
   bool _focused;
-  set focused(bool value) {
+  set focused(bool/*?*/ value) {
     if (focused == value)
       return;
     _focused = value;
@@ -3828,9 +3830,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.isInMutuallyExclusiveGroup]
   /// semantic to the given value.
-  bool get inMutuallyExclusiveGroup => _inMutuallyExclusiveGroup;
+  bool/*?*/ get inMutuallyExclusiveGroup => _inMutuallyExclusiveGroup;
   bool _inMutuallyExclusiveGroup;
-  set inMutuallyExclusiveGroup(bool value) {
+  set inMutuallyExclusiveGroup(bool/*?*/ value) {
     if (inMutuallyExclusiveGroup == value)
       return;
     _inMutuallyExclusiveGroup = value;
@@ -3839,9 +3841,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.isObscured] semantic to the
   /// given value.
-  bool get obscured => _obscured;
+  bool/*?*/ get obscured => _obscured;
   bool _obscured;
-  set obscured(bool value) {
+  set obscured(bool/*?*/ value) {
     if (obscured == value)
       return;
     _obscured = value;
@@ -3850,9 +3852,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsNode.isMultiline] semantic to the given
   /// value.
-  bool get multiline => _multiline;
+  bool/*?*/ get multiline => _multiline;
   bool _multiline;
-  set multiline(bool value) {
+  set multiline(bool/*?*/ value) {
     if (multiline == value)
       return;
     _multiline = value;
@@ -3861,9 +3863,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.scopesRoute] semantic to the
   /// give value.
-  bool get scopesRoute => _scopesRoute;
+  bool/*?*/ get scopesRoute => _scopesRoute;
   bool _scopesRoute;
-  set scopesRoute(bool value) {
+  set scopesRoute(bool/*?*/ value) {
     if (scopesRoute == value)
       return;
     _scopesRoute = value;
@@ -3872,9 +3874,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.namesRoute] semantic to the
   /// give value.
-  bool get namesRoute => _namesRoute;
+  bool/*?*/ get namesRoute => _namesRoute;
   bool _namesRoute;
-  set namesRoute(bool value) {
+  set namesRoute(bool/*?*/ value) {
     if (_namesRoute == value)
       return;
     _namesRoute = value;
@@ -3883,9 +3885,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.isHidden] semantic to the
   /// given value.
-  bool get hidden => _hidden;
+  bool/*?*/ get hidden => _hidden;
   bool _hidden;
-  set hidden(bool value) {
+  set hidden(bool/*?*/ value) {
     if (hidden == value)
       return;
     _hidden = value;
@@ -3894,9 +3896,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.isImage] semantic to the
   /// given value.
-  bool get image => _image;
+  bool/*?*/ get image => _image;
   bool _image;
-  set image(bool value) {
+  set image(bool/*?*/ value) {
     if (_image == value)
       return;
     _image = value;
@@ -3904,9 +3906,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.liveRegion] semantic to
   /// the given value.
-  bool get liveRegion => _liveRegion;
+  bool/*?*/ get liveRegion => _liveRegion;
   bool _liveRegion;
-  set liveRegion(bool value) {
+  set liveRegion(bool/*?*/ value) {
     if (_liveRegion == value)
       return;
     _liveRegion = value;
@@ -3915,9 +3917,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsNode.maxValueLength] semantic to the given
   /// value.
-  int get maxValueLength => _maxValueLength;
+  int/*?*/ get maxValueLength => _maxValueLength;
   int _maxValueLength;
-  set maxValueLength(int value) {
+  set maxValueLength(int/*?*/ value) {
     if (_maxValueLength == value)
       return;
     _maxValueLength = value;
@@ -3926,9 +3928,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsNode.currentValueLength] semantic to the
   /// given value.
-  int get currentValueLength => _currentValueLength;
+  int/*?*/ get currentValueLength => _currentValueLength;
   int _currentValueLength;
-  set currentValueLength(int value) {
+  set currentValueLength(int/*?*/ value) {
     if (_currentValueLength == value)
       return;
     _currentValueLength = value;
@@ -3937,9 +3939,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsConfiguration.isToggled] semantic to the given
   /// value.
-  bool get toggled => _toggled;
+  bool/*?*/ get toggled => _toggled;
   bool _toggled;
-  set toggled(bool value) {
+  set toggled(bool/*?*/ value) {
     if (_toggled == value)
       return;
     _toggled = value;
@@ -3949,9 +3951,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
   ///
   /// The reading direction is given by [textDirection].
-  String get label => _label;
+  String/*?*/ get label => _label;
   String _label;
-  set label(String value) {
+  set label(String/*?*/ value) {
     if (_label == value)
       return;
     _label = value;
@@ -3961,9 +3963,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// If non-null, sets the [SemanticsNode.value] semantic to the given value.
   ///
   /// The reading direction is given by [textDirection].
-  String get value => _value;
+  String/*?*/ get value => _value;
   String _value;
-  set value(String value) {
+  set value(String/*?*/ value) {
     if (_value == value)
       return;
     _value = value;
@@ -3974,9 +3976,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// value.
   ///
   /// The reading direction is given by [textDirection].
-  String get increasedValue => _increasedValue;
+  String/*?*/ get increasedValue => _increasedValue;
   String _increasedValue;
-  set increasedValue(String value) {
+  set increasedValue(String/*?*/ value) {
     if (_increasedValue == value)
       return;
     _increasedValue = value;
@@ -3987,9 +3989,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// value.
   ///
   /// The reading direction is given by [textDirection].
-  String get decreasedValue => _decreasedValue;
+  String/*?*/ get decreasedValue => _decreasedValue;
   String _decreasedValue;
-  set decreasedValue(String value) {
+  set decreasedValue(String/*?*/ value) {
     if (_decreasedValue == value)
       return;
     _decreasedValue = value;
@@ -3999,9 +4001,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// If non-null, sets the [SemanticsNode.hint] semantic to the given value.
   ///
   /// The reading direction is given by [textDirection].
-  String get hint => _hint;
+  String/*?*/ get hint => _hint;
   String _hint;
-  set hint(String value) {
+  set hint(String/*?*/ value) {
     if (_hint == value)
       return;
     _hint = value;
@@ -4009,9 +4011,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   /// If non-null, sets the [SemanticsConfiguration.hintOverrides] to the given value.
-  SemanticsHintOverrides get hintOverrides => _hintOverrides;
+  SemanticsHintOverrides/*?*/ get hintOverrides => _hintOverrides;
   SemanticsHintOverrides _hintOverrides;
-  set hintOverrides(SemanticsHintOverrides value) {
+  set hintOverrides(SemanticsHintOverrides/*?*/ value) {
     if (_hintOverrides == value)
       return;
     _hintOverrides = value;
@@ -4022,9 +4024,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// This must not be null if [label], [hint], [value], [increasedValue], or
   /// [decreasedValue] are not null.
-  TextDirection get textDirection => _textDirection;
+  TextDirection/*?*/ get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(TextDirection/*?*/ value) {
     if (textDirection == value)
       return;
     _textDirection = value;
@@ -4036,9 +4038,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// This defines how this node is sorted among the sibling semantics nodes
   /// to determine the order in which they are traversed by the accessibility
   /// services on the platform (e.g. VoiceOver on iOS and TalkBack on Android).
-  SemanticsSortKey get sortKey => _sortKey;
+  SemanticsSortKey/*?*/ get sortKey => _sortKey;
   SemanticsSortKey _sortKey;
-  set sortKey(SemanticsSortKey value) {
+  set sortKey(SemanticsSortKey/*?*/ value) {
     if (sortKey == value)
       return;
     _sortKey = value;
@@ -4053,9 +4055,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// VoiceOver users on iOS and TalkBack users on Android can trigger this
   /// action by double-tapping the screen while an element is focused.
-  VoidCallback get onTap => _onTap;
+  VoidCallback/*?*/ get onTap => _onTap;
   VoidCallback _onTap;
-  set onTap(VoidCallback handler) {
+  set onTap(VoidCallback/*?*/ handler) {
     if (_onTap == handler)
       return;
     final bool hadValue = _onTap != null;
@@ -4071,9 +4073,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// TalkBack users on Android can trigger this action in the local context
   /// menu, and VoiceOver users on iOS can trigger this action with a standard
   /// gesture or menu option.
-  VoidCallback get onDismiss => _onDismiss;
+  VoidCallback/*?*/ get onDismiss => _onDismiss;
   VoidCallback _onDismiss;
-  set onDismiss(VoidCallback handler) {
+  set onDismiss(VoidCallback/*?*/ handler) {
     if (_onDismiss == handler)
       return;
     final bool hadValue = _onDismiss != null;
@@ -4090,9 +4092,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// VoiceOver users on iOS and TalkBack users on Android can trigger this
   /// action by double-tapping the screen without lifting the finger after the
   /// second tap.
-  VoidCallback get onLongPress => _onLongPress;
+  VoidCallback/*?*/ get onLongPress => _onLongPress;
   VoidCallback _onLongPress;
-  set onLongPress(VoidCallback handler) {
+  set onLongPress(VoidCallback/*?*/ handler) {
     if (_onLongPress == handler)
       return;
     final bool hadValue = _onLongPress != null;
@@ -4112,9 +4114,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// right and then left in one motion path. On Android, [onScrollUp] and
   /// [onScrollLeft] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback get onScrollLeft => _onScrollLeft;
+  VoidCallback/*?*/ get onScrollLeft => _onScrollLeft;
   VoidCallback _onScrollLeft;
-  set onScrollLeft(VoidCallback handler) {
+  set onScrollLeft(VoidCallback/*?*/ handler) {
     if (_onScrollLeft == handler)
       return;
     final bool hadValue = _onScrollLeft != null;
@@ -4134,9 +4136,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback get onScrollRight => _onScrollRight;
+  VoidCallback/*?*/ get onScrollRight => _onScrollRight;
   VoidCallback _onScrollRight;
-  set onScrollRight(VoidCallback handler) {
+  set onScrollRight(VoidCallback/*?*/ handler) {
     if (_onScrollRight == handler)
       return;
     final bool hadValue = _onScrollRight != null;
@@ -4156,9 +4158,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// right and then left in one motion path. On Android, [onScrollUp] and
   /// [onScrollLeft] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback get onScrollUp => _onScrollUp;
+  VoidCallback/*?*/ get onScrollUp => _onScrollUp;
   VoidCallback _onScrollUp;
-  set onScrollUp(VoidCallback handler) {
+  set onScrollUp(VoidCallback/*?*/ handler) {
     if (_onScrollUp == handler)
       return;
     final bool hadValue = _onScrollUp != null;
@@ -4178,9 +4180,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback get onScrollDown => _onScrollDown;
+  VoidCallback/*?*/ get onScrollDown => _onScrollDown;
   VoidCallback _onScrollDown;
-  set onScrollDown(VoidCallback handler) {
+  set onScrollDown(VoidCallback/*?*/ handler) {
     if (_onScrollDown == handler)
       return;
     final bool hadValue = _onScrollDown != null;
@@ -4197,9 +4199,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// VoiceOver users on iOS can trigger this action by swiping up with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume up button.
-  VoidCallback get onIncrease => _onIncrease;
+  VoidCallback/*?*/ get onIncrease => _onIncrease;
   VoidCallback _onIncrease;
-  set onIncrease(VoidCallback handler) {
+  set onIncrease(VoidCallback/*?*/ handler) {
     if (_onIncrease == handler)
       return;
     final bool hadValue = _onIncrease != null;
@@ -4216,9 +4218,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// VoiceOver users on iOS can trigger this action by swiping down with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume down button.
-  VoidCallback get onDecrease => _onDecrease;
+  VoidCallback/*?*/ get onDecrease => _onDecrease;
   VoidCallback _onDecrease;
-  set onDecrease(VoidCallback handler) {
+  set onDecrease(VoidCallback/*?*/ handler) {
     if (_onDecrease == handler)
       return;
     final bool hadValue = _onDecrease != null;
@@ -4233,9 +4235,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  VoidCallback get onCopy => _onCopy;
+  VoidCallback/*?*/ get onCopy => _onCopy;
   VoidCallback _onCopy;
-  set onCopy(VoidCallback handler) {
+  set onCopy(VoidCallback/*?*/ handler) {
     if (_onCopy == handler)
       return;
     final bool hadValue = _onCopy != null;
@@ -4251,9 +4253,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  VoidCallback get onCut => _onCut;
+  VoidCallback/*?*/ get onCut => _onCut;
   VoidCallback _onCut;
-  set onCut(VoidCallback handler) {
+  set onCut(VoidCallback/*?*/ handler) {
     if (_onCut == handler)
       return;
     final bool hadValue = _onCut != null;
@@ -4268,9 +4270,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  VoidCallback get onPaste => _onPaste;
+  VoidCallback/*?*/ get onPaste => _onPaste;
   VoidCallback _onPaste;
-  set onPaste(VoidCallback handler) {
+  set onPaste(VoidCallback/*?*/ handler) {
     if (_onPaste == handler)
       return;
     final bool hadValue = _onPaste != null;
@@ -4286,9 +4288,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users can trigger this by pressing the volume up key while the
   /// input focus is in a text field.
-  MoveCursorHandler get onMoveCursorForwardByCharacter => _onMoveCursorForwardByCharacter;
+  MoveCursorHandler/*?*/ get onMoveCursorForwardByCharacter => _onMoveCursorForwardByCharacter;
   MoveCursorHandler _onMoveCursorForwardByCharacter;
-  set onMoveCursorForwardByCharacter(MoveCursorHandler handler) {
+  set onMoveCursorForwardByCharacter(MoveCursorHandler/*?*/ handler) {
     if (_onMoveCursorForwardByCharacter == handler)
       return;
     final bool hadValue = _onMoveCursorForwardByCharacter != null;
@@ -4304,9 +4306,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  MoveCursorHandler get onMoveCursorBackwardByCharacter => _onMoveCursorBackwardByCharacter;
+  MoveCursorHandler/*?*/ get onMoveCursorBackwardByCharacter => _onMoveCursorBackwardByCharacter;
   MoveCursorHandler _onMoveCursorBackwardByCharacter;
-  set onMoveCursorBackwardByCharacter(MoveCursorHandler handler) {
+  set onMoveCursorBackwardByCharacter(MoveCursorHandler/*?*/ handler) {
     if (_onMoveCursorBackwardByCharacter == handler)
       return;
     final bool hadValue = _onMoveCursorBackwardByCharacter != null;
@@ -4322,9 +4324,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  MoveCursorHandler get onMoveCursorForwardByWord => _onMoveCursorForwardByWord;
+  MoveCursorHandler/*?*/ get onMoveCursorForwardByWord => _onMoveCursorForwardByWord;
   MoveCursorHandler _onMoveCursorForwardByWord;
-  set onMoveCursorForwardByWord(MoveCursorHandler handler) {
+  set onMoveCursorForwardByWord(MoveCursorHandler/*?*/ handler) {
     if (_onMoveCursorForwardByWord == handler)
       return;
     final bool hadValue = _onMoveCursorForwardByWord != null;
@@ -4340,9 +4342,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  MoveCursorHandler get onMoveCursorBackwardByWord => _onMoveCursorBackwardByWord;
+  MoveCursorHandler/*?*/ get onMoveCursorBackwardByWord => _onMoveCursorBackwardByWord;
   MoveCursorHandler _onMoveCursorBackwardByWord;
-  set onMoveCursorBackwardByWord(MoveCursorHandler handler) {
+  set onMoveCursorBackwardByWord(MoveCursorHandler/*?*/ handler) {
     if (_onMoveCursorBackwardByWord == handler)
       return;
     final bool hadValue = _onMoveCursorBackwardByWord != null;
@@ -4358,9 +4360,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users can trigger this handler by selecting "Move cursor to
   /// beginning/end" or "Select all" from the local context menu.
-  SetSelectionHandler get onSetSelection => _onSetSelection;
+  SetSelectionHandler/*?*/ get onSetSelection => _onSetSelection;
   SetSelectionHandler _onSetSelection;
-  set onSetSelection(SetSelectionHandler handler) {
+  set onSetSelection(SetSelectionHandler/*?*/ handler) {
     if (_onSetSelection == handler)
       return;
     final bool hadValue = _onSetSelection != null;
@@ -4386,9 +4388,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
   ///    focus is removed from the node.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
-  VoidCallback get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
+  VoidCallback/*?*/ get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
   VoidCallback _onDidGainAccessibilityFocus;
-  set onDidGainAccessibilityFocus(VoidCallback handler) {
+  set onDidGainAccessibilityFocus(VoidCallback/*?*/ handler) {
     if (_onDidGainAccessibilityFocus == handler)
       return;
     final bool hadValue = _onDidGainAccessibilityFocus != null;
@@ -4414,9 +4416,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
   ///    accessibility focus.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
-  VoidCallback get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
+  VoidCallback/*?*/ get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
   VoidCallback _onDidLoseAccessibilityFocus;
-  set onDidLoseAccessibilityFocus(VoidCallback handler) {
+  set onDidLoseAccessibilityFocus(VoidCallback/*?*/ handler) {
     if (_onDidLoseAccessibilityFocus == handler)
       return;
     final bool hadValue = _onDidLoseAccessibilityFocus != null;
@@ -4434,9 +4436,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// See also:
   ///
   ///  * [CustomSemanticsAction], for an explanation of custom actions.
-  Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
+  Map<CustomSemanticsAction, VoidCallback>/*?*/ get customSemanticsActions => _customSemanticsActions;
   Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions;
-  set customSemanticsActions(Map<CustomSemanticsAction, VoidCallback> value) {
+  set customSemanticsActions(Map<CustomSemanticsAction, VoidCallback>/*?*/ value) {
     if (_customSemanticsActions == value)
       return;
     _customSemanticsActions = value;
@@ -4828,9 +4830,9 @@ class RenderLeaderLayer extends RenderProxyBox {
   ///
   /// This property must not be null. The object must not be associated with
   /// another [RenderLeaderLayer] that is also being painted.
-  LayerLink get link => _link;
+  LayerLink/*!*/ get link => _link;
   LayerLink _link;
-  set link(LayerLink value) {
+  set link(LayerLink/*!*/ value) {
     assert(value != null);
     if (_link == value)
       return;
@@ -4887,17 +4889,16 @@ class RenderFollowerLayer extends RenderProxyBox {
   }) : assert(link != null),
        assert(showWhenUnlinked != null),
        assert(offset != null),
-       super(child) {
-    this.link = link;
-    this.showWhenUnlinked = showWhenUnlinked;
-    this.offset = offset;
-  }
+       _link = link,
+       _showWhenUnlinked = showWhenUnlinked,
+       _offset = offset,
+       super(child);
 
   /// The link object that connects this [RenderFollowerLayer] with a
   /// [RenderLeaderLayer] earlier in the paint order.
-  LayerLink get link => _link;
+  LayerLink/*!*/ get link => _link;
   LayerLink _link;
-  set link(LayerLink value) {
+  set link(LayerLink/*!*/ value) {
     assert(value != null);
     if (_link == value)
       return;
@@ -4914,9 +4915,9 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// When the render object is not linked, then: if [showWhenUnlinked] is true,
   /// the child is visible and not repositioned; if it is false, then child is
   /// hidden, and its hit testing is also disabled.
-  bool get showWhenUnlinked => _showWhenUnlinked;
+  bool/*!*/ get showWhenUnlinked => _showWhenUnlinked;
   bool _showWhenUnlinked;
-  set showWhenUnlinked(bool value) {
+  set showWhenUnlinked(bool/*!*/ value) {
     assert(value != null);
     if (_showWhenUnlinked == value)
       return;
@@ -4926,9 +4927,9 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   /// The offset to apply to the origin of the linked [RenderLeaderLayer] to
   /// obtain this render object's origin.
-  Offset get offset => _offset;
+  Offset/*!*/ get offset => _offset;
   Offset _offset;
-  set offset(Offset value) {
+  set offset(Offset/*!*/ value) {
     assert(value != null);
     if (_offset == value)
       return;
@@ -4960,7 +4961,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     // Disables the hit testing if this render object is hidden.
     if (link.leader == null && !showWhenUnlinked)
       return false;
@@ -4972,7 +4973,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     return result.addWithPaintTransform(
       transform: getCurrentTransform(),
       position: position,
@@ -4993,7 +4994,7 @@ class RenderFollowerLayer extends RenderProxyBox {
         unlinkedOffset: offset,
       );
     } else {
-      layer
+      layer/*!*/
         ..link = link
         ..showWhenUnlinked = showWhenUnlinked
         ..linkedOffset = this.offset

@@ -6,6 +6,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'box.dart';
 import 'object.dart';
 
@@ -292,9 +294,9 @@ class RenderWrap extends RenderBox
   /// [crossAxisAlignment] is either [WrapCrossAlignment.start] or
   /// [WrapCrossAlignment.end], or there's more than one child, then the
   /// [textDirection] must not be null.
-  TextDirection get textDirection => _textDirection;
+  TextDirection/*!*/ get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(TextDirection/*!*/ value) {
     if (_textDirection != value) {
       _textDirection = value;
       markNeedsLayout();
@@ -471,7 +473,7 @@ class RenderWrap extends RenderBox
       case Axis.vertical:
         return _computeIntrinsicWidthForHeight(height);
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
@@ -488,7 +490,7 @@ class RenderWrap extends RenderBox
       case Axis.vertical:
         return _computeIntrinsicWidthForHeight(height);
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
@@ -505,7 +507,7 @@ class RenderWrap extends RenderBox
         }
         return height;
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
@@ -522,7 +524,7 @@ class RenderWrap extends RenderBox
         }
         return height;
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
@@ -537,7 +539,7 @@ class RenderWrap extends RenderBox
       case Axis.vertical:
         return child.size.height;
     }
-    return 0.0;
+    return 0.0; // ignore: dead_code
   }
 
   double _getCrossAxisExtent(RenderBox child) {
@@ -547,7 +549,7 @@ class RenderWrap extends RenderBox
       case Axis.vertical:
         return child.size.width;
     }
-    return 0.0;
+    return 0.0; // ignore: dead_code
   }
 
   Offset _getOffset(double mainAxisOffset, double crossAxisOffset) {
@@ -557,7 +559,7 @@ class RenderWrap extends RenderBox
       case Axis.vertical:
         return Offset(crossAxisOffset, mainAxisOffset);
     }
-    return Offset.zero;
+    return Offset.zero; // ignore: dead_code
   }
 
   double _getChildCrossAxisOffset(bool flipCrossAxis, double runCrossAxisExtent, double childCrossAxisExtent) {
@@ -570,7 +572,7 @@ class RenderWrap extends RenderBox
       case WrapCrossAlignment.center:
         return freeSpace / 2.0;
     }
-    return 0.0;
+    return 0.0; // ignore: dead_code
   }
 
   bool _hasVisualOverflow = false;
@@ -761,7 +763,7 @@ class RenderWrap extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     return defaultHitTestChildren(result, position: position);
   }
 

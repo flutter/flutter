@@ -104,7 +104,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     if (childScrollOffset(firstChild) == null) {
       int leadingChildrenWithoutLayoutOffset = 0;
       while (childScrollOffset(earliestUsefulChild) == null) {
-        earliestUsefulChild = childAfter(firstChild);
+        earliestUsefulChild = childAfter(firstChild/*!*/);
         leadingChildrenWithoutLayoutOffset += 1;
       }
       // We should be able to destroy children with null layout offset safely,
@@ -216,7 +216,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
 
     bool inLayoutRange = true;
     RenderBox child = earliestUsefulChild;
-    int index = indexOf(child);
+    int/*!*/ index = indexOf(child);
     double endScrollOffset = childScrollOffset(child) + paintExtentOf(child);
     bool advance() { // returns true if we advanced, false if we have no more children
       // This function is used in two different places below, to avoid code duplication.

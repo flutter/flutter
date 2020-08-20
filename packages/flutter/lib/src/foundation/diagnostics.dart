@@ -3470,13 +3470,10 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
   }
 
   @override
-  String? toStringShallow({
+  String toStringShallow({
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    if (kReleaseMode) {
-      return toString();
-    }
     String? shallowString;
     assert(() {
       final StringBuffer result = StringBuffer();
@@ -3491,7 +3488,7 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
       shallowString = result.toString();
       return true;
     }());
-    return shallowString;
+    return shallowString ?? toString();
   }
 
   @override

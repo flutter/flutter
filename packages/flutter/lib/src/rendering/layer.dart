@@ -487,9 +487,9 @@ class PictureLayer extends Layer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  ui.Picture get picture => _picture;
+  ui.Picture/*?*/ get picture => _picture;
   ui.Picture _picture;
-  set picture(ui.Picture picture) {
+  set picture(ui.Picture/*?*/ picture) {
     markNeedsAddToScene();
     _picture = picture;
   }
@@ -819,7 +819,7 @@ class ContainerLayer extends Layer {
         ..style = PaintingStyle.stroke
         // The elevation may be 0 or otherwise too small to notice.
         // Adding 10 to it makes it more visually obvious.
-        ..strokeWidth = child.elevation + 10.0,
+        ..strokeWidth = child.elevation/*!*/ + 10.0,
     );
     final PictureLayer pictureLayer = PictureLayer(child.clipPath.getBounds())
       ..picture = recorder.endRecording()
@@ -866,24 +866,24 @@ class ContainerLayer extends Layer {
         'debugCheckElevations has either already visited this layer or failed '
         'to remove the added picture from it.',
       );
-      double accumulatedElevation = physicalModelLayer.elevation;
+      double accumulatedElevation = physicalModelLayer.elevation/*!*/;
       Layer ancestor = physicalModelLayer.parent;
       while (ancestor != null) {
         if (ancestor is PhysicalModelLayer) {
-          accumulatedElevation += ancestor.elevation;
+          accumulatedElevation += ancestor.elevation/*!*/;
         }
         ancestor = ancestor.parent;
       }
       for (int j = 0; j <= i; j++) {
         final PhysicalModelLayer predecessor = physicalModelLayers[j];
-        double predecessorAccumulatedElevation = predecessor.elevation;
+        double predecessorAccumulatedElevation = predecessor.elevation/*!*/;
         ancestor = predecessor.parent;
         while (ancestor != null) {
           if (ancestor == predecessor) {
             continue;
           }
           if (ancestor is PhysicalModelLayer) {
-            predecessorAccumulatedElevation += ancestor.elevation;
+            predecessorAccumulatedElevation += ancestor.elevation/*!*/;
           }
           ancestor = ancestor.parent;
         }
@@ -1246,9 +1246,9 @@ class ClipRectLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  Rect get clipRect => _clipRect;
+  Rect/*?*/ get clipRect => _clipRect;
   Rect _clipRect;
-  set clipRect(Rect value) {
+  set clipRect(Rect/*?*/ value) {
     if (value != _clipRect) {
       _clipRect = value;
       markNeedsAddToScene();
@@ -1335,9 +1335,9 @@ class ClipRRectLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  RRect get clipRRect => _clipRRect;
+  RRect/*?*/ get clipRRect => _clipRRect;
   RRect _clipRRect;
-  set clipRRect(RRect value) {
+  set clipRRect(RRect/*?*/ value) {
     if (value != _clipRRect) {
       _clipRRect = value;
       markNeedsAddToScene();
@@ -1420,9 +1420,9 @@ class ClipPathLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  Path get clipPath => _clipPath;
+  Path/*?*/ get clipPath => _clipPath;
   Path _clipPath;
-  set clipPath(Path value) {
+  set clipPath(Path/*?*/ value) {
     if (value != _clipPath) {
       _clipPath = value;
       markNeedsAddToScene();
@@ -1496,9 +1496,9 @@ class ColorFilterLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  ColorFilter get colorFilter => _colorFilter;
+  ColorFilter/*?*/ get colorFilter => _colorFilter;
   ColorFilter _colorFilter;
-  set colorFilter(ColorFilter value) {
+  set colorFilter(ColorFilter/*?*/ value) {
     assert(value != null);
     if (value != _colorFilter) {
       _colorFilter = value;
@@ -1538,9 +1538,9 @@ class ImageFilterLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  ui.ImageFilter get imageFilter => _imageFilter;
+  ui.ImageFilter/*?*/ get imageFilter => _imageFilter;
   ui.ImageFilter _imageFilter;
-  set imageFilter(ui.ImageFilter value) {
+  set imageFilter(ui.ImageFilter/*?*/ value) {
     assert(value != null);
     if (value != _imageFilter) {
       _imageFilter = value;
@@ -1589,9 +1589,9 @@ class TransformLayer extends OffsetLayer {
   ///
   /// The [transform] property must be non-null before the compositing phase of
   /// the pipeline.
-  Matrix4 get transform => _transform;
+  Matrix4/*?*/ get transform => _transform;
   Matrix4 _transform;
-  set transform(Matrix4 value) {
+  set transform(Matrix4/*?*/ value) {
     assert(value != null);
     assert(value.storage.every((double component) => component.isFinite));
     if (value == _transform)
@@ -1689,9 +1689,9 @@ class OpacityLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  int get alpha => _alpha;
+  int/*?*/ get alpha => _alpha;
   int _alpha;
-  set alpha(int value) {
+  set alpha(int/*?*/ value) {
     assert(value != null);
     if (value != _alpha) {
       _alpha = value;
@@ -1777,9 +1777,9 @@ class ShaderMaskLayer extends ContainerLayer {
   /// See also:
   ///
   ///  * [ui.Gradient] and [ui.ImageShader], two shader types that can be used.
-  Shader get shader => _shader;
+  Shader/*?*/ get shader => _shader;
   Shader _shader;
-  set shader(Shader value) {
+  set shader(Shader/*?*/ value) {
     if (value != _shader) {
       _shader = value;
       markNeedsAddToScene();
@@ -1793,9 +1793,9 @@ class ShaderMaskLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  Rect get maskRect => _maskRect;
+  Rect/*?*/ get maskRect => _maskRect;
   Rect _maskRect;
-  set maskRect(Rect value) {
+  set maskRect(Rect/*?*/ value) {
     if (value != _maskRect) {
       _maskRect = value;
       markNeedsAddToScene();
@@ -1806,9 +1806,9 @@ class ShaderMaskLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  BlendMode get blendMode => _blendMode;
+  BlendMode/*?*/ get blendMode => _blendMode;
   BlendMode _blendMode;
-  set blendMode(BlendMode value) {
+  set blendMode(BlendMode/*?*/ value) {
     if (value != _blendMode) {
       _blendMode = value;
       markNeedsAddToScene();
@@ -1853,9 +1853,9 @@ class BackdropFilterLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  ui.ImageFilter get filter => _filter;
+  ui.ImageFilter/*?*/ get filter => _filter;
   ui.ImageFilter _filter;
-  set filter(ui.ImageFilter value) {
+  set filter(ui.ImageFilter/*?*/ value) {
     if (value != _filter) {
       _filter = value;
       markNeedsAddToScene();
@@ -1905,9 +1905,9 @@ class PhysicalModelLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  Path get clipPath => _clipPath;
+  Path/*?*/ get clipPath => _clipPath;
   Path _clipPath;
-  set clipPath(Path value) {
+  set clipPath(Path/*?*/ value) {
     if (value != _clipPath) {
       _clipPath = value;
       markNeedsAddToScene();
@@ -1945,9 +1945,9 @@ class PhysicalModelLayer extends ContainerLayer {
   /// flag is set. For this reason, this property will often be set to zero in
   /// tests even if the layer should be raised. To verify the actual value,
   /// consider setting [debugDisableShadows] to false in your test.
-  double get elevation => _elevation;
+  double/*?*/ get elevation => _elevation;
   double _elevation;
-  set elevation(double value) {
+  set elevation(double/*?*/ value) {
     if (value != _elevation) {
       _elevation = value;
       markNeedsAddToScene();
@@ -1958,9 +1958,9 @@ class PhysicalModelLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  Color get color => _color;
+  Color/*?*/ get color => _color;
   Color _color;
-  set color(Color value) {
+  set color(Color/*?*/ value) {
     if (value != _color) {
       _color = value;
       markNeedsAddToScene();
@@ -1968,9 +1968,9 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   /// The shadow color.
-  Color get shadowColor => _shadowColor;
+  Color/*?*/ get shadowColor => _shadowColor;
   Color _shadowColor;
-  set shadowColor(Color value) {
+  set shadowColor(Color/*?*/ value) {
     if (value != _shadowColor) {
       _shadowColor = value;
       markNeedsAddToScene();

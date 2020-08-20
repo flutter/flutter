@@ -46,7 +46,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   }) : super(childManager: childManager);
 
   /// The main-axis extent of each item.
-  double get itemExtent;
+  double/*!*/ get itemExtent;
 
   /// The layout offset for the child with the given index.
   ///
@@ -202,6 +202,9 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         double max;
         if (childManager.childCount != null) {
           max = computeMaxScrollOffset(constraints, itemExtent);
+        // TODO(ianh): null-aware flow analysis flags the next two
+        // branches as entirely dead code, and it's hard to argue with
+        // its logic.
         } else if (firstIndex <= 0) {
           max = 0.0;
         } else {
@@ -227,7 +230,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       }
     }
 
-    RenderBox trailingChildWithLayout;
+    RenderBox/*?*/ trailingChildWithLayout;
 
     for (int index = indexOf(firstChild) - 1; index >= firstIndex; --index) {
       final RenderBox child = insertAndLayoutLeadingChild(childConstraints);
@@ -253,7 +256,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     double estimatedMaxScrollOffset = double.infinity;
     for (int index = indexOf(trailingChildWithLayout) + 1; targetLastIndex == null || index <= targetLastIndex; ++index) {
-      RenderBox child = childAfter(trailingChildWithLayout);
+      RenderBox child = childAfter(trailingChildWithLayout/*!*/);
       if (child == null || indexOf(child) != index) {
         child = insertAndLayoutChild(childConstraints, after: trailingChildWithLayout);
         if (child == null) {
@@ -351,14 +354,14 @@ class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   /// The [childManager] argument must not be null.
   RenderSliverFixedExtentList({
     @required RenderSliverBoxChildManager childManager,
-    double itemExtent,
+    @required double/*!*/ itemExtent,
   }) : _itemExtent = itemExtent,
        super(childManager: childManager);
 
   @override
-  double get itemExtent => _itemExtent;
-  double _itemExtent;
-  set itemExtent(double value) {
+  double/*!*/ get itemExtent => _itemExtent;
+  double/*!*/ _itemExtent;
+  set itemExtent(double/*!*/ value) {
     assert(value != null);
     if (_itemExtent == value)
       return;

@@ -373,7 +373,7 @@ class RenderTable extends RenderBox {
     TableBorder border,
     List<Decoration> rowDecorations,
     ImageConfiguration configuration = ImageConfiguration.empty,
-    TableCellVerticalAlignment defaultVerticalAlignment = TableCellVerticalAlignment.top,
+    TableCellVerticalAlignment/*!*/ defaultVerticalAlignment = TableCellVerticalAlignment.top,
     TextBaseline textBaseline,
     List<List<RenderBox>> children,
   }) : assert(columns == null || columns >= 0),
@@ -382,23 +382,23 @@ class RenderTable extends RenderBox {
        assert(defaultColumnWidth != null),
        assert(textDirection != null),
        assert(configuration != null),
-       _textDirection = textDirection {
-    _columns = columns ?? (children != null && children.isNotEmpty ? children.first.length : 0);
-    _rows = rows ?? 0;
-    _children = <RenderBox>[]..length = _columns * _rows;
-    _columnWidths = columnWidths ?? HashMap<int, TableColumnWidth>();
+       _textDirection = textDirection,
+       _columns = columns ?? (children != null && children.isNotEmpty ? children.first.length : 0),
+      _rows = rows ?? 0,
+      _columnWidths = columnWidths ?? HashMap<int, TableColumnWidth>(),
+      _defaultVerticalAlignment = defaultVerticalAlignment {
+    _children = List<RenderBox>.filled(_columns * _rows, null);
     _defaultColumnWidth = defaultColumnWidth;
     _border = border;
     this.rowDecorations = rowDecorations; // must use setter to initialize box painters array
     _configuration = configuration;
-    _defaultVerticalAlignment = defaultVerticalAlignment;
     _textBaseline = textBaseline;
     children?.forEach(addRow);
   }
 
   // Children are stored in row-major order.
   // _children.length must be rows * columns
-  List<RenderBox> _children = const <RenderBox>[];
+  List<RenderBox/*?*/> _children = const <RenderBox/*?*/>[];
 
   /// The number of vertical alignment lines in this table.
   ///
@@ -407,9 +407,9 @@ class RenderTable extends RenderBox {
   ///
   /// Changing the number of columns is an expensive operation because the table
   /// needs to rearrange its internal representation.
-  int get columns => _columns;
+  int/*!*/ get columns => _columns;
   int _columns;
-  set columns(int value) {
+  set columns(int/*!*/ value) {
     assert(value != null);
     assert(value >= 0);
     if (value == columns)
@@ -439,9 +439,9 @@ class RenderTable extends RenderBox {
   ///
   /// Changing the number of rows will remove any children that no longer fit
   /// in the table.
-  int get rows => _rows;
-  int _rows;
-  set rows(int value) {
+  int/*!*/ get rows => _rows;
+  int/*!*/ _rows;
+  set rows(int/*!*/ value) {
     assert(value != null);
     assert(value >= 0);
     if (value == rows)
@@ -466,10 +466,10 @@ class RenderTable extends RenderBox {
   /// sizing algorithms are used here. In particular, [IntrinsicColumnWidth] is
   /// quite expensive because it needs to measure each cell in the column to
   /// determine the intrinsic size of the column.
-  Map<int, TableColumnWidth> get columnWidths => Map<int, TableColumnWidth>.unmodifiable(_columnWidths);
-  Map<int, TableColumnWidth> _columnWidths;
-  set columnWidths(Map<int, TableColumnWidth> value) {
-    value ??= HashMap<int, TableColumnWidth>();
+  Map<int, TableColumnWidth>/*!*/ get columnWidths => Map<int, TableColumnWidth>.unmodifiable(_columnWidths);
+  Map<int, TableColumnWidth>/*!*/ _columnWidths;
+  set columnWidths(Map<int, TableColumnWidth>/*!*/ value) {
+    assert(value != null);
     if (_columnWidths == value)
       return;
     _columnWidths = value;
@@ -488,9 +488,9 @@ class RenderTable extends RenderBox {
   ///
   /// Specifically, the [defaultColumnWidth] is used for column `i` if
   /// `columnWidths[i]` is null.
-  TableColumnWidth get defaultColumnWidth => _defaultColumnWidth;
+  TableColumnWidth/*!*/ get defaultColumnWidth => _defaultColumnWidth;
   TableColumnWidth _defaultColumnWidth;
-  set defaultColumnWidth(TableColumnWidth value) {
+  set defaultColumnWidth(TableColumnWidth/*!*/ value) {
     assert(value != null);
     if (defaultColumnWidth == value)
       return;
@@ -510,9 +510,9 @@ class RenderTable extends RenderBox {
   }
 
   /// The style to use when painting the boundary and interior divisions of the table.
-  TableBorder get border => _border;
+  TableBorder/*?*/ get border => _border;
   TableBorder _border;
-  set border(TableBorder value) {
+  set border(TableBorder/*?*/ value) {
     if (border == value)
       return;
     _border = value;
@@ -537,15 +537,15 @@ class RenderTable extends RenderBox {
       for (final BoxPainter painter in _rowDecorationPainters)
         painter?.dispose();
     }
-    _rowDecorationPainters = _rowDecorations != null ? List<BoxPainter>(_rowDecorations.length) : null;
+    _rowDecorationPainters = _rowDecorations != null ? List<BoxPainter>.filled(_rowDecorations.length, null) : null;
   }
 
   /// The settings to pass to the [rowDecorations] when painting, so that they
   /// can resolve images appropriately. See [ImageProvider.resolve] and
   /// [BoxPainter.paint].
-  ImageConfiguration get configuration => _configuration;
+  ImageConfiguration/*!*/ get configuration => _configuration;
   ImageConfiguration _configuration;
-  set configuration(ImageConfiguration value) {
+  set configuration(ImageConfiguration/*!*/ value) {
     assert(value != null);
     if (value == _configuration)
       return;
@@ -554,9 +554,10 @@ class RenderTable extends RenderBox {
   }
 
   /// How cells that do not explicitly specify a vertical alignment are aligned vertically.
-  TableCellVerticalAlignment get defaultVerticalAlignment => _defaultVerticalAlignment;
+  TableCellVerticalAlignment/*!*/ get defaultVerticalAlignment => _defaultVerticalAlignment;
   TableCellVerticalAlignment _defaultVerticalAlignment;
-  set defaultVerticalAlignment(TableCellVerticalAlignment value) {
+  set defaultVerticalAlignment(TableCellVerticalAlignment/*!*/ value) {
+    assert(value != null);
     if (_defaultVerticalAlignment == value)
       return;
     _defaultVerticalAlignment = value;
@@ -564,9 +565,9 @@ class RenderTable extends RenderBox {
   }
 
   /// The text baseline to use when aligning rows using [TableCellVerticalAlignment.baseline].
-  TextBaseline get textBaseline => _textBaseline;
+  TextBaseline/*?*/ get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
-  set textBaseline(TextBaseline value) {
+  set textBaseline(TextBaseline/*?*/ value) {
     if (_textBaseline == value)
       return;
     _textBaseline = value;
@@ -646,7 +647,7 @@ class RenderTable extends RenderBox {
   }
 
   /// Replaces the children of this table with the given cells.
-  void setChildren(List<List<RenderBox>> cells) {
+  void setChildren(List<List<RenderBox>>/*?*/ cells) {
     // TODO(ianh): Make this smarter, like setFlatChildren
     if (cells == null) {
       setFlatChildren(0, null);
@@ -703,7 +704,7 @@ class RenderTable extends RenderBox {
   void attach(PipelineOwner owner) {
     super.attach(owner);
     for (final RenderBox child in _children)
-      child?.attach(owner);
+      child.attach(owner);
   }
 
   @override
@@ -712,10 +713,10 @@ class RenderTable extends RenderBox {
     if (_rowDecorationPainters != null) {
       for (final BoxPainter painter in _rowDecorationPainters)
         painter?.dispose();
-      _rowDecorationPainters = List<BoxPainter>(_rowDecorations.length);
+      _rowDecorationPainters = List<BoxPainter>.filled(_rowDecorations.length, null);
     }
     for (final RenderBox child in _children)
-      child?.detach();
+      child.detach();
   }
 
   @override
@@ -825,12 +826,12 @@ class RenderTable extends RenderBox {
     //    necessary, applying minimum column widths as we go
 
     // 1. apply ideal widths, and collect information we'll need later
-    final List<double> widths = List<double>(columns);
-    final List<double> minWidths = List<double>(columns);
-    final List<double> flexes = List<double>(columns);
-    double tableWidth = 0.0; // running tally of the sum of widths[x] for all x
-    double unflexedTableWidth = 0.0; // sum of the maxIntrinsicWidths of any column that has null flex
-    double totalFlex = 0.0;
+    final List<double/*!*/> widths = List<double>.filled(columns, 0.0);
+    final List<double/*!*/> minWidths = List<double>.filled(columns, 0.0);
+    final List<double/*!*/> flexes = List<double>.filled(columns, 0.0);
+    double/*!*/ tableWidth = 0.0; // running tally of the sum of widths[x] for all x
+    double/*!*/ unflexedTableWidth = 0.0; // sum of the maxIntrinsicWidths of any column that has null flex
+    double/*!*/ totalFlex = 0.0;
     for (int x = 0; x < columns; x += 1) {
       final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
       final Iterable<RenderBox> columnCells = column(x);
@@ -902,10 +903,6 @@ class RenderTable extends RenderBox {
     }
 
     // beyond this point, unflexedTableWidth is no longer valid
-    assert(() {
-      unflexedTableWidth = null;
-      return true;
-    }());
 
     // 4. apply the maximum width of the table, shrinking columns as
     //    necessary, applying minimum column widths as we go
@@ -1010,7 +1007,7 @@ class RenderTable extends RenderBox {
       return;
     }
     final List<double> widths = _computeColumnWidths(constraints);
-    final List<double> positions = List<double>(columns);
+    final List<double> positions = List<double>.filled(columns, 0.0);
     double tableWidth;
     switch (textDirection) {
       case TextDirection.rtl:
@@ -1039,7 +1036,7 @@ class RenderTable extends RenderBox {
       bool haveBaseline = false;
       double beforeBaselineDistance = 0.0;
       double afterBaselineDistance = 0.0;
-      final List<double> baselines = List<double>(columns);
+      final List<double> baselines = List<double>.filled(columns, 0.0);
       for (int x = 0; x < columns; x += 1) {
         final int xy = x + y * columns;
         final RenderBox child = _children[xy];
@@ -1113,7 +1110,7 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     assert(_children.length == rows * columns);
     for (int index = _children.length - 1; index >= 0; index -= 1) {
       final RenderBox child = _children[index];
@@ -1189,7 +1186,7 @@ class RenderTable extends RenderBox {
     properties.add(DiagnosticsProperty<TableColumnWidth>('default column width', defaultColumnWidth));
     properties.add(MessageProperty('table size', '$columns\u00D7$rows'));
     properties.add(IterableProperty<String>('column offsets', _columnLefts?.map(debugFormatDouble), ifNull: 'unknown'));
-    properties.add(IterableProperty<String>('row offsets', _rowTops?.map(debugFormatDouble), ifNull: 'unknown'));
+    properties.add(IterableProperty<String>('row offsets', _rowTops?.map(debugFormatDouble), ifNull: 'unknown')); // ignore: invalid_null_aware_operator
   }
 
   @override

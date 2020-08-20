@@ -902,7 +902,6 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
       if (oldParentData != null)
         newParentData.offset = oldParentData.offset;
     }
-
     return newChild;
   }
 
