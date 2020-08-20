@@ -116,6 +116,7 @@ TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = false}) {
     'backdrop_filter_perf',
     measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/backdrop_filter_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
@@ -126,6 +127,7 @@ TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = false}) {
     'post_backdrop_filter_perf',
     measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/post_backdrop_filter_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
@@ -136,6 +138,7 @@ TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = false}) {
     'simple_animation_perf',
     measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/simple_animation_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
@@ -247,6 +250,7 @@ TaskFunction createColorFilterAndFadePerfTest() {
     'test_driver/run_app.dart',
     'color_filter_and_fade_perf',
     testDriver: 'test_driver/color_filter_and_fade_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
@@ -256,6 +260,7 @@ TaskFunction createFadingChildAnimationPerfTest() {
     'test_driver/run_app.dart',
     'fading_child_animation_perf',
     testDriver: 'test_driver/fading_child_animation_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
@@ -265,6 +270,7 @@ TaskFunction createImageFilteredTransformAnimationPerfTest() {
     'test_driver/run_app.dart',
     'imagefiltered_transform_animation_perf',
     testDriver: 'test_driver/imagefiltered_transform_animation_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
@@ -369,6 +375,7 @@ class PerfTest {
     this.testTarget,
     this.timelineFileName, {
     this.measureCpuGpu = false,
+    this.saveTraceFile = false,
     this.testDriver,
     this.needsFullTimeline = true,
     this.benchmarkScoreKeys,
@@ -382,12 +389,15 @@ class PerfTest {
   // The prefix name of the filename such as `<timelineFileName>.timeline_summary.json`.
   final String timelineFileName;
   String get resultFilename => '$timelineFileName.timeline_summary';
+  String get traceFilename => '$timelineFileName.timeline';
   /// The test file to run on the host.
   final String testDriver;
   /// Whether to collect CPU and GPU metrics.
   final bool measureCpuGpu;
   /// Whether to collect full timeline, meaning if `--trace-startup` flag is needed.
   final bool needsFullTimeline;
+  /// Whether to save the trace timeline file `*.timeline.json`.
+  final bool saveTraceFile;
 
   /// The keys of the values that need to be reported.
   ///
@@ -454,6 +464,10 @@ class PerfTest {
       final Map<String, dynamic> data = json.decode(
         file('$testDirectory/build/$resultFilename.json').readAsStringSync(),
       ) as Map<String, dynamic>;
+      final List<String> detailFiles = <String>[
+        if (saveTraceFile)
+          '$testDirectory/build/$traceFilename.json',
+      ];
 
       if (data['frame_count'] as int < 5) {
         return TaskResult.failure(
@@ -464,6 +478,7 @@ class PerfTest {
 
       return TaskResult.success(
         data,
+        detailFiles: detailFiles.isNotEmpty ? detailFiles : null,
         benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
           'average_frame_build_time_millis',
           'worst_frame_build_time_millis',

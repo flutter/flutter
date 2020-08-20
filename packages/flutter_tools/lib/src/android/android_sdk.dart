@@ -22,9 +22,6 @@ const String kAndroidSdkRoot = 'ANDROID_SDK_ROOT';
 final RegExp _numberedAndroidPlatformRe = RegExp(r'^android-([0-9]+)$');
 final RegExp _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 
-/// The minimum Android SDK version we support.
-const int minimumAndroidSdkVersion = 25;
-
 /// Locate ADB. Prefer to use one from an Android SDK, if we can locate that.
 /// This should be used over accessing androidSdk.adbPath directly because it
 /// will work for those users who have Android Platform Tools installed but
