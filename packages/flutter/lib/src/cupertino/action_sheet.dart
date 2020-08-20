@@ -448,13 +448,13 @@ class _CupertinoAlertRenderElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, _AlertSections slot) {
+  void insertRenderObjectChild(RenderObject child, _AlertSections slot) {
     _placeChildInSlot(child, slot);
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, _AlertSections slot) {
-    _placeChildInSlot(child, slot);
+  void moveRenderObjectChild(RenderObject child, _AlertSections oldSlot, _AlertSections newSlot) {
+    _placeChildInSlot(child, newSlot);
   }
 
   @override
@@ -478,7 +478,7 @@ class _CupertinoAlertRenderElement extends RenderObjectElement {
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, _AlertSections slot) {
     assert(child == renderObject.contentSection || child == renderObject.actionsSection);
     if (renderObject.contentSection == child) {
       renderObject.contentSection = null;
