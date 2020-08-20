@@ -723,22 +723,20 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child:
-          Container(
+          child: Container(
             width: 200,
             height: 75,
-            child:
-              Stepper(
-                type: StepperType.horizontal,
-                horizontalElevation: elevation,
-                steps: const <Step>[
-                  Step(
-                    title: Text('Regular title'),
-                    subtitle: Text('Text subtitle'),
-                    content: Text('Text content')
-                  ),
-                ],
-              ),
+            child: Stepper(
+              type: StepperType.horizontal,
+              horizontalElevation: elevation,
+              steps: const <Step>[
+                Step(
+                  title: Text('Regular title'),
+                  subtitle: Text('Text subtitle'),
+                  content: Text('Text content'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
