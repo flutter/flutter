@@ -219,7 +219,7 @@ void main() {
     when(sdk.platformToolsAvailable).thenReturn(true);
 
     // Test with invalid SDK and build tools
-    when(mockSdkVersion.sdkLevel).thenReturn(26);
+    when(mockSdkVersion.sdkLevel).thenReturn(28);
     when(mockSdkVersion.buildToolsVersion).thenReturn(Version(26, 0, 3));
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.latestVersion).thenReturn(mockSdkVersion);
@@ -250,7 +250,7 @@ void main() {
     );
 
     // Test with valid SDK but invalid build tools
-    when(mockSdkVersion.sdkLevel).thenReturn(28);
+    when(mockSdkVersion.sdkLevel).thenReturn(29);
     when(mockSdkVersion.buildToolsVersion).thenReturn(Version(28, 0, 2));
 
     validationResult = await androidValidator.validate();
@@ -279,7 +279,7 @@ void main() {
     // Mock a pass through scenario to reach _checkJavaVersion()
     when(sdk.licensesAvailable).thenReturn(true);
     when(sdk.platformToolsAvailable).thenReturn(true);
-    when(mockSdkVersion.sdkLevel).thenReturn(28);
+    when(mockSdkVersion.sdkLevel).thenReturn(29);
     when(mockSdkVersion.buildToolsVersion).thenReturn(Version(28, 0, 3));
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.latestVersion).thenReturn(mockSdkVersion);
