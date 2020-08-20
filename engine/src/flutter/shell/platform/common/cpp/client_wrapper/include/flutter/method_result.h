@@ -22,18 +22,46 @@ class MethodResult {
   MethodResult(MethodResult const&) = delete;
   MethodResult& operator=(MethodResult const&) = delete;
 
-  // Sends a success response, indicating that the call completed successfully.
-  // An optional value can be provided as part of the success message.
-  void Success(const T* result = nullptr) { SuccessInternal(result); }
+  // DEPRECATED. Use the reference versions below. This will be removed in the
+  // near future.
+  void Success(const T* result) { SuccessInternal(result); }
+
+  // Sends a success response, indicating that the call completed successfully
+  // with the given result.
+  void Success(const T& result) { SuccessInternal(&result); }
+
+  // Sends a success response, indicating that the call completed successfully
+  // with no result.
+  void Success() { SuccessInternal(nullptr); }
+
+  // DEPRECATED. Use the reference versions below. This will be removed in the
+  // near future.
+  void Error(const std::string& error_code,
+             const std::string& error_message,
+             const T* error_details) {
+    ErrorInternal(error_code, error_message, error_details);
+  }
 
   // Sends an error response, indicating that the call was understood but
-  // handling failed in some way. A string error code must be provided, and in
-  // addition an optional user-readable error_message and/or details object can
-  // be included.
+  // handling failed in some way.
+  //
+  // error_code: A string error code describing the error.
+  // error_message: A user-readable error message.
+  // error_details: Arbitrary extra details about the error.
   void Error(const std::string& error_code,
-             const std::string& error_message = "",
-             const T* error_details = nullptr) {
-    ErrorInternal(error_code, error_message, error_details);
+             const std::string& error_message,
+             const T& error_details) {
+    ErrorInternal(error_code, error_message, &error_details);
+  }
+
+  // Sends an error response, indicating that the call was understood but
+  // handling failed in some way.
+  //
+  // error_code: A string error code describing the error.
+  // error_message: A user-readable error message (optional).
+  void Error(const std::string& error_code,
+             const std::string& error_message = "") {
+    ErrorInternal(error_code, error_message, nullptr);
   }
 
   // Sends a not-implemented response, indicating that the method either was not

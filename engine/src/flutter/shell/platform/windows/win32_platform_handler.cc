@@ -228,12 +228,11 @@ void PlatformHandler::HandleMethodCall(
     if (!clipboard.Open(std::get<HWND>(*view_->GetRenderTarget()))) {
       rapidjson::Document error_code;
       error_code.SetInt(::GetLastError());
-      result->Error(kClipboardError, "Unable to open clipboard", &error_code);
+      result->Error(kClipboardError, "Unable to open clipboard", error_code);
       return;
     }
     if (!clipboard.HasString()) {
-      rapidjson::Document null;
-      result->Success(&null);
+      result->Success(rapidjson::Document());
       return;
     }
     std::optional<std::wstring> clipboard_string = clipboard.GetString();
@@ -241,7 +240,7 @@ void PlatformHandler::HandleMethodCall(
       rapidjson::Document error_code;
       error_code.SetInt(::GetLastError());
       result->Error(kClipboardError, "Unable to get clipboard data",
-                    &error_code);
+                    error_code);
       return;
     }
 
@@ -252,7 +251,7 @@ void PlatformHandler::HandleMethodCall(
         rapidjson::Value(kTextKey, allocator),
         rapidjson::Value(Utf8FromUtf16(*clipboard_string), allocator),
         allocator);
-    result->Success(&document);
+    result->Success(document);
   } else if (method.compare(kSetClipboardDataMethod) == 0) {
     const rapidjson::Value& document = *method_call.arguments();
     rapidjson::Value::ConstMemberIterator itr = document.FindMember(kTextKey);
@@ -266,14 +265,14 @@ void PlatformHandler::HandleMethodCall(
     if (!clipboard.Open(std::get<HWND>(*view_->GetRenderTarget()))) {
       rapidjson::Document error_code;
       error_code.SetInt(::GetLastError());
-      result->Error(kClipboardError, "Unable to open clipboard", &error_code);
+      result->Error(kClipboardError, "Unable to open clipboard", error_code);
       return;
     }
     if (!clipboard.SetString(Utf16FromUtf8(itr->value.GetString()))) {
       rapidjson::Document error_code;
       error_code.SetInt(::GetLastError());
       result->Error(kClipboardError, "Unable to set clipboard data",
-                    &error_code);
+                    error_code);
       return;
     }
     result->Success();

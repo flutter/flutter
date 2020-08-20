@@ -522,7 +522,11 @@ bool StandardMethodCodec::DecodeAndProcessResponseEnvelopeInternal(
   switch (flag) {
     case 0: {
       EncodableValue value = serializer_->ReadValue(&stream);
-      result->Success(value.IsNull() ? nullptr : &value);
+      if (value.IsNull()) {
+        result->Success();
+      } else {
+        result->Success(value);
+      }
       return true;
     }
     case 1: {
@@ -530,13 +534,21 @@ bool StandardMethodCodec::DecodeAndProcessResponseEnvelopeInternal(
       EncodableValue message = serializer_->ReadValue(&stream);
       EncodableValue details = serializer_->ReadValue(&stream);
 #ifdef USE_LEGACY_ENCODABLE_VALUE
-      result->Error(code.StringValue(),
-                    message.IsNull() ? "" : message.StringValue(),
-                    details.IsNull() ? nullptr : &details);
+      if (details.IsNull()) {
+        result->Error(code.StringValue(),
+                      message.IsNull() ? "" : message.StringValue());
+      } else {
+        result->Error(code.StringValue(),
+                      message.IsNull() ? "" : message.StringValue(), details);
+      }
 #else
-      result->Error(std::get<std::string>(code),
-                    message.IsNull() ? "" : std::get<std::string>(message),
-                    details.IsNull() ? nullptr : &details);
+      const std::string& message_string =
+          message.IsNull() ? "" : std::get<std::string>(message);
+      if (details.IsNull()) {
+        result->Error(std::get<std::string>(code), message_string);
+      } else {
+        result->Error(std::get<std::string>(code), message_string, details);
+      }
 #endif
       return true;
     }
