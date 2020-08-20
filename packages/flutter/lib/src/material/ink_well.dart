@@ -766,7 +766,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   void _handleAction(ActivateIntent intent) {
     _startSplash(context: context);
-    _handleTap(context);
+    _handleTapUp(context);
   }
 
   @override
@@ -973,15 +973,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
-  void _handleTapUp(TapUpDetails details) {
-    _currentSplash?.confirm();
-    _currentSplash = null;
-    if (widget.onTapUp != null) {
-      widget.onTapUp(details);
-    }
-    updateHighlight(_HighlightType.pressed, value: false);
-  }
-
   void _startSplash({TapDownDetails details, BuildContext context}) {
     assert(details != null || context != null);
 
@@ -1001,10 +992,15 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     updateHighlight(_HighlightType.pressed, value: true);
   }
 
-  void _handleTap(BuildContext context) {
+  void _handleTapUp(BuildContext context, [TapUpDetails details]) {
     _currentSplash?.confirm();
     _currentSplash = null;
     updateHighlight(_HighlightType.pressed, value: false);
+    if (details != null) {
+      if (widget.onTapUp != null)
+        widget.onTapUp(details);
+      return;
+    }
     if (widget.onTap != null) {
       if (widget.enableFeedback)
         Feedback.forTap(context);
@@ -1126,8 +1122,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
             onExit: _handleMouseExit,
             child: GestureDetector(
               onTapDown: enabled ? _handleTapDown : null,
-              onTapUp: enabled ? _handleTapUp : null,
-              onTap: enabled ? () => _handleTap(context) : null,
+              onTapUp: enabled ? (TapUpDetails details) => _handleTapUp(context, details) : null,
+              onTap: enabled ? () => _handleTapUp(context) : null,
               onTapCancel: enabled ? _handleTapCancel : null,
               onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
               onLongPress: widget.onLongPress != null ? () => _handleLongPress(context) : null,
