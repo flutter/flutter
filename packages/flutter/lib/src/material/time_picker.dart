@@ -1416,6 +1416,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
               ],
               Expanded(
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   // Hour/minutes should not change positions in RTL locales.
                   textDirection: TextDirection.ltr,
                   children: <Widget>[

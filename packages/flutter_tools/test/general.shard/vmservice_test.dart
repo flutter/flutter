@@ -402,6 +402,16 @@ void main() {
     expect(vmService.httpAddress, null);
     expect(vmService.wsAddress, null);
   });
+
+  testWithoutContext('Can process log events from the vm service', () {
+    final vm_service.Event event = vm_service.Event(
+      bytes: base64.encode(utf8.encode('Hello There\n')),
+      timestamp: 0,
+      kind: vm_service.EventKind.kLogging,
+    );
+
+    expect(processVmServiceMessage(event), 'Hello There');
+  });
 }
 
 class MockDevice extends Mock implements Device {}

@@ -237,6 +237,8 @@ class UserMessages {
   String pkgConfigTooOld(String minimumVersion) => 'pkg-config $minimumVersion or later is required.';
   String get gtkLibrariesMissing => 'GTK 3.0 development libraries are required for Linux development.\n'
       'They are likely available from your distribution (e.g.: apt install libgtk-3-dev)';
+  String get blkidLibraryMissing => 'The blkid development library is required for Linux development.\n'
+      'It is likely available from your distribution (e.g.: apt install libblkid-dev)';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';
