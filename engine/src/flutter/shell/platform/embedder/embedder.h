@@ -320,6 +320,29 @@ typedef struct {
   uint32_t height;
 } FlutterUIntSize;
 
+/// A structure to represent a rectangle.
+typedef struct {
+  double left;
+  double top;
+  double right;
+  double bottom;
+} FlutterRect;
+
+/// A structure to represent a 2D point.
+typedef struct {
+  double x;
+  double y;
+} FlutterPoint;
+
+/// A structure to represent a rounded rectangle.
+typedef struct {
+  FlutterRect rect;
+  FlutterSize upper_left_corner_radius;
+  FlutterSize upper_right_corner_radius;
+  FlutterSize lower_right_corner_radius;
+  FlutterSize lower_left_corner_radius;
+} FlutterRoundedRect;
+
 /// This information is passed to the embedder when requesting a frame buffer
 /// object.
 ///
@@ -531,26 +554,6 @@ typedef void (*FlutterPlatformMessageCallback)(
 typedef void (*FlutterDataCallback)(const uint8_t* /* data */,
                                     size_t /* size */,
                                     void* /* user data */);
-
-typedef struct {
-  double left;
-  double top;
-  double right;
-  double bottom;
-} FlutterRect;
-
-typedef struct {
-  double x;
-  double y;
-} FlutterPoint;
-
-typedef struct {
-  FlutterRect rect;
-  FlutterSize upper_left_corner_radius;
-  FlutterSize upper_right_corner_radius;
-  FlutterSize lower_right_corner_radius;
-  FlutterSize lower_left_corner_radius;
-} FlutterRoundedRect;
 
 /// The identifier of the platform view. This identifier is specified by the
 /// application when a platform view is added to the scene via the
