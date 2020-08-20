@@ -383,29 +383,29 @@ void main() {
     }
 
     final ControlsWidgetBuilder builder =
-      (BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel }) {
-        return Container(
-          margin: const EdgeInsets.only(top: 16.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints.tightFor(height: 48.0),
-            child: Row(
-              children: <Widget>[
-                TextButton(
-                  onPressed: onStepContinue,
-                  child: const Text('Let us continue!'),
+        (BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel }) {
+      return Container(
+        margin: const EdgeInsets.only(top: 16.0),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints.tightFor(height: 48.0),
+          child: Row(
+            children: <Widget>[
+              TextButton(
+                onPressed: onStepContinue,
+                child: const Text('Let us continue!'),
+              ),
+              Container(
+                margin: const EdgeInsetsDirectional.only(start: 8.0),
+                child: TextButton(
+                  onPressed: onStepCancel,
+                  child: const Text('Cancel This!'),
                 ),
-                Container(
-                  margin: const EdgeInsetsDirectional.only(start: 8.0),
-                  child: TextButton(
-                    onPressed: onStepCancel,
-                    child: const Text('Cancel This!'),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-      };
+        ),
+      );
+    };
 
     await tester.pumpWidget(
       MaterialApp(
@@ -526,13 +526,13 @@ void main() {
     // The lines in the middle of the error message contain the stack trace
     // which will change depending on where the test is run.
     final String errorMessage = lines.takeWhile(
-      (String line) => line != '',
-    ).join('\n');
+          (String line) => line != '',
+        ).join('\n');
     expect(errorMessage.length, lessThan(fullErrorMessage.length));
     expect(errorMessage, startsWith(
       '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
       'The following assertion was thrown building Stepper('
-    ));
+      ));
     // The description string of the stepper looks slightly different depending
     // on the platform and is omitted here.
     expect(errorMessage, endsWith(
@@ -541,7 +541,7 @@ void main() {
       'The material specification advises that one should avoid\n'
       'embedding steppers within steppers.\n'
       'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
-    ));
+      ));
   });
 
   ///https://github.com/flutter/flutter/issues/16920
@@ -671,7 +671,7 @@ void main() {
               Stepper(
                 steps: const <Step>[
                   Step(
-                    title: Text(longText),
+                    title: Text(longText), 
                     content: Text('Text content')
                   ),
                 ],
@@ -735,7 +735,7 @@ void main() {
     Material buttonMaterial(String label) {
       return tester.widget<Material>(
         find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material))
-      );
+        );
     }
 
     // The checks that follow verify that the layout and appearance of
@@ -793,7 +793,7 @@ void main() {
     Material buttonMaterial(String label) {
       return tester.widget<Material>(
         find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material))
-      );
+        );
     }
 
     // The checks that follow verify that the appearance of the
@@ -873,7 +873,7 @@ void main() {
     );
 
     await tester.pump();
-    final Stepper stepper = find.byType(Stepper).evaluate().first.widget as Stepper;
+    final Stepper stepper = tester.widget(find.byType(Stepper));
 
     expect(stepper.horizontalElevation, elevation);
   });
@@ -895,17 +895,16 @@ void main() {
                   subtitle: Text('Text subtitle'),
                   content: Text('Text content')
                 ),
-               ],
-             ),
-           ),
-         ),
-       ),
-     );
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
 
     await tester.pump();
-    final Stepper stepper = find.byType(Stepper).evaluate().first.widget as Stepper;
+    final Stepper stepper = tester.widget(find.byType(Stepper));
 
     expect(stepper.horizontalElevation, 2.0);
   });
 }
-
