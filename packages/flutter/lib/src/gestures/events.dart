@@ -777,15 +777,13 @@ class PointerAddedEvent extends PointerEvent with _PointerEventDescription {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return _TransformedPointerAddedEvent(
-      transform: transform,
-      original: original as PointerAddedEvent? ?? this,
-    );
+    return _TransformedPointerAddedEvent(original as PointerAddedEvent? ?? this, transform);
   }
 }
 
 class _TransformedPointerAddedEvent extends _TransformedPointerEvent implements PointerAddedEvent {
-  _TransformedPointerAddedEvent({required this.original, required this.transform});
+  _TransformedPointerAddedEvent(this.original, this.transform)
+    : assert(original != null), assert(transform != null);
 
   @override
   final PointerAddedEvent original;
@@ -839,15 +837,13 @@ class PointerRemovedEvent extends PointerEvent with _PointerEventDescription {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return _TransformedPointerRemovedEvent(
-      transform: transform,
-      original: original as PointerRemovedEvent? ?? this,
-    );
+    return _TransformedPointerRemovedEvent(original as PointerRemovedEvent? ?? this, transform);
   }
 }
 
 class _TransformedPointerRemovedEvent extends _TransformedPointerEvent implements PointerRemovedEvent {
-  _TransformedPointerRemovedEvent({required this.original, required this.transform});
+  _TransformedPointerRemovedEvent(this.original, this.transform)
+    : assert(original != null), assert(transform != null);
 
   @override
   final PointerRemovedEvent original;
@@ -928,15 +924,13 @@ class PointerHoverEvent extends PointerEvent with _PointerEventDescription {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return _TransformedPointerHoverEvent(
-      transform: transform,
-      original: original as PointerHoverEvent? ?? this,
-    );
+    return _TransformedPointerHoverEvent(original as PointerHoverEvent? ?? this, transform);
   }
 }
 
 class _TransformedPointerHoverEvent extends _TransformedPointerEvent implements PointerHoverEvent {
-  _TransformedPointerHoverEvent({required this.original, required this.transform});
+  _TransformedPointerHoverEvent(this.original, this.transform)
+    : assert(original != null), assert(transform != null);
 
   @override
   final PointerHoverEvent original;
@@ -1011,6 +1005,15 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription {
          embedderId: embedderId,
        );
 
+  /// Creates an enter event from a [PointerHoverEvent].
+  ///
+  /// Deprecated. Please use [PointerEnterEvent.fromMouseEvent] instead.
+  @Deprecated(
+    'Use PointerEnterEvent.fromMouseEvent instead. '
+    'This feature was deprecated after v1.4.3.'
+  )
+  factory PointerEnterEvent.fromHoverEvent(PointerHoverEvent event) => PointerEnterEvent.fromMouseEvent(event);
+
   /// Creates an enter event from a [PointerEvent].
   ///
   /// This is used by the [MouseTracker] to synthesize enter events.
@@ -1042,15 +1045,13 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return _TransformedPointerEnterEvent(
-      transform: transform,
-      original: original as PointerEnterEvent? ?? this,
-    );
+    return _TransformedPointerEnterEvent(original as PointerEnterEvent? ?? this, transform);
   }
 }
 
 class _TransformedPointerEnterEvent extends _TransformedPointerEvent implements PointerEnterEvent {
-  _TransformedPointerEnterEvent({required this.original, required this.transform});
+  _TransformedPointerEnterEvent(this.original, this.transform)
+    : assert(original != null), assert(transform != null);
 
   @override
   final PointerEnterEvent original;
@@ -1125,6 +1126,15 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription {
          embedderId: embedderId,
        );
 
+  /// Creates an enter event from a [PointerHoverEvent].
+  ///
+  /// Deprecated. Please use [PointerExitEvent.fromMouseEvent] instead.
+  @Deprecated(
+    'Use PointerExitEvent.fromMouseEvent instead. '
+    'This feature was deprecated after v1.4.3.'
+  )
+  factory PointerExitEvent.fromHoverEvent(PointerHoverEvent event) => PointerExitEvent.fromMouseEvent(event);
+
   /// Creates an exit event from a [PointerEvent].
   ///
   /// This is used by the [MouseTracker] to synthesize exit events.
@@ -1156,15 +1166,13 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return _TransformedPointerExitEvent(
-      transform: transform,
-      original: original as PointerExitEvent? ?? this,
-    );
+    return _TransformedPointerExitEvent(original as PointerExitEvent? ?? this, transform);
   }
 }
 
 class _TransformedPointerExitEvent extends _TransformedPointerEvent implements PointerExitEvent {
-  _TransformedPointerExitEvent({required this.original, required this.transform});
+  _TransformedPointerExitEvent(this.original, this.transform})
+    : assert(original != null), assert(transform != null);
 
   @override
   final PointerExitEvent original;
@@ -1235,15 +1243,13 @@ class PointerDownEvent extends PointerEvent with _PointerEventDescription {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return _TransformedPointerDownEvent(
-      transform: transform,
-      original: original as PointerDownEvent? ?? this,
-    );
+    return _TransformedPointerDownEvent(original as PointerDownEvent? ?? this, transform);
   }
 }
 
 class _TransformedPointerDownEvent extends _TransformedPointerEvent implements PointerDownEvent {
-  _TransformedPointerDownEvent({required this.original, required this.transform});
+  _TransformedPointerDownEvent(this.original, this.transform)
+    : assert(original != null), assert(transform != null);
 
   @override
   final PointerDownEvent original;
@@ -1324,15 +1330,13 @@ class PointerMoveEvent extends PointerEvent with _PointerEventDescription {
       return this;
     }
 
-    return _TransformedPointerMoveEvent(
-      transform: transform,
-      original: original as PointerMoveEvent? ?? this,
-    );
+    return _TransformedPointerMoveEvent(original as PointerMoveEvent? ?? this, transform);
   }
 }
 
 class _TransformedPointerMoveEvent extends _TransformedPointerEvent implements PointerMoveEvent {
-  _TransformedPointerMoveEvent({required this.original, required this.transform});
+  _TransformedPointerMoveEvent(this.original, this.transform)
+    : assert(original != null), assert(transform != null);
 
   @override
   final PointerMoveEvent original;
@@ -1406,15 +1410,13 @@ class PointerUpEvent extends PointerEvent with _PointerEventDescription {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return _TransformedPointerUpEvent(
-      transform: transform,
-      original: original as PointerUpEvent? ?? this,
-    );
+    return _TransformedPointerUpEvent(original as PointerUpEvent? ?? this, transform);
   }
 }
 
 class _TransformedPointerUpEvent extends _TransformedPointerEvent implements PointerUpEvent {
-  _TransformedPointerUpEvent({required this.original, required this.transform});
+  _TransformedPointerUpEvent(this.original, this.transform)
+    : assert(original != null), assert(transform != null);
 
   @override
   final PointerUpEvent original;
@@ -1497,10 +1499,7 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return _TransformedPointerScrollEvent(
-      transform: transform,
-      original: original as PointerScrollEvent? ?? this,
-    );
+    return _TransformedPointerScrollEvent(original as PointerScrollEvent? ?? this, transform);
   }
 
   @override
@@ -1511,7 +1510,8 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
 }
 
 class _TransformedPointerScrollEvent extends _TransformedPointerEvent implements PointerScrollEvent {
-  _TransformedPointerScrollEvent({required this.original, required this.transform});
+  _TransformedPointerScrollEvent(this.original, this.transform)
+    : assert(original != null), assert(transform != null);
 
   @override
   final PointerScrollEvent original;
@@ -1591,15 +1591,13 @@ class PointerCancelEvent extends PointerEvent with _PointerEventDescription {
     if (transform == null || transform == this.transform) {
       return this;
     }
-    return _TransformedPointerCancelEvent(
-      transform: transform,
-      original: original as PointerCancelEvent? ?? this,
-    );
+    return _TransformedPointerCancelEvent(original as PointerCancelEvent? ?? this, transform);
   }
 }
 
 class _TransformedPointerCancelEvent extends _TransformedPointerEvent implements PointerCancelEvent {
-  _TransformedPointerCancelEvent({required this.original, required this.transform});
+  _TransformedPointerCancelEvent(this.original, this.transform)
+    : assert(original != null), assert(transform != null);
 
   @override
   final PointerCancelEvent original;
