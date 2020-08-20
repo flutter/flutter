@@ -11,7 +11,7 @@ void main() {
     'multi_widget_construction_perf',
     kMultiWidgetConstructionRouteName,
     pageDelay: const Duration(seconds: 1),
-    duration: const Duration(seconds: 10),
-    timeout: const Duration(seconds: 45),
+    duration: const Duration(seconds: 20),
+    timeout: const Duration(seconds: 60),
   );
 }

@@ -64,8 +64,8 @@ class GalleryTransitionTest {
       await flutter('packages', options: <String>['get']);
 
       final String testDriver = driverFile ?? (semanticsEnabled
-          ? '${testFile}_test'
-          : '${testFile}_with_semantics_test');
+          ? '${testFile}_with_semantics_test'
+          : '${testFile}_test');
 
       await flutter('drive', options: <String>[
         '--profile',

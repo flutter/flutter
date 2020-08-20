@@ -148,6 +148,20 @@ void main() {
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
+      _testInMemory('Android project not on v2 embedding shows a warning', () async {
+        final FlutterProject project = await someProject();
+        // The default someProject with an empty <manifest> already indicates
+        // v1 embedding, as opposed to having <meta-data
+        // android:name="flutterEmbedding" android:value="2" />.
+
+        await project.ensureReadyForPlatformSpecificTooling();
+        expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
+      });
+      _testInMemory('updates local properties for Android', () async {
+        final FlutterProject project = await someProject();
+        await project.ensureReadyForPlatformSpecificTooling();
+        expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
+      });
       testUsingContext('injects plugins for macOS', () async {
         final FlutterProject project = await someProject();
         project.macos.managedDirectory.createSync(recursive: true);
