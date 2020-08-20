@@ -1654,25 +1654,26 @@ class _RenderDecorationElement extends RenderObjectElement {
   }
 
   @override
-  void insertRenderObjectChild(RenderObject child, _DecorationSlot slot) {
+  void insertChildRenderObject(RenderObject child, dynamic slotValue) {
     assert(child is RenderBox);
+    assert(slotValue is _DecorationSlot);
+    final _DecorationSlot slot = slotValue as _DecorationSlot;
     _updateRenderObject(child as RenderBox, slot);
     assert(renderObject.childToSlot.keys.contains(child));
     assert(renderObject.slotToChild.keys.contains(slot));
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, _DecorationSlot slot) {
+  void removeChildRenderObject(RenderObject child) {
     assert(child is RenderBox);
-    assert(renderObject.childToSlot[child] == slot);
-    assert(renderObject.slotToChild[slot] == child);
-    _updateRenderObject(null, slot);
+    assert(renderObject.childToSlot.keys.contains(child));
+    _updateRenderObject(null, renderObject.childToSlot[child]);
     assert(!renderObject.childToSlot.keys.contains(child));
     assert(!renderObject.slotToChild.keys.contains(slot));
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveChildRenderObject(RenderObject child, dynamic slotValue) {
     assert(false, 'not reachable');
   }
 }
