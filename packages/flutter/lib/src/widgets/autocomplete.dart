@@ -455,7 +455,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   }
 
   void _onChangedQuery() {
-    if (_autocompleteController.textEditingController.text == _selection) {
+    if (_autocompleteController.textEditingController.text == _selection.toString()) {
       return;
     }
     setState(() {

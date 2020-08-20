@@ -26,7 +26,7 @@ class User {
 void main() {
   const List<String> kOptions = <String>[
     'aardvark',
-    'baboon',
+    'bobcat',
     'chameleon',
     'dingo',
     'elephant',
@@ -171,7 +171,7 @@ void main() {
         MaterialApp(
           home: AutocompleteCore<String>(
             autocompleteController: autocompleteController,
-            buildField: (BuildContext context) {
+            buildField: (BuildContext context, TextEditingController textEditingController) {
               return Container(key: fieldKey);
             },
             buildResults: (BuildContext context, OnSelectedAutocomplete<String> onSelected, List<String> results) {
@@ -183,11 +183,16 @@ void main() {
         ),
       );
 
+      // The query field is always rendered, but the results are not unless
+      // needed.
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsOneWidget);
+      expect(find.byKey(resultsKey), findsNothing);
 
       // Enter a query. The results are filtered by the query.
-      autocompleteController.textEditingController.text = 'ele';
+      autocompleteController.textEditingController.value = const TextEditingValue(
+        text: 'ele',
+        selection: TextSelection(baseOffset: 3, extentOffset: 3),
+      );
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(resultsKey), findsOneWidget);
@@ -205,7 +210,10 @@ void main() {
       expect(autocompleteController.textEditingController.text, selection);
 
       // Modify the selected query. The results appear again and are filtered.
-      autocompleteController.textEditingController.text = 'e';
+      autocompleteController.textEditingController.value = const TextEditingValue(
+        text: 'e',
+        selection: TextSelection(baseOffset: 1, extentOffset: 1),
+      );
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(resultsKey), findsOneWidget);
@@ -236,7 +244,7 @@ void main() {
             onSelected: (User selected) {
               lastUserSelected = selected;
             },
-            buildField: (BuildContext context) {
+            buildField: (BuildContext context, TextEditingController textEditingController) {
               return Container(key: fieldKey);
             },
             buildResults: (BuildContext context, OnSelectedAutocomplete<User> onSelected, List<User> results) {
@@ -249,10 +257,13 @@ void main() {
       );
 
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsOneWidget);
+      expect(find.byKey(resultsKey), findsNothing);
 
       // Enter a query. The results are filtered by the query.
-      autocompleteController.textEditingController.text = 'example';
+      autocompleteController.textEditingController.value = const TextEditingValue(
+        text: 'example',
+        selection: TextSelection(baseOffset: 7, extentOffset: 7),
+      );
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(resultsKey), findsOneWidget);
@@ -267,13 +278,14 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(resultsKey), findsNothing);
       expect(lastUserSelected, selection);
-      // The field hasn't been updated because we passed onSelected. When
-      // onSelected is passed, it's up to it to update the field.
-      expect(autocompleteController.textEditingController.text, 'example');
+      expect(autocompleteController.textEditingController.text, selection.toString());
 
       // Modify the selected query. The results appear again and are filtered,
       // this time by name instead of email.
-      autocompleteController.textEditingController.text = 'B';
+      autocompleteController.textEditingController.value = const TextEditingValue(
+        text: 'B',
+        selection: TextSelection(baseOffset: 1, extentOffset: 1),
+      );
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(resultsKey), findsOneWidget);
