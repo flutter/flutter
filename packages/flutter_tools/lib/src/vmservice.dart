@@ -900,3 +900,13 @@ enum Brightness {
   /// For example, the color might be bright white, requiring black text.
   light,
 }
+
+/// Process a VM service log event into a string message.
+String processVmServiceMessage(vm_service.Event event) {
+  final String message = utf8.decode(base64.decode(event.bytes));
+  // Remove extra trailing newlines appended by the vm service.
+  if (message.endsWith('\n')) {
+    return message.substring(0, message.length - 1);
+  }
+  return message;
+}
