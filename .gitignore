@@ -11,6 +11,7 @@
 .gdb_history
 .gdbinit
 .idea
+.ignore
 .landmines
 .packages
 .project
