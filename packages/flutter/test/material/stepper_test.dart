@@ -790,10 +790,10 @@ void main() {
       );
     }
 
-    Material buttonMaterial(String label) {
+   Material buttonMaterial(String label) {
       return tester.widget<Material>(
         find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material))
-        );
+      );
     }
 
     // The checks that follow verify that the appearance of the
