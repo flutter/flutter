@@ -252,6 +252,7 @@ class Template {
       //         rendering via mustache.
 
       if (sourceFile.path.endsWith(templateExtension)) {
+         _validateReadPermissions(sourceFile);
         final String templateContents = sourceFile.readAsStringSync();
         final String renderedContents = _templateRenderer.renderString(templateContents, context);
 
@@ -274,7 +275,7 @@ class Template {
   /// If this fails with a certain error code, the [ErrorHandlingFileSystem] will
   /// trigger a tool exit with a better message.
   void _validateReadPermissions(File file) {
-    file.lengthSync();
+    file.openSync().closeSync();
   }
 }
 

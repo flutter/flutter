@@ -195,6 +195,17 @@ class ErrorHandlingFile
   }
 
   @override
+  RandomAccessFile openSync({FileMode mode = FileMode.read}) {
+    return _runSync<RandomAccessFile>(
+      () => delegate.openSync(
+        mode: mode,
+      ),
+      platform: _platform,
+      failureMessage: 'Flutter failed to open a file at "${delegate.path}"',
+    );
+  }
+
+  @override
   String toString() => delegate.toString();
 }
 
@@ -392,7 +403,7 @@ void _handleWindowsException(FileSystemException e, String message) {
     case kAccessDenied:
       throwToolExit(
         '$message. The flutter tool cannot access the file.\n'
-        'Please ensure that the SDK and/or project is installed in a location'
+        'Please ensure that the SDK and/or project is installed in a location '
         'that has read/write permissions for the current user.'
       );
       break;

@@ -59,6 +59,9 @@ void setupWriteMocks({
     encoding: anyNamed('encoding'),
     flush: anyNamed('flush'),
   )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockFile.openSync(
+    mode: anyNamed('mode'),
+  )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
 void setupCreateTempMocks({
@@ -108,6 +111,8 @@ void main() {
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsStringSync(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(),
              throwsToolExit(message: expectedMessage));
     });
 
