@@ -145,8 +145,22 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   double get maxScrollExtent => _maxScrollExtent;
   double _maxScrollExtent;
 
-  /// The implied amount of velocity when pixels are forced without respect to
-  /// scroll physics, such as when [forcePixels] or [jumpTo] is used.
+  /// The additional velocity added for a [forcePixels] change in a single
+  /// frame.
+  ///
+  /// This value is used by [recommendDeferredLoading] in addition to the
+  /// [activity]'s [ScrollActivity.velocity] to ask the [physics] whether or
+  /// not to defer loading. It accounts for the fact that a [forcePixels] call
+  /// may involve a [ScrollActivity] with 0 velocity, but the scrollable is
+  /// still instantaneously moving from its current position to a potentially
+  /// very far position, and which is of interest to callers of
+  /// [recommendDeferredLoading].
+  ///
+  /// For example, if a scrollable is currently at 5000 pixels, and we [jumpTo]
+  /// 0 to get back to the top of the list, we would have an implied velocity of
+  /// -5000 and an `activity.velocity` of 0. The jump may be going past a
+  /// number of resource intensive widgets which should avoid doing work if the
+  /// position jumps past them.
   double _impliedVelocity = 0;
 
   @override
@@ -347,6 +361,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   void forcePixels(double value) {
     assert(pixels != null);
+    assert(value != null);
     _impliedVelocity = value - _pixels;
     _pixels = value;
     notifyListeners();
