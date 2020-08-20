@@ -261,7 +261,7 @@ task:
 # WINDOWS SHARDS
 task:
   windows_container:
-    image: cirrusci/android-sdk:28-windowsservercore-2019
+    image: cirrusci/android-sdk:30-windowsservercore-2019
     os_version: 2019
     cpu: $CPU
     memory: $MEMORY
