@@ -129,7 +129,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   }
 
   @override
-  Uri getTestUri(Uri key, int version) => key;
+  Uri getTestUri(Uri key, int? version) => key;
 
   /// Calculate the appropriate basedir for the current test context.
   ///
