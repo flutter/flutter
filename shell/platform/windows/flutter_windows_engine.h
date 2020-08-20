@@ -61,9 +61,17 @@ class FlutterWindowsEngine {
   // Returns the currently configured Plugin Registrar.
   FlutterDesktopPluginRegistrarRef GetRegistrar();
 
+  // Sets |callback| to be called when the plugin registrar is destroyed.
+  void SetPluginRegistrarDestructionCallback(
+      FlutterDesktopOnRegistrarDestroyed callback);
+
   FLUTTER_API_SYMBOL(FlutterEngine) engine() { return engine_; }
 
   FlutterDesktopMessengerRef messenger() { return messenger_.get(); }
+
+  IncomingMessageDispatcher* message_dispatcher() {
+    return message_dispatcher_.get();
+  }
 
   Win32TaskRunner* task_runner() { return task_runner_.get(); }
 
@@ -104,6 +112,10 @@ class FlutterWindowsEngine {
 
   // The plugin registrar handle given to API clients.
   std::unique_ptr<FlutterDesktopPluginRegistrar> plugin_registrar_;
+
+  // A callback to be called when the engine (and thus the plugin registrar)
+  // is being destroyed.
+  FlutterDesktopOnRegistrarDestroyed plugin_registrar_destruction_callback_;
 
   // The manager for WindowProc delegate registration and callbacks.
   std::unique_ptr<Win32WindowProcDelegateManager> window_proc_delegate_manager_;
