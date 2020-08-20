@@ -103,7 +103,7 @@ function deploy_docs() {
             ;;
         *)
             >&2 echo "Docs deployment cannot be run on the $CIRRUS_BRANCH branch."
-            exit 1
+            exit 0
     esac
 }
 
@@ -161,7 +161,7 @@ fi
 
 generate_docs
 # Skip publishing docs for PRs and release candidate branches
-if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" && ! "$CIRRUS_BRANCH" =~ ^flutter-[0-9]+\.[0-9]+-candidate\.[0-9]+$ ]]; then
+if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
   (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
   # TODO(tvolkert): re-enable (https://github.com/flutter/flutter/issues/60646)
   # (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
