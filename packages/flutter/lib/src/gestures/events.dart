@@ -952,7 +952,7 @@ class _TransformedPointerHoverEvent extends _TransformedPointerEvent implements 
 ///  * [PointerExitEvent], which reports when the pointer has left an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
 ///    contact with the device.
-///  * [Listener.onPointerEnter], which allows callers to be notified of these
+///  * [MouseRegion.onEnter], which allows callers to be notified of these
 ///    events in a widget tree.
 class PointerEnterEvent extends PointerEvent with _PointerEventDescription {
   /// Creates a pointer enter event.
@@ -1073,7 +1073,7 @@ class _TransformedPointerEnterEvent extends _TransformedPointerEvent implements 
 ///  * [PointerEnterEvent], which reports when the pointer has entered an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
 ///    contact with the device.
-///  * [Listener.onPointerExit], which allows callers to be notified of these
+///  * [MouseRegion.onExit], which allows callers to be notified of these
 ///    events in a widget tree.
 class PointerExitEvent extends PointerEvent with _PointerEventDescription {
   /// Creates a pointer exit event.
