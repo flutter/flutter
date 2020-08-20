@@ -230,22 +230,7 @@ def ProcessCIPDPackage(upload, engine_version):
       if tries == num_tries - 1:
         raise
 
-def GetRunnerTarget(runner_type, product, aot):
-  base = '%s/%s:' % (_fuchsia_base, runner_type)
-  if 'dart' in runner_type:
-    target = 'dart_'
-  else:
-    target = 'flutter_'
-  if aot:
-    target += 'aot_'
-  else:
-    target += 'jit_'
-  if product:
-    target += 'product_'
-  target += 'runner'
-  return base + target
-
-def BuildTarget(runtime_mode, arch, optimized, enable_lto, asan, additional_targets=[]):
+def BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy, asan, additional_targets=[]):
   unopt = "_unopt" if not optimized else ""
   out_dir = 'fuchsia_%s%s_%s' % (runtime_mode, unopt, arch)
   flags = [
@@ -261,6 +246,8 @@ def BuildTarget(runtime_mode, arch, optimized, enable_lto, asan, additional_targ
 
   if not enable_lto:
     flags.append('--no-lto')
+  if not enable_legacy:
+    flags.append('--no-fuchsia-legacy')
   if asan:
     flags.append('--asan')
 
@@ -312,6 +299,12 @@ def main():
       help='If set, disables LTO for the build.')
 
   parser.add_argument(
+      '--no-legacy',
+      action='store_true',
+      default=False,
+      help='If set, disables legacy code for the build.')
+
+  parser.add_argument(
       '--skip-build',
       action='store_true',
       default=False,
@@ -333,6 +326,7 @@ def main():
 
   optimized = not args.unoptimized
   enable_lto = not args.no_lto
+  enable_legacy = not args.no_legacy
 
   for arch in archs:
     for i in range(3):
@@ -340,7 +334,7 @@ def main():
       product = product_modes[i]
       if build_mode == 'all' or runtime_mode == build_mode:
         if not args.skip_build:
-          BuildTarget(runtime_mode, arch, optimized, enable_lto, args.asan, args.targets.split(","))
+          BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy, args.asan, args.targets.split(","))
         BuildBucket(runtime_mode, arch, optimized, product)
 
   if args.upload:

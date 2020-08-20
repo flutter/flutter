@@ -39,7 +39,7 @@ source_set("testing") {
   public_deps = [ ":testing_lib" ]
 }
 
-source_set_maybe_fuchsia_legacy("dart") {
+source_set("dart") {
   testonly = true
 
   sources = [
@@ -54,13 +54,12 @@ source_set_maybe_fuchsia_legacy("dart") {
   public_deps = [
     ":testing_lib",
     "//flutter/common",
+    "//flutter/runtime",
     "//flutter/runtime:libdart",
     "//flutter/third_party/tonic",
     "//third_party/dart/runtime/bin:elf_loader",
     "//third_party/skia",
   ]
-
-  public_deps_legacy_and_next = [ "//flutter/runtime:runtime" ]
 }
 
 source_set("skia") {
@@ -80,7 +79,7 @@ source_set("skia") {
   ]
 }
 
-source_set_maybe_fuchsia_legacy("fixture_test") {
+source_set("fixture_test") {
   testonly = true
 
   sources = [
@@ -88,11 +87,10 @@ source_set_maybe_fuchsia_legacy("fixture_test") {
     "fixture_test.h",
   ]
 
-  public_deps = [ "//flutter/common" ]
-
-  public_deps_legacy_and_next = [
+  public_deps = [
     ":dart",
-    "//flutter/runtime:runtime",
+    "//flutter/common",
+    "//flutter/runtime",
   ]
 }
 

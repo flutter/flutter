@@ -6,7 +6,7 @@ import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
 
-source_set_maybe_fuchsia_legacy("flow") {
+source_set("flow") {
   sources = [
     "compositor_context.cc",
     "compositor_context.h",
@@ -78,20 +78,23 @@ source_set_maybe_fuchsia_legacy("flow") {
     "//third_party/skia",
   ]
 
-  sources_legacy = [
-    "layers/child_scene_layer.cc",
-    "layers/child_scene_layer.h",
-    "scene_update_context.cc",
-    "scene_update_context.h",
-    "view_holder.cc",
-    "view_holder.h",
-  ]
+  if (is_fuchsia && flutter_enable_legacy_fuchsia_embedder) {
+    sources += [
+      "layers/child_scene_layer.cc",
+      "layers/child_scene_layer.h",
+      "scene_update_context.cc",
+      "scene_update_context.h",
+      "view_holder.cc",
+      "view_holder.h",
+    ]
 
-  public_deps_legacy = [
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.gfx",
-    "$fuchsia_sdk_root/pkg:scenic_cpp",
-  ]
+    public_deps = [
+      "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
+      "$fuchsia_sdk_root/fidl:fuchsia.ui.gfx",
+      "$fuchsia_sdk_root/fidl:fuchsia.ui.views",
+      "$fuchsia_sdk_root/pkg:scenic_cpp",
+    ]
+  }
 }
 
 if (enable_unittests) {
@@ -99,7 +102,7 @@ if (enable_unittests) {
     fixtures = []
   }
 
-  source_set_maybe_fuchsia_legacy("flow_testing") {
+  source_set("flow_testing") {
     testonly = true
 
     sources = [
@@ -121,10 +124,10 @@ if (enable_unittests) {
       "//third_party/googletest:gtest",
     ]
 
-    deps_legacy_and_next = [ ":flow" ]
+    deps = [ ":flow" ]
   }
 
-  source_set_maybe_fuchsia_legacy("flow_unittests_common") {
+  executable("flow_unittests") {
     testonly = true
 
     sources = [
@@ -160,7 +163,9 @@ if (enable_unittests) {
     ]
 
     deps = [
+      ":flow",
       ":flow_fixtures",
+      ":flow_testing",
       "//flutter/fml",
       "//flutter/testing:skia",
       "//flutter/testing:testing_lib",
@@ -169,32 +174,10 @@ if (enable_unittests) {
       "//third_party/skia",
     ]
 
-    sources_legacy = [ "layers/fuchsia_layer_unittests.cc" ]
+    if (is_fuchsia && flutter_enable_legacy_fuchsia_embedder) {
+      sources += [ "layers/fuchsia_layer_unittests.cc" ]
 
-    deps_legacy = [ "//build/fuchsia/pkg:sys_cpp_testing" ]
-
-    deps_legacy_and_next = [
-      ":flow",
-      ":flow_testing",
-    ]
-  }
-
-  if (is_fuchsia) {
-    executable("flow_unittests") {
-      testonly = true
-
-      deps = [ ":flow_unittests_common_fuchsia_legacy" ]
-    }
-    executable("flow_unittests_next") {
-      testonly = true
-
-      deps = [ ":flow_unittests_common" ]
-    }
-  } else {
-    executable("flow_unittests") {
-      testonly = true
-
-      deps = [ ":flow_unittests_common" ]
+      deps += [ "//build/fuchsia/pkg:sys_cpp_testing" ]
     }
   }
 }

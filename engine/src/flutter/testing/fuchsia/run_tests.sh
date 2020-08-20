@@ -121,13 +121,6 @@ echo "$(date) START:flow_tests --------------------------------------"
    --identity-file $pkey \
    --timeout-seconds $test_timeout_seconds \
    --packages-directory packages
-
-./fuchsia_ctl -d $device_name test \
-   -f flow_tests_next-0.far  \
-   -t flow_tests_next \
-   --identity-file $pkey \
-   --timeout-seconds $test_timeout_seconds \
-   --packages-directory packages
 echo "$(date) DONE:flow_tests ---------------------------------------"
 
 
@@ -135,13 +128,6 @@ echo "$(date) START:runtime_tests -----------------------------------"
 ./fuchsia_ctl -d $device_name test \
     -f runtime_tests-0.far  \
     -t runtime_tests \
-    --identity-file $pkey \
-    --timeout-seconds $test_timeout_seconds \
-    --packages-directory packages
-
-./fuchsia_ctl -d $device_name test \
-    -f runtime_tests_next-0.far  \
-    -t runtime_tests_next \
     --identity-file $pkey \
     --timeout-seconds $test_timeout_seconds \
     --packages-directory packages
@@ -154,26 +140,12 @@ echo "$(date) START:ui_tests ----------------------------------------"
    --identity-file $pkey \
    --timeout-seconds $test_timeout_seconds \
    --packages-directory packages
-
-./fuchsia_ctl -d $device_name test \
-   -f ui_tests_next-0.far  \
-   -t ui_tests_next \
-   --identity-file $pkey \
-   --timeout-seconds $test_timeout_seconds \
-   --packages-directory packages
 echo "$(date) DONE:ui_tests -----------------------------------------"
 
 echo "$(date) START:shell_tests -------------------------------------"
 ./fuchsia_ctl -d $device_name test \
     -f shell_tests-0.far  \
     -t shell_tests \
-    --identity-file $pkey \
-    --timeout-seconds $test_timeout_seconds \
-    --packages-directory packages
-
-./fuchsia_ctl -d $device_name test \
-    -f shell_tests_next-0.far  \
-    -t shell_tests_next \
     --identity-file $pkey \
     --timeout-seconds $test_timeout_seconds \
     --packages-directory packages
