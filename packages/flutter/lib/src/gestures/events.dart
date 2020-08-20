@@ -1171,7 +1171,7 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription {
 }
 
 class _TransformedPointerExitEvent extends _TransformedPointerEvent implements PointerExitEvent {
-  _TransformedPointerExitEvent(this.original, this.transform})
+  _TransformedPointerExitEvent(this.original, this.transform)
     : assert(original != null), assert(transform != null);
 
   @override
