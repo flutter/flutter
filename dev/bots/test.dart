@@ -581,7 +581,7 @@ Future<void> _runFrameworkTests() async {
 
   Future<void> runMisc() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata);
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata, enableNonNullable: true);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'tools'), tableData: bigqueryApi?.tabledata);
@@ -986,6 +986,7 @@ Future<void> _pubRunTester(String workingDirectory, {
 Future<void> _pubRunTest(String workingDirectory, {
   List<String> testPaths,
   bool enableFlutterToolAsserts = true,
+  bool enableNonNullable = false,
   bool useBuildRunner = false,
   String coverage,
   bq.TabledataResourceApi tableData,
@@ -1012,6 +1013,8 @@ Future<void> _pubRunTest(String workingDirectory, {
 
   final List<String> args = <String>[
     'run',
+    if (enableNonNullable)
+      '--enable-experiment=non-nullable',
     'test',
     if (useFlutterTestFormatter)
       '-rjson'
