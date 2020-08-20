@@ -101,7 +101,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// [ActionDispatcher.invokeAction] directly.
   ///
   /// This method is only meant to be invoked by an [ActionDispatcher], or by
-  /// its subclasses, and only when [enabled] is true.
+  /// its subclasses, and only when [isEnabled] is true.
   ///
   /// When overriding this method, the returned value can be any Object, but
   /// changing the return type of the override to match the type of the returned
@@ -300,10 +300,10 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// [ActionDispatcher.invokeAction] directly.
   ///
   /// This method is only meant to be invoked by an [ActionDispatcher], or by
-  /// its subclasses, and only when [enabled] is true.
+  /// its subclasses, and only when [isEnabled] is true.
   ///
   /// The optional `context` parameter is the context of the invocation of the
-  /// action, and in the case of an action invoked by a [ShortcutsManager], via
+  /// action, and in the case of an action invoked by a [ShortcutManager], via
   /// a [Shortcuts] widget, will be the context of the [Shortcuts] widget.
   ///
   /// When overriding this method, the returned value can be any Object, but
@@ -943,7 +943,7 @@ class FocusableActionDetector extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// The [cursor] defaults to [MouseCursor.defer], deferring the choice of
+  /// The [mouseCursor] defaults to [MouseCursor.defer], deferring the choice of
   /// cursor to the next region behind it in hit-test order.
   final MouseCursor mouseCursor;
 
@@ -1092,25 +1092,30 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
 
   @override
   Widget build(BuildContext context) {
-    Widget child = MouseRegion(
-      onEnter: _handleMouseEnter,
-      onExit: _handleMouseExit,
-      cursor: widget.mouseCursor,
-      child: Focus(
-        focusNode: widget.focusNode,
-        autofocus: widget.autofocus,
-        canRequestFocus: _canRequestFocus,
-        onFocusChange: _handleFocusChange,
-        child: widget.child,
+    final Map<Type, Action<Intent>> actions = widget.enabled && widget.actions != null
+      ? widget.actions
+      : const <Type, Action<Intent>>{};
+    final Map<LogicalKeySet, Intent> shortcuts = widget.enabled && widget.shortcuts != null
+      ? widget.shortcuts
+      : const <LogicalKeySet, Intent>{};
+
+    return Actions(actions:  actions,
+      child: Shortcuts(
+        shortcuts: shortcuts,
+        child: MouseRegion(
+          onEnter: _handleMouseEnter,
+          onExit: _handleMouseExit,
+          cursor: widget.mouseCursor,
+          child: Focus(
+            focusNode: widget.focusNode,
+            autofocus: widget.autofocus,
+            canRequestFocus: _canRequestFocus,
+            onFocusChange: _handleFocusChange,
+            child: widget.child,
+          ),
+        ),
       ),
     );
-    if (widget.enabled && widget.actions != null && widget.actions.isNotEmpty) {
-      child = Actions(actions: widget.actions, child: child);
-    }
-    if (widget.enabled && widget.shortcuts != null && widget.shortcuts.isNotEmpty) {
-      child = Shortcuts(shortcuts: widget.shortcuts, child: child);
-    }
-    return child;
   }
 }
 

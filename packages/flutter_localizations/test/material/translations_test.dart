@@ -472,38 +472,6 @@ void main() {
     expect(localizations.okButtonLabel, '確定');
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/53036.
-  testWidgets('`nb` uses `no` as its synonym when `nb` arb file is not present', (WidgetTester tester) async {
-    final File nbMaterialArbFile = File(
-      path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'material_nb.arb'),
-    );
-    final File noMaterialArbFile = File(
-      path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'material_no.arb'),
-    );
-
-    // No need to run test if `nb` arb file exists or if `no` arb file does not exist.
-    if (noMaterialArbFile.existsSync() && !nbMaterialArbFile.existsSync()) {
-      Locale locale = const Locale.fromSubtags(languageCode: 'no', scriptCode: null, countryCode: null);
-      expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
-      MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-      expect(localizations, isA<MaterialLocalizationNo>());
-
-      final String alertDialogLabelNo = localizations.alertDialogLabel;
-      final String anteMeridiemAbbreviationNo = localizations.anteMeridiemAbbreviation;
-      final String closeButtonLabelNo = localizations.closeButtonLabel;
-      final String okButtonLabelNo = localizations.okButtonLabel;
-
-      locale = const Locale.fromSubtags(languageCode: 'nb', scriptCode: null, countryCode: null);
-      expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
-      localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-      expect(localizations, isA<MaterialLocalizationNb>());
-      expect(localizations.alertDialogLabel, alertDialogLabelNo);
-      expect(localizations.anteMeridiemAbbreviation, anteMeridiemAbbreviationNo);
-      expect(localizations.closeButtonLabel, closeButtonLabelNo);
-      expect(localizations.okButtonLabel, okButtonLabelNo);
-    }
-  });
-
   // Regression test for https://github.com/flutter/flutter/issues/36704.
   testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
     final File file = File(

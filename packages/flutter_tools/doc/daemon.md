@@ -252,6 +252,16 @@ The returned `params` will contain:
 - `emulatorName` - the name of the emulator created; this will have been auto-generated if you did not supply one
 - `error` - when `success`=`false`, a message explaining why the creation of the emulator failed
 
+### devtools domain
+
+#### devtools.serve
+
+The `serve()` command starts a DevTools server if one isn't already running. The return value will contain:
+
+- `success` - whether the server started.
+- `host` - the address host if the server successfully started.
+- `port` - the port if the server successfully started.
+
 ## 'flutter run --machine' and 'flutter attach --machine'
 
 When running `flutter run --machine` or `flutter attach --machine` the following subset of the daemon is available:

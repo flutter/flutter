@@ -103,7 +103,7 @@ class TextButtonTheme extends InheritedTheme {
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [TextButtonsTheme] widget, then
+  /// If there is no enclosing [TextButtonTheme] widget, then
   /// [ThemeData.textButtonTheme] is used.
   ///
   /// Typical usage is as follows:

@@ -281,12 +281,12 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// {@end-tool}
 ///
 /// [SliverFillRemaining] will defer to the size of its [child] if the
-/// [precedingScrollExtent] exceeded the length of the viewport's main axis.
+/// [SliverConstraints.precedingScrollExtent] exceeded the length of the viewport's main axis.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] defers to the size of its [child]
-/// because the [precedingScrollExtent] of the [SliverConstraints] has gone
+/// because the [SliverConstraints.precedingScrollExtent] has gone
 /// beyond that of the viewport's main axis.
 ///
 /// ```dart
@@ -407,7 +407,9 @@ class SliverFillRemaining extends StatelessWidget {
        assert(fillOverscroll != null),
        super(key: key);
 
-  /// Doc
+  /// Box child widget that fills the remaining space in the viewport.
+  ///
+  /// The main [SliverFillRemaining] documentation contains more details.
   final Widget child;
 
   /// Indicates whether the child has a scrollable body, this value cannot be

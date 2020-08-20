@@ -63,7 +63,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Container(
-              child: OutlineButton(
+              child: OutlinedButton(
                   onPressed: () { },
                   child: const Text('hello'),
               ),
@@ -85,7 +85,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Container(
-              child: OutlineButton(
+              child: OutlinedButton(
                   onPressed: () { },
                   child: const Text('hello'),
               ),
@@ -551,7 +551,109 @@ void main() {
   );
 
   testWidgets(
-    'ensureVisibl: scrolls to make widget visible',
+    'WidgetTester.fling produces strictly monotonically increasing timestamps, '
+    'when given a large velocity',
+    (WidgetTester tester) async {
+      // Velocity trackers may misbehave if the `PointerMoveEvent`s' have the
+      // same timestamp. This is more likely to happen when the velocity tracker
+      // has a small sample size.
+      final List<Duration> logs = <Duration>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerMove: (PointerMoveEvent event) => logs.add(event.timeStamp),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.fling(find.text('test'), const Offset(0.0, -50.0), 10000.0);
+      await tester.pumpAndSettle();
+
+      for (int i = 0; i + 1 < logs.length; i += 1) {
+        expect(logs[i + 1],  greaterThan(logs[i]));
+      }
+  });
+
+  testWidgets(
+    'WidgetTester.timedDrag must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.timedDrag(
+        find.text('test'),
+        const Offset(-200.0, 0.0),
+        const Duration(seconds: 1),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.timedDrag uses correct pointer',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.pointer}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.timedDrag(
+        find.text('test'),
+        const Offset(-200.0, 0.0),
+        const Duration(seconds: 1),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.timedDrag(
+        find.text('test'),
+        const Offset(200.0, 0.0),
+        const Duration(seconds: 1),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+
+      expect(logs.length, 2);
+      expect(logs[0], isNotNull);
+      expect(logs[1], isNotNull);
+      expect(logs[1] != logs[0], isTrue);
+    },
+  );
+
+  testWidgets(
+    'ensureVisible: scrolls to make widget visible',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -596,7 +698,6 @@ void main() {
 
         await tester.scrollUntilVisible(
           find.text('Item 45', skipOffstage: false),
-          find.byType(Scrollable),
           100,
         );
         await tester.pumpAndSettle();
@@ -628,7 +729,6 @@ void main() {
 
         await tester.scrollUntilVisible(
           find.text('Item 45', skipOffstage: false),
-          find.byType(Scrollable),
           100,
         );
         await tester.pumpAndSettle();
@@ -656,7 +756,6 @@ void main() {
         try {
           await tester.scrollUntilVisible(
             find.text('Item 55', skipOffstage: false),
-            find.byType(Scrollable),
             100,
           );
         } on StateError catch (e) {
@@ -664,5 +763,48 @@ void main() {
         }
       },
     );
+
+    testWidgets('Drag Until Visible', (WidgetTester tester) async {
+      // when there are two implicit [Scrollable], `scrollUntilVisible` is hard
+      // to use.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                Container(height: 200, child: ListView.builder(
+                  key: const Key('listView-a'),
+                  itemCount: 50,
+                  shrinkWrap: true,
+                  itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item a-$i')),
+                )),
+                const Divider(thickness: 5),
+                Expanded(child: ListView.builder(
+                  key: const Key('listView-b'),
+                  itemCount: 50,
+                  shrinkWrap: true,
+                  itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item b-$i')),
+                )),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(Scrollable), findsNWidgets(2));
+
+      // Make sure widget isn't built yet.
+      expect(find.text('Item b-45', skipOffstage: false), findsNothing);
+
+      await tester.dragUntilVisible(
+        find.text('Item b-45', skipOffstage: false),
+        find.byKey(const ValueKey<String>('listView-b')),
+        const Offset(0, -100),
+      );
+      await tester.pumpAndSettle();
+
+      // Now the widget is on screen.
+      expect(find.text('Item b-45', skipOffstage: true), findsOneWidget);
+    });
   });
 }

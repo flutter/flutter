@@ -194,7 +194,7 @@ class FlutterProject {
   /// True if this project is a Flutter module project.
   bool get isModule => manifest.isModule;
 
-  /// True if the Flutter project is using the AndroidX support library
+  /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => manifest.usesAndroidX;
 
   /// True if this project has an example application.
@@ -709,7 +709,7 @@ class AndroidProject extends FlutterProjectPlatform {
   /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
 
-  /// True if the Flutter project is using the AndroidX support library
+  /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => parent.usesAndroidX;
 
   /// True, if the app project is using Kotlin.
@@ -756,6 +756,23 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
+    if (getEmbeddingVersion() == AndroidEmbeddingVersion.v1) {
+      globals.printStatus(
+"""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Warning
+──────────────────────────────────────────────────────────────────────────────
+Your Flutter application is created using an older version of the Android
+embedding. It's being deprecated in favor of Android embedding v2. Follow the
+steps at
+
+https://flutter.dev/go/android-project-migration
+
+to migrate your project.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"""
+      );
+    }
     if (isModule && _shouldRegenerateFromTemplate()) {
       await _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
@@ -989,7 +1006,7 @@ class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 }
 
-/// The Windows sub project
+/// The Windows sub project.
 class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject {
   WindowsProject._(this.parent);
 
@@ -1039,6 +1056,8 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   @override
   String get pluginConfigKey => LinuxPlugin.kConfigKey;
 
+  static final RegExp _applicationIdPattern = RegExp(r'''^\s*set\s*\(\s*APPLICATION_ID\s*"(.*)"\s*\)\s*$''');
+
   Directory get _editableDirectory => parent.directory.childDirectory('linux');
 
   /// The directory in the project that is managed by Flutter. As much as
@@ -1067,9 +1086,13 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
+
+  String get applicationId {
+    return _firstMatchInFile(cmakeFile, _applicationIdPattern)?.group(1);
+  }
 }
 
-/// The Fuchsia sub project
+/// The Fuchsia sub project.
 class FuchsiaProject {
   FuchsiaProject._(this.project);
 
