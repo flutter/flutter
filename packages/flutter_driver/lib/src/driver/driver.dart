@@ -41,7 +41,7 @@ enum TimelineStream {
   /// Marks events from the Dart VM's JIT compiler.
   compiler,
 
-  /// the verbose version of compiler.
+  /// The verbose version of compiler.
   compilerVerbose,
 
   /// Marks events emitted using the `dart:developer` API.
