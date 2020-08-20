@@ -183,11 +183,6 @@ class VisualStudio {
     'vswhere.exe',
   );
 
-  /// Workload ID for use with vswhere requirements.
-  ///
-  /// See https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids
-  static const String _requiredWorkload = 'Microsoft.VisualStudio.Workload.NativeDesktop';
-
   /// Components for use with vswhere requirements.
   ///
   /// Maps from component IDs to description in the installer UI.
@@ -274,13 +269,13 @@ class VisualStudio {
     final List<String> requirementArguments = validateRequirements
         ? <String>[
             '-requires',
-            _requiredWorkload,
             ..._requiredComponents(_minimumSupportedVersion).keys
           ]
         : <String>[];
     try {
       final List<String> defaultArguments = <String>[
         '-format', 'json',
+        '-products', '*',
         '-utf8',
         '-latest',
       ];

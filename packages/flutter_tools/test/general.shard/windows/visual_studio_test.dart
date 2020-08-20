@@ -69,7 +69,6 @@ const Map<String, dynamic> _missingStatusResponse = <String, dynamic>{
 // Arguments for a vswhere query to search for an installation with the
 // requirements.
 const List<String> _requirements = <String>[
-  'Microsoft.VisualStudio.Workload.NativeDesktop',
   'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
   'Microsoft.VisualStudio.Component.VC.CMake.Project',
 ];
@@ -98,6 +97,8 @@ void setMockVswhereResponse(
       vswherePath,
       '-format',
       'json',
+      '-products',
+      '*',
       '-utf8',
       '-latest',
       ...?additionalArguments,
