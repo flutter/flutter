@@ -580,7 +580,7 @@ class TextPainter {
           newWidth = maxIntrinsicWidth;
           break;
       }
-      newWidth = newWidth.clamp(minWidth, maxWidth) as double;
+      newWidth = newWidth.clamp(minWidth, maxWidth) as double; // ignore: unnecessary_cast
       if (newWidth != _applyFloatingPointHack(_paragraph!.width)) {
         _paragraph!.layout(ui.ParagraphConstraints(width: newWidth));
       }
