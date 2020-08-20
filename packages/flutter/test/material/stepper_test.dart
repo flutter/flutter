@@ -888,7 +888,6 @@ void main() {
             height: 75,
             child: Stepper(
               type: StepperType.horizontal,
-              //horizontalElevation: ,
               steps: const <Step>[
                 Step(
                   title: Text('Regular title'),
