@@ -22,6 +22,7 @@ typedef struct FlutterDesktopViewControllerState*
     FlutterDesktopViewControllerRef;
 
 // Opaque reference to a Flutter window.
+struct FlutterDesktopView;
 typedef struct FlutterDesktopView* FlutterDesktopViewRef;
 
 // Opaque reference to a Flutter engine instance.
