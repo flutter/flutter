@@ -757,16 +757,16 @@ void main() {
             width: 200,
             height: 75,
             child: Stepper(
-                type: StepperType.horizontal,
-                //horizontalElevation: ,
-                steps: const <Step>[
-                  Step(
-                    title: Text('Regular title'),
-                    subtitle: Text('Text subtitle'),
-                    content: Text('Text content')
-                  ),
-                ],
-              ),
+              type: StepperType.horizontal,
+              //horizontalElevation: ,
+              steps: const <Step>[
+                Step(
+                  title: Text('Regular title'),
+                  subtitle: Text('Text subtitle'),
+                  content: Text('Text content')
+                ),
+               ],
+             ),
            ),
          ),
        ),
