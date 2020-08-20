@@ -173,8 +173,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   @override // from HitTestDispatcher
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     assert(!locked);
-    // No hit test information implies that this is a hover or pointer
-    // add/remove event.
+    // No hit test information implies that this is a pointer hover or
+    // add/remove event. These events are specially routed here; other events
+    // will be routed through the `handleEvent` below.
     if (hitTestResult == null) {
       assert(event is PointerHoverEvent || event is PointerAddedEvent || event is PointerRemovedEvent);
       try {

@@ -869,7 +869,7 @@ class PointerHoverEvent extends PointerEvent {
 ///  * [PointerExitEvent], which reports when the pointer has left an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
 ///    contact with the device.
-///  * [Listener.onPointerEnter], which allows callers to be notified of these
+///  * [MouseRegion.onEnter], which allows callers to be notified of these
 ///    events in a widget tree.
 class PointerEnterEvent extends PointerEvent {
   /// Creates a pointer enter event.
@@ -1020,7 +1020,7 @@ class PointerEnterEvent extends PointerEvent {
 ///  * [PointerEnterEvent], which reports when the pointer has entered an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
 ///    contact with the device.
-///  * [Listener.onPointerExit], which allows callers to be notified of these
+///  * [MouseRegion.onExit], which allows callers to be notified of these
 ///    events in a widget tree.
 class PointerExitEvent extends PointerEvent {
   /// Creates a pointer exit event.
