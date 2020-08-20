@@ -75,12 +75,12 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   static final Object _prototypeSlot = Object();
 
   @override
-  void insertRenderObjectChild(covariant RenderObject child, covariant dynamic slot) {
+  void insertChildRenderObject(covariant RenderObject child, covariant dynamic slot) {
     if (slot == _prototypeSlot) {
       assert(child is RenderBox);
       renderObject.child = child as RenderBox;
     } else {
-      super.insertRenderObjectChild(child, slot as int);
+      super.insertChildRenderObject(child, slot as int);
     }
   }
 
@@ -91,19 +91,19 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderBox child, dynamic oldSlot, dynamic newSlot) {
-    if (newSlot == _prototypeSlot)
+  void moveChildRenderObject(RenderBox child, dynamic slot) {
+    if (slot == _prototypeSlot)
       assert(false); // There's only one prototype child so it cannot be moved.
     else
-      super.moveRenderObjectChild(child, oldSlot as int, newSlot as int);
+      super.moveChildRenderObject(child, slot as int);
   }
 
   @override
-  void removeRenderObjectChild(RenderBox child, dynamic slot) {
+  void removeChildRenderObject(RenderBox child) {
     if (renderObject.child == child)
       renderObject.child = null;
     else
-      super.removeRenderObjectChild(child, slot as int);
+      super.removeChildRenderObject(child);
   }
 
   @override
