@@ -129,6 +129,7 @@ export 'src/material/text_button_theme.dart';
 export 'src/material/text_field.dart';
 export 'src/material/text_form_field.dart';
 export 'src/material/text_selection.dart';
+export 'src/material/text_selection_theme.dart';
 export 'src/material/text_theme.dart';
 export 'src/material/theme.dart';
 export 'src/material/theme_data.dart';

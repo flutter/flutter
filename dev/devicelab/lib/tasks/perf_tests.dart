@@ -12,15 +12,15 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
-TaskFunction createComplexLayoutScrollPerfTest() {
+TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'complex_layout_scroll_perf',
+    measureCpuGpu: measureCpuGpu,
   ).run;
 }
 
@@ -95,8 +95,9 @@ TaskFunction createCubicBezierPerfTest() {
 TaskFunction createCubicBezierPerfSkSLWarmupTest() {
   return PerfTestWithSkSL(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/cubic_bezier_perf.dart',
+    'test_driver/run_app.dart',
     'cubic_bezier_perf',
+    testDriver: 'test_driver/cubic_bezier_perf_test.dart',
   ).run;
 }
 
@@ -108,42 +109,42 @@ TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
   ).run;
 }
 
-TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
+TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'backdrop_filter_perf',
-    needsMeasureCpuGpu: needsMeasureCpuGpu,
+    measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/backdrop_filter_perf_test.dart',
   ).run;
 }
 
-TaskFunction createPostBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
+TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'post_backdrop_filter_perf',
-    needsMeasureCpuGpu: needsMeasureCpuGpu,
+    measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/post_backdrop_filter_perf_test.dart',
   ).run;
 }
 
-TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
+TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'simple_animation_perf',
-    needsMeasureCpuGpu: needsMeasureCpuGpu,
+    measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/simple_animation_perf_test.dart',
   ).run;
 }
 
-TaskFunction createAnimatedPlaceholderPerfTest({bool needsMeasureCpuGpu = false}) {
+TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'animated_placeholder_perf',
-    needsMeasureCpuGpu: needsMeasureCpuGpu,
+    measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/animated_placeholder_perf_test.dart',
   ).run;
 }
@@ -154,6 +155,13 @@ TaskFunction createPictureCachePerfTest() {
     'test_driver/run_app.dart',
     'picture_cache_perf',
     testDriver: 'test_driver/picture_cache_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createPictureCachePerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/picture_cache_perf_e2e.dart',
   ).run;
 }
 
@@ -269,6 +277,13 @@ TaskFunction createsMultiWidgetConstructPerfTest() {
   ).run;
 }
 
+TaskFunction createsMultiWidgetConstructPerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/multi_widget_construction_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createFramePolicyIntegrationTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
@@ -353,7 +368,7 @@ class PerfTest {
     this.testDirectory,
     this.testTarget,
     this.timelineFileName, {
-    this.needsMeasureCpuGpu = false,
+    this.measureCpuGpu = false,
     this.testDriver,
     this.needsFullTimeline = true,
     this.benchmarkScoreKeys,
@@ -370,7 +385,7 @@ class PerfTest {
   /// The test file to run on the host.
   final String testDriver;
   /// Whether to collect CPU and GPU metrics.
-  final bool needsMeasureCpuGpu;
+  final bool measureCpuGpu;
   /// Whether to collect full timeline, meaning if `--trace-startup` flag is needed.
   final bool needsFullTimeline;
 
@@ -390,8 +405,8 @@ class PerfTest {
   ///   'average_vsync_transitions_missed',
   ///   '90th_percentile_vsync_transitions_missed',
   ///   '99th_percentile_vsync_transitions_missed',
-  ///   if (needsMeasureCpuGpu) 'cpu_percentage',
-  ///   if (needsMeasureCpuGpu) 'gpu_percentage',
+  ///   if (measureCpuGpu) 'average_cpu_usage',
+  ///   if (measureCpuGpu) 'average_gpu_usage',
   /// ]
   /// ```
   final List<String> benchmarkScoreKeys;
@@ -447,12 +462,6 @@ class PerfTest {
         );
       }
 
-      if (needsMeasureCpuGpu) {
-        await inDirectory<void>('$testDirectory/build', () async {
-          data.addAll(await measureIosCpuGpu(deviceId: deviceId));
-        });
-      }
-
       return TaskResult.success(
         data,
         benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
@@ -467,8 +476,8 @@ class PerfTest {
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
-          if (needsMeasureCpuGpu) 'cpu_percentage',
-          if (needsMeasureCpuGpu) 'gpu_percentage',
+          if (measureCpuGpu) 'average_cpu_usage',
+          if (measureCpuGpu) 'average_gpu_usage',
         ],
       );
     });
@@ -509,13 +518,13 @@ class PerfTestWithSkSL extends PerfTest {
     String testDirectory,
     String testTarget,
     String timelineFileName, {
-    bool needsMeasureCpuGpu = false,
+    bool measureCpuGpu = false,
     String testDriver,
   }) : super(
     testDirectory,
     testTarget,
     timelineFileName,
-    needsMeasureCpuGpu: needsMeasureCpuGpu,
+    measureCpuGpu: measureCpuGpu,
     testDriver: testDriver,
   );
 
