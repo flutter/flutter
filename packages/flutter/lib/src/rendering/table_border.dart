@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' hide Border;
@@ -150,7 +150,7 @@ class TableBorder {
   /// borders.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static TableBorder lerp(TableBorder a, TableBorder b, double t) {
+  static TableBorder? lerp(TableBorder a, TableBorder b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
@@ -197,8 +197,8 @@ class TableBorder {
   void paint(
     Canvas canvas,
     Rect rect, {
-    @required Iterable<double> rows,
-    @required Iterable<double> columns,
+    required Iterable<double> rows,
+    required Iterable<double?> columns,
   }) {
     // properties can't be null
     assert(top != null);
@@ -214,7 +214,7 @@ class TableBorder {
     assert(rows != null);
     assert(rows.isEmpty || (rows.first >= 0.0 && rows.last <= rect.height));
     assert(columns != null);
-    assert(columns.isEmpty || (columns.first >= 0.0 && columns.last <= rect.width));
+    assert(columns.isEmpty || (columns.first! >= 0.0 && columns.last! <= rect.width));
 
     if (columns.isNotEmpty || rows.isNotEmpty) {
       final Paint paint = Paint();
@@ -228,8 +228,8 @@ class TableBorder {
               ..strokeWidth = verticalInside.width
               ..style = PaintingStyle.stroke;
             path.reset();
-            for (final double x in columns) {
-              path.moveTo(rect.left + x, rect.top);
+            for (final double? x in columns) {
+              path.moveTo(rect.left + x!, rect.top);
               path.lineTo(rect.left + x, rect.bottom);
             }
             canvas.drawPath(path, paint);

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'box.dart';
 import 'layer.dart';
@@ -170,7 +170,7 @@ class RenderPerformanceOverlay extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    assert(needsCompositing);
+    assert(needsCompositing!);
     context.addLayer(PerformanceOverlayLayer(
       overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       optionsMask: optionsMask,

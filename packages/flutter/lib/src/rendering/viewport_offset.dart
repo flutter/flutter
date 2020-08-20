@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -42,7 +42,7 @@ enum ScrollDirection {
 /// Specifically, returns [ScrollDirection.reverse] for [ScrollDirection.forward]
 /// (and vice versa) and returns [ScrollDirection.idle] for
 /// [ScrollDirection.idle].
-ScrollDirection flipScrollDirection(ScrollDirection direction) {
+ScrollDirection? flipScrollDirection(ScrollDirection direction) {
   switch (direction) {
     case ScrollDirection.idle:
       return ScrollDirection.idle;
@@ -120,7 +120,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// dimensions unconditionally?"; if the new dimensions change the
   /// [ViewportOffset]'s actual [pixels] value, then the viewport will need to
   /// be laid out again.)
-  bool applyViewportDimension(double viewportDimension);
+  bool applyViewportDimension(double? viewportDimension);
 
   /// Called when the viewport's content extents are established.
   ///
@@ -161,7 +161,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   ///  * [jumpTo], for also changing the scroll position when not in layout.
   ///    [jumpTo] applies the change immediately and notifies its listeners.
-  void correctBy(double correction);
+  void correctBy(double? correction);
 
   /// Jumps [pixels] from its current value to the given value,
   /// without animation, and without checking if the new value is in range.
@@ -181,8 +181,8 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// animation, use [jumpTo].
   Future<void> animateTo(
     double to, {
-    @required Duration duration,
-    @required Curve curve,
+    required Duration duration,
+    required Curve curve,
   });
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
@@ -194,9 +194,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// underscroll.
   Future<void> moveTo(
     double to, {
-    Duration duration,
-    Curve curve,
-    bool clamp,
+    Duration? duration,
+    Curve? curve,
+    bool? clamp,
   }) {
     assert(to != null);
     if (duration == null || duration == Duration.zero) {
@@ -262,13 +262,13 @@ class _FixedViewportOffset extends ViewportOffset {
   double get pixels => _pixels;
 
   @override
-  bool applyViewportDimension(double viewportDimension) => true;
+  bool applyViewportDimension(double? viewportDimension) => true;
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) => true;
 
   @override
-  void correctBy(double correction) {
+  void correctBy(double? correction) {
     _pixels += correction;
   }
 
@@ -280,8 +280,8 @@ class _FixedViewportOffset extends ViewportOffset {
   @override
   Future<void> animateTo(
     double to, {
-    @required Duration duration,
-    @required Curve curve,
+    required Duration duration,
+    required Curve curve,
   }) async { }
 
   @override

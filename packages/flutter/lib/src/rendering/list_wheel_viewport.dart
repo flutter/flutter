@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:math' as math;
 
@@ -44,16 +44,16 @@ abstract class ListWheelChildManager {
   /// nothing.
   ///
   /// It is possible to create children with negative indices.
-  void createChild(int index, { @required RenderBox after });
+  void createChild(int index, { required RenderBox? after });
 
   /// Removes the child element corresponding with the given RenderBox.
-  void removeChild(RenderBox child);
+  void removeChild(RenderBox? child);
 }
 
 /// [ParentData] for use with [RenderListWheelViewport].
 class ListWheelParentData extends ContainerBoxParentData<RenderBox> {
   /// Index of this child in its parent's child list.
-  int index;
+  int? index;
 }
 
 /// Render, onto a wheel, a bigger sequential set of objects inside this viewport.
@@ -129,25 +129,25 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> {
 ///    above and below it being transformed more as the angle increases.
 class RenderListWheelViewport
     extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, ListWheelParentData>
+    with ContainerRenderObjectMixin<RenderBox?, ListWheelParentData>
     implements RenderAbstractViewport {
   /// Creates a [RenderListWheelViewport] which renders children on a wheel.
   ///
   /// All arguments must not be null. Optional arguments have reasonable defaults.
   RenderListWheelViewport({
-    @required this.childManager,
-    @required ViewportOffset offset,
+    required this.childManager,
+    required ViewportOffset offset,
     double diameterRatio = defaultDiameterRatio,
     double perspective = defaultPerspective,
     double offAxisFraction = 0,
     bool useMagnifier = false,
     double magnification = 1,
     double overAndUnderCenterOpacity = 1,
-    @required double itemExtent,
+    required double itemExtent,
     double squeeze = 1,
     bool renderChildrenOutsideViewport = false,
     Clip clipBehavior = Clip.none,
-    List<RenderBox> children,
+    List<RenderBox>? children,
   }) : assert(childManager != null),
        assert(offset != null),
        assert(diameterRatio != null),
@@ -567,7 +567,7 @@ class RenderListWheelViewport
 
   double _getIntrinsicCrossAxis(_ChildSizingFunction childSize) {
     double extent = 0.0;
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     while (child != null) {
       extent = math.max(extent, childSize(child));
       child = childAfter(child);
@@ -612,7 +612,7 @@ class RenderListWheelViewport
   }
 
   /// Gets the index of a child by looking at its parentData.
-  int indexOf(RenderBox child) {
+  int? indexOf(RenderBox child) {
     assert(child != null);
     final ListWheelParentData childParentData = child.parentData as ListWheelParentData;
     assert(childParentData.index != null);
@@ -625,14 +625,14 @@ class RenderListWheelViewport
   /// Returns the scroll offset of the child with the given index.
   double indexToScrollOffset(int index) => index * itemExtent;
 
-  void _createChild(int index, { RenderBox after }) {
+  void _createChild(int index, { RenderBox? after }) {
     invokeLayoutCallback<BoxConstraints>((BoxConstraints constraints) {
       assert(constraints == this.constraints);
       childManager.createChild(index, after: after);
     });
   }
 
-  void _destroyChild(RenderBox child) {
+  void _destroyChild(RenderBox? child) {
     invokeLayoutCallback<BoxConstraints>((BoxConstraints constraints) {
       assert(constraints == this.constraints);
       childManager.removeChild(child);
@@ -711,7 +711,7 @@ class RenderListWheelViewport
 
     // Case when there is no intersection.
     if (childCount > 0 &&
-        (indexOf(firstChild) > targetLastIndex || indexOf(lastChild) < targetFirstIndex)) {
+        (indexOf(firstChild!)! > targetLastIndex || indexOf(lastChild!)! < targetFirstIndex)) {
       while (firstChild != null)
         _destroyChild(firstChild);
     }
@@ -720,11 +720,11 @@ class RenderListWheelViewport
     // target range.
     if (childCount == 0) {
       _createChild(targetFirstIndex);
-      _layoutChild(firstChild, childConstraints, targetFirstIndex);
+      _layoutChild(firstChild!, childConstraints, targetFirstIndex);
     }
 
-    int currentFirstIndex = indexOf(firstChild);
-    int currentLastIndex = indexOf(lastChild);
+    int currentFirstIndex = indexOf(firstChild!)!;
+    int currentLastIndex = indexOf(lastChild!)!;
 
     // Remove all unnecessary children by shortening the current child list, in
     // both directions.
@@ -738,7 +738,7 @@ class RenderListWheelViewport
     }
 
     // Relayout all active children.
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     while (child != null) {
       child.layout(childConstraints, parentUsesSize: true);
       child = childAfter(child);
@@ -747,11 +747,11 @@ class RenderListWheelViewport
     // Spawning new children that are actually visible but not in child list yet.
     while (currentFirstIndex > targetFirstIndex) {
       _createChild(currentFirstIndex - 1);
-      _layoutChild(firstChild, childConstraints, --currentFirstIndex);
+      _layoutChild(firstChild!, childConstraints, --currentFirstIndex);
     }
     while (currentLastIndex < targetLastIndex) {
       _createChild(currentLastIndex + 1, after: lastChild);
-      _layoutChild(lastChild, childConstraints, ++currentLastIndex);
+      _layoutChild(lastChild!, childConstraints, ++currentLastIndex);
     }
 
     offset.applyViewportDimension(_viewportExtent);
@@ -782,7 +782,7 @@ class RenderListWheelViewport
     if (childCount > 0) {
       if (_shouldClipAtCurrentOffset() && clipBehavior != Clip.none) {
         context.pushClipRect(
-          needsCompositing,
+          needsCompositing!,
           offset,
           Offset.zero & size,
           _paintVisibleChildren,
@@ -796,20 +796,20 @@ class RenderListWheelViewport
 
   /// Paints all children visible in the current viewport.
   void _paintVisibleChildren(PaintingContext context, Offset offset) {
-    RenderBox childToPaint = firstChild;
-    ListWheelParentData childParentData = childToPaint?.parentData as ListWheelParentData;
+    RenderBox? childToPaint = firstChild;
+    ListWheelParentData? childParentData = childToPaint?.parentData as ListWheelParentData?;
 
     while (childParentData != null) {
       _paintTransformedChild(childToPaint, context, offset, childParentData.offset);
       childToPaint = childAfter(childToPaint);
-      childParentData = childToPaint?.parentData as ListWheelParentData;
+      childParentData = childToPaint?.parentData as ListWheelParentData?;
     }
   }
 
   /// Takes in a child with a **scrollable layout offset** and paints it in the
   /// **transformed cylindrical space viewport painting coordinates**.
   void _paintTransformedChild(
-    RenderBox child,
+    RenderBox? child,
     PaintingContext context,
     Offset offset,
     Offset layoutOffset,
@@ -856,7 +856,7 @@ class RenderListWheelViewport
   void _paintChildWithMagnifier(
     PaintingContext context,
     Offset offset,
-    RenderBox child,
+    RenderBox? child,
     Matrix4 cylindricalTransform,
     Offset offsetToCenter,
     Offset untransformedPaintingCoordinates,
@@ -891,12 +891,12 @@ class RenderListWheelViewport
 
       // Clipping the part in the center.
       context.pushClipRect(
-        needsCompositing,
+        needsCompositing!,
         offset,
         centerRect,
         (PaintingContext context, Offset offset) {
           context.pushTransform(
-            needsCompositing,
+            needsCompositing!,
             offset,
             _magnifyTransform(),
             (PaintingContext context, Offset offset) {
@@ -906,7 +906,7 @@ class RenderListWheelViewport
 
       // Clipping the part in either the top-half or bottom-half of the wheel.
       context.pushClipRect(
-        needsCompositing,
+        needsCompositing!,
         offset,
         untransformedPaintingCoordinates.dy <= magnifierTopLinePosition
           ? topHalfRect
@@ -934,7 +934,7 @@ class RenderListWheelViewport
   void _paintChildCylindrically(
     PaintingContext context,
     Offset offset,
-    RenderBox child,
+    RenderBox? child,
     Matrix4 cylindricalTransform,
     Offset offsetToCenter,
   ) {
@@ -953,7 +953,7 @@ class RenderListWheelViewport
     };
 
     context.pushTransform(
-      needsCompositing,
+      needsCompositing!,
       offset,
       _centerOriginTransform(cylindricalTransform),
       // Pre-transform painting function.
@@ -993,7 +993,7 @@ class RenderListWheelViewport
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderObject child) {
+  Rect? describeApproximatePaintClip(RenderObject child) {
     if (child != null && _shouldClipAtCurrentOffset()) {
       return Offset.zero & size;
     }
@@ -1001,10 +1001,10 @@ class RenderListWheelViewport
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) => false;
+  bool hitTestChildren(BoxHitTestResult result, { Offset? position }) => false;
 
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect rect }) {
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {
     // `target` is only fully revealed when in the selected/center position. Therefore,
     // this method always returns the offset that shows `target` in the center position,
     // which is the same offset for all `alignment` values.
@@ -1020,7 +1020,7 @@ class RenderListWheelViewport
     final double targetOffset = parentData.offset.dy; // the so-called "centerPosition"
 
     final Matrix4 transform = target.getTransformTo(child);
-    final Rect bounds = MatrixUtils.transformRect(transform, rect);
+    final Rect bounds = MatrixUtils.transformRect(transform, rect!);
     final Rect targetRect = bounds.translate(0.0, (size.height - itemExtent) / 2);
 
     return RevealedOffset(offset: targetOffset, rect: targetRect);
@@ -1028,8 +1028,8 @@ class RenderListWheelViewport
 
   @override
   void showOnScreen({
-    RenderObject descendant,
-    Rect rect,
+    RenderObject? descendant,
+    Rect? rect,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {

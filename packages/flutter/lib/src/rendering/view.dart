@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:developer';
 import 'dart:io' show Platform;
@@ -50,16 +50,16 @@ class ViewConfiguration {
 /// The view represents the total output surface of the render tree and handles
 /// bootstrapping the rendering pipeline. The view has a unique child
 /// [RenderBox], which is required to fill the entire output surface.
-class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox> {
+class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox?> {
   /// Creates the root of the render tree.
   ///
   /// Typically created by the binding (e.g., [RendererBinding]).
   ///
   /// The [configuration] must not be null.
   RenderView({
-    RenderBox child,
-    @required ViewConfiguration configuration,
-    @required ui.Window window,
+    RenderBox? child,
+    required ViewConfiguration configuration,
+    required ui.Window window,
   }) : assert(configuration != null),
        _configuration = configuration,
        _window = window {
@@ -120,7 +120,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   )
   void scheduleInitialFrame() {
     prepareInitialFrame();
-    owner.requestVisualUpdate();
+    owner!.requestVisualUpdate();
   }
 
   /// Bootstrap the rendering pipeline by preparing the first frame.
@@ -139,7 +139,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(_rootTransform != null);
   }
 
-  Matrix4 _rootTransform;
+  Matrix4? _rootTransform;
 
   TransformLayer _updateMatricesAndCreateNewRootLayer() {
     _rootTransform = configuration.toMatrix();
@@ -166,11 +166,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(_size.isFinite);
 
     if (child != null)
-      child.layout(BoxConstraints.tight(_size));
+      child!.layout(BoxConstraints.tight(_size));
   }
 
   @override
-  void rotate({ int oldAngle, int newAngle, Duration time }) {
+  void rotate({ int? oldAngle, int? newAngle, Duration? time }) {
     assert(false); // nobody tells the screen to rotate, the whole rotate() dance is started from our performResize()
   }
 
@@ -184,9 +184,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// which is to say, in logical pixels. This is not necessarily the same
   /// coordinate system as that expected by the root [Layer], which will
   /// normally be in physical (device) pixels.
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(HitTestResult result, { Offset? position }) {
     if (child != null)
-      child.hitTest(BoxHitTestResult.wrap(result), position: position);
+      child!.hitTest(BoxHitTestResult.wrap(result), position: position);
     result.add(HitTestEntry(this));
     return true;
   }
@@ -218,7 +218,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     assert(_rootTransform != null);
-    transform.multiply(_rootTransform);
+    transform.multiply(_rootTransform!);
     super.applyPaintTransform(child, transform);
   }
 
@@ -229,7 +229,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     Timeline.startSync('Compositing', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
-      final ui.Scene scene = layer.buildScene(builder);
+      final ui.Scene scene = layer!.buildScene(builder);
       if (automaticSystemUiAdjustment)
         _updateSystemChrome();
       _window.render(scene);
@@ -248,12 +248,12 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     final Rect bounds = paintBounds;
     final Offset top = Offset(bounds.center.dx, _window.padding.top / _window.devicePixelRatio);
     final Offset bottom = Offset(bounds.center.dx, bounds.center.dy - _window.padding.bottom / _window.devicePixelRatio);
-    final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top);
+    final SystemUiOverlayStyle? upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
-    SystemUiOverlayStyle lowerOverlayStyle;
+    SystemUiOverlayStyle? lowerOverlayStyle;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom);
+        lowerOverlayStyle = layer!.find<SystemUiOverlayStyle>(bottom);
         break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
@@ -282,7 +282,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   Rect get semanticBounds {
     assert(_rootTransform != null);
-    return MatrixUtils.transformRect(_rootTransform, Offset.zero & size);
+    return MatrixUtils.transformRect(_rootTransform!, Offset.zero & size);
   }
 
   @override
