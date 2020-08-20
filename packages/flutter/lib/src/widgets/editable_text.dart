@@ -2026,11 +2026,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     // There's no need to format when starting to compose or when continuing
     // an existing composition.
-    final bool isValueComposing = value?.isComposingRangeValid ?? false;
-    final bool isLastUnmodifiedValueComposing = _lastFormattedUnmodifiedTextEditingValue?.isComposingRangeValid ?? false;
-    final bool isRepeatComposing = isValueComposing == isLastUnmodifiedValueComposing;
+    final bool isComposing = value?.composing?.isValid ?? false;
+    final bool isPreviouslyComposing = _lastFormattedUnmodifiedTextEditingValue?.composing?.isValid ?? false;
 
-    if ((textChanged || (!isRepeatComposing && !isValueComposing)) &&
+    if ((textChanged || (!isComposing && isPreviouslyComposing)) &&
         widget.inputFormatters != null &&
         widget.inputFormatters.isNotEmpty) {
       // Only format when the text has changed and there are available formatters.
