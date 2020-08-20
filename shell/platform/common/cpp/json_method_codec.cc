@@ -131,7 +131,11 @@ bool JsonMethodCodec::DecodeAndProcessResponseEnvelopeInternal(
     case 1: {
       std::unique_ptr<rapidjson::Document> value =
           ExtractElement(json_response.get(), &((*json_response)[0]));
-      result->Success(value->IsNull() ? nullptr : value.get());
+      if (value->IsNull()) {
+        result->Success();
+      } else {
+        result->Success(*value);
+      }
       return true;
     }
     case 3: {
@@ -139,7 +143,11 @@ bool JsonMethodCodec::DecodeAndProcessResponseEnvelopeInternal(
       std::string message = (*json_response)[1].GetString();
       std::unique_ptr<rapidjson::Document> details =
           ExtractElement(json_response.get(), &((*json_response)[2]));
-      result->Error(code, message, details->IsNull() ? nullptr : details.get());
+      if (details->IsNull()) {
+        result->Error(code, message);
+      } else {
+        result->Error(code, message, *details);
+      }
       return true;
     }
     default:

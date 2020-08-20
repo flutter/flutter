@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/method_result_functions.h"
-
 #include <functional>
 #include <string>
 
+#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/method_result_functions.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -29,7 +28,7 @@ TEST(MethodChannelTest, Success) {
         EXPECT_EQ(*i, value);
       },
       nullptr, nullptr);
-  result.Success(&value);
+  result.Success(value);
   EXPECT_TRUE(called);
 }
 
@@ -50,7 +49,7 @@ TEST(MethodChannelTest, Error) {
         EXPECT_EQ(*details, error_details);
       },
       nullptr);
-  result.Error(error_code, error_message, &error_details);
+  result.Error(error_code, error_message, error_details);
   EXPECT_TRUE(called);
 }
 

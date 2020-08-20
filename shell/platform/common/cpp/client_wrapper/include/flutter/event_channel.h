@@ -144,14 +144,14 @@ class EventChannel {
     const MethodCodec<T>* codec_;
 
    protected:
-    void SuccessInternal(T* event = nullptr) override {
+    void SuccessInternal(const T* event = nullptr) override {
       auto result = codec_->EncodeSuccessEnvelope(event);
       messenger_->Send(name_, result->data(), result->size());
     }
 
     void ErrorInternal(const std::string& error_code,
                        const std::string& error_message,
-                       T* error_details) override {
+                       const T* error_details) override {
       auto result =
           codec_->EncodeErrorEnvelope(error_code, error_message, error_details);
       messenger_->Send(name_, result->data(), result->size());
