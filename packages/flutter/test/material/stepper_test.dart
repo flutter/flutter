@@ -872,7 +872,6 @@ void main() {
       ),
     );
 
-    await tester.pump();
     final Stepper stepper = tester.widget(find.byType(Stepper));
 
     expect(stepper.horizontalElevation, elevation);
@@ -901,7 +900,6 @@ void main() {
       ),
     );
 
-    await tester.pump();
     final Stepper stepper = tester.widget(find.byType(Stepper));
 
     expect(stepper.horizontalElevation, 2.0);
