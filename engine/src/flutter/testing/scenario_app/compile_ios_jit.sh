@@ -7,27 +7,53 @@
 
 set -e
 
-HOST_TOOLS=$1
-DEVICE_TOOLS=$2
+# Needed because if it is set, cd may print the path it changed to.
+unset CDPATH
+
+# On Mac OS, readlink -f doesn't work, so follow_links traverses the path one
+# link at a time, and then cds into the link destination and find out where it
+# ends up.
+#
+# The function is enclosed in a subshell to avoid changing the working directory
+# of the caller.
+function follow_links() (
+  cd -P "$(dirname -- "$1")"
+  file="$PWD/$(basename -- "$1")"
+  while [[ -h "$file" ]]; do
+    cd -P "$(dirname -- "$file")"
+    file="$(readlink -- "$file")"
+    cd -P "$(dirname -- "$file")"
+    file="$PWD/$(basename -- "$file")"
+  done
+  echo "$file"
+)
+
+SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
+
+HOST_TOOLS="$1"
+DEVICE_TOOLS="$2"
 
 if [[ ! -d "$HOST_TOOLS" ]]; then
-  echo "Must specify the host out directory containing dart."
+  echo "Directory $HOST_TOOLS not found."
+  echo "First argument must specify the host out directory containing dart (e.g. host_debug_unopt)."
   exit 1
 fi
 
 if [[ ! -d "$DEVICE_TOOLS" ]]; then
-  echo "Must specify the device out directory containing gen_snapshot."
+  echo "Directory $DEVICE_TOOLS not found."
+  ehco "Second argument must specify the device out directory containing gen_snapshot (e.g. ios_debug_unopt)."
   exit 1
 fi
 
-PUB_VERSION=$($HOST_TOOLS/dart-sdk/bin/pub --version)
-echo "Using Pub ${PUB_VERSION} from $HOST_TOOLS/dart-sdk/bin/pub"
+PUB="$HOST_TOOLS/dart-sdk/bin/pub"
+PUB_VERSION=$("$PUB" --version)
+echo "Using Pub $PUB_VERSION from $PUB"
 
-$HOST_TOOLS/dart-sdk/bin/pub get
+"$PUB" get
 
 echo "Using dart from $HOST_TOOLS, gen_snapshot from $DEVICE_TOOLS."
 
-OUTDIR="${BASH_SOURCE%/*}/build/ios"
+OUTDIR="$SCRIPT_DIR/build/ios"
 
 echo "Creating $OUTDIR..."
 
@@ -77,11 +103,11 @@ echo "static const int Moo = 88;" | xcrun clang -x c \
 
 strip "$OUTDIR/App.framework/App"
 
-cp "${BASH_SOURCE%/*}/ios/AppFrameworkInfo.plist" "$OUTDIR/App.framework/Info.plist"
+cp "$SCRIPT_DIR/ios/AppFrameworkInfo.plist" "$OUTDIR/App.framework/Info.plist"
 echo "Created $OUTDIR/App.framework/App."
 
-rm -rf "${BASH_SOURCE%/*}/ios/Scenarios/App.framework"
-rm -rf "${BASH_SOURCE%/*}/ios/Scenarios/Flutter.framework"
-cp -R "$OUTDIR/App.framework" "${BASH_SOURCE%/*}/ios/Scenarios"
-cp -R "$DEVICE_TOOLS/../Flutter.framework" "${BASH_SOURCE%/*}/ios/Scenarios"
+rm -rf "$SCRIPT_DIR/ios/Scenarios/App.framework"
+rm -rf "$SCRIPT_DIR/ios/Scenarios/Flutter.framework"
+cp -R "$OUTDIR/App.framework" "$SCRIPT_DIR/ios/Scenarios"
+cp -R "$DEVICE_TOOLS/../Flutter.framework" "$SCRIPT_DIR/ios/Scenarios"
 
