@@ -515,7 +515,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
     const FileSystem fs = LocalFileSystem();
     final Uri basedir = defaultComparator.basedir;
-    final SkiaGoldClient skiaClient = SkiaGoldClient(fs.directory(basedir), ci: ContinuousIntegrationEnvironment.luci,);
+    final SkiaGoldClient skiaClient = SkiaGoldClient(fs.directory(basedir), ci: ContinuousIntegrationEnvironment.none);
     return FlutterSkippingFileComparator(basedir, skiaClient, reason);
   }
 
@@ -607,11 +607,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       baseDirectory.createSync(recursive: true);
     }
 
-    goldens ??= SkiaGoldClient(baseDirectory,
-      ci: platform.environment.containsKey('CIRRUS_CI')
-        ? ContinuousIntegrationEnvironment.cirrus
-        : ContinuousIntegrationEnvironment.luci,
-    );
+    goldens ??= SkiaGoldClient(baseDirectory, ci: ContinuousIntegrationEnvironment.none);
 
     try {
       await goldens.getExpectations();

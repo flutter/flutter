@@ -25,6 +25,7 @@ const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 enum ContinuousIntegrationEnvironment {
   luci,
   cirrus,
+  none,
 }
 
 /// A client for uploading image tests and making baseline requests to the
@@ -150,6 +151,8 @@ class SkiaGoldClient {
           'Cirrus, if the debug information below contains ENCRYPTED, the wrong '
           'comparator was chosen for the test case.';
         break;
+      case ContinuousIntegrationEnvironment.none:
+        return;
     }
 
     final io.ProcessResult result = await io.Process.run(
@@ -656,6 +659,8 @@ class SkiaGoldClient {
         jobId = platform.environment['CIRRUS_TASK_ID']!;
         cis = 'cirrus';
         break;
+      case ContinuousIntegrationEnvironment.none:
+        return <String>[];
     }
 
     return <String>[
