@@ -109,6 +109,14 @@ TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
   ).run;
 }
 
+TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupE2ETest() {
+  return E2EPerfTestWithSkSL(
+    '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
+    'test_driver/transitions_perf_e2e.dart',
+    testDriver: 'test_driver/transitions_perf_e2e_test.dart',
+  ).run;
+}
+
 TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -504,13 +512,44 @@ class E2EPerfTest extends PerfTest {
     String testDirectory,
     String testTarget, {
     String summaryFilename,
+    String testDriver,
     List<String> benchmarkScoreKeys,
     }
   ) : super(
     testDirectory,
     testTarget,
     summaryFilename,
-    testDriver: 'test_driver/e2e_test.dart',
+    testDriver: testDriver?? 'test_driver/e2e_test.dart',
+    needsFullTimeline: false,
+    benchmarkScoreKeys: benchmarkScoreKeys ?? const <String>[
+      'average_frame_build_time_millis',
+      'worst_frame_build_time_millis',
+      '90th_percentile_frame_build_time_millis',
+      '99th_percentile_frame_build_time_millis',
+      'average_frame_rasterizer_time_millis',
+      'worst_frame_rasterizer_time_millis',
+      '90th_percentile_frame_rasterizer_time_millis',
+      '99th_percentile_frame_rasterizer_time_millis',
+      ],
+  );
+
+  @override
+  String get resultFilename => timelineFileName ?? 'e2e_perf_summary';
+}
+
+class E2EPerfTestWithSkSL extends PerfTestWithSkSL {
+  E2EPerfTestWithSkSL(
+    String testDirectory,
+    String testTarget, {
+    String summaryFilename,
+    String testDriver,
+    List<String> benchmarkScoreKeys,
+    }
+  ) : super(
+    testDirectory,
+    testTarget,
+    summaryFilename,
+    testDriver: testDriver?? 'test_driver/e2e_test.dart',
     needsFullTimeline: false,
     benchmarkScoreKeys: benchmarkScoreKeys ?? const <String>[
       'average_frame_build_time_millis',
@@ -535,12 +574,16 @@ class PerfTestWithSkSL extends PerfTest {
     String timelineFileName, {
     bool measureCpuGpu = false,
     String testDriver,
+    bool needsFullTimeline = true,
+    List<String> benchmarkScoreKeys,
   }) : super(
     testDirectory,
     testTarget,
     timelineFileName,
     measureCpuGpu: measureCpuGpu,
     testDriver: testDriver,
+    needsFullTimeline: needsFullTimeline,
+    benchmarkScoreKeys: benchmarkScoreKeys,
   );
 
   @override
