@@ -2677,7 +2677,7 @@ void main() {
     // There was a time where this would throw an exception
     // because we tried to send a notification on dispose.
   });
-  
+
   testWidgets('TabController changes offset attribute', (WidgetTester tester) async {
     final TabController controller = TabController(
       vsync: const TestVSync(),
