@@ -55,7 +55,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
       case AxisDirection.left:
         return resolvedPadding.right;
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   /// The padding in the scroll direction on the side furthest from the 0.0 scroll offset.
@@ -77,7 +77,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
       case AxisDirection.left:
         return resolvedPadding.left;
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   /// The total padding in the [SliverConstraints.axisDirection]. (In other
@@ -109,7 +109,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
       case Axis.vertical:
         return resolvedPadding.horizontal;
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
@@ -255,7 +255,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
       case AxisDirection.right:
         return resolvedPadding.top;
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
@@ -267,7 +267,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child != null);
-    assert(child == this.child);
+    assert(child == this.child/*!*/);
     final SliverPhysicalParentData childParentData = child.parentData as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
   }
@@ -362,9 +362,9 @@ class RenderSliverPadding extends RenderSliverEdgeInsetsPadding {
   ///
   /// This may be changed to null, but only after the [padding] has been changed
   /// to a value that does not depend on the direction.
-  TextDirection get textDirection => _textDirection;
+  TextDirection/*?*/ get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(TextDirection/*?*/ value) {
     if (_textDirection == value)
       return;
     _textDirection = value;

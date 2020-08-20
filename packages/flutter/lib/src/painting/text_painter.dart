@@ -44,6 +44,12 @@ class PlaceholderDimensions {
   }) : assert(size != null),
        assert(alignment != null);
 
+  /// An instance of [PlaceholderDimensions] with zero size, aligned to the bottom.
+  ///
+  /// This is useful to prefill non-nullable arrays (using [List.filled]) that are
+  /// subsequently going to be filled with real data.
+  static const PlaceholderDimensions empty = PlaceholderDimensions(size: Size.zero, alignment: ui.PlaceholderAlignment.bottom);
+
   /// Width and height dimensions of the placeholder.
   final Size size;
 

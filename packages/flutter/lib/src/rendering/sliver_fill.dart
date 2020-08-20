@@ -6,7 +6,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart'; // ignore: unused_import
 
 import 'box.dart';
 import 'object.dart';

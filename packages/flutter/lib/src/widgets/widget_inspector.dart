@@ -1865,7 +1865,7 @@ mixin WidgetInspectorService {
 
   void _onPaint(RenderObject renderObject) {
     try {
-      final Element element = renderObject.debugCreator?.element as Element;
+      final Element element = (renderObject.debugCreator as DebugCreator)?.element;
       if (element is! RenderObjectElement) {
         // This branch should not hit as long as all RenderObjects were created
         // by Widgets. It is possible there might be some render objects
@@ -2363,7 +2363,7 @@ class InspectorSelection {
   set current(RenderObject value) {
     if (_current != value) {
       _current = value;
-      _currentElement = value.debugCreator.element as Element;
+      _currentElement = (value.debugCreator as DebugCreator).element;
     }
   }
 
@@ -2384,7 +2384,7 @@ class InspectorSelection {
   void _computeCurrent() {
     if (_index < candidates.length) {
       _current = candidates[index];
-      _currentElement = _current.debugCreator.element as Element;
+      _currentElement = (_current.debugCreator as DebugCreator).element;
     } else {
       _current = null;
       _currentElement = null;

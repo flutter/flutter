@@ -74,7 +74,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     if (child != null) {
       final BoxParentData childParentData = child.parentData as BoxParentData;
       return result.addWithPaintOffset(
@@ -144,9 +144,9 @@ class RenderPadding extends RenderShiftedBox {
   ///
   /// This may be changed to null, but only after the [padding] has been changed
   /// to a value that does not depend on the direction.
-  TextDirection get textDirection => _textDirection;
+  TextDirection/*?*/ get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(TextDirection/*?*/ value) {
     if (_textDirection == value)
       return;
     _textDirection = value;
@@ -299,9 +299,9 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   ///
   /// This may be changed to null, but only after [alignment] has been changed
   /// to a value that does not depend on the direction.
-  TextDirection get textDirection => _textDirection;
+  TextDirection/*?*/ get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(TextDirection/*?*/ value) {
     if (_textDirection == value)
       return;
     _textDirection = value;
@@ -363,9 +363,9 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   /// If non-null, sets its width to the child's width multiplied by this factor.
   ///
   /// Can be both greater and less than 1.0 but must be positive.
-  double get widthFactor => _widthFactor;
-  double _widthFactor;
-  set widthFactor(double value) {
+  double/*?*/ get widthFactor => _widthFactor;
+  double/*?*/ _widthFactor;
+  set widthFactor(double/*?*/ value) {
     assert(value == null || value >= 0.0);
     if (_widthFactor == value)
       return;
@@ -376,9 +376,9 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   /// If non-null, sets its height to the child's height multiplied by this factor.
   ///
   /// Can be both greater and less than 1.0 but must be positive.
-  double get heightFactor => _heightFactor;
-  double _heightFactor;
-  set heightFactor(double value) {
+  double/*?*/ get heightFactor => _heightFactor;
+  double/*?*/ _heightFactor;
+  set heightFactor(double/*?*/ value) {
     assert(value == null || value >= 0.0);
     if (_heightFactor == value)
       return;
@@ -517,9 +517,9 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 
   /// The minimum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
-  double get minWidth => _minWidth;
+  double/*?*/ get minWidth => _minWidth;
   double _minWidth;
-  set minWidth(double value) {
+  set minWidth(double/*?*/ value) {
     if (_minWidth == value)
       return;
     _minWidth = value;
@@ -528,9 +528,9 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 
   /// The maximum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
-  double get maxWidth => _maxWidth;
+  double/*?*/ get maxWidth => _maxWidth;
   double _maxWidth;
-  set maxWidth(double value) {
+  set maxWidth(double/*?*/ value) {
     if (_maxWidth == value)
       return;
     _maxWidth = value;
@@ -539,9 +539,9 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 
   /// The minimum height constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
-  double get minHeight => _minHeight;
+  double/*?*/ get minHeight => _minHeight;
   double _minHeight;
-  set minHeight(double value) {
+  set minHeight(double/*?*/ value) {
     if (_minHeight == value)
       return;
     _minHeight = value;
@@ -550,9 +550,9 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 
   /// The maximum height constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
-  double get maxHeight => _maxHeight;
+  double/*?*/ get maxHeight => _maxHeight;
   double _maxHeight;
-  set maxHeight(double value) {
+  set maxHeight(double/*?*/ value) {
     if (_maxHeight == value)
       return;
     _maxHeight = value;
@@ -641,9 +641,9 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
   /// constraints. If set to [Axis.vertical], then vertical constraints will
   /// be retained, and if set to [Axis.horizontal], then horizontal constraints
   /// will be retained.
-  Axis get constrainedAxis => _constrainedAxis;
+  Axis/*?*/ get constrainedAxis => _constrainedAxis;
   Axis _constrainedAxis;
-  set constrainedAxis(Axis value) {
+  set constrainedAxis(Axis/*?*/ value) {
     if (_constrainedAxis == value)
       return;
     _constrainedAxis = value;
@@ -676,7 +676,7 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
       // constrainedAxis is non-null, keep any constraints on that axis.
       BoxConstraints childConstraints;
       if (constrainedAxis != null) {
-        switch (constrainedAxis) {
+        switch (constrainedAxis/*!*/) {
           case Axis.horizontal:
             childConstraints = BoxConstraints(maxWidth: constraints.maxWidth, minWidth: constraints.minWidth);
             break;
@@ -858,9 +858,9 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// If non-null, the child is given a tight width constraint that is the max
   /// incoming width constraint multiplied by this factor. If null, the child is
   /// given the incoming width constraints.
-  double get widthFactor => _widthFactor;
-  double _widthFactor;
-  set widthFactor(double value) {
+  double/*?*/ get widthFactor => _widthFactor;
+  double/*?*/ _widthFactor;
+  set widthFactor(double/*?*/ value) {
     assert(value == null || value >= 0.0);
     if (_widthFactor == value)
       return;
@@ -873,9 +873,9 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// If non-null, the child is given a tight height constraint that is the max
   /// incoming width constraint multiplied by this factor. If null, the child is
   /// given the incoming width constraints.
-  double get heightFactor => _heightFactor;
-  double _heightFactor;
-  set heightFactor(double value) {
+  double/*?*/ get heightFactor => _heightFactor;
+  double/*?*/ _heightFactor;
+  set heightFactor(double/*?*/ value) {
     assert(value == null || value >= 0.0);
     if (_heightFactor == value)
       return;
@@ -1083,20 +1083,20 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
       markNeedsLayout();
     _delegate = newDelegate;
     if (attached) {
-      oldDelegate?._relayout?.removeListener(markNeedsLayout);
-      newDelegate?._relayout?.addListener(markNeedsLayout);
+      oldDelegate?._relayout?.removeListener(markNeedsLayout); // ignore: invalid_null_aware_operator
+      newDelegate?._relayout?.addListener(markNeedsLayout); // ignore: invalid_null_aware_operator
     }
   }
 
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _delegate?._relayout?.addListener(markNeedsLayout);
+    _delegate?._relayout?.addListener(markNeedsLayout); // ignore: invalid_null_aware_operator
   }
 
   @override
   void detach() {
-    _delegate?._relayout?.removeListener(markNeedsLayout);
+    _delegate?._relayout?.removeListener(markNeedsLayout); // ignore: invalid_null_aware_operator
     super.detach();
   }
 

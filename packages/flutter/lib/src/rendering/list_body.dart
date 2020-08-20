@@ -6,6 +6,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'box.dart';
 import 'object.dart';
 
@@ -230,7 +232,7 @@ class RenderListBody extends RenderBox
       case Axis.vertical:
         return _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicWidth(height));
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
@@ -242,7 +244,7 @@ class RenderListBody extends RenderBox
       case Axis.vertical:
         return _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicWidth(height));
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
@@ -254,7 +256,7 @@ class RenderListBody extends RenderBox
       case Axis.vertical:
         return _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicHeight(width));
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
@@ -266,7 +268,7 @@ class RenderListBody extends RenderBox
       case Axis.vertical:
         return _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicHeight(width));
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   @override
@@ -280,7 +282,7 @@ class RenderListBody extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     return defaultHitTestChildren(result, position: position);
   }
 

@@ -7,7 +7,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart'; // ignore: unused_import
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'box.dart';
@@ -30,7 +30,7 @@ abstract class ListWheelChildManager {
   /// If null, then there's no explicit limits to the range of the children
   /// except that it has to be contiguous. If [childExistsAt] for a certain
   /// index returns false, that index is already past the limit.
-  int get childCount;
+  int/*?*/ get childCount;
 
   /// Checks whether the delegate is able to provide a child widget at the given
   /// index.
@@ -53,6 +53,8 @@ abstract class ListWheelChildManager {
 /// [ParentData] for use with [RenderListWheelViewport].
 class ListWheelParentData extends ContainerBoxParentData<RenderBox> {
   /// Index of this child in its parent's child list.
+  ///
+  /// This must be maintained by the [ListWheelChildManager].
   int index;
 }
 
@@ -208,6 +210,8 @@ class RenderListWheelViewport
       'rendered outside will be clipped anyway.';
 
   /// The delegate that manages the children of this object.
+  ///
+  /// This delegate must maintain the [ListWheelParentData.index] value.
   final ListWheelChildManager childManager;
 
   /// The associated ViewportOffset object for the viewport describing the part
@@ -611,8 +615,10 @@ class RenderListWheelViewport
     size = constraints.biggest;
   }
 
-  /// Gets the index of a child by looking at its parentData.
-  int indexOf(RenderBox child) {
+  /// Gets the index of a child by looking at its [parentData].
+  ///
+  /// This relies on the [childManager] maintaining [ListWheelParentData.index].
+  int/*!*/ indexOf(RenderBox child) {
     assert(child != null);
     final ListWheelParentData childParentData = child.parentData as ListWheelParentData;
     assert(childParentData.index != null);
@@ -797,12 +803,10 @@ class RenderListWheelViewport
   /// Paints all children visible in the current viewport.
   void _paintVisibleChildren(PaintingContext context, Offset offset) {
     RenderBox childToPaint = firstChild;
-    ListWheelParentData childParentData = childToPaint?.parentData as ListWheelParentData;
-
-    while (childParentData != null) {
+    while (childToPaint != null) {
+      final ListWheelParentData childParentData = childToPaint.parentData as ListWheelParentData;
       _paintTransformedChild(childToPaint, context, offset, childParentData.offset);
       childToPaint = childAfter(childToPaint);
-      childParentData = childToPaint?.parentData as ListWheelParentData;
     }
   }
 
@@ -988,7 +992,8 @@ class RenderListWheelViewport
   /// painting coordinates** system.
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final ListWheelParentData parentData = child?.parentData as ListWheelParentData;
+    assert(child != null);
+    final ListWheelParentData parentData = child.parentData as ListWheelParentData;
     transform.translate(0.0, _getUntransformedPaintingCoordinateY(parentData.offset.dy));
   }
 
@@ -1001,7 +1006,7 @@ class RenderListWheelViewport
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) => false;
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) => false;
 
   @override
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect rect }) {

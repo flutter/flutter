@@ -167,7 +167,7 @@ class RelativeRect {
   int get hashCode => hashValues(left, top, right, bottom);
 
   @override
-  String toString() => 'RelativeRect.fromLTRB(${left?.toStringAsFixed(1)}, ${top?.toStringAsFixed(1)}, ${right?.toStringAsFixed(1)}, ${bottom?.toStringAsFixed(1)})';
+  String toString() => 'RelativeRect.fromLTRB(${left?.toStringAsFixed(1)}, ${top?.toStringAsFixed(1)}, ${right?.toStringAsFixed(1)}, ${bottom?.toStringAsFixed(1)})'; // ignore: invalid_null_aware_operator
 }
 
 /// Parent data for use with [RenderStack].
@@ -393,9 +393,9 @@ class RenderStack extends RenderBox
   ///
   /// This may be changed to null, but only after the [alignment] has been changed
   /// to a value that does not depend on the direction.
-  TextDirection get textDirection => _textDirection;
+  TextDirection/*?*/ get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(TextDirection/*?*/ value) {
     if (_textDirection == value)
       return;
     _textDirection = value;
@@ -597,7 +597,7 @@ class RenderStack extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
@@ -684,7 +684,7 @@ class RenderIndexedStack extends RenderStack {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
     if (firstChild == null || index == null)
       return false;
     assert(position != null);

@@ -161,10 +161,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   PipelineOwner _pipelineOwner;
 
   /// The render tree that's attached to the output surface.
-  RenderView get renderView => _pipelineOwner.rootNode as RenderView;
+  RenderView/*!*/ get renderView => _pipelineOwner.rootNode as RenderView;
   /// Sets the given [RenderView] object (which must not be null), and its tree, to
   /// be the new render tree to display. The previous tree, if any, is detached.
-  set renderView(RenderView value) {
+  set renderView(RenderView/*!*/ value) {
     assert(value != null);
     _pipelineOwner.rootNode = value;
   }
@@ -453,7 +453,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   @override
-  void hitTest(HitTestResult result, Offset position) {
+  void hitTest(HitTestResult/*!*/ result, Offset/*!*/ position) {
+    assert(result != null);
+    assert(position != null);
     assert(renderView != null);
     renderView.hitTest(result, position: position);
     super.hitTest(result, position);
@@ -465,19 +467,19 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       child.markNeedsPaint();
       child.visitChildren(visitor);
     };
-    instance?.renderView?.visitChildren(visitor);
+    instance?.renderView?.visitChildren(visitor); // ignore: invalid_null_aware_operator
     return endOfFrame;
   }
 }
 
 /// Prints a textual representation of the entire render tree.
 void debugDumpRenderTree() {
-  debugPrint(RendererBinding.instance?.renderView?.toStringDeep() ?? 'Render tree unavailable.');
+  debugPrint(RendererBinding.instance?.renderView?.toStringDeep() ?? 'Render tree unavailable.'); // ignore: invalid_null_aware_operator
 }
 
 /// Prints a textual representation of the entire layer tree.
 void debugDumpLayerTree() {
-  debugPrint(RendererBinding.instance?.renderView?.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.');
+  debugPrint(RendererBinding.instance?.renderView?.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.'); // ignore: invalid_null_aware_operator
 }
 
 /// Prints a textual representation of the entire semantics tree.
@@ -487,7 +489,7 @@ void debugDumpLayerTree() {
 /// The order in which the children of a [SemanticsNode] will be printed is
 /// controlled by the [childOrder] parameter.
 void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
-  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: childOrder) ?? 'Semantics not collected.');
+  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: childOrder) ?? 'Semantics not collected.'); // ignore: invalid_null_aware_operator
 }
 
 /// A concrete binding for applications that use the Rendering framework

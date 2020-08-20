@@ -3377,13 +3377,10 @@ abstract class DiagnosticableTree with Diagnosticable {
   ///
   ///  * [toString], for a brief description of the object.
   ///  * [toStringDeep], for a description of the subtree rooted at this object.
-  String? toStringShallow({
+  String toStringShallow({
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    if (kReleaseMode) {
-      return toString();
-    }
     String? shallowString;
     assert(() {
       final StringBuffer result = StringBuffer();
@@ -3398,7 +3395,7 @@ abstract class DiagnosticableTree with Diagnosticable {
       shallowString = result.toString();
       return true;
     }());
-    return shallowString;
+    return shallowString ?? toString();
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -3470,13 +3467,10 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
   }
 
   @override
-  String? toStringShallow({
+  String toStringShallow({
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    if (kReleaseMode) {
-      return toString();
-    }
     String? shallowString;
     assert(() {
       final StringBuffer result = StringBuffer();
@@ -3491,7 +3485,7 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
       shallowString = result.toString();
       return true;
     }());
-    return shallowString;
+    return shallowString ?? toString();
   }
 
   @override

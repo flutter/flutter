@@ -87,7 +87,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
 
   /// The dimension of the child in the main axis.
   @protected
-  double get childExtent {
+  double/*!*/ get childExtent {
     if (child == null)
       return 0.0;
     assert(child.hasSize);
@@ -98,7 +98,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
       case Axis.horizontal:
         return child.size.width;
     }
-    return null;
+    return null; // ignore: dead_code
   }
 
   bool _needsUpdateChild = true;
@@ -232,7 +232,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child != null);
-    assert(child == this.child);
+    assert(child == this.child/*!*/);
     applyPaintTransformForBoxChild(child as RenderBox, transform);
   }
 
@@ -462,9 +462,9 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   ///    start or stop the floating header's animation.
   ///  * [SliverAppBar], which creates a header that can be pinned, floating,
   ///    and snapped into view via the corresponding parameters.
-  FloatingHeaderSnapConfiguration get snapConfiguration => _snapConfiguration;
+  FloatingHeaderSnapConfiguration/*?*/ get snapConfiguration => _snapConfiguration;
   FloatingHeaderSnapConfiguration _snapConfiguration;
-  set snapConfiguration(FloatingHeaderSnapConfiguration value) {
+  set snapConfiguration(FloatingHeaderSnapConfiguration/*?*/ value) {
     if (value == _snapConfiguration)
       return;
     if (value == null) {

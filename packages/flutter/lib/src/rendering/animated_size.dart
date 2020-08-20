@@ -116,7 +116,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   RenderAnimatedSizeState _state = RenderAnimatedSizeState.start;
 
   /// The duration of the animation.
-  Duration get duration => _controller.duration;
+  Duration/*!*/ get duration => _controller.duration;
   set duration(Duration value) {
     assert(value != null);
     if (value == _controller.duration)
@@ -126,7 +126,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   /// The duration of the animation when running in reverse.
   Duration get reverseDuration => _controller.reverseDuration;
-  set reverseDuration(Duration value) {
+  set reverseDuration(Duration/*?*/ value) {
     if (value == _controller.reverseDuration)
       return;
     _controller.reverseDuration = value;

@@ -4,7 +4,8 @@
 
 // @dart = 2.8
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart'; // ignore: unused_import
+
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -47,9 +48,9 @@ class TextureBox extends RenderBox {
       _filterQuality = filterQuality;
 
   /// The identity of the backend texture.
-  int get textureId => _textureId;
-  int _textureId;
-  set textureId(int value) {
+  int/*!*/ get textureId => _textureId;
+  int/*!*/ _textureId;
+  set textureId(int/*!*/ value) {
     assert(value != null);
     if (value != _textureId) {
       _textureId = value;
@@ -87,8 +88,6 @@ class TextureBox extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_textureId == null)
-      return;
     context.addLayer(TextureLayer(
       rect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       textureId: _textureId,
