@@ -269,12 +269,12 @@ class Template {
     return fileCount;
   }
 
-  /// Attempt to read a byte from the file to ensure that read permissions are correct.
+  /// Attempt to the length from the file to ensure that read permissions are correct.
   ///
   /// If this fails with a certain error code, the [ErrorHandlingFileSystem] will
   /// trigger a tool exit with a better message.
   void _validateReadPermissions(File file) {
-    file.openSync().readByteSync();
+    file.lengthSync();
   }
 }
 

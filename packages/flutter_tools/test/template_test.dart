@@ -173,22 +173,15 @@ class MockDirectory extends Mock implements Directory {}
 class FakeFile extends Fake implements File {
   FakeFile(this.path);
 
-  final FakeRandomAccessFile randomAccessFile = FakeRandomAccessFile();
-
   @override
   final String path;
 
   @override
-  RandomAccessFile openSync({FileMode mode = FileMode.read}) {
-    return randomAccessFile;
-  }
-}
-class FakeRandomAccessFile extends Fake implements RandomAccessFile {
-  @override
-  int readByteSync() {
+  int lengthSync() {
     throw const FileSystemException('', '', OSError('', 5));
   }
 }
+
 class FakeTemplateRenderer extends TemplateRenderer {
   @override
   String renderString(String template, dynamic context, {bool htmlEscapeValues = false}) {
