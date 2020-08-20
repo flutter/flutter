@@ -170,6 +170,7 @@ tasks:
       Measures the runtime performance of constructing and destructing widgets on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   multi_widget_construction_perf__e2e_summary:
     description: >
