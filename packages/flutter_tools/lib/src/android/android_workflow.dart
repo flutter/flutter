@@ -25,7 +25,7 @@ import '../globals.dart' as globals;
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
-const int kAndroidSdkMinVersion = 28;
+const int kAndroidSdkMinVersion = 29;
 final Version kAndroidJavaMinVersion = Version(1, 8, 0);
 final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
@@ -178,7 +178,7 @@ class AndroidValidator extends DoctorValidator {
 
     String sdkVersionText;
     if (_androidSdk.latestVersion != null) {
-      if (_androidSdk.latestVersion.sdkLevel < 28 || _androidSdk.latestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
+      if (_androidSdk.latestVersion.sdkLevel < kAndroidSdkMinVersion || _androidSdk.latestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
         messages.add(ValidationMessage.error(
           _userMessages.androidSdkBuildToolsOutdated(
             _androidSdk.sdkManagerPath,

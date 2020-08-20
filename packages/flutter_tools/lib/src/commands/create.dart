@@ -9,7 +9,7 @@ import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
 import '../android/android.dart' as android_common;
-import '../android/android_sdk.dart' as android_sdk;
+import '../android/android_workflow.dart';
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/context.dart';
@@ -764,7 +764,7 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidMinApiLevel': android_common.minApiLevel,
-      'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
+      'androidSdkVersion': kAndroidSdkMinVersion,
       'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
       'pluginClassSnakeCase': pluginClassSnakeCase,
