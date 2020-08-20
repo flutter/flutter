@@ -237,7 +237,10 @@ class Stepper extends StatefulWidget {
   /// ```
   /// {@end-tool}
   final ControlsWidgetBuilder controlsBuilder;
-  /// This determines the elevation of the stepper widget when build horizontally.
+
+  /// This determines the elevation of the stepper widget when built horizontally.
+  ///
+  /// By default, the value of `horizontalElevation` is 2.0.
   final double horizontalElevation;
 
   @override
