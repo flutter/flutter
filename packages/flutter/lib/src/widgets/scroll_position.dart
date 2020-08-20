@@ -145,6 +145,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   double get maxScrollExtent => _maxScrollExtent;
   double _maxScrollExtent;
 
+  /// The implied amount of velocity when pixels are forced without respect to
+  /// scroll physics, such as when [forcePixels] or [jumpTo] is used.
+  double _impliedVelocity = 0;
+
   @override
   double get pixels => _pixels;
   double _pixels;
@@ -343,8 +347,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   void forcePixels(double value) {
     assert(pixels != null);
+    _impliedVelocity = value - _pixels;
     _pixels = value;
     notifyListeners();
+    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      _impliedVelocity = 0;
+    });
   }
 
   /// Called whenever scrolling ends, to store the current scroll offset in a
@@ -834,7 +842,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(context != null);
     assert(activity != null);
     assert(activity.velocity != null);
-    return physics.recommendDeferredLoading(activity.velocity, copyWith(), context);
+    assert(_impliedVelocity != null);
+    return physics.recommendDeferredLoading(
+      activity.velocity + _impliedVelocity,
+      copyWith(),
+      context,
+    );
   }
 
   @override
