@@ -98,7 +98,6 @@ tasks:
       Gallery for iOS from Mac.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    on_luci: true
 
   flutter_gallery_win__compile:
     description: >
@@ -195,7 +194,6 @@ tasks:
       Measures the runtime performance of raster caching many pictures on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   cubic_bezier_perf__timeline_summary:
     description: >
@@ -467,6 +465,7 @@ tasks:
       Builds an obfuscated app and verifies contents and structure
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
+    on_luci: true
 
   tiles_scroll_perf_ios__timeline_summary:
     description: >
@@ -643,7 +642,6 @@ tasks:
       Measure CPU/GPU usage percentages of a simple animation.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   smoke_catalina_start_up_ios:
     description: >
@@ -774,7 +772,6 @@ tasks:
       Android with e2e.
     stage: devicelab
     required_agent_capabilities: ["mac/ios32"]
-    flaky: true
 
   flutter_gallery__transition_perf_e2e_ios:
     description: >
@@ -782,7 +779,6 @@ tasks:
       Android with e2e.
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   flutter_gallery__transition_perf_hybrid:
     description: >

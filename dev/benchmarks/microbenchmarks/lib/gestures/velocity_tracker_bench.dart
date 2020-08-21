@@ -9,15 +9,25 @@ import 'data/velocity_tracker_data.dart';
 
 const int _kNumIters = 10000;
 
+class TrackerBenchmark {
+  TrackerBenchmark({ this.name, this.tracker });
+
+  final VelocityTracker tracker;
+  final String name;
+}
+
 void main() {
   assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
-  final List<VelocityTracker> trackers = <VelocityTracker>[VelocityTracker(), IOSScrollViewFlingVelocityTracker()];
+  final List<TrackerBenchmark> benchmarks = <TrackerBenchmark>[
+    TrackerBenchmark(name: 'velocity_tracker_iteration', tracker: VelocityTracker()),
+    TrackerBenchmark(name: 'velocity_tracker_iteration_ios_fling', tracker: IOSScrollViewFlingVelocityTracker()),
+  ];
   final Stopwatch watch = Stopwatch();
 
-  for (final VelocityTracker tracker in trackers) {
-    final String trackerType = tracker.runtimeType.toString();
-    print('$trackerType benchmark...');
+  for (final TrackerBenchmark benchmark in benchmarks) {
+    print('${benchmark.name} benchmark...');
+    final VelocityTracker tracker = benchmark.tracker;
     watch.reset();
     watch.start();
     for (int i = 0; i < _kNumIters; i += 1) {
@@ -30,10 +40,10 @@ void main() {
     }
     watch.stop();
     printer.addResult(
-      description: 'Velocity tracker: $trackerType',
+      description: 'Velocity tracker: ${tracker.runtimeType}',
       value: watch.elapsedMicroseconds / _kNumIters,
       unit: 'µs per iteration',
-      name: 'velocity_tracker_iteration_$trackerType',
+      name: benchmark.name,
     );
   }
 

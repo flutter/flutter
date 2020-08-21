@@ -28,7 +28,6 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'flutter_gallery_assets': '^0.2.0',
   'mockito': '^4.1.0',  // Prevent mockito from downgrading to 4.0.0
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
-  'vm_service': '4.1.0', // TODO(CareF): remove this when dwds updates (#63117)
   'video_player': '0.10.6', // 0.10.7 fails a gallery smoke test for toString.
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
   'shelf': '0.7.5',
@@ -58,6 +57,9 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'test_core': '0.3.12-nullsafety.1',
   'typed_data': '1.3.0-nullsafety.2',
   'vector_math': '2.1.0-nullsafety.2',
+  'platform': '3.0.0-nullsafety.1',
+  'file': '6.0.0-nullsafety.1',
+  'process': '4.0.0-nullsafety.1',
   // https://github.com/dart-lang/build/issues/2772
   'build_runner_core': '5.2.0',
 };
