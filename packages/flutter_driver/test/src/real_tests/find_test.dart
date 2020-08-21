@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/common/find.dart';
+import 'package:flutter_driver/src/extension/extension.dart';
 
 import '../../common.dart';
 
@@ -10,6 +12,7 @@ void main() {
   test('Ancestor finder serialize', () {
     const SerializableFinder of = ByType('Text');
     final SerializableFinder matching = ByValueKey('hello');
+
 
     final Ancestor a = Ancestor(
       of: of,
@@ -35,7 +38,7 @@ void main() {
       'firstMatchOnly': 'true',
     };
 
-    final Ancestor a = Ancestor.deserialize(serialized);
+    final Ancestor a = Ancestor.deserialize(serialized, deserialize);
     expect(a.of, isA<ByType>());
     expect(a.matching, isA<ByValueKey>());
     expect(a.matchRoot, isTrue);
@@ -70,10 +73,26 @@ void main() {
       'firstMatchOnly': 'true',
     };
 
-    final Descendant a = Descendant.deserialize(serialized);
+    final Descendant a = Descendant.deserialize(serialized, deserialize);
     expect(a.of, isA<ByType>());
     expect(a.matching, isA<ByValueKey>());
     expect(a.matchRoot, isTrue);
     expect(a.firstMatchOnly, isTrue);
   });
+}
+
+
+SerializableFinder deserialize(Map<String, String> json){
+    final String finderType = json['finderType'];
+    switch (finderType) {
+      case 'ByType': return ByType.deserialize(json);
+      case 'ByValueKey': return ByValueKey.deserialize(json);
+      case 'ByTooltipMessage': return ByTooltipMessage.deserialize(json);
+      case 'BySemanticsLabel': return BySemanticsLabel.deserialize(json);
+      case 'ByText': return ByText.deserialize(json);
+      case 'PageBack': return const PageBack();
+      case 'Descendant': return Descendant.deserialize(json, deserialize);
+      case 'Ancestor': return Ancestor.deserialize(json, deserialize);
+    }
+    throw DriverError('Unsupported search specification type $finderType');
 }
