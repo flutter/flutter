@@ -425,6 +425,7 @@ class DataTable extends StatelessWidget {
     this.columnSpacing,
     this.sortIconPadding,
     this.showCheckboxColumn = true,
+    this.showBottomDivider = false,
     this.dividerThickness = 1.0,
     @required this.rows,
   }) : assert(columns != null),
@@ -598,6 +599,18 @@ class DataTable extends StatelessWidget {
   /// Must be non-null, but may be empty.
   final List<DataRow> rows;
 
+  /// The width of the divider that appears between [TableRow]s.
+  ///
+  /// Must be non-null and greater than or equal to zero.
+  /// This value defaults to 1.0.
+  final double dividerThickness;
+
+  /// Whether a divider at the bottom of the table is displayed.
+  ///
+  /// By default, a divider not is shown at the bottom to allow for a border
+  /// around the table set with [DataTable.decoration].
+  final bool showBottomDivider;
+
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
   final int _onlyTextColumn;
@@ -648,12 +661,6 @@ class DataTable extends StatelessWidget {
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
   static const Color _grey100Opacity = Color(0x0A000000); // Grey 100 as opacity instead of solid color
   static const Color _grey300Opacity = Color(0x1E000000); // Dark theme variant is just a guess.
-
-  /// The width of the divider that appears between [TableRow]s.
-  ///
-  /// Must be non-null and greater than or equal to zero.
-  /// This value defaults to 1.0.
-  final double dividerThickness;
 
   Widget _buildCheckbox({
     BuildContext context,
@@ -861,12 +868,14 @@ class DataTable extends StatelessWidget {
         final Color resolvedDataRowColor = index > 0 ? (rows[index - 1].color ?? effectiveDataRowColor)?.resolve(states) : null;
         final Color resolvedHeadingRowColor = effectiveHeadingRowColor?.resolve(<MaterialState>{});
         final Color rowColor = index > 0 ? resolvedDataRowColor : resolvedHeadingRowColor;
+        final BorderSide borderSide = Divider.createBorderSide(context, width: dividerThickness);
+        final Border border = showBottomDivider
+          ? Border(bottom: borderSide)
+          : index == 0 ? null : Border(top: borderSide);
         return TableRow(
           key: index == 0 ? _headingRowKey : rows[index - 1].key,
           decoration: BoxDecoration(
-            border: index == 0 ? null : Border(
-              top: Divider.createBorderSide(context, width: dividerThickness),
-            ),
+            border: border,
             color: rowColor ?? defaultRowColor.resolve(states),
           ),
           children: List<Widget>(tableColumns.length),
