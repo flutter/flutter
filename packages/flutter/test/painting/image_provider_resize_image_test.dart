@@ -34,7 +34,6 @@ void main() {
     expect(resizedImageSize, resizeDims);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56312
 
-
   test('ResizeImage resizes to the correct dimensions (down)', () async {
     final Uint8List bytes = Uint8List.fromList(kBlueSquare);
     final MemoryImage imageProvider = MemoryImage(bytes);
@@ -134,6 +133,152 @@ void main() {
     });
     isAsync = true;
     expect(isAsync, true);
+  });
+
+  void createFitTests(bool allowUpscaling) {
+    for (final ResizeImageFit fit in ResizeImageFit.values) {
+      test('ResizeImage with $fit correctly applies fit with allowUpscaling = $allowUpscaling', () async {
+        final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+        final MemoryImage imageProvider = MemoryImage(bytes);
+        final Size rawImageSize = await _resolveAndGetSize(imageProvider);
+        expect(rawImageSize, const Size(1, 1));
+
+        const Size resizeDims = Size(14, 7);
+        final ResizeImage resizedImage = ResizeImage(
+          MemoryImage(bytes),
+          width: resizeDims.width.round(),
+          height: resizeDims.height.round(),
+          allowUpscaling: allowUpscaling,
+          fit: fit,
+        );
+        const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
+        final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
+        expect(resizedImageSize, resizedImage.applyFit(1, 1));
+      }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56312
+    }
+  }
+  createFitTests(true);
+  createFitTests(false);
+
+  group('ResizeImage.applyFit', () {
+    Future<ResizeImage> createResizeImage({
+      int width,
+      int height,
+      bool allowUpscaling,
+      ResizeImageFit fit,
+    }) async {
+      final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+      final MemoryImage imageProvider = MemoryImage(bytes);
+      await _resolveAndGetSize(imageProvider);
+
+      return ResizeImage(
+        MemoryImage(bytes),
+        width: width,
+        height: height,
+        allowUpscaling: allowUpscaling,
+        fit: fit,
+      );
+    }
+
+    test('maintainNonNull, both specified, no upscaling', () async {
+      final ResizeImage provider = await createResizeImage(
+        width: 14,
+        height: 7,
+        allowUpscaling: false,
+        fit: ResizeImageFit.maintainNonNull,
+      );
+      expect(provider.applyFit(1, 1), const Size(1, 1));
+    });
+
+    test('maintainNonNull, both specified, upscaling', () async {
+      final ResizeImage provider = await createResizeImage(
+        width: 14,
+        height: 7,
+        allowUpscaling: true,
+        fit: ResizeImageFit.maintainNonNull,
+      );
+      expect(provider.applyFit(1, 1), const Size(14, 7));
+    });
+
+    test('maintainNonNull, width specified, no upscaling', () async {
+      final ResizeImage provider = await createResizeImage(
+        width: 14,
+        height: null,
+        allowUpscaling: false,
+        fit: ResizeImageFit.maintainNonNull,
+      );
+      expect(provider.applyFit(1, 1), const Size(1, 1));
+    });
+
+    test('maintainNonNull, width specified, upscaling', () async {
+      final ResizeImage provider = await createResizeImage(
+        width: 14,
+        height: null,
+        allowUpscaling: true,
+        fit: ResizeImageFit.maintainNonNull,
+      );
+      expect(provider.applyFit(1, 1), const Size(14, 14));
+    });
+
+    test('maintainNonNull, height specified, no upscaling', () async {
+      final ResizeImage provider = await createResizeImage(
+        width: null,
+        height: 14,
+        allowUpscaling: false,
+        fit: ResizeImageFit.maintainNonNull,
+      );
+      expect(provider.applyFit(1, 1), const Size(1, 1));
+    });
+
+    test('maintainNonNull, height specified, upscaling', () async {
+      final ResizeImage provider = await createResizeImage(
+        width: null,
+        height: 14,
+        allowUpscaling: true,
+        fit: ResizeImageFit.maintainNonNull,
+      );
+      expect(provider.applyFit(1, 1), const Size(14, 14));
+    });
+
+    test('maintainHeight, no upscaling', () async {
+      final ResizeImage provider = await createResizeImage(
+        width: 140,
+        height: 14,
+        allowUpscaling: false,
+        fit: ResizeImageFit.maintainHeight,
+      );
+      expect(provider.applyFit(1, 1), const Size(1, 1));
+    });
+
+    test('maintainHeight, upscaling', () async {
+      final ResizeImage provider = await createResizeImage(
+        width: 140,
+        height: 14,
+        allowUpscaling: true,
+        fit: ResizeImageFit.maintainHeight,
+      );
+      expect(provider.applyFit(1, 1), const Size(14, 14));
+    });
+
+    test('maintainWidth, no upscaling', () async {
+      final ResizeImage provider = await createResizeImage(
+        width: 14,
+        height: 140,
+        allowUpscaling: false,
+        fit: ResizeImageFit.maintainWidth,
+      );
+      expect(provider.applyFit(1, 1), const Size(1, 1));
+    });
+
+    test('maintainWidth, upscaling', () async {
+      final ResizeImage provider = await createResizeImage(
+        width: 14,
+        height: 140,
+        allowUpscaling: true,
+        fit: ResizeImageFit.maintainWidth,
+      );
+      expect(provider.applyFit(1, 1), const Size(14, 14));
+    });
   });
 }
 

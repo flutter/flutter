@@ -5,8 +5,9 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
-import 'dart:ui' as ui show Codec;
+import 'dart:ui' as ui show Codec, ImageDescriptor, ImmutableBuffer;
 import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 
 import 'package:flutter/foundation.dart';
@@ -705,6 +706,35 @@ class _SizeAwareCacheKey {
   int get hashCode => hashValues(providerCacheKey, width, height);
 }
 
+/// Describes whether and how to maintain aspect ratio when using a
+/// [ResizeImage].
+///
+/// See also:
+///   * [ResizeImage.fit].
+///   * [ResizeImage.applyFit], which calculates how to apply these values
+///     based on the underlying image size and whether upscaling is allowed.
+enum ResizeImageFit {
+  /// Keep the [ResizeImage.width] and [ResizeImage.height] even if it distorts
+  /// the aspect ratio.
+  ///
+  /// If either width or height are null, the aspect ratio will be maintained
+  /// using the non-null value. For example, if the specified width is null,
+  /// [maintainNonNull] will have the same effect as [maintainHeight].
+  maintainNonNull,
+
+  /// Maintain the aspect ratio of the original image by preserving the supplied
+  /// [ResizeImage.height].
+  ///
+  /// The [ResizeImage.height] must not be null if this fit is used.
+  maintainHeight,
+
+  /// Maintain the aspect ratio of the original image by preserving the supplied
+  /// [ResizeImage.width].
+  ///
+  /// The [ResizeImage.width] must not be null if this fit is used.
+  maintainWidth,
+}
+
 /// Instructs Flutter to decode the image at the specified dimensions
 /// instead of at its native size.
 ///
@@ -717,15 +747,26 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
   /// Creates an ImageProvider that decodes the image to the specified size.
   ///
   /// The cached image will be directly decoded and stored at the resolution
-  /// defined by `width` and `height`. The image will lose detail and
+  /// defined by [width] and [height]. The image will lose detail and
   /// use less memory if resized to a size smaller than the native size.
+  ///
+  /// By default, the image will not be scaled larger than its intrinsic
+  /// dimensions. This behavior can be overridden by specifying [allowUpscaling]
+  /// as true.
+  ///
+  /// The [fit] parameter controls how and whether aspect ratio is maintained
+  /// when resizing the image. By default, it is [ResizeImage.maintainNonNull].
   const ResizeImage(
     this.imageProvider, {
     this.width,
     this.height,
     this.allowUpscaling = false,
+    this.fit = ResizeImageFit.maintainNonNull,
   }) : assert(width != null || height != null),
-       assert(allowUpscaling != null);
+       assert(allowUpscaling != null),
+       assert(fit != null),
+       assert(fit != ResizeImageFit.maintainHeight || height != null),
+       assert(fit != ResizeImageFit.maintainWidth || width != null);
 
   /// The [ImageProvider] that this class wraps.
   final ImageProvider imageProvider;
@@ -735,6 +776,42 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
 
   /// The height the image should decode to and cache.
   final int? height;
+
+  /// Specifies how to handle the sizing if the aspect ratio of the underlying
+  /// image does not match the aspect ratio of [width]/[height].
+  ///
+  /// The default value of [ResizeImageFit.maintainNonNull] will allow for
+  /// aspect ratio changes if both [width] and [height] are not null. If one is
+  /// null, the aspect ratio will be maintained along the non-null dimension.
+  /// For example, if [width] is specified but [height] is not, the image will
+  /// be scaled as if [ResizeImageFit.maintainWidth] had been specified.
+  ///
+  /// Specifying [ResizeImage.maintainHeight] or [ResizeImage.maintainWidth]
+  /// will force the aspect ratio to be maintained along the specified axis.
+  /// The specified dimension must not be null.
+  ///
+  /// If the [allowUpscaling] parameter is set to true, the values of [width]
+  /// and  [height] will be clamped to the underlying image dimensions _before_
+  /// doing any aspect ratio calculations. For example, if you specify a [width]
+  /// of 100 and a fit of [ResizeImageFit.maintainWidth], but the underlying
+  /// image width is 50 and [allowUpscaling] is false, the decode width of
+  /// the image will remain unchanged at 50.
+  final ResizeImageFit fit;
+
+  /// Resolves the [fit] so that if it is [ResizeImageFit.maintainNonNull] and
+  /// one of [height] or [width] is null, the expected fit is used.
+  ResizeImageFit get _resolvedFit {
+    if (fit == ResizeImageFit.maintainNonNull) {
+      assert(width != null || height != null);
+      if (width == null) {
+        return ResizeImageFit.maintainHeight;
+      }
+      if (height == null) {
+        return ResizeImageFit.maintainWidth;
+      }
+    }
+    return fit;
+  }
 
   /// Whether the [width] and [height] parameters should be clamped to the
   /// intrinsic width and height of the image.
@@ -757,14 +834,48 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
     return provider;
   }
 
+  double _resolveDimension(int? desired, int actual) {
+    desired ??= actual;
+    if (allowUpscaling) {
+      return desired.toDouble();
+    }
+    return math.min(desired, actual).toDouble();
+  }
+
+  /// Calculates the output [Size] of the image based on its dimensions, the
+  /// [fit] of this provider, and whether or not to [allowUpscaling].
+  Size applyFit(int actualWidth, int actualHeight) {
+    final double resolvedWidth = _resolveDimension(width, actualWidth);
+    final double resolvedHeight = _resolveDimension(height, actualHeight);
+    switch (_resolvedFit) {
+      case ResizeImageFit.maintainNonNull:
+        return Size(resolvedWidth, resolvedHeight);
+      case ResizeImageFit.maintainWidth:
+        final double aspectRatio = actualWidth / actualHeight;
+        return Size(resolvedWidth, resolvedWidth / aspectRatio);
+      case ResizeImageFit.maintainHeight:
+        final double aspectRatio = actualWidth / actualHeight;
+        return Size(resolvedHeight / aspectRatio, resolvedHeight);
+    }
+  }
+
   @override
   ImageStreamCompleter load(_SizeAwareCacheKey key, DecoderCallback decode) {
-    final DecoderCallback decodeResize = (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    final DecoderCallback decodeResize = (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
       assert(
         cacheWidth == null && cacheHeight == null && allowUpscaling == null,
         'ResizeImage cannot be composed with another ImageProvider that applies '
         'cacheWidth, cacheHeight, or allowUpscaling.'
       );
+      if (width != null || height != null) {
+        final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+        final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(buffer);
+        final Size fittedSize = applyFit(descriptor.width, descriptor.height);
+        return descriptor.instantiateCodec(
+          targetWidth: fittedSize.width.round(),
+          targetHeight: fittedSize.height.round(),
+        );
+      }
       return decode(bytes, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
     };
     final ImageStreamCompleter completer = imageProvider.load(key.providerCacheKey, decodeResize);
