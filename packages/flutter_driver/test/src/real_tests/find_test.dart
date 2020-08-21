@@ -4,7 +4,6 @@
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/common/find.dart';
-import 'package:flutter_driver/src/extension/extension.dart';
 
 import '../../common.dart';
 
