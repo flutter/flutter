@@ -50,7 +50,7 @@ void main() {
         ),
       );
 
-      mockHelper.finishInteractions = true;
+      expect(mockHelper.invocations, isEmpty);
 
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '0')),
@@ -85,8 +85,7 @@ void main() {
         refreshTriggerPullDistance: 100,  // default value.
         refreshIndicatorExtent: 60,  // default value.
       ));
-
-      mockHelper.finishInteractions = true;
+      expect(mockHelper.invocations, hasLength(1));
 
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '0')),
@@ -115,7 +114,7 @@ void main() {
         await tester.drag(find.text('0'), const Offset(0.0, 50.0));
         await tester.pump();
 
-        mockHelper.finishInteractions = true;
+        expect(mockHelper.invocations, isEmpty);
 
         expect(
           tester.getTopLeft(find.widgetWithText(Container, '0')),
@@ -166,7 +165,7 @@ void main() {
         ),
       ]));
       // The builder isn't called again when the sliver completely goes away.
-      mockHelper.finishInteractions = true;
+      expect(mockHelper.invocations, hasLength(3));
 
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '0')),
@@ -226,8 +225,7 @@ void main() {
       ]));
       // The refresh callback is triggered after the frame.
       expect(mockHelper.invocations.last, const RefreshTaskInvocation());
-
-      mockHelper.finishInteractions = true;
+      expect(mockHelper.invocations, hasLength(4));
 
       expect(
         platformCallLog.last,
@@ -300,7 +298,7 @@ void main() {
           refreshIndicatorExtent: 60, // Default value.
           refreshTriggerPullDistance: 100, // Default value.
         )));
-        mockHelper.finishInteractions = true;
+        expect(mockHelper.invocations, hasLength(5));
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
     testWidgets(
@@ -373,7 +371,7 @@ void main() {
               refreshIndicatorExtent: 60, // Default value.
               refreshTriggerPullDistance: 100, // Default value.
             )));
-            mockHelper.finishInteractions = true;
+            expect(mockHelper.invocations, hasLength(5));
           },
           onError: (dynamic e) {
             expect(e, error);
@@ -849,7 +847,7 @@ void main() {
 
         await tester.fling(find.byType(Container).first, const Offset(0.0, -200.0), 3000.0);
 
-        mockHelper.finishInteractions = true;
+        expect(mockHelper.invocations, isEmpty);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
     testWidgets(
@@ -1362,7 +1360,6 @@ class FakeBuilder {
   Completer<void> refreshCompleter = Completer<void>.sync();
   final List<MockHelperInvocation> invocations = <MockHelperInvocation>[];
 
-  bool finishInteractions = false;
   Widget refreshIndicator = Container();
 
   Widget builder(
@@ -1372,9 +1369,6 @@ class FakeBuilder {
     double refreshTriggerPullDistance,
     double refreshIndicatorExtent,
   ) {
-    if (finishInteractions) {
-      throw TestFailure('MockHelper.builder was called after finishInteractions was set to true');
-    }
     if (pulledExtent < 0.0) {
       throw TestFailure('The pulledExtent should never be less than 0.0');
     }
