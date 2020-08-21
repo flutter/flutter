@@ -22,13 +22,15 @@
          "name":"Linux docs",
          "repo":"flutter",
          "taskName":"linux_docs",
-         "enabled":true
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_drive/", "packages/flutter_localizations/", "bin/"]
       },
       {
          "name":"Linux framework_tests",
          "repo":"flutter",
          "taskName":"linux_framework_tests",
-         "enabled":true
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
       },
       {
          "name":"Linux fuchsia_precache",
@@ -46,25 +48,29 @@
          "name":"Linux tool_tests",
          "repo":"flutter",
          "taskName":"linux_tool_tests",
-         "enabled":true
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter_tools/", "bin/"]
       },
       {
          "name":"Linux web_tests",
          "repo":"flutter",
          "taskName":"linux_web_tests",
-         "enabled":true
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter/", "packages/flutter_goldens_client/", "packages/flutter_goldens/", "packages/flutter_test/", "packages/flutter_tools/lib/src/test/", "packages/flutter_web_plugins/", "bin/"]
       },
       {
          "name":"Linux web_integration_tests",
          "repo":"flutter",
          "taskName":"linux_web_integration_tests",
-         "enabled":true
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_tools/", "packages/flutter_web_plugins/", "bin/"]
       },
       {
          "name": "Windows build_tests",
          "repo": "flutter",
          "task_name": "win_build_tests",
-         "enabled":true
+         "enabled":true,
+         "run_if":["dev/", "bin/"]
       },
       {
          "name": "Windows customer_testing",
@@ -76,7 +82,8 @@
          "name": "Windows framework_tests",
          "repo": "flutter",
          "task_name": "win_framework_tests",
-         "enabled":true
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
       },
       {
         "name": "Windows tool_tests",
