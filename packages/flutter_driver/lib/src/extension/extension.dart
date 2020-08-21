@@ -87,9 +87,9 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// for tests where exceptions are expected. Defaults to false. Any errors
 /// will still be returned in the `response` field of the result JSON along
 /// with an `isError` boolean.
-/// 
+///
 /// `finders` Used to add custom finder
-/// 
+///
 void enableFlutterDriverExtension({ DataHandler handler, bool silenceErrors = false, Map<String, FinderConfig> finders }) {
   assert(WidgetsBinding.instance == null);
   _DriverBinding(handler, silenceErrors, finders ?? <String, FinderConfig>{});
@@ -107,7 +107,7 @@ typedef CommandDeserializerCallback = Command Function(Map<String, String> param
 typedef FinderConstructor = Finder Function(SerializableFinder finder);
 
 
-/// Signature for factory functions. that deserialize a JSON map to a Finder object. 
+/// Signature for factory functions. that deserialize a JSON map to a Finder object.
 typedef DeserializeFinderFactory = SerializableFinder Function(Map<String, String> json);
 
 /// Signature for functions that deserialize a JSON map to a Finder object.
@@ -348,7 +348,7 @@ class FlutterDriverExtension {
     return finder;
   }
 
-  /// that deserialize a JSON map to a Finder object. 
+  /// that deserialize a JSON map to a Finder object.
   SerializableFinder _finderFactory(Map<String, String> json){
     final String finderType = json['finderType'];
 
