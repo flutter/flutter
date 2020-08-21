@@ -327,7 +327,6 @@ void Canvas::drawImage(const CanvasImage* image,
         ToDart("Canvas.drawImage called with non-genuine Image."));
     return;
   }
-  external_allocation_size_ += image->GetAllocationSize();
   canvas_->drawImage(image->image(), x, y, paint.paint());
 }
 
@@ -352,7 +351,6 @@ void Canvas::drawImageRect(const CanvasImage* image,
   }
   SkRect src = SkRect::MakeLTRB(src_left, src_top, src_right, src_bottom);
   SkRect dst = SkRect::MakeLTRB(dst_left, dst_top, dst_right, dst_bottom);
-  external_allocation_size_ += image->GetAllocationSize();
   canvas_->drawImageRect(image->image(), src, dst, paint.paint(),
                          SkCanvas::kFast_SrcRectConstraint);
 }
@@ -381,7 +379,6 @@ void Canvas::drawImageNine(const CanvasImage* image,
   SkIRect icenter;
   center.round(&icenter);
   SkRect dst = SkRect::MakeLTRB(dst_left, dst_top, dst_right, dst_bottom);
-  external_allocation_size_ += image->GetAllocationSize();
   canvas_->drawImageNine(image->image(), icenter, dst, paint.paint());
 }
 
