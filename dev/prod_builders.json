@@ -79,12 +79,6 @@
          "flaky": false
       },
       {
-         "name": "Windows docs",
-         "repo": "flutter",
-         "task_name": "win_docs",
-         "flaky": false
-      },
-      {
          "name": "Windows framework_tests",
          "repo": "flutter",
          "task_name": "win_framework_tests",
