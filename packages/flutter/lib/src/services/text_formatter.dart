@@ -379,8 +379,8 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    // Return the new value when the old value not reached the max limit
-    // or the old value is composing too.
+    // Return the new value when the old value has not reached the max
+    // limit or the old value is composing too.
     if (newValue.composing.isValid) {
       if (maxLength != null && maxLength! > 0 &&
           oldValue.text.characters.length == maxLength! &&
