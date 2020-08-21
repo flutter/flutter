@@ -30,4 +30,21 @@ void main() {
       expect(WidgetsBinding.instance.renderViewElement, isNotNull);
     });
   });
+
+  test('runApp.onFlutterInitialized callback is executed if it is not null', () async {
+    final FakeAsync fakeAsync = FakeAsync();
+    int count = 0;
+    fakeAsync.run((FakeAsync async) {
+      runApp(
+          const Placeholder(),
+          onFlutterInitialized: () {
+            count ++;
+          },
+      );
+
+      expect(count, equals(0));
+      async.flushTimers();
+      expect(count, equals(1));
+    });
+  });
 }
