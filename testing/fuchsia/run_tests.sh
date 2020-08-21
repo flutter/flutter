@@ -142,13 +142,10 @@ echo "$(date) START:ui_tests ----------------------------------------"
    --packages-directory packages
 echo "$(date) DONE:ui_tests -----------------------------------------"
 
-# TODO(https://github.com/flutter/flutter/issues/64343): Re-enable this when it
-# stops flaking.
 echo "$(date) START:shell_tests -------------------------------------"
 ./fuchsia_ctl -d $device_name test \
     -f shell_tests-0.far  \
     -t shell_tests \
-    -a "--gtest_filter=-ShellTest.InitializeWithDifferentThreads" \
     --identity-file $pkey \
     --timeout-seconds $test_timeout_seconds \
     --packages-directory packages
