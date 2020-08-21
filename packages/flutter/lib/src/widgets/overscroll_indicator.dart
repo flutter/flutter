@@ -253,6 +253,10 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
     // scroll, e.g. when scrolling in the opposite direction again to hide
     // the glow. Otherwise, the glow would always stay in a fixed position,
     // even if the top of the content already scrolled away.
+    // For example (CustomScrollView with sliver before center), the scroll
+    // extent is [-200.0, 300.0], scroll in the opposite direction with 10.0 pixels
+    // before glow disappears, so the current pixels is -190.0,
+    // in this case, we should move the glow up 10.0 pixels.
     _leadingController._paintOffsetScrollPixels = -(notification.metrics.pixels - notification.metrics.minScrollExtent);
     _trailingController._paintOffsetScrollPixels = -(notification.metrics.maxScrollExtent - notification.metrics.pixels);
 
