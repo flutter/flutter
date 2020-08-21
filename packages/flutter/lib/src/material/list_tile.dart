@@ -1253,18 +1253,15 @@ class _ListTileElement extends RenderObjectElement {
   void insertRenderObjectChild(RenderObject child, _ListTileSlot slot) {
     assert(child is RenderBox);
     _updateRenderObject(child as RenderBox, slot);
-    assert(renderObject.childToSlot.keys.contains(child));
-    assert(renderObject.slotToChild.keys.contains(slot));
+    assert(renderObject.children.keys.contains(slot));
   }
 
   @override
   void removeRenderObjectChild(RenderObject child, _ListTileSlot slot) {
     assert(child is RenderBox);
-    assert(renderObject.childToSlot[child] == slot);
-    assert(renderObject.slotToChild[slot] == child);
+    assert(renderObject.children[slot] == child);
     _updateRenderObject(null, slot);
-    assert(!renderObject.childToSlot.keys.contains(child));
-    assert(!renderObject.slotToChild.keys.contains(slot));
+    assert(!renderObject.children.keys.contains(slot));
   }
 
   @override
@@ -1299,18 +1296,15 @@ class _RenderListTile extends RenderBox {
   // The minimum padding on the top and bottom of the title and subtitle widgets.
   static const double _minVerticalPadding = 4.0;
 
-  final Map<_ListTileSlot, RenderBox> slotToChild = <_ListTileSlot, RenderBox>{};
-  final Map<RenderBox, _ListTileSlot> childToSlot = <RenderBox, _ListTileSlot>{};
+  final Map<_ListTileSlot, RenderBox> children = <_ListTileSlot, RenderBox>{};
 
   RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _ListTileSlot slot) {
     if (oldChild != null) {
       dropChild(oldChild);
-      childToSlot.remove(oldChild);
-      slotToChild.remove(slot);
+      children.remove(slot);
     }
     if (newChild != null) {
-      childToSlot[newChild] = slot;
-      slotToChild[slot] = newChild;
+      children[slot] = newChild;
       adoptChild(newChild);
     }
     return newChild;

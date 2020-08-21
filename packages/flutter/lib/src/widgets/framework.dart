@@ -6079,6 +6079,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   @override
   void removeRenderObjectChild(RenderObject child, dynamic slot) {
     final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject as RenderObjectWithChildMixin<RenderObject>;
+    assert(slot == null);
     assert(renderObject.child == child);
     renderObject.child = null;
     assert(renderObject == this.renderObject);
