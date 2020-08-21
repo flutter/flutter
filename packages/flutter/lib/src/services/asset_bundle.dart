@@ -71,11 +71,11 @@ abstract class AssetBundle {
     // that the null-handling logic is dead code).
     if (data == null)
       throw FlutterError('Unable to load asset: $key'); // ignore: dead_code
-    // For strings larger than 50 KB, run the computation in an isolate to
-    // avoid causing main thread jank.
     if (data.lengthInBytes < 50 * 1024) {
       return utf8.decode(data.buffer.asUint8List());
     }
+    // For strings larger than 50 KB, run the computation in an isolate to
+    // avoid causing main thread jank.
     return compute(_utf8decode, data, debugLabel: 'UTF8 decode for "$key"');
   }
 
