@@ -177,6 +177,10 @@ void main() {
       MaterialApp(
         home: Material(
           child: DataTable(
+            headingTextStyle: const TextStyle(
+              fontSize: 14.0,
+              letterSpacing: 0.0, // will overflow if letter spacing is larger than 0.0
+            ),
             columns: <DataColumn>[
               DataColumn(
                 label: Text('X' * 2000),
@@ -195,6 +199,7 @@ void main() {
         ),
       ),
     );
+
     expect(tester.renderObject<RenderBox>(find.byType(Text).first).size.width, greaterThan(800.0));
     expect(tester.renderObject<RenderBox>(find.byType(Row).first).size.width, greaterThan(800.0));
     expect(tester.takeException(), isNull); // column overflows table, but text doesn't overflow cell
@@ -571,7 +576,7 @@ void main() {
 
     // default checkbox padding
     checkbox = find.byType(Checkbox).first;
-    padding = find.ancestor(of: checkbox, matching: find.byType(Padding));
+    padding = find.ancestor(of: checkbox, matching: find.byType(Padding)).first;
     expect(
       tester.getRect(checkbox).left - tester.getRect(padding).left,
       _defaultHorizontalMargin,
@@ -582,7 +587,7 @@ void main() {
     );
 
     // default first column padding
-    padding = find.widgetWithText(Padding, 'Frozen yogurt');
+    padding = find.widgetWithText(Padding, 'Frozen yogurt').first;
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -594,7 +599,7 @@ void main() {
     );
 
     // default middle column padding
-    padding = find.widgetWithText(Padding, '159');
+    padding = find.widgetWithText(Padding, '159').first;
     cellContent = find.widgetWithText(Align, '159');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -606,7 +611,7 @@ void main() {
     );
 
     // default last column padding
-    padding = find.widgetWithText(Padding, '6.0');
+    padding = find.widgetWithText(Padding, '6.0').first;
     cellContent = find.widgetWithText(Align, '6.0');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -681,7 +686,7 @@ void main() {
 
     // custom checkbox padding
     checkbox = find.byType(Checkbox).first;
-    padding = find.ancestor(of: checkbox, matching: find.byType(Padding));
+    padding = find.ancestor(of: checkbox, matching: find.byType(Padding)).first;
     expect(
       tester.getRect(checkbox).left - tester.getRect(padding).left,
       _customHorizontalMargin,
@@ -692,7 +697,7 @@ void main() {
     );
 
     // custom first column padding
-    padding = find.widgetWithText(Padding, 'Frozen yogurt');
+    padding = find.widgetWithText(Padding, 'Frozen yogurt').first;
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -704,7 +709,7 @@ void main() {
     );
 
     // custom middle column padding
-    padding = find.widgetWithText(Padding, '159');
+    padding = find.widgetWithText(Padding, '159').first;
     cellContent = find.widgetWithText(Align, '159');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -716,7 +721,7 @@ void main() {
     );
 
     // custom last column padding
-    padding = find.widgetWithText(Padding, '6.0');
+    padding = find.widgetWithText(Padding, '6.0').first;
     cellContent = find.widgetWithText(Align, '6.0');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -790,7 +795,7 @@ void main() {
     ));
 
     // default first column padding
-    padding = find.widgetWithText(Padding, 'Frozen yogurt');
+    padding = find.widgetWithText(Padding, 'Frozen yogurt').first;
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -802,7 +807,7 @@ void main() {
     );
 
     // default middle column padding
-    padding = find.widgetWithText(Padding, '159');
+    padding = find.widgetWithText(Padding, '159').first;
     cellContent = find.widgetWithText(Align, '159');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -814,7 +819,7 @@ void main() {
     );
 
     // default last column padding
-    padding = find.widgetWithText(Padding, '6.0');
+    padding = find.widgetWithText(Padding, '6.0').first;
     cellContent = find.widgetWithText(Align, '6.0');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -886,7 +891,7 @@ void main() {
     ));
 
     // custom first column padding
-    padding = find.widgetWithText(Padding, 'Frozen yogurt');
+    padding = find.widgetWithText(Padding, 'Frozen yogurt').first;
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -898,7 +903,7 @@ void main() {
     );
 
     // custom middle column padding
-    padding = find.widgetWithText(Padding, '159');
+    padding = find.widgetWithText(Padding, '159').first;
     cellContent = find.widgetWithText(Align, '159');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -910,7 +915,7 @@ void main() {
     );
 
     // custom last column padding
-    padding = find.widgetWithText(Padding, '6.0');
+    padding = find.widgetWithText(Padding, '6.0').first;
     cellContent = find.widgetWithText(Align, '6.0');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -952,9 +957,9 @@ void main() {
     );
 
     Table table = tester.widget(find.byType(Table));
-    TableRow tableRow = table.children.first;
+    TableRow tableRow = table.children.last;
     BoxDecoration boxDecoration = tableRow.decoration as BoxDecoration;
-    expect(boxDecoration.border.bottom.width, 1.0);
+    expect(boxDecoration.border.top.width, 1.0);
 
     const double thickness =  4.2;
     await tester.pumpWidget(
@@ -969,9 +974,9 @@ void main() {
       ),
     );
     table = tester.widget(find.byType(Table));
-    tableRow = table.children.first;
+    tableRow = table.children.last;
     boxDecoration = tableRow.decoration as BoxDecoration;
-    expect(boxDecoration.border.bottom.width, thickness);
+    expect(boxDecoration.border.top.width, thickness);
   });
 
   testWidgets('DataTable column heading cell - with and without sorting', (WidgetTester tester) async {
@@ -1195,6 +1200,7 @@ void main() {
     const Color pressedColor = Color(0xff4caf50);
     Widget buildTable() {
       return DataTable(
+        dataTextStyle: const TextStyle(fontSize: 13.0),
         columns: const <DataColumn>[
           DataColumn(
             label: Text('Column1'),
