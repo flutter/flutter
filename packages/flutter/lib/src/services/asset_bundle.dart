@@ -71,8 +71,15 @@ abstract class AssetBundle {
     // that the null-handling logic is dead code).
     if (data == null)
       throw FlutterError('Unable to load asset: $key'); // ignore: dead_code
-    // 10KB takes about 3ms to parse on a Pixel 2 XL.
-    // See: https://github.com/dart-lang/sdk/issues/31954
+    // For strings larger than 50 KB, run the computation in an isolate to
+    // avoid causing main thread jank.
+    if (data.lengthInBytes < 50 * 1024) {
+      return utf8.decode(data.buffer.asUint8List());
+    }
+    return compute(_utf8decode, data, debugLabel: 'UTF8 decode for "$key"');
+  }
+
+  static String _utf8decode(ByteData data) {
     return utf8.decode(data.buffer.asUint8List());
   }
 
@@ -178,6 +185,7 @@ abstract class CachingAssetBundle extends AssetBundle {
       return _structuredDataCache[key] as Future<T>;
     Completer<T>? completer;
     Future<T>? result;
+    var sw = Stopwatch()..start();
     loadString(key, cache: false).then<T>(parser).then<void>((T value) {
       result = SynchronousFuture<T>(value);
       _structuredDataCache[key] = result!;
@@ -197,6 +205,9 @@ abstract class CachingAssetBundle extends AssetBundle {
     // completer for it to use when it does run.
     completer = Completer<T>();
     _structuredDataCache[key] = completer.future;
+    completer.future.whenComplete(() {
+      print('LoadStructuredDataTook: ${sw.elapsedMilliseconds}');
+    });
     return completer.future;
   }
 
