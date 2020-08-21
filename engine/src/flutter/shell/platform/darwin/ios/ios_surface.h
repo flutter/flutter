@@ -34,8 +34,6 @@ class IOSSurface : public ExternalViewEmbedder {
 
   std::shared_ptr<IOSContext> GetContext() const;
 
-  ExternalViewEmbedder* GetExternalViewEmbedderIfEnabled();
-
   virtual bool IsValid() const = 0;
 
   virtual void UpdateStorageSizeIfNecessary() = 0;
