@@ -692,6 +692,23 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect rect }) {
+    // Steps to convert `rect` (from a RenderBox coordinate system) to its
+    // scroll offset within this viewport (not in the exact order):
+    //
+    // 1. Pick the outmost RenderBox (between which, and the viewport, there is
+    // nothing but RenderSlivers) as an intermediate reference frame
+    // (the `pivot`), convert `rect` to that coordinate space.
+    //
+    // 2. Convert `rect` from the `pivot` coordinate space to its sliver
+    // parent's sliver coordinate system (i.e., to a scroll offset), based on
+    // the axis direction and growth direction of the parent.
+    //
+    // 3. Convert the scroll offset to its sliver parent's coordinate space
+    // using `childScrollOffset`, until we reach the viewport.
+    //
+    // 4. Make the final conversion from the outmost sliver to the viewport
+    // using `scrollOffsetOf`.
+
     double leadingScrollOffset = 0.0;
     // Starting at `target` and walking towards the root:
     //  - `child` will be the last object before we reach this viewport, and
@@ -714,21 +731,14 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       child = parent;
     }
 
-    // Choose a render object as an intermediate reference frame to convert
-    // `rect`'s coordinates to a scroll offset. It is going to be:
-    //
-    // - the `pivot` RenderBox if it exists.
-    // - the `target` RenderSliver otherwise .
-    //
-    // `leadingScrollOffset` is currently the scrollOffset within `child`, to
-    // our new reference frame (`pivot` or `target`).
-
     // `rect` in the new intermediate coordinate system.
     Rect rectLocal;
     // Our new reference frame render object's main axis extent.
     double localMaxExtent;
     GrowthDirection growthDirection;
 
+    // `leadingScrollOffset` is currently the scrollOffset of our new reference
+    // frame (`pivot` or `target`), within `child`.
     if (pivot != null) {
       assert(pivot.parent != null);
       assert(pivot.parent != this);
@@ -747,6 +757,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       rect ??= target.paintBounds;
       rectLocal = MatrixUtils.transformRect(target.getTransformTo(pivot), rect);
     } else if (onlySlivers) {
+      // `pivot` does not exist. We'll have to make up one from `target`, the
+      // innermost sliver.
       final RenderSliver targetSliver = target as RenderSliver;
       growthDirection = targetSliver.constraints.growthDirection;
       // TODO(LongCatIsLooong): make sure this works if `targetSliver` is a
