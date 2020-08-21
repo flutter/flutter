@@ -71,8 +71,6 @@ abstract class AssetBundle {
     // that the null-handling logic is dead code).
     if (data == null)
       throw FlutterError('Unable to load asset: $key'); // ignore: dead_code
-    // 10KB takes about 3ms to parse on a Pixel 2 XL.
-    // See: https://github.com/dart-lang/sdk/issues/31954
     return utf8.decode(data.buffer.asUint8List());
   }
 
