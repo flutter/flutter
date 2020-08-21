@@ -424,10 +424,6 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// Drifting past the allowed slop amount causes the gesture to stop tracking
   /// and signaling subsequent callbacks.
   ///
-  /// If null, will default to a distance that is appropriate for the pointer
-  /// device kind. This is 18 logical pixels for touch gestures and 2 logical
-  /// pixels for mouse gestures.
-  ///
   /// Can be null to indicate that the gesture can drift for any distance.
   /// Defaults to 18 logical pixels.
   final double? postAcceptSlopTolerance;
