@@ -6,9 +6,15 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
-import '../../driver_extension.dart';
 import 'error.dart';
 import 'message.dart';
+
+
+/// Signature for factory functions. that deserialize a JSON map to a Finder object.
+typedef DeserializeFinderFactory = SerializableFinder Function(Map<String, String> json);
+
+/// Signature for functions that deserialize a JSON map to a Finder object.
+typedef DeserializeFinder = SerializableFinder Function(Map<String, String> json, DeserializeFinderFactory finderFactory);
 
 const List<Type> _supportedKeyValueTypes = <Type>[String, int];
 

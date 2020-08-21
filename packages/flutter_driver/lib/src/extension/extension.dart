@@ -107,12 +107,6 @@ typedef CommandDeserializerCallback = Command Function(Map<String, String> param
 typedef FinderConstructor = Finder Function(SerializableFinder finder);
 
 
-/// Signature for factory functions. that deserialize a JSON map to a Finder object.
-typedef DeserializeFinderFactory = SerializableFinder Function(Map<String, String> json);
-
-/// Signature for functions that deserialize a JSON map to a Finder object.
-typedef DeserializeFinder = SerializableFinder Function(Map<String, String> json, DeserializeFinderFactory finderFactory);
-
 /// Used to register Flutter Driver Finder
 @immutable
 class FinderConfig {
