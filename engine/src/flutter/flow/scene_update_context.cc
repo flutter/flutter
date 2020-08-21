@@ -115,6 +115,7 @@ void SceneUpdateContext::CreateFrame(scenic::EntityNode& entity_node,
                                      SkAlpha opacity,
                                      const SkRect& paint_bounds,
                                      std::vector<Layer*> paint_layers) {
+  // We don't need a shape if the frame is zero size.
   if (rrect.isEmpty())
     return;
 
@@ -122,7 +123,6 @@ void SceneUpdateContext::CreateFrame(scenic::EntityNode& entity_node,
   SkRect shape_bounds = rrect.getBounds();
   SetEntityNodeClipPlanes(entity_node, shape_bounds);
 
-  // and possibly for its texture.
   // TODO(SCN-137): Need to be able to express the radii as vectors.
   scenic::ShapeNode shape_node(session_.get());
   scenic::Rectangle shape(session_.get(), rrect.width(), rrect.height());
@@ -140,7 +140,7 @@ void SceneUpdateContext::CreateFrame(scenic::EntityNode& entity_node,
   entity_node.AddChild(shape_node);
 
   // Check whether a solid color will suffice.
-  if (paint_layers.empty() || shape_bounds.isEmpty()) {
+  if (paint_layers.empty()) {
     SetMaterialColor(material, color, opacity);
   } else {
     // The final shape's color is material_color * texture_color.  The passed in
@@ -182,6 +182,9 @@ void SceneUpdateContext::UpdateView(int64_t view_id,
   view_holder->UpdateScene(session_.get(), top_entity_->embedder_node(), offset,
                            size, SkScalarRoundToInt(alphaf() * 255),
                            hit_testable);
+
+  // Assume embedded views are 10 "layers" wide.
+  next_elevation_ += 10 * kScenicZElevationBetweenLayers;
 }
 
 void SceneUpdateContext::CreateView(int64_t view_id,
@@ -286,13 +289,17 @@ SceneUpdateContext::Frame::Frame(SceneUpdateContext& context,
       opacity_(opacity),
       opacity_node_(context.session_.get()),
       paint_bounds_(SkRect::MakeEmpty()) {
-  entity_node().SetLabel(label);
-  entity_node().SetTranslation(0.f, 0.f,
-                               context.next_elevation_ - previous_elevation_);
+  // Increment elevation trackers before calculating any local elevation.
+  // |UpdateView| can modify context.next_elevation_, which is why it is
+  // neccesary to track this addtional state.
   context.top_elevation_ += kScenicZElevationBetweenLayers;
   context.next_elevation_ += kScenicZElevationBetweenLayers;
 
+  float local_elevation = context.next_elevation_ - previous_elevation_;
+  entity_node().SetTranslation(0.f, 0.f, -local_elevation);
+  entity_node().SetLabel(label);
   entity_node().AddChild(opacity_node_);
+
   // Scenic currently lacks an API to enable rendering of alpha channel; alpha
   // channels are only rendered if there is a OpacityNode higher in the tree
   // with opacity != 1. For now, clamp to a infinitesimally smaller value than
@@ -301,11 +308,11 @@ SceneUpdateContext::Frame::Frame(SceneUpdateContext& context,
 }
 
 SceneUpdateContext::Frame::~Frame() {
+  context().top_elevation_ = previous_elevation_;
+
   // Add a part which represents the frame's geometry for clipping purposes
   context().CreateFrame(entity_node(), rrect_, color_, opacity_, paint_bounds_,
                         std::move(paint_layers_));
-
-  context().top_elevation_ = previous_elevation_;
 }
 
 void SceneUpdateContext::Frame::AddPaintLayer(Layer* layer) {
