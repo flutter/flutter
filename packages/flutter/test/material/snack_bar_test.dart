@@ -420,6 +420,53 @@ void main() {
     expect(snackBarBottomRight.dx, 800 - padding); // Device width is 800.
   });
 
+  testWidgets('SnackbarBehavior.floating is positioned within safe area', (WidgetTester tester) async {
+    const double viewPadding = 50.0;
+    const double floatingSnackBarDefaultBottomMargin = 10.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            // Simulate non-safe area.
+            viewPadding: EdgeInsets.only(bottom: viewPadding),
+          ),
+          child: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    Scaffold.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('I am a snack bar.'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              }
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // Start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final Finder materialFinder = find.descendant(
+      of: find.byType(SnackBar),
+      matching: find.byType(Material),
+    );
+    final Offset snackBarBottomLeft = tester.getBottomLeft(materialFinder);
+    expect(
+      snackBarBottomLeft.dy,
+      // Device height is 600.
+      600 - viewPadding - floatingSnackBarDefaultBottomMargin,
+    );
+  });
+
   testWidgets('Snackbar padding can be customized', (WidgetTester tester) async {
     const double padding = 20.0;
     await tester.pumpWidget(
