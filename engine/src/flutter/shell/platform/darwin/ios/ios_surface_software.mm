@@ -124,7 +124,7 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
 
 // |GPUSurfaceSoftwareDelegate|
 ExternalViewEmbedder* IOSSurfaceSoftware::GetExternalViewEmbedder() {
-  return GetExternalViewEmbedderIfEnabled();
+  return this;
 }
 
 }  // namespace flutter

@@ -84,7 +84,7 @@ bool IOSSurfaceGL::GLContextPresent() {
 
 // |GPUSurfaceGLDelegate|
 ExternalViewEmbedder* IOSSurfaceGL::GetExternalViewEmbedder() {
-  return GetExternalViewEmbedderIfEnabled();
+  return this;
 }
 
 }  // namespace flutter
