@@ -204,8 +204,6 @@ class TimePickerThemeData with Diagnosticable {
     Color backgroundColor,
     Color hourMinuteTextColor,
     Color hourMinuteColor,
-    Color hourMinuteUnselectedTextColor,
-    Color hourMinuteUnselectedColor,
     Color dayPeriodTextColor,
     Color dayPeriodColor,
     Color dialHandColor,

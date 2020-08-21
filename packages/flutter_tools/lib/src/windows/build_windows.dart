@@ -107,6 +107,10 @@ Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory
 Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeName) async {
   final Stopwatch sw = Stopwatch()..start();
 
+  // MSBuild sends all output to stdout, including build errors. This surfaces
+  // known error patterns.
+  final RegExp errorMatcher = RegExp(r':\s*(?:warning|(?:fatal )?error).*?:');
+
   int result;
   try {
     result = await processUtils.stream(
@@ -126,13 +130,13 @@ Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeNam
           'VERBOSE_SCRIPT_LOGGING': 'true'
       },
       trace: true,
+      stdoutErrorMatcher: errorMatcher,
     );
   } on ArgumentError {
     throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
   }
   if (result != 0) {
-    final String verboseInstructions = globals.logger.isVerbose ? '' : ' To view the stack trace, please run `flutter run -d windows -v`.';
-    throwToolExit('Build process failed.$verboseInstructions');
+    throwToolExit('Build process failed.');
   }
   globals.flutterUsage.sendTiming('build', 'windows-cmake-build', Duration(milliseconds: sw.elapsedMilliseconds));
 }

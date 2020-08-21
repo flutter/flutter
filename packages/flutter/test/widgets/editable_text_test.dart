@@ -1302,6 +1302,77 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
+  testWidgets('Handles the read-only flag correctly', (WidgetTester tester) async {
+    final TextEditingController controller =
+        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Select the first word "Lorem".
+    state.renderEditable.selectWordsInRange(
+      from: Offset.zero,
+      cause: SelectionChangedCause.tap,
+    );
+
+    if (kIsWeb) {
+      // On the web, a regular connection to the platform should've been made
+      // with the `readOnly` flag set to true.
+      expect(tester.testTextInput.hasAnyClients, isTrue);
+      expect(tester.testTextInput.setClientArgs['readOnly'], isTrue);
+      expect(tester.testTextInput.editingState['text'], equals('Lorem'));
+    } else {
+      // On non-web platforms, a read-only field doesn't need a connection with
+      // the platform.
+      expect(tester.testTextInput.hasAnyClients, isFalse);
+    }
+  });
+
+  testWidgets('Does not accept updates when read-only', (WidgetTester tester) async {
+    final TextEditingController controller =
+        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Select something.
+    state.renderEditable.selectWordsInRange(
+      from: Offset.zero,
+      cause: SelectionChangedCause.tap,
+    );
+
+    expect(tester.testTextInput.hasAnyClients, kIsWeb ? isTrue : isFalse);
+    if (kIsWeb) {
+      // On the web, the input connection exists, but text updates should be
+      // ignored.
+      tester.testTextInput.enterText('Foo bar');
+      // No change.
+      expect(controller.text, 'Lorem ipsum dolor sit amet');
+    }
+  });
+
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
     String changedValue;
     final Widget widget = MaterialApp(
@@ -1336,35 +1407,88 @@ void main() {
     expect(changedValue, clipboardContent);
   });
 
-  testWidgets('Does not lose focus by default when "next" action is pressed', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+  // The variants to test in the focus handling test.
+  final ValueVariant<TextInputAction> focusVariants = ValueVariant<
+      TextInputAction>(
+    TextInputAction.values.toSet(),
+  );
 
-    final Widget widget = MaterialApp(
-      home: EditableText(
-        backgroundCursorColor: Colors.grey,
-        controller: TextEditingController(),
-        focusNode: focusNode,
-        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
-        cursorColor: Colors.blue,
-        selectionControls: materialTextSelectionControls,
-        keyboardType: TextInputType.text,
-      ),
-    );
-    await tester.pumpWidget(widget);
+  testWidgets('Handles focus correctly when action is invoked', (WidgetTester tester) async {
+    // The expectations for each of the types of TextInputAction.
+    const Map<TextInputAction, bool> actionShouldLoseFocus = <TextInputAction, bool>{
+      TextInputAction.none: false,
+      TextInputAction.unspecified: false,
+      TextInputAction.done: true,
+      TextInputAction.go: true,
+      TextInputAction.search: true,
+      TextInputAction.send: true,
+      TextInputAction.continueAction: false,
+      TextInputAction.join: false,
+      TextInputAction.route: false,
+      TextInputAction.emergencyCall: false,
+      TextInputAction.newline: true,
+      TextInputAction.next: true,
+      TextInputAction.previous: true,
+    };
 
-    // Select EditableText to give it focus.
-    final Finder textFinder = find.byType(EditableText);
-    await tester.tap(textFinder);
-    await tester.pump();
+    final TextInputAction action = focusVariants.currentValue;
+    expect(actionShouldLoseFocus.containsKey(action), isTrue);
 
-    assert(focusNode.hasFocus);
+    Future<void> _ensureCorrectFocusHandlingForAction(
+        TextInputAction action, {
+          @required bool shouldLoseFocus,
+          bool shouldFocusNext = false,
+          bool shouldFocusPrevious = false,
+        }) async {
+      final FocusNode focusNode = FocusNode();
+      final GlobalKey previousKey = GlobalKey();
+      final GlobalKey nextKey = GlobalKey();
 
-    await tester.testTextInput.receiveAction(TextInputAction.next);
-    await tester.pump();
+      final Widget widget = MaterialApp(
+        home: Column(
+          children: <Widget>[
+            TextButton(
+                child: Text('Previous Widget', key: previousKey),
+                onPressed: () {}),
+            EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: TextEditingController(),
+              focusNode: focusNode,
+              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
+              cursorColor: Colors.blue,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+              autofocus: true,
+            ),
+            TextButton(
+                child: Text('Next Widget', key: nextKey), onPressed: () {}),
+          ],
+        ),
+      );
+      await tester.pumpWidget(widget);
 
-    // Still has focus after pressing "next".
-    expect(focusNode.hasFocus, true);
-  });
+      assert(focusNode.hasFocus);
+
+      await tester.testTextInput.receiveAction(action);
+      await tester.pump();
+
+      expect(Focus.of(nextKey.currentContext).hasFocus, equals(shouldFocusNext));
+      expect(Focus.of(previousKey.currentContext).hasFocus, equals(shouldFocusPrevious));
+      expect(focusNode.hasFocus, equals(!shouldLoseFocus));
+    }
+
+    try {
+      await _ensureCorrectFocusHandlingForAction(
+        action,
+        shouldLoseFocus: actionShouldLoseFocus[action],
+        shouldFocusNext: action == TextInputAction.next,
+        shouldFocusPrevious: action == TextInputAction.previous,
+      );
+    } on PlatformException {
+      // on Android, continueAction isn't supported.
+      expect(action, equals(TextInputAction.continueAction));
+    }
+  }, variant: focusVariants);
 
   testWidgets('Does not lose focus by default when "done" action is pressed and onEditingComplete is provided', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();

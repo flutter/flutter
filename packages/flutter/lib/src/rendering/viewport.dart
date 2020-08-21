@@ -188,6 +188,21 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
        _cacheExtentStyle = cacheExtentStyle,
        _clipBehavior = clipBehavior;
 
+  /// Report the semantics of this node, for example for accessibility purposes.
+  ///
+  /// [RenderViewportBase] adds [RenderViewport.useTwoPaneSemantics] to the
+  /// provided [SemanticsConfiguration] to support children using
+  /// [RenderViewport.excludeFromScrolling].
+  ///
+  /// This method should be overridden by subclasses that have interesting
+  /// semantic information. Overriding subclasses should call
+  /// `super.describeSemanticsConfiguration(config)` to ensure
+  /// [RenderViewport.useTwoPaneSemantics] is still added to `config`.
+  ///
+  /// See also:
+  ///
+  /// * [RenderObject.describeSemanticsConfiguration], for important
+  ///   details about not mutating a [SemanticsConfiguration] out of context.
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -1040,6 +1055,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ///
   /// The `duration` parameter can be set to a non-zero value to animate the
   /// target object into the viewport with an animation defined by `curve`.
+  ///
+  /// See also:
+  ///
+  /// * [RenderObject.showOnScreen], overridden by [RenderViewportBase] and the
+  ///   renderer for [SingleChildScrollView] to delegate to this method.
   static Rect showInViewport({
     RenderObject descendant,
     Rect rect,
@@ -1188,6 +1208,11 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   /// The semantic scrolling actions and the [SemanticsNode]s of scrollable
   /// children will be attached to the inner node, which itself is a child of
   /// the outer node.
+  ///
+  /// See also:
+  ///
+  /// * [RenderViewportBase.describeSemanticsConfiguration], which adds this
+  ///   tag to its [SemanticsConfiguration].
   static const SemanticsTag useTwoPaneSemantics = SemanticsTag('RenderViewport.twoPane');
 
   /// When a top-level [SemanticsNode] below a [RenderAbstractViewport] is

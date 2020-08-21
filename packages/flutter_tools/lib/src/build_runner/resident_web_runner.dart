@@ -22,7 +22,6 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../dart/language_version.dart';
 import '../dart/pub.dart';
 import '../devfs.dart';
@@ -470,6 +469,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           entrypoint: globals.fs.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
+          nullAssertions: debuggingOptions.nullAssertions,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {
@@ -731,14 +731,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
       _connectionResult = await webDevFS.connect(useDebugExtension);
       unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
 
-      _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
-        final String message = utf8.decode(base64.decode(log.bytes));
-        globals.printStatus(message, newline: false);
-      });
-      _stdErrSub = _vmService.onStderrEvent.listen((vmservice.Event log) {
-        final String message = utf8.decode(base64.decode(log.bytes));
-        globals.printStatus(message, newline: false);
-      });
+      void onLogEvent(vmservice.Event event)  {
+        final String message = processVmServiceMessage(event);
+        globals.printStatus(message);
+      }
+
+      _stdOutSub = _vmService.onStdoutEvent.listen(onLogEvent);
+      _stdErrSub = _vmService.onStderrEvent.listen(onLogEvent);
       _extensionEventSub =
           _vmService.onExtensionEvent.listen(printStructuredErrorLog);
       try {
