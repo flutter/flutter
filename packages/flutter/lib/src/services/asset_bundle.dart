@@ -71,6 +71,8 @@ abstract class AssetBundle {
     // that the null-handling logic is dead code).
     if (data == null)
       throw FlutterError('Unable to load asset: $key'); // ignore: dead_code
+    // 50 KB of data should take 2-3 ms to parse on a Moto G4, and about 400 μs
+    // on a Pixel 4.
     if (data.lengthInBytes < 50 * 1024) {
       return utf8.decode(data.buffer.asUint8List());
     }
