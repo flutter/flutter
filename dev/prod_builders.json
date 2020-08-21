@@ -63,7 +63,7 @@
       {
          "name":"Linux web_smoke_test",
          "repo":"flutter",
-         "taskName":"linux_web_smoke_test",
+         "task_name":"linux_web_smoke_test",
          "flaky":false
       },
       {
