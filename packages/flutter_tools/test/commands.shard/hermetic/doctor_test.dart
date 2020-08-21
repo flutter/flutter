@@ -14,13 +14,14 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
-import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
@@ -28,7 +29,7 @@ import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:quiver/testing/async.dart';
+import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -43,6 +44,11 @@ final Generator _kNoColorOutputPlatform = () => FakePlatform(
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorOutputPlatform,
 };
+
+final Platform macPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{'HOME': '/foo/bar'}
+);
 
 void main() {
   MockProcessManager mockProcessManager;
@@ -94,11 +100,14 @@ void main() {
       expect(validator.plistFile, '/path/to/app/Contents/Info.plist');
       expect(validator.pluginsPath, pluginsDirectory.path);
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{'HOME': '/foo/bar'},
+      Platform: () => macPlatform,
       PlistParser: () => mockPlistParser,
       FileSystem: () => fileSystem,
       ProcessManager: () => mockProcessManager,
+      FileSystemUtils: () => FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: macPlatform,
+      )
     });
 
     testUsingContext('legacy intellij plugins path checking on mac', () async {
@@ -107,9 +116,14 @@ void main() {
       final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/foo');
       expect(validator.pluginsPath, '/foo/bar/Library/Application Support/TestID2020.10');
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{'HOME': '/foo/bar'},
+      Platform: () => macPlatform,
       PlistParser: () => mockPlistParser,
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: macPlatform,
+      ),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('intellij plugins path checking on mac with override', () async {
@@ -119,6 +133,13 @@ void main() {
       expect(validator.pluginsPath, '/path/to/JetBrainsToolboxApp.plugins');
     }, overrides: <Type, Generator>{
       PlistParser: () => mockPlistParser,
+      Platform: () => macPlatform,
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: macPlatform,
+      ),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('vs code validator when both installed', () async {
@@ -168,90 +189,75 @@ void main() {
       expect(message.message, startsWith('Flutter extension not installed'));
       expect(message.isError, isTrue);
     }, overrides: noColorTerminalOverride);
-  });
 
-  group('proxy validator', () {
-    testUsingContext('does not show if HTTP_PROXY is not set', () {
-      expect(ProxyValidator.shouldShow, isFalse);
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()..environment = <String, String>{},
-    });
+    group('device validator', () {
+      testWithoutContext('no devices', () async {
+        final MockDeviceManager mockDeviceManager = MockDeviceManager();
 
-    testUsingContext('does not show if HTTP_PROXY is only whitespace', () {
-      expect(ProxyValidator.shouldShow, isFalse);
-    }, overrides: <Type, Generator>{
-      Platform: () =>
-          FakePlatform()..environment = <String, String>{'HTTP_PROXY': ' '},
-    });
+        when(mockDeviceManager.getAllConnectedDevices()).thenAnswer(
+          (Invocation invocation) => Future<List<Device>>.value(<Device>[])
+        );
+        when(mockDeviceManager.getDeviceDiagnostics()).thenAnswer(
+          (Invocation invocation) => Future<List<String>>.value(<String>[])
+        );
 
-    testUsingContext('shows when HTTP_PROXY is set', () {
-      expect(ProxyValidator.shouldShow, isTrue);
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{'HTTP_PROXY': 'fakeproxy.local'},
-    });
+        final DeviceValidator deviceValidator = DeviceValidator(
+          deviceManager: mockDeviceManager,
+          userMessages: UserMessages(),
+        );
+        final ValidationResult result = await deviceValidator.validate();
+        expect(result.type, ValidationType.notAvailable);
+        expect(result.messages, const <ValidationMessage>[
+          ValidationMessage.hint('No devices available'),
+        ]);
+        expect(result.statusInfo, isNull);
+      });
 
-    testUsingContext('shows when http_proxy is set', () {
-      expect(ProxyValidator.shouldShow, isTrue);
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{'http_proxy': 'fakeproxy.local'},
-    });
+      testWithoutContext('diagnostic message', () async {
+        final MockDeviceManager mockDeviceManager = MockDeviceManager();
 
-    testUsingContext('reports success when NO_PROXY is configured correctly', () async {
-      final ValidationResult results = await ProxyValidator().validate();
-      final List<ValidationMessage> issues = results.messages
-          .where((ValidationMessage msg) => msg.isError || msg.isHint)
-          .toList();
-      expect(issues, hasLength(0));
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{
-          'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': 'localhost,127.0.0.1',
-        },
-    });
+        when(mockDeviceManager.getAllConnectedDevices()).thenAnswer(
+          (Invocation invocation) => Future<List<Device>>.value(<Device>[])
+        );
+        when(mockDeviceManager.getDeviceDiagnostics()).thenAnswer(
+          (Invocation invocation) => Future<List<String>>.value(<String>['Device locked'])
+        );
 
-    testUsingContext('reports success when no_proxy is configured correctly', () async {
-      final ValidationResult results = await ProxyValidator().validate();
-      final List<ValidationMessage> issues = results.messages
-          .where((ValidationMessage msg) => msg.isError || msg.isHint)
-          .toList();
-      expect(issues, hasLength(0));
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{
-          'http_proxy': 'fakeproxy.local',
-          'no_proxy': 'localhost,127.0.0.1',
-        },
-    });
+        final DeviceValidator deviceValidator = DeviceValidator(
+          deviceManager: mockDeviceManager,
+          userMessages: UserMessages(),
+        );
+        final ValidationResult result = await deviceValidator.validate();
+        expect(result.type, ValidationType.notAvailable);
+        expect(result.messages, const <ValidationMessage>[
+          ValidationMessage.hint('Device locked'),
+        ]);
+        expect(result.statusInfo, isNull);
+      });
 
-    testUsingContext('reports issues when NO_PROXY is missing localhost', () async {
-      final ValidationResult results = await ProxyValidator().validate();
-      final List<ValidationMessage> issues = results.messages
-          .where((ValidationMessage msg) => msg.isError || msg.isHint)
-          .toList();
-      expect(issues, isNot(hasLength(0)));
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{
-          'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': '127.0.0.1',
-        },
-    });
+      testWithoutContext('diagnostic message and devices', () async {
+        final MockDeviceManager mockDeviceManager = MockDeviceManager();
+        final MockDevice mockDevice = MockDevice();
 
-    testUsingContext('reports issues when NO_PROXY is missing 127.0.0.1', () async {
-      final ValidationResult results = await ProxyValidator().validate();
-      final List<ValidationMessage> issues = results.messages
-          .where((ValidationMessage msg) => msg.isError || msg.isHint)
-          .toList();
-      expect(issues, isNot(hasLength(0)));
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform()
-        ..environment = <String, String>{
-          'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': 'localhost',
-        },
+        when(mockDeviceManager.getAllConnectedDevices()).thenAnswer(
+          (_) => Future<List<Device>>.value(<Device>[mockDevice])
+        );
+        when(mockDeviceManager.getDeviceDiagnostics()).thenAnswer(
+          (_) => Future<List<String>>.value(<String>['Device locked'])
+        );
+
+        final DeviceValidator deviceValidator = DeviceValidator(
+          deviceManager: mockDeviceManager,
+          userMessages: UserMessages(),
+        );
+        final ValidationResult result = await deviceValidator.validate();
+        expect(result.type, ValidationType.installed);
+        expect(result.messages, const <ValidationMessage>[
+          ValidationMessage('null (null) • device-id • android • null'),
+          ValidationMessage.hint('Device locked'),
+        ]);
+        expect(result.statusInfo, '1 available');
+      });
     });
   });
 
@@ -1220,3 +1226,12 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockArtifacts extends Mock implements Artifacts {}
 class MockPlistParser extends Mock implements PlistParser {}
+class MockDeviceManager extends Mock implements DeviceManager {}
+class MockDevice extends Mock implements Device {
+  MockDevice() {
+    when(isSupported()).thenReturn(true);
+    when(id).thenReturn('device-id');
+    when(isLocalEmulator).thenAnswer((_) => Future<bool>.value(false));
+    when(targetPlatform).thenAnswer((_) => Future<TargetPlatform>.value(TargetPlatform.android));
+  }
+}

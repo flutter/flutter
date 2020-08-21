@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -157,14 +159,14 @@ class NavigationRail extends StatefulWidget {
   ///
   /// The default value is [NavigationRailThemeData.backgroundColor]. If
   /// [NavigationRailThemeData.backgroundColor] is null, then the default value
-  /// is based on [ThemeData.colorScheme.surface].
+  /// is based on [ColorScheme.surface] of [ThemeData.colorScheme].
   final Color backgroundColor;
 
   /// Indicates that the [NavigationRail] should be in the extended state.
   ///
   /// The extended state has a wider rail container, and the labels are
   /// positioned next to the icons. [minExtendedWidth] can be used to set the
-  /// the minimum width of the rail when it is in this state.
+  /// minimum width of the rail when it is in this state.
   ///
   /// The rail will implicitly animate between the extended and normal state.
   ///
@@ -260,9 +262,8 @@ class NavigationRail extends StatefulWidget {
   /// When one of the [destinations] is selected the [selectedLabelTextStyle]
   /// will be used instead.
   ///
-  /// The default value is based on the [Theme]'s
-  /// [ThemeData.textTheme.bodyText]. The default color is based on the
-  /// [Theme]'s [ColorScheme.onSurface].
+  /// The default value is based on the [Theme]'s [TextTheme.bodyText1]. The
+  /// default color is based on the [Theme]'s [ColorScheme.onSurface].
   ///
   /// Properties from this text style, or
   /// [NavigationRailThemeData.unselectedLabelTextStyle] if this is null, are
@@ -274,9 +275,9 @@ class NavigationRail extends StatefulWidget {
   /// When a [NavigationRailDestination] is not selected,
   /// [unselectedLabelTextStyle] will be used.
   ///
-  /// The default value is based on the [Theme]'s
-  /// [ThemeData.textTheme.bodyText]. The default color is based on the
-  /// [Theme]'s [ColorScheme.primary].
+  /// The default value is based on the [TextTheme.bodyText1] of
+  /// [ThemeData.textTheme]. The default color is based on the [Theme]'s
+  /// [ColorScheme.primary].
   ///
   /// Properties from this text style,
   /// or [NavigationRailThemeData.selectedLabelTextStyle] if this is null, are

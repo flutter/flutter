@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -68,7 +70,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isEnabled: true,
@@ -83,7 +85,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isChecked: true,
@@ -99,6 +101,15 @@ void main() {
       ),
     ));
 
+    expect(tester.getSemantics(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_CheckboxRenderObjectWidget')), matchesSemantics(
+      hasCheckedState: true,
+      hasEnabledState: true,
+      // isFocusable is delayed by 1 frame.
+      isFocusable: true,
+    ));
+
+    await tester.pump();
+    // isFocusable should be false now after the 1 frame delay.
     expect(tester.getSemantics(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_CheckboxRenderObjectWidget')), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
@@ -602,6 +613,60 @@ void main() {
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(60, 36)));
   });
+
+  testWidgets('Checkbox stops hover animation when removed from the tree.', (WidgetTester tester) async {
+    const Key checkboxKey = Key('checkbox');
+    bool checkboxVal = true;
+
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: StatefulBuilder(
+                builder: (_, StateSetter setState) => Checkbox(
+                  key: checkboxKey,
+                  value: checkboxVal,
+                  onChanged: (bool newValue) => setState(() {checkboxVal = newValue;}),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(checkboxKey), findsOneWidget);
+    final Offset checkboxCenter = tester.getCenter(find.byKey(checkboxKey));
+    final TestGesture testGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await testGesture.moveTo(checkboxCenter);
+
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 25)); // hover animation duration is 50 ms. It is half-way.
+
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: Container(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Hover animation should not trigger an exception when the checkbox is removed
+    // before the hover animation should complete.
+    expect(tester.takeException(), isNull);
+
+    await testGesture.removePointer();
+  });
+
 
   testWidgets('Checkbox changes mouse cursor when hovered', (WidgetTester tester) async {
     // Test Checkbox() constructor

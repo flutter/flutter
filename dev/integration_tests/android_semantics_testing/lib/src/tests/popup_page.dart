@@ -84,7 +84,7 @@ class _PopupControlsPageState extends State<PopupControlsPage> {
                           ),
                         ),
                         actions: <Widget>[
-                          FlatButton(
+                          TextButton(
                             child: const Text('OK', key: ValueKey<String>('$alertKeyValue.OK')),
                             onPressed: () {
                               Navigator.of(context).pop();

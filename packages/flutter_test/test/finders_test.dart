@@ -41,7 +41,7 @@ void main() {
         Semantics(
           label: 'Add',
           button: true,
-          child: const FlatButton(
+          child: const TextButton(
             child: Text('+'),
             onPressed: null,
           ),

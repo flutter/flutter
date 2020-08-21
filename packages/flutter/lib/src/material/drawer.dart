@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -48,6 +50,8 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 
 /// A material design panel that slides in horizontally from the edge of a
 /// [Scaffold] to show navigation links in an application.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=WRj86iHihgY}
 ///
 /// Drawers are typically used with the [Scaffold.drawer] property. The child of
 /// the drawer is usually a [ListView] whose first child is a [DrawerHeader]
@@ -211,7 +215,7 @@ typedef DrawerCallback = void Function(bool isOpened);
 /// Rarely used directly. Drawer controllers are typically created automatically
 /// by [Scaffold] widgets.
 ///
-/// The draw controller provides the ability to open and close a drawer, either
+/// The drawer controller provides the ability to open and close a drawer, either
 /// via an animation or via user interaction. When closed, the drawer collapses
 /// to a translucent gesture detector that can be used to listen for edge
 /// swipes.
@@ -597,6 +601,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));

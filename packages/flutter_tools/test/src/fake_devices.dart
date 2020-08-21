@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/project.dart';
 /// (`Device.toJson()` and `--machine` flag for `devices` command)
 List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
   FakeDeviceJsonData(
-    FakeDevice('ephemeral', 'ephemeral', true),
+    FakeDevice('ephemeral', 'ephemeral', true, true, PlatformType.android),
     <String, Object>{
       'name': 'ephemeral',
       'id': 'ephemeral',
@@ -47,18 +47,18 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'screenshot': false,
         'fastStart': false,
         'flutterExit': true,
-        'hardwareRendering': false,
+        'hardwareRendering': true,
         'startPaused': true
       }
     }
   ),
 ];
 
-/// Fake device to test `devices` command
+/// Fake device to test `devices` command.
 class FakeDevice extends Device {
-  FakeDevice(this.name, String id, [bool ephemeral = true, this._isSupported = true]) : super(
+  FakeDevice(this.name, String id, [bool ephemeral = true, this._isSupported = true, PlatformType type = PlatformType.web]) : super(
       id,
-      platformType: PlatformType.web,
+      platformType: type,
       category: Category.mobile,
       ephemeral: ephemeral,
   );
@@ -87,7 +87,7 @@ class FakeDevice extends Device {
   Future<String> sdkNameAndVersion = Future<String>.value('Test SDK (1.2.3)');
 }
 
-/// Combines fake device with its canonical JSON representation
+/// Combines fake device with its canonical JSON representation.
 class FakeDeviceJsonData {
   FakeDeviceJsonData(this.dev, this.json);
 

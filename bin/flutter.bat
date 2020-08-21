@@ -15,6 +15,21 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 
 FOR %%i IN ("%~dp0..") DO SET FLUTTER_ROOT=%%~fi
 
+REM If available, add location of bundled mingit to PATH
+SET mingit_path=%FLUTTER_ROOT%\bin\mingit\cmd
+IF EXIST "%mingit_path%" SET PATH=%PATH%;%mingit_path%
+
+REM Test if Git is available on the Host
+where /q git || ECHO Error: Unable to find git in your PATH. && EXIT /B 1
+REM  Test if the flutter directory is a git clone, otherwise git rev-parse HEAD would fail
+IF NOT EXIST "%flutter_root%\.git" (
+  ECHO Error: The Flutter directory is not a clone of the GitHub project.
+  ECHO        The flutter tool requires Git in order to operate properly;
+  ECHO        to set up Flutter, run the following command:
+  ECHO        git clone -b stable https://github.com/flutter/flutter.git
+  EXIT /B 1
+)
+
 REM Include shared scripts in shared.bat
 SET shared_bin=%FLUTTER_ROOT%/bin/internal/shared.bat
 CALL "%shared_bin%"
@@ -37,6 +52,3 @@ REM Do not use the CALL command in the next line to execute Dart. CALL causes
 REM Windows to re-read the line from disk after the CALL command has finished
 REM regardless of the ampersand chain.
 "%dart%" --disable-dart-dev --packages="%flutter_tools_dir%\.packages" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & exit /B !ERRORLEVEL!
-
-:final_exit
-EXIT /B %exit_code%

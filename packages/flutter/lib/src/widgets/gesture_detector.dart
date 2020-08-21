@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -51,6 +53,7 @@ export 'package:flutter/rendering.dart' show RenderSemanticsGestureHandler;
 // bool _lights;
 // void setState(VoidCallback fn) { }
 // String _last;
+// Color _color;
 
 /// Factory for creating gesture recognizers.
 ///
@@ -130,8 +133,9 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 ///
 /// {@tool snippet}
 ///
-/// This example turns the light bulb yellow when the "turn lights on" button is
-/// tapped by setting the `_lights` field:
+/// This example of a [Container] contains a black light bulb wrapped in a [GestureDetector].
+/// It turns the light bulb yellow when the "turn lights on" button is tapped
+/// by setting the `_lights` field. Above animation shows the code in use:
 ///
 /// ```dart
 /// Container(
@@ -166,10 +170,39 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// ```
 /// {@end-tool}
 ///
+/// {@tool snippet}
+///
+/// This example of a [Container] wraps a [GestureDetector] widget.
+/// Since the [GestureDetector] does not have a child it takes on the size of
+/// its parent making the entire area of the surrounding [Container] clickable.
+/// When tapped the [Container] turns yellow by setting the `_color` field:
+///
+/// ```dart
+/// Container(
+///   color: _color,
+///   height: 200.0,
+///   width: 200.0,
+///   child: GestureDetector(
+///     onTap: () {
+///       setState(() {
+///         _color = Colors.yellow;
+///       });
+///     },
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// ## Debugging
 ///
 /// To see how large the hit test box of a [GestureDetector] is for debugging
 /// purposes, set [debugPaintPointersEnabled] to true.
+///
+/// See also:
+///
+///  * [Listener], a widget for listening to lower-level raw pointer events.
+///  * [MouseRegion], a widget that tracks the movement of mice, even when no
+///    button is pressed.
 class GestureDetector extends StatelessWidget {
   /// Creates a widget that detects gestures.
   ///
@@ -193,6 +226,9 @@ class GestureDetector extends StatelessWidget {
     this.onSecondaryTapDown,
     this.onSecondaryTapUp,
     this.onSecondaryTapCancel,
+    this.onTertiaryTapDown,
+    this.onTertiaryTapUp,
+    this.onTertiaryTapCancel,
     this.onDoubleTap,
     this.onLongPress,
     this.onLongPressStart,
@@ -357,6 +393,40 @@ class GestureDetector extends StatelessWidget {
   ///
   ///  * [kSecondaryButton], the button this callback responds to.
   final GestureTapCancelCallback onSecondaryTapCancel;
+
+  /// A pointer that might cause a tap with a tertiary button has contacted the
+  /// screen at a particular location.
+  ///
+  /// This is called after a short timeout, even if the winning gesture has not
+  /// yet been selected. If the tap gesture wins, [onTertiaryTapUp] will be
+  /// called, otherwise [onTertiaryTapCancel] will be called.
+  ///
+  /// See also:
+  ///
+  ///  * [kTertiaryButton], the button this callback responds to.
+  final GestureTapDownCallback onTertiaryTapDown;
+
+  /// A pointer that will trigger a tap with a tertiary button has stopped
+  /// contacting the screen at a particular location.
+  ///
+  /// This triggers in the case of the tap gesture winning. If the tap gesture
+  /// did not win, [onTertiaryTapCancel] is called instead.
+  ///
+  /// See also:
+  ///
+  ///  * [kTertiaryButton], the button this callback responds to.
+  final GestureTapUpCallback onTertiaryTapUp;
+
+  /// The pointer that previously triggered [onTertiaryTapDown] will not end up
+  /// causing a tap.
+  ///
+  /// This is called after [onTertiaryTapDown], and instead of
+  /// [onTertiaryTapUp], if the tap gesture did not win.
+  ///
+  /// See also:
+  ///
+  ///  * [kTertiaryButton], the button this callback responds to.
+  final GestureTapCancelCallback onTertiaryTapCancel;
 
   /// The user has tapped the screen with a primary button at the same location
   /// twice in quick succession.
@@ -656,9 +726,9 @@ class GestureDetector extends StatelessWidget {
   ///
   /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
-  /// Only the [onStart] callbacks for the [VerticalDragGestureRecognizer],
-  /// [HorizontalDragGestureRecognizer] and [PanGestureRecognizer] are affected
-  /// by this setting.
+  /// Only the [DragGestureRecognizer.onStart] callbacks for the
+  /// [VerticalDragGestureRecognizer], [HorizontalDragGestureRecognizer] and
+  /// [PanGestureRecognizer] are affected by this setting.
   ///
   /// See also:
   ///
@@ -669,15 +739,17 @@ class GestureDetector extends StatelessWidget {
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
-    if (
-      onTapDown != null ||
-      onTapUp != null ||
-      onTap != null ||
-      onTapCancel != null ||
-      onSecondaryTap != null ||
-      onSecondaryTapDown != null ||
-      onSecondaryTapUp != null ||
-      onSecondaryTapCancel != null
+    if (onTapDown != null ||
+        onTapUp != null ||
+        onTap != null ||
+        onTapCancel != null ||
+        onSecondaryTap != null ||
+        onSecondaryTapDown != null ||
+        onSecondaryTapUp != null ||
+        onSecondaryTapCancel != null||
+        onTertiaryTapDown != null ||
+        onTertiaryTapUp != null ||
+        onTertiaryTapCancel != null
     ) {
       gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
         () => TapGestureRecognizer(debugOwner: this),
@@ -690,7 +762,10 @@ class GestureDetector extends StatelessWidget {
             ..onSecondaryTap = onSecondaryTap
             ..onSecondaryTapDown = onSecondaryTapDown
             ..onSecondaryTapUp = onSecondaryTapUp
-            ..onSecondaryTapCancel = onSecondaryTapCancel;
+            ..onSecondaryTapCancel = onSecondaryTapCancel
+            ..onTertiaryTapDown = onTertiaryTapDown
+            ..onTertiaryTapUp = onTertiaryTapUp
+            ..onTertiaryTapCancel = onTertiaryTapCancel;
         },
       );
     }
@@ -708,21 +783,8 @@ class GestureDetector extends StatelessWidget {
         onLongPressUp != null ||
         onLongPressStart != null ||
         onLongPressMoveUpdate != null ||
-        onLongPressEnd != null) {
-      gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-        () => LongPressGestureRecognizer(debugOwner: this),
-        (LongPressGestureRecognizer instance) {
-          instance
-            ..onLongPress = onLongPress
-            ..onLongPressStart = onLongPressStart
-            ..onLongPressMoveUpdate = onLongPressMoveUpdate
-            ..onLongPressEnd =onLongPressEnd
-            ..onLongPressUp = onLongPressUp;
-        },
-      );
-    }
-
-    if (onSecondaryLongPress != null ||
+        onLongPressEnd != null ||
+        onSecondaryLongPress != null ||
         onSecondaryLongPressUp != null ||
         onSecondaryLongPressStart != null ||
         onSecondaryLongPressMoveUpdate != null ||
@@ -731,10 +793,15 @@ class GestureDetector extends StatelessWidget {
         () => LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
+            ..onLongPress = onLongPress
+            ..onLongPressStart = onLongPressStart
+            ..onLongPressMoveUpdate = onLongPressMoveUpdate
+            ..onLongPressEnd = onLongPressEnd
+            ..onLongPressUp = onLongPressUp
             ..onSecondaryLongPress = onSecondaryLongPress
             ..onSecondaryLongPressStart = onSecondaryLongPressStart
             ..onSecondaryLongPressMoveUpdate = onSecondaryLongPressMoveUpdate
-            ..onSecondaryLongPressEnd =onSecondaryLongPressEnd
+            ..onSecondaryLongPressEnd = onSecondaryLongPressEnd
             ..onSecondaryLongPressUp = onSecondaryLongPressUp;
         },
       );
@@ -832,6 +899,7 @@ class GestureDetector extends StatelessWidget {
       child: child,
     );
   }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -1190,7 +1258,7 @@ abstract class SemanticsGestureDelegate {
   /// object of the gesture detector.
   ///
   /// This method is called when the widget is created, updated, or during
-  /// [RawGestureDetector.replaceGestureRecognizers].
+  /// [RawGestureDetectorState.replaceGestureRecognizers].
   void assignSemantics(RenderSemanticsGestureHandler renderObject);
 
   @override
@@ -1235,7 +1303,7 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
       if (tap.onTapDown != null)
         tap.onTapDown(TapDownDetails());
       if (tap.onTapUp != null)
-        tap.onTapUp(TapUpDetails());
+        tap.onTapUp(TapUpDetails(kind: PointerDeviceKind.unknown));
       if (tap.onTap != null)
         tap.onTap();
     };

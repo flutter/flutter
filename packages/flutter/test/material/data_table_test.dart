@@ -2,10 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
+import '../rendering/mock_canvas.dart';
 import 'data_table_test_utils.dart';
 
 void main() {
@@ -304,6 +310,54 @@ void main() {
     await tester.tap(find.text('Dessert'));
     await tester.pump();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('DataTable sort indicator orientation', (WidgetTester tester) async {
+    Widget buildTable({ bool sortAscending = true }) {
+      return DataTable(
+        sortColumnIndex: 0,
+        sortAscending: sortAscending,
+        columns: <DataColumn>[
+          DataColumn(
+            label: const Text('Name'),
+            tooltip: 'Name',
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    // Check for ascending list
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(sortAscending: true)),
+    ));
+    // The `tester.widget` ensures that there is exactly one upward arrow.
+    Transform transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
+    expect(
+      transformOfArrow.transform.getRotation(),
+      equals(Matrix3.identity())
+    );
+
+    // Check for descending list.
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(sortAscending: false)),
+    ));
+    await tester.pumpAndSettle();
+    // The `tester.widget` ensures that there is exactly one upward arrow.
+    transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
+    expect(
+      transformOfArrow.transform.getRotation(),
+      equals(Matrix3.rotationZ(math.pi))
+    );
   });
 
   testWidgets('DataTable row onSelectChanged test', (WidgetTester tester) async {
@@ -1033,5 +1087,145 @@ void main() {
     // Wait for the tooltip timer to expire to prevent it scheduling a new frame
     // after the view is destroyed, which causes exceptions.
     await tester.pumpAndSettle(const Duration(seconds: 1));
+  });
+
+  testWidgets('DataRow renders custom colors when selected', (WidgetTester tester) async {
+    const Color selectedColor = Colors.green;
+    const Color defaultColor = Colors.red;
+
+    Widget buildTable({bool selected = false}) {
+      return Material(
+        child: DataTable(
+          columns: const <DataColumn>[
+            DataColumn(
+              label: Text('Column1'),
+            ),
+          ],
+          rows: <DataRow>[
+            DataRow(
+              selected: selected,
+              color: MaterialStateProperty.resolveWith<Color>(
+                    (Set<MaterialState> states) {
+                  if (states.contains(MaterialState.selected))
+                    return selectedColor;
+                  return defaultColor;
+                },
+              ),
+              cells: const <DataCell>[
+                DataCell(Text('Content1')),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    BoxDecoration lastTableRowBoxDecoration() {
+      final Table table = tester.widget(find.byType(Table));
+      final TableRow tableRow = table.children.last;
+      return tableRow.decoration as BoxDecoration;
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(),
+    ));
+    expect(lastTableRowBoxDecoration().color, defaultColor);
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(selected: true),
+    ));
+    expect(lastTableRowBoxDecoration().color, selectedColor);
+  });
+
+  testWidgets('DataRow renders custom colors when disabled', (WidgetTester tester) async {
+    const Color disabledColor = Colors.grey;
+    const Color defaultColor = Colors.red;
+
+    Widget buildTable({bool disabled = false}) {
+      return Material(
+        child: DataTable(
+          columns: const <DataColumn>[
+            DataColumn(
+              label: Text('Column1'),
+            ),
+          ],
+          rows: <DataRow>[
+            DataRow(
+              cells: const <DataCell>[
+                DataCell(Text('Content1')),
+              ],
+              onSelectChanged: (bool value) {},
+            ),
+            DataRow(
+              color: MaterialStateProperty.resolveWith<Color>(
+                    (Set<MaterialState> states) {
+                  if (states.contains(MaterialState.disabled))
+                    return disabledColor;
+                  return defaultColor;
+                },
+              ),
+              cells: const <DataCell>[
+                DataCell(Text('Content2')),
+              ],
+              onSelectChanged: disabled ? null : (bool value) {},
+            ),
+          ],
+        ),
+      );
+    }
+
+    BoxDecoration lastTableRowBoxDecoration() {
+      final Table table = tester.widget(find.byType(Table));
+      final TableRow tableRow = table.children.last;
+      return tableRow.decoration as BoxDecoration;
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(),
+    ));
+    expect(lastTableRowBoxDecoration().color, defaultColor);
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(disabled: true),
+    ));
+    expect(lastTableRowBoxDecoration().color, disabledColor);
+  });
+
+  testWidgets('DataRow renders custom colors when pressed', (WidgetTester tester) async {
+    const Color pressedColor = Color(0xff4caf50);
+    Widget buildTable() {
+      return DataTable(
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('Column1'),
+          ),
+        ],
+        rows: <DataRow>[
+          DataRow(
+            color: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed))
+                  return pressedColor;
+                return Colors.transparent;
+              },
+            ),
+            onSelectChanged: (bool value) {},
+            cells: const <DataCell>[
+              DataCell(Text('Content1')),
+            ],
+          ),
+        ]
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable()),
+    ));
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content1')));
+    await tester.pump(const Duration(milliseconds: 200)); // splash is well underway
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    expect(box, paints..circle(x: 64.0, y: 24.0, color: pressedColor));
+    await gesture.up();
   });
 }

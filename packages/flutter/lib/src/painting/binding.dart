@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:typed_data' show Uint8List;
 import 'dart:ui' as ui show instantiateImageCodec, Codec;
 import 'package:flutter/foundation.dart';
@@ -21,14 +22,12 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     super.initInstances();
     _instance = this;
     _imageCache = createImageCache();
-    if (shaderWarmUp != null) {
-      shaderWarmUp.execute();
-    }
+    shaderWarmUp?.execute();
   }
 
   /// The current [PaintingBinding], if one has been created.
-  static PaintingBinding get instance => _instance;
-  static PaintingBinding _instance;
+  static PaintingBinding? get instance => _instance;
+  static PaintingBinding? _instance;
 
   /// [ShaderWarmUp] to be executed during [initInstances].
   ///
@@ -51,7 +50,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// See also:
   ///
   ///  * [ShaderWarmUp], the interface of how this warm up works.
-  static ShaderWarmUp shaderWarmUp = const DefaultShaderWarmUp();
+  static ShaderWarmUp? shaderWarmUp = const DefaultShaderWarmUp();
 
   /// The singleton that implements the Flutter framework's image cache.
   ///
@@ -60,8 +59,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   ///
   /// The image cache is created during startup by the [createImageCache]
   /// method.
-  ImageCache get imageCache => _imageCache;
-  ImageCache _imageCache;
+  ImageCache? get imageCache => _imageCache;
+  ImageCache? _imageCache;
 
   /// Creates the [ImageCache] singleton (accessible via [imageCache]).
   ///
@@ -69,40 +68,51 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   @protected
   ImageCache createImageCache() => ImageCache();
 
-  /// Calls through to [dart:ui] with [decodedCacheRatioCap] from [ImageCache].
+  /// Calls through to [dart:ui] from [ImageCache].
   ///
-  /// The [cacheWidth] and [cacheHeight] parameters, when specified, indicate the
-  /// size to decode the image to.
+  /// The `cacheWidth` and `cacheHeight` parameters, when specified, indicate
+  /// the size to decode the image to.
   ///
-  /// Both [cacheWidth] and [cacheHeight] must be positive values greater than or
-  /// equal to 1 or null. It is valid to specify only one of [cacheWidth] and
-  /// [cacheHeight] with the other remaining null, in which case the omitted
-  /// dimension will decode to its original size. When both are null or omitted,
-  /// the image will be decoded at its native resolution.
+  /// Both `cacheWidth` and `cacheHeight` must be positive values greater than
+  /// or equal to 1, or null. It is valid to specify only one of `cacheWidth`
+  /// and `cacheHeight` with the other remaining null, in which case the omitted
+  /// dimension will be scaled to maintain the aspect ratio of the original
+  /// dimensions. When both are null or omitted, the image will be decoded at
+  /// its native resolution.
+  ///
+  /// The `allowUpscaling` parameter determines whether the `cacheWidth` or
+  /// `cacheHeight` parameters are clamped to the intrinsic width and height of
+  /// the original image. By default, the dimensions are clamped to avoid
+  /// unnecessary memory usage for images. Callers that wish to display an image
+  /// above its native resolution should prefer scaling the canvas the image is
+  /// drawn into.
   Future<ui.Codec> instantiateImageCodec(Uint8List bytes, {
-    int cacheWidth,
-    int cacheHeight,
+    int? cacheWidth,
+    int? cacheHeight,
+    bool allowUpscaling = false,
   }) {
     assert(cacheWidth == null || cacheWidth > 0);
     assert(cacheHeight == null || cacheHeight > 0);
+    assert(allowUpscaling != null);
     return ui.instantiateImageCodec(
       bytes,
       targetWidth: cacheWidth,
       targetHeight: cacheHeight,
+      allowUpscaling: allowUpscaling,
     );
   }
 
   @override
   void evict(String asset) {
     super.evict(asset);
-    imageCache.clear();
-    imageCache.clearLiveImages();
+    imageCache!.clear();
+    imageCache!.clearLiveImages();
   }
 
   @override
   void handleMemoryPressure() {
     super.handleMemoryPressure();
-    imageCache.clear();
+    imageCache?.clear();
   }
 
   /// Listenable that notifies when the available fonts on the system have
@@ -157,4 +167,4 @@ class _SystemFontsNotifier extends Listenable {
 ///
 /// The image cache is created during startup by the [PaintingBinding]'s
 /// [PaintingBinding.createImageCache] method.
-ImageCache get imageCache => PaintingBinding.instance.imageCache;
+ImageCache? get imageCache => PaintingBinding.instance!.imageCache;

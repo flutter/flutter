@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 /// Flutter widgets implementing the current iOS design language.
 ///
 /// To use, import `package:flutter/cupertino.dart`.
@@ -15,6 +17,7 @@ export 'src/cupertino/app.dart';
 export 'src/cupertino/bottom_tab_bar.dart';
 export 'src/cupertino/button.dart';
 export 'src/cupertino/colors.dart';
+export 'src/cupertino/constants.dart';
 export 'src/cupertino/context_menu.dart';
 export 'src/cupertino/context_menu_action.dart';
 export 'src/cupertino/date_picker.dart';

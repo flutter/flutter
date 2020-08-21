@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:intl/date_symbols.dart' as intl;
 
 import 'l10n/generated_cupertino_localizations.dart';
 import 'utils/date_localizations.dart' as util;
@@ -362,8 +361,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     ).replaceFirst(r'$second', _decimalFormat.format(second));
   }
 
-  /// A [LocalizationsDelegate] that uses [GlobalCupertinoLocalizations.load]
-  /// to create an instance of this class.
+  /// A [LocalizationsDelegate] for [CupertinoLocalizations].
   ///
   /// Most internationalized apps will use [GlobalCupertinoLocalizations.delegates]
   /// as the value of [CupertinoApp.localizationsDelegates] to include

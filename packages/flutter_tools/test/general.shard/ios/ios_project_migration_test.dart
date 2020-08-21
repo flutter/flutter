@@ -100,7 +100,7 @@ void main () {
 
       testWithoutContext('skips migrating script with embed', () {
         const String contents = '''
-shellScript = "/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" embed\\n/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" thin\n";
+shellScript = "/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" embed\\n/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" thin";
 			''';
         xcodeProjectInfoFile.writeAsStringSync(contents);
 
@@ -145,7 +145,6 @@ keep this 2
 keep this 1
 			shellScript = "/bin/sh "\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" embed_and_thin";
 keep this 2
-
 ''');
         expect(testLogger.statusText, contains('Upgrading project.pbxproj'));
       });
@@ -165,7 +164,7 @@ keep this 2
           mockUsage,
         );
 
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
 
@@ -183,7 +182,7 @@ keep this 2
           mockXcode,
           mockUsage,
         );
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
 
@@ -199,7 +198,7 @@ keep this 2
           mockXcode,
           mockUsage,
         );
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
 
@@ -236,7 +235,7 @@ keep this 2
           mockXcode,
           mockUsage,
         );
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
 
@@ -254,7 +253,7 @@ keep this 2
           mockXcode,
           mockUsage,
         );
-        expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
+        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
       });
     });

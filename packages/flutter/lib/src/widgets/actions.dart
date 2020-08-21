@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/gestures.dart';
@@ -28,11 +30,17 @@ BuildContext _getParent(BuildContext context) {
   return parent;
 }
 
-/// A class representing a particular configuration of an action.
+/// A class representing a particular configuration of an [Action].
 ///
-/// This class is what a key map in a [ShortcutMap] has as values, and is used
+/// This class is what the [Shortcuts.shortcuts] map has as values, and is used
 /// by an [ActionDispatcher] to look up an action and invoke it, giving it this
 /// object to extract configuration information from.
+///
+/// See also:
+///
+///  * [Actions.invoke], which invokes the action associated with a specified
+///    [Intent] using the [Actions] widget that most tightly encloses the given
+///    [BuildContext].
 @immutable
 class Intent with Diagnosticable {
   /// A const constructor for an [Intent].
@@ -93,7 +101,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// [ActionDispatcher.invokeAction] directly.
   ///
   /// This method is only meant to be invoked by an [ActionDispatcher], or by
-  /// its subclasses, and only when [enabled] is true.
+  /// its subclasses, and only when [isEnabled] is true.
   ///
   /// When overriding this method, the returned value can be any Object, but
   /// changing the return type of the override to match the type of the returned
@@ -292,10 +300,10 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// [ActionDispatcher.invokeAction] directly.
   ///
   /// This method is only meant to be invoked by an [ActionDispatcher], or by
-  /// its subclasses, and only when [enabled] is true.
+  /// its subclasses, and only when [isEnabled] is true.
   ///
   /// The optional `context` parameter is the context of the invocation of the
-  /// action, and in the case of an action invoked by a [ShortcutsManager], via
+  /// action, and in the case of an action invoked by a [ShortcutManager], via
   /// a [Shortcuts] widget, will be the context of the [Shortcuts] widget.
   ///
   /// When overriding this method, the returned value can be any Object, but
@@ -579,7 +587,13 @@ class Actions extends StatefulWidget {
   /// that are found.
   ///
   /// Setting `nullOk` to true means that if no ambient [Actions] widget is
-  /// found, then this method will return false instead of throwing.
+  /// found, then this method will return null instead of throwing.
+  ///
+  /// Returns the result of invoking the action's [Action.invoke] method. If
+  /// no action mapping was found for the specified intent, or if the action
+  /// that was found was disabled, then this returns null. Callers can detect
+  /// whether or not the action is available (found, and not disabled) using
+  /// [Actions.find] with its `nullOk` argument set to true.
   static Object invoke<T extends Intent>(
     BuildContext context,
     T intent, {
@@ -622,7 +636,7 @@ class Actions extends StatefulWidget {
     }());
     // Invoke the action we found using the relevant dispatcher from the Actions
     // Element we found.
-    return actionElement != null ? _findDispatcher(actionElement).invokeAction(action, intent, context) != null : null;
+    return actionElement != null ? _findDispatcher(actionElement).invokeAction(action, intent, context) : null;
   }
 
   @override
@@ -849,7 +863,7 @@ class _ActionsMarker extends InheritedWidget {
 ///         children: <Widget>[
 ///           Padding(
 ///             padding: const EdgeInsets.all(8.0),
-///             child: FlatButton(onPressed: () {}, child: Text('Press Me')),
+///             child: TextButton(onPressed: () {}, child: Text('Press Me')),
 ///           ),
 ///           Padding(
 ///             padding: const EdgeInsets.all(8.0),
@@ -929,8 +943,8 @@ class FocusableActionDetector extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// The [cursor] defaults to [MouseCursor.defer], deferring the choice of
-  /// cursor to the next region behing it in hit-test order.
+  /// The [mouseCursor] defaults to [MouseCursor.defer], deferring the choice of
+  /// cursor to the next region behind it in hit-test order.
   final MouseCursor mouseCursor;
 
   /// The child widget for this [FocusableActionDetector] widget.
@@ -1078,25 +1092,30 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
 
   @override
   Widget build(BuildContext context) {
-    Widget child = MouseRegion(
-      onEnter: _handleMouseEnter,
-      onExit: _handleMouseExit,
-      cursor: widget.mouseCursor,
-      child: Focus(
-        focusNode: widget.focusNode,
-        autofocus: widget.autofocus,
-        canRequestFocus: _canRequestFocus,
-        onFocusChange: _handleFocusChange,
-        child: widget.child,
+    final Map<Type, Action<Intent>> actions = widget.enabled && widget.actions != null
+      ? widget.actions
+      : const <Type, Action<Intent>>{};
+    final Map<LogicalKeySet, Intent> shortcuts = widget.enabled && widget.shortcuts != null
+      ? widget.shortcuts
+      : const <LogicalKeySet, Intent>{};
+
+    return Actions(actions:  actions,
+      child: Shortcuts(
+        shortcuts: shortcuts,
+        child: MouseRegion(
+          onEnter: _handleMouseEnter,
+          onExit: _handleMouseExit,
+          cursor: widget.mouseCursor,
+          child: Focus(
+            focusNode: widget.focusNode,
+            autofocus: widget.autofocus,
+            canRequestFocus: _canRequestFocus,
+            onFocusChange: _handleFocusChange,
+            child: widget.child,
+          ),
+        ),
       ),
     );
-    if (widget.enabled && widget.actions != null && widget.actions.isNotEmpty) {
-      child = Actions(actions: widget.actions, child: child);
-    }
-    if (widget.enabled && widget.shortcuts != null && widget.shortcuts.isNotEmpty) {
-      child = Shortcuts(shortcuts: widget.shortcuts, child: child);
-    }
-    return child;
   }
 }
 
@@ -1151,3 +1170,21 @@ class SelectIntent extends Intent {}
 /// This is an abstract class that serves as a base class for actions that
 /// select something. It is not bound to any key by default.
 abstract class SelectAction extends Action<SelectIntent> {}
+
+/// An [Intent] that dismisses the currently focused widget.
+///
+/// The [WidgetsApp.defaultShortcuts] binds this intent to the
+/// [LogicalKeyboardKey.escape] and [LogicalKeyboardKey.gameButtonB] keys.
+///
+/// See also:
+///  - [ModalRoute] which listens for this intent to dismiss modal routes
+///    (dialogs, pop-up menus, drawers, etc).
+class DismissIntent extends Intent {
+  /// Creates a const [DismissIntent].
+  const DismissIntent();
+}
+
+/// An action that dismisses the focused widget.
+///
+/// This is an abstract class that serves as a base class for dismiss actions.
+abstract class DismissAction extends Action<DismissIntent> {}

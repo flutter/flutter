@@ -13,12 +13,14 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
-import 'package:quiver/testing/async.dart';
+import 'package:fake_async/fake_async.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -86,11 +88,15 @@ void main() {
             <String>['Runner'],
             <String>['Debug', 'Release'],
             <String>['Runner'],
+            logger,
           ));
         }
       );
       mockXcode = MockXcode();
       when(mockXcode.isVersionSatisfactory).thenReturn(true);
+      fileSystem.file('foo/.packages')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('\n');
     });
 
     testUsingContext('with buildable app', () async {
@@ -261,16 +267,19 @@ void main() {
         ])
       );
 
-      final LaunchResult launchResult = await iosDevice.startApp(
-        buildableIOSApp,
-        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        platformArgs: <String, Object>{},
-      );
+      await FakeAsync().run((FakeAsync time) async {
+        final LaunchResult launchResult = await iosDevice.startApp(
+          buildableIOSApp,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          platformArgs: <String, Object>{},
+        );
+        time.elapse(const Duration(seconds: 2));
 
-      expect(logger.statusText,
-        contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'));
-      expect(launchResult.started, true);
-      expect(processManager.hasRemainingExpectations, false);
+        expect(logger.statusText,
+          contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'));
+        expect(launchResult.started, true);
+        expect(processManager.hasRemainingExpectations, false);
+      });
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
@@ -278,7 +287,7 @@ void main() {
       Platform: () => macPlatform,
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       Xcode: () => mockXcode,
-    });
+    }, skip: true); // TODO(jonahwilliams): clean up with https://github.com/flutter/flutter/issues/60675
   });
 }
 
@@ -313,7 +322,7 @@ IOSDevice setUpIOSDevice({
     sdkVersion: sdkVersion,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     platform: macPlatform,
-    artifacts: artifacts,
+    iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     logger: logger,
     iosDeploy: IOSDeploy(
       logger: logger,
@@ -330,6 +339,7 @@ IOSDevice setUpIOSDevice({
     ),
     cpuArchitecture: DarwinArch.arm64,
     interfaceType: IOSDeviceInterface.usb,
+    vmServiceConnectUri: (String string, {Log log}) async => MockVmService(),
   );
 }
 
@@ -337,3 +347,4 @@ class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
 class MockXcode extends Mock implements Xcode {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
+class MockVmService extends Mock implements VmService {}

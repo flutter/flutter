@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -421,6 +423,36 @@ void main() {
 
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
     });
+    testWidgets('Actions.invoke returns the value of Action.invoke', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      final Object sentinel = Object();
+      bool invoked = false;
+      const TestIntent intent = TestIntent();
+      final Action<Intent> testAction = TestAction(
+        onInvoke: (Intent intent) {
+          invoked = true;
+          return sentinel;
+        },
+      );
+
+      await tester.pumpWidget(
+        Actions(
+          dispatcher: TestDispatcher(postInvoke: collect),
+          actions: <Type, Action<Intent>>{
+            TestIntent: testAction,
+          },
+          child: Container(key: containerKey),
+        ),
+      );
+
+      await tester.pump();
+      final Object result = Actions.invoke<TestIntent>(
+        containerKey.currentContext,
+        intent,
+      );
+      expect(identical(result, sentinel), isTrue);
+      expect(invoked, isTrue);
+    });
   });
 
   group('Listening', () {
@@ -482,7 +514,7 @@ void main() {
         const TestIntent(),
       );
       expect(enabled1, isFalse);
-      expect(result, isFalse);
+      expect(result, isNull);
       expect(invoked1, isFalse);
 
       action1.enabled = true;
@@ -521,7 +553,7 @@ void main() {
       );
       expect(enabledChanged, isNull);
       expect(enabled2, isFalse);
-      expect(result, isFalse);
+      expect(result, isNull);
       expect(invoked2, isFalse);
 
       action2.enabled = true;
@@ -804,6 +836,6 @@ void main() {
       expect(description.length, equals(2));
       expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
       expect(description[1], equalsIgnoringHashCodes('actions: {TestIntent: TestAction#00000}'));
-    }, skip: isBrowser);
+    });
   });
 }

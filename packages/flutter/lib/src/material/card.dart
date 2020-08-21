@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/widgets.dart';
 
 import 'card_theme.dart';
-import 'colors.dart';
 import 'material.dart';
 import 'theme.dart';
 
-/// A material design card. A card has slightly rounded corners and a shadow.
+/// A material design card: a panel with slightly rounded corners and an
+/// elevation shadow.
 ///
 /// A card is a sheet of [Material] used to represent some related information,
 /// for example an album, a geographical location, a meal, contact details, etc.
@@ -37,16 +39,19 @@ import 'theme.dart';
 ///             title: Text('The Enchanted Nightingale'),
 ///             subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
 ///           ),
-///           ButtonBar(
+///           Row(
+///             mainAxisAlignment: MainAxisAlignment.end,
 ///             children: <Widget>[
-///               FlatButton(
+///               TextButton(
 ///                 child: const Text('BUY TICKETS'),
 ///                 onPressed: () { /* ... */ },
 ///               ),
-///               FlatButton(
+///               const SizedBox(width: 8),
+///               TextButton(
 ///                 child: const Text('LISTEN'),
 ///                 onPressed: () { /* ... */ },
 ///               ),
+///               const SizedBox(width: 8),
 ///             ],
 ///           ),
 ///         ],
@@ -91,7 +96,6 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [ListTile], to display icons and text in a card.
-///  * [ButtonBar], to display buttons at the bottom of a card.
 ///  * [showDialog], to display a modal card.
 ///  * <https://material.io/design/components/cards.html>
 class Card extends StatelessWidget {
@@ -118,14 +122,15 @@ class Card extends StatelessWidget {
   ///
   /// Defines the card's [Material.color].
   ///
-  /// If this property is null then [ThemeData.cardTheme.color] is used,
-  /// if that's null then [ThemeData.cardColor] is used.
+  /// If this property is null then [CardTheme.color] of [ThemeData.cardTheme]
+  /// is used. If that's null then [ThemeData.cardColor] is used.
   final Color color;
 
   /// The color to paint the shadow below the card.
   ///
   /// If null then the ambient [CardTheme]'s shadowColor is used.
-  /// If that's null too, then the default is fully opaque black.
+  /// If that's null too, then the overall theme's [ThemeData.shadowColor]
+  /// (default black) is used.
   final Color shadowColor;
 
   /// The z-coordinate at which to place this card. This controls the size of
@@ -133,17 +138,17 @@ class Card extends StatelessWidget {
   ///
   /// Defines the card's [Material.elevation].
   ///
-  /// If this property is null then [ThemeData.cardTheme.elevation] is used,
-  /// if that's null, the default value is 1.0.
+  /// If this property is null then [CardTheme.elevation] of
+  /// [ThemeData.cardTheme] is used. If that's null, the default value is 1.0.
   final double elevation;
 
   /// The shape of the card's [Material].
   ///
   /// Defines the card's [Material.shape].
   ///
-  /// If this property is null then [ThemeData.cardTheme.shape] is used.
-  /// If that's null then the shape will be a [RoundedRectangleBorder] with a
-  /// circular corner radius of 4.0.
+  /// If this property is null then [CardTheme.shape] of [ThemeData.cardTheme]
+  /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
+  /// with a circular corner radius of 4.0.
   final ShapeBorder shape;
 
   /// Whether to paint the [shape] border in front of the [child].
@@ -154,17 +159,17 @@ class Card extends StatelessWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// If this property is null then [ThemeData.cardTheme.clipBehavior] is used.
-  /// If that's null then the behavior will be [Clip.none].
+  /// If this property is null then [CardTheme.clipBehavior] of
+  /// [ThemeData.cardTheme] is used. If that's null then the behavior will be [Clip.none].
   final Clip clipBehavior;
 
   /// The empty space that surrounds the card.
   ///
   /// Defines the card's outer [Container.margin].
   ///
-  /// If this property is null then [ThemeData.cardTheme.margin] is used,
-  /// if that's null, the default margin is 4.0 logical pixels on all sides:
-  /// `EdgeInsets.all(4.0)`.
+  /// If this property is null then [CardTheme.margin] of
+  /// [ThemeData.cardTheme] is used. If that's null, the default margin is 4.0
+  /// logical pixels on all sides: `EdgeInsets.all(4.0)`.
   final EdgeInsetsGeometry margin;
 
   /// Whether this widget represents a single semantic container, or if false
@@ -189,6 +194,7 @@ class Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     final CardTheme cardTheme = CardTheme.of(context);
 
     return Semantics(
@@ -197,8 +203,8 @@ class Card extends StatelessWidget {
         margin: margin ?? cardTheme.margin ?? const EdgeInsets.all(4.0),
         child: Material(
           type: MaterialType.card,
-          shadowColor: shadowColor ?? cardTheme.shadowColor ?? Colors.black,
-          color: color ?? cardTheme.color ?? Theme.of(context).cardColor,
+          shadowColor: shadowColor ?? cardTheme.shadowColor ?? theme.shadowColor,
+          color: color ?? cardTheme.color ?? theme.cardColor,
           elevation: elevation ?? cardTheme.elevation ?? _defaultElevation,
           shape: shape ?? cardTheme.shape ?? const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0)),

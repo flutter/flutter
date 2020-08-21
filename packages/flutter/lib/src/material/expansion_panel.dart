@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -10,6 +12,7 @@ import 'expand_icon.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
 import 'mergeable_material.dart';
+import 'shadows.dart';
 import 'theme.dart';
 
 const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
@@ -228,6 +231,8 @@ class ExpansionPanelList extends StatefulWidget {
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
+    this.dividerColor,
+    this.elevation = 2,
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
@@ -317,6 +322,8 @@ class ExpansionPanelList extends StatefulWidget {
     this.animationDuration = kThemeAnimationDuration,
     this.initialOpenPanelValue,
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
+    this.dividerColor,
+    this.elevation = 2,
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true,
@@ -360,6 +367,23 @@ class ExpansionPanelList extends StatefulWidget {
   /// By default, 16px of space is added to the header vertically (above and below)
   /// during expansion.
   final EdgeInsets expandedHeaderPadding;
+
+  /// Defines color for the divider when [ExpansionPanel.isExpanded] is false.
+  ///
+  /// If `dividerColor` is null, then [DividerThemeData.color] is used. If that
+  /// is null, then [ThemeData.dividerColor] is used.
+  final Color dividerColor;
+
+  /// Defines elevation for the [ExpansionPanel] while it's expanded.
+  ///
+  /// This uses [kElevationToShadow] to simulate shadows, it does not use
+  /// [Material]'s arbitrary elevation feature.
+  ///
+  /// The following values can be used to define the elevation: 0, 1, 2, 3, 4, 6,
+  /// 8, 9, 12, 16, 24.
+  ///
+  /// By default, the value of elevation is 2.
+  final int elevation;
 
   @override
   State<StatefulWidget> createState() => _ExpansionPanelListState();
@@ -446,6 +470,11 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   @override
   Widget build(BuildContext context) {
+    assert(kElevationToShadow.containsKey(widget.elevation),
+      'Invalid value for elevation. See the kElevationToShadow constant for'
+      ' possible elevation values.'
+    );
+
     final List<MergeableMaterialItem> items = <MergeableMaterialItem>[];
 
     for (int index = 0; index < widget.children.length; index += 1) {
@@ -526,6 +555,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
     return MergeableMaterial(
       hasDividers: true,
+      dividerColor: widget.dividerColor,
+      elevation: widget.elevation,
       children: items,
     );
   }

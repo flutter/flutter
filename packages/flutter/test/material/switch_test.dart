@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -1012,5 +1014,52 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('Material switch should not recreate its render object when disabled', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/61247.
+    bool value = true;
+    bool enabled = true;
+    StateSetter stateSetter;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Material(
+              child: Center(
+                child: Switch(
+                  value: value,
+                  onChanged: !enabled ? null : (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final RenderToggleable oldSwitchRenderObject = tester
+      .renderObject(find.byWidgetPredicate((Widget widget) => widget is LeafRenderObjectWidget));
+
+    stateSetter(() { value = false; });
+    await tester.pump();
+    // Disable the switch when the implicit animation begins.
+    stateSetter(() { enabled = false; });
+    await tester.pump();
+
+    final RenderToggleable updatedSwitchRenderObject = tester
+      .renderObject(find.byWidgetPredicate((Widget widget) => widget is LeafRenderObjectWidget));
+
+
+    expect(updatedSwitchRenderObject.isInteractive, false);
+    expect(updatedSwitchRenderObject, oldSwitchRenderObject);
+    expect(updatedSwitchRenderObject.position.isCompleted, false);
+    expect(updatedSwitchRenderObject.position.isDismissed, false);
   });
 }

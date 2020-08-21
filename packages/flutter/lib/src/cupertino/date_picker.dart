@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/scheduler.dart';
@@ -36,7 +38,7 @@ const double _kTimerPickerHalfColumnPadding = 2;
 const double _kTimerPickerLabelPadSize = 4.5;
 const double _kTimerPickerLabelFontSize = 17.0;
 
-// The width of each colmn of the countdown time picker.
+// The width of each column of the countdown time picker.
 const double _kTimerPickerColumnIntrinsicWidth = 106;
 // Unfortunately turning on magnification for the timer picker messes up the label
 // alignment. So we'll have to hard code the font size and turn magnification off
@@ -265,7 +267,7 @@ class CupertinoDatePicker extends StatefulWidget {
     );
     assert(
       mode != CupertinoDatePickerMode.date || (minimumYear >= 1 && this.initialDateTime.year >= minimumYear),
-      'initial year is not greater than minimum year, or mininum year is not positive',
+      'initial year is not greater than minimum year, or minimum year is not positive',
     );
     assert(
       mode != CupertinoDatePickerMode.date || maximumYear == null || this.initialDateTime.year <= maximumYear,
@@ -301,7 +303,7 @@ class CupertinoDatePicker extends StatefulWidget {
   /// The minimum selectable date that the picker can settle on.
   ///
   /// When non-null, the user can still scroll the picker to [DateTime]s earlier
-  /// than [minimumDate], but the [onDateChangeCallback] will not be called on
+  /// than [minimumDate], but the [onDateTimeChanged] will not be called on
   /// these [DateTime]s. Once let go, the picker will scroll back to [minimumDate].
   ///
   /// In [CupertinoDatePickerMode.time] mode, a time becomes unselectable if the
@@ -316,7 +318,7 @@ class CupertinoDatePicker extends StatefulWidget {
   /// The maximum selectable date that the picker can settle on.
   ///
   /// When non-null, the user can still scroll the picker to [DateTime]s later
-  /// than [maximumDate], but the [onDateChangeCallback] will not be called on
+  /// than [maximumDate], but the [onDateTimeChanged] will not be called on
   /// these [DateTime]s. Once let go, the picker will scroll back to [maximumDate].
   ///
   /// In [CupertinoDatePickerMode.time] mode, a time becomes unselectable if the
@@ -713,7 +715,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     );
   }
 
-  // With the meridem picker set to `meridiemIndex`, and the hour picker set to
+  // With the meridiem picker set to `meridiemIndex`, and the hour picker set to
   // `hourIndex`, is it possible to change the value of the minute picker, so
   // that the resulting date stays in the valid range.
   bool _isValidHour(int meridiemIndex, int hourIndex) {
@@ -946,10 +948,11 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       _getEstimatedColumnWidth(_PickerColumnType.hour),
       _getEstimatedColumnWidth(_PickerColumnType.minute),
     ];
-    final List<_ColumnBuilder> pickerBuilders = <_ColumnBuilder>[
-      _buildHourPicker,
-      _buildMinutePicker,
-    ];
+
+    // Swap the hours and minutes if RTL to ensure they are in the correct position.
+    final List<_ColumnBuilder> pickerBuilders = Directionality.of(context) == TextDirection.rtl
+      ? <_ColumnBuilder>[_buildMinutePicker, _buildHourPicker]
+      : <_ColumnBuilder>[_buildHourPicker, _buildMinutePicker];
 
     // Adds am/pm column if the picker is not using 24h format.
     if (!widget.use24hFormat) {

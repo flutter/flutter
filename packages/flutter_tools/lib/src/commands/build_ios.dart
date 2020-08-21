@@ -33,6 +33,8 @@ class BuildIOSCommand extends BuildSubCommand {
     usesExtraFrontendOptions();
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
+    addBundleSkSLPathOption(hide: !verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
     argParser
       ..addFlag('simulator',
         help: 'Build for the iOS simulator instead of the device. This changes '

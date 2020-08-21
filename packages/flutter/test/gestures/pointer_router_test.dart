@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -149,6 +151,17 @@ void main() {
     ]));
 
     FlutterError.onError = previousErrorHandler;
+  });
+
+  test('Exceptions include router, route & event', () {
+    try {
+      final PointerRouter router = PointerRouter();
+      router.addRoute(2, (PointerEvent event) => throw 'Pointer exception');
+    } catch (e) {
+      expect(e, contains('router: Instance of \'PointerRouter\''));
+      expect(e, contains('route: Closure: (PointerEvent) => Null'));
+      expect(e, contains('event: PointerDownEvent#[a-zA-Z0-9]{5}(position: Offset(0.0, 0.0))'));
+    }
   });
 
   test('Should transform events', () {

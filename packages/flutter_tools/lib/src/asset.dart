@@ -18,6 +18,7 @@ import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
+import 'project.dart';
 
 const AssetBundleFactory _kManifestFactory = _ManifestAssetBundleFactory();
 
@@ -51,7 +52,7 @@ abstract class AssetBundle {
   Future<int> build({
     String manifestPath = defaultManifestPath,
     String assetDirPath,
-    String packagesPath,
+    @required String packagesPath,
     bool includeDefaultFonts = true,
     bool reportLicensedPackages = false,
   });
@@ -64,7 +65,7 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
   AssetBundle createBundle() => ManifestAssetBundle();
 }
 
-/// An asset bundle based on a pubspec.yaml
+/// An asset bundle based on a pubspec.yaml file.
 class ManifestAssetBundle implements AssetBundle {
   /// Constructs an [ManifestAssetBundle] that gathers the set of assets from the
   /// pubspec.yaml manifest.
@@ -122,28 +123,23 @@ class ManifestAssetBundle implements AssetBundle {
   Future<int> build({
     String manifestPath = defaultManifestPath,
     String assetDirPath,
-    String packagesPath,
+    @required String packagesPath,
     bool includeDefaultFonts = true,
     bool reportLicensedPackages = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
-    packagesPath ??= globals.fs.path.absolute(globalPackagesPath);
-    FlutterManifest flutterManifest;
+    FlutterProject flutterProject;
     try {
-      flutterManifest = FlutterManifest.createFromPath(
-        manifestPath,
-        logger: globals.logger,
-        fileSystem: globals.fs,
-      );
+      flutterProject = FlutterProject.fromDirectory(globals.fs.file(manifestPath).parent);
     } on Exception catch (e) {
       globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
       globals.printError('$e');
       return 1;
     }
-    if (flutterManifest == null) {
+    if (flutterProject == null) {
       return 1;
     }
-
+    final FlutterManifest flutterManifest = flutterProject.manifest;
     // If the last build time isn't set before this early return, empty pubspecs will
     // hang on hot reload, as the incremental dill files will never be copied to the
     // device.
@@ -169,17 +165,30 @@ class ManifestAssetBundle implements AssetBundle {
       flutterManifest,
       wildcardDirectories,
       assetBasePath,
-      excludeDirs: <String>[assetDirPath, getBuildDirectory()],
+      excludeDirs: <String>[
+        assetDirPath,
+        getBuildDirectory(),
+        if (flutterProject.ios.existsSync())
+          flutterProject.ios.hostAppRoot.path,
+        if (flutterProject.macos.existsSync())
+          flutterProject.macos.managedDirectory.path,
+        if (flutterProject.windows.existsSync())
+          flutterProject.windows.managedDirectory.path,
+        if (flutterProject.linux.existsSync())
+          flutterProject.linux.managedDirectory.path,
+      ],
     );
 
     if (assetVariants == null) {
       return 1;
     }
 
+    final bool includesMaterialFonts = flutterManifest.usesMaterialDesign;
     final List<Map<String, dynamic>> fonts = _parseFonts(
       flutterManifest,
       includeDefaultFonts,
       packageConfig,
+      primary: true,
     );
 
     // Add fonts and assets from packages.
@@ -215,12 +224,20 @@ class ManifestAssetBundle implements AssetBundle {
           return 1;
         }
         assetVariants.addAll(packageAssets);
-
+        if (!includesMaterialFonts && packageFlutterManifest.usesMaterialDesign) {
+          globals.printError(
+            'package:${package.name} has `uses-material-design: true` set but '
+            'the primary pubspec contains `uses-material-design: false`. '
+            'If the application needs material icons, then `uses-material-design` '
+            ' must be set to true.'
+          );
+        }
         fonts.addAll(_parseFonts(
           packageFlutterManifest,
           includeDefaultFonts,
           packageConfig,
           packageName: package.name,
+          primary: false,
         ));
       }
     }
@@ -251,7 +268,6 @@ class ManifestAssetBundle implements AssetBundle {
         entries[variant.entryUri.path] ??= DevFSFileContent(variant.assetFile);
       }
     }
-
     final List<_Asset> materialAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign && includeDefaultFonts)
         ..._getMaterialAssets(_kFontSetMaterial),
@@ -523,9 +539,10 @@ List<Map<String, dynamic>> _parseFonts(
   bool includeDefaultFonts,
   PackageConfig packageConfig, {
   String packageName,
+  @required bool primary,
 }) {
   return <Map<String, dynamic>>[
-    if (manifest.usesMaterialDesign && includeDefaultFonts)
+    if (primary && manifest.usesMaterialDesign && includeDefaultFonts)
       ..._getMaterialFonts(ManifestAssetBundle._kFontSetMaterial),
     if (packageName == null)
       ...manifest.fontsDescriptor
@@ -585,11 +602,12 @@ List<Map<String, dynamic>> _createFontsDescriptor(List<Font> fonts) {
 // variantsFor('assets/foo') => ['/assets/var1/foo', '/assets/var2/foo']
 // variantsFor('assets/bar') => []
 class _AssetDirectoryCache {
-  _AssetDirectoryCache(Iterable<String> excluded) {
-    _excluded = excluded.map<String>((String path) => globals.fs.path.absolute(path) + globals.fs.path.separator);
-  }
+  _AssetDirectoryCache(Iterable<String> excluded)
+    : _excluded = excluded
+        .map<String>(globals.fs.path.absolute)
+        .toList();
 
-  Iterable<String> _excluded;
+  final List<String> _excluded;
   final Map<String, Map<String, List<String>>> _cache = <String, Map<String, List<String>>>{};
 
   List<String> variantsFor(String assetPath) {
@@ -604,7 +622,9 @@ class _AssetDirectoryCache {
       final List<String> paths = <String>[];
       for (final FileSystemEntity entity in globals.fs.directory(directory).listSync(recursive: true)) {
         final String path = entity.path;
-        if (globals.fs.isFileSync(path) && !_excluded.any((String exclude) => path.startsWith(exclude))) {
+        if (globals.fs.isFileSync(path)
+          && assetPath != path
+          && !_excluded.any((String exclude) => globals.fs.path.isWithin(exclude, path))) {
           paths.add(path);
         }
       }
@@ -632,12 +652,13 @@ class _AssetDirectoryCache {
 ///
 /// Given package: 'test_package' and an assets directory like this:
 ///
-/// assets/foo
-/// assets/var1/foo
-/// assets/var2/foo
-/// assets/bar
+/// - assets/foo
+/// - assets/var1/foo
+/// - assets/var2/foo
+/// - assets/bar
 ///
-/// returns
+/// This will return:
+/// ```
 /// {
 ///   asset: packages/test_package/assets/foo: [
 ///     asset: packages/test_package/assets/foo,
@@ -648,7 +669,7 @@ class _AssetDirectoryCache {
 ///     asset: packages/test_package/assets/bar,
 ///   ],
 /// }
-///
+/// ```
 
 Map<_Asset, List<_Asset>> _parseAssets(
   PackageConfig packageConfig,

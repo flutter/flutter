@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_key.dart';
@@ -61,7 +62,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   final int modifiers;
 
   @override
-  String get keyLabel => charactersIgnoringModifiers.isEmpty ? null : charactersIgnoringModifiers;
+  String get keyLabel => charactersIgnoringModifiers;
 
   @override
   PhysicalKeyboardKey get physicalKey => kMacOsToPhysicalKey[keyCode] ?? PhysicalKeyboardKey.none;
@@ -71,19 +72,21 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     // Look to see if the keyCode is a printable number pad key, so that a
     // difference between regular keys (e.g. "=") and the number pad version
     // (e.g. the "=" on the number pad) can be determined.
-    final LogicalKeyboardKey numPadKey = kMacOsNumPadMap[keyCode];
+    final LogicalKeyboardKey? numPadKey = kMacOsNumPadMap[keyCode];
     if (numPadKey != null) {
       return numPadKey;
     }
-    // If this key is printable, generate the LogicalKeyboardKey from its Unicode value.
-    // Control keys such as ESC, CRTL, and SHIFT are not printable. HOME, DEL, arrow keys, and function
-    // keys are considered modifier function keys, which generate invalid Unicode scalar values.
-    if (keyLabel != null &&
+    // If this key is printable, generate the LogicalKeyboardKey from its
+    // Unicode value. Control keys such as ESC, CRTL, and SHIFT are not
+    // printable. HOME, DEL, arrow keys, and function keys are considered
+    // modifier function keys, which generate invalid Unicode scalar values.
+    if (keyLabel.isNotEmpty &&
         !LogicalKeyboardKey.isControlCharacter(keyLabel) &&
         !_isUnprintableKey(keyLabel)) {
-      // Given that charactersIgnoringModifiers can contain a String of arbitrary length,
-      // limit to a maximum of two Unicode scalar values. It is unlikely that a keyboard would produce a code point
-      // bigger than 32 bits, but it is still worth defending against this case.
+      // Given that charactersIgnoringModifiers can contain a String of
+      // arbitrary length, limit to a maximum of two Unicode scalar values. It
+      // is unlikely that a keyboard would produce a code point bigger than 32
+      // bits, but it is still worth defending against this case.
       assert(charactersIgnoringModifiers.length <= 2);
       int codeUnit = charactersIgnoringModifiers.codeUnitAt(0);
       if (charactersIgnoringModifiers.length == 2) {
@@ -99,16 +102,17 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       );
     }
 
-    // Control keys like "backspace" and movement keys like arrow keys don't have a printable representation,
-    // but are present on the physical keyboard. Since there is no logical keycode map for macOS
-    // (macOS uses the keycode to reference physical keys), a LogicalKeyboardKey is created with
-    // the physical key's HID usage and debugName. This avoids duplicating the physical
-    // key map.
+    // Control keys like "backspace" and movement keys like arrow keys don't
+    // have a printable representation, but are present on the physical
+    // keyboard. Since there is no logical keycode map for macOS (macOS uses the
+    // keycode to reference physical keys), a LogicalKeyboardKey is created with
+    // the physical key's HID usage and debugName. This avoids duplicating the
+    // physical key map.
     if (physicalKey != PhysicalKeyboardKey.none) {
       final int keyId = physicalKey.usbHidUsage | LogicalKeyboardKey.hidPlane;
       return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(
         keyId,
-        keyLabel: physicalKey.debugName,
+        keyLabel: physicalKey.debugName ?? '',
         debugName: physicalKey.debugName,
       );
     }
@@ -128,10 +132,9 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       return false;
     }
     // If only the "anyMask" bit is set, then we respond true for requests of
-    // whether either left or right is pressed.
-    // Handles the case where macOS supplies just the "either" modifier flag,
-    // but not the left/right flag. (e.g. modifierShift but not
-    // modifierLeftShift).
+    // whether either left or right is pressed. Handles the case where macOS
+    // supplies just the "either" modifier flag, but not the left/right flag.
+    // (e.g. modifierShift but not modifierLeftShift).
     final bool anyOnly = modifiers & (leftMask | rightMask | anyMask) == anyMask;
     switch (side) {
       case KeyboardSide.any:
@@ -143,7 +146,6 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       case KeyboardSide.right:
         return modifiers & rightMask != 0 || anyOnly;
     }
-    return false;
   }
 
   @override
@@ -183,8 +185,8 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   }
 
   @override
-  KeyboardSide getModifierSide(ModifierKey key) {
-    KeyboardSide findSide(int leftMask, int rightMask, int anyMask) {
+  KeyboardSide? getModifierSide(ModifierKey key) {
+    KeyboardSide? findSide(int anyMask, int leftMask, int rightMask) {
       final int combinedMask = leftMask | rightMask;
       final int combined = modifiers & combinedMask;
       if (combined == leftMask) {
@@ -194,7 +196,8 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       } else if (combined == combinedMask || modifiers & (combinedMask | anyMask) == anyMask) {
         // Handles the case where macOS supplies just the "either" modifier
         // flag, but not the left/right flag. (e.g. modifierShift but not
-        // modifierLeftShift).
+        // modifierLeftShift), or if left and right flags are provided, but not
+        // the "either" modifier flag.
         return KeyboardSide.all;
       }
       return null;
@@ -202,13 +205,13 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
 
     switch (key) {
       case ModifierKey.controlModifier:
-        return findSide(modifierLeftControl, modifierRightControl, modifierControl);
+        return findSide(modifierControl, modifierLeftControl, modifierRightControl);
       case ModifierKey.shiftModifier:
-        return findSide(modifierLeftShift, modifierRightShift, modifierShift);
+        return findSide(modifierShift, modifierLeftShift, modifierRightShift);
       case ModifierKey.altModifier:
-        return findSide(modifierLeftOption, modifierRightOption, modifierOption);
+        return findSide(modifierOption, modifierLeftOption, modifierRightOption);
       case ModifierKey.metaModifier:
-        return findSide(modifierLeftCommand, modifierRightCommand, modifierCommand);
+        return findSide(modifierCommand, modifierLeftCommand, modifierRightCommand);
       case ModifierKey.capsLockModifier:
       case ModifierKey.numLockModifier:
       case ModifierKey.scrollLockModifier:
@@ -216,9 +219,6 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       case ModifierKey.symbolModifier:
         return KeyboardSide.all;
     }
-
-    assert(false, 'Not handling $key type properly.');
-    return null;
   }
 
   /// Returns true if the given label represents an unprintable key.
@@ -231,7 +231,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   ///
   /// Used by [RawKeyEvent] subclasses to help construct IDs.
   static bool _isUnprintableKey(String label) {
-    if (label.length > 1) {
+    if (label.length != 1) {
       return false;
     }
     final int codeUnit = label.codeUnitAt(0);

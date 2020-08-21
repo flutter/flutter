@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(shihaohong-Piinks): remove ignoring deprecated member use analysis
-//   * when AlertDialog.scrollable parameter is removed. See
-//     https://flutter.dev/go/scrollable-alert-dialog for more details.
-//   * when Dialog.useMaterialBorderRadius parameter is removed.
-// ignore_for_file: deprecated_member_use_from_same_package
+// @dart = 2.8
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -56,9 +53,7 @@ class Dialog extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.shape,
     this.child,
-    bool useMaterialBorderRadius,
   }) : assert(clipBehavior != null),
-       useMaterialBorderRadius = useMaterialBorderRadius ?? false,
        super(key: key);
 
   /// {@template flutter.material.dialog.backgroundColor}
@@ -120,8 +115,7 @@ class Dialog extends StatelessWidget {
   ///
   /// Defines the dialog's [Material.shape].
   ///
-  /// The default shape is a [RoundedRectangleBorder] with a radius of 2.0
-  /// (temporarily, set [useMaterialBorderRadius] to match Material guidelines).
+  /// The default shape is a [RoundedRectangleBorder] with a radius of 4.0
   /// {@endtemplate}
   final ShapeBorder shape;
 
@@ -130,20 +124,8 @@ class Dialog extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  /// Indicates whether the [Dialog.shape]'s default [RoundedRectangleBorder]
-  /// should have a radius of 4.0 pixels to match Material Design, or use the
-  /// prior default of 2.0 pixels.
-  @Deprecated(
-    'Set useMaterialBorderRadius to `true`. This parameter will be removed and '
-    'was introduced to migrate Dialog to the correct border radius by default. '
-    'This feature was deprecated after v1.18.0.'
-  )
-  final bool useMaterialBorderRadius;
-
   static const RoundedRectangleBorder _defaultDialogShape =
     RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
-  static const RoundedRectangleBorder _oldDefaultDialogShape =
-    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
   static const double _defaultElevation = 24.0;
 
   @override
@@ -166,11 +148,7 @@ class Dialog extends StatelessWidget {
             child: Material(
               color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
               elevation: elevation ?? dialogTheme.elevation ?? _defaultElevation,
-              shape: shape ?? dialogTheme.shape ?? (
-                useMaterialBorderRadius ?
-                  _defaultDialogShape :
-                  _oldDefaultDialogShape
-              ),
+              shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
               type: MaterialType.card,
               clipBehavior: clipBehavior,
               child: child,
@@ -230,7 +208,7 @@ class Dialog extends StatelessWidget {
 ///           ),
 ///         ),
 ///         actions: <Widget>[
-///           FlatButton(
+///           TextButton(
 ///             child: Text('Approve'),
 ///             onPressed: () {
 ///               Navigator.of(context).pop();
@@ -279,10 +257,8 @@ class AlertDialog extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.shape,
     this.scrollable = false,
-    bool useMaterialBorderRadius,
   }) : assert(contentPadding != null),
        assert(clipBehavior != null),
-       useMaterialBorderRadius = useMaterialBorderRadius ?? false,
        super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -305,8 +281,8 @@ class AlertDialog extends StatelessWidget {
 
   /// Style for the text in the [title] of this [AlertDialog].
   ///
-  /// If null, [DialogTheme.titleTextStyle] is used, if that's null, defaults to
-  /// [ThemeData.textTheme.headline6].
+  /// If null, [DialogTheme.titleTextStyle] is used. If that's null, defaults to
+  /// [TextTheme.headline6] of [ThemeData.textTheme].
   final TextStyle titleTextStyle;
 
   /// The (optional) content of the dialog is displayed in the center of the
@@ -328,14 +304,17 @@ class AlertDialog extends StatelessWidget {
 
   /// Style for the text in the [content] of this [AlertDialog].
   ///
-  /// If null, [DialogTheme.contentTextStyle] is used, if that's null, defaults
-  /// to [ThemeData.textTheme.subtitle1].
+  /// If null, [DialogTheme.contentTextStyle] is used. If that's null, defaults
+  /// to [TextTheme.subtitle1] of [ThemeData.textTheme].
   final TextStyle contentTextStyle;
 
   /// The (optional) set of actions that are displayed at the bottom of the
   /// dialog.
   ///
-  /// Typically this is a list of [FlatButton] widgets.
+  /// Typically this is a list of [TextButton] widgets. It is recommended to
+  /// set the [Text.textAlign] to [TextAlign.end] for the [Text] within the
+  /// [TextButton], so that buttons whose labels wrap to an extra line align
+  /// with the overall [ButtonBar]'s alignment within the dialog.
   ///
   /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
   /// of padding on each side.
@@ -362,8 +341,8 @@ class AlertDialog extends StatelessWidget {
   ///   title: Text('Title'),
   ///   content: Container(width: 200, height: 200, color: Colors.green),
   ///   actions: <Widget>[
-  ///     RaisedButton(onPressed: () {}, child: Text('Button 1')),
-  ///     RaisedButton(onPressed: () {}, child: Text('Button 2')),
+  ///     ElevatedButton(onPressed: () {}, child: Text('Button 1')),
+  ///     ElevatedButton(onPressed: () {}, child: Text('Button 2')),
   ///   ],
   ///   actionsPadding: EdgeInsets.symmetric(horizontal: 8.0),
   /// )
@@ -387,7 +366,7 @@ class AlertDialog extends StatelessWidget {
   /// bottom and "ends" at the top.
   ///
   /// If null then it will use the surrounding
-  /// [ButtonBarTheme.overflowDirection]. If that is null, it will
+  /// [ButtonBarThemeData.overflowDirection]. If that is null, it will
   /// default to [VerticalDirection.down].
   ///
   /// See also:
@@ -417,7 +396,7 @@ class AlertDialog extends StatelessWidget {
   /// between the entire button bar and the edges of the dialog.
   ///
   /// If this property is null, then it will use the surrounding
-  /// [ButtonBarTheme.buttonPadding]. If that is null, it will default to
+  /// [ButtonBarThemeData.buttonPadding]. If that is null, it will default to
   /// 8.0 logical pixels on the left and right.
   ///
   /// See also:
@@ -441,7 +420,7 @@ class AlertDialog extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///  * [SemanticsConfiguration.namesRoute], for a description of how this
   ///    value is used.
   final String semanticLabel;
 
@@ -470,16 +449,6 @@ class AlertDialog extends StatelessWidget {
   )
   final bool scrollable;
 
-  /// Indicates whether the [Dialog.shape]'s default [RoundedRectangleBorder]
-  /// should have a radius of 4.0 pixels to match Material Design, or use the
-  /// prior default of 2.0 pixels.
-  @Deprecated(
-    'Set useMaterialBorderRadius to `true`. This parameter will be removed and '
-    'was introduced to migrate Dialog to the correct border radius by default. '
-    'This feature was deprecated after v1.18.0.'
-  )
-  final bool useMaterialBorderRadius;
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -501,12 +470,24 @@ class AlertDialog extends StatelessWidget {
       }
     }
 
+    // The paddingScaleFactor is used to adjust the padding of Dialog's
+    // children.
+    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
+    final TextDirection textDirection = Directionality.of(context);
+
     Widget titleWidget;
     Widget contentWidget;
     Widget actionsWidget;
-    if (title != null)
-     titleWidget = Padding(
-        padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
+    if (title != null) {
+      final EdgeInsets defaultTitlePadding = EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0);
+      final EdgeInsets effectiveTitlePadding = titlePadding?.resolve(textDirection) ?? defaultTitlePadding;
+      titleWidget = Padding(
+        padding: EdgeInsets.only(
+          left: effectiveTitlePadding.left * paddingScaleFactor,
+          right: effectiveTitlePadding.right * paddingScaleFactor,
+          top: effectiveTitlePadding.top * paddingScaleFactor,
+          bottom: effectiveTitlePadding.bottom,
+        ),
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6,
           child: Semantics(
@@ -516,17 +497,26 @@ class AlertDialog extends StatelessWidget {
           ),
         ),
       );
+    }
 
-    if (content != null)
+    if (content != null) {
+      final EdgeInsets effectiveContentPadding = contentPadding.resolve(textDirection);
       contentWidget = Padding(
-        padding: contentPadding,
+        padding: EdgeInsets.only(
+          left: effectiveContentPadding.left * paddingScaleFactor,
+          right: effectiveContentPadding.right * paddingScaleFactor,
+          top: title == null ? effectiveContentPadding.top * paddingScaleFactor : effectiveContentPadding.top,
+          bottom: effectiveContentPadding.bottom,
+        ),
         child: DefaultTextStyle(
           style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1,
           child: content,
         ),
       );
+    }
 
-    if (actions != null)
+
+    if (actions != null) {
       actionsWidget = Padding(
         padding: actionsPadding,
         child: ButtonBar(
@@ -536,6 +526,7 @@ class AlertDialog extends StatelessWidget {
           children: actions,
         ),
       );
+    }
 
     List<Widget> columnChildren;
     if (scrollable) {
@@ -591,7 +582,6 @@ class AlertDialog extends StatelessWidget {
       clipBehavior: clipBehavior,
       shape: shape,
       child: dialogChild,
-      useMaterialBorderRadius: useMaterialBorderRadius,
     );
   }
 }
@@ -623,7 +613,7 @@ class AlertDialog extends StatelessWidget {
 ///
 ///  * [SimpleDialog], for a dialog in which to use this widget.
 ///  * [showDialog], which actually displays the dialog and returns its result.
-///  * [FlatButton], which are commonly used as actions in other kinds of
+///  * [TextButton], which are commonly used as actions in other kinds of
 ///    dialogs, such as [AlertDialog]s.
 ///  * <https://material.io/design/components/dialogs.html#simple-dialog>
 class SimpleDialogOption extends StatelessWidget {
@@ -751,10 +741,8 @@ class SimpleDialog extends StatelessWidget {
     this.elevation,
     this.semanticLabel,
     this.shape,
-    bool useMaterialBorderRadius,
   }) : assert(titlePadding != null),
        assert(contentPadding != null),
-       useMaterialBorderRadius = useMaterialBorderRadius ?? false,
        super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -776,8 +764,8 @@ class SimpleDialog extends StatelessWidget {
 
   /// Style for the text in the [title] of this [SimpleDialog].
   ///
-  /// If null, [DialogTheme.titleTextStyle] is used, if that's null, defaults to
-  /// [ThemeData.textTheme.headline6].
+  /// If null, [DialogTheme.titleTextStyle] is used. If that's null, defaults to
+  /// [TextTheme.headline6] of [ThemeData.textTheme].
   final TextStyle titleTextStyle;
 
   /// The (optional) content of the dialog is displayed in a
@@ -816,22 +804,12 @@ class SimpleDialog extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///  * [SemanticsConfiguration.namesRoute], for a description of how this
   ///    value is used.
   final String semanticLabel;
 
   /// {@macro flutter.material.dialog.shape}
   final ShapeBorder shape;
-
-  /// Indicates whether the [Dialog.shape]'s default [RoundedRectangleBorder]
-  /// should have a radius of 4.0 pixels to match Material Design, or use the
-  /// prior default of 2.0 pixels.
-  @Deprecated(
-    'Set useMaterialBorderRadius to `true`. This parameter will be removed and '
-    'was introduced to migrate Dialog to the correct border radius by default. '
-    'This feature was deprecated after v1.18.0.'
-  )
-  final bool useMaterialBorderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -853,6 +831,44 @@ class SimpleDialog extends StatelessWidget {
       }
     }
 
+    // The paddingScaleFactor is used to adjust the padding of Dialog
+    // children.
+    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
+    final TextDirection textDirection = Directionality.of(context);
+
+    Widget titleWidget;
+    if (title != null) {
+      final EdgeInsets effectiveTitlePadding = titlePadding.resolve(textDirection);
+      titleWidget = Padding(
+        padding: EdgeInsets.only(
+          left: effectiveTitlePadding.left * paddingScaleFactor,
+          right: effectiveTitlePadding.right * paddingScaleFactor,
+          top: effectiveTitlePadding.top * paddingScaleFactor,
+          bottom: children == null ? effectiveTitlePadding.bottom * paddingScaleFactor : effectiveTitlePadding.bottom,
+        ),
+        child: DefaultTextStyle(
+          style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6,
+          child: Semantics(namesRoute: true, child: title),
+        ),
+      );
+    }
+
+    Widget contentWidget;
+    if (children != null) {
+      final EdgeInsets effectiveContentPadding = contentPadding.resolve(textDirection);
+      contentWidget = Flexible(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: effectiveContentPadding.left * paddingScaleFactor,
+            right: effectiveContentPadding.right * paddingScaleFactor,
+            top: title == null ? effectiveContentPadding.top * paddingScaleFactor : effectiveContentPadding.top,
+            bottom: effectiveContentPadding.bottom * paddingScaleFactor,
+          ),
+          child: ListBody(children: children),
+        ),
+      );
+    }
+
     Widget dialogChild = IntrinsicWidth(
       stepWidth: 56.0,
       child: ConstrainedBox(
@@ -862,20 +878,9 @@ class SimpleDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             if (title != null)
-              Padding(
-                padding: titlePadding,
-                child: DefaultTextStyle(
-                  style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6,
-                  child: Semantics(namesRoute: true, child: title),
-                ),
-              ),
+              titleWidget,
             if (children != null)
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: contentPadding,
-                  child: ListBody(children: children),
-                ),
-              ),
+              contentWidget,
           ],
         ),
       ),
@@ -892,7 +897,6 @@ class SimpleDialog extends StatelessWidget {
       elevation: elevation,
       shape: shape,
       child: dialogChild,
-      useMaterialBorderRadius: useMaterialBorderRadius,
     );
   }
 }
@@ -1007,4 +1011,11 @@ Future<T> showDialog<T>({
     useRootNavigator: useRootNavigator,
     routeSettings: routeSettings,
   );
+}
+
+double _paddingScaleFactor(double textScaleFactor) {
+  final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0).toDouble();
+  // The final padding scale factor is clamped between 1/3 and 1. For example,
+  // a non-scaled padding of 24 will produce a padding between 24 and 8.
+  return lerpDouble(1.0, 1.0 / 3.0, clampedTextScaleFactor - 1.0);
 }

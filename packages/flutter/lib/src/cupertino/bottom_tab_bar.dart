@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/widgets.dart';
@@ -256,6 +258,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         child: Center(child: active ? item.activeIcon : item.icon),
       ),
       if (item.title != null) item.title,
+      if (item.label != null) Text(item.label),
     ];
   }
 

@@ -32,6 +32,3 @@ REM Do not use the CALL command in the next line to execute Dart. CALL causes
 REM Windows to re-read the line from disk after the CALL command has finished
 REM regardless of the ampersand chain.
 "%dart%" %* & exit /B !ERRORLEVEL!
-
-:final_exit
-EXIT /B %exit_code%

@@ -41,6 +41,9 @@ enum TimelineStream {
   /// Marks events from the Dart VM's JIT compiler.
   compiler,
 
+  /// The verbose version of compiler.
+  compilerVerbose,
+
   /// Marks events emitted using the `dart:developer` API.
   dart,
 
@@ -160,10 +163,10 @@ abstract class FlutterDriver {
     );
   }
 
-  /// Getter of appIsolate
+  /// Getter of appIsolate.
   VMIsolate get appIsolate => throw UnimplementedError();
 
-  /// Getter of serviceClient
+  /// Getter of serviceClient.
   VMServiceClient get serviceClient => throw UnimplementedError();
 
   /// Sends [command] to the Flutter Driver extensions.

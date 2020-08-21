@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/rendering.dart';
 import '../flutter_test_alternative.dart';
 
@@ -69,5 +71,5 @@ void main() {
 
     expect(positioner.size.width, equals(200.0));
     expect(positioner.size.height, equals(200.0));
-  }, skip: isBrowser);
+  });
 }

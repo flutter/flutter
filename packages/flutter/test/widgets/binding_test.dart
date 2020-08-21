@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -34,6 +36,16 @@ class PushRouteObserver with WidgetsBindingObserver {
   @override
   Future<bool> didPushRoute(String route) async {
     pushedRoute = route;
+    return true;
+  }
+}
+
+class PushRouteInformationObserver with WidgetsBindingObserver {
+  RouteInformation pushedRouteInformation;
+
+  @override
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+    pushedRouteInformation = routeInformation;
     return true;
   }
 }
@@ -85,6 +97,38 @@ void main() {
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRoute, testRouteName);
 
+    WidgetsBinding.instance.removeObserver(observer);
+  });
+
+  testWidgets('didPushRouteInformation calls didPushRoute by default', (WidgetTester tester) async {
+    final PushRouteObserver observer = PushRouteObserver();
+    WidgetsBinding.instance.addObserver(observer);
+
+    const Map<String, dynamic> testRouteInformation = <String, dynamic>{
+      'location': 'testRouteName',
+      'state': 'state',
+      'restorationData': <dynamic, dynamic>{'test': 'config'}
+    };
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('pushRouteInformation', testRouteInformation));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    expect(observer.pushedRoute, 'testRouteName');
+    WidgetsBinding.instance.removeObserver(observer);
+  });
+
+  testWidgets('didPushRouteInformation callback', (WidgetTester tester) async {
+    final PushRouteInformationObserver observer = PushRouteInformationObserver();
+    WidgetsBinding.instance.addObserver(observer);
+
+    const Map<String, dynamic> testRouteInformation = <String, dynamic>{
+      'location': 'testRouteName',
+      'state': 'state',
+    };
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('pushRouteInformation', testRouteInformation));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    expect(observer.pushedRouteInformation.location, 'testRouteName');
+    expect(observer.pushedRouteInformation.state, 'state');
     WidgetsBinding.instance.removeObserver(observer);
   });
 
@@ -150,7 +194,7 @@ void main() {
   testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {
     FlutterError error;
     try {
-      tester.binding.scheduleFrameCallback(null, rescheduling: true);
+      tester.binding.scheduleFrameCallback((Duration _) { }, rescheduling: true);
     } on FlutterError catch (e) {
       error = e;
     }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -74,6 +76,29 @@ void main() {
       matching: find.byType(RichText),
     ));
     expect(actualActive.text.style.color, const Color(0xFF123456));
+  });
+
+
+  testWidgets('BottomNavigationBar.label will create a text widget', (WidgetTester tester) async {
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoTabBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            label: 'Tab 1',
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            label: 'Tab 2',
+          ),
+        ],
+        currentIndex: 1,
+      ),
+    ));
+
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsOneWidget);
   });
 
   testWidgets('Active and inactive colors dark mode', (WidgetTester tester) async {

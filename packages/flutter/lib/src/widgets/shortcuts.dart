@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -77,8 +78,8 @@ class KeySet<T extends KeyboardKey> {
         assert(!keys.contains(null)),
         _keys = HashSet<T>.from(keys);
 
-  /// Returns an unmodifiable view of the [KeyboardKey]s in this [KeySet].
-  Set<T> get keys => UnmodifiableSetView<T>(_keys);
+  /// Returns a copy of the [KeyboardKey]s in this [KeySet].
+  Set<T> get keys => _keys.toSet();
   final HashSet<T> _keys;
 
   @override
@@ -271,10 +272,11 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   ///
   /// When the map is changed, listeners to this manager will be notified.
   ///
-  /// The returned [LogicalKeyMap] should not be modified.
+  /// The returned map should not be modified.
   Map<LogicalKeySet, Intent> get shortcuts => _shortcuts;
   Map<LogicalKeySet, Intent> _shortcuts;
   set shortcuts(Map<LogicalKeySet, Intent> value) {
+    assert(value != null);
     if (!mapEquals<LogicalKeySet, Intent>(_shortcuts, value)) {
       _shortcuts = value;
       notifyListeners();
@@ -304,7 +306,21 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
       return false;
     }
     assert(context != null);
-    final LogicalKeySet keySet = keysPressed ?? LogicalKeySet.fromSet(RawKeyboard.instance.keysPressed);
+    LogicalKeySet keySet = keysPressed;
+    if (keySet == null) {
+      assert(RawKeyboard.instance.keysPressed.isNotEmpty,
+        'Received a key down event when no keys are in keysPressed. '
+        "This state can occur if the key event being sent doesn't properly "
+        'set its modifier flags. This was the event: $event and its data: '
+        '${event.data}');
+      // Avoid the crash in release mode, since it's easy to miss a particular
+      // bad key sequence in testing, and so shouldn't crash the app in release.
+      if (RawKeyboard.instance.keysPressed.isNotEmpty) {
+        keySet = LogicalKeySet.fromSet(RawKeyboard.instance.keysPressed);
+      } else {
+        return false;
+      }
+    }
     Intent matchedIntent = _shortcuts[keySet];
     if (matchedIntent == null) {
       // If there's not a more specific match, We also look for any keys that
@@ -349,16 +365,18 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///    invoked.
 ///  * [Action], a class for defining an invocation of a user action.
 class Shortcuts extends StatefulWidget {
-  /// Creates a ActionManager object.
+  /// Creates a const [Shortcuts] widget.
   ///
-  /// The [child] argument must not be null.
+  /// The [child] and [shortcuts] arguments are required and must not be null.
   const Shortcuts({
     Key key,
     this.manager,
-    this.shortcuts,
-    this.child,
+    @required this.shortcuts,
+    @required this.child,
     this.debugLabel,
-  }) : super(key: key);
+  }) : assert(shortcuts != null),
+       assert(child != null),
+       super(key: key);
 
   /// The [ShortcutManager] that will manage the mapping between key
   /// combinations and [Action]s.

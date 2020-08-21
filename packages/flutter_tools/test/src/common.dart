@@ -4,19 +4,22 @@
 
 import 'dart:async';
 
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:test_api/test_api.dart' as test_package show TypeMatcher, test; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
 // ignore: deprecated_member_use
@@ -78,21 +81,11 @@ String getFlutterRoot() {
 }
 
 CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
-  final FlutterCommandRunner runner = FlutterCommandRunner();
+  final FlutterCommandRunner runner = TestFlutterCommandRunner();
   if (command != null) {
     runner.addCommand(command);
   }
   return runner;
-}
-
-/// Updates [path] to have a modification time [seconds] from now.
-void updateFileModificationTime(
-  String path,
-  DateTime baseTime,
-  int seconds,
-) {
-  final DateTime modificationTime = baseTime.add(Duration(seconds: seconds));
-  globals.fs.file(path).setLastModifiedSync(modificationTime);
 }
 
 /// Matcher for functions that throw [AssertionError].
@@ -113,15 +106,17 @@ Matcher throwsToolExit({ int exitCode, Pattern message }) {
 /// Matcher for [ToolExit]s.
 final test_package.TypeMatcher<ToolExit> isToolExit = isA<ToolExit>();
 
-/// Matcher for functions that throw [ProcessExit].
-Matcher throwsProcessExit([ dynamic exitCode ]) {
-  return exitCode == null
-      ? throwsA(isProcessExit)
-      : throwsA(allOf(isProcessExit, (ProcessExit e) => e.exitCode == exitCode));
+/// Matcher for functions that throw [ProcessException].
+Matcher throwsProcessException({ Pattern message }) {
+  Matcher matcher = isProcessException;
+  if (message != null) {
+    matcher = allOf(matcher, (ProcessException e) => e.message?.contains(message));
+  }
+  return throwsA(matcher);
 }
 
-/// Matcher for [ProcessExit]s.
-final test_package.TypeMatcher<ProcessExit> isProcessExit = isA<ProcessExit>();
+/// Matcher for [ProcessException]s.
+final test_package.TypeMatcher<ProcessException> isProcessException = isA<ProcessException>();
 
 /// Creates a flutter project in the [temp] directory using the
 /// [arguments] list if specified, or `--no-pub` if not.
@@ -217,6 +212,21 @@ void testWithoutContext(String description, FutureOr<void> body(), {
     retry: retry,
     testOn: testOn,
   );
+}
+
+/// Runs a callback using FakeAsync.run while continually pumping the
+/// microtask queue. This avoids a deadlock when tests `await` a Future
+/// which queues a microtask that will not be processed unless the queue
+/// is flushed.
+Future<T> runFakeAsync<T>(Future<T> Function(FakeAsync time) f) async {
+  return FakeAsync().run((FakeAsync time) async {
+    bool pump = true;
+    final Future<T> future = f(time).whenComplete(() => pump = false);
+    while (pump) {
+      time.flushMicrotasks();
+    }
+    return future;
+  });
 }
 
 /// An implementation of [AppContext] that throws if context.get is called in the test.
@@ -361,4 +371,21 @@ class FakeVmServiceStreamResponse implements VmServiceExpectation {
 
   @override
   bool get isRequest => false;
+}
+
+class TestFlutterCommandRunner extends FlutterCommandRunner {
+  @override
+  Future<void> runCommand(ArgResults topLevelResults) async {
+    final Logger topLevelLogger = globals.logger;
+    final Map<Type, dynamic> contextOverrides = <Type, dynamic>{
+      if (topLevelResults['verbose'] as bool)
+        Logger: VerboseLogger(topLevelLogger),
+    };
+    return context.run<void>(
+      overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
+        return MapEntry<Type, Generator>(type, () => value);
+      }),
+      body: () => super.runCommand(topLevelResults),
+    );
+  }
 }

@@ -198,9 +198,9 @@ abstract class ProcessUtils {
   /// When [throwOnError] is `true`, if the child process finishes with a non-zero
   /// exit code, a [ProcessException] is thrown.
   ///
-  /// If [throwOnError] is `true`, and [whiteListFailures] is supplied,
+  /// If [throwOnError] is `true`, and [allowedFailures] is supplied,
   /// a [ProcessException] is only thrown on a non-zero exit code if
-  /// [whiteListFailures] returns false when passed the exit code.
+  /// [allowedFailures] returns false when passed the exit code.
   ///
   /// When [workingDirectory] is set, it is the working directory of the child
   /// process.
@@ -219,7 +219,7 @@ abstract class ProcessUtils {
   Future<RunResult> run(
     List<String> cmd, {
     bool throwOnError = false,
-    RunResultChecker whiteListFailures,
+    RunResultChecker allowedFailures,
     String workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String> environment,
@@ -231,11 +231,13 @@ abstract class ProcessUtils {
   RunResult runSync(
     List<String> cmd, {
     bool throwOnError = false,
-    RunResultChecker whiteListFailures,
+    bool verboseExceptions = false,
+    RunResultChecker allowedFailures,
     bool hideStdout = false,
     String workingDirectory,
     Map<String, String> environment,
     bool allowReentrantFlutter = false,
+    Encoding encoding = systemEncoding,
   });
 
   /// This runs the command in the background from the specified working
@@ -255,6 +257,9 @@ abstract class ProcessUtils {
   /// If [filter] is non-null, all lines that do not match it are removed. If
   /// [mapFunction] is present, all lines that match [filter] are also forwarded
   /// to [mapFunction] for further processing.
+  ///
+  /// If [stdoutErrorMatcher] is non-null, matching lines from stdout will be
+  /// treated as errors, just as if they had been logged to stderr instead.
   Future<int> stream(
     List<String> cmd, {
     String workingDirectory,
@@ -262,6 +267,7 @@ abstract class ProcessUtils {
     String prefix = '',
     bool trace = false,
     RegExp filter,
+    RegExp stdoutErrorMatcher,
     StringConverter mapFunction,
     Map<String, String> environment,
   });
@@ -292,7 +298,7 @@ class _DefaultProcessUtils implements ProcessUtils {
   Future<RunResult> run(
     List<String> cmd, {
     bool throwOnError = false,
-    RunResultChecker whiteListFailures,
+    RunResultChecker allowedFailures,
     String workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String> environment,
@@ -318,7 +324,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       final RunResult runResult = RunResult(results, cmd);
       _logger.printTrace(runResult.toString());
       if (throwOnError && runResult.exitCode != 0 &&
-          (whiteListFailures == null || !whiteListFailures(runResult.exitCode))) {
+          (allowedFailures == null || !allowedFailures(runResult.exitCode))) {
         runResult.throwException('Process exited abnormally:\n$runResult');
       }
       return runResult;
@@ -382,7 +388,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       if (exitCode != null) {
         _logger.printTrace(runResult.toString());
         if (throwOnError && runResult.exitCode != 0 &&
-            (whiteListFailures == null || !whiteListFailures(exitCode))) {
+            (allowedFailures == null || !allowedFailures(exitCode))) {
           runResult.throwException('Process exited abnormally:\n$runResult');
         }
         return runResult;
@@ -407,25 +413,29 @@ class _DefaultProcessUtils implements ProcessUtils {
   RunResult runSync(
     List<String> cmd, {
     bool throwOnError = false,
-    RunResultChecker whiteListFailures,
+    bool verboseExceptions = false,
+    RunResultChecker allowedFailures,
     bool hideStdout = false,
     String workingDirectory,
     Map<String, String> environment,
     bool allowReentrantFlutter = false,
+    Encoding encoding = systemEncoding,
   }) {
     _traceCommand(cmd, workingDirectory: workingDirectory);
     final ProcessResult results = _processManager.runSync(
       cmd,
       workingDirectory: workingDirectory,
       environment: _environment(allowReentrantFlutter, environment),
+      stderrEncoding: encoding,
+      stdoutEncoding: encoding,
     );
     final RunResult runResult = RunResult(results, cmd);
 
     _logger.printTrace('Exit code ${runResult.exitCode} from: ${cmd.join(' ')}');
 
     bool failedExitCode = runResult.exitCode != 0;
-    if (whiteListFailures != null && failedExitCode) {
-      failedExitCode = !whiteListFailures(runResult.exitCode);
+    if (allowedFailures != null && failedExitCode) {
+      failedExitCode = !allowedFailures(runResult.exitCode);
     }
 
     if (runResult.stdout.isNotEmpty && !hideStdout) {
@@ -445,7 +455,12 @@ class _DefaultProcessUtils implements ProcessUtils {
     }
 
     if (failedExitCode && throwOnError) {
-      runResult.throwException('The command failed');
+      String message = 'The command failed';
+      if (verboseExceptions) {
+        message = 'The command failed\nStdout:\n${runResult.stdout}\n'
+            'Stderr:\n${runResult.stderr}';
+      }
+      runResult.throwException(message);
     }
 
     return runResult;
@@ -474,6 +489,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     String prefix = '',
     bool trace = false,
     RegExp filter,
+    RegExp stdoutErrorMatcher,
     StringConverter mapFunction,
     Map<String, String> environment,
   }) async {
@@ -493,7 +509,9 @@ class _DefaultProcessUtils implements ProcessUtils {
         }
         if (line != null) {
           final String message = '$prefix$line';
-          if (trace) {
+          if (stdoutErrorMatcher?.hasMatch(line) == true) {
+            _logger.printError(message, wrap: false);
+          } else if (trace) {
             _logger.printTrace(message);
           } else {
             _logger.printStatus(message, wrap: false);

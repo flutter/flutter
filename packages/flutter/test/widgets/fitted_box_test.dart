@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -77,7 +79,7 @@ void main() {
     expect(insidePoint, equals(outsidePoint));
   });
 
-  testWidgets('Child can conver', (WidgetTester tester) async {
+  testWidgets('Child can cover', (WidgetTester tester) async {
     final Key outside = UniqueKey();
     final Key inside = UniqueKey();
 
@@ -369,6 +371,7 @@ void main() {
           height: 10.0,
           child: FittedBox(
             fit: BoxFit.cover,
+            clipBehavior: Clip.hardEdge,
             child: SizedBox(
               width: 10.0,
               height: 50.0,
@@ -391,6 +394,7 @@ void main() {
           height: 100.0,
           child: FittedBox(
             fit: BoxFit.cover,
+            clipBehavior: Clip.hardEdge,
             child: SizedBox(
               width: 50.0,
               height: 10.0,
@@ -418,6 +422,7 @@ void main() {
                   height: b,
                   child: FittedBox(
                     fit: BoxFit.none,
+                    clipBehavior: Clip.hardEdge,
                     child: SizedBox(
                       width: c,
                       height: d,
@@ -471,6 +476,120 @@ void main() {
     expect(_pointerDown, isFalse);
     await tester.tap(find.byKey(key1));
     expect(_pointerDown, isTrue);
+  });
+
+  testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(FittedBox(fit: BoxFit.none, child: Container()));
+    final RenderFittedBox renderObject = tester.allRenderObjects.whereType<RenderFittedBox>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    await tester.pumpWidget(FittedBox(fit: BoxFit.none, child: Container(), clipBehavior: Clip.antiAlias));
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('BoxFit.scaleDown matches size of child', (WidgetTester tester) async {
+    final Key outside = UniqueKey();
+    final Key inside = UniqueKey();
+
+    // Does not scale up when child is smaller than constraints
+
+    await tester.pumpWidget(
+      Center(
+        child: Container(
+          width: 200.0,
+          child: FittedBox(
+            key: outside,
+            fit: BoxFit.scaleDown,
+            child: Container(
+              key: inside,
+              width: 100.0,
+              height: 50.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
+    final RenderBox insideBox = tester.firstRenderObject(find.byKey(inside));
+
+    expect(outsideBox.size.width, 200.0);
+    expect(outsideBox.size.height, 50.0);
+
+    Offset outsidePoint = outsideBox.localToGlobal(Offset.zero);
+    Offset insidePoint = insideBox.localToGlobal(Offset.zero);
+    expect(insidePoint - outsidePoint, equals(const Offset(50.0, 0.0)));
+
+    // Scales down when child is bigger than constraints
+
+    await tester.pumpWidget(
+      Center(
+        child: Container(
+          width: 200.0,
+          child: FittedBox(
+            key: outside,
+            fit: BoxFit.scaleDown,
+            child: Container(
+              key: inside,
+              width: 400.0,
+              height: 200.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(outsideBox.size.width, 200.0);
+    expect(outsideBox.size.height, 100.0);
+
+    outsidePoint = outsideBox.localToGlobal(Offset.zero);
+    insidePoint = insideBox.localToGlobal(Offset.zero);
+
+    expect(insidePoint - outsidePoint, equals(Offset.zero));
+  });
+
+  testWidgets('Switching to and from BoxFit.scaleDown causes relayout', (WidgetTester tester) async {
+    final Key outside = UniqueKey();
+
+    final Widget scaleDownWidget = Center(
+      child: Container(
+        width: 200.0,
+        child: FittedBox(
+          key: outside,
+          fit: BoxFit.scaleDown,
+          child: Container(
+            width: 100.0,
+            height: 50.0,
+          ),
+        ),
+      ),
+    );
+
+    final Widget coverWidget = Center(
+      child: Container(
+        width: 200.0,
+        child: FittedBox(
+          key: outside,
+          child: Container(
+            width: 100.0,
+            height: 50.0,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(scaleDownWidget);
+
+    final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
+    expect(outsideBox.size.height, 50.0);
+
+    await tester.pumpWidget(coverWidget);
+
+    expect(outsideBox.size.height, 100.0);
+
+    await tester.pumpWidget(scaleDownWidget);
+
+    expect(outsideBox.size.height, 50.0);
   });
 }
 

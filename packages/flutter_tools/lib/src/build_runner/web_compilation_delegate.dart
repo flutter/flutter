@@ -211,6 +211,7 @@ class BuildDaemonCreator {
       await pub.get(
         context: PubContext.pubGet,
         directory: globals.fs.file(buildScriptPackages).parent.path,
+        generateSyntheticPackage: false,
       );
     }
     final String flutterWebSdk = globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);
@@ -220,6 +221,7 @@ class BuildDaemonCreator {
     // STDIO.
     final List<String> args = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--disable-dart-dev',
       '--packages=$buildScriptPackages',
       buildScript,
       'daemon',

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -9,12 +11,16 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_theme.dart';
+import 'colors.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'flat_button.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'text_selection_theme.dart';
 import 'theme.dart';
 
 const double _kHandleSize = 22.0;
@@ -52,6 +58,18 @@ class _TextSelectionToolbar extends StatefulWidget {
   _TextSelectionToolbarState createState() => _TextSelectionToolbarState();
 }
 
+// Intermediate data used for building menu items with the _getItems method.
+class _ItemData {
+  const _ItemData(
+    this.onPressed,
+    this.label,
+  ) : assert(onPressed != null),
+      assert(label != null);
+
+  final VoidCallback onPressed;
+  final String label;
+}
+
 class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
   ClipboardStatusNotifier _clipboardStatus;
 
@@ -63,11 +81,25 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   // The key for _TextSelectionToolbarContainer.
   UniqueKey _containerKey = UniqueKey();
 
-  FlatButton _getItem(VoidCallback onPressed, String label) {
-    assert(onPressed != null);
-    return FlatButton(
-      child: Text(label),
-      onPressed: onPressed,
+  Widget _getItem(_ItemData itemData, bool isFirst, bool isLast) {
+    assert(isFirst != null);
+    assert(isLast != null);
+    return ButtonTheme.fromButtonThemeData(
+      data: ButtonTheme.of(context).copyWith(
+        height: kMinInteractiveDimension,
+        minWidth: kMinInteractiveDimension,
+      ),
+      child: FlatButton(
+        onPressed: itemData.onPressed,
+        padding: EdgeInsets.only(
+          // These values were eyeballed to match the native text selection menu
+          // on a Pixel 2 running Android 10.
+          left: 9.5 + (isFirst ? 5.0 : 0.0),
+          right: 9.5 + (isLast ? 5.0 : 0.0),
+        ),
+        shape: Border.all(width: 0.0, color: Colors.transparent),
+        child: Text(itemData.label),
+      ),
     );
   }
 
@@ -151,20 +183,20 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
     }
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final List<Widget> items = <Widget>[
+    final List<_ItemData> itemDatas = <_ItemData>[
       if (widget.handleCut != null)
-        _getItem(widget.handleCut, localizations.cutButtonLabel),
+        _ItemData(widget.handleCut, localizations.cutButtonLabel),
       if (widget.handleCopy != null)
-        _getItem(widget.handleCopy, localizations.copyButtonLabel),
+        _ItemData(widget.handleCopy, localizations.copyButtonLabel),
       if (widget.handlePaste != null
           && _clipboardStatus.value == ClipboardStatus.pasteable)
-        _getItem(widget.handlePaste, localizations.pasteButtonLabel),
+        _ItemData(widget.handlePaste, localizations.pasteButtonLabel),
       if (widget.handleSelectAll != null)
-        _getItem(widget.handleSelectAll, localizations.selectAllButtonLabel),
+        _ItemData(widget.handleSelectAll, localizations.selectAllButtonLabel),
     ];
 
     // If there is no option available, build an empty widget.
-    if (items.isEmpty) {
+    if (itemDatas.isEmpty) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
@@ -177,7 +209,12 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
         // API 28.
         duration: const Duration(milliseconds: 140),
         child: Material(
+          // This value was eyeballed to match the native text selection menu on
+          // a Pixel 2 running Android 10.
+          borderRadius: const BorderRadius.all(Radius.circular(7.0)),
+          clipBehavior: Clip.antiAlias,
           elevation: 1.0,
+          type: MaterialType.card,
           child: _TextSelectionToolbarItems(
             isAbove: widget.isAbove,
             overflowOpen: _overflowOpen,
@@ -185,6 +222,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
               // The navButton that shows and hides the overflow menu is the
               // first child.
               Material(
+                type: MaterialType.card,
                 child: IconButton(
                   // TODO(justinmc): This should be an AnimatedIcon, but
                   // AnimatedIcons doesn't yet support arrow_back to more_vert.
@@ -200,7 +238,8 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
                       : localizations.moreButtonTooltip,
                 ),
               ),
-              ...items,
+              for (int i = 0; i < itemDatas.length; i++)
+                _getItem(itemDatas[i], i == 0, i == itemDatas.length - 1)
             ],
           ),
         ),
@@ -757,12 +796,16 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style text selection handles.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
+    final ThemeData theme = Theme.of(context);
+    final Color handleColor = theme.useTextSelectionTheme ?
+      TextSelectionTheme.of(context).selectionHandleColor ?? theme.colorScheme.primary :
+      theme.textSelectionHandleColor;
     final Widget handle = SizedBox(
       width: _kHandleSize,
       height: _kHandleSize,
       child: CustomPaint(
         painter: _TextSelectionHandlePainter(
-          color: Theme.of(context).textSelectionHandleColor,
+          color: handleColor,
         ),
       ),
     );

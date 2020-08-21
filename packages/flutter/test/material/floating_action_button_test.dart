@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 @TestOn('!chrome') // whole file needs triage.
 import 'dart:ui';
 
@@ -625,20 +627,24 @@ void main() {
         TestSemantics.rootChild(
           children: <TestSemantics>[
             TestSemantics(
-              flags: <SemanticsFlag>[
-                SemanticsFlag.scopesRoute,
-              ],
               children: <TestSemantics>[
                 TestSemantics(
-                  label: 'Add Photo',
-                  actions: <SemanticsAction>[
-                    SemanticsAction.tap,
-                  ],
                   flags: <SemanticsFlag>[
-                    SemanticsFlag.hasEnabledState,
-                    SemanticsFlag.isButton,
-                    SemanticsFlag.isEnabled,
-                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.scopesRoute,
+                  ],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'Add Photo',
+                      actions: <SemanticsAction>[
+                        SemanticsAction.tap,
+                      ],
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.hasEnabledState,
+                        SemanticsFlag.isButton,
+                        SemanticsFlag.isEnabled,
+                        SemanticsFlag.isFocusable,
+                      ],
+                    ),
                   ],
                 ),
               ],
@@ -672,7 +678,7 @@ void main() {
                           onPressed: () { },
                         ),
                         body: Center(
-                          child: RaisedButton(
+                          child: ElevatedButton(
                             child: const Text('POP'),
                             onPressed: () {
                               Navigator.pop(context);

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -208,8 +210,8 @@ void main() {
   test('Cannot use a disposed ChangeNotifier', () {
     final TestNotifier source = TestNotifier();
     source.dispose();
-    expect(() { source.addListener(null); }, throwsFlutterError);
-    expect(() { source.removeListener(null); }, throwsFlutterError);
+    expect(() { source.addListener(() { }); }, throwsFlutterError);
+    expect(() { source.removeListener(() { }); }, throwsFlutterError);
     expect(() { source.dispose(); }, throwsFlutterError);
     expect(() { source.notify(); }, throwsFlutterError);
   });

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show Shader;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -21,7 +23,7 @@ void main() {
   testWidgets('Can be constructed', (WidgetTester tester) async {
     const Widget child = SizedBox(width: 100.0, height: 100.0);
     await tester.pumpWidget(const ShaderMask(child: child, shaderCallback: createShader));
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
 
   testWidgets('Bounds rect includes offset', (WidgetTester tester) async {
     Rect shaderBounds;
@@ -45,7 +47,7 @@ void main() {
 
     // The shader bounds rectangle should reflect the position of the centered SizedBox.
     expect(shaderBounds, equals(const Rect.fromLTWH(0.0, 0.0, 400.0, 400.0)));
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
 
 
   testWidgets('Bounds rect includes offset visual inspection', (WidgetTester tester) async {
@@ -108,5 +110,5 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('shader_mask.bounds.matches_top_left.png'),
     );
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
 }

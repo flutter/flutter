@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -733,6 +735,7 @@ void main() {
 
     await tester.pumpWidget(Wrap(
       textDirection: TextDirection.ltr,
+      clipBehavior: Clip.hardEdge,
       children: const <Widget>[
         SizedBox(width: 500.0, height: 500.0),
         SizedBox(width: 500.0, height: 500.0),
@@ -894,5 +897,14 @@ void main() {
       const Offset(0.0, 0.0),
       const Offset(0.0, 20.0),
     ]);
+  });
+
+  testWidgets('Wrap can set and update clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(Wrap(textDirection: TextDirection.ltr));
+    final RenderWrap renderObject = tester.allRenderObjects.whereType<RenderWrap>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    await tester.pumpWidget(Wrap(textDirection: TextDirection.ltr, clipBehavior: Clip.antiAlias));
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 }

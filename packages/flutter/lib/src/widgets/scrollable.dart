@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
@@ -10,6 +12,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
@@ -17,6 +20,8 @@ import 'focus_manager.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'notification_listener.dart';
+import 'restoration.dart';
+import 'restoration_properties.dart';
 import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
@@ -88,6 +93,7 @@ class Scrollable extends StatefulWidget {
     this.excludeFromSemantics = false,
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.restorationId,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
@@ -224,6 +230,22 @@ class Scrollable extends StatefulWidget {
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
+  /// {@template flutter.widgets.scrollable.restorationId}
+  /// Restoration ID to save and restore the scroll offset of the scrollable.
+  ///
+  /// If a restoration id is provided, the scrollable will persist its current
+  /// scroll offset and restore it during state restoration.
+  ///
+  /// The scroll offset is persisted in a [RestorationBucket] claimed from
+  /// the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  /// {@endtemplate}
+  final String restorationId;
+
   /// The axis along which the scroll view scrolls.
   ///
   /// Determined by the [axisDirection].
@@ -237,6 +259,7 @@ class Scrollable extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<AxisDirection>('axisDirection', axisDirection));
     properties.add(DiagnosticsProperty<ScrollPhysics>('physics', physics));
+    properties.add(StringProperty('restorationId', restorationId));
   }
 
   /// The state from the closest instance of this class that encloses the given context.
@@ -262,8 +285,8 @@ class Scrollable extends StatefulWidget {
   /// when it is called, and callers will not get updated if the value changes.
   ///
   /// The heuristic used is determined by the [physics] of this [Scrollable]
-  /// via [ScrollPhysics.recommendDeferredScrolling]. That method is called with
-  /// the current [activity]'s [ScrollActivity.velocity].
+  /// via [ScrollPhysics.recommendDeferredLoading]. That method is called with
+  /// the current [ScrollPosition.activity]'s [ScrollActivity.velocity].
   ///
   /// If there is no [Scrollable] in the widget tree above the [context], this
   /// method returns false.
@@ -338,7 +361,7 @@ class _ScrollableScope extends InheritedWidget {
 ///
 /// This class is not intended to be subclassed. To specialize the behavior of a
 /// [Scrollable], provide it with a [ScrollPhysics].
-class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
+class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, RestorationMixin
     implements ScrollContext {
   /// The manager for this [Scrollable] widget's viewport position.
   ///
@@ -347,6 +370,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   /// [ScrollPosition] in its [ScrollController.createScrollPosition] method.
   ScrollPosition get position => _position;
   ScrollPosition _position;
+
+  final _RestorableScrollOffset _persistedScrollOffset = _RestorableScrollOffset();
 
   @override
   AxisDirection get axisDirection => widget.axisDirection;
@@ -377,9 +402,27 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   @override
+  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+    registerForRestoration(_persistedScrollOffset, 'offset');
+    assert(position != null);
+    if (_persistedScrollOffset.value != null) {
+      position.restoreOffset(_persistedScrollOffset.value, initialRestore: initialRestore);
+    }
+  }
+
+  @override
+  void saveOffset(double offset) {
+    assert(debugIsSerializableForRestoration(offset));
+    _persistedScrollOffset.value = offset;
+    // [saveOffset] is called after a scrolling ends and it is usually not
+    // followed by a frame. Therefore, manually flush restoration data.
+    ServicesBinding.instance.restorationManager.flushData();
+  }
+
+  @override
   void didChangeDependencies() {
-    super.didChangeDependencies();
     _updatePosition();
+    super.didChangeDependencies();
   }
 
   bool _shouldUpdatePosition(Scrollable oldWidget) {
@@ -412,6 +455,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   void dispose() {
     widget.controller?.detach(position);
     position.dispose();
+    _persistedScrollOffset.dispose();
     super.dispose();
   }
 
@@ -463,6 +507,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
+                  ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior;
               },
             ),
@@ -482,6 +527,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
+                  ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior;
               },
             ),
@@ -661,6 +707,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ScrollPosition>('position', position));
   }
+
+  @override
+  String get restorationId => widget.restorationId;
 }
 
 /// With [_ScrollSemantics] certain child [SemanticsNode]s can be
@@ -782,7 +831,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
     _innerNode ??= SemanticsNode(showOnScreen: showOnScreen);
     _innerNode
       ..isMergedIntoParent = node.isPartOfNodeMerging
-      ..rect = Offset.zero & node.rect.size;
+      ..rect = node.rect;
 
     int firstVisibleIndex;
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
@@ -882,9 +931,6 @@ class ScrollIncrementDetails {
 class ScrollIntent extends Intent {
   /// Creates a const [ScrollIntent] that requests scrolling in the given
   /// [direction], with the given [type].
-  ///
-  /// If [reversed] is specified, then the scroll will happen in the opposite
-  /// direction from the normal scroll direction.
   const ScrollIntent({
     @required this.direction,
     this.type = ScrollIncrementType.line,
@@ -907,9 +953,6 @@ class ScrollIntent extends Intent {
 /// size of the scroll window, and for [ScrollIncrementType.line], 50 logical
 /// pixels.
 class ScrollAction extends Action<ScrollIntent> {
-  /// The [LocalKey] that uniquely connects this action to a [ScrollIntent].
-  static const LocalKey key = ValueKey<Type>(ScrollAction);
-
   @override
   bool isEnabled(ScrollIntent intent) {
     final FocusNode focus = primaryFocus;
@@ -1032,4 +1075,29 @@ class ScrollAction extends Action<ScrollIntent> {
       curve: Curves.easeInOut,
     );
   }
+}
+
+// Not using a RestorableDouble because we want to allow null values and override
+// [enabled].
+class _RestorableScrollOffset extends RestorableValue<double> {
+  @override
+  double createDefaultValue() => null;
+
+  @override
+  void didUpdateValue(double oldValue) {
+    notifyListeners();
+  }
+
+  @override
+  double fromPrimitives(Object data) {
+    return data as double;
+  }
+
+  @override
+  Object toPrimitives() {
+    return value;
+  }
+
+  @override
+  bool get enabled => value != null;
 }

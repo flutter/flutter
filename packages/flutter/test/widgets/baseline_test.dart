@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +21,7 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Baseline - position test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -40,7 +42,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
     expect(tester.renderObject<RenderBox>(find.byType(Baseline)).size,
            within<Size>(from: const Size(100.0, 200.0), distance: 0.001));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Chip caches baseline', (WidgetTester tester) async {
     int calls = 0;
@@ -65,7 +67,7 @@ void main() {
     tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
     await tester.pump();
     expect(calls, 2);
-  }, skip: isBrowser);
+  });
 
   testWidgets('ListTile caches baseline', (WidgetTester tester) async {
     int calls = 0;

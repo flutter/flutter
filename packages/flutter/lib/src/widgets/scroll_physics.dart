@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -426,8 +428,9 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
     @required bool isScrolling,
     @required double velocity,
   }) {
-    if (velocity != 0.0 || ((oldPosition.minScrollExtent == newPosition.minScrollExtent) && (oldPosition.maxScrollExtent == newPosition.maxScrollExtent)))
+    if (velocity != 0.0 || ((oldPosition.minScrollExtent == newPosition.minScrollExtent) && (oldPosition.maxScrollExtent == newPosition.maxScrollExtent))) {
       return super.adjustPositionForNewDimensions(oldPosition: oldPosition, newPosition: newPosition, isScrolling: isScrolling, velocity: velocity);
+    }
     if (oldPosition.pixels < oldPosition.minScrollExtent) {
       final double oldDelta = oldPosition.minScrollExtent - oldPosition.pixels;
       return newPosition.minScrollExtent - oldDelta;
@@ -446,12 +449,25 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
 ///
 /// This is the behavior typically seen on iOS.
 ///
+/// [BouncingScrollPhysics] by itself will not create an overscroll effect if
+/// the contents of the scroll view do not extend beyond the size of the
+/// viewport. To create the overscroll and bounce effect regardless of the
+/// length of your scroll view, combine with [AlwaysScrollableScrollPhysics].
+///
+/// {@tool snippet}
+/// ```dart
+/// BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ScrollConfiguration], which uses this to provide the default
 ///    scroll behavior on iOS.
 ///  * [ClampingScrollPhysics], which is the analogous physics for Android's
 ///    clamping behavior.
+///  * [ScrollPhysics], for more examples of combining [ScrollPhysics] objects
+///    of different types to get the desired scroll physics.
 class BouncingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that bounce back from the edge.
   const BouncingScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
@@ -517,7 +533,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
       return BouncingScrollSimulation(
         spring: spring,
         position: position.pixels,
-        velocity: velocity * 0.91, // TODO(abarth): We should move this constant closer to the drag end.
+        velocity: velocity,
         leadingExtent: position.minScrollExtent,
         trailingExtent: position.maxScrollExtent,
         tolerance: tolerance,
@@ -533,9 +549,8 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double get minFlingVelocity => kMinFlingVelocity * 2.0;
 
   // Methodology:
-  // 1- Use https://github.com/flutter/scroll_overlay to test with Flutter and
-  //    platform scroll views superimposed.
-  // 2- Record incoming speed and make rapid flings in the test app.
+  // 1- Use https://github.com/flutter/platform_tests/tree/master/scroll_overlay to test with
+  //    Flutter and platform scroll views superimposed.
   // 3- If the scrollables stopped overlapping at any moment, adjust the desired
   //    output value of this function at that input speed.
   // 4- Feed new input/output set into a power curve fitter. Change function

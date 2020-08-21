@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:developer';
 import 'dart:ui' as ui show PictureRecorder;
 
@@ -22,9 +24,14 @@ export 'package:flutter/painting.dart';
 
 /// Base class for data associated with a [RenderObject] by its parent.
 ///
-/// Some render objects wish to store data on their children, such as their
-/// input parameters to the parent's layout algorithm or their position relative
-/// to other children.
+/// Some render objects wish to store data on their children, such as the
+/// children's input parameters to the parent's layout algorithm or the
+/// children's position relative to other children.
+///
+/// See also:
+///
+///  * [RenderObject.setupParentData], which [RenderObject] subclasses may
+///    override to attach specific types of parent data to children.
 class ParentData {
   /// Called when the RenderObject is removed from the tree.
   @protected
@@ -171,7 +178,7 @@ class PaintingContext extends ClipContext {
   void paintChild(RenderObject child, Offset offset) {
     assert(() {
       if (debugProfilePaintsEnabled)
-        Timeline.startSync('${child.runtimeType}', arguments: timelineWhitelistArguments);
+        Timeline.startSync('${child.runtimeType}', arguments: timelineArgumentsIndicatingLandmarkEvent);
       if (debugOnProfilePaint != null)
         debugOnProfilePaint(child);
       return true;
@@ -669,7 +676,7 @@ abstract class Constraints {
   /// const constructors so that they can be used in const expressions.
   const Constraints();
 
-  /// Whether there is exactly one size possible given these constraints
+  /// Whether there is exactly one size possible given these constraints.
   bool get isTight;
 
   /// Whether the constraint is expressed in a consistent manner.
@@ -708,6 +715,8 @@ abstract class Constraints {
 /// Signature for a function that is called for each [RenderObject].
 ///
 /// Used by [RenderObject.visitChildren] and [RenderObject.visitChildrenForSemantics].
+///
+/// The `child` argument must not be null.
 typedef RenderObjectVisitor = void Function(RenderObject child);
 
 /// Signature for a function that is called during layout.
@@ -871,7 +880,7 @@ class PipelineOwner {
   /// See [RendererBinding] for an example of how this function is used.
   void flushLayout() {
     if (!kReleaseMode) {
-      Timeline.startSync('Layout', arguments: timelineWhitelistArguments);
+      Timeline.startSync('Layout', arguments: timelineArgumentsIndicatingLandmarkEvent);
     }
     assert(() {
       _debugDoingLayout = true;
@@ -963,7 +972,7 @@ class PipelineOwner {
   /// See [RendererBinding] for an example of how this function is used.
   void flushPaint() {
     if (!kReleaseMode) {
-      Timeline.startSync('Paint', arguments: timelineWhitelistArguments);
+      Timeline.startSync('Paint', arguments: timelineArgumentsIndicatingLandmarkEvent);
     }
     assert(() {
       _debugDoingPaint = true;
@@ -1310,12 +1319,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   dynamic debugCreator;
 
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
-    FlutterError.reportError(FlutterErrorDetailsForRendering(
+    FlutterError.reportError(FlutterErrorDetails(
       exception: exception,
       stack: stack,
       library: 'rendering library',
       context: ErrorDescription('during $method()'),
-      renderObject: this,
       informationCollector: () sync* {
         if (debugCreator != null)
           yield DiagnosticsDebugCreator(debugCreator);
@@ -1666,6 +1674,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
+    if (!kReleaseMode && debugProfileLayoutsEnabled)
+      Timeline.startSync('$runtimeType',  arguments: timelineArgumentsIndicatingLandmarkEvent);
+
     assert(constraints != null);
     assert(constraints.debugAssertIsValid(
       isAppliedConstraint: true,
@@ -1719,6 +1730,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         _debugDoingThisResize = false;
         return true;
       }());
+
+      if (!kReleaseMode && debugProfileLayoutsEnabled)
+        Timeline.finishSync();
       return;
     }
     _constraints = constraints;
@@ -1781,6 +1795,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }());
     _needsLayout = false;
     markNeedsPaint();
+
+    if (!kReleaseMode && debugProfileLayoutsEnabled)
+      Timeline.finishSync();
   }
 
   /// If a subclass has a "size" (the state controlled by `parentUsesSize`,
@@ -1802,6 +1819,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Typically, subclasses will always return the same value. If the value can
   /// change, then, when it does change, the subclass should make sure to call
   /// [markNeedsLayoutForSizedByParentChange].
+  ///
+  /// Subclasses that return true must not change the dimensions of this render
+  /// object in [performLayout]. Instead, that work should be done by
+  /// [performResize].
   @protected
   bool get sizedByParent => false;
 
@@ -2230,6 +2251,37 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return;
     assert(() {
       if (_needsCompositingBitsUpdate) {
+        if (parent is RenderObject) {
+          final RenderObject parent = this.parent as RenderObject;
+          bool visitedByParent = false;
+          parent.visitChildren((RenderObject child) {
+            if (child == this) {
+              visitedByParent = true;
+            }
+          });
+          if (!visitedByParent) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary(
+                "A RenderObject was not visited by the parent's visitChildren "
+                'during paint.',
+              ),
+              parent.describeForError(
+                'The parent was',
+              ),
+              describeForError(
+                'The child that was not visited was'
+              ),
+              ErrorDescription(
+                'A RenderObject with children must implement visitChildren and '
+                'call the visitor exactly once for each child; it also should not '
+                'paint children that were removed with dropChild.'
+              ),
+              ErrorHint(
+                'This usually indicates an error in the Flutter framework itself.'
+              ),
+            ]);
+          }
+        }
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
             'Tried to paint a RenderObject before its compositing bits were '
@@ -2378,6 +2430,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// semantics tree to implement implicit accessibility scrolling on iOS where
   /// the viewport scrolls implicitly when moving the accessibility focus from
   /// a the last visible node in the viewport to the first hidden one.
+  ///
+  /// See also:
+  ///
+  /// * [RenderViewportBase.cacheExtent], used by viewports to extend their
+  ///   semantics clip beyond their approximate paint clip.
   Rect describeSemanticsClip(covariant RenderObject child) => null;
 
   // SEMANTICS
@@ -2482,15 +2539,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// render objects in production, obtain a [SemanticsHandle] from
   /// [PipelineOwner.ensureSemantics].
   ///
-  /// Only valid when asserts are enabled. In release builds, always returns
+  /// Only valid in debug and profile mode. In release builds, always returns
   /// null.
   SemanticsNode get debugSemantics {
-    SemanticsNode result;
-    assert(() {
-      result = _semantics;
-      return true;
-    }());
-    return result;
+    if (!kReleaseMode) {
+      return _semantics;
+    }
+    return null;
   }
 
   /// Removes all semantics from this render object and its descendants.
@@ -2701,10 +2756,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// Assemble the [SemanticsNode] for this [RenderObject].
   ///
-  /// If [isSemanticBoundary] is true, this method is called with the `node`
-  /// created for this [RenderObject], the `config` to be applied to that node
-  /// and the `children` [SemanticsNode]s that descendants of this RenderObject
-  /// have generated.
+  /// If [describeSemanticsConfiguration] sets
+  /// [SemanticsConfiguration.isSemanticBoundary] to true, this method is called
+  /// with the `node` created for this [RenderObject], the `config` to be
+  /// applied to that node and the `children` [SemanticsNode]s that descendants
+  /// of this RenderObject have generated.
   ///
   /// By default, the method will annotate `node` with `config` and add the
   /// `children` to it.
@@ -2864,6 +2920,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// The `duration` parameter can be set to a non-zero value to bring the
   /// target object on screen in an animation defined by `curve`.
+  ///
+  /// See also:
+  ///
+  /// * [RenderViewportBase.showInViewport], which [RenderViewportBase] and
+  ///   [SingleChildScrollView] delegate this method to.
   void showOnScreen({
     RenderObject descendant,
     Rect rect,
@@ -2945,7 +3006,7 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
   }
 
   ChildType _child;
-  /// The render object's unique child
+  /// The render object's unique child.
   ChildType get child => _child;
   set child(ChildType value) {
     if (_child != null)
@@ -3340,35 +3401,6 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
     PaintingBinding.instance.systemFonts.removeListener(systemFontsDidChange);
     super.detach();
   }
-}
-
-/// Variant of [FlutterErrorDetails] with extra fields for the rendering
-/// library.
-class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
-  /// Creates a [FlutterErrorDetailsForRendering] object with the given
-  /// arguments setting the object's properties.
-  ///
-  /// The rendering library calls this constructor when catching an exception
-  /// that will subsequently be reported using [FlutterError.onError].
-  const FlutterErrorDetailsForRendering({
-    dynamic exception,
-    StackTrace stack,
-    String library,
-    DiagnosticsNode context,
-    this.renderObject,
-    InformationCollector informationCollector,
-    bool silent = false,
-  }) : super(
-    exception: exception,
-    stack: stack,
-    library: library,
-    context: context,
-    informationCollector: informationCollector,
-    silent: silent,
-  );
-
-  /// The RenderObject that was being processed when the exception was caught.
-  final RenderObject renderObject;
 }
 
 /// Describes the semantics information a [RenderObject] wants to add to its
@@ -3792,6 +3824,12 @@ class _SemanticsGeometry {
   /// Value for [SemanticsNode.rect].
   Rect get rect => _rect;
 
+  /// Computes values, ensuring `rect` is properly bounded by ancestor clipping rects.
+  ///
+  /// See also:
+  ///
+  /// * [RenderObject.describeSemanticsClip], typically used to determine `parentSemanticsClipRect`.
+  /// * [RenderObject.describeApproximatePaintClip], typically used to determine `parentPaintClipRect`.
   void _computeValues(Rect parentSemanticsClipRect, Rect parentPaintClipRect, List<RenderObject> ancestors) {
     assert(ancestors.length > 1);
 

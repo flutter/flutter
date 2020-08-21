@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -110,8 +112,10 @@ void main() {
     await gesture.moveTo(const Offset(400.0, 300.0));
     expect(move, isNotNull);
     expect(move.position, equals(const Offset(400.0, 300.0)));
+    expect(move.localPosition, equals(const Offset(50.0, 50.0)));
     expect(enter, isNotNull);
     expect(enter.position, equals(const Offset(400.0, 300.0)));
+    expect(enter.localPosition, equals(const Offset(50.0, 50.0)));
     expect(exit, isNull);
   });
 
@@ -143,6 +147,7 @@ void main() {
     expect(enter, isNull);
     expect(exit, isNotNull);
     expect(exit.position, equals(const Offset(1.0, 1.0)));
+    expect(exit.localPosition, equals(const Offset(-349.0, -249.0)));
   });
 
   testWidgets('triggers pointer enter when a mouse is connected', (WidgetTester tester) async {
@@ -166,12 +171,9 @@ void main() {
     await gesture.addPointer(location: const Offset(400, 300));
     addTearDown(gesture.removePointer);
     expect(move, isNull);
-    expect(enter, isNull);
-    expect(exit, isNull);
-    await tester.pump();
-    expect(move, isNull);
     expect(enter, isNotNull);
     expect(enter.position, equals(const Offset(400.0, 300.0)));
+    expect(enter.localPosition, equals(const Offset(50.0, 50.0)));
     expect(exit, isNull);
   });
 
@@ -205,6 +207,7 @@ void main() {
     expect(enter, isNull);
     expect(exit, isNotNull);
     expect(exit.position, equals(const Offset(400.0, 300.0)));
+    expect(exit.localPosition, equals(const Offset(50.0, 50.0)));
     exit = null;
     await tester.pump();
     expect(move, isNull);
@@ -245,6 +248,7 @@ void main() {
     expect(move, isNull);
     expect(enter, isNotNull);
     expect(enter.position, equals(const Offset(400.0, 300.0)));
+    expect(enter.localPosition, equals(const Offset(50.0, 50.0)));
     expect(exit, isNull);
   });
 
@@ -287,7 +291,7 @@ void main() {
     PointerHoverEvent move;
     PointerExitEvent exit;
     await tester.pumpWidget(Container(
-      alignment: Alignment.center,
+      alignment: Alignment.topLeft,
       child: MouseRegion(
         child: const SizedBox(
           width: 100.0,
@@ -299,14 +303,14 @@ void main() {
       ),
     ));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer(location: const Offset(1.0, 1.0));
+    await gesture.addPointer(location: const Offset(401.0, 301.0));
     addTearDown(gesture.removePointer);
     await tester.pump();
     expect(enter, isNull);
     expect(move, isNull);
     expect(exit, isNull);
     await tester.pumpWidget(Container(
-      alignment: Alignment.topLeft,
+      alignment: Alignment.center,
       child: MouseRegion(
         child: const SizedBox(
           width: 100.0,
@@ -319,7 +323,8 @@ void main() {
     ));
     await tester.pump();
     expect(enter, isNotNull);
-    expect(enter.position, equals(const Offset(1.0, 1.0)));
+    expect(enter.position, equals(const Offset(401.0, 301.0)));
+    expect(enter.localPosition, equals(const Offset(51.0, 51.0)));
     expect(move, isNull);
     expect(exit, isNull);
   });
@@ -364,6 +369,7 @@ void main() {
     expect(move, isNull);
     expect(exit, isNotNull);
     expect(exit.position, equals(const Offset(400, 300)));
+    expect(exit.localPosition, equals(const Offset(50, 50)));
   });
 
   testWidgets('Hover works with nested listeners', (WidgetTester tester) async {
@@ -583,18 +589,20 @@ void main() {
     }
 
     await tester.pumpWidget(hoverableContainer(
-      onEnter: (PointerEnterEvent details) => logs.add('enter1'),
-      onHover: (PointerHoverEvent details) => logs.add('hover1'),
-      onExit: (PointerExitEvent details) => logs.add('exit1'),
+      onEnter: (PointerEnterEvent details) { logs.add('enter1'); },
+      onHover: (PointerHoverEvent details) { logs.add('hover1'); },
+      onExit: (PointerExitEvent details) { logs.add('exit1'); },
     ));
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
+    await gesture.addPointer(location: const Offset(150.0, 150.0));
     addTearDown(gesture.removePointer);
 
     // Start outside, move inside, then move outside
     await gesture.moveTo(const Offset(150.0, 150.0));
     await tester.pump();
+    expect(logs, isEmpty);
+    logs.clear();
     await gesture.moveTo(const Offset(50.0, 50.0));
     await tester.pump();
     await gesture.moveTo(const Offset(150.0, 150.0));
@@ -707,7 +715,7 @@ void main() {
     events.clear();
   });
 
-  testWidgets('needsCompositing updates correctly and is respected', (WidgetTester tester) async {
+  testWidgets('needsCompositing is always false', (WidgetTester tester) async {
     // Pretend that we have a mouse connected.
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
@@ -727,7 +735,7 @@ void main() {
     // transform.)
     expect(tester.layers.whereType<TransformLayer>(), hasLength(1));
 
-    // Test that needsCompositing updates correctly with callback change
+    // Test that needsCompositing stays false with callback change
     await tester.pumpWidget(
       Transform.scale(
         scale: 2.0,
@@ -737,35 +745,10 @@ void main() {
         ),
       ),
     );
-    expect(mouseRegion.needsCompositing, isTrue);
-    // Compositing is required, therefore a dedicated TransformLayer for
-    // `Transform.scale` is added.
-    expect(tester.layers.whereType<TransformLayer>(), hasLength(2));
-
-    await tester.pumpWidget(
-      Transform.scale(
-        scale: 2.0,
-        child: const MouseRegion(opaque: false),
-      ),
-    );
     expect(mouseRegion.needsCompositing, isFalse);
-    // TransformLayer for `Transform.scale` is removed again as transform is
-    // executed directly on the canvas.
+    // If compositing was required, a dedicated TransformLayer for
+    // `Transform.scale` would be added.
     expect(tester.layers.whereType<TransformLayer>(), hasLength(1));
-
-    // Test that needsCompositing updates correctly with `opaque` change
-    await tester.pumpWidget(
-      Transform.scale(
-        scale: 2.0,
-        child: const MouseRegion(
-          opaque: true,
-        ),
-      ),
-    );
-    expect(mouseRegion.needsCompositing, isTrue);
-    // Compositing is required, therefore a dedicated TransformLayer for
-    // `Transform.scale` is added.
-    expect(tester.layers.whereType<TransformLayer>(), hasLength(2));
   });
 
   testWidgets("Callbacks aren't called during build", (WidgetTester tester) async {
@@ -1125,14 +1108,15 @@ void main() {
       // Same as MouseRegion, but when opaque is null, use the default value.
       Widget mouseRegionWithOptionalOpaque({
         void Function(PointerEnterEvent e) onEnter,
+        void Function(PointerHoverEvent e) onHover,
         void Function(PointerExitEvent e) onExit,
         Widget child,
         bool opaque,
       }) {
         if (opaque == null) {
-          return MouseRegion(onEnter: onEnter, onExit: onExit, child: child);
+          return MouseRegion(onEnter: onEnter, onHover: onHover, onExit: onExit, child: child);
         }
-        return MouseRegion(onEnter: onEnter, onExit: onExit, child: child, opaque: opaque);
+        return MouseRegion(onEnter: onEnter, onHover: onHover, onExit: onExit, child: child, opaque: opaque);
       }
 
       return Directionality(
@@ -1141,6 +1125,7 @@ void main() {
           alignment: Alignment.topLeft,
           child: MouseRegion(
             onEnter: (PointerEnterEvent e) { addLog('enterA'); },
+            onHover: (PointerHoverEvent e) { addLog('hoverA'); },
             onExit: (PointerExitEvent e) { addLog('exitA'); },
             child: SizedBox(
               width: 150,
@@ -1154,6 +1139,7 @@ void main() {
                     height: 80,
                     child: MouseRegion(
                       onEnter: (PointerEnterEvent e) { addLog('enterB'); },
+                      onHover: (PointerHoverEvent e) { addLog('hoverB'); },
                       onExit: (PointerExitEvent e) { addLog('exitB'); },
                     ),
                   ),
@@ -1165,6 +1151,7 @@ void main() {
                     child: mouseRegionWithOptionalOpaque(
                       opaque: opaqueC,
                       onEnter: (PointerEnterEvent e) { addLog('enterC'); },
+                      onHover: (PointerHoverEvent e) { addLog('hoverC'); },
                       onExit: (PointerExitEvent e) { addLog('exitC'); },
                     ),
                   ),
@@ -1191,31 +1178,31 @@ void main() {
       // Move to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
-      expect(logs, <String>['enterA', 'enterB', 'enterC']);
+      expect(logs, <String>['enterA', 'enterB', 'enterC', 'hoverA', 'hoverB', 'hoverC']);
       logs.clear();
 
       // Move to the B only area.
       await gesture.moveTo(const Offset(25, 75));
       await tester.pumpAndSettle();
-      expect(logs, <String>['exitC']);
+      expect(logs, <String>['exitC', 'hoverA', 'hoverB']);
       logs.clear();
 
       // Move back to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
-      expect(logs, <String>['enterC']);
+      expect(logs, <String>['enterC', 'hoverA', 'hoverB', 'hoverC']);
       logs.clear();
 
       // Move to the C only area.
       await gesture.moveTo(const Offset(125, 75));
       await tester.pumpAndSettle();
-      expect(logs, <String>['exitB']);
+      expect(logs, <String>['exitB', 'hoverA', 'hoverC']);
       logs.clear();
 
       // Move back to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
-      expect(logs, <String>['enterB']);
+      expect(logs, <String>['enterB', 'hoverA', 'hoverB', 'hoverC']);
       logs.clear();
 
       // Move out.
@@ -1239,31 +1226,31 @@ void main() {
       // Move to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
-      expect(logs, <String>['enterA', 'enterC']);
+      expect(logs, <String>['enterA', 'enterC', 'hoverA', 'hoverC']);
       logs.clear();
 
       // Move to the B only area.
       await gesture.moveTo(const Offset(25, 75));
       await tester.pumpAndSettle();
-      expect(logs, <String>['exitC', 'enterB']);
+      expect(logs, <String>['exitC', 'enterB', 'hoverA', 'hoverB']);
       logs.clear();
 
       // Move back to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
-      expect(logs, <String>['exitB', 'enterC']);
+      expect(logs, <String>['exitB', 'enterC', 'hoverA', 'hoverC']);
       logs.clear();
 
       // Move to the C only area.
       await gesture.moveTo(const Offset(125, 75));
       await tester.pumpAndSettle();
-      expect(logs, <String>[]);
+      expect(logs, <String>['hoverA', 'hoverC']);
       logs.clear();
 
       // Move back to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
-      expect(logs, <String>[]);
+      expect(logs, <String>['hoverA', 'hoverC']);
       logs.clear();
 
       // Move out.
@@ -1287,7 +1274,7 @@ void main() {
       // Move to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
-      expect(logs, <String>['enterA', 'enterC']);
+      expect(logs, <String>['enterA', 'enterC', 'hoverA', 'hoverC']);
       logs.clear();
 
       // Move out.

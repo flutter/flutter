@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -74,7 +75,7 @@ class PolynomialFit {
   /// An indicator of the quality of the fit.
   ///
   /// Larger values indicate greater quality.
-  double confidence;
+  late double confidence;
 }
 
 /// Uses the least-squares algorithm to fit a polynomial to a set of data.
@@ -96,7 +97,9 @@ class LeastSquaresSolver {
   final List<double> w;
 
   /// Fits a polynomial of the given degree to the data points.
-  PolynomialFit solve(int degree) {
+  ///
+  /// When there is not enough data to fit a curve null is returned.
+  PolynomialFit? solve(int degree) {
     if (degree > x.length) // Not enough data to fit a curve.
       return null;
 

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -28,7 +29,7 @@ abstract class SemanticsEvent {
   ///
   /// [nodeId] is the unique identifier of the semantics node associated with
   /// the event, or null if the event is not associated with a semantics node.
-  Map<String, dynamic> toMap({ int nodeId }) {
+  Map<String, dynamic> toMap({ int? nodeId }) {
     final Map<String, dynamic> event = <String, dynamic>{
       'type': type,
       'data': getDataMap(),
@@ -147,7 +148,7 @@ class TapSemanticEvent extends SemanticsEvent {
 ///
 /// See also:
 ///
-///  * [SemanticsFlag.liveRegion], for a description of live regions.
+///  * [SemanticsFlag.isLiveRegion], for a description of live regions.
 ///
 @Deprecated(
   'This event has never been implemented and will be removed in a future version of Flutter. References to it should be removed. '

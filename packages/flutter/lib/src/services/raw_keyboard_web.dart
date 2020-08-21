@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_key.dart';
@@ -17,10 +18,10 @@ import 'raw_keyboard.dart';
 class RawKeyEventDataWeb extends RawKeyEventData {
   /// Creates a key event data structure specific for Web.
   ///
-  /// The [keyCode] and [metaState] arguments must not be null.
+  /// The [code] and [metaState] arguments must not be null.
   const RawKeyEventDataWeb({
-    @required this.code,
-    @required this.key,
+    required this.code,
+    required this.key,
     this.metaState = modifierNone,
   })  : assert(code != null),
         assert(metaState != null);
@@ -55,7 +56,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   final int metaState;
 
   @override
-  String get keyLabel => key;
+  String get keyLabel => key == 'Unidentified' ? '' : key;
 
   @override
   PhysicalKeyboardKey get physicalKey {
@@ -67,13 +68,13 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     // Look to see if the keyCode is a printable number pad key, so that a
     // difference between regular keys (e.g. ".") and the number pad version
     // (e.g. the "." on the number pad) can be determined.
-    final LogicalKeyboardKey numPadKey = kWebNumPadMap[code];
+    final LogicalKeyboardKey? numPadKey = kWebNumPadMap[code];
     if (numPadKey != null) {
       return numPadKey;
     }
 
     // Look to see if the [code] is one we know about and have a mapping for.
-    final LogicalKeyboardKey newKey = kWebToLogicalKey[code];
+    final LogicalKeyboardKey? newKey = kWebToLogicalKey[code];
     if (newKey != null) {
       return newKey;
     }

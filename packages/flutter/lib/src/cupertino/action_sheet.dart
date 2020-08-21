@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
@@ -74,6 +76,8 @@ const double _kCornerRadius = 14.0;
 const double _kDividerThickness = 1.0;
 
 /// An iOS-style action sheet.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=U-ao8p4A82k}
 ///
 /// An action sheet is a specific style of alert that presents the user
 /// with a set of two or more choices related to the current context.
@@ -444,13 +448,13 @@ class _CupertinoAlertRenderElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, _AlertSections slot) {
+  void insertRenderObjectChild(RenderObject child, _AlertSections slot) {
     _placeChildInSlot(child, slot);
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, _AlertSections slot) {
-    _placeChildInSlot(child, slot);
+  void moveRenderObjectChild(RenderObject child, _AlertSections oldSlot, _AlertSections newSlot) {
+    _placeChildInSlot(child, newSlot);
   }
 
   @override
@@ -474,7 +478,7 @@ class _CupertinoAlertRenderElement extends RenderObjectElement {
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, _AlertSections slot) {
     assert(child == renderObject.contentSection || child == renderObject.actionsSection);
     if (renderObject.contentSection == child) {
       renderObject.contentSection = null;

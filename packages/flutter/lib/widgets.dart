@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 /// The Flutter widgets framework.
 ///
 /// To use, import `package:flutter/widgets.dart`.
@@ -13,6 +15,7 @@
 library widgets;
 
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
+export 'package:characters/characters.dart';
 
 export 'src/widgets/actions.dart';
 export 'src/widgets/animated_cross_fade.dart';
@@ -35,6 +38,7 @@ export 'src/widgets/dismissible.dart';
 export 'src/widgets/disposable_build_context.dart';
 export 'src/widgets/drag_target.dart';
 export 'src/widgets/draggable_scrollable_sheet.dart';
+export 'src/widgets/dual_transition_builder.dart';
 export 'src/widgets/editable_text.dart';
 export 'src/widgets/fade_in_image.dart';
 export 'src/widgets/focus_manager.dart';
@@ -56,6 +60,7 @@ export 'src/widgets/implicit_animations.dart';
 export 'src/widgets/inherited_model.dart';
 export 'src/widgets/inherited_notifier.dart';
 export 'src/widgets/inherited_theme.dart';
+export 'src/widgets/interactive_viewer.dart';
 export 'src/widgets/layout_builder.dart';
 export 'src/widgets/list_wheel_scroll_view.dart';
 export 'src/widgets/localizations.dart';
@@ -66,6 +71,7 @@ export 'src/widgets/navigator.dart';
 export 'src/widgets/nested_scroll_view.dart';
 export 'src/widgets/notification_listener.dart';
 export 'src/widgets/orientation_builder.dart';
+export 'src/widgets/overflow_bar.dart';
 export 'src/widgets/overlay.dart';
 export 'src/widgets/overscroll_indicator.dart';
 export 'src/widgets/page_storage.dart';
@@ -77,6 +83,9 @@ export 'src/widgets/platform_view.dart';
 export 'src/widgets/preferred_size.dart';
 export 'src/widgets/primary_scroll_controller.dart';
 export 'src/widgets/raw_keyboard_listener.dart';
+export 'src/widgets/restoration.dart';
+export 'src/widgets/restoration_properties.dart';
+export 'src/widgets/router.dart';
 export 'src/widgets/routes.dart';
 export 'src/widgets/safe_area.dart';
 export 'src/widgets/scroll_activity.dart';

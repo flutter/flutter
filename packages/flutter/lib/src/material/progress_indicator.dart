@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -69,7 +71,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   final Animation<Color> valueColor;
 
   /// {@template flutter.material.progressIndicator.semanticsLabel}
-  /// The [Semantics.label] for this progress indicator.
+  /// The [SemanticsProperties.label] for this progress indicator.
   ///
   /// This value indicates the purpose of the progress bar, and will be
   /// read out by screen readers to indicate the purpose of this progress
@@ -78,15 +80,16 @@ abstract class ProgressIndicator extends StatefulWidget {
   final String semanticsLabel;
 
   /// {@template flutter.material.progressIndicator.semanticsValue}
-  /// The [Semantics.value] for this progress indicator.
+  /// The [SemanticsProperties.value] for this progress indicator.
   ///
   /// This will be used in conjunction with the [semanticsLabel] by
   /// screen reading software to identify the widget, and is primarily
   /// intended for use with determinate progress indicators to announce
   /// how far along they are.
   ///
-  /// For determinate progress indicators, this will be defaulted to [value]
-  /// expressed as a percentage, i.e. `0.1` will become '10%'.
+  /// For determinate progress indicators, this will be defaulted to
+  /// [ProgressIndicator.value] expressed as a percentage, i.e. `0.1` will
+  /// become '10%'.
   /// {@endtemplate}
   final String semanticsValue;
 
@@ -203,6 +206,8 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 }
 
 /// A material design linear progress indicator, also known as a progress bar.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=O-rhXZLtpv0}
 ///
 /// A widget that shows progress along a line. There are two kinds of linear
 /// progress indicators:
@@ -394,6 +399,8 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
 /// A material design circular progress indicator, which spins to indicate that
 /// the application is busy.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=O-rhXZLtpv0}
 ///
 /// A widget that shows progress along a circle. There are two kinds of circular
 /// progress indicators:

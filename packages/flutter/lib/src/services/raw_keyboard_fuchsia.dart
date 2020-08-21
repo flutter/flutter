@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_key.dart';
@@ -60,7 +61,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
   // Fuchsia only reports a single code point for the key label.
   @override
-  String get keyLabel => codePoint == 0 ? null : String.fromCharCode(codePoint);
+  String get keyLabel => codePoint == 0 ? '' : String.fromCharCode(codePoint);
 
   @override
   LogicalKeyboardKey get logicalKey {
@@ -75,7 +76,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
     }
 
     // Look to see if the hidUsage is one we know about and have a mapping for.
-    LogicalKeyboardKey newKey = kFuchsiaToLogicalKey[hidUsage | LogicalKeyboardKey.hidPlane];
+    LogicalKeyboardKey? newKey = kFuchsiaToLogicalKey[hidUsage | LogicalKeyboardKey.hidPlane];
     if (newKey != null) {
       return newKey;
     }
@@ -107,7 +108,6 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
       case KeyboardSide.right:
         return modifiers & rightMask != 0;
     }
-    return false;
   }
 
   @override
@@ -131,18 +131,17 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
         // Fuchsia doesn't have masks for these keys (yet).
         return false;
     }
-    return false;
   }
 
   @override
-  KeyboardSide getModifierSide(ModifierKey key) {
-    KeyboardSide findSide(int leftMask, int rightMask, int combinedMask) {
-      final int combined = modifiers & combinedMask;
+  KeyboardSide? getModifierSide(ModifierKey key) {
+    KeyboardSide? findSide(int anyMask, int leftMask, int rightMask) {
+      final int combined = modifiers & anyMask;
       if (combined == leftMask) {
         return KeyboardSide.left;
       } else if (combined == rightMask) {
         return KeyboardSide.right;
-      } else if (combined == combinedMask) {
+      } else if (combined == anyMask) {
         return KeyboardSide.all;
       }
       return null;
@@ -150,13 +149,13 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
     switch (key) {
       case ModifierKey.controlModifier:
-        return findSide(modifierLeftControl, modifierRightControl, modifierControl);
+        return findSide(modifierControl, modifierLeftControl, modifierRightControl, );
       case ModifierKey.shiftModifier:
-        return findSide(modifierLeftShift, modifierRightShift, modifierShift);
+        return findSide(modifierShift, modifierLeftShift, modifierRightShift);
       case ModifierKey.altModifier:
-        return findSide(modifierLeftAlt, modifierRightAlt, modifierAlt);
+        return findSide(modifierAlt, modifierLeftAlt, modifierRightAlt);
       case ModifierKey.metaModifier:
-        return findSide(modifierLeftMeta, modifierRightMeta, modifierMeta);
+        return findSide(modifierMeta, modifierLeftMeta, modifierRightMeta);
       case ModifierKey.capsLockModifier:
         return (modifiers & modifierCapsLock == 0) ? null : KeyboardSide.all;
       case ModifierKey.numLockModifier:
@@ -166,9 +165,6 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
         // Fuchsia doesn't support these modifiers, so they can't be pressed.
         return null;
     }
-
-    assert(false, 'Not handling $key type properly.');
-    return null;
   }
 
   // Keyboard modifier masks for Fuchsia modifiers.

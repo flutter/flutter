@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show window;
 
 import 'package:flutter/material.dart';
@@ -159,13 +161,13 @@ void main() {
           child: Material(
             child: ListView(
               children: <Widget>[
-                RaisedButton(
+                ElevatedButton(
                   onPressed: () {
                     log.add('top');
                   },
                   child: const Text('TOP'),
                 ),
-                RaisedButton(
+                ElevatedButton(
                   onPressed: () {
                     log.add('bottom');
                   },
@@ -197,14 +199,14 @@ void main() {
           child: Material(
             child: ListView(
               children: <Widget>[
-                RaisedButton(
+                ElevatedButton(
                   onPressed: () {
                     log.add('top');
                   },
                   child: const Text('TOP', textDirection: TextDirection.ltr),
                 ),
                 ExcludeSemantics(
-                  child: RaisedButton(
+                  child: ElevatedButton(
                     onPressed: () {
                       log.add('bottom');
                     },

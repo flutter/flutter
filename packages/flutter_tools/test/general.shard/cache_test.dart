@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show InternetAddress, SocketException;
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -43,11 +44,11 @@ void main() {
       // Restore locking to prevent potential side-effects in
       // tests outside this group (this option is globally shared).
       Cache.enableLocking();
-      Cache.releaseLockEarly();
+      Cache.releaseLock();
     });
 
     test('should throw when locking is not acquired', () {
-      expect(() => Cache.checkLockAcquired(), throwsStateError);
+      expect(Cache.checkLockAcquired, throwsStateError);
     });
 
     test('should not throw when locking is disabled', () {
@@ -60,7 +61,7 @@ void main() {
       when(mockFile.openSync(mode: anyNamed('mode'))).thenReturn(mockRandomAccessFile);
       await Cache.lock();
       Cache.checkLockAcquired();
-      Cache.releaseLockEarly();
+      Cache.releaseLock();
     }, overrides: <Type, Generator>{
       FileSystem: () => mockFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -241,13 +242,13 @@ void main() {
     });
 
     testUsingContext('Invalid URI for FLUTTER_STORAGE_BASE_URL throws ToolExit', () async {
-      when(globals.platform.environment).thenReturn(const <String, String>{
-        'FLUTTER_STORAGE_BASE_URL': ' http://foo',
-      });
       final Cache cache = Cache();
+
       expect(() => cache.storageBaseUrl, throwsToolExit());
     }, overrides: <Type, Generator>{
-      Platform: () => MockPlatform(),
+      Platform: () => FakePlatform(environment: <String, String>{
+        'FLUTTER_STORAGE_BASE_URL': ' http://foo',
+      }),
     });
   });
 
@@ -258,15 +259,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => FakeProcessManager.any(),
-  });
-
-  test('Unstable artifacts', () {
-    expect(DevelopmentArtifact.web.unstable, false);
-    expect(DevelopmentArtifact.linux.unstable, false);
-    expect(DevelopmentArtifact.macOS.unstable, false);
-    expect(DevelopmentArtifact.windows.unstable, false);
-    expect(DevelopmentArtifact.fuchsia.unstable, true);
-    expect(DevelopmentArtifact.flutterRunner.unstable, true);
   });
 
   group('EngineCachedArtifact', () {
@@ -546,7 +538,7 @@ void main() {
     final MockCache mockCache = MockCache();
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
     when(mockCache.includeAllPlatforms).thenReturn(false);
-    expect(() => artifacts.getBinaryDirs(), throwsToolExit(message: 'Unsupported operating system: ${globals.platform.operatingSystem}'));
+    expect(artifacts.getBinaryDirs, throwsToolExit(message: 'Unsupported operating system: ${globals.platform.operatingSystem}'));
   }, overrides: <Type, Generator> {
     Platform: () => FakePlatform(operatingSystem: 'fuchsia'),
   });
@@ -610,6 +602,96 @@ void main() {
     when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'linux'});
 
     expect(artifacts.getBinaryDirs(), isNotEmpty);
+  });
+
+  testWithoutContext('Linux desktop artifacts include profile and release artifacts', () {
+    final MockCache mockCache = MockCache();
+    final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
+      mockCache,
+      platform: FakePlatform(operatingSystem: 'linux'),
+    );
+
+    expect(artifacts.getBinaryDirs(), containsAll(<Matcher>[
+      contains(contains('profile')),
+      contains(contains('release')),
+    ]));
+  });
+
+  testWithoutContext('Cache can delete stampfiles of artifacts', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final ArtifactSet artifactSet = MockIosUsbArtifacts();
+    final BufferLogger logger = BufferLogger.test();
+
+    when(artifactSet.stampName).thenReturn('STAMP');
+    final Cache cache = Cache(
+      artifacts: <ArtifactSet>[
+        artifactSet,
+      ],
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: FakePlatform(),
+      osUtils: MockOperatingSystemUtils(),
+      rootOverride: fileSystem.currentDirectory,
+    );
+    final File toolStampFile = fileSystem.file('bin/cache/flutter_tools.stamp');
+    final File stampFile = cache.getStampFileFor(artifactSet.stampName);
+    stampFile.createSync(recursive: true);
+    toolStampFile.createSync(recursive: true);
+
+    cache.clearStampFiles();
+
+    expect(logger.errorText, isEmpty);
+    expect(stampFile, isNot(exists));
+    expect(toolStampFile, isNot(exists));
+  });
+
+   testWithoutContext('Cache does not attempt to delete already missing stamp files', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final ArtifactSet artifactSet = MockIosUsbArtifacts();
+    final BufferLogger logger = BufferLogger.test();
+
+    when(artifactSet.stampName).thenReturn('STAMP');
+    final Cache cache = Cache(
+      artifacts: <ArtifactSet>[
+        artifactSet,
+      ],
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: FakePlatform(),
+      osUtils: MockOperatingSystemUtils(),
+      rootOverride: fileSystem.currentDirectory,
+    );
+    final File toolStampFile = fileSystem.file('bin/cache/flutter_tools.stamp');
+    final File stampFile = cache.getStampFileFor(artifactSet.stampName);
+    toolStampFile.createSync(recursive: true);
+
+    cache.clearStampFiles();
+
+    expect(logger.errorText, isEmpty);
+    expect(stampFile, isNot(exists));
+    expect(toolStampFile, isNot(exists));
+  });
+
+  testWithoutContext('Cache catches file system exception from missing tool stamp file', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final ArtifactSet artifactSet = MockIosUsbArtifacts();
+    final BufferLogger logger = BufferLogger.test();
+
+    when(artifactSet.stampName).thenReturn('STAMP');
+    final Cache cache = Cache(
+      artifacts: <ArtifactSet>[
+        artifactSet,
+      ],
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: FakePlatform(),
+      osUtils: MockOperatingSystemUtils(),
+      rootOverride: fileSystem.currentDirectory,
+    );
+
+    cache.clearStampFiles();
+
+    expect(logger.errorText, contains('Failed to delete some stamp files'));
   });
 }
 
@@ -676,7 +758,6 @@ class MockIosUsbArtifacts extends Mock implements IosUsbArtifacts {}
 class MockInternetAddress extends Mock implements InternetAddress {}
 class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
-class MockPlatform extends Mock implements Platform {}
 class MockVersionedPackageResolver extends Mock implements VersionedPackageResolver {}
 
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}

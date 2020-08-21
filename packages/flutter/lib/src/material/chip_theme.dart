@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -16,7 +18,7 @@ import 'theme_data.dart';
 /// [InputChip], [ChoiceChip], [FilterChip], and [ActionChip].
 ///
 /// A chip theme describes the color, shape and text styles for the chips it is
-/// applied to
+/// applied to.
 ///
 /// Descendant widgets obtain the current theme's [ChipThemeData] object using
 /// [ChipTheme.of]. When a widget uses [ChipTheme.of], it is automatically
@@ -118,7 +120,7 @@ class ChipTheme extends InheritedTheme {
 ///
 /// The simplest way to create a ChipThemeData is to use [copyWith] on the one
 /// you get from [ChipTheme.of], or create an entirely new one with
-/// [ChipThemeData..fromDefaults].
+/// [ChipThemeData.fromDefaults].
 ///
 /// {@tool snippet}
 ///
@@ -186,7 +188,7 @@ class ChipThemeData with Diagnosticable {
     this.selectedShadowColor,
     this.showCheckmark,
     this.checkmarkColor,
-    @required this.labelPadding,
+    this.labelPadding,
     @required this.padding,
     @required this.shape,
     @required this.labelStyle,
@@ -198,7 +200,6 @@ class ChipThemeData with Diagnosticable {
        assert(disabledColor != null),
        assert(selectedColor != null),
        assert(secondarySelectedColor != null),
-       assert(labelPadding != null),
        assert(padding != null),
        assert(shape != null),
        assert(labelStyle != null),
@@ -247,7 +248,6 @@ class ChipThemeData with Diagnosticable {
     const int selectAlpha = 0x3d; // 12% + 12% = 24%
     const int textLabelAlpha = 0xde; // 87%
     const ShapeBorder shape = StadiumBorder();
-    const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(horizontal: 8.0);
     const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
 
     primaryColor = primaryColor ?? (brightness == Brightness.light ? Colors.black : Colors.white);
@@ -267,7 +267,6 @@ class ChipThemeData with Diagnosticable {
       disabledColor: disabledColor,
       selectedColor: selectedColor,
       secondarySelectedColor: secondarySelectedColor,
-      labelPadding: labelPadding,
       padding: padding,
       shape: shape,
       labelStyle: labelStyle,
@@ -285,14 +284,15 @@ class ChipThemeData with Diagnosticable {
   /// (slightly transparent black) for light themes, and Color(0xdeffffff)
   /// (slightly transparent white) for dark themes.
   ///
-  /// May be set to null, in which case the ambient [IconTheme.color] is used.
+  /// May be set to null, in which case the ambient [IconThemeData.color] is used.
   final Color deleteIconColor;
 
   /// Color to be used for the chip's background indicating that it is disabled.
   ///
-  /// The chip is disabled when [isEnabled] is false, or all three of
-  /// [SelectableChipAttributes.onSelected], [TappableChipAttributes.onPressed],
-  /// and [DeletableChipAttributes.onDelete] are null.
+  /// The chip is disabled when [DisabledChipAttributes.isEnabled] is false, or
+  /// all three of [SelectableChipAttributes.onSelected],
+  /// [TappableChipAttributes.onPressed], and
+  /// [DeletableChipAttributes.onDeleted] are null.
   ///
   /// It defaults to [Colors.black38].
   final Color disabledColor;
@@ -300,14 +300,14 @@ class ChipThemeData with Diagnosticable {
   /// Color to be used for the chip's background, indicating that it is
   /// selected.
   ///
-  /// The chip is selected when [selected] is true.
+  /// The chip is selected when [SelectableChipAttributes.selected] is true.
   final Color selectedColor;
 
   /// An alternate color to be used for the chip's background, indicating that
   /// it is selected. For example, this color is used by [ChoiceChip] when the
   /// choice is selected.
   ///
-  /// The chip is selected when [selected] is true.
+  /// The chip is selected when [SelectableChipAttributes.selected] is true.
   final Color secondarySelectedColor;
 
   /// Color of the chip's shadow when the elevation is greater than 0.
@@ -329,7 +329,7 @@ class ChipThemeData with Diagnosticable {
   ///  * [shadowColor]
   final Color selectedShadowColor;
 
-  /// Whether or not to show a check mark when [selected] is true.
+  /// Whether or not to show a check mark when [SelectableChipAttributes.selected] is true.
   ///
   /// For instance, the [ChoiceChip] sets this to false so that it can be
   /// selected without showing the check mark.
@@ -342,7 +342,7 @@ class ChipThemeData with Diagnosticable {
   /// This will override the color set by the platform's brightness setting.
   final Color checkmarkColor;
 
-  /// The padding around the [label] widget.
+  /// The padding around the [Chip.label] widget.
   ///
   /// By default, this is 4 logical pixels at the beginning and the end of the
   /// label, and zero on top and bottom.

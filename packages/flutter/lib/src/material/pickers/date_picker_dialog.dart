@@ -2,20 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../button_bar.dart';
-import '../button_theme.dart';
 import '../color_scheme.dart';
 import '../debug.dart';
 import '../dialog.dart';
-import '../dialog_theme.dart';
-import '../flat_button.dart';
 import '../icons.dart';
 import '../material_localizations.dart';
+import '../text_button.dart';
 import '../text_theme.dart';
 import '../theme.dart';
 
@@ -356,6 +355,11 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     return null;
   }
 
+  static final Map<LogicalKeySet, Intent> _formShortcutMap = <LogicalKeySet, Intent>{
+    // Pressing enter on the field will move focus to the next field or control.
+    LogicalKeySet(LogicalKeyboardKey.enter): const NextFocusIntent(),
+  };
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -377,19 +381,23 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       ? textTheme.headline5?.copyWith(color: dateColor)
       : textTheme.headline4?.copyWith(color: dateColor);
 
-    final Widget actions = ButtonBar(
-      buttonTextTheme: ButtonTextTheme.primary,
-      layoutBehavior: ButtonBarLayoutBehavior.constrained,
-      children: <Widget>[
-        FlatButton(
-          child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
-          onPressed: _handleCancel,
-        ),
-        FlatButton(
-          child: Text(widget.confirmText ?? localizations.okButtonLabel),
-          onPressed: _handleOk,
-        ),
-      ],
+    final Widget actions = Container(
+      alignment: AlignmentDirectional.centerEnd,
+      constraints: const BoxConstraints(minHeight: 52.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: OverflowBar(
+        spacing: 8,
+        children: <Widget>[
+          TextButton(
+            child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
+            onPressed: _handleCancel,
+          ),
+          TextButton(
+            child: Text(widget.confirmText ?? localizations.okButtonLabel),
+            onPressed: _handleOk,
+          ),
+        ],
+      ),
     );
 
     Widget picker;
@@ -418,24 +426,27 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             height: orientation == Orientation.portrait ? _inputFormPortraitHeight : _inputFormLandscapeHeight,
-            child: Column(
-              children: <Widget>[
-                const Spacer(),
-                InputDatePickerFormField(
-                  initialDate: _selectedDate,
-                  firstDate: widget.firstDate,
-                  lastDate: widget.lastDate,
-                  onDateSubmitted: _handleDateChanged,
-                  onDateSaved: _handleDateChanged,
-                  selectableDayPredicate: widget.selectableDayPredicate,
-                  errorFormatText: widget.errorFormatText,
-                  errorInvalidText: widget.errorInvalidText,
-                  fieldHintText: widget.fieldHintText,
-                  fieldLabelText: widget.fieldLabelText,
-                  autofocus: true,
-                ),
-                const Spacer(),
-              ],
+            child: Shortcuts(
+              shortcuts: _formShortcutMap,
+              child: Column(
+                children: <Widget>[
+                  const Spacer(),
+                  InputDatePickerFormField(
+                    initialDate: _selectedDate,
+                    firstDate: widget.firstDate,
+                    lastDate: widget.lastDate,
+                    onDateSubmitted: _handleDateChanged,
+                    onDateSaved: _handleDateChanged,
+                    selectableDayPredicate: widget.selectableDayPredicate,
+                    errorFormatText: widget.errorFormatText,
+                    errorInvalidText: widget.errorInvalidText,
+                    fieldHintText: widget.fieldHintText,
+                    fieldLabelText: widget.fieldLabelText,
+                    autofocus: true,
+                  ),
+                  const Spacer(),
+                ],
+              ),
             ),
           ),
         );
@@ -456,7 +467,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     );
 
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
-    final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
     return Dialog(
       child: AnimatedContainer(
         width: dialogSize.width,
@@ -503,13 +513,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         ),
       ),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      // TODO(Piinks): remove once border radius migration is complete
-      // The default dialog shape is radius 2 rounded rect, but the spec has
-      // been updated to 4, so we will use that here for the Date Picker, but
-      // only if there isn't one provided in the theme.
-      shape: dialogTheme.shape ?? const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(4.0))
-      ),
       clipBehavior: Clip.antiAlias,
     );
   }

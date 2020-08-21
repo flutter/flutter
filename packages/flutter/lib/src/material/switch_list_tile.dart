@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
@@ -288,7 +290,7 @@ class SwitchListTile extends StatelessWidget {
   ///
   /// If a [CupertinoSwitch] is created, the following parameters are
   /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
-  /// [activeThumbImage], [inactiveThumbImage], [materialTapTargetSize].
+  /// [activeThumbImage], [inactiveThumbImage].
   const SwitchListTile.adaptive({
     Key key,
     @required this.value,

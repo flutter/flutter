@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection' show SplayTreeMap, HashMap;
 
 import 'package:flutter/foundation.dart';
@@ -104,7 +106,8 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 ///
 ///    [AutomaticKeepAlive] descendants typically signal it to be kept alive by
 ///    using the [AutomaticKeepAliveClientMixin], then implementing the
-///    [wantKeepAlive] getter and calling [updateKeepAlive].
+///    [AutomaticKeepAliveClientMixin.wantKeepAlive] getter and calling
+///    [AutomaticKeepAliveClientMixin.updateKeepAlive].
 /// {@endtemplate}
 ///
 /// See also:
@@ -180,7 +183,7 @@ abstract class SliverChildDelegate {
 
   /// Find index of child element with associated key.
   ///
-  /// This will be called during [performRebuild] in [SliverMultiBoxAdaptorElement]
+  /// This will be called during `performRebuild` in [SliverMultiBoxAdaptorElement]
   /// to check if a child has moved to a different position. It should return the
   /// index of the child element with associated key, null if not found.
   int findIndexByKey(Key key) => null;
@@ -325,9 +328,9 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// null.
   ///
   /// If the order in which [builder] returns children ever changes, consider
-  /// providing a [findChildIndex]. This allows the delegate to find the new index
-  /// for a child that was previously located at a different index to attach the
-  /// existing state to the [Widget] at its new location.
+  /// providing a [findChildIndexCallback]. This allows the delegate to find the
+  /// new index for a child that was previously located at a different index to
+  /// attach the existing state to the [Widget] at its new location.
   const SliverChildBuilderDelegate(
     this.builder, {
     this.findChildIndexCallback,
@@ -391,13 +394,13 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Typically, children in a scrolling container must be annotated with a
   /// semantic index in order to generate the correct accessibility
   /// announcements. This should only be set to false if the indexes have
-  /// already been provided by an [IndexedChildSemantics] widget.
+  /// already been provided by an [IndexedSemantics] widget.
   ///
   /// Defaults to true.
   ///
   /// See also:
   ///
-  ///  * [IndexedChildSemantics], for an explanation of how to manually
+  ///  * [IndexedSemantics], for an explanation of how to manually
   ///    provide semantic indexes.
   final bool addSemanticIndexes;
 
@@ -597,13 +600,13 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// Typically, children in a scrolling container must be annotated with a
   /// semantic index in order to generate the correct accessibility
   /// announcements. This should only be set to false if the indexes have
-  /// already been provided by an [IndexedChildSemantics] widget.
+  /// already been provided by an [IndexedSemantics] widget.
   ///
   /// Defaults to true.
   ///
   /// See also:
   ///
-  ///  * [IndexedChildSemantics], for an explanation of how to manually
+  ///  * [IndexedSemantics], for an explanation of how to manually
   ///    provide semantic indexes.
   final bool addSemanticIndexes;
 
@@ -715,8 +718,8 @@ abstract class SliverWithKeepAliveWidget extends RenderObjectWidget {
 /// Helps subclasses build their children lazily using a [SliverChildDelegate].
 ///
 /// The widgets returned by the [delegate] are cached and the delegate is only
-/// consulted again if it changes and the new delegate's [shouldRebuild] method
-/// returns true.
+/// consulted again if it changes and the new delegate's
+/// [SliverChildDelegate.shouldRebuild] method returns true.
 abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   /// Initializes fields for subclasses.
   const SliverMultiBoxAdaptorWidget({
@@ -800,6 +803,8 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 ///
 /// See also:
 ///
+///  * <https://flutter.dev/docs/development/ui/advanced/slivers>, a description
+///    of what slivers are and how to use them.
 ///  * [SliverFixedExtentList], which is more efficient for children with
 ///    the same extent in the main axis.
 ///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
@@ -1050,20 +1055,11 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       performRebuild();
   }
 
-  // We inflate widgets at two different times:
-  //  1. When we ourselves are told to rebuild (see performRebuild).
-  //  2. When our render object needs a new child (see createChild).
-  // In both cases, we cache the results of calling into our delegate to get the widget,
-  // so that if we do case 2 later, we don't call the builder again.
-  // Any time we do case 1, though, we reset the cache.
-
-  final Map<int, Widget> _childWidgets = HashMap<int, Widget>();
   final SplayTreeMap<int, Element> _childElements = SplayTreeMap<int, Element>();
   RenderBox _currentBeforeChild;
 
   @override
   void performRebuild() {
-    _childWidgets.clear(); // Reset the cache, as described above.
     super.performRebuild();
     _currentBeforeChild = null;
     assert(_currentlyUpdatingChildIndex == null);
@@ -1131,7 +1127,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   Widget _build(int index) {
-    return _childWidgets.putIfAbsent(index, () => widget.delegate.build(this, index));
+    return widget.delegate.build(this, index);
   }
 
   @override
@@ -1277,7 +1273,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  void insertChildRenderObject(covariant RenderObject child, int slot) {
+  void insertRenderObjectChild(covariant RenderObject child, int slot) {
     assert(slot != null);
     assert(_currentlyUpdatingChildIndex == slot);
     assert(renderObject.debugValidateChild(child));
@@ -1290,14 +1286,14 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  void moveChildRenderObject(covariant RenderObject child, int slot) {
-    assert(slot != null);
-    assert(_currentlyUpdatingChildIndex == slot);
+  void moveRenderObjectChild(covariant RenderObject child, int oldSlot, int newSlot) {
+    assert(newSlot != null);
+    assert(_currentlyUpdatingChildIndex == newSlot);
     renderObject.move(child as RenderBox, after: _currentBeforeChild);
   }
 
   @override
-  void removeChildRenderObject(covariant RenderObject child) {
+  void removeRenderObjectChild(covariant RenderObject child, int slot) {
     assert(_currentlyUpdatingChildIndex != null);
     renderObject.remove(child as RenderBox);
   }

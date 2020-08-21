@@ -5,6 +5,7 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -26,6 +27,7 @@ class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter
       <String>['Runner'],
       <String>['Debug', 'Profile', 'Release'],
       <String>['Runner'],
+      BufferLogger.test(),
     );
   }
 }
@@ -84,7 +86,9 @@ void main() {
         'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
         'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
         if (verbose)
-          'VERBOSE_SCRIPT_LOGGING=YES',
+          'VERBOSE_SCRIPT_LOGGING=YES'
+        else
+          '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
       ],
       stdout: 'STDOUT STUFF',
@@ -127,7 +131,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
-  testUsingContext('macOS build does not spew stdout to status logger', () async {
+  testUsingContext('macOS build forwards error stdout to status logger error', () async {
     final BuildCommand command = BuildCommand();
     createMinimalMockProjectFiles();
 
@@ -135,7 +139,8 @@ void main() {
       const <String>['build', 'macos', '--debug']
     );
     expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
-    expect(testLogger.traceText, contains('STDOUT STUFF'));
+    expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.errorText, contains('STDOUT STUFF'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[

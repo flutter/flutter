@@ -53,7 +53,7 @@ class WaitFor extends CommandWithTarget {
   /// Creates a command that waits for the widget identified by [finder] to
   /// appear within the [timeout] amount of time.
   ///
-  /// If [timeout] is not specified the command times out after 5 seconds.
+  /// If [timeout] is not specified, the command defaults to no timeout.
   WaitFor(SerializableFinder finder, {Duration timeout})
     : super(finder, timeout: timeout);
 
@@ -83,7 +83,7 @@ class WaitForAbsent extends CommandWithTarget {
   /// Creates a command that waits for the widget identified by [finder] to
   /// disappear within the [timeout] amount of time.
   ///
-  /// If [timeout] is not specified the command times out after 5 seconds.
+  /// If [timeout] is not specified, the command defaults to no timeout.
   WaitForAbsent(SerializableFinder finder, {Duration timeout})
     : super(finder, timeout: timeout);
 
@@ -174,7 +174,7 @@ class BySemanticsLabel extends SerializableFinder {
   /// Creates a semantic label finder given the [label].
   const BySemanticsLabel(this.label);
 
-  /// A [Pattern] matching the [Semantics.properties.label].
+  /// A [Pattern] matching the label of a [SemanticsNode].
   ///
   /// If this is a [String], it will be treated as an exact match.
   final Pattern label;
@@ -449,7 +449,7 @@ class GetSemanticsIdResult extends Result {
   /// Creates a new [GetSemanticsId] result.
   const GetSemanticsIdResult(this.id);
 
-  /// The semantics id of the node;
+  /// The semantics id of the node.
   final int id;
 
   /// Deserializes this result from JSON.

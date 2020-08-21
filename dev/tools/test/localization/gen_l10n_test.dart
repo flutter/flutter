@@ -193,6 +193,95 @@ void main() {
       );
     });
 
+    test('sets absolute path of the target Flutter project', () {
+      // Set up project directory.
+      final Directory l10nDirectory = fs.currentDirectory
+        .childDirectory('absolute')
+        .childDirectory('path')
+        .childDirectory('to')
+        .childDirectory('flutter_project')
+        .childDirectory('lib')
+        .childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleMessageArbFileString);
+      l10nDirectory.childFile(esArbFileName)
+        .writeAsStringSync(singleEsMessageArbFileString);
+
+      // Run localizations generator in specified absolute path.
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      final String flutterProjectPath = path.join('absolute', 'path', 'to', 'flutter_project');
+      try {
+        generator.initialize(
+          projectPathString: flutterProjectPath,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+        generator.writeOutputFiles();
+      } on L10nException catch (e) {
+        throw TestFailure('Unexpected failure during test setup: ${e.message}');
+      } on Exception catch (e) {
+        throw TestFailure('Unexpected failure during test setup: $e');
+      }
+
+      // Output files should be generated in the provided absolute path.
+      expect(
+        fs.isFileSync(path.join(
+          flutterProjectPath,
+          'lib',
+          'l10n',
+          'output-localization-file_en.dart',
+        )),
+        true,
+      );
+      expect(
+        fs.isFileSync(path.join(
+          flutterProjectPath,
+          'lib',
+          'l10n',
+          'output-localization-file_es.dart',
+        )),
+        true,
+      );
+    });
+
+    test('throws error when directory at absolute path does not exist', () {
+      // Set up project directory.
+      final Directory l10nDirectory = fs.currentDirectory
+        .childDirectory('lib')
+        .childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleMessageArbFileString);
+      l10nDirectory.childFile(esArbFileName)
+        .writeAsStringSync(singleEsMessageArbFileString);
+
+      // Project path should be intentionally a directory that does not exist.
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          projectPathString: 'absolute/path/to/flutter_project',
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+      } on L10nException catch (e) {
+        expect(e.message, contains('Directory does not exist'));
+        return;
+      }
+
+      fail(
+        'An exception should be thrown when the directory '
+        'specified in projectPathString does not exist.'
+      );
+    });
+
     group('className should only take valid Dart class names', () {
       LocalizationsGenerator generator;
       setUp(() {
@@ -306,6 +395,61 @@ void main() {
     }
 
     expect(generator.header, '/// Sample header in a text file');
+  });
+
+  test('sets templateArbFileName with more than one underscore correctly', () {
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile('app_localizations_en.arb')
+      .writeAsStringSync(singleMessageArbFileString);
+    l10nDirectory.childFile('app_localizations_es.arb')
+      .writeAsStringSync(singleEsMessageArbFileString);
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: 'app_localizations_en.arb',
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources()
+        ..writeOutputFiles();
+    } on L10nException catch (e) {
+      fail('Generating output should not fail: \n${e.message}');
+    }
+
+    final Directory outputDirectory = fs.directory('lib').childDirectory('l10n');
+    expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
+  });
+
+  test('filenames with invalid locales should not be recognized', () {
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile('app_localizations_en.arb')
+      .writeAsStringSync(singleMessageArbFileString);
+    l10nDirectory.childFile('app_localizations_en_CA_foo.arb')
+      .writeAsStringSync(singleMessageArbFileString);
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: 'app_localizations_en.arb',
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources();
+    } on L10nException catch (e) {
+      expect(e.message, contains('The following .arb file\'s locale could not be determined'));
+      return;
+    }
+
+    fail('Using app_en_CA_foo.arb should fail as it is not a valid locale.');
   });
 
   test('correctly creates an unimplemented messages file', () {
@@ -799,7 +943,7 @@ void main() {
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('zh')), true);
     });
 
-    test('correctly prioritizes @@locale property in arb file over filename', () {
+    test('correctly requires @@locale property in arb file to match the filename locale suffix', () {
       const String arbFileWithEnLocale = '''
 {
   "@@locale": "en",
@@ -837,15 +981,14 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n${e.message}');
+        expect(e.message, contains('The locale specified in @@locale and the arb filename do not match.'));
+        return;
       }
 
-      // @@locale property should hold higher priority
-      expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
-      expect(generator.supportedLocales.contains(LocaleInfo.fromString('zh')), true);
-      // filename should not be used since @@locale is specified
-      expect(generator.supportedLocales.contains(LocaleInfo.fromString('es')), false);
-      expect(generator.supportedLocales.contains(LocaleInfo.fromString('am')), false);
+      fail(
+        'An exception should occur if the @@locale and the filename extensions are '
+        'defined but not matching.'
+      );
     });
 
     test("throws when arb file's locale could not be determined", () {
@@ -1006,7 +1149,7 @@ import 'output-localization-file_zh.dart';
 '''));
     });
 
-    test('imports are deferred when useDeferredImports are set', () {
+    test('imports are deferred and loaded when useDeferredImports are set', () {
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString);
 
@@ -1033,6 +1176,7 @@ import 'output-localization-file_zh.dart';
 '''
 import 'output-localization-file_en.dart' deferred as output-localization-file_en;
 '''));
+      expect(localizationsFile, contains('output-localization-file_en.loadLibrary()'));
     });
 
     group('DateTime tests', () {

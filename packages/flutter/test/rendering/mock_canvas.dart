@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui show Paragraph, Image;
 
 import 'package:flutter/foundation.dart';
@@ -48,7 +50,7 @@ Matcher get paintsNothing => _TestRecordingCanvasPaintsNothingMatcher();
 /// Matches objects or functions that assert when they try to paint.
 Matcher get paintsAssertion => _TestRecordingCanvasPaintsAssertionMatcher();
 
-/// Matches objects or functions that draw `methodName` exactly `count` number of times
+/// Matches objects or functions that draw `methodName` exactly `count` number of times.
 Matcher paintsExactlyCountTimes(Symbol methodName, int count) {
   return _TestRecordingCanvasPaintsCountMatcher(methodName, count);
 }

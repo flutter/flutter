@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -127,8 +129,9 @@ class MaterialButton extends StatelessWidget {
 
   /// The color to use for this button's text.
   ///
-  /// The button's [Material.textStyle] will be the current theme's button
-  /// text style, [ThemeData.textTheme.button], configured with this color.
+  /// The button's [Material.textStyle] will be the current theme's button text
+  /// style, [TextTheme.button] of [ThemeData.textTheme], configured with this
+  /// color.
   ///
   /// The default text color depends on the button theme's text theme,
   /// [ButtonThemeData.textTheme].
@@ -144,8 +147,9 @@ class MaterialButton extends StatelessWidget {
 
   /// The color to use for this button's text when the button is disabled.
   ///
-  /// The button's [Material.textStyle] will be the current theme's button
-  /// text style, [ThemeData.textTheme.button], configured with this color.
+  /// The button's [Material.textStyle] will be the current theme's button text
+  /// style, [TextTheme.button] of [ThemeData.textTheme], configured with this
+  /// color.
   ///
   /// The default value is the theme's disabled color,
   /// [ThemeData.disabledColor].
@@ -322,8 +326,8 @@ class MaterialButton extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
-  ///    within a [Theme].
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
+  ///    widgets within a [Theme].
   final VisualDensity visualDensity;
 
   /// The shape of the button's [Material].
@@ -415,6 +419,7 @@ class MaterialButton extends StatelessWidget {
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
+      disabledElevation: disabledElevation ?? 0.0,
     );
   }
 

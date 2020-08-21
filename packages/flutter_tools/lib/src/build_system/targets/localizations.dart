@@ -36,10 +36,13 @@ Future<void> generateLocalizations({
     'bin',
     'gen_l10n.dart',
   );
+
   final ProcessResult result = await processManager.run(<String>[
     dartBinaryPath,
+    '--disable-dart-dev',
     genL10nPath,
     '--gen-inputs-and-outputs-list=${dependenciesDir.path}',
+    '--project-dir=${projectDir.path}',
     if (options.arbDirectory != null)
       '--arb-dir=${options.arbDirectory.toFilePath()}',
     if (options.templateArbFile != null)
@@ -178,7 +181,7 @@ class LocalizationOptions {
 
   /// The `--header` argument.
   ///
-  /// The header to prepend to the generated Dart localizations
+  /// The header to prepend to the generated Dart localizations.
   final String header;
 
   /// The `--output-class` argument.

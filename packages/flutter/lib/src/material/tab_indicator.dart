@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -13,8 +15,8 @@ import 'colors.dart';
 /// The [borderSide] defines the line's color and weight.
 ///
 /// The [TabBar.indicatorSize] property can be used to define the indicator's
-/// bounds in terms of its (centered) widget with [TabIndicatorSize.label],
-/// or the entire tab with [TabIndicatorSize.tab].
+/// bounds in terms of its (centered) widget with [TabBarIndicatorSize.label],
+/// or the entire tab with [TabBarIndicatorSize.tab].
 class UnderlineTabIndicator extends Decoration {
   /// Create an underline style selected tab indicator.
   ///
@@ -30,9 +32,10 @@ class UnderlineTabIndicator extends Decoration {
 
   /// Locates the selected tab's underline relative to the tab's boundary.
   ///
-  /// The [TabBar.indicatorSize] property can be used to define the
-  /// tab indicator's bounds in terms of its (centered) tab widget with
-  /// [TabIndicatorSize.label], or the entire tab with [TabIndicatorSize.tab].
+  /// The [TabBar.indicatorSize] property can be used to define the tab
+  /// indicator's bounds in terms of its (centered) tab widget with
+  /// [TabBarIndicatorSize.label], or the entire tab with
+  /// [TabBarIndicatorSize.tab].
   final EdgeInsetsGeometry insets;
 
   @override

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -1212,6 +1214,31 @@ void main() {
         find.byType(CupertinoDatePicker),
         matchesGoldenFile('date_picker_test.datetime.drag.png'),
       );
+    });
+
+    testWidgets('DatePicker displays hours and minutes correctly in RTL', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Center(
+              child: SizedBox(
+                width: 500,
+                height: 400,
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.dateAndTime,
+                  initialDateTime: DateTime(2019, 1, 1, 4),
+                  onDateTimeChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final double hourLeft = tester.getTopLeft(find.text('4')).dx;
+      final double minuteLeft = tester.getTopLeft(find.text('00')).dx;
+      expect(hourLeft, lessThan(minuteLeft));
     });
   });
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
@@ -25,7 +27,8 @@ void main() {
     caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
 
-    // Check that getOffsetForCaret handles a character that is encoded as a surrogate pair.
+    // Check that getOffsetForCaret handles a character that is encoded as a
+    // surrogate pair.
     text = 'A\u{1F600}';
     painter.text = TextSpan(text: text);
     painter.layout();
@@ -146,7 +149,7 @@ void main() {
 
   test('TextPainter error test', () {
     final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
-    expect(() { painter.paint(null, Offset.zero); }, throwsFlutterError);
+    expect(() { painter.paint(null, Offset.zero); }, anyOf(throwsFlutterError, throwsAssertionError));
   });
 
   test('TextPainter requires textDirection', () {
@@ -757,15 +760,6 @@ void main() {
 
     expect(lines.length, 4);
 
-    // TODO(garyq): This data dump is for debugging a test flake. This should
-    // be removed when it is no longer useful.
-    if (lines[1].hardBreak == true) {
-      print('LineMetrics called: ${lines.length}');
-      for (final ui.LineMetrics line in lines) {
-        print('${line.lineNumber}: ${line.hardBreak}');
-      }
-    }
-
     expect(lines[0].hardBreak, true);
     expect(lines[1].hardBreak, false);
     expect(lines[2].hardBreak, true);
@@ -810,12 +804,7 @@ void main() {
     expect(lines[1].lineNumber, 1);
     expect(lines[2].lineNumber, 2);
     expect(lines[3].lineNumber, 3);
-
-  // Disable this test, this is causing a large amount of flaking and
-  // does not have a clear cause. This may or may not be a dart compiler
-  // issue or similar. See https://github.com/flutter/flutter/issues/43763
-  // for more info.
-  }, skip: true);
+  }, skip: true); // https://github.com/flutter/flutter/issues/62819
 
   test('TextPainter caret height and line height', () {
     final TextPainter painter = TextPainter()

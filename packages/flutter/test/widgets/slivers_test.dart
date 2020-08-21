@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -303,6 +305,109 @@ void main() {
       expect(isRight(item0Location, item3Location) && sameHorizontal(item0Location, item3Location), true);
       expect(isBelow(item0Location, item4Location) && sameVertical(item0Location, item4Location), true);
       expect(isBelow(item0Location, item1Location) && isRight(item0Location, item1Location), true);
+    },
+  );
+
+  testWidgets(
+    'SliverList can handle inaccurate scroll offset due to changes in children list',
+      (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/59888.
+      bool skip = true;
+      Widget _buildItem(BuildContext context, int index) {
+        return !skip || index.isEven
+          ? Card(
+          child: ListTile(
+            title: Text(
+              'item$index',
+              style: const TextStyle(fontSize: 80),
+            ),
+          ),
+        )
+          : Container();
+      }
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget> [
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    _buildItem,
+                    childCount: 30,
+                  ),
+                ),
+              ],
+            )
+          ),
+        ),
+      );
+      // Only even items 0~12 are on the screen.
+      expect(find.text('item0'), findsOneWidget);
+      expect(find.text('item12'), findsOneWidget);
+      expect(find.text('item14'), findsNothing);
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, -750.0));
+      await tester.pump();
+      // Only even items 16~28 are on the screen.
+      expect(find.text('item15'), findsNothing);
+      expect(find.text('item16'), findsOneWidget);
+      expect(find.text('item28'), findsOneWidget);
+
+      skip = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget> [
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    _buildItem,
+                    childCount: 30,
+                  ),
+                ),
+              ],
+            )
+          ),
+        ),
+      );
+
+      // Only items 12~19 are on the screen.
+      expect(find.text('item11'), findsNothing);
+      expect(find.text('item12'), findsOneWidget);
+      expect(find.text('item19'), findsOneWidget);
+      expect(find.text('item20'), findsNothing);
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+
+      // Only items 10~16 are on the screen.
+      expect(find.text('item9'), findsNothing);
+      expect(find.text('item10'), findsOneWidget);
+      expect(find.text('item16'), findsOneWidget);
+      expect(find.text('item17'), findsNothing);
+
+      // The inaccurate scroll offset should reach zero at this point
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+
+      // Only items 7~13 are on the screen.
+      expect(find.text('item6'), findsNothing);
+      expect(find.text('item7'), findsOneWidget);
+      expect(find.text('item13'), findsOneWidget);
+      expect(find.text('item14'), findsNothing);
+
+      // It will be corrected as we scroll, so we have to drag multiple times.
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+
+      // Only items 0~6 are on the screen.
+      expect(find.text('item0'), findsOneWidget);
+      expect(find.text('item6'), findsOneWidget);
+      expect(find.text('item7'), findsNothing);
     },
   );
 
@@ -708,6 +813,31 @@ void main() {
       await tester.tap(find.byType(GestureDetector));
       expect(events, equals(<String>['tap']));
     });
+  });
+
+  testWidgets('SliverList handles 0 scrollOffsetCorrection', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/62198
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: CustomScrollView(
+          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          slivers: <Widget>[
+            SliverList(
+              delegate: SliverChildListDelegate(
+                const <Widget>[
+                  SizedBox.shrink(),
+                  Text('index 1'),
+                  Text('index 2'),
+                ]
+              ),
+            ),
+          ],
+        )
+      ),
+    ));
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -500.0), 10000.0);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 }
 

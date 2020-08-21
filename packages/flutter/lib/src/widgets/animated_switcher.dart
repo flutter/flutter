@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
@@ -118,7 +120,7 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 ///             style: Theme.of(context).textTheme.headline4,
 ///           ),
 ///         ),
-///         RaisedButton(
+///         ElevatedButton(
 ///           child: const Text('Increment'),
 ///           onPressed: () {
 ///             setState(() {

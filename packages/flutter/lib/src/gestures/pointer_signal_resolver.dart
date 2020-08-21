@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'package:flutter/foundation.dart';
 
 import 'events.dart';
@@ -25,15 +26,15 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 /// at the end of event dispatch. The first callback registered will be the one
 /// that is called.
 class PointerSignalResolver {
-  PointerSignalResolvedCallback _firstRegisteredCallback;
+  PointerSignalResolvedCallback? _firstRegisteredCallback;
 
-  PointerSignalEvent _currentEvent;
+  PointerSignalEvent? _currentEvent;
 
   /// Registers interest in handling [event].
   void register(PointerSignalEvent event, PointerSignalResolvedCallback callback) {
     assert(event != null);
     assert(callback != null);
-    assert(_currentEvent == null || _isSameEvent(_currentEvent, event));
+    assert(_currentEvent == null || _isSameEvent(_currentEvent!, event));
     if (_firstRegisteredCallback != null) {
       return;
     }
@@ -51,11 +52,11 @@ class PointerSignalResolver {
       assert(_currentEvent == null);
       return;
     }
-    assert(_isSameEvent(_currentEvent, event));
+    assert(_isSameEvent(_currentEvent!, event));
     try {
-      _firstRegisteredCallback(_currentEvent);
+      _firstRegisteredCallback!(_currentEvent!);
     } catch (exception, stack) {
-      InformationCollector collector;
+      InformationCollector? collector;
       assert(() {
         collector = () sync* {
           yield DiagnosticsProperty<PointerSignalEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);

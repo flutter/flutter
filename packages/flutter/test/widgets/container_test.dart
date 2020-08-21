@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:mockito/mockito.dart';
 
+import '../flutter_test_alternative.dart' show Fake;
 import '../rendering/mock_canvas.dart';
 
 void main() {
@@ -437,10 +440,6 @@ void main() {
 
     final RenderBox decoratedBox = tester.renderObject(find.byType(DecoratedBox).last);
     final PaintingContext context = _MockPaintingContext();
-    final Canvas canvas = _MockCanvas();
-    int saveCount = 0;
-    when(canvas.getSaveCount()).thenAnswer((_) => saveCount++);
-    when(context.canvas).thenReturn(canvas);
     FlutterError error;
     try {
       decoratedBox.paint(context, const Offset(0, 0));
@@ -502,7 +501,75 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('Container is hittable only when having decorations', (WidgetTester tester) async {
+    bool tapped = false;
+    await tester.pumpWidget(GestureDetector(
+      onTap: () { tapped = true; },
+      child: Container(
+        decoration: const BoxDecoration(color: Colors.black),
+      ),
+    ));
+
+    await tester.tap(find.byType(Container));
+    expect(tapped, true);
+    tapped = false;
+
+    await tester.pumpWidget(GestureDetector(
+      onTap: () { tapped = true; },
+      child: Container(
+        foregroundDecoration: const BoxDecoration(color: Colors.black),
+      ),
+    ));
+
+    await tester.tap(find.byType(Container));
+    expect(tapped, true);
+    tapped = false;
+
+    await tester.pumpWidget(GestureDetector(
+      onTap: () { tapped = true; },
+      child: Container(
+        color: Colors.black,
+      ),
+    ));
+
+    await tester.tap(find.byType(Container));
+    expect(tapped, true);
+    tapped = false;
+
+    // Everything but color or decorations
+    await tester.pumpWidget(GestureDetector(
+      onTap: () { tapped = true; },
+      child: Center(
+        child: Container(
+          alignment: Alignment.bottomRight,
+          padding: const EdgeInsets.all(2),
+          width: 50,
+          height: 50,
+          margin: const EdgeInsets.all(2),
+          transform: Matrix4.rotationZ(1),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(Container));
+    expect(tapped, false);
+  });
 }
 
-class _MockPaintingContext extends Mock implements PaintingContext {}
-class _MockCanvas extends Mock implements Canvas {}
+class _MockPaintingContext extends Fake implements PaintingContext {
+  @override
+  final Canvas canvas = _MockCanvas();
+}
+
+class _MockCanvas extends Fake implements Canvas {
+  int saveCount = 0;
+
+  @override
+  int getSaveCount() {
+    return saveCount++;
+  }
+
+  @override
+  void drawRect(Rect rect, Paint paint) { }
+}

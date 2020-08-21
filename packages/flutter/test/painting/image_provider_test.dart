@@ -2,15 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:file/memory.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
+import 'image_data.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
@@ -130,8 +136,76 @@ void main() {
     final File file = fs.file('/empty.png')..createSync(recursive: true);
     final FileImage provider = FileImage(file);
 
-    expect(provider.load(provider, null), isA<MultiFrameImageStreamCompleter>());
+    expect(provider.load(provider, (Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) async {
+      return Future<Codec>.value(FakeCodec());
+    }), isA<MultiFrameImageStreamCompleter>());
 
     expect(await error.future, isStateError);
   });
+
+  Future<Codec> _decoder(Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) async {
+    return FakeCodec();
+  }
+
+  test('File image sets tag', () async {
+    final MemoryFileSystem fs = MemoryFileSystem();
+    final File file = fs.file('/blue.png')..createSync(recursive: true)..writeAsBytesSync(kBlueRectPng);
+    final FileImage provider = FileImage(file);
+
+    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+
+    expect(completer.debugLabel, file.path);
+  });
+
+  test('Memory image sets tag', () async {
+    final Uint8List bytes = Uint8List.fromList(kBlueRectPng);
+    final MemoryImage provider = MemoryImage(bytes);
+
+    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+
+    expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)})');
+  });
+
+  test('Asset image sets tag', () async {
+    const String asset = 'images/blue.png';
+    final ExactAssetImage provider = ExactAssetImage(asset, bundle: _TestAssetBundle());
+    final AssetBundleImageKey key = await provider.obtainKey(ImageConfiguration.empty);
+    final MultiFrameImageStreamCompleter completer = provider.load(key, _decoder) as MultiFrameImageStreamCompleter;
+
+    expect(completer.debugLabel, asset);
+  });
+
+  test('Resize image sets tag', () async {
+    final Uint8List bytes = Uint8List.fromList(kBlueRectPng);
+    final ResizeImage provider = ResizeImage(MemoryImage(bytes), width: 40, height: 40);
+    final MultiFrameImageStreamCompleter completer = provider.load(
+      await provider.obtainKey(ImageConfiguration.empty),
+      _decoder,
+    ) as MultiFrameImageStreamCompleter;
+
+    expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)}) - Resized(40×40)');
+  });
+}
+
+class FakeCodec implements Codec {
+  @override
+  void dispose() {}
+
+  @override
+  int get frameCount => throw UnimplementedError();
+
+  @override
+  Future<FrameInfo> getNextFrame() {
+    throw UnimplementedError();
+  }
+
+  @override
+  int get repetitionCount => throw UnimplementedError();
+}
+
+class _TestAssetBundle extends CachingAssetBundle {
+  @override
+  Future<ByteData> load(String key) async {
+    return Uint8List.fromList(kBlueRectPng).buffer.asByteData();
+  }
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -22,6 +24,8 @@ import 'toggle_buttons_theme.dart';
 /// if a button is in an unselected or selected state. They are both
 /// correlated by their index in the list. The length of [isSelected] has to
 /// match the length of the [children] list.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=kVEguaQWGAY}
 ///
 /// ## Customizing toggle buttons
 /// Each toggle's behavior can be configured by the [onPressed] callback, which

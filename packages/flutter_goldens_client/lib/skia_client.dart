@@ -93,13 +93,13 @@ class SkiaGoldClient {
   /// The path to the local [Directory] where the goldctl tool is hosted.
   ///
   /// Uses the [platform] environment in this implementation.
-  String get _goldctl => platform.environment[_kGoldctlKey];
+  String/*!*/ get _goldctl => platform.environment[_kGoldctlKey];
 
   /// The path to the local [Directory] where the service account key is
   /// hosted.
   ///
   /// Uses the [platform] environment in this implementation.
-  String get _serviceAccount => platform.environment[_kServiceAccountKey];
+  String/*!*/ get _serviceAccount => platform.environment[_kServiceAccountKey];
 
   /// Prepares the local work space for golden file testing and calls the
   /// goldctl `auth` command.
@@ -116,9 +116,9 @@ class SkiaGoldClient {
       return;
 
     List<String> authArguments;
-    String failureContext;
+    /*late*/ String failureContext;
 
-    switch (ci) {
+    switch (ci/*!*/) {
       case ContinuousIntegrationEnvironment.luci:
         authArguments = <String>[
           'auth',
@@ -378,7 +378,7 @@ class SkiaGoldClient {
       imgtestArguments,
     );
 
-    final String resultStdout = result.stdout.toString();
+    final String/*!*/ resultStdout = result.stdout.toString();
     if (result.exitCode != 0 &&
       !(resultStdout.contains('Untriaged') || resultStdout.contains('negative image'))) {
       final StringBuffer buf = StringBuffer()
@@ -438,20 +438,30 @@ class SkiaGoldClient {
       final Uri requestForExpectations = Uri.parse(
         'https://flutter-gold.skia.org/json/expectations/commit/HEAD'
       );
+      const String mainKey = 'master';
+      const String temporaryKey = 'master_str';
       String rawResponse;
       try {
         final io.HttpClientRequest request = await httpClient.getUrl(requestForExpectations);
         final io.HttpClientResponse response = await request.close();
         rawResponse = await utf8.decodeStream(response);
-        final Map<String, dynamic> skiaJson = json.decode(rawResponse)['master'] as Map<String, dynamic>;
-
+        final dynamic jsonResponse = json.decode(rawResponse);
+        if (jsonResponse is! Map<String, dynamic>)
+          throw const FormatException('Skia gold expectations do not match expected format.');
+        final Map<String, dynamic> skiaJson = (jsonResponse[mainKey] ?? jsonResponse[temporaryKey]) as Map<String, dynamic>;
+        if (skiaJson == null)
+          throw FormatException('Skia gold expectations are missing the "$mainKey" key (and also doesn\'t have "$temporaryKey")! Available keys: ${jsonResponse.keys.join(", ")}');
         skiaJson.forEach((String key, dynamic value) {
           final Map<String, dynamic> hashesMap = value as Map<String, dynamic>;
           _expectations[key] = hashesMap.keys.toList();
         });
-      } on FormatException catch(_) {
-        print('Formatting error detected requesting expectations from Flutter Gold.\n'
-          'rawResponse: $rawResponse');
+      } on FormatException catch (error) {
+        print(
+          'Formatting error detected requesting expectations from Flutter Gold.\n'
+          'error: $error\n'
+          'url: $requestForExpectations\n'
+          'response: $rawResponse'
+        );
         rethrow;
       }
     },
@@ -508,8 +518,8 @@ class SkiaGoldClient {
         rawResponse = await utf8.decodeStream(response);
         final List<dynamic> ignores = json.decode(rawResponse) as List<dynamic>;
         for(final dynamic ignore in ignores) {
-          final List<String> ignoredQueries = (ignore['query'] as String).split('&');
-          final String ignoredPullRequest = (ignore['note'] as String).split('/').last;
+          final List<String> ignoredQueries = (ignore['query'] as String/*!*/).split('&');
+          final String ignoredPullRequest = (ignore['note'] as String/*!*/).split('/').last;
           final DateTime expiration = DateTime.parse(ignore['expires'] as String);
           // The currently failing test is in the process of modification.
           if (ignoredQueries.contains('name=$testName')) {
@@ -589,15 +599,16 @@ class SkiaGoldClient {
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
     if (!_flutterRoot.existsSync()) {
-      final StringBuffer buf = StringBuffer()
-        ..writeln('Flutter root could not be found: $_flutterRoot');
-      throw Exception(buf.toString());
+      throw Exception('Flutter root could not be found: $_flutterRoot\n');
     } else {
       final io.ProcessResult revParse = await process.run(
         <String>['git', 'rev-parse', 'HEAD'],
         workingDirectory: _flutterRoot.path,
       );
-      return revParse.exitCode == 0 ? (revParse.stdout as String).trim() : null;
+      if (revParse.exitCode != 0) {
+        throw Exception('Current commit of Flutter can not be found.');
+      }
+      return (revParse.stdout as String/*!*/).trim();
     }
   }
 
@@ -626,15 +637,15 @@ class SkiaGoldClient {
   /// Returns a boolean value to prevent the client from re-authorizing itself
   /// for multiple tests.
   Future<bool> clientIsAuthorized() async {
-    final File authFile = workDirectory?.childFile(fs.path.join(
+    final File authFile = workDirectory.childFile(fs.path.join(
       'temp',
       'auth_opt.json',
-    ));
+    ))/*!*/;
 
     if(await authFile.exists()) {
       final String contents = await authFile.readAsString();
       final Map<String, dynamic> decoded = json.decode(contents) as Map<String, dynamic>;
-      return !(decoded['GSUtil'] as bool);
+      return !(decoded['GSUtil'] as bool/*!*/);
     }
     return false;
   }
@@ -642,11 +653,11 @@ class SkiaGoldClient {
   /// Returns a list of arguments for initializing a tryjob based on the testing
   /// environment.
   List<String> getCIArguments() {
-    String pullRequest;
-    String jobId;
-    String cis;
+    /*late*/ String/*!*/ pullRequest;
+    /*late*/ String/*!*/ jobId;
+    /*late*/ String cis;
 
-    switch (ci) {
+    switch (ci/*!*/) {
       case ContinuousIntegrationEnvironment.luci:
         jobId = platform.environment['LOGDOG_STREAM_PREFIX'].split('/').last;
         final List<String> refs = platform.environment['GOLD_TRYJOB'].split('/');
@@ -682,9 +693,6 @@ class SkiaGoldDigest {
 
   /// Create a digest from requested JSON.
   factory SkiaGoldDigest.fromJson(Map<String, dynamic> json) {
-    if (json == null)
-      return null;
-
     return SkiaGoldDigest(
       imageHash: json['digest'] as String,
       paramSet: Map<String, dynamic>.from(json['paramset'] as Map<String, dynamic> ??
@@ -698,21 +706,21 @@ class SkiaGoldDigest {
   }
 
   /// Unique identifier for the image associated with the digest.
-  final String imageHash;
+  final String/*!*/ imageHash;
 
   /// Parameter set for the given test, e.g. Platform : Windows.
-  final Map<String, dynamic> paramSet;
+  final Map<String, dynamic>/*!*/ paramSet;
 
   /// Test name associated with the digest, e.g. positive or un-triaged.
-  final String testName;
+  final String/*!*/ testName;
 
   /// Status of the given digest, e.g. positive or un-triaged.
-  final String status;
+  final String/*!*/ status;
 
   /// Validates a given digest against the current testing conditions.
   bool isValid(Platform platform, String name, String expectation) {
     return imageHash == expectation
-      && (paramSet['Platform'] as List<dynamic>).contains(platform.operatingSystem)
+      && (paramSet['Platform'] as List<dynamic>/*!*/).contains(platform.operatingSystem)
       && (platform.environment[_kTestBrowserKey] == null
          || paramSet['Browser'] == platform.environment[_kTestBrowserKey])
       && testName == name

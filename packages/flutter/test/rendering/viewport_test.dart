@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // This file is separate from viewport_caching_test.dart because we can't use
 // both testWidgets and rendering_tester in the same file - testWidgets will
 // initialize a binding, which rendering_tester will attempt to re-initialize
@@ -196,7 +198,7 @@ void main() {
     revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 360.0);
     expect(revealed.rect, const Rect.fromLTWH(0.0, 40.0, 10.0, 10.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Viewport getOffsetToReveal Sliver - down', (WidgetTester tester) async {
     final List<Widget> children = <Widget>[];

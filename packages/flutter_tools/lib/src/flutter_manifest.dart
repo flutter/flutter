@@ -37,19 +37,19 @@ class FlutterManifest {
     return FlutterManifest.createFromString(manifest, logger: logger);
   }
 
-  /// Returns null on missing or invalid manifest
+  /// Returns null on missing or invalid manifest.
   @visibleForTesting
   static FlutterManifest createFromString(String manifest, { @required Logger logger }) {
-    return _createFromYaml(loadYaml(manifest) as YamlMap, logger);
+    return _createFromYaml(manifest != null ? loadYaml(manifest) : null, logger);
   }
 
-  static FlutterManifest _createFromYaml(YamlMap yamlDocument, Logger logger) {
-    final FlutterManifest pubspec = FlutterManifest._(logger);
+  static FlutterManifest _createFromYaml(dynamic yamlDocument, Logger logger) {
     if (yamlDocument != null && !_validate(yamlDocument, logger)) {
       return null;
     }
 
-    final Map<dynamic, dynamic> yamlMap = yamlDocument;
+    final FlutterManifest pubspec = FlutterManifest._(logger);
+    final Map<dynamic, dynamic> yamlMap = yamlDocument as YamlMap;
     if (yamlMap != null) {
       pubspec._descriptor = yamlMap.cast<String, dynamic>();
     } else {
@@ -163,17 +163,16 @@ class FlutterManifest {
     if (isModule) {
       return _flutterDescriptor['module']['androidPackage'] as String;
     }
-    if (isPlugin) {
-      final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
-      if (plugin.containsKey('platforms')) {
-        final YamlMap platforms = plugin['platforms'] as YamlMap;
-
-        if (platforms.containsKey('android')) {
-          return platforms['android']['package'] as String;
-        }
-      } else {
+    if (supportedPlatforms == null) {
+      // Pre-multi-platform plugin format
+      if (isPlugin) {
+        final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
         return plugin['androidPackage'] as String;
       }
+      return null;
+    }
+    if (supportedPlatforms.containsKey('android')) {
+       return supportedPlatforms['android']['package'] as String;
     }
     return null;
   }
@@ -183,6 +182,20 @@ class FlutterManifest {
   String get iosBundleIdentifier {
     if (isModule) {
       return _flutterDescriptor['module']['iosBundleIdentifier'] as String;
+    }
+    return null;
+  }
+
+  /// Gets the supported platforms. This only supports the new `platforms` format.
+  ///
+  /// If the plugin uses the legacy pubspec format, this method returns null.
+  Map<String, dynamic> get supportedPlatforms {
+    if (isPlugin) {
+      final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
+      if (plugin.containsKey('platforms')) {
+        final YamlMap platformsMap = plugin['platforms'] as YamlMap;
+        return platformsMap.value.cast<String, dynamic>();
+      }
     }
     return null;
   }
@@ -266,6 +279,26 @@ class FlutterManifest {
     }
     return fonts;
   }
+
+  /// Whether a synthetic flutter_gen package should be generated.
+  ///
+  /// This can be provided to the [Pub] interface to inject a new entry
+  /// into the package_config.json file which points to `.dart_tool/flutter_gen`.
+  ///
+  /// This allows generated source code to be imported using a package
+  /// alias.
+  bool get generateSyntheticPackage => _generateSyntheticPackage ??= _computeGenerateSyntheticPackage();
+  bool _generateSyntheticPackage;
+  bool _computeGenerateSyntheticPackage() {
+    if (!_flutterDescriptor.containsKey('generate')) {
+      return false;
+    }
+    final Object value = _flutterDescriptor['generate'];
+    if (value is! bool) {
+      return false;
+    }
+    return value as bool;
+  }
 }
 
 class Font {
@@ -332,32 +365,36 @@ String buildSchemaPath(FileSystem fileSystem) {
 /// This method should be kept in sync with the schema in
 /// `$FLUTTER_ROOT/packages/flutter_tools/schema/pubspec_yaml.json`,
 /// but avoid introducing dependencies on packages for simple validation.
-bool _validate(YamlMap manifest, Logger logger) {
+bool _validate(dynamic manifest, Logger logger) {
   final List<String> errors = <String>[];
-  for (final MapEntry<dynamic, dynamic> kvp in manifest.entries) {
-    if (kvp.key is! String) {
-      errors.add('Expected YAML key to be a string, but got ${kvp.key}.');
-      continue;
-    }
-    switch (kvp.key as String) {
-      case 'name':
-        if (kvp.value is! String) {
-          errors.add('Expected "${kvp.key}" to be a string, but got ${kvp.value}.');
-        }
-        break;
-      case 'flutter':
-        if (kvp.value == null) {
-          continue;
-        }
-        if (kvp.value is! YamlMap) {
-          errors.add('Expected "${kvp.key}" section to be an object or null, but got ${kvp.value}.');
-        } else {
-          _validateFlutter(kvp.value as YamlMap, errors);
-        }
-        break;
-      default:
+  if (manifest is! YamlMap) {
+    errors.add('Expected YAML map');
+  } else {
+    for (final MapEntry<dynamic, dynamic> kvp in (manifest as YamlMap).entries) {
+      if (kvp.key is! String) {
+        errors.add('Expected YAML key to be a string, but got ${kvp.key}.');
+        continue;
+      }
+      switch (kvp.key as String) {
+        case 'name':
+          if (kvp.value is! String) {
+            errors.add('Expected "${kvp.key}" to be a string, but got ${kvp.value}.');
+          }
+          break;
+        case 'flutter':
+          if (kvp.value == null) {
+            continue;
+          }
+          if (kvp.value is! YamlMap) {
+            errors.add('Expected "${kvp.key}" section to be an object or null, but got ${kvp.value}.');
+          } else {
+            _validateFlutter(kvp.value as YamlMap, errors);
+          }
+          break;
+        default:
         // additionalProperties are allowed.
-        break;
+          break;
+      }
     }
   }
 
@@ -420,6 +457,8 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
         }
         final List<String> pluginErrors = Plugin.validatePluginYaml(kvp.value as YamlMap);
         errors.addAll(pluginErrors);
+        break;
+      case 'generate':
         break;
       default:
         errors.add('Unexpected child "${kvp.key}" found under "flutter".');

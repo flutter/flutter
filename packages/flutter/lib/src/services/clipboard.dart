@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -18,12 +19,12 @@ class ClipboardData {
   const ClipboardData({ this.text });
 
   /// Plain text variant of this clipboard data.
-  final String text;
+  final String? text;
 }
 
 /// Utility methods for interacting with the system's clipboard.
 class Clipboard {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   Clipboard._();
@@ -52,13 +53,13 @@ class Clipboard {
   ///
   /// Returns a future which completes to null if the data could not be
   /// obtained, and to a [ClipboardData] object if it could.
-  static Future<ClipboardData> getData(String format) async {
-    final Map<String, dynamic> result = await SystemChannels.platform.invokeMethod(
+  static Future<ClipboardData?> getData(String format) async {
+    final Map<String, dynamic>? result = await SystemChannels.platform.invokeMethod(
       'Clipboard.getData',
       format,
     );
     if (result == null)
       return null;
-    return ClipboardData(text: result['text'] as String);
+    return ClipboardData(text: result['text'] as String?);
   }
 }

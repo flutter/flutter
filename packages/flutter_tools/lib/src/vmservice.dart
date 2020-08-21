@@ -4,11 +4,14 @@
 
 import 'dart:async';
 
+import 'package:file/file.dart';
 import 'package:meta/meta.dart' show required, visibleForTesting;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/context.dart';
 import 'base/io.dart' as io;
+import 'build_info.dart';
+import 'convert.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
 import 'version.dart';
@@ -27,6 +30,8 @@ const int kIsolateReloadBarred = 1005;
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
 typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression});
+
+typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
 WebSocketConnector _openChannel = _defaultOpenChannel;
 
@@ -146,6 +151,7 @@ typedef VMServiceConnector = Future<vm_service.VmService> Function(Uri httpUri, 
   CompileExpression compileExpression,
   ReloadMethod reloadMethod,
   GetSkSLMethod getSkSLMethod,
+  PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression,
   Device device,
 });
@@ -172,6 +178,7 @@ vm_service.VmService setUpVmService(
   Device device,
   ReloadMethod reloadMethod,
   GetSkSLMethod skSLMethod,
+  PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   vm_service.VmService vmService
 ) {
   if (reloadSources != null) {
@@ -259,9 +266,7 @@ vm_service.VmService setUpVmService(
           isStatic);
       return <String, dynamic>{
         'type': 'Success',
-        'result': <String, dynamic>{
-          'result': <String, dynamic>{'kernelBytes': kernelBytesBase64},
-        },
+        'result': <String, dynamic>{'kernelBytes': kernelBytesBase64},
       };
     });
     vmService.registerService('compileExpression', 'Flutter Tools');
@@ -290,6 +295,15 @@ vm_service.VmService setUpVmService(
     });
     vmService.registerService('flutterGetSkSL', 'Flutter Tools');
   }
+  if (printStructuredErrorLogMethod != null) {
+    try {
+      vmService.streamListen(vm_service.EventStreams.kExtension);
+    } on vm_service.RPCError {
+      // It is safe to ignore this error because we expect an error to be
+      // thrown if we're already subscribed.
+    }
+    vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
+  }
   return vmService;
 }
 
@@ -308,6 +322,7 @@ Future<vm_service.VmService> connectToVmService(
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
+    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
     Device device,
   }) async {
@@ -320,6 +335,7 @@ Future<vm_service.VmService> connectToVmService(
     device: device,
     reloadMethod: reloadMethod,
     getSkSLMethod: getSkSLMethod,
+    printStructuredErrorLogMethod: printStructuredErrorLogMethod,
   );
 }
 
@@ -330,22 +346,17 @@ Future<vm_service.VmService> _connect(
   CompileExpression compileExpression,
   ReloadMethod reloadMethod,
   GetSkSLMethod getSkSLMethod,
+  PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device device,
 }) async {
   final Uri wsUri = httpUri.replace(scheme: 'ws', path: globals.fs.path.join(httpUri.path, 'ws'));
   final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
-  // Create an instance of the package:vm_service API in addition to the flutter
-  // tool's to allow gradual migration.
-  final Completer<void> streamClosedCompleter = Completer<void>();
   final vm_service.VmService delegateService = vm_service.VmService(
     channel,
     channel.add,
     log: null,
     disposeHandler: () async {
-      if (!streamClosedCompleter.isCompleted) {
-        streamClosedCompleter.complete();
-      }
       await channel.close();
     },
   );
@@ -357,6 +368,7 @@ Future<vm_service.VmService> _connect(
     device,
     reloadMethod,
     getSkSLMethod,
+    printStructuredErrorLogMethod,
     delegateService,
   );
   _httpAddressExpando[service] = httpUri;
@@ -430,9 +442,9 @@ class FlutterView {
 
 /// Flutter specific VM Service functionality.
 extension FlutterVmService on vm_service.VmService {
-  Uri get wsAddress => _wsAddressExpando[this];
+  Uri get wsAddress => this != null ? _wsAddressExpando[this] : null;
 
-  Uri get httpAddress => _httpAddressExpando[this];
+  Uri get httpAddress => this != null ? _httpAddressExpando[this] : null;
 
   /// Set the asset directory for the an attached Flutter view.
   Future<void> setAssetDirectory({
@@ -589,6 +601,10 @@ extension FlutterVmService on vm_service.VmService {
     @required String isolateId,
   }) => _flutterToggle('inspector.show', isolateId: isolateId);
 
+  Future<Map<String,dynamic>> flutterToggleInvertOversizedImages({
+    @required String isolateId,
+  }) => _flutterToggle('invertOversizedImages', isolateId: isolateId);
+
   Future<Map<String, dynamic>> flutterToggleProfileWidgetBuilds({
     @required String isolateId,
   }) => _flutterToggle('profileWidgetBuilds', isolateId: isolateId);
@@ -612,15 +628,13 @@ extension FlutterVmService on vm_service.VmService {
     );
   }
 
-  Future<Map<String, dynamic>> flutterFastReassemble(String classId, {
+  Future<Map<String, dynamic>> flutterFastReassemble({
    @required String isolateId,
   }) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.fastReassemble',
       isolateId: isolateId,
-      args: <String, Object>{
-        'class': classId,
-      },
+      args: <String, Object>{},
     );
   }
 
@@ -692,6 +706,30 @@ extension FlutterVmService on vm_service.VmService {
       return result['value'] as String;
     }
     return 'unknown';
+  }
+
+  /// Return the current brightness value for the flutter view running with
+  /// the main isolate [isolateId].
+  ///
+  /// If a non-null value is provided for [brightness], the brightness override
+  /// is updated with this value.
+  Future<Brightness> flutterBrightnessOverride({
+    Brightness brightness,
+    @required String isolateId,
+  }) async {
+    final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw(
+      'ext.flutter.brightnessOverride',
+      isolateId: isolateId,
+      args: brightness != null
+        ? <String, dynamic>{'value': brightness.toString()}
+        : <String, String>{},
+    );
+    if (result != null && result['value'] is String) {
+      return (result['value'] as String) == 'Brightness.light'
+        ? Brightness.light
+        : Brightness.dark;
+    }
+    return null;
   }
 
   /// Invoke a flutter extension method, if the flutter extension is not
@@ -773,7 +811,7 @@ extension FlutterVmService on vm_service.VmService {
     return callServiceExtension(kScreenshotSkpMethod);
   }
 
-  /// Set the VM timeline flags
+  /// Set the VM timeline flags.
   Future<vm_service.Response> setVMTimelineFlags(List<String> recordedStreams) {
     assert(recordedStreams != null);
     return callServiceExtension(
@@ -799,4 +837,76 @@ bool isPauseEvent(String kind) {
          kind == vm_service.EventKind.kPauseException ||
          kind == vm_service.EventKind.kPausePostRequest ||
          kind == vm_service.EventKind.kNone;
+}
+
+// TODO(jonahwilliams): either refactor drive to use the resident runner
+// or delete it.
+Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
+  File outputFile,
+}) async {
+  if (data.isEmpty) {
+    globals.logger.printStatus(
+      'No data was receieved. To ensure SkSL data can be generated use a '
+      'physical device then:\n'
+      '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
+      '  2. Interact with the application to force shaders to be compiled.\n'
+    );
+    return null;
+  }
+  if (outputFile == null) {
+    outputFile = globals.fsUtils.getUniqueFile(
+      globals.fs.currentDirectory,
+      'flutter',
+      'sksl.json',
+    );
+  } else if (!outputFile.parent.existsSync()) {
+    outputFile.parent.createSync(recursive: true);
+  }
+  // Convert android sub-platforms to single target platform.
+  TargetPlatform targetPlatform = await device.targetPlatform;
+  switch (targetPlatform) {
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
+    case TargetPlatform.android_x64:
+    case TargetPlatform.android_x86:
+      targetPlatform = TargetPlatform.android;
+      break;
+    default:
+      break;
+  }
+  final Map<String, Object> manifest = <String, Object>{
+    'platform': getNameForTargetPlatform(targetPlatform),
+    'name': device.name,
+    'engineRevision': globals.flutterVersion.engineRevision,
+    'data': data,
+  };
+  outputFile.writeAsStringSync(json.encode(manifest));
+  globals.logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
+  return outputFile.path;
+}
+
+/// A brightness enum that matches the values https://github.com/flutter/engine/blob/3a96741247528133c0201ab88500c0c3c036e64e/lib/ui/window.dart#L1328
+/// Describes the contrast of a theme or color palette.
+enum Brightness {
+  /// The color is dark and will require a light text color to achieve readable
+  /// contrast.
+  ///
+  /// For example, the color might be dark grey, requiring white text.
+  dark,
+
+  /// The color is light and will require a dark text color to achieve readable
+  /// contrast.
+  ///
+  /// For example, the color might be bright white, requiring black text.
+  light,
+}
+
+/// Process a VM service log event into a string message.
+String processVmServiceMessage(vm_service.Event event) {
+  final String message = utf8.decode(base64.decode(event.bytes));
+  // Remove extra trailing newlines appended by the vm service.
+  if (message.endsWith('\n')) {
+    return message.substring(0, message.length - 1);
+  }
+  return message;
 }

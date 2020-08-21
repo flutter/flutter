@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 
 import 'package:flutter/gestures.dart';
@@ -432,7 +434,7 @@ void main() {
       4: Text('Child 5'),
     };
 
-    // Child 3 is intially selected.
+    // Child 3 is initially selected.
     groupValue = 2;
 
     await tester.pumpWidget(
