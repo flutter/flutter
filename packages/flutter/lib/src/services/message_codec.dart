@@ -80,9 +80,9 @@ abstract class MethodCodec {
 
   /// Encodes an error result into a binary envelope.
   ///
-  /// The specified error [code], human-readable error [message], and error
+  /// The specified error [code], human-readable error [message] and error
   /// [details] correspond to the fields of [PlatformException].
-  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details });
+  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details});
 }
 
 
@@ -107,6 +107,7 @@ class PlatformException implements Exception {
     required this.code,
     this.message,
     this.details,
+    this.stacktrace,
   }) : assert(code != null);
 
   /// An error code.
@@ -118,8 +119,18 @@ class PlatformException implements Exception {
   /// Error details, possibly null.
   final dynamic details;
 
+  /// Native stacktrace for the error, possibly null.
+  /// This is strictly for native platform stacktrace.
+  /// The stacktrace info on dart platform can be found within the try-catch block for example:
+  /// try {
+  ///   ...
+  /// } catch (e, stacktrace) {
+  ///   print(stacktrace);
+  /// }
+  final String? stacktrace;
+
   @override
-  String toString() => 'PlatformException($code, $message, $details)';
+  String toString() => 'PlatformException($code, $message, $details, $stacktrace)';
 }
 
 /// Thrown to indicate that a platform interaction failed to find a handling
