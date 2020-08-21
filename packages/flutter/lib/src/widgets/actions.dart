@@ -1090,9 +1090,17 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     return null;
   }
 
+  // This global key is needed to keep only the necessary widgets in the tree
+  // while maintaining the subtree's state.
+  //
+  // See https://github.com/flutter/flutter/issues/64058 for an explanation of
+  // why using a global key over keeping the shape of the tree.
+  final GlobalKey _mouseRegionKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     Widget child = MouseRegion(
+      key: _mouseRegionKey,
       onEnter: _handleMouseEnter,
       onExit: _handleMouseExit,
       cursor: widget.mouseCursor,
