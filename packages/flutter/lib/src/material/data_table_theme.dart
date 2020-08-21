@@ -47,13 +47,9 @@ import 'theme.dart';
   });
 
   /// The background and border decoration for the table.
-  ///
-  /// By default there is no decoration.
   final Decoration decoration;
 
   /// The color for the data rows.
-  ///
-  /// By default, the color is transparent unless selected.
   ///
   /// The effective color can depend on the [MaterialState] state, if the
   /// row is selected, pressed, hovered, focused, disabled or enabled. The
@@ -79,19 +75,12 @@ import 'theme.dart';
   final MaterialStateProperty<Color> dataRowColor;
 
   /// The height of each row (excluding the row that contains column headings).
-  ///
-  /// This value defaults to [kMinInteractiveDimension] to adhere to the Material
-  /// Design specifications.
   final double dataRowHeight;
 
   /// The text style for data rows.
-  ///
-  /// By default, the text style is [TextTheme.bodyText2].
   final TextStyle dataTextStyle;
 
   /// The color for the heading row.
-  ///
-  /// By default, the color is transparent.
   ///
   /// The effective color can depend on the [MaterialState] state, if the
   /// row is pressed, hovered, focused. The color is painted as an overlay
@@ -117,14 +106,9 @@ import 'theme.dart';
   final MaterialStateProperty<Color> headingRowColor;
 
   /// The height of the heading row.
-  ///
-  /// This value defaults to [DataTable.defaultHeadingRowHeight] to adhere to the
-  /// Material Design specifications.
   final double headingRowHeight;
 
   /// The text style for the heading row.
-  ///
-  /// By default, the text style is [TextTheme.subtitle2].
   final TextStyle headingTextStyle;
 
   /// The horizontal margin between the edges of the table and the content
@@ -132,20 +116,12 @@ import 'theme.dart';
   ///
   /// When a checkbox is displayed, it is also the margin between the checkbox
   /// the content in the first data column.
-  ///
-  /// This value defaults to [DataTable.defaultHorizontalMargin] to adhere to the
-  /// Material Design specifications.
   final double horizontalMargin;
 
   /// The horizontal margin between the contents of each data column.
-  ///
-  /// This value defaults to [DataTable.defaultColumnSpacing] to adhere to the
-  /// Material Design specifications.
   final double columnSpacing;
 
   /// The padding between header text and the sort icon.
-  ///
-  /// By default the padding is [DataTable.defaultSortArrowPadding].
   final EdgeInsetsGeometry sortIconPadding;
 
   /// Creates a copy of this object but with the given fields replaced with the
