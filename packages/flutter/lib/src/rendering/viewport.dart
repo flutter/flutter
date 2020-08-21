@@ -718,7 +718,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // `rect`'s coordinates to a scroll offset. It is going to be:
     //
     // - the `pivot` RenderBox if it exists.
-    // - otherwise the `target` RenderSliver.
+    // - the `target` RenderSliver otherwise .
     //
     // `leadingScrollOffset` is currently the scrollOffset within `child`, to
     // our new reference frame (`pivot` or `target`).
@@ -819,7 +819,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         break;
       case GrowthDirection.reverse:
         // If child's growth direction is reverse, when viewport.offset is
-        // `leadingScrollOffset` it is just outside of the viewport.
+        // `leadingScrollOffset`, it is positioned just outside of the leading
+        // edge of the viewport.
         switch (axis) {
           case Axis.vertical:
             leadingScrollOffset -= targetRect.height;
