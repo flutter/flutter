@@ -212,7 +212,7 @@ void main([List<String> args = const <String>[]]) {
 
       // Execute the remaining tests.
       if (hybrid) {
-        await driver.requestData('profileDemos');
+        await driver.requestData('restDemos');
       } else {
         final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
         await runDemos(unprofiledDemos.toList(), driver);
