@@ -447,6 +447,7 @@ class TextInputConfiguration {
   /// [actionLabel] may be null.
   const TextInputConfiguration({
     this.inputType = TextInputType.text,
+    this.readOnly = false,
     this.obscureText = false,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
@@ -469,6 +470,11 @@ class TextInputConfiguration {
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
+
+  /// Whether the text field can be edited or not.
+  ///
+  /// Defaults to false.
+  final bool readOnly;
 
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
@@ -580,6 +586,7 @@ class TextInputConfiguration {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'inputType': inputType.toJson(),
+      'readOnly': readOnly,
       'obscureText': obscureText,
       'autocorrect': autocorrect,
       'smartDashesType': smartDashesType.index.toString(),
@@ -801,6 +808,9 @@ abstract class TextInputClient {
 
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
+
+  /// Requests that this client perform the private command.
+  void performPrivateCommand(String action, Map<String, dynamic> data);
 
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
@@ -1156,6 +1166,10 @@ class TextInput {
         break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
+        break;
+      case 'TextInputClient.performPrivateCommand':
+        _currentConnection!._client.performPrivateCommand(
+          args[1]['action'] as String, args[1]['data'] as Map<String, dynamic>);
         break;
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection!._client.updateFloatingCursor(_toTextPoint(

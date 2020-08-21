@@ -434,12 +434,14 @@ class _FixedExtentScrollable extends Scrollable {
     ScrollPhysics physics,
     @required this.itemExtent,
     @required ViewportBuilder viewportBuilder,
+    String restorationId,
   }) : super (
     key: key,
     axisDirection: axisDirection,
     controller: controller,
     physics: physics,
     viewportBuilder: viewportBuilder,
+    restorationId: restorationId,
   );
 
   final double itemExtent;
@@ -585,6 +587,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.onSelectedItemChanged,
     this.renderChildrenOutsideViewport = false,
     this.clipBehavior = Clip.hardEdge,
+    this.restorationId,
     @required List<Widget> children,
   }) : assert(children != null),
        assert(diameterRatio != null),
@@ -625,6 +628,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.onSelectedItemChanged,
     this.renderChildrenOutsideViewport = false,
     this.clipBehavior = Clip.hardEdge,
+    this.restorationId,
     @required this.childDelegate,
   }) : assert(childDelegate != null),
        assert(diameterRatio != null),
@@ -713,6 +717,9 @@ class ListWheelScrollView extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  /// {@macro flutter.widgets.scrollable.restorationId}
+  final String restorationId;
+
   @override
   _ListWheelScrollViewState createState() => _ListWheelScrollViewState();
 }
@@ -765,6 +772,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
         controller: scrollController,
         physics: widget.physics,
         itemExtent: widget.itemExtent,
+        restorationId: widget.restorationId,
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return ListWheelViewport(
             diameterRatio: widget.diameterRatio,
@@ -899,7 +907,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, int slot) {
+  void insertRenderObjectChild(RenderObject child, int slot) {
     final RenderListWheelViewport renderObject = this.renderObject;
     assert(renderObject.debugValidateChild(child));
     renderObject.insert(child as RenderBox, after: _childElements[slot - 1]?.renderObject as RenderBox);
@@ -907,7 +915,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, dynamic slot) {
+  void moveRenderObjectChild(RenderObject child, int oldSlot, int newSlot) {
     const String moveChildRenderObjectErrorMessage =
         'Currently we maintain the list in contiguous increasing order, so '
         'moving children around is not allowed.';
@@ -915,7 +923,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, int slot) {
     assert(child.parent == renderObject);
     renderObject.remove(child as RenderBox);
   }

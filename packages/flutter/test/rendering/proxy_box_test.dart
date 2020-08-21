@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:collection' show LinkedHashMap;
 import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, Image, ImageFilter;
 
@@ -491,10 +490,6 @@ void main() {
   });
 
   test('RenderMouseRegion can change properties when detached', () {
-    renderer.initMouseTracker(MouseTracker(
-      renderer.pointerRouter,
-      (_) => <MouseTrackerAnnotation, Matrix4>{} as LinkedHashMap<MouseTrackerAnnotation, Matrix4>,
-    ));
     final RenderMouseRegion object = RenderMouseRegion();
     object
       ..opaque = false

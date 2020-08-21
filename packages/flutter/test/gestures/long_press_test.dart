@@ -48,6 +48,18 @@ const PointerUpEvent up3 = PointerUpEvent(
   position: Offset(31, 29),
 );
 
+// Down/up pair 4: tap sequence with tertiary button
+const PointerDownEvent down4 = PointerDownEvent(
+  pointer: 8,
+  position: Offset(42, 24),
+  buttons: kTertiaryButton,
+);
+
+const PointerUpEvent up4 = PointerUpEvent(
+  pointer: 8,
+  position: Offset(43, 23),
+);
+
 void main() {
   setUp(ensureGestureBinding);
 
@@ -241,7 +253,7 @@ void main() {
       longPress.addPointer(const PointerDownEvent(
         pointer: 5,
         kind: PointerDeviceKind.mouse,
-        buttons: kSecondaryMouseButton | kMiddleMouseButton,
+        buttons: kSecondaryMouseButton | kTertiaryButton,
         position: Offset(10, 10),
       ));
       tester.closeArena(5);
@@ -267,7 +279,7 @@ void main() {
       tester.route(const PointerMoveEvent(
         pointer: 5,
         kind: PointerDeviceKind.mouse,
-        buttons: kMiddleMouseButton,
+        buttons: kTertiaryButton,
         position: Offset(10, 10),
       ));
       expect(longPressDown, isFalse);
@@ -595,6 +607,68 @@ void main() {
     const PointerMoveEvent move2 = PointerMoveEvent(
       pointer: 2,
       buttons: kSecondaryButton,
+      position: Offset(100, 200),
+    );
+
+    const PointerUpEvent up2 = PointerUpEvent(
+      pointer: 2,
+      position: Offset(100, 201),
+    );
+
+    longPress.addPointer(down2);
+    tester.closeArena(2);
+    tester.route(down2);
+    tester.async.elapse(const Duration(milliseconds: 700));
+    tester.route(move2);
+    tester.route(up2);
+    expect(recognized, <String>[]);
+    longPress.dispose();
+    recognized.clear();
+  });
+
+  testGesture('A tertiary long press should not trigger primary or secondary', (GestureTester tester) {
+    final List<String> recognized = <String>[];
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer()
+      ..onLongPressStart = (LongPressStartDetails details) {
+        recognized.add('primaryStart');
+      }
+      ..onLongPress = () {
+        recognized.add('primary');
+      }
+      ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+        recognized.add('primaryUpdate');
+      }
+      ..onLongPressEnd = (LongPressEndDetails details) {
+        recognized.add('primaryEnd');
+      }
+      ..onLongPressUp = () {
+        recognized.add('primaryUp');
+      }
+      ..onSecondaryLongPressStart = (LongPressStartDetails details) {
+        recognized.add('secondaryStart');
+      }
+      ..onSecondaryLongPress = () {
+        recognized.add('secondary');
+      }
+      ..onSecondaryLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+        recognized.add('secondaryUpdate');
+      }
+      ..onSecondaryLongPressEnd = (LongPressEndDetails details) {
+        recognized.add('secondaryEnd');
+      }
+      ..onSecondaryLongPressUp = () {
+        recognized.add('secondaryUp');
+      };
+
+    const PointerDownEvent down2 = PointerDownEvent(
+      pointer: 2,
+      buttons: kTertiaryButton,
+      position: Offset(30.0, 30.0),
+    );
+
+    const PointerMoveEvent move2 = PointerMoveEvent(
+      pointer: 2,
+      buttons: kTertiaryButton,
       position: Offset(100, 200),
     );
 

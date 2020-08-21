@@ -73,7 +73,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesIpv6Flag();
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    usesIsolateFilterOption(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
   }
@@ -424,6 +423,7 @@ class RunCommand extends RunCommandBase {
         fastStart: boolArg('fast-start')
           && !runningWithPrebuiltApplication
           && devices.every((Device device) => device.supportsFastStart),
+        nullAssertions: boolArg('null-assertions'),
       );
     }
   }
@@ -526,7 +526,6 @@ class RunCommand extends RunCommandBase {
           flutterProject: flutterProject,
           fileSystemRoots: stringsArg('filesystem-root'),
           fileSystemScheme: stringArg('filesystem-scheme'),
-          viewFilter: stringArg('isolate-filter'),
           experimentalFlags: expFlags,
           target: stringArg('target'),
           buildInfo: getBuildInfo(),

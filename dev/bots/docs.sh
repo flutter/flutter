@@ -9,7 +9,7 @@ function deploy {
   local total_tries="$1"
   local remaining_tries=$(($total_tries - 1))
   shift
-  while [[ "$remaining_tries" > 0 ]]; do
+  while [[ "$remaining_tries" -gt 0 ]]; do
     (cd "$FLUTTER_ROOT/dev/docs" && firebase --debug deploy --token "$FIREBASE_TOKEN" --project "$@") && break
     remaining_tries=$(($remaining_tries - 1))
     echo "Error: Unable to deploy documentation to Firebase. Retrying in five seconds... ($remaining_tries tries left)"
@@ -37,14 +37,14 @@ function script_location() {
 
 function generate_docs() {
     # Install and activate dartdoc.
-    "$PUB" global activate dartdoc 0.32.1
+    "$PUB" global activate dartdoc 0.32.4
 
     # This script generates a unified doc set, and creates
     # a custom index.html, placing everything into dev/docs/doc.
     (cd "$FLUTTER_ROOT/dev/tools" && "$FLUTTER" pub get)
     (cd "$FLUTTER_ROOT/dev/tools" && "$PUB" get)
-    (cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
-    (cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev "$FLUTTER_ROOT/dev/tools/java_and_objc_doc.dart")
+    (cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev --enable-asserts "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
+    (cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev --enable-asserts "$FLUTTER_ROOT/dev/tools/java_and_objc_doc.dart")
 }
 
 # Zip up the docs so people can download them for offline usage.
@@ -71,7 +71,7 @@ function create_docset() {
   dashing_pid=$!
   wait $dashing_pid && \
   cp ./doc/flutter/static-assets/favicon.png ./flutter.docset/icon.png && \
-  "$DART" --disable-dart-dev ./dashing_postprocess.dart && \
+  "$DART" --disable-dart-dev --enable-asserts ./dashing_postprocess.dart && \
   tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset
   if [[ $? -ne 0 ]]; then
       >&2 echo "Dashing docset generation failed"
@@ -103,7 +103,7 @@ function deploy_docs() {
             ;;
         *)
             >&2 echo "Docs deployment cannot be run on the $CIRRUS_BRANCH branch."
-            exit 1
+            exit 0
     esac
 }
 
@@ -160,10 +160,11 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
 fi
 
 generate_docs
+# Skip publishing docs for PRs and release candidate branches
 if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
-    (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
-    # TODO(tvolkert): re-enable (https://github.com/flutter/flutter/issues/60646)
-    # (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
-    (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
-    deploy_docs
+  (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
+  # TODO(tvolkert): re-enable (https://github.com/flutter/flutter/issues/60646)
+  # (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
+  (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
+  deploy_docs
 fi

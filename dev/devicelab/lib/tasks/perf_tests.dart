@@ -12,15 +12,15 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
-TaskFunction createComplexLayoutScrollPerfTest() {
+TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'complex_layout_scroll_perf',
+    measureCpuGpu: measureCpuGpu,
   ).run;
 }
 
@@ -109,42 +109,45 @@ TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
   ).run;
 }
 
-TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
+TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'backdrop_filter_perf',
-    needsMeasureCpuGpu: needsMeasureCpuGpu,
+    measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/backdrop_filter_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
-TaskFunction createPostBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
+TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'post_backdrop_filter_perf',
-    needsMeasureCpuGpu: needsMeasureCpuGpu,
+    measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/post_backdrop_filter_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
-TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
+TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'simple_animation_perf',
-    needsMeasureCpuGpu: needsMeasureCpuGpu,
+    measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/simple_animation_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
-TaskFunction createAnimatedPlaceholderPerfTest({bool needsMeasureCpuGpu = false}) {
+TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'animated_placeholder_perf',
-    needsMeasureCpuGpu: needsMeasureCpuGpu,
+    measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/animated_placeholder_perf_test.dart',
   ).run;
 }
@@ -155,6 +158,13 @@ TaskFunction createPictureCachePerfTest() {
     'test_driver/run_app.dart',
     'picture_cache_perf',
     testDriver: 'test_driver/picture_cache_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createPictureCachePerfE2ETest() {
+  return E2EPerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/picture_cache_perf_e2e.dart',
   ).run;
 }
 
@@ -240,6 +250,7 @@ TaskFunction createColorFilterAndFadePerfTest() {
     'test_driver/run_app.dart',
     'color_filter_and_fade_perf',
     testDriver: 'test_driver/color_filter_and_fade_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
@@ -249,6 +260,7 @@ TaskFunction createFadingChildAnimationPerfTest() {
     'test_driver/run_app.dart',
     'fading_child_animation_perf',
     testDriver: 'test_driver/fading_child_animation_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
@@ -258,6 +270,7 @@ TaskFunction createImageFilteredTransformAnimationPerfTest() {
     'test_driver/run_app.dart',
     'imagefiltered_transform_animation_perf',
     testDriver: 'test_driver/imagefiltered_transform_animation_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
@@ -361,7 +374,8 @@ class PerfTest {
     this.testDirectory,
     this.testTarget,
     this.timelineFileName, {
-    this.needsMeasureCpuGpu = false,
+    this.measureCpuGpu = false,
+    this.saveTraceFile = false,
     this.testDriver,
     this.needsFullTimeline = true,
     this.benchmarkScoreKeys,
@@ -375,12 +389,15 @@ class PerfTest {
   // The prefix name of the filename such as `<timelineFileName>.timeline_summary.json`.
   final String timelineFileName;
   String get resultFilename => '$timelineFileName.timeline_summary';
+  String get traceFilename => '$timelineFileName.timeline';
   /// The test file to run on the host.
   final String testDriver;
   /// Whether to collect CPU and GPU metrics.
-  final bool needsMeasureCpuGpu;
+  final bool measureCpuGpu;
   /// Whether to collect full timeline, meaning if `--trace-startup` flag is needed.
   final bool needsFullTimeline;
+  /// Whether to save the trace timeline file `*.timeline.json`.
+  final bool saveTraceFile;
 
   /// The keys of the values that need to be reported.
   ///
@@ -398,8 +415,8 @@ class PerfTest {
   ///   'average_vsync_transitions_missed',
   ///   '90th_percentile_vsync_transitions_missed',
   ///   '99th_percentile_vsync_transitions_missed',
-  ///   if (needsMeasureCpuGpu) 'cpu_percentage',
-  ///   if (needsMeasureCpuGpu) 'gpu_percentage',
+  ///   if (measureCpuGpu) 'average_cpu_usage',
+  ///   if (measureCpuGpu) 'average_gpu_usage',
   /// ]
   /// ```
   final List<String> benchmarkScoreKeys;
@@ -447,6 +464,10 @@ class PerfTest {
       final Map<String, dynamic> data = json.decode(
         file('$testDirectory/build/$resultFilename.json').readAsStringSync(),
       ) as Map<String, dynamic>;
+      final List<String> detailFiles = <String>[
+        if (saveTraceFile)
+          '$testDirectory/build/$traceFilename.json',
+      ];
 
       if (data['frame_count'] as int < 5) {
         return TaskResult.failure(
@@ -455,14 +476,9 @@ class PerfTest {
         );
       }
 
-      if (needsMeasureCpuGpu) {
-        await inDirectory<void>('$testDirectory/build', () async {
-          data.addAll(await measureIosCpuGpu(deviceId: deviceId));
-        });
-      }
-
       return TaskResult.success(
         data,
+        detailFiles: detailFiles.isNotEmpty ? detailFiles : null,
         benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
           'average_frame_build_time_millis',
           'worst_frame_build_time_millis',
@@ -475,8 +491,8 @@ class PerfTest {
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
-          if (needsMeasureCpuGpu) 'cpu_percentage',
-          if (needsMeasureCpuGpu) 'gpu_percentage',
+          if (measureCpuGpu) 'average_cpu_usage',
+          if (measureCpuGpu) 'average_gpu_usage',
         ],
       );
     });
@@ -517,13 +533,13 @@ class PerfTestWithSkSL extends PerfTest {
     String testDirectory,
     String testTarget,
     String timelineFileName, {
-    bool needsMeasureCpuGpu = false,
+    bool measureCpuGpu = false,
     String testDriver,
   }) : super(
     testDirectory,
     testTarget,
     timelineFileName,
-    needsMeasureCpuGpu: needsMeasureCpuGpu,
+    measureCpuGpu: measureCpuGpu,
     testDriver: testDriver,
   );
 

@@ -42,7 +42,6 @@ class FlutterDevice {
     @required this.buildInfo,
     this.fileSystemRoots,
     this.fileSystemScheme,
-    this.viewFilter,
     TargetModel targetModel = TargetModel.flutter,
     TargetPlatform targetPlatform,
     ResidentCompiler generator,
@@ -76,7 +75,6 @@ class FlutterDevice {
     @required BuildInfo buildInfo,
     List<String> fileSystemRoots,
     String fileSystemScheme,
-    String viewFilter,
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
@@ -165,7 +163,6 @@ class FlutterDevice {
       device,
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme:fileSystemScheme,
-      viewFilter: viewFilter,
       targetModel: targetModel,
       targetPlatform: targetPlatform,
       generator: generator,
@@ -188,7 +185,6 @@ class FlutterDevice {
   String fileSystemScheme;
   StreamSubscription<String> _loggingSubscription;
   bool _isListeningForObservatoryUri;
-  final String viewFilter;
 
   /// Whether the stream [observatoryUris] is still open.
   bool get isWaitingForObservatory => _isListeningForObservatoryUri ?? false;
@@ -947,18 +943,6 @@ abstract class ResidentRunner {
     throw Exception('Canvaskit not supported by this runner.');
   }
 
-  /// List the attached flutter views.
-  Future<List<FlutterView>> listFlutterViews() async {
-    final List<List<FlutterView>> views = await Future.wait(<Future<List<FlutterView>>>[
-      for (FlutterDevice device in flutterDevices)
-        if (device.vmService != null)
-          device.vmService.getFlutterViews()
-    ]);
-    return views
-      .expand((List<FlutterView> viewList) => viewList)
-      .toList();
-  }
-
   /// Write the SkSL shaders to a zip file in build directory.
   ///
   /// Returns the name of the file, or `null` on failures.
@@ -1532,13 +1516,6 @@ class TerminalHandler {
           return true;
         }
         return false;
-      case 'l':
-        final List<FlutterView> views = await residentRunner.listFlutterViews();
-        globals.printStatus('Connected ${pluralize('view', views.length)}:');
-        for (final FlutterView v in views) {
-          globals.printStatus('${v.uiIsolate.name} (${v.uiIsolate.id})', indent: 2);
-        }
-        return true;
       case 'L':
         if (residentRunner.supportsServiceProtocol) {
           await residentRunner.debugDumpLayerTree();
@@ -1746,15 +1723,16 @@ class DevtoolsLauncher {
     }
   }
 
-  Future<io.HttpServer> serve() async {
+  Future<DevToolsServerAddress> serve() async {
     try {
       _devtoolsServer ??= await devtools_server.serveDevTools(
         enableStdinCommands: false,
       );
+      return DevToolsServerAddress(_devtoolsServer.address.host, _devtoolsServer.port);
     } on Exception catch (e, st) {
       globals.printTrace('Failed to serve DevTools: $e\n$st');
+      return null;
     }
-    return _devtoolsServer;
   }
 
   Future<void> close() async {
@@ -1763,4 +1741,11 @@ class DevtoolsLauncher {
   }
 
   static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>() ?? DevtoolsLauncher();
+}
+
+class DevToolsServerAddress {
+  DevToolsServerAddress(this.host, this.port);
+
+  final String host;
+  final int port;
 }
