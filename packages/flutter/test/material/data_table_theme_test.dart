@@ -79,10 +79,10 @@ void main() {
 
     expect(description[0], 'decoration: BoxDecoration(color: Color(0xfffffff0))');
     expect(description[1], 'dataRowColor: Instance of \'_MaterialStatePropertyWith<Color>\'');
-    expect(description[2], 'dataRowHeight: 1.0');
+    expect(description[2], 'dataRowHeight: 51.0');
     expect(description[3], 'dataTextStyle: TextStyle(inherit: true, size: 12.0)');
     expect(description[4], 'headingRowColor: Instance of \'_MaterialStatePropertyWith<Color>\'');
-    expect(description[5], 'headingRowHeight: 2.0');
+    expect(description[5], 'headingRowHeight: 52.0');
     expect(description[6], 'headingTextStyle: TextStyle(inherit: true, size: 14.0)');
     expect(description[7], 'horizontalMargin: 3.0');
     expect(description[8], 'columnSpacing: 4.0');
