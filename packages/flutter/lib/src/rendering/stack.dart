@@ -62,22 +62,22 @@ class RelativeRect {
   /// Distance from the left side of the container to the left side of this rectangle.
   ///
   /// May be negative if the left side of the rectangle is outside of the container.
-  final double left;
+  final double/*!*/ left;
 
   /// Distance from the top side of the container to the top side of this rectangle.
   ///
   /// May be negative if the top side of the rectangle is outside of the container.
-  final double top;
+  final double/*!*/ top;
 
   /// Distance from the right side of the container to the right side of this rectangle.
   ///
   /// May be positive if the right side of the rectangle is outside of the container.
-  final double right;
+  final double/*!*/ right;
 
   /// Distance from the bottom side of the container to the bottom side of this rectangle.
   ///
   /// May be positive if the bottom side of the rectangle is outside of the container.
-  final double bottom;
+  final double/*!*/ bottom;
 
   /// Returns whether any of the values are greater than zero.
   ///
@@ -134,7 +134,7 @@ class RelativeRect {
   /// If either rect is null, this function interpolates from [RelativeRect.fill].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static RelativeRect lerp(RelativeRect a, RelativeRect b, double t) {
+  static RelativeRect lerp(RelativeRect/*?*/ a, RelativeRect/*?*/ b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
@@ -492,7 +492,8 @@ class RenderStack extends RenderBox
 
     child.layout(childConstraints, parentUsesSize: true);
 
-    double x;
+    // TODO(ianh): x should be late final
+    /*late*/ double/*!*/ x;
     if (childParentData.left != null) {
       x = childParentData.left;
     } else if (childParentData.right != null) {
@@ -504,7 +505,8 @@ class RenderStack extends RenderBox
     if (x < 0.0 || x + child.size.width > size.width)
       hasVisualOverflow = true;
 
-    double y;
+    // TODO(ianh): y should be late final
+    /*late*/ double/*!*/ y;
     if (childParentData.top != null) {
       y = childParentData.top;
     } else if (childParentData.bottom != null) {
