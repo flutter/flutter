@@ -82,6 +82,7 @@ void main() {
   group('throws ToolExit on Windows', () {
     const int kDeviceFull = 112;
     const int kUserMappedSectionOpened = 1224;
+    const int kUserPermissionDenied = 5;
     MockFileSystem mockFileSystem;
     ErrorHandlingFileSystem fs;
 
@@ -98,7 +99,7 @@ void main() {
       setupWriteMocks(
         mockFileSystem: mockFileSystem,
         fs: fs,
-        errorCode: 5,
+        errorCode: kUserPermissionDenied,
       );
 
       final File file = fs.file('file');
