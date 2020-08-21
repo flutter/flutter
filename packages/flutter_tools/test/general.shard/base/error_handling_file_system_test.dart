@@ -59,6 +59,9 @@ void setupWriteMocks({
     encoding: anyNamed('encoding'),
     flush: anyNamed('flush'),
   )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockFile.openSync(
+    mode: anyNamed('mode'),
+  )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
 void setupCreateTempMocks({
@@ -79,6 +82,7 @@ void main() {
   group('throws ToolExit on Windows', () {
     const int kDeviceFull = 112;
     const int kUserMappedSectionOpened = 1224;
+    const int kUserPermissionDenied = 5;
     MockFileSystem mockFileSystem;
     ErrorHandlingFileSystem fs;
 
@@ -89,6 +93,28 @@ void main() {
         platform: windowsPlatform,
       );
       when(mockFileSystem.path).thenReturn(MockPathContext());
+    });
+
+    testWithoutContext('when access is denied', () async {
+      setupWriteMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kUserPermissionDenied,
+      );
+
+      final File file = fs.file('file');
+
+      const String expectedMessage = 'The flutter tool cannot access the file';
+      expect(() async => await file.writeAsBytes(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await file.writeAsString(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsStringSync(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when writing to a full device', () async {
