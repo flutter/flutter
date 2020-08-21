@@ -979,6 +979,55 @@ void main() {
     expect(boxDecoration.border.top.width, thickness);
   });
 
+  testWidgets('DataTable set show bottom divider', (WidgetTester tester) async {
+    const List<DataColumn> columns = <DataColumn>[
+      DataColumn(label: Text('column1')),
+      DataColumn(label: Text('column2')),
+    ];
+
+    const List<DataCell> cells = <DataCell>[
+      DataCell(Text('cell1')),
+      DataCell(Text('cell2')),
+    ];
+
+    const List<DataRow> rows = <DataRow>[
+      DataRow(cells: cells),
+      DataRow(cells: cells),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            showBottomDivider: true,
+            columns: columns,
+            rows: rows,
+          ),
+        ),
+      ),
+    );
+
+    Table table = tester.widget(find.byType(Table));
+    TableRow tableRow = table.children.last;
+    BoxDecoration boxDecoration = tableRow.decoration as BoxDecoration;
+    expect(boxDecoration.border.bottom.width, 1.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            columns: columns,
+            rows: rows,
+          ),
+        ),
+      ),
+    );
+    table = tester.widget(find.byType(Table));
+    tableRow = table.children.last;
+    boxDecoration = tableRow.decoration as BoxDecoration;
+    expect(boxDecoration.border.bottom.width, 0.0);
+  });
+
   testWidgets('DataTable column heading cell - with and without sorting', (WidgetTester tester) async {
     Widget buildTable({ int sortColumnIndex, bool sortEnabled = true }) {
       return DataTable(
