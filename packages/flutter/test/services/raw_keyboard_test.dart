@@ -601,7 +601,6 @@ void main() {
         'keymap': 'android',
         'keyCode': 111,
         'codePoint': 0,
-        'character': null,
         'scanCode': 1,
         'metaState': 0x0,
         'source': 0x101, // Keyboard source.
@@ -610,7 +609,7 @@ void main() {
       final RawKeyEventDataAndroid data = escapeKeyEvent.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     });
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -619,7 +618,6 @@ void main() {
         'keyCode': 59,
         'plainCodePoint': 0,
         'codePoint': 0,
-        'character': null,
         'scanCode': 42,
         'metaState': RawKeyEventDataAndroid.modifierLeftShift,
         'source': 0x101, // Keyboard source.
@@ -628,7 +626,7 @@ void main() {
       final RawKeyEventDataAndroid data = shiftLeftKeyEvent.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     });
     test('DPAD keys from a joystick give physical key mappings', () {
       final RawKeyEvent joystickDpadDown = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -637,7 +635,6 @@ void main() {
         'keyCode': 20,
         'plainCodePoint': 0,
         'codePoint': 0,
-        'character': null,
         'scanCode': 0,
         'metaState': 0,
         'source': 0x1000010, // Joystick source.
@@ -646,7 +643,7 @@ void main() {
       final RawKeyEventDataAndroid data = joystickDpadDown.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     });
     test('Arrow keys from a keyboard give correct physical key mappings', () {
       final RawKeyEvent joystickDpadDown = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -655,7 +652,6 @@ void main() {
         'keyCode': 20,
         'plainCodePoint': 0,
         'codePoint': 0,
-        'character': null,
         'scanCode': 108,
         'metaState': 0,
         'source': 0x101, // Keyboard source.
@@ -663,7 +659,7 @@ void main() {
       final RawKeyEventDataAndroid data = joystickDpadDown.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     });
     test('DPAD center from a game pad gives physical key mappings', () {
       final RawKeyEvent joystickDpadCenter = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -672,7 +668,6 @@ void main() {
         'keyCode': 23, // DPAD_CENTER code.
         'plainCodePoint': 0,
         'codePoint': 0,
-        'character': null,
         'scanCode': 317, // Left side thumb joystick center click button.
         'metaState': 0,
         'source': 0x501, // Gamepad and keyboard source.
@@ -681,7 +676,7 @@ void main() {
       final RawKeyEventDataAndroid data = joystickDpadCenter.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.gameButtonThumbLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.select));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     });
     test('Device id is read from message', () {
       final RawKeyEvent joystickDpadCenter = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -690,7 +685,6 @@ void main() {
         'keyCode': 23, // DPAD_CENTER code.
         'plainCodePoint': 0,
         'codePoint': 0,
-        'character': null,
         'scanCode': 317, // Left side thumb joystick center click button.
         'metaState': 0,
         'source': 0x501, // Gamepad and keyboard source.
@@ -853,13 +847,11 @@ void main() {
         'type': 'keydown',
         'keymap': 'fuchsia',
         'hidUsage': 0x00070029,
-        'codePoint': null,
-        'character': null,
       });
       final RawKeyEventDataFuchsia data = escapeKeyEvent.data as RawKeyEventDataFuchsia;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
 
     test('Modifier keyboard keys are correctly translated', () {
@@ -867,13 +859,11 @@ void main() {
         'type': 'keydown',
         'keymap': 'fuchsia',
         'hidUsage': 0x000700e1,
-        'codePoint': null,
-        'character': null,
       });
       final RawKeyEventDataFuchsia data = shiftLeftKeyEvent.data as RawKeyEventDataFuchsia;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
   });
 
@@ -985,13 +975,12 @@ void main() {
         'keyCode': 0x00000035,
         'characters': '',
         'charactersIgnoringModifiers': '',
-        'character': null,
         'modifiers': 0x0,
       });
       final RawKeyEventDataMacOs data = escapeKeyEvent.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
 
     test('Modifier keyboard keys are correctly translated', () {
@@ -1001,13 +990,12 @@ void main() {
         'keyCode': 0x00000038,
         'characters': '',
         'charactersIgnoringModifiers': '',
-        'character': null,
         'modifiers': RawKeyEventDataMacOs.modifierLeftShift,
       });
       final RawKeyEventDataMacOs data = shiftLeftKeyEvent.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
 
     test('Unprintable keyboard keys are correctly translated', () {
@@ -1017,13 +1005,12 @@ void main() {
         'keyCode': 0x0000007B,
         'characters': '',
         'charactersIgnoringModifiers': '', // NSLeftArrowFunctionKey = 0xF702
-        'character': null,
         'modifiers': RawKeyEventDataMacOs.modifierFunction,
       });
       final RawKeyEventDataMacOs data = leftArrowKey.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
-      expect(data.logicalKey.keyLabel, isNull);
+      expect(data.logicalKey.keyLabel, isEmpty);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
   });
 
@@ -1140,7 +1127,7 @@ void main() {
       final RawKeyEventDataWindows data = escapeKeyEvent.data as RawKeyEventDataWindows;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     });
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -1154,7 +1141,7 @@ void main() {
       final RawKeyEventDataWindows data = shiftLeftKeyEvent.data as RawKeyEventDataWindows;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     });
     test('Unprintable keyboard keys are correctly translated', () {
       final RawKeyEvent leftArrowKey = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -1168,7 +1155,7 @@ void main() {
       final RawKeyEventDataWindows data = leftArrowKey.data as RawKeyEventDataWindows;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
-      expect(data.logicalKey.keyLabel, isNull);
+      expect(data.logicalKey.keyLabel, isEmpty);
     });
   });
 
@@ -1338,7 +1325,7 @@ void main() {
       final RawKeyEventDataLinux data = escapeKeyEvent.data as RawKeyEventDataLinux;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     });
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -1352,7 +1339,7 @@ void main() {
       final RawKeyEventDataLinux data = shiftLeftKeyEvent.data as RawKeyEventDataLinux;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     });
   });
 
@@ -1522,7 +1509,7 @@ void main() {
       final RawKeyEventDataLinux data = escapeKeyEvent.data as RawKeyEventDataLinux;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     });
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -1536,7 +1523,7 @@ void main() {
       final RawKeyEventDataLinux data = shiftLeftKeyEvent.data as RawKeyEventDataLinux;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     });
   });
 
@@ -1557,7 +1544,6 @@ void main() {
           'type': 'keydown',
           'keymap': 'web',
           'code': 'RandomCode',
-          'key': null,
           'metaState': modifier,
         });
         final RawKeyEventDataWeb data = event.data as RawKeyEventDataWeb;
@@ -1588,7 +1574,6 @@ void main() {
           'type': 'keydown',
           'keymap': 'web',
           'code': 'RandomCode',
-          'key': null,
           'metaState': modifier | RawKeyEventDataWeb.modifierMeta,
         });
         final RawKeyEventDataWeb data = event.data as RawKeyEventDataWeb;
@@ -1629,39 +1614,36 @@ void main() {
         'type': 'keydown',
         'keymap': 'web',
         'code': 'Escape',
-        'key': null,
         'metaState': 0x0,
       });
       final RawKeyEventDataWeb data = escapeKeyEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     });
     test('Modifier keyboard keys are correctly translated', () {
       final RawKeyEvent shiftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'web',
         'code': 'ShiftLeft',
-        'keyLabel': null,
         'metaState': RawKeyEventDataWeb.modifierShift,
       });
       final RawKeyEventDataWeb data = shiftKeyEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     });
     test('Arrow keys from a keyboard give correct physical key mappings', () {
       final RawKeyEvent arrowKeyDown = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'web',
         'code': 'ArrowDown',
-        'key': null,
         'metaState': 0x0,
       });
       final RawKeyEventDataWeb data = arrowKeyDown.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
-      expect(data.keyLabel, isNull);
+      expect(data.keyLabel, isEmpty);
     });
   });
 }

@@ -2148,26 +2148,22 @@ class _RenderChipElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, dynamic slotValue) {
+  void insertRenderObjectChild(RenderObject child, _ChipSlot slot) {
     assert(child is RenderBox);
-    assert(slotValue is _ChipSlot);
-    final _ChipSlot slot = slotValue as _ChipSlot;
     _updateRenderObject(child, slot);
-    assert(renderObject.childToSlot.keys.contains(child));
-    assert(renderObject.slotToChild.keys.contains(slot));
+    assert(renderObject.children.keys.contains(slot));
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, _ChipSlot slot) {
     assert(child is RenderBox);
-    assert(renderObject.childToSlot.keys.contains(child));
-    _updateRenderObject(null, renderObject.childToSlot[child]);
-    assert(!renderObject.childToSlot.keys.contains(child));
-    assert(!renderObject.slotToChild.keys.contains(slot));
+    assert(renderObject.children[slot] == child);
+    _updateRenderObject(null, slot);
+    assert(!renderObject.children.keys.contains(slot));
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, dynamic slotValue) {
+  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
     assert(false, 'not reachable');
   }
 }
@@ -2259,8 +2255,7 @@ class _RenderChip extends RenderBox {
     enableAnimation.addListener(markNeedsPaint);
   }
 
-  final Map<_ChipSlot, RenderBox> slotToChild = <_ChipSlot, RenderBox>{};
-  final Map<RenderBox, _ChipSlot> childToSlot = <RenderBox, _ChipSlot>{};
+  final Map<_ChipSlot, RenderBox> children = <_ChipSlot, RenderBox>{};
 
   bool value;
   bool isEnabled;
@@ -2275,12 +2270,10 @@ class _RenderChip extends RenderBox {
   RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _ChipSlot slot) {
     if (oldChild != null) {
       dropChild(oldChild);
-      childToSlot.remove(oldChild);
-      slotToChild.remove(slot);
+      children.remove(slot);
     }
     if (newChild != null) {
-      childToSlot[newChild] = slot;
-      slotToChild[slot] = newChild;
+      children[slot] = newChild;
       adoptChild(newChild);
     }
     return newChild;
