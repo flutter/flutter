@@ -258,6 +258,7 @@ abstract class FormatChecker {
         'diff',
         '-U0',
         '--no-color',
+        '--diff-filter=d',
         '--name-only',
         baseGitRef,
         '--',
