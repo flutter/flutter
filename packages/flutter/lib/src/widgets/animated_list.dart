@@ -285,6 +285,34 @@ class AnimatedList extends StatefulWidget {
        assert(initialItemCount != null && initialItemCount >= 0),
        super(key: key);
 
+  /// Creates a scrolling container with separators that animates items and
+  /// separators when they are inserted or removed.
+  AnimatedList.separated({
+    Key key,
+    @required AnimatedListItemBuilder itemBuilder,
+    @required AnimatedListItemBuilder separatorBuilder,
+    this.initialItemCount = 0,
+    this.scrollDirection = Axis.vertical,
+    this.reverse = false,
+    this.controller,
+    this.primary,
+    this.physics,
+    this.shrinkWrap = false,
+    this.padding,
+  })  : assert(itemBuilder != null),
+        assert(separatorBuilder != null),
+        assert(initialItemCount != null && initialItemCount >= 0),
+        itemBuilder =
+        ((BuildContext context, int index, Animation<double> animation) =>
+            Flex(
+              direction: scrollDirection,
+              children: <Widget>[
+                itemBuilder(context, index, animation),
+                separatorBuilder(context, index, animation),
+              ],
+            )),
+        super(key: key);
+
   /// Called, as needed, to build list item widgets.
   ///
   /// List items are only built when they're scrolled into view.
