@@ -693,9 +693,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @override
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect rect }) {
     double leadingScrollOffset = 0.0;
-    double targetMainAxisExtent;
-    rect ??= target.paintBounds;
-
     // Starting at `target` and walking towards the root:
     //  - `child` will be the last object before we reach this viewport, and
     //  - `pivot` will be the last RenderBox before we reach this viewport.
@@ -717,89 +714,122 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       child = parent;
     }
 
+    // The `rect` converted to the new "local" coordinate system.
+    Rect rectLocal;
+    // Our new "local" reference frame render object's extent along the main
+    // axis.
+    double localMaxExtent;
+    GrowthDirection growthDirection;
+    double targetMainAxisExtent;
+
+    // Choose a render object as our new "local" reference frame, based on if
+    // `pivot` is null.
+    //
+    // - Choose the `pivot` RenderBox as the new reference frame if it exists.
+    // - otherwise use the `target` RenderSliver.
     if (pivot != null) {
       assert(pivot.parent != null);
       assert(pivot.parent != this);
       assert(pivot != this);
       assert(pivot.parent is RenderSliver);  // TODO(abarth): Support other kinds of render objects besides slivers.
       final RenderSliver pivotParent = pivot.parent as RenderSliver;
-
-      final Matrix4 transform = target.getTransformTo(pivot);
-      final Rect bounds = MatrixUtils.transformRect(transform, rect);
-
-      final GrowthDirection growthDirection = pivotParent.constraints.growthDirection;
-      switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
-        case AxisDirection.up:
-          double offset;
-          switch (growthDirection) {
-            case GrowthDirection.forward:
-              offset = bounds.bottom;
-              break;
-            case GrowthDirection.reverse:
-              offset = bounds.top;
-              break;
-          }
-          leadingScrollOffset += pivot.size.height - offset;
-          targetMainAxisExtent = bounds.height;
+      growthDirection = pivotParent.constraints.growthDirection;
+      switch (axis) {
+        case Axis.horizontal:
+          localMaxExtent = pivot.size.width;
           break;
-        case AxisDirection.right:
-          double offset;
-          switch (growthDirection) {
-            case GrowthDirection.forward:
-              offset = bounds.left;
-              break;
-            case GrowthDirection.reverse:
-              offset = bounds.right;
-              break;
-          }
-          leadingScrollOffset += offset;
-          targetMainAxisExtent = bounds.width;
-          break;
-        case AxisDirection.down:
-          double offset;
-          switch (growthDirection) {
-            case GrowthDirection.forward:
-              offset = bounds.top;
-              break;
-            case GrowthDirection.reverse:
-              offset = bounds.bottom;
-              break;
-          }
-          leadingScrollOffset += offset;
-          targetMainAxisExtent = bounds.height;
-          break;
-        case AxisDirection.left:
-          double offset;
-          switch (growthDirection) {
-            case GrowthDirection.forward:
-              offset = bounds.right;
-              break;
-            case GrowthDirection.reverse:
-              offset = bounds.left;
-              break;
-          }
-          leadingScrollOffset += pivot.size.width - offset;
-          targetMainAxisExtent = bounds.width;
+        case Axis.vertical:
+          localMaxExtent = pivot.size.height;
           break;
       }
+      rect ??= target.paintBounds;
+      rectLocal = MatrixUtils.transformRect(target.getTransformTo(pivot), rect);
     } else if (onlySlivers) {
       final RenderSliver targetSliver = target as RenderSliver;
-      targetMainAxisExtent = targetSliver.geometry.scrollExtent;
+      growthDirection = targetSliver.constraints.growthDirection;
+      // TODO(LongCatIsLooong): does this work if `targetSliver` is a persistent
+      // header?
+      localMaxExtent = targetSliver.geometry.scrollExtent;
+      if (rect == null) {
+        switch (axis) {
+          case Axis.horizontal:
+            rect = Rect.fromLTWH(
+              0, 0,
+              targetSliver.geometry.scrollExtent,
+              targetSliver.constraints.crossAxisExtent,
+            );
+            break;
+          case Axis.vertical:
+            rect = Rect.fromLTWH(
+              0, 0,
+              targetSliver.constraints.crossAxisExtent,
+              targetSliver.geometry.scrollExtent,
+            );
+            break;
+        }
+      }
+      rectLocal = rect;
     } else {
+      // There's at least one RenderObject between `viewport` and `target`
+      // (excluding these two), that's neither a RenderSliver nor a RenderBox.
       return RevealedOffset(offset: offset.pixels, rect: rect);
     }
 
+    assert(localMaxExtent != null);
+    assert(rectLocal != null);
+    assert(growthDirection != null);
     assert(child.parent == this);
     assert(child is RenderSliver);
     final RenderSliver sliver = child as RenderSliver;
-    final double extentOfPinnedSlivers = maxScrollObstructionExtentBefore(sliver);
+
+    // Convert `rect`'s leading edge from our new local coordinate system to
+    // scrollOffset. For `up` and `left` AxisDirections here, the leading edge
+    // of the render box is the bottom/right edge.
+    switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
+      case AxisDirection.up:
+        leadingScrollOffset += localMaxExtent - rectLocal.bottom;
+        targetMainAxisExtent = rectLocal.height;
+        break;
+      case AxisDirection.right:
+        leadingScrollOffset += rectLocal.left;
+        targetMainAxisExtent = rectLocal.width;
+        break;
+      case AxisDirection.down:
+        leadingScrollOffset += rectLocal.top;
+        targetMainAxisExtent = rectLocal.height;
+        break;
+      case AxisDirection.left:
+        leadingScrollOffset += localMaxExtent - rectLocal.right;
+        targetMainAxisExtent = rectLocal.width;
+        break;
+    }
+
+    // This step assumes the viewport's layout is up-to-date, i.e., if
+    // offset.pixels is changed after the last performLayout, the new scroll
+    // position will not be accounted for.
+    final Matrix4 transform = target.getTransformTo(this);
+    Rect targetRect = MatrixUtils.transformRect(transform, rect);
+
+    // Add the additional scroll offset needed to move the leading edge of the
+    // `target` to align with the leading edge of the viewport.
     leadingScrollOffset = scrollOffsetOf(sliver, leadingScrollOffset);
+
+    final double extentOfPinnedSlivers = maxScrollObstructionExtentBefore(sliver);
     switch (sliver.constraints.growthDirection) {
       case GrowthDirection.forward:
         leadingScrollOffset -= extentOfPinnedSlivers;
         break;
       case GrowthDirection.reverse:
-        // Nothing to do.
+        // If child's growth direction is reverse, when viewport.offset is
+        // `leadingScrollOffset` it is just outside of the viewport.
+        switch (axis) {
+          case Axis.vertical:
+            leadingScrollOffset -= targetRect.height;
+            break;
+          case Axis.horizontal:
+            leadingScrollOffset -= targetRect.width;
+            break;
+        }
         break;
     }
 
@@ -815,9 +845,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
     final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
     final double offsetDifference = offset.pixels - targetOffset;
-
-    final Matrix4 transform = target.getTransformTo(this);
-    Rect targetRect = MatrixUtils.transformRect(transform, rect);
 
     switch (axisDirection) {
       case AxisDirection.down:
