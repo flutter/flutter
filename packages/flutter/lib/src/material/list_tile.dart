@@ -1164,7 +1164,6 @@ class _ListTileElement extends RenderObjectElement {
   _ListTileElement(_ListTile widget) : super(widget);
 
   final Map<_ListTileSlot, Element> slotToChild = <_ListTileSlot, Element>{};
-  final Map<Element, _ListTileSlot> childToSlot = <Element, _ListTileSlot>{};
 
   @override
   _ListTile get widget => super.widget as _ListTile;
@@ -1179,11 +1178,10 @@ class _ListTileElement extends RenderObjectElement {
 
   @override
   void forgetChild(Element child) {
-    assert(slotToChild.values.contains(child));
-    assert(childToSlot.keys.contains(child));
-    final _ListTileSlot slot = childToSlot[child];
-    childToSlot.remove(child);
-    slotToChild.remove(slot);
+    assert(slotToChild.containsValue(child));
+    assert(child.slot is _ListTileSlot);
+    assert(slotToChild.containsKey(child.slot));
+    slotToChild.remove(child.slot);
     super.forgetChild(child);
   }
 
@@ -1192,11 +1190,9 @@ class _ListTileElement extends RenderObjectElement {
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
       slotToChild.remove(slot);
-      childToSlot.remove(oldChild);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -1213,12 +1209,10 @@ class _ListTileElement extends RenderObjectElement {
     final Element oldChild = slotToChild[slot];
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
-      childToSlot.remove(oldChild);
       slotToChild.remove(slot);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
