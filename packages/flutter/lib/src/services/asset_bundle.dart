@@ -185,7 +185,6 @@ abstract class CachingAssetBundle extends AssetBundle {
       return _structuredDataCache[key] as Future<T>;
     Completer<T>? completer;
     Future<T>? result;
-    var sw = Stopwatch()..start();
     loadString(key, cache: false).then<T>(parser).then<void>((T value) {
       result = SynchronousFuture<T>(value);
       _structuredDataCache[key] = result!;
@@ -205,9 +204,6 @@ abstract class CachingAssetBundle extends AssetBundle {
     // completer for it to use when it does run.
     completer = Completer<T>();
     _structuredDataCache[key] = completer.future;
-    completer.future.whenComplete(() {
-      print('LoadStructuredDataTook: ${sw.elapsedMilliseconds}');
-    });
     return completer.future;
   }
 
