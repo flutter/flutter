@@ -173,9 +173,6 @@ class Visibility extends StatelessWidget {
   ///
   /// If this property is true, [Opacity] is used instead of [Offstage].
   ///
-  /// If this property is true, then both [maintainAnimation] and
-  /// [maintainState] should also be true.
-  ///
   /// If this property is false, then [maintainSemantics] and
   /// [maintainInteractivity] must also be false.
   ///
