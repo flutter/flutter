@@ -160,11 +160,7 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
 fi
 
 generate_docs
-# Skip publishing docs for PRs and release candidate branches
-if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
-  (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
-  # TODO(tvolkert): re-enable (https://github.com/flutter/flutter/issues/60646)
-  # (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
-  (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
-  deploy_docs
-fi
+(cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
+(cd "$FLUTTER_ROOT/dev/docs"; create_docset)
+(cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
+#deploy_docs
