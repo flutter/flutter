@@ -105,7 +105,7 @@ void main() {
         mockFile,
         mockCache,
       );
-      await artifact.update();
+      await artifact.update(MockArtifactUpdater());
       expect(testLogger.errorText, contains('delete failed'));
     }, overrides: <Type, Generator>{
       Cache: () => mockCache,
@@ -122,7 +122,7 @@ void main() {
         throw const FileSystemException('stamp write failed');
       });
       final FakeSimpleArtifact artifact = FakeSimpleArtifact(mockCache);
-      await artifact.update();
+      await artifact.update(MockArtifactUpdater());
       expect(testLogger.errorText, contains('stamp write failed'));
     }, overrides: <Type, Generator>{
       Cache: () => mockCache,
@@ -184,8 +184,8 @@ void main() {
       await cache.updateAll(<DevelopmentArtifact>{
         null,
       });
-      verifyNever(artifact1.update());
-      verify(artifact2.update());
+      verifyNever(artifact1.update(any));
+      verify(artifact2.update(any));
     });
     testUsingContext("getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter", () async {
       final IosUsbArtifacts artifact1 = MockIosUsbArtifacts();
@@ -220,7 +220,7 @@ void main() {
       when(artifact2.isUpToDate()).thenReturn(false);
       final MockInternetAddress address = MockInternetAddress();
       when(address.host).thenReturn('storage.googleapis.com');
-      when(artifact1.update()).thenThrow(SocketException(
+      when(artifact1.update(any)).thenThrow(SocketException(
         'Connection reset by peer',
         address: address,
       ));
@@ -231,9 +231,9 @@ void main() {
         });
         fail('Mock thrown exception expected');
       } on Exception {
-        verify(artifact1.update());
+        verify(artifact1.update(any));
         // Don't continue when retrieval fails.
-        verifyNever(artifact2.update());
+        verifyNever(artifact2.update(any));
         expect(
           testLogger.errorText,
           contains('https://flutter.dev/community/china'),
@@ -252,14 +252,14 @@ void main() {
     });
   });
 
-  testUsingContext('flattenNameSubdirs', () {
-    expect(flattenNameSubdirs(Uri.parse('http://flutter.dev/foo/bar')), 'flutter.dev/foo/bar');
-    expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar')), 'docs.flutter.io/foo/bar');
-    expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev')), 'www.flutter.dev');
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
+  // testUsingContext('flattenNameSubdirs', () {
+  //   expect(flattenNameSubdirs(Uri.parse('http://flutter.dev/foo/bar')), 'flutter.dev/foo/bar');
+  //   expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar')), 'docs.flutter.io/foo/bar');
+  //   expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev')), 'www.flutter.dev');
+  // }, overrides: <Type, Generator>{
+  //   FileSystem: () => MemoryFileSystem(),
+  //   ProcessManager: () => FakeProcessManager.any(),
+  // });
 
   group('EngineCachedArtifact', () {
     FakeHttpClient fakeHttpClient;
@@ -291,7 +291,7 @@ void main() {
         ],
         requiredArtifacts: DevelopmentArtifact.universal,
       );
-      await artifact.updateInner();
+      await artifact.updateInner(MockArtifactUpdater());
       final Directory dir = memoryFileSystem.systemTempDirectory
           .listSync(recursive: true)
           .whereType<Directory>()
@@ -329,7 +329,7 @@ void main() {
         ],
         requiredArtifacts: DevelopmentArtifact.universal,
       );
-      await artifact.updateInner();
+      await artifact.updateInner(MockArtifactUpdater());
       expect(testLogger.statusText, isNotNull);
       expect(testLogger.statusText, isNotEmpty);
       expect(
@@ -392,7 +392,7 @@ void main() {
           return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
         });
 
-      await mavenArtifacts.update();
+      await mavenArtifacts.update(MockArtifactUpdater());
 
       expect(mavenArtifacts.isUpToDate(), isFalse);
     }, overrides: <Type, Generator>{
@@ -478,28 +478,23 @@ void main() {
     });
   });
 
-  group('Flutter runner debug symbols', () {
-    MockCache mockCache;
-    MockVersionedPackageResolver mockPackageResolver;
+  testWithoutContext('Downloads Flutter runner debug symbols', () async {
+    final MockCache mockCache = MockCache();
+    final MockVersionedPackageResolver mockPackageResolver = MockVersionedPackageResolver();
+    final FlutterRunnerDebugSymbols flutterRunnerDebugSymbols = FlutterRunnerDebugSymbols(
+      mockCache,
+      packageResolver: mockPackageResolver,
+      platform: FakePlatform(operatingSystem: 'linux'),
+    );
+    when(mockPackageResolver.resolveUrl(any, any)).thenReturn('');
 
-    setUp(() {
-      mockCache = MockCache();
-      mockPackageResolver = MockVersionedPackageResolver();
-    });
+    await flutterRunnerDebugSymbols.updateInner(MockArtifactUpdater());
 
-    testUsingContext('Downloads Flutter runner debug symbols', () async {
-      final FlutterRunnerDebugSymbols flutterRunnerDebugSymbols =
-        FlutterRunnerDebugSymbols(mockCache, packageResolver: mockPackageResolver, dryRun: true);
-
-      await flutterRunnerDebugSymbols.updateInner();
-
-      verifyInOrder(<void>[
-        mockPackageResolver.resolveUrl('fuchsia-debug-symbols-x64', any),
-        mockPackageResolver.resolveUrl('fuchsia-debug-symbols-arm64', any),
-      ]);
-    });
-  }, skip: !globals.platform.isLinux);
-
+    verifyInOrder(<void>[
+      mockPackageResolver.resolveUrl('fuchsia-debug-symbols-x64', any),
+      mockPackageResolver.resolveUrl('fuchsia-debug-symbols-arm64', any),
+    ]);
+  });
 
   testUsingContext('FontSubset in univeral artifacts', () {
     final MockCache mockCache = MockCache();
@@ -727,7 +722,7 @@ class FakeSimpleArtifact extends CachedArtifact {
   );
 
   @override
-  Future<void> updateInner() async {
+  Future<void> updateInner(ArtifactUpdater artifactUpdater) async {
     // nop.
   }
 }
@@ -742,11 +737,10 @@ class FakeDownloadedArtifact extends CachedArtifact {
   final File downloadedFile;
 
   @override
-  Future<void> updateInner() async {
-    downloadedFiles.add(downloadedFile);
-  }
+  Future<void> updateInner(ArtifactUpdater artifactUpdater) async {}
 }
 
+class MockArtifactUpdater extends Mock implements ArtifactUpdater {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockFile extends Mock implements File {}
