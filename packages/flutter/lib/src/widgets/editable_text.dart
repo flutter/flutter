@@ -1145,13 +1145,16 @@ class EditableText extends StatefulWidget {
   final EdgeInsets scrollPadding;
 
   /// {@template flutter.widgets.editableText.enableInteractiveSelection}
-  /// If true, then long-pressing this TextField will select text and show the
-  /// cut/copy/paste menu, and tapping will move the text caret.
+  /// Whether to enable user interface affordances for changing the
+  /// text selection.
   ///
-  /// True by default.
+  /// For example, setting this to true will enable features such as
+  /// long-pressing the TextField to select text and show the
+  /// cut/copy/paste menu, and tapping to move the text caret.
   ///
-  /// If false, most of the accessibility support for selecting text, copy
-  /// and paste, and moving the caret will be disabled.
+  /// When this is false, the text selection cannot be adjusted by
+  /// the user, text cannot be copied, and the user cannot paste into
+  /// the text field from the clipboard.
   /// {@endtemplate}
   final bool enableInteractiveSelection;
 
@@ -1186,7 +1189,12 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final ScrollPhysics scrollPhysics;
 
-  /// {@macro flutter.rendering.editable.selectionEnabled}
+  /// {@template flutter.widgets.editableText.selectionEnabled}
+  /// Same as [enableInteractiveSelection].
+  ///
+  /// This getter exists primarily for consistency with
+  /// [RenderEditable.selectionEnabled].
+  /// {@endtemplate}
   bool get selectionEnabled => enableInteractiveSelection;
 
   /// {@template flutter.widgets.editableText.autofillHints}
