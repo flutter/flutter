@@ -1526,11 +1526,10 @@ class _RenderDecoration extends RenderBox {
   }
 }
 
-class _RenderDecorationElement extends RenderObjectElement {
-  _RenderDecorationElement(_Decorator widget) : super(widget);
+class _DecorationElement extends RenderObjectElement {
+  _DecorationElement(_Decorator widget) : super(widget);
 
   final Map<_DecorationSlot, Element> slotToChild = <_DecorationSlot, Element>{};
-  final Map<Element, _DecorationSlot> childToSlot = <Element, _DecorationSlot>{};
 
   @override
   _Decorator get widget => super.widget as _Decorator;
@@ -1545,11 +1544,10 @@ class _RenderDecorationElement extends RenderObjectElement {
 
   @override
   void forgetChild(Element child) {
-    assert(slotToChild.values.contains(child));
-    assert(childToSlot.keys.contains(child));
-    final _DecorationSlot slot = childToSlot[child];
-    childToSlot.remove(child);
-    slotToChild.remove(slot);
+    assert(slotToChild.containsValue(child));
+    assert(child.slot is _DecorationSlot);
+    assert(slotToChild.containsKey(child.slot));
+    slotToChild.remove(child.slot);
     super.forgetChild(child);
   }
 
@@ -1558,11 +1556,9 @@ class _RenderDecorationElement extends RenderObjectElement {
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
       slotToChild.remove(slot);
-      childToSlot.remove(oldChild);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -1586,12 +1582,10 @@ class _RenderDecorationElement extends RenderObjectElement {
     final Element oldChild = slotToChild[slot];
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
-      childToSlot.remove(oldChild);
       slotToChild.remove(slot);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -1694,7 +1688,7 @@ class _Decorator extends RenderObjectWidget {
   final bool expands;
 
   @override
-  _RenderDecorationElement createElement() => _RenderDecorationElement(this);
+  _DecorationElement createElement() => _DecorationElement(this);
 
   @override
   _RenderDecoration createRenderObject(BuildContext context) {
