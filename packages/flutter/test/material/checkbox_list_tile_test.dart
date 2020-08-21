@@ -150,13 +150,11 @@ void main() {
   testWidgets('CheckboxListTile tristate test', (WidgetTester tester) async {
     bool _value = false;
     bool _tristate = false;
-    StateSetter setState;
 
     await tester.pumpWidget(
       Material(
         child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setter) {
-            setState = setter;
             return wrap(
               child: CheckboxListTile(
                 title: const Text('Title'),
@@ -176,7 +174,7 @@ void main() {
 
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, false);
 
-    // tap checkbox when disable tristate
+    // Tap the checkbox when tristate is disabled.
     await tester.tap(find.byType(Checkbox));
     await tester.pumpAndSettle();
     expect(_value, true);
@@ -185,7 +183,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(_value, false);
 
-    // tap ListTitle when disable tristate
+    // Tap the listTile when tristate is disabled.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
     expect(_value, true);
@@ -195,12 +193,12 @@ void main() {
     expect(_value, false);
 
     // Enable tristate
-    setState(()=> _tristate = true);
+    _tristate = true;
     await tester.pumpAndSettle();
 
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, false);
 
-    // tap checkbox when enable tristate
+    // Tap the checkbox when tristate is enabled.
     await tester.tap(find.byType(Checkbox));
     await tester.pumpAndSettle();
     expect(_value, true);
@@ -213,7 +211,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(_value, false);
 
-    // tap ListTile when enable tristate
+    // Tap the listTile when tristate is enabled.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
     expect(_value, true);
