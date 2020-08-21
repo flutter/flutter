@@ -748,7 +748,6 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   List<Element> _children;
   final Map<_CupertinoTextSelectionToolbarItemsSlot, Element> slotToChild = <_CupertinoTextSelectionToolbarItemsSlot, Element>{};
-  final Map<Element, _CupertinoTextSelectionToolbarItemsSlot> childToSlot = <Element, _CupertinoTextSelectionToolbarItemsSlot>{};
 
   // We keep a set of forgotten children to avoid O(n^2) work walking _children
   // repeatedly to remove children.
@@ -775,13 +774,11 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderObject child, dynamic slot) {
     if (slot is _CupertinoTextSelectionToolbarItemsSlot) {
       assert(child is RenderBox);
-      assert(slot is _CupertinoTextSelectionToolbarItemsSlot);
       _updateRenderObject(child as RenderBox, slot);
-      assert(renderObject.childToSlot.containsKey(child));
-      assert(renderObject.slotToChild.containsKey(slot));
+      assert(renderObject.slottedChildren.containsKey(slot));
       return;
     }
     if (slot is IndexedSlot) {
@@ -794,9 +791,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   // This is not reachable for children that don't have an IndexedSlot.
   @override
-  void moveChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
+  void moveRenderObjectChild(RenderObject child, IndexedSlot<Element> oldSlot, IndexedSlot<Element> newSlot) {
     assert(child.parent == renderObject);
-    renderObject.move(child as RenderBox, after: slot?.value?.renderObject as RenderBox);
+    renderObject.move(child as RenderBox, after: newSlot?.value?.renderObject as RenderBox);
   }
 
   static bool _shouldPaint(Element child) {
@@ -804,18 +801,18 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, dynamic slot) {
     // Check if the child is in a slot.
-    if (renderObject.childToSlot.containsKey(child)) {
+    if (slot is _CupertinoTextSelectionToolbarItemsSlot) {
       assert(child is RenderBox);
-      assert(renderObject.childToSlot.containsKey(child));
-      _updateRenderObject(null, renderObject.childToSlot[child]);
-      assert(!renderObject.childToSlot.containsKey(child));
-      assert(!renderObject.slotToChild.containsKey(slot));
+      assert(renderObject.slottedChildren.containsKey(slot));
+      _updateRenderObject(null, slot);
+      assert(!renderObject.slottedChildren.containsKey(slot));
       return;
     }
 
     // Otherwise look for it in the list of children.
+    assert(slot is IndexedSlot);
     assert(child.parent == renderObject);
     renderObject.remove(child as RenderBox);
   }
@@ -831,12 +828,11 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   @override
   void forgetChild(Element child) {
-    assert(slotToChild.values.contains(child) || _children.contains(child));
+    assert(slotToChild.containsValue(child) || _children.contains(child));
     assert(!_forgottenChildren.contains(child));
     // Handle forgetting a child in children or in a slot.
-    if (childToSlot.containsKey(child)) {
-      final _CupertinoTextSelectionToolbarItemsSlot slot = childToSlot[child];
-      childToSlot.remove(child);
+    if (slotToChild.containsKey(child.slot)) {
+      final _CupertinoTextSelectionToolbarItemsSlot slot = child.slot as _CupertinoTextSelectionToolbarItemsSlot;
       slotToChild.remove(slot);
     } else {
       _forgottenChildren.add(child);
@@ -850,11 +846,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
       slotToChild.remove(slot);
-      childToSlot.remove(oldChild);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -879,12 +873,11 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     // Visit slot children.
-    childToSlot.forEach((Element child, _) {
-      if (!_shouldPaint(child) || _forgottenChildren.contains(child)) {
-        return;
+    for (final Element child in slotToChild.values) {
+      if (_shouldPaint(child) && !_forgottenChildren.contains(child)) {
+        visitor(child);
       }
-      visitor(child);
-    });
+    }
     // Visit list children.
     _children
         .where((Element child) => !_forgottenChildren.contains(child) && _shouldPaint(child))
@@ -918,21 +911,22 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
        _page = page,
        super();
 
-  final Map<_CupertinoTextSelectionToolbarItemsSlot, RenderBox> slotToChild = <_CupertinoTextSelectionToolbarItemsSlot, RenderBox>{};
-  final Map<RenderBox, _CupertinoTextSelectionToolbarItemsSlot> childToSlot = <RenderBox, _CupertinoTextSelectionToolbarItemsSlot>{};
+  final Map<_CupertinoTextSelectionToolbarItemsSlot, RenderBox> slottedChildren = <_CupertinoTextSelectionToolbarItemsSlot, RenderBox>{};
 
   RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _CupertinoTextSelectionToolbarItemsSlot slot) {
     if (oldChild != null) {
       dropChild(oldChild);
-      childToSlot.remove(oldChild);
-      slotToChild.remove(slot);
+      slottedChildren.remove(slot);
     }
     if (newChild != null) {
-      childToSlot[newChild] = slot;
-      slotToChild[slot] = newChild;
+      slottedChildren[slot] = newChild;
       adoptChild(newChild);
     }
     return newChild;
+  }
+
+  bool _isSlottedChild(RenderBox child) {
+    return child == _backButton || child == _nextButton || child == _nextButtonDisabled;
   }
 
   int _page;
@@ -1000,7 +994,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       childParentData.shouldPaint = false;
 
       // Skip slotted children and children on pages after the visible page.
-      if (childToSlot.containsKey(child) || currentPage > _page) {
+      if (_isSlottedChild(child) || currentPage > _page) {
         return;
       }
 
@@ -1164,9 +1158,9 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     super.attach(owner);
 
     // Attach slot children.
-    childToSlot.forEach((RenderBox child, _) {
+    for (final RenderBox child in slottedChildren.values) {
       child.attach(owner);
-    });
+    }
   }
 
   @override
@@ -1175,9 +1169,9 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     super.detach();
 
     // Detach slot children.
-    childToSlot.forEach((RenderBox child, _) {
+    for (final RenderBox child in slottedChildren.values) {
       child.detach();
-    });
+    }
   }
 
   @override

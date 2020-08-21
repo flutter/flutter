@@ -907,7 +907,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, int slot) {
+  void insertRenderObjectChild(RenderObject child, int slot) {
     final RenderListWheelViewport renderObject = this.renderObject;
     assert(renderObject.debugValidateChild(child));
     renderObject.insert(child as RenderBox, after: _childElements[slot - 1]?.renderObject as RenderBox);
@@ -915,7 +915,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, dynamic slot) {
+  void moveRenderObjectChild(RenderObject child, int oldSlot, int newSlot) {
     const String moveChildRenderObjectErrorMessage =
         'Currently we maintain the list in contiguous increasing order, so '
         'moving children around is not allowed.';
@@ -923,7 +923,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, int slot) {
     assert(child.parent == renderObject);
     renderObject.remove(child as RenderBox);
   }

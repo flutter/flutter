@@ -116,7 +116,7 @@ class BoundedFrictionSimulation extends FrictionSimulation {
 
   @override
   double x(double time) {
-    return super.x(time).clamp(_minX, _maxX) as double;
+    return super.x(time).clamp(_minX, _maxX) as double; // ignore: unnecessary_cast
   }
 
   @override

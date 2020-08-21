@@ -1416,6 +1416,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
               ],
               Expanded(
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   // Hour/minutes should not change positions in RTL locales.
                   textDirection: TextDirection.ltr,
                   children: <Widget>[
@@ -2069,6 +2070,10 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// Optional strings for the [helpText], [cancelText], and [confirmText] can be
 /// provided to override the default values.
 ///
+/// By default, the time picker gets its colors from the overall theme's
+/// [ColorScheme]. The time picker can be further customized by providing a
+/// [TimePickerThemeData] to the overall theme.
+///
 /// {@tool snippet}
 /// Show a dialog with the text direction overridden to be [TextDirection.rtl].
 ///
@@ -2107,6 +2112,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 ///
 ///  * [showDatePicker], which shows a dialog that contains a material design
 ///    date picker.
+///  * [TimePickerThemeData], which allows you to customize the colors,
+///    typography, and shape of the time picker.
 Future<TimeOfDay> showTimePicker({
   @required BuildContext context,
   @required TimeOfDay initialTime,
