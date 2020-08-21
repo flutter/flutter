@@ -167,7 +167,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     Object? debugOwner,
   }) : super(
           deadline: duration ?? kLongPressTimeout,
-          postAcceptSlopTolerance: postAcceptSlopTolerance ?? 0,
+          postAcceptSlopTolerance: postAcceptSlopTolerance,
           kind: kind,
           debugOwner: debugOwner,
         );

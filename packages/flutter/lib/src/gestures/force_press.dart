@@ -7,7 +7,6 @@ import 'dart:ui' show Offset;
 import 'package:flutter/foundation.dart';
 
 import 'arena.dart';
-import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
 
