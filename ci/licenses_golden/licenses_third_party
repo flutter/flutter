@@ -1,4 +1,4 @@
-Signature: 593a03c2f5ae4c190dddf0f58b87d95e
+Signature: 00efa64a22b3ce9ad58311846e38c643
 
 UNUSED LICENSES:
 
@@ -8054,6 +8054,18 @@ FILE: ../../../third_party/dart/benchmarks/Utf8Decode/dart2/netext_3_10k.dart
 FILE: ../../../third_party/dart/benchmarks/Utf8Decode/dart2/rutext_2_10k.dart
 FILE: ../../../third_party/dart/benchmarks/Utf8Decode/dart2/sktext_10k.dart
 FILE: ../../../third_party/dart/benchmarks/Utf8Decode/dart2/zhtext_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Encode/dart/datext_latin1_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Encode/dart/entext_ascii_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Encode/dart/netext_3_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Encode/dart/rutext_2_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Encode/dart/sktext_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Encode/dart/zhtext_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Encode/dart2/datext_latin1_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Encode/dart2/entext_ascii_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Encode/dart2/netext_3_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Encode/dart2/rutext_2_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Encode/dart2/sktext_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Encode/dart2/zhtext_10k.dart
 FILE: ../../../third_party/dart/client/idea/.idea/.name
 FILE: ../../../third_party/dart/client/idea/.idea/inspectionProfiles/Project_Default.xml
 FILE: ../../../third_party/dart/client/idea/.idea/vcs.xml
@@ -8381,6 +8393,8 @@ FILE: ../../../third_party/dart/benchmarks/TypedDataDuplicate/dart/TypedDataDupl
 FILE: ../../../third_party/dart/benchmarks/TypedDataDuplicate/dart2/TypedDataDuplicate.dart
 FILE: ../../../third_party/dart/benchmarks/Utf8Decode/dart/Utf8Decode.dart
 FILE: ../../../third_party/dart/benchmarks/Utf8Decode/dart2/Utf8Decode.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Encode/dart/Utf8Encode.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Encode/dart2/Utf8Encode.dart
 FILE: ../../../third_party/dart/runtime/bin/dartdev_isolate.cc
 FILE: ../../../third_party/dart/runtime/bin/dartdev_isolate.h
 FILE: ../../../third_party/dart/runtime/bin/exe_utils.cc
