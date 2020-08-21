@@ -139,6 +139,7 @@ class ParagraphTxt : public Paragraph {
   FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, CenterAlignParagraph);
   FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, JustifyAlignParagraph);
   FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, JustifyRTL);
+  FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, InlinePlaceholderLongestLine);
   FRIEND_TEST_LINUX_ONLY(ParagraphTest, JustifyRTLNewLine);
   FRIEND_TEST(ParagraphTest, DecorationsParagraph);
   FRIEND_TEST(ParagraphTest, ItalicsParagraph);
@@ -234,6 +235,7 @@ class ParagraphTxt : public Paragraph {
           end_(e),
           direction_(d),
           style_(&st),
+          is_ghost_(false),
           placeholder_run_(&placeholder) {}
 
     size_t start() const { return start_; }
