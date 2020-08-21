@@ -397,7 +397,7 @@ class PerfTest {
     this.measureCpuGpu = false,
     this.testDriver =  'test_driver/e2e_test.dart',
     this.needsFullTimeline = false,
-    this.benchmarkScoreKeys = _ke2eDefaultScoreKeys,
+    this.benchmarkScoreKeys = _kCommonScoreKeys,
     this.dartDefine = '',
     String resultFilename = 'e2e_perf_summary',
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
@@ -501,7 +501,7 @@ class PerfTest {
         data,
         detailFiles: detailFiles.isNotEmpty ? detailFiles : null,
         benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
-          ..._ke2eDefaultScoreKeys,
+          ..._kCommonScoreKeys,
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
@@ -513,7 +513,7 @@ class PerfTest {
   }
 }
 
-const List<String> _ke2eDefaultScoreKeys = <String>[
+const List<String> _kCommonScoreKeys = <String>[
   'average_frame_build_time_millis',
   'worst_frame_build_time_millis',
   '90th_percentile_frame_build_time_millis',
