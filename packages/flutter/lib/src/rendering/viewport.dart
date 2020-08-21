@@ -714,19 +714,21 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       child = parent;
     }
 
-    // The `rect` converted to the new "local" coordinate system.
+    // Choose a render object as an intermediate reference frame to convert
+    // `rect`'s coordinates to a scroll offset. It is going to be:
+    //
+    // - the `pivot` RenderBox if it exists.
+    // - otherwise the `target` RenderSliver.
+    //
+    // `leadingScrollOffset` is currently the scrollOffset within `child`, to
+    // our new reference frame (`pivot` or `target`).
+
+    // `rect` in the new intermediate coordinate system.
     Rect rectLocal;
-    // Our new "local" reference frame render object's extent along the main
-    // axis.
+    // Our new reference frame render object's main axis extent.
     double localMaxExtent;
     GrowthDirection growthDirection;
-    double targetMainAxisExtent;
 
-    // Choose a render object as our new "local" reference frame, based on if
-    // `pivot` is null.
-    //
-    // - Choose the `pivot` RenderBox as the new reference frame if it exists.
-    // - otherwise use the `target` RenderSliver.
     if (pivot != null) {
       assert(pivot.parent != null);
       assert(pivot.parent != this);
@@ -747,8 +749,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     } else if (onlySlivers) {
       final RenderSliver targetSliver = target as RenderSliver;
       growthDirection = targetSliver.constraints.growthDirection;
-      // TODO(LongCatIsLooong): does this work if `targetSliver` is a persistent
-      // header?
+      // TODO(LongCatIsLooong): make sure this works if `targetSliver` is a
+      // persistent header, when #56413 relands.
       localMaxExtent = targetSliver.geometry.scrollExtent;
       if (rect == null) {
         switch (axis) {
@@ -770,21 +772,19 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       }
       rectLocal = rect;
     } else {
-      // There's at least one RenderObject between `viewport` and `target`
-      // (excluding these two), that's neither a RenderSliver nor a RenderBox.
       return RevealedOffset(offset: offset.pixels, rect: rect);
     }
 
     assert(localMaxExtent != null);
+    assert(rect != null);
     assert(rectLocal != null);
     assert(growthDirection != null);
     assert(child.parent == this);
     assert(child is RenderSliver);
     final RenderSliver sliver = child as RenderSliver;
 
-    // Convert `rect`'s leading edge from our new local coordinate system to
-    // scrollOffset. For `up` and `left` AxisDirections here, the leading edge
-    // of the render box is the bottom/right edge.
+    double targetMainAxisExtent;
+    // The scroll offset within `child` to `rect`.
     switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
       case AxisDirection.up:
         leadingScrollOffset += localMaxExtent - rectLocal.bottom;
@@ -804,16 +804,14 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         break;
     }
 
+    // The scroll offset in the viewport to `rect`.
+    leadingScrollOffset = scrollOffsetOf(sliver, leadingScrollOffset);
+
     // This step assumes the viewport's layout is up-to-date, i.e., if
     // offset.pixels is changed after the last performLayout, the new scroll
     // position will not be accounted for.
     final Matrix4 transform = target.getTransformTo(this);
     Rect targetRect = MatrixUtils.transformRect(transform, rect);
-
-    // Add the additional scroll offset needed to move the leading edge of the
-    // `target` to align with the leading edge of the viewport.
-    leadingScrollOffset = scrollOffsetOf(sliver, leadingScrollOffset);
-
     final double extentOfPinnedSlivers = maxScrollObstructionExtentBefore(sliver);
     switch (sliver.constraints.growthDirection) {
       case GrowthDirection.forward:
