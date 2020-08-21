@@ -1057,10 +1057,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 ///    element for the element hierarchy.
 ///  * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
 ///    ensure the widget, element, and render trees are all built.
-void runApp(Widget app) {
+void runApp(Widget app, {VoidCallback onFlutterInitialized}) {
   WidgetsFlutterBinding.ensureInitialized()
     ..scheduleAttachRootWidget(app)
-    ..scheduleWarmUpFrame();
+    ..scheduleWarmUpFrame()
+    ..addPostFrameCallback((Duration _) {
+      if (onFlutterInitialized != null)
+        onFlutterInitialized();
+    });
 }
 
 /// A function that should validate that the provided object is assignable to a
