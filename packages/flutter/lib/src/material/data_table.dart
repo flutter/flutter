@@ -836,7 +836,7 @@ class DataTable extends StatelessWidget {
         if (states.contains(MaterialState.selected)) {
           // The color has to be transparent so you can see the ink on
           // the [Material].
-          // TODO(per): Align with Material specs, should be translucent primary color: https://github.com/flutter/flutter/issues/56079.
+          // TODO(per): Align with Material specs, use translucent primary color: https://github.com/flutter/flutter/issues/64314.
           return (Theme.of(context).brightness == Brightness.light) ?
             _grey100Opacity : _grey300Opacity;
         }
