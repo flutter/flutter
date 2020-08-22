@@ -201,6 +201,16 @@ void SceneUpdateContext::CreateView(int64_t view_id,
   view_holder->set_focusable(focusable);
 }
 
+void SceneUpdateContext::UpdateView(int64_t view_id,
+                                    bool hit_testable,
+                                    bool focusable) {
+  auto* view_holder = ViewHolder::FromId(view_id);
+  FML_DCHECK(view_holder);
+
+  view_holder->set_hit_testable(hit_testable);
+  view_holder->set_focusable(focusable);
+}
+
 void SceneUpdateContext::DestroyView(int64_t view_id) {
   ViewHolder::Destroy(view_id);
 }
