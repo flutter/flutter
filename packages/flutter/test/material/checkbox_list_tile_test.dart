@@ -154,14 +154,14 @@ void main() {
     await tester.pumpWidget(
       Material(
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setter) {
+          builder: (BuildContext context, StateSetter setState) {
             return wrap(
               child: CheckboxListTile(
                 title: const Text('Title'),
                 tristate: _tristate,
                 value: _value,
                 onChanged: (bool value) {
-                  setter(() {
+                  setState(() {
                     _value = value;
                   });
                 },
