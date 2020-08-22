@@ -430,13 +430,25 @@ void main() {
         ),
       );
       final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
-      await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
+      await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0)); // offset will be magnified ten times
       expect(painter, paints..save()..translate(y: 50.0)..scale()..circle());
-      // Reverse scroll direction.
+      // Reverse scroll (30 pixels), and the offset < notification.paintOffset.
       await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, -30.0));
       await tester.pump();
-      // The painter should follow the scroll direction.
+      // The painter should follow the scroll direction .
       expect(painter, paints..save()..translate(y: 50.0 - 30.0)..scale()..circle());
+
+      // Regressing test for https://github.com/flutter/flutter/issues/64149
+      // Reverse scroll (30+20 pixels) and offset == notification.paintOffset.
+      await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, -20.0));
+      await tester.pump();
+      expect(painter, paints..save()..translate(y: 50.0 - 50.0)..scale()..circle());
+
+      // Reverse scroll (30+20+10 pixels) and offset > notification.paintOffset.
+      await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, -10.0));
+      await tester.pump();
+      // The OverscrollIndicator should not overflow the CustomScrollView's edge.
+      expect(painter, paints..save()..translate(y: 50.0 - 50.0)..scale()..circle());
     });
 
     testWidgets('Trailing', (WidgetTester tester) async {
@@ -463,11 +475,23 @@ void main() {
       await tester.pump();
       await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, -5.0));
       expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0)..scale()..circle());
-      // Reverse scroll direction.
+      // Reverse scroll (30 pixels).
       await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, 30.0));
       await tester.pump();
       // The painter should follow the scroll direction.
       expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0 - 30.0)..scale()..circle());
+
+      // Regressing test for https://github.com/flutter/flutter/issues/64149
+      // Reverse scroll (30+20 pixels) and offset == notification.paintOffset.
+      await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, 20.0));
+      await tester.pump();
+      expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0 - 50.0)..scale()..circle());
+
+      // Reverse scroll (30+20+10 pixels) and offset > notification.paintOffset.
+      await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, 10.0));
+      await tester.pump();
+      // The OverscrollIndicator should not overflow the CustomScrollView's edge.
+      expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0 - 50.0)..scale()..circle());
     });
   });
 }

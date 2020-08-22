@@ -256,9 +256,12 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
     // For example (CustomScrollView with sliver before center), the scroll
     // extent is [-200.0, 300.0], scroll in the opposite direction with 10.0 pixels
     // before glow disappears, so the current pixels is -190.0,
-    // in this case, we should move the glow up 10.0 pixels.
-    _leadingController._paintOffsetScrollPixels = -(notification.metrics.pixels - notification.metrics.minScrollExtent);
-    _trailingController._paintOffsetScrollPixels = -(notification.metrics.maxScrollExtent - notification.metrics.pixels);
+    // in this case, we should move the glow up 10.0 pixels and should not
+    // overflow the scrollable widget's edge. https://github.com/flutter/flutter/issues/64149.
+    _leadingController._paintOffsetScrollPixels =
+      -math.min(notification.metrics.pixels - notification.metrics.minScrollExtent, _leadingController._paintOffset);
+    _trailingController._paintOffsetScrollPixels =
+      -math.min(notification.metrics.maxScrollExtent - notification.metrics.pixels, _trailingController._paintOffset);
 
     if (notification is OverscrollNotification) {
       _GlowController controller;
