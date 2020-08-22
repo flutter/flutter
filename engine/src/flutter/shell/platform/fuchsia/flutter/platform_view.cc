@@ -58,6 +58,7 @@ PlatformView::PlatformView(
     fit::closure session_listener_error_callback,
     OnEnableWireframe wireframe_enabled_callback,
     OnCreateView on_create_view_callback,
+    OnUpdateView on_update_view_callback,
     OnDestroyView on_destroy_view_callback,
     OnGetViewEmbedder on_get_view_embedder_callback,
     OnGetGrContext on_get_gr_context_callback,
@@ -72,6 +73,7 @@ PlatformView::PlatformView(
           std::move(session_listener_error_callback)),
       wireframe_enabled_callback_(std::move(wireframe_enabled_callback)),
       on_create_view_callback_(std::move(on_create_view_callback)),
+      on_update_view_callback_(std::move(on_update_view_callback)),
       on_destroy_view_callback_(std::move(on_destroy_view_callback)),
       on_get_view_embedder_callback_(std::move(on_get_view_embedder_callback)),
       on_get_gr_context_callback_(std::move(on_get_gr_context_callback)),
@@ -762,6 +764,35 @@ void PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
       message->response()->Complete(
           std::make_unique<fml::NonOwnedMapping>((const uint8_t*)"[0]", 3u));
     }
+  } else if (method->value == "View.update") {
+    auto args_it = root.FindMember("args");
+    if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {
+      FML_LOG(ERROR) << "No arguments found.";
+      return;
+    }
+    const auto& args = args_it->value;
+
+    auto view_id = args.FindMember("viewId");
+    if (!view_id->value.IsUint64()) {
+      FML_LOG(ERROR) << "Argument 'viewId' is not a int64";
+      return;
+    }
+
+    auto hit_testable = args.FindMember("hitTestable");
+    if (!hit_testable->value.IsBool()) {
+      FML_LOG(ERROR) << "Argument 'hitTestable' is not a bool";
+      return;
+    }
+
+    auto focusable = args.FindMember("focusable");
+    if (!focusable->value.IsBool()) {
+      FML_LOG(ERROR) << "Argument 'focusable' is not a bool";
+      return;
+    }
+
+    on_update_view_callback_(view_id->value.GetUint64(),
+                             hit_testable->value.GetBool(),
+                             focusable->value.GetBool());
   } else if (method->value == "View.dispose") {
     auto args_it = root.FindMember("args");
     if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {

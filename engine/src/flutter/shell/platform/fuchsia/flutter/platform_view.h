@@ -24,6 +24,7 @@ namespace flutter_runner {
 
 using OnEnableWireframe = fit::function<void(bool)>;
 using OnCreateView = fit::function<void(int64_t, bool, bool)>;
+using OnUpdateView = fit::function<void(int64_t, bool, bool)>;
 using OnDestroyView = fit::function<void(int64_t)>;
 using OnGetViewEmbedder = fit::function<flutter::ExternalViewEmbedder*()>;
 using OnGetGrContext = fit::function<GrDirectContext*()>;
@@ -52,6 +53,7 @@ class PlatformView final : public flutter::PlatformView,
                fit::closure on_session_listener_error_callback,
                OnEnableWireframe wireframe_enabled_callback,
                OnCreateView on_create_view_callback,
+               OnUpdateView on_update_view_callback,
                OnDestroyView on_destroy_view_callback,
                OnGetViewEmbedder on_get_view_embedder_callback,
                OnGetGrContext on_get_gr_context_callback,
@@ -83,6 +85,7 @@ class PlatformView final : public flutter::PlatformView,
   fit::closure session_listener_error_callback_;
   OnEnableWireframe wireframe_enabled_callback_;
   OnCreateView on_create_view_callback_;
+  OnUpdateView on_update_view_callback_;
   OnDestroyView on_destroy_view_callback_;
   OnGetViewEmbedder on_get_view_embedder_callback_;
   OnGetGrContext on_get_gr_context_callback_;
