@@ -798,4 +798,53 @@ void main() {
       '   handler has fired.\n',
     );
   });
+
+  testWidgets('How Dismissible should behave during hit testing', (WidgetTester tester) async {
+    bool didReceivePointerDown;
+
+    Future<void> pumpWidgetTree(HitTestBehavior hitTestBehavior) {
+      return tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Listener(
+                onPointerDown: (_) {
+                  didReceivePointerDown = true;
+                },
+                child: Container(
+                  width: 100.0,
+                  height: 100.0,
+                  color: const Color(0xFF00FF00),
+                ),
+              ),
+              Dismissible(
+                key: const ValueKey<int>(1),
+                hitTestBehavior: hitTestBehavior,
+                child: const SizedBox(
+                  width: 100.0,
+                  height: 100.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    didReceivePointerDown = false;
+    await pumpWidgetTree(HitTestBehavior.deferToChild);
+    await tester.tapAt(const Offset(10.0, 10.0));
+    expect(didReceivePointerDown, isTrue);
+
+    didReceivePointerDown = false;
+    await pumpWidgetTree(HitTestBehavior.opaque);
+    await tester.tapAt(const Offset(10.0, 10.0));
+    expect(didReceivePointerDown, isFalse);
+
+    didReceivePointerDown = false;
+    await pumpWidgetTree(HitTestBehavior.translucent);
+    await tester.tapAt(const Offset(10.0, 10.0));
+    expect(didReceivePointerDown, isTrue);
+  });
 }
