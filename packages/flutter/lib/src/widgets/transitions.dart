@@ -345,11 +345,15 @@ class SlideTransition extends AnimatedWidget {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return ScaleTransition(
-///     scale: _animation,
-///     child: const Padding(
-///       padding: EdgeInsets.all(8.0),
-///       child: FlutterLogo(size: 150.0),
+///   return Scaffold(
+///     body: Center(
+///       child: ScaleTransition(
+///         scale: _animation,
+///         child: const Padding(
+///           padding: EdgeInsets.all(8.0),
+///           child: FlutterLogo(size: 150.0),
+///         ),
+///       ),
 ///     ),
 ///   );
 /// }
