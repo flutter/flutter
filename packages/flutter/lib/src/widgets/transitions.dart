@@ -542,7 +542,7 @@ class SizeTransition extends AnimatedWidget {
 ///     vsync: this,
 ///   )..repeat(reverse: true);
 ///   _animation = CurvedAnimation(
-///     parent: controller,
+///     parent: _controller,
 ///     curve: Curves.easeIn,
 ///   );
 /// }
