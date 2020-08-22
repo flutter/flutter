@@ -220,7 +220,8 @@ class FlutterDriverExtension {
       return _makeResponse(response?.toJson());
     } on TimeoutException catch (error, stackTrace) {
       final String message = 'Timeout while executing $commandKind: $error\n$stackTrace';
-      _log(message);
+      if (!_silenceErrors)
+        _log(message);
       return _makeResponse(message, isError: true);
     } catch (error, stackTrace) {
       final String message = 'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
@@ -389,24 +390,41 @@ class FlutterDriverExtension {
     return const TapResult();
   }
 
-  Future<WaitForResult> _waitFor(Command command) async {
+  Future<WaitForResult> _waitFor(Command command) {
     final WaitFor waitForCommand = command as WaitFor;
-    await _waitForElement(_createFinder(waitForCommand.finder));
-    return const WaitForResult();
+    Future<WaitForResult> futureResult = _waitForElement(
+      _createFinder(waitForCommand.finder),
+    ).then((_) => const WaitForResult());
+
+    if (command.timeout != null) {
+      futureResult = futureResult.timeout(command.timeout);
+    }
+    return futureResult;
   }
 
   Future<WaitForAbsentResult> _waitForAbsent(Command command) async {
     final WaitForAbsent waitForAbsentCommand = command as WaitForAbsent;
-    await _waitForAbsentElement(_createFinder(waitForAbsentCommand.finder));
-    return const WaitForAbsentResult();
+    Future<WaitForAbsentResult> futureResult = _waitForAbsentElement(
+      _createFinder(waitForAbsentCommand.finder),
+    ).then((_) => const WaitForAbsentResult());
+
+    if (command.timeout != null) {
+      futureResult = futureResult.timeout(command.timeout);
+    }
+    return futureResult;
   }
 
   Future<Result> _waitForCondition(Command command) async {
     assert(command != null);
     final WaitForCondition waitForConditionCommand = command as WaitForCondition;
     final WaitCondition condition = deserializeCondition(waitForConditionCommand.condition);
-    await condition.wait();
-    return null;
+
+    Future<Result> futureResult = condition.wait().then((_) => null);
+
+    if (waitForConditionCommand.timeout != null) {
+      futureResult = futureResult.timeout(waitForConditionCommand.timeout);
+    }
+    return await futureResult;
   }
 
   @Deprecated(

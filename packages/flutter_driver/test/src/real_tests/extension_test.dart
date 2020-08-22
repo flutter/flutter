@@ -953,4 +953,59 @@ void main() {
       );
     });
   });
+
+  group('waitFor* respects timeout', () {
+    FlutterDriverExtension driverExtension;
+    const Duration oneMilisecond = Duration(milliseconds: 1);
+    String timeoutFailureMessage(String method) => 'Timeout while executing $method: '
+        'TimeoutException after $oneMilisecond: Future not completed\n';
+
+    setUp(() {
+      driverExtension = FlutterDriverExtension(null, true);
+    });
+
+    testWidgets('waitForElement times out', (WidgetTester tester) async {
+      await tester.pumpWidget(const SizedBox());
+      await tester.runAsync(() async {
+        final Map<String, dynamic> result = await driverExtension.call(
+          WaitFor(
+            ByValueKey('does not exist'),
+            timeout: oneMilisecond,
+          ).serialize(),
+        );
+        expect(result['isError'], true);
+        expect(result['response'], timeoutFailureMessage('waitFor'));
+      });
+    });
+
+    testWidgets('waitForAbsentElement times out', (WidgetTester tester) async {
+      await tester.pumpWidget(const SizedBox());
+      await tester.runAsync(() async {
+        final Map<String, dynamic> result = await driverExtension.call(
+          WaitForAbsent(
+            const ByType('SizedBox'),
+            timeout: oneMilisecond,
+          ).serialize(),
+        );
+        expect(result['isError'], true);
+        expect(result['response'], timeoutFailureMessage('waitForAbsent'));
+      });
+    });
+
+
+    testWidgets('waitForCondition times out', (WidgetTester tester) async {
+      // Pump a constantly animating widget so the frames will not settle.
+      await tester.pumpWidget(const CircularProgressIndicator());
+      await tester.runAsync(() async {
+        final Map<String, dynamic> result = await driverExtension.call(
+          const WaitForCondition(
+            NoPendingFrame(),
+            timeout: oneMilisecond,
+          ).serialize(),
+        );
+        expect(result['isError'], true);
+        expect(result['response'], timeoutFailureMessage('waitForCondition'));
+      });
+    });
+  });
 }
