@@ -80,6 +80,24 @@ public final class StandardMethodCodec implements MethodCodec {
   }
 
   @Override
+  public ByteBuffer encodeErrorEnvelopeWithStacktrace(
+      String errorCode, String errorMessage, Object errorDetails, String errorStacktrace) {
+    final ExposedByteArrayOutputStream stream = new ExposedByteArrayOutputStream();
+    stream.write(1);
+    messageCodec.writeValue(stream, errorCode);
+    messageCodec.writeValue(stream, errorMessage);
+    if (errorDetails instanceof Throwable) {
+      messageCodec.writeValue(stream, getStackTrace((Throwable) errorDetails));
+    } else {
+      messageCodec.writeValue(stream, errorDetails);
+    }
+    messageCodec.writeValue(stream, errorStacktrace);
+    final ByteBuffer buffer = ByteBuffer.allocateDirect(stream.size());
+    buffer.put(stream.buffer(), 0, stream.size());
+    return buffer;
+  }
+
+  @Override
   public Object decodeEnvelope(ByteBuffer envelope) {
     envelope.order(ByteOrder.nativeOrder());
     final byte flag = envelope.get();

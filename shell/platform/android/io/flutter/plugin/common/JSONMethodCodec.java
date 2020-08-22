@@ -71,6 +71,17 @@ public final class JSONMethodCodec implements MethodCodec {
   }
 
   @Override
+  public ByteBuffer encodeErrorEnvelopeWithStacktrace(
+      String errorCode, String errorMessage, Object errorDetails, String errorStacktrace) {
+    return JSONMessageCodec.INSTANCE.encodeMessage(
+        new JSONArray()
+            .put(errorCode)
+            .put(JSONUtil.wrap(errorMessage))
+            .put(JSONUtil.wrap(errorDetails))
+            .put(JSONUtil.wrap(errorStacktrace)));
+  }
+
+  @Override
   public Object decodeEnvelope(ByteBuffer envelope) {
     try {
       final Object json = JSONMessageCodec.INSTANCE.decodeMessage(envelope);
