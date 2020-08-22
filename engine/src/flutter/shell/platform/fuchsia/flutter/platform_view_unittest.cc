@@ -168,6 +168,7 @@ TEST_F(PlatformViewTests, ChangesAccessibilitySettings) {
       nullptr,  // on_session_listener_error_callback
       nullptr,  // on_enable_wireframe_callback,
       nullptr,  // on_create_view_callback,
+      nullptr,  // on_update_view_callback,
       nullptr,  // on_destroy_view_callback,
       nullptr,  // on_get_view_embedder_callback,
       nullptr,  // on_get_gr_context_callback,
@@ -224,6 +225,7 @@ TEST_F(PlatformViewTests, EnableWireframeTest) {
       nullptr,                  // on_session_listener_error_callback
       EnableWireframeCallback,  // on_enable_wireframe_callback,
       nullptr,                  // on_create_view_callback,
+      nullptr,                  // on_update_view_callback,
       nullptr,                  // on_destroy_view_callback,
       nullptr,                  // on_get_view_embedder_callback,
       nullptr,                  // on_get_gr_context_callback,
@@ -291,6 +293,7 @@ TEST_F(PlatformViewTests, CreateViewTest) {
       nullptr,             // on_session_listener_error_callback
       nullptr,             // on_enable_wireframe_callback,
       CreateViewCallback,  // on_create_view_callback,
+      nullptr,             // on_update_view_callback,
       nullptr,             // on_destroy_view_callback,
       nullptr,             // on_get_view_embedder_callback,
       nullptr,             // on_get_gr_context_callback,
@@ -328,6 +331,76 @@ TEST_F(PlatformViewTests, CreateViewTest) {
 
 // Test to make sure that PlatformView correctly registers messages sent on
 // the "flutter/platform_views" channel, correctly parses the JSON it receives
+// and calls the UdpateViewCallback with the appropriate args.
+TEST_F(PlatformViewTests, UpdateViewTest) {
+  sys::testing::ServiceDirectoryProvider services_provider(dispatcher());
+  MockPlatformViewDelegate delegate;
+  zx::eventpair a, b;
+  zx::eventpair::create(/* flags */ 0u, &a, &b);
+  auto view_ref = fuchsia::ui::views::ViewRef({
+      .reference = std::move(a),
+  });
+  flutter::TaskRunners task_runners =
+      flutter::TaskRunners("test_runners", nullptr, nullptr, nullptr, nullptr);
+
+  // Test wireframe callback function. If the message sent to the platform
+  // view was properly handled and parsed, this function should be called,
+  // setting |wireframe_enabled| to true.
+  int64_t update_view_called = false;
+  auto UpdateViewCallback = [&update_view_called](
+                                int64_t view_id, bool hit_testable,
+                                bool focusable) { update_view_called = true; };
+
+  auto platform_view = flutter_runner::PlatformView(
+      delegate,                               // delegate
+      "test_platform_view",                   // label
+      std::move(view_ref),                    // view_refs
+      std::move(task_runners),                // task_runners
+      services_provider.service_directory(),  // runner_services
+      nullptr,             // parent_environment_service_provider_handle
+      nullptr,             // session_listener_request
+      nullptr,             // focuser,
+      nullptr,             // on_session_listener_error_callback
+      nullptr,             // on_enable_wireframe_callback,
+      nullptr,             // on_create_view_callback,
+      UpdateViewCallback,  // on_update_view_callback,
+      nullptr,             // on_destroy_view_callback,
+      nullptr,             // on_get_view_embedder_callback,
+      nullptr,             // on_get_gr_context_callback,
+      0u,                  // vsync_event_handle
+      {}                   // product_config
+  );
+
+  // Cast platform_view to its base view so we can have access to the public
+  // "HandlePlatformMessage" function.
+  auto base_view = dynamic_cast<flutter::PlatformView*>(&platform_view);
+  EXPECT_TRUE(base_view);
+
+  // JSON for the message to be passed into the PlatformView.
+  const uint8_t txt[] =
+      "{"
+      "    \"method\":\"View.update\","
+      "    \"args\": {"
+      "       \"viewId\":42,"
+      "       \"hitTestable\":true,"
+      "       \"focusable\":true"
+      "    }"
+      "}";
+
+  fml::RefPtr<flutter::PlatformMessage> message =
+      fml::MakeRefCounted<flutter::PlatformMessage>(
+          "flutter/platform_views",
+          std::vector<uint8_t>(txt, txt + sizeof(txt)),
+          fml::RefPtr<flutter::PlatformMessageResponse>());
+  base_view->HandlePlatformMessage(message);
+
+  RunLoopUntilIdle();
+
+  EXPECT_TRUE(update_view_called);
+}
+
+// Test to make sure that PlatformView correctly registers messages sent on
+// the "flutter/platform_views" channel, correctly parses the JSON it receives
 // and calls the DestroyViewCallback with the appropriate args.
 TEST_F(PlatformViewTests, DestroyViewTest) {
   sys::testing::ServiceDirectoryProvider services_provider(dispatcher());
@@ -360,6 +433,7 @@ TEST_F(PlatformViewTests, DestroyViewTest) {
       nullptr,              // on_session_listener_error_callback
       nullptr,              // on_enable_wireframe_callback,
       nullptr,              // on_create_view_callback,
+      nullptr,              // on_update_view_callback,
       DestroyViewCallback,  // on_destroy_view_callback,
       nullptr,              // on_get_view_embedder_callback,
       nullptr,              // on_get_gr_context_callback,
@@ -423,6 +497,7 @@ TEST_F(PlatformViewTests, RequestFocusTest) {
       nullptr,                    // on_session_listener_error_callback
       nullptr,                    // on_enable_wireframe_callback,
       nullptr,                    // on_create_view_callback,
+      nullptr,                    // on_update_view_callback,
       nullptr,                    // on_destroy_view_callback,
       nullptr,                    // on_get_gr_context_callback,
       nullptr,                    // on_get_view_embedder_callback,
@@ -493,6 +568,7 @@ TEST_F(PlatformViewTests, GetViewEmbedderTest) {
       nullptr,                  // on_session_listener_error_callback
       nullptr,                  // on_enable_wireframe_callback,
       nullptr,                  // on_create_view_callback,
+      nullptr,                  // on_update_view_callback,
       nullptr,                  // on_destroy_view_callback,
       GetViewEmbedderCallback,  // on_get_view_embedder_callback,
       nullptr,                  // on_get_gr_context_callback,
@@ -547,6 +623,7 @@ TEST_F(PlatformViewTests, GetGrContextTest) {
       nullptr,               // on_session_listener_error_callback
       nullptr,               // on_enable_wireframe_callback,
       nullptr,               // on_create_view_callback,
+      nullptr,               // on_update_view_callback,
       nullptr,               // on_destroy_view_callback,
       nullptr,               // on_get_view_embedder_callback,
       GetGrContextCallback,  // on_get_gr_context_callback,
