@@ -2267,7 +2267,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 ///    unconstrained, expands to fit them, and considers overflow to be an error.
 class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that uses a function to transform the constraints it
-  /// passes to its child. If the child overflows the parents constraints, a
+  /// passes to its child. If the child overflows the parent's constraints, a
   /// warning will be given in debug mode.
   const ConstraintsTransformBox({
     Key key,
