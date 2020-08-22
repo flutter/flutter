@@ -2664,7 +2664,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// needed, prefer removing the widget from the tree entirely rather than
 /// keeping it alive in an [Offstage] subtree.
 ///
-/// {@tool snippet}
+/// {@tool dartpad --template=stateless_widget_material}
 ///
 /// Difference in painting can be easily compared by the following sections of with Offstage where we don't bring
 /// the widget on screen and without Offstage where we bring the widget on screen.
