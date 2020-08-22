@@ -54,6 +54,7 @@ void main() {
       });
       when(mockVM.isolates).thenReturn(<VMRunnableIsolate>[mockIsolate]);
       when(mockIsolate.loadRunnable()).thenAnswer((_) => Future<MockIsolate>.value(mockIsolate));
+      when(mockIsolate.load()).thenAnswer((_) => Future<MockIsolate>.value(mockIsolate));
       when(mockIsolate.extensionRpcs).thenReturn(<String>[]);
       when(mockIsolate.onExtensionAdded).thenAnswer((Invocation invocation) {
         return Stream<String>.fromIterable(<String>['ext.flutter.driver']);
@@ -98,8 +99,8 @@ void main() {
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
-      expectLogContains('Isolate is paused at start');
-      expect(connectionLog, <String>['resume', 'streamListen', 'other-resume', 'onExtensionAdded']);
+      expectLogContains('Attempting to resume isolate');
+      expect(connectionLog, <String>['streamListen', 'resume', 'other-resume', 'onExtensionAdded']);
     });
 
     test('connects to isolate paused mid-flight', () async {
@@ -108,7 +109,7 @@ void main() {
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
-      expectLogContains('Isolate is paused mid-flight');
+      expectLogContains('Attempting to resume isolate');
     });
 
     // This test simulates a situation when we believe that the isolate is
@@ -174,6 +175,9 @@ void main() {
       mockClient = MockVMServiceClient();
       mockPeer = MockPeer();
       mockIsolate = MockIsolate();
+      when(mockClient.onIsolateRunnable).thenAnswer((Invocation invocation) {
+        return Stream<VMIsolateRef>.fromIterable(<VMIsolateRef>[]);
+      });
       driver = VMServiceFlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
     });
 
@@ -804,6 +808,9 @@ void main() {
       mockClient = MockVMServiceClient();
       mockPeer = MockPeer();
       mockIsolate = MockIsolate();
+      when(mockClient.onIsolateRunnable).thenAnswer((Invocation invocation) {
+        return Stream<VMIsolateRef>.fromIterable(<VMIsolateRef>[]);
+      });
       driver = VMServiceFlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
     });
 
