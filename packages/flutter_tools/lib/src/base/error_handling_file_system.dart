@@ -195,6 +195,17 @@ class ErrorHandlingFile
   }
 
   @override
+  RandomAccessFile openSync({FileMode mode = FileMode.read}) {
+    return _runSync<RandomAccessFile>(
+      () => delegate.openSync(
+        mode: mode,
+      ),
+      platform: _platform,
+      failureMessage: 'Flutter failed to open a file at "${delegate.path}"',
+    );
+  }
+
+  @override
   String toString() => delegate.toString();
 }
 
@@ -385,9 +396,17 @@ void _handleWindowsException(FileSystemException e, String message) {
   // https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes
   const int kDeviceFull = 112;
   const int kUserMappedSectionOpened = 1224;
+  const int kAccessDenied = 5;
   final int errorCode = e.osError?.errorCode ?? 0;
   // Catch errors and bail when:
   switch (errorCode) {
+    case kAccessDenied:
+      throwToolExit(
+        '$message. The flutter tool cannot access the file.\n'
+        'Please ensure that the SDK and/or project is installed in a location '
+        'that has read/write permissions for the current user.'
+      );
+      break;
     case kDeviceFull:
       throwToolExit(
         '$message. The target device is full.'

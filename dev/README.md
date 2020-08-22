@@ -7,22 +7,40 @@ The tests in this directory are run in the `framework_tests_misc-*`
 shards.
 
 ## Luci builder file
-`try_builders.json` and `prod_builders.json` contain the
-supported luci try/prod builders for engine. They follow format:
+`try_builders.json` and `prod_builders.json` contain the supported luci
+try/prod builders for flutter.
+### `try_builders.json`
+It follows format:
 ```json
 {
     "builders":[
         {
-            "name":"xxx1",
-            "repo":"flutter"
-        },
-        {
-            "name":"xxx2",
+            "name":"yyy",
             "repo":"flutter",
-            "taskName":"yyy2"
+            "taskName":"zzz",
+            "enabled":true,
+            "run_if":["a/b/", "c/d/**"]
         }
     ]
 }
 ```
-These files will be mainly used in [`flutter/cocoon`](https://github.com/flutter/cocoon)
-to trigger/update flutter luci tasks.
+* enabled(optional): `true` is the default value if unspecified
+* run_if(optional): will always be triggered if unspecified
+### `prod_builders.json`
+It follows format:
+```json
+{
+    "builders":[
+        {
+            "name":"yyy",
+            "repo":"flutter",
+            "taskName":"zzz",
+            "flaky":false
+        }
+    ]
+}
+```
+`try_builders.json` will be mainly used in
+[`flutter/cocoon`](https://github.com/flutter/cocoon) to trigger/update pre-submit
+flutter luci tasks, whereas `prod_builders.json` will be mainly used in `flutter/cocoon`
+to refresh luci task statuses to [dashboard](https://flutter-dashboard.appspot.com).
