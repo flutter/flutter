@@ -2669,7 +2669,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// Difference in painting can be easily compared by the following sections of with Offstage where we don't bring
 /// the widget on screen and without Offstage where we bring the widget on screen.
 ///
-/// ### Without Offstage
+/// Without Offstage:
 ///
 /// ```dart
 /// import 'package:flutter/material.dart';
@@ -2695,7 +2695,11 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// }
 /// ```
 ///
-/// ### With Offstage
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// With Offstage:
 ///
 /// ```dart
 /// import 'package:flutter/material.dart';
