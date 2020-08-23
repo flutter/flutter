@@ -965,8 +965,10 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ### Nested Scaffolds
 ///
 /// The Scaffold was designed to be the single top level container for
-/// a [MaterialApp] and it's typically not necessary to nest
-/// scaffolds. For example in a tabbed UI, where the
+/// a [MaterialApp] but you can have one Scaffold for each route if you
+/// need to (and it is recommended if you are using Material Design widgets).
+/// It's typically not necessary to nest scaffolds.
+/// For example in a tabbed UI, where the
 /// [bottomNavigationBar] is a [TabBar] and the body is a
 /// [TabBarView], you might be tempted to make each tab bar view a
 /// scaffold with a differently titled AppBar. It would be better to add a
@@ -989,8 +991,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// {@end-tool}
 ///
 /// Although there are some use cases, like a presentation app that
-/// shows embedded flutter content, where nested scaffolds are
-/// appropriate, it's best to avoid nesting scaffolds.
+/// shows embedded flutter content, where nested Scaffolds are
+/// appropriate, But it's best to avoid nesting Scaffolds with widgets such as [TabController]
+/// or IndexedStack to navigate the content inside the body of a single screen.
 ///
 /// See also:
 ///
