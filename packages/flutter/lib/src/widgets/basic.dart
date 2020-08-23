@@ -2684,7 +2684,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///       ),
 ///     );
 ///   }
-/// }
+///
 /// ```
 ///
 /// {@end-tool}
@@ -2708,7 +2708,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///       ),
 ///     );
 ///   }
-/// }
+///
 /// ```
 ///
 /// {@end-tool}
