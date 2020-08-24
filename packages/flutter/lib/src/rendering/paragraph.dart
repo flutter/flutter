@@ -328,7 +328,7 @@ class RenderParagraph extends RenderBox
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    assert(!debugNeedsLayout!);
+    assert(!debugNeedsLayout);
     assert(constraints != null);
     assert(constraints.debugAssertIsValid());
     _layoutTextWithConstraints(constraints);
@@ -739,7 +739,7 @@ class RenderParagraph extends RenderBox
   ///
   /// Valid only after [layout].
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
-    assert(!debugNeedsLayout!);
+    assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getOffsetForCaret(position, caretPrototype);
   }
@@ -752,7 +752,7 @@ class RenderParagraph extends RenderBox
   ///
   /// Valid only after [layout].
   List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
-    assert(!debugNeedsLayout!);
+    assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getBoxesForSelection(selection);
   }
@@ -761,7 +761,7 @@ class RenderParagraph extends RenderBox
   ///
   /// Valid only after [layout].
   TextPosition getPositionForOffset(Offset offset) {
-    assert(!debugNeedsLayout!);
+    assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getPositionForOffset(offset);
   }
@@ -776,7 +776,7 @@ class RenderParagraph extends RenderBox
   ///
   /// Valid only after [layout].
   TextRange getWordBoundary(TextPosition position) {
-    assert(!debugNeedsLayout!);
+    assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getWordBoundary(position);
   }
@@ -791,7 +791,7 @@ class RenderParagraph extends RenderBox
   ///
   /// Valid only after [layout].
   Size get textSize {
-    assert(!debugNeedsLayout!);
+    assert(!debugNeedsLayout);
     return _textPainter.size;
   }
 

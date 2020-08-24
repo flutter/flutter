@@ -2591,7 +2591,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset? position }) {
-    assert(!debugNeedsLayout!);
+    assert(!debugNeedsLayout);
     return result.addWithPaintOffset(
       offset: transformHitTests
           ? Offset(translation.dx * size.width, translation.dy * size.height)
@@ -2605,7 +2605,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    assert(!debugNeedsLayout!);
+    assert(!debugNeedsLayout);
     if (child != null) {
       super.paint(context, Offset(
         offset.dx + translation.dx * size.width,

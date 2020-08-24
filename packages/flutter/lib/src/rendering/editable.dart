@@ -1706,7 +1706,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent) {
-      assert(!debugNeedsLayout!);
+      assert(!debugNeedsLayout);
       // Checks if there is any gesture recognizer in the text span.
       final Offset offset = entry.localPosition;
       final TextPosition position = _textPainter.getPositionForOffset(offset);

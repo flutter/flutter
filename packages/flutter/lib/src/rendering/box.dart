@@ -1887,7 +1887,7 @@ abstract class RenderBox extends RenderObject {
   /// computation, override [computeDistanceToActualBaseline].
   double? getDistanceToBaseline(TextBaseline baseline, { bool onlyReal = false }) {
     assert(!_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
-    assert(!debugNeedsLayout!);
+    assert(!debugNeedsLayout);
     assert(() {
       final RenderObject? parent = this.parent as RenderObject?;
       if (owner!.debugDoingLayout)
@@ -2136,7 +2136,7 @@ abstract class RenderBox extends RenderObject {
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
     assert(() {
       if (!hasSize) {
-        if (debugNeedsLayout!) {
+        if (debugNeedsLayout) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Cannot hit test a render box that has never been laid out.'),
             describeForError('The hitTest() method was called on this RenderBox'),
@@ -2477,7 +2477,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   /// Useful when the children are displayed vertically in the same order they
   /// appear in the child list.
   double? defaultComputeDistanceToFirstActualBaseline(TextBaseline baseline) {
-    assert(!debugNeedsLayout!);
+    assert(!debugNeedsLayout);
     ChildType? child = firstChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData as ParentDataType;
@@ -2494,7 +2494,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   /// Useful when the vertical position of the children isn't determined by the
   /// order in the child list.
   double? defaultComputeDistanceToHighestActualBaseline(TextBaseline baseline) {
-    assert(!debugNeedsLayout!);
+    assert(!debugNeedsLayout);
     double? result;
     ChildType? child = firstChild;
     while (child != null) {

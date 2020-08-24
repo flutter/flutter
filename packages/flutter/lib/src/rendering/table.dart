@@ -778,7 +778,7 @@ class RenderTable extends RenderBox {
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     // returns the baseline of the first cell that has a baseline in the first row
-    assert(!debugNeedsLayout!);
+    assert(!debugNeedsLayout);
     return _baselineDistance;
   }
 
@@ -991,7 +991,7 @@ class RenderTable extends RenderBox {
   Rect getRowBox(int row) {
     assert(row >= 0);
     assert(row < rows);
-    assert(!debugNeedsLayout!);
+    assert(!debugNeedsLayout);
     return Rect.fromLTRB(0.0, _rowTops[row], size.width, _rowTops[row + 1]);
   }
 

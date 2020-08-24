@@ -1441,8 +1441,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// out and painted.
   ///
   /// It is intended to be used by tests and asserts.
-  bool? get debugNeedsLayout {
-    bool? result;
+  bool get debugNeedsLayout {
+    late bool result;
     assert(() {
       result = _needsLayout;
       return true;
