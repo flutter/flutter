@@ -56,7 +56,7 @@ enum ButtonBarLayoutBehavior {
 ///
 /// Please use one or more of the new buttons and their themes
 /// instead: [TextButton] and [TextButtonTheme], [ElevatedButton] and
-/// [ElevatedButtonTheme], [OutlinedButon] and
+/// [ElevatedButtonTheme], [OutlinedButton] and
 /// [OutlinedButtonTheme]. The original classes will be deprecated
 /// soon, please migrate code that uses them.  There's a detailed
 /// migration guide for the new button and button theme classes in
@@ -259,7 +259,7 @@ class ButtonTheme extends InheritedTheme {
 ///
 ///  * [TextButton], [TextButtonTheme], [TextButtonThemeData],
 ///  * [ElevatedButton], [ElevatedButtonTheme], [ElevatedButtonThemeData],
-///  * [OutlinedButton], [OutlinedButtonTheme], [OutlinedButonThemeData]
+///  * [OutlinedButton], [OutlinedButtonTheme], [OutlinedButtonThemeData]
 ///
 /// FlatButton, RaisedButton, and OutlineButton have been replaced by
 /// TextButton, ElevatedButton, and OutlinedButton respectively.
