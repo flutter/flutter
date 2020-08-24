@@ -144,7 +144,7 @@ class Dialog extends StatelessWidget {
         context: context,
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: double.infinity),
+            constraints: BoxConstraints(minWidth: (insetPadding.horizontal < 280.0)? double.infinity : 280.0),
             child: Material(
               color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
               elevation: elevation ?? dialogTheme.elevation ?? _defaultElevation,
