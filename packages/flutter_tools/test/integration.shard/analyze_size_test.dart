@@ -51,7 +51,7 @@ void main() {
 
     print(result.stdout);
     print(result.stderr);
-    expect(result.stdout.toString(), contains('App (Dart AOT)'));
+    expect(result.stdout.toString(), contains('Dart AOT symbols accounted decompressed size'));
 
     final String line = result.stdout.toString()
       .split('\n')
