@@ -24,9 +24,14 @@ FlutterPlatformViewLayer::FlutterPlatformViewLayer(
 FlutterPlatformViewLayer::~FlutterPlatformViewLayer() = default;
 
 FlutterPlatformViewsController::FlutterPlatformViewsController()
-    : layer_pool_(std::make_unique<FlutterPlatformViewLayerPool>()){};
+    : layer_pool_(std::make_unique<FlutterPlatformViewLayerPool>()),
+      weak_factory_(std::make_unique<fml::WeakPtrFactory<FlutterPlatformViewsController>>(this)){};
 
 FlutterPlatformViewsController::~FlutterPlatformViewsController() = default;
+
+fml::WeakPtr<flutter::FlutterPlatformViewsController> FlutterPlatformViewsController::GetWeakPtr() {
+  return weak_factory_->GetWeakPtr();
+}
 
 CATransform3D GetCATransform3DFromSkMatrix(const SkMatrix& matrix) {
   // Skia only supports 2D transform so we don't map z.
