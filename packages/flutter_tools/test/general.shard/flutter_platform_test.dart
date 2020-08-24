@@ -123,49 +123,6 @@ void main() {
       }, overrides: contextOverrides);
     });
 
-    group('The arguments that are passed to the test process', () {
-      MockPlatform mockPlatform;
-      MockProcessManager mockProcessManager;
-      FlutterPlatform flutterPlatform;
-      final Map<Type, Generator> contextOverrides = <Type, Generator>{
-        Platform: () => mockPlatform,
-        ProcessManager: () => mockProcessManager,
-        FileSystem: () => fileSystem,
-      };
-
-      setUp(() {
-        mockPlatform = MockPlatform();
-        when(mockPlatform.isWindows).thenReturn(false);
-        mockProcessManager = MockProcessManager();
-        flutterPlatform = TestFlutterPlatform();
-        when(mockPlatform.environment).thenReturn(<String, String>{});
-      });
-
-      Future<Set<String>> captureArguments() async {
-        flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
-        when(mockProcessManager.start(
-            any,
-            environment: anyNamed('environment')),
-        ).thenAnswer((_) {
-          return Future<Process>.value(MockProcess());
-        });
-        await untilCalled(mockProcessManager.start(any, environment: anyNamed('environment')));
-        final VerificationResult toVerify = verify(mockProcessManager.start(
-          captureAny,
-          environment: anyNamed('environment'),
-        ));
-        expect(toVerify.captured, hasLength(1));
-        expect(toVerify.captured.first, isA<List<String>>());
-        final List<String> command = toVerify.captured.first as List<String>;
-        return command.where((String element) => element.startsWith('-')).toSet();
-      }
-
-      testUsingContext('contain --verbose-logging', () async {
-        final Set<String> capturedArguments = await captureArguments();
-        expect(capturedArguments, contains('--verbose-logging'));
-      }, overrides: contextOverrides);
-    });
-
     testUsingContext('installHook creates a FlutterPlatform', () {
       expect(() => installHook(
         buildMode: BuildMode.debug,
