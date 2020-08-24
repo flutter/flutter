@@ -196,15 +196,7 @@ DEF_SWITCH(
     "Uses separate threads for the platform, UI, GPU and IO task runners. "
     "By default, a single thread is used for all task runners. Only available "
     "in the flutter_tester.")
-// TODO(cyanlaz): Remove this when dynamic thread merging is done.
-// https://github.com/flutter/flutter/issues/59930
-DEF_SWITCH(UseEmbeddedView,
-           "use-embedded-view",
-           "Whether an android application uses embedded views."
-           "This is a temporary flag to make the raster task runner runs on "
-           "the platform thread."
-           "This flag should be removed once the dynamic thread merging is "
-           "enabled on android.")
+
 DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);

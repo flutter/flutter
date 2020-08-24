@@ -146,9 +146,6 @@ bool AndroidSurfaceSoftware::PresentBackingStore(
 
 // |GPUSurfaceSoftwareDelegate|
 ExternalViewEmbedder* AndroidSurfaceSoftware::GetExternalViewEmbedder() {
-  if (!AndroidShellHolder::use_embedded_view) {
-    return nullptr;
-  }
   return external_view_embedder_.get();
 }
 
