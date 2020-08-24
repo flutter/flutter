@@ -290,7 +290,7 @@ abstract class MultiChildLayoutDelegate {
   /// This should compare the fields of the current delegate and the given
   /// `oldDelegate` and return true if the fields are such that the layout would
   /// be different.
-  bool shouldRelayout(covariant MultiChildLayoutDelegate? oldDelegate);
+  bool shouldRelayout(covariant MultiChildLayoutDelegate oldDelegate);
 
   /// Override this method to include additional information in the
   /// debugging data printed by [debugDumpRenderTree] and friends.
@@ -327,18 +327,18 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   /// The delegate that controls the layout of the children.
-  MultiChildLayoutDelegate get delegate => _delegate!;
-  MultiChildLayoutDelegate? _delegate;
+  MultiChildLayoutDelegate get delegate => _delegate;
+  MultiChildLayoutDelegate _delegate;
   set delegate(MultiChildLayoutDelegate newDelegate) {
     assert(newDelegate != null);
     if (_delegate == newDelegate)
       return;
-    final MultiChildLayoutDelegate? oldDelegate = _delegate;
+    final MultiChildLayoutDelegate oldDelegate = _delegate;
     if (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRelayout(oldDelegate))
       markNeedsLayout();
     _delegate = newDelegate;
     if (attached) {
-      oldDelegate?._relayout?.removeListener(markNeedsLayout);
+      oldDelegate._relayout?.removeListener(markNeedsLayout);
       newDelegate._relayout?.addListener(markNeedsLayout);
     }
   }
@@ -346,18 +346,18 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _delegate?._relayout?.addListener(markNeedsLayout);
+    _delegate._relayout?.addListener(markNeedsLayout);
   }
 
   @override
   void detach() {
-    _delegate?._relayout?.removeListener(markNeedsLayout);
+    _delegate._relayout?.removeListener(markNeedsLayout);
     super.detach();
   }
 
   Size _getSize(BoxConstraints constraints) {
     assert(constraints.debugAssertIsValid());
-    return constraints.constrain(_delegate!.getSize(constraints));
+    return constraints.constrain(_delegate.getSize(constraints));
   }
 
   // TODO(ianh): It's a bit dubious to be using the getSize function from the delegate to
