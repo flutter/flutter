@@ -2480,11 +2480,11 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     assert(!debugNeedsLayout);
     ChildType? child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final ParentDataType? childParentData = child.parentData as ParentDataType?;
       final double? result = child.getDistanceToActualBaseline(baseline);
       if (result != null)
-        return result + childParentData.offset.dy;
-      child = childParentData.nextSibling;
+        return result + childParentData!.offset.dy;
+      child = childParentData!.nextSibling;
     }
     return null;
   }
