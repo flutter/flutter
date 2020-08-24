@@ -35,9 +35,9 @@ import 'theme_data.dart';
 ///
 /// The elevated button's default style is defined by
 /// [defaultStyleOf].  The style of this elevated button can be
-/// overridden with its [style] parameter. The style of all contained
+/// overridden with its [style] parameter. The style of all elevated
 /// buttons in a subtree can be overridden with the
-/// [ElevatedButtonTheme], and the style of all of the contained
+/// [ElevatedButtonTheme], and the style of all of the elevated
 /// buttons in an app can be overridden with the [Theme]'s
 /// [ThemeData.elevatedButtonTheme] property.
 ///
@@ -408,141 +408,6 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
 
 class _ElevatedButtonWithIconChild extends StatelessWidget {
   const _ElevatedButtonWithIconChild({ Key key, this.label, this.icon }) : super(key: key);
-
-  final Widget label;
-  final Widget icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final double scale = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1;
-    final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1));
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), label],
-    );
-  }
-}
-
-/// Please use [ElevatedButton].
-@Deprecated(
-  'This class was briefly released with the wrong name. The correct name is ElevatedButton. '
-  'This feature was deprecated after v1.20.0-2.0.pre.'
-)
-class ContainedButton extends ElevatedButton {
-  /// Please use [new ElevatedButton].
-  const ContainedButton({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
-    bool autofocus = false,
-    Clip clipBehavior = Clip.none,
-    @required Widget child,
-  }) : super(
-    key: key,
-    onPressed: onPressed,
-    onLongPress: onLongPress,
-    style: style,
-    focusNode: focusNode,
-    autofocus: autofocus,
-    clipBehavior: clipBehavior,
-    child: child,
-  );
-
-  /// Please use [new ElevatedButton.icon].
-  factory ContainedButton.icon({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
-    bool autofocus,
-    Clip clipBehavior,
-    @required Widget icon,
-    @required Widget label,
-  }) = _ContainedButtonWithIcon;
-
-  /// Please use [ElevatedButton.styleFrom].
-  static ButtonStyle styleFrom({
-    Color primary,
-    Color onPrimary,
-    Color onSurface,
-    Color shadowColor,
-    double elevation,
-    TextStyle textStyle,
-    EdgeInsetsGeometry padding,
-    Size minimumSize,
-    BorderSide side,
-    OutlinedBorder shape,
-    MouseCursor enabledMouseCursor,
-    MouseCursor disabledMouseCursor,
-    VisualDensity visualDensity,
-    MaterialTapTargetSize tapTargetSize,
-    Duration animationDuration,
-    bool enableFeedback,
-  }) {
-    return ElevatedButton.styleFrom(
-      primary: primary,
-      onPrimary: onPrimary,
-      onSurface: onSurface,
-      shadowColor: shadowColor,
-      elevation: elevation,
-      textStyle: textStyle,
-      padding: padding,
-      minimumSize: minimumSize,
-      side: side,
-      shape: shape,
-      enabledMouseCursor: enabledMouseCursor,
-      disabledMouseCursor: disabledMouseCursor,
-      visualDensity: visualDensity,
-      tapTargetSize: tapTargetSize,
-      animationDuration: animationDuration,
-      enableFeedback: enableFeedback,
-    );
-  }
-}
-
-class _ContainedButtonWithIcon extends ContainedButton {
-  _ContainedButtonWithIcon({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
-    bool autofocus,
-    Clip clipBehavior,
-    @required Widget icon,
-    @required Widget label,
-  }) : assert(icon != null),
-       assert(label != null),
-       super(
-         key: key,
-         onPressed: onPressed,
-         onLongPress: onLongPress,
-         style: style,
-         focusNode: focusNode,
-         autofocus: autofocus ?? false,
-         clipBehavior: clipBehavior ?? Clip.none,
-         child: _ContainedButtonWithIconChild(icon: icon, label: label),
-      );
-
-  @override
-  ButtonStyle defaultStyleOf(BuildContext context) {
-    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
-      const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
-      const EdgeInsets.symmetric(horizontal: 8),
-      const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
-      MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1,
-    );
-    return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding)
-    );
-  }
-}
-
-class _ContainedButtonWithIconChild extends StatelessWidget {
-  const _ContainedButtonWithIconChild({ Key key, this.label, this.icon }) : super(key: key);
 
   final Widget label;
   final Widget icon;
