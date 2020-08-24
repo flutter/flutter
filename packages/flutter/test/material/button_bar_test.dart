@@ -630,7 +630,7 @@ void main() {
     );
   });
 
-  testWidgets('_RenderButtonBarRow.constraints works before layout', (WidgetTester tester) async {
+  testWidgets('_RenderButtonBarRow.constraints does not work before layout', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: ButtonBar()),
       Duration.zero,
@@ -641,6 +641,6 @@ void main() {
     final RenderBox renderButtonBar = tester.renderObject(buttonBar) as RenderBox;
 
     expect(renderButtonBar.debugNeedsLayout, isTrue);
-    expect(renderButtonBar.constraints, isNull);
+    expect(() => renderButtonBar.constraints, throwsStateError);
   });
 }

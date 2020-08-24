@@ -70,7 +70,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isEnabled: true,
@@ -85,7 +85,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isChecked: true,

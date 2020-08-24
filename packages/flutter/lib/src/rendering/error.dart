@@ -47,6 +47,8 @@ class RenderErrorBox extends RenderBox {
         builder.pushStyle(textStyle);
         builder.addText(message);
         _paragraph = builder.build();
+      } else {
+        _paragraph = null;
       }
     } catch (error) {
       // Intentionally left empty.
@@ -56,7 +58,8 @@ class RenderErrorBox extends RenderBox {
   /// The message to attempt to display at paint time.
   final String message;
 
-  ui.Paragraph _paragraph;
+  // TODO(ianh): should be final
+  /*late*/ ui.Paragraph/*?*/ _paragraph;
 
   @override
   double computeMaxIntrinsicWidth(double height) {

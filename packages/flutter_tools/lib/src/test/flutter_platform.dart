@@ -800,6 +800,7 @@ class FlutterPlatform extends PlatformPlugin {
       '--skia-deterministic-rendering',
       '--enable-dart-profiling',
       '--non-interactive',
+      '--verbose-logging',
       '--use-test-fonts',
       '--packages=$packages',
       if (nullAssertions)
