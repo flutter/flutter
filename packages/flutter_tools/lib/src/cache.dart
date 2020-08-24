@@ -105,13 +105,6 @@ class Cache {
     // are required.
     _net = Net(logger: _logger, platform: _platform);
     _fsUtils = FileSystemUtils(fileSystem: _fileSystem, platform: _platform);
-    _artifactUpdater = ArtifactUpdater(
-      operatingSystemUtils: _osUtils,
-      net: _net,
-      logger: _logger,
-      fileSystem: _fileSystem,
-      tempStorage: getDownloadDir(),
-    );
     if (artifacts == null) {
       _artifacts.add(MaterialFonts(this));
 
@@ -144,7 +137,20 @@ class Cache {
   final FileSystem _fileSystem;
   final OperatingSystemUtils _osUtils;
 
-  ArtifactUpdater _artifactUpdater;
+  ArtifactUpdater get _artifactUpdater => __artifactUpdater ??= _createUpdater();
+  ArtifactUpdater __artifactUpdater;
+
+  /// This has to be lazy because it requires FLUTTER_ROOT to be initialized.
+  ArtifactUpdater _createUpdater() {
+    return ArtifactUpdater(
+      operatingSystemUtils: _osUtils,
+      net: _net,
+      logger: _logger,
+      fileSystem: _fileSystem,
+      tempStorage: getDownloadDir(),
+    );
+  }
+
   Net _net;
   FileSystemUtils _fsUtils;
 
@@ -1419,7 +1425,6 @@ class ArtifactUpdater {
       message,
       url,
       location,
-      _operatingSystemUtils.verifyZip,
       _operatingSystemUtils.unzip,
     );
   }
@@ -1430,7 +1435,6 @@ class ArtifactUpdater {
       message,
       url,
       location,
-      _operatingSystemUtils.verifyGzip,
       _operatingSystemUtils.unpack,
     );
   }
@@ -1440,40 +1444,35 @@ class ArtifactUpdater {
     String message,
     Uri url,
     Directory location,
-    bool Function(File) verifier,
     void Function(File, Directory) extractor,
   ) async {
-    final String downloadPath = _flattenNameSubdirs(url);
+    final String downloadPath = flattenNameSubdirs(url, _fileSystem);
     final File tempFile = _createDownloadFile(downloadPath);
     final Status status = _logger.startProgress(message, timeout: const Duration(minutes: 2));
     int retries = 0;
 
     while (retries < 2) {
       try {
-        _ensureExists(location.parent);
+        _ensureExists(tempFile.parent);
         await _net.fetchUrl(url, destFile: tempFile, maxAttempts: 2);
         status.stop();
-      // The exception is rethrown, so don't catch only Exceptions.
-      } catch (exception) { // ignore: avoid_catches_without_on_clauses
-        status.cancel();
-        if (retries == 1) {
-          rethrow;
-        }
-        retries += 1;
-        continue;
+      } finally {
+        status.stop();
       }
       _ensureExists(location);
       try {
         extractor(tempFile, location);
       } on ProcessException {
-        if (retries == 1) {
+        if (retries >= 1) {
           rethrow;
         }
         retries += 1;
         if (tempFile.existsSync()) {
           tempFile.deleteSync();
         }
+        continue;
       }
+      return;
     }
   }
 
@@ -1485,12 +1484,6 @@ class ArtifactUpdater {
     return tempFile;
   }
 
-  String _flattenNameSubdirs(Uri url) {
-    final List<String> pieces = <String>[url.host, ...url.pathSegments];
-    final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
-    return _fileSystem.path.joinAll(convertedPieces);
-  }
-
   /// Create the given [directory] and parents, as necessary.
   void _ensureExists(Directory directory) {
     if (!directory.existsSync()) {
@@ -1500,14 +1493,17 @@ class ArtifactUpdater {
 
     /// Clear any zip/gzip files downloaded.
   void removeDownloadedFiles() {
-    for (final File f in downloadedFiles) {
-      try {
-        f.deleteSync();
-      } on FileSystemException catch (e) {
-        globals.printError('Failed to delete "${f.path}". Please delete manually. $e');
+    for (final File file in downloadedFiles) {
+      if (!file.existsSync()) {
         continue;
       }
-      for (Directory d = f.parent; d.absolute.path != _tempStorage.absolute.path; d = d.parent) {
+      try {
+        file.deleteSync();
+      } on FileSystemException catch (e) {
+        globals.printError('Failed to delete "${file.path}". Please delete manually. $e');
+        continue;
+      }
+      for (Directory d = file.parent; d.absolute.path != _tempStorage.absolute.path; d = d.parent) {
         if (d.listSync().isEmpty) {
           d.deleteSync();
         } else {
@@ -1516,4 +1512,11 @@ class ArtifactUpdater {
       }
     }
   }
+}
+
+@visibleForTesting
+String flattenNameSubdirs(Uri url, FileSystem fileSystem){
+  final List<String> pieces = <String>[url.host, ...url.pathSegments];
+  final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
+  return fileSystem.path.joinAll(convertedPieces);
 }
