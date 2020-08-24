@@ -394,7 +394,7 @@ void main() {
       firstErrorDetails = null;
     });
 
-    test('the resulting constraints are normalized', () {
+    test('throws if the resulting constraints are not normalized', () {
       final RenderConstrainedBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(height: 0));
       final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
         alignment: Alignment.center,
@@ -403,8 +403,9 @@ void main() {
         child: child,
       );
 
-      layout(box, constraints: const BoxConstraints());
-      expect(child.constraints, const BoxConstraints.tightFor(height: 200));
+      layout(box, constraints: const BoxConstraints(), onErrors: exhaustErrors);
+
+      expect(firstErrorDetails?.toString(), contains('is not normalized'));
     });
 
     test('overflow is reported when insufficient size is given', () {

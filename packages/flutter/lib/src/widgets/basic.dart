@@ -2223,28 +2223,22 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// its child using the resulting [BoxConstraints], treating any overflow
 /// as error.
 ///
-/// This container sizes its child using a normalized [BoxConstraints] created
-/// by applying [constraintsTransform] to its own constraints. This container
-/// will then attempt to adopt the same size, within the limits of its own
-/// constraints. If it ends up with a different size, it will align the child
-/// based on [alignment]. If the container cannot expand enough to accommodate
-/// the entire child, the child will be clipped if [clipBehavior] is not
-/// [Clip.none].
+/// This container sizes its child using a [BoxConstraints] created by applying
+/// [constraintsTransform] to its own constraints. This container will then
+/// attempt to adopt the same size, within the limits of its own constraints. If
+/// it ends up with a different size, it will align the child based on
+/// [alignment]. If the container cannot expand enough to accommodate the entire
+/// child, the child will be clipped if [clipBehavior] is not [Clip.none].
 ///
 /// In debug mode, if the child overflows the container, a warning will be
 /// printed on the console, and black and yellow striped areas will appear where
 /// the overflow occurs.
 ///
-/// This widget can be used to allow the child to enforce some of its intrinsic
-/// sizing rules, partially disregard the constraints set by its parent, and
-/// display a warning in debug mode if the parent container fails to provide
-/// enough space:
-///
 /// {@tool snippet}
-/// This snippet allows the [Card] to be at least its intrinsic height high, but
-/// unlike [UnconstrainedBox], it allows the [Card] to stretch vertically when
-/// the parent container demands so. If parent container fails to provide
-/// sufficient height, in debug mode a warning will be given.
+/// This snippet guarantees the child [Card] will be at least as tall as its
+/// intrinsic height. Unlike [UnconstrainedBox], the child can be taller if the
+/// the parent's minHeight is constrained. If parent container's maxHeight is
+/// less than [Card]'s intrinsic height, in debug mode a warning will be given.
 ///
 /// ```dart
 /// ConstraintsTransformBox(
@@ -2256,19 +2250,19 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [BoxConstraints], the type constraints of constraints this widget can be
-///    used to manipulate.
 ///  * [ConstrainedBox], which renders a box which imposes constraints
 ///    on its child.
-///  * [OverflowBox], which renders a box that imposes different constraints on
-///    its child than it gets from its parent, possibly allowing the child to
-///    overflow the parent.
+///  * [OverflowBox], a widget that imposes additional constraints on its child,
+///    and allows the child to overflow itself.
 ///  * [UnconstrainedBox] which allows its children to render themselves
 ///    unconstrained, expands to fit them, and considers overflow to be an error.
 class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that uses a function to transform the constraints it
   /// passes to its child. If the child overflows the parent's constraints, a
   /// warning will be given in debug mode.
+  ///
+  /// The `alignment`, `clipBehavior` and `constraintsTransform` arguments must
+  /// not be null.
   const ConstraintsTransformBox({
     Key key,
     Widget child,
@@ -2283,9 +2277,13 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
 
   /// The text direction to use when interpreting the [alignment] if it is an
   /// [AlignmentDirectional].
+  ///
+  /// Defaults to null, in which case [Directionality.of] is used to determine
+  /// the text direction.
   final TextDirection textDirection;
 
-  /// The alignment to use when laying out the child.
+  /// The alignment to use when laying out the child, if it has a different size
+  /// than this widget.
   ///
   /// If this is an [AlignmentDirectional], then [textDirection] must not be
   /// null.
@@ -2297,10 +2295,11 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   final AlignmentGeometry alignment;
 
   /// @{template flutter.widgets.constraintsTransform}
-  /// The function used to transform the [BoxConstraints] imposed on [child].
+  /// The function used to transform the incoming [BoxConstraints], to impose on
+  /// [child].
   ///
-  /// Must not be null. The function must not return null. The result will be
-  /// normalized.
+  /// Must not be null. The function must return a non-null and normalized
+  /// [BoxConstraints].
   /// @{endtemplate}
   final BoxConstraintsTransform constraintsTransform;
 
