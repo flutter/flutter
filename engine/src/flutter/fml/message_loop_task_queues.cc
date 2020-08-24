@@ -79,8 +79,7 @@ void MessageLoopTaskQueues::RegisterTask(TaskQueueId queue_id,
   if (queue_entry->subsumed_by != _kUnmerged) {
     loop_to_wake = queue_entry->subsumed_by;
   }
-  WakeUpUnlocked(loop_to_wake,
-                 queue_entry->delayed_tasks.top().GetTargetTime());
+  WakeUpUnlocked(loop_to_wake, GetNextWakeTimeUnlocked(loop_to_wake));
 }
 
 bool MessageLoopTaskQueues::HasPendingTasks(TaskQueueId queue_id) const {

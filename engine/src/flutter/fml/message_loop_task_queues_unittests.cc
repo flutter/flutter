@@ -238,3 +238,42 @@ TEST(MessageLoopTaskQueue, DISABLED_ConcurrentQueueAndTaskCreatingCounts) {
   creation_1.join();
   creation_2.join();
 }
+
+TEST(MessageLoopTaskQueue, RegisterTaskWakesUpOwnerQueue) {
+  auto task_queue = fml::MessageLoopTaskQueues::GetInstance();
+  auto platform_queue = task_queue->CreateTaskQueue();
+  auto raster_queue = task_queue->CreateTaskQueue();
+
+  std::vector<fml::TimePoint> wakes;
+
+  task_queue->SetWakeable(platform_queue,
+                          new TestWakeable([&wakes](fml::TimePoint wake_time) {
+                            wakes.push_back(wake_time);
+                          }));
+
+  task_queue->SetWakeable(raster_queue,
+                          new TestWakeable([](fml::TimePoint wake_time) {
+                            // The raster queue is owned by the platform queue.
+                            ASSERT_FALSE(true);
+                          }));
+
+  auto time1 = fml::TimePoint::Now() + fml::TimeDelta::FromMilliseconds(1);
+  auto time2 = fml::TimePoint::Now() + fml::TimeDelta::FromMilliseconds(2);
+
+  ASSERT_EQ(0UL, wakes.size());
+
+  task_queue->RegisterTask(
+      platform_queue, []() {}, time1);
+
+  ASSERT_EQ(1UL, wakes.size());
+  ASSERT_EQ(time1, wakes[0]);
+
+  task_queue->Merge(platform_queue, raster_queue);
+
+  task_queue->RegisterTask(
+      raster_queue, []() {}, time2);
+
+  ASSERT_EQ(3UL, wakes.size());
+  ASSERT_EQ(time1, wakes[1]);
+  ASSERT_EQ(time1, wakes[2]);
+}
