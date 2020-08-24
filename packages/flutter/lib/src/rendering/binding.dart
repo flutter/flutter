@@ -143,10 +143,12 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   /// Called automatically when the binding is created.
   void initRenderView() {
-    assert(renderView == null);
+    assert(!_isRenderViewInitialized);
+    _isRenderViewInitialized = true;
     renderView = RenderView(configuration: createViewConfiguration(), window: window);
-    renderView!.prepareInitialFrame();
+    renderView.prepareInitialFrame();
   }
+  bool _isRenderViewInitialized = false;
 
   /// The object that manages state about currently connected mice, for hover
   /// notification.
@@ -159,10 +161,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   late PipelineOwner _pipelineOwner;
 
   /// The render tree that's attached to the output surface.
-  RenderView? get renderView => _pipelineOwner.rootNode as RenderView?;
+  RenderView get renderView => _pipelineOwner.rootNode as RenderView;
   /// Sets the given [RenderView] object (which must not be null), and its tree, to
   /// be the new render tree to display. The previous tree, if any, is detached.
-  set renderView(RenderView? value) {
+  set renderView(RenderView value) {
     assert(value != null);
     _pipelineOwner.rootNode = value;
   }
@@ -173,7 +175,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @protected
   void handleMetricsChanged() {
     assert(renderView != null);
-    renderView!.configuration = createViewConfiguration();
+    renderView.configuration = createViewConfiguration();
     scheduleForcedFrame();
   }
 
@@ -256,7 +258,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
       _mouseTracker!.updateWithEvent(event,
-          () => hitTestResult ?? renderView!.hitTestMouseTrackers(event.position));
+          () => hitTestResult ?? renderView.hitTestMouseTrackers(event.position));
     }
     super.dispatchEvent(event, hitTestResult);
   }
@@ -285,11 +287,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   void _handleSemanticsOwnerCreated() {
-    renderView!.scheduleInitialSemantics();
+    renderView.scheduleInitialSemantics();
   }
 
   void _handleSemanticsOwnerDisposed() {
-    renderView!.clearSemantics();
+    renderView.clearSemantics();
   }
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
@@ -310,7 +312,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         _debugMouseTrackerUpdateScheduled = false;
         return true;
       }());
-      _mouseTracker!.updateAllDevices(renderView!.hitTestMouseTrackers);
+      _mouseTracker!.updateAllDevices(renderView.hitTestMouseTrackers);
     });
   }
 
@@ -431,7 +433,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     pipelineOwner.flushCompositingBits();
     pipelineOwner.flushPaint();
     if (sendFramesToEngine) {
-      renderView!.compositeFrame(); // this sends the bits to the GPU
+      renderView.compositeFrame(); // this sends the bits to the GPU
       pipelineOwner.flushSemantics(); // this also sends the semantics to the OS.
       _firstFrameSent = true;
     }
@@ -442,7 +444,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     await super.performReassemble();
     Timeline.startSync('Dirty Render Tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
-      renderView!.reassemble();
+      renderView.reassemble();
     } finally {
       Timeline.finishSync();
     }
@@ -453,7 +455,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @override
   void hitTest(HitTestResult result, Offset position) {
     assert(renderView != null);
-    renderView!.hitTest(result, position: position);
+    renderView.hitTest(result, position: position);
     super.hitTest(result, position);
   }
 
@@ -463,19 +465,19 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       child.markNeedsPaint();
       child.visitChildren(visitor);
     };
-    instance?.renderView?.visitChildren(visitor);
+    instance?.renderView.visitChildren(visitor);
     return endOfFrame;
   }
 }
 
 /// Prints a textual representation of the entire render tree.
 void debugDumpRenderTree() {
-  debugPrint(RendererBinding.instance?.renderView?.toStringDeep() ?? 'Render tree unavailable.');
+  debugPrint(RendererBinding.instance?.renderView.toStringDeep() ?? 'Render tree unavailable.');
 }
 
 /// Prints a textual representation of the entire layer tree.
 void debugDumpLayerTree() {
-  debugPrint(RendererBinding.instance?.renderView?.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.');
+  debugPrint(RendererBinding.instance?.renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.');
 }
 
 /// Prints a textual representation of the entire semantics tree.
@@ -485,7 +487,7 @@ void debugDumpLayerTree() {
 /// The order in which the children of a [SemanticsNode] will be printed is
 /// controlled by the [childOrder] parameter.
 void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
-  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: childOrder) ?? 'Semantics not collected.');
+  debugPrint(RendererBinding.instance?.renderView.debugSemantics?.toStringDeep(childOrder: childOrder) ?? 'Semantics not collected.');
 }
 
 /// A concrete binding for applications that use the Rendering framework
@@ -502,6 +504,6 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
   /// given constraints that require it to fill the window.
   RenderingFlutterBinding({ RenderBox? root }) {
     assert(renderView != null);
-    renderView!.child = root;
+    renderView.child = root;
   }
 }
