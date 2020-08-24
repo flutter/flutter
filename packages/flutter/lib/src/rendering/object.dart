@@ -2441,7 +2441,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// * [RenderViewportBase.cacheExtent], used by viewports to extend their
   ///   semantics clip beyond their approximate paint clip.
-  Rect? describeSemanticsClip(covariant RenderObject child) => null;
+  Rect? describeSemanticsClip(covariant RenderObject? child) => null;
 
   // SEMANTICS
 

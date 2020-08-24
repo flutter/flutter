@@ -394,31 +394,6 @@ void main() {
     {
       FlutterError result;
       try {
-        unconstrained.getMinIntrinsicWidth(null);
-      } on FlutterError catch (e) {
-        result = e;
-      }
-      expect(result, isNotNull);
-      expect(
-        result.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   The height argument to getMinIntrinsicWidth was null.\n'
-          '   The argument to getMinIntrinsicWidth must not be negative or\n'
-          '   null.\n'
-          '   If you do not have a specific height in mind, then pass\n'
-          '   double.infinity instead.\n'
-        ),
-      );
-      expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific height in mind, then pass double.infinity instead.',
-      );
-    }
-
-    {
-      FlutterError result;
-      try {
         unconstrained.getMinIntrinsicWidth(-1);
       } on FlutterError catch (e) {
         result = e;
@@ -441,31 +416,6 @@ void main() {
         'If you perform computations on another height before passing it to '
         'getMinIntrinsicWidth, consider using math.max() or double.clamp() '
         'to force the value into the valid range.',
-      );
-    }
-
-    {
-      FlutterError result;
-      try {
-        unconstrained.getMinIntrinsicHeight(null);
-      } on FlutterError catch (e) {
-        result = e;
-      }
-      expect(result, isNotNull);
-      expect(
-        result.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   The width argument to getMinIntrinsicHeight was null.\n'
-          '   The argument to getMinIntrinsicHeight must not be negative or\n'
-          '   null.\n'
-          '   If you do not have a specific width in mind, then pass\n'
-          '   double.infinity instead.\n'
-        ),
-      );
-      expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific width in mind, then pass double.infinity instead.',
       );
     }
 
@@ -500,31 +450,6 @@ void main() {
     {
       FlutterError result;
       try {
-        unconstrained.getMaxIntrinsicWidth(null);
-      } on FlutterError catch (e) {
-        result = e;
-      }
-      expect(result, isNotNull);
-      expect(
-        result.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   The height argument to getMaxIntrinsicWidth was null.\n'
-          '   The argument to getMaxIntrinsicWidth must not be negative or\n'
-          '   null.\n'
-          '   If you do not have a specific height in mind, then pass\n'
-          '   double.infinity instead.\n'
-        ),
-      );
-      expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific height in mind, then pass double.infinity instead.',
-      );
-    }
-
-    {
-      FlutterError result;
-      try {
         unconstrained.getMaxIntrinsicWidth(-1);
       } on FlutterError catch (e) {
         result = e;
@@ -547,31 +472,6 @@ void main() {
         'If you perform computations on another height before passing it to '
         'getMaxIntrinsicWidth, consider using math.max() or double.clamp() '
         'to force the value into the valid range.',
-      );
-    }
-
-    {
-      FlutterError result;
-      try {
-        unconstrained.getMaxIntrinsicHeight(null);
-      } on FlutterError catch (e) {
-        result = e;
-      }
-      expect(result, isNotNull);
-      expect(
-        result.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   The width argument to getMaxIntrinsicHeight was null.\n'
-          '   The argument to getMaxIntrinsicHeight must not be negative or\n'
-          '   null.\n'
-          '   If you do not have a specific width in mind, then pass\n'
-          '   double.infinity instead.\n'
-        ),
-      );
-      expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific width in mind, then pass double.infinity instead.',
       );
     }
 

@@ -58,7 +58,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   RenderView({
     RenderBox? child,
     required ViewConfiguration configuration,
-    required ui.Window window,
+    required ui.Window? window,
   }) : assert(configuration != null),
        _configuration = configuration,
        _window = window {
@@ -86,7 +86,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
-  final ui.Window _window;
+  final ui.Window? _window;
 
   /// Whether Flutter should automatically compute the desired system UI.
   ///
@@ -231,7 +231,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       final ui.Scene scene = layer!.buildScene(builder);
       if (automaticSystemUiAdjustment)
         _updateSystemChrome();
-      _window.render(scene);
+      _window!.render(scene);
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled)
@@ -245,8 +245,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   void _updateSystemChrome() {
     final Rect bounds = paintBounds;
-    final Offset top = Offset(bounds.center.dx, _window.padding.top / _window.devicePixelRatio);
-    final Offset bottom = Offset(bounds.center.dx, bounds.center.dy - _window.padding.bottom / _window.devicePixelRatio);
+    final Offset top = Offset(bounds.center.dx, _window!.padding.top / _window!.devicePixelRatio);
+    final Offset bottom = Offset(bounds.center.dx, bounds.center.dy - _window!.padding.bottom / _window!.devicePixelRatio);
     final SystemUiOverlayStyle? upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle? lowerOverlayStyle;
@@ -293,10 +293,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       properties.add(DiagnosticsNode.message('debug mode enabled - ${kIsWeb ? 'Web' :  Platform.operatingSystem}'));
       return true;
     }());
-    properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
-    properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
+    properties.add(DiagnosticsProperty<Size>('window size', _window!.physicalSize, tooltip: 'in physical pixels'));
+    properties.add(DoubleProperty('device pixel ratio', _window!.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
-    if (_window.semanticsEnabled)
+    if (_window!.semanticsEnabled)
       properties.add(DiagnosticsNode.message('semantics enabled'));
   }
 }

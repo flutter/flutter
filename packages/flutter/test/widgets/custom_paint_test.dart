@@ -138,48 +138,6 @@ void main() {
     expect(error.toStringDeep(), contains('2 more times'));
   });
 
-  testWidgets('assembleSemanticsNode throws FlutterError', (WidgetTester tester) async {
-    final List<String> log = <String>[];
-    final GlobalKey target = GlobalKey();
-    await tester.pumpWidget(CustomPaint(
-      key: target,
-      isComplex: true,
-      painter: TestCustomPainter(log: log),
-    ));
-    final RenderCustomPaint renderCustom = target.currentContext.findRenderObject() as RenderCustomPaint;
-    dynamic error;
-    try {
-      renderCustom.assembleSemanticsNode(
-        null,
-        null,
-        <SemanticsNode>[SemanticsNode()],
-      );
-    } on FlutterError catch (e) {
-      error = e;
-    }
-    expect(error, isNotNull);
-    expect(error.toStringDeep(), equalsIgnoringHashCodes(
-      'FlutterError\n'
-      '   RenderCustomPaint does not have a child widget but received a\n'
-      '   non-empty list of child SemanticsNode:\n'
-      '   SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), invisible)\n'
-    ));
-
-    await tester.pumpWidget(CustomPaint(
-      key: target,
-      isComplex: true,
-      painter: TestCustomPainterWithCustomSemanticsBuilder(),
-    ));
-    final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
-    error = exception;
-    expect(error.toStringDeep(), equalsIgnoringHashCodes(
-      'FlutterError\n'
-      '   Failed to update the list of CustomPainterSemantics:\n'
-      "   - duplicate key [<'0'>] found at position 1\n"
-    ));
-  });
-
   testWidgets('CustomPaint sizing', (WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
 
