@@ -845,10 +845,10 @@ void main() {
 
     navigatorKey.currentState.push(route2);
     await tester.pumpAndSettle();
-    expect(navigatorObserver.invocations, contains(NavigatorInvocation.didPush));
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didPush);
 
     await tester.dragFrom(const Offset(5, 100), const Offset(100, 0));
-    expect(navigatorObserver.invocations, contains(NavigatorInvocation.didStartUserGesture));
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStartUserGesture);
     await tester.pump();
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(100));
     expect(navigatorKey.currentState.userGestureInProgress, true);
@@ -860,14 +860,14 @@ void main() {
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(0));
     expect(navigatorKey.currentState.userGestureInProgress, false);
 
-    expect(navigatorObserver.invocations, contains(NavigatorInvocation.didStopUserGesture));
-    expect(navigatorObserver.invocations, isNot(contains(NavigatorInvocation.didPop)));
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStopUserGesture);
+    expect(navigatorObserver.invocations.removeLast(), isNot(NavigatorInvocation.didPop));
 
     await tester.dragFrom(const Offset(5, 100), const Offset(500, 0));
     await tester.pump();
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(500));
     expect(navigatorKey.currentState.userGestureInProgress, true);
-    expect(navigatorObserver.invocations, contains(NavigatorInvocation.didPop));
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didPop);
 
     // Did go far enough to snap out of this route.
     await tester.pump(const Duration(milliseconds: 301));
@@ -906,14 +906,14 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(5, 200));
     // The width of the page.
     await gesture.moveBy(const Offset(800, 0));
-    expect(navigatorObserver.invocations, contains(NavigatorInvocation.didStartUserGesture));
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStartUserGesture);
     await gesture.up();
     await tester.pump();
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
-    expect(navigatorObserver.invocations, contains(NavigatorInvocation.didPop));
-    expect(navigatorObserver.invocations, contains(NavigatorInvocation.didStopUserGesture));
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStopUserGesture);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didPop);
   });
 
   testWidgets('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
@@ -943,7 +943,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(5, 200));
     // Move right a bit
     await gesture.moveBy(const Offset(300, 0));
-    expect(navigatorObserver.invocations, contains(NavigatorInvocation.didStartUserGesture));
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStartUserGesture);
     expect(
       tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
       true,
@@ -957,8 +957,8 @@ void main() {
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
-    expect(navigatorObserver.invocations, isNot(contains(NavigatorInvocation.didPop)));
-    expect(navigatorObserver.invocations, contains(NavigatorInvocation.didStopUserGesture));
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStopUserGesture);
+    expect(navigatorObserver.invocations.removeLast(), isNot(NavigatorInvocation.didPop));
     expect(
       tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
       false,
