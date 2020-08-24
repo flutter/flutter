@@ -604,6 +604,9 @@ abstract class CachedArtifact extends ArtifactSet {
   void _removeDownloadedFiles() {
     for (final File f in downloadedFiles) {
       try {
+        if (!f.existsSync()) {
+          continue;
+        }
         f.deleteSync();
       } on FileSystemException catch (e) {
         globals.printError('Failed to delete "${f.path}". Please delete manually. $e');
