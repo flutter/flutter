@@ -4376,24 +4376,23 @@ TEST_F(EmbedderTest, FrameInfoContainsValidWidthAndHeight) {
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
 
-  constexpr size_t frames_expected = 10;
-  fml::CountDownLatch frame_latch(frames_expected);
-  size_t frames_seen = 0;
+  fml::CountDownLatch frame_latch(10);
+
   context.AddNativeCallback("SignalNativeTest",
                             CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              frames_seen++;
-                              frame_latch.CountDown();
+                              /* Nothing to do. */
                             }));
+
+  context.SetGLGetFBOCallback(
+      [&event, &frame_latch](FlutterFrameInfo frame_info) {
+        // width and height are rotated by 90 deg
+        ASSERT_EQ(frame_info.size.width, event.height);
+        ASSERT_EQ(frame_info.size.height, event.width);
+
+        frame_latch.CountDown();
+      });
+
   frame_latch.Wait();
-
-  ASSERT_EQ(frames_expected, frames_seen);
-  ASSERT_EQ(context.GetGLFBOFrameInfos().size(), frames_seen);
-
-  for (FlutterFrameInfo frame_info : context.GetGLFBOFrameInfos()) {
-    // width and height are rotated by 90 deg
-    ASSERT_EQ(frame_info.size.width, event.height);
-    ASSERT_EQ(frame_info.size.height, event.width);
-  }
 }
 
 TEST_F(EmbedderTest, MustNotRunWithBothFBOCallbacksSet) {
