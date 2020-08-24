@@ -3254,6 +3254,35 @@ void main() {
       expect(observations[7].previous, isNull);
     });
   });
+
+  testWidgets('Widget can add and remove an observer from the navigator', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const FirstWidget(), // X
+      '/second': (BuildContext context) => const ObservingWidget(), // Y
+    };
+
+    await tester.pumpWidget(MaterialApp(routes: routes));
+    expect(find.byType(FirstWidget), findsOneWidget);
+    await tester.tap(find.byType(FirstWidget));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(FirstWidget), findsNothing);
+    expect(find.byType(FirstWidget, skipOffstage: false), findsOneWidget);
+    expect(find.byType(ObservingWidget), findsOneWidget);
+    final StatefulElement observingElement = tester.element<StatefulElement>(find.byType(ObservingWidget));
+    final ObservingWidgetState observingState = observingElement.state as ObservingWidgetState;
+    expect(observingState.observer.navigator, isNotNull);
+    expect(observingState.poppedRoutes, isEmpty);
+
+    await tester.tap(find.byType(ObservingWidget));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(FirstWidget), findsOneWidget);
+    expect(find.byType(ObservingWidget, skipOffstage: false), findsNothing);
+    expect(observingState.observer.navigator, isNull);
+    expect(observingState.poppedRoutes, hasLength(1));
+    expect(observingState.poppedRoutes.single.settings.name, '/second');
+  });
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>);
@@ -3433,4 +3462,58 @@ class NavigatorObservation {
   final String previous;
   final String current;
   final String operation;
+}
+
+class ObservingWidget extends StatefulWidget {
+  const ObservingWidget();
+
+  @override
+  ObservingWidgetState createState() => ObservingWidgetState();
+}
+
+class ObservingWidgetState extends State<ObservingWidget> {
+  final List<Route<dynamic>> poppedRoutes = <Route<dynamic>>[];
+  final TestObserver observer = TestObserver();
+
+  void _addObserver() {
+    Navigator.of(context).addObserver(observer);
+  }
+
+  void _removeObserver() {
+    if (observer.navigator != null) {
+      observer.navigator.removeObserver(observer);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    observer.onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      poppedRoutes.add(route);
+    };
+  }
+
+  @override
+  void didChangeDependencies() {
+    _removeObserver();
+    _addObserver();
+    super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    _removeObserver();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.pop(context),
+      child: Container(
+        color: const Color(0xFFFF00FF),
+        child: const Text('Y'),
+      ),
+    );
+  }
 }

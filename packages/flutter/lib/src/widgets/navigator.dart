@@ -1493,6 +1493,15 @@ class Navigator extends StatefulWidget {
   final RouteFactory onUnknownRoute;
 
   /// A list of observers for this navigator.
+  ///
+  /// In addition to this immutable list of observers, observers can also be
+  /// added and removed dynamically using [NavigatorState.addObserver] and
+  /// [NavigatorState.removeObserver].
+  ///
+  /// See also:
+  ///
+  ///  * [Navigator.of], which may be used to obtain a reference to a
+  ///    [NavigatorState] object.
   final List<NavigatorObserver> observers;
 
   /// The name for the default route of the application.
@@ -2747,7 +2756,32 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   HeroController _heroControllerFromScope;
 
+  final List<NavigatorObserver> _addedObservers = <NavigatorObserver>[];
   List<NavigatorObserver> _effectiveObservers;
+
+  /// Adds the specified observer to the list of observers for this navigator.
+  ///
+  /// Observers added via this method are distinct from the immutable
+  /// [Navigator.observers] list that is specified when the navigator is
+  /// constructed.
+  void addObserver(NavigatorObserver observer) {
+    assert(observer.navigator == null);
+    _addedObservers.add(observer);
+    observer._navigator = this;
+    _updateEffectiveObservers();
+  }
+
+  /// Removes the specified observer from the list of observers for this
+  /// navigator.
+  ///
+  /// This is only capable of removing observers that were added via
+  /// [addObserver].
+  void removeObserver(NavigatorObserver observer) {
+    assert(observer.navigator == this);
+    observer._navigator = null;
+    _addedObservers.remove(observer);
+    _updateEffectiveObservers();
+  }
 
   @override
   void initState() {
@@ -2839,10 +2873,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   }
 
   void _updateEffectiveObservers() {
-    if (_heroControllerFromScope != null)
-      _effectiveObservers = widget.observers + <NavigatorObserver>[_heroControllerFromScope];
-    else
-      _effectiveObservers = widget.observers;
+    _effectiveObservers = <NavigatorObserver>[
+      ...widget.observers,
+      ..._addedObservers,
+      if (_heroControllerFromScope != null) ...<NavigatorObserver>[_heroControllerFromScope],
+    ];
   }
 
   @override
