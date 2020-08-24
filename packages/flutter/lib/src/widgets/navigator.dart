@@ -2771,7 +2771,41 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// the [NavigatorObserver.navigator] field of the observer will be set to
   /// null. Generally, widgets will manage their observer lifecycle in a [State]
   /// object and handle such changes in their [State.didChangeDependencies]
-  /// method.
+  /// method, like so:
+  ///
+  /// ```dart
+  /// class MyWidgetState extends State<MyWidget> {
+  ///   final MyObserver observer = MyObserver();
+  ///
+  ///   void _addObserver() {
+  ///     Navigator.of(context).addObserver(observer);
+  ///   }
+  ///
+  ///   void _removeObserver() {
+  ///     if (observer.navigator != null) {
+  ///       observer.navigator.removeObserver(observer);
+  ///     }
+  ///   }
+  ///
+  ///   @override
+  ///   void didChangeDependencies() {
+  ///     super.didChangeDependencies();
+  ///     _removeObserver();
+  ///     _addObserver();
+  ///   }
+  ///
+  ///   @override
+  ///   void dispose() {
+  ///     _removeObserver();
+  ///     super.dispose();
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     ...
+  ///   }
+  /// }
+  /// ```
   ///
   /// An observer may only be associated with one navigator at a time.
   void addObserver(NavigatorObserver observer) {
