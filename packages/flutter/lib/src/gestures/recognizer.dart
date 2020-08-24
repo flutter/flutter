@@ -466,7 +466,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
           _getGlobalDistance(event) > preAcceptSlopTolerance!;
       final bool isPostAcceptSlopPastTolerance =
           _gestureAccepted &&
-           postAcceptSlopTolerance != null &&
+          postAcceptSlopTolerance != null &&
           _getGlobalDistance(event) > postAcceptSlopTolerance!;
 
       if (event is PointerMoveEvent && (isPreAcceptSlopPastTolerance || isPostAcceptSlopPastTolerance)) {
