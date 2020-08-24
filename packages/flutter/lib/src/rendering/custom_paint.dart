@@ -265,7 +265,7 @@ abstract class CustomPainter extends Listenable {
   /// image that should be considered a "hit", false if it corresponds to a
   /// point that should be considered outside the painted image, and null to use
   /// the default behavior.
-  bool? hitTest(Offset? position) => null;
+  bool? hitTest(Offset position) => null;
 
   @override
   String toString() => '${describeIdentity(this)}(${ _repaint?.toString() ?? "" })';
