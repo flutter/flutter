@@ -94,7 +94,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       type: 'windows',
     );
     final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs.directory(getBuildDirectory()),'windows-analysis', 'json',
+      globals.fs.directory(getBuildDirectory()),'windows-code-size-analysis', 'json',
     )..writeAsStringSync(jsonEncode(output));
     // This message is used as a sentinel in analyze_apk_size_test.dart
     globals.printStatus(

@@ -29,6 +29,9 @@ class SizeAnalyzer {
 
   static const int tableWidth = 80;
 
+  static const int _kAotSizeMaxDepth = 2;
+  static const int _kZipSizeMaxDepth = 1;
+
   /// Analyze the [aotSnapshot] in an uncompressed output directory.
   Future<Map<String, dynamic>> analyzeAotSnapshot({
     @required Directory outputDirectory,
@@ -59,7 +62,7 @@ class SizeAnalyzer {
       );
       // Print the expansion of lib directory to show more info for `appFilename`.
       if (firstLevelPath.name == fileSystem.path.basename(outputDirectory.path)) {
-        _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot);
+        _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot, _kAotSizeMaxDepth, 0);
       }
     }
 
@@ -108,7 +111,7 @@ class SizeAnalyzer {
     );
     final _SymbolNode aotSnapshotJsonRoot = _parseAotSnapshot(processedAotSnapshotJson);
     for (final _SymbolNode firstLevelPath in apkAnalysisRoot.children) {
-      _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot);
+      _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot, _kZipSizeMaxDepth, 0);
     }
     logger.printStatus('▒' * tableWidth);
 
@@ -195,24 +198,34 @@ class SizeAnalyzer {
     _SymbolNode currentNode,
     String totalPath,
     _SymbolNode aotSnapshotJsonRoot,
+    int maxDepth,
+    int currentDepth,
   ) {
     totalPath += currentNode.name;
 
     assert(_appFilename != null);
     if (currentNode.children.isNotEmpty
-      && currentNode.name != '$_appFilename (Dart AOT)') {
+      && currentNode.name != '$_appFilename (Dart AOT)'
+      && currentDepth < maxDepth
+      && currentNode.byteSize >= 1000) {
       for (final _SymbolNode child in currentNode.children) {
-        _printLibChildrenPaths(child, '$totalPath/', aotSnapshotJsonRoot);
+        _printLibChildrenPaths(child, '$totalPath/', aotSnapshotJsonRoot, maxDepth, currentDepth + 1);
       }
+      _leadingPaths = totalPath.split('/')
+        ..removeLast();
     } else {
-      // Print total path and size if currentNode does not have any chilren.
-      _printEntitySize(totalPath, byteSize: currentNode.byteSize, level: 1);
-      if (totalPath.contains(_locatedAotFilePath.join('/'))) {
-        _printAotSnapshotSummary(aotSnapshotJsonRoot, level: totalPath.split('/').length);
+      // Print total path and size if currentNode does not have any children and is
+      // larger than 1KB
+      final bool isAotSnapshotPath = _locatedAotFilePath.join('/').contains(totalPath);
+      if (currentNode.byteSize >= 1000 || isAotSnapshotPath) {
+        _printEntitySize(totalPath, byteSize: currentNode.byteSize, level: 1, emphasis: currentNode.children.isNotEmpty);
+        if (isAotSnapshotPath) {
+          _printAotSnapshotSummary(aotSnapshotJsonRoot, level: totalPath.split('/').length);
+        }
+        _leadingPaths = totalPath.split('/')
+          ..removeLast();
       }
     }
-    _leadingPaths = totalPath.split('/')
-      ..removeLast();
   }
 
   /// Go through the AOT gen snapshot size JSON and print out a collapsed summary
