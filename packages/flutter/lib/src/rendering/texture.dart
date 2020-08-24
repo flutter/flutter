@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:flutter/foundation.dart'; // ignore: unused_import
 
@@ -41,16 +41,16 @@ class TextureBox extends RenderBox {
   /// Creates a box backed by the texture identified by [textureId], and use
   /// [filterQuality] to set texture's [FilterQuality].
   TextureBox({
-    @required int textureId,
+    required int textureId,
     FilterQuality filterQuality = FilterQuality.low,
   }) : assert(textureId != null),
       _textureId = textureId,
       _filterQuality = filterQuality;
 
   /// The identity of the backend texture.
-  int/*!*/ get textureId => _textureId;
-  int/*!*/ _textureId;
-  set textureId(int/*!*/ value) {
+  int get textureId => _textureId;
+  int _textureId;
+  set textureId(int value) {
     assert(value != null);
     if (value != _textureId) {
       _textureId = value;

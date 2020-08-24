@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:collection';
 import 'dart:math' as math;
@@ -43,7 +43,7 @@ const String _kEllipsis = '\u2026';
 /// Parent data for use with [RenderParagraph].
 class TextParentData extends ContainerBoxParentData<RenderBox> {
   /// The scaling of the text.
-  double scale;
+  double? scale;
 
   @override
   String toString() {
@@ -70,16 +70,16 @@ class RenderParagraph extends RenderBox
   /// it is not null, it must be greater than zero.
   RenderParagraph(InlineSpan text, {
     TextAlign textAlign = TextAlign.start,
-    @required TextDirection textDirection,
+    required TextDirection textDirection,
     bool softWrap = true,
     TextOverflow overflow = TextOverflow.clip,
     double textScaleFactor = 1.0,
-    int maxLines,
-    Locale locale,
-    StrutStyle strutStyle,
+    int? maxLines,
+    Locale? locale,
+    StrutStyle? strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    ui.TextHeightBehavior textHeightBehavior,
-    List<RenderBox> children,
+    ui.TextHeightBehavior? textHeightBehavior,
+    List<RenderBox>? children,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
        assert(textAlign != null),
@@ -116,10 +116,10 @@ class RenderParagraph extends RenderBox
   final TextPainter _textPainter;
 
   /// The text to display.
-  InlineSpan get text => _textPainter.text/*!*/;
+  InlineSpan get text => _textPainter.text!;
   set text(InlineSpan value) {
     assert(value != null);
-    switch (_textPainter.text.compareTo(value)) {
+    switch (_textPainter.text!.compareTo(value)) {
       case RenderComparison.identical:
       case RenderComparison.metadata:
         return;
@@ -138,7 +138,7 @@ class RenderParagraph extends RenderBox
     }
   }
 
-  List<PlaceholderSpan> _placeholderSpans;
+  late List<PlaceholderSpan> _placeholderSpans;
   void _extractPlaceholderSpans(InlineSpan span) {
     _placeholderSpans = <PlaceholderSpan>[];
     span.visitChildren((InlineSpan span) {
@@ -173,8 +173,8 @@ class RenderParagraph extends RenderBox
   /// its left.
   ///
   /// This must not be null.
-  TextDirection/*!*/ get textDirection => _textPainter.textDirection;
-  set textDirection(TextDirection/*!*/ value) {
+  TextDirection get textDirection => _textPainter.textDirection!;
+  set textDirection(TextDirection value) {
     assert(value != null);
     if (_textPainter.textDirection == value)
       return;
@@ -228,10 +228,10 @@ class RenderParagraph extends RenderBox
   /// An optional maximum number of lines for the text to span, wrapping if
   /// necessary. If the text exceeds the given number of lines, it will be
   /// truncated according to [overflow] and [softWrap].
-  int/*?*/ get maxLines => _textPainter.maxLines;
+  int? get maxLines => _textPainter.maxLines;
   /// The value may be null. If it is not null, then it must be greater than
   /// zero.
-  set maxLines(int/*?*/ value) {
+  set maxLines(int? value) {
     assert(value == null || value > 0);
     if (_textPainter.maxLines == value)
       return;
@@ -248,9 +248,9 @@ class RenderParagraph extends RenderBox
   /// on the locale. For example the '骨' character is rendered differently in
   /// the Chinese and Japanese locales. In these cases the [locale] may be used
   /// to select a locale-specific font.
-  Locale/*?*/ get locale => _textPainter.locale;
+  Locale? get locale => _textPainter.locale;
   /// The value may be null.
-  set locale(Locale/*?*/ value) {
+  set locale(Locale? value) {
     if (_textPainter.locale == value)
       return;
     _textPainter.locale = value;
@@ -259,9 +259,9 @@ class RenderParagraph extends RenderBox
   }
 
   /// {@macro flutter.painting.textPainter.strutStyle}
-  StrutStyle/*?*/ get strutStyle => _textPainter.strutStyle;
+  StrutStyle? get strutStyle => _textPainter.strutStyle;
   /// The value may be null.
-  set strutStyle(StrutStyle/*?*/ value) {
+  set strutStyle(StrutStyle? value) {
     if (_textPainter.strutStyle == value)
       return;
     _textPainter.strutStyle = value;
@@ -281,8 +281,8 @@ class RenderParagraph extends RenderBox
   }
 
   /// {@macro flutter.dart:ui.textHeightBehavior}
-  ui.TextHeightBehavior/*?*/ get textHeightBehavior => _textPainter.textHeightBehavior;
-  set textHeightBehavior(ui.TextHeightBehavior/*?*/ value) {
+  ui.TextHeightBehavior? get textHeightBehavior => _textPainter.textHeightBehavior;
+  set textHeightBehavior(ui.TextHeightBehavior? value) {
     if (_textPainter.textHeightBehavior == value)
       return;
     _textPainter.textHeightBehavior = value;
@@ -331,7 +331,7 @@ class RenderParagraph extends RenderBox
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    assert(!debugNeedsLayout);
+    assert(!debugNeedsLayout!);
     assert(constraints != null);
     assert(constraints.debugAssertIsValid());
     _layoutTextWithConstraints(constraints);
@@ -369,7 +369,7 @@ class RenderParagraph extends RenderBox
   }
 
   void _computeChildrenWidthWithMaxIntrinsics(double height) {
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     // Takes textScaleFactor into account because the content of the placeholder
@@ -390,7 +390,7 @@ class RenderParagraph extends RenderBox
   }
 
   void _computeChildrenWidthWithMinIntrinsics(double height) {
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     // Takes textScaleFactor into account because the content of the placeholder
@@ -411,7 +411,7 @@ class RenderParagraph extends RenderBox
   }
 
   void _computeChildrenHeightWithMinIntrinsics(double width) {
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     // Takes textScaleFactor into account because the content of the placeholder
@@ -435,8 +435,8 @@ class RenderParagraph extends RenderBox
   bool hitTestSelf(Offset position) => true;
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
-    RenderBox child = firstChild;
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    RenderBox? child = firstChild;
     while (child != null) {
       final TextParentData textParentData = child.parentData as TextParentData;
       final Matrix4 transform = Matrix4.translationValues(
@@ -453,11 +453,11 @@ class RenderParagraph extends RenderBox
         position: position,
         hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(() {
-            final Offset manualPosition = (position - textParentData.offset) / textParentData.scale;
+            final Offset manualPosition = (position - textParentData.offset) / textParentData.scale!;
             return (transformed.dx - manualPosition.dx).abs() < precisionErrorTolerance
               && (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
           }());
-          return child.hitTest(result, position: transformed);
+          return child!.hitTest(result, position: transformed);
         },
       );
       if (isHit) {
@@ -476,18 +476,18 @@ class RenderParagraph extends RenderBox
     _layoutTextWithConstraints(constraints);
     final Offset offset = entry.localPosition;
     final TextPosition position = _textPainter.getPositionForOffset(offset);
-    final InlineSpan span = _textPainter.text.getSpanForPosition(position);
+    final InlineSpan? span = _textPainter.text!.getSpanForPosition(position);
     if (span == null) {
       return;
     }
     if (span is TextSpan) {
       final TextSpan textSpan = span;
-      textSpan.recognizer?.addPointer(event as PointerDownEvent);
+      textSpan.recognizer?.addPointer(event);
     }
   }
 
   bool _needsClipping = false;
-  ui.Shader _overflowShader;
+  ui.Shader? _overflowShader;
 
   /// Whether this paragraph currently has a [dart:ui.Shader] for its overflow
   /// effect.
@@ -517,7 +517,7 @@ class RenderParagraph extends RenderBox
   // These need to be cached because the text painter's placeholder dimensions
   // will be overwritten during intrinsic width/height calculations and must be
   // restored to the original values before final layout and painting.
-  List<PlaceholderDimensions> _placeholderDimensions;
+  List<PlaceholderDimensions>? _placeholderDimensions;
 
   void _layoutTextWithConstraints(BoxConstraints constraints) {
     _textPainter.setPlaceholderDimensions(_placeholderDimensions);
@@ -532,7 +532,7 @@ class RenderParagraph extends RenderBox
     if (childCount == 0) {
       return;
     }
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     _placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     BoxConstraints boxConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
@@ -547,11 +547,11 @@ class RenderParagraph extends RenderBox
         boxConstraints,
         parentUsesSize: true,
       );
-      double baselineOffset;
+      double? baselineOffset;
       switch (_placeholderSpans[childIndex].alignment) {
         case ui.PlaceholderAlignment.baseline: {
           baselineOffset = child.getDistanceToBaseline(
-            _placeholderSpans[childIndex].baseline
+            _placeholderSpans[childIndex].baseline!
           );
           break;
         }
@@ -560,7 +560,7 @@ class RenderParagraph extends RenderBox
           break;
         }
       }
-      _placeholderDimensions[childIndex] = PlaceholderDimensions(
+      _placeholderDimensions![childIndex] = PlaceholderDimensions(
         size: child.size,
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
@@ -574,15 +574,15 @@ class RenderParagraph extends RenderBox
   // Iterate through the laid-out children and set the parentData offsets based
   // off of the placeholders inserted for each child.
   void _setParentData() {
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     int childIndex = 0;
-    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
       final TextParentData textParentData = child.parentData as TextParentData;
       textParentData.offset = Offset(
-        _textPainter.inlinePlaceholderBoxes[childIndex].left,
-        _textPainter.inlinePlaceholderBoxes[childIndex].top,
+        _textPainter.inlinePlaceholderBoxes![childIndex].left,
+        _textPainter.inlinePlaceholderBoxes![childIndex].top,
       );
-      textParentData.scale = _textPainter.inlinePlaceholderScales[childIndex];
+      textParentData.scale = _textPainter.inlinePlaceholderScales![childIndex];
       child = childAfter(child);
       childIndex += 1;
     }
@@ -627,14 +627,14 @@ class RenderParagraph extends RenderBox
           assert(textDirection != null);
           _needsClipping = true;
           final TextPainter fadeSizePainter = TextPainter(
-            text: TextSpan(style: _textPainter.text.style, text: '\u2026'),
+            text: TextSpan(style: _textPainter.text!.style, text: '\u2026'),
             textDirection: textDirection,
             textScaleFactor: textScaleFactor,
             locale: locale,
           )..layout();
           if (didOverflowWidth) {
             double fadeEnd, fadeStart;
-            switch (textDirection/*!*/) {
+            switch (textDirection!) {
               case TextDirection.rtl:
                 fadeEnd = 0.0;
                 fadeStart = fadeSizePainter.width;
@@ -702,18 +702,18 @@ class RenderParagraph extends RenderBox
     }
     _textPainter.paint(context.canvas, offset);
 
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     int childIndex = 0;
     // childIndex might be out of index of placeholder boxes. This can happen
     // if engine truncates children due to ellipsis. Sadly, we would not know
     // it until we finish layout, and RenderObject is in immutable state at
     // this point.
-    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
       final TextParentData textParentData = child.parentData as TextParentData;
 
-      final double scale = textParentData.scale;
+      final double scale = textParentData.scale!;
       context.pushTransform(
-        needsCompositing,
+        needsCompositing!,
         offset + textParentData.offset,
         Matrix4.diagonal3Values(scale, scale, scale),
         (PaintingContext context, Offset offset) {
@@ -742,7 +742,7 @@ class RenderParagraph extends RenderBox
   ///
   /// Valid only after [layout].
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
-    assert(!debugNeedsLayout);
+    assert(!debugNeedsLayout!);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getOffsetForCaret(position, caretPrototype);
   }
@@ -755,7 +755,7 @@ class RenderParagraph extends RenderBox
   ///
   /// Valid only after [layout].
   List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
-    assert(!debugNeedsLayout);
+    assert(!debugNeedsLayout!);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getBoxesForSelection(selection);
   }
@@ -764,7 +764,7 @@ class RenderParagraph extends RenderBox
   ///
   /// Valid only after [layout].
   TextPosition getPositionForOffset(Offset offset) {
-    assert(!debugNeedsLayout);
+    assert(!debugNeedsLayout!);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getPositionForOffset(offset);
   }
@@ -779,7 +779,7 @@ class RenderParagraph extends RenderBox
   ///
   /// Valid only after [layout].
   TextRange getWordBoundary(TextPosition position) {
-    assert(!debugNeedsLayout);
+    assert(!debugNeedsLayout!);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getWordBoundary(position);
   }
@@ -794,13 +794,13 @@ class RenderParagraph extends RenderBox
   ///
   /// Valid only after [layout].
   Size get textSize {
-    assert(!debugNeedsLayout);
+    assert(!debugNeedsLayout!);
     return _textPainter.size;
   }
 
   /// Collected during [describeSemanticsConfiguration], used by
   /// [assembleSemanticsNode] and [_combineSemanticsInfo].
-  List<InlineSpanSemanticsInformation> _semanticsInfo;
+  List<InlineSpanSemanticsInformation>? _semanticsInfo;
 
   /// Combines _semanticsInfo entries where permissible, determined by
   /// [InlineSpanSemanticsInformation.requiresOwnNode].
@@ -810,8 +810,8 @@ class RenderParagraph extends RenderBox
     // TODO(ianh): this algorithm is internally inconsistent. workingText
     // never becomes null, but we check for it being so below.
     String workingText = '';
-    String workingLabel;
-    for (final InlineSpanSemanticsInformation info in _semanticsInfo) {
+    String? workingLabel;
+    for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
       if (info.requiresOwnNode) {
         if (workingText != null) {
           combined.add(InlineSpanSemanticsInformation(
@@ -826,7 +826,7 @@ class RenderParagraph extends RenderBox
         workingText += info.text;
         workingLabel ??= '';
         if (info.semanticsLabel != null) {
-          workingLabel += info.semanticsLabel/*!*/;
+          workingLabel += info.semanticsLabel!;
         } else {
           workingLabel += info.text;
         }
@@ -848,12 +848,12 @@ class RenderParagraph extends RenderBox
     super.describeSemanticsConfiguration(config);
     _semanticsInfo = text.getSemanticsInformation();
 
-    if (_semanticsInfo.any((InlineSpanSemanticsInformation info) => info.recognizer != null)) {
+    if (_semanticsInfo!.any((InlineSpanSemanticsInformation info) => info.recognizer != null)) {
       config.explicitChildNodes = true;
       config.isSemanticBoundary = true;
     } else {
       final StringBuffer buffer = StringBuffer();
-      for (final InlineSpanSemanticsInformation info in _semanticsInfo) {
+      for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
         buffer.write(info.semanticsLabel ?? info.text);
       }
       config.label = buffer.toString();
@@ -865,18 +865,18 @@ class RenderParagraph extends RenderBox
   // can be re-used when [assembleSemanticsNode] is called again. This ensures
   // stable ids for the [SemanticsNode]s of [TextSpan]s across
   // [assembleSemanticsNode] invocations.
-  Queue<SemanticsNode> _cachedChildNodes;
+  Queue<SemanticsNode>? _cachedChildNodes;
 
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
-    assert(_semanticsInfo != null && _semanticsInfo.isNotEmpty);
+    assert(_semanticsInfo != null && _semanticsInfo!.isNotEmpty);
     final List<SemanticsNode> newChildren = <SemanticsNode>[];
     TextDirection currentDirection = textDirection;
     Rect currentRect;
     double ordinal = 0.0;
     int start = 0;
     int placeholderIndex = 0;
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
     for (final InlineSpanSemanticsInformation info in _combineSemanticsInfo()) {
       final TextDirection initialDirection = currentDirection;
@@ -913,12 +913,12 @@ class RenderParagraph extends RenderBox
 
       if (info.isPlaceholder) {
         final SemanticsNode childNode = children.elementAt(placeholderIndex++);
-        final TextParentData parentData = child.parentData as TextParentData;
+        final TextParentData parentData = child!.parentData as TextParentData;
         childNode.rect = Rect.fromLTWH(
           childNode.rect.left,
           childNode.rect.top,
-          childNode.rect.width * parentData.scale,
-          childNode.rect.height * parentData.scale,
+          childNode.rect.width * parentData.scale!,
+          childNode.rect.height * parentData.scale!,
         );
         newChildren.add(childNode);
         child = childAfter(child);
@@ -927,7 +927,7 @@ class RenderParagraph extends RenderBox
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
           ..label = info.semanticsLabel ?? info.text;
-        final GestureRecognizer recognizer = info.recognizer;
+        final GestureRecognizer? recognizer = info.recognizer;
         if (recognizer != null) {
           if (recognizer is TapGestureRecognizer) {
             configuration.onTap = recognizer.onTap;
@@ -942,7 +942,7 @@ class RenderParagraph extends RenderBox
           }
         }
         final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)
-            ? _cachedChildNodes.removeFirst()
+            ? _cachedChildNodes!.removeFirst()
             : SemanticsNode();
         newChild
           ..updateWith(config: configuration)

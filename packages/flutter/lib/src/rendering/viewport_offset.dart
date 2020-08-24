@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -42,7 +42,7 @@ enum ScrollDirection {
 /// Specifically, returns [ScrollDirection.reverse] for [ScrollDirection.forward]
 /// (and vice versa) and returns [ScrollDirection.idle] for
 /// [ScrollDirection.idle].
-ScrollDirection/*!*/ flipScrollDirection(ScrollDirection direction) {
+ScrollDirection flipScrollDirection(ScrollDirection direction) {
   switch (direction) {
     case ScrollDirection.idle:
       return ScrollDirection.idle;
@@ -51,7 +51,7 @@ ScrollDirection/*!*/ flipScrollDirection(ScrollDirection direction) {
     case ScrollDirection.reverse:
       return ScrollDirection.forward;
   }
-  return null; // ignore: dead_code
+  return null!; // ignore: dead_code
 }
 
 /// Which part of the content inside the viewport should be visible.
@@ -120,7 +120,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// dimensions unconditionally?"; if the new dimensions change the
   /// [ViewportOffset]'s actual [pixels] value, then the viewport will need to
   /// be laid out again.)
-  bool applyViewportDimension(double/*!*/ viewportDimension);
+  bool applyViewportDimension(double viewportDimension);
 
   /// Called when the viewport's content extents are established.
   ///
@@ -161,7 +161,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   ///  * [jumpTo], for also changing the scroll position when not in layout.
   ///    [jumpTo] applies the change immediately and notifies its listeners.
-  void correctBy(double/*!*/ correction);
+  void correctBy(double correction);
 
   /// Jumps [pixels] from its current value to the given value,
   /// without animation, and without checking if the new value is in range.
@@ -170,7 +170,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   ///  * [correctBy], for changing the current offset in the middle of layout
   ///    and that defers the notification of its listeners until after layout.
-  void jumpTo(double/*!*/ pixels);
+  void jumpTo(double pixels);
 
   /// Animates [pixels] from its current value to the given value.
   ///
@@ -180,9 +180,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
   Future<void> animateTo(
-    double/*!*/ to, {
-    @required Duration duration,
-    @required Curve curve,
+    double to, {
+    required Duration duration,
+    required Curve curve,
   });
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
@@ -193,10 +193,10 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// like [ScrollPosition] handle it by adjusting [to] to prevent over or
   /// underscroll.
   Future<void> moveTo(
-    double/*!*/ to, {
-    Duration duration,
-    Curve curve,
-    bool clamp,
+    double to, {
+    Duration? duration,
+    Curve? curve,
+    bool? clamp,
   }) {
     assert(to != null);
     if (duration == null || duration == Duration.zero) {
@@ -268,7 +268,7 @@ class _FixedViewportOffset extends ViewportOffset {
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) => true;
 
   @override
-  void correctBy(double/*!*/ correction) {
+  void correctBy(double correction) {
     _pixels += correction;
   }
 
@@ -280,8 +280,8 @@ class _FixedViewportOffset extends ViewportOffset {
   @override
   Future<void> animateTo(
     double to, {
-    @required Duration duration,
-    @required Curve curve,
+    required Duration duration,
+    required Curve curve,
   }) async { }
 
   @override

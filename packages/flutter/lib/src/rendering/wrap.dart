@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:math' as math;
 
@@ -113,14 +113,14 @@ class RenderWrap extends RenderBox
   /// By default, the wrap layout is horizontal and both the children and the
   /// runs are aligned to the start.
   RenderWrap({
-    List<RenderBox> children,
+    List<RenderBox>? children,
     Axis direction = Axis.horizontal,
     WrapAlignment alignment = WrapAlignment.start,
     double spacing = 0.0,
     WrapAlignment runAlignment = WrapAlignment.start,
     double runSpacing = 0.0,
     WrapCrossAlignment crossAxisAlignment = WrapCrossAlignment.start,
-    TextDirection textDirection,
+    TextDirection? textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     Clip clipBehavior = Clip.none,
   }) : assert(direction != null),
@@ -294,9 +294,9 @@ class RenderWrap extends RenderBox
   /// [crossAxisAlignment] is either [WrapCrossAlignment.start] or
   /// [WrapCrossAlignment.end], or there's more than one child, then the
   /// [textDirection] must not be null.
-  TextDirection/*!*/ get textDirection => _textDirection;
-  TextDirection _textDirection;
-  set textDirection(TextDirection/*!*/ value) {
+  TextDirection get textDirection => _textDirection!;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection value) {
     if (_textDirection != value) {
       _textDirection = value;
       markNeedsLayout();
@@ -409,7 +409,7 @@ class RenderWrap extends RenderBox
     double runWidth = 0.0;
     double runHeight = 0.0;
     int childCount = 0;
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     while (child != null) {
       final double childWidth = child.getMaxIntrinsicWidth(double.infinity);
       final double childHeight = child.getMaxIntrinsicHeight(childWidth);
@@ -437,7 +437,7 @@ class RenderWrap extends RenderBox
     double runHeight = 0.0;
     double runWidth = 0.0;
     int childCount = 0;
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     while (child != null) {
       final double childHeight = child.getMaxIntrinsicHeight(double.infinity);
       final double childWidth = child.getMaxIntrinsicWidth(childHeight);
@@ -464,7 +464,7 @@ class RenderWrap extends RenderBox
     switch (direction) {
       case Axis.horizontal:
         double width = 0.0;
-        RenderBox child = firstChild;
+        RenderBox? child = firstChild;
         while (child != null) {
           width = math.max(width, child.getMinIntrinsicWidth(double.infinity));
           child = childAfter(child);
@@ -473,7 +473,7 @@ class RenderWrap extends RenderBox
       case Axis.vertical:
         return _computeIntrinsicWidthForHeight(height);
     }
-    return null; // ignore: dead_code
+    return null!; // ignore: dead_code
   }
 
   @override
@@ -481,7 +481,7 @@ class RenderWrap extends RenderBox
     switch (direction) {
       case Axis.horizontal:
         double width = 0.0;
-        RenderBox child = firstChild;
+        RenderBox? child = firstChild;
         while (child != null) {
           width += child.getMaxIntrinsicWidth(double.infinity);
           child = childAfter(child);
@@ -490,7 +490,7 @@ class RenderWrap extends RenderBox
       case Axis.vertical:
         return _computeIntrinsicWidthForHeight(height);
     }
-    return null; // ignore: dead_code
+    return null!; // ignore: dead_code
   }
 
   @override
@@ -500,14 +500,14 @@ class RenderWrap extends RenderBox
         return _computeIntrinsicHeightForWidth(width);
       case Axis.vertical:
         double height = 0.0;
-        RenderBox child = firstChild;
+        RenderBox? child = firstChild;
         while (child != null) {
           height = math.max(height, child.getMinIntrinsicHeight(double.infinity));
           child = childAfter(child);
         }
         return height;
     }
-    return null; // ignore: dead_code
+    return null!; // ignore: dead_code
   }
 
   @override
@@ -517,18 +517,18 @@ class RenderWrap extends RenderBox
         return _computeIntrinsicHeightForWidth(width);
       case Axis.vertical:
         double height = 0.0;
-        RenderBox child = firstChild;
+        RenderBox? child = firstChild;
         while (child != null) {
           height += child.getMaxIntrinsicHeight(double.infinity);
           child = childAfter(child);
         }
         return height;
     }
-    return null; // ignore: dead_code
+    return null!; // ignore: dead_code
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
     return defaultComputeDistanceToHighestActualBaseline(baseline);
   }
 
@@ -582,12 +582,12 @@ class RenderWrap extends RenderBox
     final BoxConstraints constraints = this.constraints;
     assert(_debugHasNecessaryDirections);
     _hasVisualOverflow = false;
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     if (child == null) {
       size = constraints.smallest;
       return;
     }
-    BoxConstraints childConstraints;
+    BoxConstraints? childConstraints;
     double mainAxisLimit = 0.0;
     bool flipMainAxis = false;
     bool flipCrossAxis = false;
@@ -763,7 +763,7 @@ class RenderWrap extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
@@ -772,7 +772,7 @@ class RenderWrap extends RenderBox
     // TODO(ianh): move the debug flex overflow paint logic somewhere common so
     // it can be reused here
     if (_hasVisualOverflow && clipBehavior != Clip.none)
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint, clipBehavior: clipBehavior);
+      context.pushClipRect(needsCompositing!, offset, Offset.zero & size, defaultPaint, clipBehavior: clipBehavior);
     else
       defaultPaint(context, offset);
   }

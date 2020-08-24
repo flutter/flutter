@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:math' as math;
 
@@ -34,7 +34,7 @@ class RenderListBody extends RenderBox
   ///
   /// By default, children are arranged along the vertical axis.
   RenderListBody({
-    List<RenderBox> children,
+    List<RenderBox>? children,
     AxisDirection axisDirection = AxisDirection.down,
   }) : assert(axisDirection != null),
        _axisDirection = axisDirection {
@@ -125,7 +125,7 @@ class RenderListBody extends RenderBox
       ]);
     }());
     double mainAxisExtent = 0.0;
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     switch (axisDirection) {
       case AxisDirection.right:
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
@@ -203,7 +203,7 @@ class RenderListBody extends RenderBox
 
   double _getIntrinsicCrossAxis(_ChildSizingFunction childSize) {
     double extent = 0.0;
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     while (child != null) {
       extent = math.max(extent, childSize(child));
       final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
@@ -214,7 +214,7 @@ class RenderListBody extends RenderBox
 
   double _getIntrinsicMainAxis(_ChildSizingFunction childSize) {
     double extent = 0.0;
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     while (child != null) {
       extent += childSize(child);
       final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
@@ -232,7 +232,7 @@ class RenderListBody extends RenderBox
       case Axis.vertical:
         return _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicWidth(height));
     }
-    return null; // ignore: dead_code
+    return null!; // ignore: dead_code
   }
 
   @override
@@ -244,7 +244,7 @@ class RenderListBody extends RenderBox
       case Axis.vertical:
         return _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicWidth(height));
     }
-    return null; // ignore: dead_code
+    return null!; // ignore: dead_code
   }
 
   @override
@@ -256,7 +256,7 @@ class RenderListBody extends RenderBox
       case Axis.vertical:
         return _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicHeight(width));
     }
-    return null; // ignore: dead_code
+    return null!; // ignore: dead_code
   }
 
   @override
@@ -268,11 +268,11 @@ class RenderListBody extends RenderBox
       case Axis.vertical:
         return _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicHeight(width));
     }
-    return null; // ignore: dead_code
+    return null!; // ignore: dead_code
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
     return defaultComputeDistanceToFirstActualBaseline(baseline);
   }
 
@@ -282,7 +282,7 @@ class RenderListBody extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 

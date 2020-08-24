@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:flutter/foundation.dart';
 
@@ -14,7 +14,7 @@ import 'object.dart';
 /// [ParentData] used by [RenderCustomMultiChildLayoutBox].
 class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
   /// An object representing the identity of this child.
-  Object id;
+  Object? id;
 
   @override
   String toString() => '${super.toString()}; id=$id';
@@ -120,13 +120,13 @@ abstract class MultiChildLayoutDelegate {
   /// Creates a layout delegate.
   ///
   /// The layout will update whenever [relayout] notifies its listeners.
-  MultiChildLayoutDelegate({ Listenable relayout }) : _relayout = relayout;
+  MultiChildLayoutDelegate({ Listenable? relayout }) : _relayout = relayout;
 
-  final Listenable _relayout;
+  final Listenable? _relayout;
 
   // TODO(ianh): make these late final
-  /*late*/ Map<Object/*!*/, RenderBox>/*!*/ _idToChild;
-  /*late*/ Set<RenderBox/*!*/>/*!*/ _debugChildrenNeedingLayout;
+  late Map<Object, RenderBox> _idToChild;
+  late Set<RenderBox> _debugChildrenNeedingLayout;
 
   /// True if a non-null LayoutChild was provided for the specified id.
   ///
@@ -141,8 +141,8 @@ abstract class MultiChildLayoutDelegate {
   /// Call this from your [performLayout] function to lay out each
   /// child. Every child must be laid out using this function exactly
   /// once each time the [performLayout] function is called.
-  Size/*!*/ layoutChild(Object childId, BoxConstraints constraints) {
-    final RenderBox child = _idToChild[childId];
+  Size layoutChild(Object childId, BoxConstraints constraints) {
+    final RenderBox? child = _idToChild[childId];
     assert(() {
       if (child == null) {
         throw FlutterError(
@@ -171,7 +171,7 @@ abstract class MultiChildLayoutDelegate {
       }
       return true;
     }());
-    child.layout(constraints, parentUsesSize: true);
+    child!.layout(constraints, parentUsesSize: true);
     return child.size;
   }
 
@@ -182,7 +182,7 @@ abstract class MultiChildLayoutDelegate {
   /// remain unchanged. Children initially have their position set to
   /// (0,0), i.e. the top left of the [RenderCustomMultiChildLayoutBox].
   void positionChild(Object childId, Offset offset) {
-    final RenderBox child = _idToChild[childId];
+    final RenderBox? child = _idToChild[childId];
     assert(() {
       if (child == null) {
         throw FlutterError(
@@ -197,7 +197,7 @@ abstract class MultiChildLayoutDelegate {
       }
       return true;
     }());
-    final MultiChildLayoutParentData childParentData = child.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData childParentData = child!.parentData as MultiChildLayoutParentData;
     childParentData.offset = offset;
   }
 
@@ -206,14 +206,14 @@ abstract class MultiChildLayoutDelegate {
     return DiagnosticsProperty<RenderBox>('${childParentData.id}', child);
   }
 
-  void _callPerformLayout(Size size, RenderBox firstChild) {
+  void _callPerformLayout(Size size, RenderBox? firstChild) {
     // A particular layout delegate could be called reentrantly, e.g. if it used
     // by both a parent and a child. So, we must restore the _idToChild map when
     // we return.
     final Map<Object, RenderBox> previousIdToChild = _idToChild;
 
     // TODO(ianh): make the next line final
-    /*late*/ Set<RenderBox>/*!*/ debugPreviousChildrenNeedingLayout;
+    late Set<RenderBox> debugPreviousChildrenNeedingLayout;
     assert(() {
       debugPreviousChildrenNeedingLayout = _debugChildrenNeedingLayout;
       _debugChildrenNeedingLayout = <RenderBox>{};
@@ -222,21 +222,21 @@ abstract class MultiChildLayoutDelegate {
 
     try {
       _idToChild = <Object, RenderBox>{};
-      RenderBox child = firstChild;
+      RenderBox? child = firstChild;
       while (child != null) {
-        final MultiChildLayoutParentData childParentData = child.parentData as MultiChildLayoutParentData;
+        final MultiChildLayoutParentData? childParentData = child.parentData as MultiChildLayoutParentData?;
         assert(() {
-          if (childParentData.id == null) {
+          if (childParentData!.id == null) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('Every child of a RenderCustomMultiChildLayoutBox must have an ID in its parent data.'),
-              child.describeForError('The following child has no ID'),
+              child!.describeForError('The following child has no ID'),
             ]);
           }
           return true;
         }());
-        _idToChild[childParentData.id] = child;
+        _idToChild[childParentData!.id!] = child;
         assert(() {
-          _debugChildrenNeedingLayout.add(child);
+          _debugChildrenNeedingLayout.add(child!);
           return true;
         }());
         child = childParentData.nextSibling;
@@ -314,8 +314,8 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   ///
   /// The [delegate] argument must not be null.
   RenderCustomMultiChildLayoutBox({
-    List<RenderBox> children,
-    @required MultiChildLayoutDelegate delegate,
+    List<RenderBox>? children,
+    required MultiChildLayoutDelegate delegate,
   }) : assert(delegate != null),
        _delegate = delegate {
     addAll(children);
@@ -409,7 +409,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { @required Offset/*!*/ position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 }
