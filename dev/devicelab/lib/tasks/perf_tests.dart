@@ -293,6 +293,13 @@ TaskFunction createFadingChildAnimationPerfTest() {
   ).run;
 }
 
+TaskFunction createFadingChildAnimationPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/fading_child_animation_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createImageFilteredTransformAnimationPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',

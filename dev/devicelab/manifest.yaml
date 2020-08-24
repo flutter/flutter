@@ -269,6 +269,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  fading_child_animation_perf__e2e_summary:
+    description: >
+      Measures the runtime performance of opacity filter with fade on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   imagefiltered_transform_animation_perf__timeline_summary:
     description: >
       Measures the runtime performance of imagefiltered widget with transform on Android.
