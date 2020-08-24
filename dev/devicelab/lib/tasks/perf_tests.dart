@@ -153,6 +153,13 @@ TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = false}) {
   ).run;
 }
 
+TaskFunction createPostBackdropFilterPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/post_backdrop_filter_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
