@@ -341,6 +341,15 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// counted as a single character, but because it is a combination of two
   /// Unicode scalar values, '\u{1F44D}\u{1F3FD}', it is counted as two
   /// characters.
+  ///
+  /// ### Composing text behaviors
+  ///
+  /// There is no guarantee for the final value before the composing ends.
+  /// So while the value is composing, the constraint of [maxLength] will be
+  /// temporary lifted until the composing ends.
+  ///
+  /// In addition, if the current value already reached the [maxLength],
+  /// composing is not allowed.
   final int? maxLength;
 
   /// Truncate the given TextEditingValue to maxLength characters.
@@ -367,9 +376,19 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue, // unused.
+    TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
+    // Return the new value when the old value has not reached the max
+    // limit or the old value is composing too.
+    if (newValue.composing.isValid) {
+      if (maxLength != null && maxLength! > 0 &&
+          oldValue.text.characters.length == maxLength! &&
+          !oldValue.composing.isValid) {
+        return oldValue;
+      }
+      return newValue;
+    }
     if (maxLength != null && maxLength! > 0 && newValue.text.characters.length > maxLength!) {
       // If already at the maximum and tried to enter even more, keep the old
       // value.
