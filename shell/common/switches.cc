@@ -229,9 +229,6 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
                                                             : "127.0.0.1";
   }
 
-  settings.use_embedded_view =
-      command_line.HasOption(FlagForSwitch(Switch::UseEmbeddedView));
-
   // Set Observatory Port
   if (command_line.HasOption(FlagForSwitch(Switch::DeviceObservatoryPort))) {
     if (!GetSwitchValue(command_line, Switch::DeviceObservatoryPort,

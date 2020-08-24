@@ -43,7 +43,6 @@ public class ApplicationInfoLoaderTest {
     assertEquals("", info.domainNetworkPolicy);
     assertNull(info.nativeLibraryDir);
     assertEquals(true, info.clearTextPermitted);
-    assertEquals(false, info.useEmbeddedView);
   }
 
   @Config(shadows = {ApplicationInfoLoaderTest.ShadowNetworkSecurityPolicy.class})
@@ -88,7 +87,6 @@ public class ApplicationInfoLoaderTest {
     bundle.putString(ApplicationInfoLoader.PUBLIC_VM_SNAPSHOT_DATA_KEY, "testvmsnapshot");
     bundle.putString(ApplicationInfoLoader.PUBLIC_ISOLATE_SNAPSHOT_DATA_KEY, "testisolatesnapshot");
     bundle.putString(ApplicationInfoLoader.PUBLIC_FLUTTER_ASSETS_DIR_KEY, "testassets");
-    bundle.putBoolean("io.flutter.embedded_views_preview", true);
     Context context = generateMockContext(bundle, null);
     FlutterApplicationInfo info = ApplicationInfoLoader.load(context);
     assertNotNull(info);
@@ -98,7 +96,6 @@ public class ApplicationInfoLoaderTest {
     assertEquals("testassets", info.flutterAssetsDir);
     assertNull(info.nativeLibraryDir);
     assertEquals("", info.domainNetworkPolicy);
-    assertEquals(true, info.useEmbeddedView);
   }
 
   @Test
