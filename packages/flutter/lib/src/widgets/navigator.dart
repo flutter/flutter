@@ -2764,8 +2764,19 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// Observers added via this method are distinct from the immutable
   /// [Navigator.observers] list that is specified when the navigator is
   /// constructed.
+  ///
+  /// This may only be called when this state is [mounted]. The
+  /// [NavigatorObserver.navigator] field of the observer will be set to this
+  /// state. When this state is disposed, if the observer is still registered,
+  /// the [NavigatorObserver.navigator] field of the observer will be set to
+  /// null. Generally, widgets will manage their observer lifecycle in a [State]
+  /// object and handle such changes in their [State.didChangeDependencies]
+  /// method.
+  ///
+  /// An observer may only be associated with one navigator at a time.
   void addObserver(NavigatorObserver observer) {
     assert(observer.navigator == null);
+    assert(mounted);
     _addedObservers.add(observer);
     observer._navigator = this;
     _updateEffectiveObservers();
