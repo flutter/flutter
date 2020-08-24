@@ -172,7 +172,14 @@ TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = true}) {
   ).run;
 }
 
-TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createSimpleAnimationPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/simple_animation_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
