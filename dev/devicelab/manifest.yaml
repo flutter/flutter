@@ -201,6 +201,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  cubic_bezier_perf__e2e_summary:
+    description: >
+      Measures the runtime performance of cubic bezier animations on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   cubic_bezier_perf_sksl_warmup__timeline_summary:
     description: >
       Measures the runtime performance of cubic bezier animations on Android
