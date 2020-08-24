@@ -303,14 +303,18 @@ class AnimatedList extends StatefulWidget {
         assert(separatorBuilder != null),
         assert(initialItemCount != null && initialItemCount >= 0),
         itemBuilder =
-        ((BuildContext context, int index, Animation<double> animation) =>
-            Flex(
-              direction: scrollDirection,
-              children: <Widget>[
-                itemBuilder(context, index, animation),
-                separatorBuilder(context, index, animation),
-              ],
-            )),
+        ((BuildContext context, int index, Animation<double> animation) {
+          if (index == 0) {
+            return itemBuilder(context, index, animation);
+          }
+          return  Flex(
+            direction: scrollDirection,
+            children: <Widget>[
+              separatorBuilder(context, index, animation),
+              itemBuilder(context, index, animation),
+            ],
+          );
+        }),
         super(key: key);
 
   /// Called, as needed, to build list item widgets.
