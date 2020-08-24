@@ -229,7 +229,9 @@ class GestureDetector extends StatelessWidget {
     this.onTertiaryTapDown,
     this.onTertiaryTapUp,
     this.onTertiaryTapCancel,
+    this.onDoubleTapDown,
     this.onDoubleTap,
+    this.onDoubleTapCancel,
     this.onLongPress,
     this.onLongPressStart,
     this.onLongPressMoveUpdate,
@@ -428,6 +430,20 @@ class GestureDetector extends StatelessWidget {
   ///  * [kTertiaryButton], the button this callback responds to.
   final GestureTapCancelCallback onTertiaryTapCancel;
 
+  /// A pointer that might cause a double tap has contacted the screen at a
+  /// particular location.
+  ///
+  /// Triggered immediately after the down event of the second tap.
+  ///
+  /// If the user completes the double tap and the gesture wins, [onDoubleTap]
+  /// will be called after this callback. Otherwise, [onDoubleTapCancel] will
+  /// be called after this callback.
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
+  final GestureTapDownCallback onDoubleTapDown;
+
   /// The user has tapped the screen with a primary button at the same location
   /// twice in quick succession.
   ///
@@ -435,6 +451,14 @@ class GestureDetector extends StatelessWidget {
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   final GestureTapCallback onDoubleTap;
+
+  /// The pointer that previously triggered [onDoubleTapDown] will not end up
+  /// causing a double tap.
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
+  final GestureTapCancelCallback onDoubleTapCancel;
 
   /// Called when a long press gesture with a primary button has been recognized.
   ///
@@ -774,7 +798,10 @@ class GestureDetector extends StatelessWidget {
       gestures[DoubleTapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<DoubleTapGestureRecognizer>(
         () => DoubleTapGestureRecognizer(debugOwner: this),
         (DoubleTapGestureRecognizer instance) {
-          instance.onDoubleTap = onDoubleTap;
+          instance
+            ..onDoubleTapDown = onDoubleTapDown
+            ..onDoubleTap = onDoubleTap
+            ..onDoubleTapCancel = onDoubleTapCancel;
         },
       );
     }
