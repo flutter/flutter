@@ -137,23 +137,31 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    test('should not be up to date, if some cached artifact is not', () {
+    testUsingContext('should not be up to date, if some cached artifact is not', () {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
       when(artifact1.isUpToDate()).thenReturn(true);
       when(artifact2.isUpToDate()).thenReturn(false);
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       expect(cache.isUpToDate(), isFalse);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => MemoryFileSystem.test(),
     });
-    test('should be up to date, if all cached artifacts are', () {
+
+    testUsingContext('should be up to date, if all cached artifacts are', () {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
       when(artifact1.isUpToDate()).thenReturn(true);
       when(artifact2.isUpToDate()).thenReturn(true);
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       expect(cache.isUpToDate(), isTrue);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => MemoryFileSystem.test(),
     });
-    test('should update cached artifacts which are not up to date', () async {
+
+    testUsingContext('should update cached artifacts which are not up to date', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
       when(artifact1.isUpToDate()).thenReturn(true);
@@ -164,7 +172,11 @@ void main() {
       });
       verifyNever(artifact1.update(any));
       verify(artifact2.update(any));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => MemoryFileSystem.test(),
     });
+
     testUsingContext("getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter", () async {
       final IosUsbArtifacts artifact1 = MockIosUsbArtifacts();
       final IosUsbArtifacts artifact2 = MockIosUsbArtifacts();
@@ -217,6 +229,9 @@ void main() {
           contains('https://flutter.dev/community/china'),
         );
       }
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => MemoryFileSystem.test(),
     });
 
     testUsingContext('Invalid URI for FLUTTER_STORAGE_BASE_URL throws ToolExit', () async {

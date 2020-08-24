@@ -1455,7 +1455,6 @@ class ArtifactUpdater {
       try {
         _ensureExists(tempFile.parent);
         await _net.fetchUrl(url, destFile: tempFile, maxAttempts: 2);
-        status.stop();
       } finally {
         status.stop();
       }
