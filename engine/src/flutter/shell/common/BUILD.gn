@@ -238,10 +238,7 @@ if (enable_unittests) {
 
       public_configs += [ ":test_enable_vulkan_config" ]
 
-      public_deps += [
-        "//flutter/testing:vulkan",
-        "//flutter/vulkan",
-      ]
+      public_deps += [ "//flutter/vulkan" ]
     }
   }
 
