@@ -5341,6 +5341,40 @@ void main() {
     expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 9)), true);
     expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: -1, end: 9)), false);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/65374.
+  testWidgets('Length formatter will not cause crash while the TextEditingValue is composing', (WidgetTester tester) async {
+    final TextInputFormatter formatter = LengthLimitingTextInputFormatter(5);
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        inputFormatters: <TextInputFormatter>[formatter],
+        style: textStyle,
+        cursorColor: cursorColor,
+        selectionControls: materialTextSelectionControls,
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.updateEditingValue(const TextEditingValue(text: '12345'));
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+    state.updateEditingValue(const TextEditingValue(text: '12345', composing: TextRange(start: 2, end: 4)));
+    expect(state.currentTextEditingValue.composing, const TextRange(start: 2, end: 4));
+
+    // Formatter will not update format while the editing value is composing.
+    state.updateEditingValue(const TextEditingValue(text: '123456', composing: TextRange(start: 2, end: 5)));
+    expect(state.currentTextEditingValue.text, '123456');
+    expect(state.currentTextEditingValue.composing, const TextRange(start: 2, end: 5));
+
+    // After composing ends, formatter will update.
+    state.updateEditingValue(const TextEditingValue(text: '123456'));
+    expect(state.currentTextEditingValue.text, '12345');
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+  });
 }
 
 class MockTextFormatter extends TextInputFormatter {
