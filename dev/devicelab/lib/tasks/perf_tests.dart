@@ -303,6 +303,13 @@ TaskFunction createImageFilteredTransformAnimationPerfTest() {
   ).run;
 }
 
+TaskFunction createImageFilteredTransformAnimationPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/imagefiltered_transform_animation_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createsMultiWidgetConstructPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
