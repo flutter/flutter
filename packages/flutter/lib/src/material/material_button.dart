@@ -21,7 +21,7 @@ import 'theme_data.dart';
 /// A utility class for building Material buttons that depend on the
 /// ambient [ButtonTheme] and [Theme].
 ///
-/// ### This class is obsolete
+/// ### This class is obsolete.
 ///
 /// FlatButton, RaisedButton, and OutlineButton have been replaced by
 /// TextButton, ElevatedButton, and OutlinedButton respectively.

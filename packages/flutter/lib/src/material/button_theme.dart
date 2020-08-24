@@ -253,13 +253,13 @@ class ButtonTheme extends InheritedTheme {
 
 /// Used with [ButtonTheme] to configure the color and geometry of buttons.
 ///
-/// ### This class is obsolete
+/// ### This class is obsolete.
 ///
 /// Please use one or more of the new buttons and their themes instead:
 ///
 ///  * [TextButton], [TextButtonTheme], [TextButtonThemeData],
 ///  * [ElevatedButton], [ElevatedButtonTheme], [ElevatedButtonThemeData],
-///  * [OutlinedButton] and [OutlinedButtonTheme], [OutlinedButonThemeData]
+///  * [OutlinedButton], [OutlinedButtonTheme], [OutlinedButonThemeData]
 ///
 /// FlatButton, RaisedButton, and OutlineButton have been replaced by
 /// TextButton, ElevatedButton, and OutlinedButton respectively.
