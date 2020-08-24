@@ -28,6 +28,7 @@ import '../theme.dart';
 import 'calendar_date_range_picker.dart';
 import 'date_picker_common.dart';
 import 'date_picker_header.dart';
+import 'date_picker_theme.dart';
 import 'date_utils.dart' as utils;
 import 'input_date_range_picker.dart';
 
@@ -470,16 +471,18 @@ class _CalendarRangePickerDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
+    final DatePickerThemeData pickerTheme = DatePickerTheme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Orientation orientation = MediaQuery.of(context).orientation;
     final TextTheme textTheme = theme.textTheme;
-    final Color headerForeground = colorScheme.brightness == Brightness.light
-      ? colorScheme.onPrimary
-      : colorScheme.onSurface;
-    final Color headerDisabledForeground = headerForeground.withOpacity(0.38);
+    final Color headerForeground = pickerTheme.headerForegroundColor ??
+      (colorScheme.brightness == Brightness.light
+        ? colorScheme.onPrimary
+        : colorScheme.onSurface);
+    final Color headerDisabledForeground = pickerTheme.headerDisabledForegroundColor ?? headerForeground.withOpacity(0.38);
     final String startDateText = utils.formatRangeStartDate(localizations, selectedStartDate, selectedEndDate);
     final String endDateText = utils.formatRangeEndDate(localizations, selectedStartDate, selectedEndDate, DateTime.now());
-    final TextStyle headlineStyle = textTheme.headline5;
+    final TextStyle headlineStyle = pickerTheme.headerCompactTitleTextStyle ?? textTheme.headline5;
     final TextStyle startDateStyle = headlineStyle?.apply(
       color: selectedStartDate != null ? headerForeground : headerDisabledForeground
     );
@@ -530,7 +533,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         helpText,
-                        style: textTheme.overline.apply(
+                        style: pickerTheme.headerHelpTextStyle ?? textTheme.overline.apply(
                           color: headerForeground,
                         ),
                       ),

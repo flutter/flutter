@@ -22,6 +22,7 @@ import '../text_theme.dart';
 import '../theme.dart';
 
 import 'date_picker_common.dart';
+import 'date_picker_theme.dart';
 import 'date_utils.dart' as utils;
 
 const Duration _monthScrollDuration = Duration(milliseconds: 200);
@@ -374,7 +375,8 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final Color controlColor = colorScheme.onSurface.withOpacity(0.60);
+    final DatePickerThemeData pickerTheme = DatePickerTheme.of(context);
+    final Color controlColor = pickerTheme.gridForegroundColor ?? colorScheme.onSurface.withOpacity(0.60);
 
     return Container(
       padding: const EdgeInsetsDirectional.only(start: 16, end: 4),
@@ -745,7 +747,9 @@ class _MonthPickerState extends State<_MonthPicker> {
   Widget build(BuildContext context) {
     final String previousTooltipText = '${_localizations.previousMonthTooltip} ${_localizations.formatMonthYear(_previousMonthDate)}';
     final String nextTooltipText = '${_localizations.nextMonthTooltip} ${_localizations.formatMonthYear(_nextMonthDate)}';
-    final Color controlColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.60);
+    final DatePickerThemeData pickerTheme = DatePickerTheme.of(context);
+    final Color controlColor = pickerTheme.gridForegroundColor ?? Theme.of(context).colorScheme.onSurface.withOpacity(0.60);
+    final Color disabledControlColor = pickerTheme.gridDisabledForegroundColor;
 
     return Semantics(
       child: Column(
@@ -759,12 +763,14 @@ class _MonthPickerState extends State<_MonthPicker> {
                 IconButton(
                   icon: const Icon(Icons.chevron_left),
                   color: controlColor,
+                  disabledColor: disabledControlColor,
                   tooltip: _isDisplayingFirstMonth ? null : previousTooltipText,
                   onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
                 ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
                   color: controlColor,
+                  disabledColor: disabledControlColor,
                   tooltip: _isDisplayingLastMonth ? null : nextTooltipText,
                   onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
                 ),
@@ -944,17 +950,18 @@ class _DayPickerState extends State<_DayPicker> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final DatePickerThemeData pickerTheme = DatePickerTheme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle headerStyle = textTheme.caption?.apply(
-      color: colorScheme.onSurface.withOpacity(0.60),
+      color: pickerTheme.gridForegroundColor ?? colorScheme.onSurface.withOpacity(0.60),
     );
     final TextStyle dayStyle = textTheme.caption;
-    final Color enabledDayColor = colorScheme.onSurface.withOpacity(0.87);
-    final Color disabledDayColor = colorScheme.onSurface.withOpacity(0.38);
-    final Color selectedDayColor = colorScheme.onPrimary;
-    final Color selectedDayBackground = colorScheme.primary;
-    final Color todayColor = colorScheme.primary;
+    final Color enabledDayColor = pickerTheme.gridForegroundColor ?? colorScheme.onSurface.withOpacity(0.87);
+    final Color disabledDayColor = pickerTheme.gridDisabledForegroundColor ?? colorScheme.onSurface.withOpacity(0.38);
+    final Color selectedDayColor = pickerTheme.gridSelectedForegroundColor ?? colorScheme.onPrimary;
+    final Color selectedDayBackground = pickerTheme.gridSelectedColor ?? colorScheme.primary;
+    final Color todayColor = pickerTheme.gridSelectedColor ?? colorScheme.primary;
 
     final int year = widget.displayedMonth.year;
     final int month = widget.displayedMonth.month;
@@ -972,7 +979,8 @@ class _DayPickerState extends State<_DayPicker> {
         dayItems.add(Container());
       } else {
         final DateTime dayToBuild = DateTime(year, month, day);
-        final bool isDisabled = dayToBuild.isAfter(widget.lastDate) ||
+        final bool isDisabled =
+            dayToBuild.isAfter(widget.lastDate) ||
             dayToBuild.isBefore(widget.firstDate) ||
             (widget.selectableDayPredicate != null && !widget.selectableDayPredicate(dayToBuild));
         final bool isSelectedDay = utils.isSameDay(widget.selectedDate, dayToBuild);
@@ -1147,6 +1155,7 @@ class _YearPickerState extends State<_YearPicker> {
 
   Widget _buildYearItem(BuildContext context, int index) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final DatePickerThemeData pickerTheme = DatePickerTheme.of(context);
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     // Backfill the _YearPicker with disabled years if necessary.
@@ -1160,27 +1169,27 @@ class _YearPickerState extends State<_YearPicker> {
 
     Color textColor;
     if (isSelected) {
-      textColor = colorScheme.onPrimary;
+      textColor = pickerTheme.gridSelectedForegroundColor ?? colorScheme.onPrimary;
     } else if (isDisabled) {
-      textColor = colorScheme.onSurface.withOpacity(0.38);
+      textColor = pickerTheme.gridDisabledForegroundColor ?? colorScheme.onSurface.withOpacity(0.38);
     } else if (isCurrentYear) {
-      textColor = colorScheme.primary;
+      textColor = pickerTheme.gridSelectedForegroundColor ?? colorScheme.primary;
     } else {
-      textColor = colorScheme.onSurface.withOpacity(0.87);
+      textColor = pickerTheme.gridForegroundColor ?? colorScheme.onSurface.withOpacity(0.87);
     }
     final TextStyle itemStyle = textTheme.bodyText1?.apply(color: textColor);
 
     BoxDecoration decoration;
     if (isSelected) {
       decoration = BoxDecoration(
-        color: colorScheme.primary,
+        color: pickerTheme.gridSelectedColor ?? colorScheme.primary,
         borderRadius: BorderRadius.circular(decorationHeight / 2),
         shape: BoxShape.rectangle,
       );
     } else if (isCurrentYear && !isDisabled) {
       decoration = BoxDecoration(
         border: Border.all(
-          color: colorScheme.primary,
+          color: pickerTheme.gridSelectedColor ?? colorScheme.primary,
           width: 1,
         ),
         borderRadius: BorderRadius.circular(decorationHeight / 2),

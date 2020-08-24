@@ -13,6 +13,7 @@ export 'date_picker_common.dart' show
   SelectableDayPredicate;
 export 'date_picker_deprecated.dart';
 export 'date_picker_dialog.dart' show showDatePicker;
+export 'date_picker_theme.dart';
 export 'date_range_picker_dialog.dart' show showDateRangePicker;
 export 'input_date_picker.dart' show InputDatePickerFormField;
 

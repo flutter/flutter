@@ -32,6 +32,7 @@ import 'input_decorator.dart';
 import 'navigation_rail_theme.dart';
 import 'outlined_button_theme.dart';
 import 'page_transitions_theme.dart';
+import 'pickers/date_picker_theme.dart';
 import 'popup_menu_theme.dart';
 import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
@@ -283,6 +284,7 @@ class ThemeData with Diagnosticable {
     ElevatedButtonThemeData elevatedButtonTheme,
     OutlinedButtonThemeData outlinedButtonTheme,
     TextSelectionThemeData textSelectionTheme,
+    DatePickerThemeData datePickerTheme,
     bool fixTextFieldOutlineLabel,
     bool useTextSelectionTheme,
   }) {
@@ -400,6 +402,7 @@ class ThemeData with Diagnosticable {
     elevatedButtonTheme ??= const ElevatedButtonThemeData();
     outlinedButtonTheme ??= const OutlinedButtonThemeData();
     textSelectionTheme ??= const TextSelectionThemeData();
+    datePickerTheme ??= const DatePickerThemeData();
 
     fixTextFieldOutlineLabel ??= false;
     useTextSelectionTheme ??= false;
@@ -475,6 +478,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme: elevatedButtonTheme,
       outlinedButtonTheme: outlinedButtonTheme,
       textSelectionTheme: textSelectionTheme,
+      datePickerTheme: datePickerTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme,
     );
@@ -561,6 +565,7 @@ class ThemeData with Diagnosticable {
     @required this.elevatedButtonTheme,
     @required this.outlinedButtonTheme,
     @required this.textSelectionTheme,
+    @required this.datePickerTheme,
     @required this.fixTextFieldOutlineLabel,
     @required this.useTextSelectionTheme,
   }) : assert(visualDensity != null),
@@ -631,6 +636,7 @@ class ThemeData with Diagnosticable {
        assert(outlinedButtonTheme != null),
        assert(fixTextFieldOutlineLabel != null),
        assert(textSelectionTheme != null),
+       assert(datePickerTheme != null),
        assert(fixTextFieldOutlineLabel != null),
        assert(useTextSelectionTheme != null);
 
@@ -1107,6 +1113,12 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [TextField] widgets.
   final TextSelectionThemeData textSelectionTheme;
 
+  /// A theme for customizing the appearance and layout of Date Picker widgets.
+  ///
+  /// See also:
+  ///   * [showDatePicker], [showDateRangePicker] which display a date picker.
+  final DatePickerThemeData datePickerTheme;
+
   /// A temporary flag to allow apps to opt-in to a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
   /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
@@ -1206,6 +1218,7 @@ class ThemeData with Diagnosticable {
     ElevatedButtonThemeData elevatedButtonTheme,
     OutlinedButtonThemeData outlinedButtonTheme,
     TextSelectionThemeData textSelectionTheme,
+    DatePickerThemeData datePickerTheme,
     bool fixTextFieldOutlineLabel,
     bool useTextSelectionTheme,
   }) {
@@ -1281,6 +1294,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme: elevatedButtonTheme ?? this.elevatedButtonTheme,
       outlinedButtonTheme: outlinedButtonTheme ?? this.outlinedButtonTheme,
       textSelectionTheme: textSelectionTheme ?? this.textSelectionTheme,
+      datePickerTheme: datePickerTheme ?? this.datePickerTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme ?? this.useTextSelectionTheme,
     );
@@ -1433,7 +1447,8 @@ class ThemeData with Diagnosticable {
       textButtonTheme: TextButtonThemeData.lerp(a.textButtonTheme, b.textButtonTheme, t),
       elevatedButtonTheme: ElevatedButtonThemeData.lerp(a.elevatedButtonTheme, b.elevatedButtonTheme, t),
       outlinedButtonTheme: OutlinedButtonThemeData.lerp(a.outlinedButtonTheme, b.outlinedButtonTheme, t),
-      textSelectionTheme: TextSelectionThemeData .lerp(a.textSelectionTheme, b.textSelectionTheme, t),
+      textSelectionTheme: TextSelectionThemeData.lerp(a.textSelectionTheme, b.textSelectionTheme, t),
+      datePickerTheme: DatePickerThemeData.lerp(a.datePickerTheme, b.datePickerTheme, t),
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       useTextSelectionTheme: t < 0.5 ? a.useTextSelectionTheme : b.useTextSelectionTheme,
     );
@@ -1515,6 +1530,7 @@ class ThemeData with Diagnosticable {
         && other.elevatedButtonTheme == elevatedButtonTheme
         && other.outlinedButtonTheme == outlinedButtonTheme
         && other.textSelectionTheme == textSelectionTheme
+        && other.datePickerTheme == datePickerTheme
         && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel
         && other.useTextSelectionTheme == useTextSelectionTheme;
   }
@@ -1595,6 +1611,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme,
       outlinedButtonTheme,
       textSelectionTheme,
+      datePickerTheme,
       fixTextFieldOutlineLabel,
       useTextSelectionTheme,
     ];
@@ -1668,11 +1685,11 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ButtonBarThemeData>('buttonBarTheme', buttonBarTheme, defaultValue: defaultData.buttonBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TimePickerThemeData>('timePickerTheme', timePickerTheme, defaultValue: defaultData.timePickerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TextSelectionThemeData>('textSelectionTheme', textSelectionTheme, defaultValue: defaultData.textSelectionTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<TextSelectionThemeData>('textSelectionTheme', textSelectionTheme, defaultValue: defaultData.textSelectionTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomNavigationBarThemeData>('bottomNavigationBarTheme', bottomNavigationBarTheme, defaultValue: defaultData.bottomNavigationBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TextButtonThemeData>('textButtonTheme', textButtonTheme, defaultValue: defaultData.textButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ElevatedButtonThemeData>('elevatedButtonTheme', elevatedButtonTheme, defaultValue: defaultData.elevatedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<OutlinedButtonThemeData>('outlinedButtonTheme', outlinedButtonTheme, defaultValue: defaultData.outlinedButtonTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<DatePickerThemeData>('datePickerTheme', datePickerTheme, defaultValue: defaultData.datePickerTheme, level: DiagnosticLevel.debug));
   }
 }
 
