@@ -28,7 +28,7 @@ public class PluginComponentTest {
     FlutterJNI flutterJNI = mock(FlutterJNI.class);
     when(flutterJNI.isAttached()).thenReturn(true);
     FlutterApplicationInfo emptyInfo =
-        new FlutterApplicationInfo(null, null, null, null, null, null, false, false);
+        new FlutterApplicationInfo(null, null, null, null, null, null, false);
 
     // FlutterLoader is the object to which the PluginRegistry defers for obtaining
     // the path to a Flutter asset. Ideally in this component test we would use a

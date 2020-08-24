@@ -28,8 +28,6 @@ static PlatformData GetDefaultPlatformData() {
   return platform_data;
 }
 
-bool AndroidShellHolder::use_embedded_view;
-
 AndroidShellHolder::AndroidShellHolder(
     flutter::Settings settings,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
@@ -102,47 +100,21 @@ AndroidShellHolder::AndroidShellHolder(
     ui_runner = thread_host_.ui_thread->GetTaskRunner();
     io_runner = thread_host_.io_thread->GetTaskRunner();
   }
-  if (settings.use_embedded_view) {
-    use_embedded_view = true;
-    // Embedded views requires the gpu and the platform views to be the same.
-    // The plan is to eventually dynamically merge the threads when there's a
-    // platform view in the layer tree.
-    // For now we use a fixed thread configuration with the same thread used as
-    // the gpu and platform task runner.
-    // TODO(amirh/chinmaygarde): remove this, and dynamically change the thread
-    // configuration. https://github.com/flutter/flutter/issues/23975
-    // https://github.com/flutter/flutter/issues/59930
-    flutter::TaskRunners task_runners(thread_label,     // label
-                                      platform_runner,  // platform
-                                      platform_runner,  // raster
-                                      ui_runner,        // ui
-                                      io_runner         // io
-    );
 
-    shell_ =
-        Shell::Create(task_runners,              // task runners
-                      GetDefaultPlatformData(),  // window data
-                      settings_,                 // settings
-                      on_create_platform_view,  // platform view create callback
-                      on_create_rasterizer      // rasterizer create callback
-        );
-  } else {
-    use_embedded_view = false;
-    flutter::TaskRunners task_runners(thread_label,     // label
-                                      platform_runner,  // platform
-                                      gpu_runner,       // raster
-                                      ui_runner,        // ui
-                                      io_runner         // io
-    );
+  flutter::TaskRunners task_runners(thread_label,     // label
+                                    platform_runner,  // platform
+                                    gpu_runner,       // raster
+                                    ui_runner,        // ui
+                                    io_runner         // io
+  );
 
-    shell_ =
-        Shell::Create(task_runners,              // task runners
-                      GetDefaultPlatformData(),  // window data
-                      settings_,                 // settings
-                      on_create_platform_view,  // platform view create callback
-                      on_create_rasterizer      // rasterizer create callback
-        );
-  }
+  shell_ =
+      Shell::Create(task_runners,              // task runners
+                    GetDefaultPlatformData(),  // window data
+                    settings_,                 // settings
+                    on_create_platform_view,   // platform view create callback
+                    on_create_rasterizer       // rasterizer create callback
+      );
 
   platform_view_ = weak_platform_view;
   FML_DCHECK(platform_view_);
