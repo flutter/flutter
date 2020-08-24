@@ -70,7 +70,7 @@ class SizeAnalyzer {
 
     Map<String, dynamic> apkAnalysisJson = aotAnalysisJson.toJson();
 
-    apkAnalysisJson['type'] = type; // one of ios, macos, windows, or linux.
+    apkAnalysisJson['type'] = type; // one of apk, aab, ios, macos, windows, or linux.
 
     apkAnalysisJson = _addAotSnapshotDataToAnalysis(
       apkAnalysisJson: apkAnalysisJson,
@@ -87,13 +87,15 @@ class SizeAnalyzer {
   /// the breakdown of the both files, where the breakdown of [aotSnapshot] is placed
   /// under 'lib/arm64-v8a/$_appFilename'.
   ///
-  /// The [aotSnapshot] can be either instruction sizes snapshot or v8 snapshot.
+  /// [kind] must be one of 'apk' or 'aab'.
+  /// The [aotSnapshot] can be either instruction sizes snapshot or a v8 snapshot.
   Future<Map<String, dynamic>> analyzeZipSizeAndAotSnapshot({
     @required File zipFile,
     @required File aotSnapshot,
     @required File precompilerTrace,
     @required String kind,
   }) async {
+    assert(kind == 'apk' || kind == 'aab');
     logger.printStatus('▒' * tableWidth);
     _printEntitySize(
       '${zipFile.basename} (total compressed)',
