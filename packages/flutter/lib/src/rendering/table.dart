@@ -1111,7 +1111,7 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset? position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     assert(_children.length == rows * columns);
     for (int index = _children.length - 1; index >= 0; index -= 1) {
       final RenderBox? child = _children[index];
@@ -1121,7 +1121,7 @@ class RenderTable extends RenderBox {
           offset: childParentData.offset,
           position: position,
           hitTest: (BoxHitTestResult result, Offset? transformed) {
-            assert(transformed == position! - childParentData.offset);
+            assert(transformed == position - childParentData.offset);
             return child.hitTest(result, position: transformed!);
           },
         );

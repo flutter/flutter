@@ -2218,7 +2218,7 @@ abstract class RenderBox extends RenderObject {
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.
   @protected
-  bool hitTestChildren(BoxHitTestResult result, { Offset? position }) => false;
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) => false;
 
   /// Multiply the transform from the parent's coordinate system to this box's
   /// coordinate system into the given transform.

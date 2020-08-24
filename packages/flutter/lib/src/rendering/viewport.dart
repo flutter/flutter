@@ -648,15 +648,15 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset? position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     double mainAxisPosition, crossAxisPosition;
     switch (axis) {
       case Axis.vertical:
-        mainAxisPosition = position!.dy;
+        mainAxisPosition = position.dy;
         crossAxisPosition = position.dx;
         break;
       case Axis.horizontal:
-        mainAxisPosition = position!.dx;
+        mainAxisPosition = position.dx;
         crossAxisPosition = position.dy;
         break;
     }

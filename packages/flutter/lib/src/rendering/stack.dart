@@ -593,7 +593,7 @@ class RenderStack extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset? position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
@@ -680,7 +680,7 @@ class RenderIndexedStack extends RenderStack {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset? position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     if (firstChild == null || index == null)
       return false;
     assert(position != null);
@@ -690,7 +690,7 @@ class RenderIndexedStack extends RenderStack {
       offset: childParentData.offset,
       position: position,
       hitTest: (BoxHitTestResult result, Offset? transformed) {
-        assert(transformed == position! - childParentData.offset);
+        assert(transformed == position - childParentData.offset);
         return child.hitTest(result, position: transformed!);
       },
     );

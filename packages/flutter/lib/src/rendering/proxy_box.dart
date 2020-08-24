@@ -118,8 +118,8 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset? position }) {
-    return child?.hitTest(result, position: position!) ?? false;
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    return child?.hitTest(result, position: position) ?? false;
   }
 
   @override
@@ -2272,13 +2272,13 @@ class RenderTransform extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset? position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     assert(!transformHitTests || _effectiveTransform != null);
     return result.addWithPaintTransform(
       transform: transformHitTests ? _effectiveTransform : null,
       position: position,
       hitTest: (BoxHitTestResult result, Offset? position) {
-        return super.hitTestChildren(result, position: position);
+        return super.hitTestChildren(result, position: position!);
       },
     );
   }
@@ -2504,7 +2504,7 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset? position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     if (size.isEmpty || child?.size.isEmpty == true)
       return false;
     _updatePaintData();
@@ -2512,7 +2512,7 @@ class RenderFittedBox extends RenderProxyBox {
       transform: _transform,
       position: position,
       hitTest: (BoxHitTestResult result, Offset? position) {
-        return super.hitTestChildren(result, position: position);
+        return super.hitTestChildren(result, position: position!);
       },
     );
   }
@@ -2590,7 +2590,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
   bool transformHitTests;
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset? position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     assert(!debugNeedsLayout);
     return result.addWithPaintOffset(
       offset: transformHitTests
@@ -2598,7 +2598,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
           : null,
       position: position,
       hitTest: (BoxHitTestResult result, Offset? position) {
-        return super.hitTestChildren(result, position: position);
+        return super.hitTestChildren(result, position: position!);
       },
     );
   }
@@ -4973,12 +4973,12 @@ class RenderFollowerLayer extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset? position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     return result.addWithPaintTransform(
       transform: getCurrentTransform(),
       position: position,
       hitTest: (BoxHitTestResult result, Offset? position) {
-        return super.hitTestChildren(result, position: position);
+        return super.hitTestChildren(result, position: position!);
       },
     );
   }

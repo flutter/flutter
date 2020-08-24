@@ -998,7 +998,7 @@ class RenderListWheelViewport
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset? position }) => false;
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) => false;
 
   @override
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {

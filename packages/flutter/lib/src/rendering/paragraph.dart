@@ -432,7 +432,7 @@ class RenderParagraph extends RenderBox
   bool hitTestSelf(Offset position) => true;
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset? position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     RenderBox? child = firstChild;
     while (child != null) {
       final TextParentData textParentData = child.parentData as TextParentData;
@@ -450,7 +450,7 @@ class RenderParagraph extends RenderBox
         position: position,
         hitTest: (BoxHitTestResult result, Offset? transformed) {
           assert(() {
-            final Offset manualPosition = (position! - textParentData.offset) / textParentData.scale!;
+            final Offset manualPosition = (position - textParentData.offset) / textParentData.scale!;
             return (transformed!.dx - manualPosition.dx).abs() < precisionErrorTolerance
               && (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
           }());
