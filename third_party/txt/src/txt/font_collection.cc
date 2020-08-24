@@ -202,6 +202,43 @@ std::shared_ptr<minikin::FontFamily> FontCollection::FindFontFamilyInManagers(
   return nullptr;
 }
 
+void FontCollection::SortSkTypefaces(
+    std::vector<sk_sp<SkTypeface>>& sk_typefaces) {
+  std::sort(
+      sk_typefaces.begin(), sk_typefaces.end(),
+      [](const sk_sp<SkTypeface>& a, const sk_sp<SkTypeface>& b) {
+        SkFontStyle a_style = a->fontStyle();
+        SkFontStyle b_style = b->fontStyle();
+
+        int a_delta = std::abs(a_style.width() - SkFontStyle::kNormal_Width);
+        int b_delta = std::abs(b_style.width() - SkFontStyle::kNormal_Width);
+
+        if (a_delta != b_delta) {
+          // If a family name query is so generic it ends up bringing in fonts
+          // of multiple widths (e.g. condensed, expanded), opt to be
+          // conservative and select the most standard width.
+          //
+          // If a specific width is desired, it should be be narrowed down via
+          // the family name.
+          //
+          // The font weights are also sorted lightest to heaviest but Flutter
+          // APIs have the weight specified to narrow it down later. The width
+          // ordering here is more consequential since TextStyle doesn't have
+          // letter width APIs.
+          return a_delta < b_delta;
+        } else if (a_style.width() != b_style.width()) {
+          // However, if the 2 fonts are equidistant from the "normal" width,
+          // just arbitrarily but consistently return the more condensed font.
+          return a_style.width() < b_style.width();
+        } else if (a_style.weight() != b_style.weight()) {
+          return a_style.weight() < b_style.weight();
+        } else {
+          return a_style.slant() < b_style.slant();
+        }
+        // Use a cascade of conditions so results are consistent each time.
+      });
+}
+
 std::shared_ptr<minikin::FontFamily> FontCollection::CreateMinikinFontFamily(
     const sk_sp<SkFontMgr>& manager,
     const std::string& family_name) {
@@ -223,14 +260,7 @@ std::shared_ptr<minikin::FontFamily> FontCollection::CreateMinikinFontFamily(
     }
   }
 
-  std::sort(skia_typefaces.begin(), skia_typefaces.end(),
-            [](const sk_sp<SkTypeface>& a, const sk_sp<SkTypeface>& b) {
-              SkFontStyle a_style = a->fontStyle();
-              SkFontStyle b_style = b->fontStyle();
-              return (a_style.weight() != b_style.weight())
-                         ? a_style.weight() < b_style.weight()
-                         : a_style.slant() < b_style.slant();
-            });
+  SortSkTypefaces(skia_typefaces);
 
   std::vector<minikin::Font> minikin_fonts;
   for (const sk_sp<SkTypeface>& skia_typeface : skia_typefaces) {
