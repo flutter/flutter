@@ -127,6 +127,11 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
       const sk_sp<SkFontMgr>& manager,
       const std::string& family_name);
 
+  // Sorts in-place a group of SkTypeface from an SkTypefaceSet into a
+  // reasonable order for future queries.
+  FRIEND_TEST(FontCollectionTest, CheckSkTypefacesSorting);
+  static void SortSkTypefaces(std::vector<sk_sp<SkTypeface>>& sk_typefaces);
+
   const std::shared_ptr<minikin::FontFamily>& GetFallbackFontFamily(
       const sk_sp<SkFontMgr>& manager,
       const std::string& family_name);
