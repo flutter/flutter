@@ -564,7 +564,7 @@ class HotRunner extends ResidentRunner {
         }
         isolateNotifications.add(
           device.vmService.onIsolateEvent.firstWhere((vm_service.Event event) {
-            return event.kind == vm_service.EventKind.kIsolateRunnable;
+            return event.kind == vm_service.EventKind.kServiceExtensionAdded;
           }),
         );
       }
