@@ -59,4 +59,4 @@ task:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - rm -rf bin/cache/pkg/tests
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
-        - for i in {1..100}; do echo $i; dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test; done
+        - for i in {1..15}; do echo $i; dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test; done
