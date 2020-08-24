@@ -2521,7 +2521,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   ///
   ///  * [defaultPaint], which paints the children appropriate for this
   ///    hit-testing strategy.
-  bool defaultHitTestChildren(BoxHitTestResult result, { Offset? position }) {
+  bool defaultHitTestChildren(BoxHitTestResult result, { required Offset position }) {
     // The x, y parameters have the top left of the node's box as the origin.
     ChildType? child = lastChild;
     while (child != null) {
@@ -2530,7 +2530,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
         offset: childParentData.offset,
         position: position,
         hitTest: (BoxHitTestResult result, Offset? transformed) {
-          assert(transformed == position! - childParentData.offset);
+          assert(transformed == position - childParentData.offset);
           return child!.hitTest(result, position: transformed!);
         },
       );
