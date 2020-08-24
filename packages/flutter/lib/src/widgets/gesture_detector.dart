@@ -433,9 +433,15 @@ class GestureDetector extends StatelessWidget {
   /// A pointer that might cause a double tap has contacted the screen at a
   /// particular location.
   ///
+  /// Triggered immediately after the down event of the second tap.
+  ///
+  /// If the user completes the double tap and the gesture wins, [onDoubleTap]
+  /// will be called after this callback. Otherwise, [onDoubleTapCancel] will
+  /// be called after this callback.
+  ///
   /// See also:
   ///
-  ///  * [kTertiaryButton], the button this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureTapDownCallback onDoubleTapDown;
 
   /// The user has tapped the screen with a primary button at the same location
