@@ -734,7 +734,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // `rect` in the new intermediate coordinate system.
     Rect rectLocal;
     // Our new reference frame render object's main axis extent.
-    double localMaxExtent;
+    double pivotExtent;
     GrowthDirection growthDirection;
 
     // `leadingScrollOffset` is currently the scrollOffset of our new reference
@@ -748,10 +748,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       growthDirection = pivotParent.constraints.growthDirection;
       switch (axis) {
         case Axis.horizontal:
-          localMaxExtent = pivot.size.width;
+          pivotExtent = pivot.size.width;
           break;
         case Axis.vertical:
-          localMaxExtent = pivot.size.height;
+          pivotExtent = pivot.size.height;
           break;
       }
       rect ??= target.paintBounds;
@@ -763,7 +763,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       growthDirection = targetSliver.constraints.growthDirection;
       // TODO(LongCatIsLooong): make sure this works if `targetSliver` is a
       // persistent header, when #56413 relands.
-      localMaxExtent = targetSliver.geometry.scrollExtent;
+      pivotExtent = targetSliver.geometry.scrollExtent;
       if (rect == null) {
         switch (axis) {
           case Axis.horizontal:
@@ -787,7 +787,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       return RevealedOffset(offset: offset.pixels, rect: rect);
     }
 
-    assert(localMaxExtent != null);
+    assert(pivotExtent != null);
     assert(rect != null);
     assert(rectLocal != null);
     assert(growthDirection != null);
@@ -799,7 +799,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // The scroll offset within `child` to `rect`.
     switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
       case AxisDirection.up:
-        leadingScrollOffset += localMaxExtent - rectLocal.bottom;
+        leadingScrollOffset += pivotExtent - rectLocal.bottom;
         targetMainAxisExtent = rectLocal.height;
         break;
       case AxisDirection.right:
@@ -811,7 +811,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         targetMainAxisExtent = rectLocal.height;
         break;
       case AxisDirection.left:
-        leadingScrollOffset += localMaxExtent - rectLocal.right;
+        leadingScrollOffset += pivotExtent - rectLocal.right;
         targetMainAxisExtent = rectLocal.width;
         break;
     }
