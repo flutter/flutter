@@ -732,7 +732,7 @@ class RenderCustomPaint extends RenderProxyBox {
 
     // Scan the old children in the middle of the list.
     final bool haveOldChildren = oldChildrenTop <= oldChildrenBottom;
-    Map<Key, SemanticsNode>? oldKeyedChildren;
+    late final Map<Key, SemanticsNode> oldKeyedChildren;
     if (haveOldChildren) {
       oldKeyedChildren = <Key, SemanticsNode>{};
       while (oldChildrenTop <= oldChildrenBottom) {
@@ -750,7 +750,7 @@ class RenderCustomPaint extends RenderProxyBox {
       if (haveOldChildren) {
         final Key? key = newSemantics.key;
         if (key != null) {
-          oldChild = oldKeyedChildren![key];
+          oldChild = oldKeyedChildren[key];
           if (oldChild != null) {
             if (_canUpdateSemanticsChild(oldChild, newSemantics)) {
               // we found a match!
