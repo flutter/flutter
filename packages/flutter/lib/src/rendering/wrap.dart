@@ -409,7 +409,7 @@ class RenderWrap extends RenderBox
     int childCount = 0;
     RenderBox child = firstChild;
     while (child != null) {
-      // TODO(chunhtai): use the new intrinsic api to calculate child size
+      // TODO(chunhtai): use the new intrinsic API to calculate child sizes
       // once https://github.com/flutter/flutter/issues/48679 is fixed.
       final double childWidth = math.min(child.getMaxIntrinsicWidth(double.infinity), width);
       final double childHeight = child.getMaxIntrinsicHeight(childWidth);
@@ -439,7 +439,7 @@ class RenderWrap extends RenderBox
     int childCount = 0;
     RenderBox child = firstChild;
     while (child != null) {
-      // TODO(chunhtai): use the new intrinsic api to calculate child size
+      // TODO(chunhtai): use the new intrinsic API to calculate child sizes
       // once https://github.com/flutter/flutter/issues/48679 is fixed.
       final double childHeight = math.min(child.getMaxIntrinsicHeight(double.infinity), height);
       final double childWidth = child.getMaxIntrinsicWidth(childHeight);
