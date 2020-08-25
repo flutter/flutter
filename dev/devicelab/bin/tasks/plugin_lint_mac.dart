@@ -50,6 +50,8 @@ Future<void> main() async {
           environment: <String, String>{
             'LANG': 'en_US.UTF-8',
           },
+          // TODO(jmagman): Flutter cannot build against ARM simulators https://github.com/flutter/flutter/issues/64502
+          canFail: true,
         );
       });
 
@@ -69,6 +71,8 @@ Future<void> main() async {
           environment: <String, String>{
             'LANG': 'en_US.UTF-8',
           },
+          // TODO(jmagman): Flutter cannot build against ARM simulators https://github.com/flutter/flutter/issues/64502
+          canFail: true,
         );
       });
 
