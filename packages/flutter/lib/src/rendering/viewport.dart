@@ -760,13 +760,13 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       growthDirection = targetSliver.constraints.growthDirection;
       // TODO(LongCatIsLooong): make sure this works if `targetSliver` is a
       // persistent header, when #56413 relands.
-      pivotExtent = targetSliver.geometry.scrollExtent;
+      pivotExtent = targetSliver.geometry!.scrollExtent;
       if (rect == null) {
         switch (axis) {
           case Axis.horizontal:
             rect = Rect.fromLTWH(
               0, 0,
-              targetSliver.geometry.scrollExtent,
+              targetSliver.geometry!.scrollExtent,
               targetSliver.constraints.crossAxisExtent,
             );
             break;
@@ -774,14 +774,15 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
             rect = Rect.fromLTWH(
               0, 0,
               targetSliver.constraints.crossAxisExtent,
-              targetSliver.geometry.scrollExtent,
+              targetSliver.geometry!.scrollExtent,
             );
             break;
         }
       }
       rectLocal = rect;
     } else {
-      return RevealedOffset(offset: offset.pixels!, rect: rect);
+      assert(rect != null);
+      return RevealedOffset(offset: offset.pixels!, rect: rect!);
     }
 
     assert(pivotExtent != null);
