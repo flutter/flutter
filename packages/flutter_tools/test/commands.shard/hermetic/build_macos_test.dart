@@ -100,7 +100,9 @@ void main() {
         fileSystem.file(fileSystem.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
           ..createSync(recursive: true)
           ..writeAsStringSync('example.app');
-        onRun();
+        if (onRun != null) {
+          onRun();
+        }
       }
     );
   }
