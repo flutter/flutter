@@ -14,6 +14,8 @@ import 'debug_overflow_indicator.dart';
 import 'object.dart';
 import 'stack.dart' show RelativeRect;
 
+typedef BoxConstraintsTransform = BoxConstraints Function(BoxConstraints);
+
 /// Abstract class for one-child-layout render boxes that provide control over
 /// the child's position.
 abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
@@ -594,59 +596,62 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   }
 }
 
-/// Renders a box, imposing no constraints on its child, allowing the child to
-/// render at its "natural" size.
+/// A [RenderBox] that applies an arbitary transform to its [constraints], and
+/// sizes its child using the normalized output [BoxConstraints], treating any
+/// overflow as error.
 ///
-/// This allows a child to render at the size it would render if it were alone
-/// on an infinite canvas with no constraints. This box will then attempt to
-/// adopt the same size, within the limits of its own constraints. If it ends
-/// up with a different size, it will align the child based on [alignment].
-/// If the box cannot expand enough to accommodate the entire child, the
-/// child will be clipped.
+/// This [RenderBox] sizes its child using a normalized [BoxConstraints] created
+/// by applying [constraintsTransform] to this [RenderBox]'s own [constraints].
+/// This box will then attempt to adopt the same size, within the limits of its
+/// own constraints. If it ends up with a different size, it will align the
+/// child based on [alignment]. If the box cannot expand enough to accommodate
+/// the entire child, the child will be clipped if [clipBehavior] is not
+/// [Clip.none].
 ///
 /// In debug mode, if the child overflows the box, a warning will be printed on
 /// the console, and black and yellow striped areas will appear where the
 /// overflow occurs.
 ///
+/// This [RenderBox] can be used to allow the child to enforce some of its
+/// intrinsic sizing rules, partially disregard the constraints set by its
+/// parent render object, and display a warning in debug mode if the parent
+/// render object fails to provide enough space.
+///
 /// See also:
 ///
+///  * [ConstraintsTransformBox], the widget that makes use of this
+///    [RenderObject] and exposes the same functionality.
 ///  * [RenderConstrainedBox], which renders a box which imposes constraints
 ///    on its child.
 ///  * [RenderConstrainedOverflowBox], which renders a box that imposes different
 ///    constraints on its child than it gets from its parent, possibly allowing
 ///    the child to overflow the parent.
-///  * [RenderSizedOverflowBox], a render object that is a specific size but
-///    passes its original constraints through to its child, which it allows to
-///    overflow.
-class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
-  /// Create a render object that sizes itself to the child but does not
-  /// pass the [constraints] down to that child.
+///  * [RenderUnconstrainedBox] which allows its children to render themselves
+///    unconstrained, expands to fit them, and considers overflow to be an error.
+class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
+  /// Create a render object that sizes itself to the child and modifies the
+  /// [constraints] before passing it down to that child.
   ///
-  /// The [alignment] must not be null.
-  RenderUnconstrainedBox({
+  /// The [alignment] and [clipBehavior] must not be null.
+  RenderConstraintsTransformBox({
     @required AlignmentGeometry alignment,
     @required TextDirection textDirection,
-    Axis constrainedAxis,
+    @required BoxConstraintsTransform constraintsTransform,
     RenderBox child,
     Clip clipBehavior = Clip.none,
   }) : assert(alignment != null),
        assert(clipBehavior != null),
-       _constrainedAxis = constrainedAxis,
+       _constraintsTransform = constraintsTransform,
        _clipBehavior = clipBehavior,
        super.mixin(alignment, textDirection, child);
 
-  /// The axis to retain constraints on, if any.
-  ///
-  /// If not set, or set to null (the default), neither axis will retain its
-  /// constraints. If set to [Axis.vertical], then vertical constraints will
-  /// be retained, and if set to [Axis.horizontal], then horizontal constraints
-  /// will be retained.
-  Axis get constrainedAxis => _constrainedAxis;
-  Axis _constrainedAxis;
-  set constrainedAxis(Axis value) {
-    if (_constrainedAxis == value)
+  /// @{macro flutter.widgets.constraintsTransform}
+  BoxConstraintsTransform get constraintsTransform => _constraintsTransform;
+  BoxConstraintsTransform _constraintsTransform;
+  set constraintsTransform(BoxConstraintsTransform value) {
+    if (_constraintsTransform == value)
       return;
-    _constrainedAxis = value;
+    _constraintsTransform = value;
     markNeedsLayout();
   }
 
@@ -672,21 +677,10 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     if (child != null) {
-      // Let the child lay itself out at it's "natural" size, but if
-      // constrainedAxis is non-null, keep any constraints on that axis.
-      BoxConstraints childConstraints;
-      if (constrainedAxis != null) {
-        switch (constrainedAxis) {
-          case Axis.horizontal:
-            childConstraints = BoxConstraints(maxWidth: constraints.maxWidth, minWidth: constraints.minWidth);
-            break;
-          case Axis.vertical:
-            childConstraints = BoxConstraints(maxHeight: constraints.maxHeight, minHeight: constraints.minHeight);
-            break;
-        }
-      } else {
-        childConstraints = const BoxConstraints();
-      }
+      assert(constraintsTransform != null);
+      final BoxConstraints childConstraints = constraintsTransform(constraints);
+      assert(childConstraints != null);
+      assert(childConstraints.isNormalized, '$childConstraints is not normalized');
       child.layout(childConstraints, parentUsesSize: true);
       size = constraints.constrain(child.size);
       alignChild();
@@ -738,6 +732,78 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
     if (_isOverflowing)
       header += ' OVERFLOWING';
     return header;
+  }
+}
+
+/// Renders a box, imposing no constraints on its child, allowing the child to
+/// render at its "natural" size.
+///
+/// This allows a child to render at the size it would render if it were alone
+/// on an infinite canvas with no constraints. This box will then attempt to
+/// adopt the same size, within the limits of its own constraints. If it ends
+/// up with a different size, it will align the child based on [alignment].
+/// If the box cannot expand enough to accommodate the entire child, the
+/// child will be clipped.
+///
+/// In debug mode, if the child overflows the box, a warning will be printed on
+/// the console, and black and yellow striped areas will appear where the
+/// overflow occurs.
+///
+/// See also:
+///
+///  * [RenderConstrainedBox], which renders a box which imposes constraints
+///    on its child.
+///  * [RenderConstrainedOverflowBox], which renders a box that imposes different
+///    constraints on its child than it gets from its parent, possibly allowing
+///    the child to overflow the parent.
+///  * [RenderSizedOverflowBox], a render object that is a specific size but
+///    passes its original constraints through to its child, which it allows to
+///    overflow.
+class RenderUnconstrainedBox extends RenderConstraintsTransformBox {
+  /// Create a render object that sizes itself to the child but does not
+  /// pass the [constraints] down to that child.
+  ///
+  /// The [alignment] and [clipBehavior] must not be null.
+  RenderUnconstrainedBox({
+    @required AlignmentGeometry alignment,
+    @required TextDirection textDirection,
+    Axis constrainedAxis,
+    RenderBox child,
+    Clip clipBehavior = Clip.none,
+  }) : assert(alignment != null),
+       assert(clipBehavior != null),
+       _constrainedAxis = constrainedAxis,
+       super(alignment: alignment, textDirection: textDirection, child: child, clipBehavior: clipBehavior, constraintsTransform: null) {
+         _constraintsTransform = _convertAxis;
+       }
+
+  /// The axis to retain constraints on, if any.
+  ///
+  /// If not set, or set to null (the default), neither axis will retain its
+  /// constraints. If set to [Axis.vertical], then vertical constraints will
+  /// be retained, and if set to [Axis.horizontal], then horizontal constraints
+  /// will be retained.
+  Axis get constrainedAxis => _constrainedAxis;
+  Axis _constrainedAxis;
+  set constrainedAxis(Axis value) {
+    if (_constrainedAxis == value)
+      return;
+    _constrainedAxis = value;
+    markNeedsLayout();
+  }
+
+  BoxConstraints _convertAxis(BoxConstraints constriants) {
+    if (constrainedAxis == null) {
+      return const BoxConstraints();
+    }
+    switch (constrainedAxis) {
+      case Axis.horizontal:
+        return constraints.copyWith(maxHeight: double.infinity, minHeight: 0);
+      case Axis.vertical:
+        return constraints.copyWith(maxWidth: double.infinity, minWidth: 0);
+    }
+    assert(false);
+    return null;
   }
 }
 
