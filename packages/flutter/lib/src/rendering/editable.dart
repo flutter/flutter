@@ -105,7 +105,7 @@ class TextSelectionPoint {
 // Includes newline characters from ASCII and separators from the
 // [unicode separator category](https://www.compart.com/en/unicode/category/Zs)
 // TODO(gspencergoog): replace when we expose this ICU information.
-bool _isWhitespace(int? codeUnit) {
+bool _isWhitespace(int codeUnit) {
   switch (codeUnit) {
     case 0x9: // horizontal tab
     case 0xA: // line feed
@@ -1489,7 +1489,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _onlyWhitespace(TextRange range) {
     for (int i = range.start; i < range.end; i++) {
       final int? codeUnit = text!.codeUnitAt(i);
-      if (!_isWhitespace(codeUnit)) {
+      if (!_isWhitespace(codeUnit!)) {
         return false;
       }
     }
