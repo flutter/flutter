@@ -50,6 +50,8 @@ abstract class ListWheelChildManager {
 /// [ParentData] for use with [RenderListWheelViewport].
 class ListWheelParentData extends ContainerBoxParentData<RenderBox> {
   /// Index of this child in its parent's child list.
+  ///
+  /// This must be maintained by the [ListWheelChildManager].
   int? index;
 }
 
@@ -205,6 +207,8 @@ class RenderListWheelViewport
       'rendered outside will be clipped anyway.';
 
   /// The delegate that manages the children of this object.
+  ///
+  /// This delegate must maintain the [ListWheelParentData.index] value.
   final ListWheelChildManager childManager;
 
   /// The associated ViewportOffset object for the viewport describing the part
@@ -608,7 +612,9 @@ class RenderListWheelViewport
     size = constraints.biggest;
   }
 
-  /// Gets the index of a child by looking at its parentData.
+  /// Gets the index of a child by looking at its [parentData].
+  ///
+  /// This relies on the [childManager] maintaining [ListWheelParentData.index].
   int indexOf(RenderBox child) {
     assert(child != null);
     final ListWheelParentData childParentData = child.parentData as ListWheelParentData;
@@ -799,7 +805,7 @@ class RenderListWheelViewport
     while (childParentData != null) {
       _paintTransformedChild(childToPaint!, context, offset, childParentData.offset);
       childToPaint = childAfter(childToPaint);
-      childParentData = childToPaint?.parentData as ListWheelParentData;
+      childParentData = childToPaint?.parentData as ListWheelParentData?;
     }
   }
 
@@ -990,8 +996,8 @@ class RenderListWheelViewport
   }
 
   @override
-  Rect? describeApproximatePaintClip(RenderObject? child) {
-    if (child != null && _shouldClipAtCurrentOffset()) {
+  Rect? describeApproximatePaintClip(RenderObject child) {
+    if (_shouldClipAtCurrentOffset()) {
       return Offset.zero & size;
     }
     return null;
