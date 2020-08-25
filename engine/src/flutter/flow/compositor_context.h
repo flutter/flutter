@@ -37,18 +37,6 @@ enum class RasterStatus {
 
 class CompositorContext {
  public:
-  class Delegate {
-   public:
-    /// Called at the end of a frame with approximately how many bytes mightbe
-    /// freed if a GC ran now.
-    ///
-    /// This method is called from the raster task runner.
-    virtual void OnCompositorEndFrame(size_t freed_hint) = 0;
-
-    /// Time limit for a smooth frame. See `Engine::GetDisplayRefreshRate`.
-    virtual fml::Milliseconds GetFrameBudget() = 0;
-  };
-
   class ScopedFrame {
    public:
     ScopedFrame(CompositorContext& context,
@@ -79,8 +67,6 @@ class CompositorContext {
     virtual RasterStatus Raster(LayerTree& layer_tree,
                                 bool ignore_raster_cache);
 
-    void add_external_size(size_t size) { uncached_external_size_ += size; }
-
    private:
     CompositorContext& context_;
     GrDirectContext* gr_context_;
@@ -90,12 +76,11 @@ class CompositorContext {
     const bool instrumentation_enabled_;
     const bool surface_supports_readback_;
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_;
-    size_t uncached_external_size_ = 0;
 
     FML_DISALLOW_COPY_AND_ASSIGN(ScopedFrame);
   };
 
-  explicit CompositorContext(Delegate& delegate);
+  CompositorContext(fml::Milliseconds frame_budget = fml::kDefaultFrameBudget);
 
   virtual ~CompositorContext();
 
@@ -123,7 +108,6 @@ class CompositorContext {
   Stopwatch& ui_time() { return ui_time_; }
 
  private:
-  Delegate& delegate_;
   RasterCache raster_cache_;
   TextureRegistry texture_registry_;
   Counter frame_count_;
@@ -132,9 +116,7 @@ class CompositorContext {
 
   void BeginFrame(ScopedFrame& frame, bool enable_instrumentation);
 
-  void EndFrame(ScopedFrame& frame,
-                bool enable_instrumentation,
-                size_t freed_hint);
+  void EndFrame(ScopedFrame& frame, bool enable_instrumentation);
 
   FML_DISALLOW_COPY_AND_ASSIGN(CompositorContext);
 };

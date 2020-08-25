@@ -141,7 +141,6 @@ void RasterCache::Prepare(PrerollContext* context,
   Entry& entry = layer_cache_[cache_key];
   entry.access_count++;
   entry.used_this_frame = true;
-  entry.external_size = layer->external_size();
   if (!entry.image) {
     entry.image = RasterizeLayer(context, layer, ctm, checkerboard_images_);
   }
@@ -182,8 +181,7 @@ bool RasterCache::Prepare(GrDirectContext* context,
                           const SkMatrix& transformation_matrix,
                           SkColorSpace* dst_color_space,
                           bool is_complex,
-                          bool will_change,
-                          size_t external_size) {
+                          bool will_change) {
   // Disabling caching when access_threshold is zero is historic behavior.
   if (access_threshold_ == 0) {
     return false;
@@ -209,7 +207,6 @@ bool RasterCache::Prepare(GrDirectContext* context,
 
   // Creates an entry, if not present prior.
   Entry& entry = picture_cache_[cache_key];
-  entry.external_size = external_size;
   if (entry.access_count < access_threshold_) {
     // Frame threshold has not yet been reached.
     return false;
@@ -263,12 +260,11 @@ bool RasterCache::Draw(const Layer* layer,
   return false;
 }
 
-size_t RasterCache::SweepAfterFrame() {
-  size_t removed_size = SweepOneCacheAfterFrame(picture_cache_);
-  removed_size += SweepOneCacheAfterFrame(layer_cache_);
+void RasterCache::SweepAfterFrame() {
+  SweepOneCacheAfterFrame(picture_cache_);
+  SweepOneCacheAfterFrame(layer_cache_);
   picture_cached_this_frame_ = 0;
   TraceStatsToTimeline();
-  return removed_size;
 }
 
 void RasterCache::Clear() {

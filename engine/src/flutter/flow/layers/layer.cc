@@ -9,11 +9,10 @@
 
 namespace flutter {
 
-Layer::Layer(size_t external_size)
+Layer::Layer()
     : paint_bounds_(SkRect::MakeEmpty()),
       unique_id_(NextUniqueID()),
-      needs_system_composite_(false),
-      external_size_(external_size) {}
+      needs_system_composite_(false) {}
 
 Layer::~Layer() = default;
 

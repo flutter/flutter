@@ -24,7 +24,7 @@ using PictureLayerTest = SkiaGPUObjectLayerTest;
 TEST_F(PictureLayerTest, PaintBeforePrerollInvalidPictureDies) {
   const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
   auto layer = std::make_shared<PictureLayer>(
-      layer_offset, SkiaGPUObject<SkPicture>(), false, false, 0);
+      layer_offset, SkiaGPUObject<SkPicture>(), false, false);
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
                             "picture_\\.get\\(\\)");
@@ -35,8 +35,7 @@ TEST_F(PictureLayerTest, PaintBeforePreollDies) {
   const SkRect picture_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   auto mock_picture = SkPicture::MakePlaceholder(picture_bounds);
   auto layer = std::make_shared<PictureLayer>(
-      layer_offset, SkiaGPUObject(mock_picture, unref_queue()), false, false,
-      0);
+      layer_offset, SkiaGPUObject(mock_picture, unref_queue()), false, false);
 
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
@@ -48,8 +47,7 @@ TEST_F(PictureLayerTest, PaintingEmptyLayerDies) {
   const SkRect picture_bounds = SkRect::MakeEmpty();
   auto mock_picture = SkPicture::MakePlaceholder(picture_bounds);
   auto layer = std::make_shared<PictureLayer>(
-      layer_offset, SkiaGPUObject(mock_picture, unref_queue()), false, false,
-      0);
+      layer_offset, SkiaGPUObject(mock_picture, unref_queue()), false, false);
 
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
@@ -64,7 +62,7 @@ TEST_F(PictureLayerTest, PaintingEmptyLayerDies) {
 TEST_F(PictureLayerTest, InvalidPictureDies) {
   const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
   auto layer = std::make_shared<PictureLayer>(
-      layer_offset, SkiaGPUObject<SkPicture>(), false, false, 0);
+      layer_offset, SkiaGPUObject<SkPicture>(), false, false);
 
   // Crashes reading a nullptr.
   EXPECT_DEATH_IF_SUPPORTED(layer->Preroll(preroll_context(), SkMatrix()), "");
@@ -77,10 +75,7 @@ TEST_F(PictureLayerTest, SimplePicture) {
   const SkRect picture_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   auto mock_picture = SkPicture::MakePlaceholder(picture_bounds);
   auto layer = std::make_shared<PictureLayer>(
-      layer_offset, SkiaGPUObject(mock_picture, unref_queue()), false, false,
-      1000);
-
-  EXPECT_EQ(layer->external_size(), 1000ul);
+      layer_offset, SkiaGPUObject(mock_picture, unref_queue()), false, false);
 
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(),

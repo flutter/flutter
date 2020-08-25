@@ -233,7 +233,7 @@ bool RuntimeController::ReportTimings(std::vector<int64_t> timings) {
   return false;
 }
 
-bool RuntimeController::NotifyIdle(int64_t deadline, size_t freed_hint) {
+bool RuntimeController::NotifyIdle(int64_t deadline) {
   std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   if (!root_isolate) {
     return false;
@@ -241,9 +241,6 @@ bool RuntimeController::NotifyIdle(int64_t deadline, size_t freed_hint) {
 
   tonic::DartState::Scope scope(root_isolate);
 
-  // Dart will use the freed hint at the next idle notification. Make sure to
-  // Update it with our latest value before calling NotifyIdle.
-  Dart_HintFreed(freed_hint);
   Dart_NotifyIdle(deadline);
 
   // Idle notifications being in isolate scope are part of the contract.

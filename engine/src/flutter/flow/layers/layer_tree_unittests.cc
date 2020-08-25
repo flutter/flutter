@@ -15,11 +15,11 @@
 namespace flutter {
 namespace testing {
 
-class LayerTreeTest : public CanvasTest, public CompositorContext::Delegate {
+class LayerTreeTest : public CanvasTest {
  public:
   LayerTreeTest()
       : layer_tree_(SkISize::Make(64, 64), 1.0f),
-        compositor_context_(*this),
+        compositor_context_(fml::kDefaultFrameBudget),
         root_transform_(SkMatrix::Translate(1.0f, 1.0f)),
         scoped_frame_(compositor_context_.AcquireFrame(nullptr,
                                                        &mock_canvas(),
@@ -33,24 +33,11 @@ class LayerTreeTest : public CanvasTest, public CompositorContext::Delegate {
   CompositorContext::ScopedFrame& frame() { return *scoped_frame_.get(); }
   const SkMatrix& root_transform() { return root_transform_; }
 
-  // |CompositorContext::Delegate|
-  void OnCompositorEndFrame(size_t freed_hint) override {
-    last_freed_hint_ = freed_hint;
-  }
-
-  // |CompositorContext::Delegate|
-  fml::Milliseconds GetFrameBudget() override {
-    return fml::kDefaultFrameBudget;
-  }
-
-  size_t last_freed_hint() { return last_freed_hint_; }
-
  private:
   LayerTree layer_tree_;
   CompositorContext compositor_context_;
   SkMatrix root_transform_;
   std::unique_ptr<CompositorContext::ScopedFrame> scoped_frame_;
-  size_t last_freed_hint_ = 0;
 };
 
 TEST_F(LayerTreeTest, PaintingEmptyLayerDies) {

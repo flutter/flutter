@@ -27,7 +27,8 @@ static constexpr std::chrono::milliseconds kSkiaCleanupExpiration(15000);
 
 Rasterizer::Rasterizer(Delegate& delegate)
     : Rasterizer(delegate,
-                 std::make_unique<flutter::CompositorContext>(delegate)) {}
+                 std::make_unique<flutter::CompositorContext>(
+                     delegate.GetFrameBudget())) {}
 
 Rasterizer::Rasterizer(
     Delegate& delegate,
