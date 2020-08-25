@@ -36,6 +36,8 @@ typedef AutocompleteFieldBuilder = Widget Function(
   TextEditingController textEditingController,
 );
 
+typedef _AutocompleteOptionToString<T> = String Function(T option);
+
 // TODO(justinmc): Link to Autocomplete and AutocompleteCupertino when they are
 // implemented.
 /// A controller for the [AutocompleteCore] widget.
@@ -131,8 +133,10 @@ typedef AutocompleteFieldBuilder = Widget Function(
 class AutocompleteController<T> {
   /// Create an instance of AutocompleteController.
   AutocompleteController({
-    this.options,
     this.filter,
+    this.options,
+    _AutocompleteOptionToString<T> displayStringForOption,
+    _AutocompleteOptionToString<T> filterStringForOption,
     TextEditingController textEditingController,
   }) : assert(
          filter == null || options == null,
@@ -142,6 +146,8 @@ class AutocompleteController<T> {
          filter != null || options != null,
          'Must pass either options or filter.',
        ),
+       displayStringForOption = displayStringForOption ?? _displayStringForOption,
+       filterStringForOption = filterStringForOption ?? _filterStringForOption,
        _ownsTextEditingController = textEditingController == null,
        textEditingController = textEditingController ?? TextEditingController() {
     this.textEditingController.addListener(_onChangedQuery);
@@ -166,10 +172,46 @@ class AutocompleteController<T> {
   /// Defaults to a simple string-matching filter of [options].
   final AutocompleteFilter<T> filter;
 
+  /// Returns the string to display in the query field when the option is
+  /// selected.
+  ///
+  /// This is useful when using a custom T type for AutocompleteController and
+  /// the string to display is different than the string to search by.
+  ///
+  /// If not provided, will use `option.toString()`.
+  ///
+  /// See also:
+  ///   * [filterStringForOption], which can be used to specify a custom string
+  ///     to filter by.
+  final _AutocompleteOptionToString<T> displayStringForOption;
+
+  /// Returns the string to match against when filtering the given option.
+  ///
+  /// This is useful when using a custom T type for AutocompleteController and
+  /// the string to display is different than the string to search by.
+  ///
+  /// If not provided, will use `option.toString()`.
+  ///
+  /// See also:
+  ///   * [displayStringForOption], which can be used to specify a custom String
+  ///     to be shown in the query field.
+  final _AutocompleteOptionToString<T> filterStringForOption;
+
   /// The current results being returned by [filter].
   ///
   /// This is a [ValueNotifier], so it can be listened to for changes.
   final ValueNotifier<List<T>> results = ValueNotifier<List<T>>(<T>[]);
+
+  // The default way to convert an option to a string for display in the query
+  // field.
+  static String _displayStringForOption<T>(T option) {
+    return option.toString();
+  }
+
+  // The default way to convert an option into a string to be filtered on.
+  static String _filterStringForOption<T>(T option) {
+    return option.toString();
+  }
 
   /// Clean up memory created by the AutocompleteController.
   ///
@@ -195,7 +237,11 @@ class AutocompleteController<T> {
   List<T> _filterByString(String query) {
     assert(options != null);
     return options
-        .where((T option) => option.toString().contains(query))
+        .where((T option) {
+          return filterStringForOption(option)
+              .toLowerCase()
+              .contains(query.toLowerCase());
+        })
         .toList();
   }
 }
@@ -439,8 +485,10 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   void _onChangedResults() {
     final String query = _autocompleteController.textEditingController.text;
     final List<T> results = _autocompleteController.results.value;
+    // TODO(justinmc): I'm not 100% confident we want this feature. Just hit
+    // enter instead?
     final bool queryIsOnlyResult = results != null && results.length == 1
-        && query == results[0].toString();
+        && query == _autocompleteController.displayStringForOption(results[0]);
     if (queryIsOnlyResult) {
       if (_selection != results[0]) {
         setState(() {
@@ -455,8 +503,12 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   }
 
   void _onChangedQuery() {
-    if (_autocompleteController.textEditingController.text == _selection.toString()) {
-      return;
+    if (_selection != null) {
+      final String selectionString =
+          _autocompleteController.displayStringForOption(_selection);
+      if (_autocompleteController.textEditingController.text == selectionString) {
+        return;
+      }
     }
     setState(() {
       _selection = null;
@@ -464,19 +516,20 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     _updateOverlay();
   }
 
-  void _onSelected (T result) {
-    if (result == _selection) {
+  void _onSelected (T nextSelection) {
+    if (nextSelection == _selection) {
       return;
     }
     setState(() {
-      _selection = result;
-      final String resultString = result.toString();
+      _selection = nextSelection;
+      final String selectionString =
+          _autocompleteController.displayStringForOption(nextSelection);
       _autocompleteController.textEditingController.value = TextEditingValue(
-        selection: TextSelection.collapsed(offset: resultString.length),
-        text: resultString,
+        selection: TextSelection.collapsed(offset: selectionString.length),
+        text: selectionString,
       );
       if (widget.onSelected != null) {
-        widget.onSelected(result);
+        widget.onSelected(nextSelection);
       }
     });
   }
