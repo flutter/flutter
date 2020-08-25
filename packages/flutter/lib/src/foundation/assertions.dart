@@ -393,7 +393,7 @@ class FlutterErrorDetails with Diagnosticable {
     this.exception,
     this.stack,
     this.library = 'Flutter framework',
-    this.context,
+    this.errorDiagnostics,
     this.stackFilter,
     this.informationCollector,
     this.silent = false,
@@ -402,7 +402,7 @@ class FlutterErrorDetails with Diagnosticable {
   /// Creates a copy of the error details but with the given fields replaced
   /// with new values.
   FlutterErrorDetails copyWith({
-    DiagnosticsNode? context,
+    DiagnosticsNode? errorDiagnostics,
     dynamic exception,
     InformationCollector? informationCollector,
     String? library,
@@ -411,7 +411,7 @@ class FlutterErrorDetails with Diagnosticable {
     IterableFilter<String>? stackFilter,
   }) {
     return FlutterErrorDetails(
-      context: context ?? this.context,
+      errorDiagnostics: errorDiagnostics ?? this.errorDiagnostics,
       exception: exception ?? this.exception,
       informationCollector: informationCollector ?? this.informationCollector,
       library: library ?? this.library,
@@ -496,7 +496,7 @@ class FlutterErrorDetails with Diagnosticable {
   ///    applicable.
   ///  * [FlutterError], which is the most common place to use
   ///    [FlutterErrorDetails].
-  final DiagnosticsNode? context;
+  final DiagnosticsNode? errorDiagnostics;
 
   /// A callback which filters the [stack] trace. Receives an iterable of
   /// strings representing the frames encoded in the way that
