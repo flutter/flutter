@@ -155,6 +155,11 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
     performance_measurement_option="--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}"
   fi
 
+  local code_size_directory=""
+  if [[ -n "$CODE_SIZE_DIRECTORY" ]]; then
+    code_size_directory="-dCodeSizeDirectory=${CODE_SIZE_DIRECTORY}"
+  fi
+
   RunCommand "${FLUTTER_ROOT}/bin/flutter"                                \
     ${verbose_flag}                                                       \
     ${flutter_engine_flag}                                                \
@@ -172,6 +177,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
     -dDartObfuscation="${DART_OBFUSCATION}"                               \
     -dEnableBitcode="${bitcode_flag}"                                     \
     ${bundle_sksl_path}                                                   \
+    ${code_size_directory}                                                \
     --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"             \
     --DartDefines="${DART_DEFINES}"                                       \
     --ExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                   \
