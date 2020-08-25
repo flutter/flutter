@@ -44,7 +44,7 @@ void main() {
 
   ProcessManager processManager;
   MockVisualStudio mockVisualStudio;
-  MockFlutterUsage usage;
+  MockUsage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -54,7 +54,7 @@ void main() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
     mockVisualStudio = MockVisualStudio();
-    usage = MockFlutterUsage();
+    usage = MockUsage();
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -461,7 +461,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     );
 
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
-    verify(usage.sendEvent('code-size-analysis', 'windows'));
+    verify(usage.sendEvent('code-size-analysis', 'windows')).called(1);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     FileSystem: () => fileSystem,
@@ -475,4 +475,4 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockVisualStudio extends Mock implements VisualStudio {}
-class MockFlutterUsage extends Mock implements Usage {}
+class MockUsage extends Mock implements Usage {}

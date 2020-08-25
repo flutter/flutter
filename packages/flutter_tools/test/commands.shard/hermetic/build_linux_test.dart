@@ -403,7 +403,7 @@ set(BINARY_NAME "fizz_bar")
       const <String>['build', 'linux', '--no-pub', '--analyze-size']
     );
     expect(testLogger.statusText, contains('A summary of your Linux bundle analysis can be found at'));
-    verify(usage.sendEvent('code-size-analysis', 'linux'));
+    verify(usage.sendEvent('code-size-analysis', 'linux')).called(1);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

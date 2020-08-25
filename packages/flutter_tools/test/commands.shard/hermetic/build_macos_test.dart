@@ -285,7 +285,7 @@ void main() {
     );
 
     expect(testLogger.statusText, contains('A summary of your macOS bundle analysis can be found at'));
-    verify(usage.sendEvent('code-size-analysis', 'macos'));
+    verify(usage.sendEvent('code-size-analysis', 'macos')).called(1);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
