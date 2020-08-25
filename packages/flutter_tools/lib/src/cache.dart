@@ -765,7 +765,6 @@ abstract class EngineCachedArtifact extends CachedArtifact {
   }
 }
 
-
 /// A cached artifact containing the dart:ui source code.
 class FlutterSdk extends EngineCachedArtifact {
   FlutterSdk(Cache cache) : super(
@@ -1389,6 +1388,8 @@ const List<List<String>> _dartSdks = <List<String>> [
   <String>['windows-x64', 'dart-sdk-windows-x64.zip'],
 ];
 
+/// An API for downloading and un-archiving artifacts, such as engine binaries or
+/// additional source code.
 class ArtifactUpdater {
   ArtifactUpdater({
     @required OperatingSystemUtils operatingSystemUtils,
@@ -1448,10 +1449,13 @@ class ArtifactUpdater {
   ) async {
     final String downloadPath = flattenNameSubdirs(url, _fileSystem);
     final File tempFile = _createDownloadFile(downloadPath);
-    final Status status = _logger.startProgress(message, timeout: const Duration(minutes: 2));
-    int retries = 0;
+    final Status status = _logger.startProgress(
+      message,
+      timeout: null, // This will take a variable amount of time based on network connectivity.
+    );
+    int retries = 2;
 
-    while (retries < 2) {
+    while (retries > 0) {
       try {
         _ensureExists(tempFile.parent);
         await _net.fetchUrl(url, destFile: tempFile, maxAttempts: 2);
@@ -1459,16 +1463,15 @@ class ArtifactUpdater {
         status.stop();
       }
       _ensureExists(location);
+
       try {
         extractor(tempFile, location);
       } on ProcessException {
-        if (retries >= 1) {
+        if (retries == 0) {
           rethrow;
         }
-        retries += 1;
-        if (tempFile.existsSync()) {
-          tempFile.deleteSync();
-        }
+        retries -= 1;
+        _deleteIgnoringErrors(tempFile);
         continue;
       }
       return;
@@ -1502,13 +1505,23 @@ class ArtifactUpdater {
         globals.printError('Failed to delete "${file.path}". Please delete manually. $e');
         continue;
       }
-      for (Directory d = file.parent; d.absolute.path != _tempStorage.absolute.path; d = d.parent) {
-        if (d.listSync().isEmpty) {
-          d.deleteSync();
-        } else {
+      for (Directory directory = file.parent; directory.absolute.path != _tempStorage.absolute.path; directory = directory.parent) {
+        if (directory.listSync().isNotEmpty) {
           break;
         }
+        _deleteIgnoringErrors(directory);
       }
+    }
+  }
+
+  static void _deleteIgnoringErrors(FileSystemEntity entity) {
+    if (!entity.existsSync()) {
+      return;
+    }
+    try {
+      entity.deleteSync();
+    } on FileSystemException {
+      // Ignore errors.
     }
   }
 }
