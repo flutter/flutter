@@ -126,14 +126,15 @@ class DefaultTextStyle extends InheritedTheme {
   /// Whether the text should break at soft line breaks.
   ///
   /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
-  /// 
-  /// This also decides basis of [overflow] property.
+  ///
+  /// This also decides the [overflow] property's behavior. If this is true or null,
+  /// the word causing overflow will not be shown at all.
   final bool softWrap;
 
   /// How visual overflow should be handled.
-  /// 
-  /// This will be applied on a word basis when [softWrap] is true, and on an alphabet basis when
-  /// [softWrap] is false.
+  ///
+  /// If [softWrap] is true or null, the word causing overflow will not appear at all. Otherwise,
+  /// it will be shown with the given overflow option.
   final TextOverflow overflow;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
@@ -346,9 +347,10 @@ class Text extends StatelessWidget {
   /// closest enclosing [DefaultTextStyle].
   ///
   /// The [data] parameter must not be null.
-  /// 
-  /// The [overflow] property will be applied on a word basis when [softWrap] is true,
-  /// and on an alphabet basis when it is false.
+  ///
+  /// The [overflow] property's behavior is affected by the [softWrap] argument.
+  /// If the [softWrap] is true or null, the word causing overflow will not 
+  /// appear at all. Otherwise, it will be shown with the given overflow option.
   const Text(
     this.data, {
     Key key,
