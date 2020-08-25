@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:ui' as ui show Image, Codec, FrameInfo;
 import 'dart:ui' show hashValues;
@@ -18,12 +17,17 @@ import 'package:flutter/scheduler.dart';
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given [image] and [scale].
   ///
-  /// Both the image and the scale must not be null.
+  /// If [keepAlive] is set to false, an [ImageStream] will dispose of the
+  /// [image] once it has lost its last listener. To avoid this behavior, set
+  /// [keepAlive] to true.
+  ///
+  /// The image, keepAlive, and scale paraemters must not be null.
   ///
   /// The tag may be used to identify the source of this image.
-  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel })
+  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel, this.keepAlive = false })
     : assert(image != null),
-      assert(scale != null);
+      assert(scale != null),
+      assert(keepAlive != null);
 
   /// The raw image pixels.
   ///
@@ -46,11 +50,19 @@ class ImageInfo {
   /// A string used for debugging purpopses to identify the source of this image.
   final String? debugLabel;
 
-  @override
-  String toString() => '${debugLabel != null ? '$debugLabel ' : ''}$image @ ${debugFormatDouble(scale)}x';
+  /// Whether or not the [image] should be disposed of when an associated
+  /// [ImageStream] loses its last listener.
+  ///
+  /// If multiple [ImageStream]s may refer to the same image, this should be set
+  /// to true. Within the framework, this does not normally occur, but custom
+  /// [ImageProvider] or [ImageStream] implementations can behave differently.
+  final bool keepAlive;
 
   @override
-  int get hashCode => hashValues(image, scale, debugLabel);
+  String toString() => '${debugLabel != null ? '$debugLabel ' : ''}$image @ ${debugFormatDouble(scale)}x, keepAlive: $keepAlive';
+
+  @override
+  int get hashCode => hashValues(image, scale, debugLabel, keepAlive);
 
   @override
   bool operator ==(Object other) {
@@ -59,7 +71,8 @@ class ImageInfo {
     return other is ImageInfo
         && other.image == image
         && other.scale == scale
-        && other.debugLabel == debugLabel;
+        && other.debugLabel == debugLabel
+        && other.keepAlive == keepAlive;
   }
 }
 
@@ -412,8 +425,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
         callback();
       }
       _onLastListenerRemovedCallbacks.clear();
-      print('disposing');
-      // _currentImage?.image.dispose();
+      if (_currentImage?.keepAlive == false) {
+        _currentImage!.image.dispose();
+      }
     }
   }
 
@@ -438,6 +452,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// Calls all the registered listeners to notify them of a new image.
   @protected
   void setImage(ImageInfo image) {
+    if (_currentImage?.keepAlive == false) {
+      _currentImage!.image.dispose();
+    }
     _currentImage = image;
     if (_listeners.isEmpty)
       return;
@@ -640,13 +657,19 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// the loading progress of the image. If this stream is provided, the events
   /// produced by the stream will be delivered to registered [ImageChunkListener]s
   /// (see [addListener]).
+  ///
+  /// The `keepFramesAlive` parameter controls whether emitted frames have the
+  /// [ImageInfo.keepAlive] property set to true. It must not be null, and
+  /// defaults to false.
   MultiFrameImageStreamCompleter({
     required Future<ui.Codec> codec,
     required double scale,
     String? debugLabel,
     Stream<ImageChunkEvent>? chunkEvents,
     InformationCollector? informationCollector,
+    this.keepFramesAlive = false,
   }) : assert(codec != null),
+       assert(keepFramesAlive != null),
        _informationCollector = informationCollector,
        _scale = scale {
     this.debugLabel = debugLabel;
@@ -673,6 +696,9 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
     }
   }
+
+  /// How to set [ImageInfo.keepAlive] on emitted frames.
+  final bool keepFramesAlive;
 
   ui.Codec? _codec;
   final double _scale;
@@ -703,7 +729,12 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (!hasListeners)
       return;
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
-      _emitFrame(ImageInfo(image: _nextFrame!.image, scale: _scale, debugLabel: debugLabel));
+      _emitFrame(ImageInfo(
+        image: _nextFrame!.image,
+        scale: _scale,
+        debugLabel: debugLabel,
+        keepAlive: keepFramesAlive,
+      ));
       _shownTimestamp = timestamp;
       _frameDuration = _nextFrame!.duration;
       _nextFrame = null;
@@ -743,7 +774,12 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (_codec!.frameCount == 1) {
       // This is not an animated image, just return it and don't schedule more
       // frames.
-      _emitFrame(ImageInfo(image: _nextFrame!.image, scale: _scale, debugLabel: debugLabel));
+      _emitFrame(ImageInfo(
+        image: _nextFrame!.image,
+        scale: _scale,
+        debugLabel: debugLabel,
+        keepAlive: keepFramesAlive,
+      ));
       return;
     }
     _scheduleAppFrame();

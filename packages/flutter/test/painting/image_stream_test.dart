@@ -18,13 +18,15 @@ class FakeFrameInfo implements FrameInfo {
     : _image = FakeImage(width, height);
 
   final Duration _duration;
-  final Image _image;
+  final FakeImage _image;
 
   @override
   Duration get duration => _duration;
 
   @override
   Image get image => _image;
+
+  bool get imageDisposed => _image.disposed;
 }
 
 class FakeImage implements Image {
@@ -39,8 +41,12 @@ class FakeImage implements Image {
   @override
   int get height => _height;
 
+  bool disposed = false;
+
   @override
-  void dispose() { }
+  void dispose() {
+    disposed = true;
+  }
 
   @override
   Future<ByteData> toByteData({ ImageByteFormat format = ImageByteFormat.rawRgba }) async {
@@ -698,6 +704,228 @@ void main() {
     compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, onChunk2: handleChunk, areEqual: false);
     compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, onError2: handleError, areEqual: false);
   });
+
+  testWidgets('disposes image when last listener drops - single frame', (WidgetTester tester) async {
+    final FakeImage image = FakeImage(10, 10);
+    expect(image.disposed, false);
+
+    final ImageInfo imageInfo = ImageInfo(
+      image: image,
+      debugLabel: 'fakeImage',
+    );
+    final ImageStreamCompleter imageStream = OneFrameImageStreamCompleter(Future<ImageInfo>.value(imageInfo));
+    expect(image.disposed, false);
+
+
+    void listener(ImageInfo listenerImageInfo, bool syncCall) {
+      expectSync(listenerImageInfo, isNotNull);
+      expectSync(listenerImageInfo, imageInfo);
+      expectSync(image.disposed, false);
+    }
+    expect(imageStream.hasListeners, false);
+
+    imageStream.addListener(ImageStreamListener(listener));
+    await tester.idle();
+    expect(image.disposed, false);
+    expect(imageStream.hasListeners, true);
+
+    imageStream.removeListener(ImageStreamListener(listener));
+    expect(imageStream.hasListeners, false);
+    expect(image.disposed, true);
+  });
+
+  testWidgets('does not dispose image when last listener drops - single frame - keep alive', (WidgetTester tester) async {
+    final FakeImage image = FakeImage(10, 10);
+    expect(image.disposed, false);
+
+    final ImageInfo imageInfo = ImageInfo(
+      image: image,
+      debugLabel: 'fakeImage',
+      keepAlive: true,
+    );
+    final ImageStreamCompleter imageStream = OneFrameImageStreamCompleter(Future<ImageInfo>.value(imageInfo));
+    expect(image.disposed, false);
+
+
+    void listener(ImageInfo listenerImageInfo, bool syncCall) {
+      expectSync(listenerImageInfo, isNotNull);
+      expectSync(listenerImageInfo, imageInfo);
+      expectSync(image.disposed, false);
+    }
+    expect(imageStream.hasListeners, false);
+
+    imageStream.addListener(ImageStreamListener(listener));
+    await tester.idle();
+    expect(image.disposed, false);
+    expect(imageStream.hasListeners, true);
+
+    imageStream.removeListener(ImageStreamListener(listener));
+    expect(imageStream.hasListeners, false);
+    expect(image.disposed, false);
+  });
+
+  testWidgets('does not dispose image when last listener drops - multi frame frame count 1', (WidgetTester tester) async {
+    final MockCodec mockCodec = MockCodec();
+    mockCodec.frameCount = 1;
+    mockCodec.repetitionCount = 0;
+    final Completer<Codec> codecCompleter = Completer<Codec>();
+
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: codecCompleter.future,
+      scale: 1.0,
+    );
+
+    ImageInfo currentImage;
+    final ImageListener listener = (ImageInfo image, bool synchronousCall) {
+      currentImage = image;
+    };
+
+    imageStream.addListener(ImageStreamListener(listener));
+
+    codecCompleter.complete(mockCodec);
+    await tester.idle();
+
+    expect(currentImage, null);
+    final FakeFrameInfo frame = FakeFrameInfo(20, 10, Duration.zero);
+    mockCodec.completeNextFrame(frame);
+    await tester.idle();
+
+    expect(currentImage, isNotNull);
+
+    expect(currentImage.image, frame.image);
+    expect(frame.imageDisposed, false);
+
+    imageStream.removeListener(ImageStreamListener(listener));
+    expect(frame.imageDisposed, true);
+  });
+
+  testWidgets('does not dispose image when last listener drops and keepFramesAlive is true - multi frame frame count 1', (WidgetTester tester) async {
+    final MockCodec mockCodec = MockCodec();
+    mockCodec.frameCount = 1;
+    mockCodec.repetitionCount = 0;
+    final Completer<Codec> codecCompleter = Completer<Codec>();
+
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: codecCompleter.future,
+      scale: 1.0,
+      keepFramesAlive: true,
+    );
+
+    ImageInfo currentImage;
+    final ImageListener listener = (ImageInfo image, bool synchronousCall) {
+      currentImage = image;
+    };
+
+    imageStream.addListener(ImageStreamListener(listener));
+
+    codecCompleter.complete(mockCodec);
+    await tester.idle();
+
+    expect(currentImage, null);
+    final FakeFrameInfo frame = FakeFrameInfo(20, 10, Duration.zero);
+    mockCodec.completeNextFrame(frame);
+    await tester.idle();
+
+    expect(currentImage, isNotNull);
+
+    expect(currentImage.image, frame.image);
+    expect(frame.imageDisposed, false);
+
+    imageStream.removeListener(ImageStreamListener(listener));
+    expect(frame.imageDisposed, false);
+  });
+
+  testWidgets('disposes image when last listener drops - multi frame', (WidgetTester tester) async {
+    final MockCodec mockCodec = MockCodec();
+    mockCodec.frameCount = 2;
+    mockCodec.repetitionCount = 0;
+    final Completer<Codec> codecCompleter = Completer<Codec>();
+
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: codecCompleter.future,
+      scale: 1.0,
+    );
+
+    ImageInfo currentImage;
+    final ImageListener listener = (ImageInfo image, bool synchronousCall) {
+      currentImage = image;
+    };
+
+    imageStream.addListener(ImageStreamListener(listener));
+
+    codecCompleter.complete(mockCodec);
+    await tester.idle();
+
+    expect(currentImage, null);
+    final FakeFrameInfo frame1 = FakeFrameInfo(20, 10, Duration.zero);
+    mockCodec.completeNextFrame(frame1);
+    await tester.idle();
+    await tester.pump();
+
+    expect(currentImage, isNotNull);
+
+    expect(currentImage.image, frame1.image);
+    expect(frame1.imageDisposed, false);
+
+    final FakeFrameInfo frame2 = FakeFrameInfo(10, 10, Duration.zero);
+    mockCodec.completeNextFrame(frame2);
+    await tester.idle();
+    await tester.pump();
+
+    expect(frame1.imageDisposed, true);
+    expect(currentImage.image, frame2.image);
+    expect(frame2.imageDisposed, false);
+
+    imageStream.removeListener(ImageStreamListener(listener));
+    expect(frame2.imageDisposed, true);
+  });
+
+  testWidgets('does not dispose image when last listener drops and keepFramesAlive is true - multi frame', (WidgetTester tester) async {
+    final MockCodec mockCodec = MockCodec();
+    mockCodec.frameCount = 2;
+    mockCodec.repetitionCount = 0;
+    final Completer<Codec> codecCompleter = Completer<Codec>();
+
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: codecCompleter.future,
+      scale: 1.0,
+      keepFramesAlive: true,
+    );
+
+    ImageInfo currentImage;
+    final ImageListener listener = (ImageInfo image, bool synchronousCall) {
+      currentImage = image;
+    };
+
+    imageStream.addListener(ImageStreamListener(listener));
+
+    codecCompleter.complete(mockCodec);
+    await tester.idle();
+
+    expect(currentImage, null);
+    final FakeFrameInfo frame1 = FakeFrameInfo(20, 10, Duration.zero);
+    mockCodec.completeNextFrame(frame1);
+    await tester.idle();
+    await tester.pump();
+
+    expect(currentImage, isNotNull);
+
+    expect(currentImage.image, frame1.image);
+    expect(frame1.imageDisposed, false);
+
+    final FakeFrameInfo frame2 = FakeFrameInfo(10, 10, Duration.zero);
+    mockCodec.completeNextFrame(frame2);
+    await tester.idle();
+    await tester.pump();
+
+    expect(frame1.imageDisposed, false);
+    expect(currentImage.image, frame2.image);
+    expect(frame2.imageDisposed, false);
+
+    imageStream.removeListener(ImageStreamListener(listener));
+    expect(frame2.imageDisposed, false);
+  });
+
 
   // TODO(amirh): enable this once WidgetTester supports flushTimers.
   // https://github.com/flutter/flutter/issues/30344

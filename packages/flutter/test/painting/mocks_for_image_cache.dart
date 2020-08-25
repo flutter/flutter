@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 class TestImageInfo implements ImageInfo {
-  const TestImageInfo(this.value, { this.image, this.scale = 1.0, this.debugLabel });
+  const TestImageInfo(this.value, { this.image, this.scale = 1.0, this.debugLabel, this.keepAlive = false });
 
   @override
   final ui.Image image;
@@ -24,6 +24,9 @@ class TestImageInfo implements ImageInfo {
   @override
   final String debugLabel;
 
+  @override
+  final bool keepAlive;
+
   final int value;
 
   @override
@@ -31,7 +34,9 @@ class TestImageInfo implements ImageInfo {
 }
 
 class TestImageProvider extends ImageProvider<int> {
-  const TestImageProvider(this.key, this.imageValue, { this.image });
+  const TestImageProvider(this.key, this.imageValue, { this.image = const TestImage() })
+      : assert(image != null);
+
   final int key;
   final int imageValue;
   final ui.Image image;
