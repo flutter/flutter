@@ -6,6 +6,9 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/os.dart';
+import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -89,6 +92,18 @@ class PackagesGetCommand extends FlutterCommand {
   }
 
   Future<void> _runPubGet(String directory, FlutterProject flutterProject) async {
+    final Environment environment = Environment(
+      artifacts: globals.artifacts,
+      logger: globals.logger,
+      cacheDir: globals.cache.getRoot(),
+      engineVersion: globals.flutterVersion.engineRevision,
+      fileSystem: globals.fs,
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      outputDir: globals.fs.directory(getBuildDirectory()),
+      processManager: globals.processManager,
+      projectDir: flutterProject.directory,
+    );
+
     final Stopwatch pubGetTimer = Stopwatch()..start();
     try {
       await pub.get(context: PubContext.pubGet,
@@ -97,6 +112,8 @@ class PackagesGetCommand extends FlutterCommand {
         offline: boolArg('offline'),
         checkLastModified: false,
         generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
+        environment: environment,
+        buildSystem: globals.buildSystem,
       );
       pubGetTimer.stop();
       globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
