@@ -53,9 +53,12 @@ void main() {
   final _DrawRectOnceCanvas testCanvas = _DrawRectOnceCanvas();
   ScrollbarPainter painter;
 
-  Rect captureRect() => testCanvas.rects.removeLast();
+  Rect captureRect() => testCanvas.rects.single();
 
-  tearDown(() => painter = null);
+  tearDown(() {
+    painter = null;
+    testCanvas.rects.clear();
+  });
 
   final ScrollMetrics defaultMetrics = FixedScrollMetrics(
     minScrollExtent: 0,
