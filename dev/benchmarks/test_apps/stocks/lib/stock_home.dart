@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree, DebugSemanticsDumpOrder;
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter_gen/gen_l10n/stock_strings.dart';
 
+import 'i18n/stock_strings.dart';
 import 'stock_data.dart';
 import 'stock_list.dart';
 import 'stock_symbol_viewer.dart';
