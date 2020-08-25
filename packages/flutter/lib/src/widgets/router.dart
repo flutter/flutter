@@ -395,7 +395,6 @@ class _RouterState<T> extends State<Router<T>> {
     if (widget.routeInformationProvider != null) {
       _processInitialRoute();
     }
-    _lastSeenLocation = widget.routeInformationProvider?.value?.location;
   }
 
   bool _routeInformationReportingTaskScheduled = false;
@@ -552,6 +551,7 @@ class _RouterState<T> extends State<Router<T>> {
   void _processInitialRoute() {
     _currentRouteInformationParserTransaction = Object();
     _currentRouterDelegateTransaction = Object();
+    _lastSeenLocation = widget.routeInformationProvider.value.location;
     widget.routeInformationParser
       .parseRouteInformation(widget.routeInformationProvider.value)
       .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
@@ -563,6 +563,7 @@ class _RouterState<T> extends State<Router<T>> {
   void _handleRouteInformationProviderNotification() {
     _currentRouteInformationParserTransaction = Object();
     _currentRouterDelegateTransaction = Object();
+    _lastSeenLocation = widget.routeInformationProvider.value.location;
     widget.routeInformationParser
       .parseRouteInformation(widget.routeInformationProvider.value)
       .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
