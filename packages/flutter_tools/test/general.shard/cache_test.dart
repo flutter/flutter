@@ -634,6 +634,32 @@ void main() {
 
     expect(logger.errorText, contains('Failed to delete some stamp files'));
   });
+
+  testWithoutContext('Cache handles exception thrown if stamp file cannot be parsed', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Logger logger = BufferLogger.test();
+    final FakeCache cache = FakeCache(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: FakePlatform(),
+      osUtils: MockOperatingSystemUtils()
+    );
+    final MockFile file = MockFile();
+    cache.stampFile = file;
+    when(file.existsSync()).thenReturn(false);
+
+    expect(cache.getStampFor('foo'), null);
+
+    when(file.existsSync()).thenReturn(true);
+    when(file.readAsStringSync()).thenThrow(const FileSystemException());
+
+    expect(cache.getStampFor('foo'), null);
+
+    when(file.existsSync()).thenReturn(true);
+    when(file.readAsStringSync()).thenReturn('ABC ');
+
+    expect(cache.getStampFor('foo'), 'ABC');
+  });
 }
 
 class FakeCachedArtifact extends EngineCachedArtifact {
@@ -698,3 +724,24 @@ class MockInternetAddress extends Mock implements InternetAddress {}
 class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 class MockVersionedPackageResolver extends Mock implements VersionedPackageResolver {}
+class FakeCache extends Cache {
+  FakeCache({
+    @required Logger logger,
+    @required FileSystem fileSystem,
+    @required Platform platform,
+    @required OperatingSystemUtils osUtils,
+  }) : super(
+    logger: logger,
+    fileSystem: fileSystem,
+    platform: platform,
+    osUtils: osUtils,
+    artifacts: <ArtifactSet>[],
+  );
+
+  File stampFile;
+
+  @override
+  File getStampFileFor(String artifactName) {
+    return stampFile;
+  }
+}
