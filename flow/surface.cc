@@ -18,8 +18,4 @@ std::unique_ptr<GLContextResult> Surface::MakeRenderContextCurrent() {
   return std::make_unique<GLContextDefaultResult>(true);
 }
 
-bool Surface::ClearRenderContext() {
-  return false;
-}
-
 }  // namespace flutter
