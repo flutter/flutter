@@ -10,7 +10,7 @@ Future<void> main() => driver.e2eDriver(
   timeout: const Duration(minutes: 5),
   responseDataCallback: (Map<String, dynamic> data) async {
     await driver.writeResponseData(
-      data['without resampler'] as Map<String, dynamic>,
+      data,
       testOutputFilename: 'scroll_smoothness_test',
     );
   }

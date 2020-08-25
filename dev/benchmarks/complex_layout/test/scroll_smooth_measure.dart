@@ -91,12 +91,38 @@ Iterable<PointerDataRecord> dragInputDatas(
   )]);
 }
 
+class ResampleFlagVariant extends TestVariant<bool> {
+  ResampleFlagVariant(this.binding);
+  final E2EWidgetsFlutterBinding binding;
+
+  @override
+  final Set<bool> values = <bool>{true, false};
+
+  Map<String, dynamic> result;
+
+  @override
+  String describeValue(bool value) => value ? 'resampling on' : 'resampling off';
+
+  @override
+  Future<bool> setUp(bool value) async {
+    final bool original = binding.resamplingEnabled;
+    binding.resamplingEnabled = value;
+    return original;
+  }
+
+  @override
+  Future<void> tearDown(bool value, bool memento) async {
+    binding.resamplingEnabled = memento;
+    binding.reportData[value ? 'with resampler' : 'without resampler'] = result;
+  }
+}
 
 Future<void> main() async {
   final PointerDataTestBinding binding = PointerDataTestBinding();
   assert(WidgetsBinding.instance == binding);
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
   binding.reportData ??= <String, dynamic>{};
+  final ResampleFlagVariant variant = ResampleFlagVariant(binding);
   testWidgets('Smoothness test', (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
@@ -131,24 +157,15 @@ Future<void> main() async {
     binding.resamplingEnabled = false;
     print('without resampler');
     List<Duration> delays = <Duration>[];
-    for (int n = 0; n < 1; n++) {
+    for (int n = 0; n < 5; n++) {
       delays += await scroll();
     }
-    binding.reportData['without resampler'] = scrollSummary(scrollOffset, delays, frameTimestamp);
+    variant.result = scrollSummary(scrollOffset, delays, frameTimestamp);
     await tester.pumpAndSettle();
     scrollOffset.clear();
     delays.clear();
-
-    binding.resamplingEnabled = true;
-    print('with resampler');
-    for (int n = 0; n < 1; n++) {
-      delays += await scroll();
-    }
-    binding.reportData['with resampler'] = scrollSummary(scrollOffset, delays, frameTimestamp);
-    await tester.pumpAndSettle();
-
     await tester.idle();
-  }, semanticsEnabled: false);
+  }, semanticsEnabled: false, variant: variant);
 }
 
 Map<String, dynamic> scrollSummary(
