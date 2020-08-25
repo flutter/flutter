@@ -1,4 +1,4 @@
-Signature: ab76ce6d3ea560de10d3451aa8438b6a
+Signature: 8f2bb3254e69af1ec4d5371fa29ad12e
 
 UNUSED LICENSES:
 
@@ -8387,8 +8387,18 @@ ORIGIN: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart + ../..
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart2/ListCopy.dart
+FILE: ../../../third_party/dart/benchmarks/MD5/dart/md5.dart
+FILE: ../../../third_party/dart/benchmarks/MD5/dart2/md5.dart
 FILE: ../../../third_party/dart/benchmarks/RuntimeType/dart/RuntimeType.dart
 FILE: ../../../third_party/dart/benchmarks/RuntimeType/dart2/RuntimeType.dart
+FILE: ../../../third_party/dart/benchmarks/SHA1/dart/sha1.dart
+FILE: ../../../third_party/dart/benchmarks/SHA1/dart2/sha1.dart
+FILE: ../../../third_party/dart/benchmarks/SHA256/dart/sha256.dart
+FILE: ../../../third_party/dart/benchmarks/SHA256/dart2/sha256.dart
+FILE: ../../../third_party/dart/benchmarks/SkeletalAnimation/dart/SkeletalAnimation.dart
+FILE: ../../../third_party/dart/benchmarks/SkeletalAnimation/dart2/SkeletalAnimation.dart
+FILE: ../../../third_party/dart/benchmarks/SkeletalAnimationSIMD/dart/SkeletalAnimationSIMD.dart
+FILE: ../../../third_party/dart/benchmarks/SkeletalAnimationSIMD/dart2/SkeletalAnimationSIMD.dart
 FILE: ../../../third_party/dart/benchmarks/TypedDataDuplicate/dart/TypedDataDuplicate.dart
 FILE: ../../../third_party/dart/benchmarks/TypedDataDuplicate/dart2/TypedDataDuplicate.dart
 FILE: ../../../third_party/dart/benchmarks/Utf8Decode/dart/Utf8Decode.dart
