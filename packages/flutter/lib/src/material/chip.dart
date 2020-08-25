@@ -2067,7 +2067,6 @@ class _RenderChipElement extends RenderObjectElement {
   _RenderChipElement(_ChipRenderWidget chip) : super(chip);
 
   final Map<_ChipSlot, Element> slotToChild = <_ChipSlot, Element>{};
-  final Map<Element, _ChipSlot> childToSlot = <Element, _ChipSlot>{};
 
   @override
   _ChipRenderWidget get widget => super.widget as _ChipRenderWidget;
@@ -2082,11 +2081,10 @@ class _RenderChipElement extends RenderObjectElement {
 
   @override
   void forgetChild(Element child) {
-    assert(slotToChild.values.contains(child));
-    assert(childToSlot.keys.contains(child));
-    final _ChipSlot slot = childToSlot[child];
-    childToSlot.remove(child);
-    slotToChild.remove(slot);
+    assert(slotToChild.containsValue(child));
+    assert(child.slot is _ChipSlot);
+    assert(slotToChild.containsKey(child.slot));
+    slotToChild.remove(child.slot);
     super.forgetChild(child);
   }
 
@@ -2095,11 +2093,9 @@ class _RenderChipElement extends RenderObjectElement {
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
       slotToChild.remove(slot);
-      childToSlot.remove(oldChild);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -2115,12 +2111,10 @@ class _RenderChipElement extends RenderObjectElement {
     final Element oldChild = slotToChild[slot];
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
-      childToSlot.remove(oldChild);
       slotToChild.remove(slot);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -2151,18 +2145,15 @@ class _RenderChipElement extends RenderObjectElement {
   void insertRenderObjectChild(RenderObject child, _ChipSlot slot) {
     assert(child is RenderBox);
     _updateRenderObject(child, slot);
-    assert(renderObject.childToSlot.keys.contains(child));
-    assert(renderObject.slotToChild.keys.contains(slot));
+    assert(renderObject.children.keys.contains(slot));
   }
 
   @override
   void removeRenderObjectChild(RenderObject child, _ChipSlot slot) {
     assert(child is RenderBox);
-    assert(renderObject.childToSlot[child] == slot);
-    assert(renderObject.slotToChild[slot] == child);
+    assert(renderObject.children[slot] == child);
     _updateRenderObject(null, slot);
-    assert(!renderObject.childToSlot.keys.contains(child));
-    assert(!renderObject.slotToChild.keys.contains(slot));
+    assert(!renderObject.children.keys.contains(slot));
   }
 
   @override
@@ -2258,8 +2249,7 @@ class _RenderChip extends RenderBox {
     enableAnimation.addListener(markNeedsPaint);
   }
 
-  final Map<_ChipSlot, RenderBox> slotToChild = <_ChipSlot, RenderBox>{};
-  final Map<RenderBox, _ChipSlot> childToSlot = <RenderBox, _ChipSlot>{};
+  final Map<_ChipSlot, RenderBox> children = <_ChipSlot, RenderBox>{};
 
   bool value;
   bool isEnabled;
@@ -2274,12 +2264,10 @@ class _RenderChip extends RenderBox {
   RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _ChipSlot slot) {
     if (oldChild != null) {
       dropChild(oldChild);
-      childToSlot.remove(oldChild);
-      slotToChild.remove(slot);
+      children.remove(slot);
     }
     if (newChild != null) {
-      childToSlot[newChild] = slot;
-      slotToChild[slot] = newChild;
+      children[slot] = newChild;
       adoptChild(newChild);
     }
     return newChild;

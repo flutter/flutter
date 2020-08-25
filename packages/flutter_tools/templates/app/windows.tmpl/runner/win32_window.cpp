@@ -154,13 +154,6 @@ Win32Window::MessageHandler(HWND hwnd,
                             UINT const message,
                             WPARAM const wparam,
                             LPARAM const lparam) noexcept {
-  auto window =
-      reinterpret_cast<Win32Window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
-
-  if (window == nullptr) {
-    return 0;
-  }
-
   switch (message) {
     case WM_DESTROY:
       window_handle_ = nullptr;

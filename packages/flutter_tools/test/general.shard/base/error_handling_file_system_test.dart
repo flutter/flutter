@@ -59,9 +59,12 @@ void setupWriteMocks({
     encoding: anyNamed('encoding'),
     flush: anyNamed('flush'),
   )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockFile.openSync(
+    mode: anyNamed('mode'),
+  )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
-void setupCreateTempMocks({
+void setupDirectoryMocks({
   FileSystem mockFileSystem,
   ErrorHandlingFileSystem fs,
   int errorCode,
@@ -73,12 +76,15 @@ void setupCreateTempMocks({
   });
   when(mockDirectory.createTempSync(any))
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.createSync(recursive: anyNamed('recursive')))
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
 void main() {
   group('throws ToolExit on Windows', () {
     const int kDeviceFull = 112;
     const int kUserMappedSectionOpened = 1224;
+    const int kUserPermissionDenied = 5;
     MockFileSystem mockFileSystem;
     ErrorHandlingFileSystem fs;
 
@@ -89,6 +95,28 @@ void main() {
         platform: windowsPlatform,
       );
       when(mockFileSystem.path).thenReturn(MockPathContext());
+    });
+
+    testWithoutContext('when access is denied', () async {
+      setupWriteMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kUserPermissionDenied,
+      );
+
+      final File file = fs.file('file');
+
+      const String expectedMessage = 'The flutter tool cannot access the file';
+      expect(() async => await file.writeAsBytes(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await file.writeAsString(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsStringSync(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when writing to a full device', () async {
@@ -132,7 +160,7 @@ void main() {
     });
 
     testWithoutContext('when creating a temporary dir on a full device', () async {
-      setupCreateTempMocks(
+      setupDirectoryMocks(
         mockFileSystem: mockFileSystem,
         fs: fs,
         errorCode: kDeviceFull,
@@ -144,6 +172,20 @@ void main() {
       expect(() async => await directory.createTemp('prefix'),
              throwsToolExit(message: expectedMessage));
       expect(() => directory.createTempSync('prefix'),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when creating a directory with permission issues', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kUserPermissionDenied,
+      );
+
+      final Directory directory = fs.directory('directory');
+
+      const String expectedMessage = 'Flutter failed to create a directory at';
+      expect(() => directory.createSync(recursive: true),
              throwsToolExit(message: expectedMessage));
     });
   });
@@ -183,7 +225,7 @@ void main() {
     });
 
     testWithoutContext('when creating a temporary dir on a full device', () async {
-      setupCreateTempMocks(
+      setupDirectoryMocks(
         mockFileSystem: mockFileSystem,
         fs: fs,
         errorCode: enospc,

@@ -3561,8 +3561,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// This updates the child model such that, e.g., [visitChildren] does not
   /// walk that child anymore.
   ///
-  /// The element will still have a valid parent when this is called. After this
-  /// is called, [deactivateChild] is called to sever the link to this object.
+  /// The element will still have a valid parent when this is called, and the
+  /// child's [Element.slot] value will be valid in the context of that parent.
+  /// After this is called, [deactivateChild] is called to sever the link to
+  /// this object.
   ///
   /// The [update] is responsible for updating or creating the new child that
   /// will replace this [child].
@@ -6079,6 +6081,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   @override
   void removeRenderObjectChild(RenderObject child, dynamic slot) {
     final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject as RenderObjectWithChildMixin<RenderObject>;
+    assert(slot == null);
     assert(renderObject.child == child);
     renderObject.child = null;
     assert(renderObject == this.renderObject);

@@ -52,7 +52,7 @@ abstract class AotAssemblyBase extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
-    final List<DarwinArch> iosArchs = environment.defines[kIosArchs]
+    final List<DarwinArch> darwinArchs = environment.defines[kIosArchs]
       ?.split(' ')
       ?.map(getIOSArchForName)
       ?.toList()
@@ -60,29 +60,41 @@ abstract class AotAssemblyBase extends Target {
     if (targetPlatform != TargetPlatform.ios) {
       throw Exception('aot_assembly is only supported for iOS applications.');
     }
-    if (iosArchs.contains(DarwinArch.x86_64)) {
+    if (darwinArchs.contains(DarwinArch.x86_64)) {
       throw Exception(
         'release/profile builds are only supported for physical devices. '
-        'attempted to build for $iosArchs.'
+        'attempted to build for $darwinArchs.'
       );
     }
+    final String codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 
     // If we're building multiple iOS archs the binaries need to be lipo'd
     // together.
     final List<Future<int>> pending = <Future<int>>[];
-    for (final DarwinArch iosArch in iosArchs) {
+    for (final DarwinArch darwinArch in darwinArchs) {
+      final List<String> archExtraGenSnapshotOptions = List<String>.of(extraGenSnapshotOptions);
+      if (codeSizeDirectory != null) {
+        final File codeSizeFile = environment.fileSystem
+          .directory(codeSizeDirectory)
+          .childFile('snapshot.${getNameForDarwinArch(darwinArch)}.json');
+        final File precompilerTraceFile = environment.fileSystem
+          .directory(codeSizeDirectory)
+          .childFile('trace.${getNameForDarwinArch(darwinArch)}.json');
+        archExtraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
+        archExtraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
+      }
       pending.add(snapshotter.build(
         platform: targetPlatform,
         buildMode: buildMode,
         mainPath: environment.buildDir.childFile('app.dill').path,
         packagesPath: environment.projectDir.childFile('.packages').path,
-        outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(iosArch)),
-        darwinArch: iosArch,
+        outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(darwinArch)),
+        darwinArch: darwinArch,
         bitcode: bitcode,
         quiet: true,
         splitDebugInfo: splitDebugInfo,
         dartObfuscation: dartObfuscation,
-        extraGenSnapshotOptions: extraGenSnapshotOptions,
+        extraGenSnapshotOptions: archExtraGenSnapshotOptions,
       ));
     }
     final List<int> results = await Future.wait(pending);
@@ -93,7 +105,7 @@ abstract class AotAssemblyBase extends Target {
     environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
     final ProcessResult result = await environment.processManager.run(<String>[
       'lipo',
-      ...iosArchs.map((DarwinArch iosArch) =>
+      ...darwinArchs.map((DarwinArch iosArch) =>
           environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
       '-create',
       '-output',
