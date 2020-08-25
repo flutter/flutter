@@ -143,12 +143,15 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   /// Called automatically when the binding is created.
   void initRenderView() {
-    assert(!_isRenderViewInitialized);
-    _isRenderViewInitialized = true;
+    assert(!_debugIsRenderViewInitialized);
+    assert(() {
+      _debugIsRenderViewInitialized = true;
+      return true;
+    }());
     renderView = RenderView(configuration: createViewConfiguration(), window: window);
     renderView.prepareInitialFrame();
   }
-  bool _isRenderViewInitialized = false;
+  bool _debugIsRenderViewInitialized = false;
 
   /// The object that manages state about currently connected mice, for hover
   /// notification.
