@@ -487,16 +487,44 @@ self.addEventListener("fetch", (event) => {
   if (event.request.url == origin || event.request.url.startsWith(origin + '/#')) {
     key = '/';
   }
-  // If the URL is not the RESOURCE list, skip the cache.
   if (!RESOURCES[key]) {
     return event.respondWith(fetch(event.request));
   }
-  event.respondWith(caches.open(CACHE_NAME)
+  if (CORE.indexOf(key) != -1) {
+    return offlineFirst(event);
+  }
+  return onlineFirst(event);
+});
+
+// Attempt to download the resource online before falling back to
+// the offline cache.
+function onlineFirst(event) {
+  return event.respondWith(
+    fetch(event.request).then((response) => {
+      return caches.open(CACHE_NAME).then((cache) => {
+        cache.put(event.request, response.clone());
+        return response;
+      });
+    }).catch((error) => {
+      return caches.open(CACHE_NAME).then((cache) => {
+        return cache.match(event.request).then((response) => {
+          if (response != null) {
+            return response;
+          }
+          throw error;
+        });
+      });
+    })
+  );
+}
+
+// Either respond with the cached resource, or perform a fetch and
+// lazily populate the cache. Ensure the resources are not cached
+// by the browser for longer than the service worker expects.
+function offlineFirst(event) {
+  return event.respondWith(caches.open(CACHE_NAME)
     .then((cache) =>  {
       return cache.match(event.request).then((response) => {
-        // Either respond with the cached resource, or perform a fetch and
-        // lazily populate the cache. Ensure the resources are not cached
-        // by the browser for longer than the service worker expects.
         var modifiedRequest = new Request(event.request, {'cache': 'reload'});
         return response || fetch(modifiedRequest).then((response) => {
           cache.put(event.request, response.clone());
@@ -505,7 +533,7 @@ self.addEventListener("fetch", (event) => {
       })
     })
   );
-});
+}
 
 self.addEventListener('message', (event) => {
   // SkipWaiting can be used to immediately activate a waiting service worker.
