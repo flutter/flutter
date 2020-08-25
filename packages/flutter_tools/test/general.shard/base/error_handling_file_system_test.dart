@@ -76,7 +76,7 @@ void setupDirectoryMocks({
   });
   when(mockDirectory.createTempSync(any))
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
-  when(mockDirectory.createSync(recursive: any))
+  when(mockDirectory.createSync(recursive: anyNamed('recursive')))
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
@@ -179,15 +179,13 @@ void main() {
       setupDirectoryMocks(
         mockFileSystem: mockFileSystem,
         fs: fs,
-        errorCode: 5,
+        errorCode: kUserPermissionDenied,
       );
 
       final Directory directory = fs.directory('directory');
 
-      const String expectedMessage = 'The target device is full';
-      expect(() async => await directory.createTemp('prefix'),
-             throwsToolExit(message: expectedMessage));
-      expect(() => directory.createTempSync('prefix'),
+      const String expectedMessage = 'Flutter failed to create a directory at';
+      expect(() => directory.createSync(recursive: true),
              throwsToolExit(message: expectedMessage));
     });
   });
