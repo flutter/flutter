@@ -18,9 +18,9 @@ import '../base/io.dart' as io;
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
-import '../project.dart';
 import '../reporting/reporting.dart';
 
 import 'generate_synthetic_packages.dart';
@@ -104,6 +104,8 @@ abstract class Pub {
     bool skipPubspecYamlCheck = false,
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
+    Environment environment,
+    BuildSystem buildSystem,
   });
 
   /// Runs pub in 'batch' mode.
@@ -179,6 +181,8 @@ class _DefaultPub implements Pub {
     bool skipPubspecYamlCheck = false,
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
+    Environment environment,
+    BuildSystem buildSystem,
   }) async {
     directory ??= _fileSystem.currentDirectory.path;
 
@@ -186,7 +190,8 @@ class _DefaultPub implements Pub {
       _fileSystem.path.join(directory, 'pubspec.yaml'));
     final File packageConfigFile = _fileSystem.file(
       _fileSystem.path.join(directory, '.dart_tool', 'package_config.json'));
-    final Directory generatedDirectory = _fileSystem.directory(_fileSystem.path.join(directory, '.dart_tool', 'flutter_gen'));
+    final Directory generatedDirectory = _fileSystem.directory(
+      _fileSystem.path.join(directory, '.dart_tool', 'flutter_gen'));
 
     if (!skipPubspecYamlCheck && !pubSpecYaml.existsSync()) {
       if (!skipIfAbsent) {
@@ -206,18 +211,16 @@ class _DefaultPub implements Pub {
       // If pubspec.yaml has generate:true and if l10n.yaml exists in the
       // root project directory, check to see if a synthetic package should
       // be generated for gen_l10n.
-      final FlutterProject rootProject = FlutterProject.fromPath(directory);
-
-      if (
-        rootProject.manifest.generateSyntheticPackage &&
-        l10nYamlFile.existsSync()
-      ) {
+      if (generateSyntheticPackage && l10nYamlFile.existsSync()) {
         final YamlNode yamlNode = loadYamlNode(l10nYamlFile.readAsStringSync());
 
         // If an l10n.yaml file exists but is empty, attempt to build synthetic
         // package with default settings.
         if (yamlNode.value == null) {
-          await generateLocalizationsSyntheticPackage(rootProject);
+          await generateLocalizationsSyntheticPackage(
+            environment,
+            buildSystem,
+          );
         } else if (yamlNode.value != null && yamlNode is! YamlMap) {
           throwToolExit(
             'Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode'
@@ -237,7 +240,10 @@ class _DefaultPub implements Pub {
           // synthetic-package is null.
           final bool isSyntheticL10nPackage = value as bool ?? true;
           if (isSyntheticL10nPackage) {
-            await generateLocalizationsSyntheticPackage(rootProject);
+            await generateLocalizationsSyntheticPackage(
+              environment,
+              buildSystem,
+            );
           }
         }
       }

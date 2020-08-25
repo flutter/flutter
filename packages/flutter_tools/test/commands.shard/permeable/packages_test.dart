@@ -209,65 +209,6 @@ void main() {
       ),
     });
 
-    testUsingContext('get generates synthetic packages when generate:true', () async {
-      final String projectPath = await createProject(
-        tempDir,
-        arguments: <String>['--no-pub', '--template=module'],
-      );
-      removeGeneratedFiles(projectPath);
-
-      // Add generate:true to pubspec.yaml
-      final String pubspecPath = globals.fs.path.join(projectPath, 'pubspec.yaml');
-      final File pubspecFile = globals.fs.file(pubspecPath);
-      final String content = pubspecFile.readAsStringSync().replaceFirst(
-        '\nflutter:\n',
-        '\nflutter:\n  generate: true\n',
-      );
-      pubspecFile.writeAsStringSync(content);
-
-      // Create an l10n.yaml file and l10n/arb directories
-      final String l10nYamlPath = globals.fs.path.join(projectPath, 'l10n.yaml');
-      globals.fs.file(l10nYamlPath).createSync();
-
-      final String l10nDirectoryPath = globals.fs.path.join(projectPath, 'lib', 'l10n');
-      final Directory l10nDirectory = globals.fs.directory(l10nDirectoryPath)
-        ..createSync();
-
-      l10nDirectory.childFile('app_en.arb')
-        ..createSync()
-        ..writeAsStringSync('''{
-    "helloWorld": "Hello, world!",
-    "@helloWorld": {}
-}
-''');
-
-      // Running pub/packages get should generate gen_l10n synthetic package.
-      await runCommandIn(projectPath, 'get');
-
-      final Directory syntheticGenL10nPackage = globals.fs.directory(
-        globals.fs.path.join(
-          projectPath,
-          '.dart_tool',
-          'flutter_gen',
-          'gen_l10n',
-        ),
-      );
-
-      // Synthetic package should exist, as well as generated Dart files.
-      expect(syntheticGenL10nPackage.existsSync(), true);
-      expect(syntheticGenL10nPackage.childFile('app_localizations.dart').existsSync(), true);
-      expect(syntheticGenL10nPackage.childFile('app_localizations_en.dart').existsSync(), true);
-    }, overrides: <Type, Generator>{
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-      ),
-    });
-
     testUsingContext('get --offline fetches packages', () async {
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);

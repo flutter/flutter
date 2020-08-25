@@ -6,12 +6,15 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/localizations.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -19,6 +22,7 @@ import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:fake_async/fake_async.dart';
 
+import '../../commands.shard/permeable/build_bundle_test.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart' as mocks;
@@ -393,6 +397,67 @@ void main() {
     ));
     logger.clear();
   });
+
+    testWithoutContext('get generates synthetic packages for GenerateLocalizationsTarget when generate:true', () async {
+      // MOCKS SETUP
+
+      // Project directory setup for gen_l10n logic
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+
+      // Add generate:true to pubspec.yaml.
+      final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+      final String content = pubspecFile.readAsStringSync().replaceFirst(
+        '\nflutter:\n',
+        '\nflutter:\n  generate: true\n',
+      );
+      pubspecFile.writeAsStringSync(content);
+
+      // Set up minimal .dart_tool
+      fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"configVersion": 2,"packages": []}');
+
+      // Create an l10n.yaml file
+      fileSystem.file('l10n.yaml').createSync();
+
+      final MockProcessManager mockProcessManager = MockProcessManager(0);
+      final BufferLogger mockBufferLogger = BufferLogger.test();
+      final Artifacts mockArtifacts = Artifacts.test();
+      final Pub pub = Pub(
+        platform: FakePlatform(environment: const <String, String>{}),
+        usage: MockUsage(),
+        fileSystem: fileSystem,
+        logger: mockBufferLogger,
+        processManager: mockProcessManager,
+        botDetector: const BotDetectorAlwaysNo(),
+      );
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        fileSystem: fileSystem,
+        logger: mockBufferLogger,
+        artifacts: mockArtifacts,
+        processManager: mockProcessManager,
+      );
+      final BuildSystem buildSystem = MockBuildSystem();
+
+      // Running pub.get with conditions that trigger GenerateLocalizationsTarget
+      // synthetic package generation.
+      await pub.get(
+        context: PubContext.flutterTests,
+        checkLastModified: true,
+        generateSyntheticPackage: true,
+        environment: environment,
+        buildSystem: buildSystem,
+      );
+
+      // [BuildSystem] should have called build with [GenerateLocalizationsTarget].
+      verify(
+        buildSystem.build(
+          const GenerateLocalizationsTarget(),
+          environment,
+        ),
+      ).called(1);
+    });
 }
 
 class BotDetectorAlwaysNo implements BotDetector {
