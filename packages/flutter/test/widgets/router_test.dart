@@ -438,8 +438,6 @@ void main() {
     RouteInformation reportedRouteInformation;
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider(
       onRouterReport: (RouteInformation information) {
-        // Makes sure we only report once after manually cleaning up.
-        expect(reportedRouteInformation, isNull);
         reportedRouteInformation = information;
       }
     );
@@ -460,18 +458,18 @@ void main() {
     ));
     expect(find.text('initial'), findsOneWidget);
     expect(reportedRouteInformation, isNull);
-
+    // This will cause the router to rebuild.
     provider.value = const RouteInformation(
       location: 'update',
     );
-    // This notify listener will schedule route reporting.
+    // This will schedule the route reporting.
     delegate.notifyListeners();
     await tester.pump();
 
     expect(find.text('initial'), findsNothing);
     expect(find.text('update'), findsOneWidget);
-    // The router should not report because the route name because it is already
-    // up to date.
+    // The router should not report because the route name is already up to
+    // date.
     expect(reportedRouteInformation, isNull);
   });
 
