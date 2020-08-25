@@ -232,7 +232,7 @@ class SizeAnalyzer {
 
   /// Go through the AOT gen snapshot size JSON and print out a collapsed summary
   /// for the first package level.
-  void _printAotSnapshotSummary(_SymbolNode aotSnapshotRoot, {int maxDirectoriesShown = 30, @required int level}) {
+  void _printAotSnapshotSummary(_SymbolNode aotSnapshotRoot, {int maxDirectoriesShown = 20, @required int level}) {
     _printEntitySize(
       'Dart AOT symbols accounted decompressed size',
       byteSize: aotSnapshotRoot.byteSize,
@@ -241,6 +241,9 @@ class SizeAnalyzer {
     );
 
     final List<_SymbolNode> sortedSymbols = aotSnapshotRoot.children.toList()
+      // Remove entries like  @unknown, @shared, and @stubs as well as private dart libraries
+      //  which are not interpretable by end users.
+      ..removeWhere((_SymbolNode node) => node.name.startsWith('@') || node.name.startsWith('dart:_'))
       ..sort((_SymbolNode a, _SymbolNode b) => b.byteSize.compareTo(a.byteSize));
     for (final _SymbolNode node in sortedSymbols.take(maxDirectoriesShown)) {
       // Node names will have an extra leading `package:*` name, remove it to
@@ -292,7 +295,6 @@ class SizeAnalyzer {
     bool showColor = true,
     bool emphasis = false,
   }) {
-    // final bool emphasis = level <= 1;
     final String formattedSize = _prettyPrintBytes(byteSize);
 
     TerminalColor color = TerminalColor.green;
@@ -301,6 +303,11 @@ class SizeAnalyzer {
     } else if (formattedSize.endsWith('KB')) {
       color = TerminalColor.yellow;
     }
+
+    // Compute any preceeding directories, and compare this to the stored
+    // directoried (in _leadingPaths) for the last entity that was printed. The
+    // similary determines whether or not leading directory information needs to
+    // be printed.
     final List<String> localSegments = entityName.split('/')
         ..removeLast();
     int i = 0;
