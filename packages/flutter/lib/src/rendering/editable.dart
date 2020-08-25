@@ -1122,6 +1122,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// How tall the cursor will be.
+  ///
+  /// This can be null, in which case the getter will actually return [preferredLineHeight].
+  ///
+  /// Setting this to itself fixes the value to the current [preferredLineHeight]. Setting
+  /// this to null returns the behaviour of deferring to [preferredLineHeight].
+  // TODO(ianh): This is a confusing API. We should have a separate getter for the effective cursor height.
   double get cursorHeight => _cursorHeight ?? preferredLineHeight;
   double? _cursorHeight;
   set cursorHeight(double? value) {
@@ -1164,6 +1170,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// How rounded the corners of the cursor should be.
+  ///
+  /// A null value is the same as [Radius.zero].
   Radius? get cursorRadius => _cursorRadius;
   Radius? _cursorRadius;
   set cursorRadius(Radius? value) {
@@ -1416,12 +1424,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _handleMoveCursorForwardByWord(bool extentSelection) {
     assert(selection != null);
     final TextRange currentWord = _textPainter.getWordBoundary(selection!.extent);
-    // `currentWord` has a non-nullable return type, but might be null when
-    // running with weak checking, so we need to null check it anyway (and
-    // ignore the warning that the null-handling logic is dead code).
-    if (currentWord == null) { // ignore: dead_code
-      return;
-    }
     final TextRange? nextWord = _getNextWord(currentWord.end);
     if (nextWord == null)
       return;
@@ -1438,12 +1440,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _handleMoveCursorBackwardByWord(bool extentSelection) {
     assert(selection != null);
     final TextRange currentWord = _textPainter.getWordBoundary(selection!.extent);
-    // `currentWord` has a non-nullable return type, but might be null when
-    // running with weak checking, so we need to null check it anyway (and
-    // ignore the warning that the null-handling logic is dead code).
-    if (currentWord == null) { // ignore: dead_code
-      return;
-    }
     final TextRange? previousWord = _getPreviousWord(currentWord.start - 1);
     if (previousWord == null)
       return;
@@ -1488,8 +1484,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // TODO(jonahwilliams): replace when we expose this ICU information.
   bool _onlyWhitespace(TextRange range) {
     for (int i = range.start; i < range.end; i++) {
-      final int? codeUnit = text!.codeUnitAt(i);
-      if (!_isWhitespace(codeUnit!)) {
+      final int codeUnit = text!.codeUnitAt(i)!;
+      if (!_isWhitespace(codeUnit)) {
         return false;
       }
     }
