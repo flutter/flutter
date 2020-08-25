@@ -16,6 +16,7 @@ class GenL10nProject extends Project {
   @override
   Future<void> setUpIn(Directory dir, {
     bool useDeferredLoading = false,
+    bool useSyntheticPackage = false,
   }) {
     this.dir = dir;
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
@@ -27,7 +28,10 @@ class GenL10nProject extends Project {
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'), appZhHant);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
-    writeFile(globals.fs.path.join(dir.path, 'l10n.yaml'), l10nYaml(useDeferredLoading: useDeferredLoading));
+    writeFile(globals.fs.path.join(dir.path, 'l10n.yaml'), l10nYaml(
+      useDeferredLoading: useDeferredLoading,
+      useSyntheticPackage: useSyntheticPackage,
+    ));
     return super.setUpIn(dir);
   }
 
@@ -568,12 +572,18 @@ void main() {
 
   String l10nYaml({
     @required bool useDeferredLoading,
+    @required bool useSyntheticPackage,
   }) {
+    String l10nYamlString = '';
+
     if (useDeferredLoading) {
-      return r'''
-use-deferred-loading: false
-      ''';
+      l10nYamlString += 'use-deferred-loading: true\n';
     }
-    return '';
+
+    if (!useSyntheticPackage) {
+      l10nYamlString += 'synthetic-package: false\n';
+    }
+
+    return l10nYamlString;
   }
 }
