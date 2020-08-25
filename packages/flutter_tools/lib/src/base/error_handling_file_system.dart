@@ -267,6 +267,16 @@ class ErrorHandlingDirectory
     wrapLink(fileSystem.directory(delegate).childLink(basename));
 
   @override
+  void createSync({bool recursive = false}) {
+    return _runSync<void>(
+      () => delegate.createSync(recursive: recursive),
+      platform: _platform,
+      failureMessage:
+        'Flutter failed to create a directory at "${delegate.path}"',
+    );
+  }
+
+  @override
   Future<Directory> createTemp([String prefix]) {
     return _run<Directory>(
       () async => wrap(await delegate.createTemp(prefix)),
