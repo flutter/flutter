@@ -1090,32 +1090,35 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     return null;
   }
 
+  // This global key is needed to keep only the necessary widgets in the tree
+  // while maintaining the subtree's state.
+  //
+  // See https://github.com/flutter/flutter/issues/64058 for an explanation of
+  // why using a global key over keeping the shape of the tree.
+  final GlobalKey _mouseRegionKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
-    final Map<Type, Action<Intent>> actions = widget.enabled && widget.actions != null
-      ? widget.actions
-      : const <Type, Action<Intent>>{};
-    final Map<LogicalKeySet, Intent> shortcuts = widget.enabled && widget.shortcuts != null
-      ? widget.shortcuts
-      : const <LogicalKeySet, Intent>{};
-
-    return Actions(actions:  actions,
-      child: Shortcuts(
-        shortcuts: shortcuts,
-        child: MouseRegion(
-          onEnter: _handleMouseEnter,
-          onExit: _handleMouseExit,
-          cursor: widget.mouseCursor,
-          child: Focus(
-            focusNode: widget.focusNode,
-            autofocus: widget.autofocus,
-            canRequestFocus: _canRequestFocus,
-            onFocusChange: _handleFocusChange,
-            child: widget.child,
-          ),
-        ),
+    Widget child = MouseRegion(
+      key: _mouseRegionKey,
+      onEnter: _handleMouseEnter,
+      onExit: _handleMouseExit,
+      cursor: widget.mouseCursor,
+      child: Focus(
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+        canRequestFocus: _canRequestFocus,
+        onFocusChange: _handleFocusChange,
+        child: widget.child,
       ),
     );
+    if (widget.enabled && widget.actions != null && widget.actions.isNotEmpty) {
+      child = Actions(actions: widget.actions, child: child);
+    }
+    if (widget.enabled && widget.shortcuts != null && widget.shortcuts.isNotEmpty) {
+      child = Shortcuts(shortcuts: widget.shortcuts, child: child);
+    }
+    return child;
   }
 }
 
