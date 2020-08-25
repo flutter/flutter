@@ -22,7 +22,6 @@ import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:fake_async/fake_async.dart';
 
-import '../../commands.shard/permeable/build_bundle_test.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart' as mocks;
@@ -548,6 +547,8 @@ class MockDirectory implements Directory {
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
+
+class MockBuildSystem extends Mock implements BuildSystem {}
 
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 
