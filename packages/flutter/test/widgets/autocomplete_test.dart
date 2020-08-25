@@ -69,6 +69,12 @@ void main() {
       expect(autocompleteController.results.value[3], 'lemur');
       expect(autocompleteController.results.value[4], 'mouse');
       expect(autocompleteController.results.value[5], 'northern white rhinocerous');
+
+      // The filter is not case sensitive.
+      autocompleteController.textEditingController.text = 'ELE';
+      expect(autocompleteController.results.value.length, 2);
+      expect(autocompleteController.results.value[0], 'chameleon');
+      expect(autocompleteController.results.value[1], 'elephant');
     });
 
     testWidgets('custom filter', (WidgetTester tester) async {
@@ -100,15 +106,11 @@ void main() {
       expect(autocompleteController.results.value[5], 'northern white rhinocerous');
     });
 
-    testWidgets('custom filter on User options', (WidgetTester tester) async {
+    testWidgets('User options with custom filter string', (WidgetTester tester) async {
       final AutocompleteController<User> autocompleteController =
           AutocompleteController<User>(
-            // A custom filter that searches by both email and name.
-            filter: (String query) {
-              return kOptionsUsers
-                .where((User option) => option.name.contains(query) || option.email.contains(query))
-                .toList();
-            },
+            options: kOptionsUsers,
+            filterStringForOption: (User option) => option.name + option.email,
           );
 
       // Set a query based on the email and see that the results are filtered.
@@ -122,6 +124,34 @@ void main() {
       autocompleteController.textEditingController.text = 'B';
       expect(autocompleteController.results.value.length, 1);
       expect(autocompleteController.results.value[0], kOptionsUsers[1]);
+    });
+
+    testWidgets('custom filter on User options', (WidgetTester tester) async {
+      final AutocompleteController<User> autocompleteController =
+          AutocompleteController<User>(
+            // A custom filter that searches by name case sensitively.
+            filter: (String query) {
+              return kOptionsUsers
+                .where((User option) => option.name.contains(query))
+                .toList();
+            },
+          );
+
+      // Set a query based on the email and see that nothing is found.
+      autocompleteController.textEditingController.text = 'example';
+      expect(autocompleteController.results.value.length, 0);
+
+      // Modify the selected query. The results appear again and are filtered.
+      // A lowercase "a" matches "Charlie" and not "Alice".
+      autocompleteController.textEditingController.text = 'a';
+      expect(autocompleteController.results.value.length, 1);
+      expect(autocompleteController.results.value[0], kOptionsUsers[2]);
+
+      // Modify the selected query. An uppercase "A" matches "Alice" and not
+      // "Charlie".
+      autocompleteController.textEditingController.text = 'A';
+      expect(autocompleteController.results.value.length, 1);
+      expect(autocompleteController.results.value[0], kOptionsUsers[0]);
     });
 
     group('dispose', () {
