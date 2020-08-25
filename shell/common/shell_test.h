@@ -59,7 +59,6 @@ class ShellTest : public FixtureTest {
   /// the `will_draw_new_frame` to true.
   static void VSyncFlush(Shell* shell, bool& will_draw_new_frame);
 
-  static void SetViewportMetrics(Shell* shell, double width, double height);
   /// Given the root layer, this callback builds the layer tree to be rasterized
   /// in PumpOneFrame.
   using LayerTreeBuilder =

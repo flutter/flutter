@@ -536,8 +536,7 @@ TEST_F(ShellTest, ExternalEmbedderNoThreadMerger) {
         this->GetCurrentTaskRunner(), fml::TimeDelta::FromSeconds(0));
     auto picture_layer = std::make_shared<PictureLayer>(
         SkPoint::Make(10, 10),
-        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false,
-        0);
+        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false);
     root->Add(picture_layer);
   };
 
@@ -586,8 +585,7 @@ TEST_F(ShellTest,
         this->GetCurrentTaskRunner(), fml::TimeDelta::FromSeconds(0));
     auto picture_layer = std::make_shared<PictureLayer>(
         SkPoint::Make(10, 10),
-        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false,
-        0);
+        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false);
     root->Add(picture_layer);
   };
 
@@ -637,8 +635,7 @@ TEST_F(ShellTest, OnPlatformViewDestroyAfterMergingThreads) {
         this->GetCurrentTaskRunner(), fml::TimeDelta::FromSeconds(0));
     auto picture_layer = std::make_shared<PictureLayer>(
         SkPoint::Make(10, 10),
-        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false,
-        0);
+        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false);
     root->Add(picture_layer);
   };
 
@@ -706,8 +703,7 @@ TEST_F(ShellTest, OnPlatformViewDestroyWhenThreadsAreMerging) {
         this->GetCurrentTaskRunner(), fml::TimeDelta::FromSeconds(0));
     auto picture_layer = std::make_shared<PictureLayer>(
         SkPoint::Make(10, 10),
-        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false,
-        0);
+        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false);
     root->Add(picture_layer);
   };
 
@@ -773,8 +769,7 @@ TEST_F(ShellTest,
         this->GetCurrentTaskRunner(), fml::TimeDelta::FromSeconds(0));
     auto picture_layer = std::make_shared<PictureLayer>(
         SkPoint::Make(10, 10),
-        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false,
-        0);
+        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false);
     root->Add(picture_layer);
   };
   PumpOneFrame(shell.get(), 100, 100, builder);
@@ -822,8 +817,7 @@ TEST_F(ShellTest, OnPlatformViewDestroyWithoutRasterThreadMerger) {
         this->GetCurrentTaskRunner(), fml::TimeDelta::FromSeconds(0));
     auto picture_layer = std::make_shared<PictureLayer>(
         SkPoint::Make(10, 10),
-        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false,
-        0);
+        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false);
     root->Add(picture_layer);
   };
   PumpOneFrame(shell.get(), 100, 100, builder);
@@ -888,8 +882,7 @@ TEST_F(ShellTest, OnPlatformViewDestroyWithStaticThreadMerging) {
         this->GetCurrentTaskRunner(), fml::TimeDelta::FromSeconds(0));
     auto picture_layer = std::make_shared<PictureLayer>(
         SkPoint::Make(10, 10),
-        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false,
-        0);
+        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false);
     root->Add(picture_layer);
   };
   PumpOneFrame(shell.get(), 100, 100, builder);
@@ -1460,8 +1453,7 @@ TEST_F(ShellTest, Screenshot) {
         this->GetCurrentTaskRunner(), fml::TimeDelta::FromSeconds(0));
     auto picture_layer = std::make_shared<PictureLayer>(
         SkPoint::Make(10, 10),
-        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false,
-        0);
+        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false);
     root->Add(picture_layer);
   };
 
@@ -1747,7 +1739,7 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
   auto picture_layer = std::make_shared<PictureLayer>(
       SkPoint::Make(0, 0),
       flutter::SkiaGPUObject<SkPicture>({MakeSizedPicture(100, 100), queue}),
-      false, false, 0);
+      false, false);
   picture_layer->set_paint_bounds(SkRect::MakeWH(100, 100));
 
   // 2. Rasterize the picture and the picture layer in the raster cache.

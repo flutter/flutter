@@ -140,12 +140,10 @@ class ScopedFrame final : public flutter::CompositorContext::ScopedFrame {
 };
 
 CompositorContext::CompositorContext(
-    flutter::CompositorContext::Delegate& delegate,
     SessionConnection& session_connection,
     VulkanSurfaceProducer& surface_producer,
     flutter::SceneUpdateContext& scene_update_context)
-    : flutter::CompositorContext(delegate),
-      session_connection_(session_connection),
+    : session_connection_(session_connection),
       surface_producer_(surface_producer),
       scene_update_context_(scene_update_context) {}
 
