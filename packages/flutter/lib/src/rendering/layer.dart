@@ -1606,7 +1606,7 @@ class TransformLayer extends OffsetLayer {
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(transform != null);
-    _lastEffectiveTransform = transform!;
+    _lastEffectiveTransform = transform;
     final Offset totalOffset = offset + layerOffset;
     if (totalOffset != Offset.zero) {
       _lastEffectiveTransform = Matrix4.translationValues(totalOffset.dx, totalOffset.dy, 0.0)
@@ -1614,7 +1614,7 @@ class TransformLayer extends OffsetLayer {
     }
     engineLayer = builder.pushTransform(
       _lastEffectiveTransform!.storage,
-      oldLayer: _engineLayer as ui.TransformEngineLayer,
+      oldLayer: _engineLayer as ui.TransformEngineLayer?,
     );
     addChildrenToScene(builder);
     builder.pop();
@@ -1819,10 +1819,10 @@ class ShaderMaskLayer extends ContainerLayer {
     assert(maskRect != null);
     assert(blendMode != null);
     assert(layerOffset != null);
-    final Rect? shiftedMaskRect = layerOffset == Offset.zero ? maskRect : maskRect!.shift(layerOffset);
+    final Rect shiftedMaskRect = layerOffset == Offset.zero ? maskRect! : maskRect!.shift(layerOffset);
     engineLayer = builder.pushShaderMask(
       shader!,
-      shiftedMaskRect!,
+      shiftedMaskRect,
       blendMode!,
       oldLayer: _engineLayer as ui.ShaderMaskEngineLayer?,
     );
@@ -2118,7 +2118,7 @@ class LeaderLayer extends ContainerLayer {
     if (_lastOffset != Offset.zero)
       engineLayer = builder.pushTransform(
         Matrix4.translationValues(_lastOffset!.dx, _lastOffset!.dy, 0.0).storage,
-        oldLayer: _engineLayer as ui.TransformEngineLayer,
+        oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
     addChildrenToScene(builder);
     if (_lastOffset != Offset.zero)
