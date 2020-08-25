@@ -399,9 +399,19 @@ class Cache {
     }
   }
 
+  /// Read the stamp for [artifactName].
+  ///
+  /// If the file is missing or cannot be parsed, returns `null`.
   String getStampFor(String artifactName) {
     final File stampFile = getStampFileFor(artifactName);
-    return stampFile.existsSync() ? stampFile.readAsStringSync().trim() : null;
+    if (!stampFile.existsSync()) {
+      return null;
+    }
+    try {
+      return stampFile.readAsStringSync().trim();
+    } on FileSystemException {
+      return null;
+    }
   }
 
   void setStampFor(String artifactName, String version) {
