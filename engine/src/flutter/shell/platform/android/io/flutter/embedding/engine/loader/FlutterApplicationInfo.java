@@ -18,6 +18,9 @@ public final class FlutterApplicationInfo {
   final String domainNetworkPolicy;
   final String nativeLibraryDir;
   final boolean clearTextPermitted;
+  // TODO(cyanlaz): Remove this when dynamic thread merging is done.
+  // https://github.com/flutter/flutter/issues/59930
+  final boolean useEmbeddedView;
 
   public FlutterApplicationInfo(
       String aotSharedLibraryName,
@@ -26,7 +29,8 @@ public final class FlutterApplicationInfo {
       String flutterAssetsDir,
       String domainNetworkPolicy,
       String nativeLibraryDir,
-      boolean clearTextPermitted) {
+      boolean clearTextPermitted,
+      boolean useEmbeddedView) {
     this.aotSharedLibraryName =
         aotSharedLibraryName == null ? DEFAULT_AOT_SHARED_LIBRARY_NAME : aotSharedLibraryName;
     this.vmSnapshotData = vmSnapshotData == null ? DEFAULT_VM_SNAPSHOT_DATA : vmSnapshotData;
@@ -37,5 +41,6 @@ public final class FlutterApplicationInfo {
     this.nativeLibraryDir = nativeLibraryDir;
     this.domainNetworkPolicy = domainNetworkPolicy == null ? "" : domainNetworkPolicy;
     this.clearTextPermitted = clearTextPermitted;
+    this.useEmbeddedView = useEmbeddedView;
   }
 }

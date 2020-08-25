@@ -48,9 +48,6 @@ class GPUSurfaceGL : public Surface {
   // |Surface|
   std::unique_ptr<GLContextResult> MakeRenderContextCurrent() override;
 
-  // |Surface|
-  bool ClearRenderContext() override;
-
  private:
   GPUSurfaceGLDelegate* delegate_;
   sk_sp<GrDirectContext> context_;

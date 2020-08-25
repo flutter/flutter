@@ -33,8 +33,6 @@ class Surface {
 
   virtual std::unique_ptr<GLContextResult> MakeRenderContextCurrent();
 
-  virtual bool ClearRenderContext();
-
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(Surface);
 };
