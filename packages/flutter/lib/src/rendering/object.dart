@@ -1315,7 +1315,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// The object responsible for creating this render object.
   ///
   /// Used in debug messages.
-  dynamic debugCreator;
+  Object? debugCreator;
 
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
     FlutterError.reportError(FlutterErrorDetails(
@@ -1325,7 +1325,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       context: ErrorDescription('during $method()'),
       informationCollector: () sync* {
         if (debugCreator != null)
-          yield DiagnosticsDebugCreator(debugCreator as Object);
+          yield DiagnosticsDebugCreator(debugCreator!);
         yield describeForError('The following RenderObject was being processed when the exception was fired');
         // TODO(jacobr): this error message has a code smell. Consider whether
         // displaying the truncated children is really useful for command line
@@ -2893,7 +2893,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('needsCompositing', value: _needsCompositing, ifTrue: 'needs compositing'));
-    properties.add(DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Object?>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
     properties.add(DiagnosticsProperty<Constraints>('constraints', _constraints, missingIfNull: true));
     // don't access it via the "layer" getter since that's only valid when we don't need paint
@@ -2991,13 +2991,13 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
             'a RenderSliver does not understand the RenderBox layout protocol.',
           ),
           ErrorSpacer(),
-          DiagnosticsProperty<dynamic>(
+          DiagnosticsProperty<Object?>(
             'The $runtimeType that expected a $ChildType child was created by',
             debugCreator,
             style: DiagnosticsTreeStyle.errorProperty,
           ),
           ErrorSpacer(),
-          DiagnosticsProperty<dynamic>(
+          DiagnosticsProperty<Object?>(
             'The ${child.runtimeType} that did not match the expected child type '
             'was created by',
             child.debugCreator,
@@ -3137,13 +3137,13 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
             'a RenderSliver does not understand the RenderBox layout protocol.'
           ),
           ErrorSpacer(),
-          DiagnosticsProperty<dynamic>(
+          DiagnosticsProperty<Object?>(
             'The $runtimeType that expected a $ChildType child was created by',
             debugCreator,
             style: DiagnosticsTreeStyle.errorProperty,
           ),
           ErrorSpacer(),
-          DiagnosticsProperty<dynamic>(
+          DiagnosticsProperty<Object?>(
             'The ${child.runtimeType} that did not match the expected child type '
             'was created by',
             child.debugCreator,
