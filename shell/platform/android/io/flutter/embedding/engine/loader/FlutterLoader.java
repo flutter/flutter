@@ -216,10 +216,9 @@ public class FlutterLoader {
       }
 
       shellArgs.add("--cache-dir-path=" + result.engineCachesPath);
-      // TODO(mehmetf): Announce this since it is a breaking change then enable it.
-      // if (!flutterApplicationInfo.clearTextPermitted) {
-      //   shellArgs.add("--disallow-insecure-connections");
-      // }
+      if (!flutterApplicationInfo.clearTextPermitted) {
+        shellArgs.add("--disallow-insecure-connections");
+      }
       if (flutterApplicationInfo.domainNetworkPolicy != null) {
         shellArgs.add("--domain-network-policy=" + flutterApplicationInfo.domainNetworkPolicy);
       }
