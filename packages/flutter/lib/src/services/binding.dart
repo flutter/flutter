@@ -216,8 +216,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// To use a different [RestorationManager] subclasses can override
   /// [createRestorationManager], which is called to create the instance
   /// returned by this getter.
-  RestorationManager get restorationManager => _restorationManager!;
-  RestorationManager? _restorationManager;
+  RestorationManager get restorationManager => _restorationManager;
+  late RestorationManager _restorationManager;
 
   /// Creates the [RestorationManager] instance available via
   /// [restorationManager].
