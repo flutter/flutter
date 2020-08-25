@@ -1627,6 +1627,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_shouldCreateInputConnection) {
       return;
     }
+    if (widget.readOnly) {
+      // In the read-only case, we only care about selection changes, and reject
+      // everything else.
+      value = _value.copyWith(selection: value.selection);
+    }
     _receivedRemoteTextEditingValue = value;
     if (value.text != _value.text) {
       hideToolbar();

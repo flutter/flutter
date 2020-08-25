@@ -92,7 +92,6 @@ const List<String> kWebTestFileKnownFailures = <String>[
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
   'test/widgets/editable_text_cursor_test.dart',
-  'test/widgets/editable_text_test.dart',
   'test/material/animated_icons_private_test.dart',
   'test/material/data_table_test.dart',
   'test/cupertino/nav_bar_transition_test.dart',
