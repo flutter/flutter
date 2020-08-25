@@ -399,7 +399,6 @@ void main() {
 
     testWithoutContext('get generates synthetic packages for GenerateLocalizationsTarget when generate:true', () async {
       // MOCKS SETUP
-
       // Project directory setup for gen_l10n logic
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -441,21 +440,28 @@ void main() {
 
       // Running pub.get with conditions that trigger GenerateLocalizationsTarget
       // synthetic package generation.
-      await pub.get(
-        context: PubContext.flutterTests,
-        checkLastModified: true,
-        generateSyntheticPackage: true,
-        environment: environment,
-        buildSystem: buildSystem,
-      );
-
-      // [BuildSystem] should have called build with [GenerateLocalizationsTarget].
-      verify(
-        buildSystem.build(
+      try {
+          await pub.get(
+          context: PubContext.flutterTests,
+          checkLastModified: true,
+          generateSyntheticPackage: true,
+          environment: environment,
+          buildSystem: buildSystem,
+        );
+      } on ToolExit catch (e) {
+        // BuildSystem.build throws a ToolExit because null is returned by
+        // the mock BuildSystem.
+        expect(e.message, 'Generating synthetic localizations package has failed.');
+        // [BuildSystem] should have called build with [GenerateLocalizationsTarget].
+        verify(buildSystem.build(
           const GenerateLocalizationsTarget(),
           environment,
-        ),
-      ).called(1);
+        )).called(1);
+
+        return;
+      }
+
+      fail('A ToolExit should have been thrown.');
     });
 }
 

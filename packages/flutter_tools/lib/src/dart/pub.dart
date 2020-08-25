@@ -217,10 +217,15 @@ class _DefaultPub implements Pub {
         // If an l10n.yaml file exists but is empty, attempt to build synthetic
         // package with default settings.
         if (yamlNode.value == null) {
-          await generateLocalizationsSyntheticPackage(
+          final BuildResult result = await generateLocalizationsSyntheticPackage(
             environment,
             buildSystem,
           );
+
+          if (result == null || result.hasException) {
+            throwToolExit('Generating synthetic localizations package has failed.');
+          }
+
         } else if (yamlNode.value != null && yamlNode is! YamlMap) {
           throwToolExit(
             'Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode'
@@ -240,10 +245,14 @@ class _DefaultPub implements Pub {
           // synthetic-package is null.
           final bool isSyntheticL10nPackage = value as bool ?? true;
           if (isSyntheticL10nPackage) {
-            await generateLocalizationsSyntheticPackage(
+            final BuildResult result = await generateLocalizationsSyntheticPackage(
               environment,
               buildSystem,
             );
+
+            if (result == null || result.hasException) {
+              throwToolExit('Generating synthetic localizations package has failed.');
+            }
           }
         }
       }
