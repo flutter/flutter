@@ -262,8 +262,6 @@ class _DefaultPub implements Pub {
           '--offline',
       ];
       try {
-        print(directory);
-        print(args);
         await batch(
           args,
           context: context,
