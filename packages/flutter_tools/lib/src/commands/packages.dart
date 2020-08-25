@@ -4,41 +4,13 @@
 
 import 'dart:async';
 
-import 'package:yaml/yaml.dart';
-import 'package:file/file.dart';
-
 import '../base/common.dart';
 import '../base/os.dart';
-import '../build_info.dart';
-import '../build_system/build_system.dart';
-import '../build_system/targets/localizations.dart';
-import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
-
-Future<void> generateLocalizationsSyntheticPackage(FlutterProject flutterProject) async {
-  final Environment environment = Environment(
-    artifacts: globals.artifacts,
-    logger: globals.logger,
-    cacheDir: globals.cache.getRoot(),
-    engineVersion: globals.flutterVersion.engineRevision,
-    fileSystem: globals.fs,
-    flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-    outputDir: globals.fs.directory(getBuildDirectory()),
-    processManager: globals.processManager,
-    projectDir: flutterProject.directory,
-  );
-  final BuildResult result = await globals.buildSystem.build(
-    const GenerateLocalizationsTarget(),
-    environment,
-  );
-  if (result.hasException) {
-    throwToolExit('Generating synthetic localizations package has failed.');
-  }
-}
 
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
@@ -117,7 +89,6 @@ class PackagesGetCommand extends FlutterCommand {
   }
 
   Future<void> _runPubGet(String directory, FlutterProject flutterProject) async {
-    print('_runPubGet was executed');
     final Stopwatch pubGetTimer = Stopwatch()..start();
     try {
       await pub.get(context: PubContext.pubGet,
@@ -139,7 +110,6 @@ class PackagesGetCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    print('running command');
     if (argResults.rest.length > 1) {
       throwToolExit('Too many arguments.\n$usage');
     }
@@ -156,45 +126,6 @@ class PackagesGetCommand extends FlutterCommand {
 
     await _runPubGet(target, rootProject);
     await rootProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
-
-    final File l10nYamlFile = rootProject.directory.childFile('l10n.yaml');
-    // If pubspec.yaml has generate:true and if l10n.yaml exists in the
-    // root project directory, check to see if a synthetic package should
-    // be generated for gen_l10n.
-    if (
-      rootProject.manifest.generateSyntheticPackage &&
-      l10nYamlFile.existsSync()
-    ) {
-      final YamlNode yamlNode = loadYamlNode(l10nYamlFile.readAsStringSync());
-
-      // If an l10n.yaml file exists but is empty, attempt to build synthetic
-      // package with default settings.
-      if (yamlNode.value == null) {
-        await generateLocalizationsSyntheticPackage(rootProject);
-      } else if (yamlNode.value != null && yamlNode is! YamlMap) {
-        throwToolExit(
-          'Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode'
-        );
-      } else {
-        final YamlMap yamlMap = yamlNode as YamlMap;
-        final Object value = yamlMap['synthetic-package'];
-
-        if (value is! bool && value != null) {
-          throwToolExit(
-            'Expected "synthetic-package" to have a bool value, '
-            'instead was "$value"'
-          );
-        }
-
-        // Generate gen_l10n synthetic package if synthetic-package: true or
-        // synthetic-package is null.
-        final bool isSyntheticL10nPackage = value as bool ?? true;
-        if (isSyntheticL10nPackage) {
-          print('attempting to generate synthetic package');
-          await generateLocalizationsSyntheticPackage(rootProject);
-        }
-      }
-    }
 
     // Get/upgrade packages in example app as well
     if (rootProject.hasExampleApp) {

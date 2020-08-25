@@ -4,9 +4,11 @@
 
 import 'dart:async';
 
+import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
+import 'package:yaml/yaml.dart';
 
 import '../base/bot_detector.dart';
 import '../base/common.dart';
@@ -18,7 +20,10 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
+import '../project.dart';
 import '../reporting/reporting.dart';
+
+import 'generate_synthetic_packages.dart';
 
 /// The [Pub] instance.
 Pub get pub => context.get<Pub>();
@@ -191,19 +196,58 @@ class _DefaultPub implements Pub {
     }
 
     final DateTime originalPubspecYamlModificationTime = pubSpecYaml.lastModifiedSync();
-    print('running PUB GET');
 
     if (!checkLastModified || generateSyntheticPackage || _shouldRunPubGet(
       pubSpecYaml: pubSpecYaml,
       packageConfigFile: packageConfigFile,
     )) {
+      final File l10nYamlFile = _fileSystem.file(
+        _fileSystem.path.join(directory, 'l10n.yaml'));
+      // If pubspec.yaml has generate:true and if l10n.yaml exists in the
+      // root project directory, check to see if a synthetic package should
+      // be generated for gen_l10n.
+      final FlutterProject rootProject = FlutterProject.fromPath(directory);
+
+      if (
+        rootProject.manifest.generateSyntheticPackage &&
+        l10nYamlFile.existsSync()
+      ) {
+        final YamlNode yamlNode = loadYamlNode(l10nYamlFile.readAsStringSync());
+
+        // If an l10n.yaml file exists but is empty, attempt to build synthetic
+        // package with default settings.
+        if (yamlNode.value == null) {
+          await generateLocalizationsSyntheticPackage(rootProject);
+        } else if (yamlNode.value != null && yamlNode is! YamlMap) {
+          throwToolExit(
+            'Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode'
+          );
+        } else {
+          final YamlMap yamlMap = yamlNode as YamlMap;
+          final Object value = yamlMap['synthetic-package'];
+
+          if (value is! bool && value != null) {
+            throwToolExit(
+              'Expected "synthetic-package" to have a bool value, '
+              'instead was "$value"'
+            );
+          }
+
+          // Generate gen_l10n synthetic package if synthetic-package: true or
+          // synthetic-package is null.
+          final bool isSyntheticL10nPackage = value as bool ?? true;
+          if (isSyntheticL10nPackage) {
+            await generateLocalizationsSyntheticPackage(rootProject);
+          }
+        }
+      }
+
       final String command = upgrade ? 'upgrade' : 'get';
       final Status status = _logger.startProgress(
         'Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',
         timeout: const TimeoutConfiguration().slowOperation,
       );
       final bool verbose = _logger.isVerbose;
-      print('\nrunning pub get');
       // Maybe it's not generating here when it should
       final List<String> args = <String>[
         if (verbose)
@@ -296,8 +340,6 @@ class _DefaultPub implements Pub {
     int code;
     loop: while (true) {
       attempts += 1;
-      print('running pub command:');
-      print(arguments);
       code = await _processUtils.stream(
         _pubCommand(arguments),
         workingDirectory: directory,
