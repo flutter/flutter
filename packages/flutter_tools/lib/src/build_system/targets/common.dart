@@ -10,8 +10,7 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
-import '../../globals.dart' as globals;
-import '../../project.dart';
+import '../../globals.dart' as globals hide fs, processManager, artifacts, logger;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -69,6 +68,9 @@ const String kIosArchs = 'IosArchs';
 /// Whether to enable Dart obfuscation and where to save the symbol map.
 const String kDartObfuscation = 'DartObfuscation';
 
+/// An output directory where one or more code-size measurements may be written.
+const String kCodeSizeDirectory = 'CodeSizeDirectory';
+
 /// Copies the pre-built flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.
 class CopyFlutterBundle extends Target {
@@ -107,13 +109,13 @@ class CopyFlutterBundle extends Target {
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
     if (buildMode == BuildMode.debug) {
-      final String vmSnapshotData = globals.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
-      final String isolateSnapshotData = globals.artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
+      final String vmSnapshotData = environment.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
+      final String isolateSnapshotData = environment.artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
       environment.buildDir.childFile('app.dill')
           .copySync(environment.outputDir.childFile('kernel_blob.bin').path);
-      globals.fs.file(vmSnapshotData)
+      environment.fileSystem.file(vmSnapshotData)
           .copySync(environment.outputDir.childFile('vm_snapshot_data').path);
-      globals.fs.file(isolateSnapshotData)
+      environment.fileSystem.file(isolateSnapshotData)
           .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
     }
     final Depfile assetDepfile = await copyAssets(
@@ -122,8 +124,8 @@ class CopyFlutterBundle extends Target {
       targetPlatform: TargetPlatform.android,
     );
     final DepfileService depfileService = DepfileService(
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
     );
     depfileService.writeToFile(
       assetDepfile,
@@ -191,8 +193,11 @@ class KernelSnapshot extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final KernelCompiler compiler = await kernelCompilerFactory.create(
-      FlutterProject.fromDirectory(environment.projectDir),
+    final KernelCompiler compiler = KernelCompiler(
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+      processManager: environment.processManager,
+      artifacts: environment.artifacts,
     );
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'kernel_snapshot');
@@ -201,9 +206,9 @@ class KernelSnapshot extends Target {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final String targetFile = environment.defines[kTargetFile] ?? globals.fs.path.join('lib', 'main.dart');
+    final String targetFile = environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File packagesFile = environment.projectDir.childFile('.packages');
-    final String targetFileAbsolute = globals.fs.file(targetFile).absolute.path;
+    final String targetFileAbsolute = environment.fileSystem.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
@@ -238,7 +243,7 @@ class KernelSnapshot extends Target {
     );
 
     final CompilerOutput output = await compiler.compile(
-      sdkRoot: globals.artifacts.getArtifactPath(
+      sdkRoot: environment.artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
         platform: targetPlatform,
         mode: buildMode,
@@ -275,11 +280,11 @@ abstract class AotElfBase extends Target {
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       reportTimings: false,
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
       xcode: globals.xcode,
-      processManager: globals.processManager,
-      artifacts: globals.artifacts,
+      processManager: environment.processManager,
+      artifacts: environment.artifacts,
     );
     final String outputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {
@@ -293,6 +298,19 @@ abstract class AotElfBase extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
+    final String codeSizeDirectory = environment.defines[kCodeSizeDirectory];
+
+    if (codeSizeDirectory != null) {
+      final File codeSizeFile = environment.fileSystem
+        .directory(codeSizeDirectory)
+        .childFile('snapshot.${environment.defines[kTargetPlatform]}.json');
+      final File precompilerTraceFile = environment.fileSystem
+        .directory(codeSizeDirectory)
+        .childFile('trace.${environment.defines[kTargetPlatform]}.json');
+      extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
+      extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
+    }
+
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,

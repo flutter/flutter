@@ -15,6 +15,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
+import 'dart/pub.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
@@ -194,7 +195,7 @@ class FlutterProject {
   /// True if this project is a Flutter module project.
   bool get isModule => manifest.isModule;
 
-  /// True if the Flutter project is using the AndroidX support library
+  /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => manifest.usesAndroidX;
 
   /// True if this project has an example application.
@@ -657,7 +658,14 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
-    final Template template = await Template.fromName(path, fileSystem: globals.fs, templateManifest: null);
+    final Template template = await Template.fromName(
+      path,
+      fileSystem: globals.fs,
+      templateManifest: null,
+      logger: globals.logger,
+      templateRenderer: globals.templateRenderer,
+      pub: pub,
+    );
     template.render(
       target,
       <String, dynamic>{
@@ -709,7 +717,7 @@ class AndroidProject extends FlutterProjectPlatform {
   /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
 
-  /// True if the Flutter project is using the AndroidX support library
+  /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => parent.usesAndroidX;
 
   /// True, if the app project is using Kotlin.
@@ -756,6 +764,23 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
+    if (getEmbeddingVersion() == AndroidEmbeddingVersion.v1) {
+      globals.printStatus(
+"""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Warning
+──────────────────────────────────────────────────────────────────────────────
+Your Flutter application is created using an older version of the Android
+embedding. It's being deprecated in favor of Android embedding v2. Follow the
+steps at
+
+https://flutter.dev/go/android-project-migration
+
+to migrate your project.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"""
+      );
+    }
     if (isModule && _shouldRegenerateFromTemplate()) {
       await _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
@@ -793,7 +818,14 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
-    final Template template = await Template.fromName(path, fileSystem: globals.fs, templateManifest: null);
+    final Template template = await Template.fromName(
+      path,
+      fileSystem: globals.fs,
+      templateManifest: null,
+      logger: globals.logger,
+      templateRenderer: globals.templateRenderer,
+      pub: pub,
+    );
     template.render(
       target,
       <String, dynamic>{
@@ -989,7 +1021,7 @@ class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 }
 
-/// The Windows sub project
+/// The Windows sub project.
 class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject {
   WindowsProject._(this.parent);
 
@@ -1075,7 +1107,7 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   }
 }
 
-/// The Fuchsia sub project
+/// The Fuchsia sub project.
 class FuchsiaProject {
   FuchsiaProject._(this.project);
 

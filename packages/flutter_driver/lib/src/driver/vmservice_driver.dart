@@ -266,7 +266,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
   /// The unique ID of this driver instance.
   final int _driverId;
 
-  /// Client connected to the Dart VM running the Flutter application
+  /// Client connected to the Dart VM running the Flutter application.
   ///
   /// You can use [VMServiceClient] to check VM version, flags and get
   /// notified when a new isolate has been instantiated. That could be
@@ -651,13 +651,15 @@ Future<VMServiceClientConnection> _waitAndConnect(
 /// the VM service.
 const Duration _kPauseBetweenReconnectAttempts = Duration(seconds: 1);
 
-// See https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc#L32
+// See `timeline_streams` in
+// https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc
 String _timelineStreamsToString(List<TimelineStream> streams) {
   final String contents = streams.map<String>((TimelineStream stream) {
     switch (stream) {
       case TimelineStream.all: return 'all';
       case TimelineStream.api: return 'API';
       case TimelineStream.compiler: return 'Compiler';
+      case TimelineStream.compilerVerbose: return 'CompilerVerbose';
       case TimelineStream.dart: return 'Dart';
       case TimelineStream.debugger: return 'Debugger';
       case TimelineStream.embedder: return 'Embedder';

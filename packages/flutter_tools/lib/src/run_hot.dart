@@ -376,10 +376,19 @@ class HotRunner extends ResidentRunner {
       asyncScanning: hotRunnerConfig.asyncScanning,
       packageConfig: flutterDevices[0].devFS.lastPackageConfig,
     );
+    final File entrypointFile = globals.fs.file(mainPath);
+    if (!entrypointFile.existsSync()) {
+      globals.printError(
+        'The entrypoint file (i.e. the file with main()) ${entrypointFile.path} '
+        'cannot be found. Moving or renaming this file will prevent changes to '
+        'its contents from being discovered during hot reload/restart until '
+        'flutter is restarted or the file is restored.'
+      );
+    }
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (final FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
-        mainUri: globals.fs.file(mainPath).absolute.uri,
+        mainUri: entrypointFile.absolute.uri,
         target: target,
         bundle: assetBundle,
         firstBuildTime: firstBuildTime,
@@ -553,9 +562,11 @@ class HotRunner extends ResidentRunner {
         } on vm_service.RPCError {
           // Do nothing, we're already subcribed.
         }
+        // Ideally this would wait for kIsolateRunnable, but either this subscription occurs too
+        // late to receive the event, or it is not forwarded for hot restarted isolates.
         isolateNotifications.add(
           device.vmService.onIsolateEvent.firstWhere((vm_service.Event event) {
-            return event.kind == vm_service.EventKind.kIsolateRunnable;
+            return event.kind == vm_service.EventKind.kServiceExtensionAdded;
           }),
         );
       }

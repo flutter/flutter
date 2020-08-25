@@ -11,7 +11,10 @@ import 'base/common.dart';
 export 'dart:convert' hide utf8, Utf8Codec, Utf8Decoder;
 
 /// A [Codec] which reports malformed bytes when decoding.
-// Created to solve https://github.com/flutter/flutter/issues/15646.
+///
+/// Occasionally people end up in a situation where we try to decode bytes
+/// that aren't UTF-8 and we're not quite sure how this is happening.
+/// This tells people to report a bug when they see this.
 class Utf8Codec extends Encoding {
   const Utf8Codec();
 
@@ -40,8 +43,9 @@ class Utf8Decoder extends cnv.Utf8Decoder {
     if (reportErrors && result.contains('\u{FFFD}')) {
       throwToolExit(
         'Bad UTF-8 encoding found while decoding string: $result. '
-        'The Flutter team would greatly appreciate if you could file a bug or leave a '
-        'comment on the issue https://github.com/flutter/flutter/issues/15646.\n'
+        'The Flutter team would greatly appreciate if you could file a bug explaining '
+        'exactly what you were doing when this happened:\n'
+        'https://github.com/flutter/flutter/issues/new/choose\n'
         'The source bytes were:\n$codeUnits\n\n');
     }
     return result;
