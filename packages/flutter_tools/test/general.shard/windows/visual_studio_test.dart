@@ -285,6 +285,32 @@ VisualStudioFixture setUpVisualStudio() {
   return VisualStudioFixture(visualStudio, fileSystem, processManager);
 }
 
+// Set all vswhere query with the required components return null.
+void setNoViableToolchainInstallation(
+  VisualStudioFixture fixture,
+) {
+  setMockCompatibleVisualStudioInstallation(
+    null,
+    fixture.fileSystem,
+    fixture.processManager,
+  );
+  setMockCompatibleVisualStudioBuildToolsInstallation(
+    null,
+    fixture.fileSystem,
+    fixture.processManager,
+  );
+  setMockPrereleaseVisualStudioInstallation(
+    null,
+    fixture.fileSystem,
+    fixture.processManager,
+  );
+  setMockPrereleaseVisualStudioBuildToolsInstallation(
+    null,
+    fixture.fileSystem,
+    fixture.processManager,
+  );
+}
+
 void main() {
   group('Visual Studio', () {
     testWithoutContext('isInstalled returns false when vswhere is missing', () {
@@ -352,26 +378,8 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
+      setNoViableToolchainInstallation(fixture);
+
       setMockAnyVisualStudioInstallation(
         null,
         fixture.fileSystem,
@@ -409,26 +417,8 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
+      setNoViableToolchainInstallation(fixture);
+
       setMockAnyVisualStudioInstallation(
         _tooOldResponse,
         fixture.fileSystem,
@@ -444,26 +434,8 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
+      setNoViableToolchainInstallation(fixture);
+
       setMockAnyVisualStudioInstallation(
         _missingStatusResponse,
         fixture.fileSystem,
@@ -477,26 +449,8 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
+      setNoViableToolchainInstallation(fixture);
+
       setMockAnyVisualStudioInstallation(
         _defaultResponse,
         fixture.fileSystem,
@@ -510,26 +464,8 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
+      setNoViableToolchainInstallation(fixture);
+
       setMockAnyVisualStudioInstallation(
         _tooOldResponse,
         fixture.fileSystem,
@@ -550,23 +486,13 @@ void main() {
         fixture.fileSystem,
         fixture.processManager,
       );
-      setMockPrereleaseVisualStudioInstallation(
-        response,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
       setMockCompatibleVisualStudioBuildToolsInstallation(
         null,
         fixture.fileSystem,
         fixture.processManager,
       );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockAnyVisualStudioInstallation(
-        null,
+      setMockPrereleaseVisualStudioInstallation(
+        response,
         fixture.fileSystem,
         fixture.processManager,
       );
@@ -586,23 +512,18 @@ void main() {
         fixture.fileSystem,
         fixture.processManager,
       );
-      setMockPrereleaseVisualStudioInstallation(
+      setMockCompatibleVisualStudioBuildToolsInstallation(
         null,
         fixture.fileSystem,
         fixture.processManager,
       );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
+      setMockPrereleaseVisualStudioInstallation(
         null,
         fixture.fileSystem,
         fixture.processManager,
       );
       setMockPrereleaseVisualStudioBuildToolsInstallation(
         response,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockAnyVisualStudioInstallation(
-        null,
         fixture.fileSystem,
         fixture.processManager,
       );
@@ -615,26 +536,8 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
+      setNoViableToolchainInstallation(fixture);
+
       setMockAnyVisualStudioInstallation(
         _tooOldResponse,
         fixture.fileSystem,
@@ -649,26 +552,7 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
+      setNoViableToolchainInstallation(fixture);
 
       final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['isComplete'] = false;
@@ -687,26 +571,7 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
+      setNoViableToolchainInstallation(fixture);
 
       final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['isLaunchable'] = false;
@@ -724,26 +589,7 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
+      setNoViableToolchainInstallation(fixture);
 
       final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['isRebootRequired'] = true;
@@ -761,26 +607,8 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
+      setNoViableToolchainInstallation(fixture);
+
       setMockAnyVisualStudioInstallation(
         _defaultResponse,
         fixture.fileSystem,
@@ -794,26 +622,8 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
+      setNoViableToolchainInstallation(fixture);
+
       setMockAnyVisualStudioInstallation(
         _defaultResponse,
         fixture.fileSystem,
@@ -834,21 +644,6 @@ void main() {
         fixture.fileSystem,
         fixture.processManager,
       );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
 
       expect(visualStudio.cmakePath, isNull);
     });
@@ -864,21 +659,6 @@ void main() {
         fixture.fileSystem,
         fixture.processManager,
       );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
 
       expect(visualStudio.hasNecessaryComponents, false);
     });
@@ -887,26 +667,8 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
+      setNoViableToolchainInstallation(fixture);
+
       setMockAnyVisualStudioInstallation(
         _defaultResponse,
         fixture.fileSystem,
@@ -923,26 +685,8 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
+      setNoViableToolchainInstallation(fixture);
+
       setMockEncodedAnyVisualStudioInstallation(
         '{',
         fixture.fileSystem,
@@ -958,26 +702,6 @@ void main() {
 
       setMockCompatibleVisualStudioInstallation(
         _defaultResponse,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockAnyVisualStudioInstallation(
-        null,
         fixture.fileSystem,
         fixture.processManager,
       );
@@ -997,23 +721,8 @@ void main() {
         fixture.fileSystem,
         fixture.processManager,
       );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
       setMockCompatibleVisualStudioBuildToolsInstallation(
         _defaultBuildToolsResponse,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockAnyVisualStudioInstallation(
-        null,
         fixture.fileSystem,
         fixture.processManager,
       );
@@ -1040,21 +749,6 @@ void main() {
 
       setMockCompatibleVisualStudioInstallation(
         olderButCompleteVersionResponse,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-        null,
-        fixture.fileSystem,
-        fixture.processManager,
-      );
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-        null,
         fixture.fileSystem,
         fixture.processManager,
       );

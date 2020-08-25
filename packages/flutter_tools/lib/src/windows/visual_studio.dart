@@ -185,14 +185,12 @@ class VisualStudio {
 
   /// Workload ID for use with vswhere requirements.
   ///
-  /// See https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids
-  static const String _requiredWorkload = 'Microsoft.VisualStudio.Workload.NativeDesktop';
-
-  /// Workload ID for use with vswhere requirements for Build Tools.
-  ///
   /// Workload ID is different between Visual Studio IDE and Build Tools.
-  /// See https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools
-  static const String _requiredBuildToolsWorkload = 'Microsoft.VisualStudio.Workload.VCTools';
+  /// See https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids
+  static const List<String> _requiredWorkloads = <String>[
+    'Microsoft.VisualStudio.Workload.NativeDesktop',
+    'Microsoft.VisualStudio.Workload.VCTools'
+  ];
 
   /// Components for use with vswhere requirements.
   ///
@@ -273,12 +271,10 @@ class VisualStudio {
   /// Returns the details dictionary for the newest version of Visual Studio.
   /// If [validateRequirements] is set, the search will be limited to versions
   /// that have all of the required workloads and components.
-  /// [requiredWorkload] should be set to [_requiredBuildToolsWorkload] when
-  /// checking the Build Tools.
   Map<String, dynamic> _visualStudioDetails({
       bool validateRequirements = false,
       List<String> additionalArguments,
-      String requiredWorkload = _requiredWorkload
+      String requiredWorkload
     }) {
     final List<String> requirementArguments = validateRequirements
         ? <String>[
@@ -353,26 +349,18 @@ class VisualStudio {
       _vswhereMinVersionArgument,
       _minimumSupportedVersion.toString(),
     ];
-    Map<String, dynamic> visualStudioDetails = _visualStudioDetails(
-        validateRequirements: true,
-        additionalArguments: minimumVersionArguments);
-    // If a stable version is not found, try searching for a pre-release version.
-    visualStudioDetails ??= _visualStudioDetails(
-        validateRequirements: true,
-        additionalArguments: <String>[...minimumVersionArguments, _vswherePrereleaseArgument]);
-    // If Visual Studio IDE is not found, try searching for Build Tools.
-    visualStudioDetails ??= _visualStudioDetails(
-        validateRequirements: true,
-        additionalArguments: minimumVersionArguments,
-        requiredWorkload: _requiredBuildToolsWorkload
-        );
-    // If Visual Studio IDE and a stable version Build Tools are not found,
-    // try searching for a pre-release version Build Tools.
-    visualStudioDetails ??= _visualStudioDetails(
-        validateRequirements: true,
-        additionalArguments: <String>[...minimumVersionArguments, _vswherePrereleaseArgument],
-        requiredWorkload: _requiredBuildToolsWorkload
-        );
+    Map<String, dynamic> visualStudioDetails;
+    // Check in the order of stable VS, stable BT, pre-release VS, pre-release BT
+    for(final bool checkForPrerelease in <bool>[false, true]){
+      for(final String requiredWorkload in _requiredWorkloads){
+        visualStudioDetails ??= _visualStudioDetails(
+          validateRequirements: true,
+          additionalArguments: checkForPrerelease
+              ? <String>[...minimumVersionArguments, _vswherePrereleaseArgument]
+              : minimumVersionArguments,
+          requiredWorkload: requiredWorkload);
+      }
+    }
 
     if (visualStudioDetails != null) {
       if (installationHasIssues(visualStudioDetails)) {
