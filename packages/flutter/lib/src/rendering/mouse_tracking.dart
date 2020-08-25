@@ -168,10 +168,7 @@ class _MouseState {
 
   @override
   String toString() {
-    String describeEvent(PointerEvent? event) {
-      return event == null ? 'null' : describeIdentity(event);
-    }
-    final String describeLatestEvent = 'latestEvent: ${describeEvent(latestEvent)}';
+    final String describeLatestEvent = 'latestEvent: ${describeIdentity(latestEvent)}';
     final String describeAnnotations = 'annotations: [list of ${annotations.length}]';
     return '${describeIdentity(this)}($describeLatestEvent, $describeAnnotations)';
   }
