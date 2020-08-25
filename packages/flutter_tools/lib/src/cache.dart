@@ -1467,10 +1467,10 @@ class ArtifactUpdater {
       try {
         extractor(tempFile, location);
       } on ProcessException {
+        retries -= 1;
         if (retries == 0) {
           rethrow;
         }
-        retries -= 1;
         _deleteIgnoringErrors(tempFile);
         continue;
       }
