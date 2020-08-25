@@ -412,6 +412,8 @@ abstract class ImageStreamCompleter with Diagnosticable {
         callback();
       }
       _onLastListenerRemovedCallbacks.clear();
+      print('disposing');
+      // _currentImage?.image.dispose();
     }
   }
 
