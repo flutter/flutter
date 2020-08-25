@@ -170,7 +170,6 @@ tasks:
       Measures the runtime performance of constructing and destructing widgets on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   multi_widget_construction_perf__e2e_summary:
     description: >
@@ -214,6 +213,14 @@ tasks:
       Measures the runtime performance of Flutter gallery transitions on iPhone4s
       with SkSL shader warm-up.
     stage: devicelab
+    required_agent_capabilities: ["mac/ios32"]
+    flaky: true
+
+  flutter_gallery_sksl_warmup__transition_perf_e2e_ios32:
+    description: >
+      Measures the runtime performance of Flutter gallery transitions on iPhone4s
+      with SkSL shader warm-up with e2e.
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
     flaky: true
 
@@ -434,12 +441,14 @@ tasks:
       Measures image loading performance on release (aot) build.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   image_list_jit_reported_duration:
     description: >
       Measures image loading performance on debug (jit) build.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   build_benchmark:
     description: >
@@ -773,7 +782,6 @@ tasks:
       Android with e2e.
     stage: devicelab
     required_agent_capabilities: ["mac/ios32"]
-    flaky: true
 
   flutter_gallery__transition_perf_e2e_ios:
     description: >
@@ -797,6 +805,14 @@ tasks:
       with SkSL shader warm-up.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+
+  flutter_gallery_sksl_warmup__transition_perf_e2e:
+    description: >
+      Measures the runtime performance of Flutter gallery transitions on Android
+      with SkSL shader warm-up with e2e.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery__transition_perf_with_semantics:
     description: >
@@ -840,6 +856,7 @@ tasks:
       Measures the performance of the Crane page in the new Flutter Gallery on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   fast_scroll_large_images__memory:
     description: >

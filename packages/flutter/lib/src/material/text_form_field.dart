@@ -71,7 +71,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 /// This example shows how to move the focus to the next field when the user
-/// presses the ENTER key.
+/// presses the SPACE key.
 ///
 /// ```dart imports
 /// import 'package:flutter/services.dart';

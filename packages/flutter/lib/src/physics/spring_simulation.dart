@@ -277,7 +277,7 @@ class _UnderdampedSolution implements _SpringSolution {
     final double power = math.pow(math.e, _r * time) as double;
     final double cosine = math.cos(_w * time);
     final double sine = math.sin(_w * time);
-    return      power * (_c2 * _w * cosine - _c1 * _w * sine) +
+    return power * (_c2 * _w * cosine - _c1 * _w * sine) +
            _r * power * (_c2 *      sine   + _c1 *      cosine);
   }
 
