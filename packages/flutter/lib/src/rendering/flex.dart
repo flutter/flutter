@@ -196,7 +196,7 @@ enum CrossAxisAlignment {
   baseline,
 }
 
-bool? _startIsTopLeft(Axis direction, TextDirection? textDirection, VerticalDirection verticalDirection) {
+bool? _startIsTopLeft(Axis direction, TextDirection? textDirection, VerticalDirection? verticalDirection) {
   assert(direction != null);
   // If the relevant value of textDirection or verticalDirection is null, this returns null too.
   switch (direction) {
@@ -215,6 +215,8 @@ bool? _startIsTopLeft(Axis direction, TextDirection? textDirection, VerticalDire
           return true;
         case VerticalDirection.up:
           return false;
+        case null:
+          return null;
       }
   }
 }
@@ -740,7 +742,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             ),
           ]);
         }());
-        totalFlex += childParentData.flex!;
+        totalFlex += flex;
         lastFlexChild = child;
       } else {
         BoxConstraints innerConstraints;
@@ -1030,7 +1032,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   @override
   String toStringShort() {
     String header = super.toStringShort();
-    if (_overflow is double && _hasOverflow)
+    if (_overflow != null && _hasOverflow)
       header += ' OVERFLOWING';
     return header;
   }
