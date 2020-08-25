@@ -154,8 +154,6 @@ Future<void> main() async {
       return delays;
     }
 
-    binding.resamplingEnabled = false;
-    print('without resampler');
     List<Duration> delays = <Duration>[];
     for (int n = 0; n < 5; n++) {
       delays += await scroll();

@@ -321,13 +321,18 @@ TaskFunction createsScrollSmoothnessPerfTest() {
         file('$testDirectory/build/scroll_smoothness_test.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
+      final Map<String, dynamic> result = <String, dynamic>{
+        'janky_count_with_resampler': data['with resampler']['janky_count'],
+        'average_abs_jerk_with_resampler': data['with resampler']['average_abs_jerk'],
+        'droped_frame_count_with_resampler': data['with resampler']['droped_frame_count'],
+        'janky_count_without_resampler': data['without resampler']['janky_count'],
+        'average_abs_jerk_without_resampler': data['without resampler']['average_abs_jerk'],
+        'droped_frame_count_without_resampler': data['without resampler']['droped_frame_count'],
+      };
+
       return TaskResult.success(
-        data,
-        benchmarkScoreKeys: <String>[
-          'janky_count',
-          'average_abs_jerk',
-          'droped_frame_count'
-        ],
+        result,
+        benchmarkScoreKeys: result.keys.toList(),
       );
     });
   };

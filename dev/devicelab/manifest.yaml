@@ -120,6 +120,7 @@ tasks:
       Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   complex_layout_scroll_perf__timeline_summary:
     description: >
