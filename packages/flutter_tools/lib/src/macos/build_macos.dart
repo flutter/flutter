@@ -14,6 +14,7 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import 'cocoapod_utils.dart';
 
 /// When run in -quiet mode, Xcode only prints from the underlying tasks to stdout.
@@ -134,12 +135,13 @@ Future<void> buildMacOS({
       excludePath: 'Versions', // Avoid double counting caused by symlinks
     );
     final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs.directory(getBuildDirectory()),'macos-code-size-analysis', 'json',
+      globals.fs.directory(getBuildDirectory()), 'macos-code-size-analysis', 'json',
     )..writeAsStringSync(jsonEncode(output));
     // This message is used as a sentinel in analyze_apk_size_test.dart
     globals.printStatus(
       'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
     );
+    CodeSizeEvent('macos').send();
   }
   globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 }

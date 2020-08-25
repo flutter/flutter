@@ -16,6 +16,7 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(
@@ -78,6 +79,7 @@ Future<void> buildLinux(
     globals.printStatus(
       'A summary of your Linux bundle analysis can be found at: ${outputFile.path}',
     );
+    CodeSizeEvent('linux').send();
   }
 }
 

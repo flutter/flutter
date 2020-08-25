@@ -15,6 +15,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/mac.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
 
@@ -143,6 +144,7 @@ class BuildIOSCommand extends BuildSubCommand {
       globals.printStatus(
         'A summary of your iOS bundle analysis can be found at: ${outputFile.path}',
       );
+      CodeSizeEvent('ios').send();
     }
 
     if (result.output != null) {

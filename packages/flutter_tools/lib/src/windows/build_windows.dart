@@ -16,6 +16,7 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import 'visual_studio.dart';
 
 // From https://cmake.org/cmake/help/v3.15/manual/cmake-generators.7.html#visual-studio-generators
@@ -100,6 +101,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     globals.printStatus(
       'A summary of your Windows bundle analysis can be found at: ${outputFile.path}',
     );
+    CodeSizeEvent('windows').send();
   }
 }
 

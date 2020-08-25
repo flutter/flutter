@@ -542,6 +542,7 @@ Future<void> _performCodeSizeAnalysis(
   globals.printStatus(
     'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
   );
+  CodeSizeEvent(kind).send();
 }
 
 /// Builds AAR and POM files.
