@@ -322,5 +322,74 @@ void main() {
       expect(lastResults.length, 1);
       expect(lastResults[0], kOptionsUsers[1]);
     });
+
+    testWidgets('can specify a custom display string for a list of custom User options', (WidgetTester tester) async {
+      final GlobalKey fieldKey = GlobalKey();
+      final GlobalKey resultsKey = GlobalKey();
+      final AutocompleteController<User> autocompleteController =
+          AutocompleteController<User>(
+            options: kOptionsUsers,
+            displayStringForOption: (User option) => option.name,
+          );
+      List<User> lastResults;
+      OnSelectedAutocomplete<User> lastOnSelected;
+      User lastUserSelected;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AutocompleteCore<User>(
+            autocompleteController: autocompleteController,
+            onSelected: (User selected) {
+              lastUserSelected = selected;
+            },
+            buildField: (BuildContext context, TextEditingController textEditingController) {
+              return Container(key: fieldKey);
+            },
+            buildResults: (BuildContext context, OnSelectedAutocomplete<User> onSelected, List<User> results) {
+              lastResults = results;
+              lastOnSelected = onSelected;
+              return Container(key: resultsKey);
+            },
+          ),
+        ),
+      );
+
+      expect(find.byKey(fieldKey), findsOneWidget);
+      expect(find.byKey(resultsKey), findsNothing);
+
+      // Enter a query. The results are filtered by the query.
+      autocompleteController.textEditingController.value = const TextEditingValue(
+        text: 'example',
+        selection: TextSelection(baseOffset: 7, extentOffset: 7),
+      );
+      await tester.pump();
+      expect(find.byKey(fieldKey), findsOneWidget);
+      expect(find.byKey(resultsKey), findsOneWidget);
+      expect(lastResults.length, 2);
+      expect(lastResults[0], kOptionsUsers[0]);
+      expect(lastResults[1], kOptionsUsers[1]);
+
+      // Select a result. The results hide and onSelected is called. The query
+      // field has its text set to the selection's display string.
+      final User selection = lastResults[1];
+      lastOnSelected(selection);
+      await tester.pump();
+      expect(find.byKey(fieldKey), findsOneWidget);
+      expect(find.byKey(resultsKey), findsNothing);
+      expect(lastUserSelected, selection);
+      expect(autocompleteController.textEditingController.text, selection.name);
+
+      // Modify the selected query. The results appear again and are filtered,
+      // this time by name instead of email.
+      autocompleteController.textEditingController.value = const TextEditingValue(
+        text: 'B',
+        selection: TextSelection(baseOffset: 1, extentOffset: 1),
+      );
+      await tester.pump();
+      expect(find.byKey(fieldKey), findsOneWidget);
+      expect(find.byKey(resultsKey), findsOneWidget);
+      expect(lastResults.length, 1);
+      expect(lastResults[0], kOptionsUsers[1]);
+    });
   });
 }

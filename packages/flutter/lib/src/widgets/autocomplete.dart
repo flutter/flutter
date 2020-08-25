@@ -146,8 +146,8 @@ class AutocompleteController<T> {
          filter != null || options != null,
          'Must pass either options or filter.',
        ),
-       displayStringForOption = displayStringForOption ?? _displayStringForOption,
-       filterStringForOption = filterStringForOption ?? _filterStringForOption,
+       displayStringForOption = displayStringForOption ?? _defaultStringForOption,
+       filterStringForOption = filterStringForOption ?? _defaultStringForOption,
        _ownsTextEditingController = textEditingController == null,
        textEditingController = textEditingController ?? TextEditingController() {
     this.textEditingController.addListener(_onChangedQuery);
@@ -202,14 +202,8 @@ class AutocompleteController<T> {
   /// This is a [ValueNotifier], so it can be listened to for changes.
   final ValueNotifier<List<T>> results = ValueNotifier<List<T>>(<T>[]);
 
-  // The default way to convert an option to a string for display in the query
-  // field.
-  static String _displayStringForOption<T>(T option) {
-    return option.toString();
-  }
-
-  // The default way to convert an option into a string to be filtered on.
-  static String _filterStringForOption<T>(T option) {
+  // The default way to convert an option to a string.
+  static String _defaultStringForOption<T>(T option) {
     return option.toString();
   }
 
