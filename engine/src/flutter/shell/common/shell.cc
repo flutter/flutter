@@ -1179,16 +1179,6 @@ void Shell::OnFrameRasterized(const FrameTiming& timing) {
   }
 }
 
-void Shell::OnCompositorEndFrame(size_t freed_hint) {
-  FML_DCHECK(task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread());
-  task_runners_.GetUITaskRunner()->PostTask(
-      [engine = weak_engine_, freed_hint = freed_hint]() {
-        if (engine) {
-          engine->HintFreed(freed_hint);
-        }
-      });
-}
-
 fml::Milliseconds Shell::GetFrameBudget() {
   if (display_refresh_rate_ > 0) {
     return fml::RefreshRateToFrameBudget(display_refresh_rate_.load());

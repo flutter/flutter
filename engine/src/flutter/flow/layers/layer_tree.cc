@@ -58,7 +58,6 @@ bool LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
       device_pixel_ratio_};
 
   root_layer_->Preroll(&context, frame.root_surface_transformation());
-  frame.add_external_size(context.uncached_external_size);
   return context.surface_needs_readback;
 }
 

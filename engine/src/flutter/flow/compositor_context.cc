@@ -9,10 +9,8 @@
 
 namespace flutter {
 
-CompositorContext::CompositorContext(Delegate& delegate)
-    : delegate_(delegate),
-      raster_time_(delegate.GetFrameBudget()),
-      ui_time_(delegate.GetFrameBudget()) {}
+CompositorContext::CompositorContext(fml::Milliseconds frame_budget)
+    : raster_time_(frame_budget), ui_time_(frame_budget) {}
 
 CompositorContext::~CompositorContext() = default;
 
@@ -25,11 +23,8 @@ void CompositorContext::BeginFrame(ScopedFrame& frame,
 }
 
 void CompositorContext::EndFrame(ScopedFrame& frame,
-                                 bool enable_instrumentation,
-                                 size_t freed_hint) {
-  freed_hint += raster_cache_.SweepAfterFrame();
-  delegate_.OnCompositorEndFrame(freed_hint);
-
+                                 bool enable_instrumentation) {
+  raster_cache_.SweepAfterFrame();
   if (enable_instrumentation) {
     raster_time_.Stop();
   }
@@ -69,7 +64,7 @@ CompositorContext::ScopedFrame::ScopedFrame(
 }
 
 CompositorContext::ScopedFrame::~ScopedFrame() {
-  context_.EndFrame(*this, instrumentation_enabled_, uncached_external_size_);
+  context_.EndFrame(*this, instrumentation_enabled_);
 }
 
 RasterStatus CompositorContext::ScopedFrame::Raster(
