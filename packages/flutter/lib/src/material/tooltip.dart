@@ -284,8 +284,16 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _createNewEntry() {
+    final OverlayState overlayState = Overlay.of(
+      context,
+      debugRequiredFor: widget,
+    );
+
     final RenderBox box = context.findRenderObject() as RenderBox;
-    final Offset target = box.localToGlobal(box.size.center(Offset.zero));
+    final Offset target = box.localToGlobal(
+      box.size.center(Offset.zero),
+      ancestor: overlayState.context.findRenderObject(),
+    );
 
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
@@ -309,7 +317,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       ),
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
-    Overlay.of(context, debugRequiredFor: widget).insert(_entry);
+    overlayState.insert(_entry);
     SemanticsService.tooltip(widget.message);
   }
 

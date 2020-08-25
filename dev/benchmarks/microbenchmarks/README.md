@@ -13,3 +13,10 @@ flutter run --release lib/stocks/layout_bench.dart
 ```
 
 The results should be in the device logs.
+
+### Avoid changing names of the benchmarks
+
+Each microbenchmark is identified by a name, for example,
+"catmullrom_transform_iteration". Changing the name of an existing
+microbenchmarks will effectively remove the old benchmark and create a new one,
+losing the historical data associated with the old benchmark in the process.

@@ -577,7 +577,7 @@ void main() {
       }
   });
 
-   testWidgets(
+  testWidgets(
     'WidgetTester.timedDrag must respect buttons',
     (WidgetTester tester) async {
       final List<String> logs = <String>[];
@@ -611,6 +611,44 @@ void main() {
         else
           expect(logs[i], 'up 0');
       }
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.timedDrag uses correct pointer',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.pointer}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.timedDrag(
+        find.text('test'),
+        const Offset(-200.0, 0.0),
+        const Duration(seconds: 1),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.timedDrag(
+        find.text('test'),
+        const Offset(200.0, 0.0),
+        const Duration(seconds: 1),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+
+      expect(logs.length, 2);
+      expect(logs[0], isNotNull);
+      expect(logs[1], isNotNull);
+      expect(logs[1] != logs[0], isTrue);
     },
   );
 

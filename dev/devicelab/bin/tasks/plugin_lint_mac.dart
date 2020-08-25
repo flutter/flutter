@@ -45,6 +45,7 @@ Future<void> main() async {
             'lint',
             objcPodspecPath,
             '--allow-warnings',
+            '--verbose',
           ],
           environment: <String, String>{
             'LANG': 'en_US.UTF-8',
@@ -63,6 +64,7 @@ Future<void> main() async {
             objcPodspecPath,
             '--allow-warnings',
             '--use-libraries',
+            '--verbose',
           ],
           environment: <String, String>{
             'LANG': 'en_US.UTF-8',
