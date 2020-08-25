@@ -9,6 +9,7 @@ import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
@@ -164,10 +165,24 @@ class TestCommand extends FlutterCommand {
     }
     final FlutterProject flutterProject = FlutterProject.current();
     if (shouldRunPub) {
+      final Environment environment = Environment(
+        artifacts: globals.artifacts,
+        logger: globals.logger,
+        cacheDir: globals.cache.getRoot(),
+        engineVersion: globals.flutterVersion.engineRevision,
+        fileSystem: globals.fs,
+        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        outputDir: globals.fs.directory(getBuildDirectory()),
+        processManager: globals.processManager,
+        projectDir: flutterProject.directory,
+      );
+
       await pub.get(
         context: PubContext.getVerifyContext(name),
         skipPubspecYamlCheck: true,
         generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
+        environment: environment,
+        buildSystem: globals.buildSystem,
       );
     }
     final bool buildTestAssets = boolArg('test-assets');
