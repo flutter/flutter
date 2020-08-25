@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
@@ -92,7 +90,7 @@ void main() {
     final VoidCallback listener1 = () { log.add('listener1'); };
     final VoidCallback badListener = () {
       log.add('badListener');
-      throw null;
+      throw null!;
     };
     final VoidCallback listener2 = () { log.add('listener2'); };
 
@@ -115,7 +113,7 @@ void main() {
     final AnimationStatusListener listener1 = (AnimationStatus status) { log.add('listener1'); };
     final AnimationStatusListener badListener = (AnimationStatus status) {
       log.add('badListener');
-      throw null;
+      throw null!;
     };
     final AnimationStatusListener listener2 = (AnimationStatus status) { log.add('listener2'); };
 
