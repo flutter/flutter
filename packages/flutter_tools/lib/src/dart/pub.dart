@@ -263,7 +263,6 @@ class _DefaultPub implements Pub {
         timeout: const TimeoutConfiguration().slowOperation,
       );
       final bool verbose = _logger.isVerbose;
-      // Maybe it's not generating here when it should
       final List<String> args = <String>[
         if (verbose)
           '--verbose'

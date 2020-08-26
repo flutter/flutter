@@ -397,72 +397,66 @@ void main() {
     logger.clear();
   });
 
-    testWithoutContext('get generates synthetic packages for GenerateLocalizationsTarget when generate:true', () async {
-      // MOCKS SETUP
-      // Project directory setup for gen_l10n logic
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+  testWithoutContext('get generates synthetic packages for GenerateLocalizationsTarget when generate:true', () async {
+    // Project directory setup for gen_l10n logic
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
-      // Add generate:true to pubspec.yaml.
-      final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
-      final String content = pubspecFile.readAsStringSync().replaceFirst(
-        '\nflutter:\n',
-        '\nflutter:\n  generate: true\n',
-      );
-      pubspecFile.writeAsStringSync(content);
+    // Add generate:true to pubspec.yaml.
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    final String content = pubspecFile.readAsStringSync().replaceFirst(
+      '\nflutter:\n',
+      '\nflutter:\n  generate: true\n',
+    );
+    pubspecFile.writeAsStringSync(content);
 
-      // Set up minimal .dart_tool
-      fileSystem.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('{"configVersion": 2,"packages": []}');
+    // Set up minimal .dart_tool
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion": 2,"packages": []}');
 
-      // Create an l10n.yaml file
-      fileSystem.file('l10n.yaml').createSync();
+    // Create an l10n.yaml file
+    fileSystem.file('l10n.yaml').createSync();
 
-      final MockProcessManager mockProcessManager = MockProcessManager(0);
-      final BufferLogger mockBufferLogger = BufferLogger.test();
-      final Artifacts mockArtifacts = Artifacts.test();
-      final Pub pub = Pub(
-        platform: FakePlatform(environment: const <String, String>{}),
-        usage: MockUsage(),
-        fileSystem: fileSystem,
-        logger: mockBufferLogger,
-        processManager: mockProcessManager,
-        botDetector: const BotDetectorAlwaysNo(),
-      );
-      final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        fileSystem: fileSystem,
-        logger: mockBufferLogger,
-        artifacts: mockArtifacts,
-        processManager: mockProcessManager,
-      );
-      final BuildSystem buildSystem = MockBuildSystem();
+    final MockProcessManager mockProcessManager = MockProcessManager(0);
+    final BufferLogger mockBufferLogger = BufferLogger.test();
+    final Artifacts mockArtifacts = Artifacts.test();
+    final Pub pub = Pub(
+      platform: FakePlatform(environment: const <String, String>{}),
+      usage: MockUsage(),
+      fileSystem: fileSystem,
+      logger: mockBufferLogger,
+      processManager: mockProcessManager,
+      botDetector: const BotDetectorAlwaysNo(),
+    );
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: mockBufferLogger,
+      artifacts: mockArtifacts,
+      processManager: mockProcessManager,
+    );
+    final BuildSystem buildSystem = MockBuildSystem();
 
-      // Running pub.get with conditions that trigger GenerateLocalizationsTarget
-      // synthetic package generation.
-      try {
-          await pub.get(
+    // Running pub.get with conditions that trigger GenerateLocalizationsTarget
+    // synthetic package generation.
+    expect(
+      () {
+        pub.get(
           context: PubContext.flutterTests,
           checkLastModified: true,
           generateSyntheticPackage: true,
           environment: environment,
           buildSystem: buildSystem,
         );
-      } on ToolExit catch (e) {
-        // BuildSystem.build throws a ToolExit because null is returned by
-        // the mock BuildSystem.
-        expect(e.message, 'Generating synthetic localizations package has failed.');
-        // [BuildSystem] should have called build with [GenerateLocalizationsTarget].
-        verify(buildSystem.build(
-          const GenerateLocalizationsTarget(),
-          environment,
-        )).called(1);
-
-        return;
-      }
-
-      fail('A ToolExit should have been thrown.');
-    });
+      },
+      throwsToolExit(message: 'Generating synthetic localizations package has failed.'),
+    );
+    // [BuildSystem] should have called build with [GenerateLocalizationsTarget].
+    verify(buildSystem.build(
+      const GenerateLocalizationsTarget(),
+      environment,
+    )).called(1);
+  });
 }
 
 class BotDetectorAlwaysNo implements BotDetector {

@@ -12,10 +12,8 @@ Future<BuildResult> generateLocalizationsSyntheticPackage(
   assert(environment != null);
   assert(buildSystem != null);
 
-  final BuildResult result = await buildSystem.build(
+  return await buildSystem.build(
     const GenerateLocalizationsTarget(),
     environment,
   );
-
-  return result;
 }
