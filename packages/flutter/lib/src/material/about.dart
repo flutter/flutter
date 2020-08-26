@@ -614,7 +614,7 @@ class _PackagesViewState extends State<_PackagesView> {
       builder: (BuildContext context, AsyncSnapshot<_LicenseData> snapshot) {
         return AnimatedSwitcher(
           transitionBuilder: (Widget child, Animation<double> animation) => FadeTransition(opacity: animation, child: child),
-          duration: kThemeAnimationDuration,
+          duration: Duration.zero,
           child: LayoutBuilder(
             key: ValueKey<ConnectionState>(snapshot.connectionState),
             builder: (BuildContext context, BoxConstraints constraints) {
