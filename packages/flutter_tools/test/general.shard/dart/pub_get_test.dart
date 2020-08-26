@@ -440,8 +440,8 @@ void main() {
     // Running pub.get with conditions that trigger GenerateLocalizationsTarget
     // synthetic package generation.
     expect(
-      () {
-        pub.get(
+      () async {
+        return await pub.get(
           context: PubContext.flutterTests,
           checkLastModified: true,
           generateSyntheticPackage: true,
