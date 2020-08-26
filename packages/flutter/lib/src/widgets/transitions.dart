@@ -1104,17 +1104,17 @@ class AlignTransition extends AnimatedWidget {
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Center(
-//        child: DefaultTextStyleTransition(
-//          style: TextStyleTween(
-//              begin: TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
-//              end: TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100)
-//          ).animate(CurvedAnimation(
-//              parent: _controller,
-//              curve: Curves.elasticInOut
-//          )),
-//          child: Text('Flutter'),
-//        )
-//    );
+///        child: DefaultTextStyleTransition(
+///          style: TextStyleTween(
+///              begin: TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
+///              end: TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100)
+///          ).animate(CurvedAnimation(
+///              parent: _controller,
+///              curve: Curves.elasticInOut
+///          )),
+///          child: Text('Flutter'),
+///        )
+///    );
 /// }
 /// ```
 /// {@end-tool}
