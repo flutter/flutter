@@ -655,4 +655,3 @@ Future<void> generateVersionFile(FlutterProject flutterProject) async {
       .childFile('version.json')
       .writeAsStringSync(jsonEncode(versionFileJson));
 }
-
