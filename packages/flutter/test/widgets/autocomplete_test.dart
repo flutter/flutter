@@ -201,7 +201,7 @@ void main() {
         MaterialApp(
           home: AutocompleteCore<String>(
             autocompleteController: autocompleteController,
-            buildField: (BuildContext context, TextEditingController textEditingController) {
+            buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
               return Container(key: fieldKey);
             },
             buildResults: (BuildContext context, OnSelectedAutocomplete<String> onSelected, List<String> results) {
@@ -274,7 +274,7 @@ void main() {
             onSelected: (User selected) {
               lastUserSelected = selected;
             },
-            buildField: (BuildContext context, TextEditingController textEditingController) {
+            buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
               return Container(key: fieldKey);
             },
             buildResults: (BuildContext context, OnSelectedAutocomplete<User> onSelected, List<User> results) {
@@ -342,7 +342,7 @@ void main() {
             onSelected: (User selected) {
               lastUserSelected = selected;
             },
-            buildField: (BuildContext context, TextEditingController textEditingController) {
+            buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
               return Container(key: fieldKey);
             },
             buildResults: (BuildContext context, OnSelectedAutocomplete<User> onSelected, List<User> results) {
@@ -390,6 +390,54 @@ void main() {
       expect(find.byKey(resultsKey), findsOneWidget);
       expect(lastResults.length, 1);
       expect(lastResults[0], kOptionsUsers[1]);
+    });
+
+    testWidgets('onSelectedString selects the first result', (WidgetTester tester) async {
+      final GlobalKey fieldKey = GlobalKey();
+      final GlobalKey resultsKey = GlobalKey();
+      final AutocompleteController<String> autocompleteController =
+          AutocompleteController<String>(
+            options: kOptions,
+          );
+      List<String> lastResults;
+      AutocompleteOnSelectedString lastOnSelectedString;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AutocompleteCore<String>(
+            autocompleteController: autocompleteController,
+            buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
+              lastOnSelectedString = onSelectedString;
+              return Container(key: fieldKey);
+            },
+            buildResults: (BuildContext context, OnSelectedAutocomplete<String> onSelected, List<String> results) {
+              lastResults = results;
+              return Container(key: resultsKey);
+            },
+          ),
+        ),
+      );
+
+      // Enter a query. The results are filtered by the query.
+      const String textInField = 'ele';
+      autocompleteController.textEditingController.value = const TextEditingValue(
+        text: textInField,
+        selection: TextSelection(baseOffset: 3, extentOffset: 3),
+      );
+      await tester.pump();
+      expect(find.byKey(fieldKey), findsOneWidget);
+      expect(find.byKey(resultsKey), findsOneWidget);
+      expect(lastResults.length, 2);
+      expect(lastResults[0], 'chameleon');
+      expect(lastResults[1], 'elephant');
+
+      // Select the current string, as if the field was submitted. The results
+      // hide and the field updates to show the selection.
+      lastOnSelectedString(textInField);
+      await tester.pump();
+      expect(find.byKey(fieldKey), findsOneWidget);
+      expect(find.byKey(resultsKey), findsNothing);
+      expect(autocompleteController.textEditingController.text, lastResults[0]);
     });
   });
 }

@@ -23,6 +23,10 @@ typedef AutocompleteFilter<T> = List<T> Function(String query);
 /// A type for indicating the selection of an autocomplete result.
 typedef OnSelectedAutocomplete<T> = void Function(T result);
 
+/// A type for indicating the selection of a string to be matched to the current
+/// autocomplete results.
+typedef AutocompleteOnSelectedString = void Function(String value);
+
 /// A builder for the selectable results given the current autocomplete query.
 typedef AutocompleteResultsBuilder<T> = Widget Function(
   BuildContext context,
@@ -34,8 +38,11 @@ typedef AutocompleteResultsBuilder<T> = Widget Function(
 typedef AutocompleteFieldBuilder = Widget Function(
   BuildContext context,
   TextEditingController textEditingController,
+  AutocompleteOnSelectedString onSelectedString,
 );
 
+// A type for converting between an option and a string for display or
+// filtering.
 typedef _AutocompleteOptionToString<T> = String Function(T option);
 
 // TODO(justinmc): Link to Autocomplete and AutocompleteCupertino when they are
@@ -456,7 +463,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
           width: renderBox.size.width,
           child: widget.buildResults(
             context,
-            _onSelected,
+            _select,
             _autocompleteController.results.value,
           ),
         );
@@ -477,22 +484,6 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   }
 
   void _onChangedResults() {
-    final String query = _autocompleteController.textEditingController.text;
-    final List<T> results = _autocompleteController.results.value;
-    // TODO(justinmc): I'm not 100% confident we want this feature. Just hit
-    // enter instead?
-    final bool queryIsOnlyResult = results != null && results.length == 1
-        && query == _autocompleteController.displayStringForOption(results[0]);
-    if (queryIsOnlyResult) {
-      if (_selection != results[0]) {
-        setState(() {
-            _selection = results[0];
-            if (widget.onSelected != null) {
-              widget.onSelected(_selection);
-            }
-        });
-      }
-    }
     _updateOverlay();
   }
 
@@ -510,7 +501,18 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     _updateOverlay();
   }
 
-  void _onSelected (T nextSelection) {
+  // Called from buildField when the user attempts to select a string, such as
+  // when submitting the field.
+  void _onSelectedString(String value) {
+    final List<T> results = _autocompleteController.results.value;
+    if (results.isEmpty) {
+      return;
+    }
+    _select(results[0]);
+  }
+
+  // Select the given option and update the widget.
+  void _select(T nextSelection) {
     if (nextSelection == _selection) {
       return;
     }
@@ -523,7 +525,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
         text: selectionString,
       );
       if (widget.onSelected != null) {
-        widget.onSelected(nextSelection);
+        widget.onSelected(_selection);
       }
     });
   }
@@ -600,7 +602,11 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   Widget build(BuildContext context) {
     return Container(
       key: _fieldKey,
-      child: widget.buildField(context, _autocompleteController.textEditingController),
+      child: widget.buildField(
+        context,
+        _autocompleteController.textEditingController,
+        _onSelectedString,
+      ),
     );
   }
 }
