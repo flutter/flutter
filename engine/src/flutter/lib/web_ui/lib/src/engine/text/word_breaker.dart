@@ -5,49 +5,39 @@
 // @dart = 2.10
 part of engine;
 
-enum _FindBreakDirection {
-  /// Indicates to find the word break by looking forward.
-  forward,
+class _FindBreakDirection {
+  static const _FindBreakDirection forward = _FindBreakDirection(step: 1);
+  static const _FindBreakDirection backward = _FindBreakDirection(step: -1);
 
-  /// Indicates to find the word break by looking backward.
-  backward,
+  const _FindBreakDirection({required this.step});
+
+  final int step;
 }
 
 /// [WordBreaker] exposes static methods to identify word boundaries.
 abstract class WordBreaker {
   /// It starts from [index] and tries to find the next word boundary in [text].
-  static int nextBreakIndex(String? text, int index) =>
+  static int nextBreakIndex(String text, int index) =>
       _findBreakIndex(_FindBreakDirection.forward, text, index);
 
   /// It starts from [index] and tries to find the previous word boundary in
   /// [text].
-  static int prevBreakIndex(String? text, int index) =>
+  static int prevBreakIndex(String text, int index) =>
       _findBreakIndex(_FindBreakDirection.backward, text, index);
 
   static int _findBreakIndex(
     _FindBreakDirection direction,
-    String? text,
+    String text,
     int index,
   ) {
-    int step, min, max;
-    if (direction == _FindBreakDirection.forward) {
-      step = 1;
-      min = 0;
-      max = text!.length - 1;
-    } else {
-      step = -1;
-      min = 1;
-      max = text!.length;
-    }
-
     int i = index;
-    while (i >= min && i <= max) {
-      i += step;
+    while (i >= 0 && i <= text.length) {
+      i += direction.step;
       if (_isBreak(text, i)) {
         break;
       }
     }
-    return i;
+    return clampInt(i, 0, text.length);
   }
 
   /// Find out if there's a word break between [index - 1] and [index].
