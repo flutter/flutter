@@ -16,23 +16,24 @@ import 'terminal.dart';
 /// A class to analyze APK and AOT snapshot and generate a breakdown of the data.
 class SizeAnalyzer {
   SizeAnalyzer({
-    @required this.fileSystem,
-    @required this.logger,
+    @required FileSystem fileSystem,
+    @required Logger logger,
     // TODO(jonahwilliams): migrate to required once this has rolled into google3.
     Usage flutterUsage,
-    this.appFilenamePattern = 'libapp.so',
-  }) : _flutterUsage = flutterUsage;
+    Pattern appFilenamePattern = 'libapp.so',
+  }) : _flutterUsage = flutterUsage,
+       _fileSystem = fileSystem,
+       _logger = logger,
+       _appFilenamePattern = appFilenamePattern;
 
-  final FileSystem fileSystem;
-  final Logger logger;
-  final Pattern appFilenamePattern;
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final Pattern _appFilenamePattern;
   final Usage _flutterUsage;
   String _appFilename;
 
   static const String aotSnapshotFileName = 'aot-snapshot.json';
-
   static const int tableWidth = 80;
-
   static const int _kAotSizeMaxDepth = 2;
   static const int _kZipSizeMaxDepth = 1;
 
@@ -44,8 +45,8 @@ class SizeAnalyzer {
     @required String type,
     String excludePath,
   }) async {
-    logger.printStatus('▒' * tableWidth);
-    logger.printStatus('━' * tableWidth);
+    _logger.printStatus('▒' * tableWidth);
+    _logger.printStatus('━' * tableWidth);
     final _SymbolNode aotAnalysisJson = _parseDirectory(
       outputDirectory,
       outputDirectory.parent.path,
@@ -70,7 +71,7 @@ class SizeAnalyzer {
       }
     }
 
-    logger.printStatus('▒' * tableWidth);
+    _logger.printStatus('▒' * tableWidth);
 
     Map<String, dynamic> apkAnalysisJson = aotAnalysisJson.toJson();
 
@@ -101,7 +102,7 @@ class SizeAnalyzer {
     @required String kind,
   }) async {
     assert(kind == 'apk' || kind == 'aab');
-    logger.printStatus('▒' * tableWidth);
+    _logger.printStatus('▒' * tableWidth);
     _printEntitySize(
       '${zipFile.basename} (total compressed)',
       byteSize: zipFile.lengthSync(),
@@ -142,7 +143,7 @@ class SizeAnalyzer {
     final Map<List<String>, int> pathsToSize = <List<String>, int>{};
 
     for (final ArchiveFile archiveFile in archive.files) {
-      pathsToSize[fileSystem.path.split(archiveFile.name)] = archiveFile.rawContent.length;
+      pathsToSize[_fileSystem.path.split(archiveFile.name)] = archiveFile.rawContent.length;
     }
     return _buildSymbolTree(pathsToSize);
   }
@@ -181,7 +182,7 @@ class SizeAnalyzer {
 
         if (childWithPathAsName == null) {
           childWithPathAsName = _SymbolNode(path);
-          if (matchesPattern(path, pattern: appFilenamePattern) != null) {
+          if (matchesPattern(path, pattern: _appFilenamePattern) != null) {
             _appFilename = path;
             childWithPathAsName.name += ' (Dart AOT)';
             _locatedAotFilePath = _buildNodeName(childWithPathAsName, currentNode);
@@ -320,7 +321,7 @@ class SizeAnalyzer {
       i += 1;
     }
     for (; i < localSegments.length; i += 1) {
-      logger.printStatus(
+      _logger.printStatus(
         localSegments[i] + '/',
         indent: (level + i) * 2,
         emphasis: true,
@@ -328,15 +329,15 @@ class SizeAnalyzer {
     }
     _leadingPaths = localSegments;
 
-    final String baseName = fileSystem.path.basename(entityName);
+    final String baseName = _fileSystem.path.basename(entityName);
     final int spaceInBetween = tableWidth - (level + i) * 2 - baseName.length - formattedSize.length;
-    logger.printStatus(
+    _logger.printStatus(
       baseName + ' ' * spaceInBetween,
       newline: false,
       emphasis: emphasis,
       indent: (level + i) * 2,
     );
-    logger.printStatus(formattedSize, color: showColor ? color : null);
+    _logger.printStatus(formattedSize, color: showColor ? color : null);
   }
 
   String _prettyPrintBytes(int numBytes) {
