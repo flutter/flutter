@@ -325,7 +325,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// by their children, hence making all of its ancestors opaque to this type
   /// of annotation.
   @protected
-  bool findAnnotations<S>(
+  bool findAnnotations<S extends Object>(
     AnnotationResult<S> result,
     Offset localPosition, {
     required bool onlyFirst,
@@ -353,7 +353,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///  * [findAllAnnotations], which is similar but returns all annotations found
   ///    at the given position.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  S? find<S>(Offset localPosition) {
+  S? find<S extends Object>(Offset localPosition) {
     final AnnotationResult<S> result = AnnotationResult<S>();
     findAnnotations<S>(result, localPosition, onlyFirst: true);
     return result.entries.isEmpty ? null : result.entries.first.annotation;
@@ -387,7 +387,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     'Use findAllAnnotations(...).annotations instead. '
     'This feature was deprecated after v1.10.14.'
   )
-  Iterable<S> findAll<S>(Offset localPosition) {
+  Iterable<S> findAll<S extends Object>(Offset localPosition) {
     final AnnotationResult<S> result = findAllAnnotations(localPosition);
     return result.entries.map((AnnotationEntry<S> entry) => entry.annotation);
   }
@@ -412,7 +412,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///  * [find], which is similar but returns the first annotation found at the
   ///    given position.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  AnnotationResult<S> findAllAnnotations<S>(Offset localPosition) {
+  AnnotationResult<S> findAllAnnotations<S extends Object>(Offset localPosition) {
     final AnnotationResult<S> result = AnnotationResult<S>();
     findAnnotations<S>(result, localPosition, onlyFirst: false);
     return result;
@@ -545,8 +545,7 @@ class PictureLayer extends Layer {
   }
 
   @override
-  @protected
-  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     return false;
   }
 }
@@ -621,8 +620,7 @@ class TextureLayer extends Layer {
   }
 
   @override
-  @protected
-  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     return false;
   }
 }
@@ -729,8 +727,7 @@ class PerformanceOverlayLayer extends Layer {
   }
 
   @override
-  @protected
-  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     return false;
   }
 }
@@ -913,8 +910,7 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  @protected
-  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     for (Layer? child = lastChild; child != null; child = child.previousSibling) {
       final bool isAbsorbed = child.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
       if (isAbsorbed)
@@ -1144,8 +1140,7 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
-  @protected
-  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     return super.findAnnotations<S>(result, localPosition - offset, onlyFirst: onlyFirst);
   }
 
@@ -1272,8 +1267,7 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  @protected
-  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     if (!clipRect!.contains(localPosition))
       return false;
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
@@ -1357,8 +1351,7 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  @protected
-  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     if (!clipRRect!.contains(localPosition))
       return false;
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
@@ -1442,8 +1435,7 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  @protected
-  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     if (!clipPath!.contains(localPosition))
       return false;
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
@@ -1634,8 +1626,7 @@ class TransformLayer extends OffsetLayer {
   }
 
   @override
-  @protected
-  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     final Offset? transformedOffset = _transformOffset(localPosition);
     if (transformedOffset == null)
       return false;
@@ -1976,8 +1967,7 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  @protected
-  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     if (!clipPath!.contains(localPosition))
       return false;
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
@@ -2106,8 +2096,7 @@ class LeaderLayer extends ContainerLayer {
   Offset? _lastOffset;
 
   @override
-  @protected
-  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     return super.findAnnotations<S>(result, localPosition - offset, onlyFirst: onlyFirst);
   }
 
@@ -2230,7 +2219,7 @@ class FollowerLayer extends ContainerLayer {
   Matrix4? _invertedTransform;
   bool _inverseDirty = true;
 
-  Offset? _transformOffset<S>(Offset localPosition) {
+  Offset? _transformOffset<S extends Object>(Offset localPosition) {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(getLastTransform()!);
       _inverseDirty = false;
@@ -2243,8 +2232,7 @@ class FollowerLayer extends ContainerLayer {
   }
 
   @override
-  @protected
-  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     if (link.leader == null) {
       if (showWhenUnlinked!) {
         return super.findAnnotations(result, localPosition - unlinkedOffset!, onlyFirst: onlyFirst);
@@ -2502,8 +2490,7 @@ class AnnotatedRegionLayer<T extends Object> extends ContainerLayer {
   /// For explanation of layer annotations, parameters and return value, refer
   /// to [Layer.findAnnotations].
   @override
-  @protected
-  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     bool isAbsorbed = super.findAnnotations(result, localPosition, onlyFirst: onlyFirst);
     if (result.entries.isNotEmpty && onlyFirst)
       return isAbsorbed;

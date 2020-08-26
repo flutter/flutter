@@ -139,7 +139,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ///    values.
   @protected
   double computeMaxScrollOffset(SliverConstraints constraints, double itemExtent) {
-    return childManager.childCount! * itemExtent;
+    return childManager.childCount * itemExtent;
   }
 
   int _calculateLeadingGarbage(int firstIndex) {
@@ -200,7 +200,10 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         double max;
         if (childManager.childCount != null) {
           max = computeMaxScrollOffset(constraints, itemExtent);
-        } else if (firstIndex <= 0) {
+          // TODO(ianh): null-aware flow analysis flags the next two
+          // branches as entirely dead code, and it's hard to argue with
+          // its logic.
+        } else if (firstIndex <= 0) { // ignore: dead_code
           max = 0.0;
         } else {
           // We will have to find it manually.
@@ -349,13 +352,13 @@ class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   /// The [childManager] argument must not be null.
   RenderSliverFixedExtentList({
     required RenderSliverBoxChildManager childManager,
-    double? itemExtent,
+    required double itemExtent,
   }) : _itemExtent = itemExtent,
        super(childManager: childManager);
 
   @override
-  double get itemExtent => _itemExtent!;
-  double? _itemExtent;
+  double get itemExtent => _itemExtent;
+  double _itemExtent;
   set itemExtent(double value) {
     assert(value != null);
     if (_itemExtent == value)

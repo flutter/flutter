@@ -15,7 +15,7 @@ import 'package:flutter/painting.dart';
 /// See also:
 ///
 ///  * [AlignmentTween], which interpolates between to [Alignment] objects.
-class FractionalOffsetTween extends Tween<FractionalOffset> {
+class FractionalOffsetTween extends Tween<FractionalOffset?> {
   /// Creates a fractional offset tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
@@ -25,7 +25,7 @@ class FractionalOffsetTween extends Tween<FractionalOffset> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  FractionalOffset lerp(double t) => FractionalOffset.lerp(begin, end, t)!;
+  FractionalOffset? lerp(double t) => FractionalOffset.lerp(begin, end, t);
 }
 
 /// An interpolation between two alignments.
@@ -39,7 +39,7 @@ class FractionalOffsetTween extends Tween<FractionalOffset> {
 ///
 ///  * [AlignmentGeometryTween], which interpolates between two
 ///    [AlignmentGeometry] objects.
-class AlignmentTween extends Tween<Alignment> {
+class AlignmentTween extends Tween<Alignment?> {
   /// Creates a fractional offset tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
@@ -49,7 +49,7 @@ class AlignmentTween extends Tween<Alignment> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Alignment lerp(double t) => Alignment.lerp(begin, end, t)!;
+  Alignment? lerp(double t) => Alignment.lerp(begin, end, t);
 }
 
 /// An interpolation between two [AlignmentGeometry].
@@ -62,7 +62,7 @@ class AlignmentTween extends Tween<Alignment> {
 /// See also:
 ///
 ///  * [AlignmentTween], which interpolates between two [Alignment] objects.
-class AlignmentGeometryTween extends Tween<AlignmentGeometry> {
+class AlignmentGeometryTween extends Tween<AlignmentGeometry?> {
   /// Creates a fractional offset geometry tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
@@ -74,5 +74,5 @@ class AlignmentGeometryTween extends Tween<AlignmentGeometry> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  AlignmentGeometry lerp(double t) => AlignmentGeometry.lerp(begin, end, t)!;
+  AlignmentGeometry? lerp(double t) => AlignmentGeometry.lerp(begin, end, t);
 }

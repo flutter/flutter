@@ -549,7 +549,7 @@ class RenderListWheelViewport
   /// **untransformed plane's viewport painting coordinates**' y position given
   /// the current scroll offset.
   double _getUntransformedPaintingCoordinateY(double layoutCoordinateY) {
-    return layoutCoordinateY - _topScrollMarginExtent - offset.pixels!;
+    return layoutCoordinateY - _topScrollMarginExtent - offset.pixels;
   }
 
   /// Given the _diameterRatio, return the largest absolute angle of the item
@@ -678,7 +678,7 @@ class RenderListWheelViewport
       visibleHeight *= 2;
 
     final double firstVisibleOffset =
-        offset.pixels! + _itemExtent / 2 - visibleHeight / 2;
+        offset.pixels + _itemExtent / 2 - visibleHeight / 2;
     final double lastVisibleOffset = firstVisibleOffset + visibleHeight;
 
     // The index range that we want to spawn children. We find indexes that
@@ -800,12 +800,10 @@ class RenderListWheelViewport
   /// Paints all children visible in the current viewport.
   void _paintVisibleChildren(PaintingContext context, Offset offset) {
     RenderBox? childToPaint = firstChild;
-    ListWheelParentData? childParentData = childToPaint?.parentData as ListWheelParentData?;
-
-    while (childParentData != null) {
-      _paintTransformedChild(childToPaint!, context, offset, childParentData.offset);
+    while (childToPaint != null) {
+      final ListWheelParentData childParentData = childToPaint.parentData! as ListWheelParentData;
+      _paintTransformedChild(childToPaint, context, offset, childParentData.offset);
       childToPaint = childAfter(childToPaint);
-      childParentData = childToPaint?.parentData as ListWheelParentData?;
     }
   }
 

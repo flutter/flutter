@@ -367,7 +367,7 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenWidthWithMaxIntrinsics(double height) {
     RenderBox? child = firstChild;
-    final List<PlaceholderDimensions?> placeholderDimensions = List<PlaceholderDimensions?>.filled(childCount, null, growable: false);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
     int childIndex = 0;
     // Takes textScaleFactor into account because the content of the placeholder
     // span will be scale up when it paints.
@@ -388,7 +388,7 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenWidthWithMinIntrinsics(double height) {
     RenderBox? child = firstChild;
-    final List<PlaceholderDimensions?> placeholderDimensions = List<PlaceholderDimensions?>.filled(childCount, null, growable: false);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
     int childIndex = 0;
     // Takes textScaleFactor into account because the content of the placeholder
     // span will be scale up when it paints.
@@ -409,7 +409,7 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenHeightWithMinIntrinsics(double width) {
     RenderBox? child = firstChild;
-    final List<PlaceholderDimensions?> placeholderDimensions = List<PlaceholderDimensions?>.filled(childCount, null, growable: false);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
     int childIndex = 0;
     // Takes textScaleFactor into account because the content of the placeholder
     // span will be scale up when it paints.
@@ -529,7 +529,7 @@ class RenderParagraph extends RenderBox
       return;
     }
     RenderBox? child = firstChild;
-    final List<PlaceholderDimensions?> placeholderDimensions = List<PlaceholderDimensions?>.filled(childCount, null, growable: false);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
     int childIndex = 0;
     BoxConstraints boxConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
     // The content will be enlarged by textScaleFactor during painting phase.
@@ -805,6 +805,8 @@ class RenderParagraph extends RenderBox
     assert(_semanticsInfo != null);
     final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
     String workingText = '';
+    // TODO(ianh): this algorithm is internally inconsistent. workingText
+    // never becomes null, but we check for it being so below.
     String? workingLabel;
     for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
       if (info.requiresOwnNode) {
@@ -832,11 +834,7 @@ class RenderParagraph extends RenderBox
         workingText,
         semanticsLabel: workingLabel,
       ));
-    }
-    // `workingText` has a non-nullable return type, but might be null when
-    // running with weak checking, so we need to null check it anyway (and
-    // ignore the warning that the null-handling logic is dead code).
-    else { // ignore: dead_code
+    } else { // ignore: dead_code
       assert(workingLabel != null);
     }
     return combined;

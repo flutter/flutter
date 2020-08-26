@@ -843,7 +843,7 @@ class RenderOpacity extends RenderProxyBox {
         return;
       }
       assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
     }
   }
 
@@ -863,9 +863,9 @@ class RenderOpacity extends RenderProxyBox {
 
 /// Implementation of [RenderAnimatedOpacity] and [RenderSliverAnimatedOpacity].
 ///
-/// Use this mixin in situations where the proxying behavior
-/// of [RenderProxyBox] or [RenderProxySliver] is desired for animating opacity,
-/// but would like to use the same methods for both types of render objects.
+/// This mixin allows the logic of animating opacity to be used with different
+/// layout models, e.g. the way that [RenderAnimatedOpacity] uses it for [RenderBox]
+/// and [RenderSliverAnimatedOpacity] uses it for [RenderSliver].
 mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChildMixin<T> {
   int? _alpha;
 
@@ -880,17 +880,20 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   ///
   /// To change the opacity of a child in a static manner, not animated,
   /// consider [RenderOpacity] instead.
-  Animation<double>? get opacity => _opacity;
+  ///
+  /// This getter cannot be read until the value has been set. It should be set
+  /// by the constructor of the class in which this mixin is included.
+  Animation<double> get opacity => _opacity!;
   Animation<double>? _opacity;
-  set opacity(Animation<double>? value) {
+  set opacity(Animation<double> value) {
     assert(value != null);
     if (_opacity == value)
       return;
     if (attached && _opacity != null)
-      _opacity!.removeListener(_updateOpacity);
+      opacity.removeListener(_updateOpacity);
     _opacity = value;
     if (attached)
-      _opacity!.addListener(_updateOpacity);
+      opacity.addListener(_updateOpacity);
     _updateOpacity();
   }
 
@@ -899,9 +902,12 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   /// If false, semantics are excluded when [opacity] is 0.0.
   ///
   /// Defaults to false.
-  bool? get alwaysIncludeSemantics => _alwaysIncludeSemantics;
+  ///
+  /// This getter cannot be read until the value has been set. It should be set
+  /// by the constructor of the class in which this mixin is included.
+  bool get alwaysIncludeSemantics => _alwaysIncludeSemantics!;
   bool? _alwaysIncludeSemantics;
-  set alwaysIncludeSemantics(bool? value) {
+  set alwaysIncludeSemantics(bool value) {
     if (value == _alwaysIncludeSemantics)
       return;
     _alwaysIncludeSemantics = value;
@@ -911,19 +917,19 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _opacity!.addListener(_updateOpacity);
+    opacity.addListener(_updateOpacity);
     _updateOpacity(); // in case it changed while we weren't listening
   }
 
   @override
   void detach() {
-    _opacity!.removeListener(_updateOpacity);
+    opacity.removeListener(_updateOpacity);
     super.detach();
   }
 
   void _updateOpacity() {
     final int? oldAlpha = _alpha;
-    _alpha = ui.Color.getAlphaFromOpacity(_opacity!.value);
+    _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
       final bool? didNeedCompositing = _currentlyNeedsCompositing;
       _currentlyNeedsCompositing = _alpha! > 0 && _alpha! < 255;
@@ -956,7 +962,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && (_alpha != 0 || alwaysIncludeSemantics!))
+    if (child != null && (_alpha != 0 || alwaysIncludeSemantics))
       visitor(child!);
   }
 
@@ -2949,7 +2955,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///  * [OffsetLayer.toImage] for a similar API at the layer level.
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage({ double pixelRatio = 1.0 }) {
-    assert(!debugNeedsPaint!);
+    assert(!debugNeedsPaint);
     final OffsetLayer offsetLayer = layer as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
@@ -3690,9 +3696,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// This setting is often used in combination with
   /// [SemanticsConfiguration.isSemanticBoundary] to create semantic boundaries
   /// that are either writable or not for children.
-  bool? get explicitChildNodes => _explicitChildNodes;
-  bool? _explicitChildNodes;
-  set explicitChildNodes(bool? value) {
+  bool get explicitChildNodes => _explicitChildNodes;
+  bool _explicitChildNodes;
+  set explicitChildNodes(bool value) {
     assert(value != null);
     if (_explicitChildNodes == value)
       return;
@@ -4455,7 +4461,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = container;
     if (explicitChildNodes != null)
-      config.explicitChildNodes = explicitChildNodes!;
+      config.explicitChildNodes = explicitChildNodes;
     assert((scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
       'explicitChildNodes must be set to true if scopes route is true');
     assert(!(toggled == true && checked == true),
@@ -4888,16 +4894,15 @@ class RenderFollowerLayer extends RenderProxyBox {
   }) : assert(link != null),
        assert(showWhenUnlinked != null),
        assert(offset != null),
-       super(child) {
-    this.link = link;
-    this.showWhenUnlinked = showWhenUnlinked;
-    this.offset = offset;
-  }
+       _link = link,
+       _showWhenUnlinked = showWhenUnlinked,
+       _offset = offset,
+       super(child);
 
   /// The link object that connects this [RenderFollowerLayer] with a
   /// [RenderLeaderLayer] earlier in the paint order.
-  LayerLink get link => _link!;
-  LayerLink? _link;
+  LayerLink get link => _link;
+  LayerLink _link;
   set link(LayerLink value) {
     assert(value != null);
     if (_link == value)
@@ -4915,8 +4920,8 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// When the render object is not linked, then: if [showWhenUnlinked] is true,
   /// the child is visible and not repositioned; if it is false, then child is
   /// hidden, and its hit testing is also disabled.
-  bool get showWhenUnlinked => _showWhenUnlinked!;
-  bool? _showWhenUnlinked;
+  bool get showWhenUnlinked => _showWhenUnlinked;
+  bool _showWhenUnlinked;
   set showWhenUnlinked(bool value) {
     assert(value != null);
     if (_showWhenUnlinked == value)
@@ -4927,8 +4932,8 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   /// The offset to apply to the origin of the linked [RenderLeaderLayer] to
   /// obtain this render object's origin.
-  Offset get offset => _offset!;
-  Offset? _offset;
+  Offset get offset => _offset;
+  Offset _offset;
   set offset(Offset value) {
     assert(value != null);
     if (_offset == value)

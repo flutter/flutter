@@ -960,6 +960,7 @@ class SliverPhysicalParentData extends ParentData {
   /// Used to implement [RenderObject.applyPaintTransform] by slivers that use
   /// [SliverPhysicalParentData].
   void applyPaintTransform(Matrix4 transform) {
+    // Hit test logic relies on this always providing an invertible matrix.
     transform.translate(paintOffset.dx, paintOffset.dy);
   }
 
@@ -1664,10 +1665,9 @@ abstract class RenderSliverHelpers implements RenderSliver {
     }
     assert(paintOffset != null);
     assert(transformedPosition != null);
-    return result.addWithPaintOffset(
-      offset: paintOffset,
-      position: null, // Manually adapting from sliver to box position above.
-      hitTest: (BoxHitTestResult result, Offset? _) {
+    return result.addWithOutOfBandPosition(
+      paintOffset: paintOffset,
+      hitTest: (BoxHitTestResult result) {
         return child.hitTest(result, position: transformedPosition);
       },
     );

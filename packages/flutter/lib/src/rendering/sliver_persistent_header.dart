@@ -330,7 +330,8 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
   @override
   double childMainAxisPosition(RenderBox child) {
     assert(child == this.child);
-    return _childPosition ?? 0.0;
+    assert(_childPosition != null);
+    return _childPosition!;
   }
 }
 

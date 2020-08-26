@@ -632,7 +632,19 @@ class BoxConstraints extends Constraints {
 ///
 ///  * [RenderBox.hitTest], which documents more details around hit testing
 ///    [RenderBox]es.
-typedef BoxHitTest = bool Function(BoxHitTestResult result, Offset? position);
+typedef BoxHitTest = bool Function(BoxHitTestResult result, Offset position);
+
+/// Method signature for hit testing a [RenderBox] with a manually
+/// managed position (one that is passed out-of-band).
+///
+/// Used by [RenderSliverSingleBoxAdapter.hitTestBoxChild] to hit test
+/// [RenderBox] children of a [RenderSliver].
+///
+/// See also:
+///
+///  * [RenderBox.hitTest], which documents more details around hit testing
+///    [RenderBox]es.
+typedef BoxHitTestWithOutOfBandPosition = bool Function(BoxHitTestResult result);
 
 /// The result of performing a hit test on [RenderBox]es.
 ///
@@ -724,9 +736,10 @@ class BoxHitTestResult extends HitTestResult {
   ///    used to transform the position without any pre-processing.
   bool addWithPaintTransform({
     required Matrix4? transform,
-    required Offset? position,
+    required Offset position,
     required BoxHitTest hitTest,
   }) {
+    assert(position != null);
     assert(hitTest != null);
     if (transform != null) {
       transform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform));
@@ -762,13 +775,12 @@ class BoxHitTestResult extends HitTestResult {
   ///    documents the intended usage of this API in more detail.
   bool addWithPaintOffset({
     required Offset? offset,
-    required Offset? position,
+    required Offset position,
     required BoxHitTest hitTest,
   }) {
+    assert(position != null);
     assert(hitTest != null);
-    final Offset? transformedPosition = position == null || offset == null
-        ? position
-        : position - offset;
+    final Offset transformedPosition = offset == null ? position : position - offset;
     if (offset != null) {
       pushOffset(-offset);
     }
@@ -794,24 +806,20 @@ class BoxHitTestResult extends HitTestResult {
   ///
   /// The function returns the return value of the `hitTest` callback.
   ///
-  /// The `position` argument may be null, which will be forwarded to the
-  /// `hitTest` callback as-is. Using null as the position can be useful if
-  /// the child speaks a different hit test protocol then the parent and the
-  /// position is not required to do the actual hit testing in that protocol.
-  ///
   /// See also:
   ///
   ///  * [addWithPaintTransform], which accomplishes the same thing, but takes a
   ///    _paint_ transform matrix.
   bool addWithRawTransform({
     required Matrix4? transform,
-    required Offset? position,
+    required Offset position,
     required BoxHitTest hitTest,
   }) {
+    assert(position != null);
     assert(hitTest != null);
-    final Offset? transformedPosition = position == null || transform == null
-        ? position
-        : MatrixUtils.transformPoint(transform, position);
+    assert(position != null);
+    final Offset transformedPosition = transform == null ?
+        position : MatrixUtils.transformPoint(transform, position);
     if (transform != null) {
       pushTransform(transform);
     }
@@ -819,6 +827,59 @@ class BoxHitTestResult extends HitTestResult {
     if (transform != null) {
       popTransform();
     }
+    return isHit;
+  }
+
+  /// Pass-through method for adding a hit test while manually managing
+  /// the position transformation logic.
+  ///
+  /// The actual hit testing of the child needs to be implemented in the
+  /// provided `hitTest` callback. The position needs to be handled by
+  /// the caller.
+  ///
+  /// The function returns the return value of the `hitTest` callback.
+  ///
+  /// A `paintOffset`, `paintTransform`, or `rawTransform` should be
+  /// passed to the method to update the hit test stack.
+  ///
+  ///  * `paintOffset` has the semantics of the `offset` passed to
+  ///    [addWithPaintOffset].
+  ///
+  ///  * `paintTransform` has the semantics of the `transform` passed to
+  ///    [addWithPaintTransform], except thit it must be invertible; it
+  ///    is the responsibility of the caller to ensure this.
+  ///
+  ///  * `rawTransform` has the semantics of the `transform` passed to
+  ///    [addWithRawTransform].
+  ///
+  /// Exactly one of these must be non-null.
+  ///
+  /// See also:
+  ///
+  ///  * [addWithPaintTransform], which takes a generic paint transform matrix and
+  ///    documents the intended usage of this API in more detail.
+  bool addWithOutOfBandPosition({
+    Offset? paintOffset,
+    Matrix4? paintTransform,
+    Matrix4? rawTransform,
+    required BoxHitTestWithOutOfBandPosition hitTest,
+  }) {
+    assert(hitTest != null);
+    assert((paintOffset == null && paintTransform == null && rawTransform != null) ||
+           (paintOffset == null && paintTransform != null && rawTransform == null) ||
+           (paintOffset != null && paintTransform == null && rawTransform == null));
+    if (paintOffset != null) {
+      pushOffset(-paintOffset);
+    } else if (rawTransform != null) {
+      pushTransform(rawTransform);
+    } else {
+      assert(paintTransform != null);
+      paintTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(paintTransform!));
+      assert(paintTransform != null);
+      pushTransform(paintTransform!);
+    }
+    final bool isHit = hitTest(this);
+    popTransform();
     return isHit;
   }
 }
@@ -1847,7 +1908,7 @@ abstract class RenderBox extends RenderObject {
           }
         }
       }
-      result = _DebugSize(value, this, debugCanParentUseSize!);
+      result = _DebugSize(value, this, debugCanParentUseSize);
       return true;
     }());
     return result;

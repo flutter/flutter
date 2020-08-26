@@ -743,10 +743,10 @@ class SemanticsHandle {
       : assert(owner != null),
         _owner = owner {
     if (listener != null)
-      _owner!.semanticsOwner!.addListener(listener!);
+      _owner.semanticsOwner!.addListener(listener!);
   }
 
-  PipelineOwner? _owner;
+  final PipelineOwner _owner;
 
   /// The callback that will be notified when the semantics tree updates.
   final VoidCallback? listener;
@@ -759,21 +759,9 @@ class SemanticsHandle {
   /// semantics tree.
   @mustCallSuper
   void dispose() {
-    assert(() {
-      if (_owner == null) {
-        throw FlutterError(
-          'SemanticsHandle has already been disposed.\n'
-          'Each SemanticsHandle should be disposed exactly once.'
-        );
-      }
-      return true;
-    }());
-    if (_owner != null) {
-      if (listener != null)
-        _owner!.semanticsOwner!.removeListener(listener!);
-      _owner!._didDisposeSemanticsHandle();
-      _owner = null;
-    }
+    if (listener != null)
+      _owner.semanticsOwner!.removeListener(listener!);
+    _owner._didDisposeSemanticsHandle();
   }
 }
 
@@ -866,7 +854,8 @@ class PipelineOwner {
   ///
   /// Specifically, whether [flushLayout] is currently running.
   ///
-  /// Only valid when asserts are enabled.
+  /// Only valid when asserts are enabled; in release builds, this
+  /// always returns false.
   bool get debugDoingLayout => _debugDoingLayout;
   bool _debugDoingLayout = false;
 
@@ -958,7 +947,8 @@ class PipelineOwner {
   ///
   /// Specifically, whether [flushPaint] is currently running.
   ///
-  /// Only valid when asserts are enabled.
+  /// Only valid when asserts are enabled. In release builds,
+  /// this always returns false.
   bool get debugDoingPaint => _debugDoingPaint;
   bool _debugDoingPaint = false;
 
@@ -1362,9 +1352,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// Determined by the `parentUsesSize` parameter to [layout].
   ///
-  /// Only valid when asserts are enabled. In release builds, always returns
-  /// null.
-  bool? get debugCanParentUseSize => _debugCanParentUseSize;
+  /// Only valid when asserts are enabled. In release builds, throws.
+  bool get debugCanParentUseSize => _debugCanParentUseSize!;
   bool? _debugCanParentUseSize;
 
   bool _debugMutationsLocked = false;
@@ -1438,7 +1427,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// This is only set in debug mode. In general, render objects should not need
   /// to condition their runtime behavior on whether they are dirty or not,
   /// since they should only be marked dirty immediately prior to being laid
-  /// out and painted.
+  /// out and painted. In release builds, this throws.
   ///
   /// It is intended to be used by tests and asserts.
   bool get debugNeedsLayout {
@@ -1572,7 +1561,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @protected
   void markParentNeedsLayout() {
     _needsLayout = true;
-    final RenderObject parent = this.parent as RenderObject;
+    assert(this.parent != null);
+    final RenderObject parent = this.parent! as RenderObject;
     if (!_doingThisLayoutWithCallback) {
       parent.markNeedsLayout();
     } else {
@@ -2093,7 +2083,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// This is only set in debug mode. In general, render objects should not need
   /// to condition their runtime behavior on whether they are dirty or not,
   /// since they should only be marked dirty immediately prior to being laid
-  /// out and painted.
+  /// out and painted. (In release builds, this throws.)
   ///
   /// It is intended to be used by tests and asserts.
   ///
@@ -2102,8 +2092,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// repainted in the next frame when this is the case, because the
   /// [markNeedsPaint] method is implicitly called by the framework after a
   /// render object is laid out, prior to the paint phase.
-  bool? get debugNeedsPaint {
-    bool? result;
+  bool get debugNeedsPaint {
+    late bool result;
     assert(() {
       result = _needsPaint;
       return true;
@@ -2870,7 +2860,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// This includes the same information for this RenderObject as given by
   /// [toStringDeep], but does not recurse to any children.
   @override
-  String? toStringShallow({
+  String toStringShallow({
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
@@ -2880,7 +2870,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _debugActiveLayout = null;
       return true;
     }());
-    final String? result = super.toStringShallow(joiner: joiner, minLevel: minLevel);
+    final String result = super.toStringShallow(joiner: joiner, minLevel: minLevel);
     assert(() {
       _debugActiveLayout = debugPreviousActiveLayout;
       return true;
@@ -3569,7 +3559,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }) : super(owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
 
   @override
-  Iterable<SemanticsNode> compileChildren({ Rect? parentSemanticsClipRect, Rect? parentPaintClipRect, double? elevationAdjustment }) sync* {
+  Iterable<SemanticsNode> compileChildren({ Rect? parentSemanticsClipRect, Rect? parentPaintClipRect, required double elevationAdjustment }) sync* {
     assert(_tagsForChildren == null || _tagsForChildren!.isEmpty);
     assert(parentSemanticsClipRect == null);
     assert(parentPaintClipRect == null);
@@ -3660,7 +3650,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   final List<_InterestingSemanticsFragment> _children = <_InterestingSemanticsFragment>[];
 
   @override
-  Iterable<SemanticsNode> compileChildren({ Rect? parentSemanticsClipRect, Rect? parentPaintClipRect, double? elevationAdjustment }) sync* {
+  Iterable<SemanticsNode> compileChildren({ Rect? parentSemanticsClipRect, Rect? parentPaintClipRect, required double elevationAdjustment }) sync* {
     if (!_isExplicit) {
       owner._semantics = null;
       for (final _InterestingSemanticsFragment fragment in _children) {
@@ -3672,7 +3662,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
           // The fragment is not explicit, its elevation has been absorbed by
           // the parent config (as thickness). We still need to make sure that
           // its children are placed at the elevation dictated by this config.
-          elevationAdjustment: elevationAdjustment! + _config.elevation,
+          elevationAdjustment: elevationAdjustment + _config.elevation,
         );
       }
       return;
@@ -3693,7 +3683,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     node.elevationAdjustment = elevationAdjustment;
     if (elevationAdjustment != 0.0) {
       _ensureConfigIsWritable();
-      _config.elevation += elevationAdjustment!;
+      _config.elevation += elevationAdjustment;
     }
 
     if (geometry != null) {
@@ -3782,7 +3772,7 @@ class _AbortingSemanticsFragment extends _InterestingSemanticsFragment {
   }
 
   @override
-  Iterable<SemanticsNode> compileChildren({ Rect? parentSemanticsClipRect, Rect? parentPaintClipRect, double? elevationAdjustment }) sync* {
+  Iterable<SemanticsNode> compileChildren({ Rect? parentSemanticsClipRect, Rect? parentPaintClipRect, required double elevationAdjustment }) sync* {
     yield owner._semantics!;
   }
 

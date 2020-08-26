@@ -86,6 +86,11 @@ bool debugRepaintTextRainbowEnabled = false;
 ///
 /// This check helps developers that want a consistent look and feel detect
 /// where this inconsistency would occur.
+///
+/// This check assumes that elevations on [PhysicalModelLayer] objects have
+/// been set to non-null values before the scene is built. If this assumption
+/// is violated, the check will throw exceptions. (The scene building would
+/// also fail in that case, however.)
 bool debugCheckElevationsEnabled = false;
 
 /// The current color to overlay when repainting a layer.

@@ -84,11 +84,6 @@ class TextureBox extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    // `_textureId` has a non-nullable return type, but might be null when
-    // running with weak checking, so we need to null check it anyway (and
-    // ignore the warning that the null-handling logic is dead code).
-    if (_textureId == null)
-      return; // ignore: dead_code
     context.addLayer(TextureLayer(
       rect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       textureId: _textureId,
