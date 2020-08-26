@@ -66,7 +66,7 @@ class SizeAnalyzer {
         level: 1,
       );
       // Print the expansion of lib directory to show more info for `appFilename`.
-      if (firstLevelPath.name == fileSystem.path.basename(outputDirectory.path)) {
+      if (firstLevelPath.name == _fileSystem.path.basename(outputDirectory.path)) {
         _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot, _kAotSizeMaxDepth, 0);
       }
     }
@@ -109,7 +109,7 @@ class SizeAnalyzer {
       level: 0,
       showColor: false,
     );
-    logger.printStatus('━' * tableWidth);
+    _logger.printStatus('━' * tableWidth);
 
     final _SymbolNode apkAnalysisRoot = _parseUnzipFile(zipFile);
 
@@ -121,7 +121,7 @@ class SizeAnalyzer {
     for (final _SymbolNode firstLevelPath in apkAnalysisRoot.children) {
       _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot, _kZipSizeMaxDepth, 0);
     }
-    logger.printStatus('▒' * tableWidth);
+    _logger.printStatus('▒' * tableWidth);
 
     Map<String, dynamic> apkAnalysisJson = apkAnalysisRoot.toJson();
 
@@ -154,8 +154,8 @@ class SizeAnalyzer {
       if (excludePath != null && file.uri.pathSegments.contains(excludePath)) {
         continue;
       }
-      final List<String> path = fileSystem.path.split(
-        fileSystem.path.relative(file.path, from: relativeTo));
+      final List<String> path = _fileSystem.path.split(
+        _fileSystem.path.relative(file.path, from: relativeTo));
       pathsToSize[path] = file.lengthSync();
     }
     return _buildSymbolTree(pathsToSize);
