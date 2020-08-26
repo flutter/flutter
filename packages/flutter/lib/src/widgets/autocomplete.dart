@@ -276,7 +276,9 @@ class AutocompleteController<T> {
 ///       buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
 ///         return TextFormField(
 ///           controller: textEditingController,
-///           onFieldSubmitted: onFieldSubmitted,
+///           onFieldSubmitted: (String value) {
+///             onFieldSubmitted();
+///           },
 ///         );
 ///       },
 ///       buildResults: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
@@ -362,7 +364,9 @@ class AutocompleteController<T> {
 ///           buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
 ///             return TextFormField(
 ///               controller: _autocompleteController.textEditingController,
-///               onFieldSubmitted: onFieldSubmitted,
+///               onFieldSubmitted: (String value) {
+///                 onFieldSubmitted();
+///               },
 ///             );
 ///           },
 ///           buildResults: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
