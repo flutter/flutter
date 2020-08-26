@@ -21,7 +21,7 @@ import 'overlay.dart';
 typedef AutocompleteFilter<T> = List<T> Function(String query);
 
 /// A type for indicating the selection of an autocomplete result.
-typedef OnSelectedAutocomplete<T> = void Function(T result);
+typedef AutocompleteOnSelected<T> = void Function(T result);
 
 /// A type for indicating the selection of a string to be matched to the current
 /// autocomplete results.
@@ -30,7 +30,7 @@ typedef AutocompleteOnSelectedString = void Function(String value);
 /// A builder for the selectable results given the current autocomplete query.
 typedef AutocompleteResultsBuilder<T> = Widget Function(
   BuildContext context,
-  OnSelectedAutocomplete<T> onSelected,
+  AutocompleteOnSelected<T> onSelected,
   List<T> results,
 );
 
@@ -284,7 +284,7 @@ class AutocompleteController<T> {
 ///           controller: _autocompleteController.textEditingController,
 ///         );
 ///       },
-///       buildResults: (BuildContext context, OnSelectedAutocomplete<String> onSelected, List<String> results) {
+///       buildResults: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
 ///         return ListView(
 ///           children: results.map((String result) => GestureDetector(
 ///             onTap: () {
@@ -366,7 +366,7 @@ class AutocompleteController<T> {
 ///                 controller: _autocompleteController.textEditingController,
 ///               );
 ///             },
-///             buildResults: (BuildContext context, OnSelectedAutocomplete<User> onSelected, List<User> results) {
+///             buildResults: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
 ///               return ListView(
 ///                 children: results.map((User result) => GestureDetector(
 ///                   onTap: () {
@@ -427,7 +427,7 @@ class AutocompleteCore<T> extends StatefulWidget {
   ///
   /// This method is used to update the query field to reflect the selection, so
   /// if implemented, it should set `textEditingController.value`.
-  final OnSelectedAutocomplete<T> onSelected;
+  final AutocompleteOnSelected<T> onSelected;
 
   /// All possible options that can be selected.
   ///
@@ -444,6 +444,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   final GlobalKey _fieldKey = GlobalKey();
   AutocompleteController<T> _autocompleteController;
   T _selection;
+  final LayerLink _resultsLayerLink = LayerLink();
 
   // The OverlayEntry containing the results.
   OverlayEntry _cachedFloatingResults;
@@ -454,17 +455,22 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
 
     assert(_fieldKey.currentContext != null);
     final RenderBox renderBox = _fieldKey.currentContext.findRenderObject() as RenderBox;
-    final Offset offset = renderBox.localToGlobal(Offset.zero);
     _cachedFloatingResults = OverlayEntry(
       builder: (BuildContext context) {
         return Positioned(
-          top: offset.dy + renderBox.size.height,
-          left: offset.dx,
           width: renderBox.size.width,
-          child: widget.buildResults(
-            context,
-            _select,
-            _autocompleteController.results.value,
+          child: CompositedTransformFollower(
+            link: _resultsLayerLink,
+            showWhenUnlinked: false,
+            offset: Offset(
+              0.0,
+              renderBox.size.height,
+            ),
+            child: widget.buildResults(
+              context,
+              _select,
+              _autocompleteController.results.value,
+            ),
           ),
         );
       },
@@ -602,10 +608,13 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   Widget build(BuildContext context) {
     return Container(
       key: _fieldKey,
-      child: widget.buildField(
-        context,
-        _autocompleteController.textEditingController,
-        _onSelectedString,
+      child: CompositedTransformTarget(
+        link: _resultsLayerLink,
+        child: widget.buildField(
+          context,
+          _autocompleteController.textEditingController,
+          _onSelectedString,
+        ),
       ),
     );
   }

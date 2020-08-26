@@ -195,7 +195,7 @@ void main() {
             options: kOptions,
           );
       List<String> lastResults;
-      OnSelectedAutocomplete<String> lastOnSelected;
+      AutocompleteOnSelected<String> lastOnSelected;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -204,7 +204,7 @@ void main() {
             buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
               return Container(key: fieldKey);
             },
-            buildResults: (BuildContext context, OnSelectedAutocomplete<String> onSelected, List<String> results) {
+            buildResults: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
               lastResults = results;
               lastOnSelected = onSelected;
               return Container(key: resultsKey);
@@ -264,7 +264,7 @@ void main() {
             options: kOptionsUsers,
           );
       List<User> lastResults;
-      OnSelectedAutocomplete<User> lastOnSelected;
+      AutocompleteOnSelected<User> lastOnSelected;
       User lastUserSelected;
 
       await tester.pumpWidget(
@@ -277,7 +277,7 @@ void main() {
             buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
               return Container(key: fieldKey);
             },
-            buildResults: (BuildContext context, OnSelectedAutocomplete<User> onSelected, List<User> results) {
+            buildResults: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
               lastResults = results;
               lastOnSelected = onSelected;
               return Container(key: resultsKey);
@@ -332,7 +332,7 @@ void main() {
             displayStringForOption: (User option) => option.name,
           );
       List<User> lastResults;
-      OnSelectedAutocomplete<User> lastOnSelected;
+      AutocompleteOnSelected<User> lastOnSelected;
       User lastUserSelected;
 
       await tester.pumpWidget(
@@ -345,7 +345,7 @@ void main() {
             buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
               return Container(key: fieldKey);
             },
-            buildResults: (BuildContext context, OnSelectedAutocomplete<User> onSelected, List<User> results) {
+            buildResults: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
               lastResults = results;
               lastOnSelected = onSelected;
               return Container(key: resultsKey);
@@ -410,7 +410,7 @@ void main() {
               lastOnSelectedString = onSelectedString;
               return Container(key: fieldKey);
             },
-            buildResults: (BuildContext context, OnSelectedAutocomplete<String> onSelected, List<String> results) {
+            buildResults: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
               lastResults = results;
               return Container(key: resultsKey);
             },
