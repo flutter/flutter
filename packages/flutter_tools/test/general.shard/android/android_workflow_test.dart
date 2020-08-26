@@ -22,7 +22,6 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart' show MockAndroidSdk, MockProcess, MockProcessManager, MockStdio;
-import '../../src/testbed.dart';
 
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
@@ -56,17 +55,6 @@ void main() {
         stdout.map<List<int>>((String s) => s.codeUnits));
     return (List<String> command) => MockProcess(stdout: stdoutStream);
   }
-
-  testWithoutContext('AndroidWorkflow handles a null AndroidSDK', () {
-    final AndroidWorkflow androidWorkflow = AndroidWorkflow(
-      featureFlags: TestFeatureFlags(),
-      androidSdk: null,
-    );
-
-    expect(androidWorkflow.canLaunchDevices, false);
-    expect(androidWorkflow.canListDevices, false);
-    expect(androidWorkflow.canListEmulators, false);
-  });
 
   testUsingContext('licensesAccepted returns LicensesAccepted.unknown if cannot find sdkmanager', () async {
     processManager.canRunSucceeds = false;
