@@ -187,22 +187,36 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
   [objects_ removeObjectsForKeys:doomed_uids];
 
   layoutChanged = layoutChanged || [doomed_uids count] > 0;
+  // We should send out only one notification per semantics update.
   if (routeChanged) {
     if (!ios_delegate_->IsFlutterViewControllerPresentingModalViewController(view_controller_)) {
+      SemanticsObject* nextToFocus = [lastAdded routeFocusObject];
+      if (!nextToFocus && root) {
+        nextToFocus = FindFirstFocusable(root);
+      }
       ios_delegate_->PostAccessibilityNotification(UIAccessibilityScreenChangedNotification,
-                                                   [lastAdded routeFocusObject]);
+                                                   nextToFocus);
     }
   } else if (layoutChanged) {
     // Tries to refocus the previous focused semantics object to avoid random jumps.
-    ios_delegate_->PostAccessibilityNotification(
-        UIAccessibilityLayoutChangedNotification,
-        [objects_.get() objectForKey:@(last_focused_semantics_object_id_)]);
-  }
-  if (scrollOccured) {
-    // Tries to refocus the previous focused semantics object to avoid random jumps.
-    ios_delegate_->PostAccessibilityNotification(
-        UIAccessibilityPageScrolledNotification,
-        [objects_.get() objectForKey:@(last_focused_semantics_object_id_)]);
+    SemanticsObject* nextToFocus =
+        [objects_.get() objectForKey:@(last_focused_semantics_object_id_)];
+    if (!nextToFocus && root) {
+      nextToFocus = FindFirstFocusable(root);
+    }
+    ios_delegate_->PostAccessibilityNotification(UIAccessibilityLayoutChangedNotification,
+                                                 nextToFocus);
+  } else if (scrollOccured) {
+    // TODO(chunhtai): figure out what string to use for notification. At this
+    // point, it is guarantee the previous focused object is still in the tree
+    // so that we don't need to worry about focus lost. (e.g. "Screen 0 of 3")
+    SemanticsObject* nextToFocus =
+        [objects_.get() objectForKey:@(last_focused_semantics_object_id_)];
+    if (!nextToFocus && root) {
+      nextToFocus = FindFirstFocusable(root);
+    }
+    ios_delegate_->PostAccessibilityNotification(UIAccessibilityPageScrolledNotification,
+                                                 nextToFocus);
   }
 }
 
@@ -284,6 +298,21 @@ void AccessibilityBridge::VisitObjectsRecursivelyAndRemove(SemanticsObject* obje
   [doomed_uids removeObject:@(object.uid)];
   for (SemanticsObject* child in [object children])
     VisitObjectsRecursivelyAndRemove(child, doomed_uids);
+}
+
+SemanticsObject* AccessibilityBridge::FindFirstFocusable(SemanticsObject* object) {
+  if (object.isAccessibilityElement) {
+    return object;
+  }
+
+  SemanticsObject* candidate = nil;
+  for (SemanticsObject* child in [object children]) {
+    if (candidate) {
+      break;
+    }
+    candidate = FindFirstFocusable(child);
+  }
+  return candidate;
 }
 
 void AccessibilityBridge::HandleEvent(NSDictionary<NSString*, id>* annotatedEvent) {
