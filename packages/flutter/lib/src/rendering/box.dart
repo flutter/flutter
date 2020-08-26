@@ -213,10 +213,10 @@ class BoxConstraints extends Constraints {
   /// as close as possible to the original constraints.
   BoxConstraints enforce(BoxConstraints constraints) {
     return BoxConstraints(
-      minWidth: minWidth.clamp(constraints.minWidth, constraints.maxWidth) as double,
-      maxWidth: maxWidth.clamp(constraints.minWidth, constraints.maxWidth) as double,
-      minHeight: minHeight.clamp(constraints.minHeight, constraints.maxHeight) as double,
-      maxHeight: maxHeight.clamp(constraints.minHeight, constraints.maxHeight) as double,
+      minWidth: minWidth.clamp(constraints.minWidth, constraints.maxWidth),
+      maxWidth: maxWidth.clamp(constraints.minWidth, constraints.maxWidth),
+      minHeight: minHeight.clamp(constraints.minHeight, constraints.maxHeight),
+      maxHeight: maxHeight.clamp(constraints.minHeight, constraints.maxHeight),
     );
   }
 
@@ -225,10 +225,10 @@ class BoxConstraints extends Constraints {
   /// box constraints.
   BoxConstraints tighten({ double? width, double? height }) {
     return BoxConstraints(
-      minWidth: width == null ? minWidth : width.clamp(minWidth, maxWidth) as double,
-      maxWidth: width == null ? maxWidth : width.clamp(minWidth, maxWidth) as double,
-      minHeight: height == null ? minHeight : height.clamp(minHeight, maxHeight) as double,
-      maxHeight: height == null ? maxHeight : height.clamp(minHeight, maxHeight) as double,
+      minWidth: width == null ? minWidth : width.clamp(minWidth, maxWidth),
+      maxWidth: width == null ? maxWidth : width.clamp(minWidth, maxWidth),
+      minHeight: height == null ? minHeight : height.clamp(minHeight, maxHeight),
+      maxHeight: height == null ? maxHeight : height.clamp(minHeight, maxHeight),
     );
   }
 
@@ -254,14 +254,14 @@ class BoxConstraints extends Constraints {
   /// possible to the given width.
   double constrainWidth([ double width = double.infinity ]) {
     assert(debugAssertIsValid());
-    return width.clamp(minWidth, maxWidth) as double;
+    return width.clamp(minWidth, maxWidth);
   }
 
   /// Returns the height that both satisfies the constraints and is as close as
   /// possible to the given height.
   double constrainHeight([ double height = double.infinity ]) {
     assert(debugAssertIsValid());
-    return height.clamp(minHeight, maxHeight) as double;
+    return height.clamp(minHeight, maxHeight);
   }
 
   Size _debugPropagateDebugSize(Size size, Size result) {
@@ -846,7 +846,7 @@ class BoxHitTestResult extends HitTestResult {
   ///    [addWithPaintOffset].
   ///
   ///  * `paintTransform` has the semantics of the `transform` passed to
-  ///    [addWithPaintTransform], except thit it must be invertible; it
+  ///    [addWithPaintTransform], except that it must be invertible; it
   ///    is the responsibility of the caller to ensure this.
   ///
   ///  * `rawTransform` has the semantics of the `transform` passed to
@@ -867,7 +867,8 @@ class BoxHitTestResult extends HitTestResult {
     assert(hitTest != null);
     assert((paintOffset == null && paintTransform == null && rawTransform != null) ||
            (paintOffset == null && paintTransform != null && rawTransform == null) ||
-           (paintOffset != null && paintTransform == null && rawTransform == null));
+           (paintOffset != null && paintTransform == null && rawTransform == null),
+           'Exactly one transform or offset argument must be provided.');
     if (paintOffset != null) {
       pushOffset(-paintOffset);
     } else if (rawTransform != null) {
@@ -875,7 +876,7 @@ class BoxHitTestResult extends HitTestResult {
     } else {
       assert(paintTransform != null);
       paintTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(paintTransform!));
-      assert(paintTransform != null);
+      assert(paintTransform != null, 'paintTransform must be invertible.');
       pushTransform(paintTransform!);
     }
     final bool isHit = hitTest(this);

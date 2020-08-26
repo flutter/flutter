@@ -633,7 +633,7 @@ void main() {
 
       bool isHit = result.addWithPaintTransform(
         transform: null,
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -641,12 +641,12 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, Offset.zero);
       positions.clear();
 
       isHit = result.addWithPaintTransform(
         transform: Matrix4.translationValues(20, 30, 0),
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -654,7 +654,7 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, const Offset(-20.0, -30.0));
       positions.clear();
 
       const Offset position = Offset(3, 4);
@@ -717,7 +717,7 @@ void main() {
 
       bool isHit = result.addWithPaintOffset(
         offset: null,
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -725,12 +725,12 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, Offset.zero);
       positions.clear();
 
       isHit = result.addWithPaintOffset(
         offset: const Offset(55, 32),
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -738,7 +738,7 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, const Offset(-55.0, -32.0));
       positions.clear();
 
       const Offset position = Offset(3, 4);
@@ -788,7 +788,7 @@ void main() {
 
       bool isHit = result.addWithRawTransform(
         transform: null,
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -796,12 +796,12 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, Offset.zero);
       positions.clear();
 
       isHit = result.addWithRawTransform(
         transform: Matrix4.translationValues(20, 30, 0),
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -809,7 +809,7 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, const Offset(20.0, 30.0));
       positions.clear();
 
       const Offset position = Offset(3, 4);
@@ -851,6 +851,82 @@ void main() {
       expect(isHit, isTrue);
       expect(positions.single, position + const Offset(20, 30));
       positions.clear();
+    });
+
+    test('addWithOutOfBandPosition', () {
+      final BoxHitTestResult result = BoxHitTestResult();
+      bool ran = false;
+
+      bool isHit = result.addWithOutOfBandPosition(
+        paintOffset: const Offset(20, 30),
+        hitTest: (BoxHitTestResult result) {
+          expect(result, isNotNull);
+          ran = true;
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(ran, isTrue);
+      ran = false;
+
+      isHit = result.addWithOutOfBandPosition(
+        paintTransform: Matrix4.translationValues(20, 30, 0),
+        hitTest: (BoxHitTestResult result) {
+          expect(result, isNotNull);
+          ran = true;
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(ran, isTrue);
+      ran = false;
+
+      isHit = result.addWithOutOfBandPosition(
+        rawTransform: Matrix4.translationValues(20, 30, 0),
+        hitTest: (BoxHitTestResult result) {
+          expect(result, isNotNull);
+          ran = true;
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(ran, isTrue);
+      ran = false;
+
+      isHit = result.addWithOutOfBandPosition(
+        rawTransform: MatrixUtils.forceToPoint(Offset.zero), // cannot be inverted
+        hitTest: (BoxHitTestResult result) {
+          expect(result, isNotNull);
+          ran = true;
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(ran, isTrue);
+      ran = false;
+
+      try {
+        isHit = result.addWithOutOfBandPosition(
+          paintTransform: MatrixUtils.forceToPoint(Offset.zero), // cannot be inverted
+          hitTest: (BoxHitTestResult result) {
+            fail('non-invertible transform should be caught');
+          },
+        );
+        fail('no exception thrown');
+      } on AssertionError catch (e) {
+        expect(e.message, 'paintTransform must be invertible.');
+      }
+
+      try {
+        isHit = result.addWithOutOfBandPosition(
+          hitTest: (BoxHitTestResult result) {
+            fail('addWithOutOfBandPosition should need some transformation of some sort');
+          },
+        );
+        fail('no exception thrown');
+      } on AssertionError catch (e) {
+        expect(e.message, 'Exactly one transform or offset argument must be provided.');
+      }
     });
 
     test('error message', () {

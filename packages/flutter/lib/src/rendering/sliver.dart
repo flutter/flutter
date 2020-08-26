@@ -1345,7 +1345,7 @@ abstract class RenderSliver extends RenderObject {
     final double a = constraints.scrollOffset;
     final double b = constraints.scrollOffset + constraints.remainingPaintExtent;
     // the clamp on the next line is to avoid floating point rounding errors
-    return (to.clamp(a, b) - from.clamp(a, b)).clamp(0.0, constraints.remainingPaintExtent) as double;
+    return (to.clamp(a, b) - from.clamp(a, b)).clamp(0.0, constraints.remainingPaintExtent);
   }
 
   /// Computes the portion of the region from `from` to `to` that is within
@@ -1361,7 +1361,7 @@ abstract class RenderSliver extends RenderObject {
     final double a = constraints.scrollOffset + constraints.cacheOrigin;
     final double b = constraints.scrollOffset + constraints.remainingCacheExtent;
     // the clamp on the next line is to avoid floating point rounding errors
-    return (to.clamp(a, b) - from.clamp(a, b)).clamp(0.0, constraints.remainingCacheExtent) as double;
+    return (to.clamp(a, b) - from.clamp(a, b)).clamp(0.0, constraints.remainingCacheExtent);
   }
 
   /// Returns the distance from the leading _visible_ edge of the sliver to the

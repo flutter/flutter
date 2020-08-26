@@ -80,7 +80,7 @@ abstract class RenderAbstractViewport extends RenderObject {
 
   /// The default value for the cache extent of the viewport.
   ///
-  /// This default assumes [CacheExtentStyle.pixels].
+  /// This default assumes [CacheExtentStyle.pixel].
   ///
   /// See also:
   ///
@@ -164,7 +164,6 @@ class RevealedOffset {
 abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMixin<RenderSliver>>
     extends RenderBox with ContainerRenderObjectMixin<RenderSliver, ParentDataClass>
     implements RenderAbstractViewport {
-  /// Initializes fields for subclasses.
   /// Initializes fields for subclasses.
   ///
   /// The [cacheExtent], if null, defaults to [RenderAbstractViewport.defaultCacheExtent].
@@ -1507,8 +1506,8 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     // to the zero scroll offset (the line between the forward slivers and the
     // reverse slivers).
     final double centerOffset = mainAxisExtent * anchor - correctedOffset;
-    final double reverseDirectionRemainingPaintExtent = centerOffset.clamp(0.0, mainAxisExtent) as double;
-    final double forwardDirectionRemainingPaintExtent = (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent) as double;
+    final double reverseDirectionRemainingPaintExtent = centerOffset.clamp(0.0, mainAxisExtent);
+    final double forwardDirectionRemainingPaintExtent = (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent);
 
     switch (cacheExtentStyle) {
       case CacheExtentStyle.pixel:
@@ -1521,8 +1520,8 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
 
     final double fullCacheExtent = mainAxisExtent + 2 * _calculatedCacheExtent!;
     final double centerCacheOffset = centerOffset + _calculatedCacheExtent!;
-    final double reverseDirectionRemainingCacheExtent = centerCacheOffset.clamp(0.0, fullCacheExtent) as double;
-    final double forwardDirectionRemainingCacheExtent = (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent) as double;
+    final double reverseDirectionRemainingCacheExtent = centerCacheOffset.clamp(0.0, fullCacheExtent);
+    final double forwardDirectionRemainingCacheExtent = (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent);
 
     final RenderSliver? leadingNegativeChild = childBefore(center!);
 
@@ -1539,7 +1538,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         growthDirection: GrowthDirection.reverse,
         advance: childBefore,
         remainingCacheExtent: reverseDirectionRemainingCacheExtent,
-        cacheOrigin: (mainAxisExtent - centerOffset).clamp(-_calculatedCacheExtent!, 0.0) as double,
+        cacheOrigin: (mainAxisExtent - centerOffset).clamp(-_calculatedCacheExtent!, 0.0),
       );
       if (result != 0.0)
         return -result;
@@ -1557,7 +1556,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       growthDirection: GrowthDirection.forward,
       advance: childAfter,
       remainingCacheExtent: forwardDirectionRemainingCacheExtent,
-      cacheOrigin: centerOffset.clamp(-_calculatedCacheExtent!, 0.0) as double,
+      cacheOrigin: centerOffset.clamp(-_calculatedCacheExtent!, 0.0),
     );
   }
 

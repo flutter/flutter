@@ -360,6 +360,7 @@ class RenderTable extends RenderBox {
   ///    null, then `children` must be null.
   ///  * `children` must either be null or contain lists of all the same length.
   ///    if `children` is not null, then `rows` must be null.
+  ///  * [columnWidths] may be null, in which case it defaults to an empty map.
   ///  * [defaultColumnWidth] must not be null.
   ///  * [configuration] must not be null (but has a default value).
   RenderTable({
@@ -464,13 +465,18 @@ class RenderTable extends RenderBox {
   /// sizing algorithms are used here. In particular, [IntrinsicColumnWidth] is
   /// quite expensive because it needs to measure each cell in the column to
   /// determine the intrinsic size of the column.
-  Map<int, TableColumnWidth> get columnWidths => Map<int, TableColumnWidth>.unmodifiable(_columnWidths);
+  ///
+  /// This property can never return null. If it is set to null, and the existing
+  /// map is not empty, then the value is replaced by an empty map. (If it is set
+  /// to null while the current value is an empty map, the value is not changed.)
+  Map<int, TableColumnWidth>? get columnWidths => Map<int, TableColumnWidth>.unmodifiable(_columnWidths);
   Map<int, TableColumnWidth> _columnWidths;
-  set columnWidths(Map<int, TableColumnWidth> value) {
-    assert(value != null);
+  set columnWidths(Map<int, TableColumnWidth>? value) {
     if (_columnWidths == value)
       return;
-    _columnWidths = value;
+    if (_columnWidths.isEmpty && value == null)
+      return;
+    _columnWidths = value ?? HashMap<int, TableColumnWidth>();
     markNeedsLayout();
   }
 

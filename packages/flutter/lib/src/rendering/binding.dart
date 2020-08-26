@@ -260,6 +260,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         event is PointerHoverEvent ||
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
+      assert(event.position != null);
       _mouseTracker!.updateWithEvent(event,
           () => hitTestResult ?? renderView.hitTestMouseTrackers(event.position));
     }
