@@ -441,14 +441,12 @@ tasks:
       Measures image loading performance on release (aot) build.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   image_list_jit_reported_duration:
     description: >
       Measures image loading performance on debug (jit) build.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   build_benchmark:
     description: >

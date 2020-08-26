@@ -38,7 +38,7 @@ void main() {
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
-    expect(exception.diagnostics.first.toString(), startsWith('A RenderConstraintsTransformBox overflowed by '));
+    expect(exception.diagnostics.first.toString(), startsWith('A RenderUnconstrainedBox overflowed by '));
     expect(find.byType(UnconstrainedBox), paints..rect());
 
     await tester.pumpWidget(
