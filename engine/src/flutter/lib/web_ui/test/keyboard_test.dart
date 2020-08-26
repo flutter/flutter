@@ -473,18 +473,37 @@ void testMain() {
         }
         messages.clear();
 
-        // When repeat events stop for a long-enough period of time, a keyup
-        // should be synthesized.
+        Keyboard.instance.dispose();
+      },
+    );
+
+    testFakeAsync(
+      'do not synthesize keyup when keys are not affected by meta modifiers',
+      (FakeAsync async) {
+        Keyboard.initialize();
+
+        List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
+        ui.window.onPlatformMessage = (String channel, ByteData data,
+            ui.PlatformMessageResponseCallback callback) {
+          messages.add(const JSONMessageCodec().decodeMessage(data));
+        };
+
+        dispatchKeyboardEvent(
+          'keydown',
+          key: 'i',
+          code: 'KeyI',
+        );
+        dispatchKeyboardEvent(
+          'keydown',
+          key: 'o',
+          code: 'KeyO',
+        );
+        messages.clear();
+
+        // Wait for a long-enough period of time and no events
+        // should be synthesized
         async.elapse(Duration(seconds: 3));
-        expect(messages, <Map<String, dynamic>>[
-          <String, dynamic>{
-            'type': 'keyup',
-            'keymap': 'web',
-            'key': 'i',
-            'code': 'KeyI',
-            'metaState': 0x0,
-          }
-        ]);
+        expect(messages, hasLength(0));
 
         Keyboard.instance.dispose();
       },
