@@ -236,9 +236,11 @@ class AnalyticsConfigEvent extends UsageEvent {
 
 /// An event that reports when the code size measurement is run via `--analyze-size`.
 class CodeSizeEvent extends UsageEvent {
-  CodeSizeEvent(String platform) : super(
+  CodeSizeEvent(String platform, {
+    @required Usage flutterUsage,
+  }) : super(
     'code-size-analysis',
     platform,
-    flutterUsage: globals.flutterUsage,
+    flutterUsage: flutterUsage ?? globals.flutterUsage,
   );
 }

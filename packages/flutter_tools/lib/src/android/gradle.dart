@@ -522,6 +522,7 @@ Future<void> _performCodeSizeAnalysis(
   final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
     fileSystem: globals.fs,
     logger: globals.logger,
+    flutterUsage: globals.flutterUsage,
   );
   final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
   final BuildInfo buildInfo = androidBuildInfo.buildInfo;
@@ -542,7 +543,6 @@ Future<void> _performCodeSizeAnalysis(
   globals.printStatus(
     'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
   );
-  CodeSizeEvent(kind).send();
 }
 
 /// Builds AAR and POM files.

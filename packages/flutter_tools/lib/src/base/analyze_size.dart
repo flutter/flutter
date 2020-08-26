@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:archive/archive.dart';
 import 'package:archive/archive_io.dart';
+import 'package:meta/meta.dart';
+import 'package:vm_snapshot_analysis/treemap.dart';
 
-import '../base/file_system.dart';
 import '../convert.dart';
+import '../reporting/reporting.dart';
+import 'file_system.dart';
 import 'logger.dart';
 import 'terminal.dart';
 
@@ -17,12 +18,15 @@ class SizeAnalyzer {
   SizeAnalyzer({
     @required this.fileSystem,
     @required this.logger,
+    // TODO(jonahwilliams): migrate to required once this has rolled into google3.
+    Usage flutterUsage,
     this.appFilenamePattern = 'libapp.so',
-  });
+  }) : _flutterUsage = flutterUsage;
 
   final FileSystem fileSystem;
   final Logger logger;
   final Pattern appFilenamePattern;
+  final Usage _flutterUsage;
   String _appFilename;
 
   static const String aotSnapshotFileName = 'aot-snapshot.json';
@@ -80,6 +84,7 @@ class SizeAnalyzer {
     );
 
     assert(_appFilename != null);
+    CodeSizeEvent(type, flutterUsage: _flutterUsage).send();
     return apkAnalysisJson;
   }
 
@@ -128,7 +133,7 @@ class SizeAnalyzer {
       aotSnapshotJson: processedAotSnapshotJson,
       precompilerTrace: json.decode(precompilerTrace.readAsStringSync()) as Map<String, Object>,
     );
-
+    CodeSizeEvent(kind, flutterUsage: _flutterUsage).send();
     return apkAnalysisJson;
   }
 

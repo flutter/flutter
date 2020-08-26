@@ -14,7 +14,6 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'cocoapod_utils.dart';
 
 /// When run in -quiet mode, Xcode only prints from the underlying tasks to stdout.
@@ -141,7 +140,6 @@ Future<void> buildMacOS({
     globals.printStatus(
       'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
     );
-    CodeSizeEvent('macos').send();
   }
   globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 }
