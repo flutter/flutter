@@ -23,10 +23,6 @@ typedef AutocompleteFilter<T> = List<T> Function(String query);
 /// A type for indicating the selection of an autocomplete result.
 typedef AutocompleteOnSelected<T> = void Function(T result);
 
-/// A type for indicating the selection of a string to be matched to the current
-/// autocomplete results.
-typedef AutocompleteOnSelectedString = void Function(String value);
-
 /// A builder for the selectable results given the current autocomplete query.
 typedef AutocompleteResultsBuilder<T> = Widget Function(
   BuildContext context,
@@ -38,7 +34,7 @@ typedef AutocompleteResultsBuilder<T> = Widget Function(
 typedef AutocompleteFieldBuilder = Widget Function(
   BuildContext context,
   TextEditingController textEditingController,
-  AutocompleteOnSelectedString onSelectedString,
+  VoidCallback onFieldSubmitted,
 );
 
 // A type for converting between an option and a string for display or
@@ -277,10 +273,10 @@ class AutocompleteController<T> {
 ///   Widget build(BuildContext context) {
 ///     return AutocompleteCore<String>(
 ///       options: <String>['aardvark', 'bobcat', 'chameleon'],
-///       buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
+///       buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
 ///         return TextFormField(
 ///           controller: textEditingController,
-///           onFieldSubmitted: onSelectedString,
+///           onFieldSubmitted: onFieldSubmitted,
 ///         );
 ///       },
 ///       buildResults: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
@@ -363,10 +359,10 @@ class AutocompleteController<T> {
 ///       body: Center(
 ///         child: AutocompleteCore<User>(
 ///           autocompleteController: _autocompleteController,
-///           buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
+///           buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
 ///             return TextFormField(
 ///               controller: _autocompleteController.textEditingController,
-///               onFieldSubmitted: onSelectedString,
+///               onFieldSubmitted: onFieldSubmitted,
 ///             );
 ///           },
 ///           buildResults: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
@@ -486,9 +482,8 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     _updateOverlay();
   }
 
-  // Called from buildField when the user attempts to select a string, such as
-  // when submitting the field.
-  void _onSelectedString(String value) {
+  // Called from buildField when the user submits the field.
+  void _onFieldSubmitted() {
     final List<T> results = _autocompleteController.results.value;
     if (results.isEmpty) {
       return;
@@ -608,7 +603,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
         child: widget.buildField(
           context,
           _autocompleteController.textEditingController,
-          _onSelectedString,
+          _onFieldSubmitted,
         ),
       ),
     );

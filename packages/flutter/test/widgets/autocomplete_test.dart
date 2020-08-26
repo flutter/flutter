@@ -201,7 +201,7 @@ void main() {
         MaterialApp(
           home: AutocompleteCore<String>(
             autocompleteController: autocompleteController,
-            buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
+            buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
               return Container(key: fieldKey);
             },
             buildResults: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
@@ -274,7 +274,7 @@ void main() {
             onSelected: (User selected) {
               lastUserSelected = selected;
             },
-            buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
+            buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
               return Container(key: fieldKey);
             },
             buildResults: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
@@ -342,7 +342,7 @@ void main() {
             onSelected: (User selected) {
               lastUserSelected = selected;
             },
-            buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
+            buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
               return Container(key: fieldKey);
             },
             buildResults: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
@@ -392,7 +392,7 @@ void main() {
       expect(lastResults[0], kOptionsUsers[1]);
     });
 
-    testWidgets('onSelectedString selects the first result', (WidgetTester tester) async {
+    testWidgets('onFieldSubmitted selects the first result', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey resultsKey = GlobalKey();
       final AutocompleteController<String> autocompleteController =
@@ -400,14 +400,14 @@ void main() {
             options: kOptions,
           );
       List<String> lastResults;
-      AutocompleteOnSelectedString lastOnSelectedString;
+      VoidCallback lastOnFieldSubmitted;
 
       await tester.pumpWidget(
         MaterialApp(
           home: AutocompleteCore<String>(
             autocompleteController: autocompleteController,
-            buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
-              lastOnSelectedString = onSelectedString;
+            buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+              lastOnFieldSubmitted = onFieldSubmitted;
               return Container(key: fieldKey);
             },
             buildResults: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
@@ -419,9 +419,8 @@ void main() {
       );
 
       // Enter a query. The results are filtered by the query.
-      const String textInField = 'ele';
       autocompleteController.textEditingController.value = const TextEditingValue(
-        text: textInField,
+        text: 'ele',
         selection: TextSelection(baseOffset: 3, extentOffset: 3),
       );
       await tester.pump();
@@ -433,7 +432,7 @@ void main() {
 
       // Select the current string, as if the field was submitted. The results
       // hide and the field updates to show the selection.
-      lastOnSelectedString(textInField);
+      lastOnFieldSubmitted();
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(resultsKey), findsNothing);
@@ -460,7 +459,7 @@ void main() {
                   alignment: alignment,
                   child: AutocompleteCore<String>(
                     autocompleteController: autocompleteController,
-                    buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
+                    buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
                       return TextFormField(
                         key: fieldKey,
                       );
