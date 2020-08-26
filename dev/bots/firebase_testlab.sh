@@ -18,7 +18,7 @@
 devices=(
   # Pixel 3
   "model=blueline,version=28"
-  
+
   # Pixel 4
   "model=flame,version=29"
 
