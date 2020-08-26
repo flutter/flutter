@@ -397,6 +397,42 @@ void testMain() async {
     WebExperiments.instance.useCanvasText = null;
   });
 
+  test('getWordBoundary', () {
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle())
+      ..addText('Lorem ipsum dolor');
+    final Paragraph paragraph = builder.build();
+
+    const TextRange loremRange = TextRange(start: 0, end: 5);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 0)), loremRange);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 1)), loremRange);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 2)), loremRange);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 3)), loremRange);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 4)), loremRange);
+
+    const TextRange firstSpace = TextRange(start: 5, end: 6);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 5)), firstSpace);
+
+    const TextRange ipsumRange = TextRange(start: 6, end: 11);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 6)), ipsumRange);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 7)), ipsumRange);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 8)), ipsumRange);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 9)), ipsumRange);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 10)), ipsumRange);
+
+    const TextRange secondSpace = TextRange(start: 11, end: 12);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 11)), secondSpace);
+
+    const TextRange dolorRange = TextRange(start: 12, end: 17);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 12)), dolorRange);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 13)), dolorRange);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 14)), dolorRange);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 15)), dolorRange);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 16)), dolorRange);
+
+    const TextRange endRange = TextRange(start: 17, end: 17);
+    expect(paragraph.getWordBoundary(TextPosition(offset: 17)), endRange);
+  });
+
   testEachMeasurement('getBoxesForRange returns a box', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
       fontFamily: 'Ahem',

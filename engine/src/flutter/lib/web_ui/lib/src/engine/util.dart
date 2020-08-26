@@ -552,3 +552,14 @@ void _validateColorStops(List<ui.Color> colors, List<double>? colorStops) {
           '"colors" and "colorStops" arguments must have equal length.');
   }
 }
+
+int clampInt(int value, int min, int max) {
+  assert(min <= max);
+  if (value < min) {
+    return min;
+  } else if (value > max) {
+    return max;
+  } else {
+    return value;
+  }
+}
