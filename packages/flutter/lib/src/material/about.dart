@@ -637,12 +637,15 @@ class _PackagesViewState extends State<_PackagesView> {
                     },
                   );
                 default:
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      widget.about,
-                      const Center(child: CircularProgressIndicator()),
-                    ],
+                  return Material(
+                      color: Theme.of(context).cardColor,
+                      child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        widget.about,
+                        const Center(child: CircularProgressIndicator()),
+                      ],
+                    ),
                   );
               }
             },
