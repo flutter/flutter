@@ -624,7 +624,6 @@ FILE: ../../../flutter/shell/common/serialization_callbacks.h
 FILE: ../../../flutter/shell/common/shell.cc
 FILE: ../../../flutter/shell/common/shell.h
 FILE: ../../../flutter/shell/common/shell_benchmarks.cc
-FILE: ../../../flutter/shell/common/shell_fuchsia_unittests.cc
 FILE: ../../../flutter/shell/common/shell_io_manager.cc
 FILE: ../../../flutter/shell/common/shell_io_manager.h
 FILE: ../../../flutter/shell/common/shell_test.cc
