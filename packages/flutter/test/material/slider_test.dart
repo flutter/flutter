@@ -2366,7 +2366,8 @@ void main() {
         theme: ThemeData(
             sliderTheme: const SliderThemeData(
               trackShape: RectangularSliderTrackShape(),
-            )),
+            )
+        ),
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
