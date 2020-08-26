@@ -166,22 +166,24 @@ class TestCommand extends FlutterCommand {
     }
     final FlutterProject flutterProject = FlutterProject.current();
     if (shouldRunPub) {
-      final Environment environment = Environment(
-        artifacts: globals.artifacts,
-        logger: globals.logger,
-        cacheDir: globals.cache.getRoot(),
-        engineVersion: globals.flutterVersion.engineRevision,
-        fileSystem: globals.fs,
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        outputDir: globals.fs.directory(getBuildDirectory()),
-        processManager: globals.processManager,
-        projectDir: flutterProject.directory,
-      );
+      if (flutterProject.manifest.generateSyntheticPackage) {
+        final Environment environment = Environment(
+          artifacts: globals.artifacts,
+          logger: globals.logger,
+          cacheDir: globals.cache.getRoot(),
+          engineVersion: globals.flutterVersion.engineRevision,
+          fileSystem: globals.fs,
+          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+          outputDir: globals.fs.directory(getBuildDirectory()),
+          processManager: globals.processManager,
+          projectDir: flutterProject.directory,
+        );
 
-      await generateLocalizationsSyntheticPackage(
-        environment: environment,
-        buildSystem: globals.buildSystem,
-      );
+        await generateLocalizationsSyntheticPackage(
+          environment: environment,
+          buildSystem: globals.buildSystem,
+        );
+      }
 
       await pub.get(
         context: PubContext.getVerifyContext(name),
