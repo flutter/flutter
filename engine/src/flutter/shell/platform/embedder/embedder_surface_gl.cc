@@ -45,8 +45,8 @@ bool EmbedderSurfaceGL::GLContextClearCurrent() {
 }
 
 // |GPUSurfaceGLDelegate|
-bool EmbedderSurfaceGL::GLContextPresent() {
-  return gl_dispatch_table_.gl_present_callback();
+bool EmbedderSurfaceGL::GLContextPresent(uint32_t fbo_id) {
+  return gl_dispatch_table_.gl_present_callback(fbo_id);
 }
 
 // |GPUSurfaceGLDelegate|

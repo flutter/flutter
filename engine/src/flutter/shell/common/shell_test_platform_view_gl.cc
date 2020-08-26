@@ -55,13 +55,13 @@ bool ShellTestPlatformViewGL::GLContextClearCurrent() {
 }
 
 // |GPUSurfaceGLDelegate|
-bool ShellTestPlatformViewGL::GLContextPresent() {
+bool ShellTestPlatformViewGL::GLContextPresent(uint32_t fbo_id) {
   return gl_surface_.Present();
 }
 
 // |GPUSurfaceGLDelegate|
 intptr_t ShellTestPlatformViewGL::GLContextFBO(GLFrameInfo frame_info) const {
-  return gl_surface_.GetFramebuffer();
+  return gl_surface_.GetFramebuffer(frame_info.width, frame_info.height);
 }
 
 // |GPUSurfaceGLDelegate|

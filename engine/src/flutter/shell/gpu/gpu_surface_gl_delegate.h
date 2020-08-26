@@ -37,7 +37,7 @@ class GPUSurfaceGLDelegate : public GPUSurfaceDelegate {
 
   // Called to present the main GL surface. This is only called for the main GL
   // context and not any of the contexts dedicated for IO.
-  virtual bool GLContextPresent() = 0;
+  virtual bool GLContextPresent(uint32_t fbo_id) = 0;
 
   // The ID of the main window bound framebuffer. Typically FBO0.
   virtual intptr_t GLContextFBO(GLFrameInfo frame_info) const = 0;

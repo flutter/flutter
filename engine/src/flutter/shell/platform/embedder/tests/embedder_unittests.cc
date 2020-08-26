@@ -4406,5 +4406,58 @@ TEST_F(EmbedderTest, MustNotRunWithBothFBOCallbacksSet) {
   ASSERT_FALSE(engine.is_valid());
 }
 
+TEST_F(EmbedderTest, MustNotRunWithBothPresentCallbacksSet) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(600, 1024));
+  builder.SetOpenGLPresentCallBack();
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_FALSE(engine.is_valid());
+}
+
+TEST_F(EmbedderTest, PresentInfoContainsValidFBOId) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(600, 1024));
+  builder.SetDartEntrypoint("push_frames_over_and_over");
+
+  const auto root_surface_transformation =
+      SkMatrix().preTranslate(0, 1024).preRotate(-90, 0, 0);
+
+  context.SetRootSurfaceTransformation(root_surface_transformation);
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 1024;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  fml::CountDownLatch frame_latch(10);
+
+  context.AddNativeCallback("SignalNativeTest",
+                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                              /* Nothing to do. */
+                            }));
+
+  const uint32_t window_fbo_id = context.GetWindowFBOId();
+  context.SetGLPresentCallback(
+      [window_fbo_id = window_fbo_id, &frame_latch](uint32_t fbo_id) {
+        ASSERT_EQ(fbo_id, window_fbo_id);
+
+        frame_latch.CountDown();
+      });
+
+  frame_latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter
