@@ -95,6 +95,23 @@ class EmbedderTestContext {
   ///
   void SetGLGetFBOCallback(GLGetFBOCallback callback);
 
+  uint32_t GetWindowFBOId() const;
+
+  using GLPresentCallback = std::function<void(uint32_t fbo_id)>;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Sets a callback that will be invoked (on the raster task
+  ///             runner) when the engine presents an fbo that was given by the
+  ///             embedder.
+  ///
+  /// @attention  The callback will be invoked on the raster task runner. The
+  ///             callback can be set on the tests host thread.
+  ///
+  /// @param[in]  callback  The callback to set. The previous callback will be
+  ///                       un-registered.
+  ///
+  void SetGLPresentCallback(GLPresentCallback callback);
+
  private:
   // This allows the builder to access the hooks.
   friend class EmbedderConfigBuilder;
@@ -119,8 +136,9 @@ class EmbedderTestContext {
   SkMatrix root_surface_transformation_;
   size_t gl_surface_present_count_ = 0;
   size_t software_surface_present_count_ = 0;
-  std::mutex gl_get_fbo_callback_mutex_;
+  std::mutex gl_callback_mutex_;
   GLGetFBOCallback gl_get_fbo_callback_;
+  GLPresentCallback gl_present_callback_;
 
   static VoidCallback GetIsolateCreateCallbackHook();
 
@@ -149,7 +167,7 @@ class EmbedderTestContext {
 
   bool GLClearCurrent();
 
-  bool GLPresent();
+  bool GLPresent(uint32_t fbo_id);
 
   uint32_t GLGetFramebuffer(FlutterFrameInfo frame_info);
 

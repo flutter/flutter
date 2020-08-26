@@ -32,8 +32,10 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
   opengl_renderer_config_.clear_current = [](void* context) -> bool {
     return reinterpret_cast<EmbedderTestContext*>(context)->GLClearCurrent();
   };
-  opengl_renderer_config_.present = [](void* context) -> bool {
-    return reinterpret_cast<EmbedderTestContext*>(context)->GLPresent();
+  opengl_renderer_config_.present_with_info =
+      [](void* context, const FlutterPresentInfo* present_info) -> bool {
+    return reinterpret_cast<EmbedderTestContext*>(context)->GLPresent(
+        present_info->fbo_id);
   };
   opengl_renderer_config_.fbo_with_frame_info_callback =
       [](void* context, const FlutterFrameInfo* frame_info) -> uint32_t {
@@ -124,6 +126,15 @@ void EmbedderConfigBuilder::SetOpenGLFBOCallBack() {
     frame_info.size.height = 0;
     return reinterpret_cast<EmbedderTestContext*>(context)->GLGetFramebuffer(
         frame_info);
+  };
+}
+
+void EmbedderConfigBuilder::SetOpenGLPresentCallBack() {
+  // SetOpenGLRendererConfig must be called before this.
+  FML_CHECK(renderer_config_.type == FlutterRendererType::kOpenGL);
+  renderer_config_.open_gl.present = [](void* context) -> bool {
+    // passing a placeholder fbo_id.
+    return reinterpret_cast<EmbedderTestContext*>(context)->GLPresent(0);
   };
 }
 

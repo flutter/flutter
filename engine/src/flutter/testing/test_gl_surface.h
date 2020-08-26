@@ -27,7 +27,7 @@ class TestGLSurface {
 
   bool Present();
 
-  uint32_t GetFramebuffer() const;
+  uint32_t GetFramebuffer(uint32_t width, uint32_t height) const;
 
   bool MakeResourceCurrent();
 
@@ -40,6 +40,8 @@ class TestGLSurface {
   sk_sp<GrDirectContext> CreateGrContext();
 
   sk_sp<SkImage> GetRasterSurfaceSnapshot();
+
+  uint32_t GetWindowFBOId() const;
 
  private:
   // Importing the EGL.h pulls in platform headers which are problematic

@@ -18,7 +18,7 @@ class EmbedderSurfaceGL final : public EmbedderSurface,
   struct GLDispatchTable {
     std::function<bool(void)> gl_make_current_callback;           // required
     std::function<bool(void)> gl_clear_current_callback;          // required
-    std::function<bool(void)> gl_present_callback;                // required
+    std::function<bool(uint32_t)> gl_present_callback;            // required
     std::function<intptr_t(GLFrameInfo)> gl_fbo_callback;         // required
     std::function<bool(void)> gl_make_resource_current_callback;  // optional
     std::function<SkMatrix(void)>
@@ -56,7 +56,7 @@ class EmbedderSurfaceGL final : public EmbedderSurface,
   bool GLContextClearCurrent() override;
 
   // |GPUSurfaceGLDelegate|
-  bool GLContextPresent() override;
+  bool GLContextPresent(uint32_t fbo_id) override;
 
   // |GPUSurfaceGLDelegate|
   intptr_t GLContextFBO(GLFrameInfo frame_info) const override;
