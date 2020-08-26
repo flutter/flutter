@@ -75,13 +75,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
+    addDdsOptions(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
   bool get cacheSkSL => boolArg('cache-sksl');
   bool get dumpSkpOnShaderCompilation => boolArg('dump-skp-on-shader-compilation');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
-
+  bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
   String get route => stringArg('route');
 }
 
@@ -226,7 +227,6 @@ class RunCommand extends RunCommandBase {
               'Currently this is only supported on Android devices. This option '
               'cannot be paired with --use-application-binary.'
       );
-      addDdsOptions(verboseHelp: verboseHelp);
   }
 
   @override
