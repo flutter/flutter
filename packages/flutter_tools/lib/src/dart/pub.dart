@@ -8,7 +8,6 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
-import 'package:yaml/yaml.dart';
 
 import '../base/bot_detector.dart';
 import '../base/common.dart';
@@ -18,12 +17,9 @@ import '../base/io.dart' as io;
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../reporting/reporting.dart';
-
-import 'generate_synthetic_packages.dart';
 
 /// The [Pub] instance.
 Pub get pub => context.get<Pub>();
@@ -104,8 +100,6 @@ abstract class Pub {
     bool skipPubspecYamlCheck = false,
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
-    Environment environment,
-    BuildSystem buildSystem,
   });
 
   /// Runs pub in 'batch' mode.
@@ -181,8 +175,6 @@ class _DefaultPub implements Pub {
     bool skipPubspecYamlCheck = false,
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
-    Environment environment,
-    BuildSystem buildSystem,
   }) async {
     directory ??= _fileSystem.currentDirectory.path;
 
@@ -202,61 +194,10 @@ class _DefaultPub implements Pub {
 
     final DateTime originalPubspecYamlModificationTime = pubSpecYaml.lastModifiedSync();
 
-    if (!checkLastModified || generateSyntheticPackage || _shouldRunPubGet(
+    if (!checkLastModified || _shouldRunPubGet(
       pubSpecYaml: pubSpecYaml,
       packageConfigFile: packageConfigFile,
     )) {
-      final File l10nYamlFile = _fileSystem.file(
-        _fileSystem.path.join(directory, 'l10n.yaml'));
-      // If pubspec.yaml has generate:true and if l10n.yaml exists in the
-      // root project directory, check to see if a synthetic package should
-      // be generated for gen_l10n.
-      if (generateSyntheticPackage && l10nYamlFile.existsSync()) {
-        final YamlNode yamlNode = loadYamlNode(l10nYamlFile.readAsStringSync());
-
-        // If an l10n.yaml file exists but is empty, attempt to build synthetic
-        // package with default settings.
-        if (yamlNode.value == null) {
-          final BuildResult result = await generateLocalizationsSyntheticPackage(
-            environment,
-            buildSystem,
-          );
-
-          if (result == null || result.hasException) {
-            throwToolExit('Generating synthetic localizations package has failed.');
-          }
-
-        } else if (yamlNode.value != null && yamlNode is! YamlMap) {
-          throwToolExit(
-            'Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode'
-          );
-        } else {
-          final YamlMap yamlMap = yamlNode as YamlMap;
-          final Object value = yamlMap['synthetic-package'];
-
-          if (value is! bool && value != null) {
-            throwToolExit(
-              'Expected "synthetic-package" to have a bool value, '
-              'instead was "$value"'
-            );
-          }
-
-          // Generate gen_l10n synthetic package if synthetic-package: true or
-          // synthetic-package is null.
-          final bool isSyntheticL10nPackage = value as bool ?? true;
-          if (isSyntheticL10nPackage) {
-            final BuildResult result = await generateLocalizationsSyntheticPackage(
-              environment,
-              buildSystem,
-            );
-
-            if (result == null || result.hasException) {
-              throwToolExit('Generating synthetic localizations package has failed.');
-            }
-          }
-        }
-      }
-
       final String command = upgrade ? 'upgrade' : 'get';
       final Status status = _logger.startProgress(
         'Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',

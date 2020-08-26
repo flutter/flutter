@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:meta/meta.dart';
@@ -33,8 +32,6 @@ class ThrowingPub implements Pub {
     bool skipPubspecYamlCheck = false,
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
-    Environment environment,
-    BuildSystem buildSystem,
   }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }

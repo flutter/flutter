@@ -9,6 +9,7 @@ import '../base/os.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
+import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -104,16 +105,22 @@ class PackagesGetCommand extends FlutterCommand {
       projectDir: flutterProject.directory,
     );
 
+    if (flutterProject.manifest.generateSyntheticPackage) {
+      await generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: globals.buildSystem,
+      );
+    }
+
     final Stopwatch pubGetTimer = Stopwatch()..start();
     try {
-      await pub.get(context: PubContext.pubGet,
+      await pub.get(
+        context: PubContext.pubGet,
         directory: directory,
         upgrade: upgrade ,
         offline: boolArg('offline'),
         checkLastModified: false,
         generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
-        environment: environment,
-        buildSystem: globals.buildSystem,
       );
       pubGetTimer.stop();
       globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
