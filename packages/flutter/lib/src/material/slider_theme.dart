@@ -1453,13 +1453,14 @@ abstract class BaseSliderTrackShape {
     final double trackHeight = sliderTheme.trackHeight;
     assert(overlayWidth >= 0);
     assert(trackHeight >= 0);
-    assert(parentBox.size.width >= overlayWidth);
-    assert(parentBox.size.height >= trackHeight);
 
     final double trackLeft = offset.dx + overlayWidth / 2;
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
     final double trackWidth = parentBox.size.width - math.max(thumbWidth, overlayWidth);
-    return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
+    final double trackRight = trackLeft + trackWidth;
+    final double trackButton = trackTop + trackHeight;
+    // if the parentBox.size < slider's size, the trackRight will less then trackLeft, we need switch them.
+    return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackButton);
   }
 }
 
@@ -2313,7 +2314,6 @@ class RoundSliderThumbShape extends SliderComponentShape {
     assert(sliderTheme != null);
     assert(sliderTheme.disabledThumbColor != null);
     assert(sliderTheme.thumbColor != null);
-    assert(!sizeWithOverflow.isEmpty);
 
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = Tween<double>(
