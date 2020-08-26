@@ -75,11 +75,11 @@ typedef _AutocompleteOptionToString<T> = String Function(T option);
 ///   AutocompleteController<String> _autocompleteController;
 ///   String _selection;
 ///
-///   void _onChangedResults() {
+///   void _onChangeResults() {
 ///     setState(() {});
 ///   }
 ///
-///   void _onChangedQuery() {
+///   void _onChangeQuery() {
 ///     if (_autocompleteController.textEditingController.value.text != _selection) {
 ///       setState(() {
 ///         _selection = null;
@@ -91,16 +91,16 @@ typedef _AutocompleteOptionToString<T> = String Function(T option);
 ///   void initState() {
 ///     super.initState();
 ///     _autocompleteController = AutocompleteController<String>(
-///       options: <String>['aardvark', 'baboon', 'chameleon'],
+///       options: <String>['aardvark', 'bobcat', 'chameleon'],
 ///     );
-///     _autocompleteController.textEditingController.addListener(_onChangedQuery);
-///     _autocompleteController.results.addListener(_onChangedResults);
+///     _autocompleteController.textEditingController.addListener(_onChangeQuery);
+///     _autocompleteController.results.addListener(_onChangeResults);
 ///   }
 ///
 ///   @override
 ///   void dispose() {
-///     _autocompleteController.textEditingController.removeListener(_onChangedQuery);
-///     _autocompleteController.results.removeListener(_onChangedResults);
+///     _autocompleteController.textEditingController.removeListener(_onChangeQuery);
+///     _autocompleteController.results.removeListener(_onChangeResults);
 ///     _autocompleteController.dispose();
 ///     super.dispose();
 ///   }
@@ -121,7 +121,10 @@ typedef _AutocompleteOptionToString<T> = String Function(T option);
 ///                 onTap: () {
 ///                   setState(() {
 ///                     _selection = result;
-///                     _autocompleteController.textEditingController.text = result;
+///                     _autocompleteController.textEditingController.value = TextEditingValue(
+///                       selection: TextSelection.collapsed(offset: result.length),
+///                       text: result,
+///                     );
 ///                   });
 ///                 },
 ///                 child: ListTile(
@@ -265,35 +268,37 @@ class AutocompleteController<T> {
 /// ```
 ///
 /// ```dart
-/// class AutocompleteBasicExample extends StatelessWidget {
-///   AutocompleteBasicExample({
-///     Key key,
-///   }) : super(key: key);
+/// class AutocompleteCoreExample extends StatelessWidget {
+///   AutocompleteCoreExample({Key key, this.title}) : super(key: key);
 ///
-///   final AutocompleteController<String> _autocompleteController =
-///       AutocompleteController<String>(
-///         options: <String>['aardvark', 'baboon', 'chameleon'],
-///       );
+///   final String title;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return AutocompleteCore(
-///       autocompleteController: _autocompleteController,
-///       buildField: (BuildContext context, TextEditingController textEditingController) {
+///     return AutocompleteCore<String>(
+///       options: <String>['aardvark', 'bobcat', 'chameleon'],
+///       buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
 ///         return TextFormField(
-///           controller: _autocompleteController.textEditingController,
+///           controller: textEditingController,
+///           onFieldSubmitted: onSelectedString,
 ///         );
 ///       },
 ///       buildResults: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
-///         return ListView(
-///           children: results.map((String result) => GestureDetector(
-///             onTap: () {
-///               onSelected(result);
-///             },
-///             child: ListTile(
-///               title: Text(result),
+///         return Material(
+///           elevation: 4.0,
+///           child: SizedBox(
+///             height: 200.0,
+///             child: ListView(
+///               children: results.map((String result) => GestureDetector(
+///                 onTap: () {
+///                   onSelected(result);
+///                 },
+///                 child: ListTile(
+///                   title: Text(result),
+///                 ),
+///               )).toList(),
 ///             ),
-///           )).toList(),
+///           ),
 ///         );
 ///       },
 ///     );
@@ -312,6 +317,7 @@ class AutocompleteController<T> {
 /// ```
 ///
 /// ```dart
+/// // An example of a type that someone might want to autocomplete a list of.
 /// class User {
 ///   const User({
 ///     this.email,
@@ -325,62 +331,65 @@ class AutocompleteController<T> {
 ///   // directly with the output of this toString method. In this case,
 ///   // including both the email and name allows the user to filter by both.
 ///   // If you wanted even more advanced filter logic, you could pass a custom
-///   // filter function into AutocompleteController.
+///   // filter function into AutocompleteController and/or filterStringForOption
+///   // into AutocompleteCore.
 ///   @override
 ///   String toString() {
 ///     return '$name, $email';
 ///   }
 /// }
 ///
-/// class AutocompleteCoreExample extends StatelessWidget {
-///   AutocompleteCoreExample({Key key}) : super(key: key);
+/// class AutocompleteCoreCustomTypeExample extends StatelessWidget {
+///   AutocompleteCoreCustomTypeExample({Key key, this.title}) : super(key: key);
+///
+///   final String title;
 ///   final AutocompleteController<User> _autocompleteController = AutocompleteController<User>(
 ///     options: <User>[
 ///       User(name: 'Alice', email: 'alice@example.com'),
 ///       User(name: 'Bob', email: 'bob@example.com'),
 ///       User(name: 'Charlie', email: 'charlie123@gmail.com'),
 ///     ],
+///     // This shows just the name in the field, even though we can also filter by
+///     // email address.
+///     displayStringForOption: (User option) => option.name,
 ///   );
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Scaffold(
-///         appBar: AppBar(
-///           title: Text('AutocompleteCore Example'),
-///         ),
-///         body: Center(
-///           child: AutocompleteCore<User>(
-///             autocompleteController: _autocompleteController,
-///             // This custom onSelected callback allows the field to be set to
-///             // just the name when selected, instead of User.toString by
-///             // default.
-///             onSelected: (User selected) {
-///               _autocompleteController.textEditingController.value = TextEditingValue(
-///                 selection: TextSelection.collapsed(offset: selected.name.length),
-///                 text: selected.name,
-///               );
-///             },
-///             buildField: (BuildContext context, TextEditingController textEditingController) {
-///               return TextFormField(
-///                 controller: _autocompleteController.textEditingController,
-///               );
-///             },
-///             buildResults: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
-///               return ListView(
-///                 children: results.map((User result) => GestureDetector(
-///                   onTap: () {
-///                     onSelected(result);
-///                   },
-///                   child: ListTile(
-///                     // Despite allowing filter on both name and email, here
-///                     // only name is displayed in the results.
-///                     title: Text(result.name),
-///                   ),
-///                 )).toList(),
-///               );
-///             },
-///           ),
+///     return Scaffold(
+///       appBar: AppBar(
+///         title: Text(title),
+///       ),
+///       body: Center(
+///         child: AutocompleteCore<User>(
+///           autocompleteController: _autocompleteController,
+///           onSelected: (User selection) {
+///             showSelectedDialog(context, _autocompleteController.displayStringForOption(selection));
+///           },
+///           buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
+///             return TextFormField(
+///               controller: _autocompleteController.textEditingController,
+///               onFieldSubmitted: onSelectedString,
+///             );
+///           },
+///           buildResults: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
+///             return SizedBox(
+///               height: 200.0,
+///               child: Material(
+///                 elevation: 4.0,
+///                 child: ListView(
+///                   children: results.map((User result) => GestureDetector(
+///                     onTap: () {
+///                       onSelected(result);
+///                     },
+///                     child: ListTile(
+///                       title: Text(_autocompleteController.displayStringForOption(result)),
+///                     ),
+///                   )).toList(),
+///                 ),
+///               ),
+///             );
+///           },
 ///         ),
 ///       ),
 ///     );
