@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
@@ -14,6 +15,7 @@ import '../build_system/targets/common.dart';
 import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/web.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
@@ -35,6 +37,8 @@ Future<void> buildWeb(
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   await injectPlugins(flutterProject, checkProjects: true);
+  await generateVersionFile(flutterProject);
+
   final Status status = globals.logger.startProgress('Compiling $target for the Web...', timeout: null);
   final Stopwatch sw = Stopwatch()..start();
   try {
@@ -106,3 +110,29 @@ class WebCompilationProxy {
     throw UnimplementedError();
   }
 }
+Future<void> generateVersionFile(FlutterProject flutterProject) async {
+  dynamic yamlFile = loadYaml(await flutterProject.pubspecFile.readAsString());
+  yamlFile ??= <String, String>{};
+  final String appName =
+  yamlFile['name'] != null ? yamlFile['name'].toString() : '';
+  final String appDescription =
+  yamlFile['description'] != null ? yamlFile['description'].toString() : '';
+  final String pubVersion =
+  yamlFile['version'] != null ? yamlFile['version'].toString() : '';
+  String version = pubVersion;
+  String buildNumber = '';
+  if (pubVersion.contains('+')) {
+    final List<String> info = pubVersion.split('+');
+    version = info[0];
+    buildNumber = info[1];
+  }
+  final Map<String, String> versionFileJson = <String, String>{
+    'app_name': appName,
+    'app_description': appDescription,
+    'version': version,
+    'build_number': buildNumber
+  };
+  final File versionFile = globals.fs.currentDirectory
+      .childDirectory('web')
+      .childFile('version.json');
+  await versionFile.writeAsString(jsonEncode(versionFileJson));}

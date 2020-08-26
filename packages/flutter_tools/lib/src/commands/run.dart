@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
+import 'package:yaml/yaml.dart';
 
 import '../android/android_device.dart';
 import '../base/common.dart';
@@ -12,6 +13,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -435,7 +437,9 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode();
 
     writePidFile(stringArg('pid-file'));
-
+    if ((await devices.first.targetPlatform) == TargetPlatform.web_javascript) {
+      await generateVersionFile(FlutterProject.current());
+    }
     if (boolArg('machine')) {
       if (devices.length > 1) {
         throwToolExit('--machine does not support -d all.');
@@ -623,3 +627,32 @@ class RunCommand extends RunCommandBase {
     );
   }
 }
+Future<void> generateVersionFile(FlutterProject flutterProject) async {
+  dynamic yamlFile = loadYaml(await flutterProject.pubspecFile.readAsString());
+  yamlFile ??= <String, String>{};
+
+  final String appName =
+  yamlFile['name'] != null ? yamlFile['name'].toString() : '';
+  final String appDescription =
+  yamlFile['description'] != null ? yamlFile['description'].toString() : '';
+  final String pubVersion =
+  yamlFile['version'] != null ? yamlFile['version'].toString() : '';
+  String version = pubVersion;
+  String buildNumber = '';
+  if (pubVersion.contains('+')) {
+    final List<String> info = pubVersion.split('+');
+    version = info[0];
+    buildNumber = info[1];
+  }
+  final Map<String, String> versionFileJson = <String, String>{
+    'app_name': appName,
+    'app_description': appDescription,
+    'version': version,
+    'build_number': buildNumber
+  };
+  globals.fs.currentDirectory
+      .childDirectory('web')
+      .childFile('version.json')
+      .writeAsStringSync(jsonEncode(versionFileJson));
+}
+

@@ -161,6 +161,74 @@ class UrlLauncherPlugin {}
     ProcessManager: () => FakeProcessManager.any(),
     BuildSystem: () => MockBuildSystem(),
   });
+  testUsingContext('Check if version.json is generated successfully', () async {
+    final BuildCommand buildCommand = BuildCommand();
+    applyMocksToCommand(buildCommand);
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+    final List<String> dependencies = <String>[
+      fileSystem.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'web.dart'),
+      fileSystem.path.join('bin', 'cache', 'flutter_web_sdk'),
+      fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
+      fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+      fileSystem.path.join('bin', 'cache', 'dart-sdk '),
+    ];
+    for (final String dependency in dependencies) {
+      fileSystem.file(dependency).createSync(recursive: true);
+    }
+
+    // Project files.
+    fileSystem.file('.packages')
+        .writeAsStringSync('''
+foo:lib/
+fizz:bar/lib/
+''');
+    fileSystem.file('pubspec.yaml')
+        .writeAsStringSync('''
+name: foo
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fizz:
+    path:
+      bar/
+''');
+    fileSystem.file(fileSystem.path.join('bar', 'pubspec.yaml'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+name: bar
+
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: UrlLauncherPlugin
+        fileName: url_launcher_web.dart
+''');
+    fileSystem.file(fileSystem.path.join('bar', 'lib', 'url_launcher_web.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+class UrlLauncherPlugin {}
+''');
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
+        .writeAsStringSync('void main() { }');
+
+    // Process calls. We're not testing that these invocations are correct because
+    // that is covered in targets/web_test.dart.
+    when(globals.buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+      return BuildResult(success: true);
+    });
+    await runner.run(<String>['build', 'web']);
+
+    expect(fileSystem.file(fileSystem.path.join('web', 'version.json')).existsSync(), true);
+  }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    Pub: () => MockPub(),
+    ProcessManager: () => FakeProcessManager.any(),
+    BuildSystem: () => MockBuildSystem(),
+  });
 
   testUsingContext('hidden if feature flag is not enabled', () async {
     expect(BuildWebCommand(verboseHelp: false).hidden, true);
