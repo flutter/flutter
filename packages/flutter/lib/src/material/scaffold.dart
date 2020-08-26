@@ -152,28 +152,10 @@ class ScaffoldMessenger extends StatefulWidget {
   /// If there is no [ScaffoldMessenger] in scope, then this will throw an
   /// exception. To return null if there is no [ScaffoldMessenger], then pass
   /// `nullOk: true`.
-  static ScaffoldMessengerState of(BuildContext context, { bool nullOk = false }) {
-    assert(nullOk != null);
+  static ScaffoldMessengerState of(BuildContext context) {
     assert(context != null);
     final _ScaffoldMessengerScope scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>();
-    if (nullOk || scope != null)
-      return scope?._scaffoldMessengerState;
-    throw FlutterError.fromParts(<DiagnosticsNode>[
-      ErrorSummary(
-        'ScaffoldMessenger.of() called with a context that does not contain a '
-        'ScaffoldMessenger.'
-      ),
-      ErrorDescription(
-        'No ScaffoldMessenger ancestor could be found starting from the context '
-        'that was passed to ScaffoldMessenger.of().'
-      ),
-      ErrorHint(
-        'A ScaffoldMessenger is always available within the contex of a '
-        'MaterialApp, or you can place your own above this context in order to '
-        'create your own scope for the ScaffoldMessenger to present SnackBars.'
-      ),
-      context.describeElement('The context used was')
-    ]);
+    return scope?._scaffoldMessengerState;
   }
 
   @override
@@ -222,7 +204,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     _scaffolds.remove(scaffold);
   }
 
-  /// Distributes  a [SnackBar] across all registered [Scaffolds].
+  /// Distributes  a [SnackBar] across all registered [Scaffold]s.
   ///
   /// A scaffold can show at most one snack bar at a time. If this function is
   /// called while another snack bar is already visible, the given snack bar
@@ -318,7 +300,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   }
 
   /// Removes the current [SnackBar] (if any) immediately from registered
-  /// [Scaffolds].
+  /// [Scaffold]s.
   ///
   /// The removed snack bar does not run its normal exit animation. If there are
   /// any queued snack bars, they begin their entrance animation immediately.
@@ -2056,10 +2038,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// To control how long a [SnackBar] remains visible, use [SnackBar.duration].
   ///
   /// To remove the [SnackBar] with an exit animation, use
-  /// [ScaffoldMessenger.hideCurrentSnackBar] or call
+  /// [ScaffoldMessengerState.hideCurrentSnackBar] or call
   /// [ScaffoldFeatureController.close] on the returned [ScaffoldFeatureController].
   /// To remove a [SnackBar] suddenly (without an animation), use
-  /// [ScaffoldMessenger.removeCurrentSnackBar].
+  /// [ScaffoldMessengerState.removeCurrentSnackBar].
   ///
   /// See [ScaffoldMessenger.of] for information about how to obtain the
   /// [ScaffoldMessengerState].
@@ -2083,12 +2065,34 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///   }
   /// ```
   /// {@end-tool}
-  @Deprecated(
-    'Use ScaffoldMessenger.showSnackBar instead. '
-    'This feature was deprecated after 1.21.0-2.0.pre.70.'
-  )
+  // TODO(Piinks): Deprecate after customers are migrated
+  // @Deprecated(
+  //   'Use ScaffoldMessenger.showSnackBar instead. '
+  //   'This feature was deprecated after TBD'
+  // )
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
-    assert(_scaffoldMessenger != null);
+    assert(() {
+      if(_scaffoldMessenger == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'ScaffoldState.showSnackBar called with a context that does '
+            'not contain a ScaffoldMessenger.'
+          ),
+          ErrorDescription(
+            'SnackBars are managed by the ScaffoldMessenger instead of the Scaffold.'
+          ),
+          ErrorHint(
+            'Try calling ScaffoldMessengerState.showSnackBar instead.'
+          ),
+          ErrorHint(
+            'A ScaffoldMessenger is always available within the contex of a '
+            'MaterialApp, or you can place your own above this context in order to '
+            'create your own scope for the ScaffoldMessenger to present SnackBars.'
+          ),
+        ]);
+      }
+      return true;
+    }());
     return _scaffoldMessenger.showSnackBar(snackbar);
   }
 
@@ -2096,24 +2100,68 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// The removed snack bar does not run its normal exit animation. If there are
   /// any queued snack bars, they begin their entrance animation immediately.
-  @Deprecated(
-    'Use ScaffoldMessenger.removeCurrentSnackBar instead. '
-    'This feature was deprecated after 1.21.0-2.0.pre.70.'
-  )
+  // TODO(Piinks): Deprecate after customers are migrated
+  // @Deprecated(
+  //   'Use ScaffoldMessenger.removeCurrentSnackBar instead. '
+  //   'This feature was deprecated after TBD'
+  // )
   void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
-    assert(_scaffoldMessenger != null);
+    assert(() {
+      if(_scaffoldMessenger == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'ScaffoldState.removeCurrentSnackBar called with a context that does '
+            'not contain a ScaffoldMessenger.'
+          ),
+          ErrorDescription(
+            'SnackBars are managed by the ScaffoldMessenger instead of the Scaffold.'
+          ),
+          ErrorHint(
+            'Try calling ScaffoldMessengerState.removeCurrentSnackBar instead.'
+          ),
+          ErrorHint(
+            'A ScaffoldMessenger is always available within the contex of a '
+            'MaterialApp, or you can place your own above this context in order to '
+            'create your own scope for the ScaffoldMessenger to present SnackBars.'
+          ),
+        ]);
+      }
+      return true;
+    }());
     _scaffoldMessenger.removeCurrentSnackBar(reason: reason);
   }
 
   /// Removes the current [SnackBar] by running its normal exit animation.
   ///
   /// The closed completer is called after the animation is complete.
-  @Deprecated(
-    'Use ScaffoldMessenger.hideCurrentSnackBar instead. '
-    'This feature was deprecated after 1.21.0-2.0.pre.70.'
-  )
+  // TODO(Piinks): Deprecate after customers are migrated.
+  // @Deprecated(
+  //   'Use ScaffoldMessenger.hideCurrentSnackBar instead. '
+  //   'This feature was deprecated after TBD'
+  // )
   void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
-    assert(_scaffoldMessenger != null);
+    assert(() {
+      if(_scaffoldMessenger == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'ScaffoldState.hideCurrentSnackBar called with a context that does '
+            'not contain a ScaffoldMessenger.'
+          ),
+          ErrorDescription(
+            'SnackBars are managed by the ScaffoldMessenger instead of the Scaffold.'
+          ),
+          ErrorHint(
+            'Try calling ScaffoldMessengerState.hideCurrentSnackBar instead.'
+          ),
+          ErrorHint(
+            'A ScaffoldMessenger is always available within the contex of a '
+            'MaterialApp, or you can place your own above this context in order to '
+            'create your own scope for the ScaffoldMessenger to present SnackBars.'
+          ),
+        ]);
+      }
+      return true;
+    }());
     _scaffoldMessenger.hideCurrentSnackBar(reason: reason);
   }
 
