@@ -363,9 +363,6 @@ class AutocompleteController<T> {
 ///       body: Center(
 ///         child: AutocompleteCore<User>(
 ///           autocompleteController: _autocompleteController,
-///           onSelected: (User selection) {
-///             showSelectedDialog(context, _autocompleteController.displayStringForOption(selection));
-///           },
 ///           buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
 ///             return TextFormField(
 ///               controller: _autocompleteController.textEditingController,
@@ -451,9 +448,9 @@ class AutocompleteCore<T> extends StatefulWidget {
 
 class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   final GlobalKey _fieldKey = GlobalKey();
+  final LayerLink _resultsLayerLink = LayerLink();
   AutocompleteController<T> _autocompleteController;
   T _selection;
-  final LayerLink _resultsLayerLink = LayerLink();
 
   // The OverlayEntry containing the results.
   OverlayEntry _floatingResults;
@@ -469,10 +466,12 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     return fieldIsFocused && _selection == null && hasResults;
   }
 
+  // Called when _autocompleteController.results changes.
   void _onChangedResults() {
     _updateOverlay();
   }
 
+  // Called when _autocompleteController.textEditingController changes.
   void _onChangedQuery() {
     if (_selection != null) {
       final String selectionString =
