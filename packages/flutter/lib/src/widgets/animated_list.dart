@@ -582,6 +582,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
+///       scaffoldMessengerKey: _scaffoldMessengerKey,
 ///       home: Scaffold(
 ///         key: _scaffoldKey,
 ///         body: CustomScrollView(
