@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -484,8 +483,6 @@ class MockDirectory implements Directory {
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
-
-class MockBuildSystem extends Mock implements BuildSystem {}
 
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 
