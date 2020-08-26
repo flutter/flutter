@@ -447,36 +447,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   final LayerLink _resultsLayerLink = LayerLink();
 
   // The OverlayEntry containing the results.
-  OverlayEntry _cachedFloatingResults;
-  OverlayEntry get _floatingResults {
-    if (_cachedFloatingResults != null) {
-      return _cachedFloatingResults;
-    }
-
-    assert(_fieldKey.currentContext != null);
-    final RenderBox renderBox = _fieldKey.currentContext.findRenderObject() as RenderBox;
-    _cachedFloatingResults = OverlayEntry(
-      builder: (BuildContext context) {
-        return Positioned(
-          width: renderBox.size.width,
-          child: CompositedTransformFollower(
-            link: _resultsLayerLink,
-            showWhenUnlinked: false,
-            offset: Offset(
-              0.0,
-              renderBox.size.height,
-            ),
-            child: widget.buildResults(
-              context,
-              _select,
-              _autocompleteController.results.value,
-            ),
-          ),
-        );
-      },
-    );
-    return _cachedFloatingResults;
-  }
+  OverlayEntry _floatingResults;
 
   // True iff the state indicates that the results should be visible.
   bool get _shouldShowResults {
@@ -539,12 +510,24 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   // Hide or show the results overlay, if needed.
   void _updateOverlay() {
     if (_shouldShowResults) {
-      _cachedFloatingResults?.remove();
-      _cachedFloatingResults = null;
-      Overlay.of(context).insert(_floatingResults);
-    } else if (_cachedFloatingResults != null) {
-      _cachedFloatingResults.remove();
-      _cachedFloatingResults = null;
+      assert(_fieldKey.currentContext != null);
+      final RenderBox renderBox = _fieldKey.currentContext.findRenderObject() as RenderBox;
+      _floatingResults?.remove();
+      _floatingResults = OverlayEntry(
+        builder: (BuildContext context) {
+          return _FloatingResults<T>(
+            buildResults: widget.buildResults,
+            fieldSize: renderBox.size,
+            layerLink: _resultsLayerLink,
+            onSelected: _select,
+            results: _autocompleteController.results.value,
+          );
+        },
+      );
+      Overlay.of(context, rootOverlay: true).insert(_floatingResults);
+    } else if (_floatingResults != null) {
+      _floatingResults.remove();
+      _floatingResults = null;
     }
   }
 
@@ -592,7 +575,9 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
       _listenToController(_autocompleteController);
     }
 
-    _updateOverlay();
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      _updateOverlay();
+    });
   }
 
   @override
@@ -601,6 +586,8 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     if (widget.autocompleteController == null) {
       _autocompleteController.dispose();
     }
+    _floatingResults?.remove();
+    _floatingResults = null;
     super.dispose();
   }
 
@@ -615,6 +602,44 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
           _autocompleteController.textEditingController,
           _onSelectedString,
         ),
+      ),
+    );
+  }
+}
+
+class _FloatingResults<T> extends StatelessWidget {
+  const _FloatingResults({
+    Key key,
+    @required this.buildResults,
+    @required this.fieldSize,
+    @required this.layerLink,
+    @required this.onSelected,
+    @required this.results,
+  }) : assert(buildResults != null),
+       assert(fieldSize != null),
+       assert(layerLink != null),
+       assert(onSelected != null),
+       assert(results != null),
+       super(key: key);
+
+  final AutocompleteResultsBuilder<T> buildResults;
+  final Size fieldSize;
+  final LayerLink layerLink;
+  final AutocompleteOnSelected<T> onSelected;
+  final List<T> results;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      width: fieldSize.width,
+      child: CompositedTransformFollower(
+        link: layerLink,
+        showWhenUnlinked: false,
+        offset: Offset(
+          0.0,
+          fieldSize.height,
+        ),
+        child: buildResults(context, onSelected, results),
       ),
     );
   }

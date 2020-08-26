@@ -439,5 +439,72 @@ void main() {
       expect(find.byKey(resultsKey), findsNothing);
       expect(autocompleteController.textEditingController.text, lastResults[0]);
     });
+
+    testWidgets('results follow field when it moves', (WidgetTester tester) async {
+      final GlobalKey fieldKey = GlobalKey();
+      final GlobalKey resultsKey = GlobalKey();
+      final AutocompleteController<String> autocompleteController =
+          AutocompleteController<String>(
+            options: kOptions,
+          );
+      StateSetter setState;
+      Alignment alignment = Alignment.center;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return Align(
+                  alignment: alignment,
+                  child: AutocompleteCore<String>(
+                    autocompleteController: autocompleteController,
+                    buildField: (BuildContext context, TextEditingController textEditingController, AutocompleteOnSelectedString onSelectedString) {
+                      return TextFormField(
+                        key: fieldKey,
+                      );
+                    },
+                    buildResults: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
+                      return Container(key: resultsKey);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Field is shown but not results.
+      expect(find.byKey(fieldKey), findsOneWidget);
+      expect(find.byKey(resultsKey), findsNothing);
+
+      // Enter a query to show the results.
+      autocompleteController.textEditingController.value = const TextEditingValue(
+        text: 'ele',
+        selection: TextSelection(baseOffset: 3, extentOffset: 3),
+      );
+      await tester.pump();
+      expect(find.byKey(fieldKey), findsOneWidget);
+      expect(find.byKey(resultsKey), findsOneWidget);
+
+      // Results are just below the field.
+      final Offset resultsOffset = tester.getTopLeft(find.byKey(resultsKey));
+      Offset fieldOffset = tester.getTopLeft(find.byKey(fieldKey));
+      final Size fieldSize = tester.getSize(find.byKey(fieldKey));
+      expect(resultsOffset.dy, fieldOffset.dy + fieldSize.height);
+
+      // Move the field (similar to as if the keyboard opened). The results
+      // move to follow the field.
+      setState(() {
+        alignment = Alignment.topCenter;
+      });
+      await tester.pump();
+      fieldOffset = tester.getTopLeft(find.byKey(fieldKey));
+      final Offset resultsOffsetOpen = tester.getTopLeft(find.byKey(resultsKey));
+      expect(resultsOffsetOpen.dy, isNot(equals(resultsOffset.dy)));
+      expect(resultsOffsetOpen.dy, fieldOffset.dy + fieldSize.height);
+    });
   });
 }
