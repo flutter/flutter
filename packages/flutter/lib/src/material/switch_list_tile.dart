@@ -6,6 +6,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'list_tile.dart';
 import 'switch.dart';
 import 'theme.dart';
@@ -440,8 +441,18 @@ class SwitchListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget control;
+    ThemeData themeData = Theme.of(context);
     switch (_switchListTileType) {
       case _SwitchListTileType.adaptive:
+        // This is for removing splash effect (from Material) on iOS and macOS devices.
+        final TargetPlatform platform = themeData.platform;
+        if (platform == TargetPlatform.iOS || platform == TargetPlatform.macOS) {
+          themeData = themeData.copyWith(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+          );
+        }
+
         control = Switch.adaptive(
           value: value,
           onChanged: onChanged,
@@ -487,18 +498,21 @@ class SwitchListTile extends StatelessWidget {
     return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
-        child: ListTile(
-          leading: leading,
-          title: title,
-          subtitle: subtitle,
-          trailing: trailing,
-          isThreeLine: isThreeLine,
-          dense: dense,
-          contentPadding: contentPadding,
-          enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged(!value); } : null,
-          selected: selected,
-          autofocus: autofocus,
+        child: Theme(
+          data: themeData,
+          child: ListTile(
+            leading: leading,
+            title: title,
+            subtitle: subtitle,
+            trailing: trailing,
+            isThreeLine: isThreeLine,
+            dense: dense,
+            contentPadding: contentPadding,
+            enabled: onChanged != null,
+            onTap: onChanged != null ? () { onChanged(!value); } : null,
+            selected: selected,
+            autofocus: autofocus,
+          ),
         ),
       ),
     );
