@@ -7,6 +7,8 @@
 part of dart.ui;
 
 /// Linearly interpolate between two numbers.
+// TODO(cbracken): Consider making a and b non-nullable.
+//                 https://github.com/flutter/flutter/issues/64617
 double? lerpDouble(num? a, num? b, double t) {
   if (a == null && b == null)
     return null;
