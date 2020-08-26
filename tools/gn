@@ -189,8 +189,6 @@ def to_gn_args(args):
         gn_args['dart_use_fallback_root_certificates'] = True
 
 
-    gn_args['dart_custom_version_for_pub'] = 'flutter'
-
     # Make sure host_cpu matches the bit width of target_cpu on x86.
     if gn_args['target_cpu'] == 'x86':
       gn_args['host_cpu'] = 'x86'
