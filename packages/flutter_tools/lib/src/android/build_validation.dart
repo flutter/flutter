@@ -15,7 +15,7 @@ void validateBuild(AndroidBuildInfo androidBuildInfo) {
     throwToolExit(
       'Cannot perform code size analysis when building for multiple ABIs. '
       'Specify one of android-arm, android-arm64, or android-x64 in the '
-      '--target-plaform flag.'
+      '--target-platform flag.'
     );
   }
   if (buildInfo.mode.isPrecompiled && androidBuildInfo.targetArchs.contains(AndroidArch.x86)) {
