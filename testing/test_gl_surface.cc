@@ -220,9 +220,8 @@ bool TestGLSurface::Present() {
   return result == EGL_TRUE;
 }
 
-uint32_t TestGLSurface::GetFramebuffer() const {
-  // Return FBO0
-  return 0;
+uint32_t TestGLSurface::GetFramebuffer(uint32_t width, uint32_t height) const {
+  return GetWindowFBOId();
 }
 
 bool TestGLSurface::MakeResourceCurrent() {
@@ -296,7 +295,9 @@ sk_sp<SkSurface> TestGLSurface::GetOnscreenSurface() {
   FML_CHECK(::eglGetCurrentContext() != EGL_NO_CONTEXT);
 
   GrGLFramebufferInfo framebuffer_info = {};
-  framebuffer_info.fFBOID = GetFramebuffer();
+  const uint32_t width = surface_size_.width();
+  const uint32_t height = surface_size_.height();
+  framebuffer_info.fFBOID = GetFramebuffer(width, height);
 #if OS_MACOSX
   framebuffer_info.fFormat = GR_GL_RGBA8;
 #else
@@ -304,11 +305,11 @@ sk_sp<SkSurface> TestGLSurface::GetOnscreenSurface() {
 #endif
 
   GrBackendRenderTarget backend_render_target(
-      surface_size_.width(),   // width
-      surface_size_.height(),  // height
-      1,                       // sample count
-      8,                       // stencil bits
-      framebuffer_info         // framebuffer info
+      width,            // width
+      height,           // height
+      1,                // sample count
+      8,                // stencil bits
+      framebuffer_info  // framebuffer info
   );
 
   SkSurfaceProps surface_properties(
@@ -360,6 +361,10 @@ sk_sp<SkImage> TestGLSurface::GetRasterSurfaceSnapshot() {
   }
 
   return host_snapshot;
+}
+
+uint32_t TestGLSurface::GetWindowFBOId() const {
+  return 0u;
 }
 
 }  // namespace testing

@@ -346,7 +346,7 @@ typedef struct {
 /// This information is passed to the embedder when requesting a frame buffer
 /// object.
 ///
-/// See: \ref FlutterSoftwareRendererConfig.fbo_with_frame_info_callback.
+/// See: \ref FlutterOpenGLRendererConfig.fbo_with_frame_info_callback.
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterFrameInfo).
   size_t struct_size;
@@ -354,15 +354,34 @@ typedef struct {
   FlutterUIntSize size;
 } FlutterFrameInfo;
 
+/// Callback for when a frame buffer object is requested.
 typedef uint32_t (*UIntFrameInfoCallback)(
     void* /* user data */,
     const FlutterFrameInfo* /* frame info */);
+
+/// This information is passed to the embedder when a surface is presented.
+///
+/// See: \ref FlutterOpenGLRendererConfig.present_with_info.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterFrameInfo).
+  size_t struct_size;
+  /// Id of the fbo backing the surface that was presented.
+  uint32_t fbo_id;
+} FlutterPresentInfo;
+
+/// Callback for when a surface is presented.
+typedef bool (*BoolPresentInfoCallback)(
+    void* /* user data */,
+    const FlutterPresentInfo* /* present info */);
 
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterOpenGLRendererConfig).
   size_t struct_size;
   BoolCallback make_current;
   BoolCallback clear_current;
+  /// Specifying one (and only one) of `present` or `present_with_info` is
+  /// required. Specifying both is an error and engine initialization will be
+  /// terminated. The return value indicates success of the present call.
   BoolCallback present;
   /// Specifying one (and only one) of the `fbo_callback` or
   /// `fbo_with_frame_info_callback` is required. Specifying both is an error
@@ -407,6 +426,12 @@ typedef struct {
   /// `FlutterFrameInfo` struct that indicates the properties of the surface
   /// that flutter will acquire from the returned fbo.
   UIntFrameInfoCallback fbo_with_frame_info_callback;
+  /// Specifying one (and only one) of `present` or `present_with_info` is
+  /// required. Specifying both is an error and engine initialization will be
+  /// terminated. When using this variant, the embedder is passed a
+  /// `FlutterPresentInfo` struct that the embedder can use to release any
+  /// resources. The return value indicates success of the present call.
+  BoolPresentInfoCallback present_with_info;
 } FlutterOpenGLRendererConfig;
 
 typedef struct {
