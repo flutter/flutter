@@ -77,6 +77,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
 
  private:
   SemanticsObject* GetOrCreateObject(int32_t id, flutter::SemanticsNodeUpdates& updates);
+  SemanticsObject* FindFirstFocusable(SemanticsObject* object);
   void VisitObjectsRecursivelyAndRemove(SemanticsObject* object,
                                         NSMutableArray<NSNumber*>* doomed_uids);
   void HandleEvent(NSDictionary<NSString*, id>* annotatedEvent);
