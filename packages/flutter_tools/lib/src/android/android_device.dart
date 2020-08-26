@@ -255,7 +255,7 @@ class AndroidDevice extends Device {
   AndroidDevicePortForwarder _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
-    return <String>[_androidSdk.adbPath, '-s', id, ...args];
+    return <String>[getAdbPath(_androidSdk), '-s', id, ...args];
   }
 
   String runAdbCheckedSync(
@@ -318,13 +318,13 @@ class AndroidDevice extends Device {
 
     try {
       final RunResult adbVersion = await _processUtils.run(
-        <String>[_androidSdk.adbPath, 'version'],
+        <String>[getAdbPath(_androidSdk), 'version'],
         throwOnError: true,
       );
       if (_isValidAdbVersion(adbVersion.stdout)) {
         return true;
       }
-      _logger.printError('The ADB at "${_androidSdk.adbPath}" is too old; please install version 1.0.39 or later.');
+      _logger.printError('The ADB at "${getAdbPath(_androidSdk)}" is too old; please install version 1.0.39 or later.');
     } on Exception catch (error, trace) {
       _logger.printError('Error running ADB: $error', stackTrace: trace);
     }
@@ -339,7 +339,7 @@ class AndroidDevice extends Device {
       //   adb server is out of date.  killing..
       //   * daemon started successfully *
       await _processUtils.run(
-        <String>[_androidSdk.adbPath, 'start-server'],
+        <String>[getAdbPath(_androidSdk), 'start-server'],
         throwOnError: true,
       );
 
