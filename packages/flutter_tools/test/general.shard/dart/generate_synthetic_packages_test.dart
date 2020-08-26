@@ -149,6 +149,41 @@ void main() {
     )).called(1);
   });
 
+  testWithoutContext('does not call buildSystem.build when l10n.yaml is not present', () async {
+    // Project directory setup for gen_l10n logic
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+
+    // Add generate:true to pubspec.yaml.
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    final String content = pubspecFile.readAsStringSync().replaceFirst(
+      '\nflutter:\n',
+      '\nflutter:\n  generate: true\n',
+    );
+    pubspecFile.writeAsStringSync(content);
+
+    final MockProcessManager mockProcessManager = MockProcessManager(0);
+    final BufferLogger mockBufferLogger = BufferLogger.test();
+    final Artifacts mockArtifacts = Artifacts.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: mockBufferLogger,
+      artifacts: mockArtifacts,
+      processManager: mockProcessManager,
+    );
+    final BuildSystem buildSystem = MockBuildSystem();
+
+    await generateLocalizationsSyntheticPackage(
+      environment: environment,
+      buildSystem: buildSystem,
+    );
+    // [BuildSystem] should not be called with [GenerateLocalizationsTarget].
+    verifyNever(buildSystem.build(
+      const GenerateLocalizationsTarget(),
+      environment,
+    ));
+  });
+
   testWithoutContext('does not call buildSystem.build with incorrect l10n.yaml format', () {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
