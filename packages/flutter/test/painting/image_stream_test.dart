@@ -799,7 +799,7 @@ void main() {
     expect(frame.imageDisposed, true);
   });
 
-  testWidgets('does not dispose image when last listener drops and keepFramesAlive is true - multi frame frame count 1', (WidgetTester tester) async {
+  testWidgets('does not dispose image when last listener drops and autoDisposeFrames is false - multi frame frame count 1', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 1;
     mockCodec.repetitionCount = 0;
@@ -808,7 +808,7 @@ void main() {
     final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
       codec: codecCompleter.future,
       scale: 1.0,
-      keepFramesAlive: true,
+      autoDisposeFrames: false,
     );
 
     ImageInfo currentImage;
@@ -880,7 +880,7 @@ void main() {
     expect(frame2.imageDisposed, true);
   });
 
-  testWidgets('does not dispose image when last listener drops and keepFramesAlive is true - multi frame', (WidgetTester tester) async {
+  testWidgets('does not dispose image when last listener drops and autoDisposeFrames is false - multi frame', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = 0;
@@ -889,7 +889,7 @@ void main() {
     final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
       codec: codecCompleter.future,
       scale: 1.0,
-      keepFramesAlive: true,
+      autoDisposeFrames: false,
     );
 
     ImageInfo currentImage;

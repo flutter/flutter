@@ -1480,10 +1480,10 @@ void main() {
     expect(provider1.loadCallCount, 1);
     expect(provider2.loadCallCount, 1);
 
-    provider1.complete(image: image, keepAlive: true);
+    provider1.complete(image: image, autoDispose: false);
     await tester.idle();
 
-    provider2.complete(image: image, keepAlive: true);
+    provider2.complete(image: image, autoDispose: false);
     await tester.idle();
 
     expect(imageCache.liveImageCount, 2);
@@ -1847,9 +1847,9 @@ class TestImageProvider extends ImageProvider<Object> {
     return _streamCompleter;
   }
 
-  void complete({ui.Image image, bool keepAlive = false}) {
+  void complete({ui.Image image, bool autoDispose = true}) {
     image ??= TestImage();
-    _completer.complete(ImageInfo(image: image, keepAlive: keepAlive));
+    _completer.complete(ImageInfo(image: image, autoDispose: autoDispose));
   }
 
   void fail(dynamic exception, StackTrace stackTrace) {

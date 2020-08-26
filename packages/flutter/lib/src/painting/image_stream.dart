@@ -17,17 +17,17 @@ import 'package:flutter/scheduler.dart';
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given [image] and [scale].
   ///
-  /// If [keepAlive] is set to false, an [ImageStream] will dispose of the
+  /// If [autoDispose] is set to true, an [ImageStream] will dispose of the
   /// [image] once it has lost its last listener. To avoid this behavior, set
-  /// [keepAlive] to true.
+  /// [autoDispose] to true.
   ///
-  /// The image, keepAlive, and scale paraemters must not be null.
+  /// The image, autoDispose, and scale paraemters must not be null.
   ///
   /// The tag may be used to identify the source of this image.
-  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel, this.keepAlive = false })
+  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel, this.autoDispose = false })
     : assert(image != null),
       assert(scale != null),
-      assert(keepAlive != null);
+      assert(autoDispose != null);
 
   /// The raw image pixels.
   ///
@@ -56,13 +56,13 @@ class ImageInfo {
   /// If multiple [ImageStream]s may refer to the same image, this should be set
   /// to true. Within the framework, this does not normally occur, but custom
   /// [ImageProvider] or [ImageStream] implementations can behave differently.
-  final bool keepAlive;
+  final bool autoDispose;
 
   @override
-  String toString() => '${debugLabel != null ? '$debugLabel ' : ''}$image @ ${debugFormatDouble(scale)}x, keepAlive: $keepAlive';
+  String toString() => '${debugLabel != null ? '$debugLabel ' : ''}$image @ ${debugFormatDouble(scale)}x, autoDispose: $autoDispose';
 
   @override
-  int get hashCode => hashValues(image, scale, debugLabel, keepAlive);
+  int get hashCode => hashValues(image, scale, debugLabel, autoDispose);
 
   @override
   bool operator ==(Object other) {
@@ -72,7 +72,7 @@ class ImageInfo {
         && other.image == image
         && other.scale == scale
         && other.debugLabel == debugLabel
-        && other.keepAlive == keepAlive;
+        && other.autoDispose == autoDispose;
   }
 }
 
@@ -425,7 +425,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
         callback();
       }
       _onLastListenerRemovedCallbacks.clear();
-      if (_currentImage?.keepAlive == false) {
+      if (_currentImage?.autoDispose == true) {
         _currentImage!.image.dispose();
       }
     }
@@ -452,7 +452,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// Calls all the registered listeners to notify them of a new image.
   @protected
   void setImage(ImageInfo image) {
-    if (_currentImage?.keepAlive == false) {
+    if (_currentImage?.autoDispose == true) {
       _currentImage!.image.dispose();
     }
     _currentImage = image;
@@ -658,18 +658,18 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// produced by the stream will be delivered to registered [ImageChunkListener]s
   /// (see [addListener]).
   ///
-  /// The `keepFramesAlive` parameter controls whether emitted frames have the
-  /// [ImageInfo.keepAlive] property set to true. It must not be null, and
-  /// defaults to false.
+  /// The `autoDisposeFrames` parameter controls how emitted frames set the
+  /// [ImageInfo.autoDispose] property. It must not be null, and defaults to
+  /// true.
   MultiFrameImageStreamCompleter({
     required Future<ui.Codec> codec,
     required double scale,
     String? debugLabel,
     Stream<ImageChunkEvent>? chunkEvents,
     InformationCollector? informationCollector,
-    this.keepFramesAlive = false,
+    this.autoDisposeFrames = true,
   }) : assert(codec != null),
-       assert(keepFramesAlive != null),
+       assert(autoDisposeFrames != null),
        _informationCollector = informationCollector,
        _scale = scale {
     this.debugLabel = debugLabel;
@@ -697,8 +697,8 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     }
   }
 
-  /// How to set [ImageInfo.keepAlive] on emitted frames.
-  final bool keepFramesAlive;
+  /// How to set [ImageInfo.autoDispose] on emitted frames.
+  final bool autoDisposeFrames;
 
   ui.Codec? _codec;
   final double _scale;
@@ -733,7 +733,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
         image: _nextFrame!.image,
         scale: _scale,
         debugLabel: debugLabel,
-        keepAlive: keepFramesAlive,
+        autoDispose: autoDisposeFrames,
       ));
       _shownTimestamp = timestamp;
       _frameDuration = _nextFrame!.duration;
@@ -778,7 +778,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
         image: _nextFrame!.image,
         scale: _scale,
         debugLabel: debugLabel,
-        keepAlive: keepFramesAlive,
+        autoDispose: autoDisposeFrames,
       ));
       return;
     }
