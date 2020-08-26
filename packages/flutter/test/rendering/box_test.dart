@@ -380,6 +380,74 @@ void main() {
     expect(unconstrained.getMaxIntrinsicWidth(100.0), equals(200.0));
   });
 
+  group('ConstraintsTransfromBox', () {
+    FlutterErrorDetails firstErrorDetails;
+    void exhaustErrors() {
+      FlutterErrorDetails next;
+      do {
+        next = renderer.takeFlutterErrorDetails();
+        firstErrorDetails ??= next;
+      } while (next != null);
+    }
+
+    tearDown(() {
+      firstErrorDetails = null;
+    });
+
+    test('throws if the resulting constraints are not normalized', () {
+      final RenderConstrainedBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(height: 0));
+      final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
+        alignment: Alignment.center,
+        textDirection: TextDirection.ltr,
+        constraintsTransform: (BoxConstraints constraints) => const BoxConstraints(maxHeight: -1, minHeight: 200),
+        child: child,
+      );
+
+      layout(box, constraints: const BoxConstraints(), onErrors: exhaustErrors);
+
+      expect(firstErrorDetails?.toString(), contains('is not normalized'));
+    });
+
+    test('overflow is reported when insufficient size is given', () {
+      final RenderConstrainedBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: double.maxFinite));
+      final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
+        alignment: Alignment.center,
+        textDirection: TextDirection.ltr,
+        constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+        child: child,
+      );
+
+      // No error reported.
+      layout(box, constraints: const BoxConstraints(), phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    });
+
+    test('throws when null is returned by the transform function', () {
+      final RenderConstrainedBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200));
+      final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
+        alignment: Alignment.center,
+        textDirection: TextDirection.ltr,
+        constraintsTransform: (BoxConstraints constraints) => null,
+        child: child,
+      );
+
+      layout(box, constraints: const BoxConstraints(), onErrors: exhaustErrors);
+      expect(firstErrorDetails.toString(), contains('!= null'));
+    });
+
+    test("the transform function can't be set to null", () {
+      final RenderConstrainedBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200));
+      final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
+        alignment: Alignment.center,
+        textDirection: TextDirection.ltr,
+        constraintsTransform: null,
+        child: child,
+      );
+
+      layout(box, constraints: const BoxConstraints(), onErrors: exhaustErrors);
+      expect(firstErrorDetails.toString(), contains('!= null'));
+    });
+  });
+
   test ('getMinIntrinsicWidth error handling', () {
     final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
       textDirection: TextDirection.ltr,

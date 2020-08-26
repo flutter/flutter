@@ -5385,6 +5385,130 @@ void main() {
     expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: -1, end: 9)), false);
   });
 
+  testWidgets('shows overflow indicator for single line text with insufficient height', (WidgetTester tester) async {
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(devicePixelRatio: 1.0),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 10,
+            child: EditableText(
+              maxLines: 1,
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    expect(exception.diagnostics.first.toString(), startsWith('A RenderConstraintsTransformBox overflowed by '));
+
+    // Can be fixed by given enough height;
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(devicePixelRatio: 1.0),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 10,
+            child: EditableText(
+              maxLines: 1,
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('No overflow indicator for multiline line text or no clipping', (WidgetTester tester) async {
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(devicePixelRatio: 1.0),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 10,
+            child: EditableText(
+              maxLines: 1,
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              clipBehavior: Clip.none,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(devicePixelRatio: 1.0),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 50,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('RenderEditable can stretch vertically', (WidgetTester tester) async {
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(devicePixelRatio: 1.0),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 400,
+            child: EditableText(
+              maxLines: 1,
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isNull);
+
+    final EditableTextState state = tester.state(find.byType(EditableText));
+    expect(state.renderEditable.size.height, 400);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/65374.
   testWidgets('Length formatter will not cause crash while the TextEditingValue is composing', (WidgetTester tester) async {
     final TextInputFormatter formatter = LengthLimitingTextInputFormatter(5);

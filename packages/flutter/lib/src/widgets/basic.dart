@@ -30,6 +30,7 @@ export 'package:flutter/rendering.dart' show
   AlignmentGeometryTween,
   Axis,
   BoxConstraints,
+  BoxConstraintsTransform,
   CrossAxisAlignment,
   CustomClipper,
   CustomPainter,
@@ -2218,6 +2219,114 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A widget that applies an arbitrary transform to its constraints, and sizes
+/// its child using the resulting [BoxConstraints], treating any overflow
+/// as error.
+///
+/// This container sizes its child using a [BoxConstraints] created by applying
+/// [constraintsTransform] to its own constraints. This container will then
+/// attempt to adopt the same size, within the limits of its own constraints. If
+/// it ends up with a different size, it will align the child based on
+/// [alignment]. If the container cannot expand enough to accommodate the entire
+/// child, the child will be clipped if [clipBehavior] is not [Clip.none].
+///
+/// In debug mode, if the child overflows the container, a warning will be
+/// printed on the console, and black and yellow striped areas will appear where
+/// the overflow occurs.
+///
+/// {@tool snippet}
+/// This snippet guarantees the child [Card] will be at least as tall as its
+/// intrinsic height. Unlike [UnconstrainedBox], the child can be taller if the
+/// the parent's minHeight is constrained. If parent container's maxHeight is
+/// less than [Card]'s intrinsic height, in debug mode a warning will be given.
+///
+/// ```dart
+/// ConstraintsTransformBox(
+///   constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxHeight: double.infinity),
+///   child: const Card(child: Text('Hello World!')),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [ConstrainedBox], which renders a box which imposes constraints
+///    on its child.
+///  * [OverflowBox], a widget that imposes additional constraints on its child,
+///    and allows the child to overflow itself.
+///  * [UnconstrainedBox] which allows its children to render themselves
+///    unconstrained, expands to fit them, and considers overflow to be an error.
+class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
+  /// Creates a widget that uses a function to transform the constraints it
+  /// passes to its child. If the child overflows the parent's constraints, a
+  /// warning will be given in debug mode.
+  ///
+  /// The `alignment`, `clipBehavior` and `constraintsTransform` arguments must
+  /// not be null.
+  const ConstraintsTransformBox({
+    Key key,
+    Widget child,
+    this.textDirection,
+    this.alignment = Alignment.center,
+    this.constraintsTransform,
+    this.clipBehavior = Clip.hardEdge,
+  }) : assert(alignment != null),
+       assert(clipBehavior != null),
+       assert(constraintsTransform != null),
+       super(key: key, child: child);
+
+  /// The text direction to use when interpreting the [alignment] if it is an
+  /// [AlignmentDirectional].
+  ///
+  /// Defaults to null, in which case [Directionality.of] is used to determine
+  /// the text direction.
+  final TextDirection textDirection;
+
+  /// The alignment to use when laying out the child, if it has a different size
+  /// than this widget.
+  ///
+  /// If this is an [AlignmentDirectional], then [textDirection] must not be
+  /// null.
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment] for non-[Directionality]-aware alignments.
+  ///  * [AlignmentDirectional] for [Directionality]-aware alignments.
+  final AlignmentGeometry alignment;
+
+  /// @{template flutter.widgets.constraintsTransform}
+  /// The function used to transform the incoming [BoxConstraints], to impose on
+  /// [child].
+  ///
+  /// Must not be null. The function must return a non-null and normalized
+  /// [BoxConstraints].
+  /// @{endtemplate}
+  final BoxConstraintsTransform constraintsTransform;
+
+  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderConstraintsTransformBox renderObject) {
+    renderObject
+      ..textDirection = textDirection ?? Directionality.of(context)
+      ..constraintsTransform = constraintsTransform
+      ..alignment = alignment
+      ..clipBehavior = clipBehavior;
+  }
+
+  @override
+  RenderConstraintsTransformBox createRenderObject(BuildContext context) => RenderConstraintsTransformBox(
+    textDirection: textDirection ?? Directionality.of(context),
+    alignment: alignment,
+    constraintsTransform: constraintsTransform,
+    clipBehavior: clipBehavior,
+  );
+}
+
 /// A widget that imposes no constraints on its child, allowing it to render
 /// at its "natural" size.
 ///
@@ -2242,20 +2351,20 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 ///  * [OverflowBox], a widget that imposes different constraints on its child
 ///    than it gets from its parent, possibly allowing the child to overflow
 ///    the parent.
-class UnconstrainedBox extends SingleChildRenderObjectWidget {
+class UnconstrainedBox extends StatelessWidget {
   /// Creates a widget that imposes no constraints on its child, allowing it to
   /// render at its "natural" size. If the child overflows the parents
   /// constraints, a warning will be given in debug mode.
   const UnconstrainedBox({
     Key key,
-    Widget child,
+    this.child,
     this.textDirection,
     this.alignment = Alignment.center,
     this.constrainedAxis,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(alignment != null),
        assert(clipBehavior != null),
-       super(key: key, child: child);
+       super(key: key);
 
   /// The text direction to use when interpreting the [alignment] if it is an
   /// [AlignmentDirectional].
@@ -2286,22 +2395,39 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
-  @override
-  void updateRenderObject(BuildContext context, covariant RenderUnconstrainedBox renderObject) {
-    renderObject
-      ..textDirection = textDirection ?? Directionality.of(context)
-      ..alignment = alignment
-      ..constrainedAxis = constrainedAxis
-      ..clipBehavior = clipBehavior;
-  }
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
+
+  static BoxConstraints _unconstrained(BoxConstraints constraints) => const BoxConstraints();
+  static BoxConstraints _widthConstrained(BoxConstraints constraints) => constraints.widthConstraints();
+  static BoxConstraints _heightConstrained(BoxConstraints constraints) => constraints.heightConstraints();
 
   @override
-  RenderUnconstrainedBox createRenderObject(BuildContext context) => RenderUnconstrainedBox(
-    textDirection: textDirection ?? Directionality.of(context),
-    alignment: alignment,
-    constrainedAxis: constrainedAxis,
-    clipBehavior: clipBehavior,
-  );
+  Widget build(BuildContext context) {
+    BoxConstraintsTransform constraintsTransform;
+
+    if (constrainedAxis != null) {
+      switch (constrainedAxis) {
+        case Axis.horizontal:
+          constraintsTransform = _widthConstrained;
+          break;
+        case Axis.vertical:
+          constraintsTransform = _heightConstrained;
+          break;
+      }
+    }
+    constraintsTransform ??= _unconstrained;
+
+    return ConstraintsTransformBox(
+      child: child,
+      textDirection: textDirection ?? Directionality.of(context),
+      alignment: alignment,
+      clipBehavior: clipBehavior,
+      constraintsTransform: constraintsTransform,
+    );
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
