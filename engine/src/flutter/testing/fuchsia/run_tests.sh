@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Any modifications to this script may be applicable to
+# https://github.com/flutter/flutter/blob/master/dev/bots/run_fuchsia_tests.sh
+
 # This expects the device to be in zedboot mode, with a zedboot that is
 # is compatible with the Fuchsia system image provided.
 #
