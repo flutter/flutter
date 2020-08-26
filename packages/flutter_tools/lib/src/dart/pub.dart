@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';

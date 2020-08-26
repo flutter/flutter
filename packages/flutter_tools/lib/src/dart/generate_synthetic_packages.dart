@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/localizations.dart';
 
