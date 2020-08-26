@@ -227,7 +227,7 @@ class RecordingCanvas {
   }
 
   void restore() {
-    if (!_recordingEnded) {
+    if (!_recordingEnded && _saveCount > 1) {
       _paintBounds.restoreTransformsAndClip();
     }
     if (_commands.isNotEmpty && _commands.last is PaintSave) {

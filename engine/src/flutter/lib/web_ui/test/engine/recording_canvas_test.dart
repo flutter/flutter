@@ -200,6 +200,13 @@ void testMain() {
     // Should not throw exception on restore.
     expect(() => rc.restore(), returnsNormally);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/61697.
+  test('Allows restore calls even if recording is not ended', () {
+    final RecordingCanvas rc = RecordingCanvas(Rect.fromLTRB(0, 0, 200, 400));
+    // Should not throw exception on restore.
+    expect(() => rc.restore(), returnsNormally);
+  });
 }
 
 // Expect a drawDRRect call to be registered in the mock call log, with the expectedArguments
