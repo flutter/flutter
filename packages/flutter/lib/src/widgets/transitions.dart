@@ -1110,7 +1110,7 @@ class AlignTransition extends AnimatedWidget {
 //              end: TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100)
 //          ).animate(CurvedAnimation(
 //              parent: _controller,
-//              cFurve: Curves.elasticInOut
+//              curve: Curves.elasticInOut
 //          )),
 //          child: Text('Flutter'),
 //        )
