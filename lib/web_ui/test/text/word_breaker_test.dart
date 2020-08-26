@@ -15,8 +15,13 @@ void main() {
 void testMain() {
   group('$WordBreaker', () {
     test('Does not go beyond the ends of a string', () {
+      expect(WordBreaker.prevBreakIndex('foo', -1), 0);
       expect(WordBreaker.prevBreakIndex('foo', 0), 0);
+      expect(WordBreaker.prevBreakIndex('foo', 'foo'.length + 1), 'foo'.length);
+
+      expect(WordBreaker.nextBreakIndex('foo', -1), 0);
       expect(WordBreaker.nextBreakIndex('foo', 'foo'.length), 'foo'.length);
+      expect(WordBreaker.nextBreakIndex('foo', 'foo'.length + 1), 'foo'.length);
     });
 
     test('Words and spaces', () {
@@ -138,7 +143,10 @@ void expectWords(String text, List<String> expectedWords) {
   // Forward word break lookup.
   for (String word in expectedWords) {
     final int nextBreak = WordBreaker.nextBreakIndex(text, strIndex);
-    expect(nextBreak, strIndex + word.length);
+    expect(
+      nextBreak, strIndex + word.length,
+      reason: 'Forward word break lookup: expecting to move to the end of "$word" in "$text".'
+    );
     strIndex += word.length;
   }
 
@@ -146,7 +154,10 @@ void expectWords(String text, List<String> expectedWords) {
   strIndex = text.length;
   for (String word in expectedWords.reversed) {
     final int prevBreak = WordBreaker.prevBreakIndex(text, strIndex);
-    expect(prevBreak, strIndex - word.length);
+    expect(
+      prevBreak, strIndex - word.length,
+      reason: 'Backward word break lookup: expecting to move to the start of "$word" in "$text".'
+    );
     strIndex -= word.length;
   }
 }
