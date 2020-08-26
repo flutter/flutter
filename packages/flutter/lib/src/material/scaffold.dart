@@ -2066,10 +2066,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   // TODO(Piinks): Deprecate after customers are migrated
-  // @Deprecated(
-  //   'Use ScaffoldMessenger.showSnackBar instead. '
-  //   'This feature was deprecated after TBD'
-  // )
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
     assert(() {
       if(_scaffoldMessenger == null) {
@@ -2101,10 +2097,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// The removed snack bar does not run its normal exit animation. If there are
   /// any queued snack bars, they begin their entrance animation immediately.
   // TODO(Piinks): Deprecate after customers are migrated
-  // @Deprecated(
-  //   'Use ScaffoldMessenger.removeCurrentSnackBar instead. '
-  //   'This feature was deprecated after TBD'
-  // )
   void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
     assert(() {
       if(_scaffoldMessenger == null) {
@@ -2135,10 +2127,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// The closed completer is called after the animation is complete.
   // TODO(Piinks): Deprecate after customers are migrated.
-  // @Deprecated(
-  //   'Use ScaffoldMessenger.hideCurrentSnackBar instead. '
-  //   'This feature was deprecated after TBD'
-  // )
   void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
     assert(() {
       if(_scaffoldMessenger == null) {
