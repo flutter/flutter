@@ -259,6 +259,7 @@ class ImageCache {
         });
       }
       _currentSizeBytes -= image.sizeBytes!;
+      image.completer.keepAlive = false;
       return true;
     }
     if (!kReleaseMode) {
@@ -282,6 +283,7 @@ class ImageCache {
     if (image.sizeBytes != null && image.sizeBytes! <= maximumSizeBytes) {
       _currentSizeBytes += image.sizeBytes!;
       _cache[key] = image;
+      image.completer.keepAlive = true;
       _checkCacheSize(timelineTask);
     }
   }
@@ -342,6 +344,7 @@ class ImageCache {
       // Make sure the cache starts tracking it as live again.
       _trackLiveImage(key, _LiveImage(image.completer, image.sizeBytes, () => _liveImages.remove(key)));
       _cache[key] = image;
+      image.completer.keepAlive = true;
       return image.completer;
     }
 
@@ -492,6 +495,7 @@ class ImageCache {
       final Object key = _cache.keys.first;
       final _CachedImage image = _cache[key]!;
       _currentSizeBytes -= image.sizeBytes!;
+      image.completer.keepAlive = false;
       _cache.remove(key);
       if (!kReleaseMode) {
         finishArgs['evictedKeys'].add(key.toString());

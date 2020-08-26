@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 class TestImageInfo implements ImageInfo {
-  const TestImageInfo(this.value, { this.image, this.scale = 1.0, this.debugLabel, this.keepAlive = true });
+  const TestImageInfo(this.value, { this.image, this.scale = 1.0, this.debugLabel, this.autoDispose = true });
 
   @override
   final ui.Image image;
@@ -78,14 +78,16 @@ Future<ImageInfo> extractOneFrame(ImageStream stream) {
 }
 
 class TestImage implements ui.Image {
-  const TestImage({this.height = 0, this.width = 0});
+  const TestImage({this.height = 0, this.width = 0, this.onDisposedCallback});
   @override
   final int height;
   @override
   final int width;
 
+  final VoidCallback/*?*/ onDisposedCallback;
+
   @override
-  void dispose() { }
+  void dispose() => onDisposedCallback?.call();
 
   @override
   Future<ByteData> toByteData({ ImageByteFormat format = ImageByteFormat.rawRgba }) {
@@ -144,7 +146,7 @@ class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterIm
 }
 
 class TestImageStreamCompleter extends ImageStreamCompleter {
-  void testSetImage(TestImage image) {
-    setImage(ImageInfo(image: image, scale: 1.0));
+  void testSetImage(TestImage image, {bool autoDispose = true}) {
+    setImage(ImageInfo(image: image, scale: 1.0, autoDispose: autoDispose));
   }
 }

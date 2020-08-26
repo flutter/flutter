@@ -734,14 +734,14 @@ void main() {
     expect(image.disposed, true);
   });
 
-  testWidgets('does not dispose image when last listener drops - single frame - keep alive', (WidgetTester tester) async {
+  testWidgets('does not dispose image when last listener drops - single frame - no auto dispose', (WidgetTester tester) async {
     final FakeImage image = FakeImage(10, 10);
     expect(image.disposed, false);
 
     final ImageInfo imageInfo = ImageInfo(
       image: image,
       debugLabel: 'fakeImage',
-      keepAlive: true,
+      autoDispose: false,
     );
     final ImageStreamCompleter imageStream = OneFrameImageStreamCompleter(Future<ImageInfo>.value(imageInfo));
     expect(image.disposed, false);

@@ -478,4 +478,88 @@ void main() {
     expect(imageCache.statusForKey(testImage).keepAlive, true);
     expect(imageCache.currentSizeBytes, testImageSize);
   });
+
+  test('ImageStream is marked as keepAlive when in cache', () async {
+    const int key = 1;
+    bool testImageDisposed = false;
+    final TestImage testImage = TestImage(width: 8, height: 8, onDisposedCallback: () => testImageDisposed = true);
+
+    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
+
+    final TestImageStreamCompleter completer = TestImageStreamCompleter();
+
+    expect(completer.keepAlive, false);
+    completer.addListener(listener);
+
+    expect(completer.keepAlive, false);
+    expect(testImageDisposed, false);
+
+    imageCache.putIfAbsent(key, () => completer);
+
+    // Image hasn't completed yet - keep alive shouldn't be set.
+    expect(completer.keepAlive, false);
+    expect(testImageDisposed, false);
+
+    // This should cause keepAlive to be set to true.
+    completer.testSetImage(testImage);
+
+    expect(completer.keepAlive, true);
+    expect(testImageDisposed, false);
+
+    // keepAlive should still be true after this, and the completer should not
+    // have disposed the image.
+    completer.removeListener(listener);
+
+    expect(completer.keepAlive, true);
+    expect(testImageDisposed, false);
+
+    // keepAlive should get set to false, and the completer should dispose of
+    // the image since it's auto-disposed.
+    imageCache.evict(key);
+
+    expect(completer.keepAlive, false);
+    expect(testImageDisposed, true);
+  });
+
+  test('ImageStream is marked as keepAlive when in cache - no autodispose', () async {
+    const int key = 1;
+    bool testImageDisposed = false;
+    final TestImage testImage = TestImage(width: 8, height: 8, onDisposedCallback: () => testImageDisposed = true);
+
+    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
+
+    final TestImageStreamCompleter completer = TestImageStreamCompleter();
+
+    expect(completer.keepAlive, false);
+    completer.addListener(listener);
+
+    expect(completer.keepAlive, false);
+    expect(testImageDisposed, false);
+
+    imageCache.putIfAbsent(key, () => completer);
+
+    // Image hasn't completed yet - keep alive shouldn't be set.
+    expect(completer.keepAlive, false);
+    expect(testImageDisposed, false);
+
+    // This should cause keepAlive to be set to true.
+    completer.testSetImage(testImage, autoDispose: false);
+
+    expect(completer.keepAlive, true);
+    expect(testImageDisposed, false);
+
+    // keepAlive should still be true after this, and the completer should not
+    // have disposed the image.
+    completer.removeListener(listener);
+
+    expect(completer.keepAlive, true);
+    expect(testImageDisposed, false);
+
+    // keepAlive should get set to false, and the completer should dispose of
+    // the image since it's auto-disposed.
+    imageCache.evict(key);
+
+    expect(completer.keepAlive, false);
+    expect(testImageDisposed, false); // because we set autoDispose to false.
+  });
 }

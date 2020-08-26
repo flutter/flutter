@@ -24,7 +24,7 @@ class ImageInfo {
   /// The image, autoDispose, and scale paraemters must not be null.
   ///
   /// The tag may be used to identify the source of this image.
-  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel, this.autoDispose = false })
+  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel, this.autoDispose = true })
     : assert(image != null),
       assert(scale != null),
       assert(autoDispose != null);
@@ -352,6 +352,24 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// A string identifying the source of the underlying image.
   String? debugLabel;
 
+
+  /// Whether this stream should be kept alive even after its listener count
+  /// drops to zero.
+  ///
+  /// For example, the [ImageCache] may be holding a reference to this stream
+  /// and need to keep it alive should a new listener come along.
+  bool get keepAlive => _keepAlive;
+  set keepAlive(bool value) {
+    if (value == _keepAlive) {
+      return;
+    }
+    _keepAlive = value;
+    if (!_keepAlive && !hasListeners && _currentImage?.autoDispose == true) {
+      _currentImage!.image.dispose();
+    }
+  }
+  bool _keepAlive = false;
+
   /// Whether any listeners are currently registered.
   ///
   /// Clients should not depend on this value for their behavior, because having
@@ -425,7 +443,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
         callback();
       }
       _onLastListenerRemovedCallbacks.clear();
-      if (_currentImage?.autoDispose == true) {
+      if (!keepAlive && _currentImage?.autoDispose == true) {
         _currentImage!.image.dispose();
       }
     }
