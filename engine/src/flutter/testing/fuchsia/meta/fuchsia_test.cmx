@@ -11,14 +11,13 @@
     ],
     "services": [
       "fuchsia.accessibility.semantics.SemanticsManager",
-      "fuchsia.deprecatedtimezone.Timezone",
-      "fuchsia.logger.LogSink",
-      "fuchsia.netstack.Netstack",
       "fuchsia.process.Launcher",
-      "fuchsia.settings.Intl",
+      "fuchsia.deprecatedtimezone.Timezone",
+      "fuchsia.netstack.Netstack",
       "fuchsia.sysmem.Allocator",
-      "fuchsia.tracing.provider.Registry",
       "fuchsia.vulkan.loader.Loader",
+      "fuchsia.logger.LogSink",
+      "fuchsia.tracing.provider.Registry",
       "fuchsia.intl.PropertyProvider"
     ]
   }
