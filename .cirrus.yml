@@ -271,7 +271,6 @@ task:
         - ./dev/bots/docs.sh
 
     - name: customer_testing-linux
-      skip: true # release branch
       # environment:
         # Empirically, this shard runs fine at 1 CPU and 4G RAM as of October 2019. We will probably
         # want to grow this container when we invite people to add their tests in large numbers.
@@ -452,7 +451,6 @@ task:
         MEMORY: 6G
 
     - name: customer_testing-windows
-      skip: true # release branch
       environment:
         # As of December 2019, the customer_testing-windows shard got faster with more CPUs up to 4
         # CPUs (which requires >=4G RAM), and needed at least 2G of RAM to not run out of memory.
@@ -570,7 +568,6 @@ task:
       << : *MACOS_SHARD_TEMPLATE
 
     - name: customer_testing-macos
-      skip: true # release branch
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - rm -rf bin/cache/pkg/tests
