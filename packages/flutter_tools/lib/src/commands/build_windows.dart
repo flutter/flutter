@@ -73,6 +73,7 @@ class BuildWindowsCommand extends BuildSubCommand {
         fileSystem: globals.fs,
         logger: globals.logger,
         appFilenamePattern: 'app.so',
+        flutterUsage: globals.flutterUsage,
       ),
     );
     return FlutterCommandResult.success();
