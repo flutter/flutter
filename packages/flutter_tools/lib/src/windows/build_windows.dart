@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../artifacts.dart';
+import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -11,6 +12,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
@@ -25,6 +27,7 @@ const String _cmakeVisualStudioGeneratorIdentifier = 'Visual Studio 16 2019';
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   String target,
   VisualStudio visualStudioOverride,
+  SizeAnalyzer sizeAnalyzer,
 }) async {
   if (!windowsProject.cmakeFile.existsSync()) {
     throwToolExit(
@@ -75,6 +78,29 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   } finally {
     status.cancel();
   }
+  if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
+    final String arch = getNameForTargetPlatform(TargetPlatform.windows_x64);
+    final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
+      .childFile('snapshot.$arch.json');
+    final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
+      .childFile('trace.$arch.json');
+    final Map<String, Object> output = await sizeAnalyzer.analyzeAotSnapshot(
+      aotSnapshot: codeSizeFile,
+      // This analysis is only supported for release builds.
+      outputDirectory: globals.fs.directory(
+        globals.fs.path.join(getWindowsBuildDirectory(), 'runner', 'Release'),
+      ),
+      precompilerTrace: precompilerTrace,
+      type: 'windows',
+    );
+    final File outputFile = globals.fsUtils.getUniqueFile(
+      globals.fs.directory(getBuildDirectory()),'windows-code-size-analysis', 'json',
+    )..writeAsStringSync(jsonEncode(output));
+    // This message is used as a sentinel in analyze_apk_size_test.dart
+    globals.printStatus(
+      'A summary of your Windows bundle analysis can be found at: ${outputFile.path}',
+    );
+  }
 }
 
 Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory sourceDir) async {
@@ -107,6 +133,10 @@ Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory
 Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeName) async {
   final Stopwatch sw = Stopwatch()..start();
 
+  // MSBuild sends all output to stdout, including build errors. This surfaces
+  // known error patterns.
+  final RegExp errorMatcher = RegExp(r':\s*(?:warning|(?:fatal )?error).*?:');
+
   int result;
   try {
     result = await processUtils.stream(
@@ -126,13 +156,13 @@ Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeNam
           'VERBOSE_SCRIPT_LOGGING': 'true'
       },
       trace: true,
+      stdoutErrorMatcher: errorMatcher,
     );
   } on ArgumentError {
     throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
   }
   if (result != 0) {
-    final String verboseInstructions = globals.logger.isVerbose ? '' : ' To view the stack trace, please run `flutter run -d windows -v`.';
-    throwToolExit('Build process failed.$verboseInstructions');
+    throwToolExit('Build process failed.');
   }
   globals.flutterUsage.sendTiming('build', 'windows-cmake-build', Duration(milliseconds: sw.elapsedMilliseconds));
 }

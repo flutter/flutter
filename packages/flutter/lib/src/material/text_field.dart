@@ -261,7 +261,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///
 /// See also:
 ///
-///  * <https://material.io/design/components/text-fields.html>
 ///  * [TextFormField], which integrates with the [Form] widget.
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
@@ -269,8 +268,11 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///    [TextField]. The [EditableText] widget is rarely used directly unless
 ///    you are implementing an entirely different design language, such as
 ///    Cupertino.
-///  * Learn how to use a [TextEditingController] in one of our
-///    [cookbook recipe](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)s.
+///  * <https://material.io/design/components/text-fields.html>
+///  * Cookbook: [Create and style a text field](https://flutter.dev/docs/cookbook/forms/text-input)
+///  * Cookbook: [Handle changes to a text field](https://flutter.dev/docs/cookbook/forms/text-field-changes)
+///  * Cookbook: [Retrieve the value of a text field](https://flutter.dev/docs/cookbook/forms/retrieve-input)
+///  * Cookbook: [Focus and text fields](https://flutter.dev/docs/cookbook/forms/focus)
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
@@ -351,6 +353,7 @@ class TextField extends StatefulWidget {
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
+    this.onAppPrivateCommand,
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
@@ -369,6 +372,7 @@ class TextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints,
+    this.restorationId,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -632,6 +636,9 @@ class TextField extends StatefulWidget {
   ///    [TextInputAction.previous] for [textInputAction].
   final ValueChanged<String> onSubmitted;
 
+  /// {@macro flutter.widgets.editableText.onAppPrivateCommand}
+  final AppPrivateCommandCallback onAppPrivateCommand;
+
   /// {@macro flutter.widgets.editableText.inputFormatters}
   final List<TextInputFormatter> inputFormatters;
 
@@ -695,7 +702,7 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-  /// {@macro flutter.rendering.editable.selectionEnabled}
+  /// {@macro flutter.widgets.editableText.selectionEnabled}
   bool get selectionEnabled => enableInteractiveSelection;
 
   /// {@template flutter.material.textfield.onTap}
@@ -781,6 +788,25 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String> autofillHints;
 
+  /// {@template flutter.material.textfield.restorationId}
+  /// Restoration ID to save and restore the state of the text field.
+  ///
+  /// If non-null, the text field will persist and restore its current scroll
+  /// offset and - if no [controller] has been provided - the content of the
+  /// text field. If a [controller] has been provided, it is the responsibility
+  /// of the owner of that controller to persist and restore it, e.g. by using
+  /// a [RestorableTextEditingController].
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  /// {@endtemplate}
+  final String restorationId;
+
   @override
   _TextFieldState createState() => _TextFieldState();
 
@@ -822,9 +848,9 @@ class TextField extends StatefulWidget {
   }
 }
 
-class _TextFieldState extends State<TextField> implements TextSelectionGestureDetectorBuilderDelegate {
-  TextEditingController _controller;
-  TextEditingController get _effectiveController => widget.controller ?? _controller;
+class _TextFieldState extends State<TextField> with RestorationMixin implements TextSelectionGestureDetectorBuilderDelegate {
+  RestorableTextEditingController _controller;
+  TextEditingController get _effectiveController => widget.controller ?? _controller.value;
 
   FocusNode _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
@@ -931,7 +957,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     super.initState();
     _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(state: this);
     if (widget.controller == null) {
-      _controller = TextEditingController();
+      _createLocalController();
     }
     _effectiveFocusNode.canRequestFocus = _isEnabled;
   }
@@ -957,10 +983,13 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
   @override
   void didUpdateWidget(TextField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller == null && oldWidget.controller != null)
-      _controller = TextEditingController.fromValue(oldWidget.controller.value);
-    else if (widget.controller != null && oldWidget.controller == null)
+    if (widget.controller == null && oldWidget.controller != null) {
+      _createLocalController(oldWidget.controller.value);
+    } else if (widget.controller != null && oldWidget.controller == null) {
+      unregisterFromRestoration(_controller);
+      _controller.dispose();
       _controller = null;
+    }
     _effectiveFocusNode.canRequestFocus = _canRequestFocus;
     if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly && _isEnabled) {
       if(_effectiveController.selection.isCollapsed) {
@@ -970,8 +999,34 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
   }
 
   @override
+  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+    if (_controller != null) {
+      _registerController();
+    }
+  }
+
+  void _registerController() {
+    assert(_controller != null);
+    registerForRestoration(_controller, 'controller');
+  }
+
+  void _createLocalController([TextEditingValue value]) {
+    assert(_controller == null);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
+    if (!restorePending) {
+      _registerController();
+    }
+  }
+
+  @override
+  String get restorationId => widget.restorationId;
+
+  @override
   void dispose() {
     _focusNode?.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -1116,59 +1171,64 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     }
 
     Widget child = RepaintBoundary(
-      child: EditableText(
-        key: editableTextKey,
-        readOnly: widget.readOnly || !_isEnabled,
-        toolbarOptions: widget.toolbarOptions,
-        showCursor: widget.showCursor,
-        showSelectionHandles: _showSelectionHandles,
-        controller: controller,
-        focusNode: focusNode,
-        keyboardType: widget.keyboardType,
-        textInputAction: widget.textInputAction,
-        textCapitalization: widget.textCapitalization,
-        style: style,
-        strutStyle: widget.strutStyle,
-        textAlign: widget.textAlign,
-        textDirection: widget.textDirection,
-        autofocus: widget.autofocus,
-        obscuringCharacter: widget.obscuringCharacter,
-        obscureText: widget.obscureText,
-        autocorrect: widget.autocorrect,
-        smartDashesType: widget.smartDashesType,
-        smartQuotesType: widget.smartQuotesType,
-        enableSuggestions: widget.enableSuggestions,
-        maxLines: widget.maxLines,
-        minLines: widget.minLines,
-        expands: widget.expands,
-        selectionColor: selectionColor,
-        selectionControls: widget.selectionEnabled ? textSelectionControls : null,
-        onChanged: widget.onChanged,
-        onSelectionChanged: _handleSelectionChanged,
-        onEditingComplete: widget.onEditingComplete,
-        onSubmitted: widget.onSubmitted,
-        onSelectionHandleTapped: _handleSelectionHandleTapped,
-        inputFormatters: formatters,
-        rendererIgnoresPointer: true,
-        mouseCursor: MouseCursor.defer, // TextField will handle the cursor
-        cursorWidth: widget.cursorWidth,
-        cursorHeight: widget.cursorHeight,
-        cursorRadius: cursorRadius,
-        cursorColor: cursorColor,
-        selectionHeightStyle: widget.selectionHeightStyle,
-        selectionWidthStyle: widget.selectionWidthStyle,
-        cursorOpacityAnimates: cursorOpacityAnimates,
-        cursorOffset: cursorOffset,
-        paintCursorAboveText: paintCursorAboveText,
-        backgroundCursorColor: CupertinoColors.inactiveGray,
-        scrollPadding: widget.scrollPadding,
-        keyboardAppearance: keyboardAppearance,
-        enableInteractiveSelection: widget.enableInteractiveSelection,
-        dragStartBehavior: widget.dragStartBehavior,
-        scrollController: widget.scrollController,
-        scrollPhysics: widget.scrollPhysics,
-        autofillHints: widget.autofillHints,
-        autocorrectionTextRectColor: autocorrectionTextRectColor,
+      child: UnmanagedRestorationScope(
+        bucket: bucket,
+        child: EditableText(
+          key: editableTextKey,
+          readOnly: widget.readOnly || !_isEnabled,
+          toolbarOptions: widget.toolbarOptions,
+          showCursor: widget.showCursor,
+          showSelectionHandles: _showSelectionHandles,
+          controller: controller,
+          focusNode: focusNode,
+          keyboardType: widget.keyboardType,
+          textInputAction: widget.textInputAction,
+          textCapitalization: widget.textCapitalization,
+          style: style,
+          strutStyle: widget.strutStyle,
+          textAlign: widget.textAlign,
+          textDirection: widget.textDirection,
+          autofocus: widget.autofocus,
+          obscuringCharacter: widget.obscuringCharacter,
+          obscureText: widget.obscureText,
+          autocorrect: widget.autocorrect,
+          smartDashesType: widget.smartDashesType,
+          smartQuotesType: widget.smartQuotesType,
+          enableSuggestions: widget.enableSuggestions,
+          maxLines: widget.maxLines,
+          minLines: widget.minLines,
+          expands: widget.expands,
+          selectionColor: selectionColor,
+          selectionControls: widget.selectionEnabled ? textSelectionControls : null,
+          onChanged: widget.onChanged,
+          onSelectionChanged: _handleSelectionChanged,
+          onEditingComplete: widget.onEditingComplete,
+          onSubmitted: widget.onSubmitted,
+          onAppPrivateCommand: widget.onAppPrivateCommand,
+          onSelectionHandleTapped: _handleSelectionHandleTapped,
+          inputFormatters: formatters,
+          rendererIgnoresPointer: true,
+          mouseCursor: MouseCursor.defer, // TextField will handle the cursor
+          cursorWidth: widget.cursorWidth,
+          cursorHeight: widget.cursorHeight,
+          cursorRadius: cursorRadius,
+          cursorColor: cursorColor,
+          selectionHeightStyle: widget.selectionHeightStyle,
+          selectionWidthStyle: widget.selectionWidthStyle,
+          cursorOpacityAnimates: cursorOpacityAnimates,
+          cursorOffset: cursorOffset,
+          paintCursorAboveText: paintCursorAboveText,
+          backgroundCursorColor: CupertinoColors.inactiveGray,
+          scrollPadding: widget.scrollPadding,
+          keyboardAppearance: keyboardAppearance,
+          enableInteractiveSelection: widget.enableInteractiveSelection,
+          dragStartBehavior: widget.dragStartBehavior,
+          scrollController: widget.scrollController,
+          scrollPhysics: widget.scrollPhysics,
+          autofillHints: widget.autofillHints,
+          autocorrectionTextRectColor: autocorrectionTextRectColor,
+          restorationId: 'editable',
+        ),
       ),
     );
 

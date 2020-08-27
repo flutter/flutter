@@ -26,6 +26,10 @@ script_dir=$(dirname "$(readlink -f "$0")")
 # Bot key to pave and ssh the device.
 pkey="/etc/botanist/keys/id_rsa_infra"
 
+# This is longer than the test timeout as dumping the
+# logs can sometimes take longer.
+ssh_timeout_seconds=360
+
 # The nodes are named blah-blah--four-word-fuchsia-id
 device_name=${SWARMING_BOT_ID#*--}
 
@@ -38,9 +42,24 @@ else
 fi
 
 reboot() {
-  # note: this will set an exit code of 255, which we can ignore.
+  $script_dir/fuchsia_ctl -d $device_name ssh \
+      -c "log_listener --dump_logs yes --file /tmp/log.txt" \
+      --timeout-seconds $ssh_timeout_seconds \
+      --identity-file $pkey
+  # As we are not using recipes we don't have a way to know the location
+  # to upload the log to isolated. We are saving the log to a file to avoid dart
+  # hanging when running the process and then just using printing the content to
+  # the console.
+  $script_dir/fuchsia_ctl -d $device_name ssh \
+       -c "cat /tmp/log.txt" \
+       --timeout-seconds $ssh_timeout_seconds \
+       --identity-file $pkey
   echo "$(date) START:REBOOT ------------------------------------------"
-  $script_dir/fuchsia_ctl -d $device_name --device-finder-path $script_dir/device-finder ssh --identity-file $pkey -c "dm reboot-recovery" || true
+  # note: this will set an exit code of 255, which we can ignore.
+  $script_dir/fuchsia_ctl -d $device_name \
+      --device-finder-path $script_dir/device-finder \
+      ssh --identity-file $pkey \
+      -c "dm reboot-recovery" || true
   echo "$(date) END:REBOOT --------------------------------------------"
 }
 
@@ -52,7 +71,13 @@ $script_dir/fuchsia_ctl -d $device_name pave  -i $1 --public-key "key.pub"
 echo "$(date) END:PAVING --------------------------------------------"
 
 
-$script_dir/fuchsia_ctl push-packages -d $device_name --identity-file $pkey --repoArchive generic-x64.tar.gz -p tiles -p tiles_ctl
+echo "$(date) START:PUSH_PACKAGES -------------------------------"
+$script_dir/fuchsia_ctl push-packages \
+    -d $device_name \
+    --identity-file $pkey \
+    --repoArchive generic-x64.tar.gz \
+    -p tiles -p tiles_ctl
+echo "$(date) END:PUSH_PACKAGES ---------------------------------"
 
 # set fuchsia ssh config
 cat > $script_dir/fuchsia_ssh_config << EOF

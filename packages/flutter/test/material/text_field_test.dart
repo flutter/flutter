@@ -6988,7 +6988,7 @@ void main() {
 
     final Offset offset = tester.getTopLeft(find.byType(TextField)) + const Offset(150.0, 9.0);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
       offset,
@@ -7026,7 +7026,7 @@ void main() {
 
     final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final Offset offset = textfieldStart + const Offset(150.0, 9.0);
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
@@ -7077,7 +7077,7 @@ void main() {
 
     final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final Offset offset = textfieldStart + const Offset(150.0, 9.0);
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(

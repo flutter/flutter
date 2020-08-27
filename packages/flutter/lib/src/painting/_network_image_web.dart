@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 import 'dart:ui' as ui;
@@ -33,7 +32,7 @@ class NetworkImage
   final double scale;
 
   @override
-  final Map<String, String> headers;
+  final Map<String, String>? headers;
 
   @override
   Future<NetworkImage> obtainKey(
@@ -58,9 +57,9 @@ class NetworkImage
         informationCollector: _imageStreamInformationCollector(key));
   }
 
-  InformationCollector _imageStreamInformationCollector(
+  InformationCollector? _imageStreamInformationCollector(
       image_provider.NetworkImage key) {
-    InformationCollector collector;
+    InformationCollector? collector;
     assert(() {
       collector = () {
         return <DiagnosticsNode>[

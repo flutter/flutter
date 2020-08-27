@@ -2216,7 +2216,7 @@ void main() {
 
     final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
       textfieldStart + const Offset(150.0, 5.0),
@@ -2256,7 +2256,7 @@ void main() {
 
     final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
       textfieldStart + const Offset(150.0, 5.0),

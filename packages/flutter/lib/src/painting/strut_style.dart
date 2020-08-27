@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 
@@ -297,8 +296,8 @@ class StrutStyle with Diagnosticable {
   /// If provided, fontSize must be positive and non-zero, leading must be
   /// zero or positive.
   const StrutStyle({
-    String fontFamily,
-    List<String> fontFamilyFallback,
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
     this.fontSize,
     this.height,
     this.leading,
@@ -306,13 +305,13 @@ class StrutStyle with Diagnosticable {
     this.fontStyle,
     this.forceStrutHeight,
     this.debugLabel,
-    String package,
+    String? package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        _fontFamilyFallback = fontFamilyFallback,
        _package = package,
        assert(fontSize == null || fontSize > 0),
        assert(leading == null || leading >= 0),
-       assert(package == null || (package != null && (fontFamily != null || fontFamilyFallback != null)));
+       assert(package == null || (fontFamily != null || fontFamilyFallback != null));
 
   /// Builds a StrutStyle that contains values of the equivalent properties in
   /// the provided [textStyle].
@@ -335,20 +334,20 @@ class StrutStyle with Diagnosticable {
   /// from being prepended twice.
   StrutStyle.fromTextStyle(
     TextStyle textStyle, {
-    String fontFamily,
-    List<String> fontFamilyFallback,
-    double fontSize,
-    double height,
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
+    double? fontSize,
+    double? height,
     this.leading, // TextStyle does not have an equivalent (yet).
-    FontWeight fontWeight,
-    FontStyle fontStyle,
+    FontWeight? fontWeight,
+    FontStyle? fontStyle,
     this.forceStrutHeight,
-    String debugLabel,
-    String package,
+    String? debugLabel,
+    String? package,
   }) : assert(textStyle != null),
        assert(fontSize == null || fontSize > 0),
        assert(leading == null || leading >= 0),
-       assert(package == null || (package != null && (fontFamily != null || fontFamilyFallback != null))),
+       assert(package == null || fontFamily != null || fontFamilyFallback != null),
        fontFamily = fontFamily != null ? (package == null ? fontFamily : 'packages/$package/$fontFamily') : textStyle.fontFamily,
        _fontFamilyFallback = fontFamilyFallback ?? textStyle.fontFamilyFallback,
        height = height ?? textStyle.height,
@@ -380,7 +379,7 @@ class StrutStyle with Diagnosticable {
   /// was found, the default platform font family will be used instead. Unlike
   /// [TextStyle.fontFamilyFallback], the font does not need to contain the
   /// desired glyphs to match.
-  final String fontFamily;
+  final String? fontFamily;
 
   /// The ordered list of font families to fall back on when a higher priority
   /// font family cannot be found.
@@ -401,16 +400,16 @@ class StrutStyle with Diagnosticable {
   /// prefixed with 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto').
   /// The package name should be provided by the `package` argument in the
   /// constructor.
-  List<String> get fontFamilyFallback {
+  List<String>? get fontFamilyFallback {
     if (_package != null && _fontFamilyFallback != null)
-      return _fontFamilyFallback.map((String family) => 'packages/$_package/$family').toList();
+      return _fontFamilyFallback!.map((String family) => 'packages/$_package/$family').toList();
     return _fontFamilyFallback;
   }
-  final List<String> _fontFamilyFallback;
+  final List<String>? _fontFamilyFallback;
 
   // This is stored in order to prefix the fontFamilies in _fontFamilyFallback
   // in the [fontFamilyFallback] getter.
-  final String _package;
+  final String? _package;
 
   /// The size of text (in logical pixels) to use when obtaining metrics from the font.
   ///
@@ -419,7 +418,7 @@ class StrutStyle with Diagnosticable {
   /// [fontSize].
   ///
   /// The default fontSize is 14 logical pixels.
-  final double fontSize;
+  final double? fontSize;
 
   /// The multiple of [fontSize] to multiply the ascent and descent by where
   /// `ascent + descent = fontSize`.
@@ -447,17 +446,17 @@ class StrutStyle with Diagnosticable {
   /// See [TextStyle.height], which works in a similar manner.
   ///
   /// The default height is null.
-  final double height;
+  final double? height;
 
   /// The typeface thickness to use when calculating the strut (e.g., bold).
   ///
   /// The default fontWeight is [FontWeight.w400].
-  final FontWeight fontWeight;
+  final FontWeight? fontWeight;
 
   /// The typeface variant to use when calculating the strut (e.g., italics).
   ///
   /// The default fontStyle is [FontStyle.normal].
-  final FontStyle fontStyle;
+  final FontStyle? fontStyle;
 
   /// The custom leading to apply to the strut as a multiple of [fontSize].
   ///
@@ -467,7 +466,7 @@ class StrutStyle with Diagnosticable {
   /// baseline.
   ///
   /// The default leading is null, which will use the font-specified leading.
-  final double leading;
+  final double? leading;
 
   /// Whether the strut height should be forced.
   ///
@@ -486,7 +485,7 @@ class StrutStyle with Diagnosticable {
   /// of the strut.
   ///
   /// The default is false.
-  final bool forceStrutHeight;
+  final bool? forceStrutHeight;
 
   /// A human-readable description of this strut style.
   ///
@@ -494,7 +493,7 @@ class StrutStyle with Diagnosticable {
   ///
   /// This property is not considered when comparing strut styles using `==` or
   /// [compareTo], and it does not affect [hashCode].
-  final String debugLabel;
+  final String? debugLabel;
 
   /// Describe the difference between this style and another, in terms of how
   /// much damage it will make to the rendering.
@@ -525,7 +524,7 @@ class StrutStyle with Diagnosticable {
   /// [StrutStyle] shares many of the same basic properties as [TextStyle].
   ///
   /// If the given text style is null, returns this strut style.
-  StrutStyle inheritFromTextStyle(TextStyle other) {
+  StrutStyle inheritFromTextStyle(TextStyle? other) {
     if (other == null)
       return this;
 
@@ -580,15 +579,15 @@ class StrutStyle with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
     super.debugFillProperties(properties);
     if (debugLabel != null)
-      properties.add(MessageProperty('${prefix}debugLabel', debugLabel));
+      properties.add(MessageProperty('${prefix}debugLabel', debugLabel!));
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[
       StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false),
       IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null),
       DoubleProperty('${prefix}size', fontSize, defaultValue: null),
     ];
-    String weightDescription;
+    String? weightDescription;
     if (fontWeight != null) {
-      weightDescription = 'w${fontWeight.index + 1}00';
+      weightDescription = 'w${fontWeight!.index + 1}00';
     }
     // TODO(jacobr): switch this to use enumProperty which will either cause the
     // weight description to change to w600 from 600 or require existing

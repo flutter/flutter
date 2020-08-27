@@ -19,7 +19,7 @@ import 'object.dart';
 class _DebugSize extends Size {
   _DebugSize(Size source, this._owner, this._canBeUsedByParent) : super.copy(source);
   final RenderBox _owner;
-  final bool _canBeUsedByParent;
+  final bool/*!*/ _canBeUsedByParent;
 }
 
 /// Immutable layout constraints for [RenderBox] layout.
@@ -92,10 +92,10 @@ class BoxConstraints extends Constraints {
     this.maxWidth = double.infinity,
     this.minHeight = 0.0,
     this.maxHeight = double.infinity,
-  }) : assert (minWidth != null),
-       assert (maxWidth != null),
-       assert (minHeight != null),
-       assert (maxHeight != null);
+  }) : assert(minWidth != null),
+       assert(maxWidth != null),
+       assert(minHeight != null),
+       assert(maxHeight != null);
 
   /// Creates box constraints that is respected only by the given size.
   BoxConstraints.tight(Size size)
@@ -468,7 +468,7 @@ class BoxConstraints extends Constraints {
   /// object whose fields are all set to 0.0.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BoxConstraints lerp(BoxConstraints a, BoxConstraints b, double t) {
+  static BoxConstraints lerp(BoxConstraints/*?*/ a, BoxConstraints/*?*/ b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
@@ -1294,9 +1294,9 @@ abstract class RenderBox extends RenderObject {
       child.parentData = BoxParentData();
   }
 
-  Map<_IntrinsicDimensionsCacheEntry, double> _cachedIntrinsicDimensions;
+  Map<_IntrinsicDimensionsCacheEntry, double/*!*/> _cachedIntrinsicDimensions;
 
-  double _computeIntrinsicDimension(_IntrinsicDimension dimension, double argument, double computer(double argument)) {
+  double/*!*/ _computeIntrinsicDimension(_IntrinsicDimension dimension, double argument, double/*!*/ computer(double argument)) {
     assert(RenderObject.debugCheckingIntrinsics || !debugDoingThisResize); // performResize should not depend on anything except the incoming constraints
     bool shouldCache = true;
     assert(() {
@@ -1332,7 +1332,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Do not override this method. Instead, implement [computeMinIntrinsicWidth].
   @mustCallSuper
-  double getMinIntrinsicWidth(double height) {
+  double getMinIntrinsicWidth(double/*!*/ height) {
     assert(() {
       if (height == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -1455,7 +1455,7 @@ abstract class RenderBox extends RenderObject {
   ///  * [computeMaxIntrinsicWidth], which computes the smallest width beyond
   ///    which increasing the width never decreases the preferred height.
   @protected
-  double computeMinIntrinsicWidth(double height) {
+  double/*!*/ computeMinIntrinsicWidth(double/*!*/ height) {
     return 0.0;
   }
 
@@ -1477,7 +1477,7 @@ abstract class RenderBox extends RenderObject {
   /// Do not override this method. Instead, implement
   /// [computeMaxIntrinsicWidth].
   @mustCallSuper
-  double getMaxIntrinsicWidth(double height) {
+  double getMaxIntrinsicWidth(double/*!*/ height) {
     assert(() {
       if (height == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -1535,7 +1535,7 @@ abstract class RenderBox extends RenderObject {
   ///
   ///  * [computeMinIntrinsicWidth], which has usage examples.
   @protected
-  double computeMaxIntrinsicWidth(double height) {
+  double/*!*/ computeMaxIntrinsicWidth(double/*!*/ height) {
     return 0.0;
   }
 
@@ -1556,7 +1556,7 @@ abstract class RenderBox extends RenderObject {
   /// Do not override this method. Instead, implement
   /// [computeMinIntrinsicHeight].
   @mustCallSuper
-  double getMinIntrinsicHeight(double width) {
+  double getMinIntrinsicHeight(double/*!*/ width) {
     assert(() {
       if (width == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -1612,7 +1612,7 @@ abstract class RenderBox extends RenderObject {
   ///  * [computeMaxIntrinsicHeight], which computes the smallest height beyond
   ///    which increasing the height never decreases the preferred width.
   @protected
-  double computeMinIntrinsicHeight(double width) {
+  double/*!*/ computeMinIntrinsicHeight(double/*!*/ width) {
     return 0.0;
   }
 
@@ -1634,7 +1634,7 @@ abstract class RenderBox extends RenderObject {
   /// Do not override this method. Instead, implement
   /// [computeMaxIntrinsicHeight].
   @mustCallSuper
-  double getMaxIntrinsicHeight(double width) {
+  double getMaxIntrinsicHeight(double/*!*/ width) {
     assert(() {
       if (width == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -1692,7 +1692,7 @@ abstract class RenderBox extends RenderObject {
   ///
   ///  * [computeMinIntrinsicWidth], which has usage examples.
   @protected
-  double computeMaxIntrinsicHeight(double width) {
+  double/*!*/ computeMaxIntrinsicHeight(double/*!*/ width) {
     return 0.0;
   }
 
@@ -1709,7 +1709,7 @@ abstract class RenderBox extends RenderObject {
   /// [performResize] functions. If you wish to change the size of a box outside
   /// of those functions, call [markNeedsLayout] instead to schedule a layout of
   /// the box.
-  Size get size {
+  Size/*!*/ get size {
     assert(hasSize, 'RenderBox was not laid out: ${toString()}');
     assert(() {
       final Size _size = this._size;
@@ -1733,12 +1733,12 @@ abstract class RenderBox extends RenderObject {
     }());
     return _size;
   }
-  Size _size;
+  /*late*/ Size/*!*/ _size;
   /// Setting the size, in checked mode, triggers some analysis of the render box,
   /// as implemented by [debugAssertDoesMeetConstraints], including calling the intrinsic
   /// sizing methods and checking that they meet certain invariants.
   @protected
-  set size(Size value) {
+  set size(Size/*!*/ value) {
     assert(!(debugDoingThisResize && debugDoingThisLayout));
     assert(sizedByParent || !debugDoingThisResize);
     assert(() {
@@ -1852,7 +1852,7 @@ abstract class RenderBox extends RenderObject {
     size = size;
   }
 
-  Map<TextBaseline, double> _cachedBaselines;
+  Map<TextBaseline/*!*/, double> _cachedBaselines;
   static bool _debugDoingBaseline = false;
   static bool _debugSetDoingBaseline(bool value) {
     _debugDoingBaseline = value;
@@ -1875,7 +1875,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// When implementing a [RenderBox] subclass, to override the baseline
   /// computation, override [computeDistanceToActualBaseline].
-  double getDistanceToBaseline(TextBaseline baseline, { bool onlyReal = false }) {
+  double getDistanceToBaseline(TextBaseline/*!*/ baseline, { bool onlyReal = false }) {
     assert(!_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     assert(!debugNeedsLayout);
     assert(() {
@@ -1903,7 +1903,7 @@ abstract class RenderBox extends RenderObject {
   /// outside those two methods.
   @protected
   @mustCallSuper
-  double getDistanceToActualBaseline(TextBaseline baseline) {
+  double getDistanceToActualBaseline(TextBaseline/*!*/ baseline) {
     assert(_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     _cachedBaselines ??= <TextBaseline, double>{};
     _cachedBaselines.putIfAbsent(baseline, () => computeDistanceToActualBaseline(baseline));

@@ -12,7 +12,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'mouse_cursor.dart';
@@ -668,7 +667,7 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
     if (value != _hitTestBehavior) {
       _hitTestBehavior = value;
       if (owner != null)
-        RendererBinding.instance.mouseTracker.schedulePostFrameCheck();
+        markNeedsPaint();
     }
   }
   PlatformViewHitTestBehavior _hitTestBehavior;

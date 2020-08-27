@@ -411,6 +411,7 @@ class IOSSimulator extends Device {
     }
 
     // Prepare launch arguments.
+    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
     final List<String> args = <String>[
       '--enable-dart-profiling',
       if (debuggingOptions.debuggingEnabled) ...<String>[
@@ -423,6 +424,7 @@ class IOSSimulator extends Device {
         if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
         if (debuggingOptions.useTestFonts) '--use-test-fonts',
         if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
+        if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags'
         '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
       ],
     ];

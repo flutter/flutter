@@ -2053,7 +2053,7 @@ class PercentProperty extends DoubleProperty {
   /// The [showName] and [level] arguments must not be null.
   PercentProperty(
     String name,
-    double fraction, {
+    double? fraction, {
     String? ifNull,
     bool showName = true,
     String? tooltip,

@@ -626,9 +626,8 @@ class AndroidDevice extends Device {
       );
     }
 
-    List<String> cmd;
-
-    cmd = <String>[
+    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
+    final List<String> cmd = <String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.RUN',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
@@ -665,8 +664,8 @@ class AndroidDevice extends Device {
           ...<String>['--ez', 'start-paused', 'true'],
         if (debuggingOptions.disableServiceAuthCodes)
           ...<String>['--ez', 'disable-service-auth-codes', 'true'],
-        if (debuggingOptions.dartFlags.isNotEmpty)
-          ...<String>['--es', 'dart-flags', debuggingOptions.dartFlags],
+        if (dartVmFlags.isNotEmpty)
+          ...<String>['--es', 'dart-flags', dartVmFlags],
         if (debuggingOptions.useTestFonts)
           ...<String>['--ez', 'use-test-fonts', 'true'],
         if (debuggingOptions.verboseSystemLogs)

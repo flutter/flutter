@@ -760,22 +760,20 @@ class GitTagVersion {
       }
     }
     final List<String> tags = _runGit(
-      'git tag --contains HEAD', processUtils, workingDirectory).split('\n');
+      'git tag --points-at HEAD', processUtils, workingDirectory).trim().split('\n');
 
     // Check first for a stable tag
     final RegExp stableTagPattern = RegExp(r'^\d+\.\d+\.\d+$');
     for (final String tag in tags) {
-      final String trimmedTag = tag.trim();
-      if (stableTagPattern.hasMatch(trimmedTag)) {
-        return parse(trimmedTag);
+      if (stableTagPattern.hasMatch(tag.trim())) {
+        return parse(tag);
       }
     }
     // Next check for a dev tag
     final RegExp devTagPattern = RegExp(r'^\d+\.\d+\.\d+-\d+\.\d+\.pre$');
     for (final String tag in tags) {
-      final String trimmedTag = tag.trim();
-      if (devTagPattern.hasMatch(trimmedTag)) {
-        return parse(trimmedTag);
+      if (devTagPattern.hasMatch(tag.trim())) {
+        return parse(tag);
       }
     }
 

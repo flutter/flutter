@@ -10,7 +10,7 @@
 # for performing pushes to production, and so this image is quite a bit larger
 # than strictly needed for just building Flutter apps.
 
-# Last manual update 2020-08-05 (changing this comment will re-build image)
+# Last manual update 2020-08-11 (changing this comment will re-build image)
 
 # Note: updating past stretch (Debian 9) will bump Java past version 8,
 # which will break the Android SDK.
@@ -80,7 +80,7 @@ RUN unzip -q -d "${ANDROID_TOOLS_ROOT}" "${ANDROID_SDK_ARCHIVE}"
 # (it prints install progress WAY too often).
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "tools" > /dev/null
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "build-tools;28.0.3" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platforms;android-28" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platforms;android-30" > /dev/null
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platform-tools" > /dev/null
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;android;m2repository" > /dev/null
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;google;m2repository" > /dev/null
