@@ -41,8 +41,15 @@ else
   echo "Connecting to device $device_name"
 fi
 
+# Wrapper function to pass common args to fuchsia_ctl.
+fuchsia_ctl() {
+  $script_dir/fuchsia_ctl -d $device_name \
+      --device-finder-path $script_dir/device-finder $@
+}
+
 reboot() {
-  $script_dir/fuchsia_ctl -d $device_name ssh \
+  echo "$(date) START:DEVICE_LOGS ------------------------------------------"
+  fuchsia_ctl ssh \
       -c "log_listener --dump_logs yes --file /tmp/log.txt" \
       --timeout-seconds $ssh_timeout_seconds \
       --identity-file $pkey
@@ -50,17 +57,15 @@ reboot() {
   # to upload the log to isolated. We are saving the log to a file to avoid dart
   # hanging when running the process and then just using printing the content to
   # the console.
-  $script_dir/fuchsia_ctl -d $device_name \
-       --device-finder-path $script_dir/device-finder \
-       ssh \
+  fuchsia_ctl ssh \
        -c "cat /tmp/log.txt" \
        --timeout-seconds $ssh_timeout_seconds \
        --identity-file $pkey
+  echo "$(date) END:DEVICE_LOGS ------------------------------------------"
   echo "$(date) START:REBOOT ------------------------------------------"
   # note: this will set an exit code of 255, which we can ignore.
-  $script_dir/fuchsia_ctl -d $device_name \
-      --device-finder-path $script_dir/device-finder \
-      ssh --identity-file $pkey \
+  fuchsia_ctl ssh \
+      --identity-file $pkey \
       -c "dm reboot-recovery" || true
   echo "$(date) END:REBOOT --------------------------------------------"
 }
@@ -69,13 +74,12 @@ trap reboot EXIT
 
 echo "$(date) START:PAVING ------------------------------------------"
 ssh-keygen -y -f $pkey > key.pub
-$script_dir/fuchsia_ctl -d $device_name pave  -i $1 --public-key "key.pub"
+fuchsia_ctl pave -i $1 --public-key "key.pub"
 echo "$(date) END:PAVING --------------------------------------------"
 
 
 echo "$(date) START:PUSH_PACKAGES -------------------------------"
-$script_dir/fuchsia_ctl push-packages \
-    -d $device_name \
+fuchsia_ctl push-packages \
     --identity-file $pkey \
     --repoArchive generic-x64.tar.gz \
     -p tiles -p tiles_ctl
