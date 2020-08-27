@@ -447,6 +447,7 @@ class TextInputConfiguration {
   /// [actionLabel] may be null.
   const TextInputConfiguration({
     this.inputType = TextInputType.text,
+    this.readOnly = false,
     this.obscureText = false,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
@@ -469,6 +470,11 @@ class TextInputConfiguration {
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
+
+  /// Whether the text field can be edited or not.
+  ///
+  /// Defaults to false.
+  final bool readOnly;
 
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
@@ -580,6 +586,7 @@ class TextInputConfiguration {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'inputType': inputType.toJson(),
+      'readOnly': readOnly,
       'obscureText': obscureText,
       'autocorrect': autocorrect,
       'smartDashesType': smartDashesType.index.toString(),

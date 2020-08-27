@@ -433,7 +433,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, _AlertDialogSections slot) {
+  void insertRenderObjectChild(RenderObject child, _AlertDialogSections slot) {
     assert(slot != null);
     switch (slot) {
       case _AlertDialogSections.contentSection:
@@ -446,7 +446,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, _AlertDialogSections slot) {
+  void moveRenderObjectChild(RenderObject child, _AlertDialogSections oldSlot, _AlertDialogSections newSlot) {
     assert(false);
   }
 
@@ -470,7 +470,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, _AlertDialogSections slot) {
     assert(child == renderObject.contentSection || child == renderObject.actionsSection);
     if (renderObject.contentSection == child) {
       renderObject.contentSection = null;

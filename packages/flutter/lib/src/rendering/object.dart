@@ -1456,8 +1456,15 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   bool _doingThisLayoutWithCallback = false;
 
   /// The layout constraints most recently supplied by the parent.
+  ///
+  /// If layout has not yet happened, accessing this getter will
+  /// throw a [StateError] exception.
   @protected
-  Constraints get constraints => _constraints;
+  Constraints/*!*/ get constraints {
+    if (_constraints == null)
+      throw StateError('A RenderObject does not have any constraints before it has been laid out.');
+    return _constraints/*!*/;
+  }
   Constraints _constraints;
 
   /// Verify that the object's constraints are being met. Override
@@ -1674,6 +1681,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
+    if (!kReleaseMode && debugProfileLayoutsEnabled)
+      Timeline.startSync('$runtimeType',  arguments: timelineArgumentsIndicatingLandmarkEvent);
+
     assert(constraints != null);
     assert(constraints.debugAssertIsValid(
       isAppliedConstraint: true,
@@ -1727,6 +1737,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         _debugDoingThisResize = false;
         return true;
       }());
+
+      if (!kReleaseMode && debugProfileLayoutsEnabled)
+        Timeline.finishSync();
       return;
     }
     _constraints = constraints;
@@ -1789,6 +1802,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }());
     _needsLayout = false;
     markNeedsPaint();
+
+    if (!kReleaseMode && debugProfileLayoutsEnabled)
+      Timeline.finishSync();
   }
 
   /// If a subclass has a "size" (the state controlled by `parentUsesSize`,
@@ -2483,7 +2499,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// ```
   /// {@end-tool}
   @protected
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(SemanticsConfiguration/*!*/ config) {
     // Nothing to do by default.
   }
 
@@ -2881,7 +2897,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     properties.add(FlagProperty('needsCompositing', value: _needsCompositing, ifTrue: 'needs compositing'));
     properties.add(DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
-    properties.add(DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));
+    properties.add(DiagnosticsProperty<Constraints>('constraints', _constraints, missingIfNull: true));
     // don't access it via the "layer" getter since that's only valid when we don't need paint
     properties.add(DiagnosticsProperty<ContainerLayer>('layer', _layer, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));

@@ -121,8 +121,10 @@ bool debugPrintMarkNeedsPaintStacks = false;
 ///
 /// See also:
 ///
-///  * [debugProfilePaintsEnabled], which does something similar for
-///    painting but using the timeline view.
+///  * [debugProfileLayoutsEnabled], which does something similar for layout
+///    but using the timeline view.
+///  * [debugProfilePaintsEnabled], which does something similar for painting
+///    but using the timeline view.
 ///  * [debugPrintRebuildDirtyWidgets], which does something similar for widgets
 ///    being rebuilt.
 ///  * The discussion at [RendererBinding.drawFrame].
@@ -133,6 +135,21 @@ bool debugPrintLayouts = false;
 /// By default this is turned off since these checks are expensive, but it is
 /// enabled by the test framework.
 bool debugCheckIntrinsicSizes = false;
+
+/// Adds [dart:developer.Timeline] events for every [RenderObject] layout.
+///
+/// For details on how to use [dart:developer.Timeline] events in the Dart
+/// Observatory to optimize your app, see:
+/// <https://fuchsia.googlesource.com/topaz/+/master/shell/docs/performance.md>
+///
+/// See also:
+///
+///  * [debugPrintLayouts], which does something similar for layout but using
+///    console output.
+///  * [debugProfileBuildsEnabled], which does something similar for widgets
+///    being rebuilt.
+///  * [debugProfilePaintsEnabled], which does something similar for painting.
+bool debugProfileLayoutsEnabled = false;
 
 /// Adds [dart:developer.Timeline] events for every [RenderObject] painted.
 ///
@@ -146,18 +163,18 @@ bool debugCheckIntrinsicSizes = false;
 ///
 /// See also:
 ///
-///  * [debugPrintLayouts], which does something similar for layout but using
-///    console output.
 ///  * [debugProfileBuildsEnabled], which does something similar for widgets
 ///    being rebuilt, and [debugPrintRebuildDirtyWidgets], its console
 ///    equivalent.
+///  * [debugProfileLayoutsEnabled], which does something similar for layout,
+///    and [debugPrintLayouts], its console equivalent.
 ///  * The discussion at [RendererBinding.drawFrame].
 ///  * [RepaintBoundary], which can be used to contain repaints when unchanged
 ///    areas are being excessively repainted.
 bool debugProfilePaintsEnabled = false;
 
 /// Signature for [debugOnProfilePaint] implementations.
-typedef ProfilePaintCallback = void Function(RenderObject renderObject);
+typedef ProfilePaintCallback = void Function(RenderObject/*!*/ renderObject);
 
 /// Callback invoked for every [RenderObject] painted each frame.
 ///
