@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 
 import '../../../src/common.dart';
@@ -32,10 +31,6 @@ void main() {
   FileSystem fileSystem;
   Logger logger;
 
-  setUpAll(() {
-    Cache.disableLocking();
-  });
-
   setUp(() {
     processManager = FakeProcessManager.list(<FakeCommand>[]);
     logger = BufferLogger.test();
@@ -47,6 +42,7 @@ void main() {
         kBuildMode: getNameForBuildMode(BuildMode.profile),
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
       },
+      inputs: <String, String>{},
       artifacts: artifacts,
       processManager: processManager,
       fileSystem: fileSystem,
@@ -59,6 +55,7 @@ void main() {
         kBuildMode: getNameForBuildMode(BuildMode.profile),
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
       },
+      inputs: <String, String>{},
       artifacts: artifacts,
       processManager: processManager,
       fileSystem: fileSystem,
@@ -357,6 +354,36 @@ void main() {
     expect(processManager.hasRemainingExpectations, false);
   });
 
+  testUsingContext('AotElfRelease configures gen_snapshot with code size directory', () async {
+    androidEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
+    final String build = androidEnvironment.buildDir.path;
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(command: <String>[
+        artifacts.getArtifactPath(
+          Artifact.genSnapshot,
+          platform: TargetPlatform.android_arm,
+          mode: BuildMode.profile,
+        ),
+        '--deterministic',
+        '--write-v8-snapshot-profile-to=code_size_1/snapshot.android-arm.json',
+        '--trace-precompiler-to=code_size_1/trace.android-arm.json',
+        kElfAot,
+        '--elf=$build/app.so',
+        '--strip',
+        '--no-sim-use-hardfp',
+        '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
+        '$build/app.dill',
+      ])
+    ]);
+    androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
+
+    await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
+
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
   testUsingContext('AotElfProfile throws error if missing build mode', () async {
     androidEnvironment.defines.remove(kBuildMode);
 
@@ -541,6 +568,88 @@ void main() {
         // This path is not known by the cache due to the iOS gen_snapshot split.
         'Artifact.genSnapshot.TargetPlatform.ios.profile_arm64',
         '--deterministic',
+        kAssemblyAot,
+        '--assembly=$build/arm64/snapshot_assembly.S',
+        '--strip',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
+        '$build/app.dill',
+      ]),
+      const FakeCommand(command: <String>[
+        'xcrun',
+        '--sdk',
+        'iphoneos',
+        '--show-sdk-path',
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'cc',
+        '-arch',
+        'arm64',
+        '-isysroot',
+        '',
+        // Contains bitcode flag.
+        '-fembed-bitcode',
+        '-c',
+        '$build/arm64/snapshot_assembly.S',
+        '-o',
+        '$build/arm64/snapshot_assembly.o',
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'clang',
+        '-arch',
+        'arm64',
+        '-miphoneos-version-min=9.0',
+        '-dynamiclib',
+        '-Xlinker',
+        '-rpath',
+        '-Xlinker',
+        '@executable_path/Frameworks',
+        '-Xlinker',
+        '-rpath',
+        '-Xlinker',
+        '@loader_path/Frameworks',
+        '-install_name',
+        '@rpath/App.framework/App',
+        // Contains bitcode flag.
+        '-fembed-bitcode',
+        '-isysroot',
+        '',
+        '-o',
+        '$build/arm64/App.framework/App',
+        '$build/arm64/snapshot_assembly.o',
+      ]),
+      FakeCommand(command: <String>[
+        'lipo',
+        '$build/arm64/App.framework/App',
+        '-create',
+        '-output',
+        '$build/App.framework/App',
+      ]),
+    ]);
+
+    await const AotAssemblyProfile().build(iosEnvironment);
+
+    expect(processManager.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    Platform: () => macPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('AotAssemblyRelease configures gen_snapshot with code size directory', () async {
+    iosEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
+    iosEnvironment.defines[kIosArchs] = 'arm64';
+    iosEnvironment.defines[kBitcodeFlag] = 'true';
+    final String build = iosEnvironment.buildDir.path;
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(command: <String>[
+        // This path is not known by the cache due to the iOS gen_snapshot split.
+        'Artifact.genSnapshot.TargetPlatform.ios.profile_arm64',
+        '--deterministic',
+        '--write-v8-snapshot-profile-to=code_size_1/snapshot.arm64.json',
+        '--trace-precompiler-to=code_size_1/trace.arm64.json',
         kAssemblyAot,
         '--assembly=$build/arm64/snapshot_assembly.S',
         '--strip',
