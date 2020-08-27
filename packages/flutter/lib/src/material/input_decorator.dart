@@ -1526,11 +1526,10 @@ class _RenderDecoration extends RenderBox {
   }
 }
 
-class _RenderDecorationElement extends RenderObjectElement {
-  _RenderDecorationElement(_Decorator widget) : super(widget);
+class _DecorationElement extends RenderObjectElement {
+  _DecorationElement(_Decorator widget) : super(widget);
 
   final Map<_DecorationSlot, Element> slotToChild = <_DecorationSlot, Element>{};
-  final Map<Element, _DecorationSlot> childToSlot = <Element, _DecorationSlot>{};
 
   @override
   _Decorator get widget => super.widget as _Decorator;
@@ -1545,11 +1544,10 @@ class _RenderDecorationElement extends RenderObjectElement {
 
   @override
   void forgetChild(Element child) {
-    assert(slotToChild.values.contains(child));
-    assert(childToSlot.keys.contains(child));
-    final _DecorationSlot slot = childToSlot[child];
-    childToSlot.remove(child);
-    slotToChild.remove(slot);
+    assert(slotToChild.containsValue(child));
+    assert(child.slot is _DecorationSlot);
+    assert(slotToChild.containsKey(child.slot));
+    slotToChild.remove(child.slot);
     super.forgetChild(child);
   }
 
@@ -1558,11 +1556,9 @@ class _RenderDecorationElement extends RenderObjectElement {
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
       slotToChild.remove(slot);
-      childToSlot.remove(oldChild);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -1586,12 +1582,10 @@ class _RenderDecorationElement extends RenderObjectElement {
     final Element oldChild = slotToChild[slot];
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
-      childToSlot.remove(oldChild);
       slotToChild.remove(slot);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -1694,7 +1688,7 @@ class _Decorator extends RenderObjectWidget {
   final bool expands;
 
   @override
-  _RenderDecorationElement createElement() => _RenderDecorationElement(this);
+  _DecorationElement createElement() => _DecorationElement(this);
 
   @override
   _RenderDecoration createRenderObject(BuildContext context) {
@@ -1829,9 +1823,7 @@ class InputDecorator extends StatefulWidget {
   /// Whether the input field has focus.
   ///
   /// Determines the position of the label text and the color and weight of the
-  /// border, as well as the container fill color, which is a blend of
-  /// [InputDecoration.focusColor] with [InputDecoration.fillColor] when
-  /// focused, and [InputDecoration.fillColor] when not.
+  /// border.
   ///
   /// Defaults to false.
   ///
@@ -1849,12 +1841,6 @@ class InputDecorator extends StatefulWidget {
   /// true, and [InputDecoration.fillColor] when not.
   ///
   /// Defaults to false.
-  ///
-  /// See also:
-  ///
-  ///  * [InputDecoration.focusColor], which is also blended into the hover
-  ///    color and fill color when [isFocused] is true to produce the final
-  ///    color.
   final bool isHovering;
 
   /// If true, the height of the input field will be as large as possible.
@@ -3073,8 +3059,7 @@ class InputDecoration {
 
   /// If true the decoration's container is filled with [fillColor].
   ///
-  /// When [InputDecorator.isFocused] is true, the [focusColor] is also blended into the final
-  /// fill color.  When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
+  /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
   /// into the final fill color.
   ///
   /// Typically this field set to true if [border] is an
@@ -3090,8 +3075,7 @@ class InputDecoration {
 
   /// The base fill color of the decoration's container color.
   ///
-  /// When [InputDecorator.isFocused] is true, the [focusColor] is also blended
-  /// into the final fill color.  When [InputDecorator.isHovering] is true, the
+  /// When [InputDecorator.isHovering] is true, the
   /// [hoverColor] is also blended into the final fill color.
   ///
   /// By default the fillColor is based on the current [Theme].
@@ -3099,16 +3083,8 @@ class InputDecoration {
   /// The decoration's container is the area which is filled if [filled] is true
   /// and bordered per the [border]. It's the area adjacent to [icon] and above
   /// the widgets that contain [helperText], [errorText], and [counterText].
-  ///
-  /// This color is blended with [focusColor] if the decoration is focused.
   final Color fillColor;
 
-  /// The color to blend with [fillColor] and fill the decoration's container
-  /// with, if [filled] is true and the container has input focus.
-  ///
-  /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended into the final
-  /// fill color.
-  ///
   /// By default the [focusColor] is based on the current [Theme].
   ///
   /// The decoration's container is the area which is filled if [filled] is
@@ -3121,8 +3097,7 @@ class InputDecoration {
   /// is being hovered over by a mouse.
   ///
   /// If [filled] is true, the color is blended with [fillColor] and fills the
-  /// decoration's container. When [InputDecorator.isFocused] is true, the
-  /// [focusColor] is also blended into the final fill color.
+  /// decoration's container.
   ///
   /// If [filled] is false, and [InputDecorator.isFocused] is false, the color
   /// is blended over the [enabledBorder]'s color.

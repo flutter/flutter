@@ -124,8 +124,9 @@ abstract class MultiChildLayoutDelegate {
 
   final Listenable _relayout;
 
-  Map<Object, RenderBox> _idToChild;
-  Set<RenderBox> _debugChildrenNeedingLayout;
+  // TODO(ianh): make these late final
+  /*late*/ Map<Object/*!*/, RenderBox>/*!*/ _idToChild;
+  /*late*/ Set<RenderBox/*!*/>/*!*/ _debugChildrenNeedingLayout;
 
   /// True if a non-null LayoutChild was provided for the specified id.
   ///
@@ -140,7 +141,7 @@ abstract class MultiChildLayoutDelegate {
   /// Call this from your [performLayout] function to lay out each
   /// child. Every child must be laid out using this function exactly
   /// once each time the [performLayout] function is called.
-  Size layoutChild(Object childId, BoxConstraints constraints) {
+  Size/*!*/ layoutChild(Object childId, BoxConstraints constraints) {
     final RenderBox child = _idToChild[childId];
     assert(() {
       if (child == null) {
@@ -211,7 +212,8 @@ abstract class MultiChildLayoutDelegate {
     // we return.
     final Map<Object, RenderBox> previousIdToChild = _idToChild;
 
-    Set<RenderBox> debugPreviousChildrenNeedingLayout;
+    // TODO(ianh): make the next line final
+    /*late*/ Set<RenderBox>/*!*/ debugPreviousChildrenNeedingLayout;
     assert(() {
       debugPreviousChildrenNeedingLayout = _debugChildrenNeedingLayout;
       _debugChildrenNeedingLayout = <RenderBox>{};
