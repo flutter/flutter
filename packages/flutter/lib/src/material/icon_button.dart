@@ -141,11 +141,11 @@ class IconButton extends StatelessWidget {
   /// or an [ImageIcon].
   const IconButton({
     Key key,
-    this.iconSize = 20.0,
+    this.iconSize = 24.0,
     this.visualDensity,
     this.padding = const EdgeInsets.all(8.0),
     this.alignment = Alignment.center,
-    this.splashRadius,
+    this.splashRadius = 20.0,
     @required this.icon,
     this.color,
     this.focusColor,
@@ -170,13 +170,13 @@ class IconButton extends StatelessWidget {
 
   /// The size of the icon inside the button.
   ///
-  /// This property must not be null. It defaults to 20.0.
+  /// This property must not be null. It defaults to 24.0.
   ///
   /// The size given here is passed down to the widget in the [icon] property
   /// via an [IconTheme]. Setting the size here instead of in, for example, the
   /// [Icon.size] property allows the [IconButton] to size the splash area to
   /// fit the [Icon]. If you were to set the size of the [Icon] using
-  /// [Icon.size] instead, then the [IconButton] would default to 20.0 and then
+  /// [Icon.size] instead, then the [IconButton] would default to 24.0 and then
   /// the [Icon] itself would likely get clipped.
   final double iconSize;
 
@@ -210,7 +210,7 @@ class IconButton extends StatelessWidget {
 
   /// The splash radius.
   ///
-  /// If null, default splash radius of [Material.defaultSplashRadius] is used.
+  /// If null, it defaults to 20.0.
   final double splashRadius;
 
   /// The icon to display inside the button.
