@@ -91,7 +91,9 @@ void main() {
         fail('Expect exception');
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
-        expect(e.message, contains('Test file not found: $testFile'));
+    expect(e.message, contains('Test file not found: $testFile. '
+        'You should make without _test.dart file and _test.dart file. '
+        'And you should set without _test.dart for --target option.'));
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
