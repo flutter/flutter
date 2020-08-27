@@ -141,7 +141,7 @@ class IconButton extends StatelessWidget {
   /// or an [ImageIcon].
   const IconButton({
     Key key,
-    this.iconSize = 24.0,
+    this.iconSize = 20.0,
     this.visualDensity,
     this.padding = const EdgeInsets.all(8.0),
     this.alignment = Alignment.center,
