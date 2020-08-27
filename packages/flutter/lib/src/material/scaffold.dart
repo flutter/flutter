@@ -546,7 +546,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       final ScaffoldPrelayoutGeometry currentGeometry = ScaffoldPrelayoutGeometry(
         bottomSheetSize: bottomSheetSize,
         contentBottom: contentBottom,
-        contentTop: contentTop,
+        contentTop: appBarHeight,
         floatingActionButtonSize: fabSize,
         minInsets: minInsets,
         scaffoldSize: size,
