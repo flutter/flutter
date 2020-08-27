@@ -1628,7 +1628,7 @@ void main() {
     ];
 
     const double statusBarHeight = 24.0;
-    PopupMenuItem<int> firstItem = choices[0];
+    final PopupMenuItem<int> firstItem = choices[0];
     int _selectedValue = choices[0].value;
 
     await tester.pumpWidget(
@@ -1681,8 +1681,8 @@ void main() {
   testWidgets('Vertically long PopupMenu does not overlap with the status bar and bottom notch', (WidgetTester tester) async {
     const double windowPaddingTop = 44;
     const double windowPaddingBottom = 34;
-    GlobalKey _firstKey = GlobalKey();
-    GlobalKey _lastKey = GlobalKey();
+    final GlobalKey _firstKey = GlobalKey();
+    final GlobalKey _lastKey = GlobalKey();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1695,15 +1695,14 @@ void main() {
             appBar: AppBar(
               title: const Text('PopupMenu Test'),    
             ),
-            body: PopupMenuButton(
-              child: Text('Show Menu'),
-              itemBuilder: (BuildContext context) => Iterable.generate(
-                20, (i) => PopupMenuItem(
+            body: PopupMenuButton<int>(
+              child: const Text('Show Menu'),
+              itemBuilder: (BuildContext context) => Iterable<PopupMenuItem<int>>.generate(
+                20, (int i) => PopupMenuItem<int>(
                   // set globalKey to the first and last item
                   key: i == 0 ? _firstKey : i == 19 ? _lastKey : null,
-                  child: ListTile(
-                    title: Text('Item $i'),
-                  ),
+                  value: i,
+                  child: Text('Item $i'),
                 ),
               ).toList(),
             ),
@@ -1712,7 +1711,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byType(PopupMenuButton));
+    await tester.tap(find.text('Show Menu'));
     await tester.pumpAndSettle();
     // expected value
     // before: less than windowPaddingTop(overlapping)
