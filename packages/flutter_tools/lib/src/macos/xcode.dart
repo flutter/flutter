@@ -20,6 +20,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
+import '../ios/idevicedebug.dart';
 import '../ios/ios_deploy.dart';
 import '../ios/iproxy.dart';
 import '../ios/mac.dart';
@@ -230,6 +231,15 @@ class XCDevice {
         platform: platform,
         processManager: processManager,
       ),
+      _iDeviceDebug = IDeviceDebug(
+        iDeviceDebugPath: artifacts.getArtifactPath(
+          Artifact.idevicedebug,
+          platform: TargetPlatform.ios,
+        ),
+        logger: logger,
+        processManager: processManager,
+        dyLdLibEntry: cache.dyLdLibEntry,
+      ),
       _iProxy = iproxy,
       _xcode = xcode {
 
@@ -244,6 +254,7 @@ class XCDevice {
   final Logger _logger;
   final IMobileDevice _iMobileDevice;
   final IOSDeploy _iosDeploy;
+  final IDeviceDebug _iDeviceDebug;
   final Xcode _xcode;
   final IProxy _iProxy;
 
@@ -392,7 +403,7 @@ class XCDevice {
         .listen((String line) {
         _logger.printTrace('xcdevice observe error: $line');
       });
-      unawaited(_deviceObservationProcess.exitCode.then((int status) {
+      unawaited(_deviceObservationProcess.exitCode.then((int exitCode) {
         _logger.printTrace('xcdevice exited with code $exitCode');
         unawaited(stdoutSubscription.cancel());
         unawaited(stderrSubscription.cancel());
@@ -510,6 +521,7 @@ class XCDevice {
         fileSystem: globals.fs,
         logger: _logger,
         iosDeploy: _iosDeploy,
+        iDeviceDebug: _iDeviceDebug,
         iMobileDevice: _iMobileDevice,
         platform: globals.platform,
         vmServiceConnectUri: vm_service_io.vmServiceConnectUri,

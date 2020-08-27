@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/idevicedebug.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
@@ -33,6 +34,11 @@ void main() {
   final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
   final FakePlatform linuxPlatform = FakePlatform(operatingSystem: 'linux');
   final FakePlatform windowsPlatform = FakePlatform(operatingSystem: 'windows');
+  IDeviceDebug iDeviceDebug;
+  setUp(() {
+    iDeviceDebug = IDeviceDebug.test(logger: BufferLogger.test(), processManager: FakeProcessManager.any());
+  });
+
 
   group('IOSDevice', () {
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
@@ -74,6 +80,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        iDeviceDebug: iDeviceDebug,
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         sdkVersion: '13.3',
@@ -91,6 +98,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        iDeviceDebug: iDeviceDebug,
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
@@ -105,6 +113,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        iDeviceDebug: iDeviceDebug,
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
@@ -119,6 +128,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        iDeviceDebug: iDeviceDebug,
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
@@ -133,6 +143,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        iDeviceDebug: iDeviceDebug,
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
@@ -147,6 +158,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        iDeviceDebug: iDeviceDebug,
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
@@ -164,6 +176,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        iDeviceDebug: iDeviceDebug,
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         sdkVersion: '13.3',
@@ -189,6 +202,7 @@ void main() {
               logger: logger,
               platform: platform,
               iosDeploy: iosDeploy,
+              iDeviceDebug: iDeviceDebug,
               iMobileDevice: iMobileDevice,
               name: 'iPhone 1',
               sdkVersion: '13.3',
@@ -280,6 +294,7 @@ void main() {
           logger: logger,
           platform: macPlatform,
           iosDeploy: iosDeploy,
+          iDeviceDebug: iDeviceDebug,
           iMobileDevice: iMobileDevice,
           name: 'iPhone 1',
           sdkVersion: '13.3',
@@ -347,6 +362,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
+        iDeviceDebug: iDeviceDebug,
         iMobileDevice: iMobileDevice,
         logger: logger,
         platform: macPlatform,
@@ -362,6 +378,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
+        iDeviceDebug: iDeviceDebug,
         iMobileDevice: iMobileDevice,
         logger: logger,
         platform: macPlatform,

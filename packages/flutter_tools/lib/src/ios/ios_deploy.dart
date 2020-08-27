@@ -109,9 +109,12 @@ class IOSDeploy {
     );
   }
 
-  /// Installs and then runs the specified app bundle.
+  /// Installs, mounts developer disk image, then runs the specified app bundle.
   ///
   /// Uses ios-deploy and returns the exit code.
+  /// Launching the app with the debugger no longer works in iOS 14 due
+  /// to the debugger lockdown service being renamed, and the process always fails.
+  /// See https://github.com/ios-control/ios-deploy/issues/469
   Future<int> runApp({
     @required String deviceId,
     @required String bundlePath,
@@ -185,14 +188,9 @@ Your device is locked. Unlock your device first before running.
 ═══════════════════════════════════════════════════════════════════════════════════''',
       emphasis: true);
     } else if (stdout.contains(unknownAppLaunchError)) {
-      _logger.printError('''
-═══════════════════════════════════════════════════════════════════════════════════
-Error launching app. Try launching from within Xcode via:
-    open ios/Runner.xcworkspace
-
-Your Xcode version may be too old for your iOS version.
-═══════════════════════════════════════════════════════════════════════════════════''',
-      emphasis: true);
+      // ios-deploy no longer works in iOS 14 due to the debugger lockdown service
+      // being renamed, and this error will always happen.
+      // https://github.com/ios-control/ios-deploy/issues/469
     }
 
     return stdout;

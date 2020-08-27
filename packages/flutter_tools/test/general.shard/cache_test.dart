@@ -363,6 +363,8 @@ void main() {
         ..createSync();
       iosUsbArtifacts.location.childFile('idevicesyslog')
         .createSync();
+      iosUsbArtifacts.location.childFile('idevicedebug')
+        .createSync();
 
       expect(iosUsbArtifacts.isUpToDateInner(), true);
 

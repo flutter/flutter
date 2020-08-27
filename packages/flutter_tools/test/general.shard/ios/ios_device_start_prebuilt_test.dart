@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/fallback_discovery.dart';
+import 'package:flutter_tools/src/ios/idevicedebug.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
@@ -440,6 +441,10 @@ IOSDevice setUpIOSDevice({
       processManager: processManager ?? FakeProcessManager.any(),
       artifacts: artifacts,
       cache: cache,
+    ),
+    iDeviceDebug: IDeviceDebug.test(
+      logger: logger ?? BufferLogger.test(),
+      processManager: processManager ?? FakeProcessManager.any()
     ),
     cpuArchitecture: DarwinArch.arm64,
     interfaceType: IOSDeviceInterface.usb,

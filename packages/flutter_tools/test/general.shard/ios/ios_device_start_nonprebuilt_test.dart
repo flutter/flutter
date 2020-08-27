@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/idevicedebug.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
@@ -331,6 +332,7 @@ IOSDevice setUpIOSDevice({
       artifacts: artifacts,
       cache: cache,
     ),
+    iDeviceDebug: IDeviceDebug.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     iMobileDevice: IMobileDevice(
       logger: logger,
       processManager: processManager ?? FakeProcessManager.any(),

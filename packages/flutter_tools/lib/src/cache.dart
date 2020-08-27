@@ -1254,6 +1254,7 @@ class IosUsbArtifacts extends CachedArtifact {
     'libimobiledevice': <String>[
       'idevicescreenshot',
       'idevicesyslog',
+      'idevicedebug',
     ],
     'usbmuxd': <String>[
       'iproxy',

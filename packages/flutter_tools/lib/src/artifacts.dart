@@ -56,6 +56,7 @@ enum Artifact {
   webPrecompiledCanvaskitSoundSdkSourcemaps,
 
   iosDeploy,
+  idevicedebug,
   idevicesyslog,
   idevicescreenshot,
   iproxy,
@@ -122,6 +123,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'kernel_worker.dart.snapshot';
     case Artifact.iosDeploy:
       return 'ios-deploy';
+    case Artifact.idevicedebug:
+      return 'idevicedebug';
     case Artifact.idevicesyslog:
       return 'idevicesyslog';
     case Artifact.idevicescreenshot:
@@ -288,6 +291,7 @@ class CachedArtifacts implements Artifacts {
         final String artifactFileName = _artifactToFileName(artifact);
         final String engineDir = _getEngineArtifactsPath(platform, mode);
         return _fileSystem.path.join(engineDir, artifactFileName);
+      case Artifact.idevicedebug:
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
         final String artifactFileName = _artifactToFileName(artifact);
@@ -565,6 +569,7 @@ class LocalEngineArtifacts implements Artifacts {
         return _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin', 'snapshots', artifactFileName);
       case Artifact.kernelWorkerSnapshot:
         return _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', artifactFileName);
+      case Artifact.idevicedebug:
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
         return _cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;

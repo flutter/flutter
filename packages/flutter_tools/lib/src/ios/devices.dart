@@ -26,6 +26,7 @@ import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
 import 'fallback_discovery.dart';
+import 'idevicedebug.dart';
 import 'ios_deploy.dart';
 import 'ios_workflow.dart';
 import 'iproxy.dart';
@@ -149,6 +150,7 @@ class IOSDevice extends Device {
     @required String sdkVersion,
     @required Platform platform,
     @required IOSDeploy iosDeploy,
+    @required IDeviceDebug iDeviceDebug,
     @required IMobileDevice iMobileDevice,
     @required IProxy iProxy,
     @required Logger logger,
@@ -156,6 +158,7 @@ class IOSDevice extends Device {
   })
     : _sdkVersion = sdkVersion,
       _iosDeploy = iosDeploy,
+      _iDeviceDebug = iDeviceDebug,
       _iMobileDevice = iMobileDevice,
       _iproxy = iProxy,
       _fileSystem = fileSystem,
@@ -176,6 +179,7 @@ class IOSDevice extends Device {
 
   final String _sdkVersion;
   final IOSDeploy _iosDeploy;
+  final IDeviceDebug _iDeviceDebug;
   final FileSystem _fileSystem;
   final Logger _logger;
   final Platform _platform;
@@ -211,6 +215,8 @@ class IOSDevice extends Device {
   Map<IOSApp, DeviceLogReader> _logReaders;
 
   DevicePortForwarder _portForwarder;
+
+  Process _iDeviceDebugProcees;
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -404,13 +410,33 @@ class IOSDevice extends Device {
           ipv6: ipv6,
         );
       }
-      final int installationResult = await _iosDeploy.runApp(
+      // In iOS 14, ios-deploy no longer launches the app in iOS 14, and the install succeeds,
+      // but the app launch always fails. See https://github.com/ios-control/ios-deploy/issues/469.
+      // However, we call it here before idevicedebug even on iOS 14 to try to
+      // install the app, and critically, mount the developer disk image.
+      // Fortunately, after the install and image mount, the debugger failure is immediate,
+      // so trying this in all cases before idevicedebug doesn't add much time.
+      int launchResult = await _iosDeploy.runApp(
         deviceId: id,
         bundlePath: bundle.path,
         launchArguments: launchArguments,
         interfaceType: interfaceType,
       );
-      if (installationResult != 0) {
+
+      // 253 code is an error (as opposed to timeout or app crash).
+      if (launchResult == 253) {
+        _logger.printTrace('ios-deploy failed with error, trying idevicedebug');
+        // Try to launch the app again, but use idevicedebug instead of ios-deploy.
+        final IDeviceDebugRun runResult = await _iDeviceDebug.runApp(
+          deviceId: id,
+          bundleIdentifier: packageId,
+          launchArguments: launchArguments,
+          interfaceType: interfaceType,
+        );
+        _iDeviceDebugProcees = runResult.iDeviceDebugProcess;
+        launchResult = await runResult.status;
+      }
+      if (launchResult != 0) {
         _logger.printError('Could not run ${bundle.path} on $id.');
         _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
         _logger.printError('  open ios/Runner.xcworkspace');
@@ -457,6 +483,9 @@ class IOSDevice extends Device {
     IOSApp app, {
     String userIdentifier,
   }) async {
+    if (_iDeviceDebugProcees != null) {
+      return _iDeviceDebugProcees.kill();
+    }
     // Currently we don't have a way to stop an app running on iOS.
     return false;
   }

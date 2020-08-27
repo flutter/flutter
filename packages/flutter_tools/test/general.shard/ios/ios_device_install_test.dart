@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/idevicedebug.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
@@ -239,6 +240,7 @@ void main() {
     final bool wasAppInstalled = await device.installApp(iosApp);
 
     expect(wasAppInstalled, false);
+    expect(processManager.hasRemainingExpectations, isFalse);
   });
 
   testWithoutContext('IOSDevice.uninstallApp catches ProcessException from ios-deploy', () async {
@@ -262,6 +264,7 @@ void main() {
     final bool wasAppUninstalled = await device.uninstallApp(iosApp);
 
     expect(wasAppUninstalled, false);
+    expect(processManager.hasRemainingExpectations, isFalse);
   });
 }
 
@@ -302,6 +305,7 @@ IOSDevice setUpIOSDevice({
       artifacts: artifacts,
       cache: cache,
     ),
+    iDeviceDebug: IDeviceDebug.test(logger: logger, processManager: processManager),
     iProxy: IProxy.test(logger: logger, processManager: processManager),
     interfaceType: interfaceType,
     vmServiceConnectUri: (String string, {Log log}) async => MockVmService(),
