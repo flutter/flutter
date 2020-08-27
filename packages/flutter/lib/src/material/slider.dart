@@ -1340,10 +1340,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   double computeMaxIntrinsicWidth(double height) => _minPreferredTrackWidth + _maxSliderPartWidth;
 
   @override
-  double computeMinIntrinsicHeight(double width) => max(_minPreferredTrackHeight, _maxSliderPartHeight);
+  double computeMinIntrinsicHeight(double width) => math.max(_minPreferredTrackHeight, _maxSliderPartHeight);
 
   @override
-  double computeMaxIntrinsicHeight(double width) => max(_minPreferredTrackHeight, _maxSliderPartHeight);
+  double computeMaxIntrinsicHeight(double width) => math.max(_minPreferredTrackHeight, _maxSliderPartHeight);
 
   @override
   bool get sizedByParent => true;
@@ -1352,7 +1352,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void performResize() {
     size = Size(
       constraints.hasBoundedWidth ? constraints.maxWidth : _minPreferredTrackWidth + _maxSliderPartWidth,
-      constraints.hasBoundedHeight ? constraints.maxHeight : max(_minPreferredTrackHeight, _maxSliderPartHeight),
+      constraints.hasBoundedHeight ? constraints.maxHeight : math.max(_minPreferredTrackHeight, _maxSliderPartHeight),
     );
   }
 
