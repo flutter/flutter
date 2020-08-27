@@ -15,7 +15,7 @@ android {
     defaultConfig {
         applicationId "dev.flutter.scenarios"
         minSdkVersion 18
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "dev.flutter.TestRunner"
