@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -772,7 +773,10 @@ void main() {
         (Device device, Uri uri, bool enableServiceAuthCodes) => null,
         true, // only poll once.
       );
-
+      final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
+      when(fuchsiaDevice.dds).thenReturn(mockDds);
+      when(mockDds.startDartDevelopmentService(any, any, any, any)).thenReturn(null);
+      when(mockDds.uri).thenReturn(Uri.parse('example'));
       when(fuchsiaDevice.servicePorts())
           .thenAnswer((Invocation invocation) async => <int>[1]);
       when(portForwarder.forward(1))
@@ -1600,5 +1604,6 @@ class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
   final FuchsiaDevFinder fuchsiaDevFinder;
 }
 
+class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
 class MockFuchsiaWorkflow extends Mock implements FuchsiaWorkflow {}
 class MockCache extends Mock implements Cache {}

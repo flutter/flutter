@@ -66,7 +66,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         help: 'A file to write the attached vmservice uri to after an'
           ' application is started.',
         valueHelp: 'project/example/out.txt'
-      );
+      )
+      ..addFlag('disable-service-auth-codes',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'No longer require an authentication code to connect to the VM '
+              'service (not recommended).');
     usesWebOptions(hide: !verboseHelp);
     usesTargetOption();
     usesPortOptions();
@@ -206,11 +211,6 @@ class RunCommand extends RunCommandBase {
               'results out to "refresh_benchmark.json", and exit. This flag is '
               'intended for use in generating automated flutter benchmarks.',
       )
-      ..addFlag('disable-service-auth-codes',
-        negatable: false,
-        hide: !verboseHelp,
-        help: 'No longer require an authentication code to connect to the VM '
-              'service (not recommended).')
       ..addFlag('web-initialize-platform',
         negatable: true,
         defaultsTo: true,

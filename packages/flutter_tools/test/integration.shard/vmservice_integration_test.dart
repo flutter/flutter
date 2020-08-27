@@ -47,7 +47,7 @@ void main() {
       for (final Protocol protocol in protocolList.protocols) {
         expect(protocol.protocolName, anyOf('VM Service', 'DDS'));
       }
-    }, skip: DartDevelopmentService.ddsDisabled);
+    });
 
     test('flutterVersion can be called', () async {
       final Response response =

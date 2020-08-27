@@ -14,10 +14,7 @@ import 'logger.dart';
 /// mock out this functionality for testing purposes.
 class DartDevelopmentService {
   DartDevelopmentService({@required this.logger});
-
-  // TODO(bkonyi): enable once VM service can handle SSE forwarding for
-  // Devtools (https://github.com/flutter/flutter/issues/62507)
-  static const bool ddsDisabled = false;
+  
   final Logger logger;
   dds.DartDevelopmentService _ddsInstance;
 
@@ -29,13 +26,6 @@ class DartDevelopmentService {
     bool ipv6,
     bool disableServiceAuthCodes,
   ) async {
-    if (ddsDisabled) {
-      logger.printTrace(
-        'DDS is currently disabled due to '
-        'https://github.com/flutter/flutter/issues/62507'
-      );
-      return;
-    }
     final Uri ddsUri = Uri(
       scheme: 'http',
       host: (ipv6 ?
