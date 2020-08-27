@@ -45,7 +45,7 @@ void main() {
 
     expect(
       () async {
-        return await generateLocalizationsSyntheticPackage(
+        return generateLocalizationsSyntheticPackage(
           environment: environment,
           buildSystem: buildSystem,
         );
@@ -88,7 +88,7 @@ void main() {
 
     expect(
       () async {
-        return await generateLocalizationsSyntheticPackage(
+        return generateLocalizationsSyntheticPackage(
           environment: environment,
           buildSystem: buildSystem,
         );
@@ -131,7 +131,7 @@ void main() {
 
     expect(
       () async {
-        return await generateLocalizationsSyntheticPackage(
+        return generateLocalizationsSyntheticPackage(
           environment: environment,
           buildSystem: buildSystem,
         );
@@ -209,7 +209,7 @@ void main() {
 
     expect(
       () async {
-        return await generateLocalizationsSyntheticPackage(
+        return generateLocalizationsSyntheticPackage(
           environment: environment,
           buildSystem: buildSystem,
         );
