@@ -54,13 +54,13 @@ void main() {
             options: kOptions,
           );
 
-      // Set a query and see that the results are filtered.
+      // Enter text and see that the results are filtered.
       autocompleteController.textEditingController.text = 'ele';
       expect(autocompleteController.results.value.length, 2);
       expect(autocompleteController.results.value[0], 'chameleon');
       expect(autocompleteController.results.value[1], 'elephant');
 
-      // Modify the selected query. The results are filtered again.
+      // Modify the text. The results are filtered again.
       autocompleteController.textEditingController.text = 'e';
       expect(autocompleteController.results.value.length, 6);
       expect(autocompleteController.results.value[0], 'chameleon');
@@ -77,25 +77,26 @@ void main() {
       expect(autocompleteController.results.value[1], 'elephant');
     });
 
-    testWidgets('custom filter', (WidgetTester tester) async {
+    testWidgets('custom getResults', (WidgetTester tester) async {
       final AutocompleteController<String> autocompleteController =
           AutocompleteController<String>(
-            // A custom filter that always includes 'goose' in the results.
-            filter: (String query) {
+            // A custom getResults that always includes 'goose' in the results.
+            getResults: (String text) {
               return kOptions
-                .where((String option) => option.contains(query) || option == 'goose')
+                .where((String option) => option.contains(text) || option == 'goose')
                 .toList();
             },
           );
 
-      // Set a query and see that the results are filtered by the custom filter.
+      // Set text in the field and see that the results are filtered by
+      // getResults.
       autocompleteController.textEditingController.text = 'ele';
       expect(autocompleteController.results.value.length, 3);
       expect(autocompleteController.results.value[0], 'chameleon');
       expect(autocompleteController.results.value[1], 'elephant');
       expect(autocompleteController.results.value[2], 'goose');
 
-      // Modify the selected query. The results are filtered again.
+      // Modify the text. The results are filtered again.
       autocompleteController.textEditingController.text = 'e';
       expect(autocompleteController.results.value.length, 6);
       expect(autocompleteController.results.value[0], 'chameleon');
@@ -113,41 +114,42 @@ void main() {
             filterStringForOption: (User option) => option.name + option.email,
           );
 
-      // Set a query based on the email and see that the results are filtered.
+      // Set the field text based on the email and see that the results are
+      // filtered.
       autocompleteController.textEditingController.text = 'example';
       expect(autocompleteController.results.value.length, 2);
       expect(autocompleteController.results.value[0], kOptionsUsers[0]);
       expect(autocompleteController.results.value[1], kOptionsUsers[1]);
 
-      // Modify the selected query. The results appear again and are filtered,
-      // this time by name instead of email.
+      // Modify the field text. The results appear again and are filtered, this
+      // time by name instead of email.
       autocompleteController.textEditingController.text = 'B';
       expect(autocompleteController.results.value.length, 1);
       expect(autocompleteController.results.value[0], kOptionsUsers[1]);
     });
 
-    testWidgets('custom filter on User options', (WidgetTester tester) async {
+    testWidgets('custom getResults on User options', (WidgetTester tester) async {
       final AutocompleteController<User> autocompleteController =
           AutocompleteController<User>(
-            // A custom filter that searches by name case sensitively.
-            filter: (String query) {
+            // A custom getResults that searches by name case sensitively.
+            getResults: (String text) {
               return kOptionsUsers
-                .where((User option) => option.name.contains(query))
+                .where((User option) => option.name.contains(text))
                 .toList();
             },
           );
 
-      // Set a query based on the email and see that nothing is found.
+      // Set field text based on the email and see that nothing is found.
       autocompleteController.textEditingController.text = 'example';
       expect(autocompleteController.results.value.length, 0);
 
-      // Modify the selected query. The results appear again and are filtered.
-      // A lowercase "a" matches "Charlie" and not "Alice".
+      // Modify the field text. The results appear again and are filtered. A
+      // lowercase "a" matches "Charlie" and not "Alice".
       autocompleteController.textEditingController.text = 'a';
       expect(autocompleteController.results.value.length, 1);
       expect(autocompleteController.results.value[0], kOptionsUsers[2]);
 
-      // Modify the selected query. An uppercase "A" matches "Alice" and not
+      // Modify the field text. An uppercase "A" matches "Alice" and not
       // "Charlie".
       autocompleteController.textEditingController.text = 'A';
       expect(autocompleteController.results.value.length, 1);
@@ -213,12 +215,11 @@ void main() {
         ),
       );
 
-      // The query field is always rendered, but the results are not unless
-      // needed.
+      // The field is always rendered, but the results are not unless needed.
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(resultsKey), findsNothing);
 
-      // Enter a query. The results are filtered by the query.
+      // Enter text. The results are filtered by the text.
       autocompleteController.textEditingController.value = const TextEditingValue(
         text: 'ele',
         selection: TextSelection(baseOffset: 3, extentOffset: 3),
@@ -239,7 +240,7 @@ void main() {
       expect(find.byKey(resultsKey), findsNothing);
       expect(autocompleteController.textEditingController.text, selection);
 
-      // Modify the selected query. The results appear again and are filtered.
+      // Modify the field text. The results appear again and are filtered.
       autocompleteController.textEditingController.value = const TextEditingValue(
         text: 'e',
         selection: TextSelection(baseOffset: 1, extentOffset: 1),
@@ -289,7 +290,7 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(resultsKey), findsNothing);
 
-      // Enter a query. The results are filtered by the query.
+      // Enter text. The results are filtered by the text.
       autocompleteController.textEditingController.value = const TextEditingValue(
         text: 'example',
         selection: TextSelection(baseOffset: 7, extentOffset: 7),
@@ -310,8 +311,8 @@ void main() {
       expect(lastUserSelected, selection);
       expect(autocompleteController.textEditingController.text, selection.toString());
 
-      // Modify the selected query. The results appear again and are filtered,
-      // this time by name instead of email.
+      // Modify the field text. The results appear again and are filtered, this
+      // time by name instead of email.
       autocompleteController.textEditingController.value = const TextEditingValue(
         text: 'B',
         selection: TextSelection(baseOffset: 1, extentOffset: 1),
@@ -357,7 +358,7 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(resultsKey), findsNothing);
 
-      // Enter a query. The results are filtered by the query.
+      // Enter text. The results are filtered by the text.
       autocompleteController.textEditingController.value = const TextEditingValue(
         text: 'example',
         selection: TextSelection(baseOffset: 7, extentOffset: 7),
@@ -369,8 +370,8 @@ void main() {
       expect(lastResults[0], kOptionsUsers[0]);
       expect(lastResults[1], kOptionsUsers[1]);
 
-      // Select a result. The results hide and onSelected is called. The query
-      // field has its text set to the selection's display string.
+      // Select a result. The results hide and onSelected is called. The field
+      // has its text set to the selection's display string.
       final User selection = lastResults[1];
       lastOnSelected(selection);
       await tester.pump();
@@ -379,8 +380,8 @@ void main() {
       expect(lastUserSelected, selection);
       expect(autocompleteController.textEditingController.text, selection.name);
 
-      // Modify the selected query. The results appear again and are filtered,
-      // this time by name instead of email.
+      // Modify the field text. The results appear again and are filtered, this
+      // time by name instead of email.
       autocompleteController.textEditingController.value = const TextEditingValue(
         text: 'B',
         selection: TextSelection(baseOffset: 1, extentOffset: 1),
@@ -418,7 +419,7 @@ void main() {
         ),
       );
 
-      // Enter a query. The results are filtered by the query.
+      // Enter text. The results are filtered by the text.
       autocompleteController.textEditingController.value = const TextEditingValue(
         text: 'ele',
         selection: TextSelection(baseOffset: 3, extentOffset: 3),
@@ -479,7 +480,7 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(resultsKey), findsNothing);
 
-      // Enter a query to show the results.
+      // Enter text to show the results.
       autocompleteController.textEditingController.value = const TextEditingValue(
         text: 'ele',
         selection: TextSelection(baseOffset: 3, extentOffset: 3),

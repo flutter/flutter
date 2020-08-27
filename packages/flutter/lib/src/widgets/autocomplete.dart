@@ -13,32 +13,31 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'overlay.dart';
 
-/// A type for autocomplete filter functions.
+/// A type for getting some list of results based on a String.
 ///
-/// [AutocompleteController] uses a filter function to filter
-/// [AutocompleteController.options] and return a subset as results, given some
-/// query string.
-typedef AutocompleteFilter<T> = List<T> Function(String query);
+/// See also:
+///   * [AutocompleteController.getResults], which is of this type.
+typedef AutocompleteResultsGetter<T> = List<T> Function(String text);
 
 /// A type for indicating the selection of an autocomplete result.
 typedef AutocompleteOnSelected<T> = void Function(T result);
 
-/// A builder for the selectable results given the current autocomplete query.
+/// A builder for the selectable results given the current autocomplete field
+/// text.
 typedef AutocompleteResultsBuilder<T> = Widget Function(
   BuildContext context,
   AutocompleteOnSelected<T> onSelected,
   List<T> results,
 );
 
-/// A builder for the query field in autocomplete.
+/// A builder for the field in autocomplete.
 typedef AutocompleteFieldBuilder = Widget Function(
   BuildContext context,
   TextEditingController textEditingController,
   VoidCallback onFieldSubmitted,
 );
 
-// A type for converting between an option and a string for display or
-// filtering.
+// A type for getting a String from some option.
 typedef _AutocompleteOptionToString<T> = String Function(T option);
 
 // TODO(justinmc): Link to Autocomplete and AutocompleteCupertino when they are
@@ -75,7 +74,7 @@ typedef _AutocompleteOptionToString<T> = String Function(T option);
 ///     setState(() {});
 ///   }
 ///
-///   void _onChangeQuery() {
+///   void _onChangeField() {
 ///     if (_autocompleteController.textEditingController.value.text != _selection) {
 ///       setState(() {
 ///         _selection = null;
@@ -89,13 +88,13 @@ typedef _AutocompleteOptionToString<T> = String Function(T option);
 ///     _autocompleteController = AutocompleteController<String>(
 ///       options: <String>['aardvark', 'bobcat', 'chameleon'],
 ///     );
-///     _autocompleteController.textEditingController.addListener(_onChangeQuery);
+///     _autocompleteController.textEditingController.addListener(_onChangeField);
 ///     _autocompleteController.results.addListener(_onChangeResults);
 ///   }
 ///
 ///   @override
 ///   void dispose() {
-///     _autocompleteController.textEditingController.removeListener(_onChangeQuery);
+///     _autocompleteController.textEditingController.removeListener(_onChangeField);
 ///     _autocompleteController.results.removeListener(_onChangeResults);
 ///     _autocompleteController.dispose();
 ///     super.dispose();
@@ -105,11 +104,9 @@ typedef _AutocompleteOptionToString<T> = String Function(T option);
 ///   Widget build(BuildContext context) {
 ///     return Column(
 ///       children: <Widget>[
-///         // Query field.
 ///         TextFormField(
 ///           controller: _autocompleteController.textEditingController,
 ///         ),
-///         // Results list.
 ///         if (_selection == null)
 ///           Expanded(
 ///             child: ListView(
@@ -139,47 +136,46 @@ typedef _AutocompleteOptionToString<T> = String Function(T option);
 class AutocompleteController<T> {
   /// Create an instance of AutocompleteController.
   AutocompleteController({
-    this.filter,
+    this.getResults,
     this.options,
     _AutocompleteOptionToString<T> displayStringForOption,
     _AutocompleteOptionToString<T> filterStringForOption,
     TextEditingController textEditingController,
   }) : assert(
-         filter == null || options == null,
-         "It's unnecessary to pass options if you've passed a custom filter.",
+         getResults == null || options == null,
+         "It's unnecessary to pass options if you've passed a custom getResults.",
        ),
        assert(
-         filter != null || options != null,
-         'Must pass either options or filter.',
+         getResults != null || options != null,
+         'Must pass either options or getResults.',
        ),
        displayStringForOption = displayStringForOption ?? _defaultStringForOption,
        filterStringForOption = filterStringForOption ?? _defaultStringForOption,
        _ownsTextEditingController = textEditingController == null,
        textEditingController = textEditingController ?? TextEditingController() {
-    this.textEditingController.addListener(_onChangedQuery);
+    this.textEditingController.addListener(_onChangedField);
   }
 
   final bool _ownsTextEditingController;
 
   /// All possible options that can be selected.
   ///
-  /// If left null, a custom [filter] method must be provided that handles the
-  /// options to be filtered on its own.
+  /// If left null, a custom [getResults] method must be provided that handles
+  /// generating some results based on the text in the field.
   final List<T> options;
 
-  /// The [TextEditingController] that represents the query.
+  /// The [TextEditingController] that represents the field.
   final TextEditingController textEditingController;
 
-  /// A filter function returns the possible results given a query string.
+  /// A function that returns the possible results given the text in the field.
   ///
   /// If [options] is null, then this field must not be null. This may be the
-  /// case when querying an external service for filter results, for example.
+  /// case when querying an external service for results, for example.
   ///
   /// Defaults to a simple string-matching filter of [options].
-  final AutocompleteFilter<T> filter;
+  final AutocompleteResultsGetter<T> getResults;
 
-  /// Returns the string to display in the query field when the option is
-  /// selected.
+  /// Returns the string to display in the field when the option is selected.
   ///
   /// This is useful when using a custom T type for AutocompleteController and
   /// the string to display is different than the string to search by.
@@ -194,16 +190,18 @@ class AutocompleteController<T> {
   /// Returns the string to match against when filtering the given option.
   ///
   /// This is useful when using a custom T type for AutocompleteController and
-  /// the string to display is different than the string to search by.
+  /// the string to display is different than the string to search by. This is
+  /// only used when [getResults] is null and the default getResults filter is
+  /// used.
   ///
   /// If not provided, will use `option.toString()`.
   ///
   /// See also:
   ///   * [displayStringForOption], which can be used to specify a custom String
-  ///     to be shown in the query field.
+  ///     to be shown in the field.
   final _AutocompleteOptionToString<T> filterStringForOption;
 
-  /// The current results being returned by [filter].
+  /// The current results being returned by [getResults].
   ///
   /// This is a [ValueNotifier], so it can be listened to for changes.
   final ValueNotifier<List<T>> results = ValueNotifier<List<T>>(<T>[]);
@@ -218,29 +216,29 @@ class AutocompleteController<T> {
   /// Call this when the AutocompleteController is no longer needed, such as in
   // the dispose method of the widget it was created in.
   void dispose() {
-    textEditingController.removeListener(_onChangedQuery);
+    textEditingController.removeListener(_onChangedField);
     if (_ownsTextEditingController) {
       textEditingController.dispose();
     }
   }
 
   // Called when textEditingController reports a change in its value.
-  void _onChangedQuery() {
-    final List<T> resultsValue = filter == null
+  void _onChangedField() {
+    final List<T> resultsValue = getResults == null
         ? _filterByString(textEditingController.value.text)
-        : filter(textEditingController.value.text);
+        : getResults(textEditingController.value.text);
     assert(resultsValue != null);
     results.value = resultsValue;
   }
 
-  // The default filter function, if one wasn't supplied.
-  List<T> _filterByString(String query) {
+  // The default getResults function, if one wasn't supplied.
+  List<T> _filterByString(String text) {
     assert(options != null);
     return options
         .where((T option) {
           return filterStringForOption(option)
               .toLowerCase()
-              .contains(query.toLowerCase());
+              .contains(text.toLowerCase());
         })
         .toList();
   }
@@ -248,8 +246,8 @@ class AutocompleteController<T> {
 
 // TODO(justinmc): Link to Autocomplete and AutocompleteCupertino when they are
 // implemented.
-/// A widget for helping the user to filter a list of options and select a
-/// result.
+/// A widget for helping the user to make a selection by entering some text and
+/// choosing from among a list of results.
 ///
 /// This is a core framework widget with very basic UI. Try using Autocomplete
 /// or AutocompleteCupertino before resorting to this widget.
@@ -325,12 +323,12 @@ class AutocompleteController<T> {
 ///   final String email;
 ///   final String name;
 ///
-///   // When using a default filter function, the query will be matched
+///   // When using a default getResults function, the text will be matched
 ///   // directly with the output of this toString method. In this case,
 ///   // including both the email and name allows the user to filter by both.
-///   // If you wanted even more advanced filter logic, you could pass a custom
-///   // filter function into AutocompleteController and/or filterStringForOption
-///   // into AutocompleteCore.
+///   // If you wanted even more advanced logic, you could pass a custom
+///   // getResults function into AutocompleteController and/or
+///   // filterStringForOption into AutocompleteCore.
 ///   @override
 ///   String toString() {
 ///     return '$name, $email';
@@ -347,8 +345,8 @@ class AutocompleteController<T> {
 ///       User(name: 'Bob', email: 'bob@example.com'),
 ///       User(name: 'Charlie', email: 'charlie123@gmail.com'),
 ///     ],
-///     // This shows just the name in the field, even though we can also filter by
-///     // email address.
+///     // This shows just the name in the field, even though we can also filter
+///     // by email address.
 ///     displayStringForOption: (User option) => option.name,
 ///   );
 ///
@@ -423,16 +421,13 @@ class AutocompleteCore<T> extends StatefulWidget {
   /// [AutocompleteController.dispose] on this when it's no longer needed.
   final AutocompleteController<T> autocompleteController;
 
-  /// Builds the field that is used to input the query.
+  /// Builds the field whose input is used to find the results.
   final AutocompleteFieldBuilder buildField;
 
   /// Builds the selectable results of filtering.
   final AutocompleteResultsBuilder<T> buildResults;
 
   /// Called when a result is selected by the user.
-  ///
-  /// This method is used to update the query field to reflect the selection, so
-  /// if implemented, it should set `textEditingController.value`.
   final AutocompleteOnSelected<T> onSelected;
 
   /// All possible options that can be selected.
@@ -472,7 +467,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   }
 
   // Called when _autocompleteController.textEditingController changes.
-  void _onChangedQuery() {
+  void _onChangedField() {
     if (_selection != null) {
       final String selectionString =
           _autocompleteController.displayStringForOption(_selection);
@@ -540,12 +535,12 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
 
   void _listenToController(AutocompleteController<T> autocompleteController) {
     autocompleteController.results.addListener(_onChangedResults);
-    autocompleteController.textEditingController.addListener(_onChangedQuery);
+    autocompleteController.textEditingController.addListener(_onChangedField);
   }
 
   void _unlistenToController(AutocompleteController<T> autocompleteController) {
     autocompleteController.results.removeListener(_onChangedResults);
-    autocompleteController.textEditingController.removeListener(_onChangedQuery);
+    autocompleteController.textEditingController.removeListener(_onChangedField);
   }
 
   @override
