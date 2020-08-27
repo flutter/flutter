@@ -111,6 +111,7 @@ class BuildIOSCommand extends BuildSubCommand {
       final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
         fileSystem: globals.fs,
         logger: globals.logger,
+        flutterUsage: globals.flutterUsage,
         appFilenamePattern: 'App'
       );
       // Only support 64bit iOS code size analysis.
