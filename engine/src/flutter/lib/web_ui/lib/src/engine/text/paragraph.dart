@@ -1791,7 +1791,7 @@ String? textDirectionIndexToCss(int textDirectionIndex) {
 /// ```css
 /// text-align: right;
 /// ```
-String? textAlignToCssValue(ui.TextAlign? align, ui.TextDirection textDirection) {
+String textAlignToCssValue(ui.TextAlign? align, ui.TextDirection textDirection) {
   switch (align) {
     case ui.TextAlign.left:
       return 'left';
@@ -1808,13 +1808,16 @@ String? textAlignToCssValue(ui.TextAlign? align, ui.TextDirection textDirection)
         case ui.TextDirection.rtl:
           return 'left';
       }
-    default: // including ui.TextAlign.start
+    case ui.TextAlign.start:
       switch (textDirection) {
         case ui.TextDirection.ltr:
-          return null; // it's the default
+          return ''; // it's the default
         case ui.TextDirection.rtl:
           return 'right';
       }
+    case null:
+      // If align is not specified return default.
+      return '';
   }
 }
 

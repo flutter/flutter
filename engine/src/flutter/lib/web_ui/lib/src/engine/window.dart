@@ -73,8 +73,8 @@ class EngineWindow extends ui.Window {
       double windowInnerHeight;
       final html.VisualViewport? viewport = html.window.visualViewport;
       if (viewport != null) {
-        windowInnerWidth = viewport.width! * devicePixelRatio;
-        windowInnerHeight = viewport.height! * devicePixelRatio;
+        windowInnerWidth = viewport.width!.toDouble() * devicePixelRatio;
+        windowInnerHeight = viewport.height!.toDouble() * devicePixelRatio;
       } else {
         windowInnerWidth = html.window.innerWidth! * devicePixelRatio;
         windowInnerHeight = html.window.innerHeight! * devicePixelRatio;
@@ -90,7 +90,7 @@ class EngineWindow extends ui.Window {
     double windowInnerHeight;
     final html.VisualViewport? viewport = html.window.visualViewport;
     if (viewport != null) {
-      windowInnerHeight = viewport.height! * devicePixelRatio;
+      windowInnerHeight = viewport.height!.toDouble() * devicePixelRatio;
     } else {
       windowInnerHeight = html.window.innerHeight! * devicePixelRatio;
     }
@@ -117,8 +117,8 @@ class EngineWindow extends ui.Window {
     double height = 0;
     double width = 0;
     if (html.window.visualViewport != null) {
-      height = html.window.visualViewport!.height! * devicePixelRatio;
-      width = html.window.visualViewport!.width! * devicePixelRatio;
+      height = html.window.visualViewport!.height!.toDouble() * devicePixelRatio;
+      width = html.window.visualViewport!.width!.toDouble() * devicePixelRatio;
     } else {
       height = html.window.innerHeight! * devicePixelRatio;
       width = html.window.innerWidth! * devicePixelRatio;

@@ -11,7 +11,7 @@ double? lerpDouble(num? a, num? b, double t) {
   }
   a ??= 0.0;
   b ??= 0.0;
-  return a + (b - a) * t;
+  return (a + (b - a) * t).toDouble();
 }
 
 double _lerpDouble(double a, double b, double t) {

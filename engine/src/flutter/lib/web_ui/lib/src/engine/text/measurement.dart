@@ -686,7 +686,7 @@ double _measureSubstring(
   final double letterSpacing = style.letterSpacing ?? 0.0;
   final String sub =
       start == 0 && end == text.length ? text : text.substring(start, end);
-  final double width = _canvasContext.measureText(sub).width! +
+  final double width = _canvasContext.measureText(sub).width!.toDouble() +
       letterSpacing * sub.length;
 
   // What we are doing here is we are rounding to the nearest 2nd decimal
