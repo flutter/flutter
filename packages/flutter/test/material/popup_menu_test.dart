@@ -1620,6 +1620,7 @@ void main() {
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
+
   testWidgets('PopupMenu in AppBar does not overlap with the status bar', (WidgetTester tester) async {
     const List<PopupMenuItem<int>> choices = [
       PopupMenuItem<int>(value: 1, child: Text('Item 1')),
