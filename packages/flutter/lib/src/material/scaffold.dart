@@ -2028,7 +2028,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   ScaffoldMessengerState _scaffoldMessenger;
 
-  /// Shows a [SnackBar] at the bottom of the scaffold.
+  /// [ScaffoldMessengerState.showSnackBar] shows a [SnackBar] at the bottom of
+  /// the scaffold. This method should not be used.
   ///
   /// A scaffold can show at most one snack bar at a time. If this function is
   /// called while another snack bar is already visible, the given snack bar
@@ -2065,6 +2066,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///   }
   /// ```
   /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
   // TODO(Piinks): Deprecate after customers are migrated
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
     assert(() {
@@ -2092,10 +2097,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     return _scaffoldMessenger.showSnackBar(snackbar);
   }
 
-  /// Removes the current [SnackBar] (if any) immediately.
+  /// [ScaffoldMessengerState.removeCurrentSnackBar] removes the current
+  /// [SnackBar] (if any) immediately. This method should not be used.
   ///
   /// The removed snack bar does not run its normal exit animation. If there are
   /// any queued snack bars, they begin their entrance animation immediately.
+  ///
+  /// See also:
+  ///
+  ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
   // TODO(Piinks): Deprecate after customers are migrated
   void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
     assert(() {
@@ -2123,9 +2133,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _scaffoldMessenger.removeCurrentSnackBar(reason: reason);
   }
 
-  /// Removes the current [SnackBar] by running its normal exit animation.
+  /// [ScaffoldMessengerState.hideCurrentSnackBar] removes the current
+  /// [SnackBar] by running its normal exit animation. This method should not be
+  /// used.
   ///
   /// The closed completer is called after the animation is complete.
+  ///
+  /// See also:
+  ///
+  ///   * [ScaffoldMessenger], this should be used instead to manage [SnackBar]s.
   // TODO(Piinks): Deprecate after customers are migrated.
   void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
     assert(() {
