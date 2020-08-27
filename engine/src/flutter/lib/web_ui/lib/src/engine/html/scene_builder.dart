@@ -179,7 +179,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     ui.ColorFilterEngineLayer? oldLayer,
   }) {
     assert(filter != null); // ignore: unnecessary_null_comparison
-    return _pushSurface(PersistedColorFilter(oldLayer as PersistedColorFilter?, filter)) as ui.ColorFilterEngineLayer;
+    throw UnimplementedError();
   }
 
   /// Pushes an image filter operation onto the operation stack.
