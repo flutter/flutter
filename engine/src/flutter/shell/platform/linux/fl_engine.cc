@@ -331,10 +331,6 @@ G_MODULE_EXPORT FlEngine* fl_engine_new_headless(FlDartProject* project) {
 gboolean fl_engine_start(FlEngine* self, GError** error) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
 
-  if (!fl_renderer_start(self->renderer, error)) {
-    return FALSE;
-  }
-
   FlutterRendererConfig config = {};
   config.type = kOpenGL;
   config.open_gl.struct_size = sizeof(FlutterOpenGLRendererConfig);

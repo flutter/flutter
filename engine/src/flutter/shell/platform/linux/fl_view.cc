@@ -204,44 +204,18 @@ static void fl_view_dispose(GObject* object) {
 // Implements GtkWidget::realize.
 static void fl_view_realize(GtkWidget* widget) {
   FlView* self = FL_VIEW(widget);
+  g_autoptr(GError) error = nullptr;
 
   gtk_widget_set_realized(widget, TRUE);
 
-  g_autoptr(GError) error = nullptr;
-  if (!fl_renderer_setup(self->renderer, &error)) {
-    g_warning("Failed to setup renderer: %s", error->message);
+  if (!fl_renderer_start(self->renderer, widget, &error)) {
+    g_warning("Failed to start Flutter renderer: %s", error->message);
+    return;
   }
-
-  GtkAllocation allocation;
-  gtk_widget_get_allocation(widget, &allocation);
-
-  GdkWindowAttr window_attributes;
-  window_attributes.window_type = GDK_WINDOW_CHILD;
-  window_attributes.x = allocation.x;
-  window_attributes.y = allocation.y;
-  window_attributes.width = allocation.width;
-  window_attributes.height = allocation.height;
-  window_attributes.wclass = GDK_INPUT_OUTPUT;
-  window_attributes.visual = fl_renderer_get_visual(
-      self->renderer, gtk_widget_get_screen(widget), nullptr);
-  window_attributes.event_mask =
-      gtk_widget_get_events(widget) | GDK_EXPOSURE_MASK |
-      GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
-      GDK_BUTTON_RELEASE_MASK | GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK |
-      GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK;
-
-  gint window_attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL;
-
-  GdkWindow* window =
-      gdk_window_new(gtk_widget_get_parent_window(widget), &window_attributes,
-                     window_attributes_mask);
-  gtk_widget_register_window(widget, window);
-  gtk_widget_set_window(widget, window);
-
-  fl_renderer_set_window(self->renderer, window);
 
   if (!fl_engine_start(self->engine, &error)) {
     g_warning("Failed to start Flutter engine: %s", error->message);
+    return;
   }
 }
 
