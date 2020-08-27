@@ -794,9 +794,9 @@ class ParagraphRuler {
       }
 
       boxes.add(ui.TextBox.fromLTRBD(
-        rect.left + alignOffset,
+        rect.left.toDouble() + alignOffset,
         rect.top as double,
-        rect.right + alignOffset,
+        rect.right.toDouble() + alignOffset,
         rect.bottom as double,
         textDirection,
       ));
