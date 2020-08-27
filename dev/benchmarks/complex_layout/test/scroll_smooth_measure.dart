@@ -173,7 +173,7 @@ Future<void> main() async {
 ///
 /// For smoothness it filters the frames with delays too longer to separate the
 /// effect of building a frame too slow. Frames that are built slow are counted
-/// to `droped_frame_count`.
+/// to `dropped_frame_count`.
 ///
 /// Smoothness (jerk) is measured by the average of the absolute value for
 /// discrete 2nd derivative (`average_abs_jerk`). And the frames with
@@ -223,7 +223,7 @@ Map<String, dynamic> scrollSummary(
   return <String, dynamic>{
     'janky_count': jankyCount,
     'average_abs_jerk': jerkAvg,
-    'droped_frame_count': lostFrame,
+    'dropped_frame_count': lostFrame,
     'frame_timestamp': List<int>.from(frameTimestamp),
     'scroll_offset': List<double>.from(scrollOffset),
     'input_delay': delays.map<int>((Duration data) => data.inMicroseconds).toList(),
