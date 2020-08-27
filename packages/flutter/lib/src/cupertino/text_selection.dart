@@ -748,7 +748,6 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   List<Element> _children;
   final Map<_CupertinoTextSelectionToolbarItemsSlot, Element> slotToChild = <_CupertinoTextSelectionToolbarItemsSlot, Element>{};
-  final Map<Element, _CupertinoTextSelectionToolbarItemsSlot> childToSlot = <Element, _CupertinoTextSelectionToolbarItemsSlot>{};
 
   // We keep a set of forgotten children to avoid O(n^2) work walking _children
   // repeatedly to remove children.
@@ -829,12 +828,11 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   @override
   void forgetChild(Element child) {
-    assert(slotToChild.values.contains(child) || _children.contains(child));
+    assert(slotToChild.containsValue(child) || _children.contains(child));
     assert(!_forgottenChildren.contains(child));
     // Handle forgetting a child in children or in a slot.
-    if (childToSlot.containsKey(child)) {
-      final _CupertinoTextSelectionToolbarItemsSlot slot = childToSlot[child];
-      childToSlot.remove(child);
+    if (slotToChild.containsKey(child.slot)) {
+      final _CupertinoTextSelectionToolbarItemsSlot slot = child.slot as _CupertinoTextSelectionToolbarItemsSlot;
       slotToChild.remove(slot);
     } else {
       _forgottenChildren.add(child);
@@ -848,11 +846,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
       slotToChild.remove(slot);
-      childToSlot.remove(oldChild);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -877,12 +873,11 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     // Visit slot children.
-    childToSlot.forEach((Element child, _) {
-      if (!_shouldPaint(child) || _forgottenChildren.contains(child)) {
-        return;
+    for (final Element child in slotToChild.values) {
+      if (_shouldPaint(child) && !_forgottenChildren.contains(child)) {
+        visitor(child);
       }
-      visitor(child);
-    });
+    }
     // Visit list children.
     _children
         .where((Element child) => !_forgottenChildren.contains(child) && _shouldPaint(child))

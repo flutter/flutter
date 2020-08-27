@@ -174,7 +174,7 @@ bool debugProfileLayoutsEnabled = false;
 bool debugProfilePaintsEnabled = false;
 
 /// Signature for [debugOnProfilePaint] implementations.
-typedef ProfilePaintCallback = void Function(RenderObject renderObject);
+typedef ProfilePaintCallback = void Function(RenderObject/*!*/ renderObject);
 
 /// Callback invoked for every [RenderObject] painted each frame.
 ///
