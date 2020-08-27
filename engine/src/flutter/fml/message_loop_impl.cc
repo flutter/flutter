@@ -119,18 +119,24 @@ void MessageLoopImpl::DoTerminate() {
 
 void MessageLoopImpl::FlushTasks(FlushType type) {
   TRACE_EVENT0("fml", "MessageLoop::FlushTasks");
-  std::vector<fml::closure> invocations;
 
-  task_queue_->GetTasksToRunNow(queue_id_, type, invocations);
-
-  for (const auto& invocation : invocations) {
+  const auto now = fml::TimePoint::Now();
+  fml::closure invocation;
+  do {
+    invocation = task_queue_->GetNextTaskToRun(queue_id_, now);
+    if (!invocation) {
+      break;
+    }
     invocation();
     std::vector<fml::closure> observers =
         task_queue_->GetObserversToNotify(queue_id_);
     for (const auto& observer : observers) {
       observer();
     }
-  }
+    if (type == FlushType::kSingle) {
+      break;
+    }
+  } while (invocation);
 }
 
 void MessageLoopImpl::RunExpiredTasksNow() {

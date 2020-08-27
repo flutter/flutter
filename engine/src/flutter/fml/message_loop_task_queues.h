@@ -83,9 +83,7 @@ class MessageLoopTaskQueues
 
   bool HasPendingTasks(TaskQueueId queue_id) const;
 
-  void GetTasksToRunNow(TaskQueueId queue_id,
-                        FlushType type,
-                        std::vector<fml::closure>& invocations);
+  fml::closure GetNextTaskToRun(TaskQueueId queue_id, fml::TimePoint from_time);
 
   size_t GetNumPendingTasks(TaskQueueId queue_id) const;
 
@@ -112,7 +110,7 @@ class MessageLoopTaskQueues
   //  3. Each task queue can only be merged and subsumed once.
   //
   //  Methods currently aware of the merged state of the queues:
-  //  HasPendingTasks, GetTasksToRunNow, GetNumPendingTasks
+  //  HasPendingTasks, GetNextTaskToRun, GetNumPendingTasks
 
   // This method returns false if either the owner or subsumed has already been
   // merged with something else.
