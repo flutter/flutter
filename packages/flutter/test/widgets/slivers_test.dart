@@ -839,6 +839,66 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('SliverGrid children can be arbitrarily placed', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/64006
+    int firstTapped = 0;
+    int secondTapped = 0;
+    final Key key = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: key,
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverGrid(
+              delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                  return Container(
+                    child: Material(
+                      color: index % 2 == 0 ? Colors.yellow : Colors.red,
+                      child: InkWell(
+                        onTap: () {
+                          index % 2 == 0 ? firstTapped++ : secondTapped++;
+                        },
+                        child: Text('Index $index'),
+                      ),
+                    ),
+                  );
+                },
+                childCount: 2,
+              ),
+              gridDelegate: _TestArbitrarySliverGridDelegate(),
+            )
+          ],
+        ),
+      )
+    ));
+    // Assertion not triggered by arbitrary placement
+    expect(tester.takeException(), isNull);
+
+    // Verify correct hit testing
+    await tester.tap(find.text('Index 0'));
+    expect(firstTapped, 1);
+    expect(secondTapped, 0);
+    await tester.tap(find.text('Index 1'));
+    expect(firstTapped, 1);
+    expect(secondTapped, 1);
+    // Check other places too
+    final Offset bottomLeft = tester.getBottomLeft(find.byKey(key));
+    await tester.tapAt(bottomLeft);
+    expect(firstTapped, 1);
+    expect(secondTapped, 1);
+    final Offset topRight = tester.getTopRight(find.byKey(key));
+    await tester.tapAt(topRight);
+    expect(firstTapped, 1);
+    expect(secondTapped, 1);
+    await tester.tapAt(const Offset(100.0, 100.0));
+    expect(firstTapped, 1);
+    expect(secondTapped, 1);
+    await tester.tapAt(const Offset(700.0, 500.0));
+    expect(firstTapped, 1);
+    expect(secondTapped, 1);
+  });
 }
 
 bool isRight(Offset a, Offset b) => b.dx > a.dx;
@@ -867,6 +927,39 @@ class TestSliverGrid extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _TestArbitrarySliverGridDelegate implements SliverGridDelegate {
+  @override
+  SliverGridLayout getLayout(SliverConstraints constraints) {
+    return _TestArbitrarySliverGridLayout();
+  }
+
+  @override
+  bool shouldRelayout(SliverGridDelegate oldDelegate) {
+    return false;
+  }
+}
+
+class _TestArbitrarySliverGridLayout implements SliverGridLayout {
+  @override
+  double computeMaxScrollOffset(int childCount) => 1000;
+
+  @override
+  int getMinChildIndexForScrollOffset(double scrollOffset) => 0;
+
+  @override
+  int getMaxChildIndexForScrollOffset(double scrollOffset) => 2;
+
+  @override
+  SliverGridGeometry getGeometryForChildIndex(int index) {
+    return SliverGridGeometry(
+      scrollOffset: index * 100.0 + 300.0,
+      crossAxisOffset: 200.0,
+      mainAxisExtent: 100.0,
+      crossAxisExtent: 100.0,
     );
   }
 }

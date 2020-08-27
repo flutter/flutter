@@ -1291,7 +1291,7 @@ abstract class RenderSliver extends RenderObject {
   /// render object is to override its [hitTestSelf] and [hitTestChildren]
   /// methods.
   bool hitTest(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
-    if (mainAxisPosition >= 0.0 && mainAxisPosition < geometry.hitTestExtent &&
+    if (mainAxisPosition >= 0.0 && mainAxisPosition < geometry.maxPaintExtent &&
         crossAxisPosition >= 0.0 && crossAxisPosition < constraints.crossAxisExtent) {
       if (hitTestChildren(result, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition) ||
           hitTestSelf(mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition)) {
