@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:yaml/yaml.dart';
 
 import '../android/android_device.dart';
 import '../base/common.dart';
@@ -628,27 +627,11 @@ class RunCommand extends RunCommandBase {
   }
 }
 Future<void> generateVersionFile(FlutterProject flutterProject) async {
-  dynamic yamlFile = loadYaml(await flutterProject.pubspecFile.readAsString());
-  yamlFile ??= <String, String>{};
 
-  final String appName =
-  yamlFile['name'] != null ? yamlFile['name'].toString() : '';
-  final String appDescription =
-  yamlFile['description'] != null ? yamlFile['description'].toString() : '';
-  final String pubVersion =
-  yamlFile['version'] != null ? yamlFile['version'].toString() : '';
-  String version = pubVersion;
-  String buildNumber = '';
-  if (pubVersion.contains('+')) {
-    final List<String> info = pubVersion.split('+');
-    version = info[0];
-    buildNumber = info[1];
-  }
   final Map<String, String> versionFileJson = <String, String>{
-    'app_name': appName,
-    'app_description': appDescription,
-    'version': version,
-    'build_number': buildNumber
+    'app_name': flutterProject.manifest.appName,
+    'version': flutterProject.manifest.buildName,
+    'build_number': flutterProject.manifest.buildNumber
   };
   globals.fs.currentDirectory
       .childDirectory('web')
