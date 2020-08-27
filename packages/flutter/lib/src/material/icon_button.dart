@@ -170,13 +170,13 @@ class IconButton extends StatelessWidget {
 
   /// The size of the icon inside the button.
   ///
-  /// This property must not be null. It defaults to 24.0.
+  /// This property must not be null. It defaults to 20.0.
   ///
   /// The size given here is passed down to the widget in the [icon] property
   /// via an [IconTheme]. Setting the size here instead of in, for example, the
   /// [Icon.size] property allows the [IconButton] to size the splash area to
   /// fit the [Icon]. If you were to set the size of the [Icon] using
-  /// [Icon.size] instead, then the [IconButton] would default to 24.0 and then
+  /// [Icon.size] instead, then the [IconButton] would default to 20.0 and then
   /// the [Icon] itself would likely get clipped.
   final double iconSize;
 
