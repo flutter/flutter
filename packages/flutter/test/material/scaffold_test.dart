@@ -2034,7 +2034,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('Floating Button', (WidgetTester tester) async {
+    testWidgets('FloatingActionButton always keeps the same position regardless of extendBodyBehindAppBar', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           appBar: AppBar(),
