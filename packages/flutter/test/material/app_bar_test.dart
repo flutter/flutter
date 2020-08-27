@@ -2079,10 +2079,9 @@ void main() {
   });
 
   testWidgets("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
-    const Key key = Key('appbar');
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        appBar: AppBar(key: key),
+        appBar: AppBar(),
         endDrawer: const Drawer(),
       ),
     ));
@@ -2091,8 +2090,8 @@ void main() {
     await tester.tap(endDrawerFinder);
     await tester.pump();
 
-    final Finder appBarFinder = find.byKey(key);
-    AppBar getAppBarWidget(Finder finder) => tester.widget<AppBar>(finder);
+    final Finder appBarFinder = find.byType(NavigationToolbar);
+    NavigationToolbar getAppBarWidget(Finder finder) => tester.widget<NavigationToolbar>(finder);
     expect(getAppBarWidget(appBarFinder).leading, null);
   });
 }
