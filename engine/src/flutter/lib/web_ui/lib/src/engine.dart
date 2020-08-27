@@ -67,6 +67,7 @@ part 'engine/history.dart';
 part 'engine/html/backdrop_filter.dart';
 part 'engine/html/canvas.dart';
 part 'engine/html/clip.dart';
+part 'engine/html/color_filter.dart';
 part 'engine/html/debug_canvas_reuse_overlay.dart';
 part 'engine/html/image_filter.dart';
 part 'engine/html/offset.dart';

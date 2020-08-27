@@ -465,6 +465,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/history.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/backdrop_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/clip.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/color_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/debug_canvas_reuse_overlay.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/image_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/offset.dart
