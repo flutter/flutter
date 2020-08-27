@@ -94,13 +94,26 @@ class BuildIOSCommand extends BuildSubCommand {
 
     final String typeName = globals.artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
     globals.printStatus('Building $app for $logTarget ($typeName)...');
-    final XcodeBuildResult result = await buildXcodeProject(
+    final ParsedProjectInfo parsedProjectInfo = await valdateXcodeBuild(
       app: app,
       buildInfo: buildInfo,
       targetOverride: targetFile,
       buildForDevice: !forSimulator,
       codesign: shouldCodesign,
     );
+    XcodeBuildResult result;
+    if (parsedProjectInfo != null) {
+      result = await buildXcodeProject(
+        parsedProjectInfo: parsedProjectInfo,
+        app: app,
+        buildInfo: buildInfo,
+        targetOverride: targetFile,
+        buildForDevice: !forSimulator,
+        codesign: shouldCodesign,
+      );
+    } else {
+      result = XcodeBuildResult(success: false);
+    }
 
     if (!result.success) {
       await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger);

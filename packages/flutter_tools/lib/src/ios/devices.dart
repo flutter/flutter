@@ -319,13 +319,22 @@ class IOSDevice extends Device {
       _logger.printTrace('Building ${package.name} for $id');
 
       // Step 1: Build the precompiled/DBC application if necessary.
+
+      final ParsedProjectInfo parsedProjectInfo = await valdateXcodeBuild(
+        app: package as BuildableIOSApp,
+        buildInfo: debuggingOptions.buildInfo,
+        targetOverride: mainPath,
+        buildForDevice: true,
+        deviceID: id,
+      );
       final XcodeBuildResult buildResult = await buildXcodeProject(
-          app: package as BuildableIOSApp,
-          buildInfo: debuggingOptions.buildInfo,
-          targetOverride: mainPath,
-          buildForDevice: true,
-          activeArch: cpuArchitecture,
-          deviceID: id,
+        parsedProjectInfo: parsedProjectInfo,
+        app: package as BuildableIOSApp,
+        buildInfo: debuggingOptions.buildInfo,
+        targetOverride: mainPath,
+        buildForDevice: true,
+        activeArch: cpuArchitecture,
+        deviceID: id,
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');

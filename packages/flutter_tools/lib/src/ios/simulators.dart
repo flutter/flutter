@@ -483,8 +483,15 @@ class IOSSimulator extends Device {
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
     assert(buildInfo.isDebug);
-
+    final ParsedProjectInfo parsedProjectInfo = await valdateXcodeBuild(
+      app: app,
+      buildInfo: buildInfo,
+      targetOverride: mainPath,
+      buildForDevice: false,
+      deviceID: id,
+    );
     final XcodeBuildResult buildResult = await buildXcodeProject(
+      parsedProjectInfo: parsedProjectInfo,
       app: app,
       buildInfo: buildInfo,
       targetOverride: mainPath,
