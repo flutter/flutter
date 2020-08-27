@@ -14,7 +14,7 @@ import 'logger.dart';
 /// mock out this functionality for testing purposes.
 class DartDevelopmentService {
   DartDevelopmentService({@required this.logger});
-  
+
   final Logger logger;
   dds.DartDevelopmentService _ddsInstance;
 
