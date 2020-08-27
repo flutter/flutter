@@ -64,7 +64,7 @@ void setupWriteMocks({
   )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
-void setupCreateTempMocks({
+void setupDirectoryMocks({
   FileSystem mockFileSystem,
   ErrorHandlingFileSystem fs,
   int errorCode,
@@ -75,6 +75,8 @@ void setupCreateTempMocks({
     throw FileSystemException('', '', OSError('', errorCode));
   });
   when(mockDirectory.createTempSync(any))
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.createSync(recursive: anyNamed('recursive')))
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
@@ -158,7 +160,7 @@ void main() {
     });
 
     testWithoutContext('when creating a temporary dir on a full device', () async {
-      setupCreateTempMocks(
+      setupDirectoryMocks(
         mockFileSystem: mockFileSystem,
         fs: fs,
         errorCode: kDeviceFull,
@@ -170,6 +172,20 @@ void main() {
       expect(() async => await directory.createTemp('prefix'),
              throwsToolExit(message: expectedMessage));
       expect(() => directory.createTempSync('prefix'),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when creating a directory with permission issues', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kUserPermissionDenied,
+      );
+
+      final Directory directory = fs.directory('directory');
+
+      const String expectedMessage = 'Flutter failed to create a directory at';
+      expect(() => directory.createSync(recursive: true),
              throwsToolExit(message: expectedMessage));
     });
   });
@@ -209,7 +225,7 @@ void main() {
     });
 
     testWithoutContext('when creating a temporary dir on a full device', () async {
-      setupCreateTempMocks(
+      setupDirectoryMocks(
         mockFileSystem: mockFileSystem,
         fs: fs,
         errorCode: enospc,

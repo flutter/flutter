@@ -25,6 +25,7 @@ const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 enum ContinuousIntegrationEnvironment {
   luci,
   cirrus,
+  none,
 }
 
 /// A client for uploading image tests and making baseline requests to the
@@ -35,13 +36,9 @@ class SkiaGoldClient {
     this.fs = const LocalFileSystem(),
     this.process = const LocalProcessManager(),
     this.platform = const LocalPlatform(),
-    this.ci,
-    io.HttpClient httpClient,
-  }) : assert(workDirectory != null),
-       assert(fs != null),
-       assert(process != null),
-       assert(platform != null),
-       httpClient = httpClient ?? io.HttpClient();
+    required this.ci,
+    io.HttpClient? httpClient,
+  }) : httpClient = httpClient ?? io.HttpClient();
 
   /// The file system to use for storing the local clone of the repository.
   ///
@@ -83,7 +80,7 @@ class SkiaGoldClient {
   /// [_UnauthorizedFlutterPreSubmitComparator] to test against golden masters
   /// maintained in the Flutter Gold dashboard.
   Map<String, List<String>> get expectations => _expectations;
-  Map<String, List<String>> _expectations;
+  late Map<String, List<String>> _expectations;
 
   /// The local [Directory] where the Flutter repository is hosted.
   ///
@@ -93,13 +90,13 @@ class SkiaGoldClient {
   /// The path to the local [Directory] where the goldctl tool is hosted.
   ///
   /// Uses the [platform] environment in this implementation.
-  String/*!*/ get _goldctl => platform.environment[_kGoldctlKey];
+  String get _goldctl => platform.environment[_kGoldctlKey]!;
 
   /// The path to the local [Directory] where the service account key is
   /// hosted.
   ///
   /// Uses the [platform] environment in this implementation.
-  String/*!*/ get _serviceAccount => platform.environment[_kServiceAccountKey];
+  String get _serviceAccount => platform.environment[_kServiceAccountKey]!;
 
   /// Prepares the local work space for golden file testing and calls the
   /// goldctl `auth` command.
@@ -116,9 +113,9 @@ class SkiaGoldClient {
       return;
 
     List<String> authArguments;
-    /*late*/ String failureContext;
+    String failureContext;
 
-    switch (ci/*!*/) {
+    switch (ci) {
       case ContinuousIntegrationEnvironment.luci:
         authArguments = <String>[
           'auth',
@@ -154,6 +151,8 @@ class SkiaGoldClient {
           'Cirrus, if the debug information below contains ENCRYPTED, the wrong '
           'comparator was chosen for the test case.';
         break;
+      case ContinuousIntegrationEnvironment.none:
+        return;
     }
 
     final io.ProcessResult result = await io.Process.run(
@@ -267,9 +266,6 @@ class SkiaGoldClient {
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [FlutterPostSubmitFileComparator].
   Future<bool> imgtestAdd(String testName, File goldenFile) async {
-    assert(testName != null);
-    assert(goldenFile != null);
-
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
       '--work-dir', workDirectory
@@ -361,9 +357,6 @@ class SkiaGoldClient {
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [_AuthorizedFlutterPreSubmitComparator].
   Future<void> tryjobAdd(String testName, File goldenFile) async {
-    assert(testName != null);
-    assert(goldenFile != null);
-
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
       '--work-dir', workDirectory
@@ -410,9 +403,6 @@ class SkiaGoldClient {
   /// comparison being evaluated by the
   /// [_UnauthorizedFlutterPreSubmitComparator].
   Future<bool> imgtestCheck(String testName, File goldenFile) async {
-    assert(testName != null);
-    assert(goldenFile != null);
-
     final List<String> imgtestArguments = <String>[
       'imgtest', 'check',
       '--work-dir', workDirectory
@@ -440,7 +430,7 @@ class SkiaGoldClient {
       );
       const String mainKey = 'master';
       const String temporaryKey = 'master_str';
-      String rawResponse;
+      late String rawResponse;
       try {
         final io.HttpClientRequest request = await httpClient.getUrl(requestForExpectations);
         final io.HttpClientResponse response = await request.close();
@@ -448,7 +438,7 @@ class SkiaGoldClient {
         final dynamic jsonResponse = json.decode(rawResponse);
         if (jsonResponse is! Map<String, dynamic>)
           throw const FormatException('Skia gold expectations do not match expected format.');
-        final Map<String, dynamic> skiaJson = (jsonResponse[mainKey] ?? jsonResponse[temporaryKey]) as Map<String, dynamic>;
+        final Map<String, dynamic>? skiaJson = (jsonResponse[mainKey] ?? jsonResponse[temporaryKey]) as Map<String, dynamic>?;
         if (skiaJson == null)
           throw FormatException('Skia gold expectations are missing the "$mainKey" key (and also doesn\'t have "$temporaryKey")! Available keys: ${jsonResponse.keys.join(", ")}');
         skiaJson.forEach((String key, dynamic value) {
@@ -506,7 +496,7 @@ class SkiaGoldClient {
   Future<bool> testIsIgnoredForPullRequest(String pullRequest, String testName) async {
     bool ignoreIsActive = false;
     testName = cleanTestName(testName);
-    String rawResponse;
+    late String rawResponse;
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForIgnores = Uri.parse(
         'https://flutter-gold.skia.org/json/ignores'
@@ -565,7 +555,7 @@ class SkiaGoldClient {
   Future<bool> isValidDigestForExpectation(String expectation, String testName) async {
     bool isValid = false;
     testName = cleanTestName(testName);
-    String rawResponse;
+    late String rawResponse;
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForDigest = Uri.parse(
         'https://flutter-gold.skia.org/json/details?test=$testName&digest=$expectation'
@@ -653,22 +643,24 @@ class SkiaGoldClient {
   /// Returns a list of arguments for initializing a tryjob based on the testing
   /// environment.
   List<String> getCIArguments() {
-    /*late*/ String/*!*/ pullRequest;
-    /*late*/ String/*!*/ jobId;
-    /*late*/ String cis;
+    String pullRequest;
+    String jobId;
+    String cis;
 
-    switch (ci/*!*/) {
+    switch (ci) {
       case ContinuousIntegrationEnvironment.luci:
-        jobId = platform.environment['LOGDOG_STREAM_PREFIX'].split('/').last;
-        final List<String> refs = platform.environment['GOLD_TRYJOB'].split('/');
+        jobId = platform.environment['LOGDOG_STREAM_PREFIX']!.split('/').last;
+        final List<String> refs = platform.environment['GOLD_TRYJOB']!.split('/');
         pullRequest = refs[refs.length - 2];
         cis = 'buildbucket';
         break;
       case ContinuousIntegrationEnvironment.cirrus:
-        pullRequest = platform.environment['CIRRUS_PR'];
-        jobId = platform.environment['CIRRUS_TASK_ID'];
+        pullRequest = platform.environment['CIRRUS_PR']!;
+        jobId = platform.environment['CIRRUS_TASK_ID']!;
         cis = 'cirrus';
         break;
+      case ContinuousIntegrationEnvironment.none:
+        return <String>[];
     }
 
     return <String>[
@@ -685,17 +677,17 @@ class SkiaGoldHttpOverrides extends io.HttpOverrides {}
 /// A digest returned from a request to the Flutter Gold dashboard.
 class SkiaGoldDigest {
   const SkiaGoldDigest({
-    this.imageHash,
-    this.paramSet,
-    this.testName,
-    this.status,
+    required this.imageHash,
+    required this.paramSet,
+    required this.testName,
+    required this.status,
   });
 
   /// Create a digest from requested JSON.
   factory SkiaGoldDigest.fromJson(Map<String, dynamic> json) {
     return SkiaGoldDigest(
       imageHash: json['digest'] as String,
-      paramSet: Map<String, dynamic>.from(json['paramset'] as Map<String, dynamic> ??
+      paramSet: Map<String, dynamic>.from(json['paramset'] as Map<String, dynamic>? ??
         <String, List<String>>{
           'Platform': <String>[],
           'Browser' : <String>[],
@@ -706,16 +698,16 @@ class SkiaGoldDigest {
   }
 
   /// Unique identifier for the image associated with the digest.
-  final String/*!*/ imageHash;
+  final String imageHash;
 
   /// Parameter set for the given test, e.g. Platform : Windows.
-  final Map<String, dynamic>/*!*/ paramSet;
+  final Map<String, dynamic> paramSet;
 
   /// Test name associated with the digest, e.g. positive or un-triaged.
-  final String/*!*/ testName;
+  final String testName;
 
   /// Status of the given digest, e.g. positive or un-triaged.
-  final String/*!*/ status;
+  final String status;
 
   /// Validates a given digest against the current testing conditions.
   bool isValid(Platform platform, String name, String expectation) {

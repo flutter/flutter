@@ -1627,6 +1627,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_shouldCreateInputConnection) {
       return;
     }
+    if (widget.readOnly) {
+      // In the read-only case, we only care about selection changes, and reject
+      // everything else.
+      value = _value.copyWith(selection: value.selection);
+    }
     _receivedRemoteTextEditingValue = value;
     if (value.text != _value.text) {
       hideToolbar();
@@ -2100,7 +2105,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool textChanged = _value?.text != value?.text;
     final bool isRepeat = value == _lastFormattedUnmodifiedTextEditingValue;
 
-    if (textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+    // There's no need to format when starting to compose or when continuing
+    // an existing composition.
+    final bool isComposing = value?.composing?.isValid ?? false;
+    final bool isPreviouslyComposing = _lastFormattedUnmodifiedTextEditingValue?.composing?.isValid ?? false;
+
+    if ((textChanged || (!isComposing && isPreviouslyComposing)) &&
+        widget.inputFormatters != null &&
+        widget.inputFormatters.isNotEmpty) {
       // Only format when the text has changed and there are available formatters.
       // Pass through the formatter regardless of repeat status if the input value is
       // different than the stored value.
