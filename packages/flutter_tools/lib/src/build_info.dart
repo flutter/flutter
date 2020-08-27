@@ -33,7 +33,7 @@ class BuildInfo {
     this.performanceMeasurementFile,
     this.packagesPath = '.packages',
     this.nullSafetyMode = NullSafetyMode.autodetect,
-    this.analyzeSize,
+    this.codeSizeDirectory,
   });
 
   final BuildMode mode;
@@ -114,9 +114,9 @@ class BuildInfo {
   /// rerun tasks.
   final String performanceMeasurementFile;
 
-  /// If provided, an output file where a v8-style heapsnapshot will be written for size
-  /// profiling.
-  final String analyzeSize;
+  /// If provided, an output directory where one or more v8-style heapsnapshots
+  /// will be written for code size profiling.
+  final String codeSizeDirectory;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -178,6 +178,8 @@ class BuildInfo {
         'BUNDLE_SKSL_PATH': bundleSkSLPath,
       if (packagesPath != null)
         'PACKAGE_CONFIG': packagesPath,
+      if (codeSizeDirectory != null)
+        'CODE_SIZE_DIRECTORY': codeSizeDirectory,
     };
   }
 }
@@ -698,7 +700,7 @@ String encodeDartDefines(List<String> defines) {
 /// Dart defines are encoded inside [environmentDefines] as a comma-separated list.
 List<String> decodeDartDefines(Map<String, String> environmentDefines, String key) {
   if (!environmentDefines.containsKey(key) || environmentDefines[key].isEmpty) {
-    return const <String>[];
+    return <String>[];
   }
   return environmentDefines[key]
     .split(',')
