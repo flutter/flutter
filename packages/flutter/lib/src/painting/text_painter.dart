@@ -44,6 +44,9 @@ class PlaceholderDimensions {
   }) : assert(size != null),
        assert(alignment != null);
 
+  /// A constant representing an empty placeholder.
+  static const PlaceholderDimensions empty = PlaceholderDimensions(size: Size.zero, alignment: ui.PlaceholderAlignment.bottom);
+
   /// Width and height dimensions of the placeholder.
   final Size size;
 

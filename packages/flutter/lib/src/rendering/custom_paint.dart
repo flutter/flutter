@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
@@ -134,9 +132,9 @@ abstract class CustomPainter extends Listenable {
   /// Creates a custom painter.
   ///
   /// The painter will repaint whenever `repaint` notifies its listeners.
-  const CustomPainter({ Listenable repaint }) : _repaint = repaint;
+  const CustomPainter({ Listenable? repaint }) : _repaint = repaint;
 
-  final Listenable _repaint;
+  final Listenable? _repaint;
 
   /// Register a closure to be notified when it is time to repaint.
   ///
@@ -203,7 +201,7 @@ abstract class CustomPainter extends Listenable {
   ///  * [SemanticsConfiguration.isSemanticBoundary], which causes new
   ///    [SemanticsNode]s to be added to the semantics tree.
   ///  * [RenderCustomPaint], which uses this getter to build semantics.
-  SemanticsBuilderCallback get semanticsBuilder => null;
+  SemanticsBuilderCallback? get semanticsBuilder => null;
 
   /// Called whenever a new instance of the custom painter delegate class is
   /// provided to the [RenderCustomPaint] object, or any time that a new
@@ -267,7 +265,7 @@ abstract class CustomPainter extends Listenable {
   /// image that should be considered a "hit", false if it corresponds to a
   /// point that should be considered outside the painted image, and null to use
   /// the default behavior.
-  bool hitTest(Offset position) => null;
+  bool? hitTest(Offset position) => null;
 
   @override
   String toString() => '${describeIdentity(this)}(${ _repaint?.toString() ?? "" })';
@@ -295,8 +293,8 @@ class CustomPainterSemantics {
   /// Arguments `rect` and `properties` must not be null.
   const CustomPainterSemantics({
     this.key,
-    @required this.rect,
-    @required this.properties,
+    required this.rect,
+    required this.properties,
     this.transform,
     this.tags,
   }) : assert(rect != null),
@@ -312,7 +310,7 @@ class CustomPainterSemantics {
   /// [SemanticsNode] will be updated using this instance.
   ///
   /// This value is assigned to [SemanticsNode.key] during update.
-  final Key key;
+  final Key? key;
 
   /// The location and size of the box on the canvas where this piece of semantic
   /// information applies.
@@ -324,7 +322,7 @@ class CustomPainterSemantics {
   /// coordinate system.
   ///
   /// This value is assigned to [SemanticsNode.transform] during update.
-  final Matrix4 transform;
+  final Matrix4? transform;
 
   /// Contains properties that are assigned to the [SemanticsNode] created or
   /// updated from this object.
@@ -339,7 +337,7 @@ class CustomPainterSemantics {
   /// semantics tree.
   ///
   /// This value is assigned to [SemanticsNode.tags] during update.
-  final Set<SemanticsTag> tags;
+  final Set<SemanticsTag>? tags;
 }
 
 /// Provides a canvas on which to draw during the paint phase.
@@ -370,12 +368,12 @@ class CustomPainterSemantics {
 class RenderCustomPaint extends RenderProxyBox {
   /// Creates a render object that delegates its painting.
   RenderCustomPaint({
-    CustomPainter painter,
-    CustomPainter foregroundPainter,
+    CustomPainter? painter,
+    CustomPainter? foregroundPainter,
     Size preferredSize = Size.zero,
     this.isComplex = false,
     this.willChange = false,
-    RenderBox child,
+    RenderBox? child,
   }) : assert(preferredSize != null),
        _painter = painter,
        _foregroundPainter = foregroundPainter,
@@ -385,8 +383,8 @@ class RenderCustomPaint extends RenderProxyBox {
   /// The background custom paint delegate.
   ///
   /// This painter, if non-null, is called to paint behind the children.
-  CustomPainter get painter => _painter;
-  CustomPainter _painter;
+  CustomPainter? get painter => _painter;
+  CustomPainter? _painter;
   /// Set a new background custom paint delegate.
   ///
   /// If the new delegate is the same as the previous one, this does nothing.
@@ -399,10 +397,10 @@ class RenderCustomPaint extends RenderProxyBox {
   /// delegate will be called.
   ///
   /// If the new value is null, then there is no background custom painter.
-  set painter(CustomPainter value) {
+  set painter(CustomPainter? value) {
     if (_painter == value)
       return;
-    final CustomPainter oldPainter = _painter;
+    final CustomPainter? oldPainter = _painter;
     _painter = value;
     _didUpdatePainter(_painter, oldPainter);
   }
@@ -410,8 +408,8 @@ class RenderCustomPaint extends RenderProxyBox {
   /// The foreground custom paint delegate.
   ///
   /// This painter, if non-null, is called to paint in front of the children.
-  CustomPainter get foregroundPainter => _foregroundPainter;
-  CustomPainter _foregroundPainter;
+  CustomPainter? get foregroundPainter => _foregroundPainter;
+  CustomPainter? _foregroundPainter;
   /// Set a new foreground custom paint delegate.
   ///
   /// If the new delegate is the same as the previous one, this does nothing.
@@ -424,15 +422,15 @@ class RenderCustomPaint extends RenderProxyBox {
   /// delegate will be called.
   ///
   /// If the new value is null, then there is no foreground custom painter.
-  set foregroundPainter(CustomPainter value) {
+  set foregroundPainter(CustomPainter? value) {
     if (_foregroundPainter == value)
       return;
-    final CustomPainter oldPainter = _foregroundPainter;
+    final CustomPainter? oldPainter = _foregroundPainter;
     _foregroundPainter = value;
     _didUpdatePainter(_foregroundPainter, oldPainter);
   }
 
-  void _didUpdatePainter(CustomPainter newPainter, CustomPainter oldPainter) {
+  void _didUpdatePainter(CustomPainter? newPainter, CustomPainter? oldPainter) {
     // Check if we need to repaint.
     if (newPainter == null) {
       assert(oldPainter != null); // We should be called only for changes.
@@ -504,15 +502,15 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    if (_foregroundPainter != null && (_foregroundPainter.hitTest(position) ?? false))
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    if (_foregroundPainter != null && (_foregroundPainter!.hitTest(position) ?? false))
       return true;
     return super.hitTestChildren(result, position: position);
   }
 
   @override
   bool hitTestSelf(Offset position) {
-    return _painter != null && (_painter.hitTest(position) ?? true);
+    return _painter != null && (_painter!.hitTest(position) ?? true);
   }
 
   @override
@@ -521,9 +519,8 @@ class RenderCustomPaint extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter/*!*/ painter) {
-    // TODO(ianh): make the next line final
-    /*late*/ int/*!*/ debugPreviousCanvasSaveCount;
+  void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
+    late int debugPreviousCanvasSaveCount;
     canvas.save();
     assert(() {
       debugPreviousCanvasSaveCount = canvas.getSaveCount();
@@ -572,12 +569,12 @@ class RenderCustomPaint extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_painter != null) {
-      _paintWithPainter(context.canvas, offset, _painter);
+      _paintWithPainter(context.canvas, offset, _painter!);
       _setRasterCacheHints(context);
     }
     super.paint(context, offset);
     if (_foregroundPainter != null) {
-      _paintWithPainter(context.canvas, offset, _foregroundPainter);
+      _paintWithPainter(context.canvas, offset, _foregroundPainter!);
       _setRasterCacheHints(context);
     }
   }
@@ -590,10 +587,10 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   /// Builds semantics for the picture drawn by [painter].
-  SemanticsBuilderCallback _backgroundSemanticsBuilder;
+  SemanticsBuilderCallback? _backgroundSemanticsBuilder;
 
   /// Builds semantics for the picture drawn by [foregroundPainter].
-  SemanticsBuilderCallback _foregroundSemanticsBuilder;
+  SemanticsBuilderCallback? _foregroundSemanticsBuilder;
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
@@ -604,10 +601,10 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   /// Describe the semantics of the picture painted by the [painter].
-  List<SemanticsNode/*!*/> _backgroundSemanticsNodes;
+  List<SemanticsNode>? _backgroundSemanticsNodes;
 
   /// Describe the semantics of the picture painted by the [foregroundPainter].
-  List<SemanticsNode/*!*/> _foregroundSemanticsNodes;
+  List<SemanticsNode>? _foregroundSemanticsNodes;
 
   @override
   void assembleSemanticsNode(
@@ -628,21 +625,21 @@ class RenderCustomPaint extends RenderProxyBox {
     }());
 
     final List<CustomPainterSemantics> backgroundSemantics = _backgroundSemanticsBuilder != null
-      ? _backgroundSemanticsBuilder(size)
+      ? _backgroundSemanticsBuilder!(size)
       : const <CustomPainterSemantics>[];
     _backgroundSemanticsNodes = _updateSemanticsChildren(_backgroundSemanticsNodes, backgroundSemantics);
 
     final List<CustomPainterSemantics> foregroundSemantics = _foregroundSemanticsBuilder != null
-      ? _foregroundSemanticsBuilder(size)
+      ? _foregroundSemanticsBuilder!(size)
       : const <CustomPainterSemantics>[];
     _foregroundSemanticsNodes = _updateSemanticsChildren(_foregroundSemanticsNodes, foregroundSemantics);
 
-    final bool hasBackgroundSemantics = _backgroundSemanticsNodes != null && _backgroundSemanticsNodes.isNotEmpty;
-    final bool hasForegroundSemantics = _foregroundSemanticsNodes != null && _foregroundSemanticsNodes.isNotEmpty;
+    final bool hasBackgroundSemantics = _backgroundSemanticsNodes != null && _backgroundSemanticsNodes!.isNotEmpty;
+    final bool hasForegroundSemantics = _foregroundSemanticsNodes != null && _foregroundSemanticsNodes!.isNotEmpty;
     final List<SemanticsNode> finalChildren = <SemanticsNode>[
-      if (hasBackgroundSemantics) ..._backgroundSemanticsNodes,
+      if (hasBackgroundSemantics) ..._backgroundSemanticsNodes!,
       ...children,
-      if (hasForegroundSemantics) ..._foregroundSemanticsNodes,
+      if (hasForegroundSemantics) ..._foregroundSemanticsNodes!,
     ];
     super.assembleSemanticsNode(node, config, finalChildren);
   }
@@ -676,23 +673,23 @@ class RenderCustomPaint extends RenderProxyBox {
   /// considered because there is only one type of [SemanticsNode]. There is no
   /// concept of a "forgotten" node in semantics, deactivated nodes, or global
   /// keys.
-  static List<SemanticsNode/*!*/> _updateSemanticsChildren(
-    List<SemanticsNode> oldSemantics,
-    List<CustomPainterSemantics> newChildSemantics,
+  static List<SemanticsNode> _updateSemanticsChildren(
+    List<SemanticsNode>? oldSemantics,
+    List<CustomPainterSemantics>? newChildSemantics,
   ) {
     oldSemantics = oldSemantics ?? const <SemanticsNode>[];
     newChildSemantics = newChildSemantics ?? const <CustomPainterSemantics>[];
 
     assert(() {
-      final Map<Key/*!*/, int> keys = HashMap<Key/*!*/, int>();
+      final Map<Key, int> keys = HashMap<Key, int>();
       final List<DiagnosticsNode> information = <DiagnosticsNode>[];
-      for (int i = 0; i < newChildSemantics.length; i += 1) {
+      for (int i = 0; i < newChildSemantics!.length; i += 1) {
         final CustomPainterSemantics child = newChildSemantics[i];
         if (child.key != null) {
           if (keys.containsKey(child.key)) {
             information.add(ErrorDescription('- duplicate key ${child.key} found at position $i'));
           }
-          keys[child.key] = i;
+          keys[child.key!] = i;
         }
       }
 
@@ -709,7 +706,7 @@ class RenderCustomPaint extends RenderProxyBox {
     int newChildrenBottom = newChildSemantics.length - 1;
     int oldChildrenBottom = oldSemantics.length - 1;
 
-    final List<SemanticsNode/*!*/> newChildren = List<SemanticsNode/*!*/>(newChildSemantics.length);
+    final List<SemanticsNode?> newChildren = List<SemanticsNode?>.filled(newChildSemantics.length, null, growable: false);
 
     // Update the top of the list.
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
@@ -735,23 +732,23 @@ class RenderCustomPaint extends RenderProxyBox {
 
     // Scan the old children in the middle of the list.
     final bool haveOldChildren = oldChildrenTop <= oldChildrenBottom;
-    Map<Key/*!*/, SemanticsNode> oldKeyedChildren;
+    late final Map<Key, SemanticsNode> oldKeyedChildren;
     if (haveOldChildren) {
       oldKeyedChildren = <Key, SemanticsNode>{};
       while (oldChildrenTop <= oldChildrenBottom) {
         final SemanticsNode oldChild = oldSemantics[oldChildrenTop];
         if (oldChild.key != null)
-          oldKeyedChildren[oldChild.key] = oldChild;
+          oldKeyedChildren[oldChild.key!] = oldChild;
         oldChildrenTop += 1;
       }
     }
 
     // Update the middle of the list.
     while (newChildrenTop <= newChildrenBottom) {
-      SemanticsNode oldChild;
+      SemanticsNode? oldChild;
       final CustomPainterSemantics newSemantics = newChildSemantics[newChildrenTop];
       if (haveOldChildren) {
-        final Key key = newSemantics.key;
+        final Key? key = newSemantics.key;
         if (key != null) {
           oldChild = oldKeyedChildren[key];
           if (oldChild != null) {
@@ -793,13 +790,13 @@ class RenderCustomPaint extends RenderProxyBox {
     }
 
     assert(() {
-      for (final SemanticsNode node in newChildren) {
+      for (final SemanticsNode? node in newChildren) {
         assert(node != null);
       }
       return true;
     }());
 
-    return newChildren;
+    return newChildren.cast<SemanticsNode>();
   }
 
   /// Whether `oldChild` can be updated with properties from `newSemantics`.
@@ -814,7 +811,7 @@ class RenderCustomPaint extends RenderProxyBox {
   ///
   /// This method requires that `_canUpdateSemanticsChild(oldChild, newSemantics)`
   /// is true prior to calling it.
-  static SemanticsNode _updateSemanticsChild(SemanticsNode oldChild, CustomPainterSemantics newSemantics) {
+  static SemanticsNode _updateSemanticsChild(SemanticsNode? oldChild, CustomPainterSemantics newSemantics) {
     assert(oldChild == null || _canUpdateSemanticsChild(oldChild, newSemantics));
 
     final SemanticsNode newChild = oldChild ?? SemanticsNode(
@@ -830,52 +827,52 @@ class RenderCustomPaint extends RenderProxyBox {
       config.isChecked = properties.checked;
     }
     if (properties.selected != null) {
-      config.isSelected = properties.selected;
+      config.isSelected = properties.selected!;
     }
     if (properties.button != null) {
-      config.isButton = properties.button;
+      config.isButton = properties.button!;
     }
     if (properties.link != null) {
-      config.isLink = properties.link;
+      config.isLink = properties.link!;
     }
     if (properties.textField != null) {
-      config.isTextField = properties.textField;
+      config.isTextField = properties.textField!;
     }
     if (properties.readOnly != null) {
-      config.isReadOnly = properties.readOnly;
+      config.isReadOnly = properties.readOnly!;
     }
     if (properties.focusable != null) {
-      config.isFocusable = properties.focusable;
+      config.isFocusable = properties.focusable!;
     }
     if (properties.focused != null) {
-      config.isFocused = properties.focused;
+      config.isFocused = properties.focused!;
     }
     if (properties.enabled != null) {
       config.isEnabled = properties.enabled;
     }
     if (properties.inMutuallyExclusiveGroup != null) {
-      config.isInMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup;
+      config.isInMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup!;
     }
     if (properties.obscured != null) {
-      config.isObscured = properties.obscured;
+      config.isObscured = properties.obscured!;
     }
     if (properties.multiline != null) {
-      config.isMultiline = properties.multiline;
+      config.isMultiline = properties.multiline!;
     }
     if (properties.hidden != null) {
-      config.isHidden = properties.hidden;
+      config.isHidden = properties.hidden!;
     }
     if (properties.header != null) {
-      config.isHeader = properties.header;
+      config.isHeader = properties.header!;
     }
     if (properties.scopesRoute != null) {
-      config.scopesRoute = properties.scopesRoute;
+      config.scopesRoute = properties.scopesRoute!;
     }
     if (properties.namesRoute != null) {
-      config.namesRoute = properties.namesRoute;
+      config.namesRoute = properties.namesRoute!;
     }
     if (properties.liveRegion != null) {
-      config.liveRegion = properties.liveRegion;
+      config.liveRegion = properties.liveRegion!;
     }
     if (properties.maxValueLength != null) {
       config.maxValueLength = properties.maxValueLength;
@@ -887,22 +884,22 @@ class RenderCustomPaint extends RenderProxyBox {
       config.isToggled = properties.toggled;
     }
     if (properties.image != null) {
-      config.isImage = properties.image;
+      config.isImage = properties.image!;
     }
     if (properties.label != null) {
-      config.label = properties.label;
+      config.label = properties.label!;
     }
     if (properties.value != null) {
-      config.value = properties.value;
+      config.value = properties.value!;
     }
     if (properties.increasedValue != null) {
-      config.increasedValue = properties.increasedValue;
+      config.increasedValue = properties.increasedValue!;
     }
     if (properties.decreasedValue != null) {
-      config.decreasedValue = properties.decreasedValue;
+      config.decreasedValue = properties.decreasedValue!;
     }
     if (properties.hint != null) {
-      config.hint = properties.hint;
+      config.hint = properties.hint!;
     }
     if (properties.textDirection != null) {
       config.textDirection = properties.textDirection;
