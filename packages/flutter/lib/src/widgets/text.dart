@@ -128,7 +128,7 @@ class DefaultTextStyle extends InheritedTheme {
   /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
   ///
   /// This also decides the [overflow] property's behavior. If this is true or null,
-  /// the word causing overflow will not be shown at all.
+  /// the glyph causing overflow, and those that follow, will not be rendered.
   final bool softWrap;
 
   /// How visual overflow should be handled.
