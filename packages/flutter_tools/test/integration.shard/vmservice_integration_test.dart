@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io'; // ignore: dart_io_import
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:matcher/matcher.dart';
 import 'package:vm_service/vm_service.dart';
