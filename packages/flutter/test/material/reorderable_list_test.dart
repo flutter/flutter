@@ -1040,6 +1040,58 @@ void main() {
       ));
       expect(tester.getCenter(find.text('A')).dy, lessThan(tester.getCenter(find.text('B')).dy));
     });
+
+    testWidgets('Animation test when placing an item in place', (WidgetTester tester) async {
+      const Key testItemKey = Key('Test item');
+      final Widget reorderableListView = ReorderableListView(
+        children: const <Widget>[
+          SizedBox(
+            key: Key('First item'),
+            height: itemHeight,
+            child: Text('First item'),
+          ),
+          SizedBox(
+            key: testItemKey,
+            height: itemHeight,
+            child: Text('Test item'),
+          ),
+          SizedBox(
+            key: Key('Last item'),
+            height: itemHeight,
+            child: Text('Last item'),
+          ),
+        ],
+        scrollDirection: Axis.vertical,
+        onReorder: (int oldIndex, int newIndex) { },
+      );
+      await tester.pumpWidget(MaterialApp(
+        home: SizedBox(
+          height: itemHeight * 10,
+          child: reorderableListView,
+        ),
+      ));
+
+      Offset getTestItemPosition() {
+        final RenderBox testItem = tester.renderObject<RenderBox>(find.byKey(testItemKey));
+        return testItem.localToGlobal(Offset.zero);
+      }
+      // Before pick it up.
+      final Offset startPosition = getTestItemPosition();
+
+      // Pick it up.
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(testItemKey)));
+      await tester.pump(kLongPressTimeout + kPressTimeout);
+      expect(getTestItemPosition(), startPosition);
+
+      // Put it down.
+      await gesture.up();
+      await tester.pump();
+      expect(getTestItemPosition(), startPosition);
+
+      // After put it down.
+      await tester.pumpAndSettle();
+      expect(getTestItemPosition(), startPosition);
+    });
     // TODO(djshuckerow): figure out how to write a test for scrolling the list.
   });
 }
