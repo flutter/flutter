@@ -223,6 +223,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
   @Nullable private OnAccessibilityChangeListener onAccessibilityChangeListener;
 
+  // Set to true after {@code release} has been invoked.
+  private boolean isReleased = false;
+
   // Handler for all messages received from Flutter via the {@code accessibilityChannel}
   private final AccessibilityChannel.AccessibilityMessageHandler accessibilityMessageHandler =
       new AccessibilityChannel.AccessibilityMessageHandler() {
@@ -274,6 +277,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           new AccessibilityManager.AccessibilityStateChangeListener() {
             @Override
             public void onAccessibilityStateChanged(boolean accessibilityEnabled) {
+              if (isReleased) {
+                return;
+              }
               if (accessibilityEnabled) {
                 accessibilityChannel.setAccessibilityMessageHandler(accessibilityMessageHandler);
                 accessibilityChannel.onAndroidAccessibilityEnabled();
@@ -307,6 +313,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
+          if (isReleased) {
+            return;
+          }
           // Retrieve the current value of TRANSITION_ANIMATION_SCALE from the OS.
           String value =
               Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1
@@ -374,6 +383,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           new AccessibilityManager.TouchExplorationStateChangeListener() {
             @Override
             public void onTouchExplorationStateChanged(boolean isTouchExplorationEnabled) {
+              if (isReleased) {
+                return;
+              }
               if (isTouchExplorationEnabled) {
                 accessibilityFeatureFlags |= AccessibilityFeature.ACCESSIBLE_NAVIGATION.value;
               } else {
@@ -421,6 +433,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * on this {@code AccessibilityBridge} after invoking {@code release()} is undefined.
    */
   public void release() {
+    isReleased = true;
     // platformViewsAccessibilityDelegate should be @NonNull once the plumbing
     // for io.flutter.embedding.engine.android.FlutterView is done.
     // TODO(mattcarrol): Remove the null check once the plumbing is done.

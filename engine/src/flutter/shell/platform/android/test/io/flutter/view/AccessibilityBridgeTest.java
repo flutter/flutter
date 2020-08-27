@@ -7,11 +7,15 @@ package io.flutter.view;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.view.MotionEvent;
@@ -33,6 +37,7 @@ import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
+@TargetApi(19)
 public class AccessibilityBridgeTest {
 
   @Test
@@ -197,14 +202,26 @@ public class AccessibilityBridgeTest {
   public void releaseDropsChannelMessageHandler() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
     AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    ContentResolver mockContentResolver = mock(ContentResolver.class);
     when(mockManager.isEnabled()).thenReturn(true);
     AccessibilityBridge accessibilityBridge =
-        setUpBridge(null, mockChannel, mockManager, null, null, null);
+        setUpBridge(null, mockChannel, mockManager, mockContentResolver, null, null);
     verify(mockChannel)
         .setAccessibilityMessageHandler(
             any(AccessibilityChannel.AccessibilityMessageHandler.class));
+    ArgumentCaptor<AccessibilityManager.AccessibilityStateChangeListener> stateListenerCaptor =
+        ArgumentCaptor.forClass(AccessibilityManager.AccessibilityStateChangeListener.class);
+    ArgumentCaptor<AccessibilityManager.TouchExplorationStateChangeListener> touchListenerCaptor =
+        ArgumentCaptor.forClass(AccessibilityManager.TouchExplorationStateChangeListener.class);
+    verify(mockManager).addAccessibilityStateChangeListener(stateListenerCaptor.capture());
+    verify(mockManager).addTouchExplorationStateChangeListener(touchListenerCaptor.capture());
     accessibilityBridge.release();
     verify(mockChannel).setAccessibilityMessageHandler(null);
+    reset(mockChannel);
+    stateListenerCaptor.getValue().onAccessibilityStateChanged(true);
+    verify(mockChannel, never()).onAndroidAccessibilityEnabled();
+    touchListenerCaptor.getValue().onTouchExplorationStateChanged(true);
+    verify(mockChannel, never()).setAccessibilityFeatures(anyInt());
   }
 
   AccessibilityBridge setUpBridge() {
