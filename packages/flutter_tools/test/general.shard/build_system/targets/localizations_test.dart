@@ -76,7 +76,7 @@ void main() {
 
   testUsingContext('generateLocalizations throws exception on missing flutter: generate: true flag', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final Logger logger = BufferLogger.test();
+    final BufferLogger logger = BufferLogger.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
     final Directory arbDirectory = fileSystem.directory('arb')
       ..createSync();
@@ -103,8 +103,8 @@ flutter:
       useSyntheticPackage: true,
     );
 
-    try {
-      await generateLocalizations(
+    expect(
+      () => generateLocalizations(
         options: options,
         logger: logger,
         fileSystem: fileSystem,
@@ -113,11 +113,13 @@ flutter:
         dartBinaryPath: 'dart',
         flutterRoot: '',
         dependenciesDir: fileSystem.currentDirectory,
-      );
-      fail('Missing flutter: generate: true on pubspec.yaml should throw an Exception.');
-    } on Exception catch (e) {
-      expect(e, isA<Exception>());
-    }
+      ),
+      throwsA(isA<Exception>()),
+    );
+    expect(
+      logger.errorText,
+      contains('Attempted to generate localizations code without having the flutter: generate flag turned on.'),
+    );
   });
 
   testWithoutContext('generateLocalizations is skipped if l10n.yaml does not exist.', () async {

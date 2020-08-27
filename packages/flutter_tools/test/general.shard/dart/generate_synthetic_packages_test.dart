@@ -17,6 +17,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/mocks.dart' as mocks;
 
 void main() {
@@ -35,7 +36,7 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').createSync();
 
-    final MockProcessManager mockProcessManager = MockProcessManager(0);
+    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Artifacts mockArtifacts = Artifacts.test();
     final Environment environment = Environment.test(
@@ -78,7 +79,7 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').writeAsStringSync('synthetic-package: true');
 
-    final MockProcessManager mockProcessManager = MockProcessManager(0);
+    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Artifacts mockArtifacts = Artifacts.test();
     final Environment environment = Environment.test(
@@ -121,7 +122,7 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').writeAsStringSync('synthetic-package: null');
 
-    final MockProcessManager mockProcessManager = MockProcessManager(0);
+    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Artifacts mockArtifacts = Artifacts.test();
     final Environment environment = Environment.test(
@@ -161,7 +162,7 @@ void main() {
     );
     pubspecFile.writeAsStringSync(content);
 
-    final MockProcessManager mockProcessManager = MockProcessManager(0);
+    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Artifacts mockArtifacts = Artifacts.test();
     final Environment environment = Environment.test(
@@ -199,7 +200,7 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').writeAsStringSync('helloWorld');
 
-    final MockProcessManager mockProcessManager = MockProcessManager(0);
+    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Artifacts mockArtifacts = Artifacts.test();
     final Environment environment = Environment.test(
@@ -242,7 +243,7 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').writeAsStringSync('synthetic-package: nonBoolValue');
 
-    final MockProcessManager mockProcessManager = MockProcessManager(0);
+    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Artifacts mockArtifacts = Artifacts.test();
     final Environment environment = Environment.test(
@@ -256,7 +257,7 @@ void main() {
 
     expect(
       () async {
-        return await generateLocalizationsSyntheticPackage(
+        return generateLocalizationsSyntheticPackage(
           environment: environment,
           buildSystem: buildSystem,
         );
@@ -269,41 +270,6 @@ void main() {
       environment,
     ));
   });
-}
-
-class MockProcessManager implements ProcessManager {
-  MockProcessManager(this.fakeExitCode, {
-    this.stdout = '',
-    this.stderr = '',
-  });
-
-  final int fakeExitCode;
-  final String stdout;
-  final String stderr;
-
-  String lastPubEnvironment;
-  String lastPubCache;
-
-  @override
-  Future<Process> start(
-    List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    ProcessStartMode mode = ProcessStartMode.normal,
-  }) {
-    lastPubEnvironment = environment['PUB_ENVIRONMENT'];
-    lastPubCache = environment['PUB_CACHE'];
-    return Future<Process>.value(mocks.createMockProcess(
-      exitCode: fakeExitCode,
-      stdout: stdout,
-      stderr: stderr,
-    ));
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
 }
 
 class MockBuildSystem extends Mock implements BuildSystem {}
