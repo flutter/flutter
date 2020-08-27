@@ -355,7 +355,7 @@ void main() {
 
     expect(find.text('First sliver 1'), findsNothing);
 
-    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0)); // offset will be magnified ten times
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 300.0));
     expect(find.text('First sliver 1'), findsOneWidget);
     final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
     // The scroll offset and paint extend should cancel out each other.
