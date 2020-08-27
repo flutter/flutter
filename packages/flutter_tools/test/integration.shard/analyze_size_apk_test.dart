@@ -19,6 +19,7 @@ void main() {
       'build',
       'apk',
       '--analyze-size',
+      '--target-platform=android-arm64',
     ], workingDirectory: globals.fs.path.join(getFlutterRoot(), 'examples', 'hello_world'));
 
     print(result.stdout);
