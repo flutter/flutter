@@ -212,7 +212,7 @@ tasks:
     description: >
       Measures the runtime performance of Flutter gallery transitions on iPhone4s
       with SkSL shader warm-up.
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
     flaky: true
 
@@ -259,7 +259,6 @@ tasks:
       Checks that flavored builds work on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    on_luci: true
 
   channels_integration_test:
     description: >
@@ -441,14 +440,12 @@ tasks:
       Measures image loading performance on release (aot) build.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   image_list_jit_reported_duration:
     description: >
       Measures image loading performance on debug (jit) build.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   build_benchmark:
     description: >
@@ -467,13 +464,13 @@ tasks:
   ios_defines_test:
     description: >
       Builds a Framework with a --dart-define and verifies it can be used as a constant
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   ios_content_validation_test:
     description: >
       Builds an obfuscated app and verifies contents and structure
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     on_luci: true
 
@@ -682,7 +679,7 @@ tasks:
     description: >
       Checks the functionality and performance of hot reload on a macOS target platform
     stage: devicelab
-    required_agent_capabilities: ["mac/ios"]
+    required_agent_capabilities: ["mac"]
 
 #  TODO(jonahwilliams): investigate build failures on devicelab infra to re-enable.
 #  mac_enable_twc:
@@ -780,14 +777,14 @@ tasks:
     description: >
       Measures the performance of screen transitions in Flutter Gallery on
       Android with e2e.
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
 
   flutter_gallery__transition_perf_e2e_ios:
     description: >
       Measures the performance of screen transitions in Flutter Gallery on
       Android with e2e.
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   flutter_gallery__transition_perf_hybrid:
@@ -848,7 +845,7 @@ tasks:
   new_gallery_ios__transition_perf:
     description: >
       Measures the performance of screen transitions in the new Flutter Gallery on iOS.
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   new_gallery__crane_perf:

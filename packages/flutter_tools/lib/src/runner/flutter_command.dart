@@ -611,7 +611,9 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kAnalyzeSize,
       defaultsTo: false,
       help: 'Whether to produce additional profile information for artifact output size. '
-        'This flag is only supported on release builds on macOS/Linux hosts.'
+        'This flag is only supported on release builds. When building for Android, a single '
+        'ABI must be specified at a time with the --target-platform flag. When building for iOS, '
+        'only the symbols from the arm64 architecture are used to analyze code size.'
     );
   }
 
@@ -650,13 +652,14 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    String analyzeSize;
-    if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize)
-      && boolArg(FlutterOptions.kAnalyzeSize)
-      && !globals.platform.isWindows) {
-      final File file = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'flutter_size', 'json');
-      extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${file.path}');
-      analyzeSize = file.path;
+    String codeSizeDirectory;
+    if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) && boolArg(FlutterOptions.kAnalyzeSize)) {
+      final Directory directory = globals.fsUtils.getUniqueDirectory(
+        globals.fs.directory(getBuildDirectory()),
+        'flutter_size',
+      );
+      directory.createSync(recursive: true);
+      codeSizeDirectory = directory.path;
     }
 
     NullSafetyMode nullSafetyMode = NullSafetyMode.unsound;
@@ -690,7 +693,7 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
     final BuildMode buildMode = forcedBuildMode ?? getBuildMode();
-    if (buildMode != BuildMode.release && analyzeSize != null) {
+    if (buildMode != BuildMode.release && codeSizeDirectory != null) {
       throwToolExit('--analyze-size can only be used on release builds.');
     }
 
@@ -738,7 +741,7 @@ abstract class FlutterCommand extends Command<void> {
       performanceMeasurementFile: performanceMeasurementFile,
       packagesPath: globalResults['packages'] as String ?? '.packages',
       nullSafetyMode: nullSafetyMode,
-      analyzeSize: analyzeSize,
+      codeSizeDirectory: codeSizeDirectory,
     );
   }
 

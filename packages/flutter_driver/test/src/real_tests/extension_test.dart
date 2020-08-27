@@ -570,7 +570,7 @@ void main() {
                     ),
                   ),
                   Container(
-                    height: 40.0,
+                    height: 25.0,
                     child: EditableText(
                       key: const ValueKey<String>('text3'),
                       controller: TextEditingController(text: 'Hello3'),
@@ -581,14 +581,14 @@ void main() {
                     ),
                   ),
                   Container(
-                    height: 40.0,
+                    height: 25.0,
                     child: TextField(
                       key: const ValueKey<String>('text4'),
                       controller: TextEditingController(text: 'Hello4'),
                     ),
                   ),
                   Container(
-                    height: 40.0,
+                    height: 25.0,
                     child: TextFormField(
                       key: const ValueKey<String>('text5'),
                       controller: TextEditingController(text: 'Hello5'),
