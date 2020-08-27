@@ -1215,7 +1215,7 @@ plugin1=${plugin1.path}
       Usage: () => mockUsage,
     });
 
-    testUsingContext('rethrows unrecognized ProcessException', () async {
+    testUsingContext('rethrows unrecognized ProcessException as ToolExit', () async {
       when(mockProcessManager.start(any,
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment')))
@@ -1250,7 +1250,7 @@ plugin1=${plugin1.path}
           localGradleErrors: const <GradleHandledError>[],
         );
       },
-      throwsA(isA<ProcessException>()));
+      throwsA(isA<ToolExit>()));
 
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,

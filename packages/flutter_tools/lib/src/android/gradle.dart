@@ -397,12 +397,12 @@ Future<void> buildGradleApp({
       environment: gradleEnvironment,
       mapFunction: consumeLog,
     );
-  } on ProcessException catch(exception) {
+  } on ProcessException catch (exception) {
     consumeLog(exception.toString());
-    // Rethrow the exception if the error isn't handled by any of the
+    // Rethrow a tool exit if the error isn't handled by any of the
     // `localGradleErrors`.
     if (detectedGradleError == null) {
-      rethrow;
+      throwToolExit(exception.toString());
     }
   } finally {
     status.stop();
