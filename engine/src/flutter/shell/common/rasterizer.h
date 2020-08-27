@@ -400,12 +400,7 @@ class Rasterizer final : public SnapshotDelegate {
   ///             blocking the current thread until the 2 task runners are
   ///             merged.
   ///
-  /// @return     `true` if raster and platform task runners are the same.
-  ///             `true` if/when raster and platform task runners are merged.
-  ///             `false` if the surface or the |RasterThreadMerger| has not
-  ///             been initialized.
-  ///
-  bool EnsureThreadsAreMerged();
+  void EnsureThreadsAreMerged();
 
  private:
   Delegate& delegate_;

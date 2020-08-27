@@ -14,6 +14,9 @@
 #include "flutter/fml/task_runner.h"
 #include "gtest/gtest.h"
 
+namespace fml {
+namespace testing {
+
 TEST(RasterThreadMerger, RemainMergedTillLeaseExpires) {
   fml::MessageLoop* loop1 = nullptr;
   fml::AutoResetWaitableEvent latch1;
@@ -301,3 +304,119 @@ TEST(RasterThreadMerger, HandleTaskQueuesAreTheSame) {
   term1.Signal();
   thread1.join();
 }
+
+TEST(RasterThreadMerger, RunExpiredTasksWhileFirstTaskMergesThreads) {
+  fml::MessageLoop* loop_platform = nullptr;
+  fml::AutoResetWaitableEvent latch1;
+  std::thread thread_platform([&loop_platform, &latch1]() {
+    fml::MessageLoop::EnsureInitializedForCurrentThread();
+    loop_platform = &fml::MessageLoop::GetCurrent();
+    loop_platform->GetTaskRunner()->PostTask([&]() { latch1.Signal(); });
+    loop_platform->Run();
+  });
+
+  fml::MessageLoop* loop_raster = nullptr;
+  fml::AutoResetWaitableEvent latch2;
+  std::thread thread_raster([&loop_raster, &loop_platform, &latch1, &latch2]() {
+    latch1.Wait();
+
+    fml::MessageLoop::EnsureInitializedForCurrentThread();
+    loop_raster = &fml::MessageLoop::GetCurrent();
+    fml::TaskQueueId qid_platform =
+        loop_platform->GetTaskRunner()->GetTaskQueueId();
+    fml::TaskQueueId qid_raster =
+        loop_raster->GetTaskRunner()->GetTaskQueueId();
+    fml::CountDownLatch post_merge(2);
+    const auto raster_thread_merger_ =
+        fml::MakeRefCounted<fml::RasterThreadMerger>(qid_platform, qid_raster);
+    loop_raster->GetTaskRunner()->PostTask([&]() {
+      ASSERT_TRUE(raster_thread_merger_->IsOnRasterizingThread());
+      ASSERT_FALSE(raster_thread_merger_->IsOnPlatformThread());
+      ASSERT_EQ(fml::MessageLoop::GetCurrentTaskQueueId(), qid_raster);
+      raster_thread_merger_->MergeWithLease(1);
+      post_merge.CountDown();
+    });
+
+    loop_raster->GetTaskRunner()->PostTask([&]() {
+      ASSERT_TRUE(raster_thread_merger_->IsOnRasterizingThread());
+      ASSERT_TRUE(raster_thread_merger_->IsOnPlatformThread());
+      ASSERT_EQ(fml::MessageLoop::GetCurrentTaskQueueId(), qid_platform);
+      raster_thread_merger_->DecrementLease();
+      post_merge.CountDown();
+    });
+
+    loop_raster->RunExpiredTasksNow();
+    post_merge.Wait();
+    latch2.Signal();
+  });
+
+  latch2.Wait();
+  loop_platform->GetTaskRunner()->PostTask(
+      [&]() { loop_platform->Terminate(); });
+
+  thread_platform.join();
+  thread_raster.join();
+}
+
+TEST(RasterThreadMerger, RunExpiredTasksWhileFirstTaskUnMergesThreads) {
+  fml::MessageLoop* loop_platform = nullptr;
+  fml::AutoResetWaitableEvent latch1;
+  std::thread thread_platform([&loop_platform, &latch1]() {
+    fml::MessageLoop::EnsureInitializedForCurrentThread();
+    loop_platform = &fml::MessageLoop::GetCurrent();
+    loop_platform->GetTaskRunner()->PostTask([&]() { latch1.Signal(); });
+    loop_platform->Run();
+  });
+
+  fml::MessageLoop* loop_raster = nullptr;
+  fml::AutoResetWaitableEvent latch2;
+  std::thread thread_raster([&loop_raster, &loop_platform, &latch1, &latch2]() {
+    latch1.Wait();
+
+    fml::MessageLoop::EnsureInitializedForCurrentThread();
+    loop_raster = &fml::MessageLoop::GetCurrent();
+    fml::TaskQueueId qid_platform =
+        loop_platform->GetTaskRunner()->GetTaskQueueId();
+    fml::TaskQueueId qid_raster =
+        loop_raster->GetTaskRunner()->GetTaskQueueId();
+    fml::CountDownLatch post_merge(2);
+
+    const auto raster_thread_merger_ =
+        fml::MakeRefCounted<fml::RasterThreadMerger>(qid_platform, qid_raster);
+    loop_raster->GetTaskRunner()->PostTask([&]() {
+      raster_thread_merger_->MergeWithLease(1);
+      post_merge.CountDown();
+    });
+
+    loop_raster->RunExpiredTasksNow();
+
+    loop_raster->GetTaskRunner()->PostTask([&]() {
+      ASSERT_TRUE(raster_thread_merger_->IsOnRasterizingThread());
+      ASSERT_TRUE(raster_thread_merger_->IsOnPlatformThread());
+      ASSERT_EQ(fml::MessageLoop::GetCurrentTaskQueueId(), qid_platform);
+      raster_thread_merger_->DecrementLease();
+      post_merge.CountDown();
+    });
+
+    loop_raster->GetTaskRunner()->PostTask([&]() {
+      ASSERT_TRUE(raster_thread_merger_->IsOnRasterizingThread());
+      ASSERT_FALSE(raster_thread_merger_->IsOnPlatformThread());
+      ASSERT_EQ(fml::MessageLoop::GetCurrentTaskQueueId(), qid_platform);
+      post_merge.CountDown();
+    });
+
+    loop_raster->RunExpiredTasksNow();
+    post_merge.Wait();
+    latch2.Signal();
+  });
+
+  latch2.Wait();
+  loop_platform->GetTaskRunner()->PostTask(
+      [&]() { loop_platform->Terminate(); });
+
+  thread_platform.join();
+  thread_raster.join();
+}
+
+}  // namespace testing
+}  // namespace fml
