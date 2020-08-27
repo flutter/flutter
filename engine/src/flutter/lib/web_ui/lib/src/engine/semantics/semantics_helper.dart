@@ -340,12 +340,12 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
 
       final html.Rectangle<num> activatingElementRect =
           domRenderer.glassPaneElement!.getBoundingClientRect();
-      final double midX = activatingElementRect.left +
-          (activatingElementRect.right - activatingElementRect.left) / 2;
-      final double midY = activatingElementRect.top +
-          (activatingElementRect.bottom - activatingElementRect.top) / 2;
-      final double deltaX = activationPoint.x - midX;
-      final double deltaY = activationPoint.y - midY;
+      final double midX = (activatingElementRect.left +
+          (activatingElementRect.right - activatingElementRect.left) / 2).toDouble();
+      final double midY = (activatingElementRect.top +
+          (activatingElementRect.bottom - activatingElementRect.top) / 2).toDouble();
+      final double deltaX = activationPoint.x.toDouble() - midX;
+      final double deltaY = activationPoint.y.toDouble() - midY;
       final double deltaSquared = deltaX * deltaX + deltaY * deltaY;
       if (deltaSquared < 1.0) {
         safariEnableConditionPassed = true;

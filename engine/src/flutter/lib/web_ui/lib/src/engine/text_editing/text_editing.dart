@@ -189,11 +189,8 @@ class EngineAutofillForm {
 
     // If a form with the same Autofill elements is already on the dom, remove
     // it from DOM.
-    if (formsOnTheDom[formIdentifier] != null) {
-      final html.FormElement form =
-          formsOnTheDom[formIdentifier] as html.FormElement;
-      form.remove();
-    }
+    html.FormElement? form = formsOnTheDom[formIdentifier];
+    form?.remove();
 
     // In order to submit the form when Framework sends a `TextInput.commit`
     // message, we add a submit button to the form.
@@ -243,7 +240,7 @@ class EngineAutofillForm {
           throw StateError(
               'Autofill would not work withuot Autofill value set');
         } else {
-          final AutofillInfo autofillInfo = items![key] as AutofillInfo;
+          final AutofillInfo autofillInfo = items![key]!;
           _handleChange(element, autofillInfo);
         }
       }));
@@ -774,7 +771,7 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
     inputConfig.autofill?.applyToDomElement(domElement, focusedElement: true);
 
-    final String autocorrectValue = inputConfig.autocorrect! ? 'on' : 'off';
+    final String autocorrectValue = inputConfig.autocorrect ? 'on' : 'off';
     domElement.setAttribute('autocorrect', autocorrectValue);
 
     _setStaticStyleAttributes(domElement);
