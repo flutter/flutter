@@ -25,11 +25,24 @@ static void fl_renderer_class_init(FlRendererClass* klass) {}
 
 static void fl_renderer_init(FlRenderer* self) {}
 
-gboolean fl_renderer_setup(FlRenderer* self, GError** error) {
+// Initializes EGL and gets a valid EGL OpenGL ES configuration.
+static gboolean setup_egl_display(FlRenderer* self, GError** error) {
   FlRendererPrivate* priv =
       static_cast<FlRendererPrivate*>(fl_renderer_get_instance_private(self));
 
+  if (priv->egl_display != EGL_NO_DISPLAY) {
+    g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
+                "EGL display already set up");
+    return FALSE;
+  }
+
   priv->egl_display = FL_RENDERER_GET_CLASS(self)->create_display(self);
+
+  if (priv->egl_display == EGL_NO_DISPLAY) {
+    g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
+                "Failed to create EGL display");
+    return FALSE;
+  }
 
   if (!eglInitialize(priv->egl_display, nullptr, nullptr)) {
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
@@ -77,48 +90,76 @@ gboolean fl_renderer_setup(FlRenderer* self, GError** error) {
   return TRUE;
 }
 
-GdkVisual* fl_renderer_get_visual(FlRenderer* self,
-                                  GdkScreen* screen,
-                                  GError** error) {
+// Creates a GDK window that can be rendered to using EGL.
+static gboolean setup_gdk_window(FlRenderer* self,
+                                 GtkWidget* widget,
+                                 GError** error) {
   FlRendererPrivate* priv =
       static_cast<FlRendererPrivate*>(fl_renderer_get_instance_private(self));
+
+  if (priv->egl_display == EGL_NO_DISPLAY) {
+    g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
+                "Can not set up GDK window: EGL display not created");
+    return FALSE;
+  }
+
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(widget, &allocation);
+
+  GdkWindowAttr window_attributes;
+  window_attributes.window_type = GDK_WINDOW_CHILD;
+  window_attributes.x = allocation.x;
+  window_attributes.y = allocation.y;
+  window_attributes.width = allocation.width;
+  window_attributes.height = allocation.height;
+  window_attributes.wclass = GDK_INPUT_OUTPUT;
+  window_attributes.event_mask =
+      gtk_widget_get_events(widget) | GDK_EXPOSURE_MASK |
+      GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
+      GDK_BUTTON_RELEASE_MASK | GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK |
+      GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK;
+
+  gint window_attributes_mask = GDK_WA_X | GDK_WA_Y;
 
   EGLint visual_id;
   if (!eglGetConfigAttrib(priv->egl_display, priv->egl_config,
                           EGL_NATIVE_VISUAL_ID, &visual_id)) {
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
                 "Failed to determine EGL configuration visual");
-    return nullptr;
+    return FALSE;
   }
 
-  GdkVisual* visual =
-      FL_RENDERER_GET_CLASS(self)->get_visual(self, screen, visual_id);
-  if (visual == nullptr) {
+  window_attributes.visual = FL_RENDERER_GET_CLASS(self)->get_visual(
+      self, gtk_widget_get_screen(widget), visual_id);
+  if (window_attributes.visual == nullptr) {
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
                 "Failed to find visual 0x%x", visual_id);
-    return nullptr;
+    return FALSE;
   }
+  window_attributes_mask |= GDK_WA_VISUAL;
 
-  return visual;
-}
-
-void fl_renderer_set_window(FlRenderer* self, GdkWindow* window) {
-  g_return_if_fail(FL_IS_RENDERER(self));
-  g_return_if_fail(GDK_IS_WINDOW(window));
+  GdkWindow* window =
+      gdk_window_new(gtk_widget_get_parent_window(widget), &window_attributes,
+                     window_attributes_mask);
+  gtk_widget_register_window(widget, window);
+  gtk_widget_set_window(widget, window);
 
   if (FL_RENDERER_GET_CLASS(self)->set_window) {
     FL_RENDERER_GET_CLASS(self)->set_window(self, window);
   }
+
+  return TRUE;
 }
 
-gboolean fl_renderer_start(FlRenderer* self, GError** error) {
+// Creates the EGL surfaces that Flutter will render to.
+static gboolean setup_egl_surfaces(FlRenderer* self, GError** error) {
   FlRendererPrivate* priv =
       static_cast<FlRendererPrivate*>(fl_renderer_get_instance_private(self));
 
   if (priv->egl_surface != EGL_NO_SURFACE ||
       priv->resource_surface != EGL_NO_SURFACE) {
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
-                "fl_renderer_start() called after surfaces already created");
+                "setup_egl_surfaces() called after surfaces already created");
     return FALSE;
   }
 
@@ -143,6 +184,24 @@ gboolean fl_renderer_start(FlRenderer* self, GError** error) {
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
                 "Failed to create EGL contexts using configuration (%s): %s",
                 config_string, egl_error_to_string(egl_error));
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+gboolean fl_renderer_start(FlRenderer* self,
+                           GtkWidget* widget,
+                           GError** error) {
+  if (!setup_egl_display(self, error)) {
+    return FALSE;
+  }
+
+  if (!setup_gdk_window(self, widget, error)) {
+    return FALSE;
+  }
+
+  if (!setup_egl_surfaces(self, error)) {
     return FALSE;
   }
 
