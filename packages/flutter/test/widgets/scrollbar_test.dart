@@ -53,7 +53,7 @@ void main() {
   final _DrawRectOnceCanvas testCanvas = _DrawRectOnceCanvas();
   ScrollbarPainter painter;
 
-  Rect captureRect() => testCanvas.rects.single;
+  Rect captureRect() => testCanvas.rects..removeLast();
 
   tearDown(() {
     painter = null;
