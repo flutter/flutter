@@ -890,7 +890,7 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 ///           alignment: selected ? Alignment.topRight : Alignment.bottomLeft,
 ///           duration: const Duration(seconds: 1),
 ///           curve: Curves.fastOutSlowIn,
-///           child: const FlutterLogo(size: 50.0), 
+///           child: const FlutterLogo(size: 50.0),
 ///         ),
 ///       ),
 ///     ),
