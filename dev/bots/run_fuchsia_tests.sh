@@ -50,7 +50,9 @@ reboot() {
   # to upload the log to isolated. We are saving the log to a file to avoid dart
   # hanging when running the process and then just using printing the content to
   # the console.
-  $script_dir/fuchsia_ctl -d $device_name ssh \
+  $script_dir/fuchsia_ctl -d $device_name \
+       --device-finder-path $script_dir/device-finder \
+       ssh \
        -c "cat /tmp/log.txt" \
        --timeout-seconds $ssh_timeout_seconds \
        --identity-file $pkey
