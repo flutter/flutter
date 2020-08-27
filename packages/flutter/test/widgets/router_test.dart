@@ -434,6 +434,45 @@ void main() {
     expect(reportedRouteInformation.location, 'update');
   });
 
+  testWidgets('router does not report when route information is up to date with route information provider', (WidgetTester tester) async {
+    RouteInformation reportedRouteInformation;
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider(
+      onRouterReport: (RouteInformation information) {
+        reportedRouteInformation = information;
+      }
+    );
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    final SimpleRouterDelegate delegate = SimpleRouterDelegate(reportConfiguration: true);
+    delegate.builder = (BuildContext context, RouteInformation routeInformation) {
+      return Text(routeInformation.location);
+    };
+
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        routeInformationProvider: provider,
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+      )
+    ));
+    expect(find.text('initial'), findsOneWidget);
+    expect(reportedRouteInformation, isNull);
+    // This will cause the router to rebuild.
+    provider.value = const RouteInformation(
+      location: 'update',
+    );
+    // This will schedule the route reporting.
+    delegate.notifyListeners();
+    await tester.pump();
+
+    expect(find.text('initial'), findsNothing);
+    expect(find.text('update'), findsOneWidget);
+    // The router should not report because the route name is already up to
+    // date.
+    expect(reportedRouteInformation, isNull);
+  });
+
   testWidgets('PlatformRouteInformationProvider works', (WidgetTester tester) async {
     final RouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: const RouteInformation(
