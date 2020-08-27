@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
