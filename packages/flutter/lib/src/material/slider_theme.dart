@@ -1457,9 +1457,9 @@ abstract class BaseSliderTrackShape {
     final double trackLeft = offset.dx + overlayWidth / 2;
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
     final double trackRight = trackLeft + parentBox.size.width - math.max(thumbWidth, overlayWidth);
-    final double trackButtom = trackTop + trackHeight;
-    // if the parentBox.size < slider's size, the trackRight will less then trackLeft, we need switch them.
-    return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackButtom);
+    final double trackBottom = trackTop + trackHeight;
+    // If the parentBox'size less than slider's size the trackRight will be less than trackLeft, so switch them.
+    return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
   }
 }
 

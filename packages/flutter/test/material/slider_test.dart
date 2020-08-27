@@ -2372,6 +2372,7 @@ void main() {
                 width: 10.0,
                 child: Slider(
                   value: 0.5,
+                  onChanged: null,
                 ),
               ),
             ),
