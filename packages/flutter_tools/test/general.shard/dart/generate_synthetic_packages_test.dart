@@ -44,12 +44,10 @@ void main() {
     final BuildSystem buildSystem = MockBuildSystem();
 
     expect(
-      () async {
-        return generateLocalizationsSyntheticPackage(
-          environment: environment,
-          buildSystem: buildSystem,
-        );
-      },
+      () => generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: buildSystem,
+      ),
       throwsToolExit(message: 'Generating synthetic localizations package has failed.'),
     );
     // [BuildSystem] should have called build with [GenerateLocalizationsTarget].
@@ -87,12 +85,10 @@ void main() {
     final BuildSystem buildSystem = MockBuildSystem();
 
     expect(
-      () async {
-        return generateLocalizationsSyntheticPackage(
-          environment: environment,
-          buildSystem: buildSystem,
-        );
-      },
+      () => generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: buildSystem,
+      ),
       throwsToolExit(message: 'Generating synthetic localizations package has failed.'),
     );
     // [BuildSystem] should have called build with [GenerateLocalizationsTarget].
@@ -130,12 +126,10 @@ void main() {
     final BuildSystem buildSystem = MockBuildSystem();
 
     expect(
-      () async {
-        return generateLocalizationsSyntheticPackage(
-          environment: environment,
-          buildSystem: buildSystem,
-        );
-      },
+      () => generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: buildSystem,
+      ),
       throwsToolExit(message: 'Generating synthetic localizations package has failed.'),
     );
     // [BuildSystem] should have called build with [GenerateLocalizationsTarget].
@@ -208,12 +202,10 @@ void main() {
     final BuildSystem buildSystem = MockBuildSystem();
 
     expect(
-      () async {
-        return generateLocalizationsSyntheticPackage(
-          environment: environment,
-          buildSystem: buildSystem,
-        );
-      },
+      () => generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: buildSystem,
+      ),
       throwsToolExit(message: 'to contain a map, instead was helloWorld'),
     );
     // [BuildSystem] should not be called with [GenerateLocalizationsTarget].
@@ -251,12 +243,10 @@ void main() {
     final BuildSystem buildSystem = MockBuildSystem();
 
     expect(
-      () async {
-        return generateLocalizationsSyntheticPackage(
-          environment: environment,
-          buildSystem: buildSystem,
-        );
-      },
+      () => generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: buildSystem,
+      ),
       throwsToolExit(message: 'to have a bool value, instead was "nonBoolValue"'),
     );
     // [BuildSystem] should not be called with [GenerateLocalizationsTarget].
