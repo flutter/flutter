@@ -9,8 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mockito/mockito.dart';
-
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -847,10 +845,10 @@ void main() {
 
     navigatorKey.currentState.push(route2);
     await tester.pumpAndSettle();
-    verify(navigatorObserver.didPush(any, any)).called(greaterThanOrEqualTo(1));
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didPush);
 
     await tester.dragFrom(const Offset(5, 100), const Offset(100, 0));
-    verify(navigatorObserver.didStartUserGesture(any, any)).called(1);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStartUserGesture);
     await tester.pump();
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(100));
     expect(navigatorKey.currentState.userGestureInProgress, true);
@@ -861,14 +859,15 @@ void main() {
     // Back to the page covering the whole screen.
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(0));
     expect(navigatorKey.currentState.userGestureInProgress, false);
-    verify(navigatorObserver.didStopUserGesture()).called(1);
-    verifyNever(navigatorObserver.didPop(any, any));
+
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStopUserGesture);
+    expect(navigatorObserver.invocations.removeLast(), isNot(NavigatorInvocation.didPop));
 
     await tester.dragFrom(const Offset(5, 100), const Offset(500, 0));
     await tester.pump();
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(500));
     expect(navigatorKey.currentState.userGestureInProgress, true);
-    verify(navigatorObserver.didPop(any, any)).called(1);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didPop);
 
     // Did go far enough to snap out of this route.
     await tester.pump(const Duration(milliseconds: 301));
@@ -907,14 +906,14 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(5, 200));
     // The width of the page.
     await gesture.moveBy(const Offset(800, 0));
-    verify(navigatorObserver.didStartUserGesture(any, any)).called(1);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStartUserGesture);
     await gesture.up();
     await tester.pump();
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
-    verify(navigatorObserver.didPop(any, any)).called(1);
-    verify(navigatorObserver.didStopUserGesture()).called(1);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStopUserGesture);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didPop);
   });
 
   testWidgets('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
@@ -944,7 +943,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(5, 200));
     // Move right a bit
     await gesture.moveBy(const Offset(300, 0));
-    verify(navigatorObserver.didStartUserGesture(any, any)).called(1);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStartUserGesture);
     expect(
       tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
       true,
@@ -958,8 +957,8 @@ void main() {
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
-    verifyNever(navigatorObserver.didPop(any, any));
-    verify(navigatorObserver.didStopUserGesture()).called(1);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStopUserGesture);
+    expect(navigatorObserver.invocations.removeLast(), isNot(NavigatorInvocation.didPop));
     expect(
       tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
       false,
@@ -1474,7 +1473,36 @@ void main() {
   });
 }
 
-class MockNavigatorObserver extends Mock implements NavigatorObserver {}
+class MockNavigatorObserver extends NavigatorObserver {
+  final List<NavigatorInvocation> invocations = <NavigatorInvocation>[];
+
+  @override
+  void didStartUserGesture(Route<Object> route, Route<Object> previousRoute) {
+    invocations.add(NavigatorInvocation.didStartUserGesture);
+  }
+
+  @override
+  void didPop(Route<Object> route, Route<Object> previousRoute) {
+    invocations.add(NavigatorInvocation.didPop);
+  }
+
+  @override
+  void didPush(Route<Object> route, Route<Object> previousRoute) {
+    invocations.add(NavigatorInvocation.didPush);
+  }
+
+  @override
+  void didStopUserGesture() {
+    invocations.add(NavigatorInvocation.didStopUserGesture);
+  }
+}
+
+enum NavigatorInvocation {
+  didStartUserGesture,
+  didPop,
+  didPush,
+  didStopUserGesture,
+}
 
 class PopupObserver extends NavigatorObserver {
   int popupCount = 0;
