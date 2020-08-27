@@ -2077,4 +2077,22 @@ void main() {
     // By default toolbarHeight is 56.0.
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
   });
+
+  testWidgets("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
+    const Key key = Key('appbar');
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(key: key),
+        endDrawer: const Drawer(),
+      ),
+    ));
+
+    final Finder endDrawerFinder = find.byTooltip('Open navigation menu');
+    await tester.tap(endDrawerFinder);
+    await tester.pump();
+
+    final Finder appBarFinder = find.byKey(key);
+    AppBar getAppBarWidget(Finder finder) => tester.widget<AppBar>(finder);
+    expect(getAppBarWidget(appBarFinder).leading, null);
+  });
 }
