@@ -140,12 +140,6 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
   settings.domain_network_policy =
       [FlutterDartProject domainNetworkPolicy:appTransportSecurity].UTF8String;
 
-  // TODO(mehmetf): We need to announce this change since it is breaking.
-  // Remove these two lines after we announce and we know which release this is
-  // going to be part of.
-  settings.may_insecurely_connect_to_all_domains = true;
-  settings.domain_network_policy = "";
-
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   // There are no ownership concerns here as all mappings are owned by the
   // embedder and not the engine.
