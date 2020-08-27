@@ -64,7 +64,8 @@ Future<void> main() async {
       await _checkFlutterFrameworkArchs(appFrameworkPath, isSimulator: false);
       await _checkFlutterFrameworkArchs(flutterFrameworkPath, isSimulator: false);
 
-      // Check the watch extension framework is in place with the expected watch archs.
+      // Check the watch extension framework added in the Podfile
+      // is in place with the expected watch archs.
       final String watchExtensionFrameworkPath = path.join(
         appBundle,
         'Watch',
