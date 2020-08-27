@@ -1679,6 +1679,7 @@ void main() {
     print(tester.getTopLeft(find.byWidget(firstItem)).dy);
     expect(tester.getTopLeft(find.byWidget(firstItem)).dy, greaterThan(statusBarHeight)); // failing
   });
+
   testWidgets('Vertically long PopupMenu does not overlap with the status bar and bottom notch', (WidgetTester tester) async {
     const double windowPaddingTop = 44;
     const double windowPaddingBottom = 34;
