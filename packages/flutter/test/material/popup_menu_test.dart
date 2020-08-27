@@ -1620,6 +1620,115 @@ void main() {
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
+  testWidgets('PopupMenu in AppBar does not overlap with the status bar', (WidgetTester tester) async {
+    const List<PopupMenuItem<int>> choices = [
+      PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+      PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+      PopupMenuItem<int>(value: 3, child: Text('Item 3')),
+    ];
+
+    const double statusBarHeight = 24.0;
+    PopupMenuItem<int> firstItem = choices[0];
+    int _selectedValue = choices[0].value;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            viewInsets: EdgeInsets.only(top: statusBarHeight), // status bar
+          ),
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Scaffold(
+                appBar: AppBar(
+                  title: const Text('PopupMenu Test'),
+                  actions: <Widget>[
+                    PopupMenuButton<int>(
+                      onSelected: (int result) {
+                        setState(() {
+                          _selectedValue = result;
+                        });
+                      },
+                      initialValue: _selectedValue,
+                      itemBuilder: (BuildContext context) {
+                        return choices;
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    // tap third item
+    await tester.tap(find.text('Item 3'));
+    await tester.pumpAndSettle();
+
+    // open popupMenuItems again
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    // expected value
+    // before: less than statusBarHeight(overlapping)
+    // after: greater than statusBarHeight(not overlapping)
+    print(tester.getTopLeft(find.byWidget(firstItem)).dy);
+    expect(tester.getTopLeft(find.byWidget(firstItem)).dy, greaterThan(statusBarHeight)); // failing
+  });
+  testWidgets('Vertically long PopupMenu does not overlap with the status bar and bottom notch', (WidgetTester tester) async {
+    const double windowPaddingTop = 44;
+    const double windowPaddingBottom = 34;
+    GlobalKey _firstKey = GlobalKey();
+    GlobalKey _lastKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            viewPadding: EdgeInsets.only(bottom: windowPaddingBottom), // bottom notch
+            viewInsets: EdgeInsets.only(top: windowPaddingTop), // status bar
+          ),
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('PopupMenu Test'),    
+            ),
+            body: PopupMenuButton(
+              child: Text('Show Menu'),
+              itemBuilder: (BuildContext context) => Iterable.generate(
+                20, (i) => PopupMenuItem(
+                  // set globalKey to the first and last item
+                  key: i == 0 ? _firstKey : i == 19 ? _lastKey : null,
+                  child: ListTile(
+                    title: Text('Item $i'),
+                  ),
+                ),
+              ).toList(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PopupMenuButton));
+    await tester.pumpAndSettle();
+    // expected value
+    // before: less than windowPaddingTop(overlapping)
+    // after: greater than windowPaddingTop(not overlapping)
+    print(tester.getTopLeft(find.byKey(_firstKey)).dy);
+
+    // drag to see the last item
+    await tester.drag(find.byKey(_lastKey), const Offset(0.0, -300));
+    await tester.pumpAndSettle();
+    // expected value
+    // before: greater than windowPaddingBottom(overlapping)
+    // after: less than windowPaddingBottom(not overlapping)
+    print(tester.getBottomLeft(find.byKey(_lastKey)).dy);
+    expect(tester.getTopLeft(find.byKey(_firstKey)).dy, greaterThan(windowPaddingTop)); // failing
+    expect(tester.getBottomLeft(find.byKey(_lastKey)).dy, lessThan(windowPaddingBottom)); // failing
+  });
 }
 
 class TestApp extends StatefulWidget {
