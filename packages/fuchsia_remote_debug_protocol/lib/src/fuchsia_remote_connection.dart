@@ -405,10 +405,6 @@ class FuchsiaRemoteConnection {
   }
 
   Uri _getDartVmUri(PortForwarder pf) {
-    // While the IPv4 loopback can be used for the initial port forwarding
-    // (see [PortForwarder.start]), the address is actually bound to the IPv6
-    // loopback device, so connecting to the IPv4 loopback would fail when the
-    // target address is IPv6 link-local.
     String addr;
     if (pf.openPortAddress == null) {
       addr = _useIpV6 ? '[$_ipv6Loopback]' : _ipv4Loopback;
@@ -613,8 +609,9 @@ class _SshPortForwarder implements PortForwarder {
     // TODO(awdavies): The square-bracket enclosure for using the IPv6 loopback
     // didn't appear to work, but when assigning to the IPv4 loopback device,
     // netstat shows that the local port is actually being used on the IPv6
-    // loopback (::1). While this can be used for forwarding to the destination
-    // IPv6 interface, it cannot be used to connect to a websocket.
+    // loopback (::1). Therefore, while the IPv4 loopback can be used for
+    // forwarding to the destination IPv6 interface, when connecting to the
+    // websocket, the IPV6 loopback should be used.
     final String formattedForwardingUrl =
         '${localSocket.port}:$_ipv4Loopback:$remotePort';
     final String targetAddress =
