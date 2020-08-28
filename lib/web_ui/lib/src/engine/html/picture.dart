@@ -171,7 +171,8 @@ class PersistedPicture extends PersistedLeafSurface {
     if (parent!._projectedClip == null) {
       _exactLocalCullRect = localPaintBounds;
     } else {
-      _exactLocalCullRect = localPaintBounds!.intersect(parent!._projectedClip!);
+      _exactLocalCullRect =
+          localPaintBounds!.intersect(parent!._projectedClip!);
     }
     if (_exactLocalCullRect!.width <= 0 || _exactLocalCullRect!.height <= 0) {
       _exactLocalCullRect = ui.Rect.zero;
@@ -229,17 +230,25 @@ class PersistedPicture extends PersistedLeafSurface {
 
     // Compute the delta, by which each of the side of the clip rect has "moved"
     // since the last time we updated the cull rect.
-    final double leftwardDelta = oldOptimalLocalCullRect.left - _exactLocalCullRect!.left;
-    final double upwardDelta = oldOptimalLocalCullRect.top - _exactLocalCullRect!.top;
-    final double rightwardDelta = _exactLocalCullRect!.right - oldOptimalLocalCullRect.right;
-    final double bottomwardDelta = _exactLocalCullRect!.bottom - oldOptimalLocalCullRect.bottom;
+    final double leftwardDelta =
+        oldOptimalLocalCullRect.left - _exactLocalCullRect!.left;
+    final double upwardDelta =
+        oldOptimalLocalCullRect.top - _exactLocalCullRect!.top;
+    final double rightwardDelta =
+        _exactLocalCullRect!.right - oldOptimalLocalCullRect.right;
+    final double bottomwardDelta =
+        _exactLocalCullRect!.bottom - oldOptimalLocalCullRect.bottom;
 
     // Compute the new optimal rect to paint into.
     final ui.Rect newLocalCullRect = ui.Rect.fromLTRB(
-      _exactLocalCullRect!.left - _predictTrend(leftwardDelta, _exactLocalCullRect!.width),
-      _exactLocalCullRect!.top - _predictTrend(upwardDelta, _exactLocalCullRect!.height),
-      _exactLocalCullRect!.right + _predictTrend(rightwardDelta, _exactLocalCullRect!.width),
-      _exactLocalCullRect!.bottom + _predictTrend(bottomwardDelta, _exactLocalCullRect!.height),
+      _exactLocalCullRect!.left -
+          _predictTrend(leftwardDelta, _exactLocalCullRect!.width),
+      _exactLocalCullRect!.top -
+          _predictTrend(upwardDelta, _exactLocalCullRect!.height),
+      _exactLocalCullRect!.right +
+          _predictTrend(rightwardDelta, _exactLocalCullRect!.width),
+      _exactLocalCullRect!.bottom +
+          _predictTrend(bottomwardDelta, _exactLocalCullRect!.height),
     ).intersect(localPaintBounds!);
 
     final bool localCullRectChanged = _optimalLocalCullRect != newLocalCullRect;
@@ -333,8 +342,9 @@ class PersistedPicture extends PersistedLeafSurface {
         // The canvas needs to be resized before painting.
         return 1.0;
       } else {
-        final int newPixelCount = BitmapCanvas._widthToPhysical(_exactLocalCullRect!.width)
-             * BitmapCanvas._heightToPhysical(_exactLocalCullRect!.height);
+        final int newPixelCount =
+            BitmapCanvas._widthToPhysical(_exactLocalCullRect!.width) *
+                BitmapCanvas._heightToPhysical(_exactLocalCullRect!.height);
         final int oldPixelCount =
             oldCanvas._widthInBitmapPixels * oldCanvas._heightInBitmapPixels;
 
@@ -366,7 +376,7 @@ class PersistedPicture extends PersistedLeafSurface {
     _canvas = DomCanvas();
     domRenderer.clearDom(rootElement!);
     rootElement!.append(_canvas!.rootElement);
-    picture.recordingCanvas!.apply(_canvas, _optimalLocalCullRect);
+    picture.recordingCanvas!.apply(_canvas!, _optimalLocalCullRect);
   }
 
   void _applyBitmapPaint(EngineCanvas? oldCanvas) {
@@ -380,7 +390,7 @@ class PersistedPicture extends PersistedLeafSurface {
       _canvas = oldCanvas;
       oldCanvas.setElementCache(_elementCache);
       _canvas!.clear();
-      picture.recordingCanvas!.apply(_canvas, _optimalLocalCullRect);
+      picture.recordingCanvas!.apply(_canvas!, _optimalLocalCullRect);
     } else {
       // We can't use the old canvas because the size has changed, so we put
       // it in a cache for later reuse.
@@ -393,8 +403,8 @@ class PersistedPicture extends PersistedLeafSurface {
         canvasSize: _optimalLocalCullRect!.size,
         paintCallback: () {
           _canvas = _findOrCreateCanvas(_optimalLocalCullRect!);
-          assert(_canvas is BitmapCanvas
-              && (_canvas as BitmapCanvas?)!._elementCache == _elementCache);
+          assert(_canvas is BitmapCanvas &&
+              (_canvas as BitmapCanvas?)!._elementCache == _elementCache);
           if (_debugExplainSurfaceStats) {
             final BitmapCanvas bitmapCanvas = _canvas as BitmapCanvas;
             _surfaceStatsFor(this).paintPixelCount +=
@@ -403,7 +413,7 @@ class PersistedPicture extends PersistedLeafSurface {
           domRenderer.clearDom(rootElement!);
           rootElement!.append(_canvas!.rootElement);
           _canvas!.clear();
-          picture.recordingCanvas!.apply(_canvas, _optimalLocalCullRect);
+          picture.recordingCanvas!.apply(_canvas!, _optimalLocalCullRect);
         },
       ));
     }
