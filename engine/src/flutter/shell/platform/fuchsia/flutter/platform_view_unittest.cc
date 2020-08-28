@@ -20,6 +20,7 @@
 #include "flutter/lib/ui/window/window.h"
 #include "gtest/gtest.h"
 
+#include "surface.h"
 #include "task_runner_adapter.h"
 
 namespace flutter_runner_test::flutter_runner_a11y_test {
@@ -116,10 +117,7 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
 
   bool SemanticsEnabled() const { return semantics_enabled_; }
   int32_t SemanticsFeatures() const { return semantics_features_; }
-  flutter::ExternalViewEmbedder* get_view_embedder() {
-    return surface_->GetExternalViewEmbedder();
-  }
-  GrDirectContext* get_gr_context() { return surface_->GetContext(); }
+  flutter::Surface* surface() const { return surface_.get(); }
 
  private:
   std::unique_ptr<flutter::Surface> surface_;
@@ -162,18 +160,17 @@ TEST_F(PlatformViewTests, ChangesAccessibilitySettings) {
       std::move(view_ref),                    // view_ref
       std::move(task_runners),                // task_runners
       services_provider.service_directory(),  // runner_services
-      nullptr,  // parent_environment_service_provider_handle
-      nullptr,  // session_listener_request
-      nullptr,  // focuser,
-      nullptr,  // on_session_listener_error_callback
-      nullptr,  // on_enable_wireframe_callback,
-      nullptr,  // on_create_view_callback,
-      nullptr,  // on_update_view_callback,
-      nullptr,  // on_destroy_view_callback,
-      nullptr,  // on_get_view_embedder_callback,
-      nullptr,  // on_get_gr_context_callback,
-      0u,       // vsync_event_handle
-      {}        // product_config
+      nullptr,                 // parent_environment_service_provider_handle
+      nullptr,                 // session_listener_request
+      nullptr,                 // focuser,
+      nullptr,                 // on_session_listener_error_callback
+      nullptr,                 // on_enable_wireframe_callback,
+      nullptr,                 // on_create_view_callback,
+      nullptr,                 // on_update_view_callback,
+      nullptr,                 // on_destroy_view_callback,
+      nullptr,                 // on_create_surface_callback,
+      fml::TimeDelta::Zero(),  // vsync_offset
+      ZX_HANDLE_INVALID        // vsync_event_handle
   );
 
   RunLoopUntilIdle();
@@ -227,10 +224,9 @@ TEST_F(PlatformViewTests, EnableWireframeTest) {
       nullptr,                  // on_create_view_callback,
       nullptr,                  // on_update_view_callback,
       nullptr,                  // on_destroy_view_callback,
-      nullptr,                  // on_get_view_embedder_callback,
-      nullptr,                  // on_get_gr_context_callback,
-      0u,                       // vsync_event_handle
-      {}                        // product_config
+      nullptr,                  // on_create_surface_callback,
+      fml::TimeDelta::Zero(),   // vsync_offset
+      ZX_HANDLE_INVALID         // vsync_event_handle
   );
 
   // Cast platform_view to its base view so we can have access to the public
@@ -287,18 +283,17 @@ TEST_F(PlatformViewTests, CreateViewTest) {
       std::move(view_ref),                    // view_refs
       std::move(task_runners),                // task_runners
       services_provider.service_directory(),  // runner_services
-      nullptr,             // parent_environment_service_provider_handle
-      nullptr,             // session_listener_request
-      nullptr,             // focuser,
-      nullptr,             // on_session_listener_error_callback
-      nullptr,             // on_enable_wireframe_callback,
-      CreateViewCallback,  // on_create_view_callback,
-      nullptr,             // on_update_view_callback,
-      nullptr,             // on_destroy_view_callback,
-      nullptr,             // on_get_view_embedder_callback,
-      nullptr,             // on_get_gr_context_callback,
-      0u,                  // vsync_event_handle
-      {}                   // product_config
+      nullptr,                 // parent_environment_service_provider_handle
+      nullptr,                 // session_listener_request
+      nullptr,                 // focuser,
+      nullptr,                 // on_session_listener_error_callback
+      nullptr,                 // on_enable_wireframe_callback,
+      CreateViewCallback,      // on_create_view_callback,
+      nullptr,                 // on_update_view_callback,
+      nullptr,                 // on_destroy_view_callback,
+      nullptr,                 // on_create_surface_callback,
+      fml::TimeDelta::Zero(),  // vsync_offset
+      ZX_HANDLE_INVALID        // vsync_event_handle
   );
 
   // Cast platform_view to its base view so we can have access to the public
@@ -357,18 +352,17 @@ TEST_F(PlatformViewTests, UpdateViewTest) {
       std::move(view_ref),                    // view_refs
       std::move(task_runners),                // task_runners
       services_provider.service_directory(),  // runner_services
-      nullptr,             // parent_environment_service_provider_handle
-      nullptr,             // session_listener_request
-      nullptr,             // focuser,
-      nullptr,             // on_session_listener_error_callback
-      nullptr,             // on_enable_wireframe_callback,
-      nullptr,             // on_create_view_callback,
-      UpdateViewCallback,  // on_update_view_callback,
-      nullptr,             // on_destroy_view_callback,
-      nullptr,             // on_get_view_embedder_callback,
-      nullptr,             // on_get_gr_context_callback,
-      0u,                  // vsync_event_handle
-      {}                   // product_config
+      nullptr,                 // parent_environment_service_provider_handle
+      nullptr,                 // session_listener_request
+      nullptr,                 // focuser,
+      nullptr,                 // on_session_listener_error_callback
+      nullptr,                 // on_enable_wireframe_callback,
+      nullptr,                 // on_create_view_callback,
+      UpdateViewCallback,      // on_update_view_callback,
+      nullptr,                 // on_destroy_view_callback,
+      nullptr,                 // on_create_surface_callback,
+      fml::TimeDelta::Zero(),  // vsync_offset
+      ZX_HANDLE_INVALID        // vsync_event_handle
   );
 
   // Cast platform_view to its base view so we can have access to the public
@@ -427,18 +421,17 @@ TEST_F(PlatformViewTests, DestroyViewTest) {
       std::move(view_ref),                    // view_refs
       std::move(task_runners),                // task_runners
       services_provider.service_directory(),  // runner_services
-      nullptr,              // parent_environment_service_provider_handle
-      nullptr,              // session_listener_request
-      nullptr,              // focuser,
-      nullptr,              // on_session_listener_error_callback
-      nullptr,              // on_enable_wireframe_callback,
-      nullptr,              // on_create_view_callback,
-      nullptr,              // on_update_view_callback,
-      DestroyViewCallback,  // on_destroy_view_callback,
-      nullptr,              // on_get_view_embedder_callback,
-      nullptr,              // on_get_gr_context_callback,
-      0u,                   // vsync_event_handle
-      {}                    // product_config
+      nullptr,                 // parent_environment_service_provider_handle
+      nullptr,                 // session_listener_request
+      nullptr,                 // focuser,
+      nullptr,                 // on_session_listener_error_callback
+      nullptr,                 // on_enable_wireframe_callback,
+      nullptr,                 // on_create_view_callback,
+      nullptr,                 // on_update_view_callback,
+      DestroyViewCallback,     // on_destroy_view_callback,
+      nullptr,                 // on_create_surface_callback,
+      fml::TimeDelta::Zero(),  // vsync_offset
+      ZX_HANDLE_INVALID        // vsync_event_handle
   );
 
   // Cast platform_view to its base view so we can have access to the public
@@ -499,10 +492,9 @@ TEST_F(PlatformViewTests, RequestFocusTest) {
       nullptr,                    // on_create_view_callback,
       nullptr,                    // on_update_view_callback,
       nullptr,                    // on_destroy_view_callback,
-      nullptr,                    // on_get_gr_context_callback,
-      nullptr,                    // on_get_view_embedder_callback,
-      0u,                         // vsync_event_handle
-      {}                          // product_config
+      nullptr,                    // on_create_surface_callback,
+      fml::TimeDelta::Zero(),     // vsync_offset
+      ZX_HANDLE_INVALID           // vsync_event_handle
   );
 
   // Cast platform_view to its base view so we can have access to the public
@@ -534,8 +526,8 @@ TEST_F(PlatformViewTests, RequestFocusTest) {
 }
 
 // Test to make sure that PlatformView correctly returns a Surface instance
-// that can surface the view_embedder provided from GetViewEmbedderCallback.
-TEST_F(PlatformViewTests, GetViewEmbedderTest) {
+// that can surface the provided gr_context and view_embedder.
+TEST_F(PlatformViewTests, CreateSurfaceTest) {
   sys::testing::ServiceDirectoryProvider services_provider(dispatcher());
   MockPlatformViewDelegate delegate;
   zx::eventpair a, b;
@@ -552,63 +544,13 @@ TEST_F(PlatformViewTests, GetViewEmbedderTest) {
                            nullptr                               // io
       );
 
-  // Test get view embedder callback function.
-  MockExternalViewEmbedder view_embedder;
-  auto GetViewEmbedderCallback = [&view_embedder]() { return &view_embedder; };
-
-  auto platform_view = flutter_runner::PlatformView(
-      delegate,                               // delegate
-      "test_platform_view",                   // label
-      std::move(view_ref),                    // view_refs
-      std::move(task_runners),                // task_runners
-      services_provider.service_directory(),  // runner_services
-      nullptr,                  // parent_environment_service_provider_handle
-      nullptr,                  // session_listener_request
-      nullptr,                  // focuser,
-      nullptr,                  // on_session_listener_error_callback
-      nullptr,                  // on_enable_wireframe_callback,
-      nullptr,                  // on_create_view_callback,
-      nullptr,                  // on_update_view_callback,
-      nullptr,                  // on_destroy_view_callback,
-      GetViewEmbedderCallback,  // on_get_view_embedder_callback,
-      nullptr,                  // on_get_gr_context_callback,
-      0u,                       // vsync_event_handle
-      {}                        // product_config
-  );
-
-  RunLoopUntilIdle();
-
-  platform_view.NotifyCreated();
-
-  RunLoopUntilIdle();
-
-  EXPECT_EQ(&view_embedder, delegate.get_view_embedder());
-}
-
-// Test to make sure that PlatformView correctly returns a Surface instance
-// that can surface the GrContext provided from GetGrContextCallback.
-TEST_F(PlatformViewTests, GetGrContextTest) {
-  sys::testing::ServiceDirectoryProvider services_provider(dispatcher());
-  MockPlatformViewDelegate delegate;
-  zx::eventpair a, b;
-  zx::eventpair::create(/* flags */ 0u, &a, &b);
-  auto view_ref = fuchsia::ui::views::ViewRef({
-      .reference = std::move(a),
-  });
-  flutter::TaskRunners task_runners =
-      flutter::TaskRunners("test_runners",  // label
-                           nullptr,         // platform
-                           flutter_runner::CreateFMLTaskRunner(
-                               async_get_default_dispatcher()),  // raster
-                           nullptr,                              // ui
-                           nullptr                               // io
-      );
-
-  // Test get GrContext callback function.
+  // Test create surface callback function.
   sk_sp<GrDirectContext> gr_context =
       GrDirectContext::MakeMock(nullptr, GrContextOptions());
-  auto GetGrContextCallback = [gr_context = gr_context.get()]() {
-    return gr_context;
+  MockExternalViewEmbedder view_embedder;
+  auto CreateSurfaceCallback = [&view_embedder, gr_context]() {
+    return std::make_unique<flutter_runner::Surface>(
+        "PlatformViewTest", &view_embedder, gr_context.get());
   };
 
   auto platform_view = flutter_runner::PlatformView(
@@ -617,27 +559,24 @@ TEST_F(PlatformViewTests, GetGrContextTest) {
       std::move(view_ref),                    // view_refs
       std::move(task_runners),                // task_runners
       services_provider.service_directory(),  // runner_services
-      nullptr,               // parent_environment_service_provider_handle
-      nullptr,               // session_listener_request
-      nullptr,               // focuser
-      nullptr,               // on_session_listener_error_callback
-      nullptr,               // on_enable_wireframe_callback,
-      nullptr,               // on_create_view_callback,
-      nullptr,               // on_update_view_callback,
-      nullptr,               // on_destroy_view_callback,
-      nullptr,               // on_get_view_embedder_callback,
-      GetGrContextCallback,  // on_get_gr_context_callback,
-      0u,                    // vsync_event_handle
-      {}                     // product_config
+      nullptr,                 // parent_environment_service_provider_handle
+      nullptr,                 // session_listener_request
+      nullptr,                 // focuser,
+      nullptr,                 // on_session_listener_error_callback
+      nullptr,                 // on_enable_wireframe_callback,
+      nullptr,                 // on_create_view_callback,
+      nullptr,                 // on_update_view_callback,
+      nullptr,                 // on_destroy_view_callback,
+      CreateSurfaceCallback,   // on_create_surface_callback,
+      fml::TimeDelta::Zero(),  // vsync_offset
+      ZX_HANDLE_INVALID        // vsync_event_handle
   );
-
-  RunLoopUntilIdle();
-
   platform_view.NotifyCreated();
 
   RunLoopUntilIdle();
 
-  EXPECT_EQ(gr_context.get(), delegate.get_gr_context());
+  EXPECT_EQ(gr_context.get(), delegate.surface()->GetContext());
+  EXPECT_EQ(&view_embedder, delegate.surface()->GetExternalViewEmbedder());
 }
 
 }  // namespace flutter_runner_test::flutter_runner_a11y_test
