@@ -65,6 +65,7 @@ class BuildLinuxCommand extends BuildSubCommand {
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: globals.fs,
         logger: globals.logger,
+        flutterUsage: globals.flutterUsage,
       ),
     );
     return FlutterCommandResult.success();

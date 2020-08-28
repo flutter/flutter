@@ -240,7 +240,12 @@ class DriveCommand extends RunCommandBase {
           // If there's another flutter_tools instance still connected to the target
           // application, DDS will already be running remotely and this call will fail.
           // We can ignore this and continue to use the remote DDS instance.
-          await device.dds.startDartDevelopmentService(Uri.parse(observatoryUri), ipv6);
+          await device.dds.startDartDevelopmentService(
+            Uri.parse(observatoryUri),
+            hostVmservicePort,
+            ipv6,
+            disableServiceAuthCodes,
+          );
         } on dds.DartDevelopmentServiceException catch(_) {
           globals.printTrace('Note: DDS is already connected to $observatoryUri.');
         }
@@ -478,7 +483,7 @@ Future<LaunchResult> _startApp(
     debuggingOptions: DebuggingOptions.enabled(
       command.getBuildInfo(),
       startPaused: true,
-      hostVmServicePort: command.hostVmservicePort,
+      hostVmServicePort: (webUri != null || command.disableDds) ? command.hostVmservicePort : 0,
       verboseSystemLogs: command.verboseSystemLogs,
       cacheSkSL: command.cacheSkSL,
       dumpSkpOnShaderCompilation: command.dumpSkpOnShaderCompilation,
