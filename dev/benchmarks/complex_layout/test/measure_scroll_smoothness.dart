@@ -94,29 +94,73 @@ Iterable<PointerDataRecord> dragInputDatas(
   )]);
 }
 
-class ResampleFlagVariant extends TestVariant<bool> {
+enum TestScenario {
+  resampleOn90Hz,
+  resampleOn59Hz,
+  resampleOff90Hz,
+  resampleOff59Hz,
+}
+
+class ResampleFlagVariant extends TestVariant<TestScenario> {
   ResampleFlagVariant(this.binding);
   final E2EWidgetsFlutterBinding binding;
 
   @override
-  final Set<bool> values = <bool>{true, false};
+  final Set<TestScenario> values = Set<TestScenario>.from(TestScenario.values);
+
+  TestScenario currentValue;
+  bool get resample {
+    switch(currentValue) {
+      case TestScenario.resampleOn90Hz:
+      case TestScenario.resampleOn59Hz:
+        return true;
+      case TestScenario.resampleOff90Hz:
+      case TestScenario.resampleOff59Hz:
+        return false;
+    }
+    throw ArgumentError;
+  }
+  double get frequency {
+    switch(currentValue) {
+      case TestScenario.resampleOn90Hz:
+      case TestScenario.resampleOff90Hz:
+        return 90.0;
+      case TestScenario.resampleOn59Hz:
+      case TestScenario.resampleOff59Hz:
+        return 59.0;
+    }
+    throw ArgumentError;
+  }
 
   Map<String, dynamic> result;
 
   @override
-  String describeValue(bool value) => value ? 'resampling on' : 'resampling off';
+  String describeValue(TestScenario value) {
+    switch(value) {
+      case TestScenario.resampleOn90Hz:
+        return 'resample on with 90Hz input';
+      case TestScenario.resampleOn59Hz:
+        return 'resample on with 59Hz input';
+      case TestScenario.resampleOff90Hz:
+        return 'resample off with 90Hz input';
+      case TestScenario.resampleOff59Hz:
+        return 'resample off with 59Hz input';
+    }
+    throw ArgumentError;
+  }
 
   @override
-  Future<bool> setUp(bool value) async {
+  Future<bool> setUp(TestScenario value) async {
+    currentValue = value;
     final bool original = binding.resamplingEnabled;
-    binding.resamplingEnabled = value;
+    binding.resamplingEnabled = resample;
     return original;
   }
 
   @override
-  Future<void> tearDown(bool value, bool memento) async {
+  Future<void> tearDown(TestScenario value, bool memento) async {
     binding.resamplingEnabled = memento;
-    binding.reportData[value ? 'with resampler' : 'without resampler'] = result;
+    binding.reportData[describeValue(value)] = result;
   }
 }
 
@@ -148,11 +192,18 @@ Future<void> main() async {
     Future<void> scroll() async {
       // Extra 50ms to avoid timeouts.
       final Duration startTime = const Duration(milliseconds: 500) + now();
-      for (final PointerDataRecord record in dragInputDatas(startTime, tester.getCenter(scrollerFinder))) {
+      for (final PointerDataRecord record in dragInputDatas(
+        startTime,
+        tester.getCenter(scrollerFinder),
+        frequency: variant.frequency,
+      )) {
         await tester.binding.delayed(record.timeStamp - now());
         // This now measures how accurate the above delayed is.
         final Duration delay = now() - record.timeStamp;
         if (delays.length < frameTimestamp.length) {
+          while (delays.length < frameTimestamp.length - 1) {
+            delays.add(Duration.zero);
+          }
           delays.add(delay);
         } else if (delays.last < delay) {
           delays.last = delay;
@@ -221,7 +272,7 @@ Map<String, dynamic> scrollSummary(
   int lostFrame = 0;
   for (int i = 1; i < scrollOffset.length-1; i += 1) {
     if (frameTimestamp[i+1] - frameTimestamp[i-1] > 40E3 ||
-        delays[i] > const Duration(milliseconds: 16)) {
+        (i >= delays.length || delays[i] > const Duration(milliseconds: 16))) {
       // filter data points from slow frame building or input simulation artifact
       lostFrame += 1;
       continue;

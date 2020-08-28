@@ -321,14 +321,22 @@ TaskFunction createsScrollSmoothnessPerfTest() {
         file('$testDirectory/build/scroll_smoothness_test.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
-      final Map<String, dynamic> result = <String, dynamic>{
-        'janky_count_with_resampler': data['with resampler']['janky_count'],
-        'average_abs_jerk_with_resampler': data['with resampler']['average_abs_jerk'],
-        'dropped_frame_count_with_resampler': data['with resampler']['dropped_frame_count'],
-        'janky_count_without_resampler': data['without resampler']['janky_count'],
-        'average_abs_jerk_without_resampler': data['without resampler']['average_abs_jerk'],
-        'dropped_frame_count_without_resampler': data['without resampler']['dropped_frame_count'],
-      };
+      final Map<String, dynamic> result = <String, dynamic>{};
+      void addResult(dynamic data, String suffix) {
+        assert(data is Map<String, dynamic>);
+        const List<String> metricKeys = <String>[
+          'janky_count',
+          'average_abs_jerk',
+          'dropped_frame_count',
+        ];
+        for (final String key in metricKeys) {
+          result[key+suffix] = data[key];
+        }
+      }
+      addResult(data['resample on with 90Hz input'], '_with_resampler_90Hz');
+      addResult(data['resample on with 59Hz input'], '_with_resampler_59Hz');
+      addResult(data['resample off with 90Hz input'], '_without_resampler_90Hz');
+      addResult(data['resample off with 59Hz input'], '_without_resampler_59Hz');
 
       return TaskResult.success(
         result,
