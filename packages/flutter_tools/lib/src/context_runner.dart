@@ -4,6 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/error_handling.dart';
+import 'package:process/process.dart';
+
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
@@ -214,6 +217,10 @@ Future<T> runInContext<T>(
         platform: globals.platform,
       ),
       ProcessInfo: () => ProcessInfo(),
+      ProcessManager: () => ErrorHandlingProcessManager(
+        delegate: const LocalProcessManager(),
+        platform: globals.platform,
+      ),
       ProcessUtils: () => ProcessUtils(
         processManager: globals.processManager,
         logger: globals.logger,
