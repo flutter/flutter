@@ -1249,7 +1249,6 @@ void main() {
     const Color pressedColor = Color(0xff4caf50);
     Widget buildTable() {
       return DataTable(
-        dataTextStyle: const TextStyle(fontSize: 13.0),
         columns: const <DataColumn>[
           DataColumn(
             label: Text('Column1'),
@@ -1280,7 +1279,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content1')));
     await tester.pump(const Duration(milliseconds: 200)); // splash is well underway
     final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
-    expect(box, paints..circle(x: 64.0, y: 24.0, color: pressedColor));
+    expect(box, paints..circle(x: 68.0, y: 24.0, color: pressedColor));
     await gesture.up();
   });
 }
