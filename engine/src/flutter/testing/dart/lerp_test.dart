@@ -43,4 +43,48 @@ void main() {
     expect(lerpDouble(0.0, 10.0, 5.0), 50.0);
     expect(lerpDouble(10.0, 0.0, 5.0), -40.0);
   });
+
+  test('lerpDouble should return NaN if any input is NaN', () {
+    expect(lerpDouble(0.0, 10.0, double.nan), isNaN);
+    expect(lerpDouble(0.0, double.infinity, double.nan), isNaN);
+    expect(lerpDouble(0.0, double.nan, 5.0), isNaN);
+    expect(lerpDouble(0.0, double.nan, double.infinity), isNaN);
+    expect(lerpDouble(0.0, double.nan, double.nan), isNaN);
+    expect(lerpDouble(double.infinity, 10.0, double.nan), isNaN);
+    expect(lerpDouble(double.infinity, double.infinity, double.nan), isNaN);
+    expect(lerpDouble(double.infinity, double.nan, 5.0), isNaN);
+    expect(lerpDouble(double.infinity, double.nan, double.infinity), isNaN);
+    expect(lerpDouble(double.infinity, double.nan, double.nan), isNaN);
+    expect(lerpDouble(double.nan, 10.0, 5.0), isNaN);
+    expect(lerpDouble(double.nan, 10.0, double.infinity), isNaN);
+    expect(lerpDouble(double.nan, 10.0, double.nan), isNaN);
+    expect(lerpDouble(double.nan, double.infinity, 5.0), isNaN);
+    expect(lerpDouble(double.nan, double.infinity, double.infinity), isNaN);
+    expect(lerpDouble(double.nan, double.infinity, double.nan), isNaN);
+    expect(lerpDouble(double.nan, double.nan, 5.0), isNaN);
+    expect(lerpDouble(double.nan, double.nan, double.infinity), isNaN);
+    expect(lerpDouble(double.nan, double.nan, double.nan), isNaN);
+  });
+
+  test('lerpDouble returns NaN if interpolation results in Infinity - Infinity', () {
+    expect(lerpDouble(double.infinity, 10.0, 5.0), isNaN);
+    expect(lerpDouble(double.infinity, 10.0, double.infinity), isNaN);
+    expect(lerpDouble(-double.infinity, 10.0, 5.0), isNaN);
+    expect(lerpDouble(-double.infinity, 10.0, double.infinity), isNaN);
+  });
+
+  test('lerpDouble returns +/- infinity if interpolating towards an infinity', () {
+    expect(lerpDouble(double.infinity, 10.0, -5.0)?.isInfinite, isTrue);
+    expect(lerpDouble(double.infinity, 10.0, -double.infinity)?.isInfinite, isTrue);
+    expect(lerpDouble(-double.infinity, 10.0, -5.0)?.isInfinite, isTrue);
+    expect(lerpDouble(-double.infinity, 10.0, -double.infinity)?.isInfinite, isTrue);
+    expect(lerpDouble(0.0, double.infinity, 5.0)?.isInfinite, isTrue);
+    expect(lerpDouble(0.0, double.infinity, -5.0)?.isInfinite, isTrue);
+    expect(lerpDouble(0.0, 10.0, double.infinity)?.isInfinite, isTrue);
+    expect(lerpDouble(0.0, double.infinity, double.infinity)?.isInfinite, isTrue);
+  });
+
+  test('lerpDouble returns NaN if start/end and interpolation value are infinity', () {
+    expect(lerpDouble(double.infinity, double.infinity, double.infinity), isNaN);
+  });
 }
