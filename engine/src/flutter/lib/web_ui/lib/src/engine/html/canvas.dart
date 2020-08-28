@@ -96,7 +96,7 @@ class SurfaceCanvas implements ui.Canvas {
   }
 
   void _clipRect(ui.Rect rect, ui.ClipOp clipOp, bool doAntiAlias) {
-    _canvas.clipRect(rect);
+    _canvas.clipRect(rect, clipOp);
   }
 
   @override
@@ -212,8 +212,8 @@ class SurfaceCanvas implements ui.Canvas {
   }
 
   @override
-  void drawArc(ui.Rect rect, double startAngle, double sweepAngle, bool useCenter,
-      ui.Paint paint) {
+  void drawArc(ui.Rect rect, double startAngle, double sweepAngle,
+      bool useCenter, ui.Paint paint) {
     assert(rectIsValid(rect));
     assert(paint != null); // ignore: unnecessary_null_comparison
     const double pi = math.pi;
@@ -283,12 +283,14 @@ class SurfaceCanvas implements ui.Canvas {
     _drawImageRect(image, src, dst, paint);
   }
 
-  void _drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
+  void _drawImageRect(
+      ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
     _canvas.drawImageRect(image, src, dst, paint as SurfacePaint);
   }
 
   @override
-  void drawImageNine(ui.Image image, ui.Rect center, ui.Rect dst, ui.Paint paint) {
+  void drawImageNine(
+      ui.Image image, ui.Rect center, ui.Rect dst, ui.Paint paint) {
     // ignore: unnecessary_null_comparison
     assert(image != null); // image is checked on the engine side
     assert(rectIsValid(center));
@@ -458,16 +460,18 @@ class SurfaceCanvas implements ui.Canvas {
   }
 
   @override
-  void drawPoints(ui.PointMode pointMode, List<ui.Offset> points, ui.Paint paint) {
+  void drawPoints(
+      ui.PointMode pointMode, List<ui.Offset> points, ui.Paint paint) {
     assert(pointMode != null); // ignore: unnecessary_null_comparison
     assert(points != null); // ignore: unnecessary_null_comparison
     assert(paint != null); // ignore: unnecessary_null_comparison
-    final Float32List pointList =  offsetListToFloat32List(points);
+    final Float32List pointList = offsetListToFloat32List(points);
     drawRawPoints(pointMode, pointList, paint);
   }
 
   @override
-  void drawRawPoints(ui.PointMode pointMode, Float32List points, ui.Paint paint) {
+  void drawRawPoints(
+      ui.PointMode pointMode, Float32List points, ui.Paint paint) {
     assert(pointMode != null); // ignore: unnecessary_null_comparison
     assert(points != null); // ignore: unnecessary_null_comparison
     assert(paint != null); // ignore: unnecessary_null_comparison
@@ -478,11 +482,13 @@ class SurfaceCanvas implements ui.Canvas {
   }
 
   @override
-  void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
+  void drawVertices(
+      ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
     //assert(vertices != null); // vertices is checked on the engine side
     assert(paint != null); // ignore: unnecessary_null_comparison
     assert(blendMode != null); // ignore: unnecessary_null_comparison
-    _canvas.drawVertices(vertices as SurfaceVertices, blendMode, paint as SurfacePaint);
+    _canvas.drawVertices(
+        vertices as SurfaceVertices, blendMode, paint as SurfacePaint);
   }
 
   @override
