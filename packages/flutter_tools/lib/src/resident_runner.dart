@@ -205,6 +205,8 @@ class FlutterDevice {
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+    int hostVmServicePort,
+    bool disableServiceAuthCodes = false,
     bool disableDds = false,
     bool ipv6 = false,
   }) {
@@ -220,12 +222,14 @@ class FlutterDevice {
       if (!disableDds) {
         await device.dds.startDartDevelopmentService(
           observatoryUri,
+          hostVmServicePort,
           ipv6,
+          disableServiceAuthCodes,
         );
       }
       try {
         service = await connectToVmService(
-          observatoryUri,
+          disableDds ? observatoryUri : device.dds.uri,
           reloadSources: reloadSources,
           restart: restart,
           compileExpression: compileExpression,
@@ -1232,10 +1236,12 @@ abstract class ResidentRunner {
         restart: restart,
         compileExpression: compileExpression,
         disableDds: debuggingOptions.disableDds,
+        hostVmServicePort: debuggingOptions.hostVmServicePort,
         reloadMethod: reloadMethod,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
         ipv6: ipv6,
+        disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
@@ -1723,15 +1729,16 @@ class DevtoolsLauncher {
     }
   }
 
-  Future<io.HttpServer> serve() async {
+  Future<DevToolsServerAddress> serve() async {
     try {
       _devtoolsServer ??= await devtools_server.serveDevTools(
         enableStdinCommands: false,
       );
+      return DevToolsServerAddress(_devtoolsServer.address.host, _devtoolsServer.port);
     } on Exception catch (e, st) {
       globals.printTrace('Failed to serve DevTools: $e\n$st');
+      return null;
     }
-    return _devtoolsServer;
   }
 
   Future<void> close() async {
@@ -1740,4 +1747,11 @@ class DevtoolsLauncher {
   }
 
   static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>() ?? DevtoolsLauncher();
+}
+
+class DevToolsServerAddress {
+  DevToolsServerAddress(this.host, this.port);
+
+  final String host;
+  final int port;
 }

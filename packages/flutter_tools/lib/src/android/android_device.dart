@@ -255,7 +255,7 @@ class AndroidDevice extends Device {
   AndroidDevicePortForwarder _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
-    return <String>[getAdbPath(_androidSdk), '-s', id, ...args];
+    return <String>[_androidSdk.adbPath, '-s', id, ...args];
   }
 
   String runAdbCheckedSync(
@@ -318,13 +318,13 @@ class AndroidDevice extends Device {
 
     try {
       final RunResult adbVersion = await _processUtils.run(
-        <String>[getAdbPath(_androidSdk), 'version'],
+        <String>[_androidSdk.adbPath, 'version'],
         throwOnError: true,
       );
       if (_isValidAdbVersion(adbVersion.stdout)) {
         return true;
       }
-      _logger.printError('The ADB at "${getAdbPath(_androidSdk)}" is too old; please install version 1.0.39 or later.');
+      _logger.printError('The ADB at "${_androidSdk.adbPath}" is too old; please install version 1.0.39 or later.');
     } on Exception catch (error, trace) {
       _logger.printError('Error running ADB: $error', stackTrace: trace);
     }
@@ -339,7 +339,7 @@ class AndroidDevice extends Device {
       //   adb server is out of date.  killing..
       //   * daemon started successfully *
       await _processUtils.run(
-        <String>[getAdbPath(_androidSdk), 'start-server'],
+        <String>[_androidSdk.adbPath, 'start-server'],
         throwOnError: true,
       );
 
@@ -620,15 +620,14 @@ class AndroidDevice extends Device {
       observatoryDiscovery = ProtocolDiscovery.observatory(
         await getLogReader(),
         portForwarder: portForwarder,
-        hostPort: debuggingOptions.hostVmServicePort,
+        hostPort: debuggingOptions.disableDds ? debuggingOptions.hostVmServicePort : 0,
         devicePort: debuggingOptions.deviceVmServicePort,
         ipv6: ipv6,
       );
     }
 
-    List<String> cmd;
-
-    cmd = <String>[
+    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
+    final List<String> cmd = <String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.RUN',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
@@ -665,8 +664,8 @@ class AndroidDevice extends Device {
           ...<String>['--ez', 'start-paused', 'true'],
         if (debuggingOptions.disableServiceAuthCodes)
           ...<String>['--ez', 'disable-service-auth-codes', 'true'],
-        if (debuggingOptions.dartFlags.isNotEmpty)
-          ...<String>['--es', 'dart-flags', debuggingOptions.dartFlags],
+        if (dartVmFlags.isNotEmpty)
+          ...<String>['--es', 'dart-flags', dartVmFlags],
         if (debuggingOptions.useTestFonts)
           ...<String>['--ez', 'use-test-fonts', 'true'],
         if (debuggingOptions.verboseSystemLogs)

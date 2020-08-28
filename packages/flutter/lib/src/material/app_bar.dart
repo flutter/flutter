@@ -172,6 +172,12 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
 ///    can expand and collapse.
 ///  * <https://material.io/design/components/app-bars-top.html>
+///  * Cookbook: [Place a floating app bar above a list](https://flutter.dev/docs/cookbook/lists/floating-app-bar)
+///  * See our
+///    [AppBar Basics sample](https://flutter.dev/docs/catalog/samples/basic-app-bar)
+///    and our advanced samples with app bars with
+///    [tabs](https://flutter.dev/docs/catalog/samples/tabbed-app-bar) or
+///    [custom bottom widgets](https://flutter.dev/docs/catalog/samples/app-bar-bottom).
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///

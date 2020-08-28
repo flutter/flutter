@@ -50,9 +50,16 @@ class MockRestorationManager extends TestRestorationManager {
   Future<RestorationBucket> _rootBucket;
   set rootBucket(Future<RestorationBucket> value) {
     _rootBucket = value;
+    _isRestoring = true;
+    ServicesBinding.instance.addPostFrameCallback((Duration _) {
+      _isRestoring = false;
+    });
     notifyListeners();
   }
 
+  @override
+  bool get isReplacing => _isRestoring;
+  bool _isRestoring;
 
   @override
   Future<void> sendToEngine(Uint8List encodedData) {

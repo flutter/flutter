@@ -168,6 +168,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String excludeTags,
     bool enableObservatory = false,
     bool startPaused = false,
+    bool disableDds = false,
     bool disableServiceAuthCodes = false,
     bool ipv6 = false,
     bool machine = false,
@@ -185,6 +186,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     bool web = false,
     String randomSeed,
     @override List<String> extraFrontEndOptions,
+    bool nullAssertions = false,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;

@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:collection' show LinkedHashMap;
 import 'dart:ui' as ui;
 import 'dart:ui' show PointerChange;
 
@@ -12,86 +11,36 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import '../flutter_test_alternative.dart';
+import './mouse_tracking_test_utils.dart';
 
-typedef HandleEventCallback = void Function(PointerEvent event);
-
-class _TestGestureFlutterBinding extends BindingBase
-    with SchedulerBinding, ServicesBinding, GestureBinding, SemanticsBinding, RendererBinding {
-  @override
-  void initInstances() {
-    super.initInstances();
-    postFrameCallbacks = <void Function(Duration)>[];
-  }
-
-  SchedulerPhase _overridePhase;
-  @override
-  SchedulerPhase get schedulerPhase => _overridePhase ?? super.schedulerPhase;
-
-  // Manually schedule a post-frame check.
-  //
-  // In real apps this is done by the renderer binding, but in tests we have to
-  // bypass the phase assertion of [MouseTracker.schedulePostFrameCheck].
-  void scheduleMouseTrackerPostFrameCheck() {
-    final SchedulerPhase lastPhase = _overridePhase;
-    _overridePhase = SchedulerPhase.persistentCallbacks;
-    mouseTracker.schedulePostFrameCheck();
-    _overridePhase = lastPhase;
-  }
-
-  List<void Function(Duration)> postFrameCallbacks;
-
-  // Proxy post-frame callbacks.
-  @override
-  void addPostFrameCallback(void Function(Duration) callback) {
-    postFrameCallbacks.add(callback);
-  }
-
-  void flushPostFrameCallbacks(Duration duration) {
-    for (final void Function(Duration) callback in postFrameCallbacks) {
-      callback(duration);
-    }
-    postFrameCallbacks.clear();
-  }
-}
-
-_TestGestureFlutterBinding _binding = _TestGestureFlutterBinding();
+TestMouseTrackerFlutterBinding _binding = TestMouseTrackerFlutterBinding();
 MouseTracker get _mouseTracker => RendererBinding.instance.mouseTracker;
 
 void _ensureTestGestureBinding() {
-  _binding ??= _TestGestureFlutterBinding();
+  _binding ??= TestMouseTrackerFlutterBinding();
   assert(GestureBinding.instance != null);
 }
 
-@immutable
-class AnnotationEntry {
-  AnnotationEntry(this.annotation, [Matrix4 transform])
-    : transform = transform ?? Matrix4.identity();
-
-  final MouseTrackerAnnotation annotation;
-  final Matrix4 transform;
-}
-
-typedef SimpleAnnotationFinder = Iterable<AnnotationEntry> Function(Offset offset);
+typedef SimpleAnnotationFinder = Iterable<TestAnnotationEntry> Function(Offset offset);
 
 void main() {
   void _setUpMouseAnnotationFinder(SimpleAnnotationFinder annotationFinder) {
-    final MouseTracker mouseTracker = MouseTracker(
-      GestureBinding.instance.pointerRouter,
-      (Offset offset) => LinkedHashMap<MouseTrackerAnnotation, Matrix4>.fromEntries(
-        annotationFinder(offset).map(
-          (AnnotationEntry entry) => MapEntry<MouseTrackerAnnotation, Matrix4>(
-            entry.annotation,
-            entry.transform,
-          ),
-        ),
-      ),
-    );
-    RendererBinding.instance.initMouseTracker(mouseTracker);
+    _binding.setHitTest((BoxHitTestResult result, Offset position) {
+      for (final TestAnnotationEntry entry in annotationFinder(position)) {
+        result.addWithRawTransform(
+          transform: entry.transform,
+          position: position,
+          hitTest: (BoxHitTestResult result, Offset position) {
+            result.add(entry);
+            return true;
+          },
+        );
+      }
+      return true;
+    });
   }
 
   // Set up a trivial test environment that includes one annotation.
@@ -99,8 +48,8 @@ void main() {
   // `logEvents`.
   // This annotation also contains a cursor with a value of `testCursor`.
   // The mouse tracker records the cursor requests it receives to `logCursors`.
-  MouseTrackerAnnotation _setUpWithOneAnnotation({List<PointerEvent> logEvents}) {
-    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+  TestAnnotationTarget _setUpWithOneAnnotation({List<PointerEvent> logEvents}) {
+    final TestAnnotationTarget oneAnnotation = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) {
         if (logEvents != null)
           logEvents.add(event);
@@ -116,10 +65,16 @@ void main() {
     );
     _setUpMouseAnnotationFinder(
       (Offset position) sync* {
-        yield AnnotationEntry(annotation);
+        yield TestAnnotationEntry(oneAnnotation);
       },
     );
-    return annotation;
+    return oneAnnotation;
+  }
+
+  void dispatchRemoveDevice([int device = 0]) {
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.remove, const Offset(0.0, 0.0), device: device),
+    ]));
   }
 
   setUp(() {
@@ -131,11 +86,10 @@ void main() {
     final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
       onEnter: (_) {},
       onExit: (_) {},
-      onHover: (_) {},
     );
     expect(
       annotation1.toString(),
-      equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: [enter, hover, exit])'),
+      equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: [enter, exit])'),
     );
 
     const MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation();
@@ -169,6 +123,7 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
     ]));
+    addTearDown(() => dispatchRemoveDevice());
 
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(0.0, 0.0)),
@@ -300,6 +255,7 @@ void main() {
       _pointerData(PointerChange.add, const Offset(0.0, 101.0)),
       _pointerData(PointerChange.down, const Offset(0.0, 101.0)),
     ]));
+    addTearDown(() => dispatchRemoveDevice());
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       // This Enter event is triggered by the [PointerAddedEvent] The
       // [PointerDownEvent] is ignored by [MouseTracker].
@@ -325,14 +281,14 @@ void main() {
   test('should correctly handle when the annotation appears or disappears on the pointer', () {
     bool isInHitRegion;
     final List<Object> events = <PointerEvent>[];
-    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+    final TestAnnotationTarget annotation = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) => events.add(event),
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
-        yield AnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
+        yield TestAnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
       }
     });
 
@@ -342,6 +298,7 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 100.0)),
     ]));
+    addTearDown(() => dispatchRemoveDevice());
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
@@ -373,14 +330,14 @@ void main() {
   test('should correctly handle when the annotation moves in or out of the pointer', () {
     bool isInHitRegion;
     final List<Object> events = <PointerEvent>[];
-    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+    final TestAnnotationTarget annotation = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) => events.add(event),
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
-        yield AnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
+        yield TestAnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
       }
     });
 
@@ -390,6 +347,7 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 100.0)),
     ]));
+    addTearDown(() => dispatchRemoveDevice());
     events.clear();
 
     // During a frame, the annotation moves into the pointer.
@@ -422,14 +380,14 @@ void main() {
   test('should correctly handle when the pointer is added or removed on the annotation', () {
     bool isInHitRegion;
     final List<Object> events = <PointerEvent>[];
-    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+    final TestAnnotationTarget annotation = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) => events.add(event),
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
-        yield AnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
+        yield TestAnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
       }
     });
 
@@ -460,14 +418,14 @@ void main() {
   test('should correctly handle when the pointer moves in or out of the annotation', () {
     bool isInHitRegion;
     final List<Object> events = <PointerEvent>[];
-    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+    final TestAnnotationTarget annotation = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) => events.add(event),
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
-        yield AnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
+        yield TestAnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
       }
     });
 
@@ -475,6 +433,7 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(200.0, 100.0)),
     ]));
+    addTearDown(() => dispatchRemoveDevice());
 
     expect(_binding.postFrameCallbacks, hasLength(0));
     events.clear();
@@ -518,17 +477,17 @@ void main() {
   test('should not flip out if not all mouse events are listened to', () {
     bool isInHitRegionOne = true;
     bool isInHitRegionTwo = false;
-    final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
+    final TestAnnotationTarget annotation1 = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) {}
     );
-    final MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation(
+    final TestAnnotationTarget annotation2 = TestAnnotationTarget(
       onExit: (PointerExitEvent event) {}
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegionOne)
-        yield AnnotationEntry(annotation1);
+        yield TestAnnotationEntry(annotation1);
       else if (isInHitRegionTwo)
-        yield AnnotationEntry(annotation2);
+        yield TestAnnotationEntry(annotation2);
     });
 
     isInHitRegionOne = false;
@@ -537,6 +496,7 @@ void main() {
       _pointerData(PointerChange.add, const Offset(0.0, 101.0)),
       _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
     ]));
+    addTearDown(() => dispatchRemoveDevice());
 
     // Passes if no errors are thrown.
   });
@@ -553,12 +513,12 @@ void main() {
 
     bool isInB;
     final List<String> logs = <String>[];
-    final MouseTrackerAnnotation annotationA = MouseTrackerAnnotation(
+    final TestAnnotationTarget annotationA = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) => logs.add('enterA'),
       onExit: (PointerExitEvent event) => logs.add('exitA'),
       onHover: (PointerHoverEvent event) => logs.add('hoverA'),
     );
-    final MouseTrackerAnnotation annotationB = MouseTrackerAnnotation(
+    final TestAnnotationTarget annotationB = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) => logs.add('enterB'),
       onExit: (PointerExitEvent event) => logs.add('exitB'),
       onHover: (PointerHoverEvent event) => logs.add('hoverB'),
@@ -566,8 +526,8 @@ void main() {
     _setUpMouseAnnotationFinder((Offset position) sync* {
       // Children's annotations come before parents'.
       if (isInB) {
-        yield AnnotationEntry(annotationB);
-        yield AnnotationEntry(annotationA);
+        yield TestAnnotationEntry(annotationB);
+        yield TestAnnotationEntry(annotationA);
       }
     });
 
@@ -576,6 +536,7 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 1.0)),
     ]));
+    addTearDown(() => dispatchRemoveDevice());
     expect(logs, <String>[]);
 
     // Moves into B within one frame.
@@ -606,21 +567,21 @@ void main() {
     bool isInA;
     bool isInB;
     final List<String> logs = <String>[];
-    final MouseTrackerAnnotation annotationA = MouseTrackerAnnotation(
+    final TestAnnotationTarget annotationA = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) => logs.add('enterA'),
       onExit: (PointerExitEvent event) => logs.add('exitA'),
       onHover: (PointerHoverEvent event) => logs.add('hoverA'),
     );
-    final MouseTrackerAnnotation annotationB = MouseTrackerAnnotation(
+    final TestAnnotationTarget annotationB = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) => logs.add('enterB'),
       onExit: (PointerExitEvent event) => logs.add('exitB'),
       onHover: (PointerHoverEvent event) => logs.add('hoverB'),
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInA) {
-        yield AnnotationEntry(annotationA);
+        yield TestAnnotationEntry(annotationA);
       } else if (isInB) {
-        yield AnnotationEntry(annotationB);
+        yield TestAnnotationEntry(annotationB);
       }
     });
 
@@ -630,6 +591,7 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 1.0)),
     ]));
+    addTearDown(() => dispatchRemoveDevice());
     expect(logs, <String>['enterA']);
     logs.clear();
 

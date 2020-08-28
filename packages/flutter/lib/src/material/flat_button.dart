@@ -16,6 +16,17 @@ import 'theme_data.dart';
 
 /// A material design "flat button".
 ///
+/// ### This class is obsolete, please use [TextButton] instead.
+///
+/// FlatButton, RaisedButton, and OutlineButton have been replaced by
+/// TextButton, ElevatedButton, and OutlinedButton respectively.
+/// ButtonTheme has been replaced by TextButtonTheme,
+/// ElevatedButtonTheme, and OutlinedButtonTheme. The original classes
+/// will be deprecated soon, please migrate code that uses them.
+/// There's a detailed migration guide for the new button and button
+/// theme classes in
+/// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
+///
 /// A flat button is a text label displayed on a (zero elevation) [Material]
 /// widget that reacts to touches by filling with color.
 ///
@@ -98,6 +109,7 @@ import 'theme_data.dart';
 ///  * [InkWell], which implements the ink splash part of a flat button.
 ///  * [RawMaterialButton], the widget this widget is based on.
 ///  * <https://material.io/design/components/buttons.html>
+///  * Cookbook: [Build a form with validation](https://flutter.dev/docs/cookbook/forms/validation)
 class FlatButton extends MaterialButton {
   /// Create a simple text button.
   ///

@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -111,7 +110,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
 
   // If the user already has it set in the project build settings itself,
   // continue with that.
-  if (isNotEmpty(buildSettings['DEVELOPMENT_TEAM'])) {
+  if (_isNotEmpty(buildSettings['DEVELOPMENT_TEAM'])) {
     logger.printStatus(
       'Automatically signing iOS for device deployment using specified development '
       'team in Xcode project: ${buildSettings['DEVELOPMENT_TEAM']}'
@@ -119,7 +118,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
     return null;
   }
 
-  if (isNotEmpty(buildSettings['PROVISIONING_PROFILE'])) {
+  if (_isNotEmpty(buildSettings['PROVISIONING_PROFILE'])) {
     return null;
   }
 
@@ -152,7 +151,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
             .firstMatch(outputLine)
             ?.group(1);
       })
-      .where(isNotEmpty)
+      .where(_isNotEmpty)
       .toSet() // Unique.
       .toList();
 
@@ -266,3 +265,6 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, L
 
   return null;
 }
+
+/// Returns true if s is a not empty string.
+bool _isNotEmpty(String s) => s != null && s.isNotEmpty;
