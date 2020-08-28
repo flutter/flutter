@@ -168,7 +168,7 @@ String digestResponseTemplate({
         "status": "positive",
         "paramset": {
           "Platform": [
-            "macos"
+            "$platform"
           ],
           "ext": [
             "png"
