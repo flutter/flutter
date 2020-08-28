@@ -253,11 +253,44 @@ class TestCommand extends Command<bool> with ArgUtils {
           targets: canvasKitTargets, forCanvasKit: true);
     }
 
-    // Copy image files from test/ to build/test/.
-    // A side effect is this file copies all the images even when only one
-    // target test is asked to run.
+    _copyFilesFromTestToBuid();
+    _copyFilesFromLibToBuid();
+
+    stopwatch.stop();
+    print('The build took ${stopwatch.elapsedMilliseconds ~/ 1000} seconds.');
+
+    _cleanupExtraFilesUnderTestDir();
+  }
+
+  /// Copy image files from test/ to build/test/.
+  ///
+  /// By copying all the files helps with the following:
+  /// - Tests using on an asset/image are able to reach these files.
+  /// - Source maps can locate test files.
+  ///
+  /// A side effect is this file copies all the images even when only one
+  /// target test is asked to run.
+  void _copyFilesFromTestToBuid() {
     final List<io.FileSystemEntity> contents =
         environment.webUiTestDir.listSync(recursive: true);
+    _copyFiles(contents);
+  }
+
+  /// Copy contents of /lib under /build.
+  ///
+  /// Since the source map are created to assume library files are under
+  /// `../../../../lib/src/`. Unless these files are copied under /build,
+  /// they are not visible during debug.
+  ///
+  /// This operation was handled by `build_runner` before we started using
+  /// plain `dart2js`.
+  void _copyFilesFromLibToBuid() {
+    final List<io.FileSystemEntity> contents =
+        environment.webUiLibDir.listSync(recursive: true);
+    _copyFiles(contents);
+  }
+
+  void _copyFiles(List<io.FileSystemEntity> contents) {
     contents.whereType<io.File>().forEach((final io.File entity) {
       final String directoryPath = path.relative(path.dirname(entity.path),
           from: environment.webUiRootDir.path);
@@ -271,9 +304,20 @@ class TestCommand extends Command<bool> with ArgUtils {
       entity.copySync(
           path.join(environment.webUiBuildDir.path, pathRelativeToWebUi));
     });
+  }
 
-    stopwatch.stop();
-    print('The build took ${stopwatch.elapsedMilliseconds ~/ 1000} seconds.');
+  /// Dart2js initially run under /test directory.
+  ///
+  /// The following files are copied under /build directory after that.
+  ///
+  void _cleanupExtraFilesUnderTestDir() {
+    final List<io.FileSystemEntity> contents =
+        environment.webUiTestDir.listSync(recursive: true);
+    contents.whereType<io.File>().forEach((final io.File entity) {
+      if (path.basename(entity.path).contains('.browser_test.dart.js')) {
+        entity.deleteSync();
+      }
+    });
   }
 
   /// Whether to start the browser in debug mode.
@@ -533,10 +577,21 @@ class TestCommand extends Command<bool> with ArgUtils {
   ///
   /// When building for CanvasKit we have to use extra argument
   /// `DFLUTTER_WEB_USE_SKIA=true`.
+  ///
+  /// Dart2js creates the following outputs:
+  /// - target.browser_test.dart.js
+  /// - target.browser_test.dart.js.deps
+  /// - target.browser_test.dart.js.maps
+  /// under the same directory with test file. If all these files are not in
+  /// the same directory, Chrome dev tools cannot load the source code during
+  /// debug.
+  ///
+  /// All the files under test already copied from /test directory to /build
+  /// directory before test are build. See [_copyFilesFromTestToBuid].
+  ///
+  /// Later the extra files will be deleted in [_cleanupExtraFilesUnderTestDir].
   Future<bool> _buildTest(TestBuildInput input) async {
-    final targetFileName =
-        '${input.path.relativeToWebUi}.browser_test.dart.js';
-    final String targetPath = path.join('build', targetFileName);
+    final targetFileName = '${input.path.relativeToWebUi}.browser_test.dart.js';
 
     final io.Directory directoryToTarget = io.Directory(path.join(
         environment.webUiBuildDir.path,
@@ -555,7 +610,7 @@ class TestCommand extends Command<bool> with ArgUtils {
       if (input.forCanvasKit) '-DFLUTTER_WEB_USE_SKIA=true',
       '-O2',
       '-o',
-      targetPath, // target path.
+      targetFileName, // target path.
       '${input.path.relativeToWebUi}', // current path.
     ];
 
