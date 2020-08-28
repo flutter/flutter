@@ -2377,7 +2377,7 @@ void main() {
                       mouseCursor: SystemMouseCursors.text,
                       value: 0.5,
                       cupertinoThumbColor: thumbColor,
-                      onChanged: (double newValue) {},
+                      onChanged: (double newValue) { },
                     ),
                   ),
                 ),
@@ -2396,7 +2396,7 @@ void main() {
     await buildWidget();
     expect(cupertinoSliderWidget().thumbColor, equals(CupertinoColors.white));
 
-    // When provided, CupertinoSlider.thumbColor defaults to [CupertinoColor.white].
+    // When provided, CupertinoSlider.thumbColor matches the provided color.
     const Color thumbColor = Colors.amber;
     await buildWidget(thumbColor: thumbColor);
     expect(cupertinoSliderWidget().thumbColor, equals(thumbColor));
