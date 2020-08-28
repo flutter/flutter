@@ -239,7 +239,6 @@ class ImageCache {
       // putIfAbsent don't return this image that may never complete.
       final _LiveImage? image = _liveImages.remove(key);
       image?.removeListener();
-      image?.handle.dispose();
     }
     final _PendingImage? pendingImage = _pendingImages.remove(key);
     if (pendingImage != null) {
@@ -260,7 +259,7 @@ class ImageCache {
         });
       }
       _currentSizeBytes -= image.sizeBytes!;
-      image.handle.dispose();
+      image.dispose();
       return true;
     }
     if (!kReleaseMode) {
@@ -297,7 +296,9 @@ class ImageCache {
       // Even if the cache size is 0, we still add this listener.
       image.completer.addOnLastListenerRemovedCallback(image.handleRemove);
       return image;
-    }).sizeBytes ??= image.sizeBytes;
+    })
+      ..sizeBytes ??= image.sizeBytes
+      ..handle ??= image.lastImageInfo?.obtainImageHandle();
   }
 
   /// Returns the previously cached [ImageStream] for the given key, if available;
@@ -342,7 +343,12 @@ class ImageCache {
       }
       // The image might have been keptAlive but had no listeners (so not live).
       // Make sure the cache starts tracking it as live again.
-      _trackLiveImage(key, _LiveImage(image.completer, image.handle, image.sizeBytes, () => _liveImages.remove(key)));
+      _trackLiveImage(key, _LiveImage(
+        image.completer,
+        () => _liveImages.remove(key),
+        info: image.lastImageInfo,
+        sizeBytes: image.sizeBytes,
+      ));
       _cache[key] = image;
       return image.completer;
     }
@@ -358,7 +364,10 @@ class ImageCache {
 
     try {
       result = loader();
-      _trackLiveImage(key, _LiveImage(result, null, () => _liveImages.remove(key)));
+      _trackLiveImage(key, _LiveImage(
+        result,
+        () => _liveImages.remove(key),
+      ));
     } catch (error, stackTrace) {
       if (!kReleaseMode) {
         timelineTask!.finish(arguments: <String, dynamic>{
@@ -392,14 +401,15 @@ class ImageCache {
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info == null || info.image == null ? 0 : info.image.height * info.image.width * 4;
 
-      final _CachedImage image = _CachedImage(result!, info.imageHandle, imageSize);
+      final _CachedImage image = _CachedImage(result!, info: info, sizeBytes: imageSize);
 
       _trackLiveImage(
         key,
         _LiveImage(
           result,
-          imageSize,
           () => _liveImages.remove(key),
+          info: info,
+          sizeBytes: imageSize,
         ),
       );
 
@@ -494,7 +504,7 @@ class ImageCache {
       final Object key = _cache.keys.first;
       final _CachedImage image = _cache[key]!;
       _currentSizeBytes -= image.sizeBytes!;
-      image.handle.dispose();
+      image.dispose();
       _cache.remove(key);
       if (!kReleaseMode) {
         finishArgs['evictedKeys'].add(key.toString());
@@ -583,21 +593,46 @@ class ImageCacheStatus {
 }
 
 class _CachedImage {
-  _CachedImage(this.completer, this.handle, this.sizeBytes);
+  _CachedImage(
+    this.completer, {
+    this.sizeBytes,
+    ImageInfo? info,
+  }) : assert(completer != null) {
+    handle = info?.obtainImageHandle();
+    lastImageInfo = info;
+    completer.addListener(ImageStreamListener(_listener));
+  }
 
   final ImageStreamCompleter completer;
-  final ImageHandle handle;
+  ImageHandle? handle;
+  ImageInfo? lastImageInfo;
   int? sizeBytes;
+
+  void _listener(ImageInfo? info, bool syncCall) {
+    if (info == lastImageInfo) {
+      return;
+    }
+    handle?.dispose();
+    lastImageInfo = info;
+    handle = info?.obtainImageHandle();
+  }
+
+  void dispose() {
+    completer.removeListener(ImageStreamListener(_listener));
+    handle?.dispose();
+    handle = null;
+  }
 }
 
 class _LiveImage extends _CachedImage {
-  _LiveImage(ImageStreamCompleter completer, ImageHandle handle, int? sizeBytes, this.handleRemove)
-      : super(completer, handle, sizeBytes);
+  _LiveImage(ImageStreamCompleter completer, this.handleRemove, {ImageInfo? info, int? sizeBytes})
+      : super(completer, info: info, sizeBytes: sizeBytes);
 
   final VoidCallback handleRemove;
 
   void removeListener() {
     completer.removeOnLastListenerRemovedCallback(handleRemove);
+    dispose();
   }
 }
 
