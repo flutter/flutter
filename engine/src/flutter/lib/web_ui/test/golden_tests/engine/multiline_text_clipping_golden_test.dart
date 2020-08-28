@@ -136,13 +136,13 @@ void drawQuickBrownFox(RecordingCanvas canvas) {
 
 void paintTextWithClipRect(RecordingCanvas canvas) {
   drawBackground(canvas);
-  canvas.clipRect(testBounds.inflate(-40));
+  canvas.clipRect(testBounds.inflate(-40), ClipOp.intersect);
   drawQuickBrownFox(canvas);
 }
 
 void paintTextWithClipRectTranslated(RecordingCanvas canvas) {
   drawBackground(canvas);
-  canvas.clipRect(testBounds.inflate(-40));
+  canvas.clipRect(testBounds.inflate(-40), ClipOp.intersect);
   canvas.translate(30, 10);
   drawQuickBrownFox(canvas);
 }
@@ -190,10 +190,10 @@ void paintTextWithClipPath(RecordingCanvas canvas) {
 void paintTextWithClipStack(RecordingCanvas canvas) {
   drawBackground(canvas);
   final Rect inflatedRect = testBounds.inflate(-40);
-  canvas.clipRect(inflatedRect);
+  canvas.clipRect(inflatedRect, ClipOp.intersect);
   canvas.rotate(math.pi / 8.0);
   canvas.translate(40, -40);
-  canvas.clipRect(inflatedRect);
+  canvas.clipRect(inflatedRect, ClipOp.intersect);
   canvas.drawRect(
       inflatedRect,
       Paint()

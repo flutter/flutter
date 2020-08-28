@@ -28,7 +28,7 @@ void testMain() async {
   // Commit a recording canvas to a bitmap, and compare with the expected
   Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
       {Rect region = const Rect.fromLTWH(0, 0, 500, 500),
-        double maxDiffRatePercent = 0.0}) async {
+      double maxDiffRatePercent = 0.0}) async {
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect);
 
     rc.endRecording();
@@ -203,7 +203,7 @@ void testMain() async {
     Image testImage = createTestImage();
     double testWidth = testImage.width.toDouble();
     double testHeight = testImage.height.toDouble();
-    rc.clipRect(Rect.fromLTRB(75, 75, 160, 160));
+    rc.clipRect(Rect.fromLTRB(75, 75, 160, 160), ClipOp.intersect);
     rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
         Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), new Paint());
     rc.drawCircle(
@@ -229,7 +229,7 @@ void testMain() async {
     rc.translate(100, 100);
     rc.rotate(math.pi / 4.0);
     rc.translate(-100, -100);
-    rc.clipRect(Rect.fromLTRB(75, 75, 160, 160));
+    rc.clipRect(Rect.fromLTRB(75, 75, 160, 160), ClipOp.intersect);
     rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
         Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), new Paint());
     rc.drawCircle(
@@ -256,7 +256,7 @@ void testMain() async {
     rc.rotate(-math.pi / 4.0);
     rc.save();
     rc.translate(-100, -100);
-    rc.clipRect(Rect.fromLTRB(75, 75, 160, 160));
+    rc.clipRect(Rect.fromLTRB(75, 75, 160, 160), ClipOp.intersect);
     rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
         Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), new Paint());
     rc.drawCircle(
@@ -358,7 +358,7 @@ void testMain() async {
     EnginePictureRecorder recorder = EnginePictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     Image testImage = createNineSliceImage();
-    canvas.clipRect(Rect.fromLTWH(0, 0,420, 200));
+    canvas.clipRect(Rect.fromLTWH(0, 0, 420, 200));
     canvas.drawImageNine(testImage, Rect.fromLTWH(20, 20, 20, 20),
         Rect.fromLTWH(20, 20, 400, 400), Paint());
     Picture picture = recorder.endRecording();
@@ -395,11 +395,10 @@ void testMain() async {
       ..lineTo(50, 10)
       ..lineTo(50, 30)
       ..lineTo(10, 30)
-      ..close()
-    );
+      ..close());
     canvas.drawImage(createNineSliceImage(), Offset.zero, Paint());
-    await _checkScreenshot(canvas, 'draw_clipped_and_transformed_image', region: region,
-        maxDiffRatePercent: 1.0);
+    await _checkScreenshot(canvas, 'draw_clipped_and_transformed_image',
+        region: region, maxDiffRatePercent: 1.0);
   });
 }
 
@@ -535,13 +534,11 @@ const String base64ImageData = 'data:image/png;base64,iVBORw0KGgoAAAANSUh'
 
 HtmlImage createNineSliceImage() {
   return HtmlImage(
-    html.ImageElement()
-      ..src = base64ImageData,
+    html.ImageElement()..src = base64ImageData,
     60,
     60,
   );
 }
-
 
 HtmlImage createTestImage({int width = 100, int height = 50}) {
   html.CanvasElement canvas =
