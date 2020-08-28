@@ -634,9 +634,7 @@ class ThemeData with Diagnosticable {
        assert(textButtonTheme != null),
        assert(elevatedButtonTheme != null),
        assert(outlinedButtonTheme != null),
-       assert(fixTextFieldOutlineLabel != null),
        assert(textSelectionTheme != null),
-       assert(fixTextFieldOutlineLabel != null),
        assert(useTextSelectionTheme != null),
        assert(dataTableTheme != null),
        assert(fixTextFieldOutlineLabel != null);

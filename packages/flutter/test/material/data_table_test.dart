@@ -179,7 +179,7 @@ void main() {
           child: DataTable(
             headingTextStyle: const TextStyle(
               fontSize: 14.0,
-              letterSpacing: 0.0, // will overflow if letter spacing is larger than 0.0
+              letterSpacing: 0.0, // Will overflow if letter spacing is larger than 0.0.
             ),
             columns: <DataColumn>[
               DataColumn(
