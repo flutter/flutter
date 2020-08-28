@@ -35,14 +35,12 @@ Future<void> watchPerformance(
   final Future<void> delayForFrameTimings =
       Future<void>.delayed(const Duration(seconds: 2));
 
-  await delayForFrameTimings;
+  await delayForFrameTimings; // flush old FrameTimings
   final List<FrameTiming> frameTimings = <FrameTiming>[];
   final TimingsCallback watcher = frameTimings.addAll;
   binding.addTimingsCallback(watcher);
   await action();
-  await delayForFrameTimings;
-  await Future<void>.delayed(const Duration(seconds: 2));
-
+  await delayForFrameTimings; // make sure all FrameTimings are reported
   binding.removeTimingsCallback(watcher);
   final FrameTimingSummarizer frameTimes = FrameTimingSummarizer(frameTimings);
   binding.reportData = <String, dynamic>{reportKey: frameTimes.summary};
