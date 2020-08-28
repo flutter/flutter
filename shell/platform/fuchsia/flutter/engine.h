@@ -14,16 +14,20 @@
 #include <lib/ui/scenic/cpp/view_ref_pair.h>
 #include <lib/zx/event.h>
 
-#include "flutter/flow/embedded_views.h"
-#include "flutter/flow/scene_update_context.h"
+#include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/shell.h"
 
 #include "flutter_runner_product_configuration.h"
+#include "fuchsia_external_view_embedder.h"
 #include "isolate_configurator.h"
 #include "session_connection.h"
 #include "thread.h"
 #include "vulkan_surface_producer.h"
+
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+#include "flutter/flow/scene_update_context.h"  // nogncheck
+#endif
 
 namespace flutter_runner {
 
@@ -65,7 +69,10 @@ class Engine final {
 
   std::optional<SessionConnection> session_connection_;
   std::optional<VulkanSurfaceProducer> surface_producer_;
-  std::optional<flutter::SceneUpdateContext> scene_update_context_;
+  std::optional<FuchsiaExternalViewEmbedder> external_view_embedder_;
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+  std::optional<flutter::SceneUpdateContext> legacy_external_view_embedder_;
+#endif
 
   std::unique_ptr<IsolateConfigurator> isolate_configurator_;
   std::unique_ptr<flutter::Shell> shell_;
@@ -73,6 +80,10 @@ class Engine final {
   fuchsia::intl::PropertyProviderPtr intl_property_provider_;
 
   zx::event vsync_event_;
+
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+  bool use_legacy_renderer_ = true;
+#endif
 
   fml::WeakPtrFactory<Engine> weak_factory_;
 
@@ -87,9 +98,7 @@ class Engine final {
   void UpdateView(int64_t view_id, bool hit_testable, bool focusable);
   void DestroyView(int64_t view_id);
 
-  flutter::ExternalViewEmbedder* GetViewEmbedder();
-
-  GrDirectContext* GetGrContext();
+  std::unique_ptr<flutter::Surface> CreateSurface();
 
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
