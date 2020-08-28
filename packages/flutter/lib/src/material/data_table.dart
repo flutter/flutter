@@ -820,15 +820,15 @@ class DataTable extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final MaterialStateProperty<Color> effectiveHeadingRowColor = headingRowColor
-      ?? theme.dataTableTheme?.headingRowColor;
+      ?? theme.dataTableTheme.headingRowColor;
     final MaterialStateProperty<Color> effectiveDataRowColor = dataRowColor
-      ?? theme.dataTableTheme?.dataRowColor;
+      ?? theme.dataTableTheme.dataRowColor;
     final MaterialStateProperty<Color> defaultRowColor = MaterialStateProperty.resolveWith(
       (Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
           // The color has to be transparent so you can see the ink on
           // the [Material].
-          // TODO(per): Align with Material specs, use translucent primary color: https://github.com/flutter/flutter/issues/64314.
+          // TODO(perclasson): Align with Material specs, use translucent primary color: https://github.com/flutter/flutter/issues/64314.
           return (Theme.of(context).brightness == Brightness.light) ?
             _grey100Opacity : _grey300Opacity;
         }
@@ -839,10 +839,10 @@ class DataTable extends StatelessWidget {
     final bool displayCheckboxColumn = showCheckboxColumn && anyRowSelectable;
     final bool allChecked = displayCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
     final double effectiveHorizontalMargin = horizontalMargin
-      ?? theme.dataTableTheme?.horizontalMargin
+      ?? theme.dataTableTheme.horizontalMargin
       ?? DataTable.defaultHorizontalMargin;
     final double effectiveColumnSpacing = columnSpacing
-      ?? theme.dataTableTheme?.columnSpacing
+      ?? theme.dataTableTheme.columnSpacing
       ?? DataTable.defaultColumnSpacing;
 
     final List<TableColumnWidth> tableColumns = List<TableColumnWidth>(columns.length + (displayCheckboxColumn ? 1 : 0));
@@ -960,7 +960,7 @@ class DataTable extends StatelessWidget {
     }
 
     return Ink(
-      decoration: decoration ?? theme.dataTableTheme?.decoration,
+      decoration: decoration ?? theme.dataTableTheme.decoration,
       child: Table(
         columnWidths: tableColumns.asMap(),
         children: tableRows,
