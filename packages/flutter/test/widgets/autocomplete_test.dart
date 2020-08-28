@@ -79,7 +79,7 @@ void main() {
 
     testWidgets('custom getResults', (WidgetTester tester) async {
       final AutocompleteController<String> autocompleteController =
-          AutocompleteController<String>(
+          AutocompleteController<String>.generated(
             // A custom getResults that always includes 'goose' in the results.
             getResults: (String text) {
               return kOptions
@@ -130,7 +130,7 @@ void main() {
 
     testWidgets('custom getResults on User options', (WidgetTester tester) async {
       final AutocompleteController<User> autocompleteController =
-          AutocompleteController<User>(
+          AutocompleteController<User>.generated(
             // A custom getResults that searches by name case sensitively.
             getResults: (String text) {
               return kOptionsUsers

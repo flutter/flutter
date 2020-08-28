@@ -134,23 +134,40 @@ typedef _AutocompleteOptionToString<T> = String Function(T option);
 /// {@end-tool}
 @immutable
 class AutocompleteController<T> {
-  /// Create an instance of AutocompleteController.
+  /// Create an instance of AutocompleteController with a known list of options.
+  ///
+  /// See also:
+  ///   * [AutocompleteController.generated], which generates the options with a
+  ///     [getResults] method instead of specifying all possible options up
+  ///     front.
   AutocompleteController({
-    this.getResults,
-    this.options,
+    @required this.options,
     _AutocompleteOptionToString<T> displayStringForOption,
     _AutocompleteOptionToString<T> filterStringForOption,
     TextEditingController textEditingController,
-  }) : assert(
-         getResults == null || options == null,
-         "It's unnecessary to pass options if you've passed a custom getResults.",
-       ),
-       assert(
-         getResults != null || options != null,
-         'Must pass either options or getResults.',
-       ),
+  }) : assert(options != null && options.isNotEmpty),
+        getResults = null,
        displayStringForOption = displayStringForOption ?? _defaultStringForOption,
        filterStringForOption = filterStringForOption ?? _defaultStringForOption,
+       _ownsTextEditingController = textEditingController == null,
+       textEditingController = textEditingController ?? TextEditingController() {
+    this.textEditingController.addListener(_onChangedField);
+  }
+
+  /// Create an instance of AutocompleteController with a function [getResults]
+  /// that returns options based on the text.
+  ///
+  /// See also:
+  ///   * [AutocompleteController], which receives a list of all possible
+  ///     options up front instead of generating them in [getResults].
+  AutocompleteController.generated({
+    @required this.getResults,
+    _AutocompleteOptionToString<T> displayStringForOption,
+    TextEditingController textEditingController,
+  }) : assert(getResults != null),
+       options = null,
+       displayStringForOption = displayStringForOption ?? _defaultStringForOption,
+       filterStringForOption = null,
        _ownsTextEditingController = textEditingController == null,
        textEditingController = textEditingController ?? TextEditingController() {
     this.textEditingController.addListener(_onChangedField);
@@ -160,19 +177,23 @@ class AutocompleteController<T> {
 
   /// All possible options that can be selected.
   ///
-  /// If left null, a custom [getResults] method must be provided that handles
-  /// generating some results based on the text in the field.
+  /// This list will be filtered by the user's input with a simple string-
+  /// matching filter.
+  ///
+  /// See also:
+  ///   * [AutocompleteController.generated], which can be used with
+  ///     [getResults] to generate results programmatically.
   final List<T> options;
 
   /// The [TextEditingController] that represents the field.
   final TextEditingController textEditingController;
 
-  /// A function that returns the possible results given the text in the field.
+  /// A function that returns the results given the text in the field.
   ///
-  /// If [options] is null, then this field must not be null. This may be the
-  /// case when querying an external service for results, for example.
-  ///
-  /// Defaults to a simple string-matching filter of [options].
+  /// See also:
+  ///   * [options], which can be used with the default constructor to simply
+  ///     pass a list of all possible options and filter them with simple string
+  ///     matching.
   final AutocompleteResultsGetter<T> getResults;
 
   /// Returns the string to display in the field when the option is selected.
@@ -191,8 +212,7 @@ class AutocompleteController<T> {
   ///
   /// This is useful when using a custom T type for AutocompleteController and
   /// the string to display is different than the string to search by. This is
-  /// only used when [getResults] is null and the default getResults filter is
-  /// used.
+  /// not used when using [getResults].
   ///
   /// If not provided, will use `option.toString()`.
   ///
