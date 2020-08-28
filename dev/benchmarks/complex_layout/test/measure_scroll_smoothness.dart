@@ -134,6 +134,7 @@ Future<void> main() async {
     final ScrollController controller = scroller.controller;
     final List<int> frameTimestamp = <int>[];
     final List<double> scrollOffset = <double>[];
+    final List<Duration> delays = <Duration>[];
     binding.addPersistentFrameCallback((Duration timeStamp) {
       if (controller.hasClients) {
         // This if is necessary because by the end of the test the widget tree
@@ -144,22 +145,24 @@ Future<void> main() async {
     });
 
     Duration now() => binding.currentSystemFrameTimeStamp;
-    Future<List<Duration>> scroll() async {
+    Future<void> scroll() async {
       // Extra 50ms to avoid timeouts.
       final Duration startTime = const Duration(milliseconds: 500) + now();
-      final List<Duration> delays = <Duration>[];
       for (final PointerDataRecord record in dragInputDatas(startTime, tester.getCenter(scrollerFinder))) {
         await tester.binding.delayed(record.timeStamp - now());
         // This now measures how accurate the above delayed is.
-        delays.add(now() - record.timeStamp);
+        final Duration delay = now() - record.timeStamp;
+        if (delays.length < frameTimestamp.length) {
+          delays.add(delay);
+        } else if (delays.last < delay) {
+          delays.last = delay;
+        }
         ui.window.onPointerDataPacket(record.data);
       }
-      return delays;
     }
 
-    List<Duration> delays = <Duration>[];
     for (int n = 0; n < 5; n++) {
-      delays += await scroll();
+      await scroll();
     }
     variant.result = scrollSummary(scrollOffset, delays, frameTimestamp);
     await tester.pumpAndSettle();
@@ -171,58 +174,70 @@ Future<void> main() async {
 
 /// Calculates the smoothness measure from `scrollOffset` and `delays` list.
 ///
-/// For smoothness it filters the frames with delays too longer to separate the
-/// effect of building a frame too slow. Frames that are built slow are counted
-/// to `dropped_frame_count`.
+/// Smoothness (`abs_jerk`) is measured by  the absolute value of the discrete
+/// 2nd derivative of the scroll offset.
 ///
-/// Smoothness (jerk) is measured by the average of the absolute value for
-/// discrete 2nd derivative (`average_abs_jerk`). And the frames with
-/// estimated `jerk` larger than 0.5 is counted to `janky_count`.
+/// It was experimented that jerk (3rd derivative of the position) is a good
+/// measure the smoothness.
+/// Here we are using 2nd derivative instead because the input is completely
+/// linear and the expected acceleration should be strictly zero.
+/// Observed acceleration is jumping from positive to negative within
+/// adjacent frames, meaning mathematically the discrete 3-rd derivative
+/// (`f[3] - 3*f[2] + 3*f[1] - f[0]`) is not a good approximation of jerk
+/// (continuous 3-rd derivative), while discrete 2nd
+/// derivative (`f[2] - 2*f[1] + f[0]`) on the other hand is a better measure
+/// of how the scrolling deviate away from linear, and given the acceleration
+/// should average to zero within two frames, it's also a good approximation
+/// for jerk in terms of physics.
+/// We use abs rather than square because square (2-norm) amplifies the
+/// effect of the data point that's relatively large, but in this metric
+/// we prefer smaller data point to have similar effect.
+/// This is also why we count the number of data that's larger than a
+/// threshold (and the result is tested not sensitive to this threshold),
+/// which is effectively a 0-norm.
+///
+/// Frames that are too slow to build (longer than 40ms) or with input delay
+/// longer than 16ms (1/60Hz) is filtered out to separate the janky due to slow
+/// response.
+///
+/// The returned map has keys:
+/// `average_abs_jerk`: average for the overall smoothness.
+/// `janky_count`: number of frames with `abs_jerk` larger than 0.5.
+/// `dropped_frame_count`: number of frames that are built longer than 40ms and
+///  are not used for smoothness measurement.
+/// `frame_timestamp`: the list of the timestamp for each frame, in the time
+/// order.
+/// `scroll_offset`: the scroll offset for each frame. Its length is the same as
+/// `frame_timestamp`.
+/// `input_delay`: the list of maximum delay time of the input simulation during
+/// a frame. Its length is the same as `frame_timestamp`
 Map<String, dynamic> scrollSummary(
   List<double> scrollOffset,
   List<Duration> delays,
   List<int> frameTimestamp,
 ) {
   double jankyCount = 0;
-  double jerkAvg = 0;
+  double absJerkAvg = 0;
   int lostFrame = 0;
   for (int i = 1; i < scrollOffset.length-1; i += 1) {
-    if (frameTimestamp[i+1] - frameTimestamp[i-1] > 40E3
-        || delays[i] > const Duration(milliseconds: 16)) {
+    if (frameTimestamp[i+1] - frameTimestamp[i-1] > 40E3 ||
+        delays[i] > const Duration(milliseconds: 16)) {
       // filter data points from slow frame building or input simulation artifact
       lostFrame += 1;
       continue;
     }
-    // Using abs rather than square because square (2-norm) amplifies the
-    // effect of the data point that's relatively large, but in this metric
-    // we prefer smaller data point to have similar effect.
-    // This is also why we count the number of data that's larger than a
-    // threshold (and the result is tested not sensitive to this threshold),
-    // which is effectively a 0-norm.
     //
-    // go/tq-smooth-scrolling suggests using jerk (3rd derivative of the position)
-    // to measure the smoothness.
-    // Here we are not using 3rd derivative instead because the input is
-    // completely linear and the expected acceleration should be strictly zero.
-    // Observed acceleration is jumping from positive to negative within
-    // adjacent frames, meaning mathematically the discrete 3-rd derivative
-    // (`f[3] - 3*f[2] + 3*f[1] - f[0]`) is not a good approximation of jerk
-    // (continuous 3-rd derivative), while discrete 2nd
-    // derivative (`f[2] - 2*f[1] + f[0]`) on the other hand is a better measure
-    // of how the scrolling deviate away from linear, and given the acceleration
-    // should average to zero within two frames, it's also a good approximation
-    // for jerk in terms of physics.
-    final double jerk = (scrollOffset[i-1] + scrollOffset[i+1] - 2*scrollOffset[i]).abs();
-    jerkAvg += jerk;
-    if (jerk > 0.5)
+    final double absJerk = (scrollOffset[i-1] + scrollOffset[i+1] - 2*scrollOffset[i]).abs();
+    absJerkAvg += absJerk;
+    if (absJerk > 0.5)
       jankyCount += 1;
   }
   // expect(lostFrame < 0.1 * frameTimestamp.length, true);
-  jerkAvg /= frameTimestamp.length - lostFrame;
+  absJerkAvg /= frameTimestamp.length - lostFrame;
 
   return <String, dynamic>{
     'janky_count': jankyCount,
-    'average_abs_jerk': jerkAvg,
+    'average_abs_jerk': absJerkAvg,
     'dropped_frame_count': lostFrame,
     'frame_timestamp': List<int>.from(frameTimestamp),
     'scroll_offset': List<double>.from(scrollOffset),
