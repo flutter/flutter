@@ -48,10 +48,10 @@ class ClampedSimulation extends Simulation {
   final double dxMax;
 
   @override
-  double x(double time) => simulation.x(time).clamp(xMin, xMax) as double;
+  double x(double time) => simulation.x(time).clamp(xMin, xMax) as double; // ignore: unnecessary_cast
 
   @override
-  double dx(double time) => simulation.dx(time).clamp(dxMin, dxMax) as double;
+  double dx(double time) => simulation.dx(time).clamp(dxMin, dxMax) as double; // ignore: unnecessary_cast
 
   @override
   bool isDone(double time) => simulation.isDone(time);

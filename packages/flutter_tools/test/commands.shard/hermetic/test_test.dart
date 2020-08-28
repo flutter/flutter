@@ -168,6 +168,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String excludeTags,
     bool enableObservatory = false,
     bool startPaused = false,
+    bool disableDds = false,
     bool disableServiceAuthCodes = false,
     bool ipv6 = false,
     bool machine = false,
