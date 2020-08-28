@@ -363,7 +363,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // Handles up the logic for dragging and reordering items in the list.
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
-    final GlobalObjectKey keyIndexGlobalKey = GlobalObjectKey(toWrap.key);
+    final _ToWrapGlobalObjectValueKey keyIndexGlobalKey = _ToWrapGlobalObjectValueKey(toWrap.key);
     // We pass the toWrapWithGlobalKey into the Draggable so that when a list
     // item gets dragged, the accessibility framework can preserve the selected
     // state of the dragging item.
@@ -595,4 +595,28 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       );
     });
   }
+}
+
+/// A global key that takes its identity from the object and uses a value of a
+/// particular type to identify itself.
+///
+/// The difference with GlobalObjectKey is that it compares values ​​within Objects
+/// rather than using identical.
+@optionalTypeArgs
+class _ToWrapGlobalObjectValueKey<T extends State<StatefulWidget>> extends GlobalObjectKey {
+
+  const _ToWrapGlobalObjectValueKey(this.value) : super(value);
+
+  final Object value;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _ToWrapGlobalObjectValueKey<T>
+        && other.value == value;
+  }
+
+  @override
+  int get hashCode => super.hashCode;
 }
