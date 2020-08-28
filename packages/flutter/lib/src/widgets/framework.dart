@@ -2677,8 +2677,12 @@ class BuildOwner {
             e,
             stack,
             informationCollector: () sync* {
-              yield DiagnosticsDebugCreator(DebugCreator(_dirtyElements[index]));
-              yield _dirtyElements[index].describeElement('The element being rebuilt at the time was index $index of $dirtyCount');
+              if (index < _dirtyElements.length) {
+                yield DiagnosticsDebugCreator(DebugCreator(_dirtyElements[index]));
+                yield _dirtyElements[index].describeElement('The element being rebuilt at the time was index $index of $dirtyCount');
+              } else {
+                yield ErrorHint('The element being rebuilt at the time was index $index of $dirtyCount, but _dirtyElements only had ${_dirtyElements.length} entries. This suggests some confusion in the framework internals.');
+              }
             },
           );
         }
@@ -3561,8 +3565,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// This updates the child model such that, e.g., [visitChildren] does not
   /// walk that child anymore.
   ///
-  /// The element will still have a valid parent when this is called. After this
-  /// is called, [deactivateChild] is called to sever the link to this object.
+  /// The element will still have a valid parent when this is called, and the
+  /// child's [Element.slot] value will be valid in the context of that parent.
+  /// After this is called, [deactivateChild] is called to sever the link to
+  /// this object.
   ///
   /// The [update] is responsible for updating or creating the new child that
   /// will replace this [child].

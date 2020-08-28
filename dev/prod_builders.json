@@ -61,6 +61,12 @@
          "flaky": false
       },
       {
+         "name":"Linux web_smoke_test",
+         "repo":"flutter",
+         "task_name":"linux_web_smoke_test",
+         "flaky":false
+      },
+      {
          "name": "Mac",
          "repo": "flutter",
          "task_name": "mac_bot",

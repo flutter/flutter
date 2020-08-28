@@ -1145,13 +1145,16 @@ class EditableText extends StatefulWidget {
   final EdgeInsets scrollPadding;
 
   /// {@template flutter.widgets.editableText.enableInteractiveSelection}
-  /// If true, then long-pressing this TextField will select text and show the
-  /// cut/copy/paste menu, and tapping will move the text caret.
+  /// Whether to enable user interface affordances for changing the
+  /// text selection.
   ///
-  /// True by default.
+  /// For example, setting this to true will enable features such as
+  /// long-pressing the TextField to select text and show the
+  /// cut/copy/paste menu, and tapping to move the text caret.
   ///
-  /// If false, most of the accessibility support for selecting text, copy
-  /// and paste, and moving the caret will be disabled.
+  /// When this is false, the text selection cannot be adjusted by
+  /// the user, text cannot be copied, and the user cannot paste into
+  /// the text field from the clipboard.
   /// {@endtemplate}
   final bool enableInteractiveSelection;
 
@@ -1186,7 +1189,12 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final ScrollPhysics scrollPhysics;
 
-  /// {@macro flutter.rendering.editable.selectionEnabled}
+  /// {@template flutter.widgets.editableText.selectionEnabled}
+  /// Same as [enableInteractiveSelection].
+  ///
+  /// This getter exists primarily for consistency with
+  /// [RenderEditable.selectionEnabled].
+  /// {@endtemplate}
   bool get selectionEnabled => enableInteractiveSelection;
 
   /// {@template flutter.widgets.editableText.autofillHints}
@@ -1618,6 +1626,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // to disable text updating.
     if (!_shouldCreateInputConnection) {
       return;
+    }
+    if (widget.readOnly) {
+      // In the read-only case, we only care about selection changes, and reject
+      // everything else.
+      value = _value.copyWith(selection: value.selection);
     }
     _receivedRemoteTextEditingValue = value;
     if (value.text != _value.text) {
@@ -2092,7 +2105,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool textChanged = _value?.text != value?.text;
     final bool isRepeat = value == _lastFormattedUnmodifiedTextEditingValue;
 
-    if (textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+    // There's no need to format when starting to compose or when continuing
+    // an existing composition.
+    final bool isComposing = value?.composing?.isValid ?? false;
+    final bool isPreviouslyComposing = _lastFormattedUnmodifiedTextEditingValue?.composing?.isValid ?? false;
+
+    if ((textChanged || (!isComposing && isPreviouslyComposing)) &&
+        widget.inputFormatters != null &&
+        widget.inputFormatters.isNotEmpty) {
       // Only format when the text has changed and there are available formatters.
       // Pass through the formatter regardless of repeat status if the input value is
       // different than the stored value.
