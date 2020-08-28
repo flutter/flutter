@@ -28,10 +28,21 @@ Future<void> watchPerformance(
     }
     return true;
   }());
+
+  // The engine could batch FrameTimings and send them only once per second.
+  // Delay for a sufficient time so either old FrameTimings are flushed and not
+  // interfering our measurements here, or new FrameTimings are all reported.
+  final Future<void> delayForFrameTimings =
+      Future<void>.delayed(const Duration(seconds: 2));
+
+  await delayForFrameTimings;
   final List<FrameTiming> frameTimings = <FrameTiming>[];
   final TimingsCallback watcher = frameTimings.addAll;
   binding.addTimingsCallback(watcher);
   await action();
+  await delayForFrameTimings;
+  await Future<void>.delayed(const Duration(seconds: 2));
+
   binding.removeTimingsCallback(watcher);
   final FrameTimingSummarizer frameTimes = FrameTimingSummarizer(frameTimings);
   binding.reportData = <String, dynamic>{reportKey: frameTimes.summary};
