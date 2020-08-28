@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/error_handling.dart';
 import 'package:process/process.dart';
 
 import 'android/android_sdk.dart';
@@ -16,6 +15,7 @@ import 'artifacts.dart';
 import 'asset.dart';
 import 'base/config.dart';
 import 'base/context.dart';
+import 'base/error_handling.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
