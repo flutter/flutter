@@ -133,8 +133,8 @@ class DefaultTextStyle extends InheritedTheme {
 
   /// How visual overflow should be handled.
   ///
-  /// If [softWrap] is true or null, the word causing overflow will not appear at all. Otherwise,
-  /// it will be shown with the given overflow option.
+  /// If [softWrap] is true or null, the glyph causing overflow, and those that follow,
+  /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   final TextOverflow overflow;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
@@ -349,8 +349,8 @@ class Text extends StatelessWidget {
   /// The [data] parameter must not be null.
   ///
   /// The [overflow] property's behavior is affected by the [softWrap] argument.
-  /// If the [softWrap] is true or null, the word causing overflow will not 
-  /// appear at all. Otherwise, it will be shown with the given overflow option.
+  /// If the [softWrap] is true or null, the glyph causing overflow, and those that follow,
+  /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   const Text(
     this.data, {
     Key key,
