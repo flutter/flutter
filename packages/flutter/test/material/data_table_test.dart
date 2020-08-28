@@ -979,7 +979,7 @@ void main() {
     expect(boxDecoration.border.top.width, thickness);
   });
 
-  testWidgets('DataTable set show bottom divider', (WidgetTester tester) async {
+  testWidgets('DataTable set show bottom border', (WidgetTester tester) async {
     const List<DataColumn> columns = <DataColumn>[
       DataColumn(label: Text('column1')),
       DataColumn(label: Text('column2')),
@@ -999,7 +999,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: DataTable(
-            showBottomDivider: true,
+            showBottomBorder: true,
             columns: columns,
             rows: rows,
           ),

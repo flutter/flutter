@@ -424,7 +424,7 @@ class DataTable extends StatelessWidget {
     this.horizontalMargin,
     this.columnSpacing,
     this.showCheckboxColumn = true,
-    this.showBottomDivider = false,
+    this.showBottomBorder = false,
     this.dividerThickness = 1.0,
     @required this.rows,
   }) : assert(columns != null),
@@ -600,11 +600,11 @@ class DataTable extends StatelessWidget {
   /// This value defaults to 1.0.
   final double dividerThickness;
 
-  /// Whether a divider at the bottom of the table is displayed.
+  /// Whether a border at the bottom of the table is displayed.
   ///
-  /// By default, a divider is not shown at the bottom to allow for a border
+  /// By default, a border is not shown at the bottom to allow for a border
   /// around the table set with [DataTable.decoration].
-  final bool showBottomDivider;
+  final bool showBottomBorder;
 
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
@@ -861,7 +861,7 @@ class DataTable extends StatelessWidget {
         final Color resolvedHeadingRowColor = effectiveHeadingRowColor?.resolve(<MaterialState>{});
         final Color rowColor = index > 0 ? resolvedDataRowColor : resolvedHeadingRowColor;
         final BorderSide borderSide = Divider.createBorderSide(context, width: dividerThickness);
-        final Border border = showBottomDivider
+        final Border border = showBottomBorder
           ? Border(bottom: borderSide)
           : index == 0 ? null : Border(top: borderSide);
         return TableRow(
