@@ -202,7 +202,7 @@ Map<String, dynamic> scrollSummary(
     //
     // go/tq-smooth-scrolling suggests using jerk (3rd derivative of the position)
     // to measure the smoothness.
-    // Here we are not using 2nd derivative instead because the input is
+    // Here we are not using 3rd derivative instead because the input is
     // completely linear and the expected acceleration should be strictly zero.
     // Observed acceleration is jumping from positive to negative within
     // adjacent frames, meaning mathematically the discrete 3-rd derivative
