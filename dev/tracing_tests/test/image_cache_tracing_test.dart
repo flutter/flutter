@@ -41,7 +41,7 @@ void main() {
     PaintingBinding.instance.imageCache.clear();
 
     // ignore: invalid_use_of_protected_member
-    completer2.setImage(const ImageInfo(image: TestImage()));
+    completer2.setImage(ImageInfo(image: const TestImage()));
     PaintingBinding.instance.imageCache.putIfAbsent(
       'Test2',
       () => completer2,

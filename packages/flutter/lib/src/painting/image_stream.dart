@@ -9,33 +9,94 @@ import 'dart:ui' show hashValues;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
+/// A reference to a [ui.Image] object.
+///
+/// To get an ImageHandle, clients should call [ImageInfo.obtainHandle].
+///
+/// Clients of an [ImageStream] should call [dispose] on this object when they
+/// will no longer need to use the [ImageInfo.image] vended to them in
+/// [ImageStreamCompleter.setImage]. When all clients of the stream have
+/// disposed their handles, the underlying [ui.Image] will be disposed. Clients
+/// must not call dispose more than once on the reference they receive from
+/// [ImageInfo.obtainHandle].
+///
+/// Clients should _not_ call [ui.Image.dispose] directly, as it will prevent
+/// other clients from using the same image reference should they need to.
+class ImageHandle {
+  ImageHandle._(this._image)
+    : assert(_image != null);
+
+  final ui.Image _image;
+  int _refCount = 0;
+
+  /// Called by [ImageStream.setImage].
+  void _takeInitialRef() {
+    assert(_refCount == 0);
+    _refCount = 1;
+  }
+
+  /// Called by [ImageInfo.obtainHandle].
+  void _ref() {
+    assert(_refCount > 0, 'Object has been disposed.');
+    _refCount += 1;
+  }
+
+  /// Release this image handle.
+  ///
+  /// Once all outstanding image handles have been disposed, the underlying
+  /// [ui.Image] will be disposed as well. Further attempts to use this handle
+  /// will throw.
+  ///
+  /// Clients must call this method once and only once for each call to
+  /// [ImageInfo.obtainHandle].
+  void dispose() {
+    assert(_refCount > 0, 'Object has been disposed');
+    _refCount -= 1;
+    if (_refCount == 0) {
+      _image.dispose();
+    }
+  }
+}
+
 /// A [dart:ui.Image] object with its corresponding scale.
 ///
 /// ImageInfo objects are used by [ImageStream] objects to represent the
 /// actual data of the image once it has been obtained.
+///
+/// The [ImageStream] will hold a
 @immutable
 class ImageInfo {
-  /// Creates an [ImageInfo] object for the given [image] and [scale].
+  /// Creates an [ImageInfo] object for the given [imageHandle] and [scale].
   ///
-  /// If [autoDispose] is set to true, an [ImageStream] will dispose of the
-  /// [image] once it has lost its last listener. To avoid this behavior, set
-  /// [autoDispose] to false.
+  /// The [imageHandle] and [scale] parameters must not be null.
   ///
-  /// The [image], [autoDispose], and [scale] parameters must not be null.
-
+  /// A client of this class must call [obtainHandle] before using the [image],
+  /// and then call [ImageHandle.dispose] when they will no longer need the
+  /// [image]. Once all clients have disposed of their handles, the [image] will
+  /// be in a disposed state as well and will no longer be usable.
   ///
-  /// The tag may be used to identify the source of this image.
-  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel, this.autoDispose = true })
-    : assert(image != null),
-      assert(scale != null),
-      assert(autoDispose != null);
+  /// The [debugLabel] may be used to identify the source of this image.
+  ImageInfo({
+    required ui.Image image,
+    this.scale = 1.0,
+    this.debugLabel,
+  }) : assert(image != null),
+       assert(scale != null),
+       _imageHandle = ImageHandle._(image);
 
   /// The raw image pixels.
   ///
   /// This is the object to pass to the [Canvas.drawImage],
   /// [Canvas.drawImageRect], or [Canvas.drawImageNine] methods when painting
   /// the image.
-  final ui.Image image;
+  ///
+  /// Do not call dispose on this object. Other clients of an
+  /// [ImageStream] may be using it. Instead, call [obtainHandle] and call
+  /// [ImageHandle.dispose] when the client no longer will use the image.
+  ui.Image get image {
+    assert(_imageHandle._refCount > 0, 'Object has been disposed.');
+    return _imageHandle._image;
+  }
 
   /// The linear scale factor for drawing this image at its intended size.
   ///
@@ -51,19 +112,22 @@ class ImageInfo {
   /// A string used for debugging purpopses to identify the source of this image.
   final String? debugLabel;
 
-  /// Whether or not the [image] should be disposed of when an associated
-  /// [ImageStream] loses its last listener.
+  final ImageHandle _imageHandle;
+
+  /// Call this method to ensure that the [image] will not be disposed.
   ///
-  /// If multiple [ImageStream]s may refer to the same image, this should be set
-  /// to true. Within the framework, this does not normally occur, but custom
-  /// [ImageProvider] or [ImageStream] implementations can behave differently.
-  final bool autoDispose;
+  /// The returned [ImageHandle] must be disposed of when the client no longer
+  /// needs to use the [image]. Once all handles have been disposed of, the
+  /// underlying image will be disposed of as well.
+  ImageHandle obtainImageHandle() {
+    return _imageHandle.._ref();
+  }
 
   @override
-  String toString() => '${debugLabel != null ? '$debugLabel ' : ''}$image @ ${debugFormatDouble(scale)}x, autoDispose: $autoDispose';
+  String toString() => '${debugLabel != null ? '$debugLabel ' : ''}$image @ ${debugFormatDouble(scale)}x, active handles: ${_imageHandle._refCount}';
 
   @override
-  int get hashCode => hashValues(image, scale, debugLabel, autoDispose);
+  int get hashCode => hashValues(image, scale, debugLabel, _imageHandle);
 
   @override
   bool operator ==(Object other) {
@@ -73,7 +137,7 @@ class ImageInfo {
         && other.image == image
         && other.scale == scale
         && other.debugLabel == debugLabel
-        && other.autoDispose == autoDispose;
+        && other._imageHandle == other._imageHandle;
   }
 }
 
@@ -348,28 +412,11 @@ class ImageStream with Diagnosticable {
 abstract class ImageStreamCompleter with Diagnosticable {
   final List<ImageStreamListener> _listeners = <ImageStreamListener>[];
   ImageInfo? _currentImage;
+  ImageHandle? _currentImageHandle;
   FlutterErrorDetails? _currentError;
 
   /// A string identifying the source of the underlying image.
   String? debugLabel;
-
-
-  /// Whether this stream should be kept alive even after its listener count
-  /// drops to zero.
-  ///
-  /// For example, the [ImageCache] may be holding a reference to this stream
-  /// and need to keep it alive should a new listener come along.
-  bool get keepAlive => _keepAlive;
-  set keepAlive(bool value) {
-    if (value == _keepAlive) {
-      return;
-    }
-    _keepAlive = value;
-    if (!_keepAlive && !hasListeners && _currentImage?.autoDispose == true) {
-      _currentImage!.image.dispose();
-    }
-  }
-  bool _keepAlive = false;
 
   /// Whether any listeners are currently registered.
   ///
@@ -400,6 +447,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
   ///
   /// {@macro flutter.painting.imageStream.addListener}
   void addListener(ImageStreamListener listener) {
+    if (_listeners.isEmpty) {
+      _currentImageHandle ??= _currentImage?.obtainImageHandle();
+    }
     _listeners.add(listener);
     if (_currentImage != null) {
       try {
@@ -444,9 +494,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
         callback();
       }
       _onLastListenerRemovedCallbacks.clear();
-      if (!keepAlive && _currentImage?.autoDispose == true) {
-        _currentImage!.image.dispose();
-      }
+      _currentImageHandle?.dispose();
     }
   }
 
@@ -471,10 +519,10 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// Calls all the registered listeners to notify them of a new image.
   @protected
   void setImage(ImageInfo image) {
-    if (_currentImage?.autoDispose == true) {
-      _currentImage!.image.dispose();
-    }
+    _currentImageHandle?.dispose();
     _currentImage = image;
+    _currentImageHandle = image._imageHandle.._takeInitialRef();
+
     if (_listeners.isEmpty)
       return;
     // Make a copy to allow for concurrent modification.
@@ -676,19 +724,13 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// the loading progress of the image. If this stream is provided, the events
   /// produced by the stream will be delivered to registered [ImageChunkListener]s
   /// (see [addListener]).
-  ///
-  /// The [autoDisposeFrames] parameter controls how emitted frames set the
-  /// [ImageInfo.autoDispose] property. It must not be null, and defaults to
-  /// true.
   MultiFrameImageStreamCompleter({
     required Future<ui.Codec> codec,
     required double scale,
     String? debugLabel,
     Stream<ImageChunkEvent>? chunkEvents,
     InformationCollector? informationCollector,
-    this.autoDisposeFrames = true,
   }) : assert(codec != null),
-       assert(autoDisposeFrames != null),
        _informationCollector = informationCollector,
        _scale = scale {
     this.debugLabel = debugLabel;
@@ -715,9 +757,6 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
     }
   }
-
-  /// How to set [ImageInfo.autoDispose] on emitted frames.
-  final bool autoDisposeFrames;
 
   ui.Codec? _codec;
   final double _scale;
@@ -752,7 +791,6 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
         image: _nextFrame!.image,
         scale: _scale,
         debugLabel: debugLabel,
-        autoDispose: autoDisposeFrames,
       ));
       _shownTimestamp = timestamp;
       _frameDuration = _nextFrame!.duration;
@@ -797,7 +835,6 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
         image: _nextFrame!.image,
         scale: _scale,
         debugLabel: debugLabel,
-        autoDispose: autoDisposeFrames,
       ));
       return;
     }

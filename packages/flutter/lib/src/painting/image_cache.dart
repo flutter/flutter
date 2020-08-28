@@ -239,6 +239,7 @@ class ImageCache {
       // putIfAbsent don't return this image that may never complete.
       final _LiveImage? image = _liveImages.remove(key);
       image?.removeListener();
+      image?.handle.dispose();
     }
     final _PendingImage? pendingImage = _pendingImages.remove(key);
     if (pendingImage != null) {
@@ -259,7 +260,7 @@ class ImageCache {
         });
       }
       _currentSizeBytes -= image.sizeBytes!;
-      image.completer.keepAlive = false;
+      image.handle.dispose();
       return true;
     }
     if (!kReleaseMode) {
@@ -283,7 +284,6 @@ class ImageCache {
     if (image.sizeBytes != null && image.sizeBytes! <= maximumSizeBytes) {
       _currentSizeBytes += image.sizeBytes!;
       _cache[key] = image;
-      image.completer.keepAlive = true;
       _checkCacheSize(timelineTask);
     }
   }
@@ -342,9 +342,8 @@ class ImageCache {
       }
       // The image might have been keptAlive but had no listeners (so not live).
       // Make sure the cache starts tracking it as live again.
-      _trackLiveImage(key, _LiveImage(image.completer, image.sizeBytes, () => _liveImages.remove(key)));
+      _trackLiveImage(key, _LiveImage(image.completer, image.handle, image.sizeBytes, () => _liveImages.remove(key)));
       _cache[key] = image;
-      image.completer.keepAlive = true;
       return image.completer;
     }
 
@@ -393,7 +392,7 @@ class ImageCache {
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info == null || info.image == null ? 0 : info.image.height * info.image.width * 4;
 
-      final _CachedImage image = _CachedImage(result!, imageSize);
+      final _CachedImage image = _CachedImage(result!, info.imageHandle, imageSize);
 
       _trackLiveImage(
         key,
@@ -495,7 +494,7 @@ class ImageCache {
       final Object key = _cache.keys.first;
       final _CachedImage image = _cache[key]!;
       _currentSizeBytes -= image.sizeBytes!;
-      image.completer.keepAlive = false;
+      image.handle.dispose();
       _cache.remove(key);
       if (!kReleaseMode) {
         finishArgs['evictedKeys'].add(key.toString());
@@ -584,15 +583,16 @@ class ImageCacheStatus {
 }
 
 class _CachedImage {
-  _CachedImage(this.completer, this.sizeBytes);
+  _CachedImage(this.completer, this.handle, this.sizeBytes);
 
   final ImageStreamCompleter completer;
+  final ImageHandle handle;
   int? sizeBytes;
 }
 
 class _LiveImage extends _CachedImage {
-  _LiveImage(ImageStreamCompleter completer, int? sizeBytes, this.handleRemove)
-      : super(completer, sizeBytes);
+  _LiveImage(ImageStreamCompleter completer, ImageHandle handle, int? sizeBytes, this.handleRemove)
+      : super(completer, handle, sizeBytes);
 
   final VoidCallback handleRemove;
 
