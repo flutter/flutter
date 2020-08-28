@@ -301,7 +301,7 @@ TaskFunction createsMultiWidgetConstructPerfE2ETest() {
 TaskFunction createsScrollSmoothnessPerfTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/complex_layout';
-  const String testTarget = 'test/scroll_smooth_measure.dart';
+  const String testTarget = 'test/measure_scroll_smoothness.dart';
   return () {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
