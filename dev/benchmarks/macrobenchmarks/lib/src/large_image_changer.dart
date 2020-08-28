@@ -30,11 +30,7 @@ class _LargeImageChangerState extends State<LargeImageChangerPage> {
     _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
       currentImage.evict().then((_) {
         setState(() {
-          if (imageIndex > 5) {
-            imageIndex = 0;
-          } else {
-            imageIndex += 1;
-          }
+          imageIndex = (imageIndex + 1) % 6;
           currentImage = ResizeImage(
             const ExactAssetImage('assets/999x1000.png'),
             width: (MediaQuery.of(context).size.width * 2).toInt() + imageIndex,
