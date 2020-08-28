@@ -399,10 +399,10 @@ Future<void> buildGradleApp({
     );
   } on ProcessException catch (exception) {
     consumeLog(exception.toString());
-    // Rethrow a tool exit if the error isn't handled by any of the
+    // Rethrow the exception if the error isn't handled by any of the
     // `localGradleErrors`.
     if (detectedGradleError == null) {
-      throwToolExit(exception.toString());
+      rethrow;
     }
   } finally {
     status.stop();
