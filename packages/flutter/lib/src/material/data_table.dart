@@ -602,7 +602,7 @@ class DataTable extends StatelessWidget {
 
   /// Whether a divider at the bottom of the table is displayed.
   ///
-  /// By default, a divider not is shown at the bottom to allow for a border
+  /// By default, a divider is not shown at the bottom to allow for a border
   /// around the table set with [DataTable.decoration].
   final bool showBottomDivider;
 
