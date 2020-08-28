@@ -405,7 +405,7 @@ void main() {
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0)); // offset will be magnified ten times
     expect(find.text('First sliver 1'), findsOneWidget);
     final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
-    // The painter should respect the [OverscrollIndicatorNotification.paintOffset] setting.
+    // The OverscrollIndicator should respect the [OverscrollIndicatorNotification.paintOffset] setting.
     expect(painter, paints..save()..translate(y: 50.0)..scale()..circle());
   });
 
@@ -433,7 +433,7 @@ void main() {
     // Reverse scroll (30 pixels), and the offset < notification.paintOffset.
     await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, -30.0));
     await tester.pump();
-    // The painter should follow the scroll direction.
+    // The OverscrollIndicator should move with the CustomScrollView.
     expect(painter, paints..save()..translate(y: 50.0 - 30.0)..scale()..circle());
 
     // Reverse scroll (30+20 pixels) and offset == notification.paintOffset.
@@ -456,7 +456,7 @@ void main() {
     // Reverse scroll (30 pixels), and the offset < notification.paintOffset.
     await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, 30.0));
     await tester.pump();
-    // The painter should follow the scroll direction.
+    // The OverscrollIndicator should move with the CustomScrollView.
     expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0 - 30.0)..scale()..circle());
 
     // Reverse scroll (30+20 pixels) and offset == notification.paintOffset.
@@ -471,7 +471,7 @@ void main() {
     expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0 - 50.0)..scale()..circle());
   });
 
-  group('Modify glow position', () {
+  group('[OverscrollIndicatorNotification.paintOffset] test', () {
     testWidgets('Leading', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
@@ -493,11 +493,12 @@ void main() {
       );
       final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
       await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
+      // The OverscrollIndicator should respect the [OverscrollIndicatorNotification.paintOffset] setting.
       expect(painter, paints..save()..translate(y: 50.0)..scale()..circle());
       // Reverse scroll direction.
       await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, -30.0));
       await tester.pump();
-      // The painter should follow the scroll direction.
+      // The OverscrollIndicator should move with the CustomScrollView.
       expect(painter, paints..save()..translate(y: 50.0 - 30.0)..scale()..circle());
     });
 
@@ -524,11 +525,12 @@ void main() {
       await tester.dragFrom(const Offset(200.0, 200.0), const Offset(200.0, -10000.0));
       await tester.pump();
       await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, -5.0));
+      // The OverscrollIndicator should respect the [OverscrollIndicatorNotification.paintOffset] setting.
       expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0)..scale()..circle());
       // Reverse scroll direction.
       await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, 30.0));
       await tester.pump();
-      // The painter should follow the scroll direction.
+      // The OverscrollIndicator should move with the CustomScrollView.
       expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0 - 30.0)..scale()..circle());
     });
   });
