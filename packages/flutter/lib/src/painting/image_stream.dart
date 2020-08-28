@@ -19,9 +19,10 @@ class ImageInfo {
   ///
   /// If [autoDispose] is set to true, an [ImageStream] will dispose of the
   /// [image] once it has lost its last listener. To avoid this behavior, set
-  /// [autoDispose] to true.
+  /// [autoDispose] to false.
   ///
-  /// The image, autoDispose, and scale paraemters must not be null.
+  /// The [image], [autoDispose], and [scale] parameters must not be null.
+
   ///
   /// The tag may be used to identify the source of this image.
   const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel, this.autoDispose = true })
@@ -676,7 +677,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// produced by the stream will be delivered to registered [ImageChunkListener]s
   /// (see [addListener]).
   ///
-  /// The `autoDisposeFrames` parameter controls how emitted frames set the
+  /// The [autoDisposeFrames] parameter controls how emitted frames set the
   /// [ImageInfo.autoDispose] property. It must not be null, and defaults to
   /// true.
   MultiFrameImageStreamCompleter({
