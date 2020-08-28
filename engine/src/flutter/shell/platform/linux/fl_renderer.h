@@ -35,10 +35,17 @@ G_DECLARE_DERIVABLE_TYPE(FlRenderer, fl_renderer, FL, RENDERER, GObject)
 struct _FlRendererClass {
   GObjectClass parent_class;
 
-  // Virtual method called to get the visual that matches the given ID.
-  GdkVisual* (*get_visual)(FlRenderer* renderer,
-                           GdkScreen* screen,
-                           EGLint visual_id);
+  /**
+   * Virtual method called before creating a GdkWindow for the widget.
+   * Does not need to be implemented.
+   */
+  gboolean (*setup_window_attr)(FlRenderer* renderer,
+                                GtkWidget* widget,
+                                EGLDisplay egl_display,
+                                EGLConfig egl_config,
+                                GdkWindowAttr* window_attributes,
+                                gint* mask,
+                                GError** error);
 
   /**
    * Virtual method called after a GDK window has been created.

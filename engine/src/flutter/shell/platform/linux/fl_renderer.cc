@@ -121,22 +121,13 @@ static gboolean setup_gdk_window(FlRenderer* self,
 
   gint window_attributes_mask = GDK_WA_X | GDK_WA_Y;
 
-  EGLint visual_id;
-  if (!eglGetConfigAttrib(priv->egl_display, priv->egl_config,
-                          EGL_NATIVE_VISUAL_ID, &visual_id)) {
-    g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
-                "Failed to determine EGL configuration visual");
-    return FALSE;
+  if (FL_RENDERER_GET_CLASS(self)->setup_window_attr) {
+    if (!FL_RENDERER_GET_CLASS(self)->setup_window_attr(
+            self, widget, priv->egl_display, priv->egl_config,
+            &window_attributes, &window_attributes_mask, error)) {
+      return FALSE;
+    }
   }
-
-  window_attributes.visual = FL_RENDERER_GET_CLASS(self)->get_visual(
-      self, gtk_widget_get_screen(widget), visual_id);
-  if (window_attributes.visual == nullptr) {
-    g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
-                "Failed to find visual 0x%x", visual_id);
-    return FALSE;
-  }
-  window_attributes_mask |= GDK_WA_VISUAL;
 
   GdkWindow* window =
       gdk_window_new(gtk_widget_get_parent_window(widget), &window_attributes,
