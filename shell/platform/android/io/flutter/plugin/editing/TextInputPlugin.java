@@ -145,7 +145,7 @@ public class TextInputPlugin {
   }
 
   /**
-   * * Use the current platform view input connection until unlockPlatformViewInputConnection is
+   * Use the current platform view input connection until unlockPlatformViewInputConnection is
    * called.
    *
    * <p>The current input connection instance is cached and any following call to @{link

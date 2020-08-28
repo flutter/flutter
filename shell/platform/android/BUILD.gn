@@ -417,6 +417,7 @@ action("robolectric_tests") {
   sources = [
     "test/io/flutter/FlutterTestSuite.java",
     "test/io/flutter/SmokeTest.java",
+    "test/io/flutter/embedding/android/AndroidKeyProcessorTest.java",
     "test/io/flutter/embedding/android/FlutterActivityAndFragmentDelegateTest.java",
     "test/io/flutter/embedding/android/FlutterActivityTest.java",
     "test/io/flutter/embedding/android/FlutterAndroidComponentTest.java",
@@ -435,6 +436,7 @@ action("robolectric_tests") {
     "test/io/flutter/embedding/engine/loader/ApplicationInfoLoaderTest.java",
     "test/io/flutter/embedding/engine/plugins/shim/ShimPluginRegistryTest.java",
     "test/io/flutter/embedding/engine/renderer/FlutterRendererTest.java",
+    "test/io/flutter/embedding/engine/systemchannels/KeyEventChannelTest.java",
     "test/io/flutter/embedding/engine/systemchannels/PlatformChannelTest.java",
     "test/io/flutter/embedding/engine/systemchannels/RestorationChannelTest.java",
     "test/io/flutter/external/FlutterLaunchTests.java",
