@@ -650,8 +650,8 @@ class DataTable extends StatelessWidget {
   /// The default horizontal margin between the contents of each data column.
   static const double defaultColumnSpacing = 56.0;
 
-  /// The default padding between heading content and sort arrow.
-  static const EdgeInsetsGeometry defaultSortArrowPadding = EdgeInsetsDirectional.only(start: 2.0);
+  /// The default padding between the heading content and sort arrow.
+  static const double defaultSortArrowPadding = 2.0;
 
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
   static const Color _grey100Opacity = Color(0x0A000000); // Grey 100 as opacity instead of solid color
@@ -715,14 +715,14 @@ class DataTable extends StatelessWidget {
       children: <Widget>[
         label,
         if (onSort != null)
-          Padding(
-            padding: numeric ? DataTable.defaultSortArrowPadding.resolve(TextDirection.rtl) : DataTable.defaultSortArrowPadding,
-            child: _SortArrow(
+          ...<Widget>[
+            _SortArrow(
               visible: sorted,
               up: sorted ? ascending : null,
               duration: _sortArrowAnimationDuration,
             ),
-          ),
+            const SizedBox(width: DataTable.defaultSortArrowPadding),
+          ],
       ],
     );
 

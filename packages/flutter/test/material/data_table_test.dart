@@ -576,7 +576,7 @@ void main() {
 
     // default checkbox padding
     checkbox = find.byType(Checkbox).first;
-    padding = find.ancestor(of: checkbox, matching: find.byType(Padding)).first;
+    padding = find.ancestor(of: checkbox, matching: find.byType(Padding));
     expect(
       tester.getRect(checkbox).left - tester.getRect(padding).left,
       _defaultHorizontalMargin,
@@ -587,7 +587,7 @@ void main() {
     );
 
     // default first column padding
-    padding = find.widgetWithText(Padding, 'Frozen yogurt').first;
+    padding = find.widgetWithText(Padding, 'Frozen yogurt');
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -599,7 +599,7 @@ void main() {
     );
 
     // default middle column padding
-    padding = find.widgetWithText(Padding, '159').first;
+    padding = find.widgetWithText(Padding, '159');
     cellContent = find.widgetWithText(Align, '159');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -611,7 +611,7 @@ void main() {
     );
 
     // default last column padding
-    padding = find.widgetWithText(Padding, '6.0').first;
+    padding = find.widgetWithText(Padding, '6.0');
     cellContent = find.widgetWithText(Align, '6.0');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -686,7 +686,7 @@ void main() {
 
     // custom checkbox padding
     checkbox = find.byType(Checkbox).first;
-    padding = find.ancestor(of: checkbox, matching: find.byType(Padding)).first;
+    padding = find.ancestor(of: checkbox, matching: find.byType(Padding));
     expect(
       tester.getRect(checkbox).left - tester.getRect(padding).left,
       _customHorizontalMargin,
@@ -709,7 +709,7 @@ void main() {
     );
 
     // custom middle column padding
-    padding = find.widgetWithText(Padding, '159').first;
+    padding = find.widgetWithText(Padding, '159');
     cellContent = find.widgetWithText(Align, '159');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -721,7 +721,7 @@ void main() {
     );
 
     // custom last column padding
-    padding = find.widgetWithText(Padding, '6.0').first;
+    padding = find.widgetWithText(Padding, '6.0');
     cellContent = find.widgetWithText(Align, '6.0');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -795,7 +795,7 @@ void main() {
     ));
 
     // default first column padding
-    padding = find.widgetWithText(Padding, 'Frozen yogurt').first;
+    padding = find.widgetWithText(Padding, 'Frozen yogurt');
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -807,7 +807,7 @@ void main() {
     );
 
     // default middle column padding
-    padding = find.widgetWithText(Padding, '159').first;
+    padding = find.widgetWithText(Padding, '159');
     cellContent = find.widgetWithText(Align, '159');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -819,7 +819,7 @@ void main() {
     );
 
     // default last column padding
-    padding = find.widgetWithText(Padding, '6.0').first;
+    padding = find.widgetWithText(Padding, '6.0');
     cellContent = find.widgetWithText(Align, '6.0');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -891,7 +891,7 @@ void main() {
     ));
 
     // custom first column padding
-    padding = find.widgetWithText(Padding, 'Frozen yogurt').first;
+    padding = find.widgetWithText(Padding, 'Frozen yogurt');
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -903,7 +903,7 @@ void main() {
     );
 
     // custom middle column padding
-    padding = find.widgetWithText(Padding, '159').first;
+    padding = find.widgetWithText(Padding, '159');
     cellContent = find.widgetWithText(Align, '159');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -915,7 +915,7 @@ void main() {
     );
 
     // custom last column padding
-    padding = find.widgetWithText(Padding, '6.0').first;
+    padding = find.widgetWithText(Padding, '6.0');
     cellContent = find.widgetWithText(Align, '6.0');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
