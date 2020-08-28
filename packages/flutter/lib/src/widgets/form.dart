@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'framework.dart';
 import 'navigator.dart';
 import 'will_pop_scope.dart';
