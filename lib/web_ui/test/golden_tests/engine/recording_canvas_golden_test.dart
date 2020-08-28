@@ -27,7 +27,8 @@ void testMain() async {
 
   // Commit a recording canvas to a bitmap, and compare with the expected
   Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
-      { Rect region = const Rect.fromLTWH(0, 0, 500, 500) }) async {
+      { Rect region = const Rect.fromLTWH(0, 0, 500, 500),
+        bool write = false }) async {
 
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect);
 
@@ -50,7 +51,8 @@ void testMain() async {
     try {
       sceneElement.append(engineCanvas.rootElement);
       html.document.body.append(sceneElement);
-      await matchGoldenFile('paint_bounds_for_$fileName.png', region: region);
+      await matchGoldenFile('paint_bounds_for_$fileName.png', region: region,
+        write: write);
     } finally {
       // The page is reused across tests, so remove the element after taking the
       // Scuba screenshot.
@@ -496,6 +498,30 @@ void testMain() async {
     rc.restore();
     rc.endRecording();
     await _checkScreenshot(rc, 'path_with_line_and_roundrect');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/64371.
+  test('Should draw line following a polygon without closing path.', () async {
+    final RecordingCanvas rc =
+    RecordingCanvas(const Rect.fromLTRB(0, 0, 200, 400));
+    rc.save();
+    rc.translate(50.0, 100.0);
+    final Path path = Path();
+    // Draw a vertical small line (caret).
+    path.addPolygon(<Offset>[Offset(0, 10), Offset(20,5), Offset(50,10)],
+        false);
+    path.lineTo(60, 80);
+    path.lineTo(0, 80);
+    path.close();
+    rc.drawPath(
+        path,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.0
+          ..color = const Color(0xFF404000));
+    rc.restore();
+    rc.endRecording();
+    await _checkScreenshot(rc, 'path_with_addpolygon');
   });
 
   test('should include paint spread in bounds estimates', () async {
