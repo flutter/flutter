@@ -1131,7 +1131,7 @@ class DevToolsMemoryTest {
           }
         }, onDone: () {
           if (!observatoryUri.isCompleted) {
-            observatoryUri.complete(null);
+            observatoryUri.complete();
           }
         });
     _forwardStream(_runProcess.stderr, 'run stderr');

@@ -42,9 +42,4 @@ Future<void> main() async {
 
     await driver.close();
   });
-
-  // test('Measure CPU/GPU/Memory', () async {
-  //   final FlutterDriver driver = await FlutterDriver.connect();
-  //   await driver.forceGC();
-  // }, skip: !Platform.isIOS);
 }
