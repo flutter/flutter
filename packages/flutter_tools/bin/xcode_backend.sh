@@ -257,10 +257,11 @@ ThinFramework() {
 }
 
 ThinAppFrameworks() {
-  local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
+  local app_path="${TARGET_BUILD_DIR}/${WRAPPER_NAME}"
+  local frameworks_dir="${app_path}/Frameworks"
 
-  [[ -d "${xcode_frameworks_dir}" ]] || return 0
-  find "${xcode_frameworks_dir}" -type d -name "*.framework" | while read framework_dir; do
+  [[ -d "$frameworks_dir" ]] || return 0
+  find "${app_path}" -type d -name "*.framework" | while read framework_dir; do
     ThinFramework "$framework_dir" "$ARCHS"
   done
 }
