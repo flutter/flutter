@@ -54,6 +54,7 @@ constexpr char kDataKey[] = "data";
 constexpr char kAssetsKey[] = "assets";
 constexpr char kTmpPath[] = "/tmp";
 constexpr char kServiceRootPath[] = "/svc";
+constexpr char kRunnerConfigPath[] = "/config/data/flutter_runner_config";
 
 // static
 void Application::ParseProgramMetadata(
@@ -346,11 +347,13 @@ Application::Application(
     }
   }
 
-  // Load and use product-specific configuration, if it exists.
+  // Load and use runner-specific configuration, if it exists.
   std::string json_string;
-  if (dart_utils::ReadFileToString(
-          "/config/data/frame_scheduling_performance_values", &json_string)) {
+  if (dart_utils::ReadFileToString(kRunnerConfigPath, &json_string)) {
     product_config_ = FlutterRunnerProductConfiguration(json_string);
+  } else {
+    FML_LOG(WARNING) << "Failed to load runner configuration from "
+                     << kRunnerConfigPath << "; using default config values.";
   }
 
 #if defined(DART_PRODUCT)

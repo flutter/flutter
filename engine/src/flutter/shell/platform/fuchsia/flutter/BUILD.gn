@@ -53,12 +53,12 @@ template("runner_sources") {
       "accessibility_bridge.h",
       "component.cc",
       "component.h",
-      "compositor_context.cc",
-      "compositor_context.h",
       "engine.cc",
       "engine.h",
       "flutter_runner_product_configuration.cc",
       "flutter_runner_product_configuration.h",
+      "fuchsia_external_view_embedder.cc",
+      "fuchsia_external_view_embedder.h",
       "fuchsia_intl.cc",
       "fuchsia_intl.h",
       "isolate_configurator.cc",
@@ -92,6 +92,12 @@ template("runner_sources") {
       "vulkan_surface_producer.cc",
       "vulkan_surface_producer.h",
     ]
+    if (flutter_enable_legacy_fuchsia_embedder) {
+      sources += [
+        "compositor_context.cc",
+        "compositor_context.h",
+      ]
+    }
 
     public_configs = runner_configs
 
