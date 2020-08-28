@@ -49,7 +49,7 @@ Iterable<PointerDataRecord> dragInputDatas(
   final Offset startLocation = (center - totalMove / 2) * ui.window.devicePixelRatio;
   // The issue is about 120Hz input on 90Hz refresh rate device.
   // We test 90Hz input on 60Hz device here, which shows similar pattern.
-  final int moveEventCount = totalTime.inMilliseconds * frequency ~/ 1000;
+  final int moveEventCount = totalTime.inMicroseconds * frequency ~/ const Duration(seconds: 1).inMicroseconds;
   final Offset movePerEvent = totalMove / moveEventCount.toDouble() * ui.window.devicePixelRatio;
   yield PointerDataRecord(epoch, <ui.PointerData>[
     ui.PointerData(
@@ -71,7 +71,6 @@ Iterable<PointerDataRecord> dragInputDatas(
     yield PointerDataRecord(
       epoch + totalTime * t ~/ moveEventCount,
       <ui.PointerData>[ui.PointerData(
-        // integer milliseconds is observed from devices
         timeStamp: epoch + totalTime * t ~/ moveEventCount,
         change: ui.PointerChange.move,
         physicalX: position.dx,
