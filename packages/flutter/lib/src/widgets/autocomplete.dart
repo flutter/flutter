@@ -38,7 +38,7 @@ typedef AutocompleteFieldBuilder = Widget Function(
 );
 
 // A type for getting a String from some option.
-typedef _AutocompleteOptionToString<T> = String Function(T option);
+typedef AutocompleteOptionToString<T> = String Function(T option);
 
 // TODO(justinmc): Link to Autocomplete and AutocompleteCupertino when they are
 // implemented.
@@ -74,7 +74,7 @@ typedef _AutocompleteOptionToString<T> = String Function(T option);
 ///     setState(() {});
 ///   }
 ///
-///   void _onChangeField() {
+///   void _onChangedField() {
 ///     if (_autocompleteController.textEditingController.value.text != _selection) {
 ///       setState(() {
 ///         _selection = null;
@@ -88,13 +88,13 @@ typedef _AutocompleteOptionToString<T> = String Function(T option);
 ///     _autocompleteController = AutocompleteController<String>(
 ///       options: <String>['aardvark', 'bobcat', 'chameleon'],
 ///     );
-///     _autocompleteController.textEditingController.addListener(_onChangeField);
+///     _autocompleteController.textEditingController.addListener(_onChangedField);
 ///     _autocompleteController.results.addListener(_onChangeResults);
 ///   }
 ///
 ///   @override
 ///   void dispose() {
-///     _autocompleteController.textEditingController.removeListener(_onChangeField);
+///     _autocompleteController.textEditingController.removeListener(_onChangedField);
 ///     _autocompleteController.results.removeListener(_onChangeResults);
 ///     _autocompleteController.dispose();
 ///     super.dispose();
@@ -136,14 +136,17 @@ typedef _AutocompleteOptionToString<T> = String Function(T option);
 class AutocompleteController<T> {
   /// Create an instance of AutocompleteController with a known list of options.
   ///
+  /// When the text in the textEditingController changes, the options list will
+  /// be filtered using simple case-insensitive string matching.
+  ///
   /// See also:
   ///   * [AutocompleteController.generated], which generates the options with a
   ///     [getResults] method instead of specifying all possible options up
   ///     front.
   AutocompleteController({
     @required this.options,
-    _AutocompleteOptionToString<T> displayStringForOption,
-    _AutocompleteOptionToString<T> filterStringForOption,
+    AutocompleteOptionToString<T> displayStringForOption,
+    AutocompleteOptionToString<T> filterStringForOption,
     TextEditingController textEditingController,
   }) : assert(options != null && options.isNotEmpty),
         getResults = null,
@@ -162,7 +165,7 @@ class AutocompleteController<T> {
   ///     options up front instead of generating them in [getResults].
   AutocompleteController.generated({
     @required this.getResults,
-    _AutocompleteOptionToString<T> displayStringForOption,
+    AutocompleteOptionToString<T> displayStringForOption,
     TextEditingController textEditingController,
   }) : assert(getResults != null),
        options = null,
@@ -177,8 +180,8 @@ class AutocompleteController<T> {
 
   /// All possible options that can be selected.
   ///
-  /// This list will be filtered by the user's input with a simple string-
-  /// matching filter.
+  /// This list will be filtered by the user's input with a simple case-
+  /// insensitive string matching filter.
   ///
   /// See also:
   ///   * [AutocompleteController.generated], which can be used with
@@ -206,7 +209,7 @@ class AutocompleteController<T> {
   /// See also:
   ///   * [filterStringForOption], which can be used to specify a custom string
   ///     to filter by.
-  final _AutocompleteOptionToString<T> displayStringForOption;
+  final AutocompleteOptionToString<T> displayStringForOption;
 
   /// Returns the string to match against when filtering the given option.
   ///
@@ -219,7 +222,7 @@ class AutocompleteController<T> {
   /// See also:
   ///   * [displayStringForOption], which can be used to specify a custom String
   ///     to be shown in the field.
-  final _AutocompleteOptionToString<T> filterStringForOption;
+  final AutocompleteOptionToString<T> filterStringForOption;
 
   /// The current results being returned by [getResults].
   ///
@@ -245,20 +248,20 @@ class AutocompleteController<T> {
   // Called when textEditingController reports a change in its value.
   void _onChangedField() {
     final List<T> resultsValue = getResults == null
-        ? _filterByString(textEditingController.value.text)
+        ? _filterByString(textEditingController.value)
         : getResults(textEditingController.value.text);
     assert(resultsValue != null);
     results.value = resultsValue;
   }
 
   // The default getResults function, if one wasn't supplied.
-  List<T> _filterByString(String text) {
+  List<T> _filterByString(TextEditingValue value) {
     assert(options != null);
     return options
         .where((T option) {
           return filterStringForOption(option)
               .toLowerCase()
-              .contains(text.toLowerCase());
+              .contains(value.text.toLowerCase());
         })
         .toList();
   }
@@ -532,8 +535,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   // Hide or show the results overlay, if needed.
   void _updateOverlay() {
     if (_shouldShowResults) {
-      assert(_fieldKey.currentContext != null);
-      final RenderBox renderBox = _fieldKey.currentContext.findRenderObject() as RenderBox;
+      final RenderBox renderBox = context.findRenderObject() as RenderBox;
       _floatingResults?.remove();
       _floatingResults = OverlayEntry(
         builder: (BuildContext context) {
