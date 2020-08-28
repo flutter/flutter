@@ -92,9 +92,10 @@ GOTO :after_subroutine
     SET update_dart_bin=%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
     SET "update_dart_bin=!update_dart_bin:'=''!"
+    REM PowerShell command must have exit code set in order to prevent all non-zero exit codes from being translated
+    REM into 1. The exit code 2 is used to detect the case where the major version is incorrect and there should be
+    REM no subsequent retries.
     %powershell_executable% -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'; exit $LASTEXITCODE;"
-    REM Exit immediately if PowerShell is an incorrect version, the Dart SDK will
-    REM Not be downloaded correctly.
     IF "%ERRORLEVEL%" EQU "2" (
       EXIT 1
     )
