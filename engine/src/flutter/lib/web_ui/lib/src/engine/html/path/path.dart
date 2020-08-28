@@ -21,9 +21,9 @@ part of engine;
 ///   3. if we encounter Move without a preceeding Close, and forceClose is true, goto #2
 ///   4. if we encounter Line | Quad | Cubic after Close, cons up a Move
 class SurfacePath implements ui.Path {
-  // Flag to require a moveTo if we begin with something else,
-  // for example empty path lineTo call will inject moveTo.
-  static const int kInitialLastMoveToIndexValue = -1;
+  // Initial valid of last move to index so we can detect if a move to
+  // needs to be inserted after contour closure. See [close].
+  static const int kInitialLastMoveToIndexValue = 0;
 
   PathRef pathRef;
   ui.PathFillType _fillType = ui.PathFillType.nonZero;
@@ -173,8 +173,8 @@ class SurfacePath implements ui.Path {
   @override
   void moveTo(double x, double y) {
     // remember our index
-    fLastMoveToIndex = pathRef.countPoints() + 1;
     int pointIndex = pathRef.growForVerb(SPathVerb.kMove, 0);
+    fLastMoveToIndex = pointIndex + 1;
     pathRef.setPoint(pointIndex, x, y);
     _resetAfterEdit();
   }
@@ -194,7 +194,7 @@ class SurfacePath implements ui.Path {
   }
 
   void _injectMoveToIfNeeded() {
-    if (fLastMoveToIndex < 0) {
+    if (fLastMoveToIndex <= 0) {
       double x, y;
       if (pathRef.countPoints() == 0) {
         x = y = 0.0;
@@ -211,7 +211,7 @@ class SurfacePath implements ui.Path {
   /// point.
   @override
   void lineTo(double x, double y) {
-    if (fLastMoveToIndex < 0) {
+    if (fLastMoveToIndex <= 0) {
       _injectMoveToIfNeeded();
     }
     int pointIndex = pathRef.growForVerb(SPathVerb.kLine, 0);
@@ -381,6 +381,7 @@ class SurfacePath implements ui.Path {
     int finalDirection =
         _hasOnlyMoveTos() ? direction : SPathDirection.kUnknown;
     int pointIndex0 = pathRef.growForVerb(SPathVerb.kMove, 0);
+    fLastMoveToIndex = pointIndex0 + 1;
     int pointIndex1 = pathRef.growForVerb(SPathVerb.kLine, 0);
     int pointIndex2 = pathRef.growForVerb(SPathVerb.kLine, 0);
     int pointIndex3 = pathRef.growForVerb(SPathVerb.kLine, 0);
@@ -971,6 +972,7 @@ class SurfacePath implements ui.Path {
       return;
     }
     int pointIndex = pathRef.growForVerb(SPathVerb.kMove, 0);
+    fLastMoveToIndex = pointIndex + 1;
     pathRef.setPoint(pointIndex, points[0].dx, points[0].dy);
     pathRef.growForRepeatedVerb(SPathVerb.kLine, pointCount - 1);
     for (int i = 1; i < pointCount; i++) {
@@ -1110,7 +1112,7 @@ class SurfacePath implements ui.Path {
                 lastPointY = pathRef.points[listIndex];
               }
               // don't add lineTo if it is degenerate.
-              if (fLastMoveToIndex < 0 ||
+              if (fLastMoveToIndex <= 0 ||
                   (previousPointCount != 0) ||
                   lastPointX != point0X ||
                   lastPointY != point0Y) {
