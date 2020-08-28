@@ -115,8 +115,8 @@ class ChangeNotifier implements Listenable {
     assert(() {
       if (_listeners == null) {
         throw FlutterError(
-            'A $runtimeType was used after being disposed.\n'
-                'Once you have called dispose() on a $runtimeType, it can no longer be used.'
+          'A $runtimeType was used after being disposed.\n'
+          'Once you have called dispose() on a $runtimeType, it can no longer be used.'
         );
       }
       return true;
@@ -183,8 +183,12 @@ class ChangeNotifier implements Listenable {
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
     final List<_ListenerEntry>? links = _index![listener];
-    if (links != null && links.isNotEmpty)
-      links.removeAt(0).unlink();
+    if (links == null)
+      return;
+    assert(links.isNotEmpty);
+    links.removeAt(0).unlink();
+    if (links.isEmpty)
+      _index!.remove(listener);
   }
 
   /// Discards any resources used by the object. After this is called, the
