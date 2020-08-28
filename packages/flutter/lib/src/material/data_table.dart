@@ -423,7 +423,6 @@ class DataTable extends StatelessWidget {
     this.headingTextStyle,
     this.horizontalMargin,
     this.columnSpacing,
-    this.sortIconPadding,
     this.showCheckboxColumn = true,
     this.showBottomDivider = false,
     this.dividerThickness = 1.0,
@@ -483,17 +482,18 @@ class DataTable extends StatelessWidget {
   /// By default there is no decoration.
   final BoxDecoration decoration;
 
-  /// The color for the data rows.
+  /// The background color for the data rows.
   ///
-  /// By default, the color is transparent unless selected. Selected rows has
-  /// a grey translucent color. To set a different color for individual rows,
-  /// see [DataRow.color].
+  /// By default, the background color is transparent unless selected. Selected
+  /// rows have a grey translucent color. To set a different color for
+  /// individual rows, see [DataRow.color].
   ///
-  /// The effective color can depend on the [MaterialState] state, if the
-  /// row is selected, pressed, hovered, focused, disabled or enabled. The
-  /// color is painted as an overlay to the row. To make sure that the row's
-  /// [InkWell] is visible (when pressed, hovered and focused), it is
-  /// recommended to use a translucent color.
+  /// The effective background color can be made to depend on the
+  /// [MaterialState] state, i.e. if the row is selected, pressed, hovered,
+  /// focused, disabled or enabled. The color is painted as an overlay to the
+  /// row. To make sure that the row's [InkWell] is visible (when pressed,
+  /// hovered and focused), it is recommended to use a translucent background
+  /// color.
   ///
   /// ```dart
   /// DataTable(
@@ -523,15 +523,15 @@ class DataTable extends StatelessWidget {
   /// By default, the text style is [TextTheme.bodyText2].
   final TextStyle dataTextStyle;
 
-  /// The color for the heading row.
+  /// The background color for the heading row.
   ///
-  /// By default, the color is transparent.
+  /// By default, the background color is transparent.
   ///
-  /// The effective color can depend on the [MaterialState] state, if the
-  /// row is pressed, hovered, focused. The color is painted as an overlay
-  /// to the row. To make sure that the row's [InkWell] is visible (when
-  /// pressed, hovered and focused), it is recommended to use a translucent
-  /// color.
+  /// The effective background color can be made to depend on the
+  /// [MaterialState] state, i.e. if the row is pressed, hovered, focused when
+  /// sorted. The color is painted as an overlay to the row. To make sure that
+  /// the row's [InkWell] is visible (when pressed, hovered and focused), it is
+  /// recommended to use a translucent color.
   ///
   /// ```dart
   /// DataTable(
@@ -576,11 +576,6 @@ class DataTable extends StatelessWidget {
   /// This value defaults to [DataTable.defaultColumnSpacing] to adhere to the
   /// Material Design specifications.
   final double columnSpacing;
-
-  /// The padding between header text and the sort icon.
-  ///
-  /// By default the padding is [DataTable.defaultSortArrowPadding].
-  final EdgeInsetsGeometry sortIconPadding;
 
   /// {@template flutter.material.dataTable.showCheckboxColumn}
   /// Whether the widget should display checkboxes for selectable rows.
@@ -715,16 +710,13 @@ class DataTable extends StatelessWidget {
     MaterialStateProperty<Color> overlayColor,
   }) {
     final ThemeData themeData = Theme.of(context);
-    final EdgeInsetsGeometry effectiveSortIconPadding = sortIconPadding
-      ?? themeData.dataTableTheme?.sortIconPadding
-      ?? DataTable.defaultSortArrowPadding;
     label = Row(
       textDirection: numeric ? TextDirection.rtl : null,
       children: <Widget>[
         label,
         if (onSort != null)
           Padding(
-            padding: numeric ? effectiveSortIconPadding.resolve(TextDirection.rtl) : effectiveSortIconPadding,
+            padding: numeric ? DataTable.defaultSortArrowPadding.resolve(TextDirection.rtl) : DataTable.defaultSortArrowPadding,
             child: _SortArrow(
               visible: sorted,
               up: sorted ? ascending : null,

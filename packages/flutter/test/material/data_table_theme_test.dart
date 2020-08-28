@@ -26,7 +26,6 @@ void main() {
     expect(themeData.headingTextStyle, null);
     expect(themeData.horizontalMargin, null);
     expect(themeData.columnSpacing, null);
-    expect(themeData.sortIconPadding, null);
 
     const DataTableTheme theme = DataTableTheme(data: DataTableThemeData());
     expect(theme.data.decoration, null);
@@ -38,7 +37,6 @@ void main() {
     expect(theme.data.headingTextStyle, null);
     expect(theme.data.horizontalMargin, null);
     expect(theme.data.columnSpacing, null);
-    expect(theme.data.sortIconPadding, null);
   });
 
   testWidgets('Default DataTableThemeData debugFillProperties', (WidgetTester tester) async {
@@ -69,7 +67,6 @@ void main() {
       headingTextStyle:  const TextStyle(fontSize: 14.0),
       horizontalMargin: 3.0,
       columnSpacing: 4.0,
-      sortIconPadding: const EdgeInsets.all(1.0),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -86,7 +83,6 @@ void main() {
     expect(description[6], 'headingTextStyle: TextStyle(inherit: true, size: 14.0)');
     expect(description[7], 'horizontalMargin: 3.0');
     expect(description[8], 'columnSpacing: 4.0');
-    expect(description[9], 'sortIconPadding: EdgeInsets.all(1.0)');
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
@@ -103,7 +99,6 @@ void main() {
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
     const double columnSpacing = 4.0;
-    const EdgeInsetsGeometry sortIconPadding = EdgeInsetsDirectional.only(start: 3.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -118,7 +113,6 @@ void main() {
             headingTextStyle: headingTextStyle,
             horizontalMargin: horizontalMargin,
             columnSpacing: columnSpacing,
-            sortIconPadding: sortIconPadding,
           ),
         ),
         home: Scaffold(
@@ -160,7 +154,6 @@ void main() {
     expect(tester.getSize(headingRowContainer).height, headingRowHeight);
     expect(tester.getTopLeft(find.text('A')).dx, horizontalMargin);
     expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, columnSpacing);
-    expect(tester.getTopLeft(find.byType(Icon)).dx - tester.getTopRight(find.text('A')).dx, sortIconPadding.horizontal);
   });
 
   testWidgets('DataTable properties are taken over the theme values', (WidgetTester tester) async {
@@ -177,7 +170,6 @@ void main() {
     const TextStyle themeHeadingTextStyle = TextStyle(fontSize: 13.5);
     const double themeHorizontalMargin = 2.0;
     const double themeColumnSpacing = 3.0;
-    const EdgeInsetsGeometry themeSortIconPadding = EdgeInsetsDirectional.only(start: 1.0);
 
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
     final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.resolveWith<Color>(
@@ -192,7 +184,6 @@ void main() {
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
     const double columnSpacing = 4.0;
-    const EdgeInsetsGeometry sortIconPadding = EdgeInsetsDirectional.only(start: 3.0);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -206,7 +197,6 @@ void main() {
             headingTextStyle: themeHeadingTextStyle,
             horizontalMargin: themeHorizontalMargin,
             columnSpacing: themeColumnSpacing,
-            sortIconPadding: themeSortIconPadding,
           ),
         ),
         home: Scaffold(
@@ -220,7 +210,6 @@ void main() {
             headingTextStyle: headingTextStyle,
             horizontalMargin: horizontalMargin,
             columnSpacing: columnSpacing,
-            sortIconPadding: sortIconPadding,
             sortColumnIndex: 0,
             columns: <DataColumn>[
               DataColumn(
@@ -258,7 +247,6 @@ void main() {
     expect(tester.getSize(headingRowContainer).height, headingRowHeight);
     expect(tester.getTopLeft(find.text('A')).dx, horizontalMargin);
     expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, columnSpacing);
-    expect(tester.getTopLeft(find.byType(Icon)).dx - tester.getTopRight(find.text('A')).dx, sortIconPadding.horizontal);
   });
 }
 

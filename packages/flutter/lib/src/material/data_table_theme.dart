@@ -43,7 +43,6 @@ import 'theme.dart';
     this.headingTextStyle,
     this.horizontalMargin,
     this.columnSpacing,
-    this.sortIconPadding,
   });
 
   /// The background and border decoration for the table.
@@ -121,9 +120,6 @@ import 'theme.dart';
   /// The horizontal margin between the contents of each data column.
   final double columnSpacing;
 
-  /// The padding between header text and the sort icon.
-  final EdgeInsetsGeometry sortIconPadding;
-
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DataTableThemeData copyWith({
@@ -136,7 +132,6 @@ import 'theme.dart';
     TextStyle headingTextStyle,
     double horizontalMargin,
     double columnSpacing,
-    EdgeInsetsGeometry sortIconPadding,
   }) {
     return DataTableThemeData(
       decoration: decoration ?? this.decoration,
@@ -148,7 +143,6 @@ import 'theme.dart';
       headingTextStyle: headingTextStyle ?? this.headingTextStyle,
       horizontalMargin: horizontalMargin ?? this.horizontalMargin,
       columnSpacing: columnSpacing ?? this.columnSpacing,
-      sortIconPadding: sortIconPadding ?? this.sortIconPadding,
     );
   }
 
@@ -169,7 +163,6 @@ import 'theme.dart';
       headingTextStyle: TextStyle.lerp(a.headingTextStyle, b.headingTextStyle, t),
       horizontalMargin: lerpDouble(a.horizontalMargin, b.horizontalMargin, t),
       columnSpacing: lerpDouble(a.columnSpacing, b.columnSpacing, t),
-      sortIconPadding: EdgeInsetsGeometry.lerp(a.sortIconPadding, b.sortIconPadding, t),
     );
   }
 
@@ -185,7 +178,6 @@ import 'theme.dart';
       headingTextStyle,
       horizontalMargin,
       columnSpacing,
-      sortIconPadding,
     );
   }
 
@@ -204,8 +196,7 @@ import 'theme.dart';
         && other.headingRowHeight == headingRowHeight
         && other.headingTextStyle == headingTextStyle
         && other.horizontalMargin == horizontalMargin
-        && other.columnSpacing == columnSpacing
-        && other.sortIconPadding == sortIconPadding;
+        && other.columnSpacing == columnSpacing;
   }
 
   @override
@@ -220,7 +211,6 @@ import 'theme.dart';
     properties.add(DiagnosticsProperty<TextStyle>('headingTextStyle', headingTextStyle, defaultValue: null));
     properties.add(DoubleProperty('horizontalMargin', horizontalMargin, defaultValue: null));
     properties.add(DoubleProperty('columnSpacing', columnSpacing, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('sortIconPadding', sortIconPadding, defaultValue: null));
   }
 
   static MaterialStateProperty<T> _lerpProperties<T>(MaterialStateProperty<T> a, MaterialStateProperty<T> b, double t, T Function(T, T, double) lerpFunction ) {
