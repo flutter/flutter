@@ -1,4 +1,4 @@
-Signature: 2a2765f802cac5a0fc0b9673a4909c01
+Signature: 04656d819eb384d916a183fa7d2bca9b
 
 UNUSED LICENSES:
 
@@ -4115,6 +4115,7 @@ FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
 FILE: ../../../third_party/skia/samplecode/SampleAudio.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFitCubicToCircle.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSimpleStroker.cpp
+FILE: ../../../third_party/skia/samplecode/SampleTiming.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
 FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.cpp
 FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.h
@@ -4922,7 +4923,6 @@ FILE: ../../../third_party/skia/docs/examples/Path_dump_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_empty_constructor.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_equal_operator.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_getBounds.cpp
-FILE: ../../../third_party/skia/docs/examples/Path_getConvexity.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_getConvexityOrUnknown.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_getFillType.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_getGenerationID.cpp
@@ -4948,7 +4948,6 @@ FILE: ../../../third_party/skia/docs/examples/Path_lineTo.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_lineTo_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_moveTo.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_moveTo_2.cpp
-FILE: ../../../third_party/skia/docs/examples/Path_notequal_operator.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_offset.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_offset_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_quadTo.cpp
@@ -4964,7 +4963,6 @@ FILE: ../../../third_party/skia/docs/examples/Path_reset.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_reverseAddPath.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_rewind.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_serialize.cpp
-FILE: ../../../third_party/skia/docs/examples/Path_setConvexity.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_setFillType.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_setIsVolatile.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_setLastPt.cpp
