@@ -93,6 +93,11 @@ GOTO :after_subroutine
     REM Escape apostrophes from the executable path
     SET "update_dart_bin=!update_dart_bin:'=''!"
     %powershell_executable% -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
+    REM Exit immediately if PowerShell is an incorrect version, the Dart SDK will
+    REM Not be downloaded correctly.
+    IF "%ERRORLEVEL%" EQU "2" (
+      EXIT /B 1
+    )
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to update Dart SDK. Retrying...
       timeout /t 5 /nobreak
