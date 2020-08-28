@@ -5,14 +5,46 @@
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
-void main() {
+Future<void> main() async {
+  const String fileName = 'large_image_changer';
+
   test('Animate for 20 seconds', () async {
     final FlutterDriver driver = await FlutterDriver.connect();
     await driver.forceGC();
 
-    // Just run for 20 seconds to collect memory usage. The widget itself
-    // animates during this time.
-    await Future<void>.delayed(const Duration(seconds: 20));
+    final String targetPlatform = await driver.requestData('getTargetPlatform');
+
+    Timeline timeline;
+    switch (targetPlatform) {
+      case 'TargetPlatform.iOS':
+        {
+          timeline = await driver.traceAction(() async {
+            await Future<void>.delayed(const Duration(seconds: 20));
+          });
+        }
+        break;
+      case 'TargetPlatorm.android':
+        {
+          // Just run for 20 seconds to collect memory usage. The widget itself
+          // animates during this time.
+          await Future<void>.delayed(const Duration(seconds: 20));
+        }
+        break;
+      default:
+        throw UnsupportedError('Unsupported platform $targetPlatform');
+    }
+
+    if (timeline != null) {
+      final TimelineSummary summary = TimelineSummary.summarize(timeline);
+      await summary.writeSummaryToFile(fileName, pretty: true);
+      await summary.writeTimelineToFile(fileName, pretty: true);
+    }
+
     await driver.close();
   });
+
+  // test('Measure CPU/GPU/Memory', () async {
+  //   final FlutterDriver driver = await FlutterDriver.connect();
+  //   await driver.forceGC();
+  // }, skip: !Platform.isIOS);
 }

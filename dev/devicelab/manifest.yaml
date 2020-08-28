@@ -868,11 +868,18 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  large_image_changer_perf:
+  large_image_changer_perf_android:
     description: >
       Measures memory usage when rotating through a series of large images.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
+
+  large_image_changer_perf_ios:
+    description: >
+      Measures memory, cpu, and gpu usage when rotating through a series of large images.
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
     flaky: true
 
   animated_placeholder_perf:
