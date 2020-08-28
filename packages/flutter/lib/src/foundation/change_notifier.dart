@@ -102,21 +102,21 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
-/// It is O(1) for adding listeners and O(N) for removing listeners and dispatching
-/// notifications (where N is the number of listeners).
+/// Adding and removing listeners takes constant time.
 ///
 /// See also:
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
   LinkedList<_ListenerEntry>? _listeners = LinkedList<_ListenerEntry>();
+  Map<VoidCallback, List<_ListenerEntry>>? _index = <VoidCallback, List<_ListenerEntry>>{};
 
   bool _debugAssertNotDisposed() {
     assert(() {
       if (_listeners == null) {
         throw FlutterError(
-          'A $runtimeType was used after being disposed.\n'
-          'Once you have called dispose() on a $runtimeType, it can no longer be used.'
+            'A $runtimeType was used after being disposed.\n'
+                'Once you have called dispose() on a $runtimeType, it can no longer be used.'
         );
       }
       return true;
@@ -151,7 +151,13 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    _listeners!.add(_ListenerEntry(listener));
+    final _ListenerEntry entry = _ListenerEntry(listener);
+    _listeners!.add(entry);
+    _index!.update(
+      listener,
+      (List<_ListenerEntry> value) => value..add(entry),
+      ifAbsent: () => <_ListenerEntry>[entry],
+    );
   }
 
   /// Remove a previously registered closure from the list of closures that are
@@ -176,12 +182,9 @@ class ChangeNotifier implements Listenable {
   @override
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    for (final _ListenerEntry entry in _listeners!) {
-      if (entry.listener == listener) {
-        entry.unlink();
-        return;
-      }
-    }
+    final List<_ListenerEntry>? links = _index![listener];
+    if (links != null && links.isNotEmpty)
+      links.removeAt(0).unlink();
   }
 
   /// Discards any resources used by the object. After this is called, the
@@ -194,6 +197,7 @@ class ChangeNotifier implements Listenable {
   void dispose() {
     assert(_debugAssertNotDisposed());
     _listeners = null;
+    _index = null;
   }
 
   /// Call all the registered listeners.
