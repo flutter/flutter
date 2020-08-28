@@ -17,7 +17,7 @@ import 'overlay.dart';
 ///
 /// See also:
 ///   * [AutocompleteController.getResults], which is of this type.
-typedef AutocompleteResultsGetter<T> = List<T> Function(String text);
+typedef AutocompleteResultsGetter<T> = List<T> Function(TextEditingValue textEditingValue);
 
 /// A type for indicating the selection of an autocomplete result.
 typedef AutocompleteOnSelected<T> = void Function(T result);
@@ -249,12 +249,13 @@ class AutocompleteController<T> {
   void _onChangedField() {
     final List<T> resultsValue = getResults == null
         ? _filterByString(textEditingController.value)
-        : getResults(textEditingController.value.text);
+        : getResults(textEditingController.value);
     assert(resultsValue != null);
     results.value = resultsValue;
   }
 
-  // The default getResults function, if one wasn't supplied.
+  // The default filter when using options instead of getResults. Simply filters
+  // based on case-insensitive string matching.
   List<T> _filterByString(TextEditingValue value) {
     assert(options != null);
     return options

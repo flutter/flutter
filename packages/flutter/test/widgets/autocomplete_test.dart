@@ -81,9 +81,9 @@ void main() {
       final AutocompleteController<String> autocompleteController =
           AutocompleteController<String>.generated(
             // A custom getResults that always includes 'goose' in the results.
-            getResults: (String text) {
+            getResults: (TextEditingValue value) {
               return kOptions
-                .where((String option) => option.contains(text) || option == 'goose')
+                .where((String option) => option.contains(value.text) || option == 'goose')
                 .toList();
             },
           );
@@ -132,9 +132,9 @@ void main() {
       final AutocompleteController<User> autocompleteController =
           AutocompleteController<User>.generated(
             // A custom getResults that searches by name case sensitively.
-            getResults: (String text) {
+            getResults: (TextEditingValue value) {
               return kOptionsUsers
-                .where((User option) => option.name.contains(text))
+                .where((User option) => option.name.contains(value.text))
                 .toList();
             },
           );
