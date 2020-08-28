@@ -253,6 +253,32 @@ void main() {
         expect(findState(const Key('A')).checked, true);
       });
 
+      testWidgets('Preserves child elements when rebuilt', (WidgetTester tester) async {
+        Widget build() {
+          return MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: ReorderableListView(
+                  children: [
+                    SizedBox(key: Key('key'), width: 10, height: 10),
+                  ],
+                  onReorder: (_, __) {},
+                ),
+              ),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(build());
+        var e0 = tester.element(find.byKey(Key('key')));
+        await tester.pumpWidget(build());
+        var e1 = tester.element(find.byKey(Key('key')));
+        expect(e0, equals(e1));
+      });
+
       testWidgets('Uses the PrimaryScrollController when available', (WidgetTester tester) async {
         final ScrollController primary = ScrollController();
         final Widget reorderableList = ReorderableListView(
@@ -769,6 +795,32 @@ void main() {
         expect(findState(const Key('B')).checked, false);
         expect(findState(const Key('C')).checked, false);
         expect(findState(const Key('A')).checked, true);
+      });
+
+      testWidgets('Preserves child elements when rebuilt', (WidgetTester tester) async {
+        Widget build() {
+          return MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: ReorderableListView(
+                  children: [
+                    SizedBox(key: Key('key'), width: 10, height: 10),
+                  ],
+                  onReorder: (_, __) {},
+                ),
+              ),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(build());
+        var e0 = tester.element(find.byKey(Key('key')));
+        await tester.pumpWidget(build());
+        var e1 = tester.element(find.byKey(Key('key')));
+        expect(e0, equals(e1));
       });
 
       group('Accessibility (a11y/Semantics)', () {
