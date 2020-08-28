@@ -2045,19 +2045,21 @@ typedef ElementVisitor = void Function(Element element);
 ///           child: Text('BUTTON'),
 ///           onPressed: () {
 ///             Scaffold.of(context).showBottomSheet<void>(
-///                 (BuildContext context) {
+///               (BuildContext context) {
 ///                 return Container(
+///                   alignment: Alignment.center,
 ///                   height: 200,
 ///                   color: Colors.amber,
 ///                   child: Center(
 ///                     child: Column(
-///                       mainAxisAlignment: MainAxisAlignment.center,
 ///                       mainAxisSize: MainAxisSize.min,
 ///                       children: <Widget>[
 ///                         const Text('BottomSheet'),
 ///                         ElevatedButton(
 ///                           child: const Text('Close BottomSheet'),
-///                           onPressed: () => Navigator.pop(context),
+///                           onPressed: () {
+///                             Navigator.pop(context),
+///                           },
 ///                         )
 ///                       ],
 ///                     ),

@@ -198,4 +198,50 @@ void main() {
       '   or WidgetsApp widget at the top of your application widget tree.\n',
     ));
   });
+
+  testWidgets('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(),
+        child: Scaffold(
+          key: _scaffoldKey,
+          body: Container(),
+        ),
+      ),
+    ));
+    FlutterError error;
+    try {
+      _scaffoldKey.currentState.showSnackBar(const SnackBar(content: Text('Something is missing here')));
+    } on FlutterError catch (e) {
+      error = e;
+    } finally {
+      expect(error.diagnostics.length, 5);
+      expect(error.diagnostics[2], isA<DiagnosticsProperty<Element>>());
+      expect(error.diagnostics[3], isA<DiagnosticsBlock>());
+      expect(error.diagnostics[4].level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics[4].toStringDeep(),
+        equalsIgnoringHashCodes(
+          'Typically, the ScaffoldMessenger widget is introduced by the\n'
+          'MaterialApp at the top of your application widget tree.\n',
+        ),
+      );
+      expect(error.toStringDeep(), equalsIgnoringHashCodes(
+        'FlutterError\n'
+          '   No ScaffoldMessenger widget found.\n'
+          '   Scaffold widgets require a ScaffoldMessenger widget ancestor.\n'
+          '   The specific widget that could not find a ScaffoldMessenger\n'
+          '   ancestor was:\n'
+          '     Scaffold-[LabeledGlobalKey<ScaffoldState>#d60fa]\n'
+          '   The ancestors of this widget were:\n'
+          '     MediaQuery\n'
+          '     Directionality\n'
+          '     [root]\n'
+          '   Typically, the ScaffoldMessenger widget is introduced by the\n'
+          '   MaterialApp at the top of your application widget tree.\n'
+      ));
+    }
+  });
 }
