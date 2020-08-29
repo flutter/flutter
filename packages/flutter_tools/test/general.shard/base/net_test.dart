@@ -234,13 +234,13 @@ void main() {
 
   testWithoutContext('max attempts', () async {
     final Net net = createNet(FakeHttpClient(500));
-    String error;
+    dynamic error;
     List<int> actualResult;
     FakeAsync().run((FakeAsync time) {
       net.fetchUrl(Uri.parse('http://example.invalid/'), maxAttempts: 3).then((List<int> value) {
         actualResult = value;
       }, onError: (dynamic exception) {
-        error = 'test failed unexpectedly: $exception';
+        error = exception;
       });
       expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 10000));
@@ -251,7 +251,11 @@ void main() {
       );
     });
     expect(testLogger.errorText, isEmpty);
-    expect(error, isNull);
+    expect(error, isA<Exception>()
+      .having((Exception exception) => exception.toString(),
+      'description',
+      contains('Failed to download http://example.invalid/'),
+    ));
     expect(actualResult, isNull);
   });
 

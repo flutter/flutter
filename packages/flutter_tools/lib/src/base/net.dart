@@ -70,7 +70,7 @@ class Net {
 
       if (maxAttempts != null && attempts >= maxAttempts) {
         _logger.printStatus('Download failed -- retry $attempts');
-        return null;
+        throw Exception('Failed to download $url');
       }
       _logger.printStatus(
         'Download failed -- attempting retry $attempts in '

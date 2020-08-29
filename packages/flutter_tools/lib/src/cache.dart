@@ -1469,6 +1469,14 @@ class ArtifactUpdater {
       try {
         _ensureExists(tempFile.parent);
         await _net.fetchUrl(url, destFile: tempFile, maxAttempts: 2);
+      } on Exception {
+        retries -= 1;
+        if (retries == 0) {
+          throwToolExit(
+            'Failed to download $url. Ensure you have network connectivity and can reach ${url.host}, '
+            'then try again.',
+          );
+        }
       } finally {
         status.stop();
       }
