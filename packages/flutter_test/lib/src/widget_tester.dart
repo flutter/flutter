@@ -817,6 +817,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   HitTestResult hitTestOnBinding(Offset location) {
+    assert(location != null);
     location = binding.localToGlobal(location);
     return super.hitTestOnBinding(location);
   }

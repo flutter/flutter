@@ -2677,8 +2677,12 @@ class BuildOwner {
             e,
             stack,
             informationCollector: () sync* {
-              yield DiagnosticsDebugCreator(DebugCreator(_dirtyElements[index]));
-              yield _dirtyElements[index].describeElement('The element being rebuilt at the time was index $index of $dirtyCount');
+              if (index < _dirtyElements.length) {
+                yield DiagnosticsDebugCreator(DebugCreator(_dirtyElements[index]));
+                yield _dirtyElements[index].describeElement('The element being rebuilt at the time was index $index of $dirtyCount');
+              } else {
+                yield ErrorHint('The element being rebuilt at the time was index $index of $dirtyCount, but _dirtyElements only had ${_dirtyElements.length} entries. This suggests some confusion in the framework internals.');
+              }
             },
           );
         }

@@ -562,11 +562,9 @@ class HotRunner extends ResidentRunner {
         } on vm_service.RPCError {
           // Do nothing, we're already subcribed.
         }
-        // Ideally this would wait for kIsolateRunnable, but either this subscription occurs too
-        // late to receive the event, or it is not forwarded for hot restarted isolates.
         isolateNotifications.add(
           device.vmService.onIsolateEvent.firstWhere((vm_service.Event event) {
-            return event.kind == vm_service.EventKind.kServiceExtensionAdded;
+            return event.kind == vm_service.EventKind.kIsolateRunnable;
           }),
         );
       }
