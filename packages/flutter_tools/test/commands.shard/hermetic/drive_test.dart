@@ -225,6 +225,7 @@ void main() {
         'drive',
         '--target=$testApp',
         '--no-pub',
+        '--disable-dds',
         '--device-user',
         '10',
       ];
