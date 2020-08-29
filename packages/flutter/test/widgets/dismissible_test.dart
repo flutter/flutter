@@ -799,34 +799,54 @@ void main() {
     );
   });
 
-  testWidgets('How Dismissible should behave during hit testing', (WidgetTester tester) async {
-    bool didReceivePointerDown;
+  testWidgets('Dismissible.behavior should behave correctly during hit testing', (WidgetTester tester) async {
+    bool didReceivePointerDown = false;
 
-    Future<void> pumpWidgetTree(HitTestBehavior hitTestBehavior) {
+    Widget buildStack(Widget child) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Listener(
+              onPointerDown: (_) {
+                didReceivePointerDown = true;
+              },
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                color: const Color(0xFF00FF00),
+              ),
+            ),
+            child,
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildStack(
+        child: Dismissible(
+          key: const ValueKey<int>(1),
+          child: const SizedBox(
+            width: 100.0,
+            height: 100.0,
+          ),
+        ),
+      ),
+    );
+    await tester.tapAt(const Offset(10.0, 10.0));
+    expect(didReceivePointerDown, isFalse);
+
+    Future<void> pumpWidgetTree(HitTestBehavior behavior) {
       return tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Listener(
-                onPointerDown: (_) {
-                  didReceivePointerDown = true;
-                },
-                child: Container(
-                  width: 100.0,
-                  height: 100.0,
-                  color: const Color(0xFF00FF00),
-                ),
-              ),
-              Dismissible(
-                key: const ValueKey<int>(1),
-                hitTestBehavior: hitTestBehavior,
-                child: const SizedBox(
-                  width: 100.0,
-                  height: 100.0,
-                ),
-              ),
-            ],
+        buildStack(
+          child: Dismissible(
+            key: const ValueKey<int>(1),
+            behavior: behavior,
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
           ),
         ),
       );
