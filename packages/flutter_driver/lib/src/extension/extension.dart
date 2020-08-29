@@ -89,6 +89,31 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// with an `isError` boolean.
 ///
 /// `finders` Used to add custom finder
+/// The following code shows how to implement a [FinderExtension]
+/// 
+/// ```dart
+/// class SomeFinderExtension extends FinderExtension {
+/// 
+///  String get finderType => 'Some';
+///  
+///  SerializableFinder deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory) {
+///    SomeFinder result = SomeFinder();
+///    // Deserialize Finder
+///    ...
+///    return result;
+///  }
+///
+///  Finder createFinder(SerializableFinder finder) {
+///    return find.byElementPredicate((Element element) {
+///      final Widget widget = element.widget;
+///      if (...) {
+///        return true;
+///      }
+///      return false;
+///    });
+///  }
+/// }
+/// ```
 ///
 void enableFlutterDriverExtension({ DataHandler handler, bool silenceErrors = false, List<FinderExtension> finders}) {
   assert(WidgetsBinding.instance == null);
@@ -397,7 +422,7 @@ class FlutterDriverExtension with  DeserializeFinderFactory {
       case 'Descendant': 
         return _createDescendantFinder(finder as Descendant);
       default:
-        if(_finderExtensions.containsKey(finder.finderType)) {
+        if (_finderExtensions.containsKey(finder.finderType)) {
           return _finderExtensions[finder.finderType].createFinder(finder);
         }else{
           throw 'Unsupported finder type: ${finder.finderType}';
