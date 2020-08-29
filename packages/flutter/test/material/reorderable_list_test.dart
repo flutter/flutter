@@ -253,7 +253,7 @@ void main() {
         expect(findState(const Key('A')).checked, true);
       });
 
-      testWidgets('Preserves child elements when rebuilt', (WidgetTester tester) async {
+      testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
         Widget build() {
           return MaterialApp(
             home: Directionality(
@@ -273,9 +273,9 @@ void main() {
         }
 
         await tester.pumpWidget(build());
-        var e0 = tester.element(find.byKey(Key('key')));
+        final e0 = tester.element(find.byKey(Key('key')));
         await tester.pumpWidget(build());
-        var e1 = tester.element(find.byKey(Key('key')));
+        final e1 = tester.element(find.byKey(Key('key')));
         expect(e0, equals(e1));
       });
 
@@ -797,7 +797,7 @@ void main() {
         expect(findState(const Key('A')).checked, true);
       });
 
-      testWidgets('Preserves child elements when rebuilt', (WidgetTester tester) async {
+      testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
         Widget build() {
           return MaterialApp(
             home: Directionality(
@@ -817,9 +817,9 @@ void main() {
         }
 
         await tester.pumpWidget(build());
-        var e0 = tester.element(find.byKey(Key('key')));
+        final e0 = tester.element(find.byKey(Key('key')));
         await tester.pumpWidget(build());
-        var e1 = tester.element(find.byKey(Key('key')));
+        final e1 = tester.element(find.byKey(Key('key')));
         expect(e0, equals(e1));
       });
 
