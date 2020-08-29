@@ -3,12 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
-import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../build_info.dart';
+import '../build_system/targets/web.dart';
 import '../features.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart'
