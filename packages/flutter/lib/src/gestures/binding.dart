@@ -237,7 +237,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     _resampler.stop();
 
     while (_pendingPointerEvents.isNotEmpty)
-      _handlePointerEvent(_pendingPointerEvents.removeFirst());
+      handlePointerEvent(_pendingPointerEvents.removeFirst());
   }
 
   /// A router that routes all pointer events received from the engine.
@@ -257,7 +257,17 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// hit-testing on every frame.
   final Map<int, HitTestResult> _hitTests = <int, HitTestResult>{};
 
-  void _handlePointerEvent(PointerEvent event) {
+  /// Dispatch an event to the targets found by a hit test on its position.
+  ///
+  /// The [handlePointerEvent] sends the given event to [dispatchEvent] based on
+  /// event types:
+  ///
+  ///  * Down events and signal events are dispatched to the result of a new
+  ///    [hitTest].
+  ///  * Up events and move events are dispatched to the result of hit test of the
+  ///    preceding down events.
+  ///  * Hover, added, and removed events are dispatched without a hit test result.
+  void handlePointerEvent(PointerEvent event) {
     assert(!locked);
     HitTestResult? hitTestResult;
     if (event is PointerDownEvent || event is PointerSignalEvent) {
@@ -301,12 +311,14 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     result.add(HitTestEntry(this));
   }
 
-  /// Dispatch an event to a hit test result's path.
+  /// Dispatch an event to [pointerRouter] and the path of a hit test result.
   ///
-  /// This sends the given event to every [HitTestTarget] in the entries of the
-  /// given [HitTestResult], and catches exceptions that any of the handlers
-  /// might throw. The [hitTestResult] argument may only be null for
-  /// [PointerHoverEvent], [PointerAddedEvent], or [PointerRemovedEvent] events.
+  /// The `event` is routed to [pointerRouter]. If the `hitTestResult` is not
+  /// null, the event is also sent to every [HitTestTarget] in the entries of the
+  /// given [HitTestResult]. Any exceptions from the handlers are caught.
+  ///
+  /// The `hitTestResult` argument may only be null for [PointerHoverEvent],
+  /// [PointerAddedEvent], or [PointerRemovedEvent] events.
   @override // from HitTestDispatcher
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     assert(!locked);
@@ -364,6 +376,11 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     }
   }
 
+  @protected
+  void clear() {
+    _hitTests.clear();
+  }
+
   void _handleSampleTimeChanged() {
     if (!locked) {
       _flushPointerEventQueue();
@@ -373,7 +390,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   // Resampler used to filter incoming pointer events when resampling
   // is enabled.
   late final _Resampler _resampler = _Resampler(
-    _handlePointerEvent,
+    handlePointerEvent,
     _handleSampleTimeChanged,
   );
 
