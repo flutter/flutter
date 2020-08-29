@@ -259,7 +259,6 @@ tasks:
       Checks that flavored builds work on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    on_luci: true
 
   channels_integration_test:
     description: >
@@ -810,7 +809,6 @@ tasks:
       with SkSL shader warm-up with e2e.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__transition_perf_with_semantics:
     description: >

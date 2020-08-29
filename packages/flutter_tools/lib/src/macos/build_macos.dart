@@ -134,7 +134,7 @@ Future<void> buildMacOS({
       excludePath: 'Versions', // Avoid double counting caused by symlinks
     );
     final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs.directory(getBuildDirectory()),'macos-code-size-analysis', 'json',
+      globals.fs.directory(getBuildDirectory()), 'macos-code-size-analysis', 'json',
     )..writeAsStringSync(jsonEncode(output));
     // This message is used as a sentinel in analyze_apk_size_test.dart
     globals.printStatus(

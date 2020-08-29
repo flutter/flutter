@@ -757,6 +757,7 @@ abstract class WidgetController {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
+    assert(downLocation != null);
     final TestGesture result = await createGesture(
       pointer: pointer,
       kind: kind,
