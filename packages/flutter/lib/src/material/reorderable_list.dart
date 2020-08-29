@@ -600,10 +600,10 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 /// A global key that takes its identity from the object and uses a value of a
 /// particular type to identify itself.
 ///
-/// The difference with GlobalObjectKey is that it compares values ​​within Objects
-/// rather than using identical.
+/// The difference with GlobalObjectKey is that it uses [==] instead of [identical]
+/// of the objects used to generate widgets.
 @optionalTypeArgs
-class _GlobalObjectValueKey<T extends State<StatefulWidget>> extends GlobalObjectKey {
+class _GlobalObjectValueKey<T extends State<StatefulWidget>> extends GlobalObjectKey<T> {
 
   const _GlobalObjectValueKey(this.value) : super(value);
 
