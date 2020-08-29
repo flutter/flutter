@@ -12,7 +12,6 @@ void main() {
     const SerializableFinder of = ByType('Text');
     final SerializableFinder matching = ByValueKey('hello');
 
-
     final Ancestor a = Ancestor(
       of: of,
       matching: matching,
@@ -37,7 +36,7 @@ void main() {
       'firstMatchOnly': 'true',
     };
 
-    final Ancestor a = Ancestor.deserialize(serialized, deserialize);
+    final Ancestor a = Ancestor.deserialize(serialized, TestDeserialize());
     expect(a.of, isA<ByType>());
     expect(a.matching, isA<ByValueKey>());
     expect(a.matchRoot, isTrue);
@@ -72,7 +71,7 @@ void main() {
       'firstMatchOnly': 'true',
     };
 
-    final Descendant a = Descendant.deserialize(serialized, deserialize);
+    final Descendant a = Descendant.deserialize(serialized, TestDeserialize());
     expect(a.of, isA<ByType>());
     expect(a.matching, isA<ByValueKey>());
     expect(a.matchRoot, isTrue);
@@ -80,18 +79,6 @@ void main() {
   });
 }
 
+class TestDeserialize with DeserializeFinderFactory{
 
-SerializableFinder deserialize(Map<String, String> json){
-    final String finderType = json['finderType'];
-    switch (finderType) {
-      case 'ByType': return ByType.deserialize(json);
-      case 'ByValueKey': return ByValueKey.deserialize(json);
-      case 'ByTooltipMessage': return ByTooltipMessage.deserialize(json);
-      case 'BySemanticsLabel': return BySemanticsLabel.deserialize(json);
-      case 'ByText': return ByText.deserialize(json);
-      case 'PageBack': return const PageBack();
-      case 'Descendant': return Descendant.deserialize(json, deserialize);
-      case 'Ancestor': return Ancestor.deserialize(json, deserialize);
-    }
-    throw DriverError('Unsupported search specification type $finderType');
 }
