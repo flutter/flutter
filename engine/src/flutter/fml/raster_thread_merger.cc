@@ -16,17 +16,20 @@ RasterThreadMerger::RasterThreadMerger(fml::TaskQueueId platform_queue_id,
     : platform_queue_id_(platform_queue_id),
       gpu_queue_id_(gpu_queue_id),
       task_queues_(fml::MessageLoopTaskQueues::GetInstance()),
-      lease_term_(kLeaseNotSet) {
+      lease_term_(kLeaseNotSet),
+      enabled_(true) {
   FML_CHECK(!task_queues_->Owns(platform_queue_id_, gpu_queue_id_));
 }
 
 void RasterThreadMerger::MergeWithLease(size_t lease_term) {
+  std::scoped_lock lock(lease_term_mutex_);
   if (TaskQueuesAreSame()) {
     return;
   }
-
+  if (!IsEnabledUnSafe()) {
+    return;
+  }
   FML_DCHECK(lease_term > 0) << "lease_term should be positive.";
-  std::scoped_lock lock(lease_term_mutex_);
   if (!IsMergedUnSafe()) {
     bool success = task_queues_->Merge(platform_queue_id_, gpu_queue_id_);
     FML_CHECK(success) << "Unable to merge the raster and platform threads.";
@@ -36,11 +39,13 @@ void RasterThreadMerger::MergeWithLease(size_t lease_term) {
 }
 
 void RasterThreadMerger::UnMergeNow() {
+  std::scoped_lock lock(lease_term_mutex_);
   if (TaskQueuesAreSame()) {
     return;
   }
-
-  std::scoped_lock lock(lease_term_mutex_);
+  if (!IsEnabledUnSafe()) {
+    return;
+  }
   lease_term_ = 0;
   bool success = task_queues_->Unmerge(platform_queue_id_);
   FML_CHECK(success) << "Unable to un-merge the raster and platform threads.";
@@ -50,7 +55,7 @@ bool RasterThreadMerger::IsOnPlatformThread() const {
   return MessageLoop::GetCurrentTaskQueueId() == platform_queue_id_;
 }
 
-bool RasterThreadMerger::IsOnRasterizingThread() {
+bool RasterThreadMerger::IsOnRasterizingThread() const {
   if (IsMergedUnSafe()) {
     return IsOnPlatformThread();
   } else {
@@ -75,11 +80,30 @@ bool RasterThreadMerger::IsMerged() {
   return IsMergedUnSafe();
 }
 
-bool RasterThreadMerger::IsMergedUnSafe() {
+void RasterThreadMerger::Enable() {
+  std::scoped_lock lock(lease_term_mutex_);
+  enabled_ = true;
+}
+
+void RasterThreadMerger::Disable() {
+  std::scoped_lock lock(lease_term_mutex_);
+  enabled_ = false;
+}
+
+bool RasterThreadMerger::IsEnabled() {
+  std::scoped_lock lock(lease_term_mutex_);
+  return IsEnabledUnSafe();
+}
+
+bool RasterThreadMerger::IsEnabledUnSafe() const {
+  return enabled_;
+}
+
+bool RasterThreadMerger::IsMergedUnSafe() const {
   return lease_term_ > 0 || TaskQueuesAreSame();
 }
 
-bool RasterThreadMerger::TaskQueuesAreSame() {
+bool RasterThreadMerger::TaskQueuesAreSame() const {
   return platform_queue_id_ == gpu_queue_id_;
 }
 
@@ -100,7 +124,9 @@ RasterThreadStatus RasterThreadMerger::DecrementLease() {
   if (!IsMergedUnSafe()) {
     return RasterThreadStatus::kRemainsUnmerged;
   }
-
+  if (!IsEnabledUnSafe()) {
+    return RasterThreadStatus::kRemainsMerged;
+  }
   FML_DCHECK(lease_term_ > 0)
       << "lease_term should always be positive when merged.";
   lease_term_--;

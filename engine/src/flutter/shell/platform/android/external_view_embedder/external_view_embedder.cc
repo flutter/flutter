@@ -81,6 +81,10 @@ void AndroidExternalViewEmbedder::SubmitFrame(
     // Don't submit the current frame if the frame will be resubmitted.
     return;
   }
+  if (!FrameHasPlatformLayers()) {
+    frame->Submit();
+    return;
+  }
 
   std::unordered_map<int64_t, std::list<SkRect>> overlay_layers;
   std::unordered_map<int64_t, sk_sp<SkPicture>> pictures;
@@ -148,8 +152,7 @@ void AndroidExternalViewEmbedder::SubmitFrame(
   //
   // Skip a frame if the embedding is switching surfaces, and indicate in
   // `PostPrerollAction` that this frame must be resubmitted.
-  auto should_submit_current_frame =
-      previous_frame_view_count_ > 0 || current_frame_view_count == 0;
+  auto should_submit_current_frame = previous_frame_view_count_ > 0;
   if (should_submit_current_frame) {
     frame->Submit();
   }
@@ -223,22 +226,26 @@ PostPrerollResult AndroidExternalViewEmbedder::PostPrerollAction(
   //
   // To keep the rasterizer running on the platform thread one more frame,
   // `kDefaultMergedLeaseDuration` must be at least `1`.
-  bool has_platform_views = composition_order_.size() > 0;
-  if (has_platform_views) {
-    if (raster_thread_merger->IsMerged()) {
-      raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
-    } else {
-      // Merge the raster and platform threads in `EndFrame`.
-      should_run_rasterizer_on_platform_thread_ = true;
-      CancelFrame();
-      return PostPrerollResult::kResubmitFrame;
-    }
-    // Surface switch requires to resubmit the frame.
-    if (previous_frame_view_count_ == 0) {
-      return PostPrerollResult::kResubmitFrame;
-    }
+  if (!FrameHasPlatformLayers()) {
+    return PostPrerollResult::kSuccess;
+  }
+  if (raster_thread_merger->IsMerged()) {
+    raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
+  } else {
+    // Merge the raster and platform threads in `EndFrame`.
+    should_run_rasterizer_on_platform_thread_ = true;
+    CancelFrame();
+    return PostPrerollResult::kResubmitFrame;
+  }
+  // Surface switch requires to resubmit the frame.
+  if (previous_frame_view_count_ == 0) {
+    return PostPrerollResult::kResubmitFrame;
   }
   return PostPrerollResult::kSuccess;
+}
+
+bool AndroidExternalViewEmbedder::FrameHasPlatformLayers() {
+  return composition_order_.size() > 0;
 }
 
 // |ExternalViewEmbedder|
@@ -286,7 +293,14 @@ void AndroidExternalViewEmbedder::EndFrame(
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   if (should_resubmit_frame && should_run_rasterizer_on_platform_thread_) {
     raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
-    should_run_rasterizer_on_platform_thread_ = false;
+    if (raster_thread_merger->IsMerged()) {
+      // The raster thread merger may be disabled if the rasterizer is being
+      // teared down.
+      //
+      // Therefore, set `should_run_rasterizer_on_platform_thread_` to `false`
+      // only if the thread merger was able to set the lease.
+      should_run_rasterizer_on_platform_thread_ = false;
+    }
   }
   surface_pool_->RecycleLayers();
   // JNI method must be called on the platform thread.

@@ -564,5 +564,33 @@ TEST(AndroidExternalViewEmbedder, SupportsDynamicThreadMerging) {
   ASSERT_TRUE(embedder->SupportsDynamicThreadMerging());
 }
 
+TEST(AndroidExternalViewEmbedder, DisableThreadMerger) {
+  auto jni_mock = std::make_shared<JNIMock>();
+  auto embedder =
+      std::make_unique<AndroidExternalViewEmbedder>(nullptr, jni_mock, nullptr);
+
+  auto raster_thread_merger = GetThreadMergerFromRasterThread();
+  ASSERT_FALSE(raster_thread_merger->IsMerged());
+
+  // The shell may disable the thread merger during `OnPlatformViewDestroyed`.
+  raster_thread_merger->Disable();
+
+  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame()).Times(0);
+
+  embedder->BeginFrame(SkISize::Make(10, 20), nullptr, 1.0,
+                       raster_thread_merger);
+  // Push a platform view.
+  embedder->PrerollCompositeEmbeddedView(
+      0, std::make_unique<EmbeddedViewParams>());
+
+  auto postpreroll_result = embedder->PostPrerollAction(raster_thread_merger);
+  ASSERT_EQ(PostPrerollResult::kResubmitFrame, postpreroll_result);
+
+  EXPECT_CALL(*jni_mock, FlutterViewEndFrame()).Times(0);
+  embedder->EndFrame(/*should_resubmit_frame=*/true, raster_thread_merger);
+
+  ASSERT_FALSE(raster_thread_merger->IsMerged());
+}
+
 }  // namespace testing
 }  // namespace flutter

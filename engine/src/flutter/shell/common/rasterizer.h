@@ -392,15 +392,28 @@ class Rasterizer final : public SnapshotDelegate {
   std::optional<size_t> GetResourceCacheMaxBytes() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Makes sure the raster task runner and the platform task runner
-  ///             are merged.
+  /// @brief      Enables the thread merger if the external view embedder
+  ///             supports dynamic thread merging.
   ///
-  /// @attention  If raster and platform task runners are not the same or not
-  ///             merged, this method will try to merge the task runners,
-  ///             blocking the current thread until the 2 task runners are
-  ///             merged.
+  /// @attention  This method is thread-safe. When the thread merger is enabled,
+  ///             the raster task queue can run in the platform thread at any
+  ///             time.
   ///
-  void EnsureThreadsAreMerged();
+  /// @see        `ExternalViewEmbedder`
+  ///
+  void EnableThreadMergerIfNeeded();
+
+  //----------------------------------------------------------------------------
+  /// @brief      Disables the thread merger if the external view embedder
+  ///             supports dynamic thread merging.
+  ///
+  /// @attention  This method is thread-safe. When the thread merger is
+  ///             disabled, the raster task queue will continue to run in the
+  ///             same thread until |EnableThreadMergerIfNeeded| is called.
+  ///
+  /// @see        `ExternalViewEmbedder`
+  ///
+  void DisableThreadMergerIfNeeded();
 
  private:
   Delegate& delegate_;
