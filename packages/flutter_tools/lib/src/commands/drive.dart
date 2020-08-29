@@ -235,22 +235,17 @@ class DriveCommand extends RunCommandBase {
       }
       observatoryUri = result.observatoryUri.toString();
       // TODO(bkonyi): add web support (https://github.com/flutter/flutter/issues/61259)
-      if (!isWebPlatform && !disableDds) {
+      if (!isWebPlatform) {
         try {
           // If there's another flutter_tools instance still connected to the target
           // application, DDS will already be running remotely and this call will fail.
           // We can ignore this and continue to use the remote DDS instance.
-          await device.dds.startDartDevelopmentService(
-            Uri.parse(observatoryUri),
-            hostVmservicePort,
-            ipv6,
-            disableServiceAuthCodes,
-          );
+          await device.dds.startDartDevelopmentService(Uri.parse(observatoryUri), ipv6);
         } on dds.DartDevelopmentServiceException catch(_) {
           globals.printTrace('Note: DDS is already connected to $observatoryUri.');
         }
       }
-    } else if (isWebPlatform) {
+    } else {
       globals.printStatus('Will connect to already running application instance.');
       observatoryUri = stringArg('use-existing-app');
     }
@@ -483,7 +478,7 @@ Future<LaunchResult> _startApp(
     debuggingOptions: DebuggingOptions.enabled(
       command.getBuildInfo(),
       startPaused: true,
-      hostVmServicePort: (webUri != null || command.disableDds) ? command.hostVmservicePort : 0,
+      hostVmServicePort: command.hostVmservicePort,
       verboseSystemLogs: command.verboseSystemLogs,
       cacheSkSL: command.cacheSkSL,
       dumpSkpOnShaderCompilation: command.dumpSkpOnShaderCompilation,
