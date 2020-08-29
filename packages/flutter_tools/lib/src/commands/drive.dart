@@ -246,11 +246,12 @@ class DriveCommand extends RunCommandBase {
             ipv6,
             disableServiceAuthCodes,
           );
+          observatoryUri = device.dds.uri.toString();
         } on dds.DartDevelopmentServiceException catch(_) {
           globals.printTrace('Note: DDS is already connected to $observatoryUri.');
         }
       }
-    } else if (isWebPlatform) {
+    } else {
       globals.printStatus('Will connect to already running application instance.');
       observatoryUri = stringArg('use-existing-app');
     }
