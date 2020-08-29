@@ -9696,7 +9696,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Couper';
 
   @override
-  String get dateHelpText => 'mm/jj/aaaa';
+  String get dateHelpText => 'jj/mm/aaaa';
 
   @override
   String get dateInputLabel => 'Saisir une date';
