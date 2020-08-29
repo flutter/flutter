@@ -37,7 +37,7 @@ void main() {
 
     setUp(() {
       result = null;
-      extension = FlutterDriverExtension((String message) async { log.add(message); return (messageId += 1).toString(); }, false, []);
+      extension = FlutterDriverExtension((String message) async { log.add(message); return (messageId += 1).toString(); }, false, <FinderExtension>[]);
     });
 
     testWidgets('returns immediately when transient callback queue is empty', (WidgetTester tester) async {
