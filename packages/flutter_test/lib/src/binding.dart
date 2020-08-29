@@ -196,7 +196,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// prepare the binding for the next test.
   void reset() {
     _restorationManager = createRestorationManager();
-    clear();
+    resetGesture();
   }
 
   @override
@@ -489,8 +489,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// events from the device).
   Offset localToGlobal(Offset point) => point;
 
+  /// The source of the current pointer event.
+  ///
+  /// The [pointerEventSource] is set as the `source` parameter of
+  /// [handlePointerEvent] and can be used in the immediate enclosing
+  /// [dispatchEvent].
   @protected
-  TestBindingEventSource source = TestBindingEventSource.device;
+  TestBindingEventSource pointerEventSource = TestBindingEventSource.device;
 
   @override
   void handlePointerEvent(
@@ -498,28 +503,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     TestBindingEventSource source = TestBindingEventSource.device,
   }) {
     final TestBindingEventSource previousSource = source;
-    this.source = source;
+    pointerEventSource = source;
     try {
       super.handlePointerEvent(event);
     } finally {
-      this.source = previousSource;
+      pointerEventSource = previousSource;
     }
   }
-
-  // @override
-  // void dispatchEvent(
-  //   PointerEvent event,
-  //   HitTestResult hitTestResult, {
-  //   TestBindingEventSource source = TestBindingEventSource.device,
-  // }) {
-  //   // This override disables calling this method from base class
-  //   // [GestureBinding] when the runtime type is [TestWidgetsFlutterBinding],
-  //   // while enables sub class [LiveTestWidgetsFlutterBinding] to override
-  //   // this behavior and use this argument to determine the souce of the event
-  //   // especially when the test app is running on a device.
-  //   assert(source == TestBindingEventSource.test);
-  //   super.dispatchEvent(event, hitTestResult);
-  // }
 
   /// A stub for the system's onscreen keyboard. Callers must set the
   /// [focusedEditable] before using this value.
@@ -1539,7 +1529,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void dispatchEvent(PointerEvent event, HitTestResult hitTestResult) {
-    switch (source) {
+    switch (pointerEventSource) {
       case TestBindingEventSource.test:
         super.dispatchEvent(event, hitTestResult);
         break;

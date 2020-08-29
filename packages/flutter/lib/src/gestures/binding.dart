@@ -190,6 +190,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void initInstances() {
     super.initInstances();
     _instance = this;
+    resetGesture();
     window.onPointerDataPacket = _handlePointerDataPacket;
   }
 
@@ -241,7 +242,8 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   }
 
   /// A router that routes all pointer events received from the engine.
-  final PointerRouter pointerRouter = PointerRouter();
+  PointerRouter get pointerRouter => _pointerRouter;
+  late PointerRouter _pointerRouter;
 
   /// The gesture arenas used for disambiguating the meaning of sequences of
   /// pointer events.
@@ -376,9 +378,15 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     }
   }
 
+  /// Reset states of [GestureBinding].
+  ///
+  /// This clears the hit test records and pointer routes.
+  ///
+  /// This is typically called between tests.
   @protected
-  void clear() {
+  void resetGesture() {
     _hitTests.clear();
+    _pointerRouter = PointerRouter();
   }
 
   void _handleSampleTimeChanged() {
