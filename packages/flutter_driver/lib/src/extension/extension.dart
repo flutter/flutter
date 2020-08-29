@@ -524,17 +524,14 @@ class FlutterDriverExtension {
     final Offset startLocation = _prober.getCenter(target);
     Offset currentLocation = startLocation;
     final TestPointer pointer = TestPointer(1);
-    final HitTestResult hitTest = HitTestResult();
-
-    _prober.binding.hitTest(hitTest, startLocation);
-    _prober.binding.dispatchEvent(pointer.down(startLocation), hitTest);
+    _prober.binding.handlePointerEvent(pointer.down(startLocation));
     await Future<void>.value(); // so that down and move don't happen in the same microtask
     for (int moves = 0; moves < totalMoves; moves += 1) {
       currentLocation = currentLocation + delta;
-      _prober.binding.dispatchEvent(pointer.move(currentLocation), hitTest);
+      _prober.binding.handlePointerEvent(pointer.move(currentLocation));
       await Future<void>.delayed(pause);
     }
-    _prober.binding.dispatchEvent(pointer.up(), hitTest);
+    _prober.binding.handlePointerEvent(pointer.up());
 
     return const ScrollResult();
   }
