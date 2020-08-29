@@ -597,6 +597,46 @@ TEST_F(ShellTest,
   DestroyShell(std::move(shell));
 }
 
+TEST_F(ShellTest, OnPlatformViewDestroyDisablesThreadMerger) {
+  auto settings = CreateSettingsForFixture();
+  fml::AutoResetWaitableEvent end_frame_latch;
+  fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger;
+  auto end_frame_callback =
+      [&](bool should_resubmit_frame,
+          fml::RefPtr<fml::RasterThreadMerger> thread_merger) {
+        raster_thread_merger = thread_merger;
+        end_frame_latch.Signal();
+      };
+  auto external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
+      end_frame_callback, PostPrerollResult::kSuccess, true);
+  // Set resubmit once to trigger thread merging.
+  external_view_embedder->SetResubmitOnce();
+  auto shell = CreateShell(std::move(settings), GetTaskRunnersForFixture(),
+                           false, external_view_embedder);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  PumpOneFrame(shell.get());
+
+  end_frame_latch.Wait();
+  ASSERT_TRUE(raster_thread_merger->IsEnabled());
+
+  ValidateDestroyPlatformView(shell.get());
+  ASSERT_TRUE(raster_thread_merger->IsEnabled());
+
+  // Validate the platform view can be recreated and destroyed again
+  ValidateShell(shell.get());
+  ASSERT_TRUE(raster_thread_merger->IsEnabled());
+
+  DestroyShell(std::move(shell));
+}
+
 TEST_F(ShellTest, OnPlatformViewDestroyAfterMergingThreads) {
   const size_t ThreadMergingLease = 10;
   auto settings = CreateSettingsForFixture();
@@ -664,14 +704,14 @@ TEST_F(ShellTest, OnPlatformViewDestroyAfterMergingThreads) {
 }
 
 TEST_F(ShellTest, OnPlatformViewDestroyWhenThreadsAreMerging) {
-  const size_t ThreadMergingLease = 10;
+  const size_t kThreadMergingLease = 10;
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
   auto end_frame_callback =
       [&](bool should_resubmit_frame,
           fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
         if (should_resubmit_frame && !raster_thread_merger->IsMerged()) {
-          raster_thread_merger->MergeWithLease(ThreadMergingLease);
+          raster_thread_merger->MergeWithLease(kThreadMergingLease);
         }
         end_frame_latch.Signal();
       };
