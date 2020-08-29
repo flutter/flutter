@@ -12,36 +12,57 @@ void main() {
     expect(lerpDouble(null, null, 1.0), isNull);
     expect(lerpDouble(5.0, null, 0.25), isNotNull);
     expect(lerpDouble(null, 5.0, 0.25), isNotNull);
+
+    expect(lerpDouble(5, null, 0.25), isNotNull);
+    expect(lerpDouble(null, 5, 0.25), isNotNull);
   });
 
   test('lerpDouble should treat a null input as 0 if the other input is non-null', () {
     expect(lerpDouble(null, 10.0, 0.25), 2.5);
     expect(lerpDouble(10.0, null, 0.25), 7.5);
+
+    expect(lerpDouble(null, 10, 0.25), 2.5);
+    expect(lerpDouble(10, null, 0.25), 7.5);
   });
 
   test('lerpDouble should handle interpolation values < 0.0', () {
     expect(lerpDouble(0.0, 10.0, -5.0), -50.0);
     expect(lerpDouble(10.0, 0.0, -5.0), 60.0);
+
+    expect(lerpDouble(0, 10, -5), -50);
+    expect(lerpDouble(10, 0, -5), 60);
   });
 
   test('lerpDouble should return the start value at 0.0', () {
     expect(lerpDouble(2.0, 10.0, 0.0), 2.0);
     expect(lerpDouble(10.0, 2.0, 0.0), 10.0);
+
+    expect(lerpDouble(2, 10, 0), 2);
+    expect(lerpDouble(10, 2, 0), 10);
   });
 
   test('lerpDouble should interpolate between two values', () {
     expect(lerpDouble(0.0, 10.0, 0.25), 2.5);
     expect(lerpDouble(10.0, 0.0, 0.25), 7.5);
+
+    expect(lerpDouble(0, 10, 0.25), 2.5);
+    expect(lerpDouble(10, 0, 0.25), 7.5);
   });
 
   test('lerpDouble should return the end value at 1.0', () {
     expect(lerpDouble(2.0, 10.0, 1.0), 10.0);
     expect(lerpDouble(10.0, 2.0, 1.0), 2.0);
+
+    expect(lerpDouble(0, 10, 5), 50);
+    expect(lerpDouble(10, 0, 5), -40);
   });
 
   test('lerpDouble should handle interpolation values > 1.0', () {
     expect(lerpDouble(0.0, 10.0, 5.0), 50.0);
     expect(lerpDouble(10.0, 0.0, 5.0), -40.0);
+
+    expect(lerpDouble(0, 10, 5), 50);
+    expect(lerpDouble(10, 0, 5), -40);
   });
 
   test('lerpDouble should return NaN if any input is NaN', () {
