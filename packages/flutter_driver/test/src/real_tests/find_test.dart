@@ -4,10 +4,13 @@
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/common/find.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../common.dart';
 
 void main() {
+  MockDeserialize mockDeserialize;
+
   test('Ancestor finder serialize', () {
     const SerializableFinder of = ByType('Text');
     final SerializableFinder matching = ByValueKey('hello');
@@ -36,7 +39,7 @@ void main() {
       'firstMatchOnly': 'true',
     };
 
-    final Ancestor a = Ancestor.deserialize(serialized, TestDeserialize());
+    final Ancestor a = Ancestor.deserialize(serialized, mockDeserialize);
     expect(a.of, isA<ByType>());
     expect(a.matching, isA<ByValueKey>());
     expect(a.matchRoot, isTrue);
@@ -71,7 +74,7 @@ void main() {
       'firstMatchOnly': 'true',
     };
 
-    final Descendant a = Descendant.deserialize(serialized, TestDeserialize());
+    final Descendant a = Descendant.deserialize(serialized, mockDeserialize);
     expect(a.of, isA<ByType>());
     expect(a.matching, isA<ByValueKey>());
     expect(a.matchRoot, isTrue);
@@ -79,6 +82,4 @@ void main() {
   });
 }
 
-class TestDeserialize with DeserializeFinderFactory{
-
-}
+class MockDeserialize with Mock, DeserializeFinderFactory { }

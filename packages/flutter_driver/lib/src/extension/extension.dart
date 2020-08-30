@@ -88,9 +88,32 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// will still be returned in the `response` field of the result JSON along
 /// with an `isError` boolean.
 ///
-/// `finders` Used to add custom finder
-/// The following code shows how to implement a [FinderExtension]
+/// The [finders] parameter are used to add custom finders
+/// 
+/// The following code shows how to implement a Finder
 ///
+/// ```dart main
+/// void main() {
+///   enableFlutterDriverExtension(finders: <FinderExtension>[ SomeFinderExtension() ]);
+///
+///   app.main();
+/// }
+/// ```
+///
+/// ```dart
+/// class Some extends SerializableFinder {
+///   const Some();
+/// 
+///   @override
+///   String get finderType => 'Some';
+/// 
+///   @override
+///   Map<String, String> serialize() {
+///     // Serialize Finder
+///   }
+/// }
+/// ```
+/// 
 /// ```dart
 /// class SomeFinderExtension extends FinderExtension {
 ///
@@ -106,7 +129,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 ///  Finder createFinder(SerializableFinder finder) {
 ///    return find.byElementPredicate((Element element) {
 ///      final Widget widget = element.widget;
-///      if (...) {
+///      if (element.widget is SomeWidget) {
 ///        return true;
 ///      }
 ///      return false;
