@@ -158,8 +158,8 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
         assert(element.widget != null);
         final Element oldElement = _registry[this]!;
         assert(oldElement.widget != null);
-        assert(element.widget.runtimeType != _registry[this]!.widget.runtimeType);
-        _debugIllFatedElements.add(_registry[this]!);
+        assert(element.widget.runtimeType != oldElement.widget.runtimeType);
+        _debugIllFatedElements.add(oldElement);
       }
       return true;
     }());
