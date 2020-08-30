@@ -1,6 +1,8 @@
 package test.io.flutter.embedding.engine.dart;
 
 import static junit.framework.TestCase.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -9,17 +11,31 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.AssetManager;
+import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.dart.DartExecutor.DartEntrypoint;
+import io.flutter.embedding.engine.loader.FlutterLoader;
 import java.nio.ByteBuffer;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class DartExecutorTest {
+  @Mock FlutterLoader mockFlutterLoader;
+
+  @Before
+  public void setUp() {
+    FlutterInjector.reset();
+    MockitoAnnotations.initMocks(this);
+  }
+
   @Test
   public void itSendsBinaryMessages() {
     // Setup test.
@@ -48,5 +64,25 @@ public class DartExecutorTest {
     DartExecutor dartExecutor = new DartExecutor(mockFlutterJNI, mock(AssetManager.class));
     dartExecutor.notifyLowMemoryWarning();
     verify(mockFlutterJNI, times(1)).notifyLowMemoryWarning();
+  }
+
+  @Test
+  public void itThrowsWhenCreatingADefaultDartEntrypointWithAnUninitializedFlutterLoader() {
+    assertThrows(
+        AssertionError.class,
+        () -> {
+          DartEntrypoint.createDefault();
+        });
+  }
+
+  @Test
+  public void itHasReasonableDefaultsWhenFlutterLoaderIsInitialized() {
+    when(mockFlutterLoader.initialized()).thenReturn(true);
+    when(mockFlutterLoader.findAppBundlePath()).thenReturn("my/custom/path");
+    FlutterInjector.setInstance(
+        new FlutterInjector.Builder().setFlutterLoader(mockFlutterLoader).build());
+    DartEntrypoint entrypoint = DartEntrypoint.createDefault();
+    assertEquals(entrypoint.pathToBundle, "my/custom/path");
+    assertEquals(entrypoint.dartEntrypointFunctionName, "main");
   }
 }

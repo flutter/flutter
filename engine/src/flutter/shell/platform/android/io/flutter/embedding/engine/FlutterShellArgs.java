@@ -15,8 +15,8 @@ import java.util.*;
  * <p>The term "shell" refers to the native code that adapts Flutter to different platforms.
  * Flutter's Android Java code initializes a native "shell" and passes these arguments to that
  * native shell when it is initialized. See {@link
- * io.flutter.view.FlutterMain#ensureInitializationComplete(Context, String[])} for more
- * information.
+ * io.flutter.embedding.engine.loader.FlutterLoader#ensureInitializationComplete(Context, String[])}
+ * for more information.
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class FlutterShellArgs {

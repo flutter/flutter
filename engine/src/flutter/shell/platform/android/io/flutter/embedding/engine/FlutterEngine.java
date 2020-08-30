@@ -7,6 +7,7 @@ package io.flutter.embedding.engine;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.loader.FlutterLoader;
@@ -131,7 +132,8 @@ public class FlutterEngine {
    * <p>In order to pass Dart VM initialization arguments (see {@link
    * io.flutter.embedding.engine.FlutterShellArgs}) when creating the VM, manually set the
    * initialization arguments by calling {@link FlutterLoader#startInitialization(Context)} and
-   * {@link FlutterLoader#ensureInitializationComplete(Context, String[])}.
+   * {@link FlutterLoader#ensureInitializationComplete(Context, String[])} before constructing the
+   * engine.
    */
   public FlutterEngine(@NonNull Context context) {
     this(context, null);
@@ -143,7 +145,7 @@ public class FlutterEngine {
    * <p>If the Dart VM has already started, the given arguments will have no effect.
    */
   public FlutterEngine(@NonNull Context context, @Nullable String[] dartVmArgs) {
-    this(context, FlutterLoader.getInstance(), new FlutterJNI(), dartVmArgs, true);
+    this(context, /* flutterLoader */ null, new FlutterJNI(), dartVmArgs, true);
   }
 
   /**
@@ -158,7 +160,7 @@ public class FlutterEngine {
       boolean automaticallyRegisterPlugins) {
     this(
         context,
-        FlutterLoader.getInstance(),
+        /* flutterLoader */ null,
         new FlutterJNI(),
         dartVmArgs,
         automaticallyRegisterPlugins);
@@ -189,7 +191,7 @@ public class FlutterEngine {
       boolean waitForRestorationData) {
     this(
         context,
-        FlutterLoader.getInstance(),
+        /* flutterLoader */ null,
         new FlutterJNI(),
         new PlatformViewsController(),
         dartVmArgs,
@@ -206,7 +208,7 @@ public class FlutterEngine {
    */
   public FlutterEngine(
       @NonNull Context context,
-      @NonNull FlutterLoader flutterLoader,
+      @Nullable FlutterLoader flutterLoader,
       @NonNull FlutterJNI flutterJNI) {
     this(context, flutterLoader, flutterJNI, null, true);
   }
@@ -219,7 +221,7 @@ public class FlutterEngine {
    */
   public FlutterEngine(
       @NonNull Context context,
-      @NonNull FlutterLoader flutterLoader,
+      @Nullable FlutterLoader flutterLoader,
       @NonNull FlutterJNI flutterJNI,
       @Nullable String[] dartVmArgs,
       boolean automaticallyRegisterPlugins) {
@@ -238,7 +240,7 @@ public class FlutterEngine {
    */
   public FlutterEngine(
       @NonNull Context context,
-      @NonNull FlutterLoader flutterLoader,
+      @Nullable FlutterLoader flutterLoader,
       @NonNull FlutterJNI flutterJNI,
       @NonNull PlatformViewsController platformViewsController,
       @Nullable String[] dartVmArgs,
@@ -256,7 +258,7 @@ public class FlutterEngine {
   /** Fully configurable {@code FlutterEngine} constructor. */
   public FlutterEngine(
       @NonNull Context context,
-      @NonNull FlutterLoader flutterLoader,
+      @Nullable FlutterLoader flutterLoader,
       @NonNull FlutterJNI flutterJNI,
       @NonNull PlatformViewsController platformViewsController,
       @Nullable String[] dartVmArgs,
@@ -280,6 +282,9 @@ public class FlutterEngine {
     this.localizationPlugin = new LocalizationPlugin(context, localizationChannel);
 
     this.flutterJNI = flutterJNI;
+    if (flutterLoader == null) {
+      flutterLoader = FlutterInjector.instance().flutterLoader();
+    }
     flutterLoader.startInitialization(context.getApplicationContext());
     flutterLoader.ensureInitializationComplete(context, dartVmArgs);
 

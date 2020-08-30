@@ -7,6 +7,7 @@ package io.flutter.embedding.engine.plugins.shim;
 import android.app.Activity;
 import android.content.Context;
 import androidx.annotation.NonNull;
+import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -14,7 +15,6 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.platform.PlatformViewRegistry;
-import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterView;
 import io.flutter.view.TextureRegistry;
 import java.util.HashSet;
@@ -85,12 +85,12 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
 
   @Override
   public String lookupKeyForAsset(String asset) {
-    return FlutterMain.getLookupKeyForAsset(asset);
+    return FlutterInjector.instance().flutterLoader().getLookupKeyForAsset(asset);
   }
 
   @Override
   public String lookupKeyForAsset(String asset, String packageName) {
-    return FlutterMain.getLookupKeyForAsset(asset, packageName);
+    return FlutterInjector.instance().flutterLoader().getLookupKeyForAsset(asset, packageName);
   }
 
   @Override

@@ -15,6 +15,7 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.BuildConfig;
+import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.util.PathUtils;
 import io.flutter.view.VsyncWaiter;
@@ -47,20 +48,16 @@ public class FlutterLoader {
    * <p>The returned instance loads Flutter native libraries in the standard way. A singleton object
    * is used instead of static methods to facilitate testing without actually running native library
    * linking.
+   *
+   * @deprecated Use the {@link io.flutter.FlutterInjector} instead.
    */
+  @Deprecated
   @NonNull
   public static FlutterLoader getInstance() {
     if (instance == null) {
       instance = new FlutterLoader();
     }
     return instance;
-  }
-
-  @NonNull
-  public static FlutterLoader getInstanceForTest(FlutterApplicationInfo flutterApplicationInfo) {
-    FlutterLoader loader = new FlutterLoader();
-    loader.flutterApplicationInfo = flutterApplicationInfo;
-    return loader;
   }
 
   private boolean initialized = false;
@@ -128,7 +125,9 @@ public class FlutterLoader {
           public InitResult call() {
             ResourceExtractor resourceExtractor = initResources(appContext);
 
-            System.loadLibrary("flutter");
+            if (FlutterInjector.instance().shouldLoadNative()) {
+              System.loadLibrary("flutter");
+            }
 
             // Prefetch the default font manager as soon as possible on a background thread.
             // It helps to reduce time cost of engine setup that blocks the platform thread.
@@ -231,13 +230,15 @@ public class FlutterLoader {
 
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
 
-      FlutterJNI.nativeInit(
-          applicationContext,
-          shellArgs.toArray(new String[0]),
-          kernelPath,
-          result.appStoragePath,
-          result.engineCachesPath,
-          initTimeMillis);
+      if (FlutterInjector.instance().shouldLoadNative()) {
+        FlutterJNI.nativeInit(
+            applicationContext,
+            shellArgs.toArray(new String[0]),
+            kernelPath,
+            result.appStoragePath,
+            result.engineCachesPath,
+            initTimeMillis);
+      }
 
       initialized = true;
     } catch (Exception e) {
@@ -291,6 +292,11 @@ public class FlutterLoader {
                         });
               }
             });
+  }
+
+  /** Returns whether the FlutterLoader has finished loading the native library. */
+  public boolean initialized() {
+    return initialized;
   }
 
   /** Extract assets out of the APK that need to be cached as uncompressed files on disk. */
