@@ -424,7 +424,7 @@ class FlutterDriverExtension with DeserializeFinderFactory {
       default:
         if (_finderExtensions.containsKey(finder.finderType)) {
           return _finderExtensions[finder.finderType].createFinder(finder);
-        }else{
+        } else {
           throw 'Unsupported finder type: ${finder.finderType}';
         }
     }
