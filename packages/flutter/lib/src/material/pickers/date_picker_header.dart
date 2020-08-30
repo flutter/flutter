@@ -146,7 +146,6 @@ class DatePickerHeader extends StatelessWidget {
                 children: <Widget>[
                   const SizedBox(height: 16),
                   Flexible(child: help),
-                  // Fix Hiden help text in arabic language : change height: 38 to height: 30
                   const SizedBox(height: 30),
                   Row(
                     children: <Widget>[
