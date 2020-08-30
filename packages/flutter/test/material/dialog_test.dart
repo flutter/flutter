@@ -1275,6 +1275,27 @@ void main() {
         ));
   });
 
+  testWidgets('Dialog check the width, height by insetPadding zero value', (WidgetTester tester) async {
+    // case without padding value
+    const AlertDialog dialog = AlertDialog(
+        content: Text('content'),
+        insetPadding: EdgeInsets.all(0.0)
+    );
+
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+
+    final ConstrainedBox box = tester.widget<ConstrainedBox>(
+        find.descendant(of: find.byType(AlertDialog), matching: find.byType(ConstrainedBox))
+    );
+
+    expect(box.constraints.minWidth, double.infinity);
+    expect(box.constraints.minHeight, double.infinity);
+  });
+
+
   testWidgets('Dialog widget contains route semantics from title', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
