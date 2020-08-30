@@ -114,6 +114,14 @@ tasks:
 
   # Android on-device tests
 
+  complex_layout_android__scroll_smoothness:
+    description: >
+      Measures the smoothness of scrolling of the Complex Layout sample app on
+      Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   complex_layout_scroll_perf__timeline_summary:
     description: >
       Measures the runtime performance of the Complex Layout sample app on
@@ -259,7 +267,6 @@ tasks:
       Checks that flavored builds work on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    on_luci: true
 
   channels_integration_test:
     description: >
@@ -810,7 +817,6 @@ tasks:
       with SkSL shader warm-up with e2e.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__transition_perf_with_semantics:
     description: >

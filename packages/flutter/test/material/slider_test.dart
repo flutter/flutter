@@ -2359,4 +2359,41 @@ void main() {
       'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
     ]);
   });
+
+  testWidgets('Slider paint correctly when the track shape is rectangular', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+            sliderTheme: const SliderThemeData(
+              trackShape: RectangularSliderTrackShape(),
+            )
+        ),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData.fromWindow(window),
+            child: const Material(
+              child: Center(
+                child: Slider(
+                  value: 0.5,
+                  onChanged: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+
+    // The active track rect should start at 24.0 pixels,
+    // and there should not have a gap between active and inactive track.
+    expect(renderObject,
+        paints
+          ..rect(rect: const Rect.fromLTRB(24.0, 298.0, 400.0, 302.0)) // active track Rect.
+          ..rect(rect: const Rect.fromLTRB(400.0, 298.0, 776.0, 302.0)) // inactive track Rect.
+    );
+  });
 }
