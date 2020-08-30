@@ -90,7 +90,7 @@ void main() {
 
   testWidgets(
     'onPressed is triggered on button tap',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
         return tester.widget<DefaultTextStyle>(find.descendant(
           of: find.widgetWithText(RawMaterialButton, text),
@@ -152,7 +152,7 @@ void main() {
 
   testWidgets(
     'onPressed that is null disables buttons',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
         return tester.widget<DefaultTextStyle>(find.descendant(
           of: find.widgetWithText(RawMaterialButton, text),
@@ -225,7 +225,7 @@ void main() {
 
   testWidgets(
     'isSelected property cannot be null',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       try {
         await tester.pumpWidget(
           Material(
@@ -250,7 +250,7 @@ void main() {
 
   testWidgets(
     'children and isSelected properties have to be the same length',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       try {
         await tester.pumpWidget(
           Material(
@@ -293,15 +293,15 @@ void main() {
 
     TextStyle textStyle;
     textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-      of: find.widgetWithText(RawMaterialButton, 'First child'),
-      matching: find.byType(DefaultTextStyle),
+        of: find.widgetWithText(RawMaterialButton, 'First child'),
+        matching: find.byType(DefaultTextStyle),
     )).style;
     expect(textStyle.fontFamily, theme.textTheme.bodyText2.fontFamily);
     expect(textStyle.decoration, theme.textTheme.bodyText2.decoration);
 
     textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-      of: find.widgetWithText(RawMaterialButton, 'Second child'),
-      matching: find.byType(DefaultTextStyle),
+        of: find.widgetWithText(RawMaterialButton, 'Second child'),
+        matching: find.byType(DefaultTextStyle),
     )).style;
     expect(textStyle.fontFamily, theme.textTheme.bodyText2.fontFamily);
     expect(textStyle.decoration, theme.textTheme.bodyText2.decoration);
@@ -330,16 +330,16 @@ void main() {
 
     TextStyle textStyle;
     textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-      of: find.widgetWithText(RawMaterialButton, 'First child'),
-      matching: find.byType(DefaultTextStyle),
+        of: find.widgetWithText(RawMaterialButton, 'First child'),
+        matching: find.byType(DefaultTextStyle),
     )).style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
     expect(textStyle.color, isNot(Colors.orange));
 
     textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-      of: find.widgetWithText(RawMaterialButton, 'Second child'),
-      matching: find.byType(DefaultTextStyle),
+        of: find.widgetWithText(RawMaterialButton, 'Second child'),
+        matching: find.byType(DefaultTextStyle),
     )).style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
@@ -440,7 +440,7 @@ void main() {
 
   testWidgets(
     'Default text/icon colors for enabled, selected and disabled states',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
         return tester.widget<DefaultTextStyle>(find.descendant(
           of: find.widgetWithText(RawMaterialButton, text),
@@ -538,7 +538,7 @@ void main() {
 
   testWidgets(
     'Custom text/icon colors for enabled, selected and disabled states',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
         return tester.widget<DefaultTextStyle>(find.descendant(
           of: find.widgetWithText(RawMaterialButton, text),
@@ -941,7 +941,7 @@ void main() {
 
   testWidgets(
     'Default border width and border colors for enabled, selected and disabled states',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final ThemeData theme = ThemeData();
       const double defaultBorderWidth = 1.0;
       await tester.pumpWidget(
@@ -965,13 +965,13 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-        // trailing side
+          // trailing side
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: defaultBorderWidth,
           )
-        // leading side, top and bottom
+          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -999,13 +999,13 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-        // trailing side
+          // trailing side
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: defaultBorderWidth,
           )
-        // leading side, top and bottom
+          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1032,13 +1032,13 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-        // trailing side
+          // trailing side
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: defaultBorderWidth,
           )
-        // leading side, top and bottom
+          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1050,7 +1050,7 @@ void main() {
 
   testWidgets(
     'Custom border width and border colors for enabled, selected and disabled states',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       const Color borderColor = Color(0xff4caf50);
       const Color selectedBorderColor = Color(0xffcddc39);
       const Color disabledBorderColor = Color(0xffffeb3b);
@@ -1079,13 +1079,13 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-        // trailing side
+          // trailing side
           ..path(
             style: PaintingStyle.stroke,
             color: borderColor,
             strokeWidth: customWidth,
           )
-        // leading side, top and bottom
+          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: borderColor,
@@ -1115,13 +1115,13 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-        // trailing side
+          // trailing side
           ..path(
             style: PaintingStyle.stroke,
             color: selectedBorderColor,
             strokeWidth: customWidth,
           )
-        // leading side, top and bottom
+          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: selectedBorderColor,
@@ -1150,13 +1150,13 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-        // trailing side
+          // trailing side
           ..path(
             style: PaintingStyle.stroke,
             color: disabledBorderColor,
             strokeWidth: customWidth,
           )
-        // leading side, top and bottom
+          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: disabledBorderColor,
@@ -1433,7 +1433,7 @@ void main() {
 
   testWidgets(
     'Properly draws borders based on state',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final ThemeData theme = ThemeData();
       await tester.pumpWidget(
         Material(
@@ -1459,7 +1459,7 @@ void main() {
       expect(
         toggleButtonRenderObject[0],
         paints
-        // leading side, top and bottom - enabled
+          // leading side, top and bottom - enabled
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1472,13 +1472,13 @@ void main() {
       expect(
         toggleButtonRenderObject[1],
         paints
-        // leading side - selected
+          // leading side - selected
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: _defaultBorderWidth,
           )
-        // top and bottom - selected
+          // top and bottom - selected
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1491,13 +1491,13 @@ void main() {
       expect(
         toggleButtonRenderObject[2],
         paints
-        // leading side - selected, since previous button is selected
+          // leading side - selected, since previous button is selected
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: _defaultBorderWidth,
           )
-        // trailing side, top and bottom - enabled
+          // trailing side, top and bottom - enabled
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
