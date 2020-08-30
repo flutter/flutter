@@ -12,6 +12,8 @@ import 'package:image/image.dart' as dart_image;
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
+import 'test_util.dart';
+
 typedef CanvasCallback = void Function(Canvas canvas);
 
 Future<Image> createImage(int width, int height) {
@@ -36,35 +38,6 @@ void testCanvas(CanvasCallback callback) {
   try {
     callback(Canvas(PictureRecorder(), const Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)));
   } catch (error) { } // ignore: empty_catches
-}
-
-void expectAssertion(Function callback) {
-  bool assertsEnabled = false;
-  assert(() {
-    assertsEnabled = true;
-    return true;
-  }());
-  if (assertsEnabled) {
-    bool threw = false;
-    try {
-      callback();
-    } catch (e) {
-      expect(e is AssertionError, true);
-      threw = true;
-    }
-    expect(threw, true);
-  }
-}
-
-void expectArgumentError(Function callback) {
-  bool threw = false;
-  try {
-    callback();
-  } catch (e) {
-    expect(e is ArgumentError, true);
-    threw = true;
-  }
-  expect(threw, true);
 }
 
 void testNoCrashes() {
