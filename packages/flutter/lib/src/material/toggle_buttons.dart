@@ -936,15 +936,15 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
 
   @override
   _SelectToggleButtonRenderObject createRenderObject(BuildContext context) => _SelectToggleButtonRenderObject(
-        leadingBorderSide,
-        borderSide,
-        trailingBorderSide,
-        borderRadius,
-        isFirstButton,
-        isLastButton,
-        direction,
-        Directionality.of(context),
-      );
+    leadingBorderSide,
+    borderSide,
+    trailingBorderSide,
+    borderRadius,
+    isFirstButton,
+    isLastButton,
+    direction,
+    Directionality.of(context),
+  );
 
   @override
   void updateRenderObject(BuildContext context, _SelectToggleButtonRenderObject renderObject) {
