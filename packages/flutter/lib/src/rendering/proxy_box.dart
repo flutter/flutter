@@ -4851,12 +4851,13 @@ class RenderLeaderLayer extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (layer == null) {
-      layer = LeaderLayer(link: link, offset: offset);
+      layer = LeaderLayer(link: link, offset: offset, size: size);
     } else {
       final LeaderLayer leaderLayer = layer as LeaderLayer;
       leaderLayer
         ..link = link
-        ..offset = offset;
+        ..offset = offset
+        ..size = size;
     }
     context.pushLayer(layer!, super.paint, Offset.zero);
     assert(layer != null);
@@ -4890,6 +4891,8 @@ class RenderFollowerLayer extends RenderProxyBox {
     required LayerLink link,
     bool showWhenUnlinked = true,
     Offset offset = Offset.zero,
+    Alignment leaderAnchor = Alignment.topLeft,
+    Alignment followerAnchor = Alignment.topLeft,
     RenderBox? child,
   }) : assert(link != null),
        assert(showWhenUnlinked != null),
@@ -4897,6 +4900,8 @@ class RenderFollowerLayer extends RenderProxyBox {
        _link = link,
        _showWhenUnlinked = showWhenUnlinked,
        _offset = offset,
+       _leaderAnchor = leaderAnchor,
+       _followerAnchor = followerAnchor,
        super(child);
 
   /// The link object that connects this [RenderFollowerLayer] with a
@@ -4939,6 +4944,26 @@ class RenderFollowerLayer extends RenderProxyBox {
     if (_offset == value)
       return;
     _offset = value;
+    markNeedsPaint();
+  }
+
+  Alignment get leaderAnchor => _leaderAnchor;
+  Alignment _leaderAnchor;
+  set leaderAnchor(Alignment value) {
+    assert(value != null);
+    if (_leaderAnchor == value)
+      return;
+    _leaderAnchor = value;
+    markNeedsPaint();
+  }
+
+  Alignment get followerAnchor => _followerAnchor;
+  Alignment _followerAnchor;
+  set followerAnchor(Alignment value) {
+    assert(value != null);
+    if (_followerAnchor == value)
+      return;
+    _followerAnchor = value;
     markNeedsPaint();
   }
 
@@ -4992,18 +5017,24 @@ class RenderFollowerLayer extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     assert(showWhenUnlinked != null);
     if (layer == null) {
-      layer = FollowerLayer(
+      layer = FollowerLayer.withAlignments(
         link: link,
         showWhenUnlinked: showWhenUnlinked,
         linkedOffset: this.offset,
         unlinkedOffset: offset,
+        leaderAnchor: leaderAnchor,
+        followerAnchor: followerAnchor,
+        size: size,
       );
     } else {
-      layer!
-        ..link = link
+      layer
+        ?..link = link
         ..showWhenUnlinked = showWhenUnlinked
         ..linkedOffset = this.offset
-        ..unlinkedOffset = offset;
+        ..unlinkedOffset = offset
+        ..leaderAnchor = leaderAnchor
+        ..followerAnchor = followerAnchor
+        ..size = size;
     }
     context.pushLayer(
       layer!,

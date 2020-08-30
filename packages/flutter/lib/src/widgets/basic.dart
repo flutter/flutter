@@ -1358,10 +1358,14 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
     @required this.link,
     this.showWhenUnlinked = true,
     this.offset = Offset.zero,
+    this.targetAnchor = Alignment.topLeft,
+    this.followerAnchor = Alignment.topLeft,
     Widget child,
   }) : assert(link != null),
        assert(showWhenUnlinked != null),
        assert(offset != null),
+       assert(targetAnchor != null),
+       assert(followerAnchor != null),
        super(key: key, child: child);
 
   /// The link object that connects this [CompositedTransformFollower] with a
@@ -1381,6 +1385,9 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// hidden.
   final bool showWhenUnlinked;
 
+  final Alignment targetAnchor;
+  final Alignment followerAnchor;
+
   /// The offset to apply to the origin of the linked
   /// [CompositedTransformTarget] to obtain this widget's origin.
   final Offset offset;
@@ -1391,6 +1398,8 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
       link: link,
       showWhenUnlinked: showWhenUnlinked,
       offset: offset,
+      leaderAnchor: targetAnchor,
+      followerAnchor: followerAnchor,
     );
   }
 
@@ -1399,7 +1408,9 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
     renderObject
       ..link = link
       ..showWhenUnlinked = showWhenUnlinked
-      ..offset = offset;
+      ..offset = offset
+      ..leaderAnchor = targetAnchor
+      ..followerAnchor = followerAnchor;
   }
 }
 

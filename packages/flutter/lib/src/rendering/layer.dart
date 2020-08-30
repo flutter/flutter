@@ -2046,7 +2046,12 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  LeaderLayer({ required LayerLink link, this.offset = Offset.zero }) : assert(link != null), _link = link;
+  LeaderLayer({
+      required LayerLink link,
+      this.offset = Offset.zero,
+      this.size = Size.zero,
+  }) : assert(link != null),
+       _link = link;
 
   /// The object with which this layer should register.
   ///
@@ -2067,6 +2072,8 @@ class LeaderLayer extends ContainerLayer {
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
   Offset offset;
+
+  Size size;
 
   /// {@macro flutter.leaderFollower.alwaysNeedsAddToScene}
   @override
@@ -2158,7 +2165,22 @@ class FollowerLayer extends ContainerLayer {
     this.showWhenUnlinked = true,
     this.unlinkedOffset = Offset.zero,
     this.linkedOffset = Offset.zero,
-  }) : assert(link != null), _link = link;
+  }) : assert(link != null),
+       _link = link,
+       leaderAnchor = Alignment.topLeft,
+       followerAnchor = Alignment.topLeft,
+       size = Size.zero;
+
+  FollowerLayer.withAlignments({
+    required LayerLink link,
+    this.showWhenUnlinked = true,
+    this.unlinkedOffset = Offset.zero,
+    this.linkedOffset = Offset.zero,
+    this.leaderAnchor = Alignment.topLeft,
+    this.followerAnchor = Alignment.topLeft,
+    required this.size,
+  }) : assert(link != null),
+       _link = link;
 
   /// The link to the [LeaderLayer].
   ///
@@ -2186,6 +2208,12 @@ class FollowerLayer extends ContainerLayer {
   /// phase of the pipeline.
   bool? showWhenUnlinked;
 
+  Alignment leaderAnchor = Alignment.topLeft;
+
+  Alignment followerAnchor = Alignment.topLeft;
+
+  Size size;
+
   /// Offset from parent in the parent's coordinate system, used when the layer
   /// is not linked to a [LeaderLayer].
   ///
@@ -2200,8 +2228,8 @@ class FollowerLayer extends ContainerLayer {
   ///  * [linkedOffset], for when the layers are linked.
   Offset? unlinkedOffset;
 
-  /// Offset from the origin of the leader layer to the origin of the child
-  /// layers, used when the layer is linked to a [LeaderLayer].
+  /// Offset from the [leaderAnchor] of the leader layer to the [followerAnchor]
+  /// of the child layers, used when the layer is linked to a [LeaderLayer].
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
@@ -2213,6 +2241,18 @@ class FollowerLayer extends ContainerLayer {
   ///
   ///  * [unlinkedOffset], for when the layer is not linked.
   Offset? linkedOffset;
+
+  Offset get _effectiveLinkedOffset {
+    final Offset? additionalOffset = linkedOffset;
+    final Size? leaderSize = link.leader?.size;
+    if (additionalOffset == null || leaderSize == null) {
+      assert(additionalOffset != null, 'linkedOffset must not be null');
+      assert(leaderSize != null, 'the leader property of $link must not be null');
+      return Offset.zero;
+    }
+
+    return leaderAnchor.alongSize(leaderSize) - followerAnchor.alongSize(size) + additionalOffset;
+  }
 
   Offset? _lastOffset;
   Matrix4? _lastTransform;
@@ -2226,9 +2266,10 @@ class FollowerLayer extends ContainerLayer {
     }
     if (_invertedTransform == null)
       return null;
+    final Offset effectiveLinkedOffset = _effectiveLinkedOffset;
     final Vector4 vector = Vector4(localPosition.dx, localPosition.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform!.transform(vector);
-    return Offset(result[0] - linkedOffset!.dx, result[1] - linkedOffset!.dy);
+    return Offset(result[0] - effectiveLinkedOffset.dx, result[1] - effectiveLinkedOffset.dy);
   }
 
   @override
@@ -2266,59 +2307,92 @@ class FollowerLayer extends ContainerLayer {
   /// treated as the child of the second, and so forth. The first layer in the
   /// list won't have [applyTransform] called on it. The first layer may be
   /// null.
-  Matrix4 _collectTransformForLayerChain(List<ContainerLayer?> layers) {
+  static Matrix4 _collectTransformForLayerChain(List<ContainerLayer?> layers) {
     // Initialize our result matrix.
     final Matrix4 result = Matrix4.identity();
     // Apply each layer to the matrix in turn, starting from the last layer,
     // and providing the previous layer as the child.
     for (int index = layers.length - 1; index > 0; index -= 1)
-      layers[index]!.applyTransform(layers[index - 1], result);
+      layers[index]?.applyTransform(layers[index - 1], result);
     return result;
   }
 
+  /// Finds the common ancestor of two layers [a] and [b] by searching towards
+  /// the root of the tree, and appends the ancestors on the path to
+  /// [ancestorsA] and [ancestorsB] respectively.
+  ///
+  /// Returns null if [a] [b] do not share a common ancestor, and the results in
+  /// [ancestorsA] and [ancestorsB] are undefined.
+  static Layer? _findCommonAncestor(
+    Layer? a, Layer? b,
+    List<ContainerLayer?> ancestorsA, List<ContainerLayer?> ancestorsB,
+  ) {
+    // No common ancestor found.
+    if (a == null || b == null)
+      return null;
+
+    if (identical(a, b))
+      return a;
+
+    if (a.depth < b.depth) {
+      ancestorsB.add(b.parent);
+      return _findCommonAncestor(a, b.parent, ancestorsA, ancestorsB);
+    } else if (a.depth > b.depth){
+      ancestorsA.add(a.parent);
+      return _findCommonAncestor(a.parent, b, ancestorsA, ancestorsB);
+    }
+
+    ancestorsA.add(a.parent);
+    ancestorsB.add(b.parent);
+    return _findCommonAncestor(a.parent, b.parent, ancestorsA, ancestorsB);
+  }
+
   /// Populate [_lastTransform] given the current state of the tree.
+  ///
+  /// Must be called when [linkedOffset] is finallized.
   void _establishTransform() {
     assert(link != null);
     _lastTransform = null;
+    final LeaderLayer? leader = link.leader;
     // Check to see if we are linked.
-    if (link.leader == null)
+    if (leader == null)
       return;
     // If we're linked, check the link is valid.
-    assert(link.leader!.owner == owner, 'Linked LeaderLayer anchor is not in the same layer tree as the FollowerLayer.');
-    assert(link.leader!._lastOffset != null, 'LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.');
-    // Collect all our ancestors into a Set so we can recognize them.
-    final Set<Layer> ancestors = HashSet<Layer>();
-    Layer? ancestor = parent;
-    while (ancestor != null) {
-      ancestors.add(ancestor);
-      ancestor = ancestor.parent;
-    }
-    // Collect all the layers from a hypothetical child (null) of the target
-    // layer up to the common ancestor layer.
-    ContainerLayer? layer = link.leader;
-    final List<ContainerLayer?> forwardLayers = <ContainerLayer?>[null, layer];
-    do {
-      layer = layer!.parent;
-      forwardLayers.add(layer);
-    } while (!ancestors.contains(layer)); // ignore: iterable_contains_unrelated_type
-    ancestor = layer;
-    // Collect all the layers from this layer up to the common ancestor layer.
-    layer = this;
-    final List<ContainerLayer> inverseLayers = <ContainerLayer>[layer];
-    do {
-      layer = layer!.parent;
-      inverseLayers.add(layer!);
-    } while (layer != ancestor);
-    // Establish the forward and backward matrices given these lists of layers.
+    assert(
+      leader.owner == owner,
+      'Linked LeaderLayer anchor is not in the same layer tree as the FollowerLayer.',
+    );
+    assert(
+      leader._lastOffset != null,
+      'LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.',
+    );
+
+    // Stores [leader, ..., commonAncestor] after calling _findCommonAncestor.
+    final List<ContainerLayer?> forwardLayers = <ContainerLayer>[leader];
+    // Stores [this (follower), ..., commonAncestor] after calling
+    // _findCommonAncestor.
+    final List<ContainerLayer?> inverseLayers = <ContainerLayer>[this];
+
+    final Layer? ancestor = _findCommonAncestor(
+      leader, this,
+      forwardLayers, inverseLayers,
+    );
+    assert(ancestor != null);
+
     final Matrix4 forwardTransform = _collectTransformForLayerChain(forwardLayers);
+    leader.applyTransform(null, forwardTransform);
+    final Offset effectiveOrigin = _effectiveLinkedOffset;
+    forwardTransform.translate(effectiveOrigin.dx,effectiveOrigin.dy);
+
     final Matrix4 inverseTransform = _collectTransformForLayerChain(inverseLayers);
+    //inverseTransform.translate(followerOrigin.dx, followerOrigin.dy);
+
     if (inverseTransform.invert() == 0.0) {
       // We are in a degenerate transform, so there's not much we can do.
       return;
     }
     // Combine the matrices and store the result.
     inverseTransform.multiply(forwardTransform);
-    inverseTransform.translate(linkedOffset!.dx, linkedOffset!.dy);
     _lastTransform = inverseTransform;
     _inverseDirty = true;
   }
