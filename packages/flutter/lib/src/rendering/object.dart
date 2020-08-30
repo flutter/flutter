@@ -3429,7 +3429,7 @@ abstract class _SemanticsFragment {
 
   /// Returns [_InterestingSemanticsFragment] describing the actual semantic
   /// information that this fragment wants to add to the parent.
-  Iterable<_InterestingSemanticsFragment> get interestingFragments;
+  List<_InterestingSemanticsFragment> get interestingFragments;
 
   /// Whether this fragment wants to abort the semantics walk because the
   /// information in the tree are not sufficient to calculate semantics.
@@ -3526,7 +3526,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   bool get hasConfigForParent => config != null;
 
   @override
-  Iterable<_InterestingSemanticsFragment> get interestingFragments => <_InterestingSemanticsFragment>[this];
+  List<_InterestingSemanticsFragment> get interestingFragments => <_InterestingSemanticsFragment>[this];
 
   Set<SemanticsTag>? _tagsForChildren;
 
