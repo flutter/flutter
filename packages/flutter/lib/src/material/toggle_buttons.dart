@@ -190,7 +190,7 @@ class ToggleButtons extends StatelessWidget {
     this.disabledBorderColor,
     this.borderRadius,
     this.borderWidth,
-  }) : 
+  }) :
     assert(children != null),
     assert(isSelected != null),
     assert(children.length == isSelected.length),
@@ -475,7 +475,7 @@ class ToggleButtons extends StatelessWidget {
       ?? _defaultBorderWidth;
     if (onPressed != null && (isSelected[index] || (index != 0 && isSelected[index - 1]))) {
       return BorderSide(
-        color: selectedBorderColor 
+        color: selectedBorderColor
           ?? toggleButtonsTheme.selectedBorderColor
           ?? theme.colorScheme.onSurface.withOpacity(0.12),
         width: resultingBorderWidth,
@@ -573,27 +573,27 @@ class ToggleButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(
-        !isSelected.any((bool val) => val == null),
-        'All elements of isSelected must be non-null.\n'
-        'The current list of isSelected values is as follows:\n'
-        '$isSelected'
-      );
+      !isSelected.any((bool val) => val == null),
+      'All elements of isSelected must be non-null.\n'
+      'The current list of isSelected values is as follows:\n'
+      '$isSelected'
+    );
     assert(
-        focusNodes == null || !focusNodes.any((FocusNode val) => val == null),
-        'All elements of focusNodes must be non-null.\n'
-        'The current list of focus node values is as follows:\n'
-        '$focusNodes'
-      );
+      focusNodes == null || !focusNodes.any((FocusNode val) => val == null),
+      'All elements of focusNodes must be non-null.\n'
+      'The current list of focus node values is as follows:\n'
+      '$focusNodes'
+    );
     assert(
       () {
         if (focusNodes != null)
           return focusNodes.length == children.length;
         return true;
       }(),
-       'focusNodes.length must match children.length.\n'
-       'There are ${focusNodes.length} focus nodes, while '
-       'there are ${children.length} children.'
-     );
+      'focusNodes.length must match children.length.\n'
+      'There are ${focusNodes.length} focus nodes, while '
+      'there are ${children.length} children.'
+    );
     final ThemeData theme = Theme.of(context);
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
     final TextDirection textDirection = Directionality.of(context);
@@ -813,21 +813,21 @@ class _ToggleButton extends StatelessWidget {
 
     if (onPressed != null && selected) {
       currentColor = selectedColor
-          ?? toggleButtonsTheme.selectedColor
-          ?? theme.colorScheme.primary;
+        ?? toggleButtonsTheme.selectedColor
+        ?? theme.colorScheme.primary;
       currentFillColor = fillColor
         ?? theme.colorScheme.primary.withOpacity(0.12);
       currentFocusColor = focusColor
-        ?? toggleButtonsTheme.focusColor 
+        ?? toggleButtonsTheme.focusColor
         ?? theme.colorScheme.primary.withOpacity(0.12);
       currentHoverColor = hoverColor
         ?? toggleButtonsTheme.hoverColor
         ?? theme.colorScheme.primary.withOpacity(0.04);
-      currentSplashColor = splashColor 
+      currentSplashColor = splashColor
         ?? toggleButtonsTheme.splashColor
         ?? theme.colorScheme.primary.withOpacity(0.16);
     } else if (onPressed != null && !selected) {
-      currentColor = color 
+      currentColor = color
         ?? toggleButtonsTheme.color
         ?? theme.colorScheme.onSurface.withOpacity(0.87);
       currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
