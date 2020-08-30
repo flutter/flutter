@@ -89,7 +89,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// with an `isError` boolean.
 ///
 /// The [finders] parameter are used to add custom finders
-/// 
+///
 /// The following code shows how to implement a Finder
 ///
 /// ```dart main
@@ -103,17 +103,17 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// ```dart
 /// class Some extends SerializableFinder {
 ///   const Some();
-/// 
+///
 ///   @override
 ///   String get finderType => 'Some';
-/// 
+///
 ///   @override
 ///   Map<String, String> serialize() {
 ///     // Serialize Finder
 ///   }
 /// }
 /// ```
-/// 
+///
 /// ```dart
 /// class SomeFinderExtension extends FinderExtension {
 ///
