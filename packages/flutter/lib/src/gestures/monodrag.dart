@@ -34,6 +34,8 @@ typedef GestureDragEndCallback = void Function(DragEndDetails details);
 /// See [DragGestureRecognizer.onCancel].
 typedef GestureDragCancelCallback = void Function();
 
+typedef GestureVelocityTrackerBuilder = VelocityTracker Function(PointerEvent event);
+
 /// Recognizes movement.
 ///
 /// In contrast to [MultiDragGestureRecognizer], [DragGestureRecognizer]
@@ -64,9 +66,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     Object? debugOwner,
     PointerDeviceKind? kind,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.velocityTrackerBuilder = _defaultBuilder,
   }) : assert(dragStartBehavior != null),
        super(debugOwner: debugOwner, kind: kind);
 
+  static VelocityTracker _defaultBuilder(PointerEvent ev) => VelocityTracker();
   /// Configure the behavior of offsets sent to [onStart].
   ///
   /// If set to [DragStartBehavior.start], the [onStart] callback will be called
@@ -170,6 +174,30 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// If null then [kMaxFlingVelocity] is used.
   double? maxFlingVelocity;
 
+  /// Determines the type of velocity estimation method to use for a potential
+  /// drag gesture, when a new pointer is added.
+  ///
+  /// To estimate the velocity of a gesture, [DragGestureRecognizer] calls
+  /// [velocityTrackerBuilder] when it starts to track a new pointer in
+  /// [addAllowedPointer], and add subsequent updates on the pointer to the
+  /// resulting velocity tracker, until the gesture recognizer stops tracking
+  /// the pointer. This allows you to specify a different velocity estimation
+  /// strategy for each allowed pointer added, by changing the type of velocity
+  /// tracker this [GestureVelocityTrackerBuilder] returns.
+  ///
+  /// If left unspecified the default [velocityTrackerBuilder] creates a new
+  /// [VelocityTracker] for every pointer added.
+  ///
+  /// See also:
+  ///
+  ///  * [VelocityTracker], a velocity tracker that uses least squares estimation
+  ///    on the 20 most recent pointer data samples. It's a well-rounded velocity
+  ///    tracker and is used by default.
+  ///  * [IOSScrollViewFlingVelocityTracker], a specialized velocity tracker for
+  ///    determining the initial fling velocity for a [Scrollable] on iOS, to
+  ///    match the native behavior on that platform.
+  GestureVelocityTrackerBuilder velocityTrackerBuilder;
+
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
   late OffsetPair _pendingDragOffset;
@@ -225,7 +253,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerEvent event) {
     startTrackingPointer(event.pointer, event.transform);
-    _velocityTrackers[event.pointer] = VelocityTracker();
+    _velocityTrackers[event.pointer] = velocityTrackerBuilder(event);
     if (_state == _DragState.ready) {
       _state = _DragState.possible;
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);

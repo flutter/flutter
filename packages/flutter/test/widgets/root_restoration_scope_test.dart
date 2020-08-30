@@ -296,8 +296,8 @@ void main() {
     };
     final RestorationBucket secondRoot = RestorationBucket.root(manager: binding.restorationManager, rawData: secondRawData);
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(secondRoot);
-    firstRoot..decommission()..dispose();
     await tester.pump();
+    firstRoot.dispose();
 
     expect(state.bucket, isNot(same(firstBucket)));
     expect(state.bucket.read<int>('foo'), 22);
@@ -362,8 +362,8 @@ void main() {
     expect(state.bucket, isNotNull);
 
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(null);
-    root..decommission()..dispose();
     await tester.pump();
+    root.dispose();
 
     expect(binding.restorationManager.rootBucketAccessed, 2);
     expect(find.text('Hello'), findsOneWidget);
@@ -379,7 +379,7 @@ class TestAutomatedTestWidgetsFlutterBinding extends AutomatedTestWidgetsFlutter
 
   @override
   TestRestorationManager createRestorationManager() {
-    return null;
+    return TestRestorationManager();
   }
 
   int _deferred = 0;

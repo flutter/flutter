@@ -226,7 +226,12 @@ class GestureDetector extends StatelessWidget {
     this.onSecondaryTapDown,
     this.onSecondaryTapUp,
     this.onSecondaryTapCancel,
+    this.onTertiaryTapDown,
+    this.onTertiaryTapUp,
+    this.onTertiaryTapCancel,
+    this.onDoubleTapDown,
     this.onDoubleTap,
+    this.onDoubleTapCancel,
     this.onLongPress,
     this.onLongPressStart,
     this.onLongPressMoveUpdate,
@@ -391,6 +396,54 @@ class GestureDetector extends StatelessWidget {
   ///  * [kSecondaryButton], the button this callback responds to.
   final GestureTapCancelCallback onSecondaryTapCancel;
 
+  /// A pointer that might cause a tap with a tertiary button has contacted the
+  /// screen at a particular location.
+  ///
+  /// This is called after a short timeout, even if the winning gesture has not
+  /// yet been selected. If the tap gesture wins, [onTertiaryTapUp] will be
+  /// called, otherwise [onTertiaryTapCancel] will be called.
+  ///
+  /// See also:
+  ///
+  ///  * [kTertiaryButton], the button this callback responds to.
+  final GestureTapDownCallback onTertiaryTapDown;
+
+  /// A pointer that will trigger a tap with a tertiary button has stopped
+  /// contacting the screen at a particular location.
+  ///
+  /// This triggers in the case of the tap gesture winning. If the tap gesture
+  /// did not win, [onTertiaryTapCancel] is called instead.
+  ///
+  /// See also:
+  ///
+  ///  * [kTertiaryButton], the button this callback responds to.
+  final GestureTapUpCallback onTertiaryTapUp;
+
+  /// The pointer that previously triggered [onTertiaryTapDown] will not end up
+  /// causing a tap.
+  ///
+  /// This is called after [onTertiaryTapDown], and instead of
+  /// [onTertiaryTapUp], if the tap gesture did not win.
+  ///
+  /// See also:
+  ///
+  ///  * [kTertiaryButton], the button this callback responds to.
+  final GestureTapCancelCallback onTertiaryTapCancel;
+
+  /// A pointer that might cause a double tap has contacted the screen at a
+  /// particular location.
+  ///
+  /// Triggered immediately after the down event of the second tap.
+  ///
+  /// If the user completes the double tap and the gesture wins, [onDoubleTap]
+  /// will be called after this callback. Otherwise, [onDoubleTapCancel] will
+  /// be called after this callback.
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
+  final GestureTapDownCallback onDoubleTapDown;
+
   /// The user has tapped the screen with a primary button at the same location
   /// twice in quick succession.
   ///
@@ -398,6 +451,14 @@ class GestureDetector extends StatelessWidget {
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   final GestureTapCallback onDoubleTap;
+
+  /// The pointer that previously triggered [onDoubleTapDown] will not end up
+  /// causing a double tap.
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
+  final GestureTapCancelCallback onDoubleTapCancel;
 
   /// Called when a long press gesture with a primary button has been recognized.
   ///
@@ -709,7 +770,10 @@ class GestureDetector extends StatelessWidget {
         onSecondaryTap != null ||
         onSecondaryTapDown != null ||
         onSecondaryTapUp != null ||
-        onSecondaryTapCancel != null
+        onSecondaryTapCancel != null||
+        onTertiaryTapDown != null ||
+        onTertiaryTapUp != null ||
+        onTertiaryTapCancel != null
     ) {
       gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
         () => TapGestureRecognizer(debugOwner: this),
@@ -722,7 +786,10 @@ class GestureDetector extends StatelessWidget {
             ..onSecondaryTap = onSecondaryTap
             ..onSecondaryTapDown = onSecondaryTapDown
             ..onSecondaryTapUp = onSecondaryTapUp
-            ..onSecondaryTapCancel = onSecondaryTapCancel;
+            ..onSecondaryTapCancel = onSecondaryTapCancel
+            ..onTertiaryTapDown = onTertiaryTapDown
+            ..onTertiaryTapUp = onTertiaryTapUp
+            ..onTertiaryTapCancel = onTertiaryTapCancel;
         },
       );
     }
@@ -731,7 +798,10 @@ class GestureDetector extends StatelessWidget {
       gestures[DoubleTapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<DoubleTapGestureRecognizer>(
         () => DoubleTapGestureRecognizer(debugOwner: this),
         (DoubleTapGestureRecognizer instance) {
-          instance.onDoubleTap = onDoubleTap;
+          instance
+            ..onDoubleTapDown = onDoubleTapDown
+            ..onDoubleTap = onDoubleTap
+            ..onDoubleTapCancel = onDoubleTapCancel;
         },
       );
     }

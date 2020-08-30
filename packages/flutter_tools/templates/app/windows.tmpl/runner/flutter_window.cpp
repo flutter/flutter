@@ -1,5 +1,7 @@
 #include "flutter_window.h"
 
+#include <optional>
+
 #include "flutter/generated_plugin_registrant.h"
 
 FlutterWindow::FlutterWindow(RunLoop* run_loop,
@@ -8,17 +10,24 @@ FlutterWindow::FlutterWindow(RunLoop* run_loop,
 
 FlutterWindow::~FlutterWindow() {}
 
-void FlutterWindow::OnCreate() {
-  Win32Window::OnCreate();
+bool FlutterWindow::OnCreate() {
+  if (!Win32Window::OnCreate()) {
+    return false;
+  }
 
   RECT frame = GetWindowDimensions();
 
   // The size here must match the window dimensions to avoid unnecessary surface creation / destruction in the startup path.
   flutter_controller_ =
       std::make_unique<flutter::FlutterViewController>(frame.right - frame.left, frame.bottom - frame.top, project_);
+  // Ensure that basic setup of the controller was successful.
+  if (!flutter_controller_->engine() || !flutter_controller_->view()) {
+    return false;
+  }
   RegisterPlugins(flutter_controller_.get());
   run_loop_->RegisterFlutterInstance(flutter_controller_.get());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
+  return true;
 }
 
 void FlutterWindow::OnDestroy() {
@@ -28,4 +37,20 @@ void FlutterWindow::OnDestroy() {
   }
 
   Win32Window::OnDestroy();
+}
+
+LRESULT
+FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
+                              WPARAM const wparam,
+                              LPARAM const lparam) noexcept {
+  // Give Flutter, including plugins, an opporutunity to handle window messages.
+  if (flutter_controller_) {
+    std::optional<LRESULT> result =
+        flutter_controller_->HandleTopLevelWindowProc(hwnd, message, wparam,
+                                                      lparam);
+    if (result) {
+      return *result;
+    }
+  }
+  return Win32Window::MessageHandler(hwnd, message, wparam, lparam);
 }

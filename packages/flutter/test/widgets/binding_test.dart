@@ -194,7 +194,7 @@ void main() {
   testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {
     FlutterError error;
     try {
-      tester.binding.scheduleFrameCallback(null, rescheduling: true);
+      tester.binding.scheduleFrameCallback((Duration _) { }, rescheduling: true);
     } on FlutterError catch (e) {
       error = e;
     }

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -88,7 +87,7 @@ class BasicMessageChannel<T> {
   ///
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
-  void setMockMessageHandler(Future<T> Function(T message) handler) {
+  void setMockMessageHandler(Future<T> Function(T message)? handler) {
     if (handler == null) {
       binaryMessenger.setMockMessageHandler(name, null);
     } else {

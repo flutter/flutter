@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -33,6 +34,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     addBuildPerformanceFile(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
+    usesAnalyzeSizeFlag();
   }
 
   @override
@@ -67,6 +69,12 @@ class BuildWindowsCommand extends BuildSubCommand {
       buildInfo,
       target: targetFile,
       visualStudioOverride: visualStudioOverride,
+      sizeAnalyzer: SizeAnalyzer(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        appFilenamePattern: 'app.so',
+        flutterUsage: globals.flutterUsage,
+      ),
     );
     return FlutterCommandResult.success();
   }

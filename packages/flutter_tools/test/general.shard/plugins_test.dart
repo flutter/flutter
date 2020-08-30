@@ -638,7 +638,7 @@ dependencies:
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
-      testUsingContext('old embedding app uses a plugin that supports v1 and v2 embedding works but shows a deprecation warning', () async {
+      testUsingContext('old embedding app uses a plugin that supports v1 and v2 embedding works', () async {
         when(flutterProject.isModule).thenReturn(false);
         when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
 
@@ -655,7 +655,6 @@ dependencies:
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
         expect(registrant.readAsStringSync(),
           contains('UseBothEmbedding.registerWith(registry.registrarFor("plugin4.UseBothEmbedding"));'));
-        expect(testLogger.statusText, contains('Follow the steps on https://flutter.dev/go/android-project-migration'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -902,6 +901,28 @@ flutter:
         expect(registrantFile, exists);
         expect(registrantFile, isNot(contains('SomePlugin')));
         expect(registrantFile, isNot(contains('none')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Invalid yaml does not crash plugin lookup.', () async {
+        when(macosProject.existsSync()).thenReturn(true);
+        when(featureFlags.isMacOSEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(true);
+        // Create a plugin without a pluginClass.
+        dummyPackageDirectory.parent.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(r'''
+"aws ... \"Branch\": $BITBUCKET_BRANCH, \"Date\": $(date +"%m-%d-%y"), \"Time\": $(date +"%T")}\"
+    ''');
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantFile = macosProject.managedDirectory.childFile('GeneratedPluginRegistrant.swift');
+
+        expect(registrantFile, exists);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

@@ -182,8 +182,7 @@ void main() {
     await tester.pump();
     // The only applied velocity to the scrollable is the second fling that was in the
     // opposite direction.
-    expect(getScrollVelocity(tester), greaterThan(-1000.0));
-    expect(getScrollVelocity(tester), lessThan(0.0));
+    expect(getScrollVelocity(tester), -1000.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('No iOS/macOS momentum kept on hold gestures', (WidgetTester tester) async {
@@ -269,7 +268,7 @@ void main() {
     expect(getScrollOffset(tester), 30.0);
     await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 20));
     expect(getScrollOffset(tester), 30.5);
-    await gesture.moveBy(Offset.zero);
+    await gesture.moveBy(Offset.zero, timeStamp: const Duration(milliseconds: 21));
     // Stationary too long, threshold reset.
     await gesture.moveBy(Offset.zero, timeStamp: const Duration(milliseconds: 120));
     await gesture.moveBy(const Offset(0.0, -1.0), timeStamp: const Duration(milliseconds: 140));

@@ -871,6 +871,9 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// Set this to null to silently catch and ignore errors. This is not
   /// recommended.
+  ///
+  /// Do not call [onError] directly, instead, call [reportError], which
+  /// forwards to [onError] if it is not null.
   static FlutterExceptionHandler? onError = (FlutterErrorDetails details) => presentError(details);
 
   /// Called by the Flutter framework before attempting to parse a [StackTrace].

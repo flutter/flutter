@@ -72,25 +72,11 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   @override
   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectWordsInRange(
-            from: details.globalPosition - details.offsetFromOrigin,
-            to: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-      }
+      renderEditable.selectWordsInRange(
+        from: details.globalPosition - details.offsetFromOrigin,
+        to: details.globalPosition,
+        cause: SelectionChangedCause.longPress,
+      );
     }
   }
 
@@ -118,22 +104,8 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   @override
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-          Feedback.forLongPress(_state.context);
-          break;
-      }
+      renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+      Feedback.forLongPress(_state.context);
     }
   }
 }
@@ -391,11 +363,8 @@ class SelectableText extends StatefulWidget {
   /// If not set, select all and copy will be enabled by default.
   final ToolbarOptions toolbarOptions;
 
-  /// True if interactive selection is enabled based on the values of
-  /// [enableInteractiveSelection].
-  bool get selectionEnabled {
-    return enableInteractiveSelection;
-  }
+  /// {@macro flutter.widgets.editableText.selectionEnabled}
+  bool get selectionEnabled => enableInteractiveSelection;
 
   /// Called when the user taps on this selectable text.
   ///
