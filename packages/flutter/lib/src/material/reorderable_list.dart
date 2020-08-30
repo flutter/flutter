@@ -363,7 +363,9 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // Handles up the logic for dragging and reordering items in the list.
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
-    final _GlobalObjectValueKey keyIndexGlobalKey = _GlobalObjectValueKey(toWrap.key);
+//    final GlobalObjectKey keyIndexGlobalKey = GlobalObjectKey(toWrap.key);
+    final _ReorderableListViewChildGlobalKey keyIndexGlobalKey = _ReorderableListViewChildGlobalKey(toWrap.key, this);
+    print('$keyIndexGlobalKey ${keyIndexGlobalKey.currentContext}');
     // We pass the toWrapWithGlobalKey into the Draggable so that when a list
     // item gets dragged, the accessibility framework can preserve the selected
     // state of the dragging item.
@@ -603,20 +605,23 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 /// The difference with GlobalObjectKey is that it uses [==] instead of [identical]
 /// of the objects used to generate widgets.
 @optionalTypeArgs
-class _GlobalObjectValueKey<T extends State<StatefulWidget>> extends GlobalObjectKey<T> {
+class _ReorderableListViewChildGlobalKey<T extends State<StatefulWidget>> extends GlobalObjectKey<T> {
 
-  const _GlobalObjectValueKey(this.value) : super(value);
+  const _ReorderableListViewChildGlobalKey(this.subKey, this.state) : super(subKey);
 
-  final Object value;
+  final Key subKey;
+
+  final _ReorderableListContentState state;
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    return other is _GlobalObjectValueKey<T>
-        && other.value == value;
+    return other is _ReorderableListViewChildGlobalKey<T>
+        && other.subKey == subKey
+        && other.state == state;
   }
 
   @override
-  int get hashCode => super.hashCode;
+  int get hashCode => identityHashCode(subKey);
 }
