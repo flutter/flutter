@@ -1,20 +1,22 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package test.io.flutter.embedding.engine;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import androidx.annotation.NonNull;
+import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
-import io.flutter.embedding.engine.loader.FlutterApplicationInfo;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -22,47 +24,19 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class PluginComponentTest {
+  @Before
+  public void setUp() {
+    FlutterInjector.reset();
+  }
+
   @Test
   public void pluginsCanAccessFlutterAssetPaths() {
     // Setup test.
+    FlutterInjector.setInstance(new FlutterInjector.Builder().setShouldLoadNative(false).build());
     FlutterJNI flutterJNI = mock(FlutterJNI.class);
     when(flutterJNI.isAttached()).thenReturn(true);
-    FlutterApplicationInfo emptyInfo =
-        new FlutterApplicationInfo(null, null, null, null, null, null, false, false);
 
-    // FlutterLoader is the object to which the PluginRegistry defers for obtaining
-    // the path to a Flutter asset. Ideally in this component test we would use a
-    // real FlutterLoader and directly verify the relationship between FlutterAssets
-    // and FlutterLoader. However, a real FlutterLoader cannot be used in a JVM test
-    // because it would attempt to load native libraries. Therefore, we create a fake
-    // FlutterLoader, but then we defer the corresponding asset lookup methods to the
-    // real FlutterLoader singleton. This test ends up verifying that when FlutterAssets
-    // is queried for an asset path, it returns the real expected path based on real
-    // FlutterLoader behavior.
-    FlutterLoader flutterLoader = mock(FlutterLoader.class);
-    when(flutterLoader.getLookupKeyForAsset(any(String.class)))
-        .thenAnswer(
-            new Answer<String>() {
-              @Override
-              public String answer(InvocationOnMock invocation) throws Throwable {
-                // Defer to a real FlutterLoader to return the asset path.
-                String fileNameOrSubpath = (String) invocation.getArguments()[0];
-                return FlutterLoader.getInstanceForTest(emptyInfo)
-                    .getLookupKeyForAsset(fileNameOrSubpath);
-              }
-            });
-    when(flutterLoader.getLookupKeyForAsset(any(String.class), any(String.class)))
-        .thenAnswer(
-            new Answer<String>() {
-              @Override
-              public String answer(InvocationOnMock invocation) throws Throwable {
-                // Defer to a real FlutterLoader to return the asset path.
-                String fileNameOrSubpath = (String) invocation.getArguments()[0];
-                String packageName = (String) invocation.getArguments()[1];
-                return FlutterLoader.getInstanceForTest(emptyInfo)
-                    .getLookupKeyForAsset(fileNameOrSubpath, packageName);
-              }
-            });
+    FlutterLoader flutterLoader = new FlutterLoader();
 
     // Execute behavior under test.
     FlutterEngine flutterEngine =
@@ -82,6 +56,7 @@ public class PluginComponentTest {
     assertEquals(
         "flutter_assets/packages/fakepackage/some/path/fake_asset.jpg",
         plugin.getAssetPathBasedOnSubpathAndPackage());
+    FlutterInjector.reset();
   }
 
   private static class PluginThatAccessesAssets implements FlutterPlugin {

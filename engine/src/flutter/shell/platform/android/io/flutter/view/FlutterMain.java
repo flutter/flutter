@@ -8,7 +8,7 @@ import android.content.Context;
 import android.os.Handler;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 
 /**
@@ -42,10 +42,7 @@ public class FlutterMain {
    * @param applicationContext The Android application context.
    */
   public static void startInitialization(@NonNull Context applicationContext) {
-    if (isRunningInRobolectricTest) {
-      return;
-    }
-    FlutterLoader.getInstance().startInitialization(applicationContext);
+    FlutterInjector.instance().flutterLoader().startInitialization(applicationContext);
   }
 
   /**
@@ -61,12 +58,9 @@ public class FlutterMain {
    */
   public static void startInitialization(
       @NonNull Context applicationContext, @NonNull Settings settings) {
-    if (isRunningInRobolectricTest) {
-      return;
-    }
     FlutterLoader.Settings newSettings = new FlutterLoader.Settings();
     newSettings.setLogTag(settings.getLogTag());
-    FlutterLoader.getInstance().startInitialization(applicationContext, newSettings);
+    FlutterInjector.instance().flutterLoader().startInitialization(applicationContext, newSettings);
   }
 
   /**
@@ -79,10 +73,9 @@ public class FlutterMain {
    */
   public static void ensureInitializationComplete(
       @NonNull Context applicationContext, @Nullable String[] args) {
-    if (isRunningInRobolectricTest) {
-      return;
-    }
-    FlutterLoader.getInstance().ensureInitializationComplete(applicationContext, args);
+    FlutterInjector.instance()
+        .flutterLoader()
+        .ensureInitializationComplete(applicationContext, args);
   }
 
   /**
@@ -94,22 +87,20 @@ public class FlutterMain {
       @Nullable String[] args,
       @NonNull Handler callbackHandler,
       @NonNull Runnable callback) {
-    if (isRunningInRobolectricTest) {
-      return;
-    }
-    FlutterLoader.getInstance()
+    FlutterInjector.instance()
+        .flutterLoader()
         .ensureInitializationCompleteAsync(applicationContext, args, callbackHandler, callback);
   }
 
   @NonNull
   public static String findAppBundlePath() {
-    return FlutterLoader.getInstance().findAppBundlePath();
+    return FlutterInjector.instance().flutterLoader().findAppBundlePath();
   }
 
   @Deprecated
   @Nullable
   public static String findAppBundlePath(@NonNull Context applicationContext) {
-    return FlutterLoader.getInstance().findAppBundlePath();
+    return FlutterInjector.instance().flutterLoader().findAppBundlePath();
   }
 
   /**
@@ -121,7 +112,7 @@ public class FlutterMain {
    */
   @NonNull
   public static String getLookupKeyForAsset(@NonNull String asset) {
-    return FlutterLoader.getInstance().getLookupKeyForAsset(asset);
+    return FlutterInjector.instance().flutterLoader().getLookupKeyForAsset(asset);
   }
 
   /**
@@ -135,23 +126,6 @@ public class FlutterMain {
    */
   @NonNull
   public static String getLookupKeyForAsset(@NonNull String asset, @NonNull String packageName) {
-    return FlutterLoader.getInstance().getLookupKeyForAsset(asset, packageName);
-  }
-
-  private static boolean isRunningInRobolectricTest = false;
-
-  /*
-   * Indicates whether we are currently running in a Robolectric Test.
-   *
-   * <p> Flutter cannot be initialized inside a Robolectric environment since it cannot load
-   * native libraries.
-   *
-   * @deprecated Use the new embedding (io.flutter.embedding) instead which provides better
-   *     modularity for testing.
-   */
-  @Deprecated
-  @VisibleForTesting
-  public static void setIsRunningInRobolectricTest(boolean isRunningInRobolectricTest) {
-    FlutterMain.isRunningInRobolectricTest = isRunningInRobolectricTest;
+    return FlutterInjector.instance().flutterLoader().getLookupKeyForAsset(asset, packageName);
   }
 }
