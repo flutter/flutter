@@ -147,7 +147,7 @@ abstract class FinderExtension {
 /// This is not normally used directly. It is instantiated automatically when
 /// calling [enableFlutterDriverExtension].
 @visibleForTesting
-class FlutterDriverExtension with  DeserializeFinderFactory {
+class FlutterDriverExtension with DeserializeFinderFactory {
   /// Creates an object to manage a Flutter Driver connection.
   FlutterDriverExtension(this._requestDataHandler, this._silenceErrors, List<FinderExtension> finders) {
     _testTextInput.register();
