@@ -72,7 +72,7 @@ class ObjectKey extends LocalKey {
   const ObjectKey(this.value);
 
   /// The object whose identity is used by this key's [operator==].
-  final Object value;
+  final Object? value;
 
   @override
   bool operator ==(Object other) {
