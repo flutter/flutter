@@ -3,6 +3,7 @@ package test.io.flutter.embedding.engine;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
@@ -136,5 +138,19 @@ public class FlutterEngineTest {
         /*automaticallyRegisterPlugins=*/ false);
 
     verify(context, atLeast(1)).getApplicationContext();
+  }
+
+  @Test
+  public void itCanUseFlutterLoaderInjectionViaFlutterInjector() {
+    FlutterInjector.reset();
+    FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
+    FlutterInjector.setInstance(
+        new FlutterInjector.Builder().setFlutterLoader(mockFlutterLoader).build());
+    Context mockContext = mock(Context.class);
+
+    new FlutterEngine(mockContext, null, flutterJNI);
+
+    verify(mockFlutterLoader, times(1)).startInitialization(any());
+    verify(mockFlutterLoader, times(1)).ensureInitializationComplete(any(), any());
   }
 }

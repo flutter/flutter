@@ -16,6 +16,8 @@ import io.flutter.embedding.engine.FlutterEnginePluginRegistryTest;
 import io.flutter.embedding.engine.FlutterJNITest;
 import io.flutter.embedding.engine.LocalizationPluginTest;
 import io.flutter.embedding.engine.RenderingComponentTest;
+import io.flutter.embedding.engine.loader.ApplicationInfoLoaderTest;
+import io.flutter.embedding.engine.loader.FlutterLoaderTest;
 import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistryTest;
 import io.flutter.embedding.engine.renderer.FlutterRendererTest;
 import io.flutter.embedding.engine.systemchannels.KeyEventChannelTest;
@@ -44,6 +46,7 @@ import test.io.flutter.embedding.engine.dart.DartExecutorTest;
 @SuiteClasses({
   AccessibilityBridgeTest.class,
   AndroidKeyProcessorTest.class,
+  ApplicationInfoLoaderTest.class,
   DartExecutorTest.class,
   FlutterActivityAndFragmentDelegateTest.class,
   FlutterActivityTest.class,
@@ -53,8 +56,11 @@ import test.io.flutter.embedding.engine.dart.DartExecutorTest;
   FlutterEngineTest.class,
   FlutterFragmentActivityTest.class,
   FlutterFragmentTest.class,
+  FlutterInjectorTest.class,
   FlutterJNITest.class,
   FlutterLaunchTests.class,
+  FlutterLoaderTest.class,
+  FlutterShellArgsTest.class,
   FlutterRendererTest.class,
   FlutterShellArgsTest.class,
   FlutterViewTest.class,
