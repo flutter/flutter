@@ -10,13 +10,13 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
 import '../src/common.dart';
+import 'test_utils.dart';
 
 // Set this to true for debugging to get verbose logs written to stdout.
 // The logs include the following:
@@ -84,7 +84,7 @@ abstract class FlutterTestDriver {
     bool withDebugger = false,
     File pidFile,
   }) async {
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     if (withDebugger) {
       arguments.add('--start-paused');
     }
