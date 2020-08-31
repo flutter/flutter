@@ -4,7 +4,11 @@
 
 // @dart = 2.8
 
-/// Flutter widgets implementing the current iOS design language.
+/// Flutter widgets implementing the current iOS design language. This library
+/// is designed for apps that run on iOS or iPadOS. For apps that may also run
+/// on other operating systems, we encourage use of other widgets, for example
+/// the [Material
+/// Design](https://flutter.dev/docs/development/ui/widgets/material) set.
 ///
 /// To use, import `package:flutter/cupertino.dart`.
 ///
