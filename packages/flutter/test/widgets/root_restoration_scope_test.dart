@@ -379,7 +379,7 @@ class TestAutomatedTestWidgetsFlutterBinding extends AutomatedTestWidgetsFlutter
 
   @override
   TestRestorationManager createRestorationManager() {
-    return null;
+    return TestRestorationManager();
   }
 
   int _deferred = 0;

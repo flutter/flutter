@@ -13,6 +13,13 @@ import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
 
+/// The default path used when the `useSyntheticPackage` setting is set to true
+/// in [LocalizationsGenerator].
+///
+/// See [LocalizationsGenerator.initialize] for where and how it is used by the
+/// localizations tool.
+final String defaultSyntheticPackagePath = path.join('.dart_tool', 'flutter_gen', 'gen_l10n');
+
 List<String> generateMethodParameters(Message message) {
   assert(message.placeholders.isNotEmpty);
   final Placeholder countPlaceholder = message.isPlural ? message.getCountPlaceholder() : null;
@@ -523,11 +530,15 @@ class LocalizationsGenerator {
     String headerFile,
     bool useDeferredLoading = false,
     String inputsAndOutputsListPath,
+    bool useSyntheticPackage = true,
     String projectPathString,
   }) {
     setProjectDir(projectPathString);
     setInputDirectory(inputPathString);
-    setOutputDirectory(outputPathString ?? inputPathString);
+    setOutputDirectory(
+      outputPathString: outputPathString ?? inputPathString,
+      useSyntheticPackage: useSyntheticPackage,
+    );
     setTemplateArbFile(templateArbFileName);
     setBaseOutputFile(outputFileString);
     setPreferredSupportedLocales(preferredSupportedLocaleString);
@@ -595,14 +606,29 @@ class LocalizationsGenerator {
 
   /// Sets the reference [Directory] for [outputDirectory].
   @visibleForTesting
-  void setOutputDirectory(String outputPathString) {
-    if (outputPathString == null)
-      throw L10nException('outputPathString argument cannot be null');
-    outputDirectory = _fs.directory(
-      projectDirectory != null
-        ? _getAbsoluteProjectPath(outputPathString)
-        : outputPathString
-    );
+  void setOutputDirectory({
+    String outputPathString,
+    bool useSyntheticPackage = true,
+  }) {
+    if (useSyntheticPackage) {
+      outputDirectory = _fs.directory(
+        projectDirectory != null
+          ? _getAbsoluteProjectPath(defaultSyntheticPackagePath)
+          : defaultSyntheticPackagePath
+      );
+    } else {
+      if (outputPathString == null)
+        throw L10nException(
+          'outputPathString argument cannot be null if not using '
+          'synthetic package option.'
+        );
+
+      outputDirectory = _fs.directory(
+        projectDirectory != null
+          ? _getAbsoluteProjectPath(outputPathString)
+          : outputPathString
+      );
+    }
   }
 
   /// Sets the reference [File] for [templateArbFile].
@@ -716,6 +742,7 @@ class LocalizationsGenerator {
     _inputsAndOutputsListFile = _fs.file(
       path.join(inputsAndOutputsListPath, 'gen_l10n_inputs_and_outputs.json'),
     );
+
     _inputFileList = <String>[];
     _outputFileList = <String>[];
   }

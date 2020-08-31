@@ -129,9 +129,9 @@ void main() {
 
     final Offset target = topLeft + (bottomRight - topLeft) / 4.0;
     await tester.tapAt(target);
-    expect(value, closeTo(0.25, 0.05));
+    expect(value, moreOrLessEquals(0.25, epsilon: 0.05));
     expect(startValue, equals(0.5));
-    expect(endValue, closeTo(0.25, 0.05));
+    expect(endValue, moreOrLessEquals(0.25, epsilon: 0.05));
     await tester.pump(); // No animation should start.
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
@@ -179,7 +179,7 @@ void main() {
 
     final Offset target = topLeft + (bottomRight - topLeft) / 4.0;
     await tester.tapAt(target);
-    expect(value, closeTo(0.75, 0.05));
+    expect(value, moreOrLessEquals(0.75, epsilon: 0.05));
     await tester.pump(); // No animation should start.
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
@@ -352,20 +352,20 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 5);
-    expect(log.last.dx, closeTo(386.6, 0.1));
+    expect(log.last.dx, moreOrLessEquals(386.6, epsilon: 0.1));
     // With no more gesture or value changes, the thumb position should still
     // be redrawn in the animated position.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 7);
-    expect(log.last.dx, closeTo(344.5, 0.1));
+    expect(log.last.dx, moreOrLessEquals(344.5, epsilon: 0.1));
     // Final position.
     await tester.pump(const Duration(milliseconds: 80));
     expectedLog.add(const Offset(24.0, 300.0));
     expect(value, equals(0.0));
     expect(log.length, 8);
-    expect(log.last.dx, closeTo(24.0, 0.1));
+    expect(log.last.dx, moreOrLessEquals(24.0, epsilon: 0.1));
     await gesture.up();
   });
 
@@ -467,20 +467,20 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 5);
-    expect(log.last.dx, closeTo(386.6, 0.1));
+    expect(log.last.dx, moreOrLessEquals(386.6, epsilon: 0.1));
     // With no more gesture or value changes, the thumb position should still
     // be redrawn in the animated position.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 7);
-    expect(log.last.dx, closeTo(344.5, 0.1));
+    expect(log.last.dx, moreOrLessEquals(344.5, epsilon: 0.1));
     // Final position.
     await tester.pump(const Duration(milliseconds: 80));
     expectedLog.add(const Offset(24.0, 300.0));
     expect(value, equals(0.0));
     expect(log.length, 8);
-    expect(log.last.dx, closeTo(24.0, 0.1));
+    expect(log.last.dx, moreOrLessEquals(24.0, epsilon: 0.1));
     await gesture.up();
   });
 
@@ -2358,6 +2358,43 @@ void main() {
       'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
       'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
     ]);
+  });
+
+  testWidgets('Slider track paints correctly when the shape is rectangular', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+            sliderTheme: const SliderThemeData(
+              trackShape: RectangularSliderTrackShape(),
+            ),
+        ),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData.fromWindow(window),
+            child: const Material(
+              child: Center(
+                child: Slider(
+                  value: 0.5,
+                  onChanged: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+
+    // The active track rect should start at 24.0 pixels,
+    // and there should not have a gap between active and inactive track.
+    expect(renderObject,
+        paints
+          ..rect(rect: const Rect.fromLTRB(24.0, 298.0, 400.0, 302.0)) // active track Rect.
+          ..rect(rect: const Rect.fromLTRB(400.0, 298.0, 776.0, 302.0)) // inactive track Rect.
+    );
   });
 
   testWidgets('Slider can be painted in a narrower constraint', (WidgetTester tester) async {

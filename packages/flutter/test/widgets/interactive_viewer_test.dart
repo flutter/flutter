@@ -383,22 +383,22 @@ void main() {
       // It hits the boundary in the x direction first.
       await tester.pump(const Duration(milliseconds: 60));
       translation = transformationController.value.getTranslation();
-      expect(translation.x, closeTo(boundaryMargin, .000000001));
+      expect(translation.x, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
       expect(translation.y, lessThan(boundaryMargin));
       final double yWhenXHits = translation.y;
 
       // x is held to the boundary while y slides along.
       await tester.pump(const Duration(milliseconds: 50));
       translation = transformationController.value.getTranslation();
-      expect(translation.x, closeTo(boundaryMargin, .000000001));
+      expect(translation.x, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
       expect(translation.y, greaterThan(yWhenXHits));
       expect(translation.y, lessThan(boundaryMargin));
 
       // Eventually it ends up in the corner.
       await tester.pumpAndSettle();
       translation = transformationController.value.getTranslation();
-      expect(translation.x, closeTo(boundaryMargin, .000000001));
-      expect(translation.y, closeTo(boundaryMargin, .000000001));
+      expect(translation.x, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
+      expect(translation.y, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
     });
 
     testWidgets('Scaling automatically causes a centering translation', (WidgetTester tester) async {
@@ -430,8 +430,8 @@ void main() {
       await tester.flingFrom(childOffset, flingEnd, 1000.0);
       await tester.pumpAndSettle();
       translation = transformationController.value.getTranslation();
-      expect(translation.x, closeTo(boundaryMargin, .000000001));
-      expect(translation.y, closeTo(boundaryMargin, .000000001));
+      expect(translation.x, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
+      expect(translation.y, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
 
       // Zoom out so the entire child is visible. The child will also be
       // translated in order to keep it inside the boundaries.
@@ -457,7 +457,7 @@ void main() {
       expect(translation.y, lessThan(boundaryMargin));
       expect(translation.x, greaterThan(0.0));
       expect(translation.y, greaterThan(0.0));
-      expect(translation.x, closeTo(translation.y, .000000001));
+      expect(translation.x, moreOrLessEquals(translation.y, epsilon: 1e-9));
 
       // Zoom in on a point that's not the center, and see that it remains at
       // roughly the same location in the viewport after the zoom.
@@ -482,8 +482,8 @@ void main() {
       await gesture2.up();
       await tester.pumpAndSettle();
       final Offset newSceneFocalPoint = transformationController.toScene(viewportFocalPoint);
-      expect(newSceneFocalPoint.dx, closeTo(sceneFocalPoint.dx, 1.0));
-      expect(newSceneFocalPoint.dy, closeTo(sceneFocalPoint.dy, 1.0));
+      expect(newSceneFocalPoint.dx, moreOrLessEquals(sceneFocalPoint.dx, epsilon: 1.0));
+      expect(newSceneFocalPoint.dy, moreOrLessEquals(sceneFocalPoint.dy, epsilon: 1.0));
     });
 
     testWidgets('Scaling automatically causes a centering translation even when alignPanAxis is set', (WidgetTester tester) async {
@@ -522,8 +522,8 @@ void main() {
       await tester.flingFrom(childOffset2, flingEnd2, 1000.0);
       await tester.pumpAndSettle();
       translation = transformationController.value.getTranslation();
-      expect(translation.x, closeTo(boundaryMargin, .000000001));
-      expect(translation.y, closeTo(boundaryMargin, .000000001));
+      expect(translation.x, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
+      expect(translation.y, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
 
       // Zoom out so the entire child is visible. The child will also be
       // translated in order to keep it inside the boundaries.
@@ -549,7 +549,7 @@ void main() {
       expect(translation.y, lessThan(boundaryMargin));
       expect(translation.x, greaterThan(0.0));
       expect(translation.y, greaterThan(0.0));
-      expect(translation.x, closeTo(translation.y, .000000001));
+      expect(translation.x, moreOrLessEquals(translation.y, epsilon: 1e-9));
 
       // Zoom in on a point that's not the center, and see that it remains at
       // roughly the same location in the viewport after the zoom.
@@ -574,8 +574,8 @@ void main() {
       await gesture2.up();
       await tester.pumpAndSettle();
       final Offset newSceneFocalPoint = transformationController.toScene(viewportFocalPoint);
-      expect(newSceneFocalPoint.dx, closeTo(sceneFocalPoint.dx, 1.0));
-      expect(newSceneFocalPoint.dy, closeTo(sceneFocalPoint.dy, 1.0));
+      expect(newSceneFocalPoint.dx, moreOrLessEquals(sceneFocalPoint.dx, epsilon: 1.0));
+      expect(newSceneFocalPoint.dy, moreOrLessEquals(sceneFocalPoint.dy, epsilon: 1.0));
     });
 
     testWidgets('Can scale with mouse', (WidgetTester tester) async {
@@ -784,8 +784,8 @@ void main() {
 
       final Vector3 closestPoint = InteractiveViewer.getNearestPointOnLine(point, a , b);
 
-      expect(closestPoint.x, closeTo(-356.8, 0.1));
-      expect(closestPoint.y, closeTo(205.8, 0.1));
+      expect(closestPoint.x, moreOrLessEquals(-356.8, epsilon: 0.1));
+      expect(closestPoint.y, moreOrLessEquals(205.8, epsilon: 0.1));
     });
   });
 
@@ -933,8 +933,8 @@ void main() {
 
       final Vector3 nearestPoint = InteractiveViewer.getNearestPointInside(point, quad);
 
-      expect(nearestPoint.x, closeTo(5.8, 0.1));
-      expect(nearestPoint.y, closeTo(10.8, 0.1));
+      expect(nearestPoint.x, moreOrLessEquals(5.8, epsilon: 0.1));
+      expect(nearestPoint.y, moreOrLessEquals(10.8, epsilon: 0.1));
     });
   });
 }
