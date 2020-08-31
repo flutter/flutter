@@ -1542,7 +1542,8 @@ abstract class DiagnosticsNode {
   ///
   /// See also:
   ///
-  ///  * [getProperties]
+  ///  * [getProperties], which returns the properties of the [DiagnosticsNode]
+  ///  object.
   List<DiagnosticsNode> getChildren();
 
   String get _separator => showSeparator ? ':' : '';

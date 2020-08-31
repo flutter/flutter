@@ -590,7 +590,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
 ///    glow color is specified to use [ThemeData.accentColor].
 class ClampingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that prevent the scroll offset from exceeding the
-  /// bounds of the content..
+  /// bounds of the content.
   const ClampingScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
 
   @override
