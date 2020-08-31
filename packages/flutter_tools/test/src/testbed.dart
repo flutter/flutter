@@ -916,11 +916,6 @@ class FakeCache implements Cache {
   }
 
   @override
-  Future<String> getThirdPartyFile(String urlStr, String serviceName) {
-    throw UnsupportedError('Not supported in the fake Cache');
-  }
-
-  @override
   String getVersionFor(String artifactName) {
     throw UnsupportedError('Not supported in the fake Cache');
   }
@@ -947,10 +942,6 @@ class FakeCache implements Cache {
 
   @override
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
-  }
-
-  @override
-  Future<void> downloadFile(Uri url, File location) async {
   }
 
   @override
