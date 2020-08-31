@@ -6239,14 +6239,14 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   void mount(Element? parent, dynamic newSlot) {
     super.mount(parent, newSlot);
-    final List<Element?> children = List<Element?>.filled(widget.children.length, null, growable: false);
+    final List<Element> children = List<Element>.filled(widget.children.length, _NullElement.instance, growable: false);
     Element? previousChild;
     for (int i = 0; i < children.length; i += 1) {
       final Element newChild = inflateWidget(widget.children[i], IndexedSlot<Element?>(i, previousChild));
       children[i] = newChild;
       previousChild = newChild;
     }
-    _children = children.cast<Element>();
+    _children = children;
   }
 
   @override
