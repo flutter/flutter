@@ -1416,6 +1416,9 @@ class ArtifactUpdater {
        _tempStorage = tempStorage,
        _platform = platform;
 
+  /// The number of times the artifact updater will repeat the artifact download loop.
+  static const int _kRetryCount = 2;
+
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;
   final FileSystem _fileSystem;
@@ -1467,7 +1470,7 @@ class ArtifactUpdater {
       message,
       timeout: null, // This will take a variable amount of time based on network connectivity.
     );
-    int retries = 2;
+    int retries = _kRetryCount;
 
     while (retries > 0) {
       try {
