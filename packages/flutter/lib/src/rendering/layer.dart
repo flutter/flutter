@@ -2027,6 +2027,9 @@ class LayerLink {
   LeaderLayer? get leader => _leader;
   LeaderLayer? _leader;
 
+  /// The total size of the contents of [leader].
+  Size? leaderSize;
+
   @override
   String toString() => '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
 }
@@ -2045,12 +2048,7 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  LeaderLayer({
-      required LayerLink link,
-      this.offset = Offset.zero,
-      this.size = Size.zero,
-  }) : assert(link != null),
-       _link = link;
+  LeaderLayer({ required LayerLink link, this.offset = Offset.zero }) : assert(link != null), _link = link;
 
   /// The object with which this layer should register.
   ///
@@ -2071,12 +2069,6 @@ class LeaderLayer extends ContainerLayer {
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
   Offset offset;
-
-  /// The size of the layer's contents.
-  ///
-  /// This property is used to position the [FollowerLayer]s linked to this
-  /// layer, when their [FollowerLayer.leaderAnchor] is not [Alignment.topLeft].
-  Size size;
 
   /// {@macro flutter.leaderFollower.alwaysNeedsAddToScene}
   @override
@@ -2149,15 +2141,13 @@ class LeaderLayer extends ContainerLayer {
 /// A composited layer that applies a transformation matrix to its children such
 /// that they are positioned to match a [LeaderLayer].
 ///
-/// Once linked, a [FollowerLayer] will adjust its position so that its
-/// [followerAnchor] is lined up with the [LeaderLayer]'s anchor pont. A
-/// [linkedOffset] property can be provided to further offset the child layer
-/// from the leader layer, for example if the child is to follow the linked
-/// layer at a distance rather than directly overlapping it.
-///
 /// If any of the ancestors of this layer have a degenerate matrix (e.g. scaling
 /// by zero), then the [FollowerLayer] will not be able to transform its child
 /// to the coordinate space of the [LeaderLayer].
+///
+/// A [linkedOffset] property can be provided to further offset the child layer
+/// from the leader layer, for example if the child is to follow the linked
+/// layer at a distance rather than directly overlapping it.
 class FollowerLayer extends ContainerLayer {
   /// Creates a follower layer.
   ///
@@ -2170,23 +2160,7 @@ class FollowerLayer extends ContainerLayer {
     this.showWhenUnlinked = true,
     this.unlinkedOffset = Offset.zero,
     this.linkedOffset = Offset.zero,
-  }) : assert(link != null),
-       _link = link,
-       leaderAnchor = Alignment.topLeft,
-       followerAnchor = Alignment.topLeft,
-       size = Size.zero;
-
-  /// Creates a follower layer with specified alignments.
-  FollowerLayer.withAlignments({
-    required LayerLink link,
-    this.showWhenUnlinked = true,
-    this.unlinkedOffset = Offset.zero,
-    this.linkedOffset = Offset.zero,
-    this.leaderAnchor = Alignment.topLeft,
-    this.followerAnchor = Alignment.topLeft,
-    required this.size,
-  }) : assert(link != null),
-       _link = link;
+  }) : assert(link != null), _link = link;
 
   /// The link to the [LeaderLayer].
   ///
@@ -2203,9 +2177,8 @@ class FollowerLayer extends ContainerLayer {
   /// Whether to show the layer's contents when the [link] does not point to a
   /// [LeaderLayer].
   ///
-  /// When the layer is linked, children layers are positioned such that the
-  /// [followerAnchor] have the same global position as the linked
-  /// [LeaderLayer]'s [leaderAnchor].
+  /// When the layer is linked, children layers are positioned such that they
+  /// have the same global position as the linked [LeaderLayer].
   ///
   /// When the layer is not linked, then: if [showWhenUnlinked] is true,
   /// children are positioned as if the [FollowerLayer] was a [ContainerLayer];
@@ -2214,29 +2187,6 @@ class FollowerLayer extends ContainerLayer {
   /// The [showWhenUnlinked] property must be non-null before the compositing
   /// phase of the pipeline.
   bool? showWhenUnlinked;
-
-  /// The point on the linked leader layer that [followerAnchor] will line up
-  /// with.
-  ///
-  /// The scene must be explicitly recomposited after this property is changed
-  /// (as described at [Layer]). Does not affect the layer's position if this
-  /// layer is currently not linked.
-  Alignment leaderAnchor = Alignment.topLeft;
-
-  /// The point on this [FollowerLayer] that will line up with the the linked
-  /// leader layer.
-  ///
-  /// The scene must be explicitly recomposited after this property is changed
-  /// (as described at [Layer]). Does not affect the layer's position if this
-  /// layer is currently not linked.
-  Alignment followerAnchor = Alignment.topLeft;
-
-  /// Size of the layer's contents, as seen by the linked [LeaderLayer].
-  ///
-  /// This property is used to position this [FollowerLayer] when
-  /// [followerAnchor] is not [Alignment.topLeft]. The scene must be explicitly
-  /// recomposited after this property is changed (as described at [Layer]).
-  Size size;
 
   /// Offset from parent in the parent's coordinate system, used when the layer
   /// is not linked to a [LeaderLayer].
@@ -2252,8 +2202,8 @@ class FollowerLayer extends ContainerLayer {
   ///  * [linkedOffset], for when the layers are linked.
   Offset? unlinkedOffset;
 
-  /// Offset from the [leaderAnchor] of the leader layer to the [followerAnchor]
-  /// of the child layers, used when the layer is linked to a [LeaderLayer].
+  /// Offset from the origin of the leader layer to the origin of the child
+  /// layers, used when the layer is linked to a [LeaderLayer].
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
@@ -2266,18 +2216,6 @@ class FollowerLayer extends ContainerLayer {
   ///  * [unlinkedOffset], for when the layer is not linked.
   Offset? linkedOffset;
 
-  /// The effective [linkedOffset] in the leader's child's coordinate system.
-  Offset get _effectiveLinkedOffset {
-    final Offset? additionalOffset = linkedOffset;
-    final Size? leaderSize = link.leader?.size;
-    if (additionalOffset == null || leaderSize == null) {
-      assert(additionalOffset != null, 'linkedOffset must not be null');
-      assert(leaderSize != null, 'the leader property of $link must not be null');
-      return Offset.zero;
-    }
-
-    return leaderAnchor.alongSize(leaderSize) - followerAnchor.alongSize(size) + additionalOffset;
-  }
 
   Offset? _lastOffset;
   Matrix4? _lastTransform;
@@ -2291,10 +2229,9 @@ class FollowerLayer extends ContainerLayer {
     }
     if (_invertedTransform == null)
       return null;
-    final Offset effectiveLinkedOffset = _effectiveLinkedOffset;
     final Vector4 vector = Vector4(localPosition.dx, localPosition.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform!.transform(vector);
-    return Offset(result[0] - effectiveLinkedOffset.dx, result[1] - effectiveLinkedOffset.dy);
+    return Offset(result[0] - linkedOffset!.dx, result[1] - linkedOffset!.dy);
   }
 
   @override
@@ -2407,8 +2344,7 @@ class FollowerLayer extends ContainerLayer {
     // of the leader layer, to account for the leader's additional paint offset
     // and layer offset (LeaderLayer._lastOffset).
     leader.applyTransform(null, forwardTransform);
-    final Offset effectiveOrigin = _effectiveLinkedOffset;
-    forwardTransform.translate(effectiveOrigin.dx, effectiveOrigin.dy);
+    forwardTransform.translate(linkedOffset!.dx, linkedOffset!.dy);
 
     final Matrix4 inverseTransform = _collectTransformForLayerChain(inverseLayers);
 

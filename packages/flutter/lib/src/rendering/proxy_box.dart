@@ -4850,14 +4850,14 @@ class RenderLeaderLayer extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    link.leaderSize = size;
     if (layer == null) {
-      layer = LeaderLayer(link: link, offset: offset, size: size);
+      layer = LeaderLayer(link: link, offset: offset);
     } else {
       final LeaderLayer leaderLayer = layer as LeaderLayer;
       leaderLayer
         ..link = link
-        ..offset = offset
-        ..size = size;
+        ..offset = offset;
     }
     context.pushLayer(layer!, super.paint, Offset.zero);
     assert(layer != null);
@@ -4991,6 +4991,16 @@ class RenderFollowerLayer extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  Offset get _effectiveLinkedOffset {
+    final Size? leaderSize = link.leaderSize;
+    if (leaderSize == null) {
+      assert(leaderSize != null, 'the leader property of $link must not be null');
+      return Offset.zero;
+    }
+
+    return leaderAnchor.alongSize(leaderSize) - followerAnchor.alongSize(size) + offset;
+  }
+
   @override
   void detach() {
     layer = null;
@@ -5041,24 +5051,18 @@ class RenderFollowerLayer extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     assert(showWhenUnlinked != null);
     if (layer == null) {
-      layer = FollowerLayer.withAlignments(
+      layer = FollowerLayer(
         link: link,
         showWhenUnlinked: showWhenUnlinked,
-        linkedOffset: this.offset,
+        linkedOffset: _effectiveLinkedOffset,
         unlinkedOffset: offset,
-        leaderAnchor: leaderAnchor,
-        followerAnchor: followerAnchor,
-        size: size,
       );
     } else {
       layer
         ?..link = link
         ..showWhenUnlinked = showWhenUnlinked
-        ..linkedOffset = this.offset
-        ..unlinkedOffset = offset
-        ..leaderAnchor = leaderAnchor
-        ..followerAnchor = followerAnchor
-        ..size = size;
+        ..linkedOffset = _effectiveLinkedOffset
+        ..unlinkedOffset = offset;
     }
     context.pushLayer(
       layer!,
