@@ -18,9 +18,11 @@ import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../build_system/targets/icon_tree_shaker.dart' show kIconTreeShakerEnabledDefault;
 import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../dart/generate_synthetic_packages.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
@@ -609,7 +611,9 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kAnalyzeSize,
       defaultsTo: false,
       help: 'Whether to produce additional profile information for artifact output size. '
-        'This flag is only supported on release builds on macOS/Linux hosts.'
+        'This flag is only supported on release builds. When building for Android, a single '
+        'ABI must be specified at a time with the --target-platform flag. When building for iOS, '
+        'only the symbols from the arm64 architecture are used to analyze code size.'
     );
   }
 
@@ -648,13 +652,14 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    String analyzeSize;
-    if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize)
-      && boolArg(FlutterOptions.kAnalyzeSize)
-      && !globals.platform.isWindows) {
-      final File file = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'flutter_size', 'json');
-      extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${file.path}');
-      analyzeSize = file.path;
+    String codeSizeDirectory;
+    if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) && boolArg(FlutterOptions.kAnalyzeSize)) {
+      final Directory directory = globals.fsUtils.getUniqueDirectory(
+        globals.fs.directory(getBuildDirectory()),
+        'flutter_size',
+      );
+      directory.createSync(recursive: true);
+      codeSizeDirectory = directory.path;
     }
 
     NullSafetyMode nullSafetyMode = NullSafetyMode.unsound;
@@ -688,7 +693,7 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
     final BuildMode buildMode = forcedBuildMode ?? getBuildMode();
-    if (buildMode != BuildMode.release && analyzeSize != null) {
+    if (buildMode != BuildMode.release && codeSizeDirectory != null) {
       throwToolExit('--analyze-size can only be used on release builds.');
     }
 
@@ -736,7 +741,7 @@ abstract class FlutterCommand extends Command<void> {
       performanceMeasurementFile: performanceMeasurementFile,
       packagesPath: globalResults['packages'] as String ?? '.packages',
       nullSafetyMode: nullSafetyMode,
-      analyzeSize: analyzeSize,
+      codeSizeDirectory: codeSizeDirectory,
     );
   }
 
@@ -883,6 +888,23 @@ abstract class FlutterCommand extends Command<void> {
 
     if (shouldRunPub) {
       final FlutterProject project = FlutterProject.current();
+      final Environment environment = Environment(
+        artifacts: globals.artifacts,
+        logger: globals.logger,
+        cacheDir: globals.cache.getRoot(),
+        engineVersion: globals.flutterVersion.engineRevision,
+        fileSystem: globals.fs,
+        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        outputDir: globals.fs.directory(getBuildDirectory()),
+        processManager: globals.processManager,
+        projectDir: project.directory,
+      );
+
+      await generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: globals.buildSystem,
+      );
+
       await pub.get(
         context: PubContext.getVerifyContext(name),
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,

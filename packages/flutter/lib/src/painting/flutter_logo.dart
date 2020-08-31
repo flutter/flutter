@@ -139,7 +139,7 @@ class FlutterLogoDecoration extends Decoration {
       t < 0.5 ? a.style : b.style,
       EdgeInsets.lerp(a.margin, b.margin, t)!,
       a._position + (b._position - a._position) * t,
-      (a._opacity + (b._opacity - a._opacity) * t).clamp(0.0, 1.0) as double,
+      (a._opacity + (b._opacity - a._opacity) * t).clamp(0.0, 1.0),
     );
   }
 

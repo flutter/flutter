@@ -4,12 +4,15 @@
 
 import 'dart:async';
 
+import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/mac.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
@@ -35,6 +38,7 @@ class BuildIOSCommand extends BuildSubCommand {
     addBuildPerformanceFile(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
+    usesAnalyzeSizeFlag();
     argParser
       ..addFlag('simulator',
         help: 'Build for the iOS simulator instead of the device. This changes '
@@ -101,6 +105,45 @@ class BuildIOSCommand extends BuildSubCommand {
     if (!result.success) {
       await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger);
       throwToolExit('Encountered error while building for $logTarget.');
+    }
+
+    if (buildInfo.codeSizeDirectory != null) {
+      final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        flutterUsage: globals.flutterUsage,
+        appFilenamePattern: 'App'
+      );
+      // Only support 64bit iOS code size analysis.
+      final String arch = getNameForDarwinArch(DarwinArch.arm64);
+      final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
+        .childFile('snapshot.$arch.json');
+      final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
+        .childFile('trace.$arch.json');
+
+      // This analysis is only supported for release builds, which also excludes the simulator.
+      // Attempt to guess the correct .app by picking the first one.
+      final Directory candidateDirectory = globals.fs.directory(
+        globals.fs.path.join(getIosBuildDirectory(), 'Release-iphoneos'),
+      );
+      final Directory appDirectory = candidateDirectory.listSync()
+        .whereType<Directory>()
+        .firstWhere((Directory directory) {
+        return globals.fs.path.extension(directory.path) == '.app';
+      });
+      final Map<String, Object> output = await sizeAnalyzer.analyzeAotSnapshot(
+        aotSnapshot: aotSnapshot,
+        precompilerTrace: precompilerTrace,
+        outputDirectory: appDirectory,
+        type: 'ios',
+      );
+      final File outputFile = globals.fsUtils.getUniqueFile(
+        globals.fs.directory(getBuildDirectory()),'ios-code-size-analysis', 'json',
+      )..writeAsStringSync(jsonEncode(output));
+      // This message is used as a sentinel in analyze_apk_size_test.dart
+      globals.printStatus(
+        'A summary of your iOS bundle analysis can be found at: ${outputFile.path}',
+      );
     }
 
     if (result.output != null) {
