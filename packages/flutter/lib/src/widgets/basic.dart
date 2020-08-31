@@ -1392,7 +1392,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   ///
   /// For example, when [targetAnchor] and [followerAnchor] are both
   /// [Alignment.topLeft], this widget will be top left aligned with the linked
-  /// [CompositedTransformTarget]. When [leaderAnchor] is
+  /// [CompositedTransformTarget]. When [targetAnchor] is
   /// [Alignment.bottomLeft] and [followerAnchor] is [Alignment.topLeft], this
   /// widget will be left aligned with the linked [CompositedTransformTarget],
   /// and its top edge will line up with the [CompositedTransformTarget]'s
@@ -1406,7 +1406,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   ///
   /// For example, when [targetAnchor] and [followerAnchor] are both
   /// [Alignment.topLeft], this widget will be top left aligned with the linked
-  /// [CompositedTransformTarget]. When [leaderAnchor] is
+  /// [CompositedTransformTarget]. When [targetAnchor] is
   /// [Alignment.bottomLeft] and [followerAnchor] is [Alignment.topLeft], this
   /// widget will be left aligned with the linked [CompositedTransformTarget],
   /// and its top edge will line up with the [CompositedTransformTarget]'s

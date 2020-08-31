@@ -4963,7 +4963,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// with the linked [RenderLeaderLayer]. When [leaderAnchor] is
   /// [Alignment.bottomLeft] and [followerAnchor] is [Alignment.topLeft], this
   /// [RenderFollowerLayer] will be left aligned with the linked
-  /// [RenderLeaderlayer], and its top edge will line up with the
+  /// [RenderLeaderLayer], and its top edge will line up with the
   /// [RenderLeaderLayer]'s bottom edge.
   ///
   /// Defaults to [Alignment.topLeft].
@@ -4985,7 +4985,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// with the linked [RenderLeaderLayer]. When [leaderAnchor] is
   /// [Alignment.bottomLeft] and [followerAnchor] is [Alignment.topLeft], this
   /// [RenderFollowerLayer] will be left aligned with the linked
-  /// [RenderLeaderlayer], and its top edge will line up with the
+  /// [RenderLeaderLayer], and its top edge will line up with the
   /// [RenderLeaderLayer]'s bottom edge.
   ///
   /// Defaults to [Alignment.topLeft].
