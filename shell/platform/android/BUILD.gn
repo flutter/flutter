@@ -177,6 +177,7 @@ android_java_sources = [
   "io/flutter/embedding/engine/plugins/service/ServicePluginBinding.java",
   "io/flutter/embedding/engine/plugins/shim/ShimPluginRegistry.java",
   "io/flutter/embedding/engine/plugins/shim/ShimRegistrar.java",
+  "io/flutter/embedding/engine/plugins/util/GeneratedPluginRegister.java",
   "io/flutter/embedding/engine/renderer/FlutterRenderer.java",
   "io/flutter/embedding/engine/renderer/FlutterUiDisplayListener.java",
   "io/flutter/embedding/engine/renderer/RenderSurface.java",
