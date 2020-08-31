@@ -660,7 +660,7 @@ class _RouterScope extends InheritedWidget {
     required this.routeInformationParser,
     required this.routerDelegate,
     required this.routerState,
-    required Widget? child,
+    required Widget child,
   })  : assert(routeInformationProvider == null || routeInformationParser != null),
         assert(routerDelegate != null),
         assert(routerState != null),

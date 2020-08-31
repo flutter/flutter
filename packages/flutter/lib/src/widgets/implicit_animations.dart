@@ -1027,7 +1027,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   /// The [curve] and [duration] arguments must not be null.
   AnimatedPositioned.fromRect({
     Key? key,
-    this.child,
+    required this.child,
     required Rect rect,
     Curve curve = Curves.linear,
     required Duration duration,
@@ -1043,7 +1043,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
-  final Widget? child;
+  final Widget child;
 
   /// The offset of the child's left edge from the left of the stack.
   final double? left;

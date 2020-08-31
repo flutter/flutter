@@ -1394,7 +1394,7 @@ class OrderedTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusT
 /// [FocusTraversalOrder.of] for a particular context.
 class FocusTraversalOrder extends InheritedWidget {
   /// A const constructor so that subclasses can be const.
-  const FocusTraversalOrder({Key? key, this.order, Widget? child}) : super(key: key, child: child);
+  const FocusTraversalOrder({Key? key, this.order, required Widget child}) : super(key: key, child: child);
 
   /// The order for the widget descendants of this [FocusTraversalOrder].
   final FocusOrder? order;
@@ -1754,7 +1754,7 @@ class _FocusTraversalGroupMarker extends InheritedWidget {
   const _FocusTraversalGroupMarker({
     required this.policy,
     required this.focusNode,
-    Widget? child,
+    required Widget child,
   })  : assert(policy != null),
         assert(focusNode != null),
         super(child: child);

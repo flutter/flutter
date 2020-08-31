@@ -59,7 +59,7 @@ class DefaultTextStyle extends InheritedTheme {
   ///
   /// Returned from [of] when the given [BuildContext] doesn't have an enclosing default text style.
   ///
-  /// This constructor creates a [DefaultTextStyle] that lacks a [child], which
+  /// This constructor creates a [DefaultTextStyle] with an invalid [child], which
   /// means the constructed value cannot be incorporated into the tree.
   const DefaultTextStyle.fallback({ Key? key })
     : style = const TextStyle(),
@@ -69,7 +69,7 @@ class DefaultTextStyle extends InheritedTheme {
       overflow = TextOverflow.clip,
       textWidthBasis = TextWidthBasis.parent,
       textHeightBehavior = null,
-      super(key: key, child: null);
+      super(key: key, child: const _NullWidget());
 
   /// Creates a default text style that overrides the text styles in scope at
   /// this point in the widget tree.
@@ -204,6 +204,17 @@ class DefaultTextStyle extends InheritedTheme {
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
     properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
+  }
+}
+
+class _NullWidget extends StatelessWidget {
+  const _NullWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    throw FlutterError(
+      'DefaultTextStyle.fallback cannot be incorporated into the tree.'
+    );
   }
 }
 

@@ -288,7 +288,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
 class _AutofillScope extends InheritedWidget {
   const _AutofillScope({
     Key? key,
-    Widget? child,
+    required Widget child,
     AutofillGroupState? autofillScopeState,
   }) : _scope = autofillScopeState,
        super(key: key, child: child);

@@ -1497,7 +1497,7 @@ abstract class ProxyWidget extends Widget {
   /// widget's child be a widget such as [Row], [Column], or [Stack], which have a
   /// `children` property, and then provide the children to that widget.
   /// {@endtemplate}
-  final Widget? child;
+  final Widget child;
 }
 
 /// Base class for widgets that hook [ParentData] information to children of
@@ -1556,7 +1556,7 @@ abstract class ProxyWidget extends Widget {
 abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const ParentDataWidget({ Key? key, Widget? child })
+  const ParentDataWidget({ Key? key, required Widget child })
     : super(key: key, child: child);
 
   @override
@@ -1781,7 +1781,7 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 abstract class InheritedWidget extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const InheritedWidget({ Key? key, Widget? child })
+  const InheritedWidget({ Key? key, required Widget child })
     : super(key: key, child: child);
 
   @override

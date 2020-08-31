@@ -634,7 +634,7 @@ class HeroControllerScope extends InheritedWidget {
   const HeroControllerScope({
     Key? key,
     this.controller,
-    Widget? child,
+    required Widget child,
   }) : assert(controller != null),
        super(key: key, child: child);
 
@@ -642,7 +642,7 @@ class HeroControllerScope extends InheritedWidget {
   /// above.
   const HeroControllerScope.none({
     Key? key,
-    Widget? child,
+    required Widget child,
   }) : controller = null,
        super(key: key, child: child);
 

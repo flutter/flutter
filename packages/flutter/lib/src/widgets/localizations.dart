@@ -229,7 +229,7 @@ class _LocalizationsScope extends InheritedWidget {
     required this.locale,
     required this.localizationsState,
     required this.typeToResources,
-    Widget? child,
+    required Widget child,
   }) : assert(localizationsState != null),
        assert(typeToResources != null),
        super(key: key, child: child);

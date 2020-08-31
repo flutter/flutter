@@ -22,7 +22,7 @@ class TickerMode extends StatelessWidget {
   const TickerMode({
     Key? key,
     required this.enabled,
-    this.child,
+    required this.child,
   }) : assert(enabled != null),
        super(key: key);
 
@@ -42,7 +42,7 @@ class TickerMode extends StatelessWidget {
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
-  final Widget? child;
+  final Widget child;
 
   /// Whether tickers in the given subtree should be enabled or disabled.
   ///
@@ -81,7 +81,7 @@ class _EffectiveTickerMode extends InheritedWidget {
   const _EffectiveTickerMode({
     Key? key,
     required this.enabled,
-    Widget? child,
+    required Widget child,
   }) : assert(enabled != null),
         super(key: key, child: child);
 

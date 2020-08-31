@@ -90,7 +90,7 @@ abstract class InheritedTheme extends InheritedWidget {
 
   const InheritedTheme({
     Key? key,
-    required Widget? child,
+    required Widget child,
   }) : super(key: key, child: child);
 
   /// Return a copy of this inherited theme with the specified [child].
