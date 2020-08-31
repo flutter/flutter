@@ -305,7 +305,7 @@ class WebReleaseBundle extends Target {
       // not a content hash, because it would need to be the hash for the entire bundle and not
       // just the resource in question.
       if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
-        final String randomHash = Random().nextInt(10000000).toString();
+        final String randomHash = Random().nextInt(4294967296).toString();
         final String resultString = inputFile.readAsStringSync()
           .replaceFirst(
             '<script src="main.dart.js" type="application/javascript"></script>',
