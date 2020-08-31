@@ -754,6 +754,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugin
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/service/ServicePluginBinding.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/shim/ShimPluginRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/shim/ShimRegistrar.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/util/GeneratedPluginRegister.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/FlutterRenderer.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/FlutterUiDisplayListener.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/RenderSurface.java
