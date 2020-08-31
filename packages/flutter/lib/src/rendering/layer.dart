@@ -2027,7 +2027,7 @@ class LayerLink {
   LeaderLayer? get leader => _leader;
   LeaderLayer? _leader;
 
-  /// The total size of the contents of [leader].
+  /// The total size of [leader]'s contents.
   Size? leaderSize;
 
   @override
@@ -2215,7 +2215,6 @@ class FollowerLayer extends ContainerLayer {
   ///
   ///  * [unlinkedOffset], for when the layer is not linked.
   Offset? linkedOffset;
-
 
   Offset? _lastOffset;
   Matrix4? _lastTransform;

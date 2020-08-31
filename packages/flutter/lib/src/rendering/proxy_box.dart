@@ -4826,22 +4826,25 @@ class RenderLeaderLayer extends RenderProxyBox {
     required LayerLink link,
     RenderBox? child,
   }) : assert(link != null),
-       super(child) {
-    this.link = link;
-  }
+       _link = link,
+       super(child);
 
   /// The link object that connects this [RenderLeaderLayer] with one or more
   /// [RenderFollowerLayer]s.
   ///
   /// This property must not be null. The object must not be associated with
   /// another [RenderLeaderLayer] that is also being painted.
-  LayerLink get link => _link!;
-  LayerLink? _link;
+  LayerLink get link => _link;
+  LayerLink _link;
   set link(LayerLink value) {
     assert(value != null);
     if (_link == value)
       return;
+    _link.leaderSize = null;
     _link = value;
+    if (hasSize) {
+      _link.leaderSize = size;
+    }
     markNeedsPaint();
   }
 
@@ -4849,8 +4852,13 @@ class RenderLeaderLayer extends RenderProxyBox {
   bool get alwaysNeedsCompositing => true;
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void performLayout() {
+    super.performLayout();
     link.leaderSize = size;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
     if (layer == null) {
       layer = LeaderLayer(link: link, offset: offset);
     } else {
@@ -4991,16 +4999,6 @@ class RenderFollowerLayer extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  Offset get _effectiveLinkedOffset {
-    final Size? leaderSize = link.leaderSize;
-    if (leaderSize == null) {
-      assert(leaderSize != null, 'the leader property of $link must not be null');
-      return Offset.zero;
-    }
-
-    return leaderAnchor.alongSize(leaderSize) - followerAnchor.alongSize(size) + offset;
-  }
-
   @override
   void detach() {
     layer = null;
@@ -5049,19 +5047,29 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    final Size? leaderSize = link.leaderSize;
+    assert(
+      link.leaderSize != null || (link.leader == null || leaderAnchor == Alignment.topLeft),
+      '$link: layer is linked to ${link.leader} but a valid leaderSize is not set. '
+      'leaderSize is required when leaderAnchor is not Alignment.topLeft'
+      '(current value is $leaderAnchor).',
+    );
+    final Offset effectiveLinkedOffset = leaderSize == null
+      ? this.offset
+      : leaderAnchor.alongSize(leaderSize) - followerAnchor.alongSize(size) + this.offset;
     assert(showWhenUnlinked != null);
     if (layer == null) {
       layer = FollowerLayer(
         link: link,
         showWhenUnlinked: showWhenUnlinked,
-        linkedOffset: _effectiveLinkedOffset,
+        linkedOffset: effectiveLinkedOffset,
         unlinkedOffset: offset,
       );
     } else {
       layer
         ?..link = link
         ..showWhenUnlinked = showWhenUnlinked
-        ..linkedOffset = _effectiveLinkedOffset
+        ..linkedOffset = effectiveLinkedOffset
         ..unlinkedOffset = offset;
     }
     context.pushLayer(
