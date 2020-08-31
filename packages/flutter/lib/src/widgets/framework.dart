@@ -195,7 +195,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
       final Map<GlobalKey, Element> keyToParent = <GlobalKey, Element>{};
       _debugReservations.forEach((Element parent, Map<Element, GlobalKey> childToKey) {
         // We ignore parent that are unmounted or detached.
-        if (parent._debugLifecycleState == _ElementLifecycle.defunct || parent.renderObject?.attached == false)
+        if (parent._lifecycleState == _ElementLifecycle.defunct || parent.renderObject?.attached == false)
           return;
         childToKey.forEach((Element child, GlobalKey key) {
           // If parent = null, the node is deactivated by its parent and is
@@ -265,7 +265,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
     assert(() {
       Map<GlobalKey, Set<Element>>? duplicates;
       for (final Element element in _debugIllFatedElements) {
-        if (element._debugLifecycleState != _ElementLifecycle.defunct) {
+        if (element._lifecycleState != _ElementLifecycle.defunct) {
           assert(element != null);
           assert(element.widget != null);
           assert(element.widget.key != null);
@@ -1996,7 +1996,7 @@ class _InactiveElements {
   final Set<Element> _elements = HashSet<Element>();
 
   void _unmount(Element element) {
-    assert(element._debugLifecycleState == _ElementLifecycle.inactive);
+    assert(element._lifecycleState == _ElementLifecycle.inactive);
     assert(() {
       if (debugPrintGlobalKeyedWidgetLifecycle) {
         if (element.widget.key is GlobalKey)
@@ -2009,7 +2009,7 @@ class _InactiveElements {
       _unmount(child);
     });
     element.unmount();
-    assert(element._debugLifecycleState == _ElementLifecycle.defunct);
+    assert(element._lifecycleState == _ElementLifecycle.defunct);
   }
 
   void _unmountAll() {
@@ -2025,9 +2025,9 @@ class _InactiveElements {
   }
 
   static void _deactivateRecursively(Element element) {
-    assert(element._debugLifecycleState == _ElementLifecycle.active);
+    assert(element._lifecycleState == _ElementLifecycle.active);
     element.deactivate();
-    assert(element._debugLifecycleState == _ElementLifecycle.inactive);
+    assert(element._lifecycleState == _ElementLifecycle.inactive);
     element.visitChildren(_deactivateRecursively);
     assert(() {
       element.debugDeactivated();
@@ -2039,7 +2039,7 @@ class _InactiveElements {
     assert(!_locked);
     assert(!_elements.contains(element));
     assert(element._parent == null);
-    if (element._active)
+    if (element._lifecycleState == _ElementLifecycle.active)
       _deactivateRecursively(element);
     _elements.add(element);
   }
@@ -2049,7 +2049,7 @@ class _InactiveElements {
     assert(_elements.contains(element));
     assert(element._parent == null);
     _elements.remove(element);
-    assert(!element._active);
+    assert(element._lifecycleState != _ElementLifecycle.active);
   }
 
   bool debugContains(Element element) {
@@ -2731,7 +2731,7 @@ class BuildOwner {
         assert(_dirtyElements[index] != null);
         assert(_dirtyElements[index]._inDirtyList);
         assert(() {
-          if (_dirtyElements[index]._active && !_dirtyElements[index]._debugIsInScope(context)) {
+          if (_dirtyElements[index]._lifecycleState == _ElementLifecycle.active && !_dirtyElements[index]._debugIsInScope(context)) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('Tried to build dirty widget in the wrong build scope.'),
               ErrorDescription(
@@ -2793,7 +2793,7 @@ class BuildOwner {
         }
       }
       assert(() {
-        if (_dirtyElements.any((Element element) => element._active && element.dirty)) {
+        if (_dirtyElements.any((Element element) => element._lifecycleState == _ElementLifecycle.active && element.dirty)) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('buildScope missed some dirty elements.'),
             ErrorHint('This probably indicates that the dirty list should have been resorted but was not.'),
@@ -2860,7 +2860,7 @@ class BuildOwner {
               _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans!.isNotEmpty) {
             final Set<GlobalKey> keys = HashSet<GlobalKey>();
             for (final Element element in _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans!.keys) {
-              if (element._debugLifecycleState != _ElementLifecycle.defunct)
+              if (element._lifecycleState != _ElementLifecycle.defunct)
                 keys.addAll(_debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans![element]!);
             }
             if (keys.isNotEmpty) {
@@ -3062,13 +3062,21 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// An integer that is guaranteed to be greater than the parent's, if any.
   /// The element at the root of the tree must have a depth greater than 0.
-  int? get depth => _depth;
-  int? _depth;
+  int get depth {
+    assert(() {
+      if (_lifecycleState == _ElementLifecycle.initial) {
+        throw FlutterError('Depth is only available when element has been mounted.');
+      }
+      return true;
+    }());
+    return _depth;
+  }
+  late int _depth;
 
   static int _sort(Element a, Element b) {
-    if (a.depth! < b.depth!)
+    if (a.depth < b.depth)
       return -1;
-    if (b.depth! < a.depth!)
+    if (b.depth < a.depth)
       return 1;
     if (b.dirty && !a.dirty)
       return -1;
@@ -3096,8 +3104,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   BuildOwner? get owner => _owner;
   BuildOwner? _owner;
-
-  bool _active = false;
 
   /// {@template flutter.widgets.reassemble}
   /// Called whenever the application is reassembled during debugging, for
@@ -3218,7 +3224,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   // This is used to verify that Element objects move through life in an
   // orderly fashion.
-  _ElementLifecycle _debugLifecycleState = _ElementLifecycle.initial;
+  _ElementLifecycle _lifecycleState = _ElementLifecycle.initial;
 
   /// Calls the argument for each child. Must be overridden by subclasses that
   /// support having children.
@@ -3388,17 +3394,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// [RenderObjectElement.removeRenderObjectChild].
   @mustCallSuper
   void mount(Element? parent, dynamic newSlot) {
-    assert(_debugLifecycleState == _ElementLifecycle.initial);
+    assert(_lifecycleState == _ElementLifecycle.initial);
     assert(widget != null);
     assert(_parent == null);
-    assert(parent == null || parent._debugLifecycleState == _ElementLifecycle.active);
+    assert(parent == null || parent._lifecycleState == _ElementLifecycle.active);
     assert(slot == null);
-    assert(depth == null);
-    assert(!_active);
     _parent = parent;
     _slot = newSlot;
-    _depth = _parent != null ? _parent!.depth! + 1 : 1;
-    _active = true;
+    _lifecycleState = _ElementLifecycle.active;
+    _depth = _parent != null ? _parent!.depth + 1 : 1;
     if (parent != null) // Only assign ownership if the parent is non-null
       _owner = parent.owner;
     final Key? key = widget.key;
@@ -3406,10 +3410,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       key._register(this);
     }
     _updateInheritance();
-    assert(() {
-      _debugLifecycleState = _ElementLifecycle.active;
-      return true;
-    }());
   }
 
   void _debugRemoveGlobalKeyReservation(Element child) {
@@ -3427,12 +3427,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void update(covariant Widget newWidget) {
     // This code is hot when hot reloading, so we try to
     // only call _AssertionError._evaluateAssertion once.
-    assert(_debugLifecycleState == _ElementLifecycle.active
+    assert(_lifecycleState == _ElementLifecycle.active
         && widget != null
         && newWidget != null
         && newWidget != widget
         && depth != null
-        && _active
         && Widget.canUpdate(widget, newWidget));
     // This Element was told to update and we can now release all the global key
     // reservations of forgotten children. We cannot do this earlier because the
@@ -3454,7 +3453,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// to another in this element's child list.
   @protected
   void updateSlotForChild(Element child, dynamic newSlot) {
-    assert(_debugLifecycleState == _ElementLifecycle.active);
+    assert(_lifecycleState == _ElementLifecycle.active);
     assert(child != null);
     assert(child._parent == this);
     void visit(Element element) {
@@ -3466,17 +3465,17 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   void _updateSlot(dynamic newSlot) {
-    assert(_debugLifecycleState == _ElementLifecycle.active);
+    assert(_lifecycleState == _ElementLifecycle.active);
     assert(widget != null);
     assert(_parent != null);
-    assert(_parent!._debugLifecycleState == _ElementLifecycle.active);
+    assert(_parent!._lifecycleState == _ElementLifecycle.active);
     assert(depth != null);
     _slot = newSlot;
   }
 
   void _updateDepth(int parentDepth) {
     final int expectedDepth = parentDepth + 1;
-    if (_depth! < expectedDepth) {
+    if (_depth < expectedDepth) {
       _depth = expectedDepth;
       visitChildren((Element child) {
         child._updateDepth(expectedDepth);
@@ -3599,7 +3598,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       return true;
     }());
     newChild.mount(this, newSlot);
-    assert(newChild._debugLifecycleState == _ElementLifecycle.active);
+    assert(newChild._lifecycleState == _ElementLifecycle.active);
     return newChild;
   }
 
@@ -3678,23 +3677,23 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   void _activateWithParent(Element parent, dynamic newSlot) {
-    assert(_debugLifecycleState == _ElementLifecycle.inactive);
+    assert(_lifecycleState == _ElementLifecycle.inactive);
     _parent = parent;
     assert(() {
       if (debugPrintGlobalKeyedWidgetLifecycle)
         debugPrint('Reactivating $this (now child of $_parent).');
       return true;
     }());
-    _updateDepth(_parent!.depth!);
+    _updateDepth(_parent!.depth);
     _activateRecursively(this);
     attachRenderObject(newSlot);
-    assert(_debugLifecycleState == _ElementLifecycle.active);
+    assert(_lifecycleState == _ElementLifecycle.active);
   }
 
   static void _activateRecursively(Element element) {
-    assert(element._debugLifecycleState == _ElementLifecycle.inactive);
+    assert(element._lifecycleState == _ElementLifecycle.inactive);
     element.activate();
-    assert(element._debugLifecycleState == _ElementLifecycle.active);
+    assert(element._lifecycleState == _ElementLifecycle.active);
     element.visitChildren(_activateRecursively);
   }
 
@@ -3708,22 +3707,17 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// See the lifecycle documentation for [Element] for additional information.
   @mustCallSuper
   void activate() {
-    assert(_debugLifecycleState == _ElementLifecycle.inactive);
+    assert(_lifecycleState == _ElementLifecycle.inactive);
     assert(widget != null);
     assert(owner != null);
     assert(depth != null);
-    assert(!_active);
     final bool hadDependencies = (_dependencies != null && _dependencies!.isNotEmpty) || _hadUnsatisfiedDependencies;
-    _active = true;
+    _lifecycleState = _ElementLifecycle.active;
     // We unregistered our dependencies in deactivate, but never cleared the list.
     // Since we're going to be reused, let's clear our list now.
     _dependencies?.clear();
     _hadUnsatisfiedDependencies = false;
     _updateInheritance();
-    assert(() {
-      _debugLifecycleState = _ElementLifecycle.active;
-      return true;
-    }());
     if (_dirty)
       owner!.scheduleBuildFor(this);
     if (hadDependencies)
@@ -3744,10 +3738,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// See the lifecycle documentation for [Element] for additional information.
   @mustCallSuper
   void deactivate() {
-    assert(_debugLifecycleState == _ElementLifecycle.active);
+    assert(_lifecycleState == _ElementLifecycle.active);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(depth != null);
-    assert(_active);
     if (_dependencies != null && _dependencies!.isNotEmpty) {
       for (final InheritedElement dependency in _dependencies!)
         dependency._dependents.remove(this);
@@ -3759,11 +3752,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       // dependencies here.
     }
     _inheritedWidgets = null;
-    _active = false;
-    assert(() {
-      _debugLifecycleState = _ElementLifecycle.inactive;
-      return true;
-    }());
+    _lifecycleState = _ElementLifecycle.inactive;
   }
 
   /// Called, in debug mode, after children have been deactivated (see [deactivate]).
@@ -3771,7 +3760,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// This method is not called in release builds.
   @mustCallSuper
   void debugDeactivated() {
-    assert(_debugLifecycleState == _ElementLifecycle.inactive);
+    assert(_lifecycleState == _ElementLifecycle.inactive);
   }
 
   /// Transition from the "inactive" to the "defunct" lifecycle state.
@@ -3787,19 +3776,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// See the lifecycle documentation for [Element] for additional information.
   @mustCallSuper
   void unmount() {
-    assert(_debugLifecycleState == _ElementLifecycle.inactive);
+    assert(_lifecycleState == _ElementLifecycle.inactive);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(depth != null);
-    assert(!_active);
     // Use the private property to avoid a CastError during hot reload.
     final Key? key = _widget.key;
     if (key is GlobalKey) {
       key._unregister(this);
     }
-    assert(() {
-      _debugLifecycleState = _ElementLifecycle.defunct;
-      return true;
-    }());
+    _lifecycleState = _ElementLifecycle.defunct;
   }
 
   @override
@@ -3808,7 +3793,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   Size? get size {
     assert(() {
-      if (_debugLifecycleState != _ElementLifecycle.active) {
+      if (_lifecycleState != _ElementLifecycle.active) {
         // TODO(jacobr): is this a good separation into contract and violation?
         // I have added a line of white space.
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -3816,7 +3801,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           ErrorDescription(
             'In order for an element to have a valid size, the element must be '
             'active, which means it is part of the tree.\n'
-            'Instead, this element is in the $_debugLifecycleState state.'
+            'Instead, this element is in the $_lifecycleState state.'
           ),
           describeElement('The size getter was called for the following element'),
         ]);
@@ -3934,7 +3919,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   bool _debugCheckStateIsActiveForAncestorLookup() {
     assert(() {
-      if (_debugLifecycleState != _ElementLifecycle.active) {
+      if (_lifecycleState != _ElementLifecycle.active) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary("Looking up a deactivated widget's ancestor is unsafe."),
           ErrorDescription(
@@ -4021,7 +4006,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   void _updateInheritance() {
-    assert(_active);
+    assert(_lifecycleState == _ElementLifecycle.active);
     _inheritedWidgets = _parent?._inheritedWidgets;
   }
 
@@ -4157,7 +4142,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// this function to notify this element of the change.
   @mustCallSuper
   void didChangeDependencies() {
-    assert(_active); // otherwise markNeedsBuild is a no-op
+    assert(_lifecycleState == _ElementLifecycle.active); // otherwise markNeedsBuild is a no-op
     assert(_debugCheckOwnerBuildTargetExists('didChangeDependencies'));
     markNeedsBuild();
   }
@@ -4232,7 +4217,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle= DiagnosticsTreeStyle.dense;
-    properties.add(ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
+    if (_lifecycleState != _ElementLifecycle.initial) {
+      properties.add(ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
+    }
     properties.add(ObjectFlagProperty<Widget>('widget', widget, ifNull: 'no widget'));
     properties.add(DiagnosticsProperty<Key>('key', widget.key, showName: false, defaultValue: null, level: DiagnosticLevel.hidden));
     widget.debugFillProperties(properties);
@@ -4284,11 +4271,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// widgets dirty during event handlers before the frame begins, not during
   /// the build itself.
   void markNeedsBuild() {
-    assert(_debugLifecycleState != _ElementLifecycle.defunct);
-    if (!_active)
+    assert(_lifecycleState != _ElementLifecycle.defunct);
+    if (_lifecycleState != _ElementLifecycle.active)
       return;
     assert(owner != null);
-    assert(_debugLifecycleState == _ElementLifecycle.active);
+    assert(_lifecycleState == _ElementLifecycle.active);
     assert(() {
       if (owner!._debugBuilding) {
         assert(owner!._debugCurrentBuildTarget != null);
@@ -4339,8 +4326,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// called to mark this element dirty, by [mount] when the element is first
   /// built, and by [update] when the widget has changed.
   void rebuild() {
-    assert(_debugLifecycleState != _ElementLifecycle.initial);
-    if (!_active || !_dirty)
+    assert(_lifecycleState != _ElementLifecycle.initial);
+    if (_lifecycleState != _ElementLifecycle.active || !_dirty)
       return;
     assert(() {
       if (debugOnRebuildDirtyWidget != null) {
@@ -4356,7 +4343,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       }
       return true;
     }());
-    assert(_debugLifecycleState == _ElementLifecycle.active);
+    assert(_lifecycleState == _ElementLifecycle.active);
     assert(owner!._debugStateLocked);
     Element? debugPreviousBuildTarget;
     assert(() {
@@ -4621,7 +4608,7 @@ abstract class ComponentElement extends Element {
   void mount(Element? parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     assert(_child == null);
-    assert(_active);
+    assert(_lifecycleState == _ElementLifecycle.active);
     _firstBuild();
     assert(_child != null);
   }
@@ -4862,7 +4849,7 @@ class StatefulElement extends ComponentElement {
     // Since the State could have observed the deactivate() and thus disposed of
     // resources allocated in the build method, we have to rebuild the widget
     // so that its State can reallocate its resources.
-    assert(_active); // otherwise markNeedsBuild is a no-op
+    assert(_lifecycleState == _ElementLifecycle.active); // otherwise markNeedsBuild is a no-op
     markNeedsBuild();
   }
 
@@ -5107,7 +5094,7 @@ class InheritedElement extends ProxyElement {
 
   @override
   void _updateInheritance() {
-    assert(_active);
+    assert(_lifecycleState == _ElementLifecycle.active);
     final Map<Type, InheritedElement>? incomingWidgets = _parent?._inheritedWidgets;
     if (incomingWidgets != null)
       _inheritedWidgets = HashMap<Type, InheritedElement>.from(incomingWidgets);
@@ -5665,11 +5652,11 @@ abstract class RenderObjectElement extends Element {
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
       final Element? oldChild = replaceWithNullIfForgotten(oldChildren[oldChildrenTop]);
       final Widget newWidget = newWidgets[newChildrenTop];
-      assert(oldChild == null || oldChild._debugLifecycleState == _ElementLifecycle.active);
+      assert(oldChild == null || oldChild._lifecycleState == _ElementLifecycle.active);
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget))
         break;
       final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element>(newChildrenTop, previousChild))!;
-      assert(newChild._debugLifecycleState == _ElementLifecycle.active);
+      assert(newChild._lifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
       newChildrenTop += 1;
@@ -5680,7 +5667,7 @@ abstract class RenderObjectElement extends Element {
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
       final Element? oldChild = replaceWithNullIfForgotten(oldChildren[oldChildrenBottom]);
       final Widget newWidget = newWidgets[newChildrenBottom];
-      assert(oldChild == null || oldChild._debugLifecycleState == _ElementLifecycle.active);
+      assert(oldChild == null || oldChild._lifecycleState == _ElementLifecycle.active);
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget))
         break;
       oldChildrenBottom -= 1;
@@ -5694,7 +5681,7 @@ abstract class RenderObjectElement extends Element {
       oldKeyedChildren = <Key, Element>{};
       while (oldChildrenTop <= oldChildrenBottom) {
         final Element? oldChild = replaceWithNullIfForgotten(oldChildren[oldChildrenTop]);
-        assert(oldChild == null || oldChild._debugLifecycleState == _ElementLifecycle.active);
+        assert(oldChild == null || oldChild._lifecycleState == _ElementLifecycle.active);
         if (oldChild != null) {
           if (oldChild.widget.key != null)
             oldKeyedChildren[oldChild.widget.key!] = oldChild;
@@ -5727,8 +5714,8 @@ abstract class RenderObjectElement extends Element {
       }
       assert(oldChild == null || Widget.canUpdate(oldChild.widget, newWidget));
       final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element>(newChildrenTop, previousChild))!;
-      assert(newChild._debugLifecycleState == _ElementLifecycle.active);
-      assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.active);
+      assert(newChild._lifecycleState == _ElementLifecycle.active);
+      assert(oldChild == newChild || oldChild == null || oldChild._lifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
       newChildrenTop += 1;
@@ -5745,12 +5732,12 @@ abstract class RenderObjectElement extends Element {
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
       final Element oldChild = oldChildren[oldChildrenTop];
       assert(replaceWithNullIfForgotten(oldChild) != null);
-      assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
+      assert(oldChild._lifecycleState == _ElementLifecycle.active);
       final Widget newWidget = newWidgets[newChildrenTop];
       assert(Widget.canUpdate(oldChild.widget, newWidget));
       final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element>(newChildrenTop, previousChild))!;
-      assert(newChild._debugLifecycleState == _ElementLifecycle.active);
-      assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.active);
+      assert(newChild._lifecycleState == _ElementLifecycle.active);
+      assert(oldChild == newChild || oldChild == null || oldChild._lifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
       newChildrenTop += 1;
