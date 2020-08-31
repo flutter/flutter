@@ -328,8 +328,7 @@ class KeepAliveHandle extends ChangeNotifier {
 /// with [State] subclasses.
 ///
 /// Subclasses must implement [wantKeepAlive], and their [build] methods must
-/// call `super.build` (the return value will always return null, and should be
-/// ignored).
+/// call `super.build` (though the return value should be ignored).
 ///
 /// Then, whenever [wantKeepAlive]'s value changes (or might change), the
 /// subclass should call [updateKeepAlive].
@@ -392,9 +391,21 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
 
   @mustCallSuper
   @override
-  Widget? build(BuildContext context) {
+  Widget build(BuildContext context) {
     if (wantKeepAlive && _keepAliveHandle == null)
       _ensureKeepAlive();
-    return null;
+    return const _NullWidget();
+  }
+}
+
+class _NullWidget extends StatelessWidget {
+  const _NullWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    throw FlutterError(
+      'Widgets that mix AutomaticKeepAliveClientMixin into their State must '
+      'call super.build() but must ignore the return value of the superclass.'
+    );
   }
 }

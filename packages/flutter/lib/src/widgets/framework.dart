@@ -1425,7 +1425,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   ///  * [StatefulWidget], which contains the discussion on performance considerations.
   @protected
-  Widget? build(BuildContext context);
+  Widget build(BuildContext context);
 
   /// Called when a dependency of this [State] object changes.
   ///
