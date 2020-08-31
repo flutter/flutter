@@ -254,7 +254,7 @@ void main() {
     expect(error, isA<Exception>()
       .having((Exception exception) => exception.toString(),
       'description',
-      contains('Failed to download http://example.invalid/'),
+      contains('Download failed.'),
     ));
     expect(actualResult, isNull);
   });

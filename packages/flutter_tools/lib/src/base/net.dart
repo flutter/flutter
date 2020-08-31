@@ -60,17 +60,18 @@ class Net {
         sink = destFile.openWrite();
       }
 
-      final bool result = await _attempt(
+      final dynamic result = await _attempt(
         url,
         destSink: sink,
       );
-      if (result) {
+      if (result == null) {
         return memorySink?.writes?.takeBytes() ?? <int>[];
       }
 
       if (maxAttempts != null && attempts >= maxAttempts) {
+        assert(result != null);
         _logger.printStatus('Download failed -- retry $attempts');
-        throw Exception('Failed to download $url');
+        throw result;
       }
       _logger.printStatus(
         'Download failed -- attempting retry $attempts in '
@@ -84,10 +85,10 @@ class Net {
   }
 
   /// Check if the given URL points to a valid endpoint.
-  Future<bool> doesRemoteFileExist(Uri url) => _attempt(url, onlyHeaders: true);
+  Future<bool> doesRemoteFileExist(Uri url) async => (await _attempt(url, onlyHeaders: true)) == null;
 
-  // Returns true on success and false on failure.
-  Future<bool> _attempt(Uri url, {
+  // Returns null on success and the last error on a failure.
+  Future<dynamic> _attempt(Uri url, {
     IOSink destSink,
     bool onlyHeaders = false,
   }) async {
@@ -120,7 +121,7 @@ class Net {
           exitCode: kNetworkProblemExitCode,);
       }
       _logger.printError(error.toString());
-      rethrow;
+      return error;
     } on HandshakeException catch (error) {
       _logger.printTrace(error.toString());
       throwToolExit(
@@ -131,39 +132,36 @@ class Net {
       );
     } on SocketException catch (error) {
       _logger.printTrace('Download error: $error');
-      return false;
+      return error;
     } on HttpException catch (error) {
       _logger.printTrace('Download error: $error');
-      return false;
+      return error;
     }
     assert(response != null);
 
+    if (response.statusCode != HttpStatus.ok) {
+      _logger.printTrace('Download error: ${response.statusCode} ${response.reasonPhrase}');
+      final Exception exception = Exception(
+        'Download failed.\n'
+        'URL: $url\n'
+        'Error: ${response.statusCode} ${response.reasonPhrase}',
+      );
+      // 5xx errors are server errors and we can try again
+      return exception;
+    }
     // If we're making a HEAD request, we're only checking to see if the URL is
     // valid.
     if (onlyHeaders) {
-      return response.statusCode == HttpStatus.ok;
-    }
-    if (response.statusCode != HttpStatus.ok) {
-      if (response.statusCode > 0 && response.statusCode < 500) {
-        throwToolExit(
-          'Download failed.\n'
-          'URL: $url\n'
-          'Error: ${response.statusCode} ${response.reasonPhrase}',
-          exitCode: kNetworkProblemExitCode,
-        );
-      }
-      // 5xx errors are server errors and we can try again
-      _logger.printTrace('Download error: ${response.statusCode} ${response.reasonPhrase}');
-      return false;
+      return null;
     }
     _logger.printTrace('Received response from server, collecting bytes...');
     try {
       assert(destSink != null);
       await response.forEach(destSink.add);
-      return true;
+      return null;
     } on IOException catch (error) {
       _logger.printTrace('Download error: $error');
-      return false;
+      return error;
     } finally {
       await destSink?.flush();
       await destSink?.close();
