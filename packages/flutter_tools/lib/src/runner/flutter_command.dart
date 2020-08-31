@@ -18,9 +18,11 @@ import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../build_system/targets/icon_tree_shaker.dart' show kIconTreeShakerEnabledDefault;
 import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../dart/generate_synthetic_packages.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
@@ -311,6 +313,8 @@ abstract class FlutterCommand extends Command<void> {
             ' already connected to the target application.'
     );
   }
+
+  bool get disableDds => boolArg('disable-dds');
 
   /// Gets the vmservice port provided to in the 'observatory-port' or
   /// 'host-vmservice-port option.
@@ -886,6 +890,23 @@ abstract class FlutterCommand extends Command<void> {
 
     if (shouldRunPub) {
       final FlutterProject project = FlutterProject.current();
+      final Environment environment = Environment(
+        artifacts: globals.artifacts,
+        logger: globals.logger,
+        cacheDir: globals.cache.getRoot(),
+        engineVersion: globals.flutterVersion.engineRevision,
+        fileSystem: globals.fs,
+        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        outputDir: globals.fs.directory(getBuildDirectory()),
+        processManager: globals.processManager,
+        projectDir: project.directory,
+      );
+
+      await generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: globals.buildSystem,
+      );
+
       await pub.get(
         context: PubContext.getVerifyContext(name),
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,

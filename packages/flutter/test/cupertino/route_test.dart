@@ -439,68 +439,68 @@ void main() {
     // entire screen.
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(443.7, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(443.7, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(291.9, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(291.9, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(168.2, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(168.2, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(89.5, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(89.5, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(48.1, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(48.1, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(26.1, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(26.1, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(14.3, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(14.3, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(7.41, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(7.41, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(3.0, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(3.0, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(0.0, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(0.0, epsilon: 0.1));
 
     // Exit animation
     await tester.tap(find.text('Close'));
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(156.3, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(156.3, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(308.1, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(308.1, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(431.7, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(431.7, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(510.4, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(510.4, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(551.8, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(551.8, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(573.8, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(573.8, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(585.6, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(585.6, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(592.6, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(592.6, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(596.9, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(596.9, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(600.0, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(600.0, epsilon: 0.1));
   });
 
   Future<void> testParallax(WidgetTester tester, {@required bool fromFullscreenDialog}) async {
@@ -537,51 +537,51 @@ void main() {
 
     // Enter animation.
     await tester.tap(find.text('Button'));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(0.0, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(0.0, epsilon: 0.1));
     await tester.pump();
 
     // We use a higher number of intervals since the animation has to scale the
     // entire screen.
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-70.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-70.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-137.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-137.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-192.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-192.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-227.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-227.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-246.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-246.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-255.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-255.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-260.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-260.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-264.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-264.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-266.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-266.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-267.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-267.0, epsilon: 1.0));
 
     // Exit animation
     await tester.tap(find.text('Button'));
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-198.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-198.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 360));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-0.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-0.0, epsilon: 1.0));
   }
 
   testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
@@ -626,7 +626,7 @@ void main() {
 
     // Enter animation.
     await tester.tap(find.text('Button'));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(0.0, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(0.0, epsilon: 0.1));
     await tester.pump();
 
     // We use a higher number of intervals since the animation has to scale the

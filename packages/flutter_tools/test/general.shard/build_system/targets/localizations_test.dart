@@ -14,7 +14,7 @@ import '../../../src/context.dart';
 void main() {
   // Verifies that values are correctly passed through the localizations
   // target, but does not validate them beyond the serialized data type.
-  testWithoutContext('generateLocalizations forwards arguments correctly', () async {
+  testUsingContext('generateLocalizations forwards arguments correctly', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Logger logger = BufferLogger.test();
     final String projectDir = fileSystem.path.join('path', 'to', 'flutter_project');
@@ -34,7 +34,8 @@ void main() {
           '--header-file=header',
           '--header=HEADER',
           '--use-deferred-loading',
-          '--preferred-supported-locales=en_US'
+          '--preferred-supported-locales=en_US',
+          '--no-synthetic-package',
         ],
       ),
     ]);
@@ -57,6 +58,7 @@ void main() {
       preferredSupportedLocales: 'en_US',
       templateArbFile: Uri.file('example.arb'),
       untranslatedMessagesFile: Uri.file('untranslated'),
+      useSyntheticPackage: false,
     );
     await generateLocalizations(
       options: options,
@@ -70,6 +72,54 @@ void main() {
     );
 
     expect(processManager.hasRemainingExpectations, false);
+  });
+
+  testUsingContext('generateLocalizations throws exception on missing flutter: generate: true flag', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final Directory arbDirectory = fileSystem.directory('arb')
+      ..createSync();
+    arbDirectory.childFile('foo.arb').createSync();
+    arbDirectory.childFile('bar.arb').createSync();
+
+    // Missing flutter: generate: true should throw exception.
+    fileSystem.file('pubspec.yaml').writeAsStringSync('''
+flutter:
+  uses-material-design: true
+''');
+
+    final LocalizationOptions options = LocalizationOptions(
+      header: 'HEADER',
+      headerFile: Uri.file('header'),
+      arbDirectory: Uri.file('arb'),
+      deferredLoading: true,
+      outputClass: 'Foo',
+      outputLocalizationsFile: Uri.file('bar'),
+      preferredSupportedLocales: 'en_US',
+      templateArbFile: Uri.file('example.arb'),
+      untranslatedMessagesFile: Uri.file('untranslated'),
+      // Set synthetic package to true.
+      useSyntheticPackage: true,
+    );
+
+    expect(
+      () => generateLocalizations(
+        options: options,
+        logger: logger,
+        fileSystem: fileSystem,
+        processManager: processManager,
+        projectDir: fileSystem.currentDirectory,
+        dartBinaryPath: 'dart',
+        flutterRoot: '',
+        dependenciesDir: fileSystem.currentDirectory,
+      ),
+      throwsA(isA<Exception>()),
+    );
+    expect(
+      logger.errorText,
+      contains('Attempted to generate localizations code without having the flutter: generate flag turned on.'),
+    );
   });
 
   testWithoutContext('generateLocalizations is skipped if l10n.yaml does not exist.', () async {
