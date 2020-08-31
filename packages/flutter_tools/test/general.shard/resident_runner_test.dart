@@ -1201,6 +1201,7 @@ void main() {
     globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
       .createSync(recursive: true);
     globals.fs.file('l10n.yaml').createSync();
+    globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     await residentRunner.runSourceGenerators();
 
@@ -1227,6 +1228,7 @@ void main() {
     globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
       .createSync(recursive: true);
     globals.fs.file('l10n.yaml').createSync();
+    globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     await residentRunner.runSourceGenerators();
 
@@ -2095,8 +2097,7 @@ void main() {
     final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
     when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
     when(mockDevice.dds).thenReturn(mockDds);
-    when(mockDds.startDartDevelopmentService(any, any, any, any)).thenReturn(null);
-    when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
+    when(mockDds.startDartDevelopmentService(any, any)).thenReturn(null);
 
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,
@@ -2183,12 +2184,10 @@ class FakeFlutterDevice extends FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     bool disableDds = false,
-    bool disableServiceAuthCodes = false,
     bool ipv6 = false,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
-    int hostVmServicePort,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   }) async { }
 

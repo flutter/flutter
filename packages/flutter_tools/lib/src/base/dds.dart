@@ -15,24 +15,30 @@ import 'logger.dart';
 class DartDevelopmentService {
   DartDevelopmentService({@required this.logger});
 
+  // TODO(bkonyi): enable once VM service can handle SSE forwarding for
+  // Devtools (https://github.com/flutter/flutter/issues/62507)
+  static const bool ddsDisabled = true;
   final Logger logger;
   dds.DartDevelopmentService _ddsInstance;
 
-  Uri get uri => _ddsInstance.uri;
-
   Future<void> startDartDevelopmentService(
     Uri observatoryUri,
-    int hostPort,
     bool ipv6,
-    bool disableServiceAuthCodes,
   ) async {
+    if (ddsDisabled) {
+      logger.printTrace(
+        'DDS is currently disabled due to '
+        'https://github.com/flutter/flutter/issues/62507'
+      );
+      return;
+    }
     final Uri ddsUri = Uri(
       scheme: 'http',
       host: (ipv6 ?
         io.InternetAddress.loopbackIPv6 :
         io.InternetAddress.loopbackIPv4
       ).host,
-      port: hostPort ?? 0,
+      port: 0,
     );
     logger.printTrace(
       'Launching a Dart Developer Service (DDS) instance at $ddsUri, '
@@ -42,7 +48,6 @@ class DartDevelopmentService {
       _ddsInstance = await dds.DartDevelopmentService.startDartDevelopmentService(
           observatoryUri,
           serviceUri: ddsUri,
-          enableAuthCodes: !disableServiceAuthCodes,
         );
       logger.printTrace('DDS is listening at ${_ddsInstance.uri}.');
     } on dds.DartDevelopmentServiceException catch (e) {

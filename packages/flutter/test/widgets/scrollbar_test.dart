@@ -411,7 +411,7 @@ void main() {
       AxisDirection.down,
     );
     p.paint(testCanvas, size);
-    expect(captureRect().height, closeTo(fullThumbExtent, .000001));
+    expect(captureRect().height, moreOrLessEquals(fullThumbExtent, epsilon: 1e-6));
 
     // Scrolling just to the very end also gives a full sized thumb.
     p.update(
@@ -421,7 +421,7 @@ void main() {
       AxisDirection.down,
     );
     p.paint(testCanvas, size);
-    expect(captureRect().height, closeTo(fullThumbExtent, .000001));
+    expect(captureRect().height, moreOrLessEquals(fullThumbExtent, epsilon: 1e-6));
 
     // Scrolling just past the end shrinks the thumb slightly.
     p.update(
@@ -431,7 +431,7 @@ void main() {
       AxisDirection.down,
     );
     p.paint(testCanvas, size);
-    expect(captureRect().height, closeTo(fullThumbExtent, 2.0));
+    expect(captureRect().height, moreOrLessEquals(fullThumbExtent, epsilon: 2.0));
 
     // Scrolling way past the end shrinks the thumb to minimum.
     p.update(
