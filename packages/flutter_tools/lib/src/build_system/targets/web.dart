@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:crypto/crypto.dart';
 import 'package:package_config/package_config.dart';
 
@@ -298,8 +300,23 @@ class WebReleaseBundle extends Target {
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
-      inputFile.copySync(outputFile.path);
       outputResourcesFiles.add(outputFile);
+      // insert a random hash into the requests for main.dart.js and service_worker.js
+      if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
+        final String randomHash = Random().nextInt(10000000).toString();
+        final String resultString = inputFile.readAsStringSync()
+          .replaceFirst(
+            '<script src="main.dart.js" type="application/javascript"></script>',
+            '<script src="main.dart.js?v=$randomHash" type="application/javascript"></script>'
+          )
+          .replaceFirst(
+            "navigator.serviceWorker.register('flutter_service_worker.js')",
+            "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
+          );
+        outputFile.writeAsStringSync(resultString);
+        continue;
+      }
+      inputFile.copySync(outputFile.path);
     }
     final Depfile resourceFile = Depfile(inputResourceFiles, outputResourcesFiles);
     depfileService.writeToFile(
@@ -484,21 +501,26 @@ self.addEventListener("fetch", (event) => {
   var origin = self.location.origin;
   var key = event.request.url.substring(origin.length + 1);
   // Redirect URLs to the index.html
-  if (event.request.url == origin || event.request.url.startsWith(origin + '/#')) {
+  if (key.indexOf('?v=') != -1) {
+    key = key.split('?v=')[0];
+  }
+  if (event.request.url == origin || event.request.url.startsWith(origin + '/#') || key == '') {
     key = '/';
   }
   // If the URL is not the RESOURCE list, skip the cache.
   if (!RESOURCES[key]) {
     return event.respondWith(fetch(event.request));
   }
+  // If the URL is the index.html, perform an online-first request.
+  if (key == '/') {
+    return onlineFirst(event);
+  }
   event.respondWith(caches.open(CACHE_NAME)
     .then((cache) =>  {
       return cache.match(event.request).then((response) => {
         // Either respond with the cached resource, or perform a fetch and
-        // lazily populate the cache. Ensure the resources are not cached
-        // by the browser for longer than the service worker expects.
-        var modifiedRequest = new Request(event.request, {'cache': 'reload'});
-        return response || fetch(modifiedRequest).then((response) => {
+        // lazily populate the cache.
+        return response || fetch(event.request).then((response) => {
           cache.put(event.request, response.clone());
           return response;
         });
@@ -538,6 +560,28 @@ async function downloadOffline() {
     }
   }
   return contentCache.addAll(resources);
+}
+
+// Attempt to download the resource online before falling back to
+// the offline cache.
+function onlineFirst(event) {
+  return event.respondWith(
+    fetch(event.request).then((response) => {
+      return caches.open(CACHE_NAME).then((cache) => {
+        cache.put(event.request, response.clone());
+        return response;
+      });
+    }).catch((error) => {
+      return caches.open(CACHE_NAME).then((cache) => {
+        return cache.match(event.request).then((response) => {
+          if (response != null) {
+            return response;
+          }
+          throw error;
+        });
+      });
+    })
+  );
 }
 ''';
 }
