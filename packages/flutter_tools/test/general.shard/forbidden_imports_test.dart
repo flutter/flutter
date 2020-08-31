@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:file/file.dart';
+import 'package:file/local.dart';
 
 import '../src/common.dart';
 
+const FileSystem fileSystem = LocalFileSystem();
+
 void main() {
-  final String flutterTools = globals.fs.path.join(getFlutterRoot(), 'packages', 'flutter_tools');
+  final String flutterTools = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools');
 
   test('no imports of commands/* or test/* in lib/src/*', () {
     final List<String> skippedPaths = <String> [
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'commands'),
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'test'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'commands'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'test'),
     ];
     bool _isNotSkipped(FileSystemEntity entity) => skippedPaths.every((String path) => !entity.path.startsWith(path));
 
-    final Iterable<File> files = globals.fs.directory(globals.fs.path.join(flutterTools, 'lib', 'src'))
+    final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, 'lib', 'src'))
       .listSync(recursive: true)
       .where(_isDartFile)
       .where(_isNotSkipped)
@@ -29,7 +31,7 @@ void main() {
         }
         if (line.startsWith(RegExp(r'import.*commands/'))
          || line.startsWith(RegExp(r'import.*test/'))) {
-          final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
+          final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
           fail('$relativePath imports $line. This import introduces a layering violation. '
                'Please find another way to access the information you are using.');
         }
@@ -41,9 +43,9 @@ void main() {
     final List<String> skippedPaths = <String> [];
     bool _isNotSkipped(FileSystemEntity entity) => skippedPaths.every((String path) => !entity.path.startsWith(path));
 
-    final Iterable<File> files = globals.fs.directory(globals.fs.path.join(flutterTools, 'lib', 'src'))
+    final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, 'lib', 'src'))
       .listSync(recursive: true)
-      .followedBy(globals.fs.directory(globals.fs.path.join(flutterTools, 'test',)).listSync(recursive: true))
+      .followedBy(fileSystem.directory(fileSystem.path.join(flutterTools, 'test',)).listSync(recursive: true))
       .where(_isDartFile)
       .where(_isNotSkipped)
       .map(_asFile);
@@ -51,7 +53,7 @@ void main() {
       for (final String line in file.readAsLinesSync()) {
         if (line.startsWith(RegExp(r'import.*globals.dart'))
          && !line.contains(r'as globals')) {
-          final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
+          final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
           fail('$relativePath imports globals.dart without a globals prefix.');
         }
       }
@@ -60,14 +62,14 @@ void main() {
 
   test('no unauthorized imports of dart:io', () {
     final List<String> allowedPaths = <String>[
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'platform.dart'),
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_file_system.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'platform.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_file_system.dart'),
     ];
     bool _isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
 
     for (final String dirName in <String>['lib', 'bin']) {
-      final Iterable<File> files = globals.fs.directory(globals.fs.path.join(flutterTools, dirName))
+      final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
         .where(_isNotAllowed)
@@ -76,7 +78,7 @@ void main() {
         for (final String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*dart:io')) &&
               !line.contains('ignore: dart_io_import')) {
-            final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
+            final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'dart:io'; import 'lib/src/base/io.dart' instead");
           }
         }
@@ -86,15 +88,15 @@ void main() {
 
   test('no unauthorized imports of test_api', () {
     final List<String> allowedPaths = <String>[
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'build_script.dart'),
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_platform.dart'),
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_web_platform.dart'),
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'test', 'test_wrapper.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'build_runner', 'build_script.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_platform.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_web_platform.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'test', 'test_wrapper.dart'),
     ];
     bool _isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
 
     for (final String dirName in <String>['lib']) {
-      final Iterable<File> files = globals.fs.directory(globals.fs.path.join(flutterTools, dirName))
+      final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
         .where(_isNotAllowed)
@@ -103,7 +105,7 @@ void main() {
         for (final String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*package:test_api')) &&
               !line.contains('ignore: test_api_import')) {
-            final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
+            final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'package:test_api/test_api.dart';");
           }
         }
@@ -113,11 +115,11 @@ void main() {
 
   test('no unauthorized imports of package:path', () {
     final List<String> allowedPath = <String>[
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'web_compilation_delegate.dart'),
-      globals.fs.path.join(flutterTools, 'test', 'general.shard', 'platform_plugins_test.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'build_runner', 'web_compilation_delegate.dart'),
+      fileSystem.path.join(flutterTools, 'test', 'general.shard', 'platform_plugins_test.dart'),
     ];
     for (final String dirName in <String>['lib', 'bin', 'test']) {
-      final Iterable<File> files =  globals.fs.directory(globals.fs.path.join(flutterTools, dirName))
+      final Iterable<File> files =  fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
         .where((FileSystemEntity entity) => !allowedPath.contains(entity.path))
@@ -126,8 +128,8 @@ void main() {
         for (final String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*package:path/path.dart')) &&
               !line.contains('ignore: package_path_import')) {
-            final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
-            fail("$relativePath imports 'package:path/path.dart'; use 'globals.fs.path' instead");
+            final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
+            fail("$relativePath imports 'package:path/path.dart'; use 'fileSystem.path' instead");
           }
         }
       }
@@ -136,10 +138,12 @@ void main() {
 
   test('no unauthorized imports of package:file/local.dart', () {
     final List<String> allowedPath = <String>[
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'file_system.dart'),
+      fileSystem.path.join(flutterTools, 'test', 'general.shard', 'forbidden_imports_test.dart'),
+      fileSystem.path.join(flutterTools, 'test', 'integration.shard', 'test_utils.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'file_system.dart'),
     ];
     for (final String dirName in <String>['lib', 'bin', 'test']) {
-      final Iterable<File> files =  globals.fs.directory(globals.fs.path.join(flutterTools, dirName))
+      final Iterable<File> files =  fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
         .where((FileSystemEntity entity) => !allowedPath.contains(entity.path))
@@ -147,7 +151,7 @@ void main() {
       for (final File file in files) {
         for (final String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*package:file/local.dart'))) {
-            final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
+            final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'package:file/local.dart'; use 'lib/src/base/file_system.dart' instead");
           }
         }
@@ -157,13 +161,13 @@ void main() {
 
   test('no unauthorized imports of dart:convert', () {
     final List<String> allowedPaths = <String>[
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'convert.dart'),
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_file_system.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'convert.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_file_system.dart'),
     ];
     bool _isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
 
     for (final String dirName in <String>['lib']) {
-      final Iterable<File> files = globals.fs.directory(globals.fs.path.join(flutterTools, dirName))
+      final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
         .where(_isNotAllowed)
@@ -172,7 +176,7 @@ void main() {
         for (final String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*dart:convert')) &&
               !line.contains('ignore: dart_convert_import')) {
-            final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
+            final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'dart:convert'; import 'lib/src/convert.dart' instead");
           }
         }
@@ -182,16 +186,16 @@ void main() {
 
   test('no unauthorized imports of build_runner or dwds', () {
     final List<String> allowedPaths = <String>[
-      globals.fs.path.join(flutterTools, 'test', 'src', 'build_runner'),
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'build_runner'),
-      globals.fs.path.join(flutterTools, 'lib', 'executable.dart'),
-      globals.fs.path.join(flutterTools, 'lib', 'devfs_web.dart'),
-      globals.fs.path.join(flutterTools, 'lib', 'resident_web_runner.dart'),
+      fileSystem.path.join(flutterTools, 'test', 'src', 'build_runner'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'build_runner'),
+      fileSystem.path.join(flutterTools, 'lib', 'executable.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'devfs_web.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'resident_web_runner.dart'),
     ];
     bool _isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => !entity.path.contains(path));
 
     for (final String dirName in <String>['lib']) {
-      final Iterable<File> files = globals.fs.directory(globals.fs.path.join(flutterTools, dirName))
+      final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
         .where(_isNotAllowed)
@@ -203,7 +207,7 @@ void main() {
               line.startsWith(RegExp(r'import.*package:build_config/build_config.dart')) ||
               line.startsWith(RegExp(r'import.*dwds:*.dart')) ||
               line.startsWith(RegExp(r'import.*build_runner/.*.dart'))) {
-            final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
+            final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
             fail('$relativePath imports a build_runner package');
           }
         }
@@ -212,10 +216,10 @@ void main() {
   });
 
   test('no import of packages in tool_backend.dart', () {
-    final File file = globals.fs.file(globals.fs.path.join(flutterTools, 'bin', 'tool_backend.dart'));
+    final File file = fileSystem.file(fileSystem.path.join(flutterTools, 'bin', 'tool_backend.dart'));
     for (final String line in file.readAsLinesSync()) {
       if (line.startsWith(RegExp(r'import.*package:.*'))) {
-        final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
+        final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
         fail('$relativePath imports a package');
       }
     }
