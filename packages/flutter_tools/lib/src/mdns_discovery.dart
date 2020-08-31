@@ -239,9 +239,7 @@ Future<Uri> buildObservatoryUri(
   if (!path.endsWith('/')) {
     path += '/';
   }
-  hostVmservicePort ??= 0;
-  final int actualHostPort = hostVmservicePort == 0 ?
-    await device.portForwarder.forward(devicePort) :
-    hostVmservicePort;
+  final int actualHostPort = hostVmservicePort ?? await device
+    .portForwarder.forward(devicePort);
   return Uri(scheme: 'http', host: host, port: actualHostPort, path: path);
 }

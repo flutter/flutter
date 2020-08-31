@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:mockito/mockito.dart';
 import 'package:multicast_dns/multicast_dns.dart';
@@ -207,25 +206,6 @@ void main() {
         () async => await portDiscovery.query(),
         throwsA(isA<Exception>()),
       );
-    });
-
-    testUsingContext('Correctly builds Observatory URI with hostVmservicePort == 0', () async {
-      final MDnsClient client = getMockClient(
-        <PtrResourceRecord>[
-          PtrResourceRecord('foo', year3000, domainName: 'bar'),
-        ],
-        <String, List<SrvResourceRecord>>{
-          'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
-          ],
-        },
-      );
-
-      final MockIOSDevice mockDevice = MockIOSDevice();
-      when(mockDevice.portForwarder).thenReturn(const NoOpDevicePortForwarder());
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final Uri uri = await portDiscovery.getObservatoryUri('bar', mockDevice, hostVmservicePort: 0);
-      expect(uri.toString(), 'http://127.0.0.1:123/');
     });
   });
 }

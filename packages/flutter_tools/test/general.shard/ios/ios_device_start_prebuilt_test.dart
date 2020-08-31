@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
@@ -136,8 +135,7 @@ void main() {
     when(MDnsObservatoryDiscovery.instance.getObservatoryUri(
       any,
       any,
-      usesIpv6: anyNamed('usesIpv6'),
-      hostVmservicePort: anyNamed('hostVmservicePort')
+      usesIpv6: anyNamed('usesIpv6')
     )).thenAnswer((Invocation invocation) async => uri);
 
     final LaunchResult launchResult = await device.startApp(iosApp,
@@ -369,7 +367,6 @@ void main() {
       any,
       any,
       usesIpv6: anyNamed('usesIpv6'),
-      hostVmservicePort: anyNamed('hostVmservicePort')
     )).thenAnswer((Invocation invocation) async => uri);
 
     final LaunchResult launchResult = await device.startApp(iosApp,
@@ -457,4 +454,3 @@ class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscov
 class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
 class MockVmService extends Mock implements VmService {}
-class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
