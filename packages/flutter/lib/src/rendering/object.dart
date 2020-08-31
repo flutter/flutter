@@ -2692,8 +2692,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           continue;
         if (!config.isCompatibleWith(fragment.config))
           toBeMarkedExplicit.add(fragment);
-        final int initialLength = fragments.length - 1;
-        for (int i = 0; i < initialLength; i += 1) {
+        final int siblingLength = fragments.length - 1;
+        for (int i = 0; i < siblingLength; i += 1) {
           final _InterestingSemanticsFragment siblingFragment = fragments[i];
           if (!fragment.config!.isCompatibleWith(siblingFragment.config)) {
             toBeMarkedExplicit.add(fragment);
