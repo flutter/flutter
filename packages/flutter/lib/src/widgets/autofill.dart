@@ -257,7 +257,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _isTopmostAutofillGroup = AutofillGroup.of(context!) == null;
+    _isTopmostAutofillGroup = AutofillGroup.of(context) == null;
   }
 
   @override

@@ -137,7 +137,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   }
 
   void _updateParentDataOfChild(ParentDataElement<KeepAliveParentDataMixin> childElement) {
-    childElement.applyWidgetOutOfTurn(build(context!) as ParentDataWidget<KeepAliveParentDataMixin>);
+    childElement.applyWidgetOutOfTurn(build(context) as ParentDataWidget<KeepAliveParentDataMixin>);
   }
 
   VoidCallback _createCallback(Listenable handle) {

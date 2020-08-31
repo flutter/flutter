@@ -48,7 +48,7 @@ class _WillPopScopeState extends State<WillPopScope> {
     super.didChangeDependencies();
     if (widget.onWillPop != null)
       _route?.removeScopedWillPopCallback(widget.onWillPop!);
-    _route = ModalRoute.of(context!);
+    _route = ModalRoute.of(context);
     if (widget.onWillPop != null)
       _route?.addScopedWillPopCallback(widget.onWillPop!);
   }
@@ -56,7 +56,7 @@ class _WillPopScopeState extends State<WillPopScope> {
   @override
   void didUpdateWidget(WillPopScope oldWidget) {
     super.didUpdateWidget(oldWidget);
-    assert(_route == ModalRoute.of(context!));
+    assert(_route == ModalRoute.of(context));
     if (widget.onWillPop != oldWidget.onWillPop && _route != null) {
       if (oldWidget.onWillPop != null)
         _route!.removeScopedWillPopCallback(oldWidget.onWillPop!);

@@ -316,7 +316,7 @@ class Scrollable extends StatefulWidget {
         curve: curve,
         alignmentPolicy: alignmentPolicy,
       ));
-      context = scrollable.context!;
+      context = scrollable.context;
       scrollable = Scrollable.of(context);
     }
 
@@ -379,8 +379,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
-    _configuration = ScrollConfiguration.of(context!);
-    _physics = _configuration.getScrollPhysics(context!);
+    _configuration = ScrollConfiguration.of(context);
+    _physics = _configuration.getScrollPhysics(context);
     if (widget.physics != null)
       _physics = widget.physics!.applyTo(_physics);
     final ScrollController? controller = widget.controller;
@@ -505,7 +505,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
-                  ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context!)
+                  ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior;
               },
             ),
@@ -525,7 +525,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
-                  ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context!)
+                  ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior;
               },
             ),
@@ -558,7 +558,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   BuildContext? get notificationContext => _gestureDetectorKey.currentContext;
 
   @override
-  BuildContext get storageContext => context!;
+  BuildContext get storageContext => context;
 
   // TOUCH HANDLERS
 

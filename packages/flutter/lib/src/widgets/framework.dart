@@ -1070,7 +1070,18 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// After calling [dispose], the framework severs the [State] object's
   /// connection with the [BuildContext].
-  BuildContext? get context => _element;
+  BuildContext get context {
+    assert(() {
+      if (_element == null) {
+        throw FlutterError(
+          'This widget has been unmounted, so the State no longer has a context (and should be considered defunct). \n'
+          'Consider canceling any active work during "dispose" or using the "mounted" getter to determine if the State is still active.'
+        );
+      }
+      return true;
+    }());
+    return _element!;
+  }
   StatefulElement? _element;
 
   /// Whether this [State] object is currently in a tree.

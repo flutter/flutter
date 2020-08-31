@@ -578,7 +578,7 @@ class _FocusState extends State<Focus> {
 
   void _handleAutofocus() {
     if (!_didAutofocus && widget.autofocus) {
-      FocusScope.of(context!).autofocus(focusNode);
+      FocusScope.of(context).autofocus(focusNode);
       _didAutofocus = true;
     }
   }

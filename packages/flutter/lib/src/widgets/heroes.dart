@@ -345,7 +345,7 @@ class _HeroState extends State<Hero> {
   void startFlight({ bool shouldIncludedChildInPlaceholder = false }) {
     _shouldIncludeChild = shouldIncludedChildInPlaceholder;
     assert(mounted);
-    final RenderBox box = context!.findRenderObject() as RenderBox;
+    final RenderBox box = context.findRenderObject() as RenderBox;
     assert(box != null && box.hasSize);
     setState(() {
       _placeholderSize = box.size;
@@ -481,8 +481,8 @@ class _HeroFlight {
       context,
       manifest!.animation,
       manifest!.type,
-      manifest!.fromHero.context!,
-      manifest!.toHero.context!,
+      manifest!.fromHero.context,
+      manifest!.toHero.context,
     );
     assert(shuttle != null);
 
@@ -490,7 +490,9 @@ class _HeroFlight {
       animation: _proxyAnimation,
       child: shuttle,
       builder: (BuildContext context, Widget? child) {
-        final RenderBox? toHeroBox = manifest!.toHero.context?.findRenderObject() as RenderBox?;
+        final RenderBox? toHeroBox = manifest!.toHero.mounted
+          ? manifest!.toHero.context.findRenderObject() as RenderBox?
+          : null;
         if (_aborted || toHeroBox == null || !toHeroBox.attached) {
           // The toHero no longer exists or it's no longer the flight's destination.
           // Continue flying while fading out.
@@ -590,8 +592,8 @@ class _HeroFlight {
     manifest!.toHero.startFlight();
 
     heroRectTween = _doCreateRectTween(
-      _boundingBoxFor(manifest!.fromHero.context!, manifest!.fromRoute.subtreeContext),
-      _boundingBoxFor(manifest!.toHero.context!, manifest!.toRoute.subtreeContext),
+      _boundingBoxFor(manifest!.fromHero.context, manifest!.fromRoute.subtreeContext),
+      _boundingBoxFor(manifest!.toHero.context, manifest!.toRoute.subtreeContext),
     );
 
     overlayEntry = OverlayEntry(builder: _buildOverlay);
@@ -634,7 +636,7 @@ class _HeroFlight {
         newManifest.toHero.startFlight();
         heroRectTween = _doCreateRectTween(
             heroRectTween.end,
-            _boundingBoxFor(newManifest.toHero.context!, newManifest.toRoute.subtreeContext),
+            _boundingBoxFor(newManifest.toHero.context, newManifest.toRoute.subtreeContext),
         );
       } else {
         // TODO(hansmuller): Use ReverseTween here per github.com/flutter/flutter/pull/12203.
@@ -649,7 +651,7 @@ class _HeroFlight {
 
       heroRectTween = _doCreateRectTween(
           heroRectTween.evaluate(_proxyAnimation),
-          _boundingBoxFor(newManifest.toHero.context!, newManifest.toRoute.subtreeContext),
+          _boundingBoxFor(newManifest.toHero.context, newManifest.toRoute.subtreeContext),
       );
       shuttle = null;
 
@@ -831,7 +833,7 @@ class HeroController extends NavigatorObserver {
       return;
     }
 
-    final Rect navigatorRect = _boundingBoxFor(navigator!.context!);
+    final Rect navigatorRect = _boundingBoxFor(navigator!.context);
 
     // At this point the toHeroes may have been built and laid out for the first time.
     final Map<Object, _HeroState> fromHeroes = Hero._allHeroesFor(from.subtreeContext!, isUserGestureTransition, navigator!);

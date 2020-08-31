@@ -430,7 +430,7 @@ class FormFieldState<T> extends State<FormField<T>> {
       _hasInteractedByUser = false;
       _errorText = null;
     });
-    Form.of(context!)?._fieldDidChange();
+    Form.of(context)?._fieldDidChange();
   }
 
   /// Calls [FormField.validator] to set the [errorText]. Returns true if there
@@ -463,7 +463,7 @@ class FormFieldState<T> extends State<FormField<T>> {
       _value = value;
       _hasInteractedByUser = true;
     });
-    Form.of(context!)?._fieldDidChange();
+    Form.of(context)?._fieldDidChange();
   }
 
   /// Sets the value associated with this form field.
@@ -486,7 +486,7 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   @override
   void deactivate() {
-    Form.of(context!)?._unregister(this);
+    Form.of(context)?._unregister(this);
     super.deactivate();
   }
 

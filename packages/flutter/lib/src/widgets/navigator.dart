@@ -2762,7 +2762,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
     // We have to manually extract the inherited widget in initState because
     // the current context is not fully initialized.
-    final HeroControllerScope? heroControllerScope = context!
+    final HeroControllerScope? heroControllerScope = context
       .getElementForInheritedWidgetOfExactType<HeroControllerScope>()
       ?.widget as HeroControllerScope?;
     _updateHeroController(heroControllerScope?.controller);
@@ -2771,7 +2771,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     if (widget.pages.isNotEmpty) {
       _history.addAll(
         widget.pages.map((Page<dynamic> page) => _RouteEntry(
-          page.createRoute(context!),
+          page.createRoute(context),
           initialState: _RouteLifecycle.add,
         ))
       );
@@ -2802,7 +2802,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _updateHeroController(HeroControllerScope.of(context!));
+    _updateHeroController(HeroControllerScope.of(context));
   }
 
   void _updateHeroController(HeroController? newHeroController) {
@@ -3059,7 +3059,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         // route and wait for the transition delegate to decide how to add
         // it into the history.
         final _RouteEntry newEntry = _RouteEntry(
-          nextPage.createRoute(context!),
+          nextPage.createRoute(context),
           initialState: _RouteLifecycle.staging,
         );
         needsExplicitDecision = true;

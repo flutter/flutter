@@ -482,8 +482,8 @@ class _AndroidViewState extends State<AndroidView> {
   }
 
   TextDirection _findLayoutDirection() {
-    assert(widget.layoutDirection != null || debugCheckHasDirectionality(context!));
-    return widget.layoutDirection ?? Directionality.of(context!)!;
+    assert(widget.layoutDirection != null || debugCheckHasDirectionality(context));
+    return widget.layoutDirection ?? Directionality.of(context)!;
   }
 
   @override
@@ -607,8 +607,8 @@ class _UiKitViewState extends State<UiKitView> {
   }
 
   TextDirection _findLayoutDirection() {
-    assert(widget.layoutDirection != null || debugCheckHasDirectionality(context!));
-    return widget.layoutDirection ?? Directionality.of(context!)!;
+    assert(widget.layoutDirection != null || debugCheckHasDirectionality(context));
+    return widget.layoutDirection ?? Directionality.of(context)!;
   }
 
   @override

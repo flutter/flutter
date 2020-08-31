@@ -160,7 +160,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
   @override
   void didChangeDependencies() {
     if (_ticker != null)
-      _ticker!.muted = !TickerMode.of(context!);
+      _ticker!.muted = !TickerMode.of(context);
     super.didChangeDependencies();
   }
 
@@ -240,7 +240,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
 
   @override
   void didChangeDependencies() {
-    final bool muted = !TickerMode.of(context!);
+    final bool muted = !TickerMode.of(context);
     if (_tickers != null) {
       for (final Ticker ticker in _tickers!) {
         ticker.muted = muted;

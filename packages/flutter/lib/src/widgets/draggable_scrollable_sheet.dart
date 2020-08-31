@@ -304,7 +304,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_InheritedResetNotifier.shouldReset(context!)) {
+    if (_InheritedResetNotifier.shouldReset(context)) {
       // jumpTo can result in trying to replace semantics during build.
       // Just animate really fast.
       // Avoid doing it at all if the offset is already 0.0.

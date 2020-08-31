@@ -1185,7 +1185,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   void updateParent() {
     _outerPosition?.setParent(
-      _parent ?? PrimaryScrollController.of(_state.context!)
+      _parent ?? PrimaryScrollController.of(_state.context)
     );
   }
 
