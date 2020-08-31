@@ -599,13 +599,11 @@ TEST_F(ShellTest,
 
 TEST_F(ShellTest, OnPlatformViewDestroyDisablesThreadMerger) {
   auto settings = CreateSettingsForFixture();
-  fml::AutoResetWaitableEvent end_frame_latch;
   fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger;
   auto end_frame_callback =
       [&](bool should_resubmit_frame,
           fml::RefPtr<fml::RasterThreadMerger> thread_merger) {
         raster_thread_merger = thread_merger;
-        end_frame_latch.Signal();
       };
   auto external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
       end_frame_callback, PostPrerollResult::kSuccess, true);
@@ -639,7 +637,10 @@ TEST_F(ShellTest, OnPlatformViewDestroyDisablesThreadMerger) {
 
   PumpOneFrame(shell.get(), 100, 100, builder);
 
-  end_frame_latch.Wait();
+  auto result =
+      shell->WaitForFirstFrame(fml::TimeDelta::FromMilliseconds(1000));
+  ASSERT_TRUE(result.ok());
+
   ASSERT_TRUE(raster_thread_merger->IsEnabled());
 
   ValidateDestroyPlatformView(shell.get());
