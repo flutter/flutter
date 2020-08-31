@@ -682,7 +682,7 @@ class DataTable extends StatelessWidget {
   }) {
     final ThemeData themeData = Theme.of(context);
     final double effectiveHorizontalMargin = horizontalMargin
-      ?? themeData.dataTableTheme?.horizontalMargin
+      ?? themeData.dataTableTheme.horizontalMargin
       ?? _horizontalMargin;
     Widget contents = Semantics(
       container: true,
@@ -742,10 +742,10 @@ class DataTable extends StatelessWidget {
     );
 
     final TextStyle effectiveHeadingTextStyle = headingTextStyle
-      ?? themeData.dataTableTheme?.headingTextStyle
+      ?? themeData.dataTableTheme.headingTextStyle
       ?? themeData.textTheme.subtitle2;
     final double effectiveHeadingRowHeight = headingRowHeight
-      ?? themeData.dataTableTheme?.headingRowHeight
+      ?? themeData.dataTableTheme.headingRowHeight
       ?? _headingRowHeight;
     label = Container(
       padding: padding,
@@ -797,10 +797,10 @@ class DataTable extends StatelessWidget {
     }
 
     final TextStyle effectiveDataTextStyle = dataTextStyle
-      ?? themeData.dataTableTheme?.dataTextStyle
+      ?? themeData.dataTableTheme.dataTextStyle
       ?? themeData.textTheme.bodyText2;
     final double effectiveDataRowHeight = dataRowHeight
-      ?? themeData.dataTableTheme?.dataRowHeight
+      ?? themeData.dataTableTheme.dataRowHeight
       ?? kMinInteractiveDimension;
     label = Container(
       padding: padding,
