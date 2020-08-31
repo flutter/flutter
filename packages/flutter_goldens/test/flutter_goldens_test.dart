@@ -690,6 +690,9 @@ void main() {
         test('comparison passes test that is ignored for this PR', () async {
           when(mockSkiaClient.imgtestCheck(any, any))
             .thenAnswer((_) => Future<bool>.value(false));
+          when(mockSkiaClient.getExpectationForTest('flutter.golden_test.1'))
+            .thenAnswer((_) => Future<String>.value('123456789abc'));
+          when(mockSkiaClient.ci).thenReturn(ContinuousIntegrationEnvironment.cirrus);
           when(mockSkiaClient.testIsIgnoredForPullRequest(
             '1234',
             'library.flutter.golden_test.1.png',
@@ -705,8 +708,11 @@ void main() {
         });
 
         test('fails test that is not ignored', () async {
-          when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
-            .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
+          when(mockSkiaClient.imgtestCheck(any, any))
+            .thenAnswer((_) => Future<bool>.value(false));
+          when(mockSkiaClient.getExpectationForTest('flutter.golden_test.1'))
+            .thenAnswer((_) => Future<String>.value('123456789abc'));
+          when(mockSkiaClient.ci).thenReturn(ContinuousIntegrationEnvironment.cirrus);
           when(mockSkiaClient.testIsIgnoredForPullRequest(
             '1234',
             'library.flutter.golden_test.1.png',
@@ -785,6 +791,8 @@ void main() {
           ),
         );
 
+        when(mockSkiaClient.getExpectationForTest('flutter.golden_test.1'))
+          .thenAnswer((_) => Future<String>.value('55109a4bed52acc780530f7a9aeff6c0'));
         when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
           .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
         when(mockSkiaClient.cleanTestName('library.flutter.golden_test.1.png'))
@@ -830,25 +838,35 @@ void main() {
         completer.complete(Future<bool>.value(false));
       });
 
-      test('returns FlutterSkippingGoldenFileComparator when network connection is unavailable', () async {
-        final MockDirectory mockDirectory = MockDirectory();
-        when(mockDirectory.existsSync()).thenReturn(true);
-        when(mockDirectory.uri).thenReturn(Uri.parse('/flutter'));
-
-        FlutterGoldenFileComparator comparator = await FlutterLocalFileComparator.fromDefaultComparator(
-          platform,
-          goldens: mockSkiaClient,
-          baseDirectory: mockDirectory,
+      testWithOutput('skips when network connection is unavailable, OSError', () async {
+        when(mockSkiaClient.cleanTestName('library.flutter.new_golden_test.1.png'))
+          .thenReturn('flutter.new_golden_test.1');
+        when(mockSkiaClient.getExpectationForTest('flutter.new_golden_test.1'))
+          .thenThrow(const OSError());
+        expect(
+          await comparator.compare(
+            Uint8List.fromList(_kFailPngBytes),
+            Uri.parse('flutter.new_golden_test.1.png'),
+          ),
+          isTrue,
         );
-        expect(comparator.runtimeType, FlutterSkippingFileComparator);
+      }, 'OSError occurred, could not reach Gold. '
+        'Check your network connection.');
 
-        comparator = await FlutterLocalFileComparator.fromDefaultComparator(
-          platform,
-          goldens: mockSkiaClient,
-          baseDirectory: mockDirectory,
+      testWithOutput('skips when network connection is unavailable, SocketException', () async {
+        when(mockSkiaClient.cleanTestName('library.flutter.new_golden_test.1.png'))
+          .thenReturn('flutter.new_golden_test.1');
+        when(mockSkiaClient.getExpectationForTest('flutter.new_golden_test.1'))
+          .thenThrow(const SocketException('Error'));
+        expect(
+          await comparator.compare(
+            Uint8List.fromList(_kFailPngBytes),
+            Uri.parse('flutter.new_golden_test.1.png'),
+          ),
+          isTrue,
         );
-        expect(comparator.runtimeType, FlutterSkippingFileComparator);
-      });
+      }, 'SocketException occurred, could not reach Gold. '
+        'Check your network connection.');
     });
   });
 }

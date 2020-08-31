@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -462,7 +463,7 @@ class _UnauthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileCompar
 
     // Contributors without the proper permissions to execute a tryjob can make
     // a golden file change through Gold's ignore feature instead.
-    late String pullRequest;
+    String? pullRequest;
     switch(skiaClient.ci) {
       case ContinuousIntegrationEnvironment.cirrus:
         pullRequest = platform.environment['CIRRUS_PR']!;
@@ -475,11 +476,13 @@ class _UnauthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileCompar
         pullRequest = '';
         break;
     }
+
     final bool ignoreResult = await skiaClient.testIsIgnoredForPullRequest(
       pullRequest,
       golden.path,
     );
-    // If true, this is an intended change.
+    // If true, this is an intended change and is being handled on the Flutter
+    // Gold dashboard: https://flutter-gold.skia.org/ignores
     return ignoreResult;
   }
 }
@@ -488,8 +491,7 @@ class _UnauthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileCompar
 /// golden file tests.
 ///
 /// Currently, this comparator is used in some Cirrus test shards and Luci
-/// environments, as well as when an internet connection is not available for
-/// contacting Gold.
+/// environments.
 ///
 /// See also:
 ///
@@ -612,30 +614,11 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       local: true,
     );
 
-    if(!baseDirectory.existsSync()) {
+    if(!baseDirectory.existsSync())
       baseDirectory.createSync(recursive: true);
-    }
+
 
     goldens ??= SkiaGoldClient(baseDirectory, ci: ContinuousIntegrationEnvironment.none);
-
-//    try {
-//      await goldens.getExpectations();
-//    } on io.OSError catch (_) {
-//      return FlutterSkippingFileComparator(
-//        baseDirectory.uri,
-//        goldens,
-//        'OSError occurred, could not reach Gold. '
-//          'Switching to FlutterSkippingGoldenFileComparator.',
-//      );
-//    } on io.SocketException catch (_) {
-//      return FlutterSkippingFileComparator(
-//        baseDirectory.uri,
-//        goldens,
-//        'SocketException occurred, could not reach Gold. '
-//          'Switching to FlutterSkippingGoldenFileComparator.',
-//      );
-//    }
-
     return FlutterLocalFileComparator(baseDirectory.uri, goldens);
   }
 
@@ -643,7 +626,23 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = _addPrefix(golden);
     final String testName = skiaClient.cleanTestName(golden.path);
-    final String? testExpectation = await skiaClient.getExpectationForTest(testName);
+    late String? testExpectation;
+    try {
+      testExpectation = await skiaClient.getExpectationForTest(testName);
+    } on io.OSError catch (_) {
+      print(
+        'OSError occurred, could not reach Gold. '
+        'Check your network connection.'
+      );
+      return true;
+    } on io.SocketException catch (_) {
+      print(
+        'SocketException occurred, could not reach Gold. '
+        'Check your network connection.'
+      );
+      return true;
+    }
+
     if (testExpectation == null) {
       // There is no baseline for this test
       print('No expectations provided by Skia Gold for test: $golden. '
