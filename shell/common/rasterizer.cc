@@ -178,6 +178,10 @@ void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
     consume_result = PipelineConsumeResult::MoreAvailable;
   }
 
+  if (surface_ != nullptr) {
+    surface_->ClearRenderContext();
+  }
+
   // Merging the thread as we know the next `Draw` should be run on the platform
   // thread.
   if (surface_ != nullptr && surface_->GetExternalViewEmbedder() != nullptr) {

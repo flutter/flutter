@@ -346,4 +346,9 @@ std::unique_ptr<GLContextResult> GPUSurfaceGL::MakeRenderContextCurrent() {
   return delegate_->GLContextMakeCurrent();
 }
 
+// |Surface|
+bool GPUSurfaceGL::ClearRenderContext() {
+  return delegate_->GLContextClearCurrent();
+}
+
 }  // namespace flutter
