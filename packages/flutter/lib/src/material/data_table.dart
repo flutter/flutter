@@ -552,8 +552,8 @@ class DataTable extends StatelessWidget {
 
   /// The height of the heading row.
   ///
-  /// This value defaults to [DataTable.defaultHeadingRowHeight] to adhere to the
-  /// Material Design specifications.
+  /// This value defaults to 56.0 to adhere to the Material Design
+  /// specifications.
   final double headingRowHeight;
 
   /// The text style for the heading row.
@@ -567,14 +567,14 @@ class DataTable extends StatelessWidget {
   /// When a checkbox is displayed, it is also the margin between the checkbox
   /// the content in the first data column.
   ///
-  /// This value defaults to [DataTable.defaultHorizontalMargin] to adhere to the
-  /// Material Design specifications.
+  /// This value defaults to 24.0 to adhere to the Material Design
+  /// specifications.
   final double horizontalMargin;
 
   /// The horizontal margin between the contents of each data column.
   ///
-  /// This value defaults to [DataTable.defaultColumnSpacing] to adhere to the
-  /// Material Design specifications.
+  /// This value defaults to 56.0 to adhere to the Material Design
+  /// specifications.
   final double columnSpacing;
 
   /// {@template flutter.material.dataTable.showCheckboxColumn}
@@ -641,17 +641,17 @@ class DataTable extends StatelessWidget {
   }
 
   /// The default height of the heading row.
-  static const double defaultHeadingRowHeight = 56.0;
+  static const double _headingRowHeight = 56.0;
 
   /// The default horizontal margin between the edges of the table and the content
   /// in the first and last cells of each row.
-  static const double defaultHorizontalMargin = 24.0;
+  static const double _horizontalMargin = 24.0;
 
   /// The default horizontal margin between the contents of each data column.
-  static const double defaultColumnSpacing = 56.0;
+  static const double _columnSpacing = 56.0;
 
   /// The default padding between the heading content and sort arrow.
-  static const double defaultSortArrowPadding = 2.0;
+  static const double _sortArrowPadding = 2.0;
 
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
   static const Color _grey100Opacity = Color(0x0A000000); // Grey 100 as opacity instead of solid color
@@ -668,7 +668,7 @@ class DataTable extends StatelessWidget {
     final ThemeData themeData = Theme.of(context);
     final double effectiveHorizontalMargin = horizontalMargin
       ?? themeData.dataTableTheme?.horizontalMargin
-      ?? DataTable.defaultHorizontalMargin;
+      ?? _horizontalMargin;
     Widget contents = Semantics(
       container: true,
       child: Padding(
@@ -721,7 +721,7 @@ class DataTable extends StatelessWidget {
               up: sorted ? ascending : null,
               duration: _sortArrowAnimationDuration,
             ),
-            const SizedBox(width: DataTable.defaultSortArrowPadding),
+            const SizedBox(width: _sortArrowPadding),
           ],
       ],
     );
@@ -731,7 +731,7 @@ class DataTable extends StatelessWidget {
       ?? themeData.textTheme.subtitle2;
     final double effectiveHeadingRowHeight = headingRowHeight
       ?? themeData.dataTableTheme?.headingRowHeight
-      ?? DataTable.defaultHeadingRowHeight;
+      ?? _headingRowHeight;
     label = Container(
       padding: padding,
       height: effectiveHeadingRowHeight,
@@ -840,10 +840,10 @@ class DataTable extends StatelessWidget {
     final bool allChecked = displayCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
     final double effectiveHorizontalMargin = horizontalMargin
       ?? theme.dataTableTheme.horizontalMargin
-      ?? DataTable.defaultHorizontalMargin;
+      ?? _horizontalMargin;
     final double effectiveColumnSpacing = columnSpacing
       ?? theme.dataTableTheme.columnSpacing
-      ?? DataTable.defaultColumnSpacing;
+      ?? _columnSpacing;
 
     final List<TableColumnWidth> tableColumns = List<TableColumnWidth>(columns.length + (displayCheckboxColumn ? 1 : 0));
     final List<TableRow> tableRows = List<TableRow>.generate(
