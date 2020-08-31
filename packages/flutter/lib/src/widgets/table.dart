@@ -201,7 +201,9 @@ class Table extends RenderObjectWidget {
   /// determine the intrinsic size of the column.
   ///
   /// The keys of this map (column indexes) are zero-based.
-  final Map<int, TableColumnWidth> columnWidths;
+  ///
+  /// If this is set to null, then an empty map is assumed.
+  final Map<int, TableColumnWidth>/*?*/ columnWidths;
 
   /// How to determine with widths of columns that don't have an explicit sizing
   /// algorithm.
