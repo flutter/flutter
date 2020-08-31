@@ -718,7 +718,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           focusedChild.rect,
           nearestScope.traversalDescendants,
         );
-        if (focusedScrollable != null && !focusedScrollable.position!.atEdge) {
+        if (focusedScrollable != null && !focusedScrollable.position.atEdge) {
           final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes!.where((FocusNode node) => Scrollable.of(node.context!) == focusedScrollable);
           if (filteredEligibleNodes.isNotEmpty) {
             eligibleNodes = filteredEligibleNodes;
@@ -750,7 +750,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       case TraversalDirection.right:
       case TraversalDirection.left:
         Iterable<FocusNode>? eligibleNodes = _sortAndFilterHorizontally(direction, focusedChild.rect, nearestScope);
-        if (focusedScrollable != null && !focusedScrollable.position!.atEdge) {
+        if (focusedScrollable != null && !focusedScrollable.position.atEdge) {
           final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes!.where((FocusNode node) => Scrollable.of(node.context!) == focusedScrollable);
           if (filteredEligibleNodes.isNotEmpty) {
             eligibleNodes = filteredEligibleNodes;

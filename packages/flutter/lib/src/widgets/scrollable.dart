@@ -309,7 +309,7 @@ class Scrollable extends StatefulWidget {
 
     ScrollableState? scrollable = Scrollable.of(context);
     while (scrollable != null) {
-      futures.add(scrollable.position!.ensureVisible(
+      futures.add(scrollable.position.ensureVisible(
         context.findRenderObject()!,
         alignment: alignment,
         duration: duration,
@@ -366,7 +366,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   /// To control what kind of [ScrollPosition] is created for a [Scrollable],
   /// provide it with custom [ScrollController] that creates the appropriate
   /// [ScrollPosition] in its [ScrollController.createScrollPosition] method.
-  ScrollPosition? get position => _position;
+  ScrollPosition get position => _position!;
   ScrollPosition? _position;
 
   final _RestorableScrollOffset _persistedScrollOffset = _RestorableScrollOffset();
@@ -384,7 +384,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     if (widget.physics != null)
       _physics = widget.physics!.applyTo(_physics);
     final ScrollController? controller = widget.controller;
-    final ScrollPosition? oldPosition = position;
+    final ScrollPosition? oldPosition = _position;
     if (oldPosition != null) {
       controller?.detach(oldPosition);
       // It's important that we not dispose the old position until after the
@@ -395,16 +395,16 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
     _position = controller?.createScrollPosition(_physics!, this, oldPosition)
       ?? ScrollPositionWithSingleContext(physics: _physics!, context: this, oldPosition: oldPosition);
-    assert(position != null);
-    controller?.attach(position!);
+    assert(_position != null);
+    controller?.attach(position);
   }
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_persistedScrollOffset, 'offset');
-    assert(position != null);
+    assert(_position != null);
     if (_persistedScrollOffset.value != null) {
-      position!.restoreOffset(_persistedScrollOffset.value!, initialRestore: initialRestore);
+      position.restoreOffset(_persistedScrollOffset.value!, initialRestore: initialRestore);
     }
   }
 
@@ -441,8 +441,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     super.didUpdateWidget(oldWidget);
 
     if (widget.controller != oldWidget.controller) {
-      oldWidget.controller?.detach(position!);
-      widget.controller?.attach(position!);
+      oldWidget.controller?.detach(position);
+      widget.controller?.attach(position);
     }
 
     if (_shouldUpdatePosition(oldWidget))
@@ -451,8 +451,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   void dispose() {
-    widget.controller?.detach(position!);
-    position!.dispose();
+    widget.controller?.detach(position);
+    position.dispose();
     _persistedScrollOffset.dispose();
     super.dispose();
   }
@@ -568,7 +568,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   void _handleDragDown(DragDownDetails details) {
     assert(_drag == null);
     assert(_hold == null);
-    _hold = position!.hold(_disposeHold);
+    _hold = position.hold(_disposeHold);
   }
 
   void _handleDragStart(DragStartDetails details) {
@@ -576,7 +576,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     // _handleDragStart, for example if some user code calls jumpTo or otherwise
     // triggers a new activity to begin.
     assert(_drag == null);
-    _drag = position!.drag(details, _disposeDrag);
+    _drag = position.drag(details, _disposeDrag);
     assert(_drag != null);
     assert(_hold == null);
   }
@@ -625,15 +625,15 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       delta *= -1;
     }
 
-    return math.min(math.max(position!.pixels! + delta, position!.minScrollExtent!),
-        position!.maxScrollExtent!);
+    return math.min(math.max(position.pixels! + delta, position.minScrollExtent!),
+        position.maxScrollExtent!);
   }
 
   void _receivedPointerSignal(PointerSignalEvent event) {
-    if (event is PointerScrollEvent && position != null) {
+    if (event is PointerScrollEvent && _position != null) {
       final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
       // Only express interest in the event if it would actually result in a scroll.
-      if (targetScrollOffset != position!.pixels) {
+      if (targetScrollOffset != position.pixels) {
         GestureBinding.instance!.pointerSignalResolver.register(event, _handlePointerScroll);
       }
     }
@@ -641,12 +641,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   void _handlePointerScroll(PointerEvent event) {
     assert(event is PointerScrollEvent);
-    if (_physics != null && !_physics!.shouldAcceptUserOffset(position!)) {
+    if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
       return;
     }
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event as PointerScrollEvent);
-    if (targetScrollOffset != position!.pixels) {
-      position!.jumpTo(targetScrollOffset);
+    if (targetScrollOffset != position.pixels) {
+      position.jumpTo(targetScrollOffset);
     }
   }
 
@@ -654,7 +654,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   Widget build(BuildContext context) {
-    assert(position != null);
+    assert(_position != null);
     // _ScrollableScope must be placed above the BuildContext returned by notificationContext
     // so that we can get this ScrollableState by doing the following:
     //
@@ -665,7 +665,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     // must be placed above the widget using it: RawGestureDetector
     Widget result = _ScrollableScope(
       scrollable: this,
-      position: position!,
+      position: position,
       // TODO(ianh): Having all these global keys is sad.
       child: Listener(
         onPointerSignal: _receivedPointerSignal,
@@ -680,7 +680,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
               key: _ignorePointerKey,
               ignoring: _shouldIgnorePointer,
               ignoringSemantics: false,
-              child: widget.viewportBuilder(context, position!),
+              child: widget.viewportBuilder(context, position),
             ),
           ),
         ),
@@ -691,7 +691,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       result = _ScrollSemantics(
         key: _scrollSemanticsKey,
         child: result,
-        position: position!,
+        position: position,
         allowImplicitScrolling: _physics!.allowImplicitScrolling,
         semanticChildCount: widget.semanticChildCount,
       );
@@ -968,16 +968,16 @@ class ScrollAction extends Action<ScrollIntent> {
   double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
     assert(type != null);
     assert(state.position != null);
-    assert(state.position!.pixels != null);
-    assert(state.position!.viewportDimension != null);
-    assert(state.position!.maxScrollExtent != null);
-    assert(state.position!.minScrollExtent != null);
+    assert(state.position.pixels != null);
+    assert(state.position.viewportDimension != null);
+    assert(state.position.maxScrollExtent != null);
+    assert(state.position.minScrollExtent != null);
     assert(state._physics == null || state._physics!.shouldAcceptUserOffset(state.position!));
     if (state.widget.incrementCalculator != null) {
       return state.widget.incrementCalculator!(
         ScrollIncrementDetails(
           type: type,
-          metrics: state.position!,
+          metrics: state.position,
         ),
       );
     }
@@ -985,7 +985,7 @@ class ScrollAction extends Action<ScrollIntent> {
       case ScrollIncrementType.line:
         return 50.0;
       case ScrollIncrementType.page:
-        return 0.8 * state.position!.viewportDimension!;
+        return 0.8 * state.position.viewportDimension!;
     }
   }
 
@@ -1041,21 +1041,21 @@ class ScrollAction extends Action<ScrollIntent> {
   void invoke(ScrollIntent intent) {
     final ScrollableState? state = Scrollable.of(primaryFocus!.context!);
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
-    assert(state!.position!.pixels != null, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
-    assert(state!.position!.viewportDimension != null);
-    assert(state!.position!.maxScrollExtent != null);
-    assert(state!.position!.minScrollExtent != null);
+    assert(state!.position.pixels != null, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
+    assert(state!.position.viewportDimension != null);
+    assert(state!.position.maxScrollExtent != null);
+    assert(state!.position.minScrollExtent != null);
 
     // Don't do anything if the user isn't allowed to scroll.
-    if (state!._physics != null && !state._physics!.shouldAcceptUserOffset(state.position!)) {
+    if (state!._physics != null && !state._physics!.shouldAcceptUserOffset(state.position)) {
       return;
     }
     final double increment = _getIncrement(state, intent);
     if (increment == 0.0) {
       return;
     }
-    state.position!.moveTo(
-      state.position!.pixels! + increment,
+    state.position.moveTo(
+      state.position.pixels! + increment,
       duration: const Duration(milliseconds: 100),
       curve: Curves.easeInOut,
     );
