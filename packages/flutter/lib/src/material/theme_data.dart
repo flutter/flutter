@@ -635,9 +635,9 @@ class ThemeData with Diagnosticable {
        assert(elevatedButtonTheme != null),
        assert(outlinedButtonTheme != null),
        assert(textSelectionTheme != null),
-       assert(useTextSelectionTheme != null),
        assert(dataTableTheme != null),
-       assert(fixTextFieldOutlineLabel != null);
+       assert(fixTextFieldOutlineLabel != null),
+       assert(useTextSelectionTheme != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -1527,10 +1527,9 @@ class ThemeData with Diagnosticable {
         && other.elevatedButtonTheme == elevatedButtonTheme
         && other.outlinedButtonTheme == outlinedButtonTheme
         && other.textSelectionTheme == textSelectionTheme
-        && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel
-        && other.useTextSelectionTheme == useTextSelectionTheme
         && other.dataTableTheme == dataTableTheme
-        && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel;
+        && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel
+        && other.useTextSelectionTheme == useTextSelectionTheme;
   }
 
   @override
