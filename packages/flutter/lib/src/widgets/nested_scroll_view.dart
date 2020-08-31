@@ -873,6 +873,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   ScrollActivity createOuterBallisticScrollActivity(double velocity) {
+//    print('createOuterBallisticScrollActivity, velocity: $velocity');
     // This function creates a ballistic scroll for the outer scrollable.
     //
     // It assumes that the outer scrollable can't be overscrolled, and sets up a
@@ -887,6 +888,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     _NestedScrollPosition innerPosition;
     if (velocity != 0.0) {
       for (final _NestedScrollPosition position in _innerPositions) {
+//        print('innerPosition.pixels: ${innerPosition?.pixels}, position.pixels: ${position?.pixels}');
         if (innerPosition != null) {
           if (velocity > 0.0) {
             if (innerPosition.pixels < position.pixels)
@@ -900,6 +902,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         innerPosition = position;
       }
     }
+
+//    print(_outerPosition);
+//    print(innerPosition);
 
     if (innerPosition == null) {
       // It's either just us or a velocity=0 situation.
@@ -1114,18 +1119,23 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   @override
   void applyUserOffset(double delta) {
+//    print('delta: $delta');
     updateUserScrollDirection(
       delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse
     );
+//    print(userScrollDirection);
     assert(delta != 0.0);
     if (_innerPositions.isEmpty) {
       _outerPosition.applyFullDragUpdate(delta);
     } else if (delta < 0.0) {
+      print('*** Dragging up ***');
+      print(' - delta $delta');
       // Dragging "up"
       // Prioritize getting rid of any inner overscroll, and then the outer
       // view, so that the app bar will scroll out of the way asap.
       double outerDelta = delta;
       for (final _NestedScrollPosition position in _innerPositions) {
+        print('   - innerPosition before: $position');
         if (position.pixels < 0.0) { // This inner position is in overscroll.
           final double potentialOuterDelta = position.applyClampedDragUpdate(delta);
           // In case there are multiple positions in varying states of
@@ -1133,14 +1143,22 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
           // precedence.
           outerDelta = math.max(outerDelta, potentialOuterDelta);
         }
+        print('   - innerPosition after: $position');
       }
+      print(' - outerDelta $outerDelta');
+      print('   - outerPosition before: $_outerPosition');
       if (outerDelta != 0.0) {
         final double innerDelta = _outerPosition.applyClampedDragUpdate(
           outerDelta
         );
+        print('   - outerPosition after: $_outerPosition');
+        print(' - innerDelta $innerDelta');
         if (innerDelta != 0.0) {
-          for (final _NestedScrollPosition position in _innerPositions)
+          for (final _NestedScrollPosition position in _innerPositions) {
+            print('   - innerPosition before: $position');
             position.applyFullDragUpdate(innerDelta);
+            print('   - innerPosition before: $position');
+          }
         }
       }
     } else {
@@ -1322,6 +1340,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   // Positive delta means going down (exposing stuff above), negative delta
   // going up (exposing stuff below).
   double applyClampedDragUpdate(double delta) {
+    print('     - applyClampedDragUpdate');
     assert(delta != 0.0);
     // If we are going towards the maxScrollExtent (negative scroll offset),
     // then the furthest we can be in the minScrollExtent direction is negative
@@ -1340,26 +1359,36 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     // One is if the physics allow it, via applyFullDragUpdate (see below). An
     // overscroll situation can also be forced, e.g. if the scroll position is
     // artificially set using the scroll controller.
+    print('       - delta: $delta');
     final double min = delta < 0.0
       ? -double.infinity
       : math.min(minScrollExtent, pixels);
     // The logic for max is equivalent but on the other side.
     final double max = delta > 0.0
       ? double.infinity
-      : math.max(maxScrollExtent, pixels);
+      : pixels < 0.0 ? 0.0 : math.max(maxScrollExtent, pixels);
+    print('       - min: $min, max: $max');
     final double oldPixels = pixels;
     final double newPixels = (pixels - delta).clamp(min, max) as double;
     final double clampedDelta = newPixels - pixels;
+    print('       - oldPixels: $oldPixels, newPixels: $newPixels, clampedDelta: $clampedDelta');
     if (clampedDelta == 0.0)
       return delta;
     final double overscroll = physics.applyBoundaryConditions(this, newPixels);
     final double actualNewPixels = newPixels - overscroll;
     final double offset = actualNewPixels - oldPixels;
+    print('       - overscroll: $overscroll, actualNewPixels $actualNewPixels, offset: $offset');
     if (offset != 0.0) {
       forcePixels(actualNewPixels);
       didUpdateScrollPositionBy(offset);
     }
-    return delta + offset;
+    final double remainingDelta =  delta + offset;
+    print('         - returning $remainingDelta');
+//    if (actualNewPixels < max && returning != 0.0) {
+//      print('*** returning is wrong, r: $returning pET: $precisionErrorTolerance');
+//      return 0.0;
+//    }
+    return precisionErrorTolerance > remainingDelta ? 0.0 : remainingDelta;
   }
 
   // Returns the overscroll.
