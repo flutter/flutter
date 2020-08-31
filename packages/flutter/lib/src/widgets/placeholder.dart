@@ -37,7 +37,7 @@ class _PlaceholderPainter extends CustomPainter {
   }
 
   @override
-  bool hitTest(Offset? position) => false;
+  bool hitTest(Offset position) => false;
 }
 
 /// A widget that draws a box that represents where other widgets will one day

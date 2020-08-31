@@ -44,7 +44,7 @@ class _GridPaperPainter extends CustomPainter {
   }
 
   @override
-  bool hitTest(Offset? position) => false;
+  bool hitTest(Offset position) => false;
 }
 
 /// A widget that draws a rectilinear grid of lines one pixel wide.
