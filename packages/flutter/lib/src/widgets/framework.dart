@@ -4684,7 +4684,7 @@ abstract class ComponentElement extends Element {
   /// `build` function (e.g., [StatelessWidget.build] or [State.build]) for
   /// their widget.
   @protected
-  Widget? build();
+  Widget build();
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -4752,7 +4752,7 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  Widget? build() => _state!.build(this);
+  Widget build() => _state!.build(this);
 
   /// The [State] instance associated with this location in the tree.
   ///
@@ -4984,7 +4984,7 @@ abstract class ProxyElement extends ComponentElement {
   ProxyWidget get widget => super.widget as ProxyWidget;
 
   @override
-  Widget? build() => widget.child;
+  Widget build() => widget.child;
 
   @override
   void update(ProxyWidget newWidget) {
