@@ -264,122 +264,6 @@ void main() {
         mockHttpRequest = MockHttpClientRequest();
       });
 
-      test('validates SkiaDigest', () {
-        final Map<String, dynamic> skiaJson = json.decode(digestResponseTemplate()) as Map<String, dynamic>;
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
-        expect(
-          digest.isValid(
-            platform,
-            'flutter.golden_test.1',
-            expectation,
-          ),
-          isTrue,
-        );
-      });
-
-      test('invalidates bad SkiaDigest - platform', () {
-        final Map<String, dynamic> skiaJson = json.decode(
-          digestResponseTemplate(platform: 'linux'),
-        ) as Map<String, dynamic>;
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
-        expect(
-          digest.isValid(
-            platform,
-            'flutter.golden_test.1',
-            expectation,
-          ),
-          isFalse,
-        );
-      });
-
-      test('invalidates bad SkiaDigest - test name', () {
-        final Map<String, dynamic> skiaJson = json.decode(
-          digestResponseTemplate(testName: 'flutter.golden_test.2'),
-        ) as Map<String, dynamic>;
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
-        expect(
-          digest.isValid(
-            platform,
-            'flutter.golden_test.1',
-            expectation,
-          ),
-          isFalse,
-        );
-      });
-
-      test('invalidates bad SkiaDigest - expectation', () {
-        final Map<String, dynamic> skiaJson = json.decode(
-          digestResponseTemplate(expectation: '1deg543sf645erg44awqcc78'),
-        ) as Map<String, dynamic>;
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
-        expect(
-          digest.isValid(
-            platform,
-            'flutter.golden_test.1',
-            expectation,
-          ),
-          isFalse,
-        );
-      });
-
-      test('invalidates bad SkiaDigest - status', () {
-        final Map<String, dynamic> skiaJson = json.decode(
-          digestResponseTemplate(status: 'negative'),
-        ) as Map<String, dynamic>;
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
-        expect(
-          digest.isValid(
-            platform,
-            'flutter.golden_test.1',
-            expectation,
-          ),
-          isFalse,
-        );
-      });
-
-      test('sets up expectations', () async {
-        url = Uri.parse('https://flutter-gold.skia.org/json/expectations/commit/HEAD');
-        final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
-          utf8.encode(rawExpectationsTemplate())
-        );
-        when(mockHttpClient.getUrl(url))
-          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
-        when(mockHttpRequest.close())
-          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
-
-        await skiaClient.getExpectations();
-        expect(skiaClient.expectations, isNotNull);
-        expect(
-          skiaClient.expectations['flutter.golden_test.1'],
-          contains(expectation),
-        );
-      });
-
-      test('sets up expectations with temporary key', () async {
-        url = Uri.parse('https://flutter-gold.skia.org/json/expectations/commit/HEAD');
-        final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
-          utf8.encode(rawExpectationsTemplateWithTemporaryKey())
-        );
-        when(mockHttpClient.getUrl(url))
-          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
-        when(mockHttpRequest.close())
-          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
-
-        await skiaClient.getExpectations();
-        expect(skiaClient.expectations, isNotNull);
-        expect(
-          skiaClient.expectations['flutter.golden_test.1'],
-          contains(expectation),
-        );
-      });
-
-      test('detects invalid digests SkiaDigest', () {
-        const String testName = 'flutter.golden_test.2';
-        final Map<String, dynamic> skiaJson = json.decode(digestResponseTemplate()) as Map<String, dynamic>;
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
-        expect(digest.isValid(platform, testName, expectation), isFalse);
-      });
-
       test('image bytes are processed properly', () async {
         final Uri imageUrl = Uri.parse(
           'https://flutter-gold.skia.org/img/images/$expectation.png'
@@ -508,50 +392,6 @@ void main() {
           expect(
             test,
             throwsException,
-          );
-        });
-      });
-
-      group('digest parsing', () {
-        Uri url;
-        MockHttpClientRequest mockHttpRequest;
-        MockHttpClientResponse mockHttpResponse;
-
-        setUp(() {
-          url = Uri.parse(
-            'https://flutter-gold.skia.org/json/details?'
-              'test=flutter.golden_test.1&digest=$expectation'
-          );
-          mockHttpRequest = MockHttpClientRequest();
-          when(mockHttpClient.getUrl(url))
-            .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
-        });
-
-        test('succeeds when valid', () async {
-          mockHttpResponse = MockHttpClientResponse(utf8.encode(digestResponseTemplate()));
-          when(mockHttpRequest.close())
-            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
-          expect(
-            await skiaClient.isValidDigestForExpectation(
-              expectation,
-              testName,
-            ),
-            isTrue,
-          );
-        });
-
-        test('fails when invalid', () async {
-          mockHttpResponse = MockHttpClientResponse(utf8.encode(
-            digestResponseTemplate(platform: 'linux')
-          ));
-          when(mockHttpRequest.close())
-            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
-          expect(
-            await skiaClient.isValidDigestForExpectation(
-              expectation,
-              testName,
-            ),
-            isFalse,
           );
         });
       });
@@ -838,8 +678,6 @@ void main() {
           );
           when(mockSkiaClient.cleanTestName('library.flutter.golden_test.1.png'))
             .thenReturn('flutter.golden_test.1');
-          when(mockSkiaClient.expectations)
-            .thenReturn(expectationsTemplate());
         });
 
         test('fromDefaultComparator chooses correct comparator', () async {
@@ -949,15 +787,8 @@ void main() {
 
         when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
           .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
-        when(mockSkiaClient.expectations)
-          .thenReturn(expectationsTemplate());
         when(mockSkiaClient.cleanTestName('library.flutter.golden_test.1.png'))
           .thenReturn('flutter.golden_test.1');
-        when(mockSkiaClient.isValidDigestForExpectation(
-          '55109a4bed52acc780530f7a9aeff6c0',
-          'library.flutter.golden_test.1.png',
-        ))
-          .thenAnswer((_) => Future<bool>.value(false));
       });
 
       test('passes when bytes match', () async {
@@ -985,11 +816,6 @@ void main() {
 
       test('compare properly awaits validation & output before failing.', () async {
         final Completer<bool> completer = Completer<bool>();
-        when(mockSkiaClient.isValidDigestForExpectation(
-          '55109a4bed52acc780530f7a9aeff6c0',
-          'library.flutter.golden_test.1.png',
-        ))
-          .thenAnswer((_) => completer.future);
         final Future<bool> result = comparator.compare(
           Uint8List.fromList(_kFailPngBytes),
           Uri.parse('flutter.golden_test.1.png'),
@@ -1009,8 +835,6 @@ void main() {
         when(mockDirectory.existsSync()).thenReturn(true);
         when(mockDirectory.uri).thenReturn(Uri.parse('/flutter'));
 
-        when(mockSkiaClient.getExpectations())
-          .thenAnswer((_) => throw const OSError("Can't reach Gold"));
         FlutterGoldenFileComparator comparator = await FlutterLocalFileComparator.fromDefaultComparator(
           platform,
           goldens: mockSkiaClient,
@@ -1018,8 +842,6 @@ void main() {
         );
         expect(comparator.runtimeType, FlutterSkippingFileComparator);
 
-        when(mockSkiaClient.getExpectations())
-          .thenAnswer((_) => throw const SocketException("Can't reach Gold"));
         comparator = await FlutterLocalFileComparator.fromDefaultComparator(
           platform,
           goldens: mockSkiaClient,
