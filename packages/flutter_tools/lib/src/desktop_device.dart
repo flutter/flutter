@@ -134,7 +134,7 @@ abstract class DesktopDevice extends Device {
     }
     final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader,
       devicePort: debuggingOptions?.deviceVmServicePort,
-      hostPort: (debuggingOptions?.disableDds ?? false) ? debuggingOptions?.hostVmServicePort : 0,
+      hostPort: debuggingOptions?.hostVmServicePort,
       ipv6: ipv6,
     );
     try {
