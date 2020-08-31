@@ -40,7 +40,10 @@ void main() {
 
     // Config is updated if command succeeded.
     expect(generatedConfig, exists);
-    expect(generatedConfig.readAsStringSync(), contains('DART_OBFUSCATION=true'));
+    expect(generatedConfig.readAsStringSync(), allOf(
+      contains('DART_OBFUSCATION=true'),
+      contains('FLUTTER_FRAMEWORK_DIR=${globals.fs.path.absolute(getFlutterRoot(), 'bin', 'cache', 'artifacts', 'engine')}'),
+    ));
 
     // file that only exists if app was fully built.
     final File frameworkPlist = globals.fs.file(
