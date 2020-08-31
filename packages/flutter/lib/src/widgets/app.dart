@@ -172,11 +172,11 @@ class WidgetsApp extends StatefulWidget {
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
-    this.navigatorObservers = const <NavigatorObserver>[],
+    List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
     this.initialRoute,
     this.pageRouteBuilder,
     this.home,
-    this.routes = const <String, WidgetBuilder>{},
+    Map<String, WidgetBuilder> this.routes = const <String, WidgetBuilder>{},
     this.builder,
     this.title = '',
     this.onGenerateTitle,
@@ -206,14 +206,14 @@ class WidgetsApp extends StatefulWidget {
        ),
        assert(
          home == null ||
-         !routes!.containsKey(Navigator.defaultRouteName),
+         !routes.containsKey(Navigator.defaultRouteName),
          'If the home property is specified, the routes table '
          'cannot include an entry for "/", since it would be redundant.'
        ),
        assert(
          builder != null ||
          home != null ||
-         routes!.containsKey(Navigator.defaultRouteName) ||
+         routes.containsKey(Navigator.defaultRouteName) ||
          onGenerateRoute != null ||
          onUnknownRoute != null,
          'Either the home property must be specified, '
@@ -226,14 +226,14 @@ class WidgetsApp extends StatefulWidget {
        ),
        assert(
          (home != null ||
-          routes!.isNotEmpty ||
+          routes.isNotEmpty ||
           onGenerateRoute != null ||
           onUnknownRoute != null)
          ||
          (builder != null &&
           navigatorKey == null &&
           initialRoute == null &&
-          navigatorObservers!.isEmpty),
+          navigatorObservers.isEmpty),
          'If no route is provided using '
          'home, routes, onGenerateRoute, or onUnknownRoute, '
          'a non-null callback for the builder property must be provided, '
@@ -269,8 +269,8 @@ class WidgetsApp extends StatefulWidget {
   WidgetsApp.router({
     Key? key,
     this.routeInformationProvider,
-    required this.routeInformationParser,
-    required this.routerDelegate,
+    required RouteInformationParser<Object> this.routeInformationParser,
+    required RouterDelegate<Object> this.routerDelegate,
     BackButtonDispatcher? backButtonDispatcher,
     this.builder,
     this.title = '',
