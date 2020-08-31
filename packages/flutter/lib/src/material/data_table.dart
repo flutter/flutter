@@ -477,11 +477,14 @@ class DataTable extends StatelessWidget {
   /// row is selectable.
   final ValueSetter<bool> onSelectAll;
 
+  /// {@template flutter.material.dataTable.decoration}
   /// The background and border decoration for the table.
   ///
   /// By default there is no decoration.
+  /// {@endtemplate}
   final BoxDecoration decoration;
 
+  /// {@template flutter.material.dataTable.dataRowColor}
   /// The background color for the data rows.
   ///
   /// By default, the background color is transparent unless selected. Selected
@@ -510,19 +513,25 @@ class DataTable extends StatelessWidget {
   ///  * The Material Design specification for overlay colors and how they
   ///    match a component's state:
   ///    <https://material.io/design/interaction/states.html#anatomy>.
+  /// {@endtemplate}
   final MaterialStateProperty<Color> dataRowColor;
 
+  /// {@template flutter.material.dataTable.dataRowHeight}
   /// The height of each row (excluding the row that contains column headings).
   ///
   /// This value defaults to [kMinInteractiveDimension] to adhere to the Material
   /// Design specifications.
+  /// {@endtemplate}
   final double dataRowHeight;
 
+  /// {@template flutter.material.dataTable.dataTextStyle}
   /// The text style for data rows.
   ///
   /// By default, the text style is [TextTheme.bodyText2].
+  /// {@endtemplate}
   final TextStyle dataTextStyle;
 
+  /// {@template flutter.material.dataTable.headingRowColor}
   /// The background color for the heading row.
   ///
   /// By default, the background color is transparent.
@@ -548,33 +557,39 @@ class DataTable extends StatelessWidget {
   ///  * The Material Design specification for overlay colors and how they
   ///    match a component's state:
   ///    <https://material.io/design/interaction/states.html#anatomy>.
+  /// {@endtemplate}
   final MaterialStateProperty<Color> headingRowColor;
 
+  /// {@template flutter.material.dataTable.headingRowHeight}
   /// The height of the heading row.
   ///
-  /// This value defaults to 56.0 to adhere to the Material Design
-  /// specifications.
+  /// This value defaults to 56.0 to adhere to the Material Design specifications.
+  /// {@endtemplate}
   final double headingRowHeight;
 
+  /// {@template flutter.material.dataTable.headingTextStyle}
   /// The text style for the heading row.
   ///
   /// By default, the text style is [TextTheme.subtitle2].
+  /// {@endtemplate}
   final TextStyle headingTextStyle;
 
+  /// {@template flutter.material.dataTable.horizontalMargin}
   /// The horizontal margin between the edges of the table and the content
   /// in the first and last cells of each row.
   ///
   /// When a checkbox is displayed, it is also the margin between the checkbox
   /// the content in the first data column.
   ///
-  /// This value defaults to 24.0 to adhere to the Material Design
-  /// specifications.
+  /// This value defaults to 24.0 to adhere to the Material Design specifications.
+  /// {@endtemplate}
   final double horizontalMargin;
 
+  /// {@template flutter.material.dataTable.columnSpacing}
   /// The horizontal margin between the contents of each data column.
   ///
-  /// This value defaults to 56.0 to adhere to the Material Design
-  /// specifications.
+  /// This value defaults to 56.0 to adhere to the Material Design specifications.
+  /// {@endtemplate}
   final double columnSpacing;
 
   /// {@template flutter.material.dataTable.showCheckboxColumn}

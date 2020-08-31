@@ -45,79 +45,31 @@ class DataTableThemeData with Diagnosticable {
     this.columnSpacing,
   });
 
-  /// The background and border decoration for the table.
+  /// {@macro flutter.material.dataTable.decoration}
   final Decoration decoration;
 
-  /// The color for the data rows.
-  ///
-  /// The effective color can depend on the [MaterialState] state, if the
-  /// row is selected, pressed, hovered, focused, disabled or enabled. The
-  /// color is painted as an overlay to the row. To make sure that the row's
-  /// [InkWell] is visible (when pressed, hovered and focused), it is
-  /// recommended to use a translucent color.
-  ///
-  /// ```dart
-  /// DataTable(
-  ///   dataRowColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.selected))
-  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
-  ///     return null;  // Use the default value.
-  ///   }),
-  /// )
-  /// ```
-  ///
-  /// See also:
-  ///
-  ///  * The Material Design specification for overlay colors and how they
-  ///    match a component's state:
-  ///    <https://material.io/design/interaction/states.html#anatomy>.
+  /// {@macro flutter.material.dataTable.dataRowColor}
   final MaterialStateProperty<Color> dataRowColor;
 
-  /// The height of each row (excluding the row that contains column headings).
+  /// {@macro flutter.material.dataTable.dataRowHeight}
   final double dataRowHeight;
 
-  /// The text style for data rows.
+  /// {@macro flutter.material.dataTable.dataTextStyle}
   final TextStyle dataTextStyle;
 
-  /// The color for the heading row.
-  ///
-  /// The effective color can depend on the [MaterialState] state, if the
-  /// row is pressed, hovered, focused. The color is painted as an overlay
-  /// to the row. To make sure that the row's [InkWell] is visible (when
-  /// pressed, hovered and focused), it is recommended to use a translucent
-  /// color.
-  ///
-  /// ```dart
-  /// DataTable(
-  ///   headingRowColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.hovered))
-  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
-  ///     return null;  // Use the default value.
-  ///   }),
-  /// )
-  /// ```
-  ///
-  /// See also:
-  ///
-  ///  * The Material Design specification for overlay colors and how they
-  ///    match a component's state:
-  ///    <https://material.io/design/interaction/states.html#anatomy>.
+  /// {@macro flutter.material.dataTable.headingRowColor}
   final MaterialStateProperty<Color> headingRowColor;
 
-  /// The height of the heading row.
+  /// {@macro flutter.material.dataTable.headingRowHeight}
   final double headingRowHeight;
 
-  /// The text style for the heading row.
+  /// {@macro flutter.material.dataTable.headingTextStyle}
   final TextStyle headingTextStyle;
 
-  /// The horizontal margin between the edges of the table and the content
-  /// in the first and last cells of each row.
-  ///
-  /// When a checkbox is displayed, it is also the margin between the checkbox
-  /// the content in the first data column.
+  /// {@macro flutter.material.dataTable.horizontalMargin}
   final double horizontalMargin;
 
-  /// The horizontal margin between the contents of each data column.
+  /// {@macro flutter.material.dataTable.columnSpacing}
   final double columnSpacing;
 
   /// Creates a copy of this object but with the given fields replaced with the
