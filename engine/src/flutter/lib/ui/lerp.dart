@@ -20,21 +20,21 @@ double? lerpDouble(num? a, num? b, double t) {
   assert(a.isFinite, 'Cannot interpolate between finite and non-finite values');
   assert(b.isFinite, 'Cannot interpolate between finite and non-finite values');
   assert(t.isFinite, 't must be finite when interpolating between values');
-  return a + (b - a) * t as double;
+  return a * (1.0 - t) + b * t as double;
 }
 
 /// Linearly interpolate between two doubles.
 ///
 /// Same as [lerpDouble] but specialized for non-null `double` type.
 double _lerpDouble(double a, double b, double t) {
-  return a + (b - a) * t;
+  return a * (1.0 - t) + b * t;
 }
 
 /// Linearly interpolate between two integers.
 ///
 /// Same as [lerpDouble] but specialized for non-null `int` type.
 double _lerpInt(int a, int b, double t) {
-  return a + (b - a) * t;
+  return a * (1.0 - t) + b * t;
 }
 
 /// Same as [num.clamp] but specialized for non-null [int].

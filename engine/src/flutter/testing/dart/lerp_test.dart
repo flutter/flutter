@@ -20,19 +20,19 @@ void main() {
   });
 
   test('lerpDouble should treat a null input as 0 if the other input is non-null', () {
-    expect(lerpDouble(null, 10.0, 0.25), 2.5);
-    expect(lerpDouble(10.0, null, 0.25), 7.5);
+    expect(lerpDouble(null, 10.0, 0.25), closeTo(2.5, precisionErrorTolerance));
+    expect(lerpDouble(10.0, null, 0.25), closeTo(7.5, precisionErrorTolerance));
 
-    expect(lerpDouble(null, 10, 0.25), 2.5);
-    expect(lerpDouble(10, null, 0.25), 7.5);
+    expect(lerpDouble(null, 10, 0.25), closeTo(2.5, precisionErrorTolerance));
+    expect(lerpDouble(10, null, 0.25), closeTo(7.5, precisionErrorTolerance));
   });
 
   test('lerpDouble should handle interpolation values < 0.0', () {
-    expect(lerpDouble(0.0, 10.0, -5.0), -50.0);
-    expect(lerpDouble(10.0, 0.0, -5.0), 60.0);
+    expect(lerpDouble(0.0, 10.0, -5.0), closeTo(-50.0, precisionErrorTolerance));
+    expect(lerpDouble(10.0, 0.0, -5.0), closeTo(60.0, precisionErrorTolerance));
 
-    expect(lerpDouble(0, 10, -5), -50);
-    expect(lerpDouble(10, 0, -5), 60);
+    expect(lerpDouble(0, 10, -5), closeTo(-50, precisionErrorTolerance));
+    expect(lerpDouble(10, 0, -5), closeTo(60, precisionErrorTolerance));
   });
 
   test('lerpDouble should return the start value at 0.0', () {
@@ -44,11 +44,17 @@ void main() {
   });
 
   test('lerpDouble should interpolate between two values', () {
-    expect(lerpDouble(0.0, 10.0, 0.25), 2.5);
-    expect(lerpDouble(10.0, 0.0, 0.25), 7.5);
+    expect(lerpDouble(0.0, 10.0, 0.25), closeTo(2.5, precisionErrorTolerance));
+    expect(lerpDouble(10.0, 0.0, 0.25), closeTo(7.5, precisionErrorTolerance));
 
-    expect(lerpDouble(0, 10, 0.25), 2.5);
-    expect(lerpDouble(10, 0, 0.25), 7.5);
+    expect(lerpDouble(0, 10, 0.25), closeTo(2.5, precisionErrorTolerance));
+    expect(lerpDouble(10, 0, 0.25), closeTo(7.5, precisionErrorTolerance));
+
+    // Exact answer: 20.0 - 1.0e-29
+    expect(lerpDouble(10.0, 1.0e30, 1.0e-29), closeTo(20.0, precisionErrorTolerance));
+
+    // Exact answer: 5.0 + 5.0e29
+    expect(lerpDouble(10.0, 1.0e30, 0.5), closeTo(5.0e29, precisionErrorTolerance));
   });
 
   test('lerpDouble should return the end value at 1.0', () {
@@ -57,14 +63,17 @@ void main() {
 
     expect(lerpDouble(0, 10, 5), 50);
     expect(lerpDouble(10, 0, 5), -40);
+
+    expect(lerpDouble(1.0e30, 10.0, 1.0), 10.0);
+    expect(lerpDouble(10.0, 1.0e30, 0.0), 10.0);
   });
 
   test('lerpDouble should handle interpolation values > 1.0', () {
-    expect(lerpDouble(0.0, 10.0, 5.0), 50.0);
-    expect(lerpDouble(10.0, 0.0, 5.0), -40.0);
+    expect(lerpDouble(0.0, 10.0, 5.0), closeTo(50.0, precisionErrorTolerance));
+    expect(lerpDouble(10.0, 0.0, 5.0), closeTo(-40.0, precisionErrorTolerance));
 
-    expect(lerpDouble(0, 10, 5), 50);
-    expect(lerpDouble(10, 0, 5), -40);
+    expect(lerpDouble(0, 10, 5), closeTo(50, precisionErrorTolerance));
+    expect(lerpDouble(10, 0, 5), closeTo(-40, precisionErrorTolerance));
   });
 
   test('lerpDouble should return input value in all cases if begin/end are equal', () {
