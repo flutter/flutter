@@ -4724,60 +4724,59 @@ class StatelessElement extends ComponentElement {
 class StatefulElement extends ComponentElement {
   /// Creates an element that uses the given widget as its configuration.
   StatefulElement(StatefulWidget widget)
-      : _state = widget.createState(),
+      : state = widget.createState(),
         super(widget) {
     assert(() {
-      if (!_state!._debugTypesAreRight(widget)) {
+      if (!state._debugTypesAreRight(widget)) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('StatefulWidget.createState must return a subtype of State<${widget.runtimeType}>'),
           ErrorDescription(
             'The createState function for ${widget.runtimeType} returned a state '
-            'of type ${_state.runtimeType}, which is not a subtype of '
+            'of type ${state.runtimeType}, which is not a subtype of '
             'State<${widget.runtimeType}>, violating the contract for createState.'
           ),
         ]);
       }
       return true;
     }());
-    assert(_state!._element == null);
-    _state!._element = this;
+    assert(state._element == null);
+    state._element = this;
     assert(
-      _state!._widget == null,
+      state._widget == null,
       'The createState function for $widget returned an old or invalid state '
-      'instance: ${_state!._widget}, which is not null, violating the contract '
+      'instance: ${state._widget}, which is not null, violating the contract '
       'for createState.',
     );
-    _state!._widget = widget;
-    assert(_state!._debugLifecycleState == _StateLifecycle.created);
+    state._widget = widget;
+    assert(state._debugLifecycleState == _StateLifecycle.created);
   }
 
   @override
-  Widget build() => _state!.build(this);
+  Widget build() => state.build(this);
 
   /// The [State] instance associated with this location in the tree.
   ///
   /// There is a one-to-one relationship between [State] objects and the
   /// [StatefulElement] objects that hold them. The [State] objects are created
   /// by [StatefulElement] in [mount].
-  State<StatefulWidget>? get state => _state;
-  State<StatefulWidget>? _state;
+  final State<StatefulWidget> state;
 
   @override
   void reassemble() {
-    state!.reassemble();
+    state.reassemble();
     super.reassemble();
   }
 
   @override
   void _firstBuild() {
-    assert(_state!._debugLifecycleState == _StateLifecycle.created);
+    assert(state._debugLifecycleState == _StateLifecycle.created);
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
-      final dynamic debugCheckForReturnedFuture = _state!.initState() as dynamic;
+      final dynamic debugCheckForReturnedFuture = state.initState() as dynamic;
       assert(() {
         if (debugCheckForReturnedFuture is Future) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('${_state.runtimeType}.initState() returned a Future.'),
+            ErrorSummary('${state.runtimeType}.initState() returned a Future.'),
             ErrorDescription('State.initState() must be a void method without an `async` keyword.'),
             ErrorHint(
               'Rather than awaiting on asynchronous work directly inside of initState, '
@@ -4791,12 +4790,12 @@ class StatefulElement extends ComponentElement {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }
     assert(() {
-      _state!._debugLifecycleState = _StateLifecycle.initialized;
+      state._debugLifecycleState = _StateLifecycle.initialized;
       return true;
     }());
-    _state!.didChangeDependencies();
+    state.didChangeDependencies();
     assert(() {
-      _state!._debugLifecycleState = _StateLifecycle.ready;
+      state._debugLifecycleState = _StateLifecycle.ready;
       return true;
     }());
     super._firstBuild();
@@ -4805,7 +4804,7 @@ class StatefulElement extends ComponentElement {
   @override
   void performRebuild() {
     if (_didChangeDependencies) {
-      _state!.didChangeDependencies();
+      state.didChangeDependencies();
       _didChangeDependencies = false;
     }
     super.performRebuild();
@@ -4815,19 +4814,19 @@ class StatefulElement extends ComponentElement {
   void update(StatefulWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    final StatefulWidget oldWidget = _state!._widget!;
+    final StatefulWidget oldWidget = state._widget!;
     // Notice that we mark ourselves as dirty before calling didUpdateWidget to
     // let authors call setState from within didUpdateWidget without triggering
     // asserts.
     _dirty = true;
-    _state!._widget = widget as StatefulWidget;
+    state._widget = widget as StatefulWidget;
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
-      final dynamic debugCheckForReturnedFuture = _state!.didUpdateWidget(oldWidget) as dynamic;
+      final dynamic debugCheckForReturnedFuture = state.didUpdateWidget(oldWidget) as dynamic;
       assert(() {
         if (debugCheckForReturnedFuture is Future) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('${_state.runtimeType}.didUpdateWidget() returned a Future.'),
+            ErrorSummary('${state.runtimeType}.didUpdateWidget() returned a Future.'),
             ErrorDescription( 'State.didUpdateWidget() must be a void method without an `async` keyword.'),
             ErrorHint(
               'Rather than awaiting on asynchronous work directly inside of didUpdateWidget, '
@@ -4855,27 +4854,26 @@ class StatefulElement extends ComponentElement {
 
   @override
   void deactivate() {
-    _state!.deactivate();
+    state.deactivate();
     super.deactivate();
   }
 
   @override
   void unmount() {
     super.unmount();
-    _state!.dispose();
+    state.dispose();
     assert(() {
-      if (_state!._debugLifecycleState == _StateLifecycle.defunct)
+      if (state._debugLifecycleState == _StateLifecycle.defunct)
         return true;
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('${_state.runtimeType}.dispose failed to call super.dispose.'),
+        ErrorSummary('${state.runtimeType}.dispose failed to call super.dispose.'),
         ErrorDescription(
           'dispose() implementations must always call their superclass dispose() method, to ensure '
          'that all the resources used by the widget are fully released.'
         ),
       ]);
     }());
-    _state!._element = null;
-    _state = null;
+    state._element = null;
   }
 
   // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
@@ -4893,9 +4891,9 @@ class StatefulElement extends ComponentElement {
     assert(ancestor != null);
     assert(() {
       final Type targetType = ancestor.widget.runtimeType;
-      if (state!._debugLifecycleState == _StateLifecycle.created) {
+      if (state._debugLifecycleState == _StateLifecycle.created) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('dependOnInheritedWidgetOfExactType<$targetType>() or dependOnInheritedElement() was called before ${_state.runtimeType}.initState() completed.'),
+          ErrorSummary('dependOnInheritedWidgetOfExactType<$targetType>() or dependOnInheritedElement() was called before ${state.runtimeType}.initState() completed.'),
           ErrorDescription(
             'When an inherited widget changes, for example if the value of Theme.of() changes, '
             "its dependent widgets are rebuilt. If the dependent widget's reference to "
@@ -4910,7 +4908,7 @@ class StatefulElement extends ComponentElement {
           ),
         ]);
       }
-      if (state!._debugLifecycleState == _StateLifecycle.defunct) {
+      if (state._debugLifecycleState == _StateLifecycle.defunct) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('dependOnInheritedWidgetOfExactType<$targetType>() or dependOnInheritedElement() was called after dispose(): $this'),
           ErrorDescription(
