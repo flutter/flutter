@@ -292,7 +292,9 @@ class PersistedPhysicalShape extends PersistedContainerSurface
         offsetY: -pathBounds.top,
         scaleX: 1.0 / pathBounds.width,
         scaleY: 1.0 / pathBounds.height);
-    assert(_clipElement == null);
+    // If apply is called multiple times (without update) , remove prior
+    // svg clip element.
+    _clipElement?.remove();
     _clipElement =
         html.Element.html(svgClipPath, treeSanitizer: _NullTreeSanitizer());
     domRenderer.append(rootElement!, _clipElement!);
@@ -325,15 +327,22 @@ class PersistedPhysicalShape extends PersistedContainerSurface
     }
     if (oldSurface.path != path) {
       oldSurface._clipElement?.remove();
+      oldSurface._clipElement = null;
+      _clipElement?.remove();
+      _clipElement = null;
       // Reset style on prior element since we may have switched between
       // rect/rrect and arbitrary path.
       domRenderer.setElementStyle(rootElement!, 'clip-path', '');
       domRenderer.setElementStyle(rootElement!, '-webkit-clip-path', '');
       _applyShape();
     } else {
+      // Reuse clipElement from prior surface.
       _clipElement = oldSurface._clipElement;
+      if (_clipElement != null) {
+        domRenderer.append(rootElement!, _clipElement!);
+      }
+      oldSurface._clipElement = null;
     }
-    oldSurface._clipElement = null;
   }
 }
 
@@ -362,7 +371,8 @@ class PersistedClipPath extends PersistedContainerSurface
   @override
   void apply() {
     _clipElement?.remove();
-    final String svgClipPath = createSvgClipDef(childContainer as html.HtmlElement, clipPath);
+    final String svgClipPath =
+        createSvgClipDef(childContainer as html.HtmlElement, clipPath);
     _clipElement =
         html.Element.html(svgClipPath, treeSanitizer: _NullTreeSanitizer());
     domRenderer.append(childContainer!, _clipElement!);
