@@ -1201,6 +1201,7 @@ void main() {
     globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
       .createSync(recursive: true);
     globals.fs.file('l10n.yaml').createSync();
+    globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     await residentRunner.runSourceGenerators();
 
@@ -1227,6 +1228,7 @@ void main() {
     globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
       .createSync(recursive: true);
     globals.fs.file('l10n.yaml').createSync();
+    globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     await residentRunner.runSourceGenerators();
 
