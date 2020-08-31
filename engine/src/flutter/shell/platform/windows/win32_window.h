@@ -52,10 +52,9 @@ class Win32Window {
   // size change and DPI.  Delegates handling of these to member overloads that
   // inheriting classes can handle.
   LRESULT
-  MessageHandler(HWND window,
-                 UINT const message,
-                 WPARAM const wparam,
-                 LPARAM const lparam) noexcept;
+  HandleMessage(UINT const message,
+                WPARAM const wparam,
+                LPARAM const lparam) noexcept;
 
   // When WM_DPICHANGE process it using |hWnd|, |wParam|.  If
   // |top_level| is set, extract the suggested new size from |lParam| and resize
