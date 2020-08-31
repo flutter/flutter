@@ -556,7 +556,7 @@ void main() {
     expect(tapped, false);
   });
 
-    testWidgets('using clipBehaviour and a shadow, does not clip the shadow', (WidgetTester tester) async {
+  testWidgets('using clipBehaviour and shadow, should not clip the shadow', (WidgetTester tester) async {
     final Container container = Container(
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
