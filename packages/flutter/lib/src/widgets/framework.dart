@@ -5641,8 +5641,8 @@ abstract class RenderObjectElement extends Element {
     int newChildrenBottom = newWidgets.length - 1;
     int oldChildrenBottom = oldChildren.length - 1;
 
-    final List<Element?> newChildren = oldChildren.length == newWidgets.length ?
-        oldChildren : List<Element?>.filled(newWidgets.length, null, growable: false);
+    final List<Element> newChildren = oldChildren.length == newWidgets.length ?
+        oldChildren : List<Element>.filled(newWidgets.length, _NullElement.instance, growable: false);
 
     Element? previousChild;
 
@@ -5749,8 +5749,8 @@ abstract class RenderObjectElement extends Element {
           deactivateChild(oldChild);
       }
     }
-
-    return newChildren.cast<Element>();
+    assert(newChildren.every((Element element) => element is! _NullElement));
+    return newChildren;
   }
 
   @override
@@ -6326,4 +6326,21 @@ class IndexedSlot<T> {
 
   @override
   int get hashCode => hashValues(index, value);
+}
+
+class _NullElement extends Element {
+  _NullElement() : super(_NullWidget());
+
+  static _NullElement instance = _NullElement();
+
+  @override
+  bool get debugDoingBuild => throw UnimplementedError();
+
+  @override
+  void performRebuild() { }
+}
+
+class _NullWidget extends Widget {
+  @override
+  Element createElement() => throw UnimplementedError();
 }
