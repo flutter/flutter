@@ -4815,7 +4815,7 @@ class StatefulElement extends ComponentElement {
     super.update(newWidget);
     assert(widget == newWidget);
     final StatefulWidget oldWidget = state._widget!;
-    // Notice that we mark ourselves as dirty before calling didUpdateWidget to
+    // We mark ourselves as dirty before calling didUpdateWidget to
     // let authors call setState from within didUpdateWidget without triggering
     // asserts.
     _dirty = true;
