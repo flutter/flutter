@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
@@ -60,18 +61,17 @@ class Net {
         sink = destFile.openWrite();
       }
 
-      final dynamic result = await _attempt(
+      final bool result = await _attempt(
         url,
         destSink: sink,
       );
-      if (result == null) {
+      if (result) {
         return memorySink?.writes?.takeBytes() ?? <int>[];
       }
 
       if (maxAttempts != null && attempts >= maxAttempts) {
-        assert(result != null);
         _logger.printStatus('Download failed -- retry $attempts');
-        throw result;
+        throw Exception('Failed to download $url');
       }
       _logger.printStatus(
         'Download failed -- attempting retry $attempts in '
@@ -85,10 +85,10 @@ class Net {
   }
 
   /// Check if the given URL points to a valid endpoint.
-  Future<bool> doesRemoteFileExist(Uri url) async => (await _attempt(url, onlyHeaders: true)) == null;
+  Future<bool> doesRemoteFileExist(Uri url) => _attempt(url, onlyHeaders: true);
 
-  // Returns null on success and the last error on a failure.
-  Future<dynamic> _attempt(Uri url, {
+  // Returns true on success and false on failure.
+  Future<bool> _attempt(Uri url, {
     IOSink destSink,
     bool onlyHeaders = false,
   }) async {
@@ -121,7 +121,7 @@ class Net {
           exitCode: kNetworkProblemExitCode,);
       }
       _logger.printError(error.toString());
-      return error;
+      rethrow;
     } on HandshakeException catch (error) {
       _logger.printTrace(error.toString());
       throwToolExit(
@@ -132,44 +132,45 @@ class Net {
       );
     } on SocketException catch (error) {
       _logger.printTrace('Download error: $error');
-      return error;
+      return false;
     } on HttpException catch (error) {
       _logger.printTrace('Download error: $error');
-      return error;
+      return false;
     }
     assert(response != null);
 
-    if (response.statusCode != HttpStatus.ok) {
-      _logger.printTrace('Download error: ${response.statusCode} ${response.reasonPhrase}');
-      final Exception exception = Exception(
-        'Download failed.\n'
-        'URL: $url\n'
-        'Error: ${response.statusCode} ${response.reasonPhrase}',
-      );
-      // 5xx errors are server errors and we can try again
-      return exception;
-    }
     // If we're making a HEAD request, we're only checking to see if the URL is
     // valid.
     if (onlyHeaders) {
-      return null;
+      return response.statusCode == HttpStatus.ok;
+    }
+    if (response.statusCode != HttpStatus.ok) {
+      if (response.statusCode > 0 && response.statusCode < 500) {
+        throwToolExit(
+          'Download failed.\n'
+          'URL: $url\n'
+          'Error: ${response.statusCode} ${response.reasonPhrase}',
+          exitCode: kNetworkProblemExitCode,
+        );
+      }
+      // 5xx errors are server errors and we can try again
+      _logger.printTrace('Download error: ${response.statusCode} ${response.reasonPhrase}');
+      return false;
     }
     _logger.printTrace('Received response from server, collecting bytes...');
     try {
       assert(destSink != null);
       await response.forEach(destSink.add);
-      return null;
+      return true;
     } on IOException catch (error) {
       _logger.printTrace('Download error: $error');
-      return error;
+      return false;
     } finally {
       await destSink?.flush();
       await destSink?.close();
     }
   }
 }
-
-
 
 /// An IOSink that collects whatever is written to it.
 class _MemoryIOSink implements IOSink {

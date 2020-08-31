@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 import 'android/gradle_utils.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'base/io.dart' show ProcessException, SocketException;
+import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpStatus, ProcessException, SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
@@ -144,10 +144,11 @@ class Cache {
   ArtifactUpdater _createUpdater() {
     return ArtifactUpdater(
       operatingSystemUtils: _osUtils,
-      net: _net,
       logger: _logger,
       fileSystem: _fileSystem,
       tempStorage: getDownloadDir(),
+      platform: _platform,
+      httpClient: HttpClient(),
     );
   }
 
@@ -1403,21 +1404,24 @@ const List<List<String>> _dartSdks = <List<String>> [
 class ArtifactUpdater {
   ArtifactUpdater({
     @required OperatingSystemUtils operatingSystemUtils,
-    @required Net net,
     @required Logger logger,
     @required FileSystem fileSystem,
-    @required Directory tempStorage
+    @required Directory tempStorage,
+    @required HttpClient httpClient,
+    @required Platform platform,
   }) : _operatingSystemUtils = operatingSystemUtils,
-       _net = net,
+       _httpClient = httpClient,
        _logger = logger,
        _fileSystem = fileSystem,
-       _tempStorage = tempStorage;
+       _tempStorage = tempStorage,
+       _platform = platform;
 
   final Logger _logger;
-  final Net _net;
   final OperatingSystemUtils _operatingSystemUtils;
   final FileSystem _fileSystem;
   final Directory _tempStorage;
+  final HttpClient _httpClient;
+  final Platform _platform;
 
   /// Keep track of the files we've downloaded for this execution so we
   /// can delete them after completion. We don't delete them right after
@@ -1468,15 +1472,33 @@ class ArtifactUpdater {
     while (retries > 0) {
       try {
         _ensureExists(tempFile.parent);
-        await _net.fetchUrl(url, destFile: tempFile, maxAttempts: 2);
-      } on Exception {
+        final IOSink ioSink = tempFile.openWrite();
+        await _download(url, ioSink);
+        await ioSink.close();
+      } on Exception catch (err) {
+        _logger.printTrace(err.toString());
         retries -= 1;
         if (retries == 0) {
           throwToolExit(
-            'Failed to download $url. Ensure you have network connectivity and can reach ${url.host}, '
-            'then try again.',
+            'Failed to download $url. Ensure you have network connectivity and then try again.',
           );
         }
+        continue;
+      } on ArgumentError catch (error) {
+        final String overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+        if (overrideUrl != null && url.toString().contains(overrideUrl)) {
+          _logger.printError(error.toString());
+          throwToolExit(
+            'The value of FLUTTER_STORAGE_BASE_URL ($overrideUrl) could not be '
+            'parsed as a valid url. Please see https://flutter.dev/community/china '
+            'for an example of how to use it.\n'
+            'Full URL: $url',
+            exitCode: kNetworkProblemExitCode,
+          );
+        }
+        // This error should not be hit if there was not a storage URL override, allow the
+        // tool to crash.
+        rethrow;
       } finally {
         status.stop();
       }
@@ -1494,6 +1516,16 @@ class ArtifactUpdater {
       }
       return;
     }
+  }
+
+  /// Download bytes from [url], throwing non-200 responses as an exception.
+  Future<void> _download(Uri url, IOSink ioSink) async {
+    final HttpClientRequest request = await _httpClient.getUrl(url);
+    final HttpClientResponse response = await request.close();
+    if (response.statusCode != HttpStatus.ok) {
+      throw Exception(response.statusCode);
+    }
+    await response.forEach(ioSink.add);
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
