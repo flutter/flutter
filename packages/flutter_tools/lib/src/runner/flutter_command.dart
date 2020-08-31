@@ -314,6 +314,8 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  bool get disableDds => boolArg('disable-dds');
+
   /// Gets the vmservice port provided to in the 'observatory-port' or
   /// 'host-vmservice-port option.
   ///

@@ -132,6 +132,7 @@ class TestCommand extends FlutterCommand {
               'This flag is ignored if --start-paused or coverage are requested. '
               'The vmservice will be enabled no matter what in those cases.'
       );
+      addDdsOptions(verboseHelp: verboseHelp);
   }
 
   /// The interface for starting and configuring the tester.
@@ -275,6 +276,7 @@ class TestCommand extends FlutterCommand {
       enableObservatory: collector != null || startPaused || boolArg('enable-vmservice'),
       startPaused: startPaused,
       disableServiceAuthCodes: disableServiceAuthCodes,
+      disableDds: disableDds,
       ipv6: boolArg('ipv6'),
       machine: machine,
       buildMode: BuildMode.debug,
