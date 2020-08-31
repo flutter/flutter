@@ -687,7 +687,9 @@ class SkiaGoldDigest {
   factory SkiaGoldDigest.fromJson(Map<String, dynamic> json) {
     return SkiaGoldDigest(
       imageHash: json['digest'] as String,
-      paramSet: Map<String, dynamic>.from(json['paramset'] as Map<String, dynamic>? ??
+      paramSet:
+      Map<String, dynamic>.from(
+        json['refDiffs']['pos']['paramset'] as Map<String, dynamic>? ??
         <String, List<String>>{
           'Platform': <String>[],
           'Browser' : <String>[],

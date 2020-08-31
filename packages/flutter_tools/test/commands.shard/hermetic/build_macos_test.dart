@@ -14,6 +14,8 @@ import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -47,6 +49,7 @@ final Platform notMacosPlatform = FakePlatform(
 
 void main() {
   FileSystem fileSystem;
+  MockUsage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -54,6 +57,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    usage = MockUsage();
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -71,7 +75,7 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpMockXcodeBuildHandler(String configuration, { bool verbose = false }) {
+  FakeCommand setUpMockXcodeBuildHandler(String configuration, { bool verbose = false, void Function() onRun }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
     return FakeCommand(
@@ -96,6 +100,9 @@ void main() {
         fileSystem.file(fileSystem.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
           ..createSync(recursive: true)
           ..writeAsStringSync('example.app');
+        if (onRun != null) {
+          onRun();
+        }
       }
     );
   }
@@ -266,4 +273,45 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     Platform: () => macosPlatform,
   });
+
+  testUsingContext('Performs code size analysis and sends analytics', () async {
+    final BuildCommand command = BuildCommand();
+    createMinimalMockProjectFiles();
+
+    fileSystem.file('build/macos/Build/Products/Release/Runner.app/App')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'macos', '--analyze-size']
+    );
+
+    expect(testLogger.statusText, contains('A summary of your macOS bundle analysis can be found at'));
+    verify(usage.sendEvent('code-size-analysis', 'macos')).called(1);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      setUpMockXcodeBuildHandler('Release', onRun: () {
+        fileSystem.file('build/flutter_size_01/snapshot.x86_64.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''[
+{
+  "l": "dart:_internal",
+  "c": "SubListIterable",
+  "n": "[Optimized] skip",
+  "s": 2400
 }
+          ]''');
+        fileSystem.file('build/flutter_size_01/trace.x86_64.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{}');
+      }),
+    ]),
+    Platform: () => macosPlatform,
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
+    Usage: () => usage,
+  });
+}
+
+class MockUsage extends Mock implements Usage {}

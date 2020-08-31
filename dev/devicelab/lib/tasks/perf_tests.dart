@@ -1125,11 +1125,15 @@ class DevToolsMemoryTest {
         .listen((String line) {
           print('run stdout: $line');
           final RegExpMatch match = RegExp(r'An Observatory debugger and profiler on .+ is available at: ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)').firstMatch(line);
-          if (match != null) {
+          if (match != null && !observatoryUri.isCompleted) {
             observatoryUri.complete(match[1]);
             _observatoryUri = match[1];
           }
-        }, onDone: () { observatoryUri.complete(null); });
+        }, onDone: () {
+          if (!observatoryUri.isCompleted) {
+            observatoryUri.complete();
+          }
+        });
     _forwardStream(_runProcess.stderr, 'run stderr');
 
     _observatoryUri = await observatoryUri.future;
