@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
@@ -71,7 +70,7 @@ class Net {
 
       if (maxAttempts != null && attempts >= maxAttempts) {
         _logger.printStatus('Download failed -- retry $attempts');
-        throw Exception('Failed to download $url');
+        return null;
       }
       _logger.printStatus(
         'Download failed -- attempting retry $attempts in '
@@ -171,6 +170,8 @@ class Net {
     }
   }
 }
+
+
 
 /// An IOSink that collects whatever is written to it.
 class _MemoryIOSink implements IOSink {
