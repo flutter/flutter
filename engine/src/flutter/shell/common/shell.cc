@@ -400,13 +400,12 @@ Shell::~Shell() {
 
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetRasterTaskRunner(),
-      fml::MakeCopyable([rasterizer = std::move(rasterizer_),
-                         weak_factory_gpu = std::move(weak_factory_gpu_),
-                         &gpu_latch]() mutable {
-        rasterizer.reset();
-        weak_factory_gpu.reset();
-        gpu_latch.Signal();
-      }));
+      fml::MakeCopyable(
+          [this, rasterizer = std::move(rasterizer_), &gpu_latch]() mutable {
+            rasterizer.reset();
+            this->weak_factory_gpu_.reset();
+            gpu_latch.Signal();
+          }));
   gpu_latch.Wait();
 
   fml::TaskRunner::RunNowOrPostTask(
