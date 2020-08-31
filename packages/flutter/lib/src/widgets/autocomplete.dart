@@ -144,16 +144,26 @@ class AutocompleteController<T> {
   ///     [getResults] method instead of specifying all possible options up
   ///     front.
   AutocompleteController({
-    @required this.options,
+    /// All possible options that can be selected.
+    ///
+    /// This list will be filtered by the user's input with a simple case-
+    /// insensitive string matching filter.
+    ///
+    /// See also:
+    ///   * [AutocompleteController.generated], which can be used with
+    ///     [getResults] to generate results programmatically.
+    @required List<T> options,
     AutocompleteOptionToString<T> displayStringForOption,
     AutocompleteOptionToString<T> filterStringForOption,
     TextEditingController textEditingController,
   }) : assert(options != null && options.isNotEmpty),
-        getResults = null,
        displayStringForOption = displayStringForOption ?? _defaultStringForOption,
        filterStringForOption = filterStringForOption ?? _defaultStringForOption,
        _ownsTextEditingController = textEditingController == null,
-       textEditingController = textEditingController ?? TextEditingController() {
+       textEditingController = textEditingController ?? TextEditingController(),
+       getResults = ((TextEditingValue value) {
+         return _filterByString(options, value, filterStringForOption);
+       }) {
     this.textEditingController.addListener(_onChangedField);
   }
 
@@ -168,7 +178,6 @@ class AutocompleteController<T> {
     AutocompleteOptionToString<T> displayStringForOption,
     TextEditingController textEditingController,
   }) : assert(getResults != null),
-       options = null,
        displayStringForOption = displayStringForOption ?? _defaultStringForOption,
        filterStringForOption = null,
        _ownsTextEditingController = textEditingController == null,
@@ -176,17 +185,9 @@ class AutocompleteController<T> {
     this.textEditingController.addListener(_onChangedField);
   }
 
+  // When the instance owns textEditingController, it is responsible for
+  // disposing it.
   final bool _ownsTextEditingController;
-
-  /// All possible options that can be selected.
-  ///
-  /// This list will be filtered by the user's input with a simple case-
-  /// insensitive string matching filter.
-  ///
-  /// See also:
-  ///   * [AutocompleteController.generated], which can be used with
-  ///     [getResults] to generate results programmatically.
-  final List<T> options;
 
   /// The [TextEditingController] that represents the field.
   final TextEditingController textEditingController;
@@ -234,6 +235,19 @@ class AutocompleteController<T> {
     return option.toString();
   }
 
+  // The default filter when using options instead of getResults. Simply filters
+  // based on case-insensitive string matching.
+  static List<T> _filterByString<T>(List<T> options, TextEditingValue value, AutocompleteOptionToString<T> filterStringForOption) {
+    assert(options != null);
+    return options
+        .where((T option) {
+          return filterStringForOption(option)
+              .toLowerCase()
+              .contains(value.text.toLowerCase());
+        })
+        .toList();
+  }
+
   /// Clean up memory created by the AutocompleteController.
   ///
   /// Call this when the AutocompleteController is no longer needed, such as in
@@ -247,24 +261,9 @@ class AutocompleteController<T> {
 
   // Called when textEditingController reports a change in its value.
   void _onChangedField() {
-    final List<T> resultsValue = getResults == null
-        ? _filterByString(textEditingController.value)
-        : getResults(textEditingController.value);
+    final List<T> resultsValue = getResults(textEditingController.value);
     assert(resultsValue != null);
     results.value = resultsValue;
-  }
-
-  // The default filter when using options instead of getResults. Simply filters
-  // based on case-insensitive string matching.
-  List<T> _filterByString(TextEditingValue value) {
-    assert(options != null);
-    return options
-        .where((T option) {
-          return filterStringForOption(option)
-              .toLowerCase()
-              .contains(value.text.toLowerCase());
-        })
-        .toList();
   }
 }
 
