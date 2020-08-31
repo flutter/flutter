@@ -4947,6 +4947,18 @@ class RenderFollowerLayer extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  /// The anchor point on the linked [RenderLeaderLayer] that [followerAnchor]
+  /// will line up with.
+  ///
+  /// For example, when [leaderAnchor] and [followerAnchor] are both
+  /// [Alignment.topLeft], this [RenderFollowerLayer] will be top left aligned
+  /// with the linked [RenderLeaderLayer]. When [leaderAnchor] is
+  /// [Alignment.bottomLeft] and [followerAnchor] is [Alignment.topLeft], this
+  /// [RenderFollowerLayer] will be left aligned with the linked
+  /// [RenderLeaderlayer], and its top edge will line up with the
+  /// [RenderLeaderLayer]'s bottom edge.
+  ///
+  /// Defaults to [Alignment.topLeft].
   Alignment get leaderAnchor => _leaderAnchor;
   Alignment _leaderAnchor;
   set leaderAnchor(Alignment value) {
@@ -4957,6 +4969,18 @@ class RenderFollowerLayer extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  /// The point on this [RenderFollowerLayer] that will line up with
+  /// [followerAnchor] on the linked [RenderLeaderLayer].
+  ///
+  /// For example, when [leaderAnchor] and [followerAnchor] are both
+  /// [Alignment.topLeft], this [RenderFollowerLayer] will be top left aligned
+  /// with the linked [RenderLeaderLayer]. When [leaderAnchor] is
+  /// [Alignment.bottomLeft] and [followerAnchor] is [Alignment.topLeft], this
+  /// [RenderFollowerLayer] will be left aligned with the linked
+  /// [RenderLeaderlayer], and its top edge will line up with the
+  /// [RenderLeaderLayer]'s bottom edge.
+  ///
+  /// Defaults to [Alignment.topLeft].
   Alignment get followerAnchor => _followerAnchor;
   Alignment _followerAnchor;
   set followerAnchor(Alignment value) {

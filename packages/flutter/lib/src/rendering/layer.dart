@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -2073,6 +2072,10 @@ class LeaderLayer extends ContainerLayer {
   /// pipeline.
   Offset offset;
 
+  /// The size of the layer's contents.
+  ///
+  /// This property is used to position the [FollowerLayer]s linked to this
+  /// layer, when their [FollowerLayer.leaderAnchor] is not [Alignment.topLeft].
   Size size;
 
   /// {@macro flutter.leaderFollower.alwaysNeedsAddToScene}
@@ -2146,13 +2149,15 @@ class LeaderLayer extends ContainerLayer {
 /// A composited layer that applies a transformation matrix to its children such
 /// that they are positioned to match a [LeaderLayer].
 ///
+/// Once linked, a [FollowerLayer] will adjust its position so that its
+/// [followerAnchor] is lined up with the [LeaderLayer]'s anchor pont. A
+/// [linkedOffset] property can be provided to further offset the child layer
+/// from the leader layer, for example if the child is to follow the linked
+/// layer at a distance rather than directly overlapping it.
+///
 /// If any of the ancestors of this layer have a degenerate matrix (e.g. scaling
 /// by zero), then the [FollowerLayer] will not be able to transform its child
 /// to the coordinate space of the [LeaderLayer].
-///
-/// A [linkedOffset] property can be provided to further offset the child layer
-/// from the leader layer, for example if the child is to follow the linked
-/// layer at a distance rather than directly overlapping it.
 class FollowerLayer extends ContainerLayer {
   /// Creates a follower layer.
   ///
@@ -2171,6 +2176,7 @@ class FollowerLayer extends ContainerLayer {
        followerAnchor = Alignment.topLeft,
        size = Size.zero;
 
+  /// Creates a follower layer with specified alignments.
   FollowerLayer.withAlignments({
     required LayerLink link,
     this.showWhenUnlinked = true,
@@ -2197,8 +2203,9 @@ class FollowerLayer extends ContainerLayer {
   /// Whether to show the layer's contents when the [link] does not point to a
   /// [LeaderLayer].
   ///
-  /// When the layer is linked, children layers are positioned such that they
-  /// have the same global position as the linked [LeaderLayer].
+  /// When the layer is linked, children layers are positioned such that the
+  /// [followerAnchor] have the same global position as the linked
+  /// [LeaderLayer]'s [leaderAnchor].
   ///
   /// When the layer is not linked, then: if [showWhenUnlinked] is true,
   /// children are positioned as if the [FollowerLayer] was a [ContainerLayer];
@@ -2208,10 +2215,27 @@ class FollowerLayer extends ContainerLayer {
   /// phase of the pipeline.
   bool? showWhenUnlinked;
 
+  /// The point on the linked leader layer that [followerAnchor] will line up
+  /// with.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]). Does not affect the layer's position if this
+  /// layer is currently not linked.
   Alignment leaderAnchor = Alignment.topLeft;
 
+  /// The point on this [FollowerLayer] that will line up with the the linked
+  /// leader layer.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]). Does not affect the layer's position if this
+  /// layer is currently not linked.
   Alignment followerAnchor = Alignment.topLeft;
 
+  /// Size of the layer's contents, as seen by the linked [LeaderLayer].
+  ///
+  /// This property is used to position this [FollowerLayer] when
+  /// [followerAnchor] is not [Alignment.topLeft]. The scene must be explicitly
+  /// recomposited after this property is changed (as described at [Layer]).
   Size size;
 
   /// Offset from parent in the parent's coordinate system, used when the layer
@@ -2242,6 +2266,7 @@ class FollowerLayer extends ContainerLayer {
   ///  * [unlinkedOffset], for when the layer is not linked.
   Offset? linkedOffset;
 
+  /// The effective [linkedOffset] in the leader's child's coordinate system.
   Offset get _effectiveLinkedOffset {
     final Offset? additionalOffset = linkedOffset;
     final Size? leaderSize = link.leader?.size;
@@ -2317,13 +2342,13 @@ class FollowerLayer extends ContainerLayer {
     return result;
   }
 
-  /// Finds the common ancestor of two layers [a] and [b] by searching towards
-  /// the root of the tree, and appends the ancestors on the path to
-  /// [ancestorsA] and [ancestorsB] respectively.
+  /// Find the common ancestor of two layers [a] and [b] by searching towards
+  /// the root of the tree, and append each ancestor of [a] or [b] visited along
+  /// the path to [ancestorsA] and [ancestorsB] respectively.
   ///
-  /// Returns null if [a] [b] do not share a common ancestor, and the results in
-  /// [ancestorsA] and [ancestorsB] are undefined.
-  static Layer? _findCommonAncestor(
+  /// Returns null if [a] [b] do not share a common ancestor, in which case the
+  /// results in [ancestorsA] and [ancestorsB] are undefined.
+  static Layer? _pathsToCommonAncestor(
     Layer? a, Layer? b,
     List<ContainerLayer?> ancestorsA, List<ContainerLayer?> ancestorsB,
   ) {
@@ -2336,20 +2361,18 @@ class FollowerLayer extends ContainerLayer {
 
     if (a.depth < b.depth) {
       ancestorsB.add(b.parent);
-      return _findCommonAncestor(a, b.parent, ancestorsA, ancestorsB);
+      return _pathsToCommonAncestor(a, b.parent, ancestorsA, ancestorsB);
     } else if (a.depth > b.depth){
       ancestorsA.add(a.parent);
-      return _findCommonAncestor(a.parent, b, ancestorsA, ancestorsB);
+      return _pathsToCommonAncestor(a.parent, b, ancestorsA, ancestorsB);
     }
 
     ancestorsA.add(a.parent);
     ancestorsB.add(b.parent);
-    return _findCommonAncestor(a.parent, b.parent, ancestorsA, ancestorsB);
+    return _pathsToCommonAncestor(a.parent, b.parent, ancestorsA, ancestorsB);
   }
 
   /// Populate [_lastTransform] given the current state of the tree.
-  ///
-  /// Must be called when [linkedOffset] is finallized.
   void _establishTransform() {
     assert(link != null);
     _lastTransform = null;
@@ -2367,25 +2390,27 @@ class FollowerLayer extends ContainerLayer {
       'LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.',
     );
 
-    // Stores [leader, ..., commonAncestor] after calling _findCommonAncestor.
+    // Stores [leader, ..., commonAncestor] after calling _pathsToCommonAncestor.
     final List<ContainerLayer?> forwardLayers = <ContainerLayer>[leader];
     // Stores [this (follower), ..., commonAncestor] after calling
-    // _findCommonAncestor.
+    // _pathsToCommonAncestor.
     final List<ContainerLayer?> inverseLayers = <ContainerLayer>[this];
 
-    final Layer? ancestor = _findCommonAncestor(
+    final Layer? ancestor = _pathsToCommonAncestor(
       leader, this,
       forwardLayers, inverseLayers,
     );
     assert(ancestor != null);
 
     final Matrix4 forwardTransform = _collectTransformForLayerChain(forwardLayers);
+    // Further transforms the coordinate system to a hypothetical child (null)
+    // of the leader layer, to account for the leader's additional paint offset
+    // and layer offset (LeaderLayer._lastOffset).
     leader.applyTransform(null, forwardTransform);
     final Offset effectiveOrigin = _effectiveLinkedOffset;
     forwardTransform.translate(effectiveOrigin.dx,effectiveOrigin.dy);
 
     final Matrix4 inverseTransform = _collectTransformForLayerChain(inverseLayers);
-    //inverseTransform.translate(followerOrigin.dx, followerOrigin.dy);
 
     if (inverseTransform.invert() == 0.0) {
       // We are in a degenerate transform, so there's not much we can do.
