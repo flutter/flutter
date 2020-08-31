@@ -613,7 +613,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * Android: [AUTOFILL_HINT_NEW_USERNAME](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_NEW_USERNAME).
+  /// * Android: [AUTOFILL_HINT_USERNAME](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_USERNAME).
   /// * iOS: [username](https://developer.apple.com/documentation/uikit/uitextcontenttype).
   /// * web: ["username"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.

@@ -2299,8 +2299,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     semantics.dispose();
-    // https://github.com/flutter/flutter/issues/64507
-  }, skip: kIsWeb);
+  });
 
   testWidgets('can extend selection with a11y means - character', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -2501,8 +2500,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     semantics.dispose();
-    // https://github.com/flutter/flutter/issues/64507
-  }, skip: kIsWeb);
+  });
 
   testWidgets('password fields have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

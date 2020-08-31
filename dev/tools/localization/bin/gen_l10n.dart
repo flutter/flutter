@@ -27,10 +27,15 @@ void main(List<String> arguments) {
   );
   parser.addOption(
     'output-dir',
-    help: 'The directory where the generated localization classes will be written. '
+    help: 'The directory where the generated localization classes will be written '
+      'if the synthetic-package flag is set to false.'
+      '\n\n'
+      'If output-dir is specified and the synthetic-package flag is enabled, '
+      'this option will be ignored by the tool.'
+      '\n\n'
       'The app must import the file specified in the \'output-localization-file\' '
       'option from this directory. If unspecified, this defaults to the same '
-      'directory as the input directory specified in \'arb-dir\'.'
+      'directory as the input directory specified in \'arb-dir\'.',
   );
   parser.addOption(
     'template-arb-file',
@@ -120,6 +125,20 @@ void main(List<String> arguments) {
       '\n\n'
       'When null, the JSON file will not be generated.'
   );
+  parser.addFlag(
+    'synthetic-package',
+    defaultsTo: true,
+    help: 'Determines whether or not the generated output files will be '
+      'generated as a synthetic package or at a specified directory in '
+      'the Flutter project.'
+      '\n\n'
+      'This flag is set to true by default.'
+      '\n\n'
+      'When synthetic-package is set to false, it will generate the '
+      'localizations files in the directory specified by arb-dir by default. '
+      '\n\n'
+      'If output-dir is specified, files will be generated there.',
+  );
   parser.addOption(
     'project-dir',
     valueHelp: 'absolute/path/to/flutter/project',
@@ -148,6 +167,7 @@ void main(List<String> arguments) {
   final String headerFile = results['header-file'] as String;
   final bool useDeferredLoading = results['use-deferred-loading'] as bool;
   final String inputsAndOutputsListPath = results['gen-inputs-and-outputs-list'] as String;
+  final bool useSyntheticPackage = results['synthetic-package'] as bool;
   final String projectPathString = results['project-dir'] as String;
 
   const local.LocalFileSystem fs = local.LocalFileSystem();
@@ -166,6 +186,7 @@ void main(List<String> arguments) {
         headerFile: headerFile,
         useDeferredLoading: useDeferredLoading,
         inputsAndOutputsListPath: inputsAndOutputsListPath,
+        useSyntheticPackage: useSyntheticPackage,
         projectPathString: projectPathString,
       )
       ..loadResources()

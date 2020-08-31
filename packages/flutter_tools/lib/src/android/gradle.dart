@@ -522,6 +522,7 @@ Future<void> _performCodeSizeAnalysis(
   final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
     fileSystem: globals.fs,
     logger: globals.logger,
+    flutterUsage: globals.flutterUsage,
   );
   final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
   final BuildInfo buildInfo = androidBuildInfo.buildInfo;
