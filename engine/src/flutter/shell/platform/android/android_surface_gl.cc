@@ -127,9 +127,6 @@ intptr_t AndroidSurfaceGL::GLContextFBO(GLFrameInfo frame_info) const {
 
 // |GPUSurfaceGLDelegate|
 ExternalViewEmbedder* AndroidSurfaceGL::GetExternalViewEmbedder() {
-  if (!AndroidShellHolder::use_embedded_view) {
-    return nullptr;
-  }
   return external_view_embedder_.get();
 }
 

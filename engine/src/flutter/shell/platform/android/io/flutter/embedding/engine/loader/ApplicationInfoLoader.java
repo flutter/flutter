@@ -79,11 +79,6 @@ final class ApplicationInfoLoader {
     return output.toString();
   }
 
-  private static boolean getUseEmbeddedView(ApplicationInfo appInfo) {
-    Bundle bundle = appInfo.metaData;
-    return bundle != null && bundle.getBoolean("io.flutter.embedded_views_preview");
-  }
-
   private static void parseDomainConfig(
       XmlResourceParser xrp, JSONArray output, boolean inheritedCleartextPermitted)
       throws IOException, XmlPullParserException {
@@ -155,7 +150,6 @@ final class ApplicationInfoLoader {
         getString(appInfo.metaData, PUBLIC_FLUTTER_ASSETS_DIR_KEY),
         getNetworkPolicy(appInfo, applicationContext),
         appInfo.nativeLibraryDir,
-        clearTextPermitted,
-        getUseEmbeddedView(appInfo));
+        clearTextPermitted);
   }
 }

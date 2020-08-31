@@ -221,9 +221,6 @@ public class FlutterLoader {
       if (flutterApplicationInfo.domainNetworkPolicy != null) {
         shellArgs.add("--domain-network-policy=" + flutterApplicationInfo.domainNetworkPolicy);
       }
-      if (flutterApplicationInfo.useEmbeddedView) {
-        shellArgs.add("--use-embedded-view");
-      }
       if (settings.getLogTag() != null) {
         shellArgs.add("--log-tag=" + settings.getLogTag());
       }
