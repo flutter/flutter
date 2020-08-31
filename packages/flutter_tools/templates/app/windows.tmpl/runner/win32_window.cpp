@@ -226,9 +226,9 @@ void Win32Window::SetChildContent(HWND content) {
 }
 
 RECT Win32Window::GetClientArea() {
-    RECT frame;
-    GetClientRect(window_handle_, &frame);
-    return frame;
+  RECT frame;
+  GetClientRect(window_handle_, &frame);
+  return frame;
 }
 
 HWND Win32Window::GetHandle() {
