@@ -2408,7 +2408,7 @@ class FollowerLayer extends ContainerLayer {
     // and layer offset (LeaderLayer._lastOffset).
     leader.applyTransform(null, forwardTransform);
     final Offset effectiveOrigin = _effectiveLinkedOffset;
-    forwardTransform.translate(effectiveOrigin.dx,effectiveOrigin.dy);
+    forwardTransform.translate(effectiveOrigin.dx, effectiveOrigin.dy);
 
     final Matrix4 inverseTransform = _collectTransformForLayerChain(inverseLayers);
 

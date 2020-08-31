@@ -4969,7 +4969,7 @@ class RenderFollowerLayer extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// The point on this [RenderFollowerLayer] that will line up with
+  /// The anchor point on this [RenderFollowerLayer] that will line up with
   /// [followerAnchor] on the linked [RenderLeaderLayer].
   ///
   /// For example, when [leaderAnchor] and [followerAnchor] are both
