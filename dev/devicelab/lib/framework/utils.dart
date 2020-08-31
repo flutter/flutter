@@ -611,26 +611,6 @@ Future<void> runAndCaptureAsyncStacks(Future<void> callback()) {
 
 bool canRun(String path) => _processManager.canRun(path);
 
-String extractCloudAuthTokenArg(List<String> rawArgs) {
-  final ArgParser argParser = ArgParser()..addOption('cloud-auth-token');
-  ArgResults args;
-  try {
-    args = argParser.parse(rawArgs);
-  } on FormatException catch (error) {
-    stderr.writeln('${error.message}\n');
-    stderr.writeln('Usage:\n');
-    stderr.writeln(argParser.usage);
-    return null;
-  }
-
-  final String token = args['cloud-auth-token'] as String;
-  if (token == null) {
-    stderr.writeln('Required option --cloud-auth-token not found');
-    return null;
-  }
-  return token;
-}
-
 final RegExp _obsRegExp =
   RegExp('An Observatory debugger .* is available at: ');
 final RegExp _obsPortRegExp = RegExp(r'(\S+:(\d+)/\S*)$');
