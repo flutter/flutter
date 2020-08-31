@@ -250,6 +250,10 @@ void main() {
       );
     });
 
+    test('Creates traceID correctly', () {
+      // TODO(Piinks): test a bunch of different traces
+    });
+
     group('Request Handling', () {
       String testName;
       String pullRequestNumber;
