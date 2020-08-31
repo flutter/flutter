@@ -28,6 +28,7 @@ void main() {
       '--release',
       '--obfuscate',
       '--split-debug-info=info',
+      '--no-codesign',
     ], workingDirectory: woringDirectory);
 
     print(result.stdout);
