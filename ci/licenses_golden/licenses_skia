@@ -1,4 +1,4 @@
-Signature: 17a006393efa4426a68e2deefb052c3c
+Signature: b73bc6d3b087f55663b03074a579ef22
 
 UNUSED LICENSES:
 
@@ -3992,6 +3992,8 @@ FILE: ../../../third_party/skia/src/ports/SkNDKConversions.h
 FILE: ../../../third_party/skia/src/sksl/SkSLAnalysis.h
 FILE: ../../../third_party/skia/src/sksl/SkSLDehydrator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLDehydrator.h
+FILE: ../../../third_party/skia/src/sksl/SkSLInliner.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLInliner.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSampleUsage.cpp
