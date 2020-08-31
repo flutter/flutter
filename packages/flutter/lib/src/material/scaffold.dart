@@ -1778,7 +1778,7 @@ class Scaffold extends StatefulWidget {
   ///                       ElevatedButton(
   ///                         child: const Text('Close BottomSheet'),
   ///                         onPressed: () {
-  ///                           Navigator.pop(context),
+  ///                           Navigator.pop(context);
   ///                         },
   ///                       )
   ///                     ],
@@ -1829,7 +1829,7 @@ class Scaffold extends StatefulWidget {
   ///                           ElevatedButton(
   ///                             child: const Text('Close BottomSheet'),
   ///                             onPressed: () {
-  ///                               Navigator.pop(context),
+  ///                               Navigator.pop(context);
   ///                             },
   ///                           )
   ///                         ],
@@ -2376,7 +2376,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///                     ElevatedButton(
   ///                       child: const Text('Close BottomSheet'),
   ///                       onPressed: () {
-  ///                         Navigator.pop(context),
+  ///                         Navigator.pop(context);
   ///                       }
   ///                     )
   ///                   ],
