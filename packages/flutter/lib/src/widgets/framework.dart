@@ -2052,8 +2052,8 @@ class _InactiveElements {
     assert(!element._active);
   }
 
-  bool? debugContains(Element element) {
-    bool? result;
+  bool debugContains(Element element) {
+    late bool result;
     assert(() {
       result = _elements.contains(element);
       return true;
