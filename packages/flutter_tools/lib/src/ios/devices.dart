@@ -399,7 +399,7 @@ class IOSDevice extends Device {
         observatoryDiscovery = ProtocolDiscovery.observatory(
           getLogReader(app: package),
           portForwarder: portForwarder,
-          hostPort: debuggingOptions.hostVmServicePort,
+          hostPort: debuggingOptions.disableDds ? debuggingOptions.hostVmServicePort : 0,
           devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
         );
@@ -436,7 +436,7 @@ class IOSDevice extends Device {
         assumedDevicePort: assumedObservatoryPort,
         device: this,
         usesIpv6: ipv6,
-        hostVmservicePort: debuggingOptions.hostVmServicePort,
+        hostVmservicePort: debuggingOptions.disableDds ? debuggingOptions.hostVmServicePort : 0,
         packageId: packageId,
         packageName: FlutterProject.current().manifest.appName,
       );
