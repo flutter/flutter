@@ -684,11 +684,11 @@ void main() {
     }) {
       expect(
         tester.getTopLeft(dialogFinder).dx,
-        closeTo(tester.getTopLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
       expect(
         tester.getBottomLeft(dialogFinder).dx,
-        closeTo(tester.getBottomLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
     }
 
@@ -700,11 +700,11 @@ void main() {
     }) {
       expect(
         tester.getTopRight(dialogFinder).dx,
-        closeTo(tester.getTopRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
       expect(
         tester.getBottomRight(dialogFinder).dx,
-        closeTo(tester.getBottomRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
     }
 
@@ -716,11 +716,11 @@ void main() {
     }) {
       expect(
         tester.getTopLeft(dialogFinder).dy,
-        closeTo(tester.getTopLeft(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopLeft(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
       expect(
         tester.getTopRight(dialogFinder).dy,
-        closeTo(tester.getTopRight(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopRight(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
     }
 
@@ -732,11 +732,11 @@ void main() {
     }) {
       expect(
         tester.getBottomLeft(dialogFinder).dy,
-        closeTo(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
       expect(
         tester.getBottomRight(dialogFinder).dy,
-        closeTo(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
     }
 
