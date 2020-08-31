@@ -1027,7 +1027,7 @@ class ListView extends BoxScrollView {
   /// those children that are actually visible.
   ///
   /// It is usually more efficient to create children on demand using
-  /// [ListView.builder].
+  /// [ListView.builder] because it will create the widget children lazily as necessary.
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
