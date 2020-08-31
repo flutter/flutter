@@ -330,7 +330,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       _pixels != null,
       'An initial pixels value must exist by calling correctPixels on the ScrollPosition',
     );
-    _pixels = pixels! + correction;
+    _pixels = _pixels! + correction;
     _didChangeViewportDimensionOrReceiveCorrection = true;
   }
 
