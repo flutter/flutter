@@ -351,8 +351,8 @@ class VisualStudio {
     ];
     Map<String, dynamic> visualStudioDetails;
     // Check in the order of stable VS, stable BT, pre-release VS, pre-release BT
-    for(final bool checkForPrerelease in <bool>[false, true]){
-      for(final String requiredWorkload in _requiredWorkloads){
+    for (final bool checkForPrerelease in <bool>[false, true]) {
+      for (final String requiredWorkload in _requiredWorkloads) {
         visualStudioDetails ??= _visualStudioDetails(
           validateRequirements: true,
           additionalArguments: checkForPrerelease
