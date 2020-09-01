@@ -343,7 +343,7 @@ TaskFunction createFramePolicyIntegrationTest() {
 
 Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations) {
   final Map<String, dynamic> tally = <String, dynamic>{};
-  for (Map<String, dynamic> item in results) {
+  for (final Map<String, dynamic> item in results) {
     item.forEach((String key, dynamic value) {
       if (tally.containsKey(key)) {
         tally[key] = (tally[key] as int) + (value as int);
@@ -370,7 +370,7 @@ class StartupTest {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
-      final int iterations = 3;
+      const int iterations = 3;
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
       for (int i = 0; i < iterations; ++i) {
         await flutter('run', options: <String>[
