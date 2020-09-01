@@ -770,6 +770,10 @@ void main() {
     });
 
     group('VMServiceFlutterDriver Unsupported error', () {
+      test('enableAccessibility', () async {
+        expect(driver.enableAccessibility(), throwsA(isA<UnsupportedError>()));
+      });
+
       test('webDriver', () async {
         expect(() => driver.webDriver, throwsA(isA<UnsupportedError>()));
       });
