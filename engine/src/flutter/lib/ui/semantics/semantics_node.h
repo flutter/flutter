@@ -79,6 +79,7 @@ enum class SemanticsFlags : int32_t {
   kIsReadOnly = 1 << 20,
   kIsFocusable = 1 << 21,
   kIsLink = 1 << 22,
+  kIsSlider = 1 << 23,
 };
 
 const int kScrollableSemanticsFlags =

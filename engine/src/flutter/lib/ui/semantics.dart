@@ -300,8 +300,12 @@ class SemanticsFlag {
   static const int _kIsReadOnlyIndex = 1 << 20;
   static const int _kIsFocusableIndex = 1 << 21;
   static const int _kIsLinkIndex = 1 << 22;
+  static const int _kIsSliderIndex = 1 << 23;
   // READ THIS: if you add a flag here, you MUST update the numSemanticsFlags
-  // value in testing/dart/semantics_test.dart, or tests will fail.
+  // value in testing/dart/semantics_test.dart, or tests will fail. Also,
+  // please update the Flag enum in
+  // flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java,
+  // and the SemanticsFlag class in lib/web_ui/lib/src/ui/semantics.dart.
 
   const SemanticsFlag._(this.index) : assert(index != null); // ignore: unnecessary_null_comparison
 
@@ -354,6 +358,9 @@ class SemanticsFlag {
   /// Text fields are announced as such and allow text input via accessibility
   /// affordances.
   static const SemanticsFlag isTextField = SemanticsFlag._(_kIsTextFieldIndex);
+
+  /// Whether the semantic node represents a slider.
+  static const SemanticsFlag isSlider = SemanticsFlag._(_kIsSliderIndex);
 
   /// Whether the semantic node is read only.
   ///
@@ -551,7 +558,8 @@ class SemanticsFlag {
     _kIsReadOnlyIndex: isReadOnly,
     _kIsFocusableIndex: isFocusable,
     _kIsLinkIndex: isLink,
-  };
+    _kIsSliderIndex: isSlider,
+};
 
   @override
   String toString() {
@@ -602,6 +610,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.isFocusable';
       case _kIsLinkIndex:
         return 'SemanticsFlag.isLink';
+      case _kIsSliderIndex:
+        return 'SemanticsFlag.isSlider';
     }
     assert(false, 'Unhandled index: $index');
     return '';
