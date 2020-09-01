@@ -2,12 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:io';
-
-import 'package:args/args.dart' as argslib;
 import 'package:meta/meta.dart';
-
 import 'language_subtag_registry.dart';
 
 typedef HeaderGenerator = String Function(String regenerateInstructions);
@@ -145,128 +141,10 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   }
 }
 
-/// Parse the data for a locale from a file, and store it in the [attributes]
-/// and [resources] keys.
-void loadMatchingArbsIntoBundleMaps({
-  @required Directory directory,
-  @required RegExp filenamePattern,
-  @required Map<LocaleInfo, Map<String, String>> localeToResources,
-  @required Map<LocaleInfo, Map<String, dynamic>> localeToResourceAttributes,
-}) {
-  assert(directory != null);
-  assert(filenamePattern != null);
-  assert(localeToResources != null);
-  assert(localeToResourceAttributes != null);
-
-  /// Set that holds the locales that were assumed from the existing locales.
-  ///
-  /// For example, when the data lacks data for zh_Hant, we will use the data of
-  /// the first Hant Chinese locale as a default by repeating the data. If an
-  /// explicit match is later found, we can reference this set to see if we should
-  /// overwrite the existing assumed data.
-  final Set<LocaleInfo> assumedLocales = <LocaleInfo>{};
-
-  for (final FileSystemEntity entity in directory.listSync().toList()..sort(sortFilesByPath)) {
-    final String entityPath = entity.path;
-    if (FileSystemEntity.isFileSync(entityPath) && filenamePattern.hasMatch(entityPath)) {
-      final String localeString = filenamePattern.firstMatch(entityPath)[1];
-      final File arbFile = File(entityPath);
-
-      // Helper method to fill the maps with the correct data from file.
-      void populateResources(LocaleInfo locale, File file) {
-        final Map<String, String> resources = localeToResources[locale];
-        final Map<String, dynamic> attributes = localeToResourceAttributes[locale];
-        final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
-        for (final String key in bundle.keys) {
-          // The ARB file resource "attributes" for foo are called @foo.
-          if (key.startsWith('@')) {
-            attributes[key.substring(1)] = bundle[key];
-          } else {
-            resources[key] = bundle[key] as String;
-          }
-        }
-      }
-      // Only pre-assume scriptCode if there is a country or script code to assume off of.
-      // When we assume scriptCode based on languageCode-only, we want this initial pass
-      // to use the un-assumed version as a base class.
-      LocaleInfo locale = LocaleInfo.fromString(localeString, deriveScriptCode: localeString.split('_').length > 1);
-      // Allow overwrite if the existing data is assumed.
-      if (assumedLocales.contains(locale)) {
-        localeToResources[locale] = <String, String>{};
-        localeToResourceAttributes[locale] = <String, dynamic>{};
-        assumedLocales.remove(locale);
-      } else {
-        localeToResources[locale] ??= <String, String>{};
-        localeToResourceAttributes[locale] ??= <String, dynamic>{};
-      }
-      populateResources(locale, arbFile);
-      // Add an assumed locale to default to when there is no info on scriptOnly locales.
-      locale = LocaleInfo.fromString(localeString, deriveScriptCode: true);
-      if (locale.scriptCode != null) {
-        final LocaleInfo scriptLocale = LocaleInfo.fromString(locale.languageCode + '_' + locale.scriptCode);
-        if (!localeToResources.containsKey(scriptLocale)) {
-          assumedLocales.add(scriptLocale);
-          localeToResources[scriptLocale] ??= <String, String>{};
-          localeToResourceAttributes[scriptLocale] ??= <String, dynamic>{};
-          populateResources(scriptLocale, arbFile);
-        }
-      }
-    }
-  }
-}
-
 void exitWithError(String errorMessage) {
   assert(errorMessage != null);
   stderr.writeln('fatal: $errorMessage');
   exit(1);
-}
-
-void checkCwdIsRepoRoot(String commandName) {
-  final bool isRepoRoot = Directory('.git').existsSync();
-
-  if (!isRepoRoot) {
-    exitWithError(
-      '$commandName must be run from the root of the Flutter repository. The '
-      'current working directory is: ${Directory.current.path}'
-    );
-  }
-}
-
-GeneratorOptions parseArgs(List<String> rawArgs) {
-  final argslib.ArgParser argParser = argslib.ArgParser()
-    ..addFlag(
-      'overwrite',
-      abbr: 'w',
-      defaultsTo: false,
-    )
-    ..addFlag(
-      'material',
-      help: 'Whether to print the generated classes for the Material package only. Ignored when --overwrite is passed.',
-      defaultsTo: false,
-    )
-    ..addFlag(
-      'cupertino',
-      help: 'Whether to print the generated classes for the Cupertino package only. Ignored when --overwrite is passed.',
-      defaultsTo: false,
-    );
-  final argslib.ArgResults args = argParser.parse(rawArgs);
-  final bool writeToFile = args['overwrite'] as bool;
-  final bool materialOnly = args['material'] as bool;
-  final bool cupertinoOnly = args['cupertino'] as bool;
-
-  return GeneratorOptions(writeToFile: writeToFile, materialOnly: materialOnly, cupertinoOnly: cupertinoOnly);
-}
-
-class GeneratorOptions {
-  GeneratorOptions({
-    @required this.writeToFile,
-    @required this.materialOnly,
-    @required this.cupertinoOnly,
-  });
-
-  final bool writeToFile;
-  final bool materialOnly;
-  final bool cupertinoOnly;
 }
 
 // See also //master/tools/gen_locale.dart in the engine repo.
@@ -365,19 +243,6 @@ String describeLocale(String tag) {
   return output;
 }
 
-/// Writes the header of each class which corresponds to a locale.
-String generateClassDeclaration(
-  LocaleInfo locale,
-  String classNamePrefix,
-  String superClass,
-) {
-  final String camelCaseName = locale.camelCase();
-  return '''
-
-/// The translations for ${describeLocale(locale.originalString)} (`${locale.originalString}`).
-class $classNamePrefix$camelCaseName extends $superClass {''';
-}
-
 /// Return the input string as a Dart-parseable string.
 ///
 /// ```
@@ -425,16 +290,4 @@ String generateString(String value) {
     .replaceAll(backslash, '\\\\');
 
   return "'$value'";
-}
-
-/// Only used to generate localization strings for the Kannada locale ('kn') because
-/// some of the localized strings contain characters that can crash Emacs on Linux.
-/// See packages/flutter_localizations/lib/src/l10n/README for more information.
-String generateEncodedString(String locale, String value) {
-  if (locale != 'kn' || value.runes.every((int code) => code <= 0xFF)) {
-    return generateString(value);
-  }
-
-  final String unicodeEscapes = value.runes.map((int code) => '\\u{${code.toRadixString(16)}}').join();
-  return "'$unicodeEscapes'";
 }
