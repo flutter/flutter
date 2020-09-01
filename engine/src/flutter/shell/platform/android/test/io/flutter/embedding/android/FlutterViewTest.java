@@ -12,12 +12,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.media.Image;
+import android.media.Image.Plane;
 import android.media.ImageReader;
 import android.view.View;
 import android.view.ViewGroup;
@@ -548,6 +551,77 @@ public class FlutterViewTest {
     assertTrue(imageView.acquireLatestImage());
 
     verify(mockReader, times(2)).acquireLatestImage();
+  }
+
+  @Test
+  public void flutterImageView_detachFromRendererClosesAllImages() {
+    final ImageReader mockReader = mock(ImageReader.class);
+    when(mockReader.getMaxImages()).thenReturn(2);
+
+    final Image mockImage = mock(Image.class);
+    when(mockReader.acquireLatestImage()).thenReturn(mockImage);
+
+    final FlutterImageView imageView =
+        spy(
+            new FlutterImageView(
+                RuntimeEnvironment.application,
+                mockReader,
+                FlutterImageView.SurfaceKind.background));
+
+    final FlutterJNI jni = mock(FlutterJNI.class);
+    imageView.attachToRenderer(new FlutterRenderer(jni));
+
+    doNothing().when(imageView).invalidate();
+    imageView.acquireLatestImage();
+    imageView.acquireLatestImage();
+    imageView.detachFromRenderer();
+
+    verify(mockImage, times(2)).close();
+  }
+
+  @Test
+  @SuppressLint("WrongCall") /*View#onDraw*/
+  public void flutterImageView_onDrawClosesAllImages() {
+    final ImageReader mockReader = mock(ImageReader.class);
+    when(mockReader.getMaxImages()).thenReturn(2);
+
+    final Image mockImage = mock(Image.class);
+    when(mockImage.getPlanes()).thenReturn(new Plane[0]);
+    when(mockReader.acquireLatestImage()).thenReturn(mockImage);
+
+    final FlutterImageView imageView =
+        spy(
+            new FlutterImageView(
+                RuntimeEnvironment.application,
+                mockReader,
+                FlutterImageView.SurfaceKind.background));
+
+    final FlutterJNI jni = mock(FlutterJNI.class);
+    imageView.attachToRenderer(new FlutterRenderer(jni));
+
+    doNothing().when(imageView).invalidate();
+    imageView.acquireLatestImage();
+    imageView.acquireLatestImage();
+
+    imageView.onDraw(mock(Canvas.class));
+    imageView.onDraw(mock(Canvas.class));
+
+    // 1 image is closed and 1 is active.
+    verify(mockImage, times(1)).close();
+    verify(mockReader, times(2)).acquireLatestImage();
+
+    // This call doesn't do anything because there isn't
+    // an image in the queue.
+    imageView.onDraw(mock(Canvas.class));
+    verify(mockImage, times(1)).close();
+
+    // Aquire another image and push it to the queue.
+    imageView.acquireLatestImage();
+    verify(mockReader, times(3)).acquireLatestImage();
+
+    // Then, the second image is closed.
+    imageView.onDraw(mock(Canvas.class));
+    verify(mockImage, times(2)).close();
   }
 
   /*
