@@ -405,7 +405,7 @@ class ThemeData with Diagnosticable {
     dataTableTheme ??= const DataTableThemeData();
 
     fixTextFieldOutlineLabel ??= false;
-    useTextSelectionTheme ??= false;
+    useTextSelectionTheme ??= true;
 
     return ThemeData.raw(
       visualDensity: visualDensity,

@@ -58,49 +58,12 @@ void main() {
   });
 
   testWidgets('Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
+    final Color primaryColor = Color(ThemeData.fallback().colorScheme.primary.value);
+
     // Test TextField's cursor & selection color.
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
-          child: TextField(),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-    expect(renderEditable.cursorColor, const Color(0x004285f4));
-    expect(renderEditable.selectionColor, const Color(0xFF90CAF9));
-
-    // Test the selection handle color.
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Builder(
-            builder: (BuildContext context) {
-              return materialTextSelectionControls.buildHandle(
-                  context, TextSelectionHandleType.left, 10.0
-              );
-            },
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
-    expect(handle, paints..path(color: Colors.blue[300]));
-
-  });
-
-  testWidgets('Empty textSelectionTheme with useTextSelectionTheme set will use new defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData.fallback().copyWith(useTextSelectionTheme: true);
-    final Color primaryColor = Color(theme.colorScheme.primary.value);
-
-    // Test TextField's cursor & selection color.
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: const Material(
           child: TextField(),
         ),
       ),
@@ -114,7 +77,6 @@ void main() {
     // Test the selection handle color.
     await tester.pumpWidget(
       MaterialApp(
-        theme: theme,
         home: Material(
           child: Builder(
             builder: (BuildContext context) {
@@ -138,7 +100,6 @@ void main() {
       selectionHandleColor: Color(0x00ccbbaa),
     );
     final ThemeData theme = ThemeData.fallback().copyWith(
-      useTextSelectionTheme: true,
       textSelectionTheme: textSelectionTheme,
     );
 
@@ -184,7 +145,6 @@ void main() {
       selectionHandleColor: Color(0x00ccbbaa),
     );
     final ThemeData theme = ThemeData.fallback().copyWith(
-      useTextSelectionTheme: true,
       textSelectionTheme: defaultTextSelectionTheme,
     );
     const TextSelectionThemeData widgetTextSelectionTheme = TextSelectionThemeData(
@@ -240,7 +200,6 @@ void main() {
       selectionHandleColor: Color(0x00ccbbaa),
     );
     final ThemeData theme = ThemeData.fallback().copyWith(
-      useTextSelectionTheme: true,
       textSelectionTheme: defaultTextSelectionTheme,
     );
     const TextSelectionThemeData widgetTextSelectionTheme = TextSelectionThemeData(
