@@ -7,10 +7,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:regular_integration_tests/treeshaking_main.dart' as app;
 import 'package:flutter/material.dart';
 
-import 'package:e2e/e2e.dart';
+import 'package:integration_test/integration_test.dart';
 
 void main() {
-  E2EWidgetsFlutterBinding.ensureInitialized() as E2EWidgetsFlutterBinding;
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('debug+Fill+Properties for widgets is tree shaken',
           (WidgetTester tester) async {

@@ -2,6 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:e2e/e2e_driver.dart' as e2e;
+import 'package:integration_test/integration_test_driver.dart' as test;
 
-Future<void> main() async => e2e.main();
+Future<void> main() async => test.integrationDriver();

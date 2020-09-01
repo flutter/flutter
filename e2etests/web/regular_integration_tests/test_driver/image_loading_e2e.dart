@@ -6,10 +6,10 @@ import 'dart:html' as html;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:regular_integration_tests/image_loading_main.dart' as app;
 
-import 'package:e2e/e2e.dart';
+import 'package:integration_test/integration_test.dart';
 
 void main() {
-  E2EWidgetsFlutterBinding.ensureInitialized() as E2EWidgetsFlutterBinding;
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('Image loads asset variant based on device pixel ratio',
           (WidgetTester tester) async {
