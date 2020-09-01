@@ -651,13 +651,20 @@ class AnimationController extends Animation<double>
   ///
   /// If velocity is positive, the animation will complete, otherwise it will
   /// dismiss.
+  /// 
+  /// The [springDescription] can be used to apply custom spring to the [SpringSimulation] 
+  /// that is driven by this method.
+  /// 
+  /// Use [velocityScale] to apply scale for [velocity]. 
+  /// It only will be applied with [AnimationBehavior.normal].
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
-  TickerFuture fling({ double velocity = 1.0, AnimationBehavior? animationBehavior }) {
+  TickerFuture fling({ double velocity = 1.0, SpringDescription? springDescription, double velocityScale = 200.0, AnimationBehavior? animationBehavior }) {
+    springDescription ??= _kFlingSpringDescription;
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     final double target = velocity < 0.0 ? lowerBound - _kFlingTolerance.distance
                                          : upperBound + _kFlingTolerance.distance;
@@ -666,15 +673,15 @@ class AnimationController extends Animation<double>
     if (SemanticsBinding.instance!.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
-          // TODO(jonahwilliams): determine a better process for setting velocity.
+          // TODO(jonahwilliams): review the better process for setting up velocity.
           // the value below was arbitrarily chosen because it worked for the drawer widget.
-          scale = 200.0;
+          scale = velocityScale;
           break;
         case AnimationBehavior.preserve:
           break;
       }
     }
-    final Simulation simulation = SpringSimulation(_kFlingSpringDescription, value, target, velocity * scale)
+    final Simulation simulation = SpringSimulation(springDescription, value, target, velocity * scale)
       ..tolerance = _kFlingTolerance;
     stop();
     return _startSimulation(simulation);
