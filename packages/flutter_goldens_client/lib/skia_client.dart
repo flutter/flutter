@@ -387,7 +387,7 @@ class SkiaGoldClient {
         ..writeln();
       throw Exception(buf.toString());
     }
-    print(result);
+    print(result.exitCode);
   }
 
   /// Executes the `imgtest check` command in the goldctl tool for unauthorized
