@@ -514,6 +514,9 @@ class Shell final : public PlatformView::Delegate,
   void OnPreEngineRestart() override;
 
   // |Engine::Delegate|
+  void OnRootIsolateCreated() override;
+
+  // |Engine::Delegate|
   void UpdateIsolateDescription(const std::string isolate_name,
                                 int64_t isolate_port) override;
 

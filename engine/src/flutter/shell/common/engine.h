@@ -186,6 +186,15 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     virtual void OnPreEngineRestart() = 0;
 
     //--------------------------------------------------------------------------
+    /// @brief      Notifies the shell that the root isolate is created.
+    ///             Currently, this information is to add to the service
+    ///             protocol list of available root isolates running in the VM
+    ///             and their names so that the appropriate isolate can be
+    ///             selected in the tools for debugging and instrumentation.
+    ///
+    virtual void OnRootIsolateCreated() = 0;
+
+    //--------------------------------------------------------------------------
     /// @brief      Notifies the shell of the name of the root isolate and its
     ///             port when that isolate is launched, restarted (in the
     ///             cold-restart scenario) or the application itself updates the
@@ -811,6 +820,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
 
   // |RuntimeDelegate|
   void HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) override;
+
+  // |RuntimeDelegate|
+  void OnRootIsolateCreated() override;
 
   // |RuntimeDelegate|
   void UpdateIsolateDescription(const std::string isolate_name,
