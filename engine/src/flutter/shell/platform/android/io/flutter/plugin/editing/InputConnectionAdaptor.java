@@ -402,15 +402,16 @@ class InputConnectionAdaptor extends BaseInputConnection {
       } else {
         // Enter a character.
         int character = event.getUnicodeChar();
-        if (character != 0) {
-          int selStart = Math.max(0, Selection.getSelectionStart(mEditable));
-          int selEnd = Math.max(0, Selection.getSelectionEnd(mEditable));
-          int selMin = Math.min(selStart, selEnd);
-          int selMax = Math.max(selStart, selEnd);
-          if (selMin != selMax) mEditable.delete(selMin, selMax);
-          mEditable.insert(selMin, String.valueOf((char) character));
-          setSelection(selMin + 1, selMin + 1);
+        if (character == 0) {
+          return false;
         }
+        int selStart = Math.max(0, Selection.getSelectionStart(mEditable));
+        int selEnd = Math.max(0, Selection.getSelectionEnd(mEditable));
+        int selMin = Math.min(selStart, selEnd);
+        int selMax = Math.max(selStart, selEnd);
+        if (selMin != selMax) mEditable.delete(selMin, selMax);
+        mEditable.insert(selMin, String.valueOf((char) character));
+        setSelection(selMin + 1, selMin + 1);
         return true;
       }
     }
