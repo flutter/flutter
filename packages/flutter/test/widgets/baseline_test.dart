@@ -93,6 +93,28 @@ void main() {
     await tester.pump();
     expect(calls, 2);
   });
+
+  testWidgets('Baseline in LayoutBuilder is passed to child', (WidgetTester tester) async {
+    int calls = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Baseline(
+            baseline: 100.0,
+            baselineType: TextBaseline.alphabetic,
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return BaselineDetector(() {
+                  calls += 1;
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(calls, 1);
+  });
 }
 
 class BaselineDetector extends LeafRenderObjectWidget {
