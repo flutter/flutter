@@ -1684,6 +1684,83 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('SliverAppBar with flexable space has correct semantics order', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/64922.
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              leading: Text('Leading'),
+              flexibleSpace: Text('Flexible space'),
+              actions: <Widget>[Text('Action 1')],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                children: <TestSemantics>[
+                  TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    label: 'Leading',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    label: 'Action 1',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
+                              ),
+                              TestSemantics(
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    flags: <SemanticsFlag>[SemanticsFlag.isHeader],
+                                    label: 'Flexible space',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+      ignoreId: true,
+    ));
+
+    semantics.dispose();
+  });
+
   testWidgets('AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
     final ThemeData darkTheme = ThemeData.dark();
     await tester.pumpWidget(MaterialApp(
