@@ -673,7 +673,7 @@ class AnimationController extends Animation<double>
     if (SemanticsBinding.instance!.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
-          // TODO(jonahwilliams): review the better process for setting up velocity.
+          // TODO(jonahwilliams): review the process of setting up velocity.
           // the value below was arbitrarily chosen because it worked for the drawer widget.
           scale = velocityScale;
           break;
