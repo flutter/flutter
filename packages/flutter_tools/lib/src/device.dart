@@ -14,6 +14,7 @@ import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
+import 'base/common.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/dds.dart';
@@ -279,7 +280,7 @@ abstract class DeviceManager {
     _displayDeviceOptions(devices);
     final String userInput =  await _readUserInput(devices.length);
     if (userInput.toLowerCase() == 'q') {
-      exit(0);
+      throwToolExit('');
     }
     return devices[int.parse(userInput)];
   }
@@ -295,7 +296,8 @@ abstract class DeviceManager {
   Future<String> _readUserInput(int deviceCount) async {
     globals.terminal.usesTerminalUi = true;
     final String result = await globals.terminal.promptForCharInput(
-        <String>[ for (int i = 0; i < deviceCount; i++) '$i', 'q'],
+        <String>[ for (int i = 0; i < deviceCount; i++) '$i', 'q', 'Q'],
+        displayAcceptedCharacters: false,
         logger: globals.logger,
         prompt: userMessages.flutterChooseOne);
     return result;
