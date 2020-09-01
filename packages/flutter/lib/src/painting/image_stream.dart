@@ -103,7 +103,7 @@ class ImageHandle {
 /// call [ImageHandle.dispose].
 @immutable
 class ImageInfo {
-  /// Creates an [ImageInfo] object for the given [imageHandle] and [scale].
+  /// Creates an [ImageInfo] object for the given [image] and [scale].
   ///
   /// The [image] and [scale] parameters must not be null.
   ///
