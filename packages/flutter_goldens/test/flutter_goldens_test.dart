@@ -608,6 +608,21 @@ void main() {
         );
       });
 
+      test('Asserts goldctl is present on luci', () {
+        platform = FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_ROOT': _kFlutterRoot,
+            'SWARMING_TASK_ID' : '12345678990',
+            'GOLD_TRYJOB' : 'git/ref/12345/head'
+          },
+          operatingSystem: 'macos'
+        );
+        expect(
+          () => FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+          throwsAssertionError,
+        );
+      });
+
       group('correctly determines testing environment', () {
         test('returns true for Luci', () {
           platform = FakePlatform(
@@ -711,6 +726,21 @@ void main() {
     group('Pre-Submit', () {
       FlutterGoldenFileComparator comparator;
       final MockSkiaGoldClient mockSkiaClient = MockSkiaGoldClient();
+
+      test('Asserts goldctl is present on luci', () {
+        platform = FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_ROOT': _kFlutterRoot,
+            'SWARMING_TASK_ID' : '12345678990',
+            'GOLD_TRYJOB' : 'git/ref/12345/head'
+          },
+          operatingSystem: 'macos'
+        );
+        expect(
+          () =>FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+          throwsAssertionError,
+        );
+      });
 
       group('correctly determines testing environment', () {
         test('returns true for Cirrus', () {

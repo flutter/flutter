@@ -270,6 +270,11 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
       && cirrusBranch == 'master'
       && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
 
+    if (platform.environment.containsKey('SWARMING_TASK_ID')) {
+      // If this is a luci environment, goldctl should be present.
+      assert(platform.environment.containsKey('GOLDCTL'));
+    }
+
     final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
       && platform.environment.containsKey('GOLDCTL')
       // Luci tryjob environments contain this value to inform the [FlutterPreSubmitComparator].
@@ -391,6 +396,11 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     final bool cirrusPreSubmit = platform.environment.containsKey('CIRRUS_CI')
       && cirrusPR.isNotEmpty
       && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
+
+    if (platform.environment.containsKey('SWARMING_TASK_ID')) {
+      // If this is a luci environment, goldctl should be present.
+      assert(platform.environment.containsKey('GOLDCTL'));
+    }
 
     final bool luciPreSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
       && platform.environment.containsKey('GOLDCTL')
