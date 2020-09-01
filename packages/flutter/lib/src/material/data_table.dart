@@ -479,17 +479,13 @@ class DataTable extends StatelessWidget {
 
   /// {@template flutter.material.dataTable.decoration}
   /// The background and border decoration for the table.
+  /// {@endtemplate}
   ///
   /// By default there is no decoration.
-  /// {@endtemplate}
   final BoxDecoration decoration;
 
   /// {@template flutter.material.dataTable.dataRowColor}
   /// The background color for the data rows.
-  ///
-  /// By default, the background color is transparent unless selected. Selected
-  /// rows have a grey translucent color. To set a different color for
-  /// individual rows, see [DataRow.color].
   ///
   /// The effective background color can be made to depend on the
   /// [MaterialState] state, i.e. if the row is selected, pressed, hovered,
@@ -497,7 +493,13 @@ class DataTable extends StatelessWidget {
   /// row. To make sure that the row's [InkWell] is visible (when pressed,
   /// hovered and focused), it is recommended to use a translucent background
   /// color.
+  /// {@endtemplate}
   ///
+  /// By default, the background color is transparent unless selected. Selected
+  /// rows have a grey translucent color. To set a different color for
+  /// individual rows, see [DataRow.color].
+  ///
+  /// {@template flutter.material.dataTable.dataRowColorCode}
   /// ```dart
   /// DataTable(
   ///   dataRowColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
@@ -518,23 +520,21 @@ class DataTable extends StatelessWidget {
 
   /// {@template flutter.material.dataTable.dataRowHeight}
   /// The height of each row (excluding the row that contains column headings).
+  /// {@endtemplate}
   ///
   /// This value defaults to [kMinInteractiveDimension] to adhere to the Material
   /// Design specifications.
-  /// {@endtemplate}
   final double dataRowHeight;
 
   /// {@template flutter.material.dataTable.dataTextStyle}
   /// The text style for data rows.
+  /// {@endtemplate}
   ///
   /// By default, the text style is [TextTheme.bodyText2].
-  /// {@endtemplate}
   final TextStyle dataTextStyle;
 
   /// {@template flutter.material.dataTable.headingRowColor}
   /// The background color for the heading row.
-  ///
-  /// By default, the background color is transparent.
   ///
   /// The effective background color can be made to depend on the
   /// [MaterialState] state, i.e. if the row is pressed, hovered, focused when
@@ -562,16 +562,16 @@ class DataTable extends StatelessWidget {
 
   /// {@template flutter.material.dataTable.headingRowHeight}
   /// The height of the heading row.
+  /// {@endtemplate}
   ///
   /// This value defaults to 56.0 to adhere to the Material Design specifications.
-  /// {@endtemplate}
   final double headingRowHeight;
 
   /// {@template flutter.material.dataTable.headingTextStyle}
   /// The text style for the heading row.
+  /// {@endtemplate}
   ///
   /// By default, the text style is [TextTheme.subtitle2].
-  /// {@endtemplate}
   final TextStyle headingTextStyle;
 
   /// {@template flutter.material.dataTable.horizontalMargin}
@@ -580,16 +580,16 @@ class DataTable extends StatelessWidget {
   ///
   /// When a checkbox is displayed, it is also the margin between the checkbox
   /// the content in the first data column.
+  /// {@endtemplate}
   ///
   /// This value defaults to 24.0 to adhere to the Material Design specifications.
-  /// {@endtemplate}
   final double horizontalMargin;
 
   /// {@template flutter.material.dataTable.columnSpacing}
   /// The horizontal margin between the contents of each data column.
+  /// {@endtemplate}
   ///
   /// This value defaults to 56.0 to adhere to the Material Design specifications.
-  /// {@endtemplate}
   final double columnSpacing;
 
   /// {@template flutter.material.dataTable.showCheckboxColumn}

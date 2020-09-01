@@ -49,6 +49,7 @@ class DataTableThemeData with Diagnosticable {
   final Decoration decoration;
 
   /// {@macro flutter.material.dataTable.dataRowColor}
+  /// {@macro flutter.material.dataTable.dataRowColorCode}
   final MaterialStateProperty<Color> dataRowColor;
 
   /// {@macro flutter.material.dataTable.dataRowHeight}
