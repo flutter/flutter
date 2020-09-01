@@ -142,7 +142,7 @@ class DatePickerHeader extends StatelessWidget {
                  children: <Widget>[
                    const SizedBox(height: 16),
                    Flexible(child: help),
-                   const SizedBox(height: 38),
+                   const SizedBox(height: 30),
                    Row(
                      children: <Widget>[
                        Expanded(child: title),
