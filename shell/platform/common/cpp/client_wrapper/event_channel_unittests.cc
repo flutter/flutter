@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/event_channel.h"
-
 #include <memory>
 #include <string>
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/binary_messenger.h"
+#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/event_channel.h"
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/event_stream_handler_functions.h"
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_method_codec.h"
 #include "gtest/gtest.h"
@@ -51,25 +50,21 @@ TEST(EventChannelTest, Registration) {
   EventChannel channel(&messenger, channel_name, &codec);
 
   bool on_listen_called = false;
-  auto handler = std::make_unique<
-      flutter::StreamHandlerFunctions<flutter::EncodableValue>>(
-      [&on_listen_called](
-          const flutter::EncodableValue* arguments,
-          std::unique_ptr<flutter::EventSink<flutter::EncodableValue>>&& events)
-          -> std::unique_ptr<StreamHandlerError<flutter::EncodableValue>> {
+  auto handler = std::make_unique<StreamHandlerFunctions<>>(
+      [&on_listen_called](const EncodableValue* arguments,
+                          std::unique_ptr<EventSink<>>&& events)
+          -> std::unique_ptr<StreamHandlerError<>> {
         on_listen_called = true;
         return nullptr;
       },
-      [](const flutter::EncodableValue* arguments)
-          -> std::unique_ptr<StreamHandlerError<flutter::EncodableValue>> {
-        return nullptr;
-      });
+      [](const EncodableValue* arguments)
+          -> std::unique_ptr<StreamHandlerError<>> { return nullptr; });
   channel.SetStreamHandler(std::move(handler));
   EXPECT_EQ(messenger.last_message_handler_channel(), channel_name);
   EXPECT_NE(messenger.last_message_handler(), nullptr);
 
   // Send dummy listen message.
-  MethodCall<flutter::EncodableValue> call("listen", nullptr);
+  MethodCall<> call("listen", nullptr);
   auto message = codec.EncodeMethodCall(call);
   messenger.last_message_handler()(
       message->data(), message->size(),
@@ -86,17 +81,11 @@ TEST(EventChannelTest, Unregistration) {
   const StandardMethodCodec& codec = StandardMethodCodec::GetInstance();
   EventChannel channel(&messenger, channel_name, &codec);
 
-  auto handler = std::make_unique<
-      flutter::StreamHandlerFunctions<flutter::EncodableValue>>(
-      [](const flutter::EncodableValue* arguments,
-         std::unique_ptr<flutter::EventSink<flutter::EncodableValue>>&& events)
-          -> std::unique_ptr<StreamHandlerError<flutter::EncodableValue>> {
-        return nullptr;
-      },
-      [](const flutter::EncodableValue* arguments)
-          -> std::unique_ptr<StreamHandlerError<flutter::EncodableValue>> {
-        return nullptr;
-      });
+  auto handler = std::make_unique<StreamHandlerFunctions<>>(
+      [](const EncodableValue* arguments, std::unique_ptr<EventSink<>>&& events)
+          -> std::unique_ptr<StreamHandlerError<>> { return nullptr; },
+      [](const EncodableValue* arguments)
+          -> std::unique_ptr<StreamHandlerError<>> { return nullptr; });
   channel.SetStreamHandler(std::move(handler));
   EXPECT_EQ(messenger.last_message_handler_channel(), channel_name);
   EXPECT_NE(messenger.last_message_handler(), nullptr);
@@ -115,17 +104,15 @@ TEST(EventChannelTest, Cancel) {
 
   bool on_listen_called = false;
   bool on_cancel_called = false;
-  auto handler = std::make_unique<
-      flutter::StreamHandlerFunctions<flutter::EncodableValue>>(
-      [&on_listen_called](
-          const flutter::EncodableValue* arguments,
-          std::unique_ptr<flutter::EventSink<flutter::EncodableValue>>&& events)
-          -> std::unique_ptr<StreamHandlerError<flutter::EncodableValue>> {
+  auto handler = std::make_unique<StreamHandlerFunctions<>>(
+      [&on_listen_called](const EncodableValue* arguments,
+                          std::unique_ptr<EventSink<>>&& events)
+          -> std::unique_ptr<StreamHandlerError<>> {
         on_listen_called = true;
         return nullptr;
       },
-      [&on_cancel_called](const flutter::EncodableValue* arguments)
-          -> std::unique_ptr<StreamHandlerError<flutter::EncodableValue>> {
+      [&on_cancel_called](const EncodableValue* arguments)
+          -> std::unique_ptr<StreamHandlerError<>> {
         on_cancel_called = true;
         return nullptr;
       });
@@ -134,7 +121,7 @@ TEST(EventChannelTest, Cancel) {
   EXPECT_NE(messenger.last_message_handler(), nullptr);
 
   // Send dummy listen message.
-  MethodCall<flutter::EncodableValue> call_listen("listen", nullptr);
+  MethodCall<> call_listen("listen", nullptr);
   auto message = codec.EncodeMethodCall(call_listen);
   messenger.last_message_handler()(
       message->data(), message->size(),
@@ -142,7 +129,7 @@ TEST(EventChannelTest, Cancel) {
   EXPECT_EQ(on_listen_called, true);
 
   // Send dummy cancel message.
-  MethodCall<flutter::EncodableValue> call_cancel("cancel", nullptr);
+  MethodCall<> call_cancel("cancel", nullptr);
   message = codec.EncodeMethodCall(call_cancel);
   messenger.last_message_handler()(
       message->data(), message->size(),
@@ -164,17 +151,15 @@ TEST(EventChannelTest, ReRegistration) {
 
   bool on_listen_called = false;
   bool on_cancel_called = false;
-  auto handler = std::make_unique<
-      flutter::StreamHandlerFunctions<flutter::EncodableValue>>(
-      [&on_listen_called](
-          const flutter::EncodableValue* arguments,
-          std::unique_ptr<flutter::EventSink<flutter::EncodableValue>>&& events)
-          -> std::unique_ptr<StreamHandlerError<flutter::EncodableValue>> {
+  auto handler = std::make_unique<StreamHandlerFunctions<>>(
+      [&on_listen_called](const EncodableValue* arguments,
+                          std::unique_ptr<EventSink<>>&& events)
+          -> std::unique_ptr<StreamHandlerError<>> {
         on_listen_called = true;
         return nullptr;
       },
-      [&on_cancel_called](const flutter::EncodableValue* arguments)
-          -> std::unique_ptr<StreamHandlerError<flutter::EncodableValue>> {
+      [&on_cancel_called](const EncodableValue* arguments)
+          -> std::unique_ptr<StreamHandlerError<>> {
         on_cancel_called = true;
         return nullptr;
       });
@@ -183,7 +168,7 @@ TEST(EventChannelTest, ReRegistration) {
   EXPECT_NE(messenger.last_message_handler(), nullptr);
 
   // Send dummy listen message.
-  MethodCall<flutter::EncodableValue> call("listen", nullptr);
+  MethodCall<> call("listen", nullptr);
   auto message = codec.EncodeMethodCall(call);
   messenger.last_message_handler()(
       message->data(), message->size(),
