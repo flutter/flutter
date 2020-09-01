@@ -11,14 +11,14 @@ import 'package:flutter/scheduler.dart';
 
 /// A reference to a [ui.Image] object.
 ///
-/// To get an ImageHandle, clients should call [ImageInfo.obtainHandle].
+/// To get an ImageHandle, clients should call [ImageInfo.obtainImageHandle].
 ///
 /// Clients of an [ImageStream] should call [dispose] on this object when they
 /// will no longer need to use the [ImageInfo.image] vended to them in
 /// [ImageStreamCompleter.setImage]. When all clients of the stream have
 /// disposed their handles, the underlying [ui.Image] will be disposed. Clients
 /// must not call dispose more than once on the reference they receive from
-/// [ImageInfo.obtainHandle].
+/// [ImageInfo.obtainImageHandle].
 ///
 /// Clients should _not_ call [ui.Image.dispose] directly, as it will prevent
 /// other clients from using the same image reference should they need to.
@@ -66,7 +66,7 @@ class ImageHandle {
     return returnValue;
   }
 
-  /// Called by [ImageInfo.obtainHandle].
+  /// Called by [ImageInfo.obtainImageHandle].
   void _ref() {
     assert(!_debugDisposed, 'Object has been disposed.');
     _refCount += 1;
@@ -79,7 +79,7 @@ class ImageHandle {
   /// will throw.
   ///
   /// Clients must call this method once and only once for each call to
-  /// [ImageInfo.obtainHandle].
+  /// [ImageInfo.obtainImageHandle].
   void dispose() {
     assert(!_debugDisposed, 'Object has been disposed');
     _refCount -= 1;
@@ -105,12 +105,12 @@ class ImageHandle {
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given [imageHandle] and [scale].
   ///
-  /// The [imageHandle] and [scale] parameters must not be null.
+  /// The [image] and [scale] parameters must not be null.
   ///
-  /// A client of this class must call [obtainHandle] before using the [image],
-  /// and then call [ImageHandle.dispose] when they will no longer need the
-  /// [image]. Once all clients have disposed of their handles, the [image] will
-  /// be in a disposed state as well and will no longer be usable.
+  /// A client of this class must call [obtainImageHandle] before using the
+  /// [image], and then call [ImageHandle.dispose] when they will no longer need
+  /// the [image]. Once all clients have disposed of their handles, the [image]
+  /// will be in a disposed state as well and will no longer be usable.
   ///
   /// The [debugLabel] may be used to identify the source of this image.
   ImageInfo({
@@ -128,7 +128,7 @@ class ImageInfo {
   /// the image.
   ///
   /// Do not call dispose on this object. Other clients of an
-  /// [ImageStream] may be using it. Instead, call [obtainHandle] and call
+  /// [ImageStream] may be using it. Instead, call [obtainImageHandle] and call
   /// [ImageHandle.dispose] when the client no longer will use the image.
   ui.Image get image {
     assert(!_imageHandle.debugDisposed, 'Object has been disposed.');
