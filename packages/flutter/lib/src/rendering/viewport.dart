@@ -816,7 +816,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     final RenderSliver sliver = child as RenderSliver;
 
     double targetMainAxisExtent;
-    // The scroll offset within `child` to `rect`.
+    // The scroll offset of `rect` within `child`.
     switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
       case AxisDirection.up:
         leadingScrollOffset += pivotExtent - rectLocal.bottom;
@@ -836,6 +836,14 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         break;
     }
 
+    // So far leadingScrollOffset is the scroll offset of `rect` in the `child`
+    // sliver's sliver coordinate system. The sign of this value indicates
+    // whether the `rect` protrudes the leading edge of the `child` sliver. When
+    // this value is non-negative and `child`'s `maxScrollObstructionExtent` is
+    // greater than 0, we assume `rect` can't be obstructed by the leading edge
+    // of the viewport (i.e. its pinned to the leading edge).
+    final bool isPinned = sliver.geometry!.maxScrollObstructionExtent > 0 && leadingScrollOffset >= 0;
+
     // The scroll offset in the viewport to `rect`.
     leadingScrollOffset = scrollOffsetOf(sliver, leadingScrollOffset);
 
@@ -845,11 +853,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     final Matrix4 transform = target.getTransformTo(this);
     Rect targetRect = MatrixUtils.transformRect(transform, rect);
     final double extentOfPinnedSlivers = maxScrollObstructionExtentBefore(sliver);
+
     switch (sliver.constraints.growthDirection) {
       case GrowthDirection.forward:
+        if (isPinned && alignment <= 0)
+          return RevealedOffset(offset: double.infinity, rect: targetRect);
         leadingScrollOffset -= extentOfPinnedSlivers;
         break;
       case GrowthDirection.reverse:
+        if (isPinned && alignment >= 1)
+          return RevealedOffset(offset: double.negativeInfinity, rect: targetRect);
         // If child's growth direction is reverse, when viewport.offset is
         // `leadingScrollOffset`, it is positioned just outside of the leading
         // edge of the viewport.
