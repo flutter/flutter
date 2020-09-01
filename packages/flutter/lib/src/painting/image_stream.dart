@@ -23,21 +23,53 @@ import 'package:flutter/scheduler.dart';
 /// Clients should _not_ call [ui.Image.dispose] directly, as it will prevent
 /// other clients from using the same image reference should they need to.
 class ImageHandle {
+  /// Do not use this, use [_create] instead to make sure that ImageHandles
+  /// for the same [ui.Image] are the same.
   ImageHandle._(this._image)
     : assert(_image != null);
+
+  factory ImageHandle._create(ui.Image image) {
+    assert(image != null);
+    _handles[image] ??= ImageHandle._(image);
+    return _handles[image]!;
+  }
+
+  static final Expando<ImageHandle> _handles = Expando<ImageHandle>();
 
   final ui.Image _image;
   int _refCount = 0;
 
-  /// Called by [ImageStream.setImage].
-  void _takeInitialRef() {
-    assert(_refCount == 0);
-    _refCount = 1;
+  /// The number of references to this [ImageHandle].
+  ///
+  /// This always returns null if asserts are disabled, and is only meant for
+  /// use in debug mode or tests.
+  int? get debugRefCount {
+    int? returnValue;
+    assert(() {
+      returnValue = _refCount;
+      return true;
+    }());
+    return returnValue;
+  }
+
+  bool _debugDisposed = false;
+
+  /// Whether all holders of this handle have called [dispose].
+  ///
+  /// This always returns false if asserts are disabled, and is only meant for
+  /// use in debug mode or tests.
+  bool get debugDisposed {
+    bool returnValue = false;
+    assert(() {
+      returnValue = _debugDisposed;
+      return true;
+    }());
+    return returnValue;
   }
 
   /// Called by [ImageInfo.obtainHandle].
   void _ref() {
-    assert(_refCount > 0, 'Object has been disposed.');
+    assert(!_debugDisposed, 'Object has been disposed.');
     _refCount += 1;
   }
 
@@ -50,9 +82,13 @@ class ImageHandle {
   /// Clients must call this method once and only once for each call to
   /// [ImageInfo.obtainHandle].
   void dispose() {
-    assert(_refCount > 0, 'Object has been disposed');
+    assert(!_debugDisposed, 'Object has been disposed');
     _refCount -= 1;
     if (_refCount == 0) {
+      assert(() {
+        _debugDisposed = true;
+        return true;
+      }());
       _image.dispose();
     }
   }
@@ -63,7 +99,9 @@ class ImageHandle {
 /// ImageInfo objects are used by [ImageStream] objects to represent the
 /// actual data of the image once it has been obtained.
 ///
-/// The [ImageStream] will hold a
+/// Before accessing the [image], callers must use [obtainImageHandle] to get
+/// an [ImageHandle]. When the caller no longer needs the image, they should
+/// call [ImageHandle.dispose].
 @immutable
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given [imageHandle] and [scale].
@@ -82,7 +120,7 @@ class ImageInfo {
     this.debugLabel,
   }) : assert(image != null),
        assert(scale != null),
-       _imageHandle = ImageHandle._(image);
+       _imageHandle = ImageHandle._create(image);
 
   /// The raw image pixels.
   ///
@@ -94,7 +132,8 @@ class ImageInfo {
   /// [ImageStream] may be using it. Instead, call [obtainHandle] and call
   /// [ImageHandle.dispose] when the client no longer will use the image.
   ui.Image get image {
-    assert(_imageHandle._refCount > 0, 'Object has been disposed.');
+    assert(!_imageHandle.debugDisposed, 'Object has been disposed.');
+    assert(_imageHandle._refCount > 0, 'Call `obtainImageHandle` before accessing the image in an ImageInfo object.');
     return _imageHandle._image;
   }
 
@@ -120,11 +159,12 @@ class ImageInfo {
   /// needs to use the [image]. Once all handles have been disposed of, the
   /// underlying image will be disposed of as well.
   ImageHandle obtainImageHandle() {
+    assert(!_imageHandle.debugDisposed, 'Object has been disposed');
     return _imageHandle.._ref();
   }
 
   @override
-  String toString() => '${debugLabel != null ? '$debugLabel ' : ''}$image @ ${debugFormatDouble(scale)}x, active handles: ${_imageHandle._refCount}';
+  String toString() => '${debugLabel != null ? '$debugLabel ' : ''}${_imageHandle._image} @ ${debugFormatDouble(scale)}x, active handles: ${_imageHandle._refCount}';
 
   @override
   int get hashCode => hashValues(image, scale, debugLabel, _imageHandle);
@@ -134,10 +174,9 @@ class ImageInfo {
     if (other.runtimeType != runtimeType)
       return false;
     return other is ImageInfo
-        && other.image == image
         && other.scale == scale
         && other.debugLabel == debugLabel
-        && other._imageHandle == other._imageHandle;
+        && other._imageHandle == _imageHandle;
   }
 }
 
@@ -411,8 +450,8 @@ class ImageStream with Diagnosticable {
 /// configure it with the right [ImageStreamCompleter] when possible.
 abstract class ImageStreamCompleter with Diagnosticable {
   final List<ImageStreamListener> _listeners = <ImageStreamListener>[];
+  final List<ImageStreamListener> _passiveListeners = <ImageStreamListener>[];
   ImageInfo? _currentImage;
-  ImageHandle? _currentImageHandle;
   FlutterErrorDetails? _currentError;
 
   /// A string identifying the source of the underlying image.
@@ -447,10 +486,11 @@ abstract class ImageStreamCompleter with Diagnosticable {
   ///
   /// {@macro flutter.painting.imageStream.addListener}
   void addListener(ImageStreamListener listener) {
-    if (_listeners.isEmpty) {
-      _currentImageHandle ??= _currentImage?.obtainImageHandle();
-    }
     _listeners.add(listener);
+    _processNewListener(listener);
+  }
+
+  void _processNewListener(ImageStreamListener listener) {
     if (_currentImage != null) {
       try {
         listener.onImage(_currentImage!, true);
@@ -478,6 +518,25 @@ abstract class ImageStreamCompleter with Diagnosticable {
     }
   }
 
+  /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
+  /// object is available or an error is reported, if there are any listeners
+  /// added via [addListener]. If a concrete image is already available, or if
+  /// an error has been already reported, this object will notify the listener
+  /// synchronously.
+  ///
+  /// If the [ImageStreamCompleter] completes multiple images over its lifetime,
+  /// this listener's [ImageStreamListener.onImage] will fire multiple times.
+  ///
+  /// This call will not contribute to [hasListeners], and implementers of this
+  /// class should not consider passive listeners when deciding whether to
+  /// schedule additional frames or decode jobs.
+  ///
+  /// {@macro flutter.painting.imageStream.addListener}
+  void addPassiveListener(ImageStreamListener listener) {
+    _passiveListeners.add(listener);
+    _processNewListener(listener);
+  }
+
   /// Stops the specified [listener] from receiving image stream events.
   ///
   /// If [listener] has been added multiple times, this removes the _first_
@@ -490,11 +549,24 @@ abstract class ImageStreamCompleter with Diagnosticable {
       }
     }
     if (_listeners.isEmpty) {
-      for (final VoidCallback callback in _onLastListenerRemovedCallbacks) {
+      final List<VoidCallback> callbacks = _onLastListenerRemovedCallbacks.toList();
+      for (final VoidCallback callback in callbacks) {
         callback();
       }
       _onLastListenerRemovedCallbacks.clear();
-      _currentImageHandle?.dispose();
+    }
+  }
+
+  /// Stops the specified [listener] from receiving image stream events.
+  ///
+  /// If [listener] has been added multiple times, this removes the _first_
+  /// instance of the listener.
+  void removePassiveListener(ImageStreamListener listener) {
+    for (int i = 0; i < _passiveListeners.length; i += 1) {
+      if (_passiveListeners[i] == listener) {
+        _passiveListeners.removeAt(i);
+        return;
+      }
     }
   }
 
@@ -516,18 +588,12 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _onLastListenerRemovedCallbacks.remove(callback);
   }
 
-  /// Calls all the registered listeners to notify them of a new image.
-  @protected
-  void setImage(ImageInfo image) {
-    _currentImageHandle?.dispose();
-    _currentImage = image;
-    _currentImageHandle = image._imageHandle.._takeInitialRef();
-
-    if (_listeners.isEmpty)
+  void _notify(ImageInfo image, List<ImageStreamListener> listeners) {
+    if (listeners.isEmpty)
       return;
     // Make a copy to allow for concurrent modification.
     final List<ImageStreamListener> localListeners =
-        List<ImageStreamListener>.from(_listeners);
+        List<ImageStreamListener>.from(listeners);
     for (final ImageStreamListener listener in localListeners) {
       try {
         listener.onImage(image, false);
@@ -539,6 +605,17 @@ abstract class ImageStreamCompleter with Diagnosticable {
         );
       }
     }
+  }
+
+  /// Calls all the registered listeners to notify them of a new image.
+  @protected
+  void setImage(ImageInfo image) {
+    _currentImage = image;
+
+    if (_listeners.isEmpty)
+      return;
+    _notify(image, _listeners);
+    _notify(image, _passiveListeners);
   }
 
   /// Calls all the registered error listeners to notify them of an error that

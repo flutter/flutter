@@ -16,6 +16,7 @@ import 'package:fake_async/fake_async.dart';
 import '../flutter_test_alternative.dart';
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/rendering_tester.dart';
+import 'image_data.dart';
 
 class TestCanvas implements Canvas {
   TestCanvas([this.invocations]);
@@ -629,5 +630,33 @@ void main() {
     // considering DecorationImage scale to be 4.0 and Image scale to be 1.0.
     expect(call.positionalArguments[2].size, const Size(25.0, 25.0));
     expect(call.positionalArguments[2], const Rect.fromLTRB(0.0, 0.0, 25.0, 25.0));
+  });
+
+  test('DecorationImagePainter disposes of image when disposed',  () async {
+    final ImageProvider provider = MemoryImage(Uint8List.fromList(kTransparentImage));
+
+    final ImageStream stream = provider.resolve(ImageConfiguration.empty);
+
+    final Completer<ImageInfo> infoCompleter = Completer<ImageInfo>();
+    void _listener(ImageInfo image, bool syncCall) {
+      assert(!infoCompleter.isCompleted);
+      infoCompleter.complete(image);
+    }
+    stream.addListener(ImageStreamListener(_listener));
+
+    final ImageInfo info = await infoCompleter.future;
+
+    final ImageHandle handle = info.obtainImageHandle();
+    final int baselineRefCount = handle.debugRefCount;
+
+    final DecorationImagePainter painter = DecorationImage(image: provider).createPainter(() {});
+    final Canvas canvas = TestCanvas();
+    painter.paint(canvas, Rect.zero, Path(), ImageConfiguration.empty);
+
+    expect(handle.debugRefCount, baselineRefCount + 1);
+    painter.dispose();
+    expect(handle.debugRefCount, baselineRefCount);
+
+    handle.dispose();
   });
 }

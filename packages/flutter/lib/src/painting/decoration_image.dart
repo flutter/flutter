@@ -213,6 +213,7 @@ class DecorationImagePainter {
 
   ImageStream? _imageStream;
   ImageInfo? _image;
+  ImageHandle? _imageHandle;
 
   /// Draw the image onto the given canvas.
   ///
@@ -296,6 +297,8 @@ class DecorationImagePainter {
     if (_image == value)
       return;
     _image = value;
+    _imageHandle?.dispose();
+    _imageHandle = _image?.obtainImageHandle();
     assert(_onChanged != null);
     if (!synchronousCall)
       _onChanged();
@@ -312,6 +315,9 @@ class DecorationImagePainter {
       _handleImage,
       onError: _details.onError,
     ));
+    _imageHandle?.dispose();
+    _imageHandle = null;
+    _image = null;
   }
 
   @override

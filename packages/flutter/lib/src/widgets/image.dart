@@ -1077,6 +1077,7 @@ class Image extends StatefulWidget {
 class _ImageState extends State<Image> with WidgetsBindingObserver {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
+  ImageHandle _imageHandle;
   ImageChunkEvent _loadingProgress;
   bool _isListeningToStream = false;
   bool _invertColors;
@@ -1099,6 +1100,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _stopListeningToStream();
     _scrollAwareContext.dispose();
+    _imageHandle?.dispose();
     super.dispose();
   }
 
@@ -1184,6 +1186,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
     setState(() {
       _imageInfo = imageInfo;
+      _imageHandle?.dispose();
+      _imageHandle = imageInfo.obtainImageHandle();
       _loadingProgress = null;
       _frameNumber = _frameNumber == null ? 0 : _frameNumber + 1;
       _wasSynchronouslyLoaded |= synchronousCall;

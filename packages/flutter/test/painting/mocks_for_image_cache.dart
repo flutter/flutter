@@ -12,8 +12,29 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+class TestImageHandle implements ImageHandle {
+  TestImageHandle(this.id, this.imageInfo) : debugRefCount = null;
+
+  final int id;
+
+  final TestImageInfo imageInfo;
+
+  @override
+  final int debugRefCount;
+
+  @override
+  bool debugDisposed = false;
+
+  @override
+  void dispose() {
+    debugDisposed = true;
+    imageInfo._handleCount -= 1;
+  }
+}
+
+// ignore: must_be_immutable
 class TestImageInfo implements ImageInfo {
-  const TestImageInfo(this.value, { this.image, this.scale = 1.0, this.debugLabel, this.autoDispose = true });
+  TestImageInfo(this.value, { this.image, this.scale = 1.0, this.debugLabel });
 
   @override
   final ui.Image image;
@@ -24,13 +45,23 @@ class TestImageInfo implements ImageInfo {
   @override
   final String debugLabel;
 
-  @override
-  final bool autoDispose;
-
   final int value;
+
+  int get handleCount => _handleCount;
+  int _handleCount = 0;
+
+  int get totalHandles => _totalHandles;
+  int _totalHandles = 0;
 
   @override
   String toString() => '$runtimeType($value)';
+
+  @override
+  ImageHandle obtainImageHandle() {
+    _totalHandles += 1;
+    _handleCount += 1;
+    return TestImageHandle(_totalHandles, this);
+  }
 }
 
 class TestImageProvider extends ImageProvider<int> {
@@ -146,7 +177,7 @@ class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterIm
 }
 
 class TestImageStreamCompleter extends ImageStreamCompleter {
-  void testSetImage(TestImage image, {bool autoDispose = true}) {
-    setImage(ImageInfo(image: image, scale: 1.0, autoDispose: autoDispose));
+  void testSetImage(TestImage image) {
+    setImage(ImageInfo(image: image, scale: 1.0));
   }
 }

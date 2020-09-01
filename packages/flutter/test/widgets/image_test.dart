@@ -472,9 +472,9 @@ void main() {
     expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, unresolved, 2 listeners), pixels: null, loadingProgress: null, frameNumber: null, wasSynchronouslyLoaded: false)'));
     imageProvider.complete();
     await tester.pump();
-    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, [100×100] @ 1.0x, autoDispose: true, 1 listener), pixels: [100×100] @ 1.0x, autoDispose: true, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
+    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, [100×100] @ 1.0x, active handles: 3, 1 listener), pixels: [100×100] @ 1.0x, active handles: 3, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
     await tester.pumpWidget(Container());
-    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(lifecycle state: defunct, not mounted, stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, [100×100] @ 1.0x, autoDispose: true, 0 listeners), pixels: [100×100] @ 1.0x, autoDispose: true, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
+    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(lifecycle state: defunct, not mounted, stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, [100×100] @ 1.0x, active handles: 1, 0 listeners), pixels: [100×100] @ 1.0x, active handles: 1, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
   });
 
   testWidgets('Stream completer errors can be listened to by attaching before resolving', (WidgetTester tester) async {
@@ -1480,10 +1480,10 @@ void main() {
     expect(provider1.loadCallCount, 1);
     expect(provider2.loadCallCount, 1);
 
-    provider1.complete(image: image, autoDispose: false);
+    provider1.complete(image: image);
     await tester.idle();
 
-    provider2.complete(image: image, autoDispose: false);
+    provider2.complete(image: image);
     await tester.idle();
 
     expect(imageCache.liveImageCount, 2);
@@ -1768,6 +1768,33 @@ void main() {
 
     debugOnPaintImage = null;
   });
+
+  testWidgets('Disposes image handle when disposed', (WidgetTester tester) async {
+    final ui.Image image = await tester.runAsync(() => createTestImage(kBlueRectPng));
+
+    final ImageInfo info = ImageInfo(
+      image: image,
+      scale: 1.0,
+      debugLabel: 'BlueSquare',
+    );
+
+    final ImageHandle handle = info.obtainImageHandle();
+    expect(handle.debugDisposed, false);
+    expect(handle.debugRefCount, 1);
+
+    final ImageProvider provider = TestImageProvider(
+      streamCompleter: OneFrameImageStreamCompleter(Future<ImageInfo>.value(info)),
+    );
+
+    await tester.pumpWidget(Image(image: provider));
+    final int handles = handle.debugRefCount;
+    expect(handle.debugDisposed, false);
+
+    await tester.pumpWidget(const SizedBox());
+    expect(handle.debugRefCount, handles - 1);
+    handle.dispose();
+  });
+
 }
 
 class ImagePainter extends CustomPainter {
@@ -1847,9 +1874,9 @@ class TestImageProvider extends ImageProvider<Object> {
     return _streamCompleter;
   }
 
-  void complete({ui.Image image, bool autoDispose = true}) {
+  void complete({ui.Image image}) {
     image ??= TestImage();
-    _completer.complete(ImageInfo(image: image, autoDispose: autoDispose));
+    _completer.complete(ImageInfo(image: image));
   }
 
   void fail(dynamic exception, StackTrace stackTrace) {

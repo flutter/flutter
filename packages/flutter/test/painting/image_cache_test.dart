@@ -4,10 +4,14 @@
 
 // @dart = 2.8
 
-import 'package:flutter/painting.dart';
-import '../flutter_test_alternative.dart';
+import 'dart:async';
+import 'dart:typed_data';
 
+import 'package:flutter/painting.dart';
+
+import '../flutter_test_alternative.dart';
 import '../rendering/rendering_tester.dart';
+import 'image_data.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
@@ -479,87 +483,79 @@ void main() {
     expect(imageCache.currentSizeBytes, testImageSize);
   });
 
-  test('ImageStream is marked as keepAlive when in cache', () async {
+  test('ImageHandle is obtained and disposed of properly for cache', () async {
     const int key = 1;
     bool testImageDisposed = false;
     final TestImage testImage = TestImage(width: 8, height: 8, onDisposedCallback: () => testImageDisposed = true);
 
-    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
+    ImageInfo imageInfo;
+    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {
+      imageInfo = info;
+    });
 
     final TestImageStreamCompleter completer = TestImageStreamCompleter();
 
-    expect(completer.keepAlive, false);
     completer.addListener(listener);
-
-    expect(completer.keepAlive, false);
-    expect(testImageDisposed, false);
-
     imageCache.putIfAbsent(key, () => completer);
 
-    // Image hasn't completed yet - keep alive shouldn't be set.
-    expect(completer.keepAlive, false);
     expect(testImageDisposed, false);
 
     // This should cause keepAlive to be set to true.
     completer.testSetImage(testImage);
 
-    expect(completer.keepAlive, true);
+    expect(imageInfo, isNotNull);
     expect(testImageDisposed, false);
 
-    // keepAlive should still be true after this, and the completer should not
-    // have disposed the image.
     completer.removeListener(listener);
-
-    expect(completer.keepAlive, true);
+    // The image cache should still be keeping it alive.
     expect(testImageDisposed, false);
-
-    // keepAlive should get set to false, and the completer should dispose of
-    // the image since it's auto-disposed.
-    imageCache.evict(key);
-
-    expect(completer.keepAlive, false);
+    expect(imageCache.evict(key), true);
     expect(testImageDisposed, true);
   });
 
-  test('ImageStream is marked as keepAlive when in cache - no autodispose', () async {
+  test('ImageHandle is obtained and disposed of properly for cache when listener is still active', () async {
     const int key = 1;
     bool testImageDisposed = false;
     final TestImage testImage = TestImage(width: 8, height: 8, onDisposedCallback: () => testImageDisposed = true);
 
-    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
+    ImageInfo imageInfo;
+    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {
+      imageInfo = info;
+    });
 
     final TestImageStreamCompleter completer = TestImageStreamCompleter();
 
-    expect(completer.keepAlive, false);
     completer.addListener(listener);
-
-    expect(completer.keepAlive, false);
-    expect(testImageDisposed, false);
-
     imageCache.putIfAbsent(key, () => completer);
 
-    // Image hasn't completed yet - keep alive shouldn't be set.
-    expect(completer.keepAlive, false);
     expect(testImageDisposed, false);
 
     // This should cause keepAlive to be set to true.
-    completer.testSetImage(testImage, autoDispose: false);
+    completer.testSetImage(testImage);
 
-    expect(completer.keepAlive, true);
+    expect(imageInfo, isNotNull);
     expect(testImageDisposed, false);
 
-    // keepAlive should still be true after this, and the completer should not
-    // have disposed the image.
-    completer.removeListener(listener);
-
-    expect(completer.keepAlive, true);
+    // The image cache should still be keeping it alive.
     expect(testImageDisposed, false);
+    expect(imageCache.evict(key), true);
+    expect(testImageDisposed, true);
+  });
 
-    // keepAlive should get set to false, and the completer should dispose of
-    // the image since it's auto-disposed.
-    imageCache.evict(key);
+  test('ImageCache does not cause new frames to be pumped', () async {
+    final ImageProvider provider = MemoryImage(Uint8List.fromList(kAnimatedGif));
+    final ImageStream stream = provider.resolve(ImageConfiguration.empty);
+    final Completer<void> completer = Completer<void>();
 
-    expect(completer.keepAlive, false);
-    expect(testImageDisposed, false); // because we set autoDispose to false.
+    ImageStreamListener listener;
+    listener = ImageStreamListener((ImageInfo info, bool syncCall) {
+      completer.complete();
+      stream.completer.removePassiveListener(listener);
+    });
+    stream.completer.addPassiveListener(listener);
+    await completer.future;
+
+    expect(imageCache.containsKey(provider), true);
+    expect(stream.completer.hasListeners, false);
   });
 }
