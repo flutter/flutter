@@ -340,4 +340,49 @@ void main() {
     expect(listTile.leading.runtimeType, Icon);
     expect(listTile.trailing.runtimeType, Switch);
   });
+
+  testWidgets('SwitchListTile.adaptive splash color test', (WidgetTester tester) async {
+    bool value = false;
+
+    Widget buildFrame(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: SwitchListTile.adaptive(
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    Future<void> testSplashColor(Color expectedSplashColor, List<TargetPlatform> platforms) async {
+      for (final TargetPlatform platform in platforms) {
+        value = false;
+        await tester.pumpWidget(buildFrame(platform));
+        await tester.pumpAndSettle();
+        final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+        await tester.pump(const Duration(milliseconds: 200));
+        final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+          return object.runtimeType.toString() == '_RenderInkFeatures';
+        });
+        expect(inkFeatures, paints..circle(color: expectedSplashColor));
+        await gesture.up();
+      }
+    }
+
+    // Splash effect (from Material) should be transparent on iOS and macOS devices.
+    await testSplashColor(Colors.transparent, <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]);
+    await testSplashColor(ThemeData().splashColor, <TargetPlatform>[TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows]);
+  });
 }
