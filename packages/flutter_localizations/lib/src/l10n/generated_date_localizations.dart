@@ -1692,8 +1692,8 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '4t trimestre',
     ],
     'AMPMS': <dynamic>[
-      'a. m.',
-      'p. m.',
+      'a. m.',
+      'p. m.',
     ],
     'DATEFORMATS': <dynamic>[
       'EEEE, d MMMM \'de\' y',
@@ -4352,8 +4352,8 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '4.º trimestre',
     ],
     'AMPMS': <dynamic>[
-      'a. m.',
-      'p. m.',
+      'a. m.',
+      'p. m.',
     ],
     'DATEFORMATS': <dynamic>[
       'EEEE, d \'de\' MMMM \'de\' y',
@@ -4732,8 +4732,8 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '4o. trimestre',
     ],
     'AMPMS': <dynamic>[
-      'a. m.',
-      'p. m.',
+      'a. m.',
+      'p. m.',
     ],
     'DATEFORMATS': <dynamic>[
       'EEEE, d \'de\' MMMM \'de\' y',
@@ -4922,8 +4922,8 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '4.º trimestre',
     ],
     'AMPMS': <dynamic>[
-      'a. m.',
-      'p. m.',
+      'a. m.',
+      'p. m.',
     ],
     'DATEFORMATS': <dynamic>[
       'EEEE, d \'de\' MMMM \'de\' y',
@@ -10231,10 +10231,10 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'S',
     ],
     'SHORTQUARTERS': <dynamic>[
-      '1. cet.',
-      '2. cet.',
-      '3. cet.',
-      '4. cet.',
+      '1. cet.',
+      '2. cet.',
+      '3. cet.',
+      '4. cet.',
     ],
     'QUARTERS': <dynamic>[
       '1. ceturksnis',
