@@ -1649,13 +1649,18 @@ void main() {
                           TestSemantics(
                             children: <TestSemantics>[
                               TestSemantics(
-                                label: 'Leading',
-                                textDirection: TextDirection.ltr,
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    label: 'Leading',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    label: 'Action 1',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
                               ),
-                              TestSemantics(
-                                label: 'Action 1',
-                                textDirection: TextDirection.ltr,
-                              ),
+                              TestSemantics(),
                             ],
                           ),
                           TestSemantics(
