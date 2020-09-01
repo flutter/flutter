@@ -9,9 +9,11 @@
 
 namespace flutter {
 
+class EncodableValue;
+
 // Encapsulates a result returned from a MethodCall. Only one method should be
 // called on any given instance.
-template <typename T>
+template <typename T = EncodableValue>
 class MethodResult {
  public:
   MethodResult() = default;

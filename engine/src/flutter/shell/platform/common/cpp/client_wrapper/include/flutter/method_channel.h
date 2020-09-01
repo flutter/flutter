@@ -16,6 +16,8 @@
 
 namespace flutter {
 
+class EncodableValue;
+
 // A handler for receiving a method call from the Flutter engine.
 //
 // Implementations must asynchronously call exactly one of the methods on
@@ -27,7 +29,7 @@ using MethodCallHandler =
 
 // A channel for communicating with the Flutter engine using invocation of
 // asynchronous methods.
-template <typename T>
+template <typename T = EncodableValue>
 class MethodChannel {
  public:
   // Creates an instance that sends and receives method calls on the channel

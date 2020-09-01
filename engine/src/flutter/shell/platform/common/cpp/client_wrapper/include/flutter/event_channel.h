@@ -16,6 +16,8 @@
 
 namespace flutter {
 
+class EncodableValue;
+
 // A named channel for communicating with the Flutter application using
 // asynchronous event streams. Incoming requests for event stream setup are
 // decoded from binary on receipt, and C++ responses and events are encoded into
@@ -27,7 +29,7 @@ namespace flutter {
 // The C++ type of stream configuration arguments, events, and error details are
 // templated, but only values supported by the specified MethodCodec can be
 // used.
-template <typename T>
+template <typename T = EncodableValue>
 class EventChannel {
  public:
   // Creates an instance that sends and receives event handler on the channel

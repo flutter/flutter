@@ -12,6 +12,8 @@
 
 namespace flutter {
 
+class EncodableValue;
+
 // Handler types for each of the StreamHandler setup and tear-down
 // requests.
 template <typename T>
@@ -26,7 +28,7 @@ using StreamHandlerCancel =
 
 // An implementation of StreamHandler that pass calls through to
 // provided function objects.
-template <typename T>
+template <typename T = EncodableValue>
 class StreamHandlerFunctions : public StreamHandler<T> {
  public:
   // Creates a handler object that calls the provided functions

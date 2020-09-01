@@ -13,6 +13,8 @@
 
 namespace flutter {
 
+class EncodableValue;
+
 // A message reply callback.
 //
 // Used for submitting a reply back to a Flutter message sender.
@@ -29,7 +31,7 @@ using MessageHandler =
 
 // A channel for communicating with the Flutter engine by sending asynchronous
 // messages.
-template <typename T>
+template <typename T = EncodableValue>
 class BasicMessageChannel {
  public:
   // Creates an instance that sends and receives method calls on the channel

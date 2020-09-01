@@ -7,9 +7,11 @@
 
 namespace flutter {
 
+class EncodableValue;
+
 // Event callback. Events to be sent to Flutter application
 // act as clients of this interface for sending events.
-template <typename T>
+template <typename T = EncodableValue>
 class EventSink {
  public:
   EventSink() = default;
