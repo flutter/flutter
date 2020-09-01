@@ -348,7 +348,7 @@ class SkiaGoldClient {
     }
 
     print('tryjobInit');
-    print(imgTestArguments);
+    print(imgTestInitArguments);
     print(result.stdout);
   }
 
