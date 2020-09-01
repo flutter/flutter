@@ -357,6 +357,7 @@ class SkiaGoldClient {
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [_AuthorizedFlutterPreSubmitComparator].
   Future<void> tryjobAdd(String testName, File goldenFile) async {
+    print('tryjobAdd');
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
       '--work-dir', workDirectory

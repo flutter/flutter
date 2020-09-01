@@ -40,6 +40,7 @@ Future<void> main(FutureOr<void> testMain()) async {
     goldenFileComparator = await FlutterLocalFileComparator.fromDefaultComparator(platform);
   }
 
+  print(goldenFileComparator);
   await testMain();
 }
 
