@@ -1203,4 +1203,36 @@ void main() {
     // Since we are getting the last DecoratedBox, it will have a Border.top.
     expect(decoration.border.top.color, dividerColor);
   });
+
+  testWidgets('MergeableMaterial respects CardTheme.color prior to ThemeData.cardColor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          cardTheme: const CardTheme(
+            color: Colors.red
+          ),
+          cardColor: Colors.green,
+        ),
+        home: const Scaffold(
+          body: SingleChildScrollView(
+            child: MergeableMaterial(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox));
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    expect(decoration.color, Colors.red);
+  });
 }
