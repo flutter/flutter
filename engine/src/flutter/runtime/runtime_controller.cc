@@ -18,7 +18,10 @@ namespace flutter {
 
 RuntimeController::RuntimeController(RuntimeDelegate& client,
                                      TaskRunners p_task_runners)
-    : client_(client), vm_(nullptr), task_runners_(p_task_runners) {}
+    : client_(client),
+      vm_(nullptr),
+      task_runners_(p_task_runners),
+      weak_factory_(this) {}
 
 RuntimeController::RuntimeController(
     RuntimeDelegate& p_client,
@@ -50,48 +53,80 @@ RuntimeController::RuntimeController(
       platform_data_(std::move(p_platform_data)),
       isolate_create_callback_(p_isolate_create_callback),
       isolate_shutdown_callback_(p_isolate_shutdown_callback),
-      persistent_isolate_data_(std::move(p_persistent_isolate_data)) {
-  // Create the root isolate as soon as the runtime controller is initialized.
+      persistent_isolate_data_(std::move(p_persistent_isolate_data)),
+      weak_factory_(this) {
+  // Create the root isolate as soon as the runtime controller is initialized,
+  // but not using a synchronous way to avoid blocking the platform thread a
+  // long time as it is waiting while creating `Shell` on that platform thread.
   // It will be run at a later point when the engine provides a run
   // configuration and then runs the isolate.
-  auto strong_root_isolate =
-      DartIsolate::CreateRootIsolate(
-          vm_->GetVMData()->GetSettings(),                //
-          isolate_snapshot_,                              //
-          task_runners_,                                  //
-          std::make_unique<PlatformConfiguration>(this),  //
-          snapshot_delegate_,                             //
-          io_manager_,                                    //
-          unref_queue_,                                   //
-          image_decoder_,                                 //
-          p_advisory_script_uri,                          //
-          p_advisory_script_entrypoint,                   //
-          nullptr,                                        //
-          isolate_create_callback_,                       //
-          isolate_shutdown_callback_                      //
-          )
-          .lock();
+  create_and_config_root_isolate_ =
+      std::async(std::launch::deferred, [self = weak_factory_.GetWeakPtr()]() {
+        if (!self) {
+          return;
+        }
 
-  FML_CHECK(strong_root_isolate) << "Could not create root isolate.";
+        auto strong_root_isolate =
+            DartIsolate::CreateRootIsolate(
+                self->vm_->GetVMData()->GetSettings(),                //
+                self->isolate_snapshot_,                              //
+                self->task_runners_,                                  //
+                std::make_unique<PlatformConfiguration>(self.get()),  //
+                self->snapshot_delegate_,                             //
+                self->io_manager_,                                    //
+                self->unref_queue_,                                   //
+                self->image_decoder_,                                 //
+                self->advisory_script_uri_,                           //
+                self->advisory_script_entrypoint_,                    //
+                nullptr,                                              //
+                self->isolate_create_callback_,                       //
+                self->isolate_shutdown_callback_                      //
+                )
+                .lock();
 
-  // The root isolate ivar is weak.
-  root_isolate_ = strong_root_isolate;
+        FML_CHECK(strong_root_isolate) << "Could not create root isolate.";
 
-  strong_root_isolate->SetReturnCodeCallback([this](uint32_t code) {
-    root_isolate_return_code_ = {true, code};
-  });
+        // The root isolate ivar is weak.
+        self->root_isolate_ = strong_root_isolate;
 
-  if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    tonic::DartState::Scope scope(strong_root_isolate);
-    platform_configuration->DidCreateIsolate();
-    if (!FlushRuntimeStateToIsolate()) {
-      FML_DLOG(ERROR) << "Could not setup initial isolate state.";
-    }
-  } else {
-    FML_DCHECK(false) << "RuntimeController created without window binding.";
-  }
+        strong_root_isolate->SetReturnCodeCallback([self](uint32_t code) {
+          if (!self) {
+            return;
+          }
 
-  FML_DCHECK(Dart_CurrentIsolate() == nullptr);
+          self->root_isolate_return_code_ = {true, code};
+        });
+
+        if (auto* platform_configuration =
+                self->GetPlatformConfigurationIfAvailable()) {
+          tonic::DartState::Scope scope(strong_root_isolate);
+          platform_configuration->DidCreateIsolate();
+          if (!self->FlushRuntimeStateToIsolate()) {
+            FML_DLOG(ERROR) << "Could not setup initial isolate state.";
+          }
+        } else {
+          FML_DCHECK(false)
+              << "RuntimeController created without window binding.";
+        }
+
+        FML_DCHECK(Dart_CurrentIsolate() == nullptr);
+
+        self->client_.OnRootIsolateCreated();
+        return;
+      });
+
+  // We're still trying to create the root isolate as soon as possible here on
+  // the UI thread although it's deferred a little bit by
+  // std::async(std::launch::deferred, ...). So the callers of `GetRootIsolate`
+  // should get a quick return after this UI thread task.
+  task_runners_.GetUITaskRunner()->PostTask(
+      [self = weak_factory_.GetWeakPtr()]() {
+        if (!self) {
+          return;
+        }
+
+        self->GetRootIsolate();
+      });
 }
 
 RuntimeController::~RuntimeController() {
@@ -107,8 +142,8 @@ RuntimeController::~RuntimeController() {
   }
 }
 
-bool RuntimeController::IsRootIsolateRunning() const {
-  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+bool RuntimeController::IsRootIsolateRunning() {
+  std::shared_ptr<DartIsolate> root_isolate = GetRootIsolate().lock();
   if (root_isolate) {
     return root_isolate->GetPhase() == DartIsolate::Phase::Running;
   }
@@ -234,7 +269,7 @@ bool RuntimeController::ReportTimings(std::vector<int64_t> timings) {
 }
 
 bool RuntimeController::NotifyIdle(int64_t deadline) {
-  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  std::shared_ptr<DartIsolate> root_isolate = GetRootIsolate().lock();
   if (!root_isolate) {
     return false;
   }
@@ -291,7 +326,7 @@ bool RuntimeController::DispatchSemanticsAction(int32_t id,
 
 PlatformConfiguration*
 RuntimeController::GetPlatformConfigurationIfAvailable() {
-  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  std::shared_ptr<DartIsolate> root_isolate = GetRootIsolate().lock();
   return root_isolate ? root_isolate->platform_configuration() : nullptr;
 }
 
@@ -353,17 +388,17 @@ RuntimeController::ComputePlatformResolvedLocale(
 }
 
 Dart_Port RuntimeController::GetMainPort() {
-  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  std::shared_ptr<DartIsolate> root_isolate = GetRootIsolate().lock();
   return root_isolate ? root_isolate->main_port() : ILLEGAL_PORT;
 }
 
 std::string RuntimeController::GetIsolateName() {
-  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  std::shared_ptr<DartIsolate> root_isolate = GetRootIsolate().lock();
   return root_isolate ? root_isolate->debug_name() : "";
 }
 
 bool RuntimeController::HasLivePorts() {
-  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  std::shared_ptr<DartIsolate> root_isolate = GetRootIsolate().lock();
   if (!root_isolate) {
     return false;
   }
@@ -372,11 +407,20 @@ bool RuntimeController::HasLivePorts() {
 }
 
 tonic::DartErrorHandleType RuntimeController::GetLastError() {
-  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  std::shared_ptr<DartIsolate> root_isolate = GetRootIsolate().lock();
   return root_isolate ? root_isolate->GetLastError() : tonic::kNoError;
 }
 
 std::weak_ptr<DartIsolate> RuntimeController::GetRootIsolate() {
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  if (root_isolate) {
+    return root_isolate_;
+  }
+
+  // Root isolate is not yet created, get it and do some configuration.
+  FML_DCHECK(create_and_config_root_isolate_.valid());
+  create_and_config_root_isolate_.get();
+
   return root_isolate_;
 }
 
