@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'keyboard_key.dart';
 import 'raw_keyboard_android.dart';
 import 'raw_keyboard_fuchsia.dart';
+import 'raw_keyboard_ios.dart';
 import 'raw_keyboard_linux.dart';
 import 'raw_keyboard_macos.dart';
 import 'raw_keyboard_web.dart';
@@ -299,6 +300,13 @@ abstract class RawKeyEvent with Diagnosticable {
             keyCode: message['keyCode'] as int? ?? 0,
             modifiers: message['modifiers'] as int? ?? 0);
         break;
+      case 'ios':
+        data = RawKeyEventDataIOS(
+            characters: message['characters'] as String? ?? '',
+            charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
+            keyCode: message['keyCode'] as int? ?? 0,
+            modifiers: message['modifiers'] as int? ?? 0);
+        break;
       case 'linux':
         data = RawKeyEventDataLinux(
             keyHelper: KeyHelper(message['toolkit'] as String? ?? ''),
@@ -324,7 +332,7 @@ abstract class RawKeyEvent with Diagnosticable {
         );
         break;
       default:
-        // Raw key events are not yet implemented  on iOS or other platforms,
+        // Raw key events are not yet implemented on other platforms,
         // but this exception isn't hit, because the engine never sends these
         // messages.
         throw FlutterError('Unknown keymap for key events: $keymap');
@@ -333,7 +341,7 @@ abstract class RawKeyEvent with Diagnosticable {
     final String type = message['type'] as String;
     switch (type) {
       case 'keydown':
-        return RawKeyDownEvent(data: data, character: message['character'] as String);
+        return RawKeyDownEvent(data: data, character: message['character'] as String); // Missing for Mac/iOS?
       case 'keyup':
         return RawKeyUpEvent(data: data);
       default:

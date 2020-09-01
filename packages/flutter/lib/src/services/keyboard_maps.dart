@@ -1176,6 +1176,251 @@ const Map<int, LogicalKeyboardKey> kMacOsFunctionKeyMap = <int, LogicalKeyboardK
   0x0000005a: LogicalKeyboardKey.f20,
 };
 
+
+/// Maps iOS-specific key code values representing [PhysicalKeyboardKey].
+///
+/// iOS doesn't provide a scan code, but a virtual keycode to represent a physical key.
+const Map<int, PhysicalKeyboardKey> kIOSToPhysicalKey = <int, PhysicalKeyboardKey>{
+  0x00000004: PhysicalKeyboardKey.keyA,
+  0x00000005: PhysicalKeyboardKey.keyB,
+  0x00000006: PhysicalKeyboardKey.keyC,
+  0x00000007: PhysicalKeyboardKey.keyD,
+  0x00000008: PhysicalKeyboardKey.keyE,
+  0x00000009: PhysicalKeyboardKey.keyF,
+  0x0000000a: PhysicalKeyboardKey.keyG,
+  0x0000000b: PhysicalKeyboardKey.keyH,
+  0x0000000c: PhysicalKeyboardKey.keyI,
+  0x0000000d: PhysicalKeyboardKey.keyJ,
+  0x0000000e: PhysicalKeyboardKey.keyK,
+  0x0000000f: PhysicalKeyboardKey.keyL,
+  0x00000010: PhysicalKeyboardKey.keyM,
+  0x00000011: PhysicalKeyboardKey.keyN,
+  0x00000012: PhysicalKeyboardKey.keyO,
+  0x00000013: PhysicalKeyboardKey.keyP,
+  0x00000014: PhysicalKeyboardKey.keyQ,
+  0x00000015: PhysicalKeyboardKey.keyR,
+  0x00000016: PhysicalKeyboardKey.keyS,
+  0x00000017: PhysicalKeyboardKey.keyT,
+  0x00000018: PhysicalKeyboardKey.keyU,
+  0x00000019: PhysicalKeyboardKey.keyV,
+  0x0000001a: PhysicalKeyboardKey.keyW,
+  0x0000001b: PhysicalKeyboardKey.keyX,
+  0x0000001c: PhysicalKeyboardKey.keyY,
+  0x0000001d: PhysicalKeyboardKey.keyZ,
+  0x0000001e: PhysicalKeyboardKey.digit1,
+  0x0000001f: PhysicalKeyboardKey.digit2,
+  0x00000020: PhysicalKeyboardKey.digit3,
+  0x00000021: PhysicalKeyboardKey.digit4,
+  0x00000022: PhysicalKeyboardKey.digit5,
+  0x00000023: PhysicalKeyboardKey.digit6,
+  0x00000024: PhysicalKeyboardKey.digit7,
+  0x00000025: PhysicalKeyboardKey.digit8,
+  0x00000026: PhysicalKeyboardKey.digit9,
+  0x00000027: PhysicalKeyboardKey.digit0,
+  0x00000028: PhysicalKeyboardKey.enter,
+  0x00000029: PhysicalKeyboardKey.escape,
+  0x0000002a: PhysicalKeyboardKey.backspace,
+  0x0000002b: PhysicalKeyboardKey.tab,
+  0x0000002c: PhysicalKeyboardKey.space,
+  0x0000002d: PhysicalKeyboardKey.minus,
+  0x0000002e: PhysicalKeyboardKey.equal,
+  0x0000002f: PhysicalKeyboardKey.bracketLeft,
+  0x00000030: PhysicalKeyboardKey.bracketRight,
+  0x00000031: PhysicalKeyboardKey.backslash,
+  // 32 missing - keyboardNonUSPound
+  0x00000033: PhysicalKeyboardKey.semicolon,
+  0x00000034: PhysicalKeyboardKey.quote,
+  0x00000035: PhysicalKeyboardKey.backquote,
+  0x00000036: PhysicalKeyboardKey.comma,
+  0x00000037: PhysicalKeyboardKey.period,
+  0x00000038: PhysicalKeyboardKey.slash,
+  0x00000039: PhysicalKeyboardKey.capsLock,
+  0x0000003a: PhysicalKeyboardKey.f1,
+  0x0000003b: PhysicalKeyboardKey.f2,
+  0x0000003c: PhysicalKeyboardKey.f3,
+  0x0000003d: PhysicalKeyboardKey.f4,
+  0x0000003e: PhysicalKeyboardKey.f5,
+  0x0000003f: PhysicalKeyboardKey.f6,
+  0x00000040: PhysicalKeyboardKey.f7,
+  0x00000041: PhysicalKeyboardKey.f8,
+  0x00000042: PhysicalKeyboardKey.f9,
+  0x00000043: PhysicalKeyboardKey.f10,
+  0x00000044: PhysicalKeyboardKey.f11,
+  0x00000045: PhysicalKeyboardKey.f12,
+  0x00000046: PhysicalKeyboardKey.printScreen,
+  0x00000047: PhysicalKeyboardKey.scrollLock,
+  0x00000048: PhysicalKeyboardKey.mediaPause,
+  0x00000049: PhysicalKeyboardKey.insert,
+  0x0000004a: PhysicalKeyboardKey.home,
+  0x0000004b: PhysicalKeyboardKey.pageUp,
+  0x0000004c: PhysicalKeyboardKey.delete,
+  0x0000004d: PhysicalKeyboardKey.end,
+  0x0000004e: PhysicalKeyboardKey.pageDown,
+  0x0000004f: PhysicalKeyboardKey.arrowRight,
+  0x00000050: PhysicalKeyboardKey.arrowLeft,
+  0x00000051: PhysicalKeyboardKey.arrowDown,
+  0x00000052: PhysicalKeyboardKey.arrowUp,
+  0x00000053: PhysicalKeyboardKey.numLock,
+  0x00000054: PhysicalKeyboardKey.numpadDivide,
+  0x00000055: PhysicalKeyboardKey.numpadMultiply,
+  0x00000056: PhysicalKeyboardKey.numpadSubtract,
+  0x00000057: PhysicalKeyboardKey.numpadAdd,
+  0x00000058: PhysicalKeyboardKey.numpadEnter,
+  0x00000059: PhysicalKeyboardKey.numpad1,
+  0x0000005a: PhysicalKeyboardKey.numpad2,
+  0x0000005b: PhysicalKeyboardKey.numpad3,
+  0x0000005c: PhysicalKeyboardKey.numpad4,
+  0x0000005d: PhysicalKeyboardKey.numpad5,
+  0x0000005e: PhysicalKeyboardKey.numpad6,
+  0x0000005f: PhysicalKeyboardKey.numpad7,
+  0x00000060: PhysicalKeyboardKey.numpad8,
+  0x00000061: PhysicalKeyboardKey.numpad9,
+  0x00000062: PhysicalKeyboardKey.numpad0,
+  0x00000063: PhysicalKeyboardKey.numpadDecimal,
+  0x00000064: PhysicalKeyboardKey.intlBackslash,
+  // 65 missing - keyboardApplication
+  0x00000066: PhysicalKeyboardKey.power,
+  0x00000067: PhysicalKeyboardKey.numpadEqual,
+  0x00000068: PhysicalKeyboardKey.f13,
+  0x00000069: PhysicalKeyboardKey.f14,
+  0x0000006a: PhysicalKeyboardKey.f15,
+  0x0000006b: PhysicalKeyboardKey.f16,
+  0x0000006c: PhysicalKeyboardKey.f17,
+  0x0000006d: PhysicalKeyboardKey.f18,
+  0x0000006e: PhysicalKeyboardKey.f19,
+  0x0000006f: PhysicalKeyboardKey.f20,
+  0x00000070: PhysicalKeyboardKey.f21,
+  0x00000071: PhysicalKeyboardKey.f22,
+  0x00000072: PhysicalKeyboardKey.f23,
+  0x00000073: PhysicalKeyboardKey.f24,
+  // 74 missing - keyboardExecute
+  0x00000075: PhysicalKeyboardKey.help,
+  0x00000076: PhysicalKeyboardKey.contextMenu,
+  0x00000077: PhysicalKeyboardKey.select,
+  0x00000078: PhysicalKeyboardKey.mediaStop,
+  0x00000079: PhysicalKeyboardKey.again,
+  0x0000007a: PhysicalKeyboardKey.undo,
+  // 7b missing - not defined
+  0x0000007c: PhysicalKeyboardKey.copy,
+  0x0000007d: PhysicalKeyboardKey.paste,
+  0x0000007e: PhysicalKeyboardKey.find,
+  0x0000007f: PhysicalKeyboardKey.audioVolumeMute,
+  0x00000080: PhysicalKeyboardKey.audioVolumeUp,
+  0x00000081: PhysicalKeyboardKey.audioVolumeDown,
+  // Not sure about the next three. Those are prefixed with "locking"
+  0x00000082: PhysicalKeyboardKey.capsLock,
+  0x00000083: PhysicalKeyboardKey.numLock,
+  0x00000084: PhysicalKeyboardKey.scrollLock,
+  0x00000085: PhysicalKeyboardKey.numpadComma,
+  // 86 missing - keypadEqualSignAS400
+  // 87 - 8f missing - keyboardInternational1 - 9
+  0x00000090: PhysicalKeyboardKey.lang1,
+  0x00000091: PhysicalKeyboardKey.lang2,
+  0x00000092: PhysicalKeyboardKey.lang3,
+  0x00000093: PhysicalKeyboardKey.lang4,
+  0x00000094: PhysicalKeyboardKey.lang5,
+  // 95 - 98 missing - keyboardLANG6 - 9
+  // 99 missing - keyboardAlternateErase
+  // 9a missing - keyboardSysReqOrAttention
+  // 9b missing - keyboardCancel
+  // 9c missing - keyboardClear (numpadClear possibly?)
+  // 9e missing - keyboardPrior
+  // 9f missing - keyboardReturn
+  // a0 missing - keyboardSeparator
+  // a1 missing - keyboardOut
+  // a2 missing - keyboardOper
+  // a3 missing - keyboardClearOrAgain
+  // a4 missing - keyboardCrSelOrProps
+  // a5 missing - keyboardExSel
+  0x000000e0: PhysicalKeyboardKey.controlLeft,
+  0x000000e1: PhysicalKeyboardKey.shiftLeft,
+  0x000000e2: PhysicalKeyboardKey.altLeft,
+  0x000000e3: PhysicalKeyboardKey.metaLeft,
+  0x000000e4: PhysicalKeyboardKey.controlRight,
+  0x000000e5: PhysicalKeyboardKey.shiftRight,
+  0x000000e6: PhysicalKeyboardKey.altRight,
+  0x000000e7: PhysicalKeyboardKey.metaRight
+};
+
+/// Maps iOS specific string values of nonvisible keys to logical keys
+/// 
+/// See: https://developer.apple.com/documentation/uikit/uikeycommand/input_strings_for_special_keys?language=objc
+const Map<String, LogicalKeyboardKey> kIOStoLogicalKey = <String, LogicalKeyboardKey>{
+  'UIKeyInputEscape': LogicalKeyboardKey.escape,
+  'UIKeyInputF1': LogicalKeyboardKey.f1,
+  'UIKeyInputF2': LogicalKeyboardKey.f2,
+  'UIKeyInputF3': LogicalKeyboardKey.f3,
+  'UIKeyInputF4': LogicalKeyboardKey.f4,
+  'UIKeyInputF5': LogicalKeyboardKey.f5,
+  'UIKeyInputF6': LogicalKeyboardKey.f6,
+  'UIKeyInputF7': LogicalKeyboardKey.f7,
+  'UIKeyInputF8': LogicalKeyboardKey.f8,
+  'UIKeyInputF9': LogicalKeyboardKey.f9,
+  'UIKeyInputF10': LogicalKeyboardKey.f10,
+  'UIKeyInputF11': LogicalKeyboardKey.f11,
+  'UIKeyInputF12': LogicalKeyboardKey.f12,
+  'UIKeyInputUpArrow': LogicalKeyboardKey.arrowUp,
+  'UIKeyInputDownArrow': LogicalKeyboardKey.arrowDown,
+  'UIKeyInputLeftArrow': LogicalKeyboardKey.arrowLeft,
+  'UIKeyInputRightArrow': LogicalKeyboardKey.arrowRight,
+  'UIKeyInputHome': LogicalKeyboardKey.home,
+  'UIKeyInputEnd': LogicalKeyboardKey.enter,
+  'UIKeyInputPageUp': LogicalKeyboardKey.pageUp,
+  'UIKeyInputPageDown': LogicalKeyboardKey.pageDown
+};
+
+/// A map of iOS key codes which have printable representations, but appear
+/// on the number pad. Used to provide different key objects for keys like
+/// KEY_EQUALS and NUMPAD_EQUALS.
+const Map<int, LogicalKeyboardKey> kIOSNumPadMap = <int, LogicalKeyboardKey>{
+  0x00000054: LogicalKeyboardKey.numpadDivide,
+  0x00000055: LogicalKeyboardKey.numpadMultiply,
+  0x00000056: LogicalKeyboardKey.numpadSubtract,
+  0x00000057: LogicalKeyboardKey.numpadAdd,
+  0x00000058: LogicalKeyboardKey.numpadEnter,
+  0x00000059: LogicalKeyboardKey.numpad1,
+  0x0000005a: LogicalKeyboardKey.numpad2,
+  0x0000005b: LogicalKeyboardKey.numpad3,
+  0x0000005c: LogicalKeyboardKey.numpad4,
+  0x0000005d: LogicalKeyboardKey.numpad5,
+  0x0000005e: LogicalKeyboardKey.numpad6,
+  0x0000005f: LogicalKeyboardKey.numpad7,
+  0x00000060: LogicalKeyboardKey.numpad8,
+  0x00000061: LogicalKeyboardKey.numpad9,
+  0x00000062: LogicalKeyboardKey.numpad0,
+  0x00000063: LogicalKeyboardKey.numpadDecimal,
+  0x00000085: LogicalKeyboardKey.numpadComma
+};
+
+/// A map of iOS key codes which are numbered function keys, so that they
+/// can be excluded when asking "is the Fn modifier down?".
+const Map<int, LogicalKeyboardKey> kIOSFunctionKeyMap = <int, LogicalKeyboardKey>{
+  0x0000003a: LogicalKeyboardKey.f1,
+  0x0000003b: LogicalKeyboardKey.f2,
+  0x0000003c: LogicalKeyboardKey.f3,
+  0x0000003d: LogicalKeyboardKey.f4,
+  0x0000003e: LogicalKeyboardKey.f5,
+  0x0000003f: LogicalKeyboardKey.f6,
+  0x00000040: LogicalKeyboardKey.f7,
+  0x00000041: LogicalKeyboardKey.f8,
+  0x00000042: LogicalKeyboardKey.f9,
+  0x00000043: LogicalKeyboardKey.f10,
+  0x00000044: LogicalKeyboardKey.f11,
+  0x00000045: LogicalKeyboardKey.f12,
+  0x00000068: LogicalKeyboardKey.f13,
+  0x00000069: LogicalKeyboardKey.f14,
+  0x0000006a: LogicalKeyboardKey.f15,
+  0x0000006b: LogicalKeyboardKey.f16,
+  0x0000006c: LogicalKeyboardKey.f17,
+  0x0000006d: LogicalKeyboardKey.f18,
+  0x0000006e: LogicalKeyboardKey.f19,
+  0x0000006f: LogicalKeyboardKey.f20,
+  0x00000070: LogicalKeyboardKey.f21,
+  0x00000071: LogicalKeyboardKey.f22,
+  0x00000072: LogicalKeyboardKey.f23,
+  0x00000073: LogicalKeyboardKey.f24,
+};
+
 /// Maps GLFW-specific key codes to the matching [LogicalKeyboardKey].
 const Map<int, LogicalKeyboardKey> kGlfwToLogicalKey = <int, LogicalKeyboardKey>{
   65: LogicalKeyboardKey.keyA,

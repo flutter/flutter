@@ -40,6 +40,7 @@ class KeyEventSimulator {
       case 'macos':
       case 'linux':
       case 'web':
+      case 'ios':
       case 'windows':
         return true;
     }
@@ -59,6 +60,9 @@ class KeyEventSimulator {
         break;
       case 'macos':
         map = kMacOsToPhysicalKey;
+        break;
+      case 'ios':
+        map = kIOSToPhysicalKey;
         break;
       case 'linux':
         map = kLinuxToPhysicalKey;
@@ -92,6 +96,9 @@ class KeyEventSimulator {
         break;
       case 'macos':
       // macOS doesn't do key codes, just scan codes.
+        return null;
+      case 'ios':
+      // iOS doesn't do key codes, just scan codes.
         return null;
       case 'web':
       // web doesn't have int type code
@@ -133,6 +140,9 @@ class KeyEventSimulator {
       case 'macos':
         map = kMacOsToPhysicalKey;
         break;
+      case 'ios':
+        map = kIOSToPhysicalKey;
+        break;
       case 'linux':
         map = kLinuxToPhysicalKey;
         break;
@@ -166,8 +176,8 @@ class KeyEventSimulator {
     physicalKey ??= _findPhysicalKey(key, platform);
 
     assert(key.debugName != null);
-    final int keyCode = platform == 'macos' || platform == 'web' ? -1 : _getKeyCode(key, platform);
-    assert(platform == 'macos' || platform == 'web' || keyCode != null, 'Key $key not found in $platform keyCode map');
+    final int keyCode = platform == 'macos' || platform == 'ios' || platform == 'web' ? -1 : _getKeyCode(key, platform);
+    assert(platform == 'macos' || platform == 'ios' || platform == 'web' || keyCode != null, 'Key $key not found in $platform keyCode map');
     final int scanCode = platform == 'web' ? -1 : _getScanCode(physicalKey, platform);
     assert(platform == 'web' || scanCode != null, 'Physical key for $key not found in $platform scanCode map');
 
@@ -204,6 +214,12 @@ class KeyEventSimulator {
         result['characters'] = key.keyLabel;
         result['charactersIgnoringModifiers'] = key.keyLabel;
         result['modifiers'] = _getMacOsModifierFlags(key, isDown);
+        break;
+      case 'ios':
+        result['keyCode'] = scanCode;
+        result['characters'] = key.keyLabel;
+        result['charactersIgnoringModifiers'] = key.keyLabel;
+        result['modifiers'] = _getIOSModifierFlags(key, isDown);
         break;
       case 'web':
         result['code'] = _getWebKeyCode(key);
@@ -492,6 +508,73 @@ class KeyEventSimulator {
     }
     if (pressed.contains(LogicalKeyboardKey.capsLock)) {
       result |= RawKeyEventDataMacOs.modifierCapsLock;
+    }
+    return result;
+  }
+
+  static int _getIOSModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
+    int result = 0;
+    final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
+    if (isDown) {
+      pressed.add(newKey);
+    } else {
+      pressed.remove(newKey);
+    }
+    if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
+      result |= RawKeyEventDataIOS.modifierLeftShift | RawKeyEventDataIOS.modifierShift;
+    }
+    if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
+      result |= RawKeyEventDataIOS.modifierRightShift | RawKeyEventDataIOS.modifierShift;
+    }
+    if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
+      result |= RawKeyEventDataIOS.modifierLeftCommand | RawKeyEventDataIOS.modifierCommand;
+    }
+    if (pressed.contains(LogicalKeyboardKey.metaRight)) {
+      result |= RawKeyEventDataIOS.modifierRightCommand | RawKeyEventDataIOS.modifierCommand;
+    }
+    if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
+      result |= RawKeyEventDataIOS.modifierLeftControl | RawKeyEventDataIOS.modifierControl;
+    }
+    if (pressed.contains(LogicalKeyboardKey.controlRight)) {
+      result |= RawKeyEventDataIOS.modifierRightControl | RawKeyEventDataIOS.modifierControl;
+    }
+    if (pressed.contains(LogicalKeyboardKey.altLeft)) {
+      result |= RawKeyEventDataIOS.modifierLeftOption | RawKeyEventDataIOS.modifierOption;
+    }
+    if (pressed.contains(LogicalKeyboardKey.altRight)) {
+      result |= RawKeyEventDataIOS.modifierRightOption | RawKeyEventDataIOS.modifierOption;
+    }
+    final Set<LogicalKeyboardKey> functionKeys = <LogicalKeyboardKey>{
+      LogicalKeyboardKey.f1,
+      LogicalKeyboardKey.f2,
+      LogicalKeyboardKey.f3,
+      LogicalKeyboardKey.f4,
+      LogicalKeyboardKey.f5,
+      LogicalKeyboardKey.f6,
+      LogicalKeyboardKey.f7,
+      LogicalKeyboardKey.f8,
+      LogicalKeyboardKey.f9,
+      LogicalKeyboardKey.f10,
+      LogicalKeyboardKey.f11,
+      LogicalKeyboardKey.f12,
+      LogicalKeyboardKey.f13,
+      LogicalKeyboardKey.f14,
+      LogicalKeyboardKey.f15,
+      LogicalKeyboardKey.f16,
+      LogicalKeyboardKey.f17,
+      LogicalKeyboardKey.f18,
+      LogicalKeyboardKey.f19,
+      LogicalKeyboardKey.f20,
+      LogicalKeyboardKey.f21,
+    };
+    if (pressed.intersection(functionKeys).isNotEmpty) {
+      result |= RawKeyEventDataIOS.modifierFunction;
+    }
+    if (pressed.intersection(kMacOsNumPadMap.values.toSet()).isNotEmpty) {
+      result |= RawKeyEventDataIOS.modifierNumericPad;
+    }
+    if (pressed.contains(LogicalKeyboardKey.capsLock)) {
+      result |= RawKeyEventDataIOS.modifierCapsLock;
     }
     return result;
   }
