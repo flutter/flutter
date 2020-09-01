@@ -348,7 +348,7 @@ class SkiaGoldClient {
     }
 
     print('tryjobInit');
-    print(imgTestInitArguments);
+    print(imgtestInitArguments);
     print(result.stdout);
   }
 
@@ -391,7 +391,7 @@ class SkiaGoldClient {
       throw Exception(buf.toString());
     }
     print('tryjobAdd');
-    print(imgTestArguments);
+    print(imgtestArguments);
     print(result.stdout);
   }
 
