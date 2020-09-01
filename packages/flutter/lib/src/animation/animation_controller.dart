@@ -651,11 +651,11 @@ class AnimationController extends Animation<double>
   ///
   /// If velocity is positive, the animation will complete, otherwise it will
   /// dismiss.
-  /// 
-  /// The [springDescription] can be used to apply custom spring to the [SpringSimulation] 
+  ///
+  /// The [springDescription] can be used to apply custom spring to the [SpringSimulation]
   /// that is driven by this method.
-  /// 
-  /// Use [velocityScale] to apply scale for [velocity]. 
+  ///
+  /// Use [velocityScale] to apply scale for [velocity].
   /// It only will be applied with [AnimationBehavior.normal].
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
