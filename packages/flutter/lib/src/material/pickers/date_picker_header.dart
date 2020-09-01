@@ -45,11 +45,10 @@ class DatePickerHeader extends StatelessWidget {
     @required this.icon,
     @required this.iconTooltip,
     @required this.onIconPressed,
-  })
-      : assert(helpText != null),
-        assert(orientation != null),
-        assert(isShort != null),
-        super(key: key);
+  }) : assert(helpText != null),
+       assert(orientation != null),
+       assert(isShort != null),
+       super(key: key);
 
   /// The text that is displayed at the top of the header.
   ///
@@ -100,11 +99,8 @@ class DatePickerHeader extends StatelessWidget {
 
     // The header should use the primary color in light themes and surface color in dark
     final bool isDark = colorScheme.brightness == Brightness.dark;
-    final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme
-        .primary;
-    final Color onPrimarySurfaceColor = isDark
-        ? colorScheme.onSurface
-        : colorScheme.onPrimary;
+    final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
+    final Color onPrimarySurfaceColor = isDark ? colorScheme.onSurface : colorScheme.onPrimary;
 
     final TextStyle helpStyle = textTheme.overline?.copyWith(
       color: onPrimarySurfaceColor,
@@ -132,32 +128,32 @@ class DatePickerHeader extends StatelessWidget {
 
     switch (orientation) {
       case Orientation.portrait:
-        return SizedBox(
-          height: _datePickerHeaderPortraitHeight,
-          child: Material(
-            color: primarySurfaceColor,
-            child: Padding(
-              padding: const EdgeInsetsDirectional.only(
-                start: 24,
-                end: 12,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const SizedBox(height: 16),
-                  Flexible(child: help),
-                  const SizedBox(height: 30),
-                  Row(
-                    children: <Widget>[
-                      Expanded(child: title),
-                      icon,
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
+         return SizedBox(
+           height: _datePickerHeaderPortraitHeight,
+           child: Material(
+             color: primarySurfaceColor,
+             child: Padding(
+               padding: const EdgeInsetsDirectional.only(
+                 start: 24,
+                 end: 12,
+               ),
+               child: Column(
+                 crossAxisAlignment: CrossAxisAlignment.start,
+                 children: <Widget>[
+                   const SizedBox(height: 16),
+                   Flexible(child: help),
+                   const SizedBox(height: 30),
+                   Row(
+                     children: <Widget>[
+                       Expanded(child: title),
+                       icon,
+                     ],
+                   ),
+                 ],
+               ),
+             ),
+           ),
+         );
       case Orientation.landscape:
         return SizedBox(
           width: _datePickerHeaderLandscapeWidth,
