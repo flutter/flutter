@@ -8,6 +8,7 @@ import 'dart:collection';
 import 'dart:ui' as ui show PointerDataPacket;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'arena.dart';
 import 'converter.dart';
@@ -16,6 +17,131 @@ import 'events.dart';
 import 'hit_test.dart';
 import 'pointer_router.dart';
 import 'pointer_signal_resolver.dart';
+import 'resampler.dart';
+
+typedef HandleSampleTimeChangedCallback = void Function();
+
+// Class that handles resampling of touch events for multiple pointer
+// devices.
+//
+// SchedulerBinding's `currentSystemFrameTimeStamp` is used to determine
+// sample time.
+class _Resampler {
+  _Resampler(this._handlePointerEvent, this._handleSampleTimeChanged);
+
+  // Resamplers used to filter incoming pointer events.
+  final Map<int, PointerEventResampler> _resamplers = <int, PointerEventResampler>{};
+
+  // Flag to track if a frame callback has been scheduled.
+  bool _frameCallbackScheduled = false;
+
+  // Current frame time for resampling.
+  Duration _frameTime = Duration.zero;
+
+  // Last sample time and time stamp of last event.
+  //
+  // Only used for debugPrint of resampling margin.
+  Duration _lastSampleTime = Duration.zero;
+  Duration _lastEventTime = Duration.zero;
+
+  // Callback used to handle pointer events.
+  final HandleEventCallback _handlePointerEvent;
+
+  // Callback used to handle sample time changes.
+  final HandleSampleTimeChangedCallback _handleSampleTimeChanged;
+
+  // Enqueue `events` for resampling or dispatch them directly if
+  // not a touch event.
+  void addOrDispatchAll(Queue<PointerEvent> events) {
+    final SchedulerBinding? scheduler = SchedulerBinding.instance;
+    assert(scheduler != null);
+
+    while (events.isNotEmpty) {
+      final PointerEvent event = events.removeFirst();
+
+      // Add touch event to resampler or dispatch pointer event directly.
+      if (event.kind == PointerDeviceKind.touch) {
+        // Save last event time for debugPrint of resampling margin.
+        _lastEventTime = event.timeStamp;
+
+        final PointerEventResampler resampler = _resamplers.putIfAbsent(
+          event.device,
+          () => PointerEventResampler(),
+        );
+        resampler.addEvent(event);
+      } else {
+        _handlePointerEvent(event);
+      }
+    }
+  }
+
+  // Sample and dispatch events.
+  //
+  // `samplingOffset` is relative to the current frame time, which
+  // can be in the past when we're not actively resampling.
+  // `currentSystemFrameTimeStamp` is used to determine the current
+  // frame time.
+  void sample(Duration samplingOffset) {
+    final SchedulerBinding? scheduler = SchedulerBinding.instance;
+    assert(scheduler != null);
+
+    // Determine sample time by adding the offset to the current
+    // frame time. This is expected to be in the past and not
+    // result in any dispatched events unless we're actively
+    // resampling events.
+    final Duration sampleTime = _frameTime + samplingOffset;
+
+    // Iterate over active resamplers and sample pointer events for
+    // current sample time.
+    for (final PointerEventResampler resampler in _resamplers.values) {
+      resampler.sample(sampleTime, _handlePointerEvent);
+    }
+
+    // Remove inactive resamplers.
+    _resamplers.removeWhere((int key, PointerEventResampler resampler) {
+      return !resampler.hasPendingEvents && !resampler.isDown;
+    });
+
+    // Save last sample time for debugPrint of resampling margin.
+    _lastSampleTime = sampleTime;
+
+    // Schedule a frame callback if another call to `sample` is needed.
+    if (!_frameCallbackScheduled && _resamplers.isNotEmpty) {
+      _frameCallbackScheduled = true;
+      scheduler?.scheduleFrameCallback((_) {
+        _frameCallbackScheduled = false;
+        // We use `currentSystemFrameTimeStamp` here as it's critical that
+        // sample time is in the same clock as the event time stamps, and
+        // never adjusted or scaled like `currentFrameTimeStamp`.
+        _frameTime = scheduler.currentSystemFrameTimeStamp;
+        assert(() {
+          if (debugPrintResamplingMargin) {
+            final Duration resamplingMargin = _lastEventTime - _lastSampleTime;
+              debugPrint('$resamplingMargin');
+          }
+          return true;
+        }());
+        _handleSampleTimeChanged();
+      });
+    }
+  }
+
+  // Stop all resampling and dispatched any queued events.
+  void stop() {
+    for (final PointerEventResampler resampler in _resamplers.values) {
+      resampler.stop(_handlePointerEvent);
+    }
+    _resamplers.clear();
+  }
+}
+
+// The default sampling offset.
+//
+// Sampling offset is relative to presentation time. If we produce frames
+// 16.667 ms before presentation and input rate is ~60hz, worst case latency
+// is 33.334 ms. This however assumes zero latency from the input driver.
+// 4.666 ms margin is added for this.
+const Duration _defaultSamplingOffset = Duration(milliseconds: -38);
 
 /// A binding for the gesture subsystem.
 ///
@@ -99,6 +225,17 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   void _flushPointerEventQueue() {
     assert(!locked);
+
+    if (resamplingEnabled) {
+      _resampler.addOrDispatchAll(_pendingPointerEvents);
+      _resampler.sample(samplingOffset);
+      return;
+    }
+
+    // Stop resampler if resampling is not enabled. This is a no-op if
+    // resampling was never enabled.
+    _resampler.stop();
+
     while (_pendingPointerEvents.isNotEmpty)
       _handlePointerEvent(_pendingPointerEvents.removeFirst());
   }
@@ -154,6 +291,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
         event is PointerHoverEvent ||
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
+      assert(event.position != null);
       dispatchEvent(event, hitTestResult);
     }
   }
@@ -226,6 +364,38 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       pointerSignalResolver.resolve(event);
     }
   }
+
+  void _handleSampleTimeChanged() {
+    if (!locked) {
+      _flushPointerEventQueue();
+    }
+  }
+
+  // Resampler used to filter incoming pointer events when resampling
+  // is enabled.
+  late final _Resampler _resampler = _Resampler(
+    _handlePointerEvent,
+    _handleSampleTimeChanged,
+  );
+
+  /// Enable pointer event resampling for touch devices by setting
+  /// this to true.
+  ///
+  /// Resampling results in smoother touch event processing at the
+  /// cost of some added latency. Devices with low frequency sensors
+  /// or when the frequency is not a multiple of the display frequency
+  /// (e.g., 120Hz input and 90Hz display) benefit from this.
+  ///
+  /// This is typically set during application initialization but
+  /// can be adjusted dynamically in case the application only
+  /// wants resampling for some period of time.
+  bool resamplingEnabled = false;
+
+  /// Offset relative to current frame time that should be used for
+  /// resampling. The [samplingOffset] is expected to be negative.
+  /// Non-negative [samplingOffset] is allowed but will effectively
+  /// disable resampling.
+  Duration samplingOffset = _defaultSamplingOffset;
 }
 
 /// Variant of [FlutterErrorDetails] with extra fields for the gesture
