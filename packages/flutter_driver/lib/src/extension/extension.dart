@@ -88,9 +88,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// will still be returned in the `response` field of the result JSON along
 /// with an `isError` boolean.
 ///
-/// The [finders] parameter are used to add custom finders
-///
-/// The following code shows how to implement a Finder
+/// The `finders` parameter are used to add custom finders, as in the following example.
 ///
 /// ```dart main
 /// void main() {
