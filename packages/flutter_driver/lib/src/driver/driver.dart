@@ -173,9 +173,6 @@ abstract class FlutterDriver {
   /// Getter of webDriver.
   async_io.WebDriver get webDriver => throw UnimplementedError();
 
-  /// Getter of accessibilityEnabled.
-  bool get accessibilityEnabled => throw UnimplementedError();
-
   /// Enables accessibility feature.
   Future<void> enableAccessibility() async {
     throw UnimplementedError();
