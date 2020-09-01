@@ -225,24 +225,6 @@ class RawKeyEventDataIOS extends RawKeyEventData {
     }
   }
 
-  /// Returns true if the given label represents an unprintable key.
-  ///
-  /// Examples of unprintable keys are "NSUpArrowFunctionKey = 0xF700"
-  /// or "NSHomeFunctionKey = 0xF729".
-  /// Note: This is for macOS but is assumed to work the same on iOS 
-  /// (although there is no documentation on this on the UIKit side)
-  /// See <https://developer.apple.com/documentation/appkit/1535851-function-key_unicodes?language=objc> for more
-  /// information.
-  ///
-  /// Used by [RawKeyEvent] subclasses to help construct IDs.
-  static bool _isUnprintableKey(String label) {
-    if (label.length > 1) {
-      return false;
-    }
-    final int codeUnit = label.codeUnitAt(0);
-    return codeUnit >= 0xF700 && codeUnit <= 0xF8FF;
-  }
-
   // Modifier key masks. See Apple's UIKey documentation
   // https://developer.apple.com/documentation/uikit/uikeymodifierflags?language=objc
   // https://opensource.apple.com/source/IOHIDFamily/IOHIDFamily-86/IOHIDSystem/IOKit/hidsystem/IOLLEvent.h.auto.html
