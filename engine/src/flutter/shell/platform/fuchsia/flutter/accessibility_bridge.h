@@ -145,6 +145,11 @@ class AccessibilityBridge
       const flutter::SemanticsNode& node,
       size_t* additional_size) const;
 
+  // Derives the role for a Fuchsia semantics node from a Flutter semantics
+  // node.
+  fuchsia::accessibility::semantics::Role GetNodeRole(
+      const flutter::SemanticsNode& node) const;
+
   // Gets the set of reachable descendants from the given node id.
   std::unordered_set<int32_t> GetDescendants(int32_t node_id) const;
 
