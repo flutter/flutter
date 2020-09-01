@@ -346,6 +346,10 @@ class SkiaGoldClient {
         ..writeln('stderr: ${result.stderr}');
       throw Exception(buf.toString());
     }
+
+    print('tryjobInit');
+    print(imgTestArguments);
+    print(result.stdout);
   }
 
   /// Executes the `imgtest add` command in the goldctl tool for tryjobs.
