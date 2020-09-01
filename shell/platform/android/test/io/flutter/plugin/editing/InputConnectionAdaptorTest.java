@@ -1106,6 +1106,17 @@ public class InputConnectionAdaptorTest {
     assertEquals(Selection.getSelectionStart(editable), 0);
   }
 
+  @Test
+  public void testDoesNotConsumeBackButton() {
+    Editable editable = sampleEditable(0, 0);
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    FakeKeyEvent keyEvent = new FakeKeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
+    boolean didConsume = adaptor.sendKeyEvent(keyEvent);
+
+    assertFalse(didConsume);
+  }
+
   private static final String SAMPLE_TEXT =
       "Lorem ipsum dolor sit amet," + "\nconsectetur adipiscing elit.";
 

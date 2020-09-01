@@ -10,6 +10,9 @@ public class FakeKeyEvent extends KeyEvent {
   }
 
   public final int getUnicodeChar() {
+    if (getKeyCode() == KeyEvent.KEYCODE_BACK) {
+      return 0;
+    }
     return 1;
   }
 }
