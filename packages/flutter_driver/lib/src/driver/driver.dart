@@ -675,6 +675,7 @@ abstract class FlutterDriver {
   /// With frame sync disabled, it's the responsibility of the test author to
   /// ensure that no action is performed while the app is undergoing a
   /// transition to avoid flakiness.
+  ///
   /// See also:
   ///
   /// * [FlutterDriver.waitFor], which waits until target is located.
