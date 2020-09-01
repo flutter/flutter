@@ -176,7 +176,7 @@ abstract class FlutterTestDriver {
         .catchError((Object e) => _debugPrint('Ignoring failure to resume during shutdown'));
 
     _debugPrint('Sending SIGTERM to $_processPid..');
-    io.Process.killPid(pid, io.ProcessSignal.sigterm);
+    io.Process.killPid(_processPid, io.ProcessSignal.sigterm);
     return _process.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
   }
 
