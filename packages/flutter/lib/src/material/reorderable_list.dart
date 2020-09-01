@@ -207,7 +207,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   static const double _defaultDropAreaExtent = 100.0;
 
   // The additional margin to place around a computed drop area.
-  static const double _dropAreaMargin = 8.0;
+  static const double _dropAreaMargin = 0.0;
 
   // How long an animation to reorder an element in the list takes.
   static const Duration _reorderAnimationDuration = Duration(milliseconds: 200);
