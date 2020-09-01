@@ -15,7 +15,7 @@ import 'artifacts.dart';
 import 'asset.dart';
 import 'base/config.dart';
 import 'base/context.dart';
-import 'base/error_handling.dart';
+import 'base/error_handling_io.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';

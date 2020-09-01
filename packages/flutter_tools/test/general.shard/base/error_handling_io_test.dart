@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/error_handling.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
