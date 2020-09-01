@@ -20,19 +20,9 @@ import 'build.dart';
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({ @required bool verboseHelp }) {
-    addTreeShakeIconsFlag();
-    addSplitDebugInfoOption();
-    usesTargetOption();
-    addBuildModeFlags();
-    addDartObfuscationOption();
-    usesExtraFrontendOptions();
+    addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesBuildNumberOption();
     usesBuildNameOption();
-    addEnableExperimentation(hide: !verboseHelp);
-    addBuildPerformanceFile(hide: !verboseHelp);
-    addBundleSkSLPathOption(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
-    usesAnalyzeSizeFlag();
   }
 
   @override
