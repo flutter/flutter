@@ -71,8 +71,7 @@ void main() {
     void applyDdsMocks(Device device) {
       final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
       when(device.dds).thenReturn(mockDds);
-      when(mockDds.startDartDevelopmentService(any, any, any, any)).thenReturn(null);
-      when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
+      when(mockDds.startDartDevelopmentService(any, any)).thenReturn(null);
     }
 
     testUsingContext('returns 1 when test file is not found', () async {
@@ -225,7 +224,6 @@ void main() {
         'drive',
         '--target=$testApp',
         '--no-pub',
-        '--disable-dds',
         '--device-user',
         '10',
       ];
