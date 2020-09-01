@@ -13,8 +13,7 @@ namespace {
 
 // Returns true if the given method calls have the same method name, and their
 // arguments have equivalent values.
-bool MethodCallsAreEqual(const MethodCall<EncodableValue>& a,
-                         const MethodCall<EncodableValue>& b) {
+bool MethodCallsAreEqual(const MethodCall<>& a, const MethodCall<>& b) {
   if (a.method_name() != b.method_name()) {
     return false;
   }
@@ -34,26 +33,23 @@ bool MethodCallsAreEqual(const MethodCall<EncodableValue>& a,
 
 TEST(StandardMethodCodec, HandlesMethodCallsWithNullArguments) {
   const StandardMethodCodec& codec = StandardMethodCodec::GetInstance();
-  MethodCall<EncodableValue> call("hello", nullptr);
+  MethodCall<> call("hello", nullptr);
   auto encoded = codec.EncodeMethodCall(call);
   ASSERT_NE(encoded.get(), nullptr);
-  std::unique_ptr<MethodCall<EncodableValue>> decoded =
-      codec.DecodeMethodCall(*encoded);
+  std::unique_ptr<MethodCall<>> decoded = codec.DecodeMethodCall(*encoded);
   ASSERT_NE(decoded.get(), nullptr);
   EXPECT_TRUE(MethodCallsAreEqual(call, *decoded));
 }
 
 TEST(StandardMethodCodec, HandlesMethodCallsWithArgument) {
   const StandardMethodCodec& codec = StandardMethodCodec::GetInstance();
-  MethodCall<EncodableValue> call(
-      "hello", std::make_unique<EncodableValue>(EncodableList{
-                   EncodableValue(42),
-                   EncodableValue("world"),
-               }));
+  MethodCall<> call("hello", std::make_unique<EncodableValue>(EncodableList{
+                                 EncodableValue(42),
+                                 EncodableValue("world"),
+                             }));
   auto encoded = codec.EncodeMethodCall(call);
   ASSERT_NE(encoded.get(), nullptr);
-  std::unique_ptr<MethodCall<EncodableValue>> decoded =
-      codec.DecodeMethodCall(*encoded);
+  std::unique_ptr<MethodCall<>> decoded = codec.DecodeMethodCall(*encoded);
   ASSERT_NE(decoded.get(), nullptr);
   EXPECT_TRUE(MethodCallsAreEqual(call, *decoded));
 }
@@ -66,7 +62,7 @@ TEST(StandardMethodCodec, HandlesSuccessEnvelopesWithNullResult) {
   EXPECT_EQ(*encoded, bytes);
 
   bool decoded_successfully = false;
-  MethodResultFunctions<EncodableValue> result_handler(
+  MethodResultFunctions<> result_handler(
       [&decoded_successfully](const EncodableValue* result) {
         decoded_successfully = true;
         EXPECT_EQ(result, nullptr);
@@ -86,7 +82,7 @@ TEST(StandardMethodCodec, HandlesSuccessEnvelopesWithResult) {
   EXPECT_EQ(*encoded, bytes);
 
   bool decoded_successfully = false;
-  MethodResultFunctions<EncodableValue> result_handler(
+  MethodResultFunctions<> result_handler(
       [&decoded_successfully](const EncodableValue* result) {
         decoded_successfully = true;
         EXPECT_EQ(std::get<int32_t>(*result), 42);
@@ -106,7 +102,7 @@ TEST(StandardMethodCodec, HandlesErrorEnvelopesWithNulls) {
   EXPECT_EQ(*encoded, bytes);
 
   bool decoded_successfully = false;
-  MethodResultFunctions<EncodableValue> result_handler(
+  MethodResultFunctions<> result_handler(
       nullptr,
       [&decoded_successfully](const std::string& code,
                               const std::string& message,
@@ -140,7 +136,7 @@ TEST(StandardMethodCodec, HandlesErrorEnvelopesWithDetails) {
   EXPECT_EQ(*encoded, bytes);
 
   bool decoded_successfully = false;
-  MethodResultFunctions<EncodableValue> result_handler(
+  MethodResultFunctions<> result_handler(
       nullptr,
       [&decoded_successfully](const std::string& code,
                               const std::string& message,
@@ -163,12 +159,11 @@ TEST(StandardMethodCodec, HandlesCustomTypeArguments) {
   const StandardMethodCodec& codec = StandardMethodCodec::GetInstance(
       &PointExtensionSerializer::GetInstance());
   Point point(7, 9);
-  MethodCall<EncodableValue> call(
+  MethodCall<> call(
       "hello", std::make_unique<EncodableValue>(CustomEncodableValue(point)));
   auto encoded = codec.EncodeMethodCall(call);
   ASSERT_NE(encoded.get(), nullptr);
-  std::unique_ptr<MethodCall<EncodableValue>> decoded =
-      codec.DecodeMethodCall(*encoded);
+  std::unique_ptr<MethodCall<>> decoded = codec.DecodeMethodCall(*encoded);
   ASSERT_NE(decoded.get(), nullptr);
 
   const Point& decoded_point = std::any_cast<Point>(

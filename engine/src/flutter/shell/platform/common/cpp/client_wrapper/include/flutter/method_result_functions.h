@@ -12,6 +12,8 @@
 
 namespace flutter {
 
+class EncodableValue;
+
 // Handler types for each of the MethodResult outcomes.
 template <typename T>
 using ResultHandlerSuccess = std::function<void(const T* result)>;
@@ -24,7 +26,7 @@ using ResultHandlerNotImplemented = std::function<void()>;
 
 // An implementation of MethodResult that pass calls through to provided
 // function objects, for ease of constructing one-off result handlers.
-template <typename T>
+template <typename T = EncodableValue>
 class MethodResultFunctions : public MethodResult<T> {
  public:
   // Creates a result object that calls the provided functions for the

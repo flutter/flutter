@@ -10,9 +10,11 @@
 
 namespace flutter {
 
+class EncodableValue;
+
 // An object encapsulating a method call from Flutter whose arguments are of
 // type T.
-template <typename T>
+template <typename T = EncodableValue>
 class MethodCall {
  public:
   // Creates a MethodCall with the given name and arguments.
