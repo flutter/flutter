@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' as io; // ignore: dart_io_import
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -176,6 +177,7 @@ abstract class FlutterTestDriver {
 
     _debugPrint('Sending SIGTERM to $_processPid..');
     ProcessSignal.SIGTERM.send(_processPid);
+    io.Process.killPid(pid, io.ProcessSignal.sigterm);
     return _process.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
   }
 
