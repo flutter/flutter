@@ -1109,7 +1109,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: app\n'));
+    expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
 
   testUsingContext('can re-gen default template over existing app project with no metadta and detect the type', () async {
@@ -1126,7 +1126,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: app\n'));
+    expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
 
   testUsingContext('can re-gen app template over existing app project and detect the type', () async {
@@ -1140,7 +1140,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: app\n'));
+    expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
 
   testUsingContext('can re-gen template over existing module project and detect the type', () async {
@@ -1154,7 +1154,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: module\n'));
+    expect(LineSplitter.split(metadata), contains('project_type: module'));
   });
 
   testUsingContext('can re-gen default template over existing plugin project and detect the type', () async {
@@ -1168,7 +1168,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: plugin'));
+    expect(LineSplitter.split(metadata), contains('project_type: plugin'));
   });
 
   testUsingContext('can re-gen default template over existing package project and detect the type', () async {
@@ -1182,7 +1182,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: package'));
+    expect(LineSplitter.split(metadata), contains('project_type: package'));
   });
 
   testUsingContext('can re-gen module .android/ folder, reusing custom org', () async {

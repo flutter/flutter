@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -38,10 +39,14 @@ void main() {
       final String projectPath = await createProject(tempDir, arguments: arguments);
       final File pubspec = globals.fs.file(globals.fs.path.join(projectPath, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
-      content = content.replaceFirst(
-        '\ndependencies:\n',
-        '\ndependencies:\n  $plugin:\n',
-      );
+      final List<String> contentLines = LineSplitter.split(content).toList();
+      final int depsIndex = contentLines.indexOf('dependencies:');
+      expect(depsIndex, isNot(-1));
+      contentLines.replaceRange(depsIndex, depsIndex + 1, <String>[
+        'dependencies:',
+        '  $plugin:',
+      ]);
+      content = contentLines.join('\n');
       await pubspec.writeAsString(content, flush: true);
       return projectPath;
     }
