@@ -299,6 +299,7 @@ class SkiaGoldClient {
   Future<void> tryjobInit() async {
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
+    print(_getKeysJSON());
 
     await keys.writeAsString(_getKeysJSON());
     await failures.create();
