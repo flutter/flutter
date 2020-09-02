@@ -373,7 +373,7 @@ T _runSync<T>(T Function() op, {
   } on FileSystemException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage);
-    } else if (platform.isLinux) {
+    } else if (platform.isLinux || platform.isMacOS) {
       _handleLinuxException(e, failureMessage);
     }
     rethrow;
