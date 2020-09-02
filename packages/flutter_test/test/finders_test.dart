@@ -18,13 +18,13 @@ void main() {
 
     testWidgets('finds Text.rich widgets', (WidgetTester tester) async {
       await tester.pumpWidget(_boilerplate(
-          const Text.rich(
-            TextSpan(text: 't', children: <TextSpan>[
-              TextSpan(text: 'e'),
-              TextSpan(text: 'st'),
-            ],
-            ),
-          )));
+        const Text.rich(
+          TextSpan(text: 't', children: <TextSpan>[
+            TextSpan(text: 'e'),
+            TextSpan(text: 'st'),
+          ],
+        ),
+      )));
 
       expect(find.text('test'), findsOneWidget);
     });
