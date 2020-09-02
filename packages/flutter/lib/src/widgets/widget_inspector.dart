@@ -2077,7 +2077,7 @@ class _ElementLocationStatsTracker {
 
 class _WidgetForTypeTests extends Widget {
   @override
-  Element createElement() => throw Error();
+  Element createElement() => throw UnimplementedError();
 }
 
 /// A widget that enables inspecting the child widget's structure.
