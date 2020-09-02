@@ -13,8 +13,7 @@ dependencies:
   connectivity: 0.4.9
   string_scanner: 1.1.0-nullsafety
   url_launcher: 5.5.0
-  cupertino_icons:
-    path: ../../../../flutter-open/cupertino_icons
+  cupertino_icons: 0.1.3
   video_player: 0.10.6
   scoped_model: 1.0.1
   shrine_images: 1.1.2
