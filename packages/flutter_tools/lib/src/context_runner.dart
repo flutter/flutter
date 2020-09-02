@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/resident_runner.dart';
+
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
@@ -96,6 +98,11 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+      ),
+      DevtoolsLauncher: () => DevtoolsLauncher(
+        processManager: globals.processManager,
+        pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
+        logger: globals.logger,
       ),
       Cache: () => Cache(
         fileSystem: globals.fs,

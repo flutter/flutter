@@ -79,6 +79,9 @@ enum Artifact {
   /// Tools related to subsetting or icon font files.
   fontSubset,
   constFinder,
+
+  /// The pub or pub.bat executable
+  pubExecutable,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -166,6 +169,11 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.webPrecompiledSoundSdkSourcemaps:
     case Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
       return 'dart_sdk.js.map';
+    case Artifact.pubExecutable:
+      if (platform == TargetPlatform.windows_x64) {
+        return 'pub.bat';
+      }
+      return 'pub';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -423,6 +431,8 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', _artifactToFileName(artifact, platform, mode));
       case Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', _artifactToFileName(artifact, platform, mode));
+      case Artifact.pubExecutable:
+        return _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin',  _artifactToFileName(artifact, platform, mode));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -618,6 +628,8 @@ class LocalEngineArtifacts implements Artifacts {
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', artifactFileName);
       case Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', artifactFileName);
+      case Artifact.pubExecutable:
+        return _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin',  _artifactToFileName(artifact, platform, mode));
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

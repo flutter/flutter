@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
-import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'application_package.dart';
@@ -26,6 +26,7 @@ import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
+import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
@@ -1704,43 +1705,76 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
   }
 }
 
+/// A manager for a devtools debugger instance.
+///
+/// NB: This class is overriden in google3.
 class DevtoolsLauncher {
-  io.HttpServer _devtoolsServer;
+  DevtoolsLauncher({
+    @required ProcessManager processManager,
+    @required String pubExecutable,
+    @required Logger logger,
+  }) : _processManager = processManager,
+       _pubExecutable = pubExecutable,
+       _logger = logger;
+
+  final ProcessManager _processManager;
+  final String _pubExecutable;
+  final Logger _logger;
+
+  io.Process _devtoolsProcess;
+  Uri _devtoolsUri;
+
+  static final RegExp _devtoolsPattern = RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
+
+  /// Launch a Dart DevTools process, optionally targeting a specific VM Service URI if
+  /// [observatoryAddress] is non-null.
   Future<void> launch(Uri observatoryAddress) async {
     try {
-      await serve();
-      await devtools_server.launchDevTools(
-        <String, dynamic>{
-          'reuseWindows': true,
-        },
-        observatoryAddress,
-        'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
-        false,  // headless mode,
-        false,  // machine mode
-      );
+      _devtoolsProcess = await _processManager.start(<String>[
+        _pubExecutable,
+        'global',
+        'run',
+        'devtools',
+        '-b',
+        if (observatoryAddress != null)
+          '--vm-uri=$observatoryAddress',
+      ]);
+      final Completer<Uri> completer = Completer<Uri>();
+      _devtoolsProcess.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((String line) {
+          final Match match = _devtoolsPattern.firstMatch(line);
+          if (match != null) {
+            completer.complete(Uri.parse(match[1]));
+          }
+          _logger.printTrace(line);
+        });
+      _devtoolsProcess.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(_logger.printError);
+      _devtoolsUri = await completer.future;
     } on Exception catch (e, st) {
-      globals.printTrace('Failed to launch DevTools: $e\n$st');
+      _logger.printError('Failed to launch DevTools: $e', stackTrace: st);
     }
   }
 
+  /// Serve Dart DevTools and return the host and port they are available on.
   Future<DevToolsServerAddress> serve() async {
-    try {
-      _devtoolsServer ??= await devtools_server.serveDevTools(
-        enableStdinCommands: false,
-      );
-      return DevToolsServerAddress(_devtoolsServer.address.host, _devtoolsServer.port);
-    } on Exception catch (e, st) {
-      globals.printTrace('Failed to serve DevTools: $e\n$st');
+    await launch(null);
+    if (_devtoolsUri == null) {
       return null;
     }
+    return DevToolsServerAddress(_devtoolsUri.host, _devtoolsUri.port);
   }
 
   Future<void> close() async {
-    await _devtoolsServer?.close();
-    _devtoolsServer = null;
+    _devtoolsProcess.kill();
+    await _devtoolsProcess.exitCode;
   }
 
-  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>() ?? DevtoolsLauncher();
+  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>();
 }
 
 class DevToolsServerAddress {
