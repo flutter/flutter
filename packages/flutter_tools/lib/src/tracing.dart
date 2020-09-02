@@ -109,6 +109,10 @@ Future<void> downloadStartupTrace(vm_service.VmService vmService, {
     awaitFirstFrame: awaitFirstFrame,
   );
 
+  final String traceTimelineFilePath = globals.fs.path.join(getBuildDirectory(), 'start_up_timeline.json');
+  final File traceTimelineFile = globals.fs.file(traceTimelineFilePath);
+  traceTimelineFile.writeAsStringSync(toPrettyJson(timeline));
+
   int extractInstantEventTimestamp(String eventName) {
     final List<Map<String, dynamic>> events =
         List<Map<String, dynamic>>.from(timeline['traceEvents'] as List<dynamic>);
