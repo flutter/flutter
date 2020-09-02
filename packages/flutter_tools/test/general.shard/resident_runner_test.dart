@@ -1544,9 +1544,7 @@ void main() {
   }));
 
   testUsingContext('ResidentRunner does not toggle banner in non-debug mode', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      listViews,
-    ]);
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
