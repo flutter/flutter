@@ -735,6 +735,11 @@ class RenderParagraph extends RenderBox
     }
   }
 
+  /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
+  /// This does not required the layout to be updated.
+  double get preferredLineHeight => _textPainter.preferredLineHeight;
+
+
   /// Returns the offset at which to paint the caret.
   ///
   /// Valid only after [layout].
@@ -742,6 +747,15 @@ class RenderParagraph extends RenderBox
     assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getOffsetForCaret(position, caretPrototype);
+  }
+
+  /// Returns the tight bounded height of the glyph at the given [position].
+  ///
+  /// Valid only after [layout].
+  double? getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
+    assert(!debugNeedsLayout);
+    _layoutTextWithConstraints(constraints);
+    return _textPainter.getFullHeightForCaret(position, caretPrototype);
   }
 
   /// Returns a list of rects that bound the given selection.

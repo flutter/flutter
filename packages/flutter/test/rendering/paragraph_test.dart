@@ -36,6 +36,19 @@ void main() {
     expect(offset50.dy, greaterThan(offset5.dy));
   });
 
+  test('getFullHeightForCaret control test', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(text: _kText),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+
+    const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
+
+    final double offset5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5), caret);
+    expect(offset5, greaterThan(0.0));
+  });
+
   test('getPositionForOffset control test', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(text: _kText),
