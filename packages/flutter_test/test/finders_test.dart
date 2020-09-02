@@ -18,15 +18,40 @@ void main() {
 
     testWidgets('finds Text.rich widgets', (WidgetTester tester) async {
       await tester.pumpWidget(_boilerplate(
-        const Text.rich(
-          TextSpan(text: 't', children: <TextSpan>[
-            TextSpan(text: 'e'),
-            TextSpan(text: 'st'),
-          ],
-        ),
-      )));
+          const Text.rich(
+            TextSpan(text: 't', children: <TextSpan>[
+              TextSpan(text: 'e'),
+              TextSpan(text: 'st'),
+            ],
+            ),
+          )));
 
       expect(find.text('test'), findsOneWidget);
+    });
+  });
+
+  group('textContaining', () {
+    testWidgets('finds Text widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Text('this is a test'),
+      ));
+      expect(find.textContaining('test'), findsOneWidget);
+      expect(find.textContaining('a'), findsOneWidget);
+      expect(find.textContaining('s'), findsOneWidget);
+    });
+
+    testWidgets('finds Text.rich widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+          const Text.rich(
+            TextSpan(text: 'this', children: <TextSpan>[
+              TextSpan(text: 'is'),
+              TextSpan(text: 'a'),
+              TextSpan(text: 'test'),
+            ],
+            ),
+          )));
+
+      expect(find.textContaining('isatest'), findsOneWidget);
     });
   });
 
