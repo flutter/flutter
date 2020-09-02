@@ -177,7 +177,6 @@ class WebAssetServer implements AssetReader {
       if (testMode) {
         return server;
       }
-      //generateVersionFile(FlutterProject.current());
       // In release builds deploy a simpler proxy server.
       if (buildInfo.mode != BuildMode.debug) {
         final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
