@@ -74,7 +74,7 @@ class CupertinoIcons {
   ///  * [share_up], for another (pre-iOS 7) version of this icon.
   static const IconData share_solid = IconData(0xf4cb, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A book silhouette spread open. This icon is not filled in.  ///
+  /// A book silhouette spread open. This icon is not filled in.
   /// See also:
   ///
   ///  * [book_solid], which is similar, but filled in.
