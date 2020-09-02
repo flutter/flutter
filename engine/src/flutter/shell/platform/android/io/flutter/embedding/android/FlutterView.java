@@ -14,6 +14,7 @@ import android.os.Build;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+import android.view.DisplayCutout;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
@@ -508,6 +509,15 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   public final WindowInsets onApplyWindowInsets(@NonNull WindowInsets insets) {
     WindowInsets newInsets = super.onApplyWindowInsets(insets);
 
+    // getSystemGestureInsets() was introduced in API 29 and immediately deprecated in 30.
+    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+      Insets systemGestureInsets = insets.getSystemGestureInsets();
+      viewportMetrics.systemGestureInsetTop = systemGestureInsets.top;
+      viewportMetrics.systemGestureInsetRight = systemGestureInsets.right;
+      viewportMetrics.systemGestureInsetBottom = systemGestureInsets.bottom;
+      viewportMetrics.systemGestureInsetLeft = systemGestureInsets.left;
+    }
+
     boolean statusBarVisible = (SYSTEM_UI_FLAG_FULLSCREEN & getWindowSystemUiVisibility()) == 0;
     boolean navigationBarVisible =
         (SYSTEM_UI_FLAG_HIDE_NAVIGATION & getWindowSystemUiVisibility()) == 0;
@@ -520,18 +530,48 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
       if (statusBarVisible) {
         mask = mask | android.view.WindowInsets.Type.statusBars();
       }
-      mask = mask | android.view.WindowInsets.Type.ime();
+      Insets uiInsets = insets.getInsets(mask);
+      viewportMetrics.paddingTop = uiInsets.top;
+      viewportMetrics.paddingRight = uiInsets.right;
+      viewportMetrics.paddingBottom = uiInsets.bottom;
+      viewportMetrics.paddingLeft = uiInsets.left;
 
-      Insets finalInsets = insets.getInsets(mask);
-      viewportMetrics.paddingTop = finalInsets.top;
-      viewportMetrics.paddingRight = finalInsets.right;
-      viewportMetrics.paddingBottom = 0;
-      viewportMetrics.paddingLeft = finalInsets.left;
+      Insets imeInsets = insets.getInsets(android.view.WindowInsets.Type.ime());
+      viewportMetrics.viewInsetTop = imeInsets.top;
+      viewportMetrics.viewInsetRight = imeInsets.right;
+      viewportMetrics.viewInsetBottom = imeInsets.bottom; // Typically, only bottom is non-zero
+      viewportMetrics.viewInsetLeft = imeInsets.left;
 
-      viewportMetrics.viewInsetTop = 0;
-      viewportMetrics.viewInsetRight = 0;
-      viewportMetrics.viewInsetBottom = finalInsets.bottom;
-      viewportMetrics.viewInsetLeft = 0;
+      Insets systemGestureInsets =
+          insets.getInsets(android.view.WindowInsets.Type.systemGestures());
+      viewportMetrics.systemGestureInsetTop = systemGestureInsets.top;
+      viewportMetrics.systemGestureInsetRight = systemGestureInsets.right;
+      viewportMetrics.systemGestureInsetBottom = systemGestureInsets.bottom;
+      viewportMetrics.systemGestureInsetLeft = systemGestureInsets.left;
+
+      // TODO(garyq): Expose the full rects of the display cutout.
+
+      // Take the max of the display cutout insets and existing padding to merge them
+      DisplayCutout cutout = insets.getDisplayCutout();
+      if (cutout != null) {
+        Insets waterfallInsets = cutout.getWaterfallInsets();
+        viewportMetrics.paddingTop =
+            Math.max(
+                Math.max(viewportMetrics.paddingTop, waterfallInsets.top),
+                cutout.getSafeInsetTop());
+        viewportMetrics.paddingRight =
+            Math.max(
+                Math.max(viewportMetrics.paddingRight, waterfallInsets.right),
+                cutout.getSafeInsetRight());
+        viewportMetrics.paddingBottom =
+            Math.max(
+                Math.max(viewportMetrics.paddingBottom, waterfallInsets.bottom),
+                cutout.getSafeInsetBottom());
+        viewportMetrics.paddingLeft =
+            Math.max(
+                Math.max(viewportMetrics.paddingLeft, waterfallInsets.left),
+                cutout.getSafeInsetLeft());
+      }
     } else {
       // We zero the left and/or right sides to prevent the padding the
       // navigation bar would have caused.
@@ -561,14 +601,6 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
               ? insets.getSystemWindowInsetBottom()
               : guessBottomKeyboardInset(insets);
       viewportMetrics.viewInsetLeft = 0;
-    }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-      Insets systemGestureInsets = insets.getSystemGestureInsets();
-      viewportMetrics.systemGestureInsetTop = systemGestureInsets.top;
-      viewportMetrics.systemGestureInsetRight = systemGestureInsets.right;
-      viewportMetrics.systemGestureInsetBottom = systemGestureInsets.bottom;
-      viewportMetrics.systemGestureInsetLeft = systemGestureInsets.left;
     }
 
     Log.v(
