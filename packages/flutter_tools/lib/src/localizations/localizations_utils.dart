@@ -11,7 +11,7 @@ import 'language_subtag_registry.dart';
 typedef HeaderGenerator = String Function(String regenerateInstructions);
 typedef ConstructorGenerator = String Function(LocaleInfo locale);
 
-int sortFilesByPath (FileSystemEntity a, FileSystemEntity b) {
+int sortFilesByPath (File a, File b) {
   return a.path.compareTo(b.path);
 }
 
