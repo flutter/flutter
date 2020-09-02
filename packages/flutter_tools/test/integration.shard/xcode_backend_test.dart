@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -55,7 +57,7 @@ void main() {
     await expectXcodeBackendFails(unknownFlutterBuildMode);
     await expectXcodeBackendFails(localEngineDebugBuildModeRelease);
     await expectXcodeBackendFails(localEngineProfileBuildeModeRelease);
-  });
+  }, skip: !io.Platform.isMacOS);
 
   test('Xcode backend warns archiving a non-release build.', () async {
     final ProcessResult result = await Process.run(
@@ -68,7 +70,7 @@ void main() {
     );
     expect(result.stdout, contains('warning: Flutter archive not built in Release mode.'));
     expect(result.exitCode, isNot(0));
-  });
+  }, skip: !io.Platform.isMacOS);
 
   group('observatory Bonjour service keys', () {
     Directory buildDirectory;
@@ -92,13 +94,14 @@ void main() {
 
       final ProcessResult result = await Process.run(
         xcodeBackendPath,
-        <String>['observatory_bonjour_service'],
+        <String>['test_observatory_bonjour_service'],
         environment: <String, String>{
           'CONFIGURATION': 'Release',
           'BUILT_PRODUCTS_DIR': buildDirectory.path,
           'INFOPLIST_PATH': 'Info.plist',
         },
       );
+      print(result.stderr);
 
       final String actualInfoPlist = infoPlist.readAsStringSync();
       expect(actualInfoPlist, isNot(contains('NSBonjourServices')));
@@ -114,13 +117,14 @@ void main() {
 
         final ProcessResult result = await Process.run(
           xcodeBackendPath,
-          <String>['observatory_bonjour_service'],
+          <String>['test_observatory_bonjour_service'],
           environment: <String, String>{
             'CONFIGURATION': buildConfiguration,
             'BUILT_PRODUCTS_DIR': buildDirectory.path,
             'INFOPLIST_PATH': 'Info.plist',
           },
         );
+        print(result.stderr);
 
         final String actualInfoPlist = infoPlist.readAsStringSync();
         expect(actualInfoPlist, contains('NSBonjourServices'));
@@ -148,7 +152,7 @@ void main() {
 
       final ProcessResult result = await Process.run(
         xcodeBackendPath,
-        <String>['observatory_bonjour_service'],
+        <String>['test_observatory_bonjour_service'],
         environment: <String, String>{
           'CONFIGURATION': 'Debug',
           'BUILT_PRODUCTS_DIR': buildDirectory.path,
@@ -173,5 +177,5 @@ void main() {
 ''');
       expect(result.exitCode, 0);
     });
-  });
+  }, skip: !io.Platform.isMacOS);
 }

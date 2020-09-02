@@ -61,7 +61,7 @@ ParseFlutterBuildMode() {
       EchoError "========================================================================"
       exit -1;;
   esac
-  retval="${build_mode}"
+  echo "${build_mode}"
 }
 
 BuildApp() {
@@ -98,8 +98,7 @@ BuildApp() {
   # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
   # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
   # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
-  ParseFlutterBuildMode
-  local build_mode="${retval}"
+  local build_mode="$(ParseFlutterBuildMode)"
   local artifact_variant="unknown"
   case "$build_mode" in
     release ) artifact_variant="ios-release";;
@@ -327,8 +326,7 @@ EmbedFlutterFrameworks() {
 
 # Add the observatory publisher Bonjour service to the produced app bundle Info.plist.
 AddObservatoryBonjourService() {
-  ParseFlutterBuildMode
-  local build_mode="${retval}"
+  local build_mode="$(ParseFlutterBuildMode)"
   # Debug and profile only.
   if [[ "${build_mode}" == "release" ]]; then
     return
@@ -346,7 +344,7 @@ AddObservatoryBonjourService() {
   # Don't override the local network description the Flutter app developer specified (uncommon).
   # This text will appear below the "Your app would like to find and connect to devices on your local network" permissions popup.
   if ! plutil -extract NSLocalNetworkUsageDescription xml1 -o - "${built_products_plist}"; then
-    RunCommand plutil -insert NSLocalNetworkUsageDescription -string "Allow Flutter tools on your computer to connect and debug your Flutter application. This prompt will not appear on release builds." "${built_products_plist}"
+    RunCommand plutil -insert NSLocalNetworkUsageDescription -string "Allow Flutter tools on your computer to connect and debug your application. This prompt will not appear on release builds." "${built_products_plist}"
   fi
 }
 
@@ -370,7 +368,8 @@ else
       EmbedFlutterFrameworks ;;
     "embed_and_thin")
       EmbedAndThinFrameworks ;;
-    "observatory_bonjour_service")
+    "test_observatory_bonjour_service")
+      # Exposed for integration testing only.
       AddObservatoryBonjourService ;;
   esac
 fi

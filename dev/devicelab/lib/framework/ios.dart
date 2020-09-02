@@ -104,7 +104,7 @@ Future<bool> containsBitcode(String pathToBinary) async {
   return !emptyBitcodeMarkerFound;
 }
 
-Future<bool> bonjourServiceFound(String appBundlePath) async =>
+Future<bool> dartObservatoryBonjourServiceFound(String appBundlePath) async =>
   (await eval(
     'plutil',
     <String>[

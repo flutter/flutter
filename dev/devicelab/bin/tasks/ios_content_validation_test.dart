@@ -50,7 +50,7 @@ Future<void> main() async {
           fail('Failed to produce expected output at ${outputAppFrameworkBinary.path}');
         }
 
-        if (await bonjourServiceFound(outputAppPath)) {
+        if (await dartObservatoryBonjourServiceFound(outputAppPath)) {
           throw TaskResult.failure('Release bundle has unexpected NSBonjourServices');
         }
         if (await localNetworkUsageFound(outputAppPath)) {
@@ -160,7 +160,7 @@ Future<void> main() async {
           throw TaskResult.failure('Bitcode present in Flutter.framework');
         }
 
-        if (!await bonjourServiceFound(outputAppPath)) {
+        if (!await dartObservatoryBonjourServiceFound(outputAppPath)) {
           throw TaskResult.failure('Debug bundle is missing NSBonjourServices');
         }
         if (!await localNetworkUsageFound(outputAppPath)) {
