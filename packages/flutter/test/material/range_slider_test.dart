@@ -1833,4 +1833,86 @@ void main() {
       'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
     ]);
   });
+
+  testWidgets('Range Slider can be painted in a narrower constraint when track shape is RoundedRectRange', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: SizedBox(
+                height: 10.0,
+                width: 0.0,
+                child: RangeSlider(
+                  values: const RangeValues(0.25, 0.5),
+                  onChanged: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // _RenderRangeSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+
+    expect(renderObject,
+        paints
+          // left inactive track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(-24.0, 3.0, -12.0, 7.0, topLeft: const Radius.circular(2.0), bottomLeft: const Radius.circular(2.0)))
+          // active track RRect
+          ..rect(rect: const Rect.fromLTRB(-12.0, 2.0, 0.0, 8.0))
+          // right inactive track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(0.0, 3.0, 24.0, 7.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
+          // thumbs
+          ..circle(x: -12.0, y: 5.0, radius: 10.0,)
+          ..circle(x: 0.0, y: 5.0, radius: 10.0,)
+    );
+  });
+
+  testWidgets('Range Slider can be painted in a narrower constraint when track shape is Rectangular', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+            sliderTheme: const SliderThemeData(
+              rangeTrackShape: RectangularRangeSliderTrackShape(),
+            )
+        ),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: SizedBox(
+                height: 10.0,
+                width: 0.0,
+                child: RangeSlider(
+                  values: const RangeValues(0.25, 0.5),
+                  onChanged: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // _RenderRangeSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+
+    //There should no gap between the inactive track and active track.
+    expect(renderObject,
+        paints
+        // left inactive track RRect
+          ..rect(rect: const Rect.fromLTRB(-24.0, 3.0, -12.0, 7.0))
+        // active track RRect
+          ..rect(rect: const Rect.fromLTRB(-12.0, 3.0, 0.0, 7.0))
+        // right inactive track RRect
+          ..rect(rect: const Rect.fromLTRB(0.0, 3.0, 24.0, 7.0))
+        // thumbs
+          ..circle(x: -12.0, y: 5.0, radius: 10.0,)
+          ..circle(x: 0.0, y: 5.0, radius: 10.0,)
+    );
+  });
 }

@@ -2360,13 +2360,13 @@ void main() {
     ]);
   });
 
-  testWidgets('Slider paint correctly when the track shape is rectangular', (WidgetTester tester) async {
+  testWidgets('Slider track paints correctly when the shape is rectangular', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
             sliderTheme: const SliderThemeData(
               trackShape: RectangularSliderTrackShape(),
-            )
+            ),
         ),
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -2394,6 +2394,41 @@ void main() {
         paints
           ..rect(rect: const Rect.fromLTRB(24.0, 298.0, 400.0, 302.0)) // active track Rect.
           ..rect(rect: const Rect.fromLTRB(400.0, 298.0, 776.0, 302.0)) // inactive track Rect.
+    );
+  });
+
+  testWidgets('Slider can be painted in a narrower constraint', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: SizedBox(
+                height: 10.0,
+                width: 10.0,
+                child: Slider(
+                  value: 0.5,
+                  onChanged: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+
+    expect(renderObject,
+        paints
+          // active track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(-14.0, 2.0, 5.0, 8.0, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0)))
+          // inactive track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(5.0, 3.0, 24.0, 7.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
+          // thumb
+          ..circle(x: 5.0, y: 5.0, radius: 10.0, )
     );
   });
 }
