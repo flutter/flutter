@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
@@ -13,6 +12,7 @@ import '../../convert.dart';
 import '../../globals.dart' as globals;
 import '../../localizations/gen_l10n.dart';
 import '../../localizations/gen_l10n_types.dart';
+import '../../localizations/localizations_utils.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
