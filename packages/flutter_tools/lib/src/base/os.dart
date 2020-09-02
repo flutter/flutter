@@ -4,11 +4,11 @@
 
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../globals.dart' as globals;
+import 'common.dart';
 import 'file_system.dart';
 import 'io.dart';
 import 'logger.dart';
