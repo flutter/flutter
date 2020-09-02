@@ -315,9 +315,9 @@ EmbedAndThinFrameworks() {
 
 # Main entry point.
 if [[ $# == 0 ]]; then
-  # Backwards-compatibility: if no args are provided, build and embed.
-  BuildApp
-  EmbedFlutterFrameworks
+  # Named entry points were introduced in Flutter v0.0.7.
+  echo "error: Your Xcode project is incompatible with this version of Flutter. Run \"rm -rf ios/Runner.xcodeproj\" and \"flutter create .\" to regenerate."
+  exit -1
 else
   case $1 in
     "build")
