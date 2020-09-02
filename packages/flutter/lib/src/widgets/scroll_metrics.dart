@@ -48,10 +48,10 @@ abstract class ScrollMetrics {
     AxisDirection? axisDirection,
   }) {
     return FixedScrollMetrics(
-      minScrollExtent: minScrollExtent ?? this.minScrollExtent,
-      maxScrollExtent: maxScrollExtent ?? this.maxScrollExtent,
-      pixels: pixels ?? this.pixels,
-      viewportDimension: viewportDimension ?? this.viewportDimension,
+      minScrollExtent: minScrollExtent ?? (hasMinScrollExtent ? this.minScrollExtent : null),
+      maxScrollExtent: maxScrollExtent ?? (hasMaxScrollExtent ? this.maxScrollExtent : null),
+      pixels: pixels ?? (hasPixels ? this.pixels : null),
+      viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
     );
   }
@@ -62,7 +62,10 @@ abstract class ScrollMetrics {
   ///
   /// This value should typically be non-null and less than or equal to
   /// [maxScrollExtent]. It can be negative infinity, if the scroll is unbounded.
-  double? get minScrollExtent;
+  double get minScrollExtent;
+
+  /// Whether [minScrollExtent] property is available.
+  bool get hasMinScrollExtent;
 
   /// The maximum in-range value for [pixels].
   ///
@@ -70,10 +73,16 @@ abstract class ScrollMetrics {
   ///
   /// This value should typically be non-null and greater than or equal to
   /// [minScrollExtent]. It can be infinity, if the scroll is unbounded.
-  double? get maxScrollExtent;
+  double get maxScrollExtent;
+
+  /// Whether [maxScrollExtent] property is available.
+  bool get hasMaxScrollExtent;
 
   /// The current scroll position, in logical pixels along the [axisDirection].
   double get pixels;
+
+  /// Whether [pixels] property is available.
+  bool get hasPixels;
 
   /// The extent of the viewport along the [axisDirection].
   double get viewportDimension;
@@ -89,7 +98,7 @@ abstract class ScrollMetrics {
 
   /// Whether the [pixels] value is outside the [minScrollExtent] and
   /// [maxScrollExtent].
-  bool get outOfRange => pixels < minScrollExtent! || pixels > maxScrollExtent!;
+  bool get outOfRange => pixels < minScrollExtent || pixels > maxScrollExtent;
 
   /// Whether the [pixels] value is exactly at the [minScrollExtent] or the
   /// [maxScrollExtent].
@@ -97,7 +106,7 @@ abstract class ScrollMetrics {
 
   /// The quantity of content conceptually "above" the viewport in the scrollable.
   /// This is the content above the content described by [extentInside].
-  double get extentBefore => math.max(pixels - minScrollExtent!, 0.0);
+  double get extentBefore => math.max(pixels - minScrollExtent, 0.0);
 
   /// The quantity of content conceptually "inside" the viewport in the scrollable.
   ///
@@ -107,17 +116,17 @@ abstract class ScrollMetrics {
   ///
   /// The value is always non-negative, and less than or equal to [viewportDimension].
   double get extentInside {
-    assert(minScrollExtent! <= maxScrollExtent!);
+    assert(minScrollExtent <= maxScrollExtent);
     return viewportDimension
       // "above" overscroll value
-      - (minScrollExtent! - pixels).clamp(0, viewportDimension)
+      - (minScrollExtent - pixels).clamp(0, viewportDimension)
       // "below" overscroll value
-      - (pixels - maxScrollExtent!).clamp(0, viewportDimension);
+      - (pixels - maxScrollExtent).clamp(0, viewportDimension);
   }
 
   /// The quantity of content conceptually "below" the viewport in the scrollable.
   /// This is the content below the content described by [extentInside].
-  double get extentAfter => math.max(maxScrollExtent! - pixels, 0.0);
+  double get extentAfter => math.max(maxScrollExtent - pixels, 0.0);
 }
 
 /// An immutable snapshot of values associated with a [Scrollable] viewport.
@@ -126,27 +135,43 @@ abstract class ScrollMetrics {
 class FixedScrollMetrics extends ScrollMetrics {
   /// Creates an immutable snapshot of values associated with a [Scrollable] viewport.
   FixedScrollMetrics({
-    required this.minScrollExtent,
-    required this.maxScrollExtent,
-    required this.pixels,
-    required this.viewportDimension,
+    required double? minScrollExtent,
+    required double? maxScrollExtent,
+    required double? pixels,
+    required double? viewportDimension,
     required this.axisDirection,
-  });
+  }) : _minScrollExtent = minScrollExtent,
+       _maxScrollExtent = maxScrollExtent,
+       _pixels = pixels,
+       _viewportDimension = viewportDimension;
 
   @override
-  final double? minScrollExtent;
+  double get minScrollExtent => _minScrollExtent!;
+  final double? _minScrollExtent;
 
   @override
-  final double? maxScrollExtent;
+  bool get hasMinScrollExtent => _minScrollExtent != null;
 
   @override
-  final double pixels;
+  double get maxScrollExtent => _maxScrollExtent!;
+  final double? _maxScrollExtent;
 
   @override
-  final double viewportDimension;
+  bool get hasMaxScrollExtent => _maxScrollExtent != null;
 
   @override
-  bool get hasViewportDimension => true;
+  double get pixels => _pixels!;
+  final double? _pixels;
+
+  @override
+  bool get hasPixels => _pixels != null;
+
+  @override
+  double get viewportDimension => _viewportDimension!;
+  final double? _viewportDimension;
+
+  @override
+  bool get hasViewportDimension => _viewportDimension != null;
 
   @override
   final AxisDirection axisDirection;

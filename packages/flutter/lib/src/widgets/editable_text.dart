@@ -1863,8 +1863,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // the ascent.
     final double targetOffset = (additionalOffset + _scrollController!.offset)
       .clamp(
-        _scrollController!.position.minScrollExtent!,
-        _scrollController!.position.maxScrollExtent!,
+        _scrollController!.position.minScrollExtent,
+        _scrollController!.position.maxScrollExtent,
       );
 
     final double offsetDelta = _scrollController!.offset - targetOffset;

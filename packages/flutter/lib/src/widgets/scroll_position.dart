@@ -136,12 +136,18 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   final String? debugLabel;
 
   @override
-  double? get minScrollExtent => _minScrollExtent;
+  double get minScrollExtent => _minScrollExtent!;
   double? _minScrollExtent;
 
   @override
-  double? get maxScrollExtent => _maxScrollExtent;
+  bool get hasMinScrollExtent => _minScrollExtent != null;
+
+  @override
+  double get maxScrollExtent => _maxScrollExtent!;
   double? _maxScrollExtent;
+
+  @override
+  bool get hasMaxScrollExtent => _maxScrollExtent != null;
 
   /// The additional velocity added for a [forcePixels] change in a single
   /// frame.
@@ -215,8 +221,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(other != null);
     assert(other.context == context);
     assert(_pixels == null);
-    _minScrollExtent = other.minScrollExtent;
-    _maxScrollExtent = other.maxScrollExtent;
+    if (other.hasMinScrollExtent) {
+      _minScrollExtent = other.minScrollExtent;
+    }
+    if (other.hasMaxScrollExtent) {
+      _maxScrollExtent = other.maxScrollExtent;
+    }
     if (other.hasPixels) {
       _pixels = other.pixels;
     }
@@ -629,9 +639,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     }
 
     final Set<SemanticsAction> actions = <SemanticsAction>{};
-    if (pixels > minScrollExtent!)
+    if (pixels > minScrollExtent)
       actions.add(backward);
-    if (pixels < maxScrollExtent!)
+    if (pixels < maxScrollExtent)
       actions.add(forward);
 
     if (setEquals<SemanticsAction>(actions, _semanticActions))
@@ -663,16 +673,16 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     double target;
     switch (alignmentPolicy) {
       case ScrollPositionAlignmentPolicy.explicit:
-        target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent!, maxScrollExtent!);
+        target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent);
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
-        target = viewport.getOffsetToReveal(object, 1.0).offset.clamp(minScrollExtent!, maxScrollExtent!);
+        target = viewport.getOffsetToReveal(object, 1.0).offset.clamp(minScrollExtent, maxScrollExtent);
         if (target < pixels) {
           target = pixels;
         }
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
-        target = viewport.getOffsetToReveal(object, 0.0).offset.clamp(minScrollExtent!, maxScrollExtent!);
+        target = viewport.getOffsetToReveal(object, 0.0).offset.clamp(minScrollExtent, maxScrollExtent);
         if (target > pixels) {
           target = pixels;
         }
@@ -761,7 +771,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(clamp != null);
 
     if (clamp!)
-      to = to.clamp(minScrollExtent!, maxScrollExtent!);
+      to = to.clamp(minScrollExtent, maxScrollExtent);
 
     return super.moveTo(to, duration: duration, curve: curve);
   }
@@ -902,7 +912,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     if (debugLabel != null)
       description.add(debugLabel!);
     super.debugFillDescription(description);
-    description.add('range: ${minScrollExtent?.toStringAsFixed(1)}..${maxScrollExtent?.toStringAsFixed(1)}');
+    description.add('range: ${_minScrollExtent?.toStringAsFixed(1)}..${_maxScrollExtent?.toStringAsFixed(1)}');
     description.add('viewport: ${_viewportDimension?.toStringAsFixed(1)}');
   }
 }

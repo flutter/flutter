@@ -625,8 +625,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       delta *= -1;
     }
 
-    return math.min(math.max(position.pixels + delta, position.minScrollExtent!),
-        position.maxScrollExtent!);
+    return math.min(math.max(position.pixels + delta, position.minScrollExtent),
+        position.maxScrollExtent);
   }
 
   void _receivedPointerSignal(PointerSignalEvent event) {

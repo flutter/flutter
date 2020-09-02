@@ -288,8 +288,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   // The total size of the scrollable content.
   double get _totalContentExtent {
-    return _lastMetrics!.maxScrollExtent!
-      - _lastMetrics!.minScrollExtent!
+    return _lastMetrics!.maxScrollExtent
+      - _lastMetrics!.minScrollExtent
       + _lastMetrics!.viewportDimension;
   }
 
@@ -299,7 +299,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// thumbOffsetLocal is a position in the thumb track. Cannot be null.
   double getTrackToScroll(double thumbOffsetLocal) {
     assert(thumbOffsetLocal != null);
-    final double scrollableExtent = _lastMetrics!.maxScrollExtent! - _lastMetrics!.minScrollExtent!;
+    final double scrollableExtent = _lastMetrics!.maxScrollExtent - _lastMetrics!.minScrollExtent;
     final double thumbMovableExtent = _trackExtent - _thumbExtent();
 
     return scrollableExtent * thumbOffsetLocal / thumbMovableExtent;
@@ -308,10 +308,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // Converts between a scroll position and the corresponding position in the
   // thumb track.
   double _getScrollToTrack(ScrollMetrics metrics, double thumbExtent) {
-    final double scrollableExtent = metrics.maxScrollExtent! - metrics.minScrollExtent!;
+    final double scrollableExtent = metrics.maxScrollExtent - metrics.minScrollExtent;
 
     final double fractionPast = (scrollableExtent > 0)
-      ? ((metrics.pixels - metrics.minScrollExtent!) / scrollableExtent).clamp(0.0, 1.0)
+      ? ((metrics.pixels - metrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0)
       : 0;
 
     return (_isReversed ? 1 - fractionPast : fractionPast) * (_trackExtent - thumbExtent);

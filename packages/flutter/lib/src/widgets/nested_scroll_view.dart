@@ -706,8 +706,8 @@ class _InheritedNestedScrollView extends InheritedWidget {
 
 class _NestedScrollMetrics extends FixedScrollMetrics {
   _NestedScrollMetrics({
-    required double? minScrollExtent,
-    required double? maxScrollExtent,
+    required double minScrollExtent,
+    required double maxScrollExtent,
     required double pixels,
     required double viewportDimension,
     required AxisDirection axisDirection,
@@ -802,7 +802,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   bool get hasScrolledBody {
     for (final _NestedScrollPosition position in _innerPositions) {
       assert(position.minScrollExtent != null && position.hasPixels);
-      if (position.pixels > position.minScrollExtent!) {
+      if (position.pixels > position.minScrollExtent) {
         return true;
       }
     }
@@ -937,34 +937,34 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     double extra = 0.0;
     if (innerPosition.pixels == innerPosition.minScrollExtent) {
       pixels = _outerPosition!.pixels.clamp(
-        _outerPosition!.minScrollExtent!,
-        _outerPosition!.maxScrollExtent!,
+        _outerPosition!.minScrollExtent,
+        _outerPosition!.maxScrollExtent,
       ); // TODO(ianh): gracefully handle out-of-range outer positions
-      minRange = _outerPosition!.minScrollExtent!;
-      maxRange = _outerPosition!.maxScrollExtent!;
+      minRange = _outerPosition!.minScrollExtent;
+      maxRange = _outerPosition!.maxScrollExtent;
       assert(minRange <= maxRange);
       correctionOffset = 0.0;
     } else {
       assert(innerPosition.pixels != innerPosition.minScrollExtent);
-      if (innerPosition.pixels < innerPosition.minScrollExtent!) {
-        pixels = innerPosition.pixels - innerPosition.minScrollExtent! + _outerPosition!.minScrollExtent!;
+      if (innerPosition.pixels < innerPosition.minScrollExtent) {
+        pixels = innerPosition.pixels - innerPosition.minScrollExtent + _outerPosition!.minScrollExtent;
       } else {
-        assert(innerPosition.pixels > innerPosition.minScrollExtent!);
-        pixels = innerPosition.pixels - innerPosition.minScrollExtent! + _outerPosition!.maxScrollExtent!;
+        assert(innerPosition.pixels > innerPosition.minScrollExtent);
+        pixels = innerPosition.pixels - innerPosition.minScrollExtent + _outerPosition!.maxScrollExtent;
       }
-      if ((velocity > 0.0) && (innerPosition.pixels > innerPosition.minScrollExtent!)) {
+      if ((velocity > 0.0) && (innerPosition.pixels > innerPosition.minScrollExtent)) {
         // This handles going forward (fling up) and inner list is scrolled past
         // zero. We want to grab the extra pixels immediately to shrink.
-        extra = _outerPosition!.maxScrollExtent! - _outerPosition!.pixels;
+        extra = _outerPosition!.maxScrollExtent - _outerPosition!.pixels;
         assert(extra >= 0.0);
         minRange = pixels;
         maxRange = pixels + extra;
         assert(minRange <= maxRange);
         correctionOffset = _outerPosition!.pixels - pixels;
-      } else if ((velocity < 0.0) && (innerPosition.pixels < innerPosition.minScrollExtent!)) {
+      } else if ((velocity < 0.0) && (innerPosition.pixels < innerPosition.minScrollExtent)) {
         // This handles going backward (fling down) and inner list is
         // underscrolled. We want to grab the extra pixels immediately to grow.
-        extra = _outerPosition!.pixels - _outerPosition!.minScrollExtent!;
+        extra = _outerPosition!.pixels - _outerPosition!.minScrollExtent;
         assert(extra >= 0.0);
         minRange = pixels - extra;
         maxRange = pixels;
@@ -977,21 +977,21 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         // or shrink over.
         if (velocity > 0.0) {
           // shrinking
-          extra = _outerPosition!.minScrollExtent! - _outerPosition!.pixels;
+          extra = _outerPosition!.minScrollExtent - _outerPosition!.pixels;
         } else if (velocity < 0.0) {
           // growing
-          extra = _outerPosition!.pixels - (_outerPosition!.maxScrollExtent! - _outerPosition!.minScrollExtent!);
+          extra = _outerPosition!.pixels - (_outerPosition!.maxScrollExtent - _outerPosition!.minScrollExtent);
         }
         assert(extra <= 0.0);
-        minRange = _outerPosition!.minScrollExtent!;
-        maxRange = _outerPosition!.maxScrollExtent! + extra;
+        minRange = _outerPosition!.minScrollExtent;
+        maxRange = _outerPosition!.maxScrollExtent + extra;
         assert(minRange <= maxRange);
         correctionOffset = 0.0;
       }
     }
     return _NestedScrollMetrics(
       minScrollExtent: _outerPosition!.minScrollExtent,
-      maxScrollExtent: _outerPosition!.maxScrollExtent! + innerPosition.maxScrollExtent! - innerPosition.minScrollExtent! + extra,
+      maxScrollExtent: _outerPosition!.maxScrollExtent + innerPosition.maxScrollExtent - innerPosition.minScrollExtent + extra,
       pixels: pixels,
       viewportDimension: _outerPosition!.viewportDimension,
       axisDirection: _outerPosition!.axisDirection,
@@ -1004,25 +1004,25 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   double unnestOffset(double value, _NestedScrollPosition source) {
     if (source == _outerPosition)
       return value.clamp(
-        _outerPosition!.minScrollExtent!,
-        _outerPosition!.maxScrollExtent!,
+        _outerPosition!.minScrollExtent,
+        _outerPosition!.maxScrollExtent,
       );
-    if (value < source.minScrollExtent!)
-      return value - source.minScrollExtent! + _outerPosition!.minScrollExtent!;
-    return value - source.minScrollExtent! + _outerPosition!.maxScrollExtent!;
+    if (value < source.minScrollExtent)
+      return value - source.minScrollExtent + _outerPosition!.minScrollExtent;
+    return value - source.minScrollExtent + _outerPosition!.maxScrollExtent;
   }
 
   double nestOffset(double value, _NestedScrollPosition target) {
     if (target == _outerPosition)
       return value.clamp(
-        _outerPosition!.minScrollExtent!,
-        _outerPosition!.maxScrollExtent!,
+        _outerPosition!.minScrollExtent,
+        _outerPosition!.maxScrollExtent,
       );
-    if (value < _outerPosition!.minScrollExtent!)
-      return value - _outerPosition!.minScrollExtent! + target.minScrollExtent!;
-    if (value > _outerPosition!.maxScrollExtent!)
-      return value - _outerPosition!.maxScrollExtent! + target.minScrollExtent!;
-    return target.minScrollExtent!;
+    if (value < _outerPosition!.minScrollExtent)
+      return value - _outerPosition!.minScrollExtent + target.minScrollExtent;
+    if (value > _outerPosition!.maxScrollExtent)
+      return value - _outerPosition!.maxScrollExtent + target.minScrollExtent;
+    return target.minScrollExtent;
   }
 
   void updateCanDrag() {
@@ -1034,7 +1034,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         return;
       maxInnerExtent = math.max(
         maxInnerExtent,
-        position.maxScrollExtent! - position.minScrollExtent!,
+        position.maxScrollExtent - position.minScrollExtent,
       );
     }
     _outerPosition!.updateCanDrag(maxInnerExtent);
@@ -1341,11 +1341,11 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     // artificially set using the scroll controller.
     final double min = delta < 0.0
       ? -double.infinity
-      : math.min(minScrollExtent!, pixels);
+      : math.min(minScrollExtent, pixels);
     // The logic for max is equivalent but on the other side.
     final double max = delta > 0.0
       ? double.infinity
-      : math.max(maxScrollExtent!, pixels);
+      : math.max(maxScrollExtent, pixels);
     final double oldPixels = pixels;
     final double newPixels = (pixels - delta).clamp(min, max);
     final double clampedDelta = newPixels - pixels;
@@ -1497,7 +1497,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   void updateCanDrag(double totalExtent) {
-    context.setCanDrag(totalExtent > (viewportDimension - maxScrollExtent!) || minScrollExtent != maxScrollExtent);
+    context.setCanDrag(totalExtent > (viewportDimension - maxScrollExtent) || minScrollExtent != maxScrollExtent);
   }
 
   @override

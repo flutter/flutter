@@ -262,8 +262,8 @@ class PageController extends ScrollController {
 class PageMetrics extends FixedScrollMetrics {
   /// Creates an immutable snapshot of values associated with a [PageView].
   PageMetrics({
-    required double? minScrollExtent,
-    required double? maxScrollExtent,
+    required double minScrollExtent,
+    required double maxScrollExtent,
     required double pixels,
     required double viewportDimension,
     required AxisDirection axisDirection,
@@ -297,7 +297,7 @@ class PageMetrics extends FixedScrollMetrics {
 
   /// The current page displayed in the [PageView].
   double? get page {
-    return math.max(0.0, pixels.clamp(minScrollExtent!, maxScrollExtent!)) /
+    return math.max(0.0, pixels.clamp(minScrollExtent, maxScrollExtent)) /
            math.max(1.0, viewportDimension * viewportFraction);
   }
 
@@ -371,7 +371,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       !hasPixels || (minScrollExtent != null && maxScrollExtent != null),
       'Page value is only available after content dimensions are established.',
     );
-    return !hasPixels ? null : getPageFromPixels(pixels.clamp(minScrollExtent!, maxScrollExtent!), viewportDimension);
+    return !hasPixels ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
   }
 
   @override
@@ -513,8 +513,8 @@ class PageScrollPhysics extends ScrollPhysics {
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     // If we're out of range and not headed back in range, defer to the parent
     // ballistics, which should put us back in range at a page boundary.
-    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent!) ||
-        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent!))
+    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
+        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent))
       return super.createBallisticSimulation(position, velocity);
     final Tolerance tolerance = this.tolerance;
     final double target = _getTargetPixels(position, tolerance, velocity);
