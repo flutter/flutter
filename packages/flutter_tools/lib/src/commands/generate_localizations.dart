@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:path/path.dart' as path;
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../globals.dart' as globals;
@@ -19,7 +17,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     _fileSystem = fileSystem;
     argParser.addOption(
       'arb-dir',
-      defaultsTo: path.join('lib', 'l10n'),
+      defaultsTo: globals.fs.path.join('lib', 'l10n'),
       help: 'The directory where the template and translated arb files are located.',
     );
     argParser.addOption(
