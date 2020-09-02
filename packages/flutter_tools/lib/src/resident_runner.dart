@@ -1103,11 +1103,11 @@ abstract class ResidentRunner {
       'png',
     );
     List<FlutterView> views = <FlutterView>[];
-    Future<bool> toggleDebugBanner() async {
+    Future<bool> setDebugBanner(bool value) async {
       try {
         for (final FlutterView view in views) {
           await device.vmService.flutterDebugAllowBanner(
-            false,
+            value,
             isolateId: view.uiIsolate.id,
           );
         }
@@ -1124,7 +1124,7 @@ abstract class ResidentRunner {
         // Ensure that the vmService access is guarded by supportsServiceProtocol, it
         // will be null in release mode.
         views = await device.vmService.getFlutterViews();
-        if (!await toggleDebugBanner()) {
+        if (!await setDebugBanner(false)) {
           return;
         }
       }
@@ -1132,7 +1132,7 @@ abstract class ResidentRunner {
         await device.device.takeScreenshot(outputFile);
       } finally {
         if (supportsServiceProtocol && isRunningDebug) {
-          await toggleDebugBanner();
+          await setDebugBanner(true);
         }
       }
       final int sizeKB = outputFile.lengthSync() ~/ 1024;
