@@ -629,11 +629,11 @@ class SkiaGoldClient {
   ///   ',CI=cirrus,Platform=linux,name=cupertino.activityIndicator.inprogress.1.0,source_type=flutter,'
   String getTraceID(String testName) {
     // If we are not in a CI environment, fallback on luci.
-    return ',CI=${ci == ContinuousIntegrationEnvironment.none ? 'luci' : ci},'
-      '${platform.environment[_kTestBrowserKey] == null ? '' : 'Browser=${platform.environment[_kTestBrowserKey]},'}'
-      'Platform=$platform,'
+    return '${platform.environment[_kTestBrowserKey] == null ? ',' : ',Browser=${platform.environment[_kTestBrowserKey]},'}'
+      'CI=${ci == ContinuousIntegrationEnvironment.none ? 'luci' : ci.toString().split('.').last},'
+      'Platform=${platform.operatingSystem},'
       'name=$testName,'
-      'source_type=flutter';
+      'source_type=flutter,';
   }
 
 }

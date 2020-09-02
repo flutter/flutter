@@ -251,21 +251,127 @@ void main() {
     });
 
     test('Creates traceID correctly', () {
-      // TODO(Piinks): test a bunch of different traces
+      String traceID;
+
+      // On Cirrus
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'GOLDCTL' : 'goldctl',
+          'CIRRUS_CI' : 'true',
+          'CIRRUS_TASK_ID' : '8885996262141582672',
+          'CIRRUS_PR' : '49815',
+        },
+        operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: mockHttpClient,
+        ci: ContinuousIntegrationEnvironment.cirrus,
+      );
+
+      traceID = skiaClient.getTraceID('flutter.golden.1');
+
+      expect(
+        traceID,
+        equals(',CI=cirrus,Platform=macos,name=flutter.golden.1,source_type=flutter,'),
+      );
+
+      // On Luci
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'GOLDCTL' : 'goldctl',
+          'SWARMING_TASK_ID' : '4ae997b50dfd4d11',
+          'LOGDOG_STREAM_PREFIX' : 'buildbucket/cr-buildbucket.appspot.com/8885996262141582672',
+          'GOLD_TRYJOB' : 'refs/pull/49815/head',
+        },
+        operatingSystem: 'linux'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: mockHttpClient,
+        ci: ContinuousIntegrationEnvironment.luci,
+      );
+
+      traceID = skiaClient.getTraceID('flutter.golden.1');
+
+      expect(
+        traceID,
+        equals(',CI=luci,Platform=linux,name=flutter.golden.1,source_type=flutter,'),
+      );
+
+      // Browser
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'GOLDCTL' : 'goldctl',
+          'SWARMING_TASK_ID' : '4ae997b50dfd4d11',
+          'LOGDOG_STREAM_PREFIX' : 'buildbucket/cr-buildbucket.appspot.com/8885996262141582672',
+          'GOLD_TRYJOB' : 'refs/pull/49815/head',
+          'FLUTTER_TEST_BROWSER' : 'chrome',
+        },
+        operatingSystem: 'linux'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: mockHttpClient,
+        ci: ContinuousIntegrationEnvironment.luci,
+      );
+
+      traceID = skiaClient.getTraceID('flutter.golden.1');
+
+      expect(
+        traceID,
+        equals(',Browser=chrome,CI=luci,Platform=linux,name=flutter.golden.1,source_type=flutter,'),
+      );
+
+      // Locally - should defer to luci traceID
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+        },
+        operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: mockHttpClient,
+        ci: ContinuousIntegrationEnvironment.luci,
+      );
+
+      traceID = skiaClient.getTraceID('flutter.golden.1');
+
+      expect(
+        traceID,
+        equals(',CI=luci,Platform=macos,name=flutter.golden.1,source_type=flutter,'),
+      );
     });
 
     group('Request Handling', () {
       String testName;
       String pullRequestNumber;
       String expectation;
-      Uri url;
-      MockHttpClientRequest mockHttpRequest;
 
       setUp(() {
         testName = 'flutter.golden_test.1.png';
         pullRequestNumber = '1234';
         expectation = '55109a4bed52acc780530f7a9aeff6c0';
-        mockHttpRequest = MockHttpClientRequest();
       });
 
       test('image bytes are processed properly', () async {
