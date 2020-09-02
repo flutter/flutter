@@ -5,7 +5,6 @@
 #ifndef FLUTTER_RUNTIME_RUNTIME_CONTROLLER_H_
 #define FLUTTER_RUNTIME_RUNTIME_CONTROLLER_H_
 
-#include <future>
 #include <memory>
 #include <vector>
 
@@ -341,7 +340,7 @@ class RuntimeController : public PlatformConfigurationClient {
   ///
   /// @return     True if root isolate running, False otherwise.
   ///
-  virtual bool IsRootIsolateRunning();
+  virtual bool IsRootIsolateRunning() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Dispatch the specified platform message to running root
@@ -423,10 +422,7 @@ class RuntimeController : public PlatformConfigurationClient {
   /// @brief      Get a weak pointer to the root Dart isolate. This isolate may
   ///             only be locked on the UI task runner. Callers use this
   ///             accessor to transition to the root isolate to the running
-  ///             phase. Note that it might take times if the isolate is not yet
-  ///             created, which should be done in a subsequence task after
-  ///             constructing `RuntimeController`, or it should get a quick
-  ///             return otherwise.
+  ///             phase.
   ///
   /// @return     The root isolate reference.
   ///
@@ -475,16 +471,11 @@ class RuntimeController : public PlatformConfigurationClient {
   std::string advisory_script_entrypoint_;
   std::function<void(int64_t)> idle_notification_callback_;
   PlatformData platform_data_;
-  std::future<void> create_and_config_root_isolate_;
-  // Note that `root_isolate_` is created asynchronously from the constructor of
-  // `RuntimeController`, be careful to use it directly while it might have not
-  // been created yet. Call `GetRootIsolate()` instead which guarantees that.
   std::weak_ptr<DartIsolate> root_isolate_;
   std::pair<bool, uint32_t> root_isolate_return_code_ = {false, 0};
   const fml::closure isolate_create_callback_;
   const fml::closure isolate_shutdown_callback_;
   std::shared_ptr<const fml::Mapping> persistent_isolate_data_;
-  fml::WeakPtrFactory<RuntimeController> weak_factory_;
 
   PlatformConfiguration* GetPlatformConfigurationIfAvailable();
 
