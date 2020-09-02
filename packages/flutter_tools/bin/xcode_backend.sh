@@ -316,7 +316,7 @@ EmbedAndThinFrameworks() {
 # Main entry point.
 if [[ $# == 0 ]]; then
   # Named entry points were introduced in Flutter v0.0.7.
-  echo "error: Your Xcode project is incompatible with this version of Flutter. Run \"rm -rf ios/Runner.xcodeproj\" and \"flutter create .\" to regenerate."
+  EchoError "error: Your Xcode project is incompatible with this version of Flutter. Run \"rm -rf ios/Runner.xcodeproj\" and \"flutter create .\" to regenerate."
   exit -1
 else
   case $1 in
