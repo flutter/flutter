@@ -38,32 +38,6 @@ AssertExists() {
   return 0
 }
 
-ParseFlutterBuildMode() {
-  # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
-  # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
-  # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
-  local build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
-
-  case "$build_mode" in
-    *release*) build_mode="release";;
-    *profile*) build_mode="profile";;
-    *debug*) build_mode="debug";;
-    *)
-      EchoError "========================================================================"
-      EchoError "ERROR: Unknown FLUTTER_BUILD_MODE: ${build_mode}."
-      EchoError "Valid values are 'Debug', 'Profile', or 'Release' (case insensitive)."
-      EchoError "This is controlled by the FLUTTER_BUILD_MODE environment variable."
-      EchoError "If that is not set, the CONFIGURATION environment variable is used."
-      EchoError ""
-      EchoError "You can fix this by either adding an appropriately named build"
-      EchoError "configuration, or adding an appropriate value for FLUTTER_BUILD_MODE to the"
-      EchoError ".xcconfig file for the current build configuration (${CONFIGURATION})."
-      EchoError "========================================================================"
-      exit -1;;
-  esac
-  echo "${build_mode}"
-}
-
 BuildApp() {
   local project_path="${SOURCE_ROOT}/.."
   if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
@@ -98,12 +72,24 @@ BuildApp() {
   # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
   # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
   # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
-  local build_mode="$(ParseFlutterBuildMode)"
+  local build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
   local artifact_variant="unknown"
   case "$build_mode" in
-    release ) artifact_variant="ios-release";;
-    profile ) artifact_variant="ios-profile";;
-    debug ) artifact_variant="ios";;
+    *release*) build_mode="release"; artifact_variant="ios-release";;
+    *profile*) build_mode="profile"; artifact_variant="ios-profile";;
+    *debug*) build_mode="debug"; artifact_variant="ios";;
+    *)
+      EchoError "========================================================================"
+      EchoError "ERROR: Unknown FLUTTER_BUILD_MODE: ${build_mode}."
+      EchoError "Valid values are 'Debug', 'Profile', or 'Release' (case insensitive)."
+      EchoError "This is controlled by the FLUTTER_BUILD_MODE environment variable."
+      EchoError "If that is not set, the CONFIGURATION environment variable is used."
+      EchoError ""
+      EchoError "You can fix this by either adding an appropriately named build"
+      EchoError "configuration, or adding an appropriate value for FLUTTER_BUILD_MODE to the"
+      EchoError ".xcconfig file for the current build configuration (${CONFIGURATION})."
+      EchoError "========================================================================"
+      exit -1;;
   esac
 
   # Warn the user if not archiving (ACTION=install) in release mode.
@@ -141,7 +127,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
   fi
 
   local bitcode_flag=""
-  if [[ "$ENABLE_BITCODE" == "YES" ]]; then
+  if [[ $ENABLE_BITCODE == "YES" ]]; then
     bitcode_flag="true"
   fi
 
@@ -320,32 +306,6 @@ EmbedFlutterFrameworks() {
     RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/App.framework/App"
     RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/Flutter.framework/Flutter"
   fi
-
-  AddObservatoryBonjourService
-}
-
-# Add the observatory publisher Bonjour service to the produced app bundle Info.plist.
-AddObservatoryBonjourService() {
-  local build_mode="$(ParseFlutterBuildMode)"
-  # Debug and profile only.
-  if [[ "${build_mode}" == "release" ]]; then
-    return
-  fi
-  local built_products_plist="${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}"
-
-  # If there are already NSBonjourServices specified by the app (uncommon), insert the observatory service name to the existing list.
-  if plutil -extract NSBonjourServices xml1 -o - "${built_products_plist}"; then
-    RunCommand plutil -insert NSBonjourServices.0 -string "_dartobservatory._tcp" "${built_products_plist}"
-  else
-    # Otherwise, add the NSBonjourServices key and observatory service name.
-    RunCommand plutil -insert NSBonjourServices -json "[\"_dartobservatory._tcp\"]" "${built_products_plist}"
-  fi
-
-  # Don't override the local network description the Flutter app developer specified (uncommon).
-  # This text will appear below the "Your app would like to find and connect to devices on your local network" permissions popup.
-  if ! plutil -extract NSLocalNetworkUsageDescription xml1 -o - "${built_products_plist}"; then
-    RunCommand plutil -insert NSLocalNetworkUsageDescription -string "Allow Flutter tools on your computer to connect and debug your application. This prompt will not appear on release builds." "${built_products_plist}"
-  fi
 }
 
 EmbedAndThinFrameworks() {
@@ -368,8 +328,5 @@ else
       EmbedFlutterFrameworks ;;
     "embed_and_thin")
       EmbedAndThinFrameworks ;;
-    "test_observatory_bonjour_service")
-      # Exposed for integration testing only.
-      AddObservatoryBonjourService ;;
   esac
 fi
