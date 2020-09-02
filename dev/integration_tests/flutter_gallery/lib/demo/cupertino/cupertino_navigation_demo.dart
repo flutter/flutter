@@ -32,18 +32,19 @@ const List<String> coolColorNames = <String>[
 const int _kChildCount = 50;
 
 class CupertinoNavigationDemo extends StatelessWidget {
-  CupertinoNavigationDemo()
+  CupertinoNavigationDemo({ this.randomSeed })
       : colorItems = List<Color>.generate(_kChildCount, (int index) {
-          return coolColors[math.Random().nextInt(coolColors.length)];
+          return coolColors[math.Random(randomSeed).nextInt(coolColors.length)];
         }) ,
         colorNameItems = List<String>.generate(_kChildCount, (int index) {
-          return coolColorNames[math.Random().nextInt(coolColorNames.length)];
+          return coolColorNames[math.Random(randomSeed).nextInt(coolColorNames.length)];
         });
 
   static const String routeName = '/cupertino/navigation';
 
   final List<Color> colorItems;
   final List<String> colorNameItems;
+  final int randomSeed;
 
   @override
   Widget build(BuildContext context) {
@@ -56,15 +57,15 @@ class CupertinoNavigationDemo extends StatelessWidget {
           tabBar: CupertinoTabBar(
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.home),
+                icon: Icon(CupertinoIcons.house, size: 27),
                 label: 'Home',
               ),
               BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.conversation_bubble),
+                icon: Icon(CupertinoIcons.chat_bubble, size: 27),
                 label: 'Support',
               ),
               BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.profile_circled),
+                icon: Icon(CupertinoIcons.person_circle, size: 27),
                 label: 'Profile',
               ),
             ],
@@ -78,6 +79,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
                     return CupertinoDemoTab1(
                       colorItems: colorItems,
                       colorNameItems: colorNameItems,
+                      randomSeed: randomSeed,
                     );
                   },
                   defaultTitle: 'Colors',
@@ -134,10 +136,15 @@ final Widget trailingButtons = Row(
 );
 
 class CupertinoDemoTab1 extends StatelessWidget {
-  const CupertinoDemoTab1({this.colorItems, this.colorNameItems});
+  const CupertinoDemoTab1({
+    this.colorItems,
+    this.colorNameItems,
+    this.randomSeed,
+  });
 
   final List<Color> colorItems;
   final List<String> colorNameItems;
+  final int randomSeed;
 
   @override
   Widget build(BuildContext context) {
@@ -165,6 +172,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
                     lastItem: index == _kChildCount - 1,
                     color: colorItems[index],
                     colorName: colorNameItems[index],
+                    randomSeed: randomSeed,
                   );
                 },
                 childCount: _kChildCount,
@@ -178,12 +186,19 @@ class CupertinoDemoTab1 extends StatelessWidget {
 }
 
 class Tab1RowItem extends StatelessWidget {
-  const Tab1RowItem({this.index, this.lastItem, this.color, this.colorName});
+  const Tab1RowItem({
+    this.index,
+    this.lastItem,
+    this.color,
+    this.colorName,
+    this.randomSeed,
+  });
 
   final int index;
   final bool lastItem;
   final Color color;
   final String colorName;
+  final int randomSeed;
 
   @override
   Widget build(BuildContext context) {
@@ -196,6 +211,7 @@ class Tab1RowItem extends StatelessWidget {
             color: color,
             colorName: colorName,
             index: index,
+            randomSeed: randomSeed,
           ),
         ));
       },
@@ -274,11 +290,12 @@ class Tab1RowItem extends StatelessWidget {
 }
 
 class Tab1ItemPage extends StatefulWidget {
-  const Tab1ItemPage({this.color, this.colorName, this.index});
+  const Tab1ItemPage({this.color, this.colorName, this.index, this.randomSeed});
 
   final Color color;
   final String colorName;
   final int index;
+  final int randomSeed;
 
   @override
   State<StatefulWidget> createState() => Tab1ItemPageState();
@@ -289,7 +306,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
   void initState() {
     super.initState();
     relatedColors = List<Color>.generate(10, (int index) {
-      final math.Random random = math.Random();
+      final math.Random random = math.Random(widget.randomSeed);
       return Color.fromARGB(
         255,
         (widget.color.red + random.nextInt(100) - 50).clamp(0, 255) as int,

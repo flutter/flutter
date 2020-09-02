@@ -46,11 +46,11 @@ const Color _kDisabledBackground = CupertinoDynamicColor.withBrightness(
   darkColor: Color(0xFF050505),
 );
 
-// Value inspected from Xcode 11 & iOS 13.0 Simulator.
+// Value inspected from Xcode 12 & iOS 14.0 Simulator.
 // Note it may not be consistent with https://developer.apple.com/design/resources/.
 const CupertinoDynamicColor _kClearButtonColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFF636366),
-  darkColor: Color(0xFFAEAEB2),
+  color: Color(0x33000000),
+  darkColor: Color(0x33FFFFFF),
 );
 
 // An eyeballed value that moves the cursor slightly left of where it is
