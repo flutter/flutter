@@ -21,9 +21,13 @@ class CkPicture implements ui.Picture {
   }
 
   @override
-  Future<ui.Image> toImage(int width, int height) {
-    throw UnsupportedError(
-        'Picture.toImage not yet implemented for CanvasKit and HTML');
+  Future<ui.Image> toImage(int width, int height) async {
+    final SkSurface skSurface = canvasKit.MakeSurface(width, height);
+    final SkCanvas skCanvas = skSurface.getCanvas();
+    skCanvas.drawPicture(skiaObject.skiaObject);
+    final SkImage skImage = skSurface.makeImageSnapshot();
+    skSurface.dispose();
+    return CkImage(skImage);
   }
 }
 

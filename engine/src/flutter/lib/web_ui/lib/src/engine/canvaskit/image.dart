@@ -75,7 +75,25 @@ class CkAnimatedImage implements ui.Image {
   @override
   Future<ByteData> toByteData(
       {ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
-    throw 'unimplemented';
+    Uint8List bytes;
+
+    if (format == ui.ImageByteFormat.rawRgba) {
+      final SkImageInfo imageInfo = SkImageInfo(
+        alphaType: canvasKit.AlphaType.Premul,
+        colorType: canvasKit.ColorType.RGBA_8888,
+        colorSpace: SkColorSpaceSRGB,
+        width: width,
+        height: height,
+      );
+      bytes = _skAnimatedImage.readPixels(imageInfo, 0, 0);
+    } else {
+      final SkData skData = _skAnimatedImage.encodeToData(); //defaults to PNG 100%
+      // make a copy that we can return
+      bytes = Uint8List.fromList(canvasKit.getSkDataBytes(skData));
+    }
+
+    final ByteData data = bytes.buffer.asByteData(0, bytes.length);
+    return Future<ByteData>.value(data);
   }
 }
 
@@ -105,7 +123,25 @@ class CkImage implements ui.Image {
   @override
   Future<ByteData> toByteData(
       {ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
-    throw 'unimplemented';
+    Uint8List bytes;
+
+    if (format == ui.ImageByteFormat.rawRgba) {
+      final SkImageInfo imageInfo = SkImageInfo(
+        alphaType: canvasKit.AlphaType.Premul,
+        colorType: canvasKit.ColorType.RGBA_8888,
+        colorSpace: SkColorSpaceSRGB,
+        width: width,
+        height: height,
+      );
+      bytes = skImage.readPixels(imageInfo, 0, 0);
+    } else {
+      final SkData skData = skImage.encodeToData(); //defaults to PNG 100%
+      // make a copy that we can return
+      bytes = Uint8List.fromList(canvasKit.getSkDataBytes(skData));
+    }
+
+    final ByteData data = bytes.buffer.asByteData(0, bytes.length);
+    return Future<ByteData>.value(data);
   }
 }
 
