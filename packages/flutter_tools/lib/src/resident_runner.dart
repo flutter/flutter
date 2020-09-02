@@ -1102,10 +1102,11 @@ abstract class ResidentRunner {
       'flutter',
       'png',
     );
-    final List<FlutterView> views = await device
-      .vmService.getFlutterViews();
+    List<FlutterView> views = <FlutterView>[];
     try {
       if (supportsServiceProtocol && isRunningDebug) {
+        views = await device
+          .vmService.getFlutterViews();
         try {
           for (final FlutterView view in views) {
             await device.vmService.flutterDebugAllowBanner(
