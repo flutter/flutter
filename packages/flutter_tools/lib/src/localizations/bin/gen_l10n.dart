@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:args/args.dart' as argslib;
 import 'package:file/local.dart' as local;
 import 'package:path/path.dart' as path;
 
+import '../../base/io.dart';
 import '../gen_l10n.dart';
 import '../gen_l10n_types.dart';
 import '../localizations_utils.dart';
