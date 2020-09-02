@@ -516,8 +516,6 @@ class LocalizationsGenerator {
   List<String> _inputFileList;
   List<String> _outputFileList;
 
-  Logger _logger;
-
   /// Initializes [inputDirectory], [outputDirectory], [templateArbFile],
   /// [outputFile] and [className].
   ///
@@ -1062,9 +1060,9 @@ class LocalizationsGenerator {
 
     if (untranslatedMessagesFile == null || untranslatedMessagesFile == '') {
       _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
-        _logger.printStatus('"$locale": ${messages.length} untranslated message(s).');
+        logger.printStatus('"$locale": ${messages.length} untranslated message(s).');
       });
-      _logger.printStatus(
+      logger.printStatus(
         'To see a detailed report, use the --untranslated-messages-file \n'
         'option in the tool to generate a JSON format file containing \n'
         'all messages that need to be translated.'
