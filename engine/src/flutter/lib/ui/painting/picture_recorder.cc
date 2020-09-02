@@ -47,11 +47,9 @@ fml::RefPtr<Picture> PictureRecorder::endRecording(Dart_Handle dart_picture) {
     return nullptr;
   }
 
-  fml::RefPtr<Picture> picture =
-      Picture::Create(dart_picture,
-                      UIDartState::CreateGPUObject(
-                          picture_recorder_.finishRecordingAsPicture()),
-                      canvas_->external_allocation_size());
+  fml::RefPtr<Picture> picture = Picture::Create(
+      dart_picture, UIDartState::CreateGPUObject(
+                        picture_recorder_.finishRecordingAsPicture()));
 
   canvas_->Invalidate();
   canvas_ = nullptr;
