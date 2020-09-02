@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../globals.dart' as globals;
+import 'common.dart';
 import 'file_system.dart';
 import 'io.dart';
 import 'logger.dart';
@@ -289,7 +290,18 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   List<File> _which(String execName, { bool all = false }) {
     // `where` always returns all matches, not just the first one.
-    final ProcessResult result = _processManager.runSync(<String>['where', execName]);
+    ProcessResult result;
+    try {
+      result = _processManager.runSync(<String>['where', execName]);
+    } on ArgumentError {
+      // `where` could be missing if system32 is not on the PATH.
+      throwToolExit(
+        'Cannot find the executable for `where`. This can happen if the System32 '
+        'folder (e.g. C:\\Windows\\System32 ) is removed from the PATH environment '
+        'variable. Ensure that this is present and then try again after restarting '
+        'the terminal and/or IDE.'
+      );
+    }
     if (result.exitCode != 0) {
       return const <File>[];
     }
