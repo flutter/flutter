@@ -52,6 +52,19 @@ void main() {
     expect(result.exitCode, isNot(0));
   }
 
+  test('Xcode backend fails with no arguments', () async {
+    final ProcessResult result = await Process.run(
+      xcodeBackendPath,
+      <String>[],
+      environment: <String, String>{
+        'SOURCE_ROOT': '../examples/hello_world',
+        'FLUTTER_ROOT': '../..',
+      },
+    );
+    expect(result.stderr, startsWith('error: Your Xcode project is incompatible with this version of Flutter.'));
+    expect(result.exitCode, isNot(0));
+  }, skip: !io.Platform.isMacOS);
+
   test('Xcode backend fails for on unsupported configuration combinations', () async {
     await expectXcodeBackendFails(unknownConfiguration);
     await expectXcodeBackendFails(unknownFlutterBuildMode);
@@ -81,6 +94,20 @@ void main() {
       infoPlist = buildDirectory.childFile('Info.plist');
     });
 
+    test('fails when the Info.plist is missing', () async {
+      final ProcessResult result = await Process.run(
+        xcodeBackendPath,
+        <String>['test_observatory_bonjour_service'],
+        environment: <String, String>{
+          'CONFIGURATION': 'Debug',
+          'BUILT_PRODUCTS_DIR': buildDirectory.path,
+          'INFOPLIST_PATH': 'Info.plist',
+        },
+      );
+      expect(result.stderr, startsWith('error: Info.plist does not exist.'));
+      expect(result.exitCode, isNot(0));
+    });
+
     const String emptyPlist = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -101,7 +128,6 @@ void main() {
           'INFOPLIST_PATH': 'Info.plist',
         },
       );
-      print(result.stderr);
 
       final String actualInfoPlist = infoPlist.readAsStringSync();
       expect(actualInfoPlist, isNot(contains('NSBonjourServices')));
@@ -124,7 +150,6 @@ void main() {
             'INFOPLIST_PATH': 'Info.plist',
           },
         );
-        print(result.stderr);
 
         final String actualInfoPlist = infoPlist.readAsStringSync();
         expect(actualInfoPlist, contains('NSBonjourServices'));

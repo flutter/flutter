@@ -333,6 +333,10 @@ AddObservatoryBonjourService() {
   fi
   local built_products_plist="${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}"
 
+  if [[ ! -f "${built_products_plist}" ]]; then
+    EchoError "error: ${INFOPLIST_PATH} does not exist. The Flutter \"Thin Binary\" build phase must run after \"Copy Bundle Resources\"."
+    exit -1
+  fi
   # If there are already NSBonjourServices specified by the app (uncommon), insert the observatory service name to the existing list.
   if plutil -extract NSBonjourServices xml1 -o - "${built_products_plist}"; then
     RunCommand plutil -insert NSBonjourServices.0 -string "_dartobservatory._tcp" "${built_products_plist}"
