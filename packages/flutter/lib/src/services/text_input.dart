@@ -880,6 +880,11 @@ class TextInputConnection {
     TextInput._instance._requestAutofill();
   }
 
+  void updateConfig(TextInputConfiguration configuration) {
+    assert(attached);
+    TextInput._instance._updateConfig(configuration);
+  }
+
   /// Requests that the text input control change its internal state to match the given state.
   void setEditingState(TextEditingValue value) {
     assert(attached);
@@ -1209,6 +1214,14 @@ class TextInput {
     _channel.invokeMethod<void>('TextInput.clearClient');
     _currentConnection = null;
     _scheduleHide();
+  }
+
+  void _updateConfig(TextInputConfiguration configuration) {
+    assert(configuration != null);
+    _channel.invokeMethod<void>(
+      'TextInput.updateConfig',
+      configuration.toJson(),
+    );
   }
 
   void _setEditingState(TextEditingValue value) {
