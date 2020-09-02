@@ -1278,7 +1278,7 @@ const Map<int, PhysicalKeyboardKey> kIOSToPhysicalKey = <int, PhysicalKeyboardKe
   0x00000062: PhysicalKeyboardKey.numpad0,
   0x00000063: PhysicalKeyboardKey.numpadDecimal,
   0x00000064: PhysicalKeyboardKey.intlBackslash,
-  // 65 missing - keyboardApplication
+  0x00000065: PhysicalKeyboardKey.contextMenu,
   0x00000066: PhysicalKeyboardKey.power,
   0x00000067: PhysicalKeyboardKey.numpadEqual,
   0x00000068: PhysicalKeyboardKey.f13,
@@ -1293,45 +1293,46 @@ const Map<int, PhysicalKeyboardKey> kIOSToPhysicalKey = <int, PhysicalKeyboardKe
   0x00000071: PhysicalKeyboardKey.f22,
   0x00000072: PhysicalKeyboardKey.f23,
   0x00000073: PhysicalKeyboardKey.f24,
-  // 74 missing - keyboardExecute
+  0x00000074: PhysicalKeyboardKey.open,
   0x00000075: PhysicalKeyboardKey.help,
   0x00000076: PhysicalKeyboardKey.contextMenu,
   0x00000077: PhysicalKeyboardKey.select,
   0x00000078: PhysicalKeyboardKey.mediaStop,
   0x00000079: PhysicalKeyboardKey.again,
   0x0000007a: PhysicalKeyboardKey.undo,
-  // 7b missing - not defined
+  // 7b missing - not defined in UIKey.keyCode
   0x0000007c: PhysicalKeyboardKey.copy,
   0x0000007d: PhysicalKeyboardKey.paste,
   0x0000007e: PhysicalKeyboardKey.find,
   0x0000007f: PhysicalKeyboardKey.audioVolumeMute,
   0x00000080: PhysicalKeyboardKey.audioVolumeUp,
   0x00000081: PhysicalKeyboardKey.audioVolumeDown,
-  // Not sure about the next three. Those are prefixed with "locking"
-  0x00000082: PhysicalKeyboardKey.capsLock,
-  0x00000083: PhysicalKeyboardKey.numLock,
-  0x00000084: PhysicalKeyboardKey.scrollLock,
+  // 82 - 84 missing - locking keys
   0x00000085: PhysicalKeyboardKey.numpadComma,
   // 86 missing - keypadEqualSignAS400
-  // 87 - 8f missing - keyboardInternational1 - 9
+  0x00000087: PhysicalKeyboardKey.intlRo,
+  0x00000088: PhysicalKeyboardKey.kanaMode,
+  0x00000089: PhysicalKeyboardKey.intlYen,
+  0x0000008a: PhysicalKeyboardKey.convert,
+  0x0000008b: PhysicalKeyboardKey.nonConvert,
+  // 8c - 8f missing - keyboardInternational6 - 9
   0x00000090: PhysicalKeyboardKey.lang1,
   0x00000091: PhysicalKeyboardKey.lang2,
   0x00000092: PhysicalKeyboardKey.lang3,
   0x00000093: PhysicalKeyboardKey.lang4,
   0x00000094: PhysicalKeyboardKey.lang5,
-  // 95 - 98 missing - keyboardLANG6 - 9
   // 99 missing - keyboardAlternateErase
   // 9a missing - keyboardSysReqOrAttention
-  // 9b missing - keyboardCancel
+  0x0000009b: PhysicalKeyboardKey.abort,
   // 9c missing - keyboardClear (numpadClear possibly?)
-  // 9e missing - keyboardPrior
-  // 9f missing - keyboardReturn
-  // a0 missing - keyboardSeparator
-  // a1 missing - keyboardOut
-  // a2 missing - keyboardOper
-  // a3 missing - keyboardClearOrAgain
-  // a4 missing - keyboardCrSelOrProps
-  // a5 missing - keyboardExSel
+  // 9d missing - keyboardPrior
+  // 9e missing - keyboardReturn
+  // 9f missing - keyboardSeparator
+  // a0 missing - keyboardOut
+  // a1 missing - keyboardOper
+  // a2 missing - keyboardClearOrAgain
+  0x000000a3: PhysicalKeyboardKey.props,
+  // a4 missing - keyboardExSel
   0x000000e0: PhysicalKeyboardKey.controlLeft,
   0x000000e1: PhysicalKeyboardKey.shiftLeft,
   0x000000e2: PhysicalKeyboardKey.altLeft,
