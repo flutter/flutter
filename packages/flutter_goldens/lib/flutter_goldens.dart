@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:io' as io;
-import 'dart:math' as math;
-import 'dart:typed_data';
+import 'dart:async' show FutureOr;
+import 'dart:io' as io show OSError, SocketException;
+import 'dart:math' as math show Random;
+import 'dart:typed_data' show Uint8List;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -619,6 +619,24 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
 
 
     goldens ??= SkiaGoldClient(baseDirectory, ci: ContinuousIntegrationEnvironment.none);
+    try {
+      // Check if we can reach Gold.
+      await goldens.getExpectationForTest('');
+    } on io.OSError catch (_) {
+      return FlutterSkippingFileComparator(
+        baseDirectory.uri,
+        goldens,
+        'OSError occurred, could not reach Gold. '
+        'Switching to FlutterSkippingGoldenFileComparator.',
+      );
+    } on io.SocketException catch (_) {
+      return FlutterSkippingFileComparator(
+        baseDirectory.uri,
+        goldens,
+        'SocketException occurred, could not reach Gold. '
+        'Switching to FlutterSkippingGoldenFileComparator.',
+      );
+    }
     return FlutterLocalFileComparator(baseDirectory.uri, goldens);
   }
 
@@ -627,21 +645,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     golden = _addPrefix(golden);
     final String testName = skiaClient.cleanTestName(golden.path);
     late String? testExpectation;
-    try {
-      testExpectation = await skiaClient.getExpectationForTest(testName);
-    } on io.OSError catch (_) {
-      print(
-        'OSError occurred, could not reach Gold. '
-        'Check your network connection.'
-      );
-      return true;
-    } on io.SocketException catch (_) {
-      print(
-        'SocketException occurred, could not reach Gold. '
-        'Check your network connection.'
-      );
-      return true;
-    }
+    testExpectation = await skiaClient.getExpectationForTest(testName);
 
     if (testExpectation == null) {
       // There is no baseline for this test

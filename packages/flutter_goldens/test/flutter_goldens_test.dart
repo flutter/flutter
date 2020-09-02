@@ -948,35 +948,29 @@ void main() {
         completer.complete(Future<bool>.value(false));
       });
 
-      testWithOutput('skips when network connection is unavailable, OSError', () async {
-        when(mockSkiaClient.cleanTestName('library.flutter.new_golden_test.1.png'))
-          .thenReturn('flutter.new_golden_test.1');
-        when(mockSkiaClient.getExpectationForTest('flutter.new_golden_test.1'))
-          .thenThrow(const OSError());
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.new_golden_test.1.png'),
-          ),
-          isTrue,
-        );
-      }, 'OSError occurred, could not reach Gold. '
-        'Check your network connection.');
+      test('returns FlutterSkippingGoldenFileComparator when network connection is unavailable', () async {
+        final MockDirectory mockDirectory = MockDirectory();
+        when(mockDirectory.existsSync()).thenReturn(true);
+        when(mockDirectory.uri).thenReturn(Uri.parse('/flutter'));
 
-      testWithOutput('skips when network connection is unavailable, SocketException', () async {
-        when(mockSkiaClient.cleanTestName('library.flutter.new_golden_test.1.png'))
-          .thenReturn('flutter.new_golden_test.1');
-        when(mockSkiaClient.getExpectationForTest('flutter.new_golden_test.1'))
-          .thenThrow(const SocketException('Error'));
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.new_golden_test.1.png'),
-          ),
-          isTrue,
+        when(mockSkiaClient.getExpectationForTest(any))
+          .thenAnswer((_) => throw const OSError("Can't reach Gold"));
+        FlutterGoldenFileComparator comparator = await FlutterLocalFileComparator.fromDefaultComparator(
+          platform,
+          goldens: mockSkiaClient,
+          baseDirectory: mockDirectory,
         );
-      }, 'SocketException occurred, could not reach Gold. '
-        'Check your network connection.');
+        expect(comparator.runtimeType, FlutterSkippingFileComparator);
+
+        when(mockSkiaClient.getExpectationForTest(any))
+          .thenAnswer((_) => throw const SocketException("Can't reach Gold"));
+        comparator = await FlutterLocalFileComparator.fromDefaultComparator(
+          platform,
+          goldens: mockSkiaClient,
+          baseDirectory: mockDirectory,
+        );
+        expect(comparator.runtimeType, FlutterSkippingFileComparator);
+      });
     });
   });
 }
