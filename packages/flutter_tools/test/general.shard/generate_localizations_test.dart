@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
@@ -483,7 +484,10 @@ void main() {
         )
         ..loadResources()
         ..writeOutputFiles()
-        ..outputUnimplementedMessages(path.join('lib', 'l10n', 'unimplemented_message_translations.json'));
+        ..outputUnimplementedMessages(
+          path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
+          BufferLogger.test(),
+        );
     } on L10nException catch (e) {
       fail('Generating output should not fail: \n${e.message}');
     }
