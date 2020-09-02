@@ -14,10 +14,14 @@ const char kInvalidArgument[] = "Invalid argument.";
 
 bool LogIfError(Dart_Handle handle) {
   if (Dart_IsUnhandledExceptionError(handle)) {
+    Dart_Handle exception_handle = Dart_ErrorGetException(handle);
+    const std::string exception =
+        tonic::StdStringFromDart(Dart_ToString(exception_handle));
     Dart_Handle stack_trace_handle = Dart_ErrorGetStackTrace(handle);
     const std::string stack_trace =
         tonic::StdStringFromDart(Dart_ToString(stack_trace_handle));
-    tonic::Log("Dart Unhandled Exception: %s", stack_trace.c_str());
+    tonic::Log("Dart Unhandled Exception: %s, stack trace: %s",
+               exception.c_str(), stack_trace.c_str());
     return true;
   } else if (Dart_IsError(handle)) {
     tonic::Log("Dart Error: %s", Dart_GetError(handle));
