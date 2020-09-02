@@ -279,17 +279,17 @@ class _PathClose extends _PathCommand {
   }
 }
 
-// Interpolates a value given a set of values equally spaced in time.
-//
-// [interpolator] is the interpolation function used to interpolate between 2
-// points of type T.
-//
-// This is currently done with linear interpolation between every 2 consecutive
-// points. Linear interpolation was smooth enough with the limited set of
-// animations we have tested, so we use it for simplicity. If we find this to
-// not be smooth enough we can try applying spline instead.
-//
-// [progress] is expected to be between 0.0 and 1.0.
+/// Interpolates a value given a set of values equally spaced in time.
+///
+/// [interpolator] is the interpolation function used to interpolate between 2
+/// points of type T.
+///
+/// This is currently done with linear interpolation between every 2 consecutive
+/// points. Linear interpolation was smooth enough with the limited set of
+/// animations we have tested, so we use it for simplicity. If we find this to
+/// not be smooth enough we can try applying spline instead.
+///
+/// [progress] is expected to be between 0.0 and 1.0.
 T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator) {
   assert(progress <= 1.0);
   assert(progress >= 0.0);
@@ -303,3 +303,129 @@ T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator
 }
 
 typedef _Interpolator<T> = T Function(T a, T b, double progress);
+
+/// A test harness for testing the internals of [AnimatedIcon].
+///
+/// May only be created by tests for [AnimatedIcon].
+class AnimatedIconPrivateTestHarness {
+  /// Constructor for [AnimatedIcon] test harness.
+  ///
+  /// Meant only to be called by tests.
+  @visibleForTesting
+  const AnimatedIconPrivateTestHarness();
+
+  /// A testing function to test a private interpolator for [AnimatedIcon].
+  @visibleForTesting
+  T interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator) {
+    return _interpolate(values, progress, interpolator);
+  }
+
+  /// A testing function to create a private painting class for [AnimatedIcon].
+  @visibleForTesting
+  _AnimatedIconPainter createAnimatedIconPainter({
+    AnimatedIconData paths,
+    Animation<double> progress,
+    Color color,
+    double scale,
+    bool shouldMirror,
+    _UiPathFactory uiPathFactory,
+  }) {
+    return _AnimatedIconPainter(
+      paths: paths == null ? const <_PathFrames>[] : (paths as _AnimatedIconData).paths,
+      progress: progress,
+      color: color,
+      scale: scale,
+      shouldMirror: shouldMirror,
+      uiPathFactory: uiPathFactory,
+    );
+  }
+
+  /// A test object for testing [AnimatedIcon].
+  @visibleForTesting
+  static const AnimatedIconData movingBar = _AnimatedIconData(
+      Size(48.0, 48.0),
+      <_PathFrames>[
+        _PathFrames(
+          opacities: <double>[1.0, 0.2],
+          commands: <_PathCommand>[
+            _PathMoveTo(
+              <Offset>[
+                Offset(0.0, 0.0),
+                Offset(0.0, 38.0),
+              ],
+            ),
+            _PathLineTo(
+              <Offset>[
+                Offset(48.0, 0.0),
+                Offset(48.0, 38.0),
+              ],
+            ),
+            _PathLineTo(
+              <Offset>[
+                Offset(48.0, 10.0),
+                Offset(48.0, 48.0),
+              ],
+            ),
+            _PathLineTo(
+              <Offset>[
+                Offset(0.0, 10.0),
+                Offset(0.0, 48.0),
+              ],
+            ),
+            _PathLineTo(
+              <Offset>[
+                Offset(0.0, 0.0),
+                Offset(0.0, 38.0),
+              ],
+            ),
+            _PathClose(),
+          ],
+        ),
+      ],
+    );
+
+  /// A test object for testing [AnimatedIcon].
+  @visibleForTesting
+  static const AnimatedIconData bow = _AnimatedIconData(
+      Size(48.0, 48.0),
+      <_PathFrames>[
+        _PathFrames(
+          opacities: <double>[1.0, 1.0],
+          commands: <_PathCommand>[
+            _PathMoveTo(
+              <Offset>[
+                Offset(0.0, 24.0),
+                Offset(0.0, 24.0),
+                Offset(0.0, 24.0),
+              ],
+            ),
+            _PathCubicTo(
+              <Offset>[
+                Offset(16.0, 24.0),
+                Offset(16.0, 10.0),
+                Offset(16.0, 48.0),
+              ],
+              <Offset>[
+                Offset(32.0, 24.0),
+                Offset(32.0, 10.0),
+                Offset(32.0, 48.0),
+              ],
+              <Offset>[
+                Offset(48.0, 24.0),
+                Offset(48.0, 24.0),
+                Offset(48.0, 24.0),
+              ],
+            ),
+            _PathLineTo(
+              <Offset>[
+                Offset(0.0, 24.0),
+                Offset(0.0, 24.0),
+                Offset(0.0, 24.0),
+              ],
+            ),
+            _PathClose(),
+          ],
+        ),
+      ],
+    );
+  }
