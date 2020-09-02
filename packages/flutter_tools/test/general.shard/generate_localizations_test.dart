@@ -6,10 +6,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/memory.dart';
-import 'package:path/path.dart' as path;
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/localizations/gen_l10n.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
@@ -18,8 +18,8 @@ import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignor
 // ignore: deprecated_member_use
 export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf, test; // Defines a 'package:test' shim.
 
-final String defaultL10nPathString = path.join('lib', 'l10n');
-final String syntheticPackagePath = path.join('.dart_tool', 'flutter_gen', 'gen_l10n');
+final String defaultL10nPathString = globals.fs.path.join('lib', 'l10n');
+final String syntheticPackagePath = globals.fs.path.join('.dart_tool', 'flutter_gen', 'gen_l10n');
 const String defaultTemplateArbFileName = 'app_en.arb';
 const String defaultOutputFileString = 'output-localization-file.dart';
 const String defaultClassNameString = 'AppLocalizations';
@@ -221,7 +221,7 @@ void main() {
 
       // Run localizations generator in specified absolute path.
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      final String flutterProjectPath = path.join('absolute', 'path', 'to', 'flutter_project');
+      final String flutterProjectPath = fs.path.join('absolute', 'path', 'to', 'flutter_project');
       try {
         generator.initialize(
           projectPathString: flutterProjectPath,
@@ -241,7 +241,7 @@ void main() {
 
       // Output files should be generated in the provided absolute path.
       expect(
-        fs.isFileSync(path.join(
+        fs.isFileSync(fs.path.join(
           flutterProjectPath,
           '.dart_tool',
           'flutter_gen',
@@ -251,7 +251,7 @@ void main() {
         true,
       );
       expect(
-        fs.isFileSync(path.join(
+        fs.isFileSync(fs.path.join(
           flutterProjectPath,
           '.dart_tool',
           'flutter_gen',
@@ -485,7 +485,7 @@ void main() {
         ..loadResources()
         ..writeOutputFiles()
         ..outputUnimplementedMessages(
-          path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
+          fs.path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
           BufferLogger.test(),
         );
     } on L10nException catch (e) {
@@ -493,7 +493,7 @@ void main() {
     }
 
     final File unimplementedOutputFile = fs.file(
-      path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
+      fs.path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
     );
     final String unimplementedOutputString = unimplementedOutputFile.readAsStringSync();
     try {
@@ -560,7 +560,7 @@ void main() {
         generator
           ..initialize(
             inputPathString: defaultL10nPathString,
-            outputPathString: path.join('lib', 'l10n', 'output'),
+            outputPathString: fs.path.join('lib', 'l10n', 'output'),
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -592,7 +592,7 @@ void main() {
         generator
           ..initialize(
             inputPathString: defaultL10nPathString,
-            outputPathString: path.join('lib', 'l10n', 'output'),
+            outputPathString: fs.path.join('lib', 'l10n', 'output'),
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -633,7 +633,7 @@ void main() {
     }
 
     final File inputsAndOutputsList = fs.file(
-      path.join(syntheticPackagePath, 'gen_l10n_inputs_and_outputs.json'),
+      fs.path.join(syntheticPackagePath, 'gen_l10n_inputs_and_outputs.json'),
     );
     expect(inputsAndOutputsList.existsSync(), isTrue);
 
@@ -924,9 +924,9 @@ void main() {
         fail('Setting language and locales should not fail: \n${e.message}');
       }
 
-      expect(generator.arbPathStrings.first, path.join('lib', 'l10n', 'app_en.arb'));
-      expect(generator.arbPathStrings.elementAt(1), path.join('lib', 'l10n', 'app_es.arb'));
-      expect(generator.arbPathStrings.elementAt(2), path.join('lib', 'l10n', 'app_zh.arb'));
+      expect(generator.arbPathStrings.first, fs.path.join('lib', 'l10n', 'app_en.arb'));
+      expect(generator.arbPathStrings.elementAt(1), fs.path.join('lib', 'l10n', 'app_es.arb'));
+      expect(generator.arbPathStrings.elementAt(2), fs.path.join('lib', 'l10n', 'app_zh.arb'));
     });
 
     test('correctly parses @@locale property in arb file', () {
@@ -1136,11 +1136,11 @@ void main() {
         fail('Generating output files should not fail: $e');
       }
 
-      expect(fs.isFileSync(path.join(syntheticPackagePath, 'output-localization-file_en.dart')), true);
-      expect(fs.isFileSync(path.join(syntheticPackagePath, 'output-localization-file_en_US.dart')), false);
+      expect(fs.isFileSync(fs.path.join(syntheticPackagePath, 'output-localization-file_en.dart')), true);
+      expect(fs.isFileSync(fs.path.join(syntheticPackagePath, 'output-localization-file_en_US.dart')), false);
 
       final String englishLocalizationsFile = fs.file(
-        path.join(syntheticPackagePath, 'output-localization-file_en.dart')
+        fs.path.join(syntheticPackagePath, 'output-localization-file_en.dart')
       ).readAsStringSync();
       expect(englishLocalizationsFile, contains('class AppLocalizationsEnCa extends AppLocalizationsEn'));
       expect(englishLocalizationsFile, contains('class AppLocalizationsEn extends AppLocalizations'));
@@ -1170,7 +1170,7 @@ void main() {
       }
 
       final String localizationsFile = fs.file(
-        path.join(syntheticPackagePath, defaultOutputFileString),
+        fs.path.join(syntheticPackagePath, defaultOutputFileString),
       ).readAsStringSync();
       expect(localizationsFile, contains(
 '''
@@ -1200,7 +1200,7 @@ import 'output-localization-file_zh.dart';
       }
 
       final String localizationsFile = fs.file(
-        path.join(syntheticPackagePath, defaultOutputFileString),
+        fs.path.join(syntheticPackagePath, defaultOutputFileString),
       ).readAsStringSync();
       expect(localizationsFile, contains(
 '''
