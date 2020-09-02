@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
 import '../../base/file_system.dart';
@@ -44,7 +43,7 @@ void generateLocalizations({
 
   precacheLanguageAndRegionTags();
 
-  final String inputPathString = options?.arbDirectory?.toFilePath() ?? path.join('lib', 'l10n');
+  final String inputPathString = options?.arbDirectory?.toFilePath() ?? globals.fs.path.join('lib', 'l10n');
   final String templateArbFileName = options?.templateArbFile?.toFilePath() ?? 'app_en.arb';
   final String outputFileString = options?.outputLocalizationsFile?.toFilePath() ?? 'app_localizations.dart';
 
