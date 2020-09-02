@@ -191,7 +191,8 @@ void main() {
   });
 
   group('throws ToolExit on Linux', () {
-    const int enospc= 28;
+    const int enospc = 28;
+    const int eacces = 13;
     MockFileSystem mockFileSystem;
     ErrorHandlingFileSystem fs;
 
@@ -202,6 +203,28 @@ void main() {
         platform: linuxPlatform,
       );
       when(mockFileSystem.path).thenReturn(MockPathContext());
+    });
+
+    testWithoutContext('when access is denied', () async {
+      setupWriteMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eacces,
+      );
+
+      final File file = fs.file('file');
+
+      const String expectedMessage = 'The flutter tool cannot access the file';
+      expect(() async => await file.writeAsBytes(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await file.writeAsString(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsStringSync(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when writing to a full device', () async {

@@ -385,6 +385,7 @@ void _handleLinuxException(FileSystemException e, String message) {
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
   const int enospc = 28;
+  const int eacces = 13;
   final int errorCode = e.osError?.errorCode ?? 0;
   // Catch errors and bail when:
   switch (errorCode) {
@@ -393,6 +394,13 @@ void _handleLinuxException(FileSystemException e, String message) {
         '$message. The target device is full.'
         '\n$e\n'
         'Free up space and try again.',
+      );
+      break;
+    case eacces:
+      throwToolExit(
+        '$message. The flutter tool cannot access the file.\n'
+        'Please ensure that the SDK and/or project is installed in a location '
+        'that has read/write permissions for the current user.'
       );
       break;
     default:
