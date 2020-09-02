@@ -57,7 +57,7 @@ class CupertinoIcons {
   static const IconData right_chevron = IconData(0xf3d3, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
   /// iOS style share icon with an arrow pointing up from a box. This icon is not filled in.
-  /// This is the same icon as [square_arrow_up] in cupertino_icons 1.0.0+.
+  /// This is the same icon as [square_arrow_up] and [share_up] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -210,7 +210,7 @@ class CupertinoIcons {
   static const IconData up_arrow = IconData(0xf366, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A charging battery.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use battery_100 instead.')
+  /// This is the same icon as [battery_100], [battery_full] and [battery_75_percent] in cupertino_icons 1.0.0+.
   static const IconData battery_charging = IconData(0xf111, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An empty battery.
@@ -218,11 +218,11 @@ class CupertinoIcons {
   static const IconData battery_empty = IconData(0xf112, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A full battery.
-  /// This is the same icon as [battery_100] in cupertino_icons 1.0.0+.
+  /// This is the same icon as [battery_100], [battery_charging] and [battery_75_percent] in cupertino_icons 1.0.0+.
   static const IconData battery_full = IconData(0xf113, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A 75% charged battery.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use battery_100 instead.')
+  /// This is the same icon as [battery_100], [battery_charging] and [battery_full] in cupertino_icons 1.0.0+.
   static const IconData battery_75_percent = IconData(0xf114, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A 25% charged battery.
@@ -248,9 +248,9 @@ class CupertinoIcons {
   static const IconData reply_thick_solid = IconData(0xf21e, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// iOS style share icon with an arrow pointing upwards to the right from a box.
+  /// This is the same icon as [square_arrow_up] and [share_up] in cupertino_icons 1.0.0+.
   ///
   /// For another version of this icon (introduced in iOS 7), see [share].
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use square_arrow_up instead')
   static const IconData share_up = IconData(0xf220, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// Two thin right-facing intertwined arrows.
@@ -373,7 +373,7 @@ class CupertinoIcons {
   static const IconData folder_open = IconData(0xf38a, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A trash bin for removing items. This icon is not filled in.
-  /// This is the same icon as [trash] in cupertino_icons 1.0.0+.
+  /// This is the same icon as [trash] and [delete_simple] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -389,6 +389,7 @@ class CupertinoIcons {
   static const IconData delete_solid = IconData(0xf4c5, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A trash bin with minimal detail for removing items.
+  /// This is the same icon as [trash] and [delete] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -430,7 +431,7 @@ class CupertinoIcons {
   static const IconData create_solid = IconData(0xf417, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An arrow on a circular path with its end pointing at its start.
-  /// This is the same icon as [arrow_clockwise] in cupertino_icons 1.0.0+.
+  /// This is the same icon as [arrow_clockwise], [refresh_thin] and [refresh_thick] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -459,21 +460,20 @@ class CupertinoIcons {
   static const IconData refresh_circled_solid = IconData(0xf49c, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An arrow on a circular path with its end pointing at its start.
-  /// This is the same icon as [arrow_clockwise] and [refresh] in cupertino_icons 1.0.0+.
+  /// This is the same icon as [arrow_clockwise], [refresh] and [refresh_thick] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
   ///  * [refresh], which is an arrow of the same concept, but thicker and with a larger gap in between its end and start.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use arrow_clockwise instead')
   static const IconData refresh_thin = IconData(0xf49d, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An arrow on a circular path with its end pointing at its start.
+  /// This is the same icon as [arrow_clockwise], [refresh_thin] and [refresh] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
   ///  * [refresh], which is similar, but rotated 45 degrees anti-clockwise and thinner.
   ///  * [refresh_bold], which is similar, but rotated 45 degrees clockwise and thicker.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use arrow_clockwise instead')
   static const IconData refresh_thick = IconData(0xf3a8, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An arrow on a circular path with its end pointing at its start.
@@ -486,6 +486,7 @@ class CupertinoIcons {
   static const IconData refresh_bold = IconData(0xf21c, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A cross of two diagonal lines from edge to edge crossing in an angle of 90 degrees, which is used for dismissal.
+  /// This is the same icon as [xmark] and [clear] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -494,7 +495,7 @@ class CupertinoIcons {
   static const IconData clear_thick = IconData(0xf2d7, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A cross of two diagonal lines from edge to edge crossing in an angle of 90 degrees, which is used for dismissal, used as a blank space in a circle.
-  /// This is the same icon as [xmark_circle] in cupertino_icons 1.0.0+.
+  /// This is the same icon as [xmark_circle_fill] and [clear_circled_solid] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -504,6 +505,8 @@ class CupertinoIcons {
   static const IconData clear_thick_circled = IconData(0xf36e, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A cross of two diagonal lines from edge to edge crossing in an angle of 90 degrees, which is used for dismissal.
+  /// This is the same icon as [xmark] and [clear_thick] in cupertino_icons 1.0.0+.
+  ///
   ///
   /// See also:
   ///
@@ -521,7 +524,7 @@ class CupertinoIcons {
   static const IconData clear_circled = IconData(0xf405, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A cross of two diagonal lines from edge to edge crossing in an angle of 90 degrees, which is used for dismissal, used as a blank space in a circle. This icon is filled in.
-  /// This is the same icon as [xmark_circle_fill] in cupertino_icons 1.0.0+.
+  /// This is the same icon as [xmark_circle_fill] and [clear_thick_circled] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -556,7 +559,7 @@ class CupertinoIcons {
   static const IconData add_circled_solid = IconData(0xf48b, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A gear with eight cogs. This icon is not filled in.
-  /// This is the same icon as [gear_alt] in cupertino_icons 1.0.0+.
+  /// This is the same icon as [gear_alt] and [gear_big] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -575,6 +578,7 @@ class CupertinoIcons {
   static const IconData gear_solid = IconData(0xf43d, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A gear with six cogs.
+  /// This is the same icon as [gear_alt] and [gear] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -645,7 +649,7 @@ class CupertinoIcons {
   static const IconData pause_solid = IconData(0xf478, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// The infinity symbol.
-  /// This is the same icon as [infinite] in cupertino_icons 1.0.0+.
+  /// This is the same icon as [infinite] and [loop_thick] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -653,11 +657,11 @@ class CupertinoIcons {
   static const IconData loop = IconData(0xf449, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// The infinity symbol.
+  /// This is the same icon as [infinite] and [loop] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
   ///  * [loop], which is similar, but thinner.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use infinite instead')
   static const IconData loop_thick = IconData(0xf44a, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A speaker with a single small sound wave.
@@ -743,6 +747,7 @@ class CupertinoIcons {
   static const IconData mic_solid = IconData(0xf461, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A circle with a dotted clock face inside with hands showing 10:30.
+  /// This is the same icon as [time] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -752,6 +757,7 @@ class CupertinoIcons {
   static const IconData clock = IconData(0xf4be, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled in circle with a dotted clock face inside with hands showing 10:30.
+  /// This is the same icon as [clock_fill] and [time_solid] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -768,18 +774,16 @@ class CupertinoIcons {
   ///  * [time_solid], which is similar, but filled in.
   ///  * [clock], which is similar, but with dots on the clock face.
   ///  * [clock_solid], which is similar, but filled in and with dots on the clock face.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use clock instead')
   static const IconData time = IconData(0xf402, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled in circle with with a 90 degree angle shape in the center, resembling a clock with hands showing 09:00.
-  /// This is the same icon as [clock_fill] in cupertino_icons 1.0.0+.
+  /// This is the same icon as [clock_fill] and [clock_solid] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
   ///  * [time], which is similar, but not filled in.
   ///  * [clock], which is similar, but not filled in and with dots on the clock face.
   ///  * [clock_solid], which is similar, but with dots on the clock face.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use clock_fill instead')
   static const IconData time_solid = IconData(0xf403, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An unlocked padlock.
@@ -886,6 +890,7 @@ class CupertinoIcons {
   static const IconData location_solid = IconData(0xf456, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// Outline of a sticker tag.
+  /// This is the same icon as [tags] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -893,7 +898,7 @@ class CupertinoIcons {
   static const IconData tag = IconData(0xf48c, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A sticker tag. This icon is filled in.
-  /// This is the same icon as [tag_fill] in cupertino_icons 1.0.0+.
+  /// This is the same icon as [tag_fill] and [tags_solid] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -901,19 +906,19 @@ class CupertinoIcons {
   static const IconData tag_solid = IconData(0xf48d, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// Outlines of 2 overlapping sticker tags.
+  /// This is the same icon as [tag] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
   ///  * [tag], similar but with only one tag.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use tag instead')
   static const IconData tags = IconData(0xf48e, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// 2 overlapping sticker tags. This icon is filled in.
+  /// This is the same icon as [tag_fill] and [tag_solid] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
   ///  * [tag_solid], similar but with only one tag.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use tag_fill instead')
   static const IconData tags_solid = IconData(0xf48f, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled in bus.
@@ -965,7 +970,6 @@ class CupertinoIcons {
   /// See also:
   ///
   ///  * [paw], similar, but not filled in.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use paw instead.')
   static const IconData paw_solid = IconData(0xf47a, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An outlined game controller.
@@ -1110,6 +1114,8 @@ class CupertinoIcons {
   static const IconData arrow_branch = IconData(0xf4e8, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for arrow_clockwise. Available on cupertino_icons package 1.0.0+ only.
   /// This is the same icon as [refresh] which is available in cupertino_icons 0.1.3.
+  /// This is the same icon as [refresh_thin] which is available in cupertino_icons 0.1.3.
+  /// This is the same icon as [refresh_thick] which is available in cupertino_icons 0.1.3.
   static const IconData arrow_clockwise = IconData(0xf49a, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for arrow_clockwise_circle. Available on cupertino_icons package 1.0.0+ only.
   /// This is the same icon as [refresh_circled] which is available in cupertino_icons 0.1.3.
@@ -1471,7 +1477,9 @@ class CupertinoIcons {
   static const IconData battery_0 = IconData(0xf112, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for battery_100. Available on cupertino_icons package 1.0.0+ only.
   /// This is the same icon as [battery_charging] which is available in cupertino_icons 0.1.3.
-  static const IconData battery_100 = IconData(0xf111, fontFamily: iconFont, fontPackage: iconFontPackage);
+  /// This is the same icon as [battery_full] which is available in cupertino_icons 0.1.3.
+  /// This is the same icon as [battery_75_percent] which is available in cupertino_icons 0.1.3.
+  static const IconData battery_100 = IconData(0xf113, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for battery_25. Available on cupertino_icons package 1.0.0+ only.
   /// This is the same icon as [battery_25_percent] which is available in cupertino_icons 0.1.3.
   static const IconData battery_25 = IconData(0xf115, fontFamily: iconFont, fontPackage: iconFontPackage);
@@ -1774,6 +1782,7 @@ class CupertinoIcons {
   /// Cupertino icon for clear_fill. Available on cupertino_icons package 1.0.0+ only.
   static const IconData clear_fill = IconData(0xf5f3, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for clock_fill. Available on cupertino_icons package 1.0.0+ only.
+  /// This is the same icon as [clock_solid] which is available in cupertino_icons 0.1.3.
   /// This is the same icon as [time_solid] which is available in cupertino_icons 0.1.3.
   static const IconData clock_fill = IconData(0xf403, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for cloud. Available on cupertino_icons package 1.0.0+ only.
@@ -2146,6 +2155,7 @@ class CupertinoIcons {
   static const IconData gauge_badge_plus = IconData(0xf688, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for gear_alt. Available on cupertino_icons package 1.0.0+ only.
   /// This is the same icon as [gear] which is available in cupertino_icons 0.1.3.
+  /// This is the same icon as [gear_big] which is available in cupertino_icons 0.1.3.
   static const IconData gear_alt = IconData(0xf43c, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for gear_alt_fill. Available on cupertino_icons package 1.0.0+ only.
   /// This is the same icon as [gear_solid] which is available in cupertino_icons 0.1.3.
@@ -2308,6 +2318,7 @@ class CupertinoIcons {
   static const IconData increase_quotelevel = IconData(0xf6cd, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for infinite. Available on cupertino_icons package 1.0.0+ only.
   /// This is the same icon as [loop] which is available in cupertino_icons 0.1.3.
+  /// This is the same icon as [loop_thick] which is available in cupertino_icons 0.1.3.
   static const IconData infinite = IconData(0xf449, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for info_circle. Available on cupertino_icons package 1.0.0+ only.
   /// This is the same icon as [info] which is available in cupertino_icons 0.1.3.
@@ -3084,6 +3095,7 @@ class CupertinoIcons {
   static const IconData square_arrow_right_fill = IconData(0xf90f, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for square_arrow_up. Available on cupertino_icons package 1.0.0+ only.
   /// This is the same icon as [share] which is available in cupertino_icons 0.1.3.
+  /// This is the same icon as [share_up] which is available in cupertino_icons 0.1.3.
   static const IconData square_arrow_up = IconData(0xf4ca, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for square_arrow_up_fill. Available on cupertino_icons package 1.0.0+ only.
   /// This is the same icon as [share_solid] which is available in cupertino_icons 0.1.3.
@@ -3270,6 +3282,7 @@ class CupertinoIcons {
   static const IconData tag_circle_fill = IconData(0xf849, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for tag_fill. Available on cupertino_icons package 1.0.0+ only.
   /// This is the same icon as [tag_solid] which is available in cupertino_icons 0.1.3.
+  /// This is the same icon as [tags_solid] which is available in cupertino_icons 0.1.3.
   static const IconData tag_fill = IconData(0xf48d, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for text_aligncenter. Available on cupertino_icons package 1.0.0+ only.
   static const IconData text_aligncenter = IconData(0xf84a, fontFamily: iconFont, fontPackage: iconFontPackage);
@@ -3357,6 +3370,7 @@ class CupertinoIcons {
   static const IconData tram_fill = IconData(0xf86c, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for trash. Available on cupertino_icons package 1.0.0+ only.
   /// This is the same icon as [delete] which is available in cupertino_icons 0.1.3.
+  /// This is the same icon as [delete_simple] which is available in cupertino_icons 0.1.3.
   static const IconData trash = IconData(0xf4c4, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for trash_circle. Available on cupertino_icons package 1.0.0+ only.
   static const IconData trash_circle = IconData(0xf86d, fontFamily: iconFont, fontPackage: iconFontPackage);
@@ -3484,14 +3498,16 @@ class CupertinoIcons {
   /// Cupertino icon for wrench_fill. Available on cupertino_icons package 1.0.0+ only.
   static const IconData wrench_fill = IconData(0xf8a1, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for xmark. Available on cupertino_icons package 1.0.0+ only.
+  /// This is the same icon as [clear_thick] which is available in cupertino_icons 0.1.3.
   /// This is the same icon as [clear] which is available in cupertino_icons 0.1.3.
   static const IconData xmark = IconData(0xf404, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for xmark_circle. Available on cupertino_icons package 1.0.0+ only.
   /// This is the same icon as [clear_circled] which is available in cupertino_icons 0.1.3.
   static const IconData xmark_circle = IconData(0xf405, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for xmark_circle_fill. Available on cupertino_icons package 1.0.0+ only.
+  /// This is the same icon as [clear_thick_circled] which is available in cupertino_icons 0.1.3.
   /// This is the same icon as [clear_circled_solid] which is available in cupertino_icons 0.1.3.
-  static const IconData xmark_circle_fill = IconData(0xf406, fontFamily: iconFont, fontPackage: iconFontPackage);
+  static const IconData xmark_circle_fill = IconData(0xf36e, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for xmark_octagon. Available on cupertino_icons package 1.0.0+ only.
   static const IconData xmark_octagon = IconData(0xf8a2, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for xmark_octagon_fill. Available on cupertino_icons package 1.0.0+ only.
