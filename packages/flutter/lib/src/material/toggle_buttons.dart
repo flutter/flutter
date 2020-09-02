@@ -636,14 +636,14 @@ class ToggleButtons extends StatelessWidget {
       );
     });
 
-    return direction == Axis.horizontal 
+    return direction == Axis.horizontal
       ? IntrinsicHeight(
           child: Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: buttons
           ),
-        ) 
+        )
       : IntrinsicWidth(
           child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1071,7 +1071,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     // The baseline of this widget is the baseline of its child
-    return child.computeDistanceToActualBaseline(baseline) + 
+    return child.computeDistanceToActualBaseline(baseline) +
       borderSide.width;
   }
 
@@ -1079,13 +1079,13 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   double computeMaxIntrinsicHeight(double width) {
     if (direction == Axis.vertical) {
       final double trailingWidth = trailingBorderSide == null ? 0.0 : trailingBorderSide.width;
-      return leadingBorderSide.width + 
-        _maxHeight(child, width) + 
+      return leadingBorderSide.width +
+        _maxHeight(child, width) +
         trailingWidth;
     }
 
-    return borderSide.width + 
-      _maxHeight(child, width) + 
+    return borderSide.width +
+      _maxHeight(child, width) +
       borderSide.width;
   }
 
@@ -1093,13 +1093,13 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   double computeMinIntrinsicHeight(double width) {
     if (direction == Axis.vertical) {
       final double trailingWidth = trailingBorderSide == null ? 0.0 : trailingBorderSide.width;
-      return leadingBorderSide.width + 
-        _minHeight(child, width) + 
+      return leadingBorderSide.width +
+        _minHeight(child, width) +
         trailingWidth;
     }
 
-    return borderSide.width + 
-      _maxHeight(child, width) + 
+    return borderSide.width +
+      _maxHeight(child, width) +
       borderSide.width;
   }
 
@@ -1107,13 +1107,13 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   double computeMaxIntrinsicWidth(double height) {
     if (direction == Axis.horizontal) {
       final double trailingWidth = trailingBorderSide == null ? 0.0 : trailingBorderSide.width;
-      return leadingBorderSide.width + 
-        _maxWidth(child, height) + 
+      return leadingBorderSide.width +
+        _maxWidth(child, height) +
         trailingWidth;
     }
 
-    return borderSide.width + 
-      _maxWidth(child, height) + 
+    return borderSide.width +
+      _maxWidth(child, height) +
       borderSide.width;
   }
 
@@ -1122,10 +1122,10 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     if (direction == Axis.horizontal) {
       final double trailingWidth = trailingBorderSide == null ? 0.0 : trailingBorderSide.width;
       return leadingBorderSide.width +
-        _minWidth(child, height) + 
+        _minWidth(child, height) +
         trailingWidth;
     }
-    return borderSide.width + 
+    return borderSide.width +
       _maxWidth(child, height) +
       borderSide.width;
   }
