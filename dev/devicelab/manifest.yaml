@@ -386,12 +386,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  android_sample_catalog_generator:
-    description: >
-      Builds sample catalog markdown pages and Android screenshots
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
   android_enable_twc:
     description: >
       Verifies that track-widget-creation can be enabled and disabled.
@@ -626,12 +620,6 @@ tasks:
   #   stage: devicelab_ios
   #   required_agent_capabilities: ["mac/ios"]
 
-  ios_sample_catalog_generator:
-    description: >
-      Builds sample catalog markdown pages and iOS screenshots
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
   macos_chrome_dev_mode:
     description: >
       Run flutter web on the devicelab and hot restart.
@@ -809,7 +797,6 @@ tasks:
       with SkSL shader warm-up with e2e.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__transition_perf_with_semantics:
     description: >
@@ -867,6 +854,18 @@ tasks:
       usage widgets.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+
+  large_image_changer_perf_android:
+    description: >
+      Measures memory usage when rotating through a series of large images.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  large_image_changer_perf_ios:
+    description: >
+      Measures memory, cpu, and gpu usage when rotating through a series of large images.
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
 
   animated_placeholder_perf:
     description: >
