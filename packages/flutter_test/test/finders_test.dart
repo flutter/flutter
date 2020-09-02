@@ -53,7 +53,7 @@ void main() {
 
       expect(find.textContaining('isatest'), findsOneWidget);
     });
-    
+
     testWidgets('finds EditableText widgets', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
