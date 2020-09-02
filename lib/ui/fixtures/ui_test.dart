@@ -3,6 +3,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -73,3 +74,61 @@ Future<void> encodeImageProducesExternalUint8List() async {
 void _encodeImage(Image i, int format, void Function(Uint8List result))
   native 'EncodeImage';
 void _validateExternal(Uint8List result) native 'ValidateExternal';
+
+@pragma('vm:entry-point')
+Future<void> pumpImage() async {
+  const int width = 6000;
+  const int height = 6000;
+  final Completer<Image> completer = Completer<Image>();
+  decodeImageFromPixels(
+    Uint8List.fromList(List<int>.filled(width * height * 4, 0xFF)),
+    width,
+    height,
+    PixelFormat.rgba8888,
+    (Image image) => completer.complete(image),
+  );
+  final Image image = await completer.future;
+
+  final FrameCallback renderBlank = (Duration duration) {
+    image.dispose();
+
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawRect(Rect.largest, Paint());
+    final Picture picture = recorder.endRecording();
+
+    final SceneBuilder builder = SceneBuilder();
+    builder.addPicture(Offset.zero, picture);
+
+    final Scene scene = builder.build();
+    window.render(scene);
+    scene.dispose();
+    window.onBeginFrame = (Duration duration) {
+      window.onDrawFrame = _onBeginFrameDone;
+    };
+    window.scheduleFrame();
+  };
+
+  final FrameCallback renderImage = (Duration duration) {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawImage(image, Offset.zero, Paint());
+    final Picture picture = recorder.endRecording();
+
+    final SceneBuilder builder = SceneBuilder();
+    builder.addPicture(Offset.zero, picture);
+
+    _captureImageAndPicture(image, picture);
+
+    final Scene scene = builder.build();
+    window.render(scene);
+    scene.dispose();
+    window.onBeginFrame = renderBlank;
+    window.scheduleFrame();
+  };
+
+  window.onBeginFrame = renderImage;
+  window.scheduleFrame();
+}
+void _captureImageAndPicture(Image image, Picture picture) native 'CaptureImageAndPicture';
+Future<void> _onBeginFrameDone() native 'OnBeginFrameDone';

@@ -308,6 +308,7 @@ FILE: ../../../flutter/lib/ui/fixtures/hello_loop_2.webp
 FILE: ../../../flutter/lib/ui/fixtures/ui_test.dart
 FILE: ../../../flutter/lib/ui/geometry.dart
 FILE: ../../../flutter/lib/ui/hash_codes.dart
+FILE: ../../../flutter/lib/ui/hint_freed_delegate.h
 FILE: ../../../flutter/lib/ui/hooks.dart
 FILE: ../../../flutter/lib/ui/io_manager.h
 FILE: ../../../flutter/lib/ui/isolate_name_server.dart
@@ -337,6 +338,7 @@ FILE: ../../../flutter/lib/ui/painting/image_decoder.h
 FILE: ../../../flutter/lib/ui/painting/image_decoder_unittests.cc
 FILE: ../../../flutter/lib/ui/painting/image_descriptor.cc
 FILE: ../../../flutter/lib/ui/painting/image_descriptor.h
+FILE: ../../../flutter/lib/ui/painting/image_dispose_unittests.cc
 FILE: ../../../flutter/lib/ui/painting/image_encoding.cc
 FILE: ../../../flutter/lib/ui/painting/image_encoding.h
 FILE: ../../../flutter/lib/ui/painting/image_encoding_unittests.cc
