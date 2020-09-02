@@ -4562,7 +4562,7 @@ typedef WidgetBuilder = Widget Function(BuildContext context);
 ///
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
 ///  * [TransitionBuilder], which is similar but also takes a child.
-typedef IndexedWidgetBuilder = Widget? Function(BuildContext? context, int index);
+typedef IndexedWidgetBuilder = Widget Function(BuildContext context, int index);
 
 /// A builder that builds a widget given a child.
 ///
