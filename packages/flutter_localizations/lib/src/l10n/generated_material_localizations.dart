@@ -21702,6 +21702,303 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => 'PRIKAŽI LICENCE';
 }
 
+/// The translations for Shona (`sn`).
+class MaterialLocalizationSn extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Shona.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationSn({
+    String localeName = 'sn',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => 'Nezve \$applicationName';
+
+  @override
+  String get alertDialogLabel => 'Alert';
+
+  @override
+  String get anteMeridiemAbbreviation => 'AM';
+
+  @override
+  String get backButtonTooltip => 'Kudzoka';
+
+  @override
+  String get calendarModeButtonLabel => 'Chinja kukarenda';
+
+  @override
+  String get cancelButtonLabel => 'KANZURA';
+
+  @override
+  String get closeButtonLabel => 'PEDYO';
+
+  @override
+  String get closeButtonTooltip => 'Vhara';
+
+  @override
+  String get collapsedIconTapHint => 'Wedzera';
+
+  @override
+  String get continueButtonLabel => 'RAMBA';
+
+  @override
+  String get copyButtonLabel => 'Kopa';
+
+  @override
+  String get cutButtonLabel => 'Cheka';
+
+  @override
+  String get dateHelpText => 'mm / dd / yyyy';
+
+  @override
+  String get dateInputLabel => 'Pinda Zuva';
+
+  @override
+  String get dateOutOfRangeLabel => 'Kunze kwezera.';
+
+  @override
+  String get datePickerHelpText => 'Sarudza DATE';
+
+  @override
+  String get dateRangeEndDateSemanticLabelRaw => 'Zuva rekuguma \$fullDate';
+
+  @override
+  String get dateRangeEndLabel => 'Zuva Rokuguma';
+
+  @override
+  String get dateRangePickerHelpText => 'Sarudza RANGI';
+
+  @override
+  String get dateRangeStartDateSemanticLabelRaw => 'Kutanga zuva \$fullDate';
+
+  @override
+  String get dateRangeStartLabel => 'Kutanga Zuva';
+
+  @override
+  String get dateSeparator => '/';
+
+  @override
+  String get deleteButtonTooltip => 'Delete';
+
+  @override
+  String get dialModeButtonLabel => 'Chinja kune dial picker mode';
+
+  @override
+  String get dialogLabel => 'Dialog';
+
+  @override
+  String get drawerLabel => 'Navigation menyu';
+
+  @override
+  String get expandedIconTapHint => 'Kupunzika';
+
+  @override
+  String get hideAccountsLabel => 'Viga maakaundi';
+
+  @override
+  String get inputDateModeButtonLabel => 'Chinja kune yekuisa';
+
+  @override
+  String get inputTimeModeButtonLabel => 'Chinja kune yekuisa mameseji maitiro';
+
+  @override
+  String get invalidDateFormatLabel => 'Fomati isiriyo.';
+
+  @override
+  String get invalidDateRangeLabel => 'Nzvimbo isiriyo.';
+
+  @override
+  String get invalidTimeLabel => 'Pinda nguva inoshanda';
+
+  @override
+  String get licensesPackageDetailTextOne => '1 rezinesi';
+
+  @override
+  String get licensesPackageDetailTextOther => '\$licenseCount marezinesi';
+
+  @override
+  String get licensesPackageDetailTextZero => 'Kwete marezinesi';
+
+  @override
+  String get licensesPageTitle => 'Rezinesi';
+
+  @override
+  String get modalBarrierDismissLabel => 'Dzinga';
+
+  @override
+  String get moreButtonTooltip => 'Zvimwe';
+
+  @override
+  String get nextMonthTooltip => 'Mwedzi unouya';
+
+  @override
+  String get nextPageTooltip => 'Peji rinotevera';
+
+  @override
+  String get okButtonLabel => 'Zvakanaka';
+
+  @override
+  String get openAppDrawerTooltip => 'Vhura menyu yekufambisa';
+
+  @override
+  String get pageRowsInfoTitleRaw => '\$firstRow-\$lastRow ye \$rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow pamusoro \$rowCount';
+
+  @override
+  String get pasteButtonLabel => 'Namatidza';
+
+  @override
+  String get popupMenuLabel => 'Popup menyu';
+
+  @override
+  String get postMeridiemAbbreviation => 'PM';
+
+  @override
+  String get previousMonthTooltip => 'Mwedzi wapfuura';
+
+  @override
+  String get previousPageTooltip => 'Peji yapfuura';
+
+  @override
+  String get refreshIndicatorSemanticLabel => 'Zorodza';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => '1 munhu asara';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => '\$remainingCount mavara asara';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => 'Hapana mavara asara';
+
+  @override
+  String get reorderItemDown => 'Enda pasi';
+
+  @override
+  String get reorderItemLeft => 'Enda kuruboshwe';
+
+  @override
+  String get reorderItemRight => 'Enda kurudyi';
+
+  @override
+  String get reorderItemToEnd => 'Enda kumugumo';
+
+  @override
+  String get reorderItemToStart => 'Enda pakutanga';
+
+  @override
+  String get reorderItemUp => 'Simuka mudenga';
+
+  @override
+  String get rowsPerPageTitle => 'Mitsara pane peji.';
+
+  @override
+  String get saveButtonLabel => 'PONESA';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => 'Tsvaga';
+
+  @override
+  String get selectAllButtonLabel => 'Sarudza zvose';
+
+  @override
+  String get selectYearSemanticsLabel => 'Sarudza gore';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => '1 chinhu chasarudzwa';
+
+  @override
+  String get selectedRowCountTitleOther => '\$selectedRowCount zvinhu zvakasarudzwa';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => 'Hapana zvinhu zvakasarudzwa';
+
+  @override
+  String get showAccountsLabel => 'Ratidza maakaunzi';
+
+  @override
+  String get showMenuTooltip => 'Ratidza menyu';
+
+  @override
+  String get signedInLabel => 'Yakapinda mukati';
+
+  @override
+  String get tabLabelRaw => 'Tab \$tabIndex ye \$tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
+
+  @override
+  String get timePickerDialHelpText => 'Sarudza NGUVA';
+
+  @override
+  String get timePickerHourLabel => 'Awa';
+
+  @override
+  String get timePickerHourModeAnnouncement => 'Sarudza maawa';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER NGUVA';
+
+  @override
+  String get timePickerMinuteLabel => 'Mineti';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => 'Sarudza maminitsi';
+
+  @override
+  String get unspecifiedDate => 'Zuva';
+
+  @override
+  String get unspecifiedDateRange => 'Zuva Range';
+
+  @override
+  String get viewLicensesButtonLabel => 'ONA MARENESI';
+}
+
 /// The translations for Albanian (`sq`).
 class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Albanian.
@@ -26865,6 +27162,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
   'si', // Sinhala Sinhalese
   'sk', // Slovak
   'sl', // Slovenian
+  'sn', // Shona
   'sq', // Albanian
   'sr', // Serbian
   'sv', // Swedish
@@ -26955,6 +27253,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///  * `si` - Sinhala Sinhalese
 ///  * `sk` - Slovak
 ///  * `sl` - Slovenian
+///  * `sn` - Shona
 ///  * `sq` - Albanian
 ///  * `sr` - Serbian (plus 2 scripts)
 ///  * `sv` - Swedish
@@ -27188,6 +27487,8 @@ GlobalMaterialLocalizations getMaterialTranslation(
       return MaterialLocalizationSk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sl':
       return MaterialLocalizationSl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'sn':
+      return MaterialLocalizationSn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sq':
       return MaterialLocalizationSq(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sr': {
