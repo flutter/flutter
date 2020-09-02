@@ -156,7 +156,6 @@ class SemanticsFlag {
   static const int _kIsReadOnlyIndex = 1 << 20;
   static const int _kIsFocusableIndex = 1 << 21;
   static const int _kIsLinkIndex = 1 << 22;
-  static const int _kIsSliderIndex = 1 << 23;
 
   const SemanticsFlag._(this.index) : assert(index != null); // ignore: unnecessary_null_comparison
   final int index;
@@ -183,14 +182,12 @@ class SemanticsFlag {
   static const SemanticsFlag isToggled = SemanticsFlag._(_kIsToggledIndex);
   static const SemanticsFlag hasImplicitScrolling = SemanticsFlag._(_kHasImplicitScrollingIndex);
   static const SemanticsFlag isMultiline = SemanticsFlag._(_kIsMultilineIndex);
-  static const SemanticsFlag isSlider = SemanticsFlag._(_kIsSliderIndex);
   static const Map<int, SemanticsFlag> values = <int, SemanticsFlag>{
     _kHasCheckedStateIndex: hasCheckedState,
     _kIsCheckedIndex: isChecked,
     _kIsSelectedIndex: isSelected,
     _kIsButtonIndex: isButton,
     _kIsLinkIndex: isLink,
-    _kIsSliderIndex: isSlider,
     _kIsTextFieldIndex: isTextField,
     _kIsFocusableIndex: isFocusable,
     _kIsFocusedIndex: isFocused,
