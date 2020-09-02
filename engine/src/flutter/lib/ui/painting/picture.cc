@@ -28,20 +28,17 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
 DART_BIND_ALL(Picture, FOR_EACH_BINDING)
 
-fml::RefPtr<Picture> Picture::Create(Dart_Handle dart_handle,
-                                     flutter::SkiaGPUObject<SkPicture> picture,
-                                     size_t external_allocation_size) {
-  auto canvas_picture = fml::MakeRefCounted<Picture>(std::move(picture),
-                                                     external_allocation_size);
+fml::RefPtr<Picture> Picture::Create(
+    Dart_Handle dart_handle,
+    flutter::SkiaGPUObject<SkPicture> picture) {
+  auto canvas_picture = fml::MakeRefCounted<Picture>(std::move(picture));
 
   canvas_picture->AssociateWithDartWrapper(dart_handle);
   return canvas_picture;
 }
 
-Picture::Picture(flutter::SkiaGPUObject<SkPicture> picture,
-                 size_t external_allocation_size)
-    : picture_(std::move(picture)),
-      external_allocation_size_(external_allocation_size) {}
+Picture::Picture(flutter::SkiaGPUObject<SkPicture> picture)
+    : picture_(std::move(picture)) {}
 
 Picture::~Picture() = default;
 
@@ -62,8 +59,7 @@ void Picture::dispose() {
 
 size_t Picture::GetAllocationSize() const {
   if (auto picture = picture_.get()) {
-    return picture->approximateBytesUsed() + sizeof(Picture) +
-           external_allocation_size_;
+    return picture->approximateBytesUsed() + sizeof(Picture);
   } else {
     return sizeof(Picture);
   }

@@ -25,8 +25,7 @@ class Picture : public RefCountedDartWrappable<Picture> {
  public:
   ~Picture() override;
   static fml::RefPtr<Picture> Create(Dart_Handle dart_handle,
-                                     flutter::SkiaGPUObject<SkPicture> picture,
-                                     size_t external_allocation_size);
+                                     flutter::SkiaGPUObject<SkPicture> picture);
 
   sk_sp<SkPicture> picture() const { return picture_.get(); }
 
@@ -45,14 +44,10 @@ class Picture : public RefCountedDartWrappable<Picture> {
                                       uint32_t height,
                                       Dart_Handle raw_image_callback);
 
-  size_t external_allocation_size() const { return external_allocation_size_; }
-
  private:
-  Picture(flutter::SkiaGPUObject<SkPicture> picture,
-          size_t external_allocation_size_);
+  Picture(flutter::SkiaGPUObject<SkPicture> picture);
 
   flutter::SkiaGPUObject<SkPicture> picture_;
-  size_t external_allocation_size_;
 };
 
 }  // namespace flutter
