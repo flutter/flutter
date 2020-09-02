@@ -46,6 +46,8 @@ class CupertinoIcons {
 
   // ===========================================================================
   // BEGIN LEGACY PRE SF SYMBOLS NAMES
+  // We need to leave them as-is with the same codepoints for backward
+  // compatibility with cupertino_icons <0.1.3.
 
   /// A thin left chevron.
   /// This is the same icon as [chevron_left] in cupertino_icons 1.0.0+.
@@ -229,10 +231,8 @@ class CupertinoIcons {
   static const IconData battery_25_percent = IconData(0xf115, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// The Bluetooth logo.
-  @Deprecated(
-    'Use package version 0.1.3 if necessary. '
-    'This icon is deprecated in cupertino_icons 1.0.0.'
-  )
+  /// This icon is available in cupertino_icons 1.0.0+ for backward
+  /// compatibility but not part of Apple icons' aesthetics.
   static const IconData bluetooth = IconData(0xf116, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A restart arrow, pointing downwards.
@@ -925,10 +925,8 @@ class CupertinoIcons {
   static const IconData tags_solid = IconData(0xf48f, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled in bus.
-  @Deprecated(
-    'Use package version 0.1.3 if necessary. '
-    'This icon is deprecated in cupertino_icons 1.0.0.'
-  )
+  /// This icon is available in cupertino_icons 1.0.0+ for backward
+  /// compatibility but not part of Apple icons' aesthetics.
   static const IconData bus = IconData(0xf36d, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled in car.
@@ -944,32 +942,26 @@ class CupertinoIcons {
   /// See also:
   ///
   ///  * [car], similar, but a more simple representation.
-  @Deprecated(
-    'Use package version 0.1.3 if necessary. '
-    'This icon is deprecated in cupertino_icons 1.0.0.'
-  )
+  /// This icon is available in cupertino_icons 1.0.0+ for backward
+  /// compatibility but not part of Apple icons' aesthetics.
   static const IconData car_detailed = IconData(0xf2c1, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled in train with a window divided in half and two headlights.
+  /// This icon is available in cupertino_icons 1.0.0+ for backward
+  /// compatibility but not part of Apple icons' aesthetics.
   ///
   /// See also:
   ///
   ///  * [train_style_two], similar, but with a full, undivided window and a single, centered headlight.
-  @Deprecated(
-    'Use package version 0.1.3 if necessary. '
-    'This icon is deprecated in cupertino_icons 1.0.0.'
-  )
   static const IconData train_style_one = IconData(0xf3af, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled in train with a window and a single, centered headlight.
+  /// This icon is available in cupertino_icons 1.0.0+ for backward
+  /// compatibility but not part of Apple icons' aesthetics.
   ///
   /// See also:
   ///
   ///  * [train_style_one], similar, but with a with a window divided in half and two headlights.
-  @Deprecated(
-    'Use package version 0.1.3 if necessary. '
-    'This icon is deprecated in cupertino_icons 1.0.0.'
-  )
   static const IconData train_style_two = IconData(0xf3b4, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An outlined paw.
@@ -1004,25 +996,21 @@ class CupertinoIcons {
   static const IconData game_controller_solid = IconData(0xf43b, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An outlined lab flask.
+  /// This icon is available in cupertino_icons 1.0.0+ for backward
+  /// compatibility but not part of Apple icons' aesthetics.
   ///
   /// See also:
   ///
   ///  * [lab_flask_solid], similar, but filled in.
-  @Deprecated(
-    'Use package version 0.1.3 if necessary. '
-    'This icon is deprecated in cupertino_icons 1.0.0.'
-  )
   static const IconData lab_flask = IconData(0xf430, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled in lab flask.
+  /// This icon is available in cupertino_icons 1.0.0+ for backward
+  /// compatibility but not part of Apple icons' aesthetics.
   ///
   /// See also:
   ///
   ///  * [lab_flask], similar, but not filled in.
-  @Deprecated(
-    'Use package version 0.1.3 if necessary. '
-    'This icon is deprecated in cupertino_icons 1.0.0.'
-  )
   static const IconData lab_flask_solid = IconData(0xf431, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An outlined heart shape. Can be used to indicate like or favorite states.
@@ -1056,25 +1044,21 @@ class CupertinoIcons {
   static const IconData bell_solid = IconData(0xf3e2, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An outlined folded newspaper icon.
+  /// This icon is available in cupertino_icons 1.0.0+ for backward
+  /// compatibility but not part of Apple icons' aesthetics.
   ///
   /// See also:
   ///
   ///  * [news_solid], same shape, but filled in.
-  @Deprecated(
-    'Use package version 0.1.3 if necessary. '
-    'This icon is deprecated in cupertino_icons 1.0.0.'
-  )
   static const IconData news = IconData(0xf471, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled folded newspaper icon.
+  /// This icon is available in cupertino_icons 1.0.0+ for backward
+  /// compatibility but not part of Apple icons' aesthetics.
   ///
   /// See also:
   ///
   ///  * [news], same shape, but not filled in.
-  @Deprecated(
-    'Use package version 0.1.3 if necessary. '
-    'This icon is deprecated in cupertino_icons 1.0.0.'
-  )
   static const IconData news_solid = IconData(0xf472, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A outlined brightness icon.
