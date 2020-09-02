@@ -425,7 +425,7 @@ class DataTable extends StatelessWidget {
     this.columnSpacing,
     this.showCheckboxColumn = true,
     this.showBottomBorder = false,
-    this.dividerThickness = 1.0,
+    this.dividerThickness,
     @required this.rows,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
@@ -434,7 +434,7 @@ class DataTable extends StatelessWidget {
        assert(showCheckboxColumn != null),
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
-       assert(dividerThickness != null && dividerThickness >= 0),
+       assert(dividerThickness == null || dividerThickness >= 0),
        _onlyTextColumn = _initOnlyTextColumn(columns),
        super(key: key);
 
@@ -609,9 +609,11 @@ class DataTable extends StatelessWidget {
   /// Must be non-null, but may be empty.
   final List<DataRow> rows;
 
+  /// {@template flutter.material.dataTable.dividerThickness}
   /// The width of the divider that appears between [TableRow]s.
   ///
-  /// Must be non-null and greater than or equal to zero.
+  /// Must be greater than or equal to zero.
+  /// {@endtemplate}
   /// This value defaults to 1.0.
   final double dividerThickness;
 
@@ -667,6 +669,9 @@ class DataTable extends StatelessWidget {
 
   /// The default padding between the heading content and sort arrow.
   static const double _sortArrowPadding = 2.0;
+
+  /// The default divider thickness.
+  static const double _dividerThickness = 1.0;
 
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
   static const Color _grey100Opacity = Color(0x0A000000); // Grey 100 as opacity instead of solid color
@@ -875,7 +880,12 @@ class DataTable extends StatelessWidget {
         final Color resolvedDataRowColor = index > 0 ? (rows[index - 1].color ?? effectiveDataRowColor)?.resolve(states) : null;
         final Color resolvedHeadingRowColor = effectiveHeadingRowColor?.resolve(<MaterialState>{});
         final Color rowColor = index > 0 ? resolvedDataRowColor : resolvedHeadingRowColor;
-        final BorderSide borderSide = Divider.createBorderSide(context, width: dividerThickness);
+        final BorderSide borderSide = Divider.createBorderSide(
+          context,
+          width: dividerThickness
+            ?? theme.dataTableTheme.dividerThickness
+            ?? _dividerThickness,
+        );
         final Border border = showBottomBorder
           ? Border(bottom: borderSide)
           : index == 0 ? null : Border(top: borderSide);

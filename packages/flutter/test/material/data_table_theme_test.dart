@@ -25,6 +25,7 @@ void main() {
     expect(themeData.headingTextStyle, null);
     expect(themeData.horizontalMargin, null);
     expect(themeData.columnSpacing, null);
+    expect(themeData.dividerThickness, null);
 
     const DataTableTheme theme = DataTableTheme(data: DataTableThemeData());
     expect(theme.data.decoration, null);
@@ -36,6 +37,7 @@ void main() {
     expect(theme.data.headingTextStyle, null);
     expect(theme.data.horizontalMargin, null);
     expect(theme.data.columnSpacing, null);
+    expect(theme.data.dividerThickness, null);
   });
 
   testWidgets('Default DataTableThemeData debugFillProperties', (WidgetTester tester) async {
@@ -43,9 +45,9 @@ void main() {
     const DataTableThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description, <String>[]);
   });
@@ -66,12 +68,13 @@ void main() {
       headingTextStyle:  const TextStyle(fontSize: 14.0),
       horizontalMargin: 3.0,
       columnSpacing: 4.0,
+      dividerThickness: 5.0,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description[0], 'decoration: BoxDecoration(color: Color(0xfffffff0))');
     expect(description[1], 'dataRowColor: Instance of \'_MaterialStatePropertyWith<Color>\'');
@@ -82,6 +85,7 @@ void main() {
     expect(description[6], 'headingTextStyle: TextStyle(inherit: true, size: 14.0)');
     expect(description[7], 'horizontalMargin: 3.0');
     expect(description[8], 'columnSpacing: 4.0');
+    expect(description[9], 'dividerThickness: 5.0');
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
@@ -98,6 +102,7 @@ void main() {
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
     const double columnSpacing = 4.0;
+    const double dividerThickness = 5.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -112,6 +117,7 @@ void main() {
             headingTextStyle: headingTextStyle,
             horizontalMargin: horizontalMargin,
             columnSpacing: columnSpacing,
+            dividerThickness: dividerThickness,
           ),
         ),
         home: Scaffold(
@@ -141,6 +147,7 @@ void main() {
     final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 1).color, dataRowColor.resolve(<MaterialState>{}));
+    expect(_tableRowBoxDecoration(tester: tester, index: 1).border.top.width, dividerThickness);
 
     final Finder dataRowContainer = find.ancestor(of: find.text('Data'), matching: find.byType(Container));
     expect(tester.getSize(dataRowContainer).height, dataRowHeight);
@@ -169,6 +176,7 @@ void main() {
     const TextStyle themeHeadingTextStyle = TextStyle(fontSize: 13.5);
     const double themeHorizontalMargin = 2.0;
     const double themeColumnSpacing = 3.0;
+    const double themeDividerThickness = 4.0;
 
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
     final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.resolveWith<Color>(
@@ -183,6 +191,7 @@ void main() {
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
     const double columnSpacing = 4.0;
+    const double dividerThickness = 5.0;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -196,6 +205,7 @@ void main() {
             headingTextStyle: themeHeadingTextStyle,
             horizontalMargin: themeHorizontalMargin,
             columnSpacing: themeColumnSpacing,
+            dividerThickness: themeDividerThickness,
           ),
         ),
         home: Scaffold(
@@ -209,6 +219,7 @@ void main() {
             headingTextStyle: headingTextStyle,
             horizontalMargin: horizontalMargin,
             columnSpacing: columnSpacing,
+            dividerThickness: dividerThickness,
             sortColumnIndex: 0,
             columns: <DataColumn>[
               DataColumn(
@@ -234,6 +245,7 @@ void main() {
     final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 1).color, dataRowColor.resolve(<MaterialState>{}));
+    expect(_tableRowBoxDecoration(tester: tester, index: 1).border.top.width, dividerThickness);
 
     final Finder dataRowContainer = find.ancestor(of: find.text('Data'), matching: find.byType(Container));
     expect(tester.getSize(dataRowContainer).height, dataRowHeight);

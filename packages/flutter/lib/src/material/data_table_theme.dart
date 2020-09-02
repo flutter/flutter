@@ -43,6 +43,7 @@ class DataTableThemeData with Diagnosticable {
     this.headingTextStyle,
     this.horizontalMargin,
     this.columnSpacing,
+    this.dividerThickness,
   });
 
   /// {@macro flutter.material.dataTable.decoration}
@@ -73,6 +74,9 @@ class DataTableThemeData with Diagnosticable {
   /// {@macro flutter.material.dataTable.columnSpacing}
   final double columnSpacing;
 
+  /// {@macro flutter.material.dataTable.dividerThickness}
+  final double dividerThickness;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DataTableThemeData copyWith({
@@ -85,6 +89,7 @@ class DataTableThemeData with Diagnosticable {
     TextStyle headingTextStyle,
     double horizontalMargin,
     double columnSpacing,
+    double dividerThickness,
   }) {
     return DataTableThemeData(
       decoration: decoration ?? this.decoration,
@@ -96,10 +101,11 @@ class DataTableThemeData with Diagnosticable {
       headingTextStyle: headingTextStyle ?? this.headingTextStyle,
       horizontalMargin: horizontalMargin ?? this.horizontalMargin,
       columnSpacing: columnSpacing ?? this.columnSpacing,
+      dividerThickness: dividerThickness ?? this.dividerThickness,
     );
   }
 
-  /// Linearly interpolate between two [DataTableThemeData].
+  /// Linearly interpolate between two [DataTableThemeData]s.
   ///
   /// The argument `t` must not be null.
   ///
@@ -116,6 +122,7 @@ class DataTableThemeData with Diagnosticable {
       headingTextStyle: TextStyle.lerp(a.headingTextStyle, b.headingTextStyle, t),
       horizontalMargin: lerpDouble(a.horizontalMargin, b.horizontalMargin, t),
       columnSpacing: lerpDouble(a.columnSpacing, b.columnSpacing, t),
+      dividerThickness: lerpDouble(a.dividerThickness, b.dividerThickness, t)
     );
   }
 
@@ -131,6 +138,7 @@ class DataTableThemeData with Diagnosticable {
       headingTextStyle,
       horizontalMargin,
       columnSpacing,
+      dividerThickness,
     );
   }
 
@@ -141,15 +149,16 @@ class DataTableThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     return other is DataTableThemeData
-        && other.decoration == decoration
-        && other.dataRowColor == dataRowColor
-        && other.dataRowHeight == dataRowHeight
-        && other.dataTextStyle == dataTextStyle
-        && other.headingRowColor == headingRowColor
-        && other.headingRowHeight == headingRowHeight
-        && other.headingTextStyle == headingTextStyle
-        && other.horizontalMargin == horizontalMargin
-        && other.columnSpacing == columnSpacing;
+      && other.decoration == decoration
+      && other.dataRowColor == dataRowColor
+      && other.dataRowHeight == dataRowHeight
+      && other.dataTextStyle == dataTextStyle
+      && other.headingRowColor == headingRowColor
+      && other.headingRowHeight == headingRowHeight
+      && other.headingTextStyle == headingTextStyle
+      && other.horizontalMargin == horizontalMargin
+      && other.columnSpacing == columnSpacing
+      && other.dividerThickness == dividerThickness;
   }
 
   @override
@@ -164,6 +173,7 @@ class DataTableThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('headingTextStyle', headingTextStyle, defaultValue: null));
     properties.add(DoubleProperty('horizontalMargin', horizontalMargin, defaultValue: null));
     properties.add(DoubleProperty('columnSpacing', columnSpacing, defaultValue: null));
+    properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: null));
   }
 
   static MaterialStateProperty<T> _lerpProperties<T>(MaterialStateProperty<T> a, MaterialStateProperty<T> b, double t, T Function(T, T, double) lerpFunction ) {
