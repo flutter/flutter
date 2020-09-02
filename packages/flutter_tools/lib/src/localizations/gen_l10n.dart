@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:file/file.dart' as file;
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path;
 
+import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../convert.dart';
+import '../globals.dart' as globals;
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
@@ -19,7 +17,7 @@ import 'localizations_utils.dart';
 ///
 /// See [LocalizationsGenerator.initialize] for where and how it is used by the
 /// localizations tool.
-final String defaultSyntheticPackagePath = path.join('.dart_tool', 'flutter_gen', 'gen_l10n');
+final String defaultSyntheticPackagePath = globals.fs.path.join('.dart_tool', 'flutter_gen', 'gen_l10n');
 
 List<String> generateMethodParameters(Message message) {
   assert(message.placeholders.isNotEmpty);
@@ -402,7 +400,7 @@ class LocalizationsGenerator {
   /// It takes in a [FileSystem] representation that the class will act upon.
   LocalizationsGenerator(this._fs);
 
-  final file.FileSystem _fs;
+  final FileSystem _fs;
   Iterable<Message> _allMessages;
   AppResourceBundleCollection _allBundles;
   LocaleInfo _templateArbLocale;
@@ -653,7 +651,7 @@ class LocalizationsGenerator {
       throw L10nException('inputDirectory cannot be null when setting template arb file');
     }
 
-    templateArbFile = _fs.file(path.join(inputDirectory.path, templateArbFileName));
+    templateArbFile = _fs.file(globals.fs.path.join(inputDirectory.path, templateArbFileName));
     final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
     if (templateArbFileStatModeString[0] == '-' && templateArbFileStatModeString[3] == '-') {
       throw FileSystemException(
@@ -669,7 +667,7 @@ class LocalizationsGenerator {
     if (outputFileString == null) {
       throw L10nException('outputFileString argument cannot be null');
     }
-    baseOutputFile = _fs.file(path.join(outputDirectory.path, outputFileString));
+    baseOutputFile = _fs.file(globals.fs.path.join(outputDirectory.path, outputFileString));
   }
 
   static bool _isValidClassName(String className) {
@@ -738,7 +736,7 @@ class LocalizationsGenerator {
       header = headerString;
     } else if (headerFile != null) {
       try {
-        header = _fs.file(path.join(inputDirectory.path, headerFile)).readAsStringSync();
+        header = _fs.file(globals.fs.path.join(inputDirectory.path, headerFile)).readAsStringSync();
       } on FileSystemException catch (error) {
         throw L10nException (
           'Failed to read header file: "$headerFile". \n'
@@ -748,7 +746,7 @@ class LocalizationsGenerator {
     }
   }
 
-  String _getAbsoluteProjectPath(String relativePath) => _fs.path.join(projectDirectory.path, relativePath);
+  String _getAbsoluteProjectPath(String relativePath) => globals.fs.path.join(projectDirectory.path, relativePath);
 
   void _setUseDeferredLoading(bool useDeferredLoading) {
     if (useDeferredLoading == null) {
@@ -763,7 +761,7 @@ class LocalizationsGenerator {
     }
 
     _inputsAndOutputsListFile = _fs.file(
-      path.join(inputsAndOutputsListPath, 'gen_l10n_inputs_and_outputs.json'),
+      globals.fs.path.join(inputsAndOutputsListPath, 'gen_l10n_inputs_and_outputs.json'),
     );
 
     _inputFileList = <String>[];
@@ -916,8 +914,8 @@ class LocalizationsGenerator {
         .map((AppResourceBundle bundle) => bundle.locale).toList();
     }
 
-    final String directory = path.basename(outputDirectory.path);
-    final String outputFileName = path.basename(baseOutputFile.path);
+    final String directory = globals.fs.path.basename(outputDirectory.path);
+    final String outputFileName = globals.fs.path.basename(baseOutputFile.path);
 
     final Iterable<String> supportedLocalesCode = supportedLocales.map((LocaleInfo locale) {
       final String languageCode = locale.languageCode;
@@ -944,7 +942,7 @@ class LocalizationsGenerator {
     for (final LocaleInfo locale in allLocales) {
       if (isBaseClassLocale(locale, locale.languageCode)) {
         final File languageMessageFile = _fs.file(
-          path.join(outputDirectory.path, '${fileName}_$locale.dart'),
+          globals.fs.path.join(outputDirectory.path, '${fileName}_$locale.dart'),
         );
 
         // Generate the template for the base class file. Further string
