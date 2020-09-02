@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:intl/locale.dart';
-import 'package:path/path.dart' as path;
 
 import '../base/file_system.dart';
 import '../convert.dart';
+import '../globals.dart' as globals;
+
 
 import 'localizations_utils.dart';
 
@@ -385,7 +386,7 @@ class AppResourceBundle {
     String localeString = resources['@@locale'] as String;
 
     // Look for the first instance of an ISO 639-1 language code, matching exactly.
-    final String fileName = path.basenameWithoutExtension(file.path);
+    final String fileName = globals.fs.path.basenameWithoutExtension(file.path);
 
     for (int index = 0; index < fileName.length; index += 1) {
       // If an underscore was found, check if locale string follows.
