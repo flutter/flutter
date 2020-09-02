@@ -93,13 +93,7 @@ abstract class OperatingSystemUtils {
 
   void unzip(File file, Directory targetDirectory);
 
-  /// Returns true if the ZIP is not corrupt.
-  bool verifyZip(File file);
-
   void unpack(File gzippedTarFile, Directory targetDirectory);
-
-  /// Returns true if the gzip is not corrupt (does not check tar).
-  bool verifyGzip(File gzippedFile);
 
   /// Compresses a stream using gzip level 1 (faster but larger).
   Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) {
@@ -230,10 +224,6 @@ class _PosixUtils extends OperatingSystemUtils {
     );
   }
 
-  @override
-  bool verifyZip(File zipFile) =>
-    _processUtils.exitsHappySync(<String>['unzip', '-t', '-qq', zipFile.path]);
-
   // tar -xzf tarball -C dest
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
@@ -242,10 +232,6 @@ class _PosixUtils extends OperatingSystemUtils {
       throwOnError: true,
     );
   }
-
-  @override
-  bool verifyGzip(File gzippedFile) =>
-    _processUtils.exitsHappySync(<String>['gzip', '-t', gzippedFile.path]);
 
   @override
   File makePipe(String path) {
@@ -336,37 +322,11 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   @override
-  bool verifyZip(File zipFile) {
-    try {
-      ZipDecoder().decodeBytes(zipFile.readAsBytesSync(), verify: true);
-    } on FileSystemException catch (_) {
-      return false;
-    } on ArchiveException catch (_) {
-      return false;
-    }
-    return true;
-  }
-
-  @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
     final Archive archive = TarDecoder().decodeBytes(
       GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
     );
     _unpackArchive(archive, targetDirectory);
-  }
-
-  @override
-  bool verifyGzip(File gzipFile) {
-    try {
-      GZipDecoder().decodeBytes(gzipFile.readAsBytesSync(), verify: true);
-    } on FileSystemException catch (_) {
-      return false;
-    } on ArchiveException catch (_) {
-      return false;
-    } on RangeError catch (_) {
-      return false;
-    }
-    return true;
   }
 
   void _unpackArchive(Archive archive, Directory targetDirectory) {

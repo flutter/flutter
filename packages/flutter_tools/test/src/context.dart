@@ -313,13 +313,7 @@ class FakeOperatingSystemUtils implements OperatingSystemUtils {
   void unzip(File file, Directory targetDirectory) { }
 
   @override
-  bool verifyZip(File file) => true;
-
-  @override
   void unpack(File gzippedTarFile, Directory targetDirectory) { }
-
-  @override
-  bool verifyGzip(File gzippedFile) => true;
 
   @override
   Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) => stream;

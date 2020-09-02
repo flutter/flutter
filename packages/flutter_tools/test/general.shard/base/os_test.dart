@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -112,59 +110,6 @@ void main() {
       () => osUtils.unzip(mockFile, mockDirectory),
       throwsProcessException(message: exceptionMessage),
     );
-  });
-
-  group('gzip on Windows:', () {
-    testWithoutContext('verifyGzip returns false on a FileSystemException', () {
-      final MockFileSystem fileSystem = MockFileSystem();
-      final MockFile mockFile = MockFile();
-      when(fileSystem.file(any)).thenReturn(mockFile);
-      when(mockFile.readAsBytesSync()).thenThrow(
-        const FileSystemException('error'),
-      );
-      final OperatingSystemUtils osUtils = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'windows'),
-        processManager: mockProcessManager,
-      );
-
-      expect(osUtils.verifyGzip(mockFile), isFalse);
-    });
-
-    testWithoutContext('verifyGzip returns false on an ArchiveException', () {
-      final MockFileSystem fileSystem = MockFileSystem();
-      final MockFile mockFile = MockFile();
-      when(fileSystem.file(any)).thenReturn(mockFile);
-      when(mockFile.readAsBytesSync()).thenReturn(Uint8List.fromList(<int>[
-        // Anything other than the magic header: 0x1f, 0x8b.
-        0x01,
-        0x02,
-      ]));
-      final OperatingSystemUtils osUtils = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'windows'),
-        processManager: mockProcessManager,
-      );
-
-      expect(osUtils.verifyGzip(mockFile), isFalse);
-    });
-
-    testWithoutContext('verifyGzip returns false on an empty file', () {
-      final MockFileSystem fileSystem = MockFileSystem();
-      final MockFile mockFile = MockFile();
-      when(fileSystem.file(any)).thenReturn(mockFile);
-      when(mockFile.readAsBytesSync()).thenReturn(Uint8List(0));
-      final OperatingSystemUtils osUtils = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'windows'),
-        processManager: mockProcessManager,
-      );
-
-      expect(osUtils.verifyGzip(mockFile), isFalse);
-    });
   });
 
   testWithoutContext('stream compression level', () {
