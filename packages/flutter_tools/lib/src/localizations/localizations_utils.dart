@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
-import '../base/io.dart';
 import 'language_subtag_registry.dart';
 
 typedef HeaderGenerator = String Function(String regenerateInstructions);
@@ -141,12 +140,6 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   int compareTo(LocaleInfo other) {
     return originalString.compareTo(other.originalString);
   }
-}
-
-void exitWithError(String errorMessage) {
-  assert(errorMessage != null);
-  stderr.writeln('fatal: $errorMessage');
-  exit(1);
 }
 
 // See also //master/tools/gen_locale.dart in the engine repo.

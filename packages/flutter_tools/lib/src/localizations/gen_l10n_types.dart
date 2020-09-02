@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:intl/locale.dart';
 import 'package:path/path.dart' as path;
+
+import '../base/file_system.dart';
+import '../convert.dart';
 
 import 'localizations_utils.dart';
 

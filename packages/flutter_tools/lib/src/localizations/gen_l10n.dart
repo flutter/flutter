@@ -8,6 +8,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
+
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
