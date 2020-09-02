@@ -1188,4 +1188,29 @@ void _canvasTests() {
       20,
     );
   });
+
+  test('toImage.toByteData', () async {
+    final SkPictureRecorder otherRecorder = SkPictureRecorder();
+    final SkCanvas otherCanvas = otherRecorder.beginRecording(SkRect(
+      fLeft: 0,
+      fTop: 0,
+      fRight: 1,
+      fBottom: 1,
+    ));
+    otherCanvas.drawRect(
+      SkRect(
+        fLeft: 0,
+        fTop: 0,
+        fRight: 1,
+        fBottom: 1,
+      ),
+      SkPaint(),
+    );
+    final CkPicture picture = CkPicture(otherRecorder.finishRecordingAsPicture(), null);
+    final CkImage image = await picture.toImage(1, 1);
+    final ByteData rawData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+    expect(rawData, isNotNull);
+    final ByteData pngData = await image.toByteData(format: ui.ImageByteFormat.png);
+    expect(pngData, isNotNull);
+  });
 }
