@@ -409,26 +409,26 @@ String getBlockedTestsListMapKey(String browser) =>
 /// Note that integration tests are only running on chrome for now.
 const Map<String, List<String>> blockedTestsListsMap = <String, List<String>>{
   'chrome-linux': [
-    'target_platform_android_e2e.dart',
-    'target_platform_ios_e2e.dart',
-    'target_platform_macos_e2e.dart',
+    'target_platform_android_integration.dart',
+    'target_platform_ios_integration.dart',
+    'target_platform_macos_integration.dart',
   ],
   'chrome-macos': [
-    'target_platform_ios_e2e.dart',
-    'target_platform_android_e2e.dart',
+    'target_platform_ios_integration.dart',
+    'target_platform_android_integration.dart',
   ],
   'safari-macos': [
-    'target_platform_ios_e2e.dart',
-    'target_platform_android_e2e.dart',
-    'image_loading_e2e.dart',
+    'target_platform_ios_integration.dart',
+    'target_platform_android_integration.dart',
+    'image_loading_integration.dart',
   ],
   'firefox-linux': [
-    'target_platform_android_e2e.dart',
-    'target_platform_ios_e2e.dart',
-    'target_platform_macos_e2e.dart',
+    'target_platform_android_integration.dart',
+    'target_platform_ios_integration.dart',
+    'target_platform_macos_integration.dart',
   ],
   'firefox-macos': [
-    'target_platform_android_e2e.dart',
-    'target_platform_ios_e2e.dart',
+    'target_platform_android_integration.dart',
+    'target_platform_ios_integration.dart',
   ],
 };
