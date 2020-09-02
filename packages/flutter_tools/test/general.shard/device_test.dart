@@ -58,8 +58,10 @@ void main() {
       // 3. A device discoverer that succeeds.
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
-        testLongPollingDeviceDiscovery: true,
-        testThrowingDeviceDiscovery: true,
+        deviceDiscoveryOverrides: <DeviceDiscovery>[
+          ThrowingPollingDeviceDiscovery(),
+          LongPollingDeviceDiscovery(),
+        ],
       );
 
       Future<void> expectDevice(String id, List<Device> expected) async {
@@ -89,7 +91,9 @@ void main() {
       // 2. A device discoverer that succeeds.
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
-        testThrowingDeviceDiscovery: true
+        deviceDiscoveryOverrides: <DeviceDiscovery>[
+          ThrowingPollingDeviceDiscovery(),
+        ],
       );
 
       Future<void> expectDevice(String id, List<Device> expected) async {
@@ -387,7 +391,62 @@ void main() {
       Artifacts: () => Artifacts.test(),
       Cache: () => cache,
     });
+
+    testUsingContext('does not refresh device cache without a timeout', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+      ];
+      final MockDeviceDiscovery mockDeviceDiscovery = MockDeviceDiscovery();
+      when(mockDeviceDiscovery.supportsPlatform).thenReturn(true);
+      // when(mockDeviceDiscovery.discoverDevices(timeout: timeout)).thenAnswer((_) async => devices);
+      when(mockDeviceDiscovery.devices).thenAnswer((_) async => devices);
+      // when(mockDeviceDiscovery.discoverDevices(timeout: timeout)).thenAnswer((_) async => devices);
+
+      final DeviceManager deviceManager = TestDeviceManager(<Device>[], deviceDiscoveryOverrides: <DeviceDiscovery>[
+        mockDeviceDiscovery
+      ]);
+      deviceManager.specifiedDeviceId = ephemeralOne.id;
+      final List<Device> filtered = await deviceManager.findTargetDevices(
+        FlutterProject.current(),
+      );
+
+      expect(filtered.single, ephemeralOne);
+      verify(mockDeviceDiscovery.devices).called(1);
+      verifyNever(mockDeviceDiscovery.discoverDevices(timeout: anyNamed('timeout')));
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
+    });
+
+    testUsingContext('refreshes device cache with a timeout', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+      ];
+      const Duration timeout = Duration(seconds: 2);
+      final MockDeviceDiscovery mockDeviceDiscovery = MockDeviceDiscovery();
+      when(mockDeviceDiscovery.supportsPlatform).thenReturn(true);
+      when(mockDeviceDiscovery.discoverDevices(timeout: timeout)).thenAnswer((_) async => devices);
+      when(mockDeviceDiscovery.devices).thenAnswer((_) async => devices);
+      // when(mockDeviceDiscovery.discoverDevices(timeout: timeout)).thenAnswer((_) async => devices);
+
+      final DeviceManager deviceManager = TestDeviceManager(<Device>[], deviceDiscoveryOverrides: <DeviceDiscovery>[
+        mockDeviceDiscovery
+      ]);
+      deviceManager.specifiedDeviceId = ephemeralOne.id;
+      final List<Device> filtered = await deviceManager.findTargetDevices(
+        FlutterProject.current(),
+        timeout: timeout,
+      );
+
+      expect(filtered.single, ephemeralOne);
+      verify(mockDeviceDiscovery.devices).called(1);
+      verify(mockDeviceDiscovery.discoverDevices(timeout: anyNamed('timeout'))).called(1);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
+    });
   });
+
   group('ForwardedPort', () {
     group('dispose()', () {
       testUsingContext('does not throw exception if no process is present', () {
@@ -427,16 +486,13 @@ void main() {
 
 class TestDeviceManager extends DeviceManager {
     TestDeviceManager(List<Device> allDevices, {
-    bool testLongPollingDeviceDiscovery = false,
-    bool testThrowingDeviceDiscovery = false,
+    List<DeviceDiscovery> deviceDiscoveryOverrides,
   }) {
     _fakeDeviceDiscoverer = FakePollingDeviceDiscovery();
     _deviceDiscoverers = <DeviceDiscovery>[
-      if (testLongPollingDeviceDiscovery)
-        LongPollingDeviceDiscovery(),
-      if (testThrowingDeviceDiscovery)
-        ThrowingPollingDeviceDiscovery(),
       _fakeDeviceDiscoverer,
+      if (deviceDiscoveryOverrides != null)
+        ...deviceDiscoveryOverrides
     ];
     resetDevices(allDevices);
   }
@@ -464,3 +520,4 @@ class MockProcess extends Mock implements Process {}
 class MockTerminal extends Mock implements AnsiTerminal {}
 class MockStdio extends Mock implements Stdio {}
 class MockCache extends Mock implements Cache {}
+class MockDeviceDiscovery extends Mock implements DeviceDiscovery {}
