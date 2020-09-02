@@ -1105,8 +1105,9 @@ abstract class ResidentRunner {
     List<FlutterView> views = <FlutterView>[];
     try {
       if (supportsServiceProtocol && isRunningDebug) {
-        views = await device
-          .vmService.getFlutterViews();
+        // Ensure that the vmService access is guarded by supportsServiceProtocol, it
+        // will be null in release mode.
+        views = await device.vmService.getFlutterViews();
         try {
           for (final FlutterView view in views) {
             await device.vmService.flutterDebugAllowBanner(
