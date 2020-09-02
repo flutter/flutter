@@ -309,6 +309,44 @@ void main() {
   );
 
   testWidgets(
+    'SliverGrid negative usableCrossAxisExtent',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 4,
+              height: 4,
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  SliverGrid(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                    ),
+                    delegate: SliverChildListDelegate(
+                      <Widget>[
+                        Container(child: const Center(child: Text('A'))),
+                        Container(child: const Center(child: Text('B'))),
+                        Container(child: const Center(child: Text('C'))),
+                        Container(child: const Center(child: Text('D'))),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'SliverList can handle inaccurate scroll offset due to changes in children list',
       (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/pull/59888.
