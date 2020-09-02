@@ -7,9 +7,12 @@ import 'dart:async';
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:flutter_devicelab/tasks/sample_catalog_generator.dart';
+import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
-Future<void> main(List<String> args) async {
+Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
-  await task(() => samplePageCatalogGenerator(extractCloudAuthTokenArg(args)));
+  await task(DevToolsMemoryTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/large_image_changer.dart',
+  ).run);
 }

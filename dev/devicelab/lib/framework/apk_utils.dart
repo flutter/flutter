@@ -160,7 +160,6 @@ class ApkExtractor {
         'packages',
         apkFile.path,
       ],
-      printStdout: false,
     );
     _classes = Set<String>.from(
       packages

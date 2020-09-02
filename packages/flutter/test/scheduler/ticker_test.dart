@@ -96,7 +96,7 @@ void main() {
     Ticker ticker;
 
     void testFunction() {
-      ticker = Ticker(null);
+      ticker = Ticker((Duration _) { });
     }
 
     testFunction();

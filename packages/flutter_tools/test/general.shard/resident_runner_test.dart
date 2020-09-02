@@ -1189,6 +1189,7 @@ void main() {
         '--disable-dart-dev',
         globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
         '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
+        '--project-dir=${globals.fs.currentDirectory.path}',
       ],
       onRun: () {
         dependencies
@@ -1200,6 +1201,7 @@ void main() {
     globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
       .createSync(recursive: true);
     globals.fs.file('l10n.yaml').createSync();
+    globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     await residentRunner.runSourceGenerators();
 
@@ -1218,6 +1220,7 @@ void main() {
         '--disable-dart-dev',
         globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
         '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
+        '--project-dir=${globals.fs.currentDirectory.path}',
       ],
       exitCode: 1,
       stderr: 'stderr'
@@ -1225,6 +1228,7 @@ void main() {
     globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
       .createSync(recursive: true);
     globals.fs.file('l10n.yaml').createSync();
+    globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     await residentRunner.runSourceGenerators();
 

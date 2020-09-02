@@ -656,7 +656,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
     @required ScrollController controller,
     @required List<Widget> slivers,
     @required this.handle,
-    @required this.clipBehavior,
+    @required Clip clipBehavior,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     String restorationId,
   }) : super(
@@ -667,10 +667,10 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
          slivers: slivers,
          dragStartBehavior: dragStartBehavior,
          restorationId: restorationId,
+         clipBehavior: clipBehavior,
        );
 
   final SliverOverlapAbsorberHandle handle;
-  final Clip clipBehavior;
 
   @override
   Widget buildViewport(
