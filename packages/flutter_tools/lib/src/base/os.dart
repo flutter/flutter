@@ -292,7 +292,7 @@ class _WindowsUtils extends OperatingSystemUtils {
     // `where` always returns all matches, not just the first one.
     ProcessResult result;
     try {
-      _processManager.runSync(<String>['where', execName]);
+      result = _processManager.runSync(<String>['where', execName]);
     } on ArgumentError {
       // `where` could be missing if system32 is not on the PATH.
       throwToolExit(
