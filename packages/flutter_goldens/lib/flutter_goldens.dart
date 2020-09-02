@@ -614,9 +614,9 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       local: true,
     );
 
-    if(!baseDirectory.existsSync())
+    if(!baseDirectory.existsSync()) {
       baseDirectory.createSync(recursive: true);
-
+    }
 
     goldens ??= SkiaGoldClient(baseDirectory, ci: ContinuousIntegrationEnvironment.none);
     try {
@@ -627,16 +627,17 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
         baseDirectory.uri,
         goldens,
         'OSError occurred, could not reach Gold. '
-        'Switching to FlutterSkippingGoldenFileComparator.',
+          'Switching to FlutterSkippingGoldenFileComparator.',
       );
     } on io.SocketException catch (_) {
       return FlutterSkippingFileComparator(
         baseDirectory.uri,
         goldens,
         'SocketException occurred, could not reach Gold. '
-        'Switching to FlutterSkippingGoldenFileComparator.',
+          'Switching to FlutterSkippingGoldenFileComparator.',
       );
     }
+
     return FlutterLocalFileComparator(baseDirectory.uri, goldens);
   }
 
