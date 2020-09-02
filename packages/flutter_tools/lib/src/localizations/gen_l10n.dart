@@ -9,6 +9,7 @@ import 'package:file/file.dart' as file;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
+import '../base/logger.dart';
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
@@ -516,6 +517,8 @@ class LocalizationsGenerator {
   List<String> _inputFileList;
   List<String> _outputFileList;
 
+  Logger _logger;
+
   /// Initializes [inputDirectory], [outputDirectory], [templateArbFile],
   /// [outputFile] and [className].
   ///
@@ -537,6 +540,7 @@ class LocalizationsGenerator {
     String inputsAndOutputsListPath,
     bool useSyntheticPackage = true,
     String projectPathString,
+    Logger logger,
   }) {
     setProjectDir(projectPathString);
     setInputDirectory(inputPathString);
@@ -551,6 +555,7 @@ class LocalizationsGenerator {
     _setUseDeferredLoading(useDeferredLoading);
     className = classNameString;
     _setInputsAndOutputsListFile(inputsAndOutputsListPath);
+    _logger = logger;
   }
 
   static bool _isNotReadable(FileStat fileStat) {
@@ -1052,11 +1057,17 @@ class LocalizationsGenerator {
   }
 
   void outputUnimplementedMessages(String untranslatedMessagesFile) {
+    if (_logger == null) {
+      throw L10nException(
+        'Logger must be defined when generating untranslated messages file.'
+      );
+    }
+
     if (untranslatedMessagesFile == null || untranslatedMessagesFile == '') {
       _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
-        stdout.writeln('"$locale": ${messages.length} untranslated message(s).');
+        _logger.printStatus('"$locale": ${messages.length} untranslated message(s).');
       });
-      stdout.writeln(
+      _logger.printStatus(
         'To see a detailed report, use the --untranslated-messages-file \n'
         'option in the tool to generate a JSON format file containing \n'
         'all messages that need to be translated.'

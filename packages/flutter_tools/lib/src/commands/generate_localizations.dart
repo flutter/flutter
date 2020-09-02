@@ -6,6 +6,7 @@ import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../globals.dart' as globals;
 import '../localizations/gen_l10n.dart';
 import '../localizations/gen_l10n_types.dart';
 import '../localizations/localizations_utils.dart';
@@ -189,6 +190,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
           inputsAndOutputsListPath: inputsAndOutputsListPath,
           useSyntheticPackage: useSyntheticPackage,
           projectPathString: projectPathString,
+          logger: globals.logger,
         )
         ..loadResources()
         ..writeOutputFiles()

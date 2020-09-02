@@ -62,6 +62,7 @@ void generateLocalizations({
         headerFile: options?.headerFile?.toFilePath(),
         useDeferredLoading: options.deferredLoading ?? false,
         useSyntheticPackage: options.useSyntheticPackage ?? true,
+        logger: logger,
       )
       ..loadResources()
       ..writeOutputFiles()
