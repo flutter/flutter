@@ -123,23 +123,24 @@ class OverlayEntry {
   ///
   /// This should only be called once.
   ///
-  /// If this method is called while the [SchedulerBinding.schedulerPhase] is
-  /// [SchedulerPhase.persistentCallbacks], i.e. during the build, layout, or
-  /// paint phases (see [WidgetsBinding.drawFrame]), then the removal is
-  /// delayed until the post-frame callbacks phase. Otherwise the removal is
-  /// done synchronously. This means that it is safe to call during builds, but
-  /// also that if you do call this during a build, the UI will not update until
-  /// the next frame (i.e. many milliseconds later).
+  /// This method removes this overlay entry from the overlay immediately. The
+  /// UI will be updated in the same frame if this method is called before the
+  /// overlay rebuild in this frame; otherwise, the UI will be updated in the
+  /// next frame.
   void remove() {
     assert(_overlay != null);
     final OverlayState overlay = _overlay;
     _overlay = null;
+    if (!overlay.mounted)
+      return;
+
+    overlay._entries.remove(this);
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        overlay._remove(this);
+        overlay._markDirty();
       });
     } else {
-      overlay._remove(this);
+      overlay._markDirty();
     }
   }
 
@@ -405,11 +406,9 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     });
   }
 
-  void _remove(OverlayEntry entry) {
+  void _markDirty() {
     if (mounted) {
-      setState(() {
-        _entries.remove(entry);
-      });
+      setState(() {});
     }
   }
 
