@@ -919,9 +919,10 @@ class HotRunner extends ResidentRunner {
           // If the tool identified a change in a single widget, do a fast instead
           // of a full reassemble.
           Future<void> reassembleWork;
-          if (updatedDevFS.fastReassemble == true) {
+          if (updatedDevFS.fastReassembleClassName != null) {
             reassembleWork = device.vmService.flutterFastReassemble(
               isolateId: view.uiIsolate.id,
+              className: updatedDevFS.fastReassembleClassName,
             );
           } else {
             reassembleWork = device.vmService.flutterReassemble(

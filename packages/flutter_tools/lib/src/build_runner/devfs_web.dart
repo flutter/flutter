@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
+import 'package:flutter_tools/src/widget_cache.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
@@ -766,6 +767,7 @@ class WebDevFS implements DevFS {
     List<Uri> invalidatedFiles,
     bool skipAssets = false,
     @required PackageConfig packageConfig,
+    @required WidgetCache widgetCache,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);

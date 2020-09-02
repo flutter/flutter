@@ -20,6 +20,7 @@ import 'bundle.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'vmservice.dart';
+import 'widget_cache.dart';
 
 class DevFSConfig {
   /// Should DevFS assume that symlink targets are stable?
@@ -302,7 +303,7 @@ class UpdateFSReport {
     bool success = false,
     int invalidatedSourcesCount = 0,
     int syncedBytes = 0,
-    this.fastReassemble,
+    this.fastReassembleClassName,
   }) : _success = success,
        _invalidatedSourcesCount = invalidatedSourcesCount,
        _syncedBytes = syncedBytes;
@@ -312,7 +313,7 @@ class UpdateFSReport {
   int get syncedBytes => _syncedBytes;
 
   bool _success;
-  bool fastReassemble;
+  String fastReassembleClassName;
   int _invalidatedSourcesCount;
   int _syncedBytes;
 
@@ -320,11 +321,7 @@ class UpdateFSReport {
     if (!report._success) {
       _success = false;
     }
-    if (report.fastReassemble != null && fastReassemble != null) {
-      fastReassemble &= report.fastReassemble;
-    } else if (report.fastReassemble != null) {
-      fastReassemble = report.fastReassemble;
-    }
+    fastReassembleClassName ??= report.fastReassembleClassName;
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
   }
@@ -414,6 +411,7 @@ class DevFS {
     @required String pathToReload,
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
+    @required WidgetCache widgetCache,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
@@ -502,8 +500,12 @@ class DevFS {
       }
     }
     _logger.printTrace('DevFS: Sync finished');
-    return UpdateFSReport(success: true, syncedBytes: syncedBytes,
-         invalidatedSourcesCount: invalidatedFiles.length);
+    return UpdateFSReport(
+      success: true,
+      syncedBytes: syncedBytes,
+      invalidatedSourcesCount: invalidatedFiles.length,
+      fastReassembleClassName: widgetCache?.validateLibrary(),
+    );
   }
 
   /// Converts a platform-specific file path to a platform-independent URL path.

@@ -11,12 +11,12 @@ void main() {
   testWithoutContext('widget cache returns null when experiment is disabled', () async {
     final WidgetCache widgetCache = WidgetCache(featureFlags: TestFeatureFlags(isSingleWidgetReloadEnabled: false));
 
-    expect(await widgetCache.validateLibrary(Uri.parse('package:hello_world/main.dart')), null);
+    expect(widgetCache.validateLibrary(), null);
   });
 
   testWithoutContext('widget cache returns null because functionality is not complete', () async {
     final WidgetCache widgetCache = WidgetCache(featureFlags: TestFeatureFlags(isSingleWidgetReloadEnabled: true));
 
-    expect(await widgetCache.validateLibrary(Uri.parse('package:hello_world/main.dart')), null);
+    expect(widgetCache.validateLibrary(), null);
   });
 }

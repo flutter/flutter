@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:meta/meta.dart';
 
 import 'features.dart';
@@ -15,13 +16,23 @@ class WidgetCache {
 
   final FeatureFlags _featureFlags;
 
+  set outFile(File file) => _outFile = file;
+
+  File _outFile;
+
   /// If the build method of a single widget was modified, return the widget name.
   ///
   /// If any other changes were made, or there is an error scanning the file,
   /// return `null`.
-  Future<String> validateLibrary(Uri libraryUri) async {
+  String validateLibrary() {
     if (!_featureFlags.isSingleWidgetReloadEnabled) {
       return null;
+    }
+    if (_outFile != null && _outFile.existsSync()) {
+      final String widget = _outFile.readAsStringSync().trim();
+      if (widget.isNotEmpty) {
+        return widget;
+      }
     }
     return null;
   }

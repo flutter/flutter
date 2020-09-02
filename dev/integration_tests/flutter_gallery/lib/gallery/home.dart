@@ -25,7 +25,7 @@ class _FlutterLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        width: 34.0,
+        width: 2.0,
         height: 34.0,
         decoration: const BoxDecoration(
           image: DecorationImage(

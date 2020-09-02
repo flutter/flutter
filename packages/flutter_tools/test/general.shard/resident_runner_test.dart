@@ -2165,9 +2165,12 @@ class ThrowingForwardingFileSystem extends ForwardingFileSystem {
 
 class FakeWidgetCache implements WidgetCache {
   @override
-  Future<String> validateLibrary(Uri libraryUri) async {
+  String validateLibrary() {
     return 'FakeWidget';
   }
+
+  @override
+  set outFile(File file) {}
 }
 
 class FakeFlutterDevice extends FlutterDevice {
