@@ -430,7 +430,7 @@ class _DraggableScrollableSheetScrollPosition
 
   VoidCallback? _dragCancelCallback;
   final _DraggableSheetExtent extent;
-  bool get listShouldScroll => pixels! > 0.0;
+  bool get listShouldScroll => pixels > 0.0;
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {

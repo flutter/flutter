@@ -311,7 +311,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double scrollableExtent = metrics.maxScrollExtent! - metrics.minScrollExtent!;
 
     final double fractionPast = (scrollableExtent > 0)
-      ? ((metrics.pixels! - metrics.minScrollExtent!) / scrollableExtent).clamp(0.0, 1.0)
+      ? ((metrics.pixels - metrics.minScrollExtent!) / scrollableExtent).clamp(0.0, 1.0)
       : 0;
 
     return (_isReversed ? 1 - fractionPast : fractionPast) * (_trackExtent - thumbExtent);

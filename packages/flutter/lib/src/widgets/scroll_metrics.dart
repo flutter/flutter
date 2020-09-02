@@ -73,7 +73,7 @@ abstract class ScrollMetrics {
   double? get maxScrollExtent;
 
   /// The current scroll position, in logical pixels along the [axisDirection].
-  double? get pixels;
+  double get pixels;
 
   /// The extent of the viewport along the [axisDirection].
   double? get viewportDimension;
@@ -86,7 +86,7 @@ abstract class ScrollMetrics {
 
   /// Whether the [pixels] value is outside the [minScrollExtent] and
   /// [maxScrollExtent].
-  bool get outOfRange => pixels! < minScrollExtent! || pixels! > maxScrollExtent!;
+  bool get outOfRange => pixels < minScrollExtent! || pixels > maxScrollExtent!;
 
   /// Whether the [pixels] value is exactly at the [minScrollExtent] or the
   /// [maxScrollExtent].
@@ -94,7 +94,7 @@ abstract class ScrollMetrics {
 
   /// The quantity of content conceptually "above" the viewport in the scrollable.
   /// This is the content above the content described by [extentInside].
-  double get extentBefore => math.max(pixels! - minScrollExtent!, 0.0);
+  double get extentBefore => math.max(pixels - minScrollExtent!, 0.0);
 
   /// The quantity of content conceptually "inside" the viewport in the scrollable.
   ///
@@ -107,14 +107,14 @@ abstract class ScrollMetrics {
     assert(minScrollExtent! <= maxScrollExtent!);
     return viewportDimension!
       // "above" overscroll value
-      - (minScrollExtent! - pixels!).clamp(0, viewportDimension!)
+      - (minScrollExtent! - pixels).clamp(0, viewportDimension!)
       // "below" overscroll value
-      - (pixels! - maxScrollExtent!).clamp(0, viewportDimension!);
+      - (pixels - maxScrollExtent!).clamp(0, viewportDimension!);
   }
 
   /// The quantity of content conceptually "below" the viewport in the scrollable.
   /// This is the content below the content described by [extentInside].
-  double get extentAfter => math.max(maxScrollExtent! - pixels!, 0.0);
+  double get extentAfter => math.max(maxScrollExtent! - pixels, 0.0);
 }
 
 /// An immutable snapshot of values associated with a [Scrollable] viewport.
@@ -137,7 +137,7 @@ class FixedScrollMetrics extends ScrollMetrics {
   final double? maxScrollExtent;
 
   @override
-  final double? pixels;
+  final double pixels;
 
   @override
   final double? viewportDimension;

@@ -625,7 +625,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       delta *= -1;
     }
 
-    return math.min(math.max(position.pixels! + delta, position.minScrollExtent!),
+    return math.min(math.max(position.pixels + delta, position.minScrollExtent!),
         position.maxScrollExtent!);
   }
 
@@ -968,11 +968,11 @@ class ScrollAction extends Action<ScrollIntent> {
   double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
     assert(type != null);
     assert(state.position != null);
-    assert(state.position.pixels != null);
+    assert(state.position.hasPixels);
     assert(state.position.viewportDimension != null);
     assert(state.position.maxScrollExtent != null);
     assert(state.position.minScrollExtent != null);
-    assert(state._physics == null || state._physics!.shouldAcceptUserOffset(state.position!));
+    assert(state._physics == null || state._physics!.shouldAcceptUserOffset(state.position));
     if (state.widget.incrementCalculator != null) {
       return state.widget.incrementCalculator!(
         ScrollIncrementDetails(
@@ -1041,7 +1041,7 @@ class ScrollAction extends Action<ScrollIntent> {
   void invoke(ScrollIntent intent) {
     final ScrollableState? state = Scrollable.of(primaryFocus!.context!);
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
-    assert(state!.position.pixels != null, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
+    assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
     assert(state!.position.viewportDimension != null);
     assert(state!.position.maxScrollExtent != null);
     assert(state!.position.minScrollExtent != null);
@@ -1055,7 +1055,7 @@ class ScrollAction extends Action<ScrollIntent> {
       return;
     }
     state.position.moveTo(
-      state.position.pixels! + increment,
+      state.position.pixels + increment,
       duration: const Duration(milliseconds: 100),
       curve: Curves.easeInOut,
     );

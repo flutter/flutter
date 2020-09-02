@@ -63,7 +63,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
        ) {
     // If oldPosition is not null, the superclass will first call absorb(),
     // which may set _pixels and _activity.
-    if (pixels == null && initialPixels != null)
+    if (!hasPixels && initialPixels != null)
       correctPixels(initialPixels);
     if (activity == null)
       goIdle();
@@ -122,7 +122,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   void applyUserOffset(double delta) {
     updateUserScrollDirection(delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
-    setPixels(pixels! - physics.applyPhysicsToUserOffset(this, delta));
+    setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta));
   }
 
   @override
@@ -141,7 +141,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// The velocity should be in logical pixels per second.
   @override
   void goBallistic(double velocity) {
-    assert(pixels != null);
+    assert(hasPixels);
     final Simulation? simulation = physics.createBallisticSimulation(this, velocity);
     if (simulation != null) {
       beginActivity(BallisticScrollActivity(this, simulation, context.vsync));
@@ -181,7 +181,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
 
     final DrivenScrollActivity activity = DrivenScrollActivity(
       this,
-      from: pixels!,
+      from: pixels,
       to: to,
       duration: duration,
       curve: curve,
@@ -195,10 +195,10 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   void jumpTo(double value) {
     goIdle();
     if (pixels != value) {
-      final double oldPixels = pixels!;
+      final double oldPixels = pixels;
       forcePixels(value);
       didStartScroll();
-      didUpdateScrollPositionBy(pixels! - oldPixels);
+      didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();
     }
     goBallistic(0.0);
@@ -209,10 +209,10 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   void jumpToWithoutSettling(double value) {
     goIdle();
     if (pixels != value) {
-      final double oldPixels = pixels!;
+      final double oldPixels = pixels;
       forcePixels(value);
       didStartScroll();
-      didUpdateScrollPositionBy(pixels! - oldPixels);
+      didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();
     }
   }

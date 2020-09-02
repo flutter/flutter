@@ -293,7 +293,7 @@ class ScrollPhysics {
     required double velocity,
   }) {
     if (parent == null)
-      return newPosition.pixels!;
+      return newPosition.pixels;
     return parent!.adjustPositionForNewDimensions(oldPosition: oldPosition, newPosition: newPosition, isScrolling: isScrolling, velocity: velocity);
   }
 
@@ -494,8 +494,8 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
         enforceBoundary = false;
       }
     }
-    if ((oldPosition.pixels! < oldPosition.minScrollExtent!) ||
-        (oldPosition.pixels! > oldPosition.maxScrollExtent!)) {
+    if ((oldPosition.pixels < oldPosition.minScrollExtent!) ||
+        (oldPosition.pixels > oldPosition.maxScrollExtent!)) {
       // If the old position was out of range, then we should
       // not try to keep the new position in range.
       enforceBoundary = false;
@@ -503,12 +503,12 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
     if (maintainOverscroll) {
       // Force the new position to be no more out of range
       // than it was before, if it was overscrolled.
-      if (oldPosition.pixels! < oldPosition.minScrollExtent!) {
-        final double oldDelta = oldPosition.minScrollExtent! - oldPosition.pixels!;
+      if (oldPosition.pixels < oldPosition.minScrollExtent!) {
+        final double oldDelta = oldPosition.minScrollExtent! - oldPosition.pixels;
         return newPosition.minScrollExtent! - oldDelta;
       }
-      if (oldPosition.pixels! > oldPosition.maxScrollExtent!) {
-        final double oldDelta = oldPosition.pixels! - oldPosition.maxScrollExtent!;
+      if (oldPosition.pixels > oldPosition.maxScrollExtent!) {
+        final double oldDelta = oldPosition.pixels - oldPosition.maxScrollExtent!;
         return newPosition.maxScrollExtent! + oldDelta;
       }
     }
@@ -574,8 +574,8 @@ class BouncingScrollPhysics extends ScrollPhysics {
     if (!position.outOfRange)
       return offset;
 
-    final double overscrollPastStart = math.max(position.minScrollExtent! - position.pixels!, 0.0);
-    final double overscrollPastEnd = math.max(position.pixels! - position.maxScrollExtent!, 0.0);
+    final double overscrollPastStart = math.max(position.minScrollExtent! - position.pixels, 0.0);
+    final double overscrollPastEnd = math.max(position.pixels - position.maxScrollExtent!, 0.0);
     final double overscrollPast = math.max(overscrollPastStart, overscrollPastEnd);
     final bool easing = (overscrollPastStart > 0.0 && offset < 0.0)
         || (overscrollPastEnd > 0.0 && offset > 0.0);
@@ -611,7 +611,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
       return BouncingScrollSimulation(
         spring: spring,
-        position: position.pixels!,
+        position: position.pixels,
         velocity: velocity,
         leadingExtent: position.minScrollExtent!,
         trailingExtent: position.maxScrollExtent!,
@@ -695,13 +695,13 @@ class ClampingScrollPhysics extends ScrollPhysics {
       }
       return true;
     }());
-    if (value < position.pixels! && position.pixels! <= position.minScrollExtent!) // underscroll
-      return value - position.pixels!;
-    if (position.maxScrollExtent! <= position.pixels! && position.pixels! < value) // overscroll
-      return value - position.pixels!;
-    if (value < position.minScrollExtent! && position.minScrollExtent! < position.pixels!) // hit top edge
+    if (value < position.pixels && position.pixels <= position.minScrollExtent!) // underscroll
+      return value - position.pixels;
+    if (position.maxScrollExtent! <= position.pixels && position.pixels < value) // overscroll
+      return value - position.pixels;
+    if (value < position.minScrollExtent! && position.minScrollExtent! < position.pixels) // hit top edge
       return value - position.minScrollExtent!;
-    if (position.pixels! < position.maxScrollExtent! && position.maxScrollExtent! < value) // hit bottom edge
+    if (position.pixels < position.maxScrollExtent! && position.maxScrollExtent! < value) // hit bottom edge
       return value - position.maxScrollExtent!;
     return 0.0;
   }
@@ -711,14 +711,14 @@ class ClampingScrollPhysics extends ScrollPhysics {
     final Tolerance tolerance = this.tolerance;
     if (position.outOfRange) {
       double? end;
-      if (position.pixels! > position.maxScrollExtent!)
+      if (position.pixels > position.maxScrollExtent!)
         end = position.maxScrollExtent;
-      if (position.pixels! < position.minScrollExtent!)
+      if (position.pixels < position.minScrollExtent!)
         end = position.minScrollExtent;
       assert(end != null);
       return ScrollSpringSimulation(
         spring,
-        position.pixels!,
+        position.pixels,
         end!,
         math.min(0.0, velocity),
         tolerance: tolerance,
@@ -726,12 +726,12 @@ class ClampingScrollPhysics extends ScrollPhysics {
     }
     if (velocity.abs() < tolerance.velocity)
       return null;
-    if (velocity > 0.0 && position.pixels! >= position.maxScrollExtent!)
+    if (velocity > 0.0 && position.pixels >= position.maxScrollExtent!)
       return null;
-    if (velocity < 0.0 && position.pixels! <= position.minScrollExtent!)
+    if (velocity < 0.0 && position.pixels <= position.minScrollExtent!)
       return null;
     return ClampingScrollSimulation(
-      position: position.pixels!,
+      position: position.pixels,
       velocity: velocity,
       tolerance: tolerance,
     );

@@ -549,7 +549,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
   }
 
-  Offset get _paintOffset => _paintOffsetForPosition(offset.pixels!);
+  Offset get _paintOffset => _paintOffsetForPosition(offset.pixels);
 
   Offset _paintOffsetForPosition(double position) {
     assert(axisDirection != null);
@@ -622,7 +622,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {
     rect ??= target.paintBounds;
     if (target is! RenderBox)
-      return RevealedOffset(offset: offset.pixels!, rect: rect);
+      return RevealedOffset(offset: offset.pixels, rect: rect);
 
     final RenderBox targetBox = target;
     final Matrix4 transform = targetBox.getTransformTo(child);
