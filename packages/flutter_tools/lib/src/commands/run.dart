@@ -12,7 +12,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../convert.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -436,9 +435,6 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode();
 
     writePidFile(stringArg('pid-file'));
-    if ((await devices.first.targetPlatform) == TargetPlatform.web_javascript) {
-      await generateVersionFile(FlutterProject.current());
-    }
     if (boolArg('machine')) {
       if (devices.length > 1) {
         throwToolExit('--machine does not support -d all.');
@@ -625,16 +621,4 @@ class RunCommand extends RunCommandBase {
       endTimeOverride: appStartedTime,
     );
   }
-}
-Future<void> generateVersionFile(FlutterProject flutterProject) async {
-
-  final Map<String, String> versionFileJson = <String, String>{
-    'app_name': flutterProject.manifest.appName,
-    'version': flutterProject.manifest.buildName,
-    'build_number': flutterProject.manifest.buildNumber
-  };
-  globals.fs.currentDirectory
-      .childDirectory('web')
-      .childFile('version.json')
-      .writeAsStringSync(jsonEncode(versionFileJson));
 }

@@ -14,7 +14,6 @@ import '../build_system/targets/common.dart';
 import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/web.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
@@ -36,8 +35,6 @@ Future<void> buildWeb(
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   await injectPlugins(flutterProject, checkProjects: true);
-  await generateVersionFile(flutterProject);
-
   final Status status = globals.logger.startProgress('Compiling $target for the Web...', timeout: null);
   final Stopwatch sw = Stopwatch()..start();
   try {
@@ -108,16 +105,4 @@ class WebCompilationProxy {
   }) async {
     throw UnimplementedError();
   }
-}
-Future<void> generateVersionFile(FlutterProject flutterProject) async {
-
-  final Map<String, String> versionFileJson = <String, String>{
-    'app_name': flutterProject.manifest.appName,
-    'version': flutterProject.manifest.buildName,
-    'build_number': flutterProject.manifest.buildNumber
-  };
-  globals.fs.currentDirectory
-      .childDirectory('web')
-      .childFile('version.json')
-      .writeAsStringSync(jsonEncode(versionFileJson));
 }

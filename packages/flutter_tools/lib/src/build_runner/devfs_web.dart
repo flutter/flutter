@@ -30,6 +30,7 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
+import '../project.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 
@@ -176,7 +177,7 @@ class WebAssetServer implements AssetReader {
       if (testMode) {
         return server;
       }
-
+      //generateVersionFile(FlutterProject.current());
       // In release builds deploy a simpler proxy server.
       if (buildInfo.mode != BuildMode.debug) {
         final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
@@ -782,6 +783,7 @@ class WebDevFS implements DevFS {
       webAssetServer.writeBytes('stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile('manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile('flutter_service_worker.js', '// Service worker not loaded in run mode.');
+      generateVersionFile(FlutterProject.current());
       webAssetServer.writeFile(
         'main.dart.js',
         generateBootstrapScript(
@@ -937,4 +939,16 @@ class ReleaseAssetServer {
     }
     return shelf.Response.notFound('');
   }
+}
+void generateVersionFile(FlutterProject flutterProject)  {
+
+  final Map<String, String> versionFileJson = <String, String>{
+    'app_name': flutterProject.manifest.appName,
+    'version': flutterProject.manifest.buildName,
+    'build_number': flutterProject.manifest.buildNumber
+  };
+  globals.fs.currentDirectory
+      .childDirectory('web')
+      .childFile('version.json')
+      .writeAsStringSync(jsonEncode(versionFileJson));
 }

@@ -9,8 +9,10 @@ import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
+import '../../convert.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
+import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
@@ -266,6 +268,8 @@ class WebReleaseBundle extends Target {
         environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path
       );
     }
+    generateVersionFile(FlutterProject.current(),environment);
+
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(
@@ -540,4 +544,15 @@ async function downloadOffline() {
   return contentCache.addAll(resources);
 }
 ''';
+}
+void generateVersionFile(FlutterProject flutterProject,Environment environment)  {
+
+  final Map<String, String> versionFileJson = <String, String>{
+    'app_name': flutterProject.manifest.appName,
+    'version': flutterProject.manifest.buildName,
+    'build_number': flutterProject.manifest.buildNumber
+  };
+  environment.outputDir
+      .childFile('version.json')
+      .writeAsStringSync(jsonEncode(versionFileJson));
 }
