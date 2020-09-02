@@ -76,11 +76,12 @@ Engine::Engine(Delegate& delegate,
              io_manager,
              nullptr) {
   runtime_controller_ = std::make_unique<RuntimeController>(
-      *this,                        // runtime delegate
-      &vm,                          // VM
-      std::move(isolate_snapshot),  // isolate snapshot
-      task_runners_,                // task runners
-      std::move(snapshot_delegate),
+      *this,                                 // runtime delegate
+      &vm,                                   // VM
+      std::move(isolate_snapshot),           // isolate snapshot
+      task_runners_,                         // task runners
+      std::move(snapshot_delegate),          // snapshot delegate
+      GetWeakPtr(),                          // hint freed delegate
       std::move(io_manager),                 // io manager
       std::move(unref_queue),                // Skia unref queue
       image_decoder_.GetWeakPtr(),           // image decoder
@@ -248,11 +249,16 @@ void Engine::ReportTimings(std::vector<int64_t> timings) {
   runtime_controller_->ReportTimings(std::move(timings));
 }
 
+void Engine::HintFreed(size_t size) {
+  hint_freed_bytes_since_last_idle_ += size;
+}
+
 void Engine::NotifyIdle(int64_t deadline) {
   auto trace_event = std::to_string(deadline - Dart_TimelineGetMicros());
   TRACE_EVENT1("flutter", "Engine::NotifyIdle", "deadline_now_delta",
                trace_event.c_str());
-  runtime_controller_->NotifyIdle(deadline);
+  runtime_controller_->NotifyIdle(deadline, hint_freed_bytes_since_last_idle_);
+  hint_freed_bytes_since_last_idle_ = 0;
 }
 
 std::pair<bool, uint32_t> Engine::GetUIIsolateReturnCode() {

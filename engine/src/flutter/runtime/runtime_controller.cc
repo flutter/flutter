@@ -26,6 +26,7 @@ RuntimeController::RuntimeController(
     fml::RefPtr<const DartSnapshot> p_isolate_snapshot,
     TaskRunners p_task_runners,
     fml::WeakPtr<SnapshotDelegate> p_snapshot_delegate,
+    fml::WeakPtr<HintFreedDelegate> p_hint_freed_delegate,
     fml::WeakPtr<IOManager> p_io_manager,
     fml::RefPtr<SkiaUnrefQueue> p_unref_queue,
     fml::WeakPtr<ImageDecoder> p_image_decoder,
@@ -41,6 +42,7 @@ RuntimeController::RuntimeController(
       isolate_snapshot_(std::move(p_isolate_snapshot)),
       task_runners_(p_task_runners),
       snapshot_delegate_(p_snapshot_delegate),
+      hint_freed_delegate_(p_hint_freed_delegate),
       io_manager_(p_io_manager),
       unref_queue_(p_unref_queue),
       image_decoder_(p_image_decoder),
@@ -61,6 +63,7 @@ RuntimeController::RuntimeController(
           task_runners_,                                  //
           std::make_unique<PlatformConfiguration>(this),  //
           snapshot_delegate_,                             //
+          hint_freed_delegate_,                           //
           io_manager_,                                    //
           unref_queue_,                                   //
           image_decoder_,                                 //
@@ -122,6 +125,7 @@ std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
       isolate_snapshot_,            //
       task_runners_,                //
       snapshot_delegate_,           //
+      hint_freed_delegate_,         //
       io_manager_,                  //
       unref_queue_,                 //
       image_decoder_,               //
@@ -233,7 +237,7 @@ bool RuntimeController::ReportTimings(std::vector<int64_t> timings) {
   return false;
 }
 
-bool RuntimeController::NotifyIdle(int64_t deadline) {
+bool RuntimeController::NotifyIdle(int64_t deadline, size_t freed_hint) {
   std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   if (!root_isolate) {
     return false;
@@ -241,6 +245,9 @@ bool RuntimeController::NotifyIdle(int64_t deadline) {
 
   tonic::DartState::Scope scope(root_isolate);
 
+  // Dart will use the freed hint at the next idle notification. Make sure to
+  // Update it with our latest value before calling NotifyIdle.
+  Dart_HintFreed(freed_hint);
   Dart_NotifyIdle(deadline);
 
   // Idle notifications being in isolate scope are part of the contract.

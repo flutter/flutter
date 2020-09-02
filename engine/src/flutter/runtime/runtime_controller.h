@@ -67,6 +67,11 @@ class RuntimeController : public PlatformConfigurationClient {
   /// @param[in]  snapshot_delegate           The snapshot delegate used by the
   ///                                         isolate to gather raster snapshots
   ///                                         of Flutter view hierarchies.
+  /// @param[in]  hint_freed_delegate         The delegate used by the isolate
+  ///                                         to hint the Dart VM when
+  ///                                         additional memory may be freed
+  ///                                         if a GC ran at the next
+  ///                                         NotifyIdle.
   /// @param[in]  io_manager                  The IO manager used by the isolate
   ///                                         for asynchronous texture uploads.
   /// @param[in]  unref_queue                 The unref queue used by the
@@ -111,6 +116,7 @@ class RuntimeController : public PlatformConfigurationClient {
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       TaskRunners task_runners,
       fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+      fml::WeakPtr<HintFreedDelegate> hint_freed_delegate,
       fml::WeakPtr<IOManager> io_manager,
       fml::RefPtr<SkiaUnrefQueue> unref_queue,
       fml::WeakPtr<ImageDecoder> image_decoder,
@@ -328,10 +334,12 @@ class RuntimeController : public PlatformConfigurationClient {
   /// @param[in]  deadline  The deadline measures in microseconds against the
   ///             system's monotonic time. The clock can be accessed via
   ///             `Dart_TimelineGetMicros`.
+  /// @param[in] freed_hint  A hint of the number of bytes potentially freed
+  ///                        since the last call to NotifyIdle if a GC were run.
   ///
   /// @return     If the idle notification was forwarded to the running isolate.
   ///
-  bool NotifyIdle(int64_t deadline);
+  bool NotifyIdle(int64_t deadline, size_t freed_hint);
 
   //----------------------------------------------------------------------------
   /// @brief      Returns if the root isolate is running. The isolate must be
@@ -464,6 +472,7 @@ class RuntimeController : public PlatformConfigurationClient {
   fml::RefPtr<const DartSnapshot> isolate_snapshot_;
   TaskRunners task_runners_;
   fml::WeakPtr<SnapshotDelegate> snapshot_delegate_;
+  fml::WeakPtr<HintFreedDelegate> hint_freed_delegate_;
   fml::WeakPtr<IOManager> io_manager_;
   fml::RefPtr<SkiaUnrefQueue> unref_queue_;
   fml::WeakPtr<ImageDecoder> image_decoder_;

@@ -139,7 +139,8 @@ def RunCCTests(build_dir, filter):
     RunEngineExecutable(build_dir, 'jni_unittests', filter, shuffle_flags)
     RunEngineExecutable(build_dir, 'platform_view_android_delegate_unittests', filter, shuffle_flags)
 
-  RunEngineExecutable(build_dir, 'ui_unittests', filter, shuffle_flags)
+  # The image release unit test can take a while on slow machines.
+  RunEngineExecutable(build_dir, 'ui_unittests', filter, shuffle_flags + ['--timeout=90'])
 
   RunEngineExecutable(build_dir, 'testing_unittests', filter, shuffle_flags)
 
