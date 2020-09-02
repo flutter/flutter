@@ -153,7 +153,7 @@ void main() {
         fileSystem: fileSystem,
         processManager: processManager,
         logger: logger,
-        interface: IOSDeviceInterface.network,
+        interface: IOSDeviceConnectionInterface.network,
       );
       setUpIOSProject(fileSystem);
       final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
@@ -356,7 +356,7 @@ IOSDevice setUpIOSDevice({
   FileSystem fileSystem,
   Logger logger,
   ProcessManager processManager,
-  IOSDeviceInterface interface = IOSDeviceInterface.usb,
+  IOSDeviceConnectionInterface interface = IOSDeviceConnectionInterface.usb,
 }) {
   const MapEntry<String, String> dyldLibraryEntry = MapEntry<String, String>(
     'DYLD_LIBRARY_PATH',

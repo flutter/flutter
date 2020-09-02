@@ -134,7 +134,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   }
 }
 
-enum IOSDeviceInterface {
+enum IOSDeviceConnectionInterface {
   none,
   usb,
   network,
@@ -197,7 +197,7 @@ class IOSDevice extends Device {
 
   final DarwinArch cpuArchitecture;
 
-  final IOSDeviceInterface interfaceType;
+  final IOSDeviceConnectionInterface interfaceType;
 
   Map<IOSApp, DeviceLogReader> _logReaders;
 
@@ -355,7 +355,8 @@ class IOSDevice extends Device {
       '--enable-service-port-fallback',
       '--disable-service-auth-codes',
       '--observatory-port=$assumedObservatoryPort',
-      if (interfaceType == IOSDeviceInterface.network)
+      if (interfaceType == IOSDeviceConnectionInterface.network)
+        // Tell the observatory to listen on all interfaces, don't restrict to the loopback.
         '--observatory-host=${ipv6 ? '::/0' : '0.0.0.0'}',
       if (debuggingOptions.startPaused) '--start-paused',
       if (dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
@@ -756,7 +757,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     @required String id,
     @required IProxy iproxy,
     @required OperatingSystemUtils operatingSystemUtils,
-    @required IOSDeviceInterface interfaceType,
+    @required IOSDeviceConnectionInterface interfaceType,
   }) : _logger = logger,
        _id = id,
        _iproxy = iproxy,
@@ -783,7 +784,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
       ),
       id: id ?? '1234',
       operatingSystemUtils: operatingSystemUtils,
-      interfaceType: IOSDeviceInterface.usb,
+      interfaceType: IOSDeviceConnectionInterface.usb,
     );
   }
 
@@ -791,7 +792,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
   final String _id;
   final IProxy _iproxy;
   final OperatingSystemUtils _operatingSystemUtils;
-  final IOSDeviceInterface _interfaceType;
+  final IOSDeviceConnectionInterface _interfaceType;
 
   @override
   List<ForwardedPort> forwardedPorts = <ForwardedPort>[];

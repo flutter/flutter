@@ -78,7 +78,7 @@ void main() {
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
         vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       );
     });
@@ -95,7 +95,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '1.0.0',
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
         vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 1);
       expect(IOSDevice(
@@ -109,7 +109,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '13.1.1',
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
         vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 13);
       expect(IOSDevice(
@@ -123,7 +123,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '10',
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
         vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 10);
       expect(IOSDevice(
@@ -137,7 +137,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '0',
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
         vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 0);
       expect(IOSDevice(
@@ -151,7 +151,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: 'bogus',
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
         vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 0);
     });
@@ -168,7 +168,7 @@ void main() {
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
         vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       );
 
@@ -193,7 +193,7 @@ void main() {
               name: 'iPhone 1',
               sdkVersion: '13.3',
               cpuArchitecture: DarwinArch.arm64,
-              interfaceType: IOSDeviceInterface.usb,
+              interfaceType: IOSDeviceConnectionInterface.usb,
               vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
             );
           },
@@ -234,7 +234,7 @@ void main() {
             processManager: FakeProcessManager.any(),
           ),
           iproxy: iproxy,
-          interfaceType: IOSDeviceInterface.usb,
+          interfaceType: IOSDeviceConnectionInterface.usb,
         );
         portForwarder.addForwardedPorts(<ForwardedPort>[forwardedPort]);
         return portForwarder;
@@ -285,7 +285,7 @@ void main() {
           name: 'iPhone 1',
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
-          interfaceType: IOSDeviceInterface.usb,
+          interfaceType: IOSDeviceConnectionInterface.usb,
           vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
         );
         logReader1 = createLogReader(device, appPackage1, mockProcess1);
@@ -352,7 +352,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
         vmServiceConnectUri: (String string, {Log log}) async => mockVmService1,
       );
 
@@ -367,7 +367,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
         vmServiceConnectUri: (String string, {Log log}) async => mockVmService2,
       );
     });

@@ -89,7 +89,7 @@ void main() {
         expect(() async => await iMobileDevice.takeScreenshot(
           mockOutputFile,
           '1234',
-          IOSDeviceInterface.usb,
+          IOSDeviceConnectionInterface.usb,
         ), throwsA(anything));
       });
 
@@ -108,7 +108,7 @@ void main() {
         await iMobileDevice.takeScreenshot(
           mockOutputFile,
           '1234',
-          IOSDeviceInterface.usb,
+          IOSDeviceConnectionInterface.usb,
         );
         verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath, '--udid', '1234'],
             environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
@@ -131,7 +131,7 @@ void main() {
         await iMobileDevice.takeScreenshot(
           mockOutputFile,
           '1234',
-          IOSDeviceInterface.network,
+          IOSDeviceConnectionInterface.network,
         );
         verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath, '--udid', '1234', '--network'],
           environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},

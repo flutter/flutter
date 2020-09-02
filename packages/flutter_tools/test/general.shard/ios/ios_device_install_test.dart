@@ -49,7 +49,7 @@ void main() {
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
-      interfaceType: IOSDeviceInterface.usb,
+      interfaceType: IOSDeviceConnectionInterface.usb,
     );
     final bool wasInstalled = await device.installApp(iosApp);
 
@@ -78,7 +78,7 @@ void main() {
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
-      interfaceType: IOSDeviceInterface.network,
+      interfaceType: IOSDeviceConnectionInterface.network,
     );
     final bool wasInstalled = await device.installApp(iosApp);
 
@@ -269,7 +269,7 @@ IOSDevice setUpIOSDevice({
   @required ProcessManager processManager,
   FileSystem fileSystem,
   Logger logger,
-  IOSDeviceInterface interfaceType,
+  IOSDeviceConnectionInterface interfaceType,
 }) {
   logger ??= BufferLogger.test();
   final FakePlatform platform = FakePlatform(

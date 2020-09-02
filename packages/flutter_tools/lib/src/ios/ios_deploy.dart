@@ -85,7 +85,7 @@ class IOSDeploy {
     @required String deviceId,
     @required String bundlePath,
     @required List<String>launchArguments,
-    @required IOSDeviceInterface interfaceType,
+    @required IOSDeviceConnectionInterface interfaceType,
   }) async {
     final List<String> launchCommand = <String>[
       _binaryPath,
@@ -93,7 +93,7 @@ class IOSDeploy {
       deviceId,
       '--bundle',
       bundlePath,
-      if (interfaceType != IOSDeviceInterface.network)
+      if (interfaceType != IOSDeviceConnectionInterface.network)
         '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
@@ -116,7 +116,7 @@ class IOSDeploy {
     @required String deviceId,
     @required String bundlePath,
     @required List<String> launchArguments,
-    @required IOSDeviceInterface interfaceType,
+    @required IOSDeviceConnectionInterface interfaceType,
   }) async {
     final List<String> launchCommand = <String>[
       _binaryPath,
@@ -124,7 +124,7 @@ class IOSDeploy {
       deviceId,
       '--bundle',
       bundlePath,
-      if (interfaceType != IOSDeviceInterface.network)
+      if (interfaceType != IOSDeviceConnectionInterface.network)
         '--no-wifi',
       '--justlaunch',
       if (launchArguments.isNotEmpty) ...<String>[

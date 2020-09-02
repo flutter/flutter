@@ -534,18 +534,18 @@ class XCDevice {
     return null;
   }
 
-  static IOSDeviceInterface _interfaceType(Map<String, dynamic> deviceProperties) {
+  static IOSDeviceConnectionInterface _interfaceType(Map<String, dynamic> deviceProperties) {
     // Interface can be "usb", "network", or "none" for simulators
     // and unknown future interfaces.
     if (deviceProperties.containsKey('interface')) {
       if ((deviceProperties['interface'] as String).toLowerCase() == 'network') {
-        return IOSDeviceInterface.network;
+        return IOSDeviceConnectionInterface.network;
       } else {
-        return IOSDeviceInterface.usb;
+        return IOSDeviceConnectionInterface.usb;
       }
     }
 
-    return IOSDeviceInterface.none;
+    return IOSDeviceConnectionInterface.none;
   }
 
   static String _sdkVersion(Map<String, dynamic> deviceProperties) {

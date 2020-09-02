@@ -70,7 +70,7 @@ class IMobileDevice {
   Future<void> takeScreenshot(
     File outputFile,
     String deviceID,
-    IOSDeviceInterface interfaceType,
+    IOSDeviceConnectionInterface interfaceType,
   ) {
     return _processUtils.run(
       <String>[
@@ -78,7 +78,7 @@ class IMobileDevice {
         outputFile.path,
         '--udid',
         deviceID,
-        if (interfaceType == IOSDeviceInterface.network)
+        if (interfaceType == IOSDeviceConnectionInterface.network)
           '--network',
       ],
       throwOnError: true,
