@@ -190,11 +190,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
           inputsAndOutputsListPath: inputsAndOutputsListPath,
           useSyntheticPackage: useSyntheticPackage,
           projectPathString: projectPathString,
-          logger: globals.logger,
         )
         ..loadResources()
         ..writeOutputFiles()
-        ..outputUnimplementedMessages(untranslatedMessagesFile);
+        ..outputUnimplementedMessages(untranslatedMessagesFile, globals.logger);
     } on FileSystemException catch (e) {
       throwToolExit(e.message);
     } on FormatException catch (e) {

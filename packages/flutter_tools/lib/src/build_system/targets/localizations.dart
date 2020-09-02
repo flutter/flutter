@@ -62,11 +62,13 @@ void generateLocalizations({
         headerFile: options?.headerFile?.toFilePath(),
         useDeferredLoading: options.deferredLoading ?? false,
         useSyntheticPackage: options.useSyntheticPackage ?? true,
-        logger: logger,
       )
       ..loadResources()
       ..writeOutputFiles()
-      ..outputUnimplementedMessages(options?.untranslatedMessagesFile?.toFilePath());
+      ..outputUnimplementedMessages(
+        options?.untranslatedMessagesFile?.toFilePath(),
+        logger,
+      );
   } on FileSystemException catch (e) {
     logger.printError(e.message);
     throw Exception();

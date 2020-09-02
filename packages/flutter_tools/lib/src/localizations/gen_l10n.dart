@@ -540,7 +540,6 @@ class LocalizationsGenerator {
     String inputsAndOutputsListPath,
     bool useSyntheticPackage = true,
     String projectPathString,
-    Logger logger,
   }) {
     setProjectDir(projectPathString);
     setInputDirectory(inputPathString);
@@ -555,7 +554,6 @@ class LocalizationsGenerator {
     _setUseDeferredLoading(useDeferredLoading);
     className = classNameString;
     _setInputsAndOutputsListFile(inputsAndOutputsListPath);
-    _logger = logger;
   }
 
   static bool _isNotReadable(FileStat fileStat) {
@@ -1056,8 +1054,8 @@ class LocalizationsGenerator {
     }
   }
 
-  void outputUnimplementedMessages(String untranslatedMessagesFile) {
-    if (_logger == null) {
+  void outputUnimplementedMessages(String untranslatedMessagesFile, Logger logger) {
+    if (logger == null) {
       throw L10nException(
         'Logger must be defined when generating untranslated messages file.'
       );
