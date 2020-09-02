@@ -24,7 +24,10 @@ import 'theme.dart';
 /// overall [Theme] with [ThemeData.dataTableTheme].
 ///
 /// All [DataTableThemeData] properties are `null` by default. When
-/// null, the [DataTable]'s build method provides defaults.
+/// null, the [DataTable] will use the values from [ThemeData] if they exist,
+/// otherwise it will provide its own defaults based on the overall [Theme]'s
+/// textTheme and colorScheme. See the individual [DataTable] properties for
+/// details.
 ///
 /// See also:
 ///
