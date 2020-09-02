@@ -48,12 +48,11 @@ class CupertinoIcons {
   // BEGIN LEGACY PRE SF SYMBOLS NAMES
 
   /// A thin left chevron.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use chevron_left instead')
+  /// This is the same icon as [chevron_left] in cupertino_icons 1.0.0+.
   static const IconData left_chevron = IconData(0xf3d2, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
   /// A thin right chevron.
-  /// This is the same icon as [chevron_right] and [forward] in cupertino_icons 1.0.0+.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use chevron_right instead')
+  /// This is the same icon as [chevron_right] in cupertino_icons 1.0.0+.
   static const IconData right_chevron = IconData(0xf3d3, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
   /// iOS style share icon with an arrow pointing up from a box. This icon is not filled in.
@@ -176,11 +175,11 @@ class CupertinoIcons {
   static const IconData circle_filled = IconData(0xf400, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A thicker left chevron used in iOS for the navigation bar back button.
-  /// This is the same icon as [chevron_left] in cupertino_icons 1.0.0+.
+  /// This is the same icon as [chevron_back] in cupertino_icons 1.0.0+.
   static const IconData back = IconData(0xf3cf, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
   /// A thicker right chevron that's the reverse of [back].
-  /// This is the same icon as [chevron_right] in cupertino_icons 1.0.0+.
+  /// This is the same icon as [chevron_forward] in cupertino_icons 1.0.0+.
   static const IconData forward = IconData(0xf3d1, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
   /// Outline of a simple front-facing house.
@@ -230,7 +229,10 @@ class CupertinoIcons {
   static const IconData battery_25_percent = IconData(0xf115, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// The Bluetooth logo.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use package version 0.1.3 if necessary.')
+  @Deprecated(
+    'Use package version 0.1.3 if necessary. '
+    'This icon is deprecated in cupertino_icons 1.0.0.'
+  )
   static const IconData bluetooth = IconData(0xf116, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A restart arrow, pointing downwards.
@@ -254,6 +256,7 @@ class CupertinoIcons {
   static const IconData share_up = IconData(0xf220, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// Two thin right-facing intertwined arrows.
+  /// This is the same icon as [shuffle_medium] and [shuffle_thick] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -262,21 +265,21 @@ class CupertinoIcons {
   static const IconData shuffle = IconData(0xf4a9, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// Two medium thickness right-facing intertwined arrows.
+  /// This is the same icon as [shuffle] and [shuffle_thick] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
   ///  * [shuffle], with thin arrows.
   ///  * [shuffle_thick], with thicker, bold arrows.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use shuffle instead')
   static const IconData shuffle_medium = IconData(0xf4a8, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// Two thick right-facing intertwined arrows.
+  /// This is the same icon as [shuffle_medium] and [shuffle] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
   ///  * [shuffle], with thin arrows.
   ///  * [shuffle_medium], with slightly thinner arrows.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use shuffle instead')
   static const IconData shuffle_thick = IconData(0xf221, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A camera for still photographs. This icon is filled in.
@@ -348,6 +351,7 @@ class CupertinoIcons {
   static const IconData collections_solid = IconData(0xf3ca, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A single folder, which stores multiple files. This icon is not filled in.
+  /// This is the same icon as [folder_open] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
@@ -365,11 +369,11 @@ class CupertinoIcons {
   static const IconData folder_solid = IconData(0xf435, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A single folder that indicates being opened. A folder like this typically stores multiple files.
+  /// This is the same icon as [folder] in cupertino_icons 1.0.0+.
   ///
   /// See also:
   ///
   ///  * [folder], which is the equivalent of this icon for iOS versions later than or equal to iOS 7.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use folder instead')
   static const IconData folder_open = IconData(0xf38a, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A trash bin for removing items. This icon is not filled in.
@@ -501,7 +505,6 @@ class CupertinoIcons {
   ///
   ///  * [clear], which is equivalent to the cross of this icon without a circle.
   ///  * [clear_circled_solid], which is similar, but uses a thinner cross.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use xmark_circle instead')
   static const IconData clear_thick_circled = IconData(0xf36e, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A cross of two diagonal lines from edge to edge crossing in an angle of 90 degrees, which is used for dismissal.
@@ -922,7 +925,10 @@ class CupertinoIcons {
   static const IconData tags_solid = IconData(0xf48f, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled in bus.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use package version 0.1.3 if necessary.')
+  @Deprecated(
+    'Use package version 0.1.3 if necessary. '
+    'This icon is deprecated in cupertino_icons 1.0.0.'
+  )
   static const IconData bus = IconData(0xf36d, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled in car.
@@ -938,7 +944,10 @@ class CupertinoIcons {
   /// See also:
   ///
   ///  * [car], similar, but a more simple representation.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use package version 0.1.3 if necessary.')
+  @Deprecated(
+    'Use package version 0.1.3 if necessary. '
+    'This icon is deprecated in cupertino_icons 1.0.0.'
+  )
   static const IconData car_detailed = IconData(0xf2c1, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled in train with a window divided in half and two headlights.
@@ -946,7 +955,10 @@ class CupertinoIcons {
   /// See also:
   ///
   ///  * [train_style_two], similar, but with a full, undivided window and a single, centered headlight.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use package version 0.1.3 if necessary.')
+  @Deprecated(
+    'Use package version 0.1.3 if necessary. '
+    'This icon is deprecated in cupertino_icons 1.0.0.'
+  )
   static const IconData train_style_one = IconData(0xf3af, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled in train with a window and a single, centered headlight.
@@ -954,7 +966,10 @@ class CupertinoIcons {
   /// See also:
   ///
   ///  * [train_style_one], similar, but with a with a window divided in half and two headlights.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use package version 0.1.3 if necessary.')
+  @Deprecated(
+    'Use package version 0.1.3 if necessary. '
+    'This icon is deprecated in cupertino_icons 1.0.0.'
+  )
   static const IconData train_style_two = IconData(0xf3b4, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An outlined paw.
@@ -993,7 +1008,10 @@ class CupertinoIcons {
   /// See also:
   ///
   ///  * [lab_flask_solid], similar, but filled in.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use package version 0.1.3 if necessary.')
+  @Deprecated(
+    'Use package version 0.1.3 if necessary. '
+    'This icon is deprecated in cupertino_icons 1.0.0.'
+  )
   static const IconData lab_flask = IconData(0xf430, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled in lab flask.
@@ -1001,7 +1019,10 @@ class CupertinoIcons {
   /// See also:
   ///
   ///  * [lab_flask], similar, but not filled in.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use package version 0.1.3 if necessary.')
+  @Deprecated(
+    'Use package version 0.1.3 if necessary. '
+    'This icon is deprecated in cupertino_icons 1.0.0.'
+  )
   static const IconData lab_flask_solid = IconData(0xf431, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An outlined heart shape. Can be used to indicate like or favorite states.
@@ -1039,7 +1060,10 @@ class CupertinoIcons {
   /// See also:
   ///
   ///  * [news_solid], same shape, but filled in.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use package version 0.1.3 if necessary.')
+  @Deprecated(
+    'Use package version 0.1.3 if necessary. '
+    'This icon is deprecated in cupertino_icons 1.0.0.'
+  )
   static const IconData news = IconData(0xf471, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A filled folded newspaper icon.
@@ -1047,7 +1071,10 @@ class CupertinoIcons {
   /// See also:
   ///
   ///  * [news], same shape, but not filled in.
-  @Deprecated('This icon is deprecated in cupertino_icons 1.0.0. Use package version 0.1.3 if necessary.')
+  @Deprecated(
+    'Use package version 0.1.3 if necessary. '
+    'This icon is deprecated in cupertino_icons 1.0.0.'
+  )
   static const IconData news_solid = IconData(0xf472, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A outlined brightness icon.
@@ -1704,6 +1731,9 @@ class CupertinoIcons {
   static const IconData checkmark_square = IconData(0xf5cf, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for checkmark_square_fill. Available on cupertino_icons package 1.0.0+ only.
   static const IconData checkmark_square_fill = IconData(0xf5d0, fontFamily: iconFont, fontPackage: iconFontPackage);
+  /// Cupertino icon for chevron_back. Available on cupertino_icons package 1.0.0+ only.
+  /// This is the same icon as [back] which is available in cupertino_icons 0.1.3.
+  static const IconData chevron_back = IconData(0xf3cf, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for chevron_compact_down. Available on cupertino_icons package 1.0.0+ only.
   static const IconData chevron_compact_down = IconData(0xf5d1, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for chevron_compact_left. Available on cupertino_icons package 1.0.0+ only.
@@ -1722,9 +1752,12 @@ class CupertinoIcons {
   static const IconData chevron_down_square = IconData(0xf5d8, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for chevron_down_square_fill. Available on cupertino_icons package 1.0.0+ only.
   static const IconData chevron_down_square_fill = IconData(0xf5d9, fontFamily: iconFont, fontPackage: iconFontPackage);
+  /// Cupertino icon for chevron_forward. Available on cupertino_icons package 1.0.0+ only.
+  /// This is the same icon as [forward] which is available in cupertino_icons 0.1.3.
+  static const IconData chevron_forward = IconData(0xf3d1, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for chevron_left. Available on cupertino_icons package 1.0.0+ only.
-  /// This is the same icon as [back] which is available in cupertino_icons 0.1.3.
-  static const IconData chevron_left = IconData(0xf3cf, fontFamily: iconFont, fontPackage: iconFontPackage);
+  /// This is the same icon as [left_chevron] which is available in cupertino_icons 0.1.3.
+  static const IconData chevron_left = IconData(0xf3d2, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for chevron_left_2. Available on cupertino_icons package 1.0.0+ only.
   static const IconData chevron_left_2 = IconData(0xf5da, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for chevron_left_circle. Available on cupertino_icons package 1.0.0+ only.
@@ -1738,8 +1771,8 @@ class CupertinoIcons {
   /// Cupertino icon for chevron_left_square_fill. Available on cupertino_icons package 1.0.0+ only.
   static const IconData chevron_left_square_fill = IconData(0xf5df, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for chevron_right. Available on cupertino_icons package 1.0.0+ only.
-  /// This is the same icon as [forward] which is available in cupertino_icons 0.1.3.
-  static const IconData chevron_right = IconData(0xf3d1, fontFamily: iconFont, fontPackage: iconFontPackage);
+  /// This is the same icon as [right_chevron] which is available in cupertino_icons 0.1.3.
+  static const IconData chevron_right = IconData(0xf3d3, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for chevron_right_2. Available on cupertino_icons package 1.0.0+ only.
   static const IconData chevron_right_2 = IconData(0xf5e0, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// Cupertino icon for chevron_right_circle. Available on cupertino_icons package 1.0.0+ only.
