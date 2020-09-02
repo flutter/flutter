@@ -562,7 +562,7 @@ void main() {
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
           color: Colors.red,
-          boxShadow: [
+          boxShadow: const <BoxShadow>[
             BoxShadow(
               color: Colors.blue,
               offset: Offset.zero,
@@ -575,9 +575,9 @@ void main() {
 
     await tester.pumpWidget(
       RepaintBoundary(
-          child: Padding(
-        padding: const EdgeInsets.all(30.0),
-        child: container,
+        child: Padding(
+          padding: const EdgeInsets.all(30.0),
+          child: container,
       )),
     );
 
