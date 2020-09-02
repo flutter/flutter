@@ -1292,6 +1292,7 @@ void main() {
   testUsingContext('ResidentRunner printHelpDetails cold runner', () => testbed.run(() {
     when(mockDevice.supportsHotRestart).thenReturn(true);
     when(mockDevice.supportsScreenshot).thenReturn(true);
+    fakeVmServiceHost = null;
     residentRunner = ColdRunner(
       <FlutterDevice>[
         mockFlutterDevice,
