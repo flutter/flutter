@@ -1204,7 +1204,7 @@ void main() {
     expect(decoration.border.top.color, dividerColor);
   });
 
-  testWidgets('MergeableMaterial respects CardTheme.color prior to ThemeData.cardColor', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial\'s default color is set by CardTheme.color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
