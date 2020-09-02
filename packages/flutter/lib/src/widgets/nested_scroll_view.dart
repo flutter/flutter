@@ -709,7 +709,7 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
     required double? minScrollExtent,
     required double? maxScrollExtent,
     required double pixels,
-    required double? viewportDimension,
+    required double viewportDimension,
     required AxisDirection axisDirection,
     required this.minRange,
     required this.maxRange,
@@ -1497,7 +1497,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   void updateCanDrag(double totalExtent) {
-    context.setCanDrag(totalExtent > (viewportDimension! - maxScrollExtent!) || minScrollExtent != maxScrollExtent);
+    context.setCanDrag(totalExtent > (viewportDimension - maxScrollExtent!) || minScrollExtent != maxScrollExtent);
   }
 
   @override

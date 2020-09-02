@@ -985,7 +985,7 @@ class ScrollAction extends Action<ScrollIntent> {
       case ScrollIncrementType.line:
         return 50.0;
       case ScrollIncrementType.page:
-        return 0.8 * state.position.viewportDimension!;
+        return 0.8 * state.position.viewportDimension;
     }
   }
 

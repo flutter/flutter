@@ -76,7 +76,10 @@ abstract class ScrollMetrics {
   double get pixels;
 
   /// The extent of the viewport along the [axisDirection].
-  double? get viewportDimension;
+  double get viewportDimension;
+
+  /// Whether [viewportDimension] property is available.
+  bool get hasViewportDimension;
 
   /// The direction in which the scroll view scrolls.
   AxisDirection get axisDirection;
@@ -105,11 +108,11 @@ abstract class ScrollMetrics {
   /// The value is always non-negative, and less than or equal to [viewportDimension].
   double get extentInside {
     assert(minScrollExtent! <= maxScrollExtent!);
-    return viewportDimension!
+    return viewportDimension
       // "above" overscroll value
-      - (minScrollExtent! - pixels).clamp(0, viewportDimension!)
+      - (minScrollExtent! - pixels).clamp(0, viewportDimension)
       // "below" overscroll value
-      - (pixels - maxScrollExtent!).clamp(0, viewportDimension!);
+      - (pixels - maxScrollExtent!).clamp(0, viewportDimension);
   }
 
   /// The quantity of content conceptually "below" the viewport in the scrollable.
@@ -140,7 +143,10 @@ class FixedScrollMetrics extends ScrollMetrics {
   final double pixels;
 
   @override
-  final double? viewportDimension;
+  final double viewportDimension;
+
+  @override
+  bool get hasViewportDimension => true;
 
   @override
   final AxisDirection axisDirection;

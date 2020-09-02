@@ -247,7 +247,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       _trackExtent * fractionVisible,
     );
 
-    final double fractionOverscrolled = 1.0 - _lastMetrics!.extentInside / _lastMetrics!.viewportDimension!;
+    final double fractionOverscrolled = 1.0 - _lastMetrics!.extentInside / _lastMetrics!.viewportDimension;
     final double safeMinLength = math.min(minLength, _trackExtent);
     final double newMinLength = (_beforeExtent > 0 && _afterExtent > 0)
       // Thumb extent is no smaller than minLength if scrolling normally.
@@ -284,13 +284,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // Padding of the thumb track.
   double get _mainAxisPadding => _isVertical ? padding.vertical : padding.horizontal;
   // The size of the thumb track.
-  double get _trackExtent => _lastMetrics!.viewportDimension! - 2 * mainAxisMargin - _mainAxisPadding;
+  double get _trackExtent => _lastMetrics!.viewportDimension - 2 * mainAxisMargin - _mainAxisPadding;
 
   // The total size of the scrollable content.
   double get _totalContentExtent {
     return _lastMetrics!.maxScrollExtent!
       - _lastMetrics!.minScrollExtent!
-      + _lastMetrics!.viewportDimension!;
+      + _lastMetrics!.viewportDimension;
   }
 
   /// Convert between a thumb track position and the corresponding scroll
@@ -325,7 +325,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return;
 
     // Skip painting if there's not enough space.
-    if (_lastMetrics!.viewportDimension! <= _mainAxisPadding || _trackExtent <= 0) {
+    if (_lastMetrics!.viewportDimension <= _mainAxisPadding || _trackExtent <= 0) {
       return;
     }
 

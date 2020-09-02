@@ -169,8 +169,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   bool get hasPixels => _pixels != null;
 
   @override
-  double? get viewportDimension => _viewportDimension;
+  double get viewportDimension => _viewportDimension!;
   double? _viewportDimension;
+
+  @override
+  bool get hasViewportDimension => _viewportDimension != null;
 
   /// Whether [viewportDimension], [minScrollExtent], [maxScrollExtent],
   /// [outOfRange], and [atEdge] are available.
@@ -214,8 +217,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(_pixels == null);
     _minScrollExtent = other.minScrollExtent;
     _maxScrollExtent = other.maxScrollExtent;
-    _pixels = other._pixels;
-    _viewportDimension = other.viewportDimension;
+    if (other.hasPixels) {
+      _pixels = other.pixels;
+    }
+    if (other.hasViewportDimension) {
+      _viewportDimension = other.viewportDimension;
+    }
 
     assert(activity == null);
     assert(other.activity != null);
@@ -896,6 +903,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       description.add(debugLabel!);
     super.debugFillDescription(description);
     description.add('range: ${minScrollExtent?.toStringAsFixed(1)}..${maxScrollExtent?.toStringAsFixed(1)}');
-    description.add('viewport: ${viewportDimension?.toStringAsFixed(1)}');
+    description.add('viewport: ${_viewportDimension?.toStringAsFixed(1)}');
   }
 }

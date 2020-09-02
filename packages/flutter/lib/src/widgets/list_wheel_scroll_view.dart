@@ -311,7 +311,7 @@ class FixedExtentMetrics extends FixedScrollMetrics {
     required double? minScrollExtent,
     required double? maxScrollExtent,
     required double pixels,
-    required double? viewportDimension,
+    required double viewportDimension,
     required AxisDirection axisDirection,
     required this.itemIndex,
   }) : super(
