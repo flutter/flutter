@@ -467,15 +467,18 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
 
     FireNextFrameCallbackIfPresent();
 
+    // Clear the render context after submitting the frame.
+    // This ensures that the GL context is released after drawing to the
+    // surface.
+    //
+    // The GL context must be clear before performing Gr context deferred
+    // cleanup.
+    surface_->ClearRenderContext();
+
     if (surface_->GetContext()) {
       TRACE_EVENT0("flutter", "PerformDeferredSkiaCleanup");
       surface_->GetContext()->performDeferredCleanup(kSkiaCleanupExpiration);
     }
-
-    // Clear the render context after submitting the frame.
-    // This ensures that the GL context is released after drawing to the
-    // surface.
-    surface_->ClearRenderContext();
 
     return raster_status;
   }
