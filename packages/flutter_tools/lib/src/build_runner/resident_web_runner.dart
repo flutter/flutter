@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:dwds/dwds.dart';
+import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
@@ -488,7 +489,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             debuggingOptions.buildInfo,
             debuggingOptions.initializePlatform,
             false,
-            null,
+            kOnlineOnly,
           );
         }
         await device.device.startApp(
@@ -558,7 +559,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions.buildInfo,
           debuggingOptions.initializePlatform,
           false,
-          null,
+          kOnlineOnly,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
