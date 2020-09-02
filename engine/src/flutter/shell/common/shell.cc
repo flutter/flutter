@@ -608,6 +608,11 @@ fml::WeakPtr<PlatformView> Shell::GetPlatformView() {
   return weak_platform_view_;
 }
 
+fml::WeakPtr<ShellIOManager> Shell::GetIOManager() {
+  FML_DCHECK(is_setup_);
+  return io_manager_->GetWeakPtr();
+}
+
 DartVM* Shell::GetDartVM() {
   return &vm_;
 }

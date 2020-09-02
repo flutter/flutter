@@ -15,6 +15,7 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/lib/ui/hint_freed_delegate.h"
 #include "flutter/lib/ui/io_manager.h"
 #include "flutter/lib/ui/isolate_name_server/isolate_name_server.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
@@ -60,6 +61,8 @@ class UIDartState : public tonic::DartState {
 
   fml::WeakPtr<SnapshotDelegate> GetSnapshotDelegate() const;
 
+  fml::WeakPtr<HintFreedDelegate> GetHintFreedDelegate() const;
+
   fml::WeakPtr<GrDirectContext> GetResourceContext() const;
 
   fml::WeakPtr<ImageDecoder> GetImageDecoder() const;
@@ -87,6 +90,7 @@ class UIDartState : public tonic::DartState {
               TaskObserverAdd add_callback,
               TaskObserverRemove remove_callback,
               fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+              fml::WeakPtr<HintFreedDelegate> hint_freed_delegate,
               fml::WeakPtr<IOManager> io_manager,
               fml::RefPtr<SkiaUnrefQueue> skia_unref_queue,
               fml::WeakPtr<ImageDecoder> image_decoder,
@@ -113,6 +117,7 @@ class UIDartState : public tonic::DartState {
   const TaskObserverAdd add_callback_;
   const TaskObserverRemove remove_callback_;
   fml::WeakPtr<SnapshotDelegate> snapshot_delegate_;
+  fml::WeakPtr<HintFreedDelegate> hint_freed_delegate_;
   fml::WeakPtr<IOManager> io_manager_;
   fml::RefPtr<SkiaUnrefQueue> skia_unref_queue_;
   fml::WeakPtr<ImageDecoder> image_decoder_;

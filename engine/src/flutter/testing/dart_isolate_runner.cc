@@ -73,6 +73,7 @@ void RunDartCodeInIsolate(DartVMRef& vm_ref,
       std::move(task_runners),            // task runners
       nullptr,                            // window
       {},                                 // snapshot delegate
+      {},                                 // hint freed delegate
       io_manager,                         // io manager
       {},                                 // unref queue
       {},                                 // image decoder

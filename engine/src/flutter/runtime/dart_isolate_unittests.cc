@@ -51,6 +51,7 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
       std::move(task_runners),            // task runners
       nullptr,                            // window
       {},                                 // snapshot delegate
+      {},                                 // hint freed delegate
       {},                                 // io manager
       {},                                 // unref queue
       {},                                 // image decoder
@@ -85,6 +86,7 @@ TEST_F(DartIsolateTest, IsolateShutdownCallbackIsInIsolateScope) {
       std::move(task_runners),            // task runners
       nullptr,                            // window
       {},                                 // snapshot delegate
+      {},                                 // hint freed delegate
       {},                                 // io manager
       {},                                 // unref queue
       {},                                 // image decoder

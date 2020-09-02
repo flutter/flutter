@@ -18,6 +18,7 @@ UIDartState::UIDartState(
     TaskObserverAdd add_callback,
     TaskObserverRemove remove_callback,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+    fml::WeakPtr<HintFreedDelegate> hint_freed_delegate,
     fml::WeakPtr<IOManager> io_manager,
     fml::RefPtr<SkiaUnrefQueue> skia_unref_queue,
     fml::WeakPtr<ImageDecoder> image_decoder,
@@ -31,6 +32,7 @@ UIDartState::UIDartState(
       add_callback_(std::move(add_callback)),
       remove_callback_(std::move(remove_callback)),
       snapshot_delegate_(std::move(snapshot_delegate)),
+      hint_freed_delegate_(std::move(hint_freed_delegate)),
       io_manager_(std::move(io_manager)),
       skia_unref_queue_(std::move(skia_unref_queue)),
       image_decoder_(std::move(image_decoder)),
@@ -134,6 +136,10 @@ void UIDartState::AddOrRemoveTaskObserver(bool add) {
 
 fml::WeakPtr<SnapshotDelegate> UIDartState::GetSnapshotDelegate() const {
   return snapshot_delegate_;
+}
+
+fml::WeakPtr<HintFreedDelegate> UIDartState::GetHintFreedDelegate() const {
+  return hint_freed_delegate_;
 }
 
 fml::WeakPtr<GrDirectContext> UIDartState::GetResourceContext() const {
