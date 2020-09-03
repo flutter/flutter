@@ -237,6 +237,36 @@ TEST_F(AccessibilityBridgeTest, PopulatesHiddenState) {
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
 }
 
+TEST_F(AccessibilityBridgeTest, PopulatesActions) {
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+  node0.actions |= static_cast<int>(flutter::SemanticsAction::kTap);
+  node0.actions |= static_cast<int>(flutter::SemanticsAction::kLongPress);
+  node0.actions |= static_cast<int>(flutter::SemanticsAction::kShowOnScreen);
+  node0.actions |= static_cast<int>(flutter::SemanticsAction::kIncrease);
+  node0.actions |= static_cast<int>(flutter::SemanticsAction::kDecrease);
+
+  accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}});
+  RunLoopUntilIdle();
+
+  EXPECT_EQ(0, semantics_manager_.DeleteCount());
+  EXPECT_EQ(1, semantics_manager_.UpdateCount());
+  EXPECT_EQ(1, semantics_manager_.CommitCount());
+  EXPECT_EQ(1u, semantics_manager_.LastUpdatedNodes().size());
+  const auto& fuchsia_node = semantics_manager_.LastUpdatedNodes().at(0u);
+  EXPECT_EQ(fuchsia_node.actions().size(), 5u);
+  EXPECT_EQ(fuchsia_node.actions().at(0u),
+            fuchsia::accessibility::semantics::Action::DEFAULT);
+  EXPECT_EQ(fuchsia_node.actions().at(1u),
+            fuchsia::accessibility::semantics::Action::SECONDARY);
+  EXPECT_EQ(fuchsia_node.actions().at(2u),
+            fuchsia::accessibility::semantics::Action::SHOW_ON_SCREEN);
+  EXPECT_EQ(fuchsia_node.actions().at(3u),
+            fuchsia::accessibility::semantics::Action::INCREMENT);
+  EXPECT_EQ(fuchsia_node.actions().at(4u),
+            fuchsia::accessibility::semantics::Action::DECREMENT);
+}
+
 TEST_F(AccessibilityBridgeTest, TruncatesLargeLabel) {
   // Test that labels which are too long are truncated.
   flutter::SemanticsNode node0;
