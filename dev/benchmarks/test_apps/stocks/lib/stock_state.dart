@@ -173,7 +173,7 @@ class StockState extends State<StockStateScope> {
   void updateConfiguration(StockConfiguration configuration) {
     if (_configuration != configuration) {
       _configuration = configuration;
-      setState(() {/* Rebuild will to trigger a inherited widget update. */});
+      setState(() {/* Rebuilds to trigger a inherited widget update. */});
     }
   }
 
