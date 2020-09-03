@@ -145,6 +145,12 @@ class AccessibilityBridge
       const flutter::SemanticsNode& node,
       size_t* additional_size) const;
 
+  // Derives the set of supported actions for a Fuchsia semantics node from
+  // a Flutter semantics node.
+  std::vector<fuchsia::accessibility::semantics::Action> GetNodeActions(
+      const flutter::SemanticsNode& node,
+      size_t* additional_size) const;
+
   // Gets the set of reachable descendants from the given node id.
   std::unordered_set<int32_t> GetDescendants(int32_t node_id) const;
 

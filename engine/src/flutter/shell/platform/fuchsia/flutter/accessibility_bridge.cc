@@ -115,6 +115,36 @@ fuchsia::accessibility::semantics::States AccessibilityBridge::GetNodeStates(
   return states;
 }
 
+std::vector<fuchsia::accessibility::semantics::Action>
+AccessibilityBridge::GetNodeActions(const flutter::SemanticsNode& node,
+                                    size_t* additional_size) const {
+  std::vector<fuchsia::accessibility::semantics::Action> node_actions;
+
+  if (node.HasAction(flutter::SemanticsAction::kTap)) {
+    node_actions.push_back(fuchsia::accessibility::semantics::Action::DEFAULT);
+  }
+  if (node.HasAction(flutter::SemanticsAction::kLongPress)) {
+    node_actions.push_back(
+        fuchsia::accessibility::semantics::Action::SECONDARY);
+  }
+  if (node.HasAction(flutter::SemanticsAction::kShowOnScreen)) {
+    node_actions.push_back(
+        fuchsia::accessibility::semantics::Action::SHOW_ON_SCREEN);
+  }
+  if (node.HasAction(flutter::SemanticsAction::kIncrease)) {
+    node_actions.push_back(
+        fuchsia::accessibility::semantics::Action::INCREMENT);
+  }
+  if (node.HasAction(flutter::SemanticsAction::kDecrease)) {
+    node_actions.push_back(
+        fuchsia::accessibility::semantics::Action::DECREMENT);
+  }
+
+  *additional_size +=
+      node_actions.size() * sizeof(fuchsia::accessibility::semantics::Action);
+  return node_actions;
+}
+
 std::unordered_set<int32_t> AccessibilityBridge::GetDescendants(
     int32_t node_id) const {
   std::unordered_set<int32_t> descendents;
@@ -227,6 +257,7 @@ void AccessibilityBridge::AddSemanticsNodeUpdate(
         .set_transform(GetNodeTransform(flutter_node))
         .set_attributes(GetNodeAttributes(flutter_node, &this_node_size))
         .set_states(GetNodeStates(flutter_node, &this_node_size))
+        .set_actions(GetNodeActions(flutter_node, &this_node_size))
         .set_child_ids(child_ids);
     this_node_size +=
         kNodeIdSize * flutter_node.childrenInTraversalOrder.size();
