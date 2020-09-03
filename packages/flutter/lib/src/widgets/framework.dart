@@ -2677,8 +2677,12 @@ class BuildOwner {
             e,
             stack,
             informationCollector: () sync* {
-              yield DiagnosticsDebugCreator(DebugCreator(_dirtyElements[index]));
-              yield _dirtyElements[index].describeElement('The element being rebuilt at the time was index $index of $dirtyCount');
+              if (index < _dirtyElements.length) {
+                yield DiagnosticsDebugCreator(DebugCreator(_dirtyElements[index]));
+                yield _dirtyElements[index].describeElement('The element being rebuilt at the time was index $index of $dirtyCount');
+              } else {
+                yield ErrorHint('The element being rebuilt at the time was index $index of $dirtyCount, but _dirtyElements only had ${_dirtyElements.length} entries. This suggests some confusion in the framework internals.');
+              }
             },
           );
         }
@@ -3290,9 +3294,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// the "active" lifecycle state.
   ///
   /// Subclasses that override this method are likely to want to also override
-  /// [update], [visitChildren], [RenderObjectElement.insertChildRenderObject],
-  /// [RenderObjectElement.moveChildRenderObject], and
-  /// [RenderObjectElement.removeChildRenderObject].
+  /// [update], [visitChildren], [RenderObjectElement.insertRenderObjectChild],
+  /// [RenderObjectElement.moveRenderObjectChild], and
+  /// [RenderObjectElement.removeRenderObjectChild].
   @mustCallSuper
   void mount(Element parent, dynamic newSlot) {
     assert(_debugLifecycleState == _ElementLifecycle.initial);
@@ -3561,8 +3565,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// This updates the child model such that, e.g., [visitChildren] does not
   /// walk that child anymore.
   ///
-  /// The element will still have a valid parent when this is called. After this
-  /// is called, [deactivateChild] is called to sever the link to this object.
+  /// The element will still have a valid parent when this is called, and the
+  /// child's [Element.slot] value will be valid in the context of that parent.
+  /// After this is called, [deactivateChild] is called to sever the link to
+  /// this object.
   ///
   /// The [update] is responsible for updating or creating the new child that
   /// will replace this [child].
@@ -5335,9 +5341,9 @@ class InheritedElement extends ProxyElement {
 /// ### Maintaining the render object tree
 ///
 /// Once a descendant produces a render object, it will call
-/// [insertChildRenderObject]. If the descendant's slot changes identity, it
-/// will call [moveChildRenderObject]. If a descendant goes away, it will call
-/// [removeChildRenderObject].
+/// [insertRenderObjectChild]. If the descendant's slot changes identity, it
+/// will call [moveRenderObjectChild]. If a descendant goes away, it will call
+/// [removeRenderObjectChild].
 ///
 /// These three methods should update the render tree accordingly, attaching,
 /// moving, and detaching the given child render object from this element's own
@@ -5727,10 +5733,11 @@ abstract class RenderObjectElement extends Element {
 
   @override
   void _updateSlot(dynamic newSlot) {
-    assert(slot != newSlot);
+    final dynamic oldSlot = slot;
+    assert(oldSlot != newSlot);
     super._updateSlot(newSlot);
     assert(slot == newSlot);
-    _ancestorRenderObjectElement.moveChildRenderObject(renderObject, slot);
+    _ancestorRenderObjectElement.moveRenderObjectChild(renderObject, oldSlot, slot);
   }
 
   @override
@@ -5738,7 +5745,7 @@ abstract class RenderObjectElement extends Element {
     assert(_ancestorRenderObjectElement == null);
     _slot = newSlot;
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
-    _ancestorRenderObjectElement?.insertChildRenderObject(renderObject, newSlot);
+    _ancestorRenderObjectElement?.insertRenderObjectChild(renderObject, newSlot);
     final ParentDataElement<ParentData> parentDataElement = _findAncestorParentDataElement();
     if (parentDataElement != null)
       _updateParentData(parentDataElement.widget);
@@ -5747,10 +5754,57 @@ abstract class RenderObjectElement extends Element {
   @override
   void detachRenderObject() {
     if (_ancestorRenderObjectElement != null) {
-      _ancestorRenderObjectElement.removeChildRenderObject(renderObject);
+      _ancestorRenderObjectElement.removeRenderObjectChild(renderObject, slot);
       _ancestorRenderObjectElement = null;
     }
     _slot = null;
+  }
+
+  /// Insert the given child into [renderObject] at the given slot.
+  ///
+  /// {@macro flutter.widgets.slots}
+  ///
+  /// ## Deprecation
+  ///
+  /// This method has been deprecated in favor of [insertRenderObjectChild].
+  ///
+  /// The reason for the deprecation is to provide the `oldSlot` argument to
+  /// the [moveRenderObjectChild] method (such an argument was missing from
+  /// the now-deprecated [moveChildRenderObject] method) and the `slot`
+  /// argument to the [removeRenderObjectChild] method (such an argument was
+  /// missing from the now-deprecated [removeChildRenderObject] method). While
+  /// no argument was added to [insertRenderObjectChild], the name change (and
+  /// corresponding deprecation) was made to maintain naming parity with the
+  /// other two methods.
+  ///
+  /// To migrate, simply override [insertRenderObjectChild] instead of
+  /// [insertChildRenderObject]. The arguments stay the same. Subclasses should
+  /// _not_ call `super.insertRenderObjectChild(...)`.
+  @protected
+  @mustCallSuper
+  @Deprecated(
+    'Override insertRenderObjectChild instead. '
+    'This feature was deprecated after v1.21.0-9.0.pre.'
+  )
+  void insertChildRenderObject(covariant RenderObject child, covariant dynamic slot) {
+    assert(() {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('RenderObjectElement.insertChildRenderObject() is deprecated.'),
+        toDiagnosticsNode(
+          name: 'insertChildRenderObject() was called on this Element',
+          style: DiagnosticsTreeStyle.shallow,
+        ),
+        ErrorDescription('insertChildRenderObject() has been deprecated in favor of '
+          'insertRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
+          'for details.'),
+        ErrorHint('Rather than overriding insertChildRenderObject() in your '
+          'RenderObjectElement subclass, override insertRenderObjectChild() instead, '
+          "and DON'T call super.insertRenderObjectChild(). If you're implementing a "
+          'new RenderObjectElement, you should override/implement '
+          'insertRenderObjectChild(), moveRenderObjectChild(), and '
+          'removeRenderObjectChild().'),
+      ]);
+    }());
   }
 
   /// Insert the given child into [renderObject] at the given slot.
@@ -5762,7 +5816,9 @@ abstract class RenderObjectElement extends Element {
   /// [IndexedSlot] is a convenient value for the slot.
   /// {@endtemplate}
   @protected
-  void insertChildRenderObject(covariant RenderObject child, covariant dynamic slot);
+  void insertRenderObjectChild(covariant RenderObject child, covariant dynamic slot) {
+    insertChildRenderObject(child, slot);
+  }
 
   /// Move the given child to the given slot.
   ///
@@ -5778,14 +5834,127 @@ abstract class RenderObjectElement extends Element {
   /// always having the same slot (and where children in different slots are never
   /// compared against each other for the purposes of updating one slot with the
   /// element from another slot) would never call this.
+  ///
+  /// ## Deprecation
+  ///
+  /// This method has been deprecated in favor of [moveRenderObjectChild].
+  ///
+  /// The reason for the deprecation is to provide the `oldSlot` argument to
+  /// the [moveRenderObjectChild] method (such an argument was missing from
+  /// the now-deprecated [moveChildRenderObject] method) and the `slot`
+  /// argument to the [removeRenderObjectChild] method (such an argument was
+  /// missing from the now-deprecated [removeChildRenderObject] method). While
+  /// no argument was added to [insertRenderObjectChild], the name change (and
+  /// corresponding deprecation) was made to maintain naming parity with the
+  /// other two methods.
+  ///
+  /// To migrate, simply override [moveRenderObjectChild] instead of
+  /// [moveChildRenderObject]. The `slot` argument becomes the `newSlot`
+  /// argument, and the method will now take a new `oldSlot` argument that
+  /// subclasses may find useful. Subclasses should _not_ call
+  /// `super.moveRenderObjectChild(...)`.
   @protected
-  void moveChildRenderObject(covariant RenderObject child, covariant dynamic slot);
+  @mustCallSuper
+  @Deprecated(
+    'Override moveRenderObjectChild instead. '
+    'This feature was deprecated after v1.21.0-9.0.pre.'
+  )
+  void moveChildRenderObject(covariant RenderObject child, covariant dynamic slot) {
+    assert(() {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('RenderObjectElement.moveChildRenderObject() is deprecated.'),
+        toDiagnosticsNode(
+          name: 'super.moveChildRenderObject() was called on this Element',
+          style: DiagnosticsTreeStyle.shallow,
+        ),
+        ErrorDescription('moveChildRenderObject() has been deprecated in favor of '
+            'moveRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
+            'for details.'),
+        ErrorHint('Rather than overriding moveChildRenderObject() in your '
+            'RenderObjectElement subclass, override moveRenderObjectChild() instead, '
+            "and DON'T call super.moveRenderObjectChild(). If you're implementing a "
+            'new RenderObjectElement, you should override/implement '
+            'insertRenderObjectChild(), moveRenderObjectChild(), and '
+            'removeRenderObjectChild().'),
+      ]);
+    }());
+  }
+
+  /// Move the given child from the given old slot to the given new slot.
+  ///
+  /// The given child is guaranteed to have [renderObject] as its parent.
+  ///
+  /// {@macro flutter.widgets.slots}
+  ///
+  /// This method is only ever called if [updateChild] can end up being called
+  /// with an existing [Element] child and a `slot` that differs from the slot
+  /// that element was previously given. [MultiChildRenderObjectElement] does this,
+  /// for example. [SingleChildRenderObjectElement] does not (since the `slot` is
+  /// always null). An [Element] that has a specific set of slots with each child
+  /// always having the same slot (and where children in different slots are never
+  /// compared against each other for the purposes of updating one slot with the
+  /// element from another slot) would never call this.
+  @protected
+  void moveRenderObjectChild(covariant RenderObject child, covariant dynamic oldSlot, covariant dynamic newSlot) {
+    moveChildRenderObject(child, newSlot);
+  }
 
   /// Remove the given child from [renderObject].
   ///
   /// The given child is guaranteed to have [renderObject] as its parent.
+  ///
+  /// ## Deprecation
+  ///
+  /// This method has been deprecated in favor of [removeRenderObjectChild].
+  ///
+  /// The reason for the deprecation is to provide the `oldSlot` argument to
+  /// the [moveRenderObjectChild] method (such an argument was missing from
+  /// the now-deprecated [moveChildRenderObject] method) and the `slot`
+  /// argument to the [removeRenderObjectChild] method (such an argument was
+  /// missing from the now-deprecated [removeChildRenderObject] method). While
+  /// no argument was added to [insertRenderObjectChild], the name change (and
+  /// corresponding deprecation) was made to maintain naming parity with the
+  /// other two methods.
+  ///
+  /// To migrate, simply override [removeRenderObjectChild] instead of
+  /// [removeChildRenderObject]. The method will now take a new `slot` argument
+  /// that subclasses may find useful. Subclasses should _not_ call
+  /// `super.removeRenderObjectChild(...)`.
   @protected
-  void removeChildRenderObject(covariant RenderObject child);
+  @mustCallSuper
+  @Deprecated(
+    'Override removeRenderObjectChild instead. '
+    'This feature was deprecated after v1.21.0-9.0.pre.'
+  )
+  void removeChildRenderObject(covariant RenderObject child) {
+    assert(() {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('RenderObjectElement.removeChildRenderObject() is deprecated.'),
+        toDiagnosticsNode(
+          name: 'super.removeChildRenderObject() was called on this Element',
+          style: DiagnosticsTreeStyle.shallow,
+        ),
+        ErrorDescription('removeChildRenderObject() has been deprecated in favor of '
+            'removeRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
+            'for details.'),
+        ErrorHint('Rather than overriding removeChildRenderObject() in your '
+            'RenderObjectElement subclass, override removeRenderObjectChild() instead, '
+            "and DON'T call super.removeRenderObjectChild(). If you're implementing a "
+            'new RenderObjectElement, you should override/implement '
+            'insertRenderObjectChild(), moveRenderObjectChild(), and '
+            'removeRenderObjectChild().'),
+      ]);
+    }());
+  }
+
+  /// Remove the given child from [renderObject].
+  ///
+  /// The given child is guaranteed to have been inserted at the given `slot`
+  /// and have [renderObject] as its parent.
+  @protected
+  void removeRenderObjectChild(covariant RenderObject child, covariant dynamic slot) {
+    removeChildRenderObject(child);
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -5837,17 +6006,17 @@ class LeafRenderObjectElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderObject child, dynamic slot) {
     assert(false);
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, dynamic slot) {
+  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
     assert(false);
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, dynamic slot) {
     assert(false);
   }
 
@@ -5900,7 +6069,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderObject child, dynamic slot) {
     final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject as RenderObjectWithChildMixin<RenderObject>;
     assert(slot == null);
     assert(renderObject.debugValidateChild(child));
@@ -5909,13 +6078,14 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, dynamic slot) {
+  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
     assert(false);
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, dynamic slot) {
     final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject as RenderObjectWithChildMixin<RenderObject>;
+    assert(slot == null);
     assert(renderObject.child == child);
     renderObject.child = null;
     assert(renderObject == this.renderObject);
@@ -5958,7 +6128,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   final Set<Element> _forgottenChildren = HashSet<Element>();
 
   @override
-  void insertChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
+  void insertRenderObjectChild(RenderObject child, IndexedSlot<Element> slot) {
     final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
       this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
     assert(renderObject.debugValidateChild(child));
@@ -5967,16 +6137,16 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
+  void moveRenderObjectChild(RenderObject child, IndexedSlot<Element> oldSlot, IndexedSlot<Element> newSlot) {
     final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
       this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
     assert(child.parent == renderObject);
-    renderObject.move(child, after: slot?.value?.renderObject);
+    renderObject.move(child, after: newSlot?.value?.renderObject);
     assert(renderObject == this.renderObject);
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, dynamic slot) {
     final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
       this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
     assert(child.parent == renderObject);

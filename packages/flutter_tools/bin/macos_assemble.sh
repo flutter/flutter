@@ -72,6 +72,11 @@ if [[ -n "$BUNDLE_SKSL_PATH" ]]; then
   bundle_sksl_path="-iBundleSkSLPath=${BUNDLE_SKSL_PATH}"
 fi
 
+code_size_directory=""
+if [[ -n "$CODE_SIZE_DIRECTORY" ]]; then
+  code_size_directory="-dCodeSizeDirectory=${CODE_SIZE_DIRECTORY}"
+fi
+
 RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     ${verbose_flag}                                                         \
     ${flutter_engine_flag}                                                  \
@@ -86,6 +91,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                  \
     -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                        \
     ${bundle_sksl_path}                                                     \
+    ${code_size_directory}                                                  \
     --DartDefines="${DART_DEFINES}"                                         \
     --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"               \
     --ExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \

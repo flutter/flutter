@@ -24,6 +24,7 @@ import '../macos/xcode.dart';
 import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
+import '../vmservice.dart';
 import 'fallback_discovery.dart';
 import 'ios_deploy.dart';
 import 'ios_workflow.dart';
@@ -678,7 +679,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
 
     void logMessage(vm_service.Event event) {
-      final String message = utf8.decode(base64.decode(event.bytes));
+      final String message = processVmServiceMessage(event);
       if (message.isNotEmpty) {
         _linesController.add(message);
       }
