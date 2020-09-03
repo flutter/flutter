@@ -1482,6 +1482,21 @@ TEST_F(ShellTest, IsolateCanAccessPersistentIsolateData) {
   DestroyShell(std::move(shell), std::move(task_runners));
 }
 
+static void LogSkData(sk_sp<SkData> data, const char* title) {
+  FML_LOG(ERROR) << "---------- " << title;
+  std::ostringstream ostr;
+  for (size_t i = 0; i < data->size();) {
+    ostr << std::hex << std::setfill('0') << std::setw(2)
+         << static_cast<int>(data->bytes()[i]) << " ";
+    i++;
+    if (i % 16 == 0 || i == data->size()) {
+      FML_LOG(ERROR) << ostr.str();
+      ostr.str("");
+      ostr.clear();
+    }
+  }
+}
+
 TEST_F(ShellTest, Screenshot) {
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent firstFrameLatch;
@@ -1538,7 +1553,12 @@ TEST_F(ShellTest, Screenshot) {
   sk_sp<SkData> reference_data = SkData::MakeWithoutCopy(
       reference_png->GetMapping(), reference_png->GetSize());
 
-  ASSERT_TRUE(reference_data->equals(screenshot_future.get().data.get()));
+  sk_sp<SkData> screenshot_data = screenshot_future.get().data;
+  if (!reference_data->equals(screenshot_data.get())) {
+    LogSkData(reference_data, "reference");
+    LogSkData(screenshot_data, "screenshot");
+    ASSERT_TRUE(false);
+  }
 
   DestroyShell(std::move(shell));
 }
