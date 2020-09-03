@@ -1616,6 +1616,50 @@ void main() {
         ),
       );
     });
+
+    testWidgets('using Navigator.pop when history is empty throws assertion error', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+      
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            key: navigatorKey,
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) => const Text('dummy'),
+              );
+            },
+          ),
+        ),
+      );
+
+      // pop navigator to make history empty.
+      navigatorKey.currentState.pop();
+      await tester.pumpAndSettle();
+
+      // rebuild the same widget.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            key: navigatorKey,
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) => const Text('dummy'),
+              );
+            },
+          ),
+        ),
+      );
+
+      final dynamic exception = tester.takeException();
+      expect(exception, isNotNull);
+      expect(exception, isAssertionError);
+      expect(exception.toString(), contains('You may have accidentally called Navigator.pop() in the wrong context.'));
+    });
   });
 
   testWidgets('OverlayEntry of topmost initial route is marked as opaque', (WidgetTester tester) async {
