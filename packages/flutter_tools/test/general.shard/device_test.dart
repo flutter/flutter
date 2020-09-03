@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -208,7 +209,8 @@ void main() {
       ];
 
       when(mockStdio.stdinHasTerminal).thenReturn(true);
-      when(globals.terminal.promptForCharInput(<String>['0', '1'],
+      when(globals.terminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+      displayAcceptedCharacters: false,
       logger: globals.logger,
       prompt: globals.userMessages.flutterChooseOne)
       ).thenAnswer((Invocation invocation) async => '0');
@@ -232,8 +234,9 @@ void main() {
       ];
 
       when(mockStdio.stdinHasTerminal).thenReturn(true);
-      when(globals.terminal.promptForCharInput(<String>['0', '1'],
-      logger: globals.logger,
+      when(globals.terminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+          displayAcceptedCharacters: false,
+          logger: globals.logger,
       prompt: globals.userMessages.flutterChooseOne)
       ).thenAnswer((Invocation invocation) async => '1');
 
@@ -256,8 +259,9 @@ void main() {
       ];
 
       when(mockStdio.stdinHasTerminal).thenReturn(true);
-      when(globals.terminal.promptForCharInput(<String>['0', '1'],
-        logger: globals.logger,
+      when(globals.terminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+          displayAcceptedCharacters: false,
+          logger: globals.logger,
         prompt: globals.userMessages.flutterChooseOne)
       ).thenAnswer((Invocation invocation) async => '0');
 
@@ -280,8 +284,9 @@ void main() {
       ];
 
       when(mockStdio.stdinHasTerminal).thenReturn(true);
-      when(globals.terminal.promptForCharInput(<String>['0', '1'],
-        logger: globals.logger,
+      when(globals.terminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+          displayAcceptedCharacters: false,
+          logger: globals.logger,
         prompt: globals.userMessages.flutterChooseOne)
       ).thenAnswer((Invocation invocation) async => '1');
 
@@ -307,7 +312,8 @@ void main() {
       ];
 
       when(mockStdio.stdinHasTerminal).thenReturn(true);
-      when(globals.terminal.promptForCharInput(<String>['0', '1', '2', '3'],
+      when(globals.terminal.promptForCharInput(<String>['0', '1', '2', '3', 'q', 'Q'],
+        displayAcceptedCharacters: false,
         logger: globals.logger,
         prompt: globals.userMessages.flutterChooseOne)
       ).thenAnswer((Invocation invocation) async => '2');
@@ -318,6 +324,33 @@ void main() {
       expect(filtered, <Device>[
         nonEphemeralOne
       ]);
+    }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
+      AnsiTerminal: () => MockTerminal(),
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
+    });
+
+    testUsingContext('exit from choose one of available devices', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+        ephemeralTwo,
+      ];
+
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
+      when(globals.terminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+          displayAcceptedCharacters: false,
+          logger: globals.logger,
+          prompt: globals.userMessages.flutterChooseOne)
+      ).thenAnswer((Invocation invocation) async => 'q');
+
+      try {
+        final DeviceManager deviceManager = TestDeviceManager(devices);
+        await deviceManager.findTargetDevices(FlutterProject.current());
+      } on ToolExit catch (e) {
+        expect(e.exitCode, null);
+        expect(e.message, '');
+      }
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       AnsiTerminal: () => MockTerminal(),
