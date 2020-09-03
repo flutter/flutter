@@ -399,7 +399,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.index, 5);
     // The center of the FFFFFF item is now at the TabBar's center
-    expect(tester.getCenter(find.text('FFFFFF')).dx, closeTo(400.0, 1.0));
+    expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(400.0, epsilon: 1.0));
   });
 
 
@@ -2669,6 +2669,57 @@ void main() {
 
     final PageView pageView = tester.widget<PageView>(find.byType(PageView));
     expect(pageView.physics.toString().contains('ClampingScrollPhysics'), isFalse);
+  });
+
+  testWidgets('TabController changes offset attribute', (WidgetTester tester) async {
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: 2,
+    );
+
+    Color firstColor;
+    Color secondColor;
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          controller: controller,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.black,
+          tabs: <Widget>[
+            Builder(builder: (BuildContext context) {
+              firstColor = DefaultTextStyle.of(context).style.color;
+              return const Text('First');
+            }),
+            Builder(builder: (BuildContext context) {
+              secondColor = DefaultTextStyle.of(context).style.color;
+              return const Text('Second');
+            }),
+          ],
+        ),
+      ),
+    );
+
+    expect(firstColor, equals(Colors.white));
+    expect(secondColor, equals(Colors.black));
+
+    controller.offset = 0.6;
+    await tester.pump();
+
+    expect(firstColor, equals(Color.lerp(Colors.white, Colors.black, 0.6)));
+    expect(secondColor, equals(Color.lerp(Colors.black, Colors.white, 0.6)));
+
+    controller.index = 1;
+    await tester.pump();
+
+    expect(firstColor, equals(Colors.black));
+    expect(secondColor, equals(Colors.white));
+
+    controller.offset = 0.6;
+    await tester.pump();
+
+    expect(firstColor, equals(Colors.black));
+    expect(secondColor, equals(Colors.white));
   });
 
   testWidgets('Crash on dispose', (WidgetTester tester) async {
