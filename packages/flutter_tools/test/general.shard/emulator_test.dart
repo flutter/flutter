@@ -58,6 +58,7 @@ void main() {
     when(mockSdk.avdManagerPath).thenReturn('avdmanager');
     when(mockSdk.getAvdManagerPath()).thenReturn('avdmanager');
     when(mockSdk.emulatorPath).thenReturn('emulator');
+    when(mockSdk.adbPath).thenReturn('adb');
   });
 
   group('EmulatorManager', () {
