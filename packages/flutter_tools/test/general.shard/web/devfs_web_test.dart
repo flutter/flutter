@@ -770,7 +770,7 @@ void main() {
       Uri.base,
       null,
       testMode: true);
-      
+
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
     await webAssetServer.dispose();
   });
