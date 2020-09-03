@@ -12,7 +12,6 @@ import '../../src/context.dart';
 
 void main() {
   testUsingContext('call GenerateLocalizations with default l10n settings', () async {
-    // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
@@ -23,10 +22,6 @@ void main() {
   }
 }''');
     fileSystem.file('l10n.yaml').createSync();
-    fileSystem.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
-    // Create an l10n.yaml file
-    fileSystem.file('l10n.yaml').createSync();
-    // Add generate:true to pubspec.yaml.
     final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
     final String content = pubspecFile.readAsStringSync().replaceFirst(
       '\nflutter:\n',
