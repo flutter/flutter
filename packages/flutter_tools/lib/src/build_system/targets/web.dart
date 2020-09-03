@@ -40,24 +40,18 @@ enum ServiceWorkerStrategy {
   /// Download the app shell eagerly and all other assets lazily.
   /// Prefer the offline cached version.
   offlineFirst,
-  /// Download all assets, including the app shell, lazily.
-  /// Prefer the online version.
-  onlineFirst,
-  /// Never cache any assets.
-  onlineOnly,
+  /// Do not generate a service worker,
+  none,
 }
 
 const String kOfflineFirst = 'offline-first';
-const String kOnlineFirst = 'online-first';
-const String kOnlineOnly = 'online-only';
+const String kNoneWorker = 'none';
 
 /// Convert a [value] into a [ServiceWorkerStrategy].
 ServiceWorkerStrategy _serviceWorkerStrategyfromString(String value) {
   switch (value) {
-    case kOnlineFirst:
-      return ServiceWorkerStrategy.onlineFirst;
-    case kOnlineOnly:
-      return ServiceWorkerStrategy.onlineOnly;
+    case kNoneWorker:
+      return ServiceWorkerStrategy.none;
     // offline-first is the default value for any invalid requests.
     default:
       return ServiceWorkerStrategy.offlineFirst;
@@ -439,6 +433,9 @@ String generateServiceWorker(
   List<String> coreBundle, {
   @required ServiceWorkerStrategy serviceWorkerStrategy,
 }) {
+  if (serviceWorkerStrategy == ServiceWorkerStrategy.none) {
+    return '';
+  }
   return '''
 'use strict';
 const MANIFEST = 'flutter-app-manifest';
@@ -447,17 +444,12 @@ const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
   ${resources.entries.map((MapEntry<String, String> entry) => '"${entry.key}": "${entry.value}"').join(",\n")}
 };
-
 // The application shell files that are downloaded before a service worker can
-// start when using offline-first strategy.
+// start.
 const CORE = [
   ${coreBundle.map((String file) => '"$file"').join(',\n')}];
-
 // During install, the TEMP cache is populated with the application shell files.
 self.addEventListener("install", (event) => {
-  if ('${serviceWorkerStrategy.toString()}' != 'ServiceWorkerStrategy.offlineFirst') {
-    return;
-  }
   return event.waitUntil(
     caches.open(TEMP).then((cache) => {
       return cache.addAll(
@@ -465,21 +457,16 @@ self.addEventListener("install", (event) => {
     })
   );
 });
-
 // During activate, the cache is populated with the temp files downloaded in
 // install. If this service worker is upgrading from one with a saved
 // MANIFEST, then use this to retain unchanged resource files.
 self.addEventListener("activate", function(event) {
-  if ('${serviceWorkerStrategy.toString()}' != 'ServiceWorkerStrategy.onlineOnly') {
-    return;
-  }
   return event.waitUntil(async function() {
     try {
       var contentCache = await caches.open(CACHE_NAME);
       var tempCache = await caches.open(TEMP);
       var manifestCache = await caches.open(MANIFEST);
       var manifest = await manifestCache.match('manifest');
-
       // When there is no prior manifest, clear the entire cache.
       if (!manifest) {
         await caches.delete(CACHE_NAME);
@@ -493,7 +480,6 @@ self.addEventListener("activate", function(event) {
         await manifestCache.put('manifest', new Response(JSON.stringify(RESOURCES)));
         return;
       }
-
       var oldManifest = await manifest.json();
       var origin = self.location.origin;
       for (var request of await contentCache.keys()) {
@@ -527,79 +513,49 @@ self.addEventListener("activate", function(event) {
     }
   }());
 });
-
 // The fetch handler redirects requests for RESOURCE files to the service
 // worker cache.
 self.addEventListener("fetch", (event) => {
-  if ('${serviceWorkerStrategy.toString()}' == 'ServiceWorkerStrategy.onlineOnly') {
-    return event.respondWith(fetch(event.request));
-  }
   var origin = self.location.origin;
   var key = event.request.url.substring(origin.length + 1);
   // Redirect URLs to the index.html
-  if (event.request.url == origin || event.request.url.startsWith(origin + '/#')) {
+  if (key.indexOf('?v=') != -1) {
+    key = key.split('?v=')[0];
+  }
+  if (event.request.url == origin || event.request.url.startsWith(origin + '/#') || key == '') {
     key = '/';
   }
+  // If the URL is not the RESOURCE list, skip the cache.
   if (!RESOURCES[key]) {
     return event.respondWith(fetch(event.request));
   }
-  if ('${serviceWorkerStrategy.toString()}' == 'ServiceWorkerStrategy.offlineFirst') {
-    return offlineFirst(event);
+  // If the URL is the index.html, perform an online-first request.
+  if (key == '/') {
+    return onlineFirst(event);
   }
-  return onlineFirst(event);
-});
-
-// Attempt to download the resource online before falling back to
-// the offline cache.
-function onlineFirst(event) {
-  return event.respondWith(
-    fetch(event.request).then((response) => {
-      return caches.open(CACHE_NAME).then((cache) => {
-        cache.put(event.request, response.clone());
-        return response;
-      });
-    }).catch((error) => {
-      return caches.open(CACHE_NAME).then((cache) => {
-        return cache.match(event.request).then((response) => {
-          if (response != null) {
-            return response;
-          }
-          throw error;
-        });
-      });
-    })
-  );
-}
-
-// Either respond with the cached resource, or perform a fetch and
-// lazily populate the cache. Ensure the resources are not cached
-// by the browser for longer than the service worker expects.
-function offlineFirst(event) {
-  return event.respondWith(caches.open(CACHE_NAME)
+  event.respondWith(caches.open(CACHE_NAME)
     .then((cache) =>  {
       return cache.match(event.request).then((response) => {
-        var modifiedRequest = new Request(event.request, {'cache': 'reload'});
-        return response || fetch(modifiedRequest).then((response) => {
+        // Either respond with the cached resource, or perform a fetch and
+        // lazily populate the cache.
+        return response || fetch(event.request).then((response) => {
           cache.put(event.request, response.clone());
           return response;
         });
       })
     })
   );
-}
-
+});
 self.addEventListener('message', (event) => {
   // SkipWaiting can be used to immediately activate a waiting service worker.
   // This will also require a page refresh triggered by the main worker.
   if (event.data === 'skipWaiting') {
     return self.skipWaiting();
   }
-
   if (event.message === 'downloadOffline') {
     downloadOffline();
   }
 });
-
 // Download offline will check the RESOURCES for all files not in the cache
 // and populate them.
 async function downloadOffline() {
@@ -620,5 +576,25 @@ async function downloadOffline() {
   }
   return contentCache.addAll(resources);
 }
-''';
+// Attempt to download the resource online before falling back to
+// the offline cache.
+function onlineFirst(event) {
+  return event.respondWith(
+    fetch(event.request).then((response) => {
+      return caches.open(CACHE_NAME).then((cache) => {
+        cache.put(event.request, response.clone());
+        return response;
+      });
+    }).catch((error) => {
+      return caches.open(CACHE_NAME).then((cache) => {
+        return cache.match(event.request).then((response) => {
+          if (response != null) {
+            return response;
+          }
+          throw error;
+        });
+      });
+    })
+  );
+}''';
 }

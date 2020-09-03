@@ -46,16 +46,12 @@ class BuildWebCommand extends BuildSubCommand {
         'then lazily cache all subsequent assets as they are loaded. When '
         'making a network request for an asset, the offline cache will be '
         'preferred.\n'
-        'online-first will always attempt to make a network request for an '
-        'asset, including the app shell. If this fails for any reason, the '
-        'app will fallback on a cached version if available. This cache will '
-        'be lazily populated as resources are requested.\n'
-        'online-only will never attempt to perform offline caching of resources. '
-        'if there is no network connectivity, the application will fail to load.',
+        'none will generate a service worker with no body. This is useful for '
+        'local testing or in cases where the service worker caching functionality '
+        'is not desirable',
       allowed: <String>[
         kOfflineFirst,
-        kOnlineFirst,
-        kOnlineOnly,
+        kNoneWorker,
       ]
     );
   }

@@ -489,7 +489,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             debuggingOptions.buildInfo,
             debuggingOptions.initializePlatform,
             false,
-            kOnlineOnly,
+            kNoneWorker,
           );
         }
         await device.device.startApp(
@@ -559,7 +559,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions.buildInfo,
           debuggingOptions.initializePlatform,
           false,
-          kOnlineOnly,
+          kNoneWorker,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');

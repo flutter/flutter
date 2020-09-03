@@ -462,6 +462,12 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
+  test('Generated service worker is empty with none-strategy', () {
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[], serviceWorkerStrategy: ServiceWorkerStrategy.none);
+
+    expect(result, '');
+  });
+
   test('Generated service worker correctly inlines file hashes', () {
     final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[], serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst);
 
