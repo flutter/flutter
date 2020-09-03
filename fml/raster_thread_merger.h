@@ -85,6 +85,13 @@ class RasterThreadMerger
   // noop.
   bool IsEnabled();
 
+  // Registers a callback that can be used to clean up global state right after
+  // the thread configuration has changed.
+  //
+  // For example, it can be used to clear the GL context so it can be used in
+  // the next task from a different thread.
+  void SetMergeUnmergeCallback(const fml::closure& callback);
+
  private:
   static const int kLeaseNotSet;
   fml::TaskQueueId platform_queue_id_;
@@ -93,6 +100,7 @@ class RasterThreadMerger
   std::atomic_int lease_term_;
   std::condition_variable merged_condition_;
   std::mutex lease_term_mutex_;
+  fml::closure merge_unmerge_callback_;
   bool enabled_;
 
   bool IsMergedUnSafe() const;
