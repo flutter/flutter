@@ -39,9 +39,7 @@ const char* kDartVMArgs[] = {
     // addressed.
     "--no_causal_async_stacks",
 
-#if !defined(FLUTTER_PROFILE)
     "--systrace_timeline",
-#endif
     "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,VM",
 
 #if defined(AOT_RUNTIME)

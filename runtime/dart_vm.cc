@@ -378,8 +378,7 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     args.push_back(old_gen_heap_size_args.c_str());
   }
 
-#if defined(OS_FUCHSIA) && \
-    (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_PROFILE)
+#if defined(OS_FUCHSIA)
   PushBackAll(&args, kDartFuchsiaTraceArgs, fml::size(kDartFuchsiaTraceArgs));
   PushBackAll(&args, kDartTraceStreamsArgs, fml::size(kDartTraceStreamsArgs));
 #endif
