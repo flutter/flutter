@@ -4,34 +4,56 @@
 
 // @dart = 2.8
 
+// This is the test for the private implementation of animated icons.
+// To make the private API accessible from the test we do not import the
+// material material_animated_icons library, but instead, this test file is an
+// implementation of that library, using some of the parts of the real
+// material_animated_icons, this give the test access to the private APIs.
+library material_animated_icons;
+
 import 'dart:math' as math show pi;
-import 'dart:ui' as ui;
+import 'dart:ui' show lerpDouble;
+import 'dart:ui' as ui show Paint, Path, Canvas;
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/src/material/animated_icons.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import '../flutter_test_alternative.dart';
 
-void main() {
-  AnimatedIconPrivateTestHarness harness;
+part 'package:flutter/src/material/animated_icons/animated_icons.dart';
+part 'package:flutter/src/material/animated_icons/animated_icons_data.dart';
 
-  setUp(() {
-    harness = const AnimatedIconPrivateTestHarness();
-  });
+// We have to import all the generated files in the material library to avoid
+// analysis errors (as the generated constants are all referenced in the
+// animated_icons library).
+part 'package:flutter/src/material/animated_icons/data/add_event.g.dart';
+part 'package:flutter/src/material/animated_icons/data/arrow_menu.g.dart';
+part 'package:flutter/src/material/animated_icons/data/close_menu.g.dart';
+part 'package:flutter/src/material/animated_icons/data/ellipsis_search.g.dart';
+part 'package:flutter/src/material/animated_icons/data/event_add.g.dart';
+part 'package:flutter/src/material/animated_icons/data/home_menu.g.dart';
+part 'package:flutter/src/material/animated_icons/data/list_view.g.dart';
+part 'package:flutter/src/material/animated_icons/data/menu_arrow.g.dart';
+part 'package:flutter/src/material/animated_icons/data/menu_close.g.dart';
+part 'package:flutter/src/material/animated_icons/data/menu_home.g.dart';
+part 'package:flutter/src/material/animated_icons/data/pause_play.g.dart';
+part 'package:flutter/src/material/animated_icons/data/play_pause.g.dart';
+part 'package:flutter/src/material/animated_icons/data/search_ellipsis.g.dart';
+part 'package:flutter/src/material/animated_icons/data/view_list.g.dart';
 
-  tearDown(() {
-    harness = null;
-  });
+class MockCanvas extends Mock implements ui.Canvas {}
+class MockPath extends Mock implements ui.Path {}
 
+void main () {
   group('Interpolate points', () {
     test('- single point', () {
       const List<Offset> points = <Offset>[
         Offset(25.0, 1.0),
       ];
-      expect(harness.interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
-      expect(harness.interpolate(points, 0.5, Offset.lerp), const Offset(25.0, 1.0));
-      expect(harness.interpolate(points, 1.0, Offset.lerp), const Offset(25.0, 1.0));
+      expect(_interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
+      expect(_interpolate(points, 0.5, Offset.lerp), const Offset(25.0, 1.0));
+      expect(_interpolate(points, 1.0, Offset.lerp), const Offset(25.0, 1.0));
     });
 
     test('- two points', () {
@@ -39,9 +61,9 @@ void main() {
         Offset(25.0, 1.0),
         Offset(12.0, 12.0),
       ];
-      expect(harness.interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
-      expect(harness.interpolate(points, 0.5, Offset.lerp), const Offset(18.5, 6.5));
-      expect(harness.interpolate(points, 1.0, Offset.lerp), const Offset(12.0, 12.0));
+      expect(_interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
+      expect(_interpolate(points, 0.5, Offset.lerp), const Offset(18.5, 6.5));
+      expect(_interpolate(points, 1.0, Offset.lerp), const Offset(12.0, 12.0));
     });
 
     test('- three points', () {
@@ -50,15 +72,15 @@ void main() {
         Offset(12.0, 12.0),
         Offset(23.0, 9.0),
       ];
-      expect(harness.interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
-      expect(harness.interpolate(points, 0.25, Offset.lerp), const Offset(18.5, 6.5));
-      expect(harness.interpolate(points, 0.5, Offset.lerp), const Offset(12.0, 12.0));
-      expect(harness.interpolate(points, 0.75, Offset.lerp), const Offset(17.5, 10.5));
-      expect(harness.interpolate(points, 1.0, Offset.lerp), const Offset(23.0, 9.0));
+      expect(_interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
+      expect(_interpolate(points, 0.25, Offset.lerp), const Offset(18.5, 6.5));
+      expect(_interpolate(points, 0.5, Offset.lerp), const Offset(12.0, 12.0));
+      expect(_interpolate(points, 0.75, Offset.lerp), const Offset(17.5, 10.5));
+      expect(_interpolate(points, 1.0, Offset.lerp), const Offset(23.0, 9.0));
     });
   });
 
-  group('AnimatedIconPainter', () {
+  group('_AnimatedIconPainter', () {
     const Size size = Size(48.0, 48.0);
     MockPath mockPath;
     MockCanvas mockCanvas;
@@ -76,8 +98,8 @@ void main() {
     });
 
     test('progress 0', () {
-      final CustomPainter painter = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.movingBar,
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+        paths: movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -98,8 +120,8 @@ void main() {
     });
 
     test('progress 1', () {
-      final CustomPainter painter = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.movingBar,
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+        paths: movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(1.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -120,8 +142,8 @@ void main() {
     });
 
     test('clamped progress', () {
-      final CustomPainter painter = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.movingBar,
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+        paths: movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(1.5),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -142,9 +164,8 @@ void main() {
     });
 
     test('scale', () {
-      expect(mockCanvas._calls, isEmpty);
-      final CustomPainter painter = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.movingBar,
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+        paths: movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
         scale: 0.5,
@@ -159,8 +180,8 @@ void main() {
     });
 
     test('mirror', () {
-      final CustomPainter painter = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.movingBar,
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+        paths: movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -177,8 +198,8 @@ void main() {
     });
 
     test('interpolated frame', () {
-      final CustomPainter painter = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.movingBar,
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+        paths: movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.5),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -199,8 +220,8 @@ void main() {
     });
 
     test('curved frame', () {
-      final CustomPainter painter = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.bow,
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+        paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(1.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -219,8 +240,8 @@ void main() {
     });
 
     test('interpolated curved frame', () {
-      final CustomPainter painter = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.bow,
+      final _AnimatedIconPainter painter = _AnimatedIconPainter(
+        paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.25),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -239,8 +260,8 @@ void main() {
     });
 
     test('should not repaint same values', () {
-      final CustomPainter painter1 = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.bow,
+      final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
+        paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -248,8 +269,8 @@ void main() {
         uiPathFactory: pathFactory,
       );
 
-      final CustomPainter painter2 = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.bow,
+      final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
+        paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -261,8 +282,8 @@ void main() {
     });
 
     test('should repaint on progress change', () {
-      final CustomPainter painter1 = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.bow,
+      final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
+        paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -270,8 +291,8 @@ void main() {
         uiPathFactory: pathFactory,
       );
 
-      final CustomPainter painter2 = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.bow,
+      final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
+        paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.1),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -283,8 +304,8 @@ void main() {
     });
 
     test('should repaint on color change', () {
-      final CustomPainter painter1 = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.bow,
+      final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
+        paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -292,8 +313,8 @@ void main() {
         uiPathFactory: pathFactory,
       );
 
-      final CustomPainter painter2 = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.bow,
+      final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
+        paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFFFF0000),
         scale: 1.0,
@@ -305,8 +326,8 @@ void main() {
     });
 
     test('should repaint on paths change', () {
-      final CustomPainter painter1 = harness.createAnimatedIconPainter(
-        paths: AnimatedIconPrivateTestHarness.bow,
+      final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
+        paths: bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF0000FF),
         scale: 1.0,
@@ -314,8 +335,8 @@ void main() {
         uiPathFactory: pathFactory,
       );
 
-      final CustomPainter painter2 = harness.createAnimatedIconPainter(
-        paths: null,
+      final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
+        paths: const <_PathFrames> [],
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF0000FF),
         scale: 1.0,
@@ -327,8 +348,6 @@ void main() {
     });
   });
 }
-
-typedef _UiPathFactory = ui.Path Function();
 
 // Contains the data from an invocation used for collection of calls and for
 // expectations in Mock class.
@@ -365,10 +384,6 @@ class MockCall {
 class Mock {
   final List<MockCall> _calls = <MockCall>[];
 
-  void addMockCall(Symbol symbol, [List<dynamic> args]) {
-    _calls.add(MockCall.fromSymbol(symbol, args));
-  }
-
   // Verify that the given calls happened in the order given.
   void verifyCallsInOrder(List<MockCall> expected) {
     int count = 0;
@@ -397,10 +412,91 @@ class Mock {
 
   @override
   void noSuchMethod(Invocation invocation) {
-    addMockCall(invocation.memberName, invocation.positionalArguments);
+    _calls.add(MockCall.fromSymbol(invocation.memberName, invocation.positionalArguments));
   }
 }
 
-class MockCanvas extends Mock implements ui.Canvas {}
+const _AnimatedIconData movingBar = _AnimatedIconData(
+  Size(48.0, 48.0),
+  <_PathFrames> [
+    _PathFrames(
+      opacities: <double> [1.0, 0.2],
+      commands: <_PathCommand> [
+        _PathMoveTo(
+          <Offset> [
+            Offset(0.0, 0.0),
+            Offset(0.0, 38.0),
+          ],
+        ),
+        _PathLineTo(
+          <Offset> [
+            Offset(48.0, 0.0),
+            Offset(48.0, 38.0),
+          ],
+        ),
+        _PathLineTo(
+          <Offset> [
+            Offset(48.0, 10.0),
+            Offset(48.0, 48.0),
+          ],
+        ),
+        _PathLineTo(
+          <Offset> [
+            Offset(0.0, 10.0),
+            Offset(0.0, 48.0),
+          ],
+        ),
+        _PathLineTo(
+          <Offset> [
+            Offset(0.0, 0.0),
+            Offset(0.0, 38.0),
+          ],
+        ),
+        _PathClose(),
+      ],
+    ),
+  ],
+);
 
-class MockPath extends Mock implements ui.Path {}
+const _AnimatedIconData bow = _AnimatedIconData(
+  Size(48.0, 48.0),
+  <_PathFrames> [
+    _PathFrames(
+      opacities: <double> [1.0, 1.0],
+      commands: <_PathCommand> [
+        _PathMoveTo(
+          <Offset> [
+            Offset(0.0, 24.0),
+            Offset(0.0, 24.0),
+            Offset(0.0, 24.0),
+          ],
+        ),
+        _PathCubicTo(
+          <Offset> [
+            Offset(16.0, 24.0),
+            Offset(16.0, 10.0),
+            Offset(16.0, 48.0),
+          ],
+          <Offset> [
+            Offset(32.0, 24.0),
+            Offset(32.0, 10.0),
+            Offset(32.0, 48.0),
+          ],
+          <Offset> [
+            Offset(48.0, 24.0),
+            Offset(48.0, 24.0),
+            Offset(48.0, 24.0),
+          ],
+        ),
+        _PathLineTo(
+          <Offset> [
+            Offset(0.0, 24.0),
+            Offset(0.0, 24.0),
+            Offset(0.0, 24.0),
+          ],
+        ),
+        _PathClose(),
+      ],
+    ),
+  ],
+);
