@@ -75,7 +75,7 @@ class WebFlutterDriver extends FlutterDriver {
       // The tag used in the script is based on
       // https://github.com/flutter/engine/blob/master/lib/web_ui/lib/src/engine/semantics/semantics_helper.dart#L193
       //
-      // TODO(angjieli): Support Mobile Web.
+      // TODO(angjieli): Support Mobile Web. (https://github.com/flutter/flutter/issues/65192)
       await webDriver.execute(
           'document.querySelector(\'flt-semantics-placeholder\').click();',
           <String>[]);
