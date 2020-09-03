@@ -357,15 +357,15 @@ Future<T> _run<T>(Future<T> Function() op, {
   } on FileSystemException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.osError?.errorCode ?? 0);
-    } else if (platform.isLinux) {
-      _handleLinuxException(e, failureMessage, e.osError?.errorCode ?? 0);
+    } else if (platform.isLinux || platform.isMacOS) {
+      _handlePosixException(e, failureMessage, e.osError?.errorCode ?? 0);
     }
     rethrow;
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.errorCode ?? 0);
-    } else if (platform.isLinux) {
-      _handleLinuxException(e, failureMessage, e.errorCode ?? 0);
+    } else if (platform.isLinux || platform.isMacOS) {
+      _handlePosixException(e, failureMessage, e.errorCode ?? 0);
     }
     rethrow;
   }
@@ -381,15 +381,15 @@ T _runSync<T>(T Function() op, {
   } on FileSystemException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.osError?.errorCode ?? 0);
-    } else if (platform.isLinux) {
-      _handleLinuxException(e, failureMessage, e.osError?.errorCode ?? 0);
+    } else if (platform.isLinux || platform.isMacOS) {
+      _handlePosixException(e, failureMessage, e.osError?.errorCode ?? 0);
     }
     rethrow;
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.errorCode ?? 0);
-    } else if (platform.isLinux) {
-      _handleLinuxException(e, failureMessage, e.errorCode ?? 0);
+    } else if (platform.isLinux || platform.isMacOS) {
+      _handlePosixException(e, failureMessage, e.errorCode ?? 0);
     }
     rethrow;
   }
@@ -490,11 +490,13 @@ class ErrorHandlingProcessManager extends ProcessManager {
   }
 }
 
-void _handleLinuxException(Exception e, String message, int errorCode) {
+void _handlePosixException(Exception e, String message, int errorCode) {
   // From:
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
+  // https://github.com/apple/darwin-xnu/blob/master/bsd/dev/dtrace/scripts/errno.d
   const int enospc = 28;
+  const int eacces = 13;
   // Catch errors and bail when:
   switch (errorCode) {
     case enospc:
@@ -502,6 +504,13 @@ void _handleLinuxException(Exception e, String message, int errorCode) {
         '$message. The target device is full.'
         '\n$e\n'
         'Free up space and try again.',
+      );
+      break;
+    case eacces:
+      throwToolExit(
+        '$message. The flutter tool cannot access the file.\n'
+        'Please ensure that the SDK and/or project is installed in a location '
+        'that has read/write permissions for the current user.'
       );
       break;
     default:
