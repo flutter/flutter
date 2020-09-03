@@ -18,7 +18,9 @@
 devices=(
   # Pixel 3
   "model=blueline,version=28"
-  "model=blueline,version=29"
+
+  # Pixel 4
+  "model=flame,version=29"
 
   # Moto Z XT1650
   "model=griffin,version=24"

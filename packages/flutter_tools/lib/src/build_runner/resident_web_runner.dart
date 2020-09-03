@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:dwds/dwds.dart';
-import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
@@ -22,6 +21,7 @@ import '../base/net.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/targets/web.dart';
 import '../cache.dart';
 import '../dart/language_version.dart';
 import '../dart/pub.dart';
