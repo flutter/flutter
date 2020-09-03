@@ -113,10 +113,24 @@
 
   if (err != 0) {
     FML_LOG(ERROR) << "Failed to register observatory port with mDNS.";
+    if (@available(iOS 14.0, *)) {
+      FML_LOG(ERROR) << "Make sure the 'NSBonjourServices' key is set in your Info.plist for '"
+                     << registrationType << "' for the Debug/Profile configurations."
+                     << "(See also: https://developer.apple.com/news/?id=0oi77447)";
+    }
   } else {
     DNSServiceSetDispatchQueue(_dnsServiceRef, dispatch_get_main_queue());
   }
 }
+
+/// TODO(aaclarke): Remove this preprocessor macro once infra is moved to Xcode 12.
+static const DNSServiceErrorType kFlutter_DNSServiceErr_PolicyDenied =
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+    kDNSServiceErr_PolicyDenied;
+#else
+    // Found in usr/include/dns_sd.h.
+    -65570;
+#endif  // __IPHONE_OS_VERSION_MAX_ALLOWED
 
 static void DNSSD_API registrationCallback(DNSServiceRef sdRef,
                                            DNSServiceFlags flags,
@@ -127,6 +141,11 @@ static void DNSSD_API registrationCallback(DNSServiceRef sdRef,
                                            void* context) {
   if (errorCode == kDNSServiceErr_NoError) {
     FML_DLOG(INFO) << "FlutterObservatoryPublisher is ready!";
+  } else if (errorCode == kFlutter_DNSServiceErr_PolicyDenied) {
+    FML_LOG(ERROR)
+        << "Could not register as server for FlutterObservatoryPublisher, permission "
+        << "denied. Check your 'Local Network' permissions for this app in the Privacy section of "
+        << "the system Settings.";
   } else {
     FML_LOG(ERROR) << "Could not register as server for FlutterObservatoryPublisher. Check your "
                       "network settings and relaunch the application.";
