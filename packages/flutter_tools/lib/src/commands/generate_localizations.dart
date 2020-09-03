@@ -172,9 +172,9 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     final String preferredSupportedLocaleString = stringArg('preferred-supported-locales');
     final String headerString = stringArg('header');
     final String headerFile = stringArg('header-file');
-    final bool useDeferredLoading = stringArg('use-deferred-loading') as bool;
+    final bool useDeferredLoading = boolArg('use-deferred-loading');
     final String inputsAndOutputsListPath = stringArg('gen-inputs-and-outputs-list');
-    final bool useSyntheticPackage = stringArg('synthetic-package') as bool;
+    final bool useSyntheticPackage = boolArg('synthetic-package');
     final String projectPathString = stringArg('project-dir');
 
     final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(_fileSystem);
