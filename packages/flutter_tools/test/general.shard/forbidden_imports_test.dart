@@ -62,7 +62,7 @@ void main() {
     final List<String> allowedPaths = <String>[
       globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
       globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'platform.dart'),
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_file_system.dart'),
+      globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_io.dart'),
     ];
     bool _isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
 
@@ -158,7 +158,7 @@ void main() {
   test('no unauthorized imports of dart:convert', () {
     final List<String> allowedPaths = <String>[
       globals.fs.path.join(flutterTools, 'lib', 'src', 'convert.dart'),
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_file_system.dart'),
+      globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_io.dart'),
     ];
     bool _isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
 
