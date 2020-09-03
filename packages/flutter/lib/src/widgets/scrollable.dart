@@ -309,6 +309,7 @@ class Scrollable extends StatefulWidget {
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
+    RenderObject targetRenderObject;
     ScrollableState scrollable = Scrollable.of(context);
     while (scrollable != null) {
       futures.add(scrollable.position.ensureVisible(
@@ -317,7 +318,11 @@ class Scrollable extends StatefulWidget {
         duration: duration,
         curve: curve,
         alignmentPolicy: alignmentPolicy,
+        targetRenderObject: targetRenderObject,
       ));
+
+      targetRenderObject = targetRenderObject ?? context.findRenderObject();
+
       context = scrollable.context;
       scrollable = Scrollable.of(context);
     }
