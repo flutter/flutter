@@ -209,7 +209,12 @@ abstract class DeviceManager {
   /// * If the user did not specify a device id and there is more than one
   /// device connected, then filter out unsupported devices and prioritize
   /// ephemeral devices.
-  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject, { Duration timeout }) async {
+    if (timeout != null) {
+      // Reset the cache with the specified timeout.
+      await refreshAllConnectedDevices(timeout: timeout);
+    }
+
     List<Device> devices = await getDevices();
 
     // Always remove web and fuchsia devices from `--all`. This setting

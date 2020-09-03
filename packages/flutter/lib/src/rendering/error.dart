@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextStyle;
 
 import 'box.dart';
@@ -47,6 +45,8 @@ class RenderErrorBox extends RenderBox {
         builder.pushStyle(textStyle);
         builder.addText(message);
         _paragraph = builder.build();
+      } else {
+        _paragraph = null;
       }
     } catch (error) {
       // Intentionally left empty.
@@ -56,7 +56,8 @@ class RenderErrorBox extends RenderBox {
   /// The message to attempt to display at paint time.
   final String message;
 
-  ui.Paragraph _paragraph;
+  // TODO(ianh): should be final
+  ui.Paragraph? _paragraph;
 
   @override
   double computeMaxIntrinsicWidth(double height) {
@@ -155,11 +156,11 @@ class RenderErrorBox extends RenderBox {
           width -= padding.left + padding.right;
           left += padding.left;
         }
-        _paragraph.layout(ui.ParagraphConstraints(width: width));
-        if (size.height > padding.top + _paragraph.height + padding.bottom) {
+        _paragraph!.layout(ui.ParagraphConstraints(width: width));
+        if (size.height > padding.top + _paragraph!.height + padding.bottom) {
           top += padding.top;
         }
-        context.canvas.drawParagraph(_paragraph, offset + Offset(left, top));
+        context.canvas.drawParagraph(_paragraph!, offset + Offset(left, top));
       }
     } catch (e) {
       // Intentionally left empty.
