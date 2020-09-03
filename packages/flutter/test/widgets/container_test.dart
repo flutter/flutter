@@ -583,7 +583,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('widgets.container.clipBehaviour.with.shadow.png'),
+      matchesGoldenFile('container.clipBehaviour.with.shadow.png'),
     );
   });
 }
