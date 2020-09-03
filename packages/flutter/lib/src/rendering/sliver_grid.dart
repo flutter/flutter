@@ -620,7 +620,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
     final double paintExtent = calculatePaintOffset(
       constraints,
-      from: math.min(constraints.scrollOffset.abs(), leadingScrollOffset),
+      from: math.min(constraints.scrollOffset, leadingScrollOffset),
       to: trailingScrollOffset,
     );
     final double cacheExtent = calculateCacheOffset(
