@@ -413,9 +413,7 @@ RasterStatus Rasterizer::DoDraw(
 
 RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
   TRACE_EVENT0("flutter", "Rasterizer::DrawToSurface");
-  if (!surface_) {
-    return RasterStatus::kFailed;
-  }
+  FML_DCHECK(surface_);
 
   // There is no way for the compositor to know how long the layer tree
   // construction took. Fortunately, the layer tree does. Grab that time
