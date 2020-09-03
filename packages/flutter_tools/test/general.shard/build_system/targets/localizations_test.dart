@@ -92,7 +92,7 @@ flutter:
       deferredLoading: true,
       outputClass: 'Foo',
       outputLocalizationsFile: Uri.file('bar'),
-      preferredSupportedLocales: 'en_US',
+      preferredSupportedLocales: <String>['en_US'],
       templateArbFile: Uri.file('example.arb'),
       untranslatedMessagesFile: Uri.file('untranslated'),
       // Set synthetic package to true.
