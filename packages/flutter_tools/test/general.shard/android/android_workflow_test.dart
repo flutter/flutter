@@ -68,6 +68,20 @@ void main() {
     expect(androidWorkflow.canListEmulators, false);
   });
 
+  testWithoutContext('AndroidWorkflow handles a null adb', () {
+    final MockAndroidSdk androidSdk = MockAndroidSdk();
+    when(androidSdk.adbPath).thenReturn(null);
+    final AndroidWorkflow androidWorkflow = AndroidWorkflow(
+      featureFlags: TestFeatureFlags(),
+      androidSdk: androidSdk,
+    );
+
+    expect(androidWorkflow.canLaunchDevices, false);
+    expect(androidWorkflow.canListDevices, false);
+    expect(androidWorkflow.canListEmulators, false);
+  });
+
+
   testUsingContext('licensesAccepted returns LicensesAccepted.unknown if cannot find sdkmanager', () async {
     processManager.canRunSucceeds = false;
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
