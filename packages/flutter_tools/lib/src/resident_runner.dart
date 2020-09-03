@@ -1102,20 +1102,29 @@ abstract class ResidentRunner {
       'flutter',
       'png',
     );
-    final List<FlutterView> views = await device
-      .vmService.getFlutterViews();
+    List<FlutterView> views = <FlutterView>[];
+    Future<bool> setDebugBanner(bool value) async {
+      try {
+        for (final FlutterView view in views) {
+          await device.vmService.flutterDebugAllowBanner(
+            value,
+            isolateId: view.uiIsolate.id,
+          );
+        }
+        return true;
+      } on Exception catch (error) {
+        status.cancel();
+        globals.printError('Error communicating with Flutter on the device: $error');
+        return false;
+      }
+    }
+
     try {
       if (supportsServiceProtocol && isRunningDebug) {
-        try {
-          for (final FlutterView view in views) {
-            await device.vmService.flutterDebugAllowBanner(
-              false,
-              isolateId: view.uiIsolate.id,
-            );
-          }
-        } on Exception catch (error) {
-          status.cancel();
-          globals.printError('Error communicating with Flutter on the device: $error');
+        // Ensure that the vmService access is guarded by supportsServiceProtocol, it
+        // will be null in release mode.
+        views = await device.vmService.getFlutterViews();
+        if (!await setDebugBanner(false)) {
           return;
         }
       }
@@ -1123,18 +1132,7 @@ abstract class ResidentRunner {
         await device.device.takeScreenshot(outputFile);
       } finally {
         if (supportsServiceProtocol && isRunningDebug) {
-          try {
-            for (final FlutterView view in views) {
-              await device.vmService.flutterDebugAllowBanner(
-                true,
-                isolateId: view.uiIsolate.id,
-              );
-            }
-          } on Exception catch (error) {
-            status.cancel();
-            globals.printError('Error communicating with Flutter on the device: $error');
-            return;
-          }
+          await setDebugBanner(true);
         }
       }
       final int sizeKB = outputFile.lengthSync() ~/ 1024;

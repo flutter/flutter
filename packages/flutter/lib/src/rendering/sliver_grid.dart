@@ -606,7 +606,6 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
     final int lastIndex = indexOf(lastChild!);
 
-    assert(childScrollOffset(firstChild!)! <= scrollOffset);
     assert(debugAssertChildListIsNonEmptyAndContiguous());
     assert(indexOf(firstChild!) == firstIndex);
     assert(targetLastIndex == null || lastIndex <= targetLastIndex);
@@ -621,7 +620,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
     final double paintExtent = calculatePaintOffset(
       constraints,
-      from: leadingScrollOffset,
+      from: math.min(constraints.scrollOffset, leadingScrollOffset),
       to: trailingScrollOffset,
     );
     final double cacheExtent = calculateCacheOffset(

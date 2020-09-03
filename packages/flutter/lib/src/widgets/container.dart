@@ -397,6 +397,17 @@ class Container extends StatelessWidget {
     if (color != null)
       current = ColoredBox(color: color, child: current);
 
+    if (clipBehavior != Clip.none) {
+      current = ClipPath(
+        clipper: _DecorationClipper(
+          textDirection: Directionality.of(context),
+          decoration: decoration
+        ),
+        clipBehavior: clipBehavior,
+        child: current,
+      );
+    }
+
     if (decoration != null)
       current = DecoratedBox(decoration: decoration, child: current);
 
@@ -416,17 +427,6 @@ class Container extends StatelessWidget {
 
     if (transform != null)
       current = Transform(transform: transform, child: current);
-
-    if (clipBehavior != Clip.none) {
-      current = ClipPath(
-        clipper: _DecorationClipper(
-          textDirection: Directionality.of(context),
-          decoration: decoration
-        ),
-        clipBehavior: clipBehavior,
-        child: current,
-      );
-    }
 
     return current;
   }

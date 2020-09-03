@@ -159,6 +159,9 @@ class WebAssetServer implements AssetReader {
         address = (await InternetAddress.lookup(hostname)).first;
       }
       final HttpServer httpServer = await HttpServer.bind(address, port);
+      // Allow rendering in a iframe.
+      httpServer.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
+
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         globals.fs.file(buildInfo.packagesPath),
         logger: globals.logger,
@@ -282,6 +285,9 @@ class WebAssetServer implements AssetReader {
   final InternetAddress internetAddress;
   /* late final */ Dwds dwds;
   Directory entrypointCacheDirectory;
+
+  @visibleForTesting
+  HttpHeaders get defaultResponseHeaders => _httpServer.defaultResponseHeaders;
 
   @visibleForTesting
   Uint8List getFile(String path) => _files[path];

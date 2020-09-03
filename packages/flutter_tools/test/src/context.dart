@@ -248,7 +248,7 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject, { Duration timeout }) async {
     return devices;
   }
 }
