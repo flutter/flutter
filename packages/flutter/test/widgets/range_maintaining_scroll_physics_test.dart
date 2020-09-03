@@ -232,7 +232,7 @@ void main() {
     expect(bike2.center, bike1.shift(const Offset(100.0, 0.0)).center);
   });
 
-  testWidgets('', (WidgetTester tester) async {
+  testWidgets('Changing the size of the viewport while you are overdragged', (WidgetTester tester) async {
     Widget build(double height) {
       return Directionality(
         textDirection: TextDirection.rtl,
