@@ -22,6 +22,7 @@ import 'card_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'data_table_theme.dart';
 import 'dialog_theme.dart';
 import 'divider_theme.dart';
 import 'elevated_button_theme.dart';
@@ -283,6 +284,7 @@ class ThemeData with Diagnosticable {
     ElevatedButtonThemeData elevatedButtonTheme,
     OutlinedButtonThemeData outlinedButtonTheme,
     TextSelectionThemeData textSelectionTheme,
+    DataTableThemeData dataTableTheme,
     bool fixTextFieldOutlineLabel,
     bool useTextSelectionTheme,
   }) {
@@ -330,7 +332,7 @@ class ThemeData with Diagnosticable {
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     dialogBackgroundColor ??= isDark ? Colors.grey[800] : Colors.white;
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
-    hintColor ??= isDark ? const Color(0x80FFFFFF) : const Color(0x8A000000);
+    hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
     pageTransitionsTheme ??= const PageTransitionsTheme();
@@ -400,6 +402,7 @@ class ThemeData with Diagnosticable {
     elevatedButtonTheme ??= const ElevatedButtonThemeData();
     outlinedButtonTheme ??= const OutlinedButtonThemeData();
     textSelectionTheme ??= const TextSelectionThemeData();
+    dataTableTheme ??= const DataTableThemeData();
 
     fixTextFieldOutlineLabel ??= false;
     useTextSelectionTheme ??= false;
@@ -475,6 +478,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme: elevatedButtonTheme,
       outlinedButtonTheme: outlinedButtonTheme,
       textSelectionTheme: textSelectionTheme,
+      dataTableTheme: dataTableTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme,
     );
@@ -561,6 +565,7 @@ class ThemeData with Diagnosticable {
     @required this.elevatedButtonTheme,
     @required this.outlinedButtonTheme,
     @required this.textSelectionTheme,
+    @required this.dataTableTheme,
     @required this.fixTextFieldOutlineLabel,
     @required this.useTextSelectionTheme,
   }) : assert(visualDensity != null),
@@ -629,8 +634,8 @@ class ThemeData with Diagnosticable {
        assert(textButtonTheme != null),
        assert(elevatedButtonTheme != null),
        assert(outlinedButtonTheme != null),
-       assert(fixTextFieldOutlineLabel != null),
        assert(textSelectionTheme != null),
+       assert(dataTableTheme != null),
        assert(fixTextFieldOutlineLabel != null),
        assert(useTextSelectionTheme != null);
 
@@ -1107,6 +1112,10 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [TextField] widgets.
   final TextSelectionThemeData textSelectionTheme;
 
+  /// A theme for customizing the appearance and layout of [DataTable]
+  /// widgets.
+  final DataTableThemeData dataTableTheme;
+
   /// A temporary flag to allow apps to opt-in to a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
   /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
@@ -1206,6 +1215,7 @@ class ThemeData with Diagnosticable {
     ElevatedButtonThemeData elevatedButtonTheme,
     OutlinedButtonThemeData outlinedButtonTheme,
     TextSelectionThemeData textSelectionTheme,
+    DataTableThemeData dataTableTheme,
     bool fixTextFieldOutlineLabel,
     bool useTextSelectionTheme,
   }) {
@@ -1281,6 +1291,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme: elevatedButtonTheme ?? this.elevatedButtonTheme,
       outlinedButtonTheme: outlinedButtonTheme ?? this.outlinedButtonTheme,
       textSelectionTheme: textSelectionTheme ?? this.textSelectionTheme,
+      dataTableTheme: dataTableTheme ?? this.dataTableTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme ?? this.useTextSelectionTheme,
     );
@@ -1434,6 +1445,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme: ElevatedButtonThemeData.lerp(a.elevatedButtonTheme, b.elevatedButtonTheme, t),
       outlinedButtonTheme: OutlinedButtonThemeData.lerp(a.outlinedButtonTheme, b.outlinedButtonTheme, t),
       textSelectionTheme: TextSelectionThemeData .lerp(a.textSelectionTheme, b.textSelectionTheme, t),
+      dataTableTheme: DataTableThemeData.lerp(a.dataTableTheme, b.dataTableTheme, t),
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       useTextSelectionTheme: t < 0.5 ? a.useTextSelectionTheme : b.useTextSelectionTheme,
     );
@@ -1515,6 +1527,7 @@ class ThemeData with Diagnosticable {
         && other.elevatedButtonTheme == elevatedButtonTheme
         && other.outlinedButtonTheme == outlinedButtonTheme
         && other.textSelectionTheme == textSelectionTheme
+        && other.dataTableTheme == dataTableTheme
         && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel
         && other.useTextSelectionTheme == useTextSelectionTheme;
   }
@@ -1595,6 +1608,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme,
       outlinedButtonTheme,
       textSelectionTheme,
+      dataTableTheme,
       fixTextFieldOutlineLabel,
       useTextSelectionTheme,
     ];
@@ -1673,6 +1687,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextButtonThemeData>('textButtonTheme', textButtonTheme, defaultValue: defaultData.textButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ElevatedButtonThemeData>('elevatedButtonTheme', elevatedButtonTheme, defaultValue: defaultData.elevatedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<OutlinedButtonThemeData>('outlinedButtonTheme', outlinedButtonTheme, defaultValue: defaultData.outlinedButtonTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<DataTableThemeData>('dataTableTheme', dataTableTheme, defaultValue: defaultData.dataTableTheme, level: DiagnosticLevel.debug));
   }
 }
 

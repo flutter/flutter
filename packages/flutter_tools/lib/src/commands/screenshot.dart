@@ -51,6 +51,7 @@ class ScreenshotCommand extends FlutterCommand {
       },
       defaultsTo: _kDeviceType,
     );
+    usesDeviceTimeoutOption();
   }
 
   @override

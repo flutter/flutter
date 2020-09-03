@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -325,8 +327,25 @@ class WebReleaseBundle extends Target {
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
-      inputFile.copySync(outputFile.path);
       outputResourcesFiles.add(outputFile);
+      // insert a random hash into the requests for main.dart.js and service_worker.js. This is
+      // not a content hash, because it would need to be the hash for the entire bundle and not
+      // just the resource in question.
+      if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
+        final String randomHash = Random().nextInt(4294967296).toString();
+        final String resultString = inputFile.readAsStringSync()
+          .replaceFirst(
+            '<script src="main.dart.js" type="application/javascript"></script>',
+            '<script src="main.dart.js?v=$randomHash" type="application/javascript"></script>'
+          )
+          .replaceFirst(
+            "navigator.serviceWorker.register('flutter_service_worker.js')",
+            "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
+          );
+        outputFile.writeAsStringSync(resultString);
+        continue;
+      }
+      inputFile.copySync(outputFile.path);
     }
     final Depfile resourceFile = Depfile(inputResourceFiles, outputResourcesFiles);
     depfileService.writeToFile(
@@ -576,6 +595,7 @@ async function downloadOffline() {
   }
   return contentCache.addAll(resources);
 }
+
 // Attempt to download the resource online before falling back to
 // the offline cache.
 function onlineFirst(event) {
@@ -596,5 +616,6 @@ function onlineFirst(event) {
       });
     })
   );
-}''';
+}
+''';
 }
