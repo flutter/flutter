@@ -159,7 +159,7 @@ class WebAssetServer implements AssetReader {
         address = (await InternetAddress.lookup(hostname)).first;
       }
       final HttpServer httpServer = await HttpServer.bind(address, port);
-      // Allow rendering in a frame.
+      // Allow rendering in a iframe.
       httpServer.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
 
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
