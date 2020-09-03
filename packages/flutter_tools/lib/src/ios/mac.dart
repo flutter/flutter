@@ -208,9 +208,6 @@ Future<ParsedProjectInfo> _valdateXcodeBuild({
     buildInfo: buildInfo,
   );
   await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
-  if (configOnly) {
-    return XcodeBuildResult(success: true);
-  }
 
   return ParsedProjectInfo(
     autoSigningConfigs: autoSigningConfigs,
