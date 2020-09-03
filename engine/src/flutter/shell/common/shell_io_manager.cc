@@ -65,8 +65,8 @@ ShellIOManager::ShellIOManager(
           std::move(unref_queue_task_runner),
           fml::TimeDelta::FromMilliseconds(8),
           GetResourceContext())),
-      weak_factory_(this),
-      is_gpu_disabled_sync_switch_(is_gpu_disabled_sync_switch) {
+      is_gpu_disabled_sync_switch_(is_gpu_disabled_sync_switch),
+      weak_factory_(this) {
   if (!resource_context_) {
 #ifndef OS_FUCHSIA
     FML_DLOG(WARNING) << "The IO manager was initialized without a resource "

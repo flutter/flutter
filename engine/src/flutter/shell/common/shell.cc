@@ -327,8 +327,8 @@ Shell::Shell(DartVMRef vm, TaskRunners task_runners, Settings settings)
       settings_(std::move(settings)),
       vm_(std::move(vm)),
       is_gpu_disabled_sync_switch_(new fml::SyncSwitch()),
-      weak_factory_(this),
-      weak_factory_gpu_(nullptr) {
+      weak_factory_gpu_(nullptr),
+      weak_factory_(this) {
   FML_CHECK(vm_) << "Must have access to VM to create a shell.";
   FML_DCHECK(task_runners_.IsValid());
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
