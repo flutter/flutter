@@ -1619,7 +1619,7 @@ void main() {
 
     testWidgets('using Navigator.pop when history is empty throws assertion error', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-      
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
