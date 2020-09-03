@@ -428,8 +428,8 @@ class Rasterizer final : public SnapshotDelegate {
   fml::closure next_frame_callback_;
   bool user_override_resource_cache_bytes_;
   std::optional<size_t> max_cache_bytes_;
-  fml::TaskRunnerAffineWeakPtrFactory<Rasterizer> weak_factory_;
   fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_;
+  fml::TaskRunnerAffineWeakPtrFactory<Rasterizer> weak_factory_;
 
   // |SnapshotDelegate|
   sk_sp<SkImage> MakeRasterSnapshot(sk_sp<SkPicture> picture,

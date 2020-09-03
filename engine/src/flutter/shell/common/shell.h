@@ -596,12 +596,11 @@ class Shell final : public PlatformView::Delegate,
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document* response);
 
-  fml::WeakPtrFactory<Shell> weak_factory_;
-
   // For accessing the Shell via the raster thread, necessary for various
   // rasterizer callbacks.
   std::unique_ptr<fml::TaskRunnerAffineWeakPtrFactory<Shell>> weak_factory_gpu_;
 
+  fml::WeakPtrFactory<Shell> weak_factory_;
   friend class testing::ShellTest;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Shell);
