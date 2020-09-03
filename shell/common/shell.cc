@@ -645,9 +645,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   // signals the latch and the platform/raster thread follows with executing
   // raster_task.
   const bool should_post_raster_task =
-      !fml::TaskRunnerChecker::RunsOnTheSameThread(
-          task_runners_.GetRasterTaskRunner()->GetTaskQueueId(),
-          task_runners_.GetPlatformTaskRunner()->GetTaskQueueId());
+      !task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread();
 
   // Note:
   // This is a synchronous operation because certain platforms depend on
@@ -750,9 +748,7 @@ void Shell::OnPlatformViewDestroyed() {
   // thread just signals the latch and the platform/raster thread follows with
   // executing raster_task.
   const bool should_post_raster_task =
-      !fml::TaskRunnerChecker::RunsOnTheSameThread(
-          task_runners_.GetRasterTaskRunner()->GetTaskQueueId(),
-          task_runners_.GetPlatformTaskRunner()->GetTaskQueueId());
+      !task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread();
 
   // Note:
   // This is a synchronous operation because certain platforms depend on
