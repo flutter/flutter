@@ -119,7 +119,6 @@ class ColdRunner extends ResidentRunner {
           awaitFirstFrame: awaitFirstFrameWhenTracing,
         );
       }
-      appFinished();
     }
 
     appStartedCompleter?.complete();

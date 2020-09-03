@@ -357,6 +357,7 @@ class StartupTest {
         '--verbose',
         '--profile',
         '--trace-startup',
+        '--no-resident',
         '-d',
         deviceId,
       ]);
