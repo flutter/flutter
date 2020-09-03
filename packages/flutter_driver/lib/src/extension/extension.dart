@@ -100,15 +100,17 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 ///
 /// ```dart
 /// class Some extends SerializableFinder {
-///   const Some();
+///   const ByTooltipMessage(this.title);
+///
+///   final String title;
 ///
 ///   @override
 ///   String get finderType => 'Some';
 ///
 ///   @override
-///   Map<String, String> serialize() {
-///     // Serialize Finder
-///   }
+///   Map<String, String> serialize() => super.serialize()..addAll(<String, String>{
+///     'title': title,
+///   });
 /// }
 /// ```
 ///
@@ -118,10 +120,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 ///  String get finderType => 'Some';
 ///
 ///  SerializableFinder deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory) {
-///    SomeFinder result = SomeFinder();
-///    // Deserialize Finder
-///    ...
-///    return result;
+///    return Some(json['title']);
 ///  }
 ///
 ///  Finder createFinder(SerializableFinder finder) {
