@@ -1695,7 +1695,7 @@ void main() {
           ),
           child: Scaffold(
             appBar: AppBar(
-              title: const Text('PopupMenu Test'),    
+              title: const Text('PopupMenu Test'),
             ),
             body: PopupMenuButton<int>(
               child: const Text('Show Menu'),
