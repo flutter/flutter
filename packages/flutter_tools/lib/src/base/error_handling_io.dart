@@ -381,14 +381,14 @@ T _runSync<T>(T Function() op, {
   } on FileSystemException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.osError?.errorCode ?? 0);
-    } else if (platform.isLinux) {
+    } else if (platform.isLinux || platform.isMacOS) {
       _handlePosixException(e, failureMessage, e.osError?.errorCode ?? 0);
     }
     rethrow;
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.errorCode ?? 0);
-    } else if (platform.isLinux) {
+    } else if (platform.isLinux || platform.isMacOS) {
       _handlePosixException(e, failureMessage, e.errorCode ?? 0);
     }
     rethrow;
