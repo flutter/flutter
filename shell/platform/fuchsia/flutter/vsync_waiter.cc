@@ -27,8 +27,8 @@ VsyncWaiter::VsyncWaiter(std::string debug_label,
       debug_label_(std::move(debug_label)),
       session_wait_(session_present_handle, SessionPresentSignal),
       vsync_offset_(vsync_offset),
-      weak_factory_(this),
-      weak_factory_ui_(nullptr) {
+      weak_factory_ui_(nullptr),
+      weak_factory_(this) {
   auto wait_handler = [&](async_dispatcher_t* dispatcher,   //
                           async::Wait* wait,                //
                           zx_status_t status,               //
