@@ -68,12 +68,6 @@ void generateLocalizations({
         options?.untranslatedMessagesFile?.toFilePath(),
         logger,
       );
-  } on FileSystemException catch (e) {
-    logger.printError(e.message);
-    throw Exception();
-  } on FormatException catch (e) {
-    logger.printError(e.message);
-    throw Exception();
   } on L10nException catch (e) {
     logger.printError(e.message);
     throw Exception();

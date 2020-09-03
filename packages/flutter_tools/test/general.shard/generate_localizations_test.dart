@@ -75,7 +75,7 @@ void main() {
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
         generator.setInputDirectory('lib');
-      } on FileSystemException catch (e) {
+      } on L10nException catch (e) {
         expect(e.message, contains('Make sure that the correct path was provided'));
         return;
       }

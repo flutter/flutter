@@ -597,7 +597,7 @@ class LocalizationsGenerator {
     );
 
     if (!inputDirectory.existsSync()) {
-      throw FileSystemException(
+      throw L10nException(
         "The 'arb-dir' directory, '$inputDirectory', does not exist.\n"
         'Make sure that the correct path was provided.'
       );
@@ -605,7 +605,7 @@ class LocalizationsGenerator {
 
     final FileStat fileStat = inputDirectory.statSync();
     if (_isNotReadable(fileStat) || _isNotWritable(fileStat)) {
-      throw FileSystemException(
+      throw L10nException(
         "The 'arb-dir' directory, '$inputDirectory', doesn't allow reading and writing.\n"
         'Please ensure that the user has read and write permissions.'
       );
@@ -653,7 +653,7 @@ class LocalizationsGenerator {
     templateArbFile = _fs.file(globals.fs.path.join(inputDirectory.path, templateArbFileName));
     final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
     if (templateArbFileStatModeString[0] == '-' && templateArbFileStatModeString[3] == '-') {
-      throw FileSystemException(
+      throw L10nException(
         "The 'template-arb-file', $templateArbFile, is not readable.\n"
         'Please ensure that the user has read permissions.'
       );
@@ -1019,7 +1019,7 @@ class LocalizationsGenerator {
     // Ensure that the created directory has read/write permissions.
     final FileStat fileStat = outputDirectory.statSync();
     if (_isNotReadable(fileStat) || _isNotWritable(fileStat)) {
-      throw FileSystemException(
+      throw L10nException(
         "The 'output-dir' directory, $outputDirectory, doesn't allow reading and writing.\n"
         'Please ensure that the user has read and write permissions.'
       );

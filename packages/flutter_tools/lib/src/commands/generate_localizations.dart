@@ -10,11 +10,17 @@ import '../localizations/gen_l10n_types.dart';
 import '../localizations/localizations_utils.dart';
 import '../runner/flutter_command.dart';
 
+/// A command to generate localizations source files for a Flutter project.
+///
+/// It generates Dart localization source files from arb files.
+///
+/// For a more comprehensive tutorial on the tool, please see the
+/// [internationalization user guide](flutter.dev/go/i18n-user-guide).
 class GenerateLocalizationsCommand extends FlutterCommand {
   GenerateLocalizationsCommand({
     FileSystem fileSystem,
-  }) {
-    _fileSystem = fileSystem;
+  }) :
+    _fileSystem = fileSystem {
     argParser.addOption(
       'arb-dir',
       defaultsTo: globals.fs.path.join('lib', 'l10n'),
@@ -144,32 +150,32 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     );
   }
 
-  FileSystem _fileSystem;
+  final FileSystem _fileSystem;
 
   @override
   String get description => 'Generate localizations for the Flutter project.';
 
   @override
-  String get name => 'generate_localizations';
+  String get name => 'gen-l10n';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
 
     precacheLanguageAndRegionTags();
 
-    final String inputPathString = argResults['arb-dir'] as String;
-    final String outputPathString = argResults['output-dir'] as String;
-    final String outputFileString = argResults['output-localization-file'] as String;
-    final String templateArbFileName = argResults['template-arb-file'] as String;
-    final String untranslatedMessagesFile = argResults['untranslated-messages-file'] as String;
-    final String classNameString = argResults['output-class'] as String;
-    final String preferredSupportedLocaleString = argResults['preferred-supported-locales'] as String;
-    final String headerString = argResults['header'] as String;
-    final String headerFile = argResults['header-file'] as String;
-    final bool useDeferredLoading = argResults['use-deferred-loading'] as bool;
-    final String inputsAndOutputsListPath = argResults['gen-inputs-and-outputs-list'] as String;
-    final bool useSyntheticPackage = argResults['synthetic-package'] as bool;
-    final String projectPathString = argResults['project-dir'] as String;
+    final String inputPathString = stringArg('arb-dir');
+    final String outputPathString = stringArg('output-dir');
+    final String outputFileString = stringArg('output-localization-file');
+    final String templateArbFileName = stringArg('template-arb-file');
+    final String untranslatedMessagesFile = stringArg('untranslated-messages-file');
+    final String classNameString = stringArg('output-class');
+    final String preferredSupportedLocaleString = stringArg('preferred-supported-locales');
+    final String headerString = stringArg('header');
+    final String headerFile = stringArg('header-file');
+    final bool useDeferredLoading = stringArg('use-deferred-loading') as bool;
+    final String inputsAndOutputsListPath = stringArg('gen-inputs-and-outputs-list');
+    final bool useSyntheticPackage = stringArg('synthetic-package') as bool;
+    final String projectPathString = stringArg('project-dir');
 
     final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(_fileSystem);
 
@@ -192,10 +198,6 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         ..loadResources()
         ..writeOutputFiles()
         ..outputUnimplementedMessages(untranslatedMessagesFile, globals.logger);
-    } on FileSystemException catch (e) {
-      throwToolExit(e.message);
-    } on FormatException catch (e) {
-      throwToolExit(e.message);
     } on L10nException catch (e) {
       throwToolExit(e.message);
     }
