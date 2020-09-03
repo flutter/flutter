@@ -1131,7 +1131,7 @@ class AlignTransition extends AnimatedWidget {
 /// ```dart
 /// AnimationController _controller;
 /// TextStyleTween _styleTween;
-//  CurvedAnimation _curvedAnimation;
+/// CurvedAnimation _curvedAnimation;
 ///
 /// @override
 /// void initState() {
@@ -1141,13 +1141,13 @@ class AlignTransition extends AnimatedWidget {
 ///     vsync: this,
 ///   )..repeat(reverse: true);
 ///   _styleTween = TextStyleTween(
-//      begin: TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
-//      end: TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100)
-//    );
-//    _curvedAnimation = CurvedAnimation(
-//      parent: _controller,
-//      curve: Curves.elasticInOut
-//    );
+///     begin: TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
+///     end: TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100)
+///   );
+///   _curvedAnimation = CurvedAnimation(
+///     parent: _controller,
+///     curve: Curves.elasticInOut
+///   );
 /// }
 ///
 /// @override
