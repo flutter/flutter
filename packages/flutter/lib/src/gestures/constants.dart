@@ -95,11 +95,11 @@ const double kMaxFlingVelocity = 8000.0; // Logical pixels / second
 // TODO(ianh): Implement jump-tap gestures.
 const Duration kJumpTapTimeout = Duration(milliseconds: 500);
 
-/// Like [kTouchSlop], but for mouse pointers.
-const double kMouseHitSlop = 1.0; // Logical pixels;
+/// Like [kTouchSlop], but for more precise pointers like mice and trackpads.
+const double kPrecisePointerHitSlop = 1.0; // Logical pixels;
 
-/// Like [kPanSlop], but for mouse pointers.
-const double kPanMouseSlop = kMouseHitSlop * 2.0; // Logical pixels
+/// Like [kPanSlop], but for more precise pointers like mice and trackpads.
+const double kPrecisePointerPanSlop = kPrecisePointerHitSlop * 2.0; // Logical pixels
 
-/// Like [kScaleSlop], but for mouse pointers.
-const double kScaleMouseSlop = kMouseHitSlop; // Logical pixels
+/// Like [kScaleSlop], but for more precise pointers like mice and trackpads.
+const double kPrecisePointerScaleSlop = kPrecisePointerHitSlop; // Logical pixels

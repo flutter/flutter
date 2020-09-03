@@ -2230,7 +2230,7 @@ double computeHitSlop(PointerDeviceKind kind) {
     case PointerDeviceKind.mouse:
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
-      return kMouseHitSlop;
+      return kPrecisePointerHitSlop;
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
       return kTouchSlop;
@@ -2243,7 +2243,7 @@ double computePanSlop(PointerDeviceKind kind) {
     case PointerDeviceKind.mouse:
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
-      return kPanMouseSlop;
+      return kPrecisePointerPanSlop;
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
       return kPanSlop;
@@ -2256,7 +2256,7 @@ double computeScaleSlop(PointerDeviceKind kind) {
     case PointerDeviceKind.mouse:
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
-      return kScaleMouseSlop;
+      return kPrecisePointerScaleSlop;
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
       return kScaleSlop;

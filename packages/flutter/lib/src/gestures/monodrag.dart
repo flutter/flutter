@@ -69,7 +69,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }) : assert(dragStartBehavior != null),
        super(debugOwner: debugOwner, kind: kind);
 
-  static VelocityTracker _defaultBuilder(PointerEvent ev) => VelocityTracker(ev.kind);
+  static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker(event.kind);
   /// Configure the behavior of offsets sent to [onStart].
   ///
   /// If set to [DragStartBehavior.start], the [onStart] callback will be called
