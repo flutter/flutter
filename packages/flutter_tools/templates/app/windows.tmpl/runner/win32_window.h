@@ -52,6 +52,9 @@ class Win32Window {
   // If true, closing this window will quit the application.
   void SetQuitOnClose(bool quit_on_close);
 
+  // Return a RECT representing the bounds of the current client area.
+  RECT GetClientArea();
+
  protected:
   // Processes and route salient window messages for mouse handling,
   // size change and DPI. Delegates handling of these to member overloads that

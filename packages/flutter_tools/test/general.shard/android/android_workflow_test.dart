@@ -22,6 +22,7 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart' show MockAndroidSdk, MockProcess, MockProcessManager, MockStdio;
+import '../../src/testbed.dart';
 
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
@@ -55,6 +56,17 @@ void main() {
         stdout.map<List<int>>((String s) => s.codeUnits));
     return (List<String> command) => MockProcess(stdout: stdoutStream);
   }
+
+  testWithoutContext('AndroidWorkflow handles a null AndroidSDK', () {
+    final AndroidWorkflow androidWorkflow = AndroidWorkflow(
+      featureFlags: TestFeatureFlags(),
+      androidSdk: null,
+    );
+
+    expect(androidWorkflow.canLaunchDevices, false);
+    expect(androidWorkflow.canListDevices, false);
+    expect(androidWorkflow.canListEmulators, false);
+  });
 
   testUsingContext('licensesAccepted returns LicensesAccepted.unknown if cannot find sdkmanager', () async {
     processManager.canRunSucceeds = false;
@@ -219,7 +231,7 @@ void main() {
     when(sdk.platformToolsAvailable).thenReturn(true);
 
     // Test with invalid SDK and build tools
-    when(mockSdkVersion.sdkLevel).thenReturn(26);
+    when(mockSdkVersion.sdkLevel).thenReturn(28);
     when(mockSdkVersion.buildToolsVersion).thenReturn(Version(26, 0, 3));
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.latestVersion).thenReturn(mockSdkVersion);
@@ -250,7 +262,7 @@ void main() {
     );
 
     // Test with valid SDK but invalid build tools
-    when(mockSdkVersion.sdkLevel).thenReturn(28);
+    when(mockSdkVersion.sdkLevel).thenReturn(29);
     when(mockSdkVersion.buildToolsVersion).thenReturn(Version(28, 0, 2));
 
     validationResult = await androidValidator.validate();
@@ -279,7 +291,7 @@ void main() {
     // Mock a pass through scenario to reach _checkJavaVersion()
     when(sdk.licensesAvailable).thenReturn(true);
     when(sdk.platformToolsAvailable).thenReturn(true);
-    when(mockSdkVersion.sdkLevel).thenReturn(28);
+    when(mockSdkVersion.sdkLevel).thenReturn(29);
     when(mockSdkVersion.buildToolsVersion).thenReturn(Version(28, 0, 3));
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.latestVersion).thenReturn(mockSdkVersion);

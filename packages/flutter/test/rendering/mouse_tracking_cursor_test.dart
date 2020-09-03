@@ -47,7 +47,7 @@ void main() {
       for (final HitTestTarget target in annotationFinder(position)) {
         result.addWithRawTransform(
           transform: Matrix4.identity(),
-          position: null,
+          position: position,
           hitTest: (BoxHitTestResult result, Offset position) {
             result.add(HitTestEntry(target));
             return true;

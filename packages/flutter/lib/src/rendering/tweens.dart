@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/animation.dart';
 import 'package:flutter/painting.dart';
 
@@ -17,17 +15,17 @@ import 'package:flutter/painting.dart';
 /// See also:
 ///
 ///  * [AlignmentTween], which interpolates between to [Alignment] objects.
-class FractionalOffsetTween extends Tween<FractionalOffset> {
+class FractionalOffsetTween extends Tween<FractionalOffset?> {
   /// Creates a fractional offset tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as meaning the center.
-  FractionalOffsetTween({ FractionalOffset begin, FractionalOffset end })
+  FractionalOffsetTween({ FractionalOffset? begin, FractionalOffset? end })
     : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  FractionalOffset lerp(double t) => FractionalOffset.lerp(begin, end, t);
+  FractionalOffset? lerp(double t) => FractionalOffset.lerp(begin, end, t);
 }
 
 /// An interpolation between two alignments.
@@ -41,17 +39,17 @@ class FractionalOffsetTween extends Tween<FractionalOffset> {
 ///
 ///  * [AlignmentGeometryTween], which interpolates between two
 ///    [AlignmentGeometry] objects.
-class AlignmentTween extends Tween<Alignment> {
+class AlignmentTween extends Tween<Alignment?> {
   /// Creates a fractional offset tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as meaning the center.
-  AlignmentTween({ Alignment begin, Alignment end })
+  AlignmentTween({ Alignment? begin, Alignment? end })
     : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Alignment lerp(double t) => Alignment.lerp(begin, end, t);
+  Alignment? lerp(double t) => Alignment.lerp(begin, end, t);
 }
 
 /// An interpolation between two [AlignmentGeometry].
@@ -64,17 +62,17 @@ class AlignmentTween extends Tween<Alignment> {
 /// See also:
 ///
 ///  * [AlignmentTween], which interpolates between two [Alignment] objects.
-class AlignmentGeometryTween extends Tween<AlignmentGeometry> {
+class AlignmentGeometryTween extends Tween<AlignmentGeometry?> {
   /// Creates a fractional offset geometry tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as meaning the center.
   AlignmentGeometryTween({
-    AlignmentGeometry begin,
-    AlignmentGeometry end,
+    AlignmentGeometry? begin,
+    AlignmentGeometry? end,
   }) : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  AlignmentGeometry lerp(double t) => AlignmentGeometry.lerp(begin, end, t);
+  AlignmentGeometry? lerp(double t) => AlignmentGeometry.lerp(begin, end, t);
 }

@@ -808,28 +808,28 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 20));
     // Avatar drawer should start expanding.
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(81.2, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(81.2, epsilon: 0.1));
     expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(-18.8, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(13.2, 0.1));
+    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, moreOrLessEquals(-18.8, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, moreOrLessEquals(13.2, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(86.7, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(86.7, epsilon: 0.1));
     expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(-13.3, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(18.6, 0.1));
+    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, moreOrLessEquals(-13.3, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, moreOrLessEquals(18.6, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(94.7, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(94.7, epsilon: 0.1));
     expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(-5.3, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(26.7, 0.1));
+    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, moreOrLessEquals(-5.3, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, moreOrLessEquals(26.7, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(99.5, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(99.5, epsilon: 0.1));
     expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(-0.5, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(31.5, 0.1));
+    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, moreOrLessEquals(-0.5, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, moreOrLessEquals(31.5, epsilon: 0.1));
 
     // Wait for being done with animation, and make sure it didn't change
     // height.
@@ -849,28 +849,28 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 20));
     // Avatar drawer should start contracting.
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(102.9, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(102.9, epsilon: 0.1));
     expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(2.9, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(34.9, 0.1));
+    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, moreOrLessEquals(2.9, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, moreOrLessEquals(34.9, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(98.0, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(98.0, epsilon: 0.1));
     expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(-2.0, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(30.0, 0.1));
+    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, moreOrLessEquals(-2.0, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, moreOrLessEquals(30.0, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(84.1, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(84.1, epsilon: 0.1));
     expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(-15.9, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(16.1, 0.1));
+    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, moreOrLessEquals(-15.9, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, moreOrLessEquals(16.1, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(80.0, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(80.0, epsilon: 0.1));
     expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(-20.0, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(12.0, 0.1));
+    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, moreOrLessEquals(-20.0, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, moreOrLessEquals(12.0, epsilon: 0.1));
 
     // Wait for being done with animation, make sure it didn't change
     // height, and make sure that the avatar is no longer drawn.
@@ -923,25 +923,25 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 20));
     // Delete button drawer should start expanding.
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(81.2, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(81.2, epsilon: 0.1));
     expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(53.2, 0.1));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, moreOrLessEquals(53.2, epsilon: 0.1));
     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(86.7, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(86.7, epsilon: 0.1));
     expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(58.7, 0.1));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, moreOrLessEquals(58.7, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(94.7, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(94.7, epsilon: 0.1));
     expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(66.7, 0.1));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, moreOrLessEquals(66.7, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(99.5, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(99.5, epsilon: 0.1));
     expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(71.5, 0.1));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, moreOrLessEquals(71.5, epsilon: 0.1));
 
     // Wait for being done with animation, and make sure it didn't change
     // height.
@@ -968,25 +968,25 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 20));
     // Delete button drawer should start contracting.
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(103.8, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(103.8, epsilon: 0.1));
     expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(75.8, 0.1));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, moreOrLessEquals(75.8, epsilon: 0.1));
     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(102.9, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(102.9, epsilon: 0.1));
     expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(74.9, 0.1));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, moreOrLessEquals(74.9, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(101.0, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(101.0, epsilon: 0.1));
     expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(73.0, 0.1));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, moreOrLessEquals(73.0, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(97.5, 0.1));
+    expect(tester.getSize(find.byType(RawChip)).width, moreOrLessEquals(97.5, epsilon: 0.1));
     expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(69.5, 0.1));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, moreOrLessEquals(69.5, epsilon: 0.1));
 
     // Wait for being done with animation, make sure it didn't change
     // height, and make sure that the delete button is no longer drawn.
@@ -1244,11 +1244,11 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(getSelectProgress(tester), closeTo(0.002, 0.01));
+    expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
     expect(getAvatarDrawerProgress(tester), equals(1.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(getSelectProgress(tester), closeTo(0.54, 0.01));
+    expect(getSelectProgress(tester), moreOrLessEquals(0.54, epsilon: 0.01));
     expect(getAvatarDrawerProgress(tester), equals(1.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
     await tester.pump(const Duration(milliseconds: 100));
@@ -1262,11 +1262,11 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
-    expect(getSelectProgress(tester), closeTo(0.875, 0.01));
+    expect(getSelectProgress(tester), moreOrLessEquals(0.875, epsilon: 0.01));
     expect(getAvatarDrawerProgress(tester), equals(1.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
     await tester.pump(const Duration(milliseconds: 20));
-    expect(getSelectProgress(tester), closeTo(0.13, 0.01));
+    expect(getSelectProgress(tester), moreOrLessEquals(0.13, epsilon: 0.01));
     expect(getAvatarDrawerProgress(tester), equals(1.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
     await tester.pump(const Duration(milliseconds: 100));
@@ -1320,12 +1320,12 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(getSelectProgress(tester), closeTo(0.002, 0.01));
-    expect(getAvatarDrawerProgress(tester), closeTo(0.459, 0.01));
+    expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
+    expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.459, epsilon: 0.01));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(getSelectProgress(tester), closeTo(0.54, 0.01));
-    expect(getAvatarDrawerProgress(tester), closeTo(0.92, 0.01));
+    expect(getSelectProgress(tester), moreOrLessEquals(0.54, epsilon: 0.01));
+    expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.92, epsilon: 0.01));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
     await tester.pump(const Duration(milliseconds: 100));
     expect(getSelectProgress(tester), equals(1.0));
@@ -1338,12 +1338,12 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
-    expect(getSelectProgress(tester), closeTo(0.875, 0.01));
-    expect(getAvatarDrawerProgress(tester), closeTo(0.96, 0.01));
+    expect(getSelectProgress(tester), moreOrLessEquals(0.875, epsilon: 0.01));
+    expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.96, epsilon: 0.01));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
     await tester.pump(const Duration(milliseconds: 20));
-    expect(getSelectProgress(tester), closeTo(0.13, 0.01));
-    expect(getAvatarDrawerProgress(tester), closeTo(0.75, 0.01));
+    expect(getSelectProgress(tester), moreOrLessEquals(0.13, epsilon: 0.01));
+    expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.75, epsilon: 0.01));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
     await tester.pump(const Duration(milliseconds: 100));
     expect(getSelectProgress(tester), equals(0.0));
@@ -1395,11 +1395,11 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(getSelectProgress(tester), closeTo(0.002, 0.01));
+    expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
     expect(getAvatarDrawerProgress(tester), equals(1.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(getSelectProgress(tester), closeTo(0.54, 0.01));
+    expect(getSelectProgress(tester), moreOrLessEquals(0.54, epsilon: 0.01));
     expect(getAvatarDrawerProgress(tester), equals(1.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
     await tester.pump(const Duration(milliseconds: 100));
