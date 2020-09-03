@@ -200,7 +200,8 @@ class ScaffoldMessenger extends StatefulWidget {
 ///
 /// A [ScaffoldMessengerState] object can be used to [showSnackBar] for every
 /// registered [Scaffold] that is a descendant of the associated
-/// [ScaffoldMessenger].
+/// [ScaffoldMessenger]. Scaffolds will register to receive [SnackBar]s from
+/// their closest ScaffoldMessenger ancestor.
 ///
 /// Typically obtained via [ScaffoldMessenger.of].
 class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProviderStateMixin {
@@ -235,7 +236,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   }
 
   void _unregister(ScaffoldState scaffold) {
-    _scaffolds.remove(scaffold);
+    assert(_scaffolds.remove(scaffold));
   }
 
   /// Shows  a [SnackBar] across all registered [Scaffold]s.
