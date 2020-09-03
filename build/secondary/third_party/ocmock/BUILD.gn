@@ -2,8 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-assert(is_ios)
-
 ocmock_path = "//third_party/ocmock/Source"
 
 # OCMock headers use `#import <OCMock/Foo.h>`.
@@ -11,13 +9,11 @@ config("ocmock_config") {
   include_dirs = [ "$ocmock_path" ]
 }
 
-# This is a static library so it can be used by xcode's build system too.
-static_library("ocmock") {
+source_set("ocmock_src") {
   configs -= [ "//build/config/compiler:chromium_code" ]
   all_dependent_configs = [ ":ocmock_config" ]
   cflags = [
     "-fvisibility=default",
-    "-mios-simulator-version-min=$ios_testing_deployment_target",
     "-Wno-misleading-indentation",
   ]
   sources = [
@@ -92,3 +88,14 @@ static_library("ocmock") {
   ]
 }
 
+# This is a static library so it can be used by xcode's build system too.
+static_library("ocmock") {
+  if (is_ios) {
+    cflags = [
+      "-mios-simulator-version-min=$ios_testing_deployment_target",
+    ]
+  }
+  public_deps = [
+    ":ocmock_src",
+  ]
+}
