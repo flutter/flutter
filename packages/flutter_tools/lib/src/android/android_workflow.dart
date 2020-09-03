@@ -25,7 +25,7 @@ import '../globals.dart' as globals;
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
-const int kAndroidSdkMinVersion = 28;
+const int kAndroidSdkMinVersion = 29;
 final Version kAndroidJavaMinVersion = Version(1, 8, 0);
 final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
@@ -58,13 +58,13 @@ class AndroidWorkflow implements Workflow {
   bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled;
 
   @override
-  bool get canListDevices => getAdbPath(_androidSdk) != null;
+  bool get canListDevices => _androidSdk != null && _androidSdk.adbPath != null;
 
   @override
   bool get canLaunchDevices => _androidSdk != null && _androidSdk.validateSdkWellFormed().isEmpty;
 
   @override
-  bool get canListEmulators => getEmulatorPath(_androidSdk) != null;
+  bool get canListEmulators => _androidSdk != null && _androidSdk.emulatorPath != null;
 }
 
 class AndroidValidator extends DoctorValidator {
@@ -178,7 +178,7 @@ class AndroidValidator extends DoctorValidator {
 
     String sdkVersionText;
     if (_androidSdk.latestVersion != null) {
-      if (_androidSdk.latestVersion.sdkLevel < 28 || _androidSdk.latestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
+      if (_androidSdk.latestVersion.sdkLevel < kAndroidSdkMinVersion || _androidSdk.latestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
         messages.add(ValidationMessage.error(
           _userMessages.androidSdkBuildToolsOutdated(
             _androidSdk.sdkManagerPath,

@@ -188,7 +188,7 @@ void main() {
         return testUri;
       });
     when(mockFlutterDevice.vmService).thenAnswer((Invocation invocation) {
-      return fakeVmServiceHost.vmService;
+      return fakeVmServiceHost?.vmService;
     });
     when(mockFlutterDevice.reloadSources(any, pause: anyNamed('pause'))).thenAnswer((Invocation invocation) async {
       return <Future<vm_service.ReloadReport>>[
@@ -1189,6 +1189,7 @@ void main() {
         '--disable-dart-dev',
         globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
         '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
+        '--project-dir=${globals.fs.currentDirectory.path}',
       ],
       onRun: () {
         dependencies
@@ -1200,6 +1201,7 @@ void main() {
     globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
       .createSync(recursive: true);
     globals.fs.file('l10n.yaml').createSync();
+    globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     await residentRunner.runSourceGenerators();
 
@@ -1218,6 +1220,7 @@ void main() {
         '--disable-dart-dev',
         globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
         '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
+        '--project-dir=${globals.fs.currentDirectory.path}',
       ],
       exitCode: 1,
       stderr: 'stderr'
@@ -1225,6 +1228,7 @@ void main() {
     globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
       .createSync(recursive: true);
     globals.fs.file('l10n.yaml').createSync();
+    globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     await residentRunner.runSourceGenerators();
 
@@ -1280,6 +1284,42 @@ void main() {
           commandHelp.P,
           commandHelp.a,
           'An Observatory debugger and profiler on null is available at: null',
+          ''
+        ].join('\n')
+    ));
+  }));
+
+  testUsingContext('ResidentRunner printHelpDetails cold runner', () => testbed.run(() {
+    when(mockDevice.supportsHotRestart).thenReturn(true);
+    when(mockDevice.supportsScreenshot).thenReturn(true);
+    fakeVmServiceHost = null;
+    residentRunner = ColdRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+    );
+    residentRunner.printHelp(details: true);
+
+    final CommandHelp commandHelp = residentRunner.commandHelp;
+
+    // does not supports service protocol
+    expect(residentRunner.supportsServiceProtocol, false);
+    // isRunningDebug
+    expect(residentRunner.isRunningDebug, false);
+    // does not support CanvasKit
+    expect(residentRunner.supportsCanvasKit, false);
+    // does support SkSL
+    expect(residentRunner.supportsWriteSkSL, false);
+    // commands
+    expect(testLogger.statusText, equals(
+        <dynamic>[
+          'Flutter run key commands.',
+          commandHelp.s,
+          commandHelp.h,
+          commandHelp.c,
+          commandHelp.q,
           ''
         ].join('\n')
     ));
@@ -1391,6 +1431,26 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
+  testUsingContext('ResidentRunner can take screenshot on release device', () => testbed.run(() async {
+    when(mockDevice.supportsScreenshot).thenReturn(true);
+    when(mockDevice.takeScreenshot(any))
+      .thenAnswer((Invocation invocation) async {
+        final File file = invocation.positionalArguments.first as File;
+        file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
+      });
+
+    residentRunner = ColdRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+    );
+    await residentRunner.screenshot(mockFlutterDevice);
+
+    expect(testLogger.statusText, contains('1kB'));
+  }));
+
   testUsingContext('ResidentRunner clears the screen when it should', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     const String message = 'This should be cleared';
@@ -1484,9 +1544,7 @@ void main() {
   }));
 
   testUsingContext('ResidentRunner does not toggle banner in non-debug mode', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      listViews,
-    ]);
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,

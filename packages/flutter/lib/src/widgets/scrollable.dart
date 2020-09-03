@@ -402,11 +402,11 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   }
 
   @override
-  void restoreState(RestorationBucket oldBucket) {
+  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
     registerForRestoration(_persistedScrollOffset, 'offset');
     assert(position != null);
     if (_persistedScrollOffset.value != null) {
-      position.restoreOffset(_persistedScrollOffset.value, initialRestore: oldBucket == null);
+      position.restoreOffset(_persistedScrollOffset.value, initialRestore: initialRestore);
     }
   }
 
@@ -507,6 +507,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
+                  ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior;
               },
             ),
@@ -526,6 +527,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
+                  ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior;
               },
             ),
@@ -692,7 +694,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         key: _scrollSemanticsKey,
         child: result,
         position: position,
-        allowImplicitScrolling: _physics.allowImplicitScrolling,
+        allowImplicitScrolling: widget?.physics?.allowImplicitScrolling ?? _physics.allowImplicitScrolling,
         semanticChildCount: widget.semanticChildCount,
       );
     }
@@ -704,7 +706,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ScrollPosition>('position', position));
-    properties.add(DiagnosticsProperty<ScrollPhysics>('effective physics', _physics));
   }
 
   @override
@@ -972,7 +973,7 @@ class ScrollAction extends Action<ScrollIntent> {
     assert(state.position.viewportDimension != null);
     assert(state.position.maxScrollExtent != null);
     assert(state.position.minScrollExtent != null);
-    assert(state._physics == null || state._physics.shouldAcceptUserOffset(state.position));
+    assert(state.widget.physics == null || state.widget.physics.shouldAcceptUserOffset(state.position));
     if (state.widget.incrementCalculator != null) {
       return state.widget.incrementCalculator(
         ScrollIncrementDetails(
@@ -1061,7 +1062,7 @@ class ScrollAction extends Action<ScrollIntent> {
     assert(state.position.minScrollExtent != null);
 
     // Don't do anything if the user isn't allowed to scroll.
-    if (state._physics != null && !state._physics.shouldAcceptUserOffset(state.position)) {
+    if (state.widget.physics != null && !state.widget.physics.shouldAcceptUserOffset(state.position)) {
       return;
     }
     final double increment = _getIncrement(state, intent);
