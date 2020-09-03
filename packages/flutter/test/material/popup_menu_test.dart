@@ -1622,7 +1622,7 @@ void main() {
   });
 
   testWidgets('PopupMenu in AppBar does not overlap with the status bar', (WidgetTester tester) async {
-    const List<PopupMenuItem<int>> choices = [
+    const List<PopupMenuItem<int>> choices = <PopupMenuItem<int>>[
       PopupMenuItem<int>(value: 1, child: Text('Item 1')),
       PopupMenuItem<int>(value: 2, child: Text('Item 2')),
       PopupMenuItem<int>(value: 3, child: Text('Item 3')),
