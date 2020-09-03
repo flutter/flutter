@@ -134,18 +134,6 @@ class NonExistentPositionDelegate extends MultiChildLayoutDelegate {
   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
 }
 
-// Used in the 'performLayout error control test' test case
-//  to trigger an error when positioning with null offset
-class NullOffsetPositionDelegate extends MultiChildLayoutDelegate {
-  @override
-  void performLayout(Size size) {
-    positionChild(0, null);
-  }
-
-  @override
-  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
-}
-
 // Used in the 'performLayout error control test' test case for triggering
 //  to layout child more than once
 class InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
@@ -368,17 +356,6 @@ void main() {
           '   The NonExistentPositionDelegate custom multichild layout delegate\n'
           '   tried to position out a non-existent child:\n'
           '   There is no child with the id "1".\n'
-      );
-    });
-
-    testWidgets('positionChild on non existent child', (WidgetTester tester) async {
-      expectFlutterErrorMessage(
-        tester: tester,
-        delegate: NullOffsetPositionDelegate(),
-        message:
-          'FlutterError\n'
-          '   The NullOffsetPositionDelegate custom multichild layout delegate\n'
-          '   provided a null position for the child with id "0".\n',
       );
     });
 

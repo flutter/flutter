@@ -44,6 +44,9 @@ class PlaceholderDimensions {
   }) : assert(size != null),
        assert(alignment != null);
 
+  /// A constant representing an empty placeholder.
+  static const PlaceholderDimensions empty = PlaceholderDimensions(size: Size.zero, alignment: ui.PlaceholderAlignment.bottom);
+
   /// Width and height dimensions of the placeholder.
   final Size size;
 
@@ -579,7 +582,7 @@ class TextPainter {
           newWidth = maxIntrinsicWidth;
           break;
       }
-      newWidth = newWidth.clamp(minWidth, maxWidth) as double; // ignore: unnecessary_cast
+      newWidth = newWidth.clamp(minWidth, maxWidth);
       if (newWidth != _applyFloatingPointHack(_paragraph!.width)) {
         _paragraph!.layout(ui.ParagraphConstraints(width: newWidth));
       }
