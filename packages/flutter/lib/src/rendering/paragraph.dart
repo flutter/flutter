@@ -795,6 +795,17 @@ class RenderParagraph extends RenderBox
     return _textPainter.getWordBoundary(position);
   }
 
+  /// Returns the text range of the line at the given offset.
+  ///
+  /// The newline, if any, is included in the range.
+  ///
+  /// Valid only after [layout].
+  TextRange getLineBoundary(TextPosition position) {
+    assert(!debugNeedsLayout);
+    _layoutTextWithConstraints(constraints);
+    return _textPainter.getLineBoundary(position);
+  }
+
   /// Returns the size of the text as laid out.
   ///
   /// This can differ from [size] if the text overflowed or if the [constraints]

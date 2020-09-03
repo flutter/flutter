@@ -36,6 +36,15 @@ void main() {
     expect(offset50.dy, greaterThan(offset5.dy));
   });
 
+  test('preferredLineHeight control test', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(text: _kText),
+      textDirection: TextDirection.ltr,
+    );
+
+    expect(paragraph.preferredLineHeight, greaterThan(0.0));
+  });
+
   test('getFullHeightForCaret control test', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(text: _kText),
@@ -47,6 +56,20 @@ void main() {
 
     final double offset5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5), caret);
     expect(offset5, greaterThan(0.0));
+  });
+
+  test('getLineBoundary control test', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(text: _kText),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+
+    final TextRange range5 = paragraph.getLineBoundary(const TextPosition(offset: 5));
+    expect(range5.textInside(_kText), equals('I polished up that handle so carefullee'));
+
+    final TextRange range50 = paragraph.getLineBoundary(const TextPosition(offset: 50));
+    expect(range50.textInside(_kText), equals("That now I am the Ruler of the Queen's Navee!"));
   });
 
   test('getPositionForOffset control test', () {
