@@ -121,9 +121,10 @@ abstract class SliverChildDelegate {
 
   /// Returns the child with the given index.
   ///
-  /// Should return null if asked to build a widget with a greater index than
-  /// exists. If this returns null, [estimatedChildCount] must subsequently
-  /// return a precise non-null value.
+  /// Should return null if asked to build a widget with a greater
+  /// index than exists. If this returns null, [estimatedChildCount]
+  /// must subsequently return a precise non-null value (which is then
+  /// used to implement [RenderSliverBoxChildManager.childCount]).
   ///
   /// Subclasses typically override this function and wrap their children in
   /// [AutomaticKeepAlive], [IndexedSemantics], and [RepaintBoundary] widgets.
@@ -141,7 +142,8 @@ abstract class SliverChildDelegate {
   /// Return null if there are an unbounded number of children or if it would
   /// be too difficult to estimate the number of children.
   ///
-  /// This must return a precise number once [build] has returned null.
+  /// This must return a precise number once [build] has returned null, as it
+  /// used to implement [RenderSliverBoxChildManager.childCount].
   int? get estimatedChildCount => null;
 
   /// Returns an estimate of the max scroll extent for all the children.
@@ -217,7 +219,7 @@ typedef ChildIndexGetter = int Function(Key key);
 ///
 /// Many slivers lazily construct their box children to avoid creating more
 /// children than are visible through the [Viewport]. This delegate provides
-/// children using an [IndexedWidgetBuilder] callback, so that the children do
+/// children using a [NullableIndexedWidgetBuilder] callback, so that the children do
 /// not even have to be built until they are displayed.
 ///
 /// The widgets returned from the builder callback are automatically wrapped in
@@ -354,7 +356,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   ///
   /// The delegate wraps the children returned by this builder in
   /// [RepaintBoundary] widgets.
-  final IndexedWidgetBuilder builder;
+  final NullableIndexedWidgetBuilder builder;
 
   /// The total number of children this delegate can provide.
   ///
@@ -442,13 +444,13 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     assert(builder != null);
     if (index < 0 || (childCount != null && index >= childCount!))
       return null;
-    Widget child;
+    Widget? child;
     try {
       child = builder(context, index);
     } catch (exception, stackTrace) {
       child = _createErrorWidget(exception, stackTrace);
     }
-    if (child == null) { // ignore: dead_code
+    if (child == null) {
       return null;
     }
     final Key? key = child.key != null ? _SaltedValueKey(child.key!) : null;
@@ -693,7 +695,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   }
 
   @override
-  int get estimatedChildCount => children.length;
+  int? get estimatedChildCount => children.length;
 
   @override
   bool shouldRebuild(covariant SliverChildListDelegate oldDelegate) {
@@ -1215,7 +1217,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     double? leadingScrollOffset,
     double? trailingScrollOffset,
   }) {
-    final int? childCount = this.childCount;
+    final int? childCount = estimatedChildCount;
     if (childCount == null)
       return double.infinity;
     return widget.estimateMaxScrollOffset(
@@ -1233,8 +1235,56 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     );
   }
 
+  /// The best available estimate of [childCount], or null if no estimate is available.
+  ///
+  /// This differs from [childCount] in that [childCount] never returns null (and must
+  /// not be accessed if the child count is not yet available, meaning the [createChild]
+  /// method has not been provided an index that does not create a child).
+  ///
+  /// See also:
+  ///
+  ///  * [SliverChildDelegate.estimatedChildCount], to which this getter defers.
+  int? get estimatedChildCount => widget.delegate.estimatedChildCount;
+
   @override
-  int? get childCount => widget.delegate.estimatedChildCount;
+  int get childCount {
+    int? result = estimatedChildCount;
+    if (result == null) {
+      // Since childCount was called, we know that we reached the end of
+      // the list (as in, _build return null once), so we know that the
+      // list is finite.
+      // Let's do an open-ended binary search to find the end of the list
+      // manually.
+      int min = 0;
+      int max = 1;
+      while (_build(max - 1) != null) {
+        min = max - 1;
+        if (max < (1<<62)) {
+          max *= 2;
+        } else if (max < (1<<63) - 1) {
+          max = (1<<63) - 1;
+        } else {
+          throw FlutterError(
+            'Could not find the number of children in ${widget.delegate}.\n'
+            'The childCount getter was called (implying that the delegate\'s builder returned null '
+            'for a positive index), but even building the child with index $max (the maximum '
+            'possible integer) did not return null. Consider implementing childCount to avoid '
+            'the cost of searching for the final child.'
+          );
+        }
+      }
+      while (max - min > 1) {
+        final int mid = (max - min) ~/ 2 + min;
+        if (_build(mid - 1) == null) {
+          max = mid;
+        } else {
+          min = mid;
+        }
+      }
+      result = min;
+    }
+    return result;
+  }
 
   @override
   void didStartLayout() {

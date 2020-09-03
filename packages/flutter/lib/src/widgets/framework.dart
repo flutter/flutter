@@ -4562,7 +4562,29 @@ typedef WidgetBuilder = Widget Function(BuildContext context);
 ///
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
 ///  * [TransitionBuilder], which is similar but also takes a child.
+///  * [NullableIndexedWidgetBuilder], which is similar but may return null.
 typedef IndexedWidgetBuilder = Widget Function(BuildContext context, int index);
+
+/// Signature for a function that creates a widget for a given index, e.g., in a
+/// list, but may return null.
+///
+/// Used by [SliverChildBuilderDelegate.builder] and other APIs that
+/// use lazily-generated widgets where the child count is not known
+/// ahead of time.
+///
+/// Unlike most builders, this callback can return null, indicating the index
+/// is out of range. Whether and when this is valid depends on the semantics
+/// of the builder. For example, [SliverChildBuilderDelegate.builder] returns
+/// null when the index is out of range, where the range is defined by the
+/// [SliverChildBuilderDelegate.childCount]; so in that case the `index`
+/// parameter's value may determine whether returning null is valid or not.
+///
+/// See also:
+///
+///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
+///  * [TransitionBuilder], which is similar but also takes a child.
+///  * [IndexedWidgetBuilder], which is similar but not nullable.
+typedef NullableIndexedWidgetBuilder = Widget? Function(BuildContext context, int index);
 
 /// A builder that builds a widget given a child.
 ///
