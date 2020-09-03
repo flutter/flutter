@@ -89,6 +89,12 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
         delegate_.GetTaskRunners().GetRasterTaskRunner()->GetTaskQueueId();
     raster_thread_merger_ =
         fml::MakeRefCounted<fml::RasterThreadMerger>(platform_id, gpu_id);
+    raster_thread_merger_->SetMergeUnmergeCallback([=]() {
+      // Clear the GL context after the thread configuration has changed.
+      if (surface_) {
+        surface_->ClearRenderContext();
+      }
+    });
   }
 #endif
 }
@@ -102,6 +108,7 @@ void Rasterizer::Teardown() {
       raster_thread_merger_.get()->IsMerged()) {
     FML_DCHECK(raster_thread_merger_->IsEnabled());
     raster_thread_merger_->UnMergeNow();
+    raster_thread_merger_->SetMergeUnmergeCallback(nullptr);
   }
 }
 
@@ -466,14 +473,6 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
     }
 
     FireNextFrameCallbackIfPresent();
-
-    // Clear the render context after submitting the frame.
-    // This ensures that the GL context is released after drawing to the
-    // surface.
-    //
-    // The GL context must be clear before performing Gr context deferred
-    // cleanup.
-    surface_->ClearRenderContext();
 
     if (surface_->GetContext()) {
       TRACE_EVENT0("flutter", "PerformDeferredSkiaCleanup");
