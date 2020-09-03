@@ -269,6 +269,58 @@ typedef RefreshCallback = Future<void> Function();
 /// sliver such as [CupertinoSliverNavigationBar] and your main scrollable
 /// content's sliver.
 ///
+/// {@tool dartpad --template=stateful_widget_material}
+///
+/// When the user scrolls down far enough to pass [refreshTriggerPullDistance],
+/// this sample shows an iOS-style pull with [refreshIndicatorExtent] amount of space.
+/// It works until [onRefresh] returns a Future.
+///
+/// ```dart imports
+/// import 'package:flutter/cupertino.dart';
+/// ```
+///
+/// ```dart
+/// List<Color> colors = [Colors.amber[100], Colors.amber[300], Colors.amber[600]];
+/// List<Widget> items = [
+///   Container(color: Colors.amber[600], height: 100.0),
+///   Container(color: Colors.amber[300], height: 100.0),
+///   Container(color: Colors.amber[100], height: 100.0),
+/// ];
+///
+/// Future<void> _getItems() async {
+///   await Future.delayed(Duration(milliseconds: 1000));
+///   setState(() {
+///     items.insert(0, Container(color: colors[items.length % 3], height: 100.0));
+///   });
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return MaterialApp(
+///     home: Scaffold(
+///       body: CustomScrollView(
+///         slivers: <Widget>[
+///           CupertinoSliverNavigationBar(largeTitle: Text('Scroll down')),
+///           CupertinoSliverRefreshControl(
+///             refreshTriggerPullDistance: 100.0,
+///             refreshIndicatorExtent: 60.0,
+///             onRefresh: _getItems,
+///           ),
+///           SliverList(
+///             delegate: SliverChildBuilderDelegate(
+///                   (BuildContext context, int index) => items[index],
+///                 childCount: items.length,
+///               ),
+///             ),
+///           ],
+///         )
+///       )
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CustomScrollView], a typical sliver holding scroll view this control
