@@ -1390,6 +1390,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// The anchor point on the linked [CompositedTransformTarget] that
   /// [followerAnchor] will line up with.
   ///
+  /// {@template flutter.widgets.followerLayer.anchor}
   /// For example, when [targetAnchor] and [followerAnchor] are both
   /// [Alignment.topLeft], this widget will be top left aligned with the linked
   /// [CompositedTransformTarget]. When [targetAnchor] is
@@ -1397,6 +1398,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// widget will be left aligned with the linked [CompositedTransformTarget],
   /// and its top edge will line up with the [CompositedTransformTarget]'s
   /// bottom edge.
+  /// {@endtemplate}
   ///
   /// Defaults to [Alignment.topLeft].
   final Alignment targetAnchor;
@@ -1404,13 +1406,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// The anchor point on this widget that will line up with [followerAnchor] on
   /// the linked [CompositedTransformTarget].
   ///
-  /// For example, when [targetAnchor] and [followerAnchor] are both
-  /// [Alignment.topLeft], this widget will be top left aligned with the linked
-  /// [CompositedTransformTarget]. When [targetAnchor] is
-  /// [Alignment.bottomLeft] and [followerAnchor] is [Alignment.topLeft], this
-  /// widget will be left aligned with the linked [CompositedTransformTarget],
-  /// and its top edge will line up with the [CompositedTransformTarget]'s
-  /// bottom edge.
+  /// {@macro flutter.widgets.followerLayer.anchor}
   ///
   /// Defaults to [Alignment.topLeft].
   final Alignment followerAnchor;

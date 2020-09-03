@@ -4958,6 +4958,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// The anchor point on the linked [RenderLeaderLayer] that [followerAnchor]
   /// will line up with.
   ///
+  /// {@template flutter.rendering.followerLayer.anchor}
   /// For example, when [leaderAnchor] and [followerAnchor] are both
   /// [Alignment.topLeft], this [RenderFollowerLayer] will be top left aligned
   /// with the linked [RenderLeaderLayer]. When [leaderAnchor] is
@@ -4965,6 +4966,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// [RenderFollowerLayer] will be left aligned with the linked
   /// [RenderLeaderLayer], and its top edge will line up with the
   /// [RenderLeaderLayer]'s bottom edge.
+  /// {@endtemplate}
   ///
   /// Defaults to [Alignment.topLeft].
   Alignment get leaderAnchor => _leaderAnchor;
@@ -4980,13 +4982,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// The anchor point on this [RenderFollowerLayer] that will line up with
   /// [followerAnchor] on the linked [RenderLeaderLayer].
   ///
-  /// For example, when [leaderAnchor] and [followerAnchor] are both
-  /// [Alignment.topLeft], this [RenderFollowerLayer] will be top left aligned
-  /// with the linked [RenderLeaderLayer]. When [leaderAnchor] is
-  /// [Alignment.bottomLeft] and [followerAnchor] is [Alignment.topLeft], this
-  /// [RenderFollowerLayer] will be left aligned with the linked
-  /// [RenderLeaderLayer], and its top edge will line up with the
-  /// [RenderLeaderLayer]'s bottom edge.
+  /// {@macro flutter.rendering.followerLayer.anchor}
   ///
   /// Defaults to [Alignment.topLeft].
   Alignment get followerAnchor => _followerAnchor;
