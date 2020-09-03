@@ -13,6 +13,13 @@ import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
 
+/// The default path used when the `useSyntheticPackage` setting is set to true
+/// in [LocalizationsGenerator].
+///
+/// See [LocalizationsGenerator.initialize] for where and how it is used by the
+/// localizations tool.
+final String defaultSyntheticPackagePath = path.join('.dart_tool', 'flutter_gen', 'gen_l10n');
+
 List<String> generateMethodParameters(Message message) {
   assert(message.placeholders.isNotEmpty);
   final Placeholder countPlaceholder = message.isPlural ? message.getCountPlaceholder() : null;
@@ -403,6 +410,11 @@ class LocalizationsGenerator {
   /// This directory is specified with the [initialize] method.
   Directory inputDirectory;
 
+  /// The Flutter project's root directory.
+  ///
+  /// This directory is specified with the [initialize] method.
+  Directory projectDirectory;
+
   /// The directory to generate the project's localizations files in.
   ///
   /// It is assumed that all output files (e.g. The localizations
@@ -518,9 +530,15 @@ class LocalizationsGenerator {
     String headerFile,
     bool useDeferredLoading = false,
     String inputsAndOutputsListPath,
+    bool useSyntheticPackage = true,
+    String projectPathString,
   }) {
+    setProjectDir(projectPathString);
     setInputDirectory(inputPathString);
-    setOutputDirectory(outputPathString ?? inputPathString);
+    setOutputDirectory(
+      outputPathString: outputPathString ?? inputPathString,
+      useSyntheticPackage: useSyntheticPackage,
+    );
     setTemplateArbFile(templateArbFileName);
     setBaseOutputFile(outputFileString);
     setPreferredSupportedLocales(preferredSupportedLocaleString);
@@ -544,32 +562,73 @@ class LocalizationsGenerator {
     return !(statString[1] == 'w' || statString[4] == 'w' || statString[7] == 'w');
   }
 
+  @visibleForTesting
+  void setProjectDir(String projectPathString) {
+    if (projectPathString == null) {
+      return;
+    }
+
+    final Directory directory = _fs.directory(projectPathString);
+    if (!directory.existsSync()) {
+      throw L10nException(
+        'Directory does not exist: $directory.\n'
+        'Please select a directory that contains the project\'s localizations '
+        'resource files.'
+      );
+    }
+    projectDirectory = directory;
+  }
+
   /// Sets the reference [Directory] for [inputDirectory].
   @visibleForTesting
   void setInputDirectory(String inputPathString) {
     if (inputPathString == null)
       throw L10nException('inputPathString argument cannot be null');
-    inputDirectory = _fs.directory(inputPathString);
+    inputDirectory = _fs.directory(
+      projectDirectory != null
+        ? _getAbsoluteProjectPath(inputPathString)
+        : inputPathString
+    );
+
     if (!inputDirectory.existsSync())
       throw FileSystemException(
-        "The 'input-dir' directory, '$inputDirectory', does not exist.\n"
+        "The 'arb-dir' directory, '$inputDirectory', does not exist.\n"
         'Make sure that the correct path was provided.'
       );
 
     final FileStat fileStat = inputDirectory.statSync();
     if (_isNotReadable(fileStat) || _isNotWritable(fileStat))
       throw FileSystemException(
-        "The 'input-dir' directory, '$inputDirectory', doesn't allow reading and writing.\n"
+        "The 'arb-dir' directory, '$inputDirectory', doesn't allow reading and writing.\n"
         'Please ensure that the user has read and write permissions.'
       );
   }
 
   /// Sets the reference [Directory] for [outputDirectory].
   @visibleForTesting
-  void setOutputDirectory(String outputPathString) {
-    if (outputPathString == null)
-      throw L10nException('outputPathString argument cannot be null');
-    outputDirectory = _fs.directory(outputPathString);
+  void setOutputDirectory({
+    String outputPathString,
+    bool useSyntheticPackage = true,
+  }) {
+    if (useSyntheticPackage) {
+      outputDirectory = _fs.directory(
+        projectDirectory != null
+          ? _getAbsoluteProjectPath(defaultSyntheticPackagePath)
+          : defaultSyntheticPackagePath
+      );
+    } else {
+      if (outputPathString == null)
+        throw L10nException(
+          'outputPathString argument cannot be null if not using '
+          'synthetic package option.'
+        );
+
+      outputDirectory = _fs.directory(
+        projectDirectory != null
+          ? _getAbsoluteProjectPath(outputPathString)
+          : outputPathString
+      );
+    }
   }
 
   /// Sets the reference [File] for [templateArbFile].
@@ -667,6 +726,8 @@ class LocalizationsGenerator {
     }
   }
 
+  String _getAbsoluteProjectPath(String relativePath) => _fs.path.join(projectDirectory.path, relativePath);
+
   void _setUseDeferredLoading(bool useDeferredLoading) {
     if (useDeferredLoading == null) {
       throw L10nException('useDeferredLoading argument cannot be null.');
@@ -681,6 +742,7 @@ class LocalizationsGenerator {
     _inputsAndOutputsListFile = _fs.file(
       path.join(inputsAndOutputsListPath, 'gen_l10n_inputs_and_outputs.json'),
     );
+
     _inputFileList = <String>[];
     _outputFileList = <String>[];
   }

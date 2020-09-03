@@ -12,6 +12,7 @@ import '../../base/io.dart';
 import '../../base/logger.dart';
 import '../../convert.dart';
 import '../../globals.dart' as globals;
+import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 
@@ -36,11 +37,28 @@ Future<void> generateLocalizations({
     'bin',
     'gen_l10n.dart',
   );
+
+  // If generating a synthetic package, generate a warning if
+  // flutter: generate is not set.
+  final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDir);
+  if (options.useSyntheticPackage && !flutterProject.manifest.generateSyntheticPackage) {
+    logger.printError(
+      'Attempted to generate localizations code without having '
+      'the flutter: generate flag turned on.'
+      '\n'
+      'Check pubspec.yaml and ensure that flutter: generate: true has '
+      'been added and rebuild the project. Otherwise, the localizations '
+      'source code will not be importable.'
+    );
+    throw Exception();
+  }
+
   final ProcessResult result = await processManager.run(<String>[
     dartBinaryPath,
     '--disable-dart-dev',
     genL10nPath,
     '--gen-inputs-and-outputs-list=${dependenciesDir.path}',
+    '--project-dir=${projectDir.path}',
     if (options.arbDirectory != null)
       '--arb-dir=${options.arbDirectory.toFilePath()}',
     if (options.templateArbFile != null)
@@ -59,6 +77,8 @@ Future<void> generateLocalizations({
       '--use-deferred-loading',
     if (options.preferredSupportedLocales != null)
       '--preferred-supported-locales=${options.preferredSupportedLocales}',
+    if (!options.useSyntheticPackage)
+      '--no-synthetic-package'
   ]);
   if (result.exitCode != 0) {
     logger.printError(result.stdout + result.stderr as String);
@@ -155,7 +175,8 @@ class LocalizationOptions {
     this.preferredSupportedLocales,
     this.headerFile,
     this.deferredLoading,
-  });
+    this.useSyntheticPackage = true,
+  }) : assert(useSyntheticPackage != null);
 
   /// The `--arb-dir` argument.
   ///
@@ -199,6 +220,12 @@ class LocalizationOptions {
   /// Whether to generate the Dart localization file with locales imported
   /// as deferred.
   final bool deferredLoading;
+
+  /// The `--synthetic-package` argument.
+  ///
+  /// Whether to generate the Dart localization files in a synthetic package
+  /// or in a custom directory.
+  final bool useSyntheticPackage;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -230,6 +257,7 @@ LocalizationOptions parseLocalizationsOptions({
     preferredSupportedLocales: _tryReadString(yamlMap, 'preferred-supported-locales', logger),
     headerFile: _tryReadUri(yamlMap, 'header-file', logger),
     deferredLoading: _tryReadBool(yamlMap, 'use-deferred-loading', logger),
+    useSyntheticPackage: _tryReadBool(yamlMap, 'synthetic-package', logger) ?? true,
   );
 }
 

@@ -917,7 +917,11 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     if (widget.scrollController == null) {
       page = Scaffold(
         appBar: AppBar(
-          title: _PackageLicensePageTitle(title, subtitle, theme.primaryTextTheme),
+          title: _PackageLicensePageTitle(
+            title,
+            subtitle,
+            theme.appBarTheme.textTheme ?? theme.primaryTextTheme,
+          ),
         ),
         body: Center(
           child: Material(

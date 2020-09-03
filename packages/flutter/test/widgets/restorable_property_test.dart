@@ -353,7 +353,7 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   final _TestRestorableValue objectValue = _TestRestorableValue();
 
   @override
-  void restoreState(RestorationBucket oldBucket) {
+  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
     registerForRestoration(numValue, 'num');
     registerForRestoration(doubleValue, 'double');
     registerForRestoration(intValue, 'int');

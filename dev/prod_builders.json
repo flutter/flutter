@@ -1,9 +1,27 @@
 {
    "builders": [
       {
+         "name": "Linux analyze",
+         "repo": "flutter",
+         "task_name": "linux_analyze",
+         "flaky": false
+      },
+      {
+         "name": "Linux customer_testing",
+         "repo": "flutter",
+         "task_name": "linux_customer_testing",
+         "flaky": false
+      },
+      {
+         "name": "Linux docs",
+         "repo": "flutter",
+         "task_name": "linux_docs",
+         "flaky": false
+      },
+      {
          "name": "Linux build_tests",
          "repo": "flutter",
-         "task_name": "build_tests",
+         "task_name": "linux_build_tests",
          "flaky": false
       },
       {
@@ -13,22 +31,40 @@
          "flaky": false
       },
       {
+         "name": "Linux fuchsia_precache",
+         "repo": "flutter",
+         "task_name": "linux_fuchsia_precache",
+         "flaky": false
+      },
+      {
          "name": "Linux hostonly_devicelab_tests",
          "repo": "flutter",
-         "task_name": "hostonly_devicelab_tests",
+         "task_name": "linux_hostonly_devicelab_tests",
          "flaky": false
       },
       {
          "name": "Linux tool_tests",
          "repo": "flutter",
-         "task_name": "tool_tests",
+         "task_name": "linux_tool_tests",
          "flaky": false
       },
       {
          "name": "Linux web_tests",
          "repo": "flutter",
-         "task_name": "web_tests",
-         "flaky": true
+         "task_name": "linux_web_tests",
+         "flaky": false
+      },
+      {
+         "name": "Linux web_integration_tests",
+         "repo": "flutter",
+         "task_name": "linux_web_integration_tests",
+         "flaky": false
+      },
+      {
+         "name":"Linux web_smoke_test",
+         "repo":"flutter",
+         "task_name":"linux_web_smoke_test",
+         "flaky":false
       },
       {
          "name": "Mac",
@@ -37,9 +73,27 @@
          "flaky": false
       },
       {
-         "name": "Windows",
+         "name": "Windows build_tests",
          "repo": "flutter",
-         "task_name": "windows_bot",
+         "task_name": "win_build_tests",
+         "flaky": false
+      },
+      {
+         "name": "Windows customer_testing",
+         "repo": "flutter",
+         "task_name": "win_customer_testing",
+         "flaky": false
+      },
+      {
+         "name": "Windows framework_tests",
+         "repo": "flutter",
+         "task_name": "win_framework_tests",
+         "flaky": false
+      },
+      {
+         "name": "Windows tool_tests",
+         "repo": "flutter",
+         "task_name": "win_tool_tests",
          "flaky": false
       }
    ]

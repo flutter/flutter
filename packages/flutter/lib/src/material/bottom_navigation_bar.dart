@@ -19,6 +19,7 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'text_theme.dart';
 import 'theme.dart';
+import 'tooltip.dart';
 
 /// Defines the layout and behavior of a [BottomNavigationBar].
 ///
@@ -112,15 +113,15 @@ enum BottomNavigationBarType {
 ///       items: const <BottomNavigationBarItem>[
 ///         BottomNavigationBarItem(
 ///           icon: Icon(Icons.home),
-///           title: Text('Home'),
+///           label: 'Home',
 ///         ),
 ///         BottomNavigationBarItem(
 ///           icon: Icon(Icons.business),
-///           title: Text('Business'),
+///           label: 'Business',
 ///         ),
 ///         BottomNavigationBarItem(
 ///           icon: Icon(Icons.school),
-///           title: Text('School'),
+///           label: 'School',
 ///         ),
 ///       ],
 ///       currentIndex: _selectedIndex,
@@ -194,8 +195,9 @@ class BottomNavigationBar extends StatefulWidget {
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
-        items.every((BottomNavigationBarItem item) => item.title != null) == true,
-        'Every item must have a non-null title',
+        items.every((BottomNavigationBarItem item) => item.title != null) ||
+        items.every((BottomNavigationBarItem item) => item.label != null),
+        'Every item must have a non-null title or label',
        ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(elevation == null || elevation >= 0.0),
@@ -458,51 +460,64 @@ class _BottomNavigationTile extends StatelessWidget {
         break;
     }
 
-    return Expanded(
-      flex: size,
-      child: Semantics(
-        container: true,
-        selected: selected,
-        child: Stack(
+    Widget result = InkResponse(
+      onTap: onTap,
+      mouseCursor: mouseCursor,
+      child: Padding(
+        padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            InkResponse(
-              onTap: onTap,
-              mouseCursor: mouseCursor,
-              child: Padding(
-                padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    _TileIcon(
-                      colorTween: colorTween,
-                      animation: animation,
-                      iconSize: iconSize,
-                      selected: selected,
-                      item: item,
-                      selectedIconTheme: selectedIconTheme ?? bottomTheme.selectedIconTheme,
-                      unselectedIconTheme: unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
-                    ),
-                    _Label(
-                      colorTween: colorTween,
-                      animation: animation,
-                      item: item,
-                      selectedLabelStyle: selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
-                      unselectedLabelStyle: unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
-                      showSelectedLabels: showSelectedLabels ?? bottomTheme.showUnselectedLabels,
-                      showUnselectedLabels: showUnselectedLabels ?? bottomTheme.showUnselectedLabels,
-                    ),
-                  ],
-                ),
-              ),
+            _TileIcon(
+              colorTween: colorTween,
+              animation: animation,
+              iconSize: iconSize,
+              selected: selected,
+              item: item,
+              selectedIconTheme: selectedIconTheme ?? bottomTheme.selectedIconTheme,
+              unselectedIconTheme: unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
             ),
-            Semantics(
-              label: indexLabel,
+            _Label(
+              colorTween: colorTween,
+              animation: animation,
+              item: item,
+              selectedLabelStyle: selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
+              unselectedLabelStyle: unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
+              showSelectedLabels: showSelectedLabels ?? bottomTheme.showUnselectedLabels,
+              showUnselectedLabels: showUnselectedLabels ?? bottomTheme.showUnselectedLabels,
             ),
           ],
         ),
       ),
+    );
+
+    if (item.label != null) {
+      result = Tooltip(
+        message: item.label,
+        preferBelow: false,
+        verticalOffset: selectedIconSize + selectedFontSize,
+        child: result,
+      );
+    }
+
+    result = Semantics(
+      selected: selected,
+      container: true,
+      child: Stack(
+        children: <Widget>[
+          result,
+          Semantics(
+            label: indexLabel,
+          ),
+        ],
+      ),
+    );
+
+    return Expanded(
+      flex: size,
+      child: result,
     );
   }
 }
@@ -611,7 +626,7 @@ class _Label extends StatelessWidget {
           ),
         ),
         alignment: Alignment.bottomCenter,
-        child: item.title,
+        child: item.title ?? Text(item.label),
       ),
     );
 
@@ -638,11 +653,25 @@ class _Label extends StatelessWidget {
       );
     }
 
-    return Align(
+    text = Align(
       alignment: Alignment.bottomCenter,
       heightFactor: 1.0,
       child: Container(child: text),
     );
+
+    if (item.label != null) {
+      // Do not grow text in bottom navigation bar when we can show a tooltip
+      // instead.
+      final MediaQueryData mediaQueryData = MediaQuery.of(context);
+      text = MediaQuery(
+        data: mediaQueryData.copyWith(
+          textScaleFactor: math.min(1.0, mediaQueryData.textScaleFactor),
+        ),
+        child: text,
+      );
+    }
+
+    return text;
   }
 }
 
@@ -893,6 +922,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasMediaQuery(context));
+    assert(Overlay.of(context, debugRequiredFor: widget) != null);
 
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 

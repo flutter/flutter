@@ -246,6 +246,47 @@ void main() {
       FuchsiaSdk: () => MockFuchsiaSdk(),
       ProcessManager: () => MockProcessManager(),
     });
+
+    testUsingContext('hostAddress parsing works', () async {
+      when(globals.processManager.run(any)).thenAnswer((Invocation _) async {
+        return ProcessResult(
+          1,
+          0,
+          'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
+          '',
+        );
+      });
+      final FuchsiaDevice device = FuchsiaDevice('id');
+      expect(await device.hostAddress, 'fe80::8c6c:2fff:fe3d:c5e1%25ethp0003');
+    }, overrides: <Type, Generator>{
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => MockFuchsiaSdk(),
+      ProcessManager: () => MockProcessManager(),
+    });
+
+    testUsingContext('hostAddress parsing throws tool error on failure', () async {
+      when(globals.processManager.run(any)).thenAnswer((Invocation _) async {
+        return ProcessResult(1, 1, '', '');
+      });
+      final FuchsiaDevice device = FuchsiaDevice('id');
+      expect(() async => await device.hostAddress, throwsToolExit());
+    }, overrides: <Type, Generator>{
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => MockFuchsiaSdk(),
+      ProcessManager: () => MockProcessManager(),
+    });
+
+    testUsingContext('hostAddress parsing throws tool error on empty response', () async {
+      when(globals.processManager.run(any)).thenAnswer((Invocation _) async {
+        return ProcessResult(1, 0, '', '');
+      });
+      final FuchsiaDevice device = FuchsiaDevice('id');
+      expect(() async => await device.hostAddress, throwsToolExit());
+    }, overrides: <Type, Generator>{
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => MockFuchsiaSdk(),
+      ProcessManager: () => MockProcessManager(),
+    });
   });
 
   group('displays friendly error when', () {
