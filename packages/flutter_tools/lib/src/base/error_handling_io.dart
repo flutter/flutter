@@ -494,6 +494,7 @@ void _handlePosixException(Exception e, String message, int errorCode) {
   // From:
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
+  // https://github.com/apple/darwin-xnu/blob/master/bsd/dev/dtrace/scripts/errno.d
   const int enospc = 28;
   const int eacces = 13;
   // Catch errors and bail when:
