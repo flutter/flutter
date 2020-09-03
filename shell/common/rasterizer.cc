@@ -89,6 +89,8 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
         delegate_.GetTaskRunners().GetRasterTaskRunner()->GetTaskQueueId();
     raster_thread_merger_ =
         fml::MakeRefCounted<fml::RasterThreadMerger>(platform_id, gpu_id);
+  }
+  if (raster_thread_merger_) {
     raster_thread_merger_->SetMergeUnmergeCallback([=]() {
       // Clear the GL context after the thread configuration has changed.
       if (surface_) {
