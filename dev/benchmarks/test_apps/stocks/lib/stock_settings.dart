@@ -3,14 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
-import 'stock_types.dart';
-import 'stocks_app.dart';
+import 'package:stocks/stock_state.dart';
 
 class StockSettings extends StatefulWidget {
-  const StockSettings(this.configuration);
-
-  final StockConfiguration configuration;
+  const StockSettings();
 
   @override
   StockSettingsState createState() => StockSettingsState();
@@ -19,48 +15,59 @@ class StockSettings extends StatefulWidget {
 class StockSettingsState extends State<StockSettings> {
   void _handleOptimismChanged(bool value) {
     value ??= false;
-    StocksApp.updateConfigurationOf(context, StocksApp.configurationOf(context).copyWith(stockMode: value ? StockMode.optimistic : StockMode.pessimistic));
+    final StockState state = StockStateScope.of(context);
+    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(stockMode: value ? StockMode.optimistic : StockMode.pessimistic));
   }
 
   void _handleBackupChanged(bool value) {
-    StocksApp.updateConfigurationOf(context, StocksApp.configurationOf(context).copyWith(backupMode: value ? BackupMode.enabled : BackupMode.disabled));
+    final StockState state = StockStateScope.of(context);
+    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(backupMode: value ? BackupMode.enabled : BackupMode.disabled));
   }
 
   void _handleShowGridChanged(bool value) {
-    StocksApp.updateConfigurationOf(context, StocksApp.configurationOf(context).copyWith(debugShowGrid: value));
+    final StockState state = StockStateScope.of(context);
+    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(debugShowGrid: value));
   }
 
   void _handleShowSizesChanged(bool value) {
-    StocksApp.updateConfigurationOf(context, StocksApp.configurationOf(context).copyWith(debugShowSizes: value));
+    final StockState state = StockStateScope.of(context);
+    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(debugShowSizes: value));
   }
 
   void _handleShowBaselinesChanged(bool value) {
-    StocksApp.updateConfigurationOf(context, StocksApp.configurationOf(context).copyWith(debugShowBaselines: value));
+    final StockState state = StockStateScope.of(context);
+    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(debugShowBaselines: value));
   }
 
   void _handleShowLayersChanged(bool value) {
-    StocksApp.updateConfigurationOf(context, StocksApp.configurationOf(context).copyWith(debugShowLayers: value));
+    final StockState state = StockStateScope.of(context);
+    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(debugShowLayers: value));
   }
 
   void _handleShowPointersChanged(bool value) {
-    StocksApp.updateConfigurationOf(context, StocksApp.configurationOf(context).copyWith(debugShowPointers: value));
+    final StockState state = StockStateScope.of(context);
+    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(debugShowPointers: value));
   }
 
   void _handleShowRainbowChanged(bool value) {
-    StocksApp.updateConfigurationOf(context, StocksApp.configurationOf(context).copyWith(debugShowRainbow: value));
+    final StockState state = StockStateScope.of(context);
+    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(debugShowRainbow: value));
   }
 
 
   void _handleShowPerformanceOverlayChanged(bool value) {
-    StocksApp.updateConfigurationOf(context, StocksApp.configurationOf(context).copyWith(showPerformanceOverlay: value));
+    final StockState state = StockStateScope.of(context);
+    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(showPerformanceOverlay: value));
   }
 
   void _handleShowSemanticsDebuggerChanged(bool value) {
-    StocksApp.updateConfigurationOf(context, StocksApp.configurationOf(context).copyWith(showSemanticsDebugger: value));
+    final StockState state = StockStateScope.of(context);
+    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(showSemanticsDebugger: value));
   }
 
   void _confirmOptimismChange() {
-    switch (widget.configuration.stockMode) {
+    final StockConfiguration configuration = StockStateScope.configurationOf(context);
+    switch (configuration.stockMode) {
       case StockMode.optimistic:
         _handleOptimismChanged(false);
         break;
@@ -99,40 +106,41 @@ class StockSettingsState extends State<StockSettings> {
   }
 
   Widget buildSettingsPane(BuildContext context) {
+    final StockConfiguration configuration = StockStateScope.configurationOf(context);
     final List<Widget> rows = <Widget>[
       ListTile(
         leading: const Icon(Icons.thumb_up),
         title: const Text('Everything is awesome'),
         onTap: _confirmOptimismChange,
         trailing: Checkbox(
-          value: widget.configuration.stockMode == StockMode.optimistic,
+          value: configuration.stockMode == StockMode.optimistic,
           onChanged: (bool value) => _confirmOptimismChange(),
         ),
       ),
       ListTile(
         leading: const Icon(Icons.backup),
         title: const Text('Back up stock list to the cloud'),
-        onTap: () { _handleBackupChanged(!(widget.configuration.backupMode == BackupMode.enabled)); },
+        onTap: () { _handleBackupChanged(!(configuration.backupMode == BackupMode.enabled)); },
         trailing: Switch(
-          value: widget.configuration.backupMode == BackupMode.enabled,
+          value: configuration.backupMode == BackupMode.enabled,
           onChanged: _handleBackupChanged,
         ),
       ),
       ListTile(
         leading: const Icon(Icons.picture_in_picture),
         title: const Text('Show rendering performance overlay'),
-        onTap: () { _handleShowPerformanceOverlayChanged(!widget.configuration.showPerformanceOverlay); },
+        onTap: () { _handleShowPerformanceOverlayChanged(!configuration.showPerformanceOverlay); },
         trailing: Switch(
-          value: widget.configuration.showPerformanceOverlay,
+          value: configuration.showPerformanceOverlay,
           onChanged: _handleShowPerformanceOverlayChanged,
         ),
       ),
       ListTile(
         leading: const Icon(Icons.accessibility),
         title: const Text('Show semantics overlay'),
-        onTap: () { _handleShowSemanticsDebuggerChanged(!widget.configuration.showSemanticsDebugger); },
+        onTap: () { _handleShowSemanticsDebuggerChanged(!configuration.showSemanticsDebugger); },
         trailing: Switch(
-          value: widget.configuration.showSemanticsDebugger,
+          value: configuration.showSemanticsDebugger,
           onChanged: _handleShowSemanticsDebuggerChanged,
         ),
       ),
@@ -143,54 +151,54 @@ class StockSettingsState extends State<StockSettings> {
         ListTile(
           leading: const Icon(Icons.border_clear),
           title: const Text('Show material grid (for debugging)'),
-          onTap: () { _handleShowGridChanged(!widget.configuration.debugShowGrid); },
+          onTap: () { _handleShowGridChanged(!configuration.debugShowGrid); },
           trailing: Switch(
-            value: widget.configuration.debugShowGrid,
+            value: configuration.debugShowGrid,
             onChanged: _handleShowGridChanged,
           ),
         ),
         ListTile(
           leading: const Icon(Icons.border_all),
           title: const Text('Show construction lines (for debugging)'),
-          onTap: () { _handleShowSizesChanged(!widget.configuration.debugShowSizes); },
+          onTap: () { _handleShowSizesChanged(!configuration.debugShowSizes); },
           trailing: Switch(
-            value: widget.configuration.debugShowSizes,
+            value: configuration.debugShowSizes,
             onChanged: _handleShowSizesChanged,
           ),
         ),
         ListTile(
           leading: const Icon(Icons.format_color_text),
           title: const Text('Show baselines (for debugging)'),
-          onTap: () { _handleShowBaselinesChanged(!widget.configuration.debugShowBaselines); },
+          onTap: () { _handleShowBaselinesChanged(!configuration.debugShowBaselines); },
           trailing: Switch(
-            value: widget.configuration.debugShowBaselines,
+            value: configuration.debugShowBaselines,
             onChanged: _handleShowBaselinesChanged,
           ),
         ),
         ListTile(
           leading: const Icon(Icons.filter_none),
           title: const Text('Show layer boundaries (for debugging)'),
-          onTap: () { _handleShowLayersChanged(!widget.configuration.debugShowLayers); },
+          onTap: () { _handleShowLayersChanged(!configuration.debugShowLayers); },
           trailing: Switch(
-            value: widget.configuration.debugShowLayers,
+            value: configuration.debugShowLayers,
             onChanged: _handleShowLayersChanged,
           ),
         ),
         ListTile(
           leading: const Icon(Icons.mouse),
           title: const Text('Show pointer hit-testing (for debugging)'),
-          onTap: () { _handleShowPointersChanged(!widget.configuration.debugShowPointers); },
+          onTap: () { _handleShowPointersChanged(!configuration.debugShowPointers); },
           trailing: Switch(
-            value: widget.configuration.debugShowPointers,
+            value: configuration.debugShowPointers,
             onChanged: _handleShowPointersChanged,
           ),
         ),
         ListTile(
           leading: const Icon(Icons.gradient),
           title: const Text('Show repaint rainbow (for debugging)'),
-          onTap: () { _handleShowRainbowChanged(!widget.configuration.debugShowRainbow); },
+          onTap: () { _handleShowRainbowChanged(!configuration.debugShowRainbow); },
           trailing: Switch(
-            value: widget.configuration.debugShowRainbow,
+            value: configuration.debugShowRainbow,
             onChanged: _handleShowRainbowChanged,
           ),
         ),
@@ -213,10 +221,8 @@ class StockSettingsState extends State<StockSettings> {
 }
 
 class StockSettingsPage extends MaterialPage<void> {
-  StockSettingsPage(
-    StockConfiguration configuration,
-  ) : super(
-        key: const ValueKey<String>('settings'),
-        builder: (BuildContext context) => StockSettings(configuration),
-      );
+  StockSettingsPage() : super(
+                          key: const ValueKey<String>('settings'),
+                          builder: (BuildContext context) => const StockSettings(),
+                        );
 }

@@ -72,11 +72,11 @@ class StockSymbolPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final StockState state = StockStateScope.of(context);
+    final StockData stocks = StockStateScope.stockDataOf(context);
     return AnimatedBuilder(
-      animation: state.stocks,
+      animation: stocks,
       builder: (BuildContext context, Widget child) {
-        final Stock stock = state.stocks[symbol];
+        final Stock stock = stocks[symbol];
         return Scaffold(
           appBar: AppBar(
             title: Text(stock?.name ?? symbol),
@@ -103,7 +103,7 @@ class StockSymbolPage extends StatelessWidget {
                         padding: const EdgeInsets.all(20.0),
                         child: Center(child: Text('$symbol not found')),
                       ),
-                  crossFadeState: stock == null && state.stocks.loading ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                  crossFadeState: stock == null && stocks.loading ? CrossFadeState.showFirst : CrossFadeState.showSecond,
                 ),
               ),
             ),

@@ -12,8 +12,6 @@ import 'stock_data.dart';
 import 'stock_list.dart';
 import 'stock_state.dart';
 import 'stock_symbol_viewer.dart';
-import 'stock_types.dart';
-import 'stocks_app.dart';
 
 typedef ModeUpdater = void Function(StockMode mode);
 
@@ -54,9 +52,7 @@ class _NotImplementedDialog extends StatelessWidget {
 }
 
 class StockHome extends StatefulWidget {
-  const StockHome(this.configuration);
-
-  final StockConfiguration configuration;
+  const StockHome();
 
   @override
   StockHomeState createState() => StockHomeState();
@@ -83,7 +79,8 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleStockModeChange(StockMode value) {
-    StocksApp.updateConfigurationOf(context, StocksApp.configurationOf(context).copyWith(stockMode: value));
+    final StockState state = StockStateScope.of(context);
+    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(stockMode: value));
   }
 
   void _handleStockMenu(BuildContext context, _StockMenuItem value) {
@@ -109,6 +106,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   Widget _buildDrawer(BuildContext context) {
+    final StockConfiguration configuration = StockStateScope.configurationOf(context);
     return Drawer(
       child: ListView(
         dragStartBehavior: DragStartBehavior.down,
@@ -144,7 +142,7 @@ class StockHomeState extends State<StockHome> {
             title: const Text('Optimistic'),
             trailing: Radio<StockMode>(
               value: StockMode.optimistic,
-              groupValue: widget.configuration.stockMode,
+              groupValue: configuration.stockMode,
               onChanged: _handleStockModeChange,
             ),
             onTap: () {
@@ -156,7 +154,7 @@ class StockHomeState extends State<StockHome> {
             title: const Text('Pessimistic'),
             trailing: Radio<StockMode>(
               value: StockMode.pessimistic,
-              groupValue: widget.configuration.stockMode,
+              groupValue: configuration.stockMode,
               onChanged: _handleStockModeChange,
             ),
             onTap: () {
@@ -182,8 +180,7 @@ class StockHomeState extends State<StockHome> {
   void _handleShowSettings() {
     // Removes the opened drawer.
     Navigator.of(context).pop();
-    final StockState state = StockStateScope.of(context);
-    state.routePath = const StockSettingsPath();
+    RouterStateScope.of(context).routePath = const StockSettingsPath();
   }
 
   void _handleShowAbout() {
@@ -265,7 +262,7 @@ class StockHomeState extends State<StockHome> {
       stocks: stocks.toList(),
       onAction: _buyStock,
       onOpen: (Stock stock) {
-        final StockState state = StockStateScope.of(context);
+        final RouterState state = RouterStateScope.of(context);
         state.routePath = StockSymbolPath(stock.symbol);
       },
       onShow: (Stock stock) {
@@ -320,7 +317,7 @@ class StockHomeState extends State<StockHome> {
 
   @override
   Widget build(BuildContext context) {
-    final StockData stocks = StockStateScope.of(context).stocks;
+    final StockData stocks = StockStateScope.stockDataOf(context);
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -361,10 +358,8 @@ class _CreateCompanySheet extends StatelessWidget {
 }
 
 class StockHomePage extends MaterialPage<void> {
-  StockHomePage(
-    StockConfiguration configuration,
-  ) : super(
+  StockHomePage() : super(
         key: const ValueKey<String>('home'),
-        builder: (BuildContext context) => StockHome(configuration),
+        builder: (BuildContext context) => const StockHome(),
       );
 }
