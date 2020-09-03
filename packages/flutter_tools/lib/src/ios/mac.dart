@@ -208,6 +208,9 @@ Future<ParsedProjectInfo> _valdateXcodeBuild({
     buildInfo: buildInfo,
   );
   await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
+  if (configOnly) {
+    return XcodeBuildResult(success: true);
+  }
 
   return ParsedProjectInfo(
     autoSigningConfigs: autoSigningConfigs,
@@ -227,6 +230,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   DarwinArch activeArch,
   bool codesign = true,
   String deviceID,
+  bool configOnly = false,
 }) async {
   final ParsedProjectInfo parsedProjectInfo = await _valdateXcodeBuild(
     app: app,
@@ -238,6 +242,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
   if (parsedProjectInfo == null) {
     return XcodeBuildResult(success: false);
+  }
+  if (configOnly) {
+    return XcodeBuildResult(success: true);
   }
   final List<String> buildCommands = <String>[
     '/usr/bin/env',
