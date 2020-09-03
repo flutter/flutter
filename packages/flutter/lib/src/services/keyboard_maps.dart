@@ -1344,7 +1344,7 @@ const Map<int, PhysicalKeyboardKey> kIOSToPhysicalKey = <int, PhysicalKeyboardKe
 };
 
 /// Maps iOS specific string values of nonvisible keys to logical keys
-/// 
+///
 /// See: https://developer.apple.com/documentation/uikit/uikeycommand/input_strings_for_special_keys?language=objc
 const Map<String, LogicalKeyboardKey> kIOStoLogicalKey = <String, LogicalKeyboardKey>{
   'UIKeyInputEscape': LogicalKeyboardKey.escape,

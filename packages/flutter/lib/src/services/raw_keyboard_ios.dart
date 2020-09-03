@@ -65,7 +65,7 @@ class RawKeyEventDataIOS extends RawKeyEventData {
   @override
   PhysicalKeyboardKey get physicalKey => kIOSToPhysicalKey[keyCode] ?? PhysicalKeyboardKey.none;
 
-  
+
   @override
   LogicalKeyboardKey get logicalKey {
     // Look to see if the keyCode is a printable number pad key, so that a
