@@ -212,7 +212,15 @@ tasks:
     description: >
       Measures the runtime performance of Flutter gallery transitions on iPhone4s
       with SkSL shader warm-up.
-    stage: devicelab
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios32"]
+    flaky: true
+
+  flutter_gallery_sksl_warmup__transition_perf_e2e_ios32:
+    description: >
+      Measures the runtime performance of Flutter gallery transitions on iPhone4s
+      with SkSL shader warm-up with e2e.
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
     flaky: true
 
@@ -251,7 +259,6 @@ tasks:
       Checks that flavored builds work on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    on_luci: true
 
   channels_integration_test:
     description: >
@@ -379,12 +386,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  android_sample_catalog_generator:
-    description: >
-      Builds sample catalog markdown pages and Android screenshots
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
   android_enable_twc:
     description: >
       Verifies that track-widget-creation can be enabled and disabled.
@@ -457,13 +458,13 @@ tasks:
   ios_defines_test:
     description: >
       Builds a Framework with a --dart-define and verifies it can be used as a constant
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   ios_content_validation_test:
     description: >
       Builds an obfuscated app and verifies contents and structure
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     on_luci: true
 
@@ -484,7 +485,6 @@ tasks:
       Measures the startup time of the Flutter Gallery app on 32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
-    flaky: true # https://github.com/flutter/flutter/issues/62633
 
   flutter_gallery_ios32__transition_perf:
     description: >
@@ -619,12 +619,6 @@ tasks:
   #   stage: devicelab_ios
   #   required_agent_capabilities: ["mac/ios"]
 
-  ios_sample_catalog_generator:
-    description: >
-      Builds sample catalog markdown pages and iOS screenshots
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
   macos_chrome_dev_mode:
     description: >
       Run flutter web on the devicelab and hot restart.
@@ -672,7 +666,7 @@ tasks:
     description: >
       Checks the functionality and performance of hot reload on a macOS target platform
     stage: devicelab
-    required_agent_capabilities: ["mac/ios"]
+    required_agent_capabilities: ["mac"]
 
 #  TODO(jonahwilliams): investigate build failures on devicelab infra to re-enable.
 #  mac_enable_twc:
@@ -770,14 +764,14 @@ tasks:
     description: >
       Measures the performance of screen transitions in Flutter Gallery on
       Android with e2e.
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
 
   flutter_gallery__transition_perf_e2e_ios:
     description: >
       Measures the performance of screen transitions in Flutter Gallery on
       Android with e2e.
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   flutter_gallery__transition_perf_hybrid:
@@ -793,6 +787,13 @@ tasks:
     description: >
       Measures the runtime performance of Flutter gallery transitions on Android
       with SkSL shader warm-up.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  flutter_gallery_sksl_warmup__transition_perf_e2e:
+    description: >
+      Measures the runtime performance of Flutter gallery transitions on Android
+      with SkSL shader warm-up with e2e.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
@@ -830,7 +831,7 @@ tasks:
   new_gallery_ios__transition_perf:
     description: >
       Measures the performance of screen transitions in the new Flutter Gallery on iOS.
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   new_gallery__crane_perf:
@@ -851,6 +852,18 @@ tasks:
       usage widgets.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+
+  large_image_changer_perf_android:
+    description: >
+      Measures memory usage when rotating through a series of large images.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  large_image_changer_perf_ios:
+    description: >
+      Measures memory, cpu, and gpu usage when rotating through a series of large images.
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
 
   animated_placeholder_perf:
     description: >

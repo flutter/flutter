@@ -89,19 +89,17 @@ class IMobileDevice {
   }
 }
 
-Future<XcodeBuildResult> buildXcodeProject({
-  BuildableIOSApp app,
-  BuildInfo buildInfo,
-  String targetOverride,
-  bool buildForDevice,
-  DarwinArch activeArch,
-  bool codesign = true,
-  String deviceID,
+Future<ParsedProjectInfo> _valdateXcodeBuild({
+  @required BuildableIOSApp app,
+  @required BuildInfo buildInfo,
+  @required bool codesign,
+  @required bool buildForDevice,
+  @required String targetOverride,
+  @required String deviceID,
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
-    return XcodeBuildResult(success: false);
+    return null;
   }
-
   final List<IOSMigrator> migrators = <IOSMigrator>[
     RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
     XcodeBuildSystemMigration(app.project, globals.logger),
@@ -110,13 +108,12 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final IOSMigration migration = IOSMigration(migrators);
   if (!migration.run()) {
-    return XcodeBuildResult(success: false);
+    return null;
   }
 
   if (!_checkXcodeVersion()) {
-    return XcodeBuildResult(success: false);
+    return null;
   }
-
   await removeFinderExtendedAttributes(app.project.hostAppRoot, processUtils, globals.logger);
 
   final XcodeProjectInfo projectInfo = await app.project.projectInfo();
@@ -148,7 +145,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     globals.printError('   in the .xcconfig file for that configuration and run from Xcode.');
     globals.printError('');
     globals.printError('4. If you are not using completely custom build configurations, name the newly created configuration ${buildInfo.modeName}.');
-    return XcodeBuildResult(success: false);
+    return null;
   }
 
   final FlutterManifest manifest = app.project.parent.manifest;
@@ -166,8 +163,24 @@ Future<XcodeBuildResult> buildXcodeProject({
     globals.printStatus('Warning: Missing build number (CFBundleVersion).');
   }
   if (buildNameIsMissing || buildNumberIsMissing) {
-    globals.printError('Action Required: You must set a build name and number in the pubspec.yaml '
-      'file version field before submitting to the App Store.');
+    globals.printError(
+      'Action Required: You must set a build name and number in the pubspec.yaml '
+      'file version field before submitting to the App Store.'
+    );
+  }
+   // Check if the project contains a watchOS companion app.
+  final bool hasWatchCompanion = await app.project.containsWatchCompanion(
+    projectInfo.targets,
+    buildInfo,
+  );
+  if (hasWatchCompanion) {
+    globals.printStatus('Watch companion app found. Adjusting build settings.');
+    if (!buildForDevice && (deviceID == null || deviceID.isEmpty)) {
+      globals.printError('No simulator device ID has been set.');
+      globals.printError('A device ID is required to build an app with a watchOS companion app.');
+      globals.printError('Please run "flutter devices" to get a list of available device IDs');
+      globals.printError('and specify one using the -d, --device-id flag.');
+    }
   }
 
   Map<String, String> autoSigningConfigs;
@@ -180,6 +193,14 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
+  String workspace;
+  for (final FileSystemEntity entity in app.project.hostAppRoot.listSync()) {
+    if (globals.fs.path.extension(entity.path) == '.xcworkspace') {
+      workspace = globals.fs.path.basename(entity.path);
+      break;
+    }
+  }
+
   final FlutterProject project = FlutterProject.current();
   await updateGeneratedXcodeProperties(
     project: project,
@@ -188,90 +209,93 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
   await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
 
+  return ParsedProjectInfo(
+    autoSigningConfigs: autoSigningConfigs,
+    projectInfo: projectInfo,
+    scheme: scheme,
+    configuration:configuration,
+    hasWatchCompanion: hasWatchCompanion,
+    workspace: workspace,
+  );
+}
+
+Future<XcodeBuildResult> buildXcodeProject({
+  @required BuildableIOSApp app,
+  @required BuildInfo buildInfo,
+  String targetOverride,
+  bool buildForDevice,
+  DarwinArch activeArch,
+  bool codesign = true,
+  String deviceID,
+  bool configOnly = false,
+}) async {
+  final ParsedProjectInfo parsedProjectInfo = await _valdateXcodeBuild(
+    app: app,
+    buildInfo: buildInfo,
+    codesign: codesign,
+    buildForDevice: buildForDevice,
+    targetOverride: targetOverride,
+    deviceID: deviceID,
+  );
+  if (parsedProjectInfo == null) {
+    return XcodeBuildResult(success: false);
+  }
+  if (configOnly) {
+    return XcodeBuildResult(success: true);
+  }
   final List<String> buildCommands = <String>[
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
-    '-configuration', configuration,
-  ];
-
-  if (globals.logger.isVerbose) {
+    '-configuration', parsedProjectInfo.configuration,
     // An environment variable to be passed to xcode_backend.sh determining
     // whether to echo back executed commands.
-    buildCommands.add('VERBOSE_SCRIPT_LOGGING=YES');
-  } else {
-    // This will print warnings and errors only.
-    buildCommands.add('-quiet');
-  }
-
-  if (autoSigningConfigs != null) {
-    for (final MapEntry<String, String> signingConfig in autoSigningConfigs.entries) {
-      buildCommands.add('${signingConfig.key}=${signingConfig.value}');
-    }
-    buildCommands.add('-allowProvisioningUpdates');
-    buildCommands.add('-allowProvisioningDeviceRegistration');
-  }
-
-  final List<FileSystemEntity> contents = app.project.hostAppRoot.listSync();
-  for (final FileSystemEntity entity in contents) {
-    if (globals.fs.path.extension(entity.path) == '.xcworkspace') {
-      buildCommands.addAll(<String>[
-        '-workspace', globals.fs.path.basename(entity.path),
-        '-scheme', scheme,
-        'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
-      ]);
-      break;
-    }
-  }
-
-  // Check if the project contains a watchOS companion app.
-  final bool hasWatchCompanion = await app.project.containsWatchCompanion(
-    projectInfo.targets,
-    buildInfo,
-  );
-  if (hasWatchCompanion) {
-    // The -sdk argument has to be omitted if a watchOS companion app exists.
-    // Otherwise the build will fail as WatchKit dependencies cannot be build using the iOS SDK.
-    globals.printStatus('Watch companion app found. Adjusting build settings.');
-    if (!buildForDevice && (deviceID == null || deviceID == '')) {
-      globals.printError('No simulator device ID has been set.');
-      globals.printError('A device ID is required to build an app with a watchOS companion app.');
-      globals.printError('Please run "flutter devices" to get a list of available device IDs');
-      globals.printError('and specify one using the -d, --device-id flag.');
-      return XcodeBuildResult(success: false);
-    }
-    if (!buildForDevice) {
-      buildCommands.addAll(<String>['-destination', 'id=$deviceID']);
-    }
-  } else {
-    if (buildForDevice) {
-      buildCommands.addAll(<String>['-sdk', 'iphoneos']);
-    } else {
-      buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
-    }
-  }
-
-  if (activeArch != null) {
-    final String activeArchName = getNameForDarwinArch(activeArch);
-    if (activeArchName != null) {
-      buildCommands.add('ONLY_ACTIVE_ARCH=YES');
-      // Setting ARCHS to $activeArchName will break the build if a watchOS companion app exists,
-      // as it cannot be build for the architecture of the flutter app.
-      if (!hasWatchCompanion) {
-        buildCommands.add('ARCHS=$activeArchName');
-      }
-    }
-  }
-
-  if (!codesign) {
-    buildCommands.addAll(
-      <String>[
+    if (globals.logger.isVerbose)
+      'VERBOSE_SCRIPT_LOGGING=YES'
+    else
+      // This will print warnings and errors only.
+      '-quiet',
+    if (parsedProjectInfo.autoSigningConfigs != null)
+      ...<String>[
+        for (final MapEntry<String, String> signingConfig in parsedProjectInfo.autoSigningConfigs.entries)
+          '${signingConfig.key}=${signingConfig.value}'
+        '-allowProvisioningUpdates',
+        '-allowProvisioningDeviceRegistration',
+      ],
+    if (!codesign)
+      ...<String>[
         'CODE_SIGNING_ALLOWED=NO',
         'CODE_SIGNING_REQUIRED=NO',
         'CODE_SIGNING_IDENTITY=""',
       ],
-    );
-  }
+    // The -sdk argument has to be omitted if a watchOS companion app exists.
+    // Otherwise the build will fail as WatchKit dependencies cannot be build using the iOS SDK.
+    if (parsedProjectInfo.hasWatchCompanion && !buildForDevice)
+      ...<String>['-destination', 'id=$deviceID']
+    else if (buildForDevice)
+      ...<String>['-sdk', 'iphoneos']
+    else
+      ...<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64'],
+
+    if (parsedProjectInfo.workspace != null)
+      ...<String>[
+        '-workspace', parsedProjectInfo.workspace,
+        '-scheme', parsedProjectInfo.scheme,
+        'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
+      ],
+
+    if (activeArch != null)
+      'ONLY_ACTIVE_ARCH=YES',
+    // Setting ARCHS to $activeArchName will break the build if a watchOS companion app exists,
+    // as it cannot be build for the architecture of the flutter app.
+    if (activeArch != null && !parsedProjectInfo.hasWatchCompanion)
+      'ARCHS=${getNameForDarwinArch(activeArch)}',
+
+    /// Disable code indexing when running from the CLI to improve overall performance
+    'COMPILER_INDEX_STORE_ENABLE=NO',
+    ...environmentVariablesAsXcodeBuildSettings(globals.platform),
+  ];
+
 
   Status buildSubStatus;
   Status initialBuildStatus;
@@ -312,12 +336,6 @@ Future<XcodeBuildResult> buildXcodeProject({
 
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }
-
-  // Don't log analytics for downstream Flutter commands.
-  // e.g. `flutter build bundle`.
-  buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
-  buildCommands.add('COMPILER_INDEX_STORE_ENABLE=NO');
-  buildCommands.addAll(environmentVariablesAsXcodeBuildSettings(globals.platform));
 
   final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = globals.logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.slowOperation);
@@ -395,49 +413,47 @@ Future<XcodeBuildResult> buildXcodeProject({
         buildSettings: buildSettings,
       ),
     );
-  } else {
-    // If the app contains a watch companion target, the sdk argument of xcodebuild has to be omitted.
-    // For some reason this leads to TARGET_BUILD_DIR always ending in 'iphoneos' even though the
-    // actual directory will end with 'iphonesimulator' for simulator builds.
-    // The value of TARGET_BUILD_DIR is adjusted to accommodate for this effect.
-    String targetBuildDir = buildSettings['TARGET_BUILD_DIR'];
-    if (hasWatchCompanion && !buildForDevice) {
-      globals.printTrace('Replacing iphoneos with iphonesimulator in TARGET_BUILD_DIR.');
-      targetBuildDir = targetBuildDir.replaceFirst('iphoneos', 'iphonesimulator');
-    }
-    final String expectedOutputDirectory = globals.fs.path.join(
-      targetBuildDir,
-      buildSettings['WRAPPER_NAME'],
-    );
-
-    String outputDir;
-    if (globals.fs.isDirectorySync(expectedOutputDirectory)) {
-      // Copy app folder to a place where other tools can find it without knowing
-      // the BuildInfo.
-      outputDir = expectedOutputDirectory.replaceFirst('/$configuration-', '/');
-      if (globals.fs.isDirectorySync(outputDir)) {
-        // Previous output directory might have incompatible artifacts
-        // (for example, kernel binary files produced from previous run).
-        globals.fs.directory(outputDir).deleteSync(recursive: true);
-      }
-      globals.fsUtils.copyDirectorySync(
-        globals.fs.directory(expectedOutputDirectory),
-        globals.fs.directory(outputDir),
-      );
-    } else {
-      globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
-    }
-    return XcodeBuildResult(
-        success: true,
-        output: outputDir,
-        xcodeBuildExecution: XcodeBuildExecution(
-          buildCommands: buildCommands,
-          appDirectory: app.project.hostAppRoot.path,
-          buildForPhysicalDevice: buildForDevice,
-          buildSettings: buildSettings,
-      ),
-    );
   }
+  // If the app contains a watch companion target, the sdk argument of xcodebuild has to be omitted.
+  // For some reason this leads to TARGET_BUILD_DIR always ending in 'iphoneos' even though the
+  // actual directory will end with 'iphonesimulator' for simulator builds.
+  // The value of TARGET_BUILD_DIR is adjusted to accommodate for this effect.
+  String targetBuildDir = buildSettings['TARGET_BUILD_DIR'];
+  if (parsedProjectInfo.hasWatchCompanion && !buildForDevice) {
+    globals.printTrace('Replacing iphoneos with iphonesimulator in TARGET_BUILD_DIR.');
+    targetBuildDir = targetBuildDir.replaceFirst('iphoneos', 'iphonesimulator');
+  }
+  final String expectedOutputDirectory = globals.fs.path.join(
+    targetBuildDir,
+    buildSettings['WRAPPER_NAME'],
+  );
+
+  String outputDir;
+  if (globals.fs.isDirectorySync(expectedOutputDirectory)) {
+    // Copy app folder to a place where other tools can find it without knowing
+    // the BuildInfo.
+    outputDir = expectedOutputDirectory.replaceFirst('/${parsedProjectInfo.configuration}-', '/');
+    if (globals.fs.isDirectorySync(outputDir)) {
+      // Previous output directory might have incompatible artifacts
+      // (for example, kernel binary files produced from previous run).
+      globals.fs.directory(outputDir).deleteSync(recursive: true);
+    }
+    globals.fsUtils.copyDirectorySync(
+      globals.fs.directory(expectedOutputDirectory),
+      globals.fs.directory(outputDir),
+    );
+  } else {
+    globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
+  }
+  return XcodeBuildResult(
+    success: true,
+    output: outputDir,
+    xcodeBuildExecution: XcodeBuildExecution(
+      buildCommands: buildCommands,
+      appDirectory: app.project.hostAppRoot.path,
+      buildForPhysicalDevice: buildForDevice,
+      buildSettings: buildSettings,
+  ));
 }
 
 /// Extended attributes applied by Finder can cause code signing errors. Remove them.
@@ -639,4 +655,22 @@ bool upgradePbxProjWithFlutterAssets(IosProject project, Logger logger) {
   }
   xcodeProjectFile.writeAsStringSync(buffer.toString());
   return true;
+}
+
+class ParsedProjectInfo {
+  const ParsedProjectInfo({
+    @required this.autoSigningConfigs,
+    @required this.projectInfo,
+    @required this.scheme,
+    @required this.configuration,
+    @required this.hasWatchCompanion,
+    @required this.workspace,
+  });
+
+  final Map<String, String> autoSigningConfigs;
+  final XcodeProjectInfo projectInfo;
+  final String scheme;
+  final String configuration;
+  final bool hasWatchCompanion;
+  final String workspace;
 }

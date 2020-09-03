@@ -519,6 +519,36 @@ abstract class PointerEvent with Diagnosticable {
   /// overridden by the provided `transform`.
   PointerEvent transformed(Matrix4? transform);
 
+  /// Creates a copy of event with the specified properties replaced.
+  PointerEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? localPosition,
+    Offset? delta,
+    Offset? localDelta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    Matrix4? transform,
+    PointerEvent? original,
+    int? embedderId,
+  });
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -684,6 +714,56 @@ class PointerAddedEvent extends PointerEvent {
       embedderId: embedderId,
     );
   }
+
+  @override
+  PointerAddedEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? localPosition,
+    Offset? delta,
+    Offset? localDelta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    Matrix4? transform,
+    PointerEvent? original,
+    int? embedderId,
+  }) {
+    return PointerAddedEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      localPosition: localPosition ?? this.localPosition,
+      obscured: obscured ?? this.obscured,
+      pressureMin: pressureMin ?? this.pressureMin,
+      pressureMax: pressureMax ?? this.pressureMax,
+      distance: distance ?? this.distance,
+      distanceMax: distanceMax ?? this.distanceMax,
+      radiusMin: radiusMin ?? this.radiusMin,
+      radiusMax: radiusMax ?? this.radiusMax,
+      orientation: orientation ?? this.orientation,
+      tilt: tilt ?? this.tilt,
+      transform: transform ?? this.transform,
+      original: original as PointerAddedEvent? ?? this,
+      embedderId: embedderId ?? this.embedderId,
+    );
+  }
 }
 
 /// The device is no longer tracking the pointer.
@@ -747,6 +827,53 @@ class PointerRemovedEvent extends PointerEvent {
       transform: transform,
       original: original as PointerRemovedEvent? ?? this,
       embedderId: embedderId,
+    );
+  }
+
+  @override
+  PointerRemovedEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? localPosition,
+    Offset? delta,
+    Offset? localDelta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    Matrix4? transform,
+    PointerEvent? original,
+    int? embedderId,
+  }) {
+    return PointerRemovedEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      localPosition: localPosition ?? this.localPosition,
+      obscured: obscured ?? this.obscured,
+      pressureMin: pressureMin ?? this.pressureMin,
+      pressureMax: pressureMax ?? this.pressureMax,
+      distanceMax: distanceMax ?? this.distanceMax,
+      radiusMin: radiusMin ?? this.radiusMin,
+      radiusMax: radiusMax ?? this.radiusMax,
+      transform: transform ?? this.transform,
+      original: original as PointerRemovedEvent? ?? this,
+      embedderId: embedderId ?? this.embedderId,
     );
   }
 }
@@ -857,6 +984,63 @@ class PointerHoverEvent extends PointerEvent {
       transform: transform,
       original: original as PointerHoverEvent? ?? this,
       embedderId: embedderId,
+    );
+  }
+
+  @override
+  PointerHoverEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? localPosition,
+    Offset? delta,
+    Offset? localDelta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    Matrix4? transform,
+    PointerEvent? original,
+    int? embedderId,
+  }) {
+    return PointerHoverEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      localPosition: localPosition ?? this.localPosition,
+      delta: delta ?? this.delta,
+      localDelta: localDelta ?? this.localDelta,
+      buttons: buttons ?? this.buttons,
+      obscured: obscured ?? this.obscured,
+      pressureMin: pressureMin ?? this.pressureMin,
+      pressureMax: pressureMax ?? this.pressureMax,
+      distance: distance ?? this.distance,
+      distanceMax: distanceMax ?? this.distanceMax,
+      size: size ?? this.size,
+      radiusMajor: radiusMajor ?? this.radiusMajor,
+      radiusMinor: radiusMinor ?? this.radiusMinor,
+      radiusMin: radiusMin ?? this.radiusMin,
+      radiusMax: radiusMax ?? this.radiusMax,
+      orientation: orientation ?? this.orientation,
+      tilt: tilt ?? this.tilt,
+      synthesized: synthesized ?? this.synthesized,
+      transform: transform ?? this.transform,
+      original: original as PointerHoverEvent? ?? this,
+      embedderId: embedderId ?? this.embedderId,
     );
   }
 }
@@ -1010,6 +1194,63 @@ class PointerEnterEvent extends PointerEvent {
       embedderId: embedderId,
     );
   }
+
+  @override
+  PointerEnterEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? localPosition,
+    Offset? delta,
+    Offset? localDelta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    Matrix4? transform,
+    PointerEvent? original,
+    int? embedderId,
+  }) {
+    return PointerEnterEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      localPosition: localPosition ?? this.localPosition,
+      delta: delta ?? this.delta,
+      localDelta: localDelta ?? this.localDelta,
+      buttons: buttons ?? this.buttons,
+      obscured: obscured ?? this.obscured,
+      pressureMin: pressureMin ?? this.pressureMin,
+      pressureMax: pressureMax ?? this.pressureMax,
+      distance: distance ?? this.distance,
+      distanceMax: distanceMax ?? this.distanceMax,
+      size: size ?? this.size,
+      radiusMajor: radiusMajor ?? this.radiusMajor,
+      radiusMinor: radiusMinor ?? this.radiusMinor,
+      radiusMin: radiusMin ?? this.radiusMin,
+      radiusMax: radiusMax ?? this.radiusMax,
+      orientation: orientation ?? this.orientation,
+      tilt: tilt ?? this.tilt,
+      synthesized: synthesized ?? this.synthesized,
+      transform: transform ?? this.transform,
+      original: original as PointerEnterEvent? ?? this,
+      embedderId: embedderId ?? this.embedderId,
+    );
+  }
 }
 
 /// The pointer has moved with respect to the device while the pointer is or is
@@ -1161,6 +1402,63 @@ class PointerExitEvent extends PointerEvent {
       embedderId: embedderId,
     );
   }
+
+  @override
+  PointerExitEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? localPosition,
+    Offset? delta,
+    Offset? localDelta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    Matrix4? transform,
+    PointerEvent? original,
+    int? embedderId,
+  }) {
+    return PointerExitEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      localPosition: localPosition ?? this.localPosition,
+      delta: delta ?? this.delta,
+      localDelta: localDelta ?? this.localDelta,
+      buttons: buttons ?? this.buttons,
+      obscured: obscured ?? this.obscured,
+      pressureMin: pressureMin ?? this.pressureMin,
+      pressureMax: pressureMax ?? this.pressureMax,
+      distance: distance ?? this.distance,
+      distanceMax: distanceMax ?? this.distanceMax,
+      size: size ?? this.size,
+      radiusMajor: radiusMajor ?? this.radiusMajor,
+      radiusMinor: radiusMinor ?? this.radiusMinor,
+      radiusMin: radiusMin ?? this.radiusMin,
+      radiusMax: radiusMax ?? this.radiusMax,
+      orientation: orientation ?? this.orientation,
+      tilt: tilt ?? this.tilt,
+      synthesized: synthesized ?? this.synthesized,
+      transform: transform ?? this.transform,
+      original: original as PointerExitEvent? ?? this,
+      embedderId: embedderId ?? this.embedderId,
+    );
+  }
 }
 
 /// The pointer has made contact with the device.
@@ -1251,6 +1549,61 @@ class PointerDownEvent extends PointerEvent {
       transform: transform,
       original: original as PointerDownEvent? ?? this,
       embedderId: embedderId,
+    );
+  }
+
+  @override
+  PointerDownEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? localPosition,
+    Offset? delta,
+    Offset? localDelta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    Matrix4? transform,
+    PointerEvent? original,
+    int? embedderId,
+  }) {
+    return PointerDownEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      pointer: pointer ?? this.pointer,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      localPosition: localPosition ?? this.localPosition,
+      buttons: buttons ?? this.buttons,
+      obscured: obscured ?? this.obscured,
+      pressure: pressure ?? this.pressure,
+      pressureMin: pressureMin ?? this.pressureMin,
+      pressureMax: pressureMax ?? this.pressureMax,
+      distanceMax: distanceMax ?? this.distanceMax,
+      size: size ?? this.size,
+      radiusMajor: radiusMajor ?? this.radiusMajor,
+      radiusMinor: radiusMinor ?? this.radiusMinor,
+      radiusMin: radiusMin ?? this.radiusMin,
+      radiusMax: radiusMax ?? this.radiusMax,
+      orientation: orientation ?? this.orientation,
+      tilt: tilt ?? this.tilt,
+      transform: transform ?? this.transform,
+      original: original as PointerDownEvent? ?? this,
+      embedderId: embedderId ?? this.embedderId,
     );
   }
 }
@@ -1367,6 +1720,64 @@ class PointerMoveEvent extends PointerEvent {
       embedderId: embedderId,
     );
   }
+
+  @override
+  PointerMoveEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? localPosition,
+    Offset? delta,
+    Offset? localDelta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    Matrix4? transform,
+    PointerEvent? original,
+    int? embedderId,
+  }) {
+    return PointerMoveEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      pointer: pointer ?? this.pointer,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      localPosition: localPosition ?? this.localPosition,
+      delta: delta ?? this.delta,
+      localDelta: localDelta ?? this.localDelta,
+      buttons: buttons ?? this.buttons,
+      obscured: obscured ?? this.obscured,
+      pressure: pressure ?? this.pressure,
+      pressureMin: pressureMin ?? this.pressureMin,
+      pressureMax: pressureMax ?? this.pressureMax,
+      distanceMax: distanceMax ?? this.distanceMax,
+      size: size ?? this.size,
+      radiusMajor: radiusMajor ?? this.radiusMajor,
+      radiusMinor: radiusMinor ?? this.radiusMinor,
+      radiusMin: radiusMin ?? this.radiusMin,
+      radiusMax: radiusMax ?? this.radiusMax,
+      orientation: orientation ?? this.orientation,
+      tilt: tilt ?? this.tilt,
+      synthesized: synthesized ?? this.synthesized,
+      transform: transform ?? this.transform,
+      original: original as PointerMoveEvent? ?? this,
+      embedderId: embedderId ?? this.embedderId,
+    );
+  }
 }
 
 /// The pointer has stopped making contact with the device.
@@ -1461,6 +1872,62 @@ class PointerUpEvent extends PointerEvent {
       transform: transform,
       original: original as PointerUpEvent? ?? this,
       embedderId: embedderId,
+    );
+  }
+
+  @override
+  PointerUpEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? localPosition,
+    Offset? delta,
+    Offset? localDelta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    Matrix4? transform,
+    PointerEvent? original,
+    int? embedderId,
+  }) {
+    return PointerUpEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      pointer: pointer ?? this.pointer,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      localPosition: localPosition ?? this.localPosition,
+      buttons: buttons ?? this.buttons,
+      obscured: obscured ?? this.obscured,
+      pressure: pressure ?? this.pressure,
+      pressureMin: pressureMin ?? this.pressureMin,
+      pressureMax: pressureMax ?? this.pressureMax,
+      distance: distance ?? this.distance,
+      distanceMax: distanceMax ?? this.distanceMax,
+      size: size ?? this.size,
+      radiusMajor: radiusMajor ?? this.radiusMajor,
+      radiusMinor: radiusMinor ?? this.radiusMinor,
+      radiusMin: radiusMin ?? this.radiusMin,
+      radiusMax: radiusMax ?? this.radiusMax,
+      orientation: orientation ?? this.orientation,
+      tilt: tilt ?? this.tilt,
+      transform: transform ?? this.transform,
+      original: original as PointerUpEvent? ?? this,
+      embedderId: embedderId ?? this.embedderId,
     );
   }
 }
@@ -1562,6 +2029,48 @@ class PointerScrollEvent extends PointerSignalEvent {
   }
 
   @override
+  PointerScrollEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? localPosition,
+    Offset? delta,
+    Offset? localDelta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    Matrix4? transform,
+    PointerEvent? original,
+    int? embedderId,
+  }) {
+    return PointerScrollEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      localPosition: localPosition ?? this.localPosition,
+      scrollDelta: scrollDelta,
+      transform: transform ?? this.transform,
+      original: original as PointerScrollEvent? ?? this,
+      embedderId: embedderId ?? this.embedderId,
+    );
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('scrollDelta', scrollDelta));
@@ -1656,6 +2165,61 @@ class PointerCancelEvent extends PointerEvent {
       transform: transform,
       original: original as PointerCancelEvent? ?? this,
       embedderId: embedderId,
+    );
+  }
+
+  @override
+  PointerCancelEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? localPosition,
+    Offset? delta,
+    Offset? localDelta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    Matrix4? transform,
+    PointerEvent? original,
+    int? embedderId,
+  }) {
+    return PointerCancelEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      pointer: pointer ?? this.pointer,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      localPosition: localPosition ?? this.localPosition,
+      buttons: buttons ?? this.buttons,
+      obscured: obscured ?? this.obscured,
+      pressureMin: pressureMin ?? this.pressureMin,
+      pressureMax: pressureMax ?? this.pressureMax,
+      distance: distance ?? this.distance,
+      distanceMax: distanceMax ?? this.distanceMax,
+      size: size ?? this.size,
+      radiusMajor: radiusMajor ?? this.radiusMajor,
+      radiusMinor: radiusMinor ?? this.radiusMinor,
+      radiusMin: radiusMin ?? this.radiusMin,
+      radiusMax: radiusMax ?? this.radiusMax,
+      orientation: orientation ?? this.orientation,
+      tilt: tilt ?? this.tilt,
+      transform: transform ?? this.transform,
+      original: original as PointerCancelEvent? ?? this,
+      embedderId: embedderId ?? this.embedderId,
     );
   }
 }

@@ -43,17 +43,16 @@ const List<String> kRunReleaseArgs = <String>[
   '-configuration',
   'Release',
   '-quiet',
+  '-sdk',
+  'iphoneos',
   '-workspace',
   'Runner.xcworkspace',
   '-scheme',
   'Runner',
   'BUILD_DIR=/build/ios',
-  '-sdk',
-  'iphoneos',
   'ONLY_ACTIVE_ARCH=YES',
   'ARCHS=arm64',
-  'FLUTTER_SUPPRESS_ANALYTICS=true',
-  'COMPILER_INDEX_STORE_ENABLE=NO',
+  'COMPILER_INDEX_STORE_ENABLE=NO'
 ];
 
 const String kConcurrentBuildErrorMessage = '''

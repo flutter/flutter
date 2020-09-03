@@ -66,6 +66,7 @@ task:
     CIRRUS_DOCKER_CONTEXT: "dev/"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
     ANDROID_SDK_ROOT: "/opt/android_sdk"
+    SHOULD_UPDATE_PACKAGES: 'TRUE' # can be overridden at the task level
     USE_IN_MEMORY_DISK: false
   pub_cache:
     folder: $HOME/.pub-cache
@@ -85,8 +86,8 @@ task:
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
+    - if [ "$SHOULD_UPDATE_PACKAGES" == TRUE ]; then flutter update-packages; fi
     - flutter doctor -v
-    - flutter update-packages
     - ./dev/bots/accept_android_sdk_licenses.sh
     - date
   on_failure:
@@ -142,7 +143,12 @@ task:
         # CPUs, and needed at least 10G of RAM to not run out of memory.
         CPU: 4
         MEMORY: 10G
+        SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
+        - (cd packages/flutter_tools; pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/main; pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/font; pub get)
+        - (cd dev/bots; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-commands-linux
@@ -153,7 +159,10 @@ task:
         # Increased to 10GB on 19th Nov 2019 due to significant number of OOMKilled failures on PR builds.
         CPU: 6
         MEMORY: 10G
+        SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
+        - (cd packages/flutter_tools; pub get)
+        - (cd dev/bots; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-integration-linux
@@ -164,7 +173,11 @@ task:
         CPU: 6
         MEMORY: 8G
         CHROME_NO_SANDBOX: true
+        SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
+        - (cd packages/flutter_tools; pub get)
+        - (cd dev/bots; pub get)
+        - (cd dev/tools; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_coverage-linux # linux-only
@@ -176,7 +189,12 @@ task:
         CPU: 8
         MEMORY: 24G
         CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
+        SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
+        - (cd packages/flutter_tools; pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/main; pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/font; pub get)
+        - (cd dev/bots; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
         - bash <(curl -s https://codecov.io/bash) -c -f packages/flutter_tools/coverage/lcov.info -F flutter_tool
 
@@ -270,6 +288,7 @@ task:
     MEMORY: 2G # 256M-24G without compute credits, 256M-90G with
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\$FLUTTER_SDK_PATH_WITH_SPACE"
     PATH: "$CIRRUS_WORKING_DIR/bin;$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin;$PATH"
+    SHOULD_UPDATE_PACKAGES: "TRUE"
   pub_cache:
     folder: $APPDATA\Pub\Cache
     fingerprint_script:
@@ -289,7 +308,7 @@ task:
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
     - flutter doctor -v
-    - flutter update-packages
+    - CMD /C IF "%SHOULD_UPDATE_PACKAGES%" EQU "TRUE" flutter update-packages
     - git fetch origin master
   matrix:
     - name: hostonly_devicelab_tests-0-windows
@@ -333,7 +352,7 @@ task:
 # than just fetching the data in the first place.
 task:
   osx_instance:
-    image: catalina-xcode-11.3.1-flutter # see https://cirrus-ci.org/guide/macOS/ for list of images (we should update regularly)
+    image: catalina-xcode-12.0-flutter # see https://cirrus-ci.org/guide/macOS/ for list of images (we should update regularly)
     # cpu is always 2
     # memory is always 8G
   environment:
@@ -343,6 +362,7 @@ task:
     COCOAPODS_DISABLE_STATS: true
     CPU: 2
     MEMORY: 8G
+    SHOULD_UPDATE_PACKAGES: 'TRUE'
   setup_script:
     - date
     - which flutter
@@ -353,8 +373,8 @@ task:
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
+    - if [ "$SHOULD_UPDATE_PACKAGES" == TRUE ]; then flutter update-packages; fi
     - flutter doctor -v
-    - flutter update-packages
     - date
     - which flutter
   on_failure:
@@ -391,20 +411,35 @@ task:
 
     - name: tool_tests-general-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') || $CIRRUS_PR == ''"
+      environment:
+        SHOULD_UPDATE_PACKAGES: 'FALSE'
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - (cd packages/flutter_tools; pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/main; pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/font; pub get)
+        - (cd dev/bots; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-commands-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') || $CIRRUS_PR == ''"
+      environment:
+        SHOULD_UPDATE_PACKAGES: 'FALSE'
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - (cd packages/flutter_tools; pub get)
+        - (cd dev/bots; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-integration-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') || $CIRRUS_PR == ''"
+      environment:
+        SHOULD_UPDATE_PACKAGES: 'FALSE'
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - (cd packages/flutter_tools; pub get)
+        - (cd dev/bots; pub get)
+        - (cd dev/tools; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     # TODO(ianh): Enable Web tests on macOS.
@@ -412,11 +447,13 @@ task:
     - name: build_tests-0-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
       script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: build_tests-1_last-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
       script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-0-macos
@@ -465,23 +502,3 @@ task:
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/codesign.dart
-
-docker_builder:
-  # Only build a new docker image when we tag a release (for dev, beta, or
-  # stable). Note: tagging a commit and pushing to a release branch are
-  # different cirrus triggers. See a tag CI run at e.g.
-  # https://cirrus-ci.com/github/flutter/flutter/v1.2.3
-  name: docker_build
-  only_if: $CIRRUS_TAG != ''
-  environment:
-    GCLOUD_CREDENTIALS: ENCRYPTED[f7c098d4dd7f5ee1bfee0bb7e944cce72efbe10e97ad6440ae72de4de6a1c24d23f421a2619c668e94377fb64b0bb3e6]
-  # Do not add more tasks here. The behavior of failing dependencies is non-ideal for infra health.
-  # See also: https://github.com/flutter/flutter/pull/49454
-  depends_on:
-    - docs-linux
-    - analyze-linux
-  build_script:
-    - cd "$CIRRUS_WORKING_DIR/dev/ci/docker_linux"
-    - ./docker_build.sh
-    - ./docker_login.sh
-    - ./docker_push.sh

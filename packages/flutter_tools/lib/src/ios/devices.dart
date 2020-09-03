@@ -318,14 +318,14 @@ class IOSDevice extends Device {
       // TODO(chinmaygarde): Use mainPath, route.
       _logger.printTrace('Building ${package.name} for $id');
 
-      // Step 1: Build the precompiled/DBC application if necessary.
+      // Step 1: Build the precompiled application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
-          app: package as BuildableIOSApp,
-          buildInfo: debuggingOptions.buildInfo,
-          targetOverride: mainPath,
-          buildForDevice: true,
-          activeArch: cpuArchitecture,
-          deviceID: id,
+        app: package as BuildableIOSApp,
+        buildInfo: debuggingOptions.buildInfo,
+        targetOverride: mainPath,
+        buildForDevice: true,
+        activeArch: cpuArchitecture,
+        deviceID: id,
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
