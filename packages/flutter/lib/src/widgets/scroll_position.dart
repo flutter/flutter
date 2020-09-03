@@ -645,8 +645,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     Rect targetRect;
     if (targetRenderObject != null) {
       final Matrix4 transform = targetRenderObject.getTransformTo(object);
-      targetRect = MatrixUtils.transformRect(transform, object.paintBounds);
-      targetRect = Rect.fromLTWH(targetRect.left, targetRect.top, targetRenderObject.paintBounds.width, targetRenderObject.paintBounds.height);
+      targetRect = MatrixUtils.transformRect(transform, object.paintBounds.intersect(targetRenderObject.paintBounds));
     }
 
     double target;
