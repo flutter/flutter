@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -62,6 +63,13 @@ void main() {
   });
 
   group('which on Windows', () {
+    testWithoutContext('throws tool exit if where throws an argument error', () async {
+      when(mockProcessManager.runSync(<String>['where', kExecutable]))
+          .thenThrow(ArgumentError('Cannot find executable for where'));
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
+
+      expect(() => utils.which(kExecutable), throwsA(isA<ToolExit>()));
+    });
     testWithoutContext('returns null when executable does not exist', () async {
       when(mockProcessManager.runSync(<String>['where', kExecutable]))
           .thenReturn(ProcessResult(0, 1, null, null));

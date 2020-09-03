@@ -386,12 +386,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  android_sample_catalog_generator:
-    description: >
-      Builds sample catalog markdown pages and Android screenshots
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
   android_enable_twc:
     description: >
       Verifies that track-widget-creation can be enabled and disabled.
@@ -625,12 +619,6 @@ tasks:
   #     Tests that the Engine correctly initializes the system debugger for debug-mode iOS apps.
   #   stage: devicelab_ios
   #   required_agent_capabilities: ["mac/ios"]
-
-  ios_sample_catalog_generator:
-    description: >
-      Builds sample catalog markdown pages and iOS screenshots
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
 
   macos_chrome_dev_mode:
     description: >
@@ -872,14 +860,12 @@ tasks:
       Measures memory usage when rotating through a series of large images.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   large_image_changer_perf_ios:
     description: >
       Measures memory, cpu, and gpu usage when rotating through a series of large images.
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   animated_placeholder_perf:
     description: >

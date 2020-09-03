@@ -1453,13 +1453,13 @@ abstract class BaseSliderTrackShape {
     final double trackHeight = sliderTheme.trackHeight;
     assert(overlayWidth >= 0);
     assert(trackHeight >= 0);
-    assert(parentBox.size.width >= overlayWidth);
-    assert(parentBox.size.height >= trackHeight);
 
     final double trackLeft = offset.dx + overlayWidth / 2;
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
-    final double trackWidth = parentBox.size.width - math.max(thumbWidth, overlayWidth);
-    return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
+    final double trackRight = trackLeft + parentBox.size.width - math.max(thumbWidth, overlayWidth);
+    final double trackBottom = trackTop + trackHeight;
+    // If the parentBox'size less than slider's size the trackRight will be less than trackLeft, so switch them.
+    return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
   }
 }
 
@@ -1735,13 +1735,13 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
     final double trackHeight = sliderTheme.trackHeight;
     assert(overlayWidth >= 0);
     assert(trackHeight >= 0);
-    assert(parentBox.size.width >= overlayWidth);
-    assert(parentBox.size.height >= trackHeight);
 
     final double trackLeft = offset.dx + overlayWidth / 2;
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
-    final double trackWidth = parentBox.size.width - overlayWidth;
-    return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
+    final double trackRight = trackLeft + parentBox.size.width - overlayWidth;
+    final double trackBottom = trackTop + trackHeight;
+    // If the parentBox'size less than slider's size the trackRight will be less than trackLeft, so switch them.
+    return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
   }
 
   @override
@@ -1791,8 +1791,6 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
         rightThumbOffset = startThumbCenter;
         break;
     }
-    final Size thumbSize = sliderTheme.rangeThumbShape.getPreferredSize(isEnabled, isDiscrete);
-    final double thumbRadius = thumbSize.width / 2;
 
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
@@ -1801,13 +1799,13 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
       isEnabled: isEnabled,
       isDiscrete: isDiscrete,
     );
-    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, leftThumbOffset.dx - thumbRadius, trackRect.bottom);
+    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, leftThumbOffset.dx, trackRect.bottom);
     if (!leftTrackSegment.isEmpty)
       context.canvas.drawRect(leftTrackSegment, inactivePaint);
-    final Rect middleTrackSegment = Rect.fromLTRB(leftThumbOffset.dx + thumbRadius, trackRect.top, rightThumbOffset.dx - thumbRadius, trackRect.bottom);
+    final Rect middleTrackSegment = Rect.fromLTRB(leftThumbOffset.dx, trackRect.top, rightThumbOffset.dx, trackRect.bottom);
     if (!middleTrackSegment.isEmpty)
       context.canvas.drawRect(middleTrackSegment, activePaint);
-    final Rect rightTrackSegment = Rect.fromLTRB(rightThumbOffset.dx + thumbRadius, trackRect.top, trackRect.right, trackRect.bottom);
+    final Rect rightTrackSegment = Rect.fromLTRB(rightThumbOffset.dx, trackRect.top, trackRect.right, trackRect.bottom);
     if (!rightTrackSegment.isEmpty)
       context.canvas.drawRect(rightTrackSegment, inactivePaint);
   }
@@ -1865,13 +1863,13 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
     final double trackHeight = sliderTheme.trackHeight;
     assert(overlayWidth >= 0);
     assert(trackHeight >= 0);
-    assert(parentBox.size.width >= overlayWidth);
-    assert(parentBox.size.height >= trackHeight);
 
     final double trackLeft = offset.dx + overlayWidth / 2;
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
-    final double trackWidth = parentBox.size.width - overlayWidth;
-    return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
+    final double trackRight = trackLeft + parentBox.size.width - overlayWidth;
+    final double trackBottom = trackTop + trackHeight;
+    // If the parentBox'size less than slider's size the trackRight will be less than trackLeft, so switch them.
+    return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
   }
 
   @override
@@ -2311,7 +2309,6 @@ class RoundSliderThumbShape extends SliderComponentShape {
     assert(sliderTheme != null);
     assert(sliderTheme.disabledThumbColor != null);
     assert(sliderTheme.thumbColor != null);
-    assert(!sizeWithOverflow.isEmpty);
 
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = Tween<double>(
