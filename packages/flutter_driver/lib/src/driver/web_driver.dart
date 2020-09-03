@@ -70,7 +70,13 @@ class WebFlutterDriver extends FlutterDriver {
   @override
   Future<void> enableAccessibility() async {
     if (!_accessibilityEnabled) {
-      await _connection._driver.execute(
+      // Clicks the button to enable accessibility via Javascript for Desktop Web.
+      //
+      // The tag used in the script is based on
+      // https://github.com/flutter/engine/blob/master/lib/web_ui/lib/src/engine/semantics/semantics_helper.dart#L193
+      //
+      // TODO(angjieli): Support Mobile Web.
+      await webDriver.execute(
           'document.querySelector(\'flt-semantics-placeholder\').click();',
           <String>[]);
       _accessibilityEnabled = true;
