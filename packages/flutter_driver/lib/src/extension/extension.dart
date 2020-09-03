@@ -100,7 +100,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 ///
 /// ```dart
 /// class Some extends SerializableFinder {
-///   const ByTooltipMessage(this.title);
+///   const Some(this.title);
 ///
 ///   final String title;
 ///
