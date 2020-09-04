@@ -655,15 +655,12 @@ class AnimationController extends Animation<double>
   /// The [springDescription] can be used to apply custom spring to the [SpringSimulation]
   /// that is driven by this method.
   ///
-  /// Use [velocityScale] to apply scale for [velocity].
-  /// It only will be applied with [AnimationBehavior.normal].
-  ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
-  TickerFuture fling({ double velocity = 1.0, SpringDescription? springDescription, double velocityScale = 200.0, AnimationBehavior? animationBehavior }) {
+  TickerFuture fling({ double velocity = 1.0, SpringDescription? springDescription, AnimationBehavior? animationBehavior }) {
     springDescription ??= _kFlingSpringDescription;
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     final double target = velocity < 0.0 ? lowerBound - _kFlingTolerance.distance
@@ -675,7 +672,7 @@ class AnimationController extends Animation<double>
         case AnimationBehavior.normal:
           // TODO(jonahwilliams): review the process of setting up velocity.
           // the value below was arbitrarily chosen because it worked for the drawer widget.
-          scale = velocityScale;
+          scale = 200.0;
           break;
         case AnimationBehavior.preserve:
           break;
