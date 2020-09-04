@@ -85,7 +85,7 @@ class FontWeight {
     assert(t != null); // ignore: unnecessary_null_comparison
     if (a == null && b == null)
       return null;
-    return values[_lerpInt((a ?? normal).index, (b ?? normal).index, t).round().clamp(0, 8) as int];
+    return values[_lerpInt((a ?? normal).index, (b ?? normal).index, t).round().clamp(0, 8)];
   }
 
   @override

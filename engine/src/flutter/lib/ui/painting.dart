@@ -58,7 +58,7 @@ bool _radiusIsValid(Radius radius) {
 }
 
 Color _scaleAlpha(Color a, double factor) {
-  return a.withAlpha((a.alpha * factor).round().clamp(0, 255) as int);
+  return a.withAlpha((a.alpha * factor).round().clamp(0, 255));
 }
 
 /// An immutable 32 bit color value in ARGB format.
@@ -4665,21 +4665,21 @@ class Shadow {
       //                of shadows contains non-nullable elements, unmigrated code can still
       //                pass nulls.
       // ignore: unnecessary_null_comparison
-      if (shadow == null)
-        continue;
-      shadowOffset = shadowIndex * _kBytesPerShadow;
+      if (shadow != null) {
+        shadowOffset = shadowIndex * _kBytesPerShadow;
 
-      shadowsData.setInt32(_kColorOffset + shadowOffset,
-        shadow.color.value ^ Shadow._kColorDefault, _kFakeHostEndian);
+        shadowsData.setInt32(_kColorOffset + shadowOffset,
+          shadow.color.value ^ Shadow._kColorDefault, _kFakeHostEndian);
 
-      shadowsData.setFloat32(_kXOffset + shadowOffset,
-        shadow.offset.dx, _kFakeHostEndian);
+        shadowsData.setFloat32(_kXOffset + shadowOffset,
+          shadow.offset.dx, _kFakeHostEndian);
 
-      shadowsData.setFloat32(_kYOffset + shadowOffset,
-        shadow.offset.dy, _kFakeHostEndian);
+        shadowsData.setFloat32(_kYOffset + shadowOffset,
+          shadow.offset.dy, _kFakeHostEndian);
 
-      shadowsData.setFloat32(_kBlurOffset + shadowOffset,
-        shadow.blurRadius, _kFakeHostEndian);
+        shadowsData.setFloat32(_kBlurOffset + shadowOffset,
+          shadow.blurRadius, _kFakeHostEndian);
+      }
     }
 
     return shadowsData;
