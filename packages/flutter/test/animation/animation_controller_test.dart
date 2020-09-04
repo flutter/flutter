@@ -264,7 +264,7 @@ void main() {
       );
 
       controller.fling();
-      // Will produce longer and smoother animation than the default. 
+      // Will produce longer and smoother animation than the default.
       customSpringController.fling(
         springDescription: SpringDescription.withDampingRatio(
             mass: 0.01,
@@ -274,7 +274,7 @@ void main() {
       );
       tick(const Duration(milliseconds: 0));
       tick(const Duration(milliseconds: 50));
-      
+
       expect(customSpringController.value < controller.value, true);
   });
 
