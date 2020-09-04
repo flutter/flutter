@@ -1146,7 +1146,7 @@ class AlignTransition extends AnimatedWidget {
 ///   );
 ///   _curvedAnimation = CurvedAnimation(
 ///     parent: _controller,
-///     curve: Curves.elasticInOut
+///     curve: Curves.elasticInOut,
 ///   );
 /// }
 ///
