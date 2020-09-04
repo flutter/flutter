@@ -231,10 +231,10 @@ void main() {
       BuildContext findContext(String coordinate) => tester.element(findKey(coordinate));
       final List<Row> rows = List<Row>.generate(
         7,
-            (int y) => Row(
+        (int y) => Row(
           children: List<Container>.generate(
             7,
-                (int x) => Container(key: ValueKey<String>('$x, $y'), width: 200.0, height: 200.0,),
+            (int x) => Container(key: ValueKey<String>('$x, $y'), width: 200.0, height: 200.0,),
           ),
         ),
       );
@@ -268,7 +268,7 @@ void main() {
       //                 |0,0    |1,0    |2,0   |
       //                 |       |       |      |
       //                 +----------------------+
-      //                 | 0,1   | 1,1   | 2,1  |
+      //                 |0,1    |1,1    |2,1   |
       //                 |       |       |      |
       //             400 +----------------------+
 
