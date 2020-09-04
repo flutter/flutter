@@ -124,7 +124,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 ///  }
 ///
 ///  Finder createFinder(SerializableFinder finder) {
-///    Some someFinder = finder as SerializableFinder;
+///    Some someFinder = finder as Some;
 ///
 ///    return find.byElementPredicate((Element element) {
 ///      final Widget widget = element.widget;
