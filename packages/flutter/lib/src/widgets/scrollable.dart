@@ -312,7 +312,7 @@ class Scrollable extends StatefulWidget {
     // The `targetRenderObject` is used to record the first target renderObject.
     // If there are multiple scrollable widgets nested, we should let
     // the `targetRenderObject` as visible as possible to improve the user experience.
-    // Otherwise let the outer renderObject as visible as possible will cause
+    // Otherwise, let the outer renderObject as visible as possible maybe cause
     // the `targetRenderObject` invisible.
     // Also see https://github.com/flutter/flutter/issues/65100
     RenderObject targetRenderObject;
