@@ -1499,7 +1499,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
   /// Material spec defaults this gap width 2, which is half of the disabled
   /// thumb radius.
   @Deprecated(
-    'No longer has any effect. '
+    'No longer has any effect.'
     'This feature was deprecated after v1.5.7.'
   )
   final double disabledThumbGapWidth;
