@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -43,6 +44,7 @@ void main() {
 
   ProcessManager processManager;
   MockVisualStudio mockVisualStudio;
+  MockUsage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -52,6 +54,7 @@ void main() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
     mockVisualStudio = MockVisualStudio();
+    usage = MockUsage();
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -422,8 +425,54 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     Platform: () => windowsPlatform,
   });
+
+  testUsingContext('Performs code size analysis and sends analytics', () async {
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = mockVisualStudio;
+    applyMocksToCommand(command);
+    setUpMockProjectFilesForBuild();
+    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
+
+    fileSystem.file(r'build\windows\runner\Release\app.so')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
+
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release', onRun: () {
+        fileSystem.file(r'build\flutter_size_01\snapshot.windows-x64.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''[
+{
+  "l": "dart:_internal",
+  "c": "SubListIterable",
+  "n": "[Optimized] skip",
+  "s": 2400
+}
+          ]''');
+        fileSystem.file(r'build\flutter_size_01\trace.windows-x64.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{}');
+      }),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--no-pub', '--analyze-size']
+    );
+
+    expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
+    verify(usage.sendEvent('code-size-analysis', 'windows')).called(1);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => windowsPlatform,
+    FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
+    Usage: () => usage,
+  });
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockVisualStudio extends Mock implements VisualStudio {}
+class MockUsage extends Mock implements Usage {}

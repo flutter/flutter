@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:intl/locale.dart';
-import 'package:path/path.dart' as path;
+
+import '../base/file_system.dart';
+import '../convert.dart';
+import '../globals.dart' as globals;
+
 
 import 'localizations_utils.dart';
 
@@ -218,8 +219,9 @@ class Placeholder {
     String attributeName,
   ) {
     final dynamic value = attributes[attributeName];
-    if (value == null)
+    if (value == null) {
       return null;
+    }
     if (value is! String || (value as String).isEmpty) {
       throw L10nException(
         'The "$attributeName" value of the "$name" placeholder in message $resourceId '
@@ -235,8 +237,9 @@ class Placeholder {
     Map<String, dynamic> attributes
   ) {
     final dynamic value = attributes['optionalParameters'];
-    if (value == null)
+    if (value == null) {
       return <OptionalParameter>[];
+    }
     if (value is! Map<String, Object>) {
       throw L10nException(
         'The "optionalParameters" value of the "$name" placeholder in message '
@@ -300,10 +303,12 @@ class Message {
 
   static String _value(Map<String, dynamic> bundle, String resourceId) {
     final dynamic value = bundle[resourceId];
-    if (value == null)
+    if (value == null) {
       throw L10nException('A value for resource "$resourceId" was not found.');
-    if (value is! String)
+    }
+    if (value is! String) {
       throw L10nException('The value of "$resourceId" is not a string.');
+    }
     return bundle[resourceId] as String;
   }
 
@@ -326,8 +331,9 @@ class Message {
 
   static String _description(Map<String, dynamic> bundle, String resourceId) {
     final dynamic value = _attributes(bundle, resourceId)['description'];
-    if (value == null)
+    if (value == null) {
       return null;
+    }
     if (value is! String) {
       throw L10nException(
         'The description for "@$resourceId" is not a properly formatted String.'
@@ -338,8 +344,9 @@ class Message {
 
   static List<Placeholder> _placeholders(Map<String, dynamic> bundle, String resourceId) {
     final dynamic value = _attributes(bundle, resourceId)['placeholders'];
-    if (value == null)
+    if (value == null) {
       return <Placeholder>[];
+    }
     if (value is! Map<String, dynamic>) {
       throw L10nException(
         'The "placeholders" attribute for message $resourceId, is not '
@@ -379,7 +386,7 @@ class AppResourceBundle {
     String localeString = resources['@@locale'] as String;
 
     // Look for the first instance of an ISO 639-1 language code, matching exactly.
-    final String fileName = path.basenameWithoutExtension(file.path);
+    final String fileName = globals.fs.path.basenameWithoutExtension(file.path);
 
     for (int index = 0; index < fileName.length; index += 1) {
       // If an underscore was found, check if locale string follows.
