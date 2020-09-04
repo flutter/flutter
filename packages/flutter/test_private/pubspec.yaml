@@ -1,6 +1,6 @@
 name: flutter_test_private
 author: Flutter Authors <flutter-dev@googlegroups.com>
-description: Tests private interfaces of the flutter 
+description: Tests private interfaces of the flutter
 
 environment:
   # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.

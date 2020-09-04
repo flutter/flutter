@@ -15,7 +15,8 @@ import 'package:path/path.dart' as path;
 final Directory flutterRoot =
     Directory(path.fromUri(Platform.script)).absolute.parent.parent.parent.parent.parent;
 final Directory flutterPackageDir = Directory(path.join(flutterRoot.path, 'packages', 'flutter'));
-final Directory privateTestDir = Directory(path.join(flutterPackageDir.path, 'test_private'));
+final Directory testPrivateDir = Directory(path.join(flutterPackageDir.path, 'test_private'));
+final Directory privateTestsDir = Directory(path.join(testPrivateDir.path, 'test'));
 
 void _usage() {
   print('Usage: test_private.dart [--help] [--temp-dir=<temp_dir>]');
@@ -149,8 +150,7 @@ class TestCase extends Object {
     // Copy the test files into the top level of the tmpdir.
     for (final File file in tests) {
       try {
-        final File absFile =
-            makeAbsolute(file, workingDirectory: Directory(path.join(privateTestDir.path, 'test')));
+        final File absFile = makeAbsolute(file, workingDirectory: privateTestsDir);
         absFile.copySync(path.join(tmpdir.absolute.path, path.basename(file.path)));
       } on FileSystemException catch (e) {
         stderr.writeln('Problem copying test ${file.path} to ${tmpdir.path}: $e');
@@ -158,7 +158,7 @@ class TestCase extends Object {
       }
     }
     // Copy the pubspec to the right place.
-    makeAbsolute(pubspec, workingDirectory: Directory(path.join(privateTestDir.path, 'test')))
+    makeAbsolute(pubspec, workingDirectory: privateTestsDir)
         .copySync(path.join(tmpdir.absolute.path, 'pubspec.yaml'));
     return true;
   }
@@ -191,8 +191,13 @@ class TestCase extends Object {
 }
 
 Stream<TestCase> getTestCases(Directory tmpdir) async* {
-  final Directory testDir = Directory(path.join(privateTestDir.path, 'test'));
+  final Directory testDir = Directory(path.join(testPrivateDir.path, 'test'));
   await for (final FileSystemEntity entity in testDir.list(recursive: true)) {
+    if (path.split(entity.path).where((String element) => element.startsWith('.')).isNotEmpty) {
+      // Skip hidden files, directories, and the files inside them, like
+      // .dart_tool, which contains a (non-hidden) .json file.
+      continue;
+    }
     if (entity is File && path.basename(entity.path).endsWith('.json')) {
       print('Found manifest ${entity.path}');
       final Directory testTmpDir =

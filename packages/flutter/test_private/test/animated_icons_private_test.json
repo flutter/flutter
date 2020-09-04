@@ -2,7 +2,7 @@
   "tests": [
     "animated_icons_private_test.dart"
   ],
-  "pubspec": "animated_icons_private_test.pubspec.yaml",
+  "pubspec": "pubspec.yaml",
   "deps": [
     "test/flutter_test_alternative.dart",
     "lib/src/material/animated_icons/animated_icons.dart",
