@@ -281,7 +281,7 @@ void main() {
         when(mockDevice.name).thenReturn('specified-device');
         when(mockDevice.id).thenReturn('123');
 
-        final Device device = await findTargetDevice();
+        final Device device = await findTargetDevice(timeout: null);
         expect(device.name, 'specified-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -293,7 +293,7 @@ void main() {
       Platform platform() => FakePlatform(operatingSystem: operatingSystem);
 
       testUsingContext('returns null if no devices found', () async {
-        expect(await findTargetDevice(), isNull);
+        expect(await findTargetDevice(timeout: null), isNull);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -305,7 +305,7 @@ void main() {
         when(mockDevice.name).thenReturn('mock-android-device');
         testDeviceManager.addDevice(mockDevice);
 
-        final Device device = await findTargetDevice();
+        final Device device = await findTargetDevice(timeout: null);
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -337,7 +337,7 @@ void main() {
         testDeviceManager.addDevice(mockDevice);
         testDeviceManager.addDevice(mockUnsupportedDevice);
 
-        final Device device = await findTargetDevice();
+        final Device device = await findTargetDevice(timeout: null);
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -366,7 +366,7 @@ void main() {
         when(mockDevice.isLocalEmulator)
             .thenAnswer((Invocation invocation) => Future<bool>.value(true));
 
-        final Device device = await findTargetDevice();
+        final Device device = await findTargetDevice(timeout: null);
         expect(device.name, 'mock-simulator');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,

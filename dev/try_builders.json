@@ -1,0 +1,102 @@
+{
+   "builders":[
+      {
+         "name":"Linux analyze",
+         "repo":"flutter",
+         "task_name":"linux_analyze",
+         "enabled":true
+      },
+      {
+         "name":"Linux customer_testing",
+         "repo":"flutter",
+         "task_name":"linux_customer_testing",
+         "enabled":true
+      },
+      {
+         "name":"Linux build_tests",
+         "repo":"flutter",
+         "task_name":"linux_build_tests",
+         "enabled":true
+      },
+      {
+         "name":"Linux docs",
+         "repo":"flutter",
+         "task_name":"linux_docs",
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_drive/", "packages/flutter_localizations/", "bin/"]
+      },
+      {
+         "name":"Linux framework_tests",
+         "repo":"flutter",
+         "task_name":"linux_framework_tests",
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
+      },
+      {
+         "name":"Linux fuchsia_precache",
+         "repo":"flutter",
+         "task_name":"linux_fuchsia_precache",
+         "enabled":true
+      },
+      {
+         "name":"Linux hostonly_devicelab_tests",
+         "repo":"flutter",
+         "task_name":"linux_hostonly_devicelab_tests",
+         "enabled":true
+      },
+      {
+         "name":"Linux tool_tests",
+         "repo":"flutter",
+         "task_name":"linux_tool_tests",
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter_tools/", "bin/"]
+      },
+      {
+         "name":"Linux web_tests",
+         "repo":"flutter",
+         "task_name":"linux_web_tests",
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter/", "packages/flutter_goldens_client/", "packages/flutter_goldens/", "packages/flutter_test/", "packages/flutter_tools/lib/src/test/", "packages/flutter_web_plugins/", "bin/"]
+      },
+      {
+         "name":"Linux web_integration_tests",
+         "repo":"flutter",
+         "task_name":"linux_web_integration_tests",
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_tools/", "packages/flutter_web_plugins/", "bin/"]
+      },
+      {
+         "name":"Linux web_smoke_test",
+         "repo":"flutter",
+         "task_name":"linux_web_smoke_test",
+         "enabled":true,
+         "run_if":["examples/hello_world/**" ,"dev/**", "packages/flutter/**", "packages/flutter_test/**", "packages/flutter_tools/lib/src/test/**", "packages/flutter_web_plugins/**", "bin/**"]
+      },
+      {
+         "name": "Windows build_tests",
+         "repo": "flutter",
+         "task_name": "win_build_tests",
+         "enabled":true,
+         "run_if":["dev/", "bin/"]
+      },
+      {
+         "name": "Windows customer_testing",
+         "repo": "flutter",
+         "task_name": "win_customer_testing",
+         "enabled":true
+      },
+      {
+         "name": "Windows framework_tests",
+         "repo": "flutter",
+         "task_name": "win_framework_tests",
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
+      },
+      {
+        "name": "Windows tool_tests",
+        "repo": "flutter",
+        "task_name": "win_tool_tests",
+        "enabled":true
+      }
+   ]
+}

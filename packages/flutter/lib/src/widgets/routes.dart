@@ -24,6 +24,7 @@ import 'transitions.dart';
 
 // Examples can assume:
 // dynamic routeObserver;
+// NavigatorState navigator;
 
 const Color _kTransparent = Color(0x00000000);
 
@@ -193,7 +194,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         }
         break;
     }
-    changedInternalState();
   }
 
   @override
@@ -201,16 +201,19 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     assert(!_transitionCompleter.isCompleted, 'Cannot install a $runtimeType after disposing it.');
     _controller = createAnimationController();
     assert(_controller != null, '$runtimeType.createAnimationController() returned null.');
-    _animation = createAnimation();
+    _animation = createAnimation()
+      ..addStatusListener(_handleStatusChanged);
     assert(_animation != null, '$runtimeType.createAnimation() returned null.');
     super.install();
+    if (_animation.isCompleted && overlayEntries.isNotEmpty) {
+      overlayEntries.first.opaque = opaque;
+    }
   }
 
   @override
   TickerFuture didPush() {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
-    _didPushOrReplace();
     super.didPush();
     return _controller.forward();
   }
@@ -219,7 +222,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void didAdd() {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
-    _didPushOrReplace();
     super.didAdd();
     _controller.value = _controller.upperBound;
   }
@@ -230,17 +232,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     if (oldRoute is TransitionRoute)
       _controller.value = oldRoute._controller.value;
-    _didPushOrReplace();
     super.didReplace(oldRoute);
-  }
-
-  void _didPushOrReplace() {
-    _animation.addStatusListener(_handleStatusChanged);
-    // If the animation is already completed, _handleStatusChanged will not get
-    // a chance to set opaqueness of OverlayEntry.
-    if (_animation.isCompleted && overlayEntries.isNotEmpty) {
-      overlayEntries.first.opaque = opaque;
-    }
   }
 
   @override
@@ -878,7 +870,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// ```
   ///
   /// The given [BuildContext] will be rebuilt if the state of the route changes
-  /// (specifically, if [isCurrent] or [canPop] change value).
+  /// while it is visible (specifically, if [isCurrent] or [canPop] change value).
   @optionalTypeArgs
   static ModalRoute<T> of<T extends Object>(BuildContext context) {
     final _ModalScopeStatus widget = context.dependOnInheritedWidgetOfExactType<_ModalScopeStatus>();
@@ -958,7 +950,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// is not wrapped in any transition widgets.
   ///
   /// The [buildTransitions] method, in contrast to [buildPage], is called each
-  /// time the [Route]'s state changes (e.g. the value of [canPop]).
+  /// time the [Route]'s state changes while it is visible (e.g. if the value of
+  /// [canPop] changes on the active route).
   ///
   /// The [buildTransitions] method is typically used to define transitions
   /// that animate the new topmost route's comings and goings. When the
@@ -1155,17 +1148,31 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// While the route is animating into position, the color is animated from
   /// transparent to the specified color.
+  /// {@endtemplate}
   ///
   /// If this getter would ever start returning a different color, the
   /// [Route.changedInternalState] should be invoked so that the change can take
   /// effect.
+  ///
+  /// {@tool snippet}
+  ///
+  /// It is safe to use `navigator.context` here. For example, to make
+  /// the barrier color use the theme's background color, one could say:
+  ///
+  /// ```dart
+  /// Color get barrierColor => Theme.of(navigator.context).backgroundColor;
+  /// ```
+  ///
+  /// The [Navigator] causes the [ModalRoute]'s modal barrier overlay entry
+  /// to rebuild any time its dependencies change.
+  ///
+  /// {@end-tool}
   ///
   /// See also:
   ///
   ///  * [barrierDismissible], which controls the behavior of the barrier when
   ///    tapped.
   ///  * [ModalBarrier], the widget that implements this feature.
-  /// {@endtemplate}
   Color get barrierColor;
 
   /// {@template flutter.widgets.modalRoute.barrierLabel}
@@ -1180,6 +1187,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// For example, when a dialog is on the screen, the page below the dialog is
   /// usually darkened by the modal barrier.
+  /// {@endtemplate}
   ///
   /// If this getter would ever start returning a different label, the
   /// [Route.changedInternalState] should be invoked so that the change can take
@@ -1190,7 +1198,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [barrierDismissible], which controls the behavior of the barrier when
   ///    tapped.
   ///  * [ModalBarrier], the widget that implements this feature.
-  /// {@endtemplate}
   String get barrierLabel;
 
   /// The curve that is used for animating the modal barrier in and out.
@@ -1247,6 +1254,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// The modal barrier, if any, is not rendered if [offstage] is true (see
   /// [barrierColor]).
+  ///
+  /// Whenever this changes value, [changedInternalState] is called.
   bool get offstage => _offstage;
   bool _offstage = false;
   set offstage(bool value) {
@@ -1257,6 +1266,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     });
     _animationProxy.parent = _offstage ? kAlwaysCompleteAnimation : super.animation;
     _secondaryAnimationProxy.parent = _offstage ? kAlwaysDismissedAnimation : super.secondaryAnimation;
+    changedInternalState();
   }
 
   /// The build context for the subtree containing the primary content of this route.
@@ -1423,8 +1433,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Whether this route can be popped.
   ///
-  /// When this changes, the route will rebuild, and any widgets that used
-  /// [ModalRoute.of] will be notified.
+  /// When this changes, if the route is visible, the route will
+  /// rebuild, and any widgets that used [ModalRoute.of] will be
+  /// notified.
   bool get canPop => !isFirst || willHandlePopInternally;
 
   // Internals

@@ -8,6 +8,11 @@
 ///
 /// To use, import `package:flutter/cupertino.dart`.
 ///
+/// This library is designed for apps that run on iOS. For apps that may also
+/// run on other operating systems, we encourage use of other widgets, for
+/// example the [Material
+/// Design](https://flutter.dev/docs/development/ui/widgets/material) set.
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3PdUaidHc-E}
 library cupertino;
 

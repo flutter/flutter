@@ -19,7 +19,22 @@ import 'ticker_provider.dart';
 ///
 /// The user can transform the child by dragging to pan or pinching to zoom.
 ///
+/// By default, InteractiveViewer may draw outside of its original area of the
+/// screen, such as when a child is zoomed in and increases in size. However, it
+/// will not receive gestures outside of its original area. To prevent
+/// InteractiveViewer from drawing outside of its original size, wrap it in a
+/// [ClipRect]. Or, to prevent dead areas where InteractiveViewer does not
+/// receive gestures, be sure that the InteractiveViewer widget is the size of
+/// the area that should be interactive. See
+/// [flutter-go](https://github.com/justinmc/flutter-go) for an example of
+/// robust positioning of an InteractiveViewer child that works for all screen
+/// sizes and child sizes.
+///
 /// The [child] must not be null.
+///
+/// See also:
+///   * The [Flutter Gallery's transformations demo](https://github.com/flutter/gallery/blob/master/lib/demos/reference/transformations_demo.dart),
+///     which includes the use of InteractiveViewer.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 /// This example shows a simple Container that can be panned and zoomed.
@@ -684,6 +699,22 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
   }
 
+  // Decide which type of gesture this is by comparing the amount of scale
+  // and rotation in the gesture, if any. Scale starts at 1 and rotation
+  // starts at 0. Pan will have no scale and no rotation because it uses only one
+  // finger.
+  _GestureType _getGestureType(ScaleUpdateDetails details) {
+    final double scale = !widget.scaleEnabled ? 1.0 : details.scale;
+    final double rotation = !_rotateEnabled ? 0.0 : details.rotation;
+    if ((scale - 1).abs() > rotation.abs()) {
+      return _GestureType.scale;
+    } else if (rotation != 0.0) {
+      return _GestureType.rotate;
+    } else {
+      return _GestureType.pan;
+    }
+  }
+
   // Handle the start of a gesture. All of pan, scale, and rotate are handled
   // with GestureDetector's scale gesture.
   void _onScaleStart(ScaleStartDetails details) {
@@ -723,23 +754,23 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final Offset focalPointScene = _transformationController.toScene(
       details.localFocalPoint,
     );
-    _gestureType ??= _getGestureType(
-      !widget.scaleEnabled ? 1.0 : details.scale,
-      !_rotateEnabled ? 0.0 : details.rotation,
-    );
-    if (_gestureType == _GestureType.pan) {
-      _panAxis ??= _getPanAxis(_referenceFocalPoint, focalPointScene);
-    }
 
+    if (_gestureType == _GestureType.pan) {
+      // When a gesture first starts, it sometimes has no change in scale and
+      // rotation despite being a two-finger gesture. Here the gesture is
+      // allowed to be reinterpreted as its correct type after originally
+      // being marked as a pan.
+      _gestureType = _getGestureType(details);
+    } else {
+      _gestureType ??= _getGestureType(details);
+    }
     if (!_gestureIsSupported(_gestureType)) {
       return;
     }
 
     switch (_gestureType) {
       case _GestureType.scale:
-        if (_scaleStart == null) {
-          return;
-        }
+        assert(_scaleStart != null);
         // details.scale gives us the amount to change the scale as of the
         // start of this gesture, so calculate the amount to scale as of the
         // previous call to _onScaleUpdate.
@@ -789,9 +820,14 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         return;
 
       case _GestureType.pan:
-        if (_referenceFocalPoint == null || details.scale != 1.0) {
+        assert(_referenceFocalPoint != null);
+        // details may have a change in scale here when scaleEnabled is false.
+        // In an effort to keep the behavior similar whether or not scaleEnabled
+        // is true, these gestures are thrown away.
+        if (details.scale != 1.0) {
           return;
         }
+        _panAxis ??= _getPanAxis(_referenceFocalPoint, focalPointScene);
         // Translate so that the same point in the scene is underneath the
         // focal point before and after the movement.
         final Offset translationChange = focalPointScene - _referenceFocalPoint;
@@ -1080,20 +1116,6 @@ enum _GestureType {
 double _getFinalTime(double velocity, double drag) {
   const double effectivelyMotionless = 10.0;
   return math.log(effectivelyMotionless / velocity) / math.log(drag / 100);
-}
-
-// Decide which type of gesture this is by comparing the amount of scale
-// and rotation in the gesture, if any. Scale starts at 1 and rotation
-// starts at 0. Pan will have 0 scale and 0 rotation because it uses only one
-// finger.
-_GestureType _getGestureType(double scale, double rotation) {
-  if ((scale - 1).abs() > rotation.abs()) {
-    return _GestureType.scale;
-  } else if (rotation != 0) {
-    return _GestureType.rotate;
-  } else {
-    return _GestureType.pan;
-  }
 }
 
 // Return the translation from the given Matrix4 as an Offset.

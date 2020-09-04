@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 
@@ -20,7 +19,7 @@ class ClipboardData {
   const ClipboardData({ this.text });
 
   /// Plain text variant of this clipboard data.
-  final String text;
+  final String? text;
 }
 
 /// Utility methods for interacting with the system's clipboard.
@@ -54,13 +53,13 @@ class Clipboard {
   ///
   /// Returns a future which completes to null if the data could not be
   /// obtained, and to a [ClipboardData] object if it could.
-  static Future<ClipboardData> getData(String format) async {
-    final Map<String, dynamic> result = await SystemChannels.platform.invokeMethod(
+  static Future<ClipboardData?> getData(String format) async {
+    final Map<String, dynamic>? result = await SystemChannels.platform.invokeMethod(
       'Clipboard.getData',
       format,
     );
     if (result == null)
       return null;
-    return ClipboardData(text: result['text'] as String);
+    return ClipboardData(text: result['text'] as String?);
   }
 }

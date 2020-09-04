@@ -9,7 +9,7 @@ bool isRunningFromDaemon = false;
 /// Throw a specialized exception for expected situations
 /// where the tool should exit with a clear message to the user
 /// and no stack trace unless the --verbose option is specified.
-/// For example: network errors
+/// For example: network errors.
 void throwToolExit(String message, { int exitCode }) {
   throw ToolExit(message, exitCode: exitCode);
 }
@@ -17,7 +17,7 @@ void throwToolExit(String message, { int exitCode }) {
 /// Specialized exception for expected situations
 /// where the tool should exit with a clear message to the user
 /// and no stack trace unless the --verbose option is specified.
-/// For example: network errors
+/// For example: network errors.
 class ToolExit implements Exception {
   ToolExit(this.message, { this.exitCode });
 

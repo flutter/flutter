@@ -7,8 +7,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:mockito/mockito.dart';
 
+import '../flutter_test_alternative.dart' show Fake;
 import '../rendering/mock_canvas.dart';
 
 void main() {
@@ -440,10 +440,6 @@ void main() {
 
     final RenderBox decoratedBox = tester.renderObject(find.byType(DecoratedBox).last);
     final PaintingContext context = _MockPaintingContext();
-    final Canvas canvas = _MockCanvas();
-    int saveCount = 0;
-    when(canvas.getSaveCount()).thenAnswer((_) => saveCount++);
-    when(context.canvas).thenReturn(canvas);
     FlutterError error;
     try {
       decoratedBox.paint(context, const Offset(0, 0));
@@ -559,7 +555,52 @@ void main() {
     await tester.tap(find.byType(Container));
     expect(tapped, false);
   });
+
+  testWidgets('using clipBehaviour and shadow, should not clip the shadow', (WidgetTester tester) async {
+    final Container container = Container(
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          color: Colors.red,
+          boxShadow: const <BoxShadow>[
+            BoxShadow(
+              color: Colors.blue,
+              offset: Offset.zero,
+              spreadRadius: 10,
+              blurRadius: 20.0,
+            ),
+          ]),
+      child: const SizedBox(width: 50, height: 50),
+    );
+
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: Padding(
+          padding: const EdgeInsets.all(30.0),
+          child: container,
+      )),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('container.clipBehaviour.with.shadow.png'),
+    );
+  });
 }
 
-class _MockPaintingContext extends Mock implements PaintingContext {}
-class _MockCanvas extends Mock implements Canvas {}
+class _MockPaintingContext extends Fake implements PaintingContext {
+  @override
+  final Canvas canvas = _MockCanvas();
+}
+
+class _MockCanvas extends Fake implements Canvas {
+  int saveCount = 0;
+
+  @override
+  int getSaveCount() {
+    return saveCount++;
+  }
+
+  @override
+  void drawRect(Rect rect, Paint paint) { }
+}

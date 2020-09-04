@@ -17,7 +17,7 @@ import '../../src/fake_process_manager.dart';
 import '../../src/testbed.dart';
 
 void main() {
-  testWithoutContext('AndroidDevices returns empty device list on null adb', () async {
+  testWithoutContext('AndroidDevices returns empty device list and diagnostics on null adb', () async {
     final AndroidDevices androidDevices = AndroidDevices(
       androidSdk: MockAndroidSdk(null),
       logger: BufferLogger.test(),
@@ -31,7 +31,25 @@ void main() {
     );
 
     expect(await androidDevices.pollingGetDevices(), isEmpty);
-  }, skip: true); // a null adb unconditionally calls a static method in AndroidSDK that hits the context.
+    expect(await androidDevices.getDiagnostics(), isEmpty);
+  });
+
+  testWithoutContext('AndroidDevices returns empty device list and diagnostics on null Android SDK', () async {
+    final AndroidDevices androidDevices = AndroidDevices(
+      androidSdk: null,
+      logger: BufferLogger.test(),
+      androidWorkflow: AndroidWorkflow(
+        androidSdk: MockAndroidSdk(null),
+        featureFlags: TestFeatureFlags(),
+      ),
+      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      fileSystem: MemoryFileSystem.test(),
+      platform: FakePlatform(),
+    );
+
+    expect(await androidDevices.pollingGetDevices(), isEmpty);
+    expect(await androidDevices.getDiagnostics(), isEmpty);
+  });
 
   testWithoutContext('AndroidDevices throwsToolExit on missing adb path', () {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[

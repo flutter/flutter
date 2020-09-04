@@ -98,7 +98,7 @@ class CupertinoTheme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  _InheritedCupertinoTheme(
+    return _InheritedCupertinoTheme(
       theme: this,
       child: IconTheme(
         data: CupertinoIconThemeData(color: data.primaryColor),

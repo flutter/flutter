@@ -11,7 +11,6 @@ import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 import 'common.dart';
@@ -44,10 +43,12 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   );
 
   final File pubspecFile =  environment.projectDir.childFile('pubspec.yaml');
-  final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+  // Only the default asset bundle style is supported in assemble.
+  final AssetBundle assetBundle = AssetBundleFactory.defaultInstance.createBundle();
   final int resultCode = await assetBundle.build(
     manifestPath: pubspecFile.path,
     packagesPath: environment.projectDir.childFile('.packages').path,
+    assetDirPath: null,
   );
   if (resultCode != 0) {
     throw Exception('Failed to bundle asset files.');
@@ -63,10 +64,10 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   final IconTreeShaker iconTreeShaker = IconTreeShaker(
     environment,
     assetBundle.entries[kFontManifestJson] as DevFSStringContent,
-    processManager: globals.processManager,
-    logger: globals.logger,
-    fileSystem: globals.fs,
-    artifacts: globals.artifacts,
+    processManager: environment.processManager,
+    logger: environment.logger,
+    fileSystem: environment.fileSystem,
+    artifacts: environment.artifacts,
   );
 
   final Map<String, DevFSContent> assetEntries = <String, DevFSContent>{
@@ -85,7 +86,8 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
         // to `%23.ext`. However, we have to keep it this way since the
         // platform channels in the framework will URI encode these values,
         // and the native APIs will look for files this way.
-        final File file = globals.fs.file(globals.fs.path.join(outputDirectory.path, entry.key));
+        final File file = environment.fileSystem.file(
+          environment.fileSystem.path.join(outputDirectory.path, entry.key));
         outputs.add(file);
         file.parent.createSync(recursive: true);
         final DevFSContent content = entry.value;
@@ -222,8 +224,8 @@ class CopyAssets extends Target {
       targetPlatform: TargetPlatform.android,
     );
     final DepfileService depfileService = DepfileService(
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
     );
     depfileService.writeToFile(
       depfile,

@@ -51,7 +51,7 @@ class _BannerDemoState extends State<BannerDemo> {
       content: const Text('Your password was updated on your other device. Please sign in again.'),
       leading: _showLeading ? const CircleAvatar(child: Icon(Icons.access_alarm)) : null,
       actions: <Widget>[
-        FlatButton(
+        TextButton(
           child: const Text('SIGN IN'),
           onPressed: () {
             setState(() {
@@ -60,7 +60,7 @@ class _BannerDemoState extends State<BannerDemo> {
           },
         ),
         if (_showMultipleActions)
-          FlatButton(
+          TextButton(
             child: const Text('DISMISS'),
             onPressed: () {
               setState(() {

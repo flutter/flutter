@@ -34,6 +34,7 @@ void main() {
         config = AutofillConfiguration(
           uniqueIdentifier: null,
           autofillHints: const <String>['test'],
+          currentEditingValue: const TextEditingValue(),
         );
       } catch (e) {
         expect(e.toString(), contains('uniqueIdentifier != null'));
@@ -45,6 +46,7 @@ void main() {
         config = AutofillConfiguration(
           uniqueIdentifier: 'id',
           autofillHints: null,
+          currentEditingValue: const TextEditingValue(),
         );
       } catch (e) {
         expect(e.toString(), contains('autofillHints != null'));
@@ -59,6 +61,7 @@ void main() {
         const AutofillConfiguration config = AutofillConfiguration(
           uniqueIdentifier: 'id',
           autofillHints: <String>[],
+          currentEditingValue: TextEditingValue(),
         );
 
         json = config.toJson();
@@ -146,6 +149,11 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   @override
   void performAction(TextInputAction action) {
     latestMethodCall = 'performAction';
+  }
+
+  @override
+  void performPrivateCommand(String action, Map<String, dynamic> data) {
+    latestMethodCall = 'performPrivateCommand';
   }
 
   @override

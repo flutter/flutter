@@ -7,7 +7,7 @@ Pod::Spec.new do |s|
   s.license               = { :type => 'BSD' }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :path => '.' }
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '9.0'
   s.vendored_frameworks   = 'App.framework'
   s.dependency 'Flutter'
 end

@@ -258,7 +258,7 @@ class TextTreeConfiguration {
   /// Prefix to add to other lines to display a child with this style.
   ///
   /// [prefixOtherLines] should typically be one character shorter than
-  /// [prefixLineOne] as
+  /// [prefixLineOne] is.
   final String prefixOtherLines;
 
   /// Prefix to add to the first line to display the last child of a node with
@@ -1511,7 +1511,7 @@ abstract class DiagnosticsNode {
   /// will make the name self-evident.
   final bool showName;
 
-  /// Prefix to include at the start of each line
+  /// Prefix to include at the start of each line.
   final String? linePrefix;
 
   /// Description to show if the node has no displayed properties or children.
@@ -2053,7 +2053,7 @@ class PercentProperty extends DoubleProperty {
   /// The [showName] and [level] arguments must not be null.
   PercentProperty(
     String name,
-    double fraction, {
+    double? fraction, {
     String? ifNull,
     bool showName = true,
     String? tooltip,
@@ -3377,13 +3377,10 @@ abstract class DiagnosticableTree with Diagnosticable {
   ///
   ///  * [toString], for a brief description of the object.
   ///  * [toStringDeep], for a description of the subtree rooted at this object.
-  String? toStringShallow({
+  String toStringShallow({
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    if (kReleaseMode) {
-      return toString();
-    }
     String? shallowString;
     assert(() {
       final StringBuffer result = StringBuffer();
@@ -3398,7 +3395,7 @@ abstract class DiagnosticableTree with Diagnosticable {
       shallowString = result.toString();
       return true;
     }());
-    return shallowString;
+    return shallowString ?? toString();
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -3470,13 +3467,10 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
   }
 
   @override
-  String? toStringShallow({
+  String toStringShallow({
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    if (kReleaseMode) {
-      return toString();
-    }
     String? shallowString;
     assert(() {
       final StringBuffer result = StringBuffer();
@@ -3491,7 +3485,7 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
       shallowString = result.toString();
       return true;
     }());
-    return shallowString;
+    return shallowString ?? toString();
   }
 
   @override

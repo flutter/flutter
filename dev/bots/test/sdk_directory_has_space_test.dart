@@ -17,5 +17,5 @@ void main() {
     expect(expectedName, contains(' '));
     final List<String> parts = path.split(Directory.current.absolute.path);
     expect(parts.reversed.take(3), <String>['bots', 'dev', expectedName]);
-  }, skip: true);
+  }, skip: true); // https://github.com/flutter/flutter/issues/62919
 }

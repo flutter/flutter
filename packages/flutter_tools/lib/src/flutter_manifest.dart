@@ -37,7 +37,7 @@ class FlutterManifest {
     return FlutterManifest.createFromString(manifest, logger: logger);
   }
 
-  /// Returns null on missing or invalid manifest
+  /// Returns null on missing or invalid manifest.
   @visibleForTesting
   static FlutterManifest createFromString(String manifest, { @required Logger logger }) {
     return _createFromYaml(manifest != null ? loadYaml(manifest) : null, logger);

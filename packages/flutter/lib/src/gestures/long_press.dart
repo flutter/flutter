@@ -143,8 +143,8 @@ class LongPressEndDetails {
 /// [postAcceptSlopTolerance] constructor argument is specified.
 ///
 /// [LongPressGestureRecognizer] may compete on pointer events of
-/// [kPrimaryButton] and/or [kSecondaryButton] if at least one corresponding
-/// callback is non-null. If it has no callbacks, it is a no-op.
+/// [kPrimaryButton], [kSecondaryButton], and/or [kTertiaryButton] if at least
+/// one corresponding callback is non-null. If it has no callbacks, it is a no-op.
 class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a long-press gesture recognizer.
   ///
@@ -277,6 +277,57 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///  * [LongPressEndDetails], which is passed as an argument to this callback.
   GestureLongPressEndCallback? onSecondaryLongPressEnd;
 
+  /// Called when a long press gesture by a tertiary button has been
+  /// recognized.
+  ///
+  /// See also:
+  ///
+  ///  * [kTertiaryButton], the button this callback responds to.
+  ///  * [onTertiaryLongPressStart], which has the same timing but has data for
+  ///    the press location.
+  GestureLongPressCallback? onTertiaryLongPress;
+
+  /// Called when a long press gesture by a tertiary button has been recognized.
+  ///
+  /// See also:
+  ///
+  ///  * [kTertiaryButton], the button this callback responds to.
+  ///  * [onTertiaryLongPress], which has the same timing but without details.
+  ///  * [LongPressStartDetails], which is passed as an argument to this
+  ///    callback.
+  GestureLongPressStartCallback? onTertiaryLongPressStart;
+
+  /// Called when moving after the long press by a tertiary button is
+  /// recognized.
+  ///
+  /// See also:
+  ///
+  ///  * [kTertiaryButton], the button this callback responds to.
+  ///  * [LongPressMoveUpdateDetails], which is passed as an argument to this
+  ///    callback.
+  GestureLongPressMoveUpdateCallback? onTertiaryLongPressMoveUpdate;
+
+  /// Called when the pointer stops contacting the screen after a long-press by
+  /// a tertiary button.
+  ///
+  /// See also:
+  ///
+  ///  * [kTertiaryButton], the button this callback responds to.
+  ///  * [onTertiaryLongPressEnd], which has the same timing but has data for
+  ///    the up gesture location.
+  GestureLongPressUpCallback? onTertiaryLongPressUp;
+
+  /// Called when the pointer stops contacting the screen after a long-press by
+  /// a tertiary button.
+  ///
+  /// See also:
+  ///
+  ///  * [kTertiaryButton], the button this callback responds to.
+  ///  * [onTertiaryLongPressUp], which has the same timing, but without
+  ///    details.
+  ///  * [LongPressEndDetails], which is passed as an argument to this callback.
+  GestureLongPressEndCallback? onTertiaryLongPressEnd;
+
   VelocityTracker? _velocityTracker;
 
   @override
@@ -296,6 +347,14 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             onSecondaryLongPressMoveUpdate == null &&
             onSecondaryLongPressEnd == null &&
             onSecondaryLongPressUp == null)
+          return false;
+        break;
+      case kTertiaryButton:
+        if (onTertiaryLongPressStart == null &&
+            onTertiaryLongPress == null &&
+            onTertiaryLongPressMoveUpdate == null &&
+            onTertiaryLongPressEnd == null &&
+            onTertiaryLongPressUp == null)
           return false;
         break;
       default:
@@ -377,6 +436,19 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           invokeCallback<void>('onSecondaryLongPress', onSecondaryLongPress!);
         }
         break;
+      case kTertiaryButton:
+        if (onTertiaryLongPressStart != null) {
+          final LongPressStartDetails details = LongPressStartDetails(
+            globalPosition: _longPressOrigin!.global,
+            localPosition: _longPressOrigin!.local,
+          );
+          invokeCallback<void>(
+              'onTertiaryLongPressStart', () => onTertiaryLongPressStart!(details));
+        }
+        if (onTertiaryLongPress != null) {
+          invokeCallback<void>('onTertiaryLongPress', onTertiaryLongPress!);
+        }
+        break;
       default:
         assert(false, 'Unhandled button $_initialButtons');
     }
@@ -400,6 +472,12 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         if (onSecondaryLongPressMoveUpdate != null) {
           invokeCallback<void>('onSecondaryLongPressMoveUpdate',
             () => onSecondaryLongPressMoveUpdate!(details));
+        }
+        break;
+      case kTertiaryButton:
+        if (onTertiaryLongPressMoveUpdate != null) {
+          invokeCallback<void>('onTertiaryLongPressMoveUpdate',
+                  () => onTertiaryLongPressMoveUpdate!(details));
         }
         break;
       default:
@@ -434,6 +512,14 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         }
         if (onSecondaryLongPressUp != null) {
           invokeCallback<void>('onSecondaryLongPressUp', onSecondaryLongPressUp!);
+        }
+        break;
+      case kTertiaryButton:
+        if (onTertiaryLongPressEnd != null) {
+          invokeCallback<void>('onTertiaryLongPressEnd', () => onTertiaryLongPressEnd!(details));
+        }
+        if (onTertiaryLongPressUp != null) {
+          invokeCallback<void>('onTertiaryLongPressUp', onTertiaryLongPressUp!);
         }
         break;
       default:

@@ -1512,7 +1512,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   bool get disposed => _disposed;
 
   /// Check the [Clipboard] and update [value] if needed.
-  void update() {
+  Future<void> update() async {
     // iOS 14 added a notification that appears when an app accesses the
     // clipboard. To avoid the notification, don't access the clipboard on iOS,
     // and instead always shown the paste button, even when the clipboard is
@@ -1532,15 +1532,26 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
         break;
     }
 
-    Clipboard.getData(Clipboard.kTextPlain).then((ClipboardData data) {
-      final ClipboardStatus clipboardStatus = data != null && data.text != null && data.text.isNotEmpty
-          ? ClipboardStatus.pasteable
-          : ClipboardStatus.notPasteable;
-      if (_disposed || clipboardStatus == value) {
+    ClipboardData data;
+    try {
+      data = await Clipboard.getData(Clipboard.kTextPlain);
+    } catch (stacktrace) {
+      // In the case of an error from the Clipboard API, set the value to
+      // unknown so that it will try to update again later.
+      if (_disposed || value == ClipboardStatus.unknown) {
         return;
       }
-      value = clipboardStatus;
-    });
+      value = ClipboardStatus.unknown;
+      return;
+    }
+
+    final ClipboardStatus clipboardStatus = data != null && data.text != null && data.text.isNotEmpty
+        ? ClipboardStatus.pasteable
+        : ClipboardStatus.notPasteable;
+    if (_disposed || clipboardStatus == value) {
+      return;
+    }
+    value = clipboardStatus;
   }
 
   @override

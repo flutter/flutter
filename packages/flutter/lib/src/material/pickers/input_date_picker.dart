@@ -16,12 +16,12 @@ import '../theme.dart';
 import 'date_picker_common.dart';
 import 'date_utils.dart' as utils;
 
-/// A [TextFormField] configured to accept and validate a date entered by the user.
+/// A [TextFormField] configured to accept and validate a date entered by a user.
 ///
-/// The text entered into this field will be constrained to only allow digits
-/// and separators. When saved or submitted, the text will be parsed into a
-/// [DateTime] according to the ambient locale. If the input text doesn't parse
-/// into a date, the [errorFormatText] message will be displayed under the field.
+/// When the field is saved or submitted, the text will be parsed into a
+/// [DateTime] according to the ambient locale's compact date format. If the
+/// input text doesn't parse into a date, the [errorFormatText] message will
+/// be displayed under the field.
 ///
 /// [firstDate], [lastDate], and [selectableDayPredicate] provide constraints on
 /// what days are valid. If the input date isn't in the date range or doesn't pass
@@ -231,50 +231,11 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
         labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
       ),
       validator: _validateDate,
-      inputFormatters: <TextInputFormatter>[
-        DateTextInputFormatter(localizations.dateSeparator),
-      ],
       keyboardType: TextInputType.datetime,
       onSaved: _handleSaved,
       onFieldSubmitted: _handleSubmitted,
       autofocus: widget.autofocus,
       controller: _controller,
-    );
-  }
-}
-
-/// A `TextInputFormatter` set up to format dates.
-//
-// This is not publicly exported (see pickers.dart), as it is
-// just meant for internal use by `InputDatePickerFormField` and
-// `InputDateRangePicker`.
-class DateTextInputFormatter extends TextInputFormatter {
-
-  /// Creates a date formatter with the given separator.
-  DateTextInputFormatter(
-    this.separator
-  ) : _filterFormatter = FilteringTextInputFormatter.allow(RegExp('[\\d$_commonSeparators\\$separator]+'));
-
-  /// List of common separators that are used in dates. This is used to make
-  /// sure that if given platform's [TextInputType.datetime] keyboard doesn't
-  /// provide the given locale's separator character, they can still enter the
-  /// separator using one of these characters (slash, period, comma, dash, or
-  /// space).
-  static const String _commonSeparators = r'\/\.,-\s';
-
-  /// The date separator for the current locale.
-  final String separator;
-
-  // Formatter that will filter out all characters except digits and date
-  // separators.
-  final TextInputFormatter _filterFormatter;
-
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    final TextEditingValue filteredValue = _filterFormatter.formatEditUpdate(oldValue, newValue);
-    return filteredValue.copyWith(
-      // Replace any non-digits with the given separator
-      text: filteredValue.text.replaceAll(RegExp(r'[\D]'), separator),
     );
   }
 }

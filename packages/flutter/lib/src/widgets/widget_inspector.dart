@@ -954,6 +954,10 @@ mixin WidgetInspectorService {
     _errorsSinceReload = 0;
   }
 
+  /// Whether structured errors are enabled.
+  ///
+  /// Structured errors provide semantic information that can be used by IDEs
+  /// to enhance the display of errors with rich formatting.
   bool isStructuredErrorsEnabled() {
     return const bool.fromEnvironment('flutter.inspector.structuredErrors');
   }
@@ -1861,7 +1865,7 @@ mixin WidgetInspectorService {
 
   void _onPaint(RenderObject renderObject) {
     try {
-      final Element element = renderObject.debugCreator?.element as Element;
+      final Element element = (renderObject.debugCreator as DebugCreator)?.element;
       if (element is! RenderObjectElement) {
         // This branch should not hit as long as all RenderObjects were created
         // by Widgets. It is possible there might be some render objects
@@ -2359,7 +2363,7 @@ class InspectorSelection {
   set current(RenderObject value) {
     if (_current != value) {
       _current = value;
-      _currentElement = value.debugCreator.element as Element;
+      _currentElement = (value.debugCreator as DebugCreator).element;
     }
   }
 
@@ -2380,7 +2384,7 @@ class InspectorSelection {
   void _computeCurrent() {
     if (_index < candidates.length) {
       _current = candidates[index];
-      _currentElement = _current.debugCreator.element as Element;
+      _currentElement = (_current.debugCreator as DebugCreator).element;
     } else {
       _current = null;
       _currentElement = null;
@@ -2860,7 +2864,7 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
   bool processElement(Element target) {
     // TODO(chunhtai): should print out all the widgets that are about to cross
     // package boundaries.
-    if (_isLocalCreationLocation(target)) {
+    if (debugIsLocalCreationLocation(target)) {
       nodes.add(
         DiagnosticsBlock(
           name: 'The relevant error-causing widget was',
@@ -2881,15 +2885,22 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
 
 /// Returns if an object is user created.
 ///
+/// This always returns false if it is not called in debug mode.
+///
 /// {@macro widgets.inspector.trackCreation}
 ///
 /// Currently is local creation locations are only available for
 /// [Widget] and [Element].
-bool _isLocalCreationLocation(Object object) {
-  final _Location location = _getCreationLocation(object);
-  if (location == null)
-    return false;
-  return WidgetInspectorService.instance._isLocalCreationLocation(location);
+bool debugIsLocalCreationLocation(Object object) {
+  bool isLocal = false;
+  assert(() {
+    final _Location location = _getCreationLocation(object);
+    if (location == null)
+      isLocal =  false;
+    isLocal = WidgetInspectorService.instance._isLocalCreationLocation(location);
+    return true;
+  }());
+  return isLocal;
 }
 
 /// Returns the creation location of an object in String format if one is available.

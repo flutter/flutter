@@ -1,4 +1,13 @@
 {
+  "dialModeButtonLabel": "切換至鐘面挑選器模式",
+  "licensesPackageDetailTextOne": "1 個授權",
+  "timePickerDialHelpText": "選取時間",
+  "timePickerInputHelpText": "輸入時間",
+  "timePickerHourLabel": "時",
+  "timePickerMinuteLabel": "分",
+  "invalidTimeLabel": "請輸入有效的時間",
+  "licensesPackageDetailTextOther": "$licenseCount 個授權",
+  "inputTimeModeButtonLabel": "切換至文字輸入模式",
   "dateSeparator": "/",
   "dateInputLabel": "輸入日期",
   "calendarModeButtonLabel": "切換到日曆模式",

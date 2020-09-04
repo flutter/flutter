@@ -51,6 +51,9 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// rebuild this widget when the [offset] changes.
   ///
   /// The [offset] argument must not be null.
+  ///
+  /// The [cacheExtent] must be specified if the [cacheExtentStyle] is
+  /// not [CacheExtentStyle.pixel].
   Viewport({
     Key key,
     this.axisDirection = AxisDirection.down,
@@ -117,6 +120,10 @@ class Viewport extends MultiChildRenderObjectWidget {
   final Key center;
 
   /// {@macro flutter.rendering.viewport.cacheExtent}
+  ///
+  /// See also:
+  ///
+  ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
   final double cacheExtent;
 
   /// {@macro flutter.rendering.viewport.cacheExtentStyle}
@@ -124,7 +131,7 @@ class Viewport extends MultiChildRenderObjectWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// Given a [BuildContext] and an [AxisDirection], determine the correct cross

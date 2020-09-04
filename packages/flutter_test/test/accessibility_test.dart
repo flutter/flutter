@@ -583,9 +583,11 @@ void main() {
         theme: ThemeData.light(),
         home: Scaffold(
           backgroundColor: Colors.white,
-          body: RaisedButton(
-            color: const Color(0xFFFBBC04),
-            elevation: 0,
+          body: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: const Color(0xFFFBBC04),
+              elevation: 0,
+            ),
             onPressed: () {},
             child: const Text('Button', style: TextStyle(color: Colors.black)),
         ),

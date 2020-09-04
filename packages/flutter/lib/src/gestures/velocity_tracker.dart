@@ -192,8 +192,8 @@ class VelocityTracker {
       if (sample == null)
         break;
 
-      final double age = (newestSample.time - sample.time).inMilliseconds.toDouble();
-      final double delta = (sample.time - previousSample.time).inMilliseconds.abs().toDouble();
+      final double age = (newestSample.time - sample.time).inMicroseconds.toDouble() / 1000;
+      final double delta = (sample.time - previousSample.time).inMicroseconds.abs().toDouble() / 1000;
       previousSample = sample;
       if (age > _horizonMilliseconds || delta > _assumePointerMoveStoppedMilliseconds)
         break;
@@ -248,5 +248,112 @@ class VelocityTracker {
     if (estimate == null || estimate.pixelsPerSecond == Offset.zero)
       return Velocity.zero;
     return Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
+  }
+}
+
+/// A [VelocityTracker] subclass that provides a close approximation of iOS
+/// scroll view's velocity estimation strategy.
+///
+/// The estimated velocity reported by this class is a close approximation of
+/// the velocity an iOS scroll view would report with the same
+/// [PointerMoveEvent]s, when the touch that initiates a fling is released.
+///
+/// This class differs from the [VelocityTracker] class in that it uses weighted
+/// average of the latest few velocity samples of the tracked pointer, instead
+/// of doing a linear regression on a relatively large amount of data points, to
+/// estimate the velocity of the tracked pointer. Adding data points and
+/// estimating the velocity are both cheap.
+///
+/// To obtain a velocity, call [getVelocity] or [getVelocityEstimate]. The
+/// esimated velocity is typically used as the initial flinging velocity of a
+/// `Scrollable`, when its drag gesture ends.
+///
+/// See also:
+///
+/// * [scrollViewWillEndDragging(_:withVelocity:targetContentOffset:)](https://developer.apple.com/documentation/uikit/uiscrollviewdelegate/1619385-scrollviewwillenddragging),
+///   the iOS method that reports the fling velocity when the touch is released.
+class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
+  /// The velocity estimation uses at most 4 `_PointAtTime` samples. The extra
+  /// samples are there to make the `VelocityEstimate.offset` sufficiently large
+  /// to be recognized as a fling. See
+  /// `VerticalDragGestureRecognizer.isFlingGesture`.
+  static const int _sampleSize = 20;
+
+  final List<_PointAtTime?> _touchSamples = List<_PointAtTime?>.filled(_sampleSize, null, growable: false);
+
+  @override
+  void addPosition(Duration time, Offset position) {
+    assert(() {
+      final _PointAtTime? previousPoint = _touchSamples[_index];
+      if (previousPoint == null || previousPoint.time <= time)
+        return true;
+      throw FlutterError(
+        'The position being added ($position) has a smaller timestamp ($time)'
+        'than its predecessor: $previousPoint.'
+      );
+    }());
+    _index = (_index + 1) % _sampleSize;
+    _touchSamples[_index] = _PointAtTime(position, time);
+  }
+
+  // Computes the velocity using 2 adjacent points in history. When index = 0,
+  // it uses the latest point recorded and the point recorded immediately before
+  // it. The smaller index is, the ealier in history the points used are.
+  Offset _previousVelocityAt(int index) {
+    final int endIndex = (_index + index) % _sampleSize;
+    final int startIndex = (_index + index - 1) % _sampleSize;
+    final _PointAtTime? end = _touchSamples[endIndex];
+    final _PointAtTime? start = _touchSamples[startIndex];
+
+    if (end == null || start == null) {
+      return Offset.zero;
+    }
+
+    final int dt = (end.time - start.time).inMicroseconds;
+    assert(dt >= 0);
+
+    return dt > 0
+      // Convert dt to milliseconds to preserve floating point precision.
+      ? (end.point - start.point) * 1000 / (dt.toDouble() / 1000)
+      : Offset.zero;
+  }
+
+  @override
+  VelocityEstimate getVelocityEstimate() {
+    // The velocity estimated using this expression is an aproximation of the
+    // scroll velocity of an iOS scroll view at the moment the user touch was
+    // released, not the final velocity of the iOS pan gesture recognizer
+    // installed on the scroll view would report. Typically in an iOS scroll
+    // view the velocity values are different between the two, because the
+    // scroll view usually slows down when the touch is released.
+    final Offset estimatedVelocity = _previousVelocityAt(-2) * 0.6
+                                   + _previousVelocityAt(-1) * 0.35
+                                   + _previousVelocityAt(0) * 0.05;
+
+    final _PointAtTime? newestSample = _touchSamples[_index];
+    _PointAtTime? oldestNonNullSample;
+
+    for (int i = 1; i <= _sampleSize; i += 1) {
+      oldestNonNullSample = _touchSamples[(_index + i) % _sampleSize];
+      if (oldestNonNullSample != null)
+        break;
+    }
+
+    if (oldestNonNullSample == null || newestSample == null) {
+      assert(false, 'There must be at least 1 point in _touchSamples: $_touchSamples');
+      return const VelocityEstimate(
+        pixelsPerSecond: Offset.zero,
+        confidence: 0.0,
+        duration: Duration.zero,
+        offset: Offset.zero,
+      );
+    } else {
+      return VelocityEstimate(
+        pixelsPerSecond: estimatedVelocity,
+        confidence: 1.0,
+        duration: newestSample.time - oldestNonNullSample.time,
+        offset: newestSample.point - oldestNonNullSample.point,
+      );
+    }
   }
 }

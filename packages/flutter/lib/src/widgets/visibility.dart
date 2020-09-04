@@ -161,7 +161,7 @@ class Visibility extends StatelessWidget {
 
   /// Whether to maintain space for where the widget would have been.
   ///
-  /// To set this, [maintainAnimation] must also be set.
+  /// To set this, [maintainAnimation] and [maintainState] must also be set.
   ///
   /// Maintaining the size when the widget is not [visible] is not notably more
   /// expensive than just keeping animations running without maintaining the

@@ -40,6 +40,69 @@ class TestScrollController extends ScrollController {
 }
 
 void main() {
+  testWidgets('SingleChildScrollView overflow and clipRect test', (WidgetTester tester) async {
+    // the test widowSize is Size(800.0, 600.0)
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Container(height: 600.0,)
+        )
+      )
+    );
+
+    // 1st, check that the render object has received the default clip behavior.
+    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    // 2nd, height == widow.height test: check that the painting context does not call pushClipRect .
+    TestClipPaintingContext context = TestClipPaintingContext();
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.none));
+
+    // 3rd, height overflow test: check that the painting context call pushClipRect.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Container(height: 600.1,)
+        )
+      )
+    );
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.hardEdge));
+
+    // 4th, width == widow.width test: check that the painting context do not call pushClipRect.
+    context = TestClipPaintingContext();
+    expect(context.clipBehavior, equals(Clip.none)); // initial value
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Container(width: 800.0,)
+        )
+      )
+    );
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.none));
+
+    // 5th, width overflow test: check that the painting context call pushClipRect.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Container(width: 800.1,)
+        )
+      )
+    );
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.hardEdge));
+  });
+
   testWidgets('SingleChildScrollView respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(SingleChildScrollView(child: Container(height: 2000.0)));
 

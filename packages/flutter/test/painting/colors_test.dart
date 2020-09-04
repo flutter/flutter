@@ -7,6 +7,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 
 const double _doubleColorPrecision = 0.01;
 
@@ -25,11 +26,11 @@ void main() {
     expect(color.toColor(), const Color(0xb399816b));
 
     final HSVColor result = HSVColor.lerp(color, const HSVColor.fromAHSV(0.3, 128.0, 0.7, 0.2), 0.25);
-    expect(result.alpha, 0.6);
-    expect(result.hue, 53.0);
+    expect(result.alpha, moreOrLessEquals(0.6));
+    expect(result.hue, moreOrLessEquals(53.0));
     expect(result.saturation, greaterThan(0.3999));
     expect(result.saturation, lessThan(0.4001));
-    expect(result.value, 0.5);
+    expect(result.value, moreOrLessEquals(0.5));
   });
 
   test('HSVColor hue sweep test', () {
@@ -221,11 +222,11 @@ void main() {
     expect(color.toColor(), const Color(0xb3b8977a));
 
     final HSLColor result = HSLColor.lerp(color, const HSLColor.fromAHSL(0.3, 128.0, 0.7, 0.2), 0.25);
-    expect(result.alpha, 0.6);
-    expect(result.hue, 53.0);
+    expect(result.alpha, moreOrLessEquals(0.6));
+    expect(result.hue, moreOrLessEquals(53.0));
     expect(result.saturation, greaterThan(0.3999));
     expect(result.saturation, lessThan(0.4001));
-    expect(result.lightness, 0.5);
+    expect(result.lightness, moreOrLessEquals(0.5));
   });
 
   test('HSLColor hue sweep test', () {
@@ -439,5 +440,23 @@ void main() {
     property = ColorProperty('foo', null);
     final Map<String, Object> json = property.toJsonMap(const DiagnosticsSerializationDelegate());
     expect(json.containsKey('valueProperties'), isFalse);
+  });
+
+  test('MaterialColor swatch comparison', () {
+    const Map<int, MaterialColor> sampleMap = <int, MaterialColor>{
+      0: Colors.lightBlue,
+      1: Colors.deepOrange,
+      2: Colors.blueGrey,
+    };
+    const MaterialColor first = MaterialColor(0, sampleMap);
+    const MaterialColor second = MaterialColor(0, sampleMap);
+    const MaterialColor third = MaterialColor(
+        0, <int, MaterialColor>{
+          0: Colors.lightBlue,
+          1: Colors.deepOrange,
+          2: Colors.blueGrey,
+        });
+    expect(first == second, true);
+    expect(first == third, true);
   });
 }

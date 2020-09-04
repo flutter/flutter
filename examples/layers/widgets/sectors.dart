@@ -96,7 +96,7 @@ class SectorAppState extends State<SectorApp> {
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 25.0),
           child: Row(
             children: <Widget>[
-              RaisedButton(
+              ElevatedButton(
                 onPressed: _enabledAdd ? addSector : null,
                 child: IntrinsicWidth(
                   child: Row(
@@ -111,7 +111,7 @@ class SectorAppState extends State<SectorApp> {
                   ),
                 ),
               ),
-              RaisedButton(
+              ElevatedButton(
                 onPressed: _enabledRemove ? removeSector : null,
                 child: IntrinsicWidth(
                   child: Row(

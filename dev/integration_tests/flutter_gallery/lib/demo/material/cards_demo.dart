@@ -261,6 +261,7 @@ class TravelDestinationContent extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final TextStyle titleStyle = theme.textTheme.headline5.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.subtitle1;
+    final ButtonStyle textButtonStyle = TextButton.styleFrom(primary: Colors.amber.shade500);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,15 +327,15 @@ class TravelDestinationContent extends StatelessWidget {
           ButtonBar(
             alignment: MainAxisAlignment.start,
             children: <Widget>[
-              FlatButton(
+              TextButton(
+                style: textButtonStyle,
+                onPressed: () { print('pressed'); },
                 child: Text('SHARE', semanticsLabel: 'Share ${destination.title}'),
-                textColor: Colors.amber.shade500,
-                onPressed: () { print('pressed'); },
               ),
-              FlatButton(
-                child: Text('EXPLORE', semanticsLabel: 'Explore ${destination.title}'),
-                textColor: Colors.amber.shade500,
+              TextButton(
+                style: textButtonStyle,
                 onPressed: () { print('pressed'); },
+                child: Text('EXPLORE', semanticsLabel: 'Explore ${destination.title}'),
               ),
             ],
           ),

@@ -797,12 +797,12 @@ void main() {
     expect(listeners.length, 2);
 
     // Make sure the first listener can be called re-entrantly
-    listeners[1].onImage(null, null);
-    listeners[1].onImage(null, null);
+    listeners[1].onImage(null, false);
+    listeners[1].onImage(null, false);
 
     // Make sure the second listener can be called re-entrantly.
-    listeners[0].onImage(null, null);
-    listeners[0].onImage(null, null);
+    listeners[0].onImage(null, false);
+    listeners[0].onImage(null, false);
   });
 
   testWidgets('Precache completes with onError on error', (WidgetTester tester) async {

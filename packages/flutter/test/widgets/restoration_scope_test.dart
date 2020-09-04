@@ -323,45 +323,6 @@ void main() {
       expect(rawData[childrenMapKey]['fixed'], isEmpty);
       expect(rawData[childrenMapKey].containsKey('moving-child'), isTrue);
     });
-
-    testWidgets('decommission claims new bucket with data', (WidgetTester tester) async {
-      final MockRestorationManager manager = MockRestorationManager();
-      RestorationBucket root = RestorationBucket.root(manager: manager, rawData: <String, dynamic>{});
-
-      await tester.pumpWidget(
-        UnmanagedRestorationScope(
-          bucket: root,
-          child: const RestorationScope(
-            restorationId: 'child1',
-            child: BucketSpy(),
-          ),
-        ),
-      );
-      manager.doSerialization();
-      final BucketSpyState state = tester.state(find.byType(BucketSpy));
-      expect(state.bucket.restorationId, 'child1');
-      expect(state.bucket.read<int>('foo'), isNull); // Does not exist.
-      final RestorationBucket bucket = state.bucket;
-
-      // Replace root bucket.
-      root..decommission()..dispose();
-      root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
-
-      await tester.pumpWidget(
-        UnmanagedRestorationScope(
-          bucket: root,
-          child: const RestorationScope(
-            restorationId: 'child1',
-            child: BucketSpy(),
-          ),
-        ),
-      );
-
-      // Bucket has been replaced.
-      expect(state.bucket, isNot(same(bucket)));
-      expect(state.bucket.restorationId, 'child1');
-      expect(state.bucket.read<int>('foo'), 22);
-    });
   });
 }
 

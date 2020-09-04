@@ -134,7 +134,7 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The color of the entry mode [IconButton].
   ///
-  /// If this is null, the time picker defaults to
+  /// If this is null, the time picker defaults to:
   /// ```
   /// Theme.of(context).colorScheme.onSurface.withOpacity(
   ///   Theme.of(context).colorScheme.brightness == Brightness.dark ? 1.0 : 0.6,
@@ -204,8 +204,6 @@ class TimePickerThemeData with Diagnosticable {
     Color backgroundColor,
     Color hourMinuteTextColor,
     Color hourMinuteColor,
-    Color hourMinuteUnselectedTextColor,
-    Color hourMinuteUnselectedColor,
     Color dayPeriodTextColor,
     Color dayPeriodColor,
     Color dialHandColor,

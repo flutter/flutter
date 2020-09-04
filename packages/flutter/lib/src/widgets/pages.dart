@@ -175,9 +175,21 @@ class TransitionBuilderPage<T> extends Page<T> {
   final bool barrierDismissible;
 
   /// {@macro flutter.widgets.modalRoute.barrierColor}
+  ///
+  /// See also:
+  ///
+  ///  * [barrierDismissible], which controls the behavior of the barrier when
+  ///    tapped.
+  ///  * [ModalBarrier], the widget that implements this feature.
   final Color barrierColor;
 
   /// {@macro flutter.widgets.modalRoute.barrierLabel}
+  ///
+  /// See also:
+  ///
+  ///  * [barrierDismissible], which controls the behavior of the barrier when
+  ///    tapped.
+  ///  * [ModalBarrier], the widget that implements this feature.
   final String barrierLabel;
 
   /// {@macro flutter.widgets.modalRoute.maintainState}

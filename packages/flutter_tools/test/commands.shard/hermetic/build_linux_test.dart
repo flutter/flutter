@@ -14,6 +14,8 @@ import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -43,10 +45,12 @@ void main() {
 
   FileSystem fileSystem;
   ProcessManager processManager;
+  MockUsage usage;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     Cache.flutterRoot = _kTestFlutterRoot;
+    usage = MockUsage();
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -368,4 +372,45 @@ set(BINARY_NAME "fizz_bar")
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     Platform: () => linuxPlatform,
   });
+
+  testUsingContext('Performs code size analysis and sends analytics', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('release'),
+      ninjaCommand('release', onRun: () {
+        fileSystem.file('build/flutter_size_01/snapshot.linux-x64.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''[
+{
+  "l": "dart:_internal",
+  "c": "SubListIterable",
+  "n": "[Optimized] skip",
+  "s": 2400
 }
+          ]''');
+        fileSystem.file('build/flutter_size_01/trace.linux-x64.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{}');
+      }),
+    ]);
+
+    fileSystem.file('build/linux/release/bundle/libapp.so')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.filled(10000, 0));
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub', '--analyze-size']
+    );
+    expect(testLogger.statusText, contains('A summary of your Linux bundle analysis can be found at'));
+    verify(usage.sendEvent('code-size-analysis', 'linux')).called(1);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    Usage: () => usage,
+  });
+}
+
+class MockUsage extends Mock implements Usage {}

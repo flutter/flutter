@@ -185,10 +185,8 @@ class ColdRunner extends ResidentRunner {
   @override
   void printHelp({ @required bool details }) {
     globals.printStatus('Flutter run key commands.');
-    if (supportsServiceProtocol) {
-      if (details) {
-        printHelpDetails();
-      }
+    if (details) {
+      printHelpDetails();
     }
     commandHelp.h.print();
     if (_didAttach) {

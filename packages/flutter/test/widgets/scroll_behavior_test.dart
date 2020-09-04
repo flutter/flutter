@@ -4,9 +4,11 @@
 
 // @dart = 2.8
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+GestureVelocityTrackerBuilder lastCreatedBuilder;
 class TestScrollBehavior extends ScrollBehavior {
   const TestScrollBehavior(this.flag);
 
@@ -21,6 +23,14 @@ class TestScrollBehavior extends ScrollBehavior {
 
   @override
   bool shouldNotify(TestScrollBehavior old) => flag != old.flag;
+
+  @override
+  GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
+      lastCreatedBuilder = flag
+        ? (PointerEvent ev) => VelocityTracker()
+        : (PointerEvent ev) => IOSScrollViewFlingVelocityTracker();
+      return lastCreatedBuilder;
+  }
 }
 
 void main() {
@@ -50,6 +60,7 @@ void main() {
     expect(behavior, isNotNull);
     expect(behavior.flag, isTrue);
     expect(position.physics, isA<ClampingScrollPhysics>());
+    expect(lastCreatedBuilder(const PointerDownEvent()), isA<VelocityTracker>());
     ScrollMetrics metrics = position.copyWith();
     expect(metrics.extentAfter, equals(400.0));
     expect(metrics.viewportDimension, equals(600.0));
@@ -65,6 +76,7 @@ void main() {
     expect(behavior, isNotNull);
     expect(behavior.flag, isFalse);
     expect(position.physics, isA<BouncingScrollPhysics>());
+    expect(lastCreatedBuilder(const PointerDownEvent()), isA<IOSScrollViewFlingVelocityTracker>());
     // Regression test for https://github.com/flutter/flutter/issues/5856
     metrics = position.copyWith();
     expect(metrics.extentAfter, equals(400.0));

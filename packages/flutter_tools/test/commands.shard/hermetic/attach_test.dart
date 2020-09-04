@@ -342,6 +342,8 @@ void main() {
         '-v',
         '--device-user',
         '10',
+        '--device-timeout',
+        '15',
       ]);
       final VerificationResult verificationResult = verify(
         mockHotRunnerFactory.build(

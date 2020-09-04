@@ -10,7 +10,7 @@ import 'artifacts.dart';
 import 'base/bot_detector.dart';
 import 'base/config.dart';
 import 'base/context.dart';
-import 'base/error_handling_file_system.dart';
+import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -191,5 +191,5 @@ PlistParser get plistParser => context.get<PlistParser>() ?? (
 ));
 PlistParser _plistInstance;
 
-/// The global template renderer
+/// The global template renderer.
 TemplateRenderer get templateRenderer => context.get<TemplateRenderer>();

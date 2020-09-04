@@ -50,6 +50,20 @@ bool debugPrintGestureArenaDiagnostics = false;
 ///    arenas.
 bool debugPrintRecognizerCallbacksTrace = false;
 
+/// Whether to print the resampling margin to the console.
+///
+/// When this is set, in debug mode, any time resampling is triggered by the
+/// [GestureBinding] the resampling margin is dumped to the console. The
+/// resampling margin is the delta between the time of the last received
+/// touch event and the current sample time. Positive value indicates that
+/// resampling is effective and the resampling offset can potentially be
+/// reduced for improved latency. Negative value indicates that resampling
+/// is failing and resampling offset needs to be increased for smooth
+/// touch event processing.
+///
+/// This has no effect in release builds.
+bool debugPrintResamplingMargin = false;
+
 /// Returns true if none of the gestures library debug variables have been changed.
 ///
 /// This function is used by the test framework to ensure that debug variables
@@ -61,7 +75,8 @@ bool debugAssertAllGesturesVarsUnset(String reason) {
   assert(() {
     if (debugPrintHitTestResults ||
         debugPrintGestureArenaDiagnostics ||
-        debugPrintRecognizerCallbacksTrace)
+        debugPrintRecognizerCallbacksTrace ||
+        debugPrintResamplingMargin)
       throw FlutterError(reason);
     return true;
   }());

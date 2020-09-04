@@ -202,6 +202,7 @@ linter:
     - use_full_hex_values_for_flutter_colors
     # - use_function_type_syntax_for_parameters # not yet tested
     # - use_key_in_widget_constructors # not yet tested
+    - use_late_for_private_fields_and_variables
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested
     # - use_string_buffers # has false positives: https://github.com/dart-lang/sdk/issues/34182

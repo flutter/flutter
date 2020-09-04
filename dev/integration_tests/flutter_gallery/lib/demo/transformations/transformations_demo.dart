@@ -104,7 +104,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
         ],
       ),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
           child: const Text('OK'),
           onPressed: () {
             Navigator.of(context).pop();

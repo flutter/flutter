@@ -34,6 +34,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
+    usesAnalyzeSizeFlag();
     argParser.addMultiOption('target-platform',
         splitCommas: true,
         defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],

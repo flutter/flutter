@@ -9,7 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+
+import '../flutter_test_alternative.dart' show Fake;
 
 void main() {
   setUp(() => _GestureBindingSpy());
@@ -58,7 +59,7 @@ class _GestureBindingSpy extends AutomatedTestWidgetsFlutterBinding {
   PointerRouter get pointerRouter => _testPointerRouter;
 }
 
-class FakeEditableTextState extends TextSelectionDelegate with Mock { }
+class FakeEditableTextState extends TextSelectionDelegate with Fake { }
 
 class _PointerRouterSpy extends PointerRouter {
   int routeCount = 0;

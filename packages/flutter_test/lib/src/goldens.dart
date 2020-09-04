@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.10
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as _goldens;
 
@@ -82,7 +82,7 @@ abstract class GoldenFileComparator {
   ///
   /// Version numbers are used in golden file tests for package:flutter. You can
   /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
-  Uri getTestUri(Uri key, int version) {
+  Uri getTestUri(Uri key, int? version) {
     if (version == null)
       return key;
     final String keyString = key.toString();
@@ -130,7 +130,6 @@ abstract class GoldenFileComparator {
 GoldenFileComparator get goldenFileComparator => _goldenFileComparator;
 GoldenFileComparator _goldenFileComparator = const TrivialComparator._();
 set goldenFileComparator(GoldenFileComparator value) {
-  assert(value != null);
   _goldenFileComparator = value;
 }
 
@@ -194,7 +193,7 @@ abstract class WebGoldenComparator {
   ///
   /// Version numbers are used in golden file tests for package:flutter. You can
   /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
-  Uri getTestUri(Uri key, int version) {
+  Uri getTestUri(Uri key, int? version) {
     if (version == null)
       return key;
     final String keyString = key.toString();
@@ -239,7 +238,6 @@ abstract class WebGoldenComparator {
 WebGoldenComparator get webGoldenComparator => _webGoldenComparator;
 WebGoldenComparator _webGoldenComparator = const _TrivialWebGoldenComparator._();
 set webGoldenComparator(WebGoldenComparator value) {
-  assert(value != null);
   _webGoldenComparator = value;
 }
 
@@ -289,7 +287,7 @@ class TrivialComparator implements GoldenFileComparator {
   }
 
   @override
-  Uri getTestUri(Uri key, int version) {
+  Uri getTestUri(Uri key, int? version) {
     return key;
   }
 }
@@ -309,7 +307,7 @@ class _TrivialWebGoldenComparator implements WebGoldenComparator {
   }
 
   @override
-  Uri getTestUri(Uri key, int version) {
+  Uri getTestUri(Uri key, int? version) {
     return key;
   }
 }
@@ -322,10 +320,10 @@ class _TrivialWebGoldenComparator implements WebGoldenComparator {
 class ComparisonResult {
   /// Creates a new [ComparisonResult] for the current test.
   ComparisonResult({
-    @required this.passed,
+    required this.passed,
     this.error,
     this.diffs,
-  }) : assert(passed != null);
+  });
 
   /// Indicates whether or not a pixel comparison test has failed.
   ///
@@ -333,10 +331,10 @@ class ComparisonResult {
   final bool passed;
 
   /// Error message used to describe the cause of the pixel comparison failure.
-  final String error;
+  final String? error;
 
   /// Map containing differential images to illustrate found variants in pixel
   /// values in the execution of the pixel test.
   // TODO(jonahwilliams): fix type signature when image is updated to support web.
-  final Map<String, Object> diffs;
+  final Map<String, Object>? diffs;
 }

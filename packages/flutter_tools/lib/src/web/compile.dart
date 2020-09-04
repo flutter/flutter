@@ -28,6 +28,7 @@ Future<void> buildWeb(
   BuildInfo buildInfo,
   bool initializePlatform,
   bool csp,
+  String serviceWorkerStrategy,
 ) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
@@ -52,6 +53,8 @@ Future<void> buildWeb(
         kDartDefines: encodeDartDefines(buildInfo.dartDefines),
         kCspMode: csp.toString(),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
+        if (serviceWorkerStrategy != null)
+         kServiceWorkerStrategy: serviceWorkerStrategy,
         if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false)
           kExtraFrontEndOptions: encodeDartDefines(buildInfo.extraFrontEndOptions),
       },

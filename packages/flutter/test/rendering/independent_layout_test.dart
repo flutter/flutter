@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:ui' as ui show window;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../flutter_test_alternative.dart';
@@ -46,7 +48,7 @@ void main() {
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    final RenderView renderView = RenderView(configuration: testConfiguration, window: null);
+    final RenderView renderView = RenderView(configuration: testConfiguration, window: ui.window);
     final PipelineOwner pipelineOwner = PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
@@ -76,7 +78,7 @@ void main() {
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    final RenderView renderView = RenderView(configuration: testConfiguration, window: null);
+    final RenderView renderView = RenderView(configuration: testConfiguration, window: ui.window);
     final PipelineOwner pipelineOwner = PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;

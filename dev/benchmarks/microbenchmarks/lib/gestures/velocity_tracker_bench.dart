@@ -9,28 +9,43 @@ import 'data/velocity_tracker_data.dart';
 
 const int _kNumIters = 10000;
 
+class TrackerBenchmark {
+  TrackerBenchmark({ this.name, this.tracker });
+
+  final VelocityTracker tracker;
+  final String name;
+}
+
 void main() {
   assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
-  final VelocityTracker tracker = VelocityTracker();
-  final Stopwatch watch = Stopwatch();
-  print('Velocity tracker benchmark...');
-  watch.start();
-  for (int i = 0; i < _kNumIters; i += 1) {
-    for (final PointerEvent event in velocityEventData) {
-      if (event is PointerDownEvent || event is PointerMoveEvent)
-        tracker.addPosition(event.timeStamp, event.position);
-      if (event is PointerUpEvent)
-        tracker.getVelocity();
-    }
-  }
-  watch.stop();
-
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
-  printer.addResult(
-    description: 'Velocity tracker',
-    value: watch.elapsedMicroseconds / _kNumIters,
-    unit: 'µs per iteration',
-    name: 'velocity_tracker_iteration',
-  );
+  final List<TrackerBenchmark> benchmarks = <TrackerBenchmark>[
+    TrackerBenchmark(name: 'velocity_tracker_iteration', tracker: VelocityTracker()),
+    TrackerBenchmark(name: 'velocity_tracker_iteration_ios_fling', tracker: IOSScrollViewFlingVelocityTracker()),
+  ];
+  final Stopwatch watch = Stopwatch();
+
+  for (final TrackerBenchmark benchmark in benchmarks) {
+    print('${benchmark.name} benchmark...');
+    final VelocityTracker tracker = benchmark.tracker;
+    watch.reset();
+    watch.start();
+    for (int i = 0; i < _kNumIters; i += 1) {
+      for (final PointerEvent event in velocityEventData) {
+        if (event is PointerDownEvent || event is PointerMoveEvent)
+          tracker.addPosition(event.timeStamp, event.position);
+        if (event is PointerUpEvent)
+          tracker.getVelocity();
+      }
+    }
+    watch.stop();
+    printer.addResult(
+      description: 'Velocity tracker: ${tracker.runtimeType}',
+      value: watch.elapsedMicroseconds / _kNumIters,
+      unit: 'µs per iteration',
+      name: benchmark.name,
+    );
+  }
+
   printer.printToStdout();
 }

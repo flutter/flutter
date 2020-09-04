@@ -7,6 +7,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
+
 void main() {
   testWidgets('FlexibleSpaceBar centers title on iOS', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -117,6 +119,248 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(clipRect.size.height, minExtent);
+  });
+
+  testWidgets('Collpased FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const double expandedHeight = 200;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              const SliverAppBar(
+                pinned: true,
+                expandedHeight: expandedHeight,
+                title: Text('Title'),
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Text('Expanded title'),
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  <Widget>[
+                    for (int i = 0; i < 50; i++)
+                      Container(
+                        height: 200,
+                        child: Center(child: Text('Item $i')),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 1,
+          rect: TestSemantics.fullScreen,
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 2,
+              rect: TestSemantics.fullScreen,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 3,
+                  rect: TestSemantics.fullScreen,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 4,
+                      rect: TestSemantics.fullScreen,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 9,
+                          rect: const Rect.fromLTRB(0.0, 0.0, 800.0, expandedHeight),
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 11,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 20.0),
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isHeader,
+                                SemanticsFlag.namesRoute
+                              ],
+                              label: 'Title',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 10,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, expandedHeight),
+                              label: 'Expanded title',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                        TestSemantics(
+                          id: 12,
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          rect: TestSemantics.fullScreen,
+                          actions: <SemanticsAction>[SemanticsAction.scrollUp],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                              label: 'Item 0',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 6,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                              label: 'Item 1',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 7,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'Item 2',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 8,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0),
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'Item 3',
+                              textDirection: TextDirection.ltr,
+                            ),
+
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true));
+
+    // We drag up to fully collapse the space bar.
+    await tester.drag(find.text('Item 1'), const Offset(0, -600.0));
+    await tester.pumpAndSettle();
+
+    expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 1,
+          rect: TestSemantics.fullScreen,
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 2,
+              rect: TestSemantics.fullScreen,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 3,
+                  rect: TestSemantics.fullScreen,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 4,
+                      rect: TestSemantics.fullScreen,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 9,
+                          // The app bar is collapsed.
+                          rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0),
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 11,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 20.0),
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isHeader,
+                                SemanticsFlag.namesRoute
+                              ],
+                              label: 'Title',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            // The flexible space bar still persists in the
+                            // semantic tree even if it is collapsed.
+                            TestSemantics(
+                              id: 10,
+                              rect: const Rect.fromLTRB(0.0, 36.0, 800.0, 92.0),
+                              label: 'Expanded title',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                        TestSemantics(
+                          id: 12,
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          rect: TestSemantics.fullScreen,
+                          actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              rect: const Rect.fromLTRB(0.0, 150.0, 800.0, 200.0),
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'Item 0',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 6,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'Item 1',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 7,
+                              rect: const Rect.fromLTRB(0.0, 56.0, 800.0, 200.0),
+                              label: 'Item 2',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 8,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                              label: 'Item 3',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 13,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                              label: 'Item 4',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 14,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'Item 5',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 15,
+                              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0),
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'Item 6',
+                              textDirection: TextDirection.ltr,
+                            ),
+
+
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true));
+
+    semantics.dispose();
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/14227

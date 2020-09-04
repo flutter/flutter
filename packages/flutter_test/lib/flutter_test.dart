@@ -54,6 +54,7 @@ export 'src/binding.dart';
 export 'src/controller.dart';
 export 'src/event_simulation.dart';
 export 'src/finders.dart';
+export 'src/frame_timing_summarizer.dart';
 export 'src/goldens.dart';
 export 'src/matchers.dart';
 export 'src/nonconst.dart';

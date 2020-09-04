@@ -107,6 +107,7 @@ void main() {
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
       packagesPath: 'foo/.packages',
+      codeSizeDirectory: 'foo/code-size',
     );
 
     expect(buildInfo.toEnvironmentConfig(), <String, String>{
@@ -119,6 +120,7 @@ void main() {
       'EXTRA_GEN_SNAPSHOT_OPTIONS': '--enable-experiment%3Dnon-nullable,fizz',
       'BUNDLE_SKSL_PATH': 'foo/bar/baz.sksl.json',
       'PACKAGE_CONFIG': 'foo/.packages',
+      'CODE_SIZE_DIRECTORY': 'foo/code-size',
     });
   });
 

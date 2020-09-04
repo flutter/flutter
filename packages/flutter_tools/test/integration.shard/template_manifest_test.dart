@@ -8,7 +8,7 @@ import 'package:path/path.dart' as path; // ignore: package_path_import
 import 'package:flutter_tools/src/convert.dart';
 import '../src/common.dart';
 
-/// Checks that all active template files are defined in the template_manifest.json
+/// Checks that all active template files are defined in the template_manifest.json file.
 void main() {
   test('Check template manifest is up to date', () {
     final Map<String, Object> manifest = json.decode(

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.10
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
@@ -61,15 +62,15 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   /// directory in which [testFile] resides.
   ///
   /// The [testFile] URL must represent a file.
-  LocalFileComparator(Uri testFile, {path.Style pathStyle})
+  LocalFileComparator(Uri testFile, {path.Style? pathStyle})
     : basedir = _getBasedir(testFile, pathStyle),
       _path = _getPath(pathStyle);
 
-  static path.Context _getPath(path.Style style) {
+  static path.Context _getPath(path.Style? style) {
     return path.Context(style: style ?? path.Style.platform);
   }
 
-  static Uri _getBasedir(Uri testFile, path.Style pathStyle) {
+  static Uri _getBasedir(Uri testFile, path.Style? pathStyle) {
     final path.Context context = _getPath(pathStyle);
     final String testFilePath = context.fromUri(testFile);
     final String testDirectoryPath = context.dirname(testFilePath);
@@ -135,7 +136,7 @@ class LocalComparisonOutput {
     if (result.diffs != null) {
       additionalFeedback = '\nFailure feedback can be found at '
         '${path.join(basedir.path, 'failures')}';
-      final Map<String, Image> diffs = result.diffs.cast<String, Image>();
+      final Map<String, Image> diffs = result.diffs!.cast<String, Image>();
       for (final MapEntry<String, Image> entry in diffs.entries) {
         final File output = getFailureFile(
           key.isEmpty ? entry.key : entry.key + '_' + key,
@@ -143,9 +144,9 @@ class LocalComparisonOutput {
           basedir,
         );
         output.parent.createSync(recursive: true);
-        final ByteData pngBytes =
+        final ByteData? pngBytes =
             await entry.value.toByteData(format: ImageByteFormat.png);
-        output.writeAsBytesSync(pngBytes.buffer.asUint8List());
+        output.writeAsBytesSync(pngBytes!.buffer.asUint8List());
       }
     }
     throw test_package.TestFailure(
@@ -169,7 +170,7 @@ class LocalComparisonOutput {
 
 /// Returns a [ComparisonResult] to describe the pixel differential of the
 /// [test] and [master] image bytes provided.
-Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
+Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async {
   if (identical(test, master))
     return ComparisonResult(passed: true);
 
@@ -183,15 +184,12 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
   final Codec testImageCodec =
       await instantiateImageCodec(Uint8List.fromList(test));
   final Image testImage = (await testImageCodec.getNextFrame()).image;
-  final ByteData testImageRgba = await testImage.toByteData();
+  final ByteData? testImageRgba = await testImage.toByteData();
 
   final Codec masterImageCodec =
       await instantiateImageCodec(Uint8List.fromList(master));
   final Image masterImage = (await masterImageCodec.getNextFrame()).image;
-  final ByteData masterImageRgba = await masterImage.toByteData();
-
-  assert(testImage != null);
-  assert(masterImage != null);
+  final ByteData? masterImageRgba = await masterImage.toByteData();
 
   final int width = testImage.width;
   final int height = testImage.height;
@@ -207,10 +205,10 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
 
   int pixelDiffCount = 0;
   final int totalPixels = width * height;
-  final ByteData invertedMasterRgba = _invert(masterImageRgba);
-  final ByteData invertedTestRgba = _invert(testImageRgba);
+  final ByteData invertedMasterRgba = _invert(masterImageRgba!);
+  final ByteData invertedTestRgba = _invert(testImageRgba!);
 
-  final Uint8List testImageBytes = (await testImage.toByteData()).buffer.asUint8List();
+  final Uint8List testImageBytes = (await testImage.toByteData())!.buffer.asUint8List();
   final ByteData maskedDiffRgba = ByteData(testImageBytes.length);
   maskedDiffRgba.buffer.asUint8List().setRange(0, testImageBytes.length, testImageBytes);
   final ByteData isolatedDiffRgba = ByteData(width * height * 4);

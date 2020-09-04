@@ -251,6 +251,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///  * [Border], which has a sample which uses [Container] heavily.
 ///  * [Ink], which paints a [Decoration] on a [Material], allowing
 ///    [InkResponse] and [InkWell] splashes to paint over them.
+///  * Cookbook: [Animate the properties of a container](https://flutter.dev/docs/cookbook/animation/animated-container)
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
@@ -396,6 +397,17 @@ class Container extends StatelessWidget {
     if (color != null)
       current = ColoredBox(color: color, child: current);
 
+    if (clipBehavior != Clip.none) {
+      current = ClipPath(
+        clipper: _DecorationClipper(
+          textDirection: Directionality.of(context),
+          decoration: decoration
+        ),
+        clipBehavior: clipBehavior,
+        child: current,
+      );
+    }
+
     if (decoration != null)
       current = DecoratedBox(decoration: decoration, child: current);
 
@@ -415,17 +427,6 @@ class Container extends StatelessWidget {
 
     if (transform != null)
       current = Transform(transform: transform, child: current);
-
-    if (clipBehavior != Clip.none) {
-      current = ClipPath(
-        clipper: _DecorationClipper(
-          textDirection: Directionality.of(context),
-          decoration: decoration
-        ),
-        clipBehavior: clipBehavior,
-        child: current,
-      );
-    }
 
     return current;
   }

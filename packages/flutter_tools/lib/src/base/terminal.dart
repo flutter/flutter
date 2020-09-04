@@ -285,6 +285,7 @@ class AnsiTerminal implements Terminal {
         if (displayAcceptedCharacters) {
           logger.printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
         }
+        // prompt ends with ': '
         logger.printStatus(': ', emphasis: true, newline: false);
       }
       choice = await keystrokes.first;

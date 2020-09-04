@@ -16,6 +16,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   InstallCommand() {
     requiresPubspecYaml();
     usesDeviceUserOption();
+    usesDeviceTimeoutOption();
     argParser.addFlag('uninstall-only',
       negatable: true,
       defaultsTo: false,

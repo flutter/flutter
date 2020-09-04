@@ -60,24 +60,24 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
           ),
           if (lastTestStatus != _LastTestStatus.pending) _statusWidget(),
           if (viewChannel != null) ... <Widget>[
-            RaisedButton(
+            ElevatedButton(
               key: const ValueKey<String>('ShowAlertDialog'),
               child: const Text('SHOW ALERT DIALOG'),
               onPressed: onShowAlertDialogPressed,
             ),
-            RaisedButton(
+            ElevatedButton(
               key: const ValueKey<String>('TogglePlatformView'),
               child: const Text('TOGGLE PLATFORM VIEW'),
               onPressed: onTogglePlatformView,
             ),
             Row(
               children: <Widget>[
-                RaisedButton(
+                ElevatedButton(
                   key: const ValueKey<String>('AddChildView'),
                   child: const Text('ADD CHILD VIEW'),
                   onPressed: onChildViewPressed,
                 ),
-                RaisedButton(
+                ElevatedButton(
                   key: const ValueKey<String>('TapChildView'),
                   child: const Text('TAP CHILD VIEW'),
                   onPressed: onTapChildViewPressed,

@@ -11,15 +11,51 @@ import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/utils.dart';
 
-TaskFunction createGalleryTransitionTest({ bool semanticsEnabled = false }) {
+TaskFunction createGalleryTransitionTest({bool semanticsEnabled = false}) {
   return GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
+}
+
+TaskFunction createGalleryTransitionE2ETest({bool semanticsEnabled = false}) {
+  return GalleryTransitionTest(
+    testFile: semanticsEnabled
+        ? 'transitions_perf_e2e_with_semantics'
+        : 'transitions_perf_e2e',
+    needFullTimeline: false,
+    timelineSummaryFile: 'e2e_perf_summary',
+    transitionDurationFile: null,
+    timelineTraceFile: null,
+    driverFile: 'transitions_perf_e2e_test',
+  );
+}
+
+TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) {
+  return GalleryTransitionTest(
+    semanticsEnabled: semanticsEnabled,
+    driverFile: semanticsEnabled
+        ? 'transitions_perf_hybrid_with_semantics_test'
+        : 'transitions_perf_hybrid_test',
+  );
 }
 
 class GalleryTransitionTest {
 
-  GalleryTransitionTest({ this.semanticsEnabled = false });
+  GalleryTransitionTest({
+    this.semanticsEnabled = false,
+    this.testFile = 'transitions_perf',
+    this.needFullTimeline = true,
+    this.timelineSummaryFile = 'transitions.timeline_summary',
+    this.timelineTraceFile = 'transitions.timeline',
+    this.transitionDurationFile = 'transition_durations.timeline',
+    this.driverFile,
+  });
 
   final bool semanticsEnabled;
+  final bool needFullTimeline;
+  final String testFile;
+  final String timelineSummaryFile;
+  final String timelineTraceFile;
+  final String transitionDurationFile;
+  final String driverFile;
 
   Future<TaskResult> call() async {
     final Device device = await devices.workingDevice;
@@ -30,51 +66,60 @@ class GalleryTransitionTest {
     await inDirectory<void>(galleryDirectory, () async {
       await flutter('packages', options: <String>['get']);
 
-      final String testDriver = semanticsEnabled
-          ? 'transitions_perf_with_semantics.dart'
-          : 'transitions_perf.dart';
+      final String testDriver = driverFile ?? (semanticsEnabled
+          ? '${testFile}_with_semantics_test'
+          : '${testFile}_test');
 
       await flutter('drive', options: <String>[
         '--profile',
-        '--trace-startup',
+        if (needFullTimeline)
+          '--trace-startup',
         '-t',
-        'test_driver/$testDriver',
+        'test_driver/$testFile.dart',
+        '--driver',
+        'test_driver/$testDriver.dart',
         '-d',
         deviceId,
       ]);
     });
 
-    // Route paths contains slashes, which Firebase doesn't accept in keys, so we
-    // remove them.
-    final Map<String, dynamic> original = json.decode(
-      file('${galleryDirectory.path}/build/transition_durations.timeline.json').readAsStringSync(),
-    ) as Map<String, dynamic>;
-    final Map<String, List<int>> transitions = <String, List<int>>{};
-    for (final String key in original.keys) {
-      transitions[key.replaceAll('/', '')] = List<int>.from(original[key] as List<dynamic>);
-    }
-
     final Map<String, dynamic> summary = json.decode(
-      file('${galleryDirectory.path}/build/transitions.timeline_summary.json').readAsStringSync(),
+      file('${galleryDirectory.path}/build/$timelineSummaryFile.json').readAsStringSync(),
     ) as Map<String, dynamic>;
 
-    final Map<String, dynamic> data = <String, dynamic>{
-      'transitions': transitions,
-      'missed_transition_count': _countMissedTransitions(transitions),
-      ...summary,
-    };
+    if (transitionDurationFile != null) {
+      final Map<String, dynamic> original = json.decode(
+        file('${galleryDirectory.path}/build/$transitionDurationFile.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+      final Map<String, List<int>> transitions = <String, List<int>>{};
+      for (final String key in original.keys) {
+        transitions[key] = List<int>.from(original[key] as List<dynamic>);
+      }
+      summary['transitions'] = transitions;
+      summary['missed_transition_count'] = _countMissedTransitions(transitions);
+    }
+    final List<String> detailFiles = <String>[
+      if (transitionDurationFile != null)
+        '${galleryDirectory.path}/build/$transitionDurationFile.json',
+      if (timelineTraceFile != null)
+        '${galleryDirectory.path}/build/$timelineTraceFile.json'
+    ];
 
-    return TaskResult.success(data, benchmarkScoreKeys: <String>[
-      'missed_transition_count',
-      'average_frame_build_time_millis',
-      'worst_frame_build_time_millis',
-      '90th_percentile_frame_build_time_millis',
-      '99th_percentile_frame_build_time_millis',
-      'average_frame_rasterizer_time_millis',
-      'worst_frame_rasterizer_time_millis',
-      '90th_percentile_frame_rasterizer_time_millis',
-      '99th_percentile_frame_rasterizer_time_millis',
-    ]);
+    return TaskResult.success(summary,
+      detailFiles: detailFiles.isNotEmpty ? detailFiles : null,
+      benchmarkScoreKeys: <String>[
+        if (transitionDurationFile != null)
+          'missed_transition_count',
+        'average_frame_build_time_millis',
+        'worst_frame_build_time_millis',
+        '90th_percentile_frame_build_time_millis',
+        '99th_percentile_frame_build_time_millis',
+        'average_frame_rasterizer_time_millis',
+        'worst_frame_rasterizer_time_millis',
+        '90th_percentile_frame_rasterizer_time_millis',
+        '99th_percentile_frame_rasterizer_time_millis',
+      ],
+    );
   }
 }
 

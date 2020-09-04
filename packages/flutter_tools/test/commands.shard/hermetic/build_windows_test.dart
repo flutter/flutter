@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -43,6 +44,7 @@ void main() {
 
   ProcessManager processManager;
   MockVisualStudio mockVisualStudio;
+  MockUsage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -52,6 +54,7 @@ void main() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
     mockVisualStudio = MockVisualStudio();
+    usage = MockUsage();
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -239,6 +242,63 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
+  testUsingContext('Windows build extracts errors from stdout', () async {
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = mockVisualStudio;
+    applyMocksToCommand(command);
+    setUpMockProjectFilesForBuild();
+    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
+
+    // This contains a mix of routine build output and various types of errors
+    // (compile error, link error, warning treated as an error) from MSBuild,
+    // edited down for compactness. For instance, where similar lines are
+    // repeated in actual output, one or two representative lines are chosen
+    // to be included here.
+    const String stdout = r'''Microsoft (R) Build Engine version 16.6.0+5ff7b0c9e for .NET Framework
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+  Checking Build System
+  Generating C:/foo/windows/flutter/ephemeral/flutter_windows.dll, [etc], _phony_
+  Building Custom Rule C:/foo/windows/flutter/CMakeLists.txt
+  standard_codec.cc
+  Generating Code...
+  flutter_wrapper_plugin.vcxproj -> C:\foo\build\windows\flutter\Debug\flutter_wrapper_plugin.lib
+C:\foo\windows\runner\main.cpp(18): error C2220: the following warning is treated as an error [C:\foo\build\windows\runner\test.vcxproj]
+C:\foo\windows\runner\main.cpp(18): warning C4706: assignment within conditional expression [C:\foo\build\windows\runner\test.vcxproj]
+main.obj : error LNK2019: unresolved external symbol "void __cdecl Bar(void)" (?Bar@@YAXXZ) referenced in function wWinMain [C:\foo\build\windows\runner\test.vcxproj]
+C:\foo\build\windows\runner\Debug\test.exe : fatal error LNK1120: 1 unresolved externals [C:\foo\build\windows\runner\test.vcxproj]
+  Building Custom Rule C:/foo/windows/runner/CMakeLists.txt
+  flutter_window.cpp
+  main.cpp
+C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier [C:\foo\build\windows\runner\test.vcxproj]
+  -- Install configuration: "Debug"
+  -- Installing: C:/foo/build/windows/runner/Debug/data/icudtl.dat
+''';
+
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release',
+        stdout: stdout,
+      ),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--no-pub']
+    );
+    // Just the warnings and errors should be surfaced.
+    expect(testLogger.errorText, r'''C:\foo\windows\runner\main.cpp(18): error C2220: the following warning is treated as an error [C:\foo\build\windows\runner\test.vcxproj]
+C:\foo\windows\runner\main.cpp(18): warning C4706: assignment within conditional expression [C:\foo\build\windows\runner\test.vcxproj]
+main.obj : error LNK2019: unresolved external symbol "void __cdecl Bar(void)" (?Bar@@YAXXZ) referenced in function wWinMain [C:\foo\build\windows\runner\test.vcxproj]
+C:\foo\build\windows\runner\Debug\test.exe : fatal error LNK1120: 1 unresolved externals [C:\foo\build\windows\runner\test.vcxproj]
+C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier [C:\foo\build\windows\runner\test.vcxproj]
+''');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => windowsPlatform,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
   testUsingContext('Windows verbose build sets VERBOSE_SCRIPT_LOGGING', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = mockVisualStudio;
@@ -365,8 +425,54 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     Platform: () => windowsPlatform,
   });
+
+  testUsingContext('Performs code size analysis and sends analytics', () async {
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = mockVisualStudio;
+    applyMocksToCommand(command);
+    setUpMockProjectFilesForBuild();
+    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
+
+    fileSystem.file(r'build\windows\runner\Release\app.so')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
+
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release', onRun: () {
+        fileSystem.file(r'build\flutter_size_01\snapshot.windows-x64.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''[
+{
+  "l": "dart:_internal",
+  "c": "SubListIterable",
+  "n": "[Optimized] skip",
+  "s": 2400
+}
+          ]''');
+        fileSystem.file(r'build\flutter_size_01\trace.windows-x64.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{}');
+      }),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--no-pub', '--analyze-size']
+    );
+
+    expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
+    verify(usage.sendEvent('code-size-analysis', 'windows')).called(1);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => windowsPlatform,
+    FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
+    Usage: () => usage,
+  });
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockVisualStudio extends Mock implements VisualStudio {}
+class MockUsage extends Mock implements Usage {}

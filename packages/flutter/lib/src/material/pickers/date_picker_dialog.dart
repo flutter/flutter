@@ -9,8 +9,6 @@ import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../button_bar.dart';
-import '../button_theme.dart';
 import '../color_scheme.dart';
 import '../debug.dart';
 import '../dialog.dart';
@@ -383,19 +381,23 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       ? textTheme.headline5?.copyWith(color: dateColor)
       : textTheme.headline4?.copyWith(color: dateColor);
 
-    final Widget actions = ButtonBar(
-      buttonTextTheme: ButtonTextTheme.primary,
-      layoutBehavior: ButtonBarLayoutBehavior.constrained,
-      children: <Widget>[
-        TextButton(
-          child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
-          onPressed: _handleCancel,
-        ),
-        TextButton(
-          child: Text(widget.confirmText ?? localizations.okButtonLabel),
-          onPressed: _handleOk,
-        ),
-      ],
+    final Widget actions = Container(
+      alignment: AlignmentDirectional.centerEnd,
+      constraints: const BoxConstraints(minHeight: 52.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: OverflowBar(
+        spacing: 8,
+        children: <Widget>[
+          TextButton(
+            child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
+            onPressed: _handleCancel,
+          ),
+          TextButton(
+            child: Text(widget.confirmText ?? localizations.okButtonLabel),
+            onPressed: _handleOk,
+          ),
+        ],
+      ),
     );
 
     Widget picker;

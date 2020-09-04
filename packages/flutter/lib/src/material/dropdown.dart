@@ -1468,6 +1468,11 @@ class DropdownButtonFormField<T> extends FormField<T> {
     InputDecoration decoration,
     FormFieldSetter<T> onSaved,
     FormFieldValidator<T> validator,
+    @Deprecated(
+      'Use autoValidateMode parameter which provide more specific '
+      'behaviour related to auto validation. '
+      'This feature was deprecated after v1.19.0.'
+    )
     bool autovalidate = false,
     AutovalidateMode autovalidateMode,
   }) : assert(items == null || items.isEmpty || value == null ||

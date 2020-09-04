@@ -122,9 +122,11 @@ bool Win32Window::CreateAndShow(const std::wstring& title,
       Scale(size.width, scale_factor), Scale(size.height, scale_factor),
       nullptr, nullptr, GetModuleHandle(nullptr), this);
 
-  OnCreate();
+  if (!window) {
+    return false;
+  }
 
-  return window != nullptr;
+  return OnCreate();
 }
 
 // static
@@ -152,13 +154,6 @@ Win32Window::MessageHandler(HWND hwnd,
                             UINT const message,
                             WPARAM const wparam,
                             LPARAM const lparam) noexcept {
-  auto window =
-      reinterpret_cast<Win32Window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
-
-  if (window == nullptr) {
-    return 0;
-  }
-
   switch (message) {
     case WM_DESTROY:
       window_handle_ = nullptr;
@@ -179,8 +174,7 @@ Win32Window::MessageHandler(HWND hwnd,
       return 0;
     }
     case WM_SIZE:
-      RECT rect;
-      GetClientRect(hwnd, &rect);
+      RECT rect = GetClientArea();
       if (child_content_ != nullptr) {
         // Size and position the child window.
         MoveWindow(child_content_, rect.left, rect.top, rect.right - rect.left,
@@ -223,13 +217,18 @@ Win32Window* Win32Window::GetThisFromHandle(HWND const window) noexcept {
 void Win32Window::SetChildContent(HWND content) {
   child_content_ = content;
   SetParent(content, window_handle_);
-  RECT frame;
-  GetClientRect(window_handle_, &frame);
+  RECT frame = GetClientArea();
 
   MoveWindow(content, frame.left, frame.top, frame.right - frame.left,
              frame.bottom - frame.top, true);
 
   SetFocus(child_content_);
+}
+
+RECT Win32Window::GetClientArea() {
+  RECT frame;
+  GetClientRect(window_handle_, &frame);
+  return frame;
 }
 
 HWND Win32Window::GetHandle() {
@@ -240,8 +239,9 @@ void Win32Window::SetQuitOnClose(bool quit_on_close) {
   quit_on_close_ = quit_on_close;
 }
 
-void Win32Window::OnCreate() {
+bool Win32Window::OnCreate() {
   // No-op; provided for subclasses.
+  return true;
 }
 
 void Win32Window::OnDestroy() {

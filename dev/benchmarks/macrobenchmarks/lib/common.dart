@@ -8,6 +8,7 @@ const String kBackdropFilterRouteName = '/backdrop_filter';
 const String kPostBackdropFilterRouteName = '/post_backdrop_filter';
 const String kSimpleAnimationRouteName = '/simple_animation';
 const String kPictureCacheRouteName = '/picture_cache';
+const String kLargeImageChangerRouteName = '/large_image_changer';
 const String kLargeImagesRouteName = '/large_images';
 const String kTextRouteName = '/text';
 const String kAnimatedPlaceholderRouteName = '/animated_placeholder';
