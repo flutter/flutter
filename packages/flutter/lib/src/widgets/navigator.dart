@@ -3962,7 +3962,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// Searches for a route with the given [name] and returns it if found, otherwise
   /// returns null.
   ///
-  /// {@macro flutter.widgets.navigator.getNamedRoute}
+  /// {@macro flutter.widgets.navigator.retrieveNamedRoute}
   Route<dynamic> retrieveNamedRoute(String name) {
     assert(name != null);
     assert(!_debugLocked);
