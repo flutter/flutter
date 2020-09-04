@@ -530,7 +530,7 @@ class LocalizationsGenerator {
     String templateArbFileName,
     String outputFileString,
     String classNameString,
-    String preferredSupportedLocaleString,
+    List<String> preferredSupportedLocale,
     String headerString,
     String headerFile,
     bool useDeferredLoading = false,
@@ -546,7 +546,7 @@ class LocalizationsGenerator {
     );
     setTemplateArbFile(templateArbFileName);
     setBaseOutputFile(outputFileString);
-    setPreferredSupportedLocales(preferredSupportedLocaleString);
+    setPreferredSupportedLocales(preferredSupportedLocale);
     _setHeader(headerString, headerFile);
     _setUseDeferredLoading(useDeferredLoading);
     className = classNameString;
@@ -707,18 +707,12 @@ class LocalizationsGenerator {
   /// Sets [preferredSupportedLocales] so that this particular list of locales
   /// will take priority over the other locales.
   @visibleForTesting
-  void setPreferredSupportedLocales(String inputLocales) {
-    if (inputLocales == null || inputLocales.trim().isEmpty) {
+  void setPreferredSupportedLocales(List<String> inputLocales) {
+    if (inputLocales == null || inputLocales.isEmpty) {
       _preferredSupportedLocales = const <LocaleInfo>[];
     } else {
-      final List<dynamic> preferredLocalesStringList = json.decode(inputLocales) as List<dynamic>;
-      _preferredSupportedLocales = preferredLocalesStringList.map((dynamic localeString) {
-        if (localeString.runtimeType != String) {
-          throw L10nException('Incorrect runtime type for $localeString');
-        }
-        return LocaleInfo.fromString(
-          localeString.toString(),
-        );
+      _preferredSupportedLocales = inputLocales.map((String localeString) {
+        return LocaleInfo.fromString(localeString);
       }).toList();
     }
   }

@@ -56,7 +56,7 @@ void generateLocalizations({
         templateArbFileName: templateArbFileName,
         outputFileString: outputFileString,
         classNameString: options.outputClass ?? 'AppLocalizations',
-        preferredSupportedLocaleString: options.preferredSupportedLocales,
+        preferredSupportedLocale: options.preferredSupportedLocales,
         headerString: options.header,
         headerFile: options?.headerFile?.toFilePath(),
         useDeferredLoading: options.deferredLoading ?? false,

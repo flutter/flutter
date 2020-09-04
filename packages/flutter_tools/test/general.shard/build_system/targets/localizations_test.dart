@@ -57,7 +57,7 @@ void main() {
       templateArbFileName: 'example.arb',
       outputFileString: 'bar',
       classNameString: 'Foo',
-      preferredSupportedLocaleString: 'en_US',
+      preferredSupportedLocale: <String>['en_US'],
       headerString: 'HEADER',
       headerFile: 'header',
       useDeferredLoading: true,
