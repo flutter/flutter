@@ -308,15 +308,14 @@ typedef RefreshCallback = Future<void> Function();
 ///           ),
 ///           SliverList(
 ///             delegate: SliverChildBuilderDelegate(
-///                   (BuildContext context, int index) => items[index],
-///                 childCount: items.length,
-///               ),
+///                 (BuildContext context, int index) => items[index],
+///               childCount: items.length,
 ///             ),
-///           ],
-///         )
+///           ),
+///         ],
 ///       )
-///     );
-///   }
+///     )
+///   );
 /// }
 /// ```
 /// {@end-tool}
