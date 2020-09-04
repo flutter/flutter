@@ -3254,6 +3254,36 @@ void main() {
       expect(observations[7].previous, isNull);
     });
   });
+
+  testWidgets('finds named route and returns it', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (_) => Container(),
+      '/second': (_) => Container(),
+      '/third': (_) => Container()
+    };
+
+    final GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
+
+    await tester.pumpWidget(MaterialApp(
+      routes: routes,
+      navigatorKey: navKey,
+    ));
+
+    navKey.currentState..pushNamed('/second')..pushNamed('/third');
+
+    Route<dynamic> route = navKey.currentState.retrieveNamedRoute('/second');
+
+    expect(route.settings.name, '/second');
+    expect(route, isNotNull);
+
+    navKey.currentState.removeRoute(route);
+
+    await tester.pumpAndSettle();
+
+    route = navKey.currentState.retrieveNamedRoute('/second');
+
+    expect(route, isNull);
+  });
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>);

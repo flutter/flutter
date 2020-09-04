@@ -3959,6 +3959,37 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }());
   }
 
+  /// Searches for a route with the given [name] and returns it if found, otherwise
+  /// returns null.
+  ///
+  /// {@macro flutter.widgets.navigator.getNamedRoute}
+  Route<dynamic> retrieveNamedRoute(String name) {
+    assert(name != null);
+    assert(!_debugLocked);
+    assert(() {
+      _debugLocked = true;
+      return true;
+    }());
+
+    final _RouteEntry entry = _history.firstWhere(
+        (_RouteEntry entry) => entry.route.settings.name == name,
+        orElse: () => null);
+
+    assert(() {
+      _debugLocked = false;
+      return true;
+    }());
+
+    return entry?.route;
+  }
+
+  /// Simply checks if the result of [getNamedRoute] exists.
+  ///
+  /// {@macro flutter.widgets.navigator.hasNamedRoute}
+  bool hasNamedRoute(String name) {
+    return retrieveNamedRoute(name) != null;
+  }
+
   /// Complete the lifecycle for a route that has been popped off the navigator.
   ///
   /// When the navigator pops a route, the navigator retains a reference to the
