@@ -236,7 +236,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   }
 
   void _unregister(ScaffoldState scaffold) {
-    final stateInHashSet = _scaffolds.remove(scaffold);
+    final bool stateInHashSet = _scaffolds.remove(scaffold);
     // We want to assert that unregister is only called for scaffold states that
     // were actually registered before.
     assert(stateInHashSet);
