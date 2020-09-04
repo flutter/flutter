@@ -157,7 +157,7 @@ class ChangeNotifier implements Listenable {
     _index!.update(
       listener,
       (ListQueue<_ListenerEntry> value) => value..add(entry),
-      ifAbsent: () => ListQueue.of(<_ListenerEntry>[entry]),
+      ifAbsent: () => ListQueue<_ListenerEntry>.of(<_ListenerEntry>[entry]),
     );
   }
 
