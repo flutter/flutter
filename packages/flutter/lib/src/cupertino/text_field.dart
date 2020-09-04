@@ -676,6 +676,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     if (widget.controller == null) {
       _createLocalController();
     }
+    _effectiveFocusNode.canRequestFocus = widget.enabled ?? true;
   }
 
   @override
@@ -688,11 +689,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       _controller.dispose();
       _controller = null;
     }
-    final bool isEnabled = widget.enabled ?? true;
-    final bool wasEnabled = oldWidget.enabled ?? true;
-    if (wasEnabled && !isEnabled) {
-      _effectiveFocusNode.unfocus();
-    }
+    _effectiveFocusNode.canRequestFocus = widget.enabled ?? true;
   }
 
   @override

@@ -2710,6 +2710,43 @@ void main() {
       expect(tapCount, 1);
   });
 
+  testWidgets('Focus test when the text field is disabled', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            focusNode: focusNode,
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, false); // initial status
+
+    // Should accept requestFocus
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, true);
+
+    // Disable the text field, now it should not accept requestFocus.
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            enabled: false,
+            focusNode: focusNode,
+          ),
+        ),
+      ),
+    );
+
+    // Should not accept requestFocus
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, false);
+  });
+
   testWidgets(
     'text field respects theme',
     (WidgetTester tester) async {
