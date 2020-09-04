@@ -19,6 +19,81 @@ import 'restoration.dart';
 /// call [notifyListeners] from this method if the new value changes what
 /// [toPrimitives] returns.
 ///
+/// ## Using a RestorableValue
+///
+/// {@tool dartpad --template=stateful_widget_restoration}
+/// A [StatefulWidget] that has a restorable [int] property.
+///
+/// ```dart
+///   // The current value of the answer is stored in a [RestorableProperty].
+///   // During state restoration it is automatically restored to its old value.
+///   // If no restoration data is available to restore the answer from, it is
+///   // initialized to the specified default value, in this case 42.
+///   RestorableInt _answer = RestorableInt(42);
+///
+///   @override
+///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///     // All restorable properties must be registered with the mixin. After
+///     // registration, the answer either has its old value restored or is
+///     // initialized to its default value.
+///     registerForRestoration(_answer, 'answer');
+///   }
+///
+///   void _incrementAnswer() {
+///     setState(() {
+///       // The current value of the property can be accessed and modified via
+///       // the value getter and setter.
+///       _answer.value += 1;
+///     });
+///   }
+///
+///   @override
+///   void dispose() {
+///     // Properties must be disposed when no longer used.
+///     _answer.dispose();
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return OutlinedButton(
+///       child: Text('${_answer.value}'),
+///       onPressed: _incrementAnswer,
+///     );
+///   }
+/// ```
+/// {@end-tool}
+///
+/// ## Creating a subclass
+///
+/// {@tool snippet}
+/// This example shows how to create a new `RestorableValue` subclass,
+/// in this case for the [Duration] class.
+///
+/// ```dart
+/// class RestorableDuration extends RestorableValue<Duration> {
+///   @override
+///   Duration createDefaultValue() => const Duration();
+///
+///   @override
+///   void didUpdateValue(Duration oldValue) {
+///     if (oldValue.inMicroseconds != value.inMicroseconds)
+///       notifyListeners();
+///   }
+///
+///   @override
+///   Duration fromPrimitives(Object data) {
+///     return Duration(microseconds: data as int);
+///   }
+///
+///   @override
+///   Object toPrimitives() {
+///     return value.inMicroseconds;
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [RestorableProperty], which is the super class of this class.

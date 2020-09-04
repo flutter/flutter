@@ -159,6 +159,9 @@ class WebAssetServer implements AssetReader {
         address = (await InternetAddress.lookup(hostname)).first;
       }
       final HttpServer httpServer = await HttpServer.bind(address, port);
+      // Allow rendering in a iframe.
+      httpServer.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
+
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         globals.fs.file(buildInfo.packagesPath),
         logger: globals.logger,
@@ -282,6 +285,9 @@ class WebAssetServer implements AssetReader {
   final InternetAddress internetAddress;
   /* late final */ Dwds dwds;
   Directory entrypointCacheDirectory;
+
+  @visibleForTesting
+  HttpHeaders get defaultResponseHeaders => _httpServer.defaultResponseHeaders;
 
   @visibleForTesting
   Uint8List getFile(String path) => _files[path];
@@ -636,6 +642,7 @@ class WebDevFS implements DevFS {
     @required this.entrypoint,
     @required this.expressionCompiler,
     @required this.chromiumLauncher,
+    @required this.nullAssertions,
     this.testMode = false,
   });
 
@@ -651,6 +658,7 @@ class WebDevFS implements DevFS {
   final bool testMode;
   final ExpressionCompiler expressionCompiler;
   final ChromiumLauncher chromiumLauncher;
+  final bool nullAssertions;
 
   WebAssetServer webAssetServer;
 
@@ -791,8 +799,7 @@ class WebDevFS implements DevFS {
         'main_module.bootstrap.js',
         generateMainModule(
           entrypoint: entrypoint,
-          nullSafety: buildInfo.extraFrontEndOptions
-            ?.contains('--enable-experiment=non-nullable') ?? false,
+          nullAssertions: nullAssertions,
         ),
       );
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to

@@ -50,14 +50,14 @@ document.head.appendChild(requireEl);
 /// this object is the module.
 String generateMainModule({
   @required String entrypoint,
-  @required bool nullSafety,
+  @required bool nullAssertions,
 }) {
   return '''/* ENTRYPOINT_EXTENTION_MARKER */
 // Create the main module loaded below.
 define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   dart_sdk.dart.setStartAsyncSynchronously(true);
   dart_sdk._debugger.registerDevtoolsFormatter();
-  if ($nullSafety) {
+  if ($nullAssertions) {
     dart_sdk.dart.nonNullAsserts(true);
   }
 

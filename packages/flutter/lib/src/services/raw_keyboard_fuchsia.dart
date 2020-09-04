@@ -61,7 +61,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
   // Fuchsia only reports a single code point for the key label.
   @override
-  String? get keyLabel => codePoint == 0 ? null : String.fromCharCode(codePoint);
+  String get keyLabel => codePoint == 0 ? '' : String.fromCharCode(codePoint);
 
   @override
   LogicalKeyboardKey get logicalKey {

@@ -213,6 +213,8 @@ abstract class RawKeyEventData {
 
   /// Returns the Unicode string representing the label on this key.
   ///
+  /// This value is an empty string if there's no key label data for a key.
+  ///
   /// {@template flutter.services.RawKeyEventData.keyLabel}
   /// Do not use the [keyLabel] to compose a text string: it will be missing
   /// special processing for Unicode strings for combining characters and other
@@ -226,7 +228,7 @@ abstract class RawKeyEventData {
   /// complexities of managing keyboard input, like showing a soft keyboard or
   /// interacting with an input method editor (IME).
   /// {@endtemplate}
-  String? get keyLabel;
+  String get keyLabel;
 }
 
 /// Defines the interface for raw key events.
@@ -308,17 +310,17 @@ abstract class RawKeyEvent with Diagnosticable {
         break;
       case 'web':
         data = RawKeyEventDataWeb(
-          code: message['code'] as String,
-          key: message['key'] as String,
-          metaState: message['metaState'] as int,
+          code: message['code'] as String? ?? '',
+          key: message['key'] as String? ?? '',
+          metaState: message['metaState'] as int? ?? 0,
         );
         break;
       case 'windows':
         data = RawKeyEventDataWindows(
-          keyCode: message['keyCode'] as int,
-          scanCode: message['scanCode'] as int,
-          characterCodePoint: message['characterCodePoint'] as int,
-          modifiers: message['modifiers'] as int,
+          keyCode: message['keyCode'] as int? ?? 0,
+          scanCode: message['scanCode'] as int? ?? 0,
+          characterCodePoint: message['characterCodePoint'] as int? ?? 0,
+          modifiers: message['modifiers'] as int? ?? 0,
         );
         break;
       default:

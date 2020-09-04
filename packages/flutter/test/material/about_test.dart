@@ -234,6 +234,115 @@ void main() {
     expect(find.text('Another license'), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
+  testWidgets('_PackageLicensePage title style without AppBarTheme', (
+    WidgetTester tester,
+  ) async {
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
+      ]);
+    });
+
+    const TextStyle titleTextStyle = TextStyle(
+      fontSize: 20,
+      color: Colors.black,
+      inherit: false,
+    );
+    const TextStyle subtitleTextStyle = TextStyle(
+      fontSize: 15,
+      color: Colors.red,
+      inherit: false,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryTextTheme: const TextTheme(
+            headline6: titleTextStyle,
+            subtitle2: subtitleTextStyle,
+          ),
+        ),
+        home: const Center(
+          child: LicensePage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Check for packages.
+    expect(find.text('AAA'), findsOneWidget);
+
+    // Check license is displayed after entering into license page for 'AAA'.
+    await tester.tap(find.text('AAA'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+
+    // Check for titles style.
+    final Text title = tester.widget(find.text('AAA'));
+    expect(title.style, titleTextStyle);
+    final Text subtitle = tester.widget(find.text('1 license.'));
+    expect(subtitle.style, subtitleTextStyle);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
+
+  testWidgets('_PackageLicensePage title style with AppBarTheme', (
+    WidgetTester tester,
+  ) async {
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
+      ]);
+    });
+
+    const TextStyle titleTextStyle = TextStyle(
+      fontSize: 20,
+      color: Colors.black,
+    );
+    const TextStyle subtitleTextStyle = TextStyle(
+      fontSize: 15,
+      color: Colors.red,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          // Not used because appBarTheme is prioritized.
+          primaryTextTheme: const TextTheme(
+            headline6: TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+            ),
+            subtitle2: TextStyle(
+              fontSize: 10,
+              color: Colors.grey,
+            ),
+          ),
+          appBarTheme: const AppBarTheme(
+            textTheme: TextTheme(
+              headline6: titleTextStyle,
+              subtitle2: subtitleTextStyle,
+            ),
+          ),
+        ),
+        home: const Center(
+          child: LicensePage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Check for packages.
+    expect(find.text('AAA'), findsOneWidget);
+
+    // Check license is displayed after entering into license page for 'AAA'.
+    await tester.tap(find.text('AAA'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+
+    // Check for titles style.
+    final Text title = tester.widget(find.text('AAA'));
+    expect(title.style, titleTextStyle);
+    final Text subtitle = tester.widget(find.text('1 license.'));
+    expect(subtitle.style, subtitleTextStyle);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
+
   testWidgets('LicensePage respects the notch', (WidgetTester tester) async {
     const double safeareaPadding = 27.0;
 

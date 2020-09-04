@@ -180,13 +180,17 @@ class KeyEventSimulator {
     switch (platform) {
       case 'android':
         result['keyCode'] = keyCode;
-        result['codePoint'] = key.keyLabel?.codeUnitAt(0);
+        if (key.keyLabel.isNotEmpty) {
+          result['codePoint'] = key.keyLabel.codeUnitAt(0);
+        }
         result['scanCode'] = scanCode;
         result['metaState'] = _getAndroidModifierFlags(key, isDown);
         break;
       case 'fuchsia':
         result['hidUsage'] = physicalKey?.usbHidUsage ?? (key.keyId & LogicalKeyboardKey.hidPlane != 0 ? key.keyId & LogicalKeyboardKey.valueMask : null);
-        result['codePoint'] = key.keyLabel?.codeUnitAt(0);
+        if (key.keyLabel.isNotEmpty) {
+          result['codePoint'] = key.keyLabel.codeUnitAt(0);
+        }
         result['modifiers'] = _getFuchsiaModifierFlags(key, isDown);
         break;
       case 'linux':
@@ -209,7 +213,9 @@ class KeyEventSimulator {
       case 'windows':
         result['keyCode'] = keyCode;
         result['scanCode'] = scanCode;
-        result['characterCodePoint'] = key.keyLabel?.codeUnitAt(0) ?? 0;
+        if (key.keyLabel.isNotEmpty) {
+          result['characterCodePoint'] = key.keyLabel.codeUnitAt(0);
+        }
         result['modifiers'] = _getWindowsModifierFlags(key, isDown);
     }
     return result;
