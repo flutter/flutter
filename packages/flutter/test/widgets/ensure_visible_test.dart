@@ -224,6 +224,83 @@ void main() {
       await tester.pump();
       expect(tester.getTopLeft(findKey(0)).dy, moreOrLessEquals(500.0, epsilon: 0.1));
     });
+
+    testWidgets('Nested SingleChildScrollView ensureVisible behavior test', (WidgetTester tester) async {
+      // Regressing test for https://github.com/flutter/flutter/issues/65100
+      Finder findKey(String coordinate) => find.byKey(ValueKey<String>(coordinate));
+      BuildContext findContext(String coordinate) => tester.element(findKey(coordinate));
+      final List<Row> rows = List<Row>.generate(
+        7,
+            (int y) => Row(
+          children: List<Container>.generate(
+            7,
+                (int x) => Container(key: ValueKey<String>('$x, $y'), width: 200.0, height: 200.0,),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 600.0,
+              height: 400.0,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Column(
+                    children: rows,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      //      Items: 7 * 7 Container(width: 200.0, height: 200.0)
+      //      viewport: Size(width: 600.0, height: 400.0)
+      //
+      //               0                       600
+      //                 +----------------------+
+      //                 |0,0    |1,0    |2,0   |
+      //                 |       |       |      |
+      //                 +----------------------+
+      //                 | 0,1   | 1,1   | 2,1  |
+      //                 |       |       |      |
+      //             400 +----------------------+
+
+      Scrollable.ensureVisible(findContext('0, 0'));
+      await tester.pump();
+      expect(tester.getTopLeft(findKey('0, 0')), const Offset(100.0, 100.0));
+
+      Scrollable.ensureVisible(findContext('3, 0'));
+      await tester.pump();
+      expect(tester.getTopLeft(findKey('3, 0')), const Offset(100.0, 100.0));
+
+      Scrollable.ensureVisible(findContext('3, 0'), alignment: 0.5);
+      await tester.pump();
+      expect(tester.getTopLeft(findKey('3, 0')), const Offset(300.0, 100.0));
+
+      Scrollable.ensureVisible(findContext('6, 0'));
+      await tester.pump();
+      expect(tester.getTopLeft(findKey('6, 0')), const Offset(500.0, 100.0));
+
+      Scrollable.ensureVisible(findContext('0, 2'));
+      await tester.pump();
+      expect(tester.getTopLeft(findKey('0, 2')), const Offset(100.0, 100.0));
+
+      Scrollable.ensureVisible(findContext('3, 2'));
+      await tester.pump();
+      expect(tester.getTopLeft(findKey('3, 2')), const Offset(100.0, 100.0));
+
+      // It should be at the center of the screen.
+      Scrollable.ensureVisible(findContext('3, 2'), alignment: 0.5);
+      await tester.pump();
+      expect(tester.getTopLeft(findKey('3, 2')), const Offset(300.0, 200.0));
+    });
   });
 
   group('ListView', () {

@@ -309,6 +309,12 @@ class Scrollable extends StatefulWidget {
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
+    // The `targetRenderObject` is used to record the first target renderObject.
+    // If there are multiple scrollable widgets nested, we should let
+    // the `targetRenderObject` as visible as possible to improve the user experience.
+    // Otherwise let the outer renderObject as visible as possible will cause
+    // the `targetRenderObject` invisible.
+    // Also see https://github.com/flutter/flutter/issues/65100
     RenderObject targetRenderObject;
     ScrollableState scrollable = Scrollable.of(context);
     while (scrollable != null) {
@@ -322,7 +328,6 @@ class Scrollable extends StatefulWidget {
       ));
 
       targetRenderObject = targetRenderObject ?? context.findRenderObject();
-
       context = scrollable.context;
       scrollable = Scrollable.of(context);
     }
