@@ -2046,7 +2046,8 @@
       ],
       "windows": [
         "ESCAPE"
-      ]
+      ],
+      "ios": "UIKeyInputEscape"
     },
     "scanCodes": {
       "android": [
@@ -2754,7 +2755,8 @@
       ],
       "windows": [
         "F1"
-      ]
+      ],
+      "ios": "UIKeyInputF1"
     },
     "scanCodes": {
       "android": [
@@ -2800,7 +2802,8 @@
       ],
       "windows": [
         "F2"
-      ]
+      ],
+      "ios": "UIKeyInputF2"
     },
     "scanCodes": {
       "android": [
@@ -2846,7 +2849,8 @@
       ],
       "windows": [
         "F3"
-      ]
+      ],
+      "ios": "UIKeyInputF3"
     },
     "scanCodes": {
       "android": [
@@ -2892,7 +2896,8 @@
       ],
       "windows": [
         "F4"
-      ]
+      ],
+      "ios": "UIKeyInputF4"
     },
     "scanCodes": {
       "android": [
@@ -2937,7 +2942,8 @@
       ],
       "windows": [
         "F5"
-      ]
+      ],
+      "ios": "UIKeyInputF5"
     },
     "scanCodes": {
       "android": [
@@ -2981,7 +2987,8 @@
       ],
       "windows": [
         "F6"
-      ]
+      ],
+      "ios": "UIKeyInputF6"
     },
     "scanCodes": {
       "android": [
@@ -3025,7 +3032,8 @@
       ],
       "windows": [
         "F7"
-      ]
+      ],
+      "ios": "UIKeyInputF7"
     },
     "scanCodes": {
       "android": [
@@ -3069,7 +3077,8 @@
       ],
       "windows": [
         "F8"
-      ]
+      ],
+      "ios": "UIKeyInputF8"
     },
     "scanCodes": {
       "android": [
@@ -3113,7 +3122,8 @@
       ],
       "windows": [
         "F9"
-      ]
+      ],
+      "ios": "UIKeyInputF9"
     },
     "scanCodes": {
       "android": [
@@ -3157,7 +3167,8 @@
       ],
       "windows": [
         "F10"
-      ]
+      ],
+      "ios": "UIKeyInputF10"
     },
     "scanCodes": {
       "android": [
@@ -3201,7 +3212,8 @@
       ],
       "windows": [
         "F11"
-      ]
+      ],
+      "ios": "UIKeyInputF11"
     },
     "scanCodes": {
       "android": [
@@ -3245,7 +3257,8 @@
       ],
       "windows": [
         "F12"
-      ]
+      ],
+      "ios": "UIKeyInputF12"
     },
     "scanCodes": {
       "android": [
@@ -3457,7 +3470,8 @@
       ],
       "windows": [
         "HOME"
-      ]
+      ],
+      "ios": "UIKeyInputHome"
     },
     "scanCodes": {
       "android": [
@@ -3501,7 +3515,8 @@
         "Page_Up",
         "KP_Page_Up"
       ],
-      "windows": null
+      "windows": null,
+      "ios": "UIKeyInputPageUp"
     },
     "scanCodes": {
       "android": [
@@ -3592,7 +3607,8 @@
       ],
       "windows": [
         "END"
-      ]
+      ],
+      "ios": "UIKeyInputEnd"
     },
     "scanCodes": {
       "android": [
@@ -3636,7 +3652,8 @@
         "Page_Down",
         "KP_Page_Down"
       ],
-      "windows": null
+      "windows": null,
+      "ios": "UIKeyInputPageDown"
     },
     "scanCodes": {
       "android": [
@@ -3681,7 +3698,8 @@
       ],
       "windows": [
         "RIGHT"
-      ]
+      ],
+      "ios": "UIKeyInputRightArrow"
     },
     "scanCodes": {
       "android": [
@@ -3727,7 +3745,8 @@
       ],
       "windows": [
         "LEFT"
-      ]
+      ],
+      "ios": "UIKeyInputLeftArrow"
     },
     "scanCodes": {
       "android": [
@@ -3773,7 +3792,8 @@
       ],
       "windows": [
         "DOWN"
-      ]
+      ],
+      "ios": "UIKeyInputDownArrow"
     },
     "scanCodes": {
       "android": [
@@ -3819,7 +3839,8 @@
       ],
       "windows": [
         "UP"
-      ]
+      ],
+      "ios": "UIKeyInputUpArrow"
     },
     "scanCodes": {
       "android": [
