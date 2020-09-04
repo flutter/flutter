@@ -403,6 +403,7 @@ class Key {
       windowsKeyCodes: (map['keyCodes']['windows'] as List<dynamic>)?.cast<int>(),
       windowsKeyNames: (map['names']['windows'] as List<dynamic>)?.cast<String>(),
       macOsScanCode: map['scanCodes']['macos'] as int,
+      iOSScanCode: map['scanCodes']['ios'] as int,
       glfwKeyNames: (map['names']['glfw'] as List<dynamic>)?.cast<String>(),
       glfwKeyCodes: (map['keyCodes']['glfw'] as List<dynamic>)?.cast<int>(),
       gtkKeyNames: (map['names']['gtk'] as List<dynamic>)?.cast<String>(),
