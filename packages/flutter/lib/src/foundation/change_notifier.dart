@@ -109,7 +109,8 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
   LinkedList<_ListenerEntry>? _listeners = LinkedList<_ListenerEntry>();
-  Map<VoidCallback, List<_ListenerEntry>>? _index = <VoidCallback, List<_ListenerEntry>>{};
+  HashMap<VoidCallback, ListQueue<_ListenerEntry>>?
+    _index = HashMap<VoidCallback, ListQueue<_ListenerEntry>>();
 
   bool _debugAssertNotDisposed() {
     assert(() {
@@ -155,8 +156,8 @@ class ChangeNotifier implements Listenable {
     _listeners!.add(entry);
     _index!.update(
       listener,
-      (List<_ListenerEntry> value) => value..add(entry),
-      ifAbsent: () => <_ListenerEntry>[entry],
+      (ListQueue<_ListenerEntry> value) => value..add(entry),
+      ifAbsent: () => ListQueue.of(<_ListenerEntry>[entry]),
     );
   }
 
@@ -182,11 +183,11 @@ class ChangeNotifier implements Listenable {
   @override
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    final List<_ListenerEntry>? links = _index![listener];
+    final ListQueue<_ListenerEntry>? links = _index![listener];
     if (links == null)
       return;
     assert(links.isNotEmpty);
-    links.removeAt(0).unlink();
+    links.removeFirst().unlink();
     if (links.isEmpty)
       _index!.remove(listener);
   }
