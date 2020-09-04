@@ -563,9 +563,9 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   }
 }
 
-// TODO(yjbanov): in HTML the blur looks too aggressive. The current
-//                implementation was copied from the existing backdrop-filter
-//                but probably needs a revision.
+// HTML only supports a single radius, but Flutter ImageFilter supports separate
+// horizontal and vertical radii. The best approximation we can provide is to
+// average the two radii together for a single compromise value.
 String _imageFilterToCss(EngineImageFilter filter) {
-  return 'blur(${math.max(filter.sigmaX, filter.sigmaY) * 2}px)';
+  return 'blur(${(filter.sigmaX + filter.sigmaY) / 2}px)';
 }
