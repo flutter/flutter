@@ -274,8 +274,7 @@ void main() {
       );
       tick(const Duration(milliseconds: 0));
       tick(const Duration(milliseconds: 50));
-
-      // We don't assert a specific faction that normal animation.
+      
       expect(customSpringController.value < controller.value, true);
   });
 
