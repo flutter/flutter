@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
+import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.app.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -366,10 +367,15 @@ import java.util.Arrays;
       flutterEngine.getNavigationChannel().setInitialRoute(host.getInitialRoute());
     }
 
+    String appBundlePathOverride = host.getAppBundlePath();
+    if (appBundlePathOverride == null || appBundlePathOverride.isEmpty()) {
+      appBundlePathOverride = FlutterInjector.instance().flutterLoader().findAppBundlePath();
+    }
+
     // Configure the Dart entrypoint and execute it.
     DartExecutor.DartEntrypoint entrypoint =
         new DartExecutor.DartEntrypoint(
-            host.getAppBundlePath(), host.getDartEntrypointFunctionName());
+            appBundlePathOverride, host.getDartEntrypointFunctionName());
     flutterEngine.getDartExecutor().executeDartEntrypoint(entrypoint);
   }
 

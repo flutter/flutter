@@ -44,7 +44,6 @@ import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
-import io.flutter.view.FlutterMain;
 
 /**
  * {@code Activity} which displays a fullscreen Flutter UI.
@@ -754,12 +753,14 @@ public class FlutterActivity extends Activity
   }
 
   /**
-   * The path to the bundle that contains this Flutter app's resources, e.g., Dart code snapshots.
+   * A custom path to the bundle that contains this Flutter app's resources, e.g., Dart code
+   * snapshots.
    *
    * <p>When this {@code FlutterActivity} is run by Flutter tooling and a data String is included in
    * the launching {@code Intent}, that data String is interpreted as an app bundle path.
    *
-   * <p>By default, the app bundle path is obtained from {@link FlutterMain#findAppBundlePath()}.
+   * <p>When otherwise unspecified, the value is null, which defaults to the app bundle path defined
+   * in {@link FlutterLoader#findAppBundlePath()}.
    *
    * <p>Subclasses may override this method to return a custom app bundle path.
    */
@@ -776,9 +777,7 @@ public class FlutterActivity extends Activity
       }
     }
 
-    // Return the default app bundle path.
-    // TODO(mattcarroll): move app bundle resolution into an appropriately named class.
-    return FlutterMain.findAppBundlePath();
+    return null;
   }
 
   /**

@@ -41,7 +41,6 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
-import io.flutter.view.FlutterMain;
 
 /**
  * A Flutter {@code Activity} that is based upon {@link FragmentActivity}.
@@ -581,14 +580,15 @@ public class FlutterFragmentActivity extends FragmentActivity
   }
 
   /**
-   * The path to the bundle that contains this Flutter app's resources, e.g., Dart code snapshots.
+   * A custom path to the bundle that contains this Flutter app's resources, e.g., Dart code
+   * snapshots.
    *
    * <p>When this {@code FlutterFragmentActivity} is run by Flutter tooling and a data String is
    * included in the launching {@code Intent}, that data String is interpreted as an app bundle
    * path.
    *
-   * <p>By default, the app bundle path is obtained from {@link
-   * FlutterMain#findAppBundlePath(Context)}.
+   * <p>When otherwise unspecified, the value is null, which defaults to the app bundle path defined
+   * in {@link FlutterLoader#findAppBundlePath()}.
    *
    * <p>Subclasses may override this method to return a custom app bundle path.
    */
@@ -605,9 +605,7 @@ public class FlutterFragmentActivity extends FragmentActivity
       }
     }
 
-    // Return the default app bundle path.
-    // TODO(mattcarroll): move app bundle resolution into an appropriately named class.
-    return FlutterMain.findAppBundlePath();
+    return null;
   }
 
   /**

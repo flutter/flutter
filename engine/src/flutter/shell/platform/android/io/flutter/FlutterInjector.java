@@ -28,6 +28,7 @@ public final class FlutterInjector {
    * <p>This can only be called at the beginning of the program before the {@link #instance()} is
    * accessed.
    */
+  @VisibleForTesting
   public static void setInstance(@NonNull FlutterInjector injector) {
     if (accessed) {
       throw new IllegalStateException(
