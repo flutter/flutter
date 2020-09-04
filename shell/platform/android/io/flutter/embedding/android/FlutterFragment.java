@@ -22,7 +22,6 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
-import io.flutter.view.FlutterMain;
 
 /**
  * {@code Fragment} which displays a Flutter UI that takes up all available {@code Fragment} space.
@@ -226,8 +225,8 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     }
 
     /**
-     * The path to the app bundle which contains the Dart app to execute, defaults to {@link
-     * FlutterMain#findAppBundlePath()}
+     * The path to the app bundle which contains the Dart app to execute. Null when unspecified,
+     * which defaults to {@link FlutterLoader#findAppBundlePath()}
      */
     @NonNull
     public NewEngineFragmentBuilder appBundlePath(@NonNull String appBundlePath) {
@@ -800,16 +799,18 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   }
 
   /**
-   * Returns the file path to the desired Flutter app's bundle of code.
+   * A custom path to the bundle that contains this Flutter app's resources, e.g., Dart code
+   * snapshots.
    *
-   * <p>Defaults to {@link FlutterMain#findAppBundlePath()}.
+   * <p>When unspecified, the value is null, which defaults to the app bundle path defined in {@link
+   * FlutterLoader#findAppBundlePath()}.
    *
    * <p>Used by this {@code FlutterFragment}'s {@link FlutterActivityAndFragmentDelegate.Host}
    */
   @Override
   @NonNull
   public String getAppBundlePath() {
-    return getArguments().getString(ARG_APP_BUNDLE_PATH, FlutterMain.findAppBundlePath());
+    return getArguments().getString(ARG_APP_BUNDLE_PATH);
   }
 
   /**
