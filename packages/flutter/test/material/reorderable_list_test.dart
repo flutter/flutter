@@ -254,6 +254,7 @@ void main() {
       });
 
       testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
+        const Key firstBox = Key('key');
         Widget build() {
           return MaterialApp(
             home: Directionality(
@@ -262,8 +263,8 @@ void main() {
                 width: 100,
                 height: 100,
                 child: ReorderableListView(
-                  children: [
-                    SizedBox(key: Key('key'), width: 10, height: 10),
+                  children: const <Widget>[
+                    SizedBox(key: firstBox, width: 10, height: 10),
                   ],
                   onReorder: (_, __) {},
                 ),
@@ -273,9 +274,9 @@ void main() {
         }
 
         await tester.pumpWidget(build());
-        final e0 = tester.element(find.byKey(Key('key')));
+        final Element e0 = tester.element(find.byKey(firstBox));
         await tester.pumpWidget(build());
-        final e1 = tester.element(find.byKey(Key('key')));
+        final Element e1 = tester.element(find.byKey(firstBox));
         expect(e0, equals(e1));
       });
 
@@ -798,6 +799,7 @@ void main() {
       });
 
       testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
+        const Key firstBox = Key('key');
         Widget build() {
           return MaterialApp(
             home: Directionality(
@@ -806,8 +808,8 @@ void main() {
                 width: 100,
                 height: 100,
                 child: ReorderableListView(
-                  children: [
-                    SizedBox(key: Key('key'), width: 10, height: 10),
+                  children: const <Widget>[
+                    SizedBox(key: firstBox, width: 10, height: 10),
                   ],
                   onReorder: (_, __) {},
                 ),
@@ -817,9 +819,9 @@ void main() {
         }
 
         await tester.pumpWidget(build());
-        final e0 = tester.element(find.byKey(Key('key')));
+        final Element e0 = tester.element(find.byKey(firstBox));
         await tester.pumpWidget(build());
-        final e1 = tester.element(find.byKey(Key('key')));
+        final Element e1 = tester.element(find.byKey(firstBox));
         expect(e0, equals(e1));
       });
 
