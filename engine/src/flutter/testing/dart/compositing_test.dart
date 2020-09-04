@@ -326,7 +326,7 @@ void main() {
       );
     });
     testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
-      return builder.pushPhysicalShape(path: Path(), color: const Color.fromARGB(0, 0, 0, 0), oldLayer: oldLayer as PhysicalShapeEngineLayer);
+      return builder.pushPhysicalShape(path: Path(), color: const Color.fromARGB(0, 0, 0, 0), oldLayer: oldLayer as PhysicalShapeEngineLayer, elevation: 0.0);
     });
     testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
       return builder.pushColorFilter(
