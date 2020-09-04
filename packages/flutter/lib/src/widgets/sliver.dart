@@ -1255,33 +1255,36 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       // list is finite.
       // Let's do an open-ended binary search to find the end of the list
       // manually.
-      int min = 0;
-      int max = 1;
-      while (_build(max - 1) != null) {
-        min = max - 1;
-        if (max < (1<<62)) {
-          max *= 2;
-        } else if (max < (1<<63) - 1) {
-          max = (1<<63) - 1;
+      int lo = 0;
+      int hi = 1;
+      const int maxShift = kIsWeb ? 31 : 63;
+      const int halfMax = 1 << (maxShift - 1);
+      const int max = (1 << maxShift) - 1;
+      while (_build(hi - 1) != null) {
+        lo = hi - 1;
+        if (hi < halfMax) {
+          hi *= 2;
+        } else if (hi < max) {
+          hi = max;
         } else {
           throw FlutterError(
             'Could not find the number of children in ${widget.delegate}.\n'
             'The childCount getter was called (implying that the delegate\'s builder returned null '
-            'for a positive index), but even building the child with index $max (the maximum '
+            'for a positive index), but even building the child with index $hi (the maximum '
             'possible integer) did not return null. Consider implementing childCount to avoid '
             'the cost of searching for the final child.'
           );
         }
       }
-      while (max - min > 1) {
-        final int mid = (max - min) ~/ 2 + min;
+      while (hi - lo > 1) {
+        final int mid = (hi - lo) ~/ 2 + lo;
         if (_build(mid - 1) == null) {
-          max = mid;
+          hi = mid;
         } else {
-          min = mid;
+          lo = mid;
         }
       }
-      result = min;
+      result = lo;
     }
     return result;
   }
