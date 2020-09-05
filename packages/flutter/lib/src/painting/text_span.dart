@@ -206,7 +206,9 @@ class TextSpan extends InlineSpan {
     final bool hasStyle = style != null;
     if (hasStyle)
       builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
-    if (text != null) builder.addText(tabSize == null ? text! : text!.replaceAll("\t", " " * tabSize!));
+    if (text != null)
+      builder.addText(
+          tabSize == null ? text! : text!.replaceAll('\t', ' ' * tabSize!));
     if (children != null) {
       for (final InlineSpan child in children!) {
         assert(child != null);
@@ -217,7 +219,8 @@ class TextSpan extends InlineSpan {
         );
       }
     }
-    if (hasStyle) builder.pop();
+    if (hasStyle)
+      builder.pop();
   }
 
   /// Walks this [TextSpan] and its descendants in pre-order and calls [visitor]
@@ -228,11 +231,13 @@ class TextSpan extends InlineSpan {
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
     if (text != null) {
-      if (!visitor(this)) return false;
+      if (!visitor(this))
+       return false;
     }
     if (children != null) {
       for (final InlineSpan child in children!) {
-        if (!child.visitChildren(visitor)) return false;
+        if (!child.visitChildren(visitor))
+         return false;
       }
     }
     return true;
@@ -245,11 +250,14 @@ class TextSpan extends InlineSpan {
   /// When `visitor` returns true, the walk will continue. When `visitor`
   /// returns false, then the walk will end.
   @override
-  @Deprecated('Use to visitChildren instead. '
-      'This feature was deprecated after v1.7.3.')
+  @Deprecated(
+    'Use to visitChildren instead. '
+    'This feature was deprecated after v1.7.3.'
+  )
   bool visitTextSpan(bool visitor(TextSpan span)) {
     if (text != null) {
-      if (!visitor(this)) return false;
+      if (!visitor(this)) 
+      return false;
     }
     if (children != null) {
       for (final InlineSpan child in children!) {
@@ -258,7 +266,8 @@ class TextSpan extends InlineSpan {
           'visitTextSpan is deprecated. Use visitChildren to support InlineSpans',
         );
         final TextSpan textSpanChild = child as TextSpan;
-        if (!textSpanChild.visitTextSpan(visitor)) return false;
+        if (!textSpanChild.visitTextSpan(visitor)) 
+          return false;
       }
     }
     return true;
@@ -384,8 +393,10 @@ class TextSpan extends InlineSpan {
 
   @override
   RenderComparison compareTo(InlineSpan other) {
-    if (identical(this, other)) return RenderComparison.identical;
-    if (other.runtimeType != runtimeType) return RenderComparison.layout;
+    if (identical(this, other)) 
+      return RenderComparison.identical;
+    if (other.runtimeType != runtimeType) 
+      return RenderComparison.layout;
     final TextSpan textSpan = other as TextSpan;
     if (textSpan.text != text ||
         children?.length != textSpan.children?.length ||
@@ -396,15 +407,19 @@ class TextSpan extends InlineSpan {
         : RenderComparison.metadata;
     if (style != null) {
       final RenderComparison candidate = style!.compareTo(textSpan.style!);
-      if (candidate.index > result.index) result = candidate;
-      if (result == RenderComparison.layout) return result;
+      if (candidate.index > result.index) 
+        result = candidate;
+      if (result == RenderComparison.layout) 
+        return result;
     }
     if (children != null) {
       for (int index = 0; index < children!.length; index += 1) {
         final RenderComparison candidate =
             children![index].compareTo(textSpan.children![index]);
-        if (candidate.index > result.index) result = candidate;
-        if (result == RenderComparison.layout) return result;
+        if (candidate.index > result.index) 
+          result = candidate;
+        if (result == RenderComparison.layout) 
+          return result;
       }
     }
     return result;
@@ -412,9 +427,12 @@ class TextSpan extends InlineSpan {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    if (super != other) return false;
+    if (identical(this, other)) 
+      return true;
+    if (other.runtimeType != runtimeType) 
+      return false;
+    if (super != other) 
+      return false;
     return other is TextSpan &&
         other.text == text &&
         other.recognizer == recognizer &&
@@ -461,7 +479,8 @@ class TextSpan extends InlineSpan {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    if (children == null) return const <DiagnosticsNode>[];
+    if (children == null) 
+      return const <DiagnosticsNode>[];
     return children!.map<DiagnosticsNode>((InlineSpan child) {
       // `child` has a non-nullable return type, but might be null when running
       // with weak checking, so we need to null check it anyway (and ignore the
