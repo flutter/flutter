@@ -485,7 +485,6 @@ tasks:
       Measures the startup time of the Flutter Gallery app on 32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
-    flaky: true # https://github.com/flutter/flutter/issues/62633
 
   flutter_gallery_ios32__transition_perf:
     description: >
@@ -543,11 +542,12 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  # post_backdrop_filter_perf_ios__timeline_summary:
-  #   description: >
-  #     Measures the runtime performance of animations after a backdrop filter is removed on iOS.
-  #   stage: devicelab_ios
-  #   required_agent_capabilities: ["mac/iphonexs"]
+  post_backdrop_filter_perf_ios__timeline_summary:
+    description: >
+      Measures the runtime performance of animations after a backdrop filter is removed on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
 
   complex_layout_scroll_perf_ios__timeline_summary:
     description: >
@@ -840,7 +840,6 @@ tasks:
       Measures the performance of the Crane page in the new Flutter Gallery on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   fast_scroll_large_images__memory:
     description: >

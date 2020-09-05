@@ -3,16 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' as io show Directory, File, Link;
+import 'dart:io' as io show Directory, File, Link, ProcessException, ProcessResult, ProcessSignal, systemEncoding, Process, ProcessStartMode;
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p; // ignore: package_path_import
+import 'package:process/process.dart';
 
 import 'common.dart' show throwToolExit;
 import 'platform.dart';
 
-// The Flutter tool hits file system errors that only the end-user can address.
+// The Flutter tool hits file system and process errors that only the end-user can address.
 // We would like these errors to not hit crash logging. In these cases, we
 // should exit gracefully and provide potentially useful advice. For example, if
 // a write fails because the target device is full, we can explain that with a
@@ -355,9 +356,16 @@ Future<T> _run<T>(Future<T> Function() op, {
     return await op();
   } on FileSystemException catch (e) {
     if (platform.isWindows) {
-      _handleWindowsException(e, failureMessage);
-    } else if (platform.isLinux) {
-      _handleLinuxException(e, failureMessage);
+      _handleWindowsException(e, failureMessage, e.osError?.errorCode ?? 0);
+    } else if (platform.isLinux || platform.isMacOS) {
+      _handlePosixException(e, failureMessage, e.osError?.errorCode ?? 0);
+    }
+    rethrow;
+  } on io.ProcessException catch (e) {
+    if (platform.isWindows) {
+      _handleWindowsException(e, failureMessage, e.errorCode ?? 0);
+    } else if (platform.isLinux || platform.isMacOS) {
+      _handlePosixException(e, failureMessage, e.errorCode ?? 0);
     }
     rethrow;
   }
@@ -372,20 +380,123 @@ T _runSync<T>(T Function() op, {
     return op();
   } on FileSystemException catch (e) {
     if (platform.isWindows) {
-      _handleWindowsException(e, failureMessage);
-    } else if (platform.isLinux) {
-      _handleLinuxException(e, failureMessage);
+      _handleWindowsException(e, failureMessage, e.osError?.errorCode ?? 0);
+    } else if (platform.isLinux || platform.isMacOS) {
+      _handlePosixException(e, failureMessage, e.osError?.errorCode ?? 0);
+    }
+    rethrow;
+  } on io.ProcessException catch (e) {
+    if (platform.isWindows) {
+      _handleWindowsException(e, failureMessage, e.errorCode ?? 0);
+    } else if (platform.isLinux || platform.isMacOS) {
+      _handlePosixException(e, failureMessage, e.errorCode ?? 0);
     }
     rethrow;
   }
 }
 
-void _handleLinuxException(FileSystemException e, String message) {
+/// A [ProcessManager] that throws a [ToolExit] on certain errors.
+///
+/// If a [ProcessException] is not caused by the Flutter tool, and can only be
+/// addressed by the user, it should be caught by this [ProcessManager] and thrown
+/// as a [ToolExit] using [throwToolExit].
+///
+/// See also:
+///   * [ErrorHandlngFileSystem], for a similar file system strategy.
+class ErrorHandlingProcessManager extends ProcessManager {
+  ErrorHandlingProcessManager({
+    @required ProcessManager delegate,
+    @required Platform platform,
+  }) : _delegate = delegate,
+       _platform = platform;
+
+  final ProcessManager _delegate;
+  final Platform _platform;
+
+  @override
+  bool canRun(dynamic executable, {String workingDirectory}) {
+    return _runSync(
+      () => _delegate.canRun(executable, workingDirectory: workingDirectory),
+      platform: _platform,
+    );
+  }
+
+  @override
+  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+    return _runSync(
+      () => _delegate.killPid(pid, signal),
+      platform: _platform,
+    );
+  }
+
+  @override
+  Future<io.ProcessResult> run(
+    List<dynamic> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = io.systemEncoding,
+    Encoding stderrEncoding = io.systemEncoding,
+  }) {
+    return _run(() => _delegate.run(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    ), platform: _platform);
+  }
+
+  @override
+  Future<io.Process> start(
+    List<dynamic> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    io.ProcessStartMode mode = io.ProcessStartMode.normal,
+  }) {
+    return _run(() => _delegate.start(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+    ), platform: _platform);
+  }
+
+  @override
+  io.ProcessResult runSync(
+    List<dynamic> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = io.systemEncoding,
+    Encoding stderrEncoding = io.systemEncoding,
+  }) {
+    return _runSync(() => _delegate.runSync(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    ), platform: _platform);
+  }
+}
+
+void _handlePosixException(Exception e, String message, int errorCode) {
   // From:
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
+  // https://github.com/apple/darwin-xnu/blob/master/bsd/dev/dtrace/scripts/errno.d
   const int enospc = 28;
-  final int errorCode = e.osError?.errorCode ?? 0;
+  const int eacces = 13;
   // Catch errors and bail when:
   switch (errorCode) {
     case enospc:
@@ -395,19 +506,25 @@ void _handleLinuxException(FileSystemException e, String message) {
         'Free up space and try again.',
       );
       break;
+    case eacces:
+      throwToolExit(
+        '$message. The flutter tool cannot access the file.\n'
+        'Please ensure that the SDK and/or project is installed in a location '
+        'that has read/write permissions for the current user.'
+      );
+      break;
     default:
       // Caller must rethrow the exception.
       break;
   }
 }
 
-void _handleWindowsException(FileSystemException e, String message) {
+void _handleWindowsException(Exception e, String message, int errorCode) {
   // From:
   // https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes
   const int kDeviceFull = 112;
   const int kUserMappedSectionOpened = 1224;
   const int kAccessDenied = 5;
-  final int errorCode = e.osError?.errorCode ?? 0;
   // Catch errors and bail when:
   switch (errorCode) {
     case kAccessDenied:
