@@ -751,6 +751,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         rotation: details.rotation,
       ));
     }
+
     final Offset focalPointScene = _transformationController.toScene(
       details.localFocalPoint,
     );
@@ -923,7 +924,22 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _transformationController.value,
         focalPointSceneScaled - focalPointScene,
       );
+      final double scale = _transformationController.value.getMaxScaleOnAxis();
+      if (widget.onInteractionStart != null) {
+        widget.onInteractionStart(
+            ScaleStartDetails(focalPoint: focalPointSceneScaled));
+      }
+      if (widget.onInteractionUpdate != null) {
+        widget.onInteractionUpdate(ScaleUpdateDetails(
+          rotation: 0,
+          scale: scale,
+        ));
+      }
+      if (widget.onInteractionEnd != null) {
+        widget.onInteractionEnd(ScaleEndDetails());
+      }
     }
+
   }
 
   // Handle inertia drag animation.

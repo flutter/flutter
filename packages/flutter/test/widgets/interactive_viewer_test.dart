@@ -623,6 +623,37 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), equals(1.0));
     });
 
+
+    testWidgets('Scale with mouse returns onInteraction properties',(WidgetTester tester) async{
+      final TransformationController transformationController = TransformationController();
+      double currentScale;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                transformationController: transformationController,
+                onInteractionStart: (details){
+                },
+                onInteractionUpdate: (details){
+                  currentScale = details.scale; 
+                },
+                onInteractionEnd: (details){
+                },
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      await scrollAt(center, tester, const Offset(0.0, -20.0));
+      await tester.pumpAndSettle();
+
+      expect(transformationController.value.getMaxScaleOnAxis(),equals(currentScale));
+    });
+
     testWidgets('viewport changes size', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       await tester.pumpWidget(
