@@ -9,7 +9,7 @@ import 'package:mockito/mockito.dart';
 import '../../common.dart';
 
 void main() {
-  MockDeserialize mockDeserialize;
+  MockDeserialize mockDeserialize = MockDeserialize();
 
   test('Ancestor finder serialize', () {
     const SerializableFinder of = ByType('Text');
