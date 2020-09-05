@@ -603,7 +603,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 /// The difference with GlobalObjectKey is that it uses [==] instead of [identical]
 /// of the objects used to generate widgets.
 @optionalTypeArgs
-class _ReorderableListViewChildGlobalKey<T extends State<StatefulWidget>> extends GlobalObjectKey<T> {
+class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
 
   const _ReorderableListViewChildGlobalKey(this.subKey, this.state) : super(subKey);
 
@@ -615,7 +615,7 @@ class _ReorderableListViewChildGlobalKey<T extends State<StatefulWidget>> extend
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    return other is _ReorderableListViewChildGlobalKey<T>
+    return other is _ReorderableListViewChildGlobalKey
         && other.subKey == subKey
         && other.state == state;
   }
