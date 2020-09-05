@@ -100,6 +100,55 @@ const double _kDividerThickness = 1.0;
 /// [showCupertinoModalPopup], which displays the action sheet by sliding it up
 /// from the bottom of the screen.
 ///
+/// {@tool snippet}
+/// This sample shows how to use a [CupertinoActionSheet].
+///	The [CupertinoActionSheet] shows an alert with a set of two choices
+/// when [CupertinoButton] is pressed.
+///
+/// ```dart
+/// class MyStatefulWidget extends StatefulWidget {
+///   @override
+///   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
+/// }
+///
+/// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+///   @override
+///   Widget build(BuildContext context) {
+///     return CupertinoPageScaffold(
+///       child: Center(
+///         child: CupertinoButton(
+///           onPressed: () {
+///             showCupertinoModalPopup(
+///               context: context,
+///               builder: (BuildContext context) => CupertinoActionSheet(
+///                 title: const Text('Title'),
+///                 message: const Text('Message'),
+///                 actions: [
+///                   CupertinoActionSheetAction(
+///                     child: const Text('Action One'),
+///                     onPressed: () {
+///                       Navigator.pop(context);
+///                     },
+///                   ),
+///                   CupertinoActionSheetAction(
+///                     child: const Text('Action Two'),
+///                     onPressed: () {
+///                       Navigator.pop(context);
+///                     },
+///                   )
+///                 ],
+///               ),
+///             );
+///           },
+///           child: Text('CupertinoActionSheet'),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoActionSheetAction], which is an iOS-style action sheet button.
