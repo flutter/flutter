@@ -597,18 +597,11 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           );
         }
 
-        BorderRadius _sliceBorderRadius;
-
-        if (i == _children.length - 1)
-          _sliceBorderRadius = _borderRadius(i, i == 0, true);
-        else
-          _sliceBorderRadius = _borderRadius(i, i == 0, false);
-
         slices.add(
           Container(
             decoration: BoxDecoration(
               color: (_children[i] as MaterialSlice).color ?? Theme.of(context).cardColor,
-              borderRadius: _sliceBorderRadius,
+              borderRadius: _borderRadius(i, i == 0, i == _children.length - 1),
               shape: BoxShape.rectangle
             ),
             child: Material(
