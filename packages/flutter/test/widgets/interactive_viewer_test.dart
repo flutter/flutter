@@ -624,9 +624,10 @@ void main() {
     });
 
 
-    testWidgets('Scale with mouse returns onInteraction properties',(WidgetTester tester) async{
+testWidgets('Scale with mouse returns onInteraction properties',(WidgetTester tester) async{
       final TransformationController transformationController = TransformationController();
       double currentScale;
+      Velocity currentVelocity;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -634,11 +635,13 @@ void main() {
               child: InteractiveViewer(
                 transformationController: transformationController,
                 onInteractionStart: (details){
+                  
                 },
                 onInteractionUpdate: (details){
                   currentScale = details.scale; 
                 },
                 onInteractionEnd: (details){
+                  currentVelocity = details.velocity;
                 },
                 child: Container(width: 200.0, height: 200.0),
               ),
@@ -652,6 +655,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(transformationController.value.getMaxScaleOnAxis(),equals(currentScale));
+      expect(currentVelocity,equals(Velocity(pixelsPerSecond: Offset(0,0))));
     });
 
     testWidgets('viewport changes size', (WidgetTester tester) async {
