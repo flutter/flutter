@@ -372,8 +372,8 @@ class TextSpan extends InlineSpan {
           // `child` has a non-nullable return type, but might be null when
           // running with weak checking, so we need to null check it anyway (and
           // ignore the warning that the null-handling logic is dead code).
+          // ignore: dead_code
           if (child == null) {
-            // ignore: dead_code
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('TextSpan contains a null child.'),
               ErrorDescription(
@@ -487,8 +487,8 @@ class TextSpan extends InlineSpan {
       // warning that the null-handling logic is dead code).
       if (child != null) {
         return child.toDiagnosticsNode();
+      // ignore: dead_code
       } else {
-        // ignore: dead_code
         return DiagnosticsNode.message('<null child>');
       }
     }).toList();
