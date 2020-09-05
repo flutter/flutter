@@ -256,7 +256,7 @@ class TextSpan extends InlineSpan {
   )
   bool visitTextSpan(bool visitor(TextSpan span)) {
     if (text != null) {
-      if (!visitor(this)) 
+      if (!visitor(this))
       return false;
     }
     if (children != null) {
@@ -266,7 +266,7 @@ class TextSpan extends InlineSpan {
           'visitTextSpan is deprecated. Use visitChildren to support InlineSpans',
         );
         final TextSpan textSpanChild = child as TextSpan;
-        if (!textSpanChild.visitTextSpan(visitor)) 
+        if (!textSpanChild.visitTextSpan(visitor))
           return false;
       }
     }
@@ -393,9 +393,9 @@ class TextSpan extends InlineSpan {
 
   @override
   RenderComparison compareTo(InlineSpan other) {
-    if (identical(this, other)) 
+    if (identical(this, other))
       return RenderComparison.identical;
-    if (other.runtimeType != runtimeType) 
+    if (other.runtimeType != runtimeType)
       return RenderComparison.layout;
     final TextSpan textSpan = other as TextSpan;
     if (textSpan.text != text ||
@@ -407,18 +407,18 @@ class TextSpan extends InlineSpan {
         : RenderComparison.metadata;
     if (style != null) {
       final RenderComparison candidate = style!.compareTo(textSpan.style!);
-      if (candidate.index > result.index) 
+      if (candidate.index > result.index)
         result = candidate;
-      if (result == RenderComparison.layout) 
+      if (result == RenderComparison.layout)
         return result;
     }
     if (children != null) {
       for (int index = 0; index < children!.length; index += 1) {
         final RenderComparison candidate =
             children![index].compareTo(textSpan.children![index]);
-        if (candidate.index > result.index) 
+        if (candidate.index > result.index)
           result = candidate;
-        if (result == RenderComparison.layout) 
+        if (result == RenderComparison.layout)
           return result;
       }
     }
@@ -427,11 +427,11 @@ class TextSpan extends InlineSpan {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) 
+    if (identical(this, other))
       return true;
-    if (other.runtimeType != runtimeType) 
+    if (other.runtimeType != runtimeType)
       return false;
-    if (super != other) 
+    if (super != other)
       return false;
     return other is TextSpan &&
         other.text == text &&
@@ -479,7 +479,7 @@ class TextSpan extends InlineSpan {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    if (children == null) 
+    if (children == null)
       return const <DiagnosticsNode>[];
     return children!.map<DiagnosticsNode>((InlineSpan child) {
       // `child` has a non-nullable return type, but might be null when running
