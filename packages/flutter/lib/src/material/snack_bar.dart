@@ -50,7 +50,7 @@ enum SnackBarClosedReason {
   /// The snack bar was closed after the user tapped a [SnackBarAction].
   action,
 
-  /// The snack bar was closed through a [SemanticAction.dismiss].
+  /// The snack bar was closed through a [SemanticsAction.dismiss].
   dismiss,
 
   /// The snack bar was closed by a user's swipe.
@@ -92,11 +92,12 @@ class SnackBarAction extends StatefulWidget {
        assert(onPressed != null),
        super(key: key);
 
-  /// The button label color. If not provided, defaults to [accentColor].
+  /// The button label color. If not provided, defaults to
+  /// [SnackBarThemeData.actionTextColor].
   final Color textColor;
 
   /// The button disabled label color. This color is shown after the
-  /// [snackBarAction] is dismissed.
+  /// [SnackBarAction] is dismissed.
   final Color disabledTextColor;
 
   /// The button label.
@@ -207,9 +208,10 @@ class SnackBar extends StatefulWidget {
   final Widget content;
 
   /// The snack bar's background color. If not specified it will use
-  /// [ThemeData.snackBarTheme.backgroundColor]. If that is not specified
-  /// it will default to a dark variation of [ColorScheme.surface] for light
-  /// themes, or [ColorScheme.onSurface] for dark themes.
+  /// [SnackBarThemeData.backgroundColor] of [ThemeData.snackBarTheme]. If that
+  /// is not specified it will default to a dark variation of
+  /// [ColorScheme.surface] for light themes, or [ColorScheme.onSurface] for
+  /// dark themes.
   final Color backgroundColor;
 
   /// The z-coordinate at which to place the snack bar. This controls the size
@@ -217,8 +219,9 @@ class SnackBar extends StatefulWidget {
   ///
   /// Defines the card's [Material.elevation].
   ///
-  /// If this property is null, then [ThemeData.snackBarTheme.elevation] is
-  /// used, if that is also null, the default value is 6.0.
+  /// If this property is null, then [SnackBarThemeData.elevation] of
+  /// [ThemeData.snackBarTheme] is used, if that is also null, the default value
+  /// is 6.0.
   final double elevation;
 
   /// Empty space to surround the snack bar.
@@ -253,11 +256,12 @@ class SnackBar extends StatefulWidget {
   ///
   /// Defines the snack bar's [Material.shape].
   ///
-  /// If this property is null then [ThemeData.snackBarTheme.shape] is used.
-  /// If that's null then the shape will depend on the [SnackBarBehavior]. For
-  /// [SnackBarBehavior.fixed], no overriding shape is specified, so the
-  /// [SnackBar] is rectangular. For [SnackBarBehavior.floating], it uses a
-  /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
+  /// If this property is null then [SnackBarThemeData.shape] of
+  /// [ThemeData.snackBarTheme] is used. If that's null then the shape will
+  /// depend on the [SnackBarBehavior]. For [SnackBarBehavior.fixed], no
+  /// overriding shape is specified, so the [SnackBar] is rectangular. For
+  /// [SnackBarBehavior.floating], it uses a [RoundedRectangleBorder] with a
+  /// circular corner radius of 4.0.
   final ShapeBorder shape;
 
   /// This defines the behavior and location of the snack bar.
@@ -266,8 +270,9 @@ class SnackBar extends StatefulWidget {
   /// location should be adjusted when the scaffold also includes a
   /// [FloatingActionButton] or a [BottomNavigationBar]
   ///
-  /// If this property is null, then [ThemeData.snackBarTheme.behavior]
-  /// is used. If that is null, then the default is [SnackBarBehavior.fixed].
+  /// If this property is null, then [SnackBarThemeData.behavior] of
+  /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
+  /// [SnackBarBehavior.fixed].
   final SnackBarBehavior behavior;
 
   /// (optional) An action that the user can take based on the snack bar.

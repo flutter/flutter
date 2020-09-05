@@ -7,7 +7,7 @@ without `flutter run` and provides a HotRunner (enabling hot reload/restart).
 
 ## Usage
 
-There are four ways for the attach command to discover a running app:
+There are three ways for the attach command to discover a running app:
 
 1. If the platform is Fuchsia the module name must be provided, e.g. `$
 flutter attach --module=mod_name`. This can be called either before or after

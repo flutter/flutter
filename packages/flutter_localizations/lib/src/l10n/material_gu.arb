@@ -70,14 +70,14 @@
   "dateRangePickerHelpText": "રેંજ પસંદ કરો",
   "calendarModeButtonLabel": "કૅલેન્ડર મોડ પર સ્વિચ કરો",
   "inputDateModeButtonLabel": "ઇનપુટ મોડ પર સ્વિચ કરો",
-  "timePickerDialHelpText": "SELECT TIME",
-  "timePickerInputHelpText": "ENTER TIME",
-  "timePickerHourLabel": "Hour",
-  "timePickerMinuteLabel": "Minute",
-  "invalidTimeLabel": "Enter a valid time",
-  "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "timePickerDialHelpText": "સમય પસંદ કરો",
+  "timePickerInputHelpText": "સમય દાખલ કરો",
+  "timePickerHourLabel": "કલાક",
+  "timePickerMinuteLabel": "મિનિટ",
+  "invalidTimeLabel": "માન્ય સમય દાખલ કરો",
+  "dialModeButtonLabel": "ડાયલ પિકર મોડ પર સ્વિચ કરો",
+  "inputTimeModeButtonLabel": "ટેક્સ્ટ ઇનપુટ મોડ પર સ્વિચ કરો",
   "licensesPackageDetailTextZero": "No licenses",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses"
+  "licensesPackageDetailTextOne": "1 લાઇસન્સ",
+  "licensesPackageDetailTextOther": "$licenseCount લાઇસન્સ"
 }

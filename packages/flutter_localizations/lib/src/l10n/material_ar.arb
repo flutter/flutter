@@ -1,4 +1,7 @@
 {
+  "licensesPackageDetailTextTwo": "ترخيصان ($licenseCount)",
+  "licensesPackageDetailTextMany": "$licenseCount ترخيصًا",
+  "licensesPackageDetailTextFew": "$licenseCount تراخيص",
   "remainingTextFieldCharacterCountTwo": "حرفان ($remainingCount) متبقيان",
   "remainingTextFieldCharacterCountMany": "$remainingCount حرفًا متبقيًا",
   "remainingTextFieldCharacterCountFew": "$remainingCount أحرف متبقية",
@@ -78,14 +81,14 @@
   "dateRangePickerHelpText": "اختيار النطاق",
   "calendarModeButtonLabel": "التبديل إلى التقويم",
   "inputDateModeButtonLabel": "التبديل إلى الإدخال",
-  "timePickerDialHelpText": "SELECT TIME",
-  "timePickerInputHelpText": "ENTER TIME",
-  "timePickerHourLabel": "Hour",
-  "timePickerMinuteLabel": "Minute",
-  "invalidTimeLabel": "Enter a valid time",
-  "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode",
-  "licensesPackageDetailTextZero": "No licenses",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses"
+  "timePickerDialHelpText": "اختيار الوقت",
+  "timePickerInputHelpText": "إدخال الوقت",
+  "timePickerHourLabel": "ساعة",
+  "timePickerMinuteLabel": "دقيقة",
+  "invalidTimeLabel": "يُرجى إدخال وقت صالح.",
+  "dialModeButtonLabel": "التبديل إلى وضع \"منتقي قُرص الساعة\"",
+  "inputTimeModeButtonLabel": "التبديل إلى وضع \"إدخال النص\"",
+  "licensesPackageDetailTextZero": "ما مِن تراخيص",
+  "licensesPackageDetailTextOne": "ترخيص واحد",
+  "licensesPackageDetailTextOther": "$licenseCount ترخيص"
 }

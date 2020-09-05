@@ -57,6 +57,11 @@ typedef DragEndCallback = void Function(DraggableDetails details);
 /// Used by [DragTarget.onLeave].
 typedef DragTargetLeave = void Function(Object data);
 
+/// Signature for when a [Draggable] moves within a [DragTarget].
+///
+/// Used by [DragTarget.onMove].
+typedef DragTargetMove = void Function(DragTargetDetails<dynamic> details);
+
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
   /// Display the feedback anchored at the position of the original child. If
@@ -504,6 +509,7 @@ class DragTarget<T> extends StatefulWidget {
     this.onAccept,
     this.onAcceptWithDetails,
     this.onLeave,
+    this.onMove,
   }) : super(key: key);
 
   /// Called to build the contents of this widget.
@@ -534,6 +540,11 @@ class DragTarget<T> extends StatefulWidget {
   /// Called when a given piece of data being dragged over this target leaves
   /// the target.
   final DragTargetLeave onLeave;
+
+  /// Called when a [Draggable] moves within this [DragTarget].
+  ///
+  /// Note that this includes entering and leaving the target.
+  final DragTargetMove onMove;
 
   @override
   _DragTargetState<T> createState() => _DragTargetState<T>();
@@ -586,6 +597,13 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
       widget.onAccept(avatar.data as T);
     if (widget.onAcceptWithDetails != null)
       widget.onAcceptWithDetails(DragTargetDetails<T>(data: avatar.data as T, offset: avatar._lastOffset));
+  }
+
+  void didMove(_DragAvatar<Object> avatar) {
+    if (!mounted)
+      return;
+    if (widget.onMove != null)
+      widget.onMove(DragTargetDetails<dynamic>(data: avatar.data, offset: avatar._lastOffset));
   }
 
   @override
@@ -680,9 +698,13 @@ class _DragAvatar<T> extends Drag {
       }
     }
 
-    // If everything's the same, bail early.
-    if (listsMatch)
+    // If everything's the same, report moves, and bail early.
+    if (listsMatch) {
+      for (final _DragTargetState<T> target in _enteredTargets) {
+        target.didMove(this);
+      }
       return;
+    }
 
     // Leave old targets.
     _leaveAllEntered();
@@ -695,6 +717,11 @@ class _DragAvatar<T> extends Drag {
       },
       orElse: () => null,
     );
+
+    // Report moves to the targets.
+    for (final _DragTargetState<T> target in _enteredTargets) {
+      target.didMove(this);
+    }
 
     _activeTarget = newTarget;
   }

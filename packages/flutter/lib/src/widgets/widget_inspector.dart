@@ -954,6 +954,10 @@ mixin WidgetInspectorService {
     _errorsSinceReload = 0;
   }
 
+  /// Whether structured errors are enabled.
+  ///
+  /// Structured errors provide semantic information that can be used by IDEs
+  /// to enhance the display of errors with rich formatting.
   bool isStructuredErrorsEnabled() {
     return const bool.fromEnvironment('flutter.inspector.structuredErrors');
   }
@@ -1216,8 +1220,7 @@ mixin WidgetInspectorService {
   }
 
   /// Returns a unique id for [object] that will remain live at least until
-  /// [disposeGroup] is called on [groupName] or [dispose] is called on the id
-  /// returned by this method.
+  /// [disposeGroup] is called on [groupName].
   @protected
   String toId(Object object, String groupName) {
     if (object == null)
@@ -1862,7 +1865,7 @@ mixin WidgetInspectorService {
 
   void _onPaint(RenderObject renderObject) {
     try {
-      final Element element = renderObject.debugCreator?.element as Element;
+      final Element element = (renderObject.debugCreator as DebugCreator)?.element;
       if (element is! RenderObjectElement) {
         // This branch should not hit as long as all RenderObjects were created
         // by Widgets. It is possible there might be some render objects
@@ -1894,7 +1897,7 @@ mixin WidgetInspectorService {
     }
   }
 
-  /// This method is called by [WidgetBinding.performReassemble] to flush caches
+  /// This method is called by [WidgetsBinding.performReassemble] to flush caches
   /// of obsolete values after a hot reload.
   ///
   /// Do not call this method directly. Instead, use
@@ -2293,6 +2296,9 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
   @override
   Widget build(BuildContext context) {
+    // Be careful changing this build method. The _InspectorOverlayLayer
+    // assumes the root RenderObject for the WidgetInspector will be
+    // a RenderStack with a _RenderInspectorOverlay as the last child.
     return Stack(children: <Widget>[
       GestureDetector(
         onTap: _handleTap,
@@ -2357,7 +2363,7 @@ class InspectorSelection {
   set current(RenderObject value) {
     if (_current != value) {
       _current = value;
-      _currentElement = value.debugCreator.element as Element;
+      _currentElement = (value.debugCreator as DebugCreator).element;
     }
   }
 
@@ -2378,7 +2384,7 @@ class InspectorSelection {
   void _computeCurrent() {
     if (_index < candidates.length) {
       _current = candidates[index];
-      _currentElement = _current.debugCreator.element as Element;
+      _currentElement = (_current.debugCreator as DebugCreator).element;
     } else {
       _current = null;
       _currentElement = null;
@@ -2441,15 +2447,16 @@ class _RenderInspectorOverlay extends RenderBox {
     context.addLayer(_InspectorOverlayLayer(
       overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       selection: selection,
+      rootRenderObject: parent is RenderObject ? parent as RenderObject : null,
     ));
   }
 }
 
 @immutable
 class _TransformedRect {
-  _TransformedRect(RenderObject object)
+  _TransformedRect(RenderObject object, RenderObject ancestor)
     : rect = object.semanticBounds,
-      transform = object.getTransformTo(null);
+      transform = object.getTransformTo(ancestor);
 
   final Rect rect;
   final Matrix4 transform;
@@ -2517,6 +2524,7 @@ class _InspectorOverlayLayer extends Layer {
   _InspectorOverlayLayer({
     @required this.overlayRect,
     @required this.selection,
+    @required this.rootRenderObject,
   }) : assert(overlayRect != null),
        assert(selection != null) {
     bool inDebugMode = false;
@@ -2543,6 +2551,10 @@ class _InspectorOverlayLayer extends Layer {
   /// (as described at [Layer]).
   final Rect overlayRect;
 
+  /// Widget inspector root render object. The selection overlay will be painted
+  /// with transforms relative to this render object.
+  final RenderObject rootRenderObject;
+
   _InspectorOverlayRenderState _lastState;
 
   /// Picture generated from _lastState.
@@ -2557,16 +2569,21 @@ class _InspectorOverlayLayer extends Layer {
       return;
 
     final RenderObject selected = selection.current;
+
+    if (!_isInInspectorRenderObjectTree(selected))
+      return;
+
     final List<_TransformedRect> candidates = <_TransformedRect>[];
     for (final RenderObject candidate in selection.candidates) {
-      if (candidate == selected || !candidate.attached)
+      if (candidate == selected || !candidate.attached
+          || !_isInInspectorRenderObjectTree(candidate))
         continue;
-      candidates.add(_TransformedRect(candidate));
+      candidates.add(_TransformedRect(candidate, rootRenderObject));
     }
 
     final _InspectorOverlayRenderState state = _InspectorOverlayRenderState(
       overlayRect: overlayRect,
-      selected: _TransformedRect(selected),
+      selected: _TransformedRect(selected, rootRenderObject),
       tooltip: selection.currentElement.toStringShort(),
       textDirection: TextDirection.ltr,
       candidates: candidates,
@@ -2583,6 +2600,9 @@ class _InspectorOverlayLayer extends Layer {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder, state.overlayRect);
     final Size size = state.overlayRect.size;
+    // The overlay rect could have an offset if the widget inspector does
+    // not take all the screen.
+    canvas.translate(state.overlayRect.left, state.overlayRect.top);
 
     final Paint fillPaint = Paint()
       ..style = PaintingStyle.fill
@@ -2693,6 +2713,24 @@ class _InspectorOverlayLayer extends Layer {
     Offset localPosition, {
     bool onlyFirst,
   }) {
+    return false;
+  }
+
+  /// Return whether or not a render object belongs to this inspector widget
+  /// tree.
+  /// The inspector selection is static, so if there are multiple inspector
+  /// overlays in the same app (i.e. an storyboard), a selected or candidate
+  /// render object may not belong to this tree.
+  bool _isInInspectorRenderObjectTree(RenderObject child) {
+    RenderObject current = child.parent as RenderObject;
+    while (current != null) {
+      // We found the widget inspector render object.
+      if (current is RenderStack
+          && current.lastChild is _RenderInspectorOverlay) {
+        return rootRenderObject == current;
+      }
+      current = current.parent as RenderObject;
+    }
     return false;
   }
 }
@@ -2826,7 +2864,7 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
   bool processElement(Element target) {
     // TODO(chunhtai): should print out all the widgets that are about to cross
     // package boundaries.
-    if (_isLocalCreationLocation(target)) {
+    if (debugIsLocalCreationLocation(target)) {
       nodes.add(
         DiagnosticsBlock(
           name: 'The relevant error-causing widget was',
@@ -2847,15 +2885,22 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
 
 /// Returns if an object is user created.
 ///
+/// This always returns false if it is not called in debug mode.
+///
 /// {@macro widgets.inspector.trackCreation}
 ///
 /// Currently is local creation locations are only available for
 /// [Widget] and [Element].
-bool _isLocalCreationLocation(Object object) {
-  final _Location location = _getCreationLocation(object);
-  if (location == null)
-    return false;
-  return WidgetInspectorService.instance._isLocalCreationLocation(location);
+bool debugIsLocalCreationLocation(Object object) {
+  bool isLocal = false;
+  assert(() {
+    final _Location location = _getCreationLocation(object);
+    if (location == null)
+      isLocal =  false;
+    isLocal = WidgetInspectorService.instance._isLocalCreationLocation(location);
+    return true;
+  }());
+  return isLocal;
 }
 
 /// Returns the creation location of an object in String format if one is available.

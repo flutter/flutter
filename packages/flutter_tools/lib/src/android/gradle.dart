@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 
 import '../artifacts.dart';
+import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -18,6 +19,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -355,6 +357,9 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.buildInfo.performanceMeasurementFile != null) {
     command.add('-Pperformance-measurement-file=${androidBuildInfo.buildInfo.performanceMeasurementFile}');
   }
+  if (buildInfo.codeSizeDirectory != null) {
+    command.add('-Pcode-size-directory=${buildInfo.codeSizeDirectory}');
+  }
   command.add(assembleTask);
 
   GradleHandledError detectedGradleError;
@@ -392,7 +397,7 @@ Future<void> buildGradleApp({
       environment: gradleEnvironment,
       mapFunction: consumeLog,
     );
-  } on ProcessException catch(exception) {
+  } on ProcessException catch (exception) {
     consumeLog(exception.toString());
     // Rethrow the exception if the error isn't handled by any of the
     // `localGradleErrors`.
@@ -465,6 +470,10 @@ Future<void> buildGradleApp({
       ? '' // Don't display the size when building a debug variant.
       : ' (${getSizeAsMB(bundleFile.lengthSync())})';
 
+    if (buildInfo.codeSizeDirectory != null) {
+      await _performCodeSizeAnalysis('aab', bundleFile, androidBuildInfo);
+    }
+
     globals.printStatus(
       '$successMark Built ${globals.fs.path.relative(bundleFile.path)}$appSize.',
       color: TerminalColor.green,
@@ -498,6 +507,41 @@ Future<void> buildGradleApp({
   globals.printStatus(
     '$successMark Built ${globals.fs.path.relative(apkFile.path)}$appSize.',
     color: TerminalColor.green,
+  );
+
+  if (buildInfo.codeSizeDirectory != null) {
+    await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
+  }
+}
+
+Future<void> _performCodeSizeAnalysis(
+  String kind,
+  File zipFile,
+  AndroidBuildInfo androidBuildInfo,
+) async {
+  final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    flutterUsage: globals.flutterUsage,
+  );
+  final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
+  final BuildInfo buildInfo = androidBuildInfo.buildInfo;
+  final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
+    .childFile('snapshot.$archName.json');
+  final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
+    .childFile('trace.$archName.json');
+  final Map<String, Object> output = await sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
+    zipFile: zipFile,
+    aotSnapshot: aotSnapshot,
+    precompilerTrace: precompilerTrace,
+    kind: kind,
+  );
+  final File outputFile = globals.fsUtils.getUniqueFile(
+    globals.fs.directory(getBuildDirectory()),'$kind-code-size-analysis', 'json',
+  )..writeAsStringSync(jsonEncode(output));
+  // This message is used as a sentinel in analyze_apk_size_test.dart
+  globals.printStatus(
+    'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
   );
 }
 
@@ -851,7 +895,7 @@ Iterable<String> findApkFilesModule(
 /// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
 ///
 /// The flutter.gradle plugin will copy APK outputs into:
-/// $buildDir/app/outputs/flutter-apk/app-<abi>-<flavor-flag>-<build-mode-flag>.apk
+/// `$buildDir/app/outputs/flutter-apk/app-<abi>-<flavor-flag>-<build-mode-flag>.apk`
 @visibleForTesting
 Iterable<String> listApkPaths(
   AndroidBuildInfo androidBuildInfo,

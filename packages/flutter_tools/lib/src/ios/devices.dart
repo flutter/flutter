@@ -10,13 +10,11 @@ import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
-import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
@@ -26,22 +24,23 @@ import '../macos/xcode.dart';
 import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
+import '../vmservice.dart';
 import 'fallback_discovery.dart';
 import 'ios_deploy.dart';
 import 'ios_workflow.dart';
+import 'iproxy.dart';
 import 'mac.dart';
 
 class IOSDevices extends PollingDeviceDiscovery {
-  // TODO(fujino): make these required and remove fallbacks once internal invocations migrated
   IOSDevices({
-    Platform platform,
-    XCDevice xcdevice,
-    IOSWorkflow iosWorkflow,
-    Logger logger,
-  }) : _platform = platform ?? globals.platform,
-       _xcdevice = xcdevice ?? globals.xcdevice,
-       _iosWorkflow = iosWorkflow ?? globals.iosWorkflow,
-       _logger = logger ?? globals.logger,
+    @required Platform platform,
+    @required XCDevice xcdevice,
+    @required IOSWorkflow iosWorkflow,
+    @required Logger logger,
+  }) : _platform = platform,
+       _xcdevice = xcdevice,
+       _iosWorkflow = iosWorkflow,
+       _logger = logger,
        super('iOS devices');
 
   final Platform _platform;
@@ -149,15 +148,16 @@ class IOSDevice extends Device {
     @required this.interfaceType,
     @required String sdkVersion,
     @required Platform platform,
-    @required Artifacts artifacts,
     @required IOSDeploy iosDeploy,
     @required IMobileDevice iMobileDevice,
+    @required IProxy iProxy,
     @required Logger logger,
     @required VmServiceConnector vmServiceConnectUri,
   })
     : _sdkVersion = sdkVersion,
       _iosDeploy = iosDeploy,
       _iMobileDevice = iMobileDevice,
+      _iproxy = iProxy,
       _fileSystem = fileSystem,
       _logger = logger,
       _platform = platform,
@@ -172,13 +172,7 @@ class IOSDevice extends Device {
       assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
       return;
     }
-    _iproxyPath = artifacts.getArtifactPath(
-      Artifact.iproxy,
-      platform: TargetPlatform.ios,
-    );
   }
-
-  String _iproxyPath;
 
   final String _sdkVersion;
   final IOSDeploy _iosDeploy;
@@ -186,6 +180,7 @@ class IOSDevice extends Device {
   final Logger _logger;
   final Platform _platform;
   final IMobileDevice _iMobileDevice;
+  final IProxy _iproxy;
   final VmServiceConnector _vmServiceConnectUri;
 
   /// May be 0 if version cannot be parsed.
@@ -361,6 +356,7 @@ class IOSDevice extends Device {
       ?? math.Random(packageId.hashCode).nextInt(16383) + 49152;
 
     // Step 3: Attempt to install the application on the device.
+    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
     final List<String> launchArguments = <String>[
       '--enable-dart-profiling',
       // These arguments are required to support the fallback connection strategy
@@ -369,7 +365,7 @@ class IOSDevice extends Device {
       '--disable-service-auth-codes',
       '--observatory-port=$assumedObservatoryPort',
       if (debuggingOptions.startPaused) '--start-paused',
-      if (debuggingOptions.dartFlags.isNotEmpty) '--dart-flags="${debuggingOptions.dartFlags}"',
+      if (dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
       if (debuggingOptions.useTestFonts) '--use-test-fonts',
       // "--enable-checked-mode" and "--verify-entry-points" should always be
       // passed when we launch debug build via "ios-deploy". However, we don't
@@ -389,6 +385,7 @@ class IOSDevice extends Device {
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
+      if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
       if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
 
@@ -437,7 +434,7 @@ class IOSDevice extends Device {
       );
       final Uri localUri = await fallbackDiscovery.discover(
         assumedDevicePort: assumedObservatoryPort,
-        deivce: this,
+        device: this,
         usesIpv6: ipv6,
         hostVmservicePort: debuggingOptions.hostVmServicePort,
         packageId: packageId,
@@ -492,11 +489,9 @@ class IOSDevice extends Device {
 
   @override
   DevicePortForwarder get portForwarder => _portForwarder ??= IOSDevicePortForwarder(
-    processManager: globals.processManager,
     logger: _logger,
-    dyLdLibEntry: globals.cache.dyLdLibEntry,
+    iproxy: _iproxy,
     id: id,
-    iproxyPath: _iproxyPath,
     operatingSystemUtils: globals.os,
   );
 
@@ -684,7 +679,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
 
     void logMessage(vm_service.Event event) {
-      final String message = utf8.decode(base64.decode(event.bytes));
+      final String message = processVmServiceMessage(event);
       if (message.isNotEmpty) {
         _linesController.add(message);
       }
@@ -763,17 +758,13 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
 
   /// Create a new [IOSDevicePortForwarder].
   IOSDevicePortForwarder({
-    @required ProcessManager processManager,
     @required Logger logger,
-    @required MapEntry<String, String> dyLdLibEntry,
     @required String id,
-    @required String iproxyPath,
+    @required IProxy iproxy,
     @required OperatingSystemUtils operatingSystemUtils,
   }) : _logger = logger,
-       _dyLdLibEntry = dyLdLibEntry,
        _id = id,
-       _iproxyPath = iproxyPath,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+       _iproxy = iproxy,
        _operatingSystemUtils = operatingSystemUtils;
 
   /// Create a [IOSDevicePortForwarder] for testing.
@@ -781,7 +772,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
   /// This specifies the path to iproxy as 'iproxy` and the dyLdLibEntry as
   /// 'DYLD_LIBRARY_PATH: /path/to/libs'.
   ///
-  /// The device id may be provided, but otherwise defaultts to '1234'.
+  /// The device id may be provided, but otherwise defaults to '1234'.
   factory IOSDevicePortForwarder.test({
     @required ProcessManager processManager,
     @required Logger logger,
@@ -789,22 +780,19 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     OperatingSystemUtils operatingSystemUtils,
   }) {
     return IOSDevicePortForwarder(
-      processManager: processManager,
       logger: logger,
-      iproxyPath: 'iproxy',
-      id: id ?? '1234',
-      dyLdLibEntry: const MapEntry<String, String>(
-        'DYLD_LIBRARY_PATH', '/path/to/libs',
+      iproxy: IProxy.test(
+        logger: logger,
+        processManager: processManager,
       ),
+      id: id ?? '1234',
       operatingSystemUtils: operatingSystemUtils,
     );
   }
 
-  final ProcessUtils _processUtils;
   final Logger _logger;
-  final MapEntry<String, String> _dyLdLibEntry;
   final String _id;
-  final String _iproxyPath;
+  final IProxy _iproxy;
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
@@ -831,18 +819,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     bool connected = false;
     while (!connected) {
       _logger.printTrace('Attempting to forward device port $devicePort to host port $hostPort');
-      // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
-      process = await _processUtils.start(
-        <String>[
-          _iproxyPath,
-          '$hostPort:$devicePort',
-          '--udid',
-          _id,
-        ],
-        environment: Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[_dyLdLibEntry],
-        ),
-      );
+      process = await _iproxy.forward(devicePort, hostPort, _id);
       // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
       connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
       if (!connected) {

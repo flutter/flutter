@@ -238,10 +238,10 @@ class TextStyleTween extends Tween<TextStyle> {
 /// the animation. While these widgets are simple to use and don't require you
 /// to manually manage the lifecycle of an [AnimationController], they
 /// are also somewhat limited: Besides the target value for the animated
-/// property, developers can only chose a [duration] and [curve] for the
+/// property, developers can only choose a [duration] and [curve] for the
 /// animation. If you require more control over the animation (e.g. you want
-/// to stop it somewhere in the middle), consider using a
-/// [AnimatedWidget] or one of its subclasses. These widget take an [Animation]
+/// to stop it somewhere in the middle), consider using an
+/// [AnimatedWidget] or one of its subclasses. These widgets take an [Animation]
 /// as an argument to power the animation. This gives the developer full control
 /// over the animation at the cost of requiring you to manually manage the
 /// underlying [AnimationController].
@@ -582,7 +582,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// The following example (depicted above) transitions an AnimatedContainer
-/// between two states. It adjusts the [height], [width], [color], and
+/// between two states. It adjusts the `height`, `width`, `color`, and
 /// [alignment] properties when tapped.
 ///
 /// ```dart
@@ -790,7 +790,8 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 ///
 ///  * [AnimatedContainer], which can transition more values at once.
 ///  * [AnimatedAlign], which automatically transitions its child's
-///    position over a given duration whenever the given [alignment] changes.
+///    position over a given duration whenever the given
+///    [AnimatedAlign.alignment] changes.
 class AnimatedPadding extends ImplicitlyAnimatedWidget {
   /// Creates a widget that insets its child by a value that animates
   /// implicitly.
@@ -857,7 +858,7 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 /// [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_align.mp4}
 ///
-/// For the animation, you can chose a [curve] as well as a [duration] and the
+/// For the animation, you can choose a [curve] as well as a [duration] and the
 /// widget will automatically animate to the new target [alignment]. If you require
 /// more control over the animation (e.g. if you want to stop it mid-animation),
 /// consider using an [AlignTransition] instead, which takes a provided
@@ -988,11 +989,11 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_positioned.mp4}
 ///
-/// For the animation, you can chose a [curve] as well as a [duration] and the
+/// For the animation, you can choose a [curve] as well as a [duration] and the
 /// widget will automatically animate to the new target position. If you require
 /// more control over the animation (e.g. if you want to stop it mid-animation),
-/// consider using an [PositionedTransition] instead, which takes a provided
-/// [Animation] as argument. While that allows you to fine-tune the animation,
+/// consider using a [PositionedTransition] instead, which takes a provided
+/// [Animation] as an argument. While that allows you to fine-tune the animation,
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
@@ -1305,7 +1306,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///           duration: Duration(seconds: 3),
 ///           child: FlutterLogo(),
 ///         ),
-///         RaisedButton(
+///         ElevatedButton(
 ///           child: Text('Fade Logo'),
 ///           onPressed: _changeOpacity,
 ///         ),
@@ -1535,7 +1536,7 @@ class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<SliverAn
 /// without explicit style) over a given duration whenever the given style
 /// changes.
 ///
-/// The [textAlign], [softWrap], [textOverflow], [maxLines], [textWidthBasis]
+/// The [textAlign], [softWrap], [overflow], [maxLines], [textWidthBasis]
 /// and [textHeightBehavior] properties are not animated and take effect
 /// immediately when changed.
 ///
@@ -1543,10 +1544,10 @@ class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<SliverAn
 /// of [Curves.elasticInOut].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_default_text_style.mp4}
 ///
-/// For the animation, you can chose a [curve] as well as a [duration] and the
+/// For the animation, you can choose a [curve] as well as a [duration] and the
 /// widget will automatically animate to the new default text style. If you require
 /// more control over the animation (e.g. if you want to stop it mid-animation),
-/// consider using an [DefaultTextStyleTransition] instead, which takes a provided
+/// consider using a [DefaultTextStyleTransition] instead, which takes a provided
 /// [Animation] as argument. While that allows you to fine-tune the animation,
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].

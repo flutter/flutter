@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 
@@ -121,7 +120,7 @@ mixin AnimationLocalListenersMixin {
   void notifyListeners() {
     final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
     for (final VoidCallback listener in localListeners) {
-      InformationCollector collector;
+      InformationCollector? collector;
       assert(() {
         collector = () sync* {
           yield DiagnosticsProperty<AnimationLocalListenersMixin>(
@@ -199,7 +198,7 @@ mixin AnimationLocalStatusListenersMixin {
         if (_statusListeners.contains(listener))
           listener(status);
       } catch (exception, stack) {
-        InformationCollector collector;
+        InformationCollector? collector;
         assert(() {
           collector = () sync* {
             yield DiagnosticsProperty<AnimationLocalStatusListenersMixin>(

@@ -20,28 +20,25 @@ class CupertinoSegmentedControlDemo extends StatefulWidget {
 
 class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedControlDemo> {
   final Map<int, Widget> children = const <int, Widget>{
-    0: Text('Midnight'),
-    1: Text('Viridian'),
-    2: Text('Cerulean'),
+    0: Text('Small'),
+    1: Text('Medium'),
+    2: Text('Large'),
   };
 
   final Map<int, Widget> icons = const <int, Widget>{
     0: Center(
       child: FlutterLogo(
-        colors: Colors.indigo,
-        size: 200.0,
+        size: 100.0,
       ),
     ),
     1: Center(
       child: FlutterLogo(
-        colors: Colors.teal,
         size: 200.0,
       ),
     ),
     2: Center(
       child: FlutterLogo(
-        colors: Colors.cyan,
-        size: 200.0,
+        size: 300.0,
       ),
     ),
   };

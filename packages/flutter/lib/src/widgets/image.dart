@@ -75,17 +75,17 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// large, or some other criteria implemented by a custom [ImageCache]
 /// implementation.
 ///
-/// The [ImageCache] holds a reference to all images passed to [putIfAbsent] as
-/// long as their [ImageStreamCompleter] has at least one listener. This method
-/// will wait until the end of the frame after its future completes before
-/// releasing its own listener. This gives callers a chance to listen to the
-/// stream if necessary. A caller can determine if the image ended up in the
-/// cache by calling [ImageProvider.obtainCacheStatus]. If it is only held as
-/// [ImageCacheStatus.live], and the caller wishes to keep the resolved
-/// image in memory, the caller should immediately call `provider.resolve` and
-/// add a listener to the returned [ImageStream]. The image will remain pinned
-/// in memory at least until the caller removes its listener from the stream,
-/// even if it would not otherwise fit into the cache.
+/// The [ImageCache] holds a reference to all images passed to
+/// [ImageCache.putIfAbsent] as long as their [ImageStreamCompleter] has at
+/// least one listener. This method will wait until the end of the frame after
+/// its future completes before releasing its own listener. This gives callers a
+/// chance to listen to the stream if necessary. A caller can determine if the
+/// image ended up in the cache by calling [ImageProvider.obtainCacheStatus]. If
+/// it is only held as [ImageCacheStatus.live], and the caller wishes to keep
+/// the resolved image in memory, the caller should immediately call
+/// `provider.resolve` and add a listener to the returned [ImageStream]. The
+/// image will remain pinned in memory at least until the caller removes its
+/// listener from the stream, even if it would not otherwise fit into the cache.
 ///
 /// Callers should be cautious about pinning large images or a large number of
 /// images in memory, as this can result in running out of memory and being
@@ -281,12 +281,12 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 ///
 /// The [Image.asset], [Image.network], [Image.file], and [Image.memory]
 /// constructors allow a custom decode size to be specified through
-/// [cacheWidth] and [cacheHeight] parameters. The engine will decode the
+/// `cacheWidth` and `cacheHeight` parameters. The engine will decode the
 /// image to the specified size, which is primarily intended to reduce the
 /// memory usage of [ImageCache].
 ///
 /// In the case where a network image is used on the Web platform, the
-/// [cacheWidth] and [cacheHeight] parameters are ignored as the Web engine
+/// `cacheWidth` and `cacheHeight` parameters are ignored as the Web engine
 /// delegates image decoding of network images to the Web, which does not support
 /// custom decode sizes.
 ///
@@ -297,7 +297,9 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 ///    material application (especially if the image is in a [Material] and will
 ///    have an [InkWell] on top of it).
 ///  * [Image](dart-ui/Image-class.html), the class in the [dart:ui] library.
-///
+///  * Cookbook: [Display images from the internet](https://flutter.dev/docs/cookbook/images/network-image)
+///  * Cookbook: [Work with cached images](https://flutter.dev/docs/cookbook/images/cached-images)
+///  * Cookbook: [Fade in images with a placeholder](https://flutter.dev/docs/cookbook/images/fading-in-images)
 class Image extends StatefulWidget {
   /// Creates a widget that displays an image.
   ///
@@ -436,6 +438,15 @@ class Image extends StatefulWidget {
   /// will be rendered to the constraints of the layout or [width] and [height]
   /// regardless of these parameters. These parameters are primarily intended
   /// to reduce the memory usage of [ImageCache].
+  ///
+  /// Loading an image from a file creates an in memory copy of the file,
+  /// which is retained in the [ImageCache]. The underlying file is not
+  /// monitored for changes. If it does change, the application should evict
+  /// the entry from the [ImageCache].
+  ///
+  /// See also:
+  ///
+  ///  * [FileImage] provider for evicting the underlying file easily.
   Image.file(
     File file, {
     Key key,
@@ -642,8 +653,8 @@ class Image extends StatefulWidget {
   /// The [bytes], [scale], and [repeat] arguments must not be null.
   ///
   /// This only accepts compressed image formats (e.g. PNG). Uncompressed
-  /// formats like rawRgba (the default format of [ui.Image.toByteData]) will
-  /// lead to exceptions.
+  /// formats like rawRgba (the default format of [dart:ui.Image.toByteData])
+  /// will lead to exceptions.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -993,7 +1004,33 @@ class Image extends StatefulWidget {
   final bool matchTextDirection;
 
   /// Whether to continue showing the old image (true), or briefly show nothing
-  /// (false), when the image provider changes.
+  /// (false), when the image provider changes. The default value is false.
+  ///
+  /// ## Design discussion
+  ///
+  /// ### Why is the default value of [gaplessPlayback] false?
+  ///
+  /// Having the default value of [gaplessPlayback] be false helps prevent
+  /// situations where stale or misleading information might be presented.
+  /// Consider the following case:
+  ///
+  /// We have constructed a 'Person' widget that displays an avatar [Image] of
+  /// the currently loaded person along with their name. We could request for a
+  /// new person to be loaded into the widget at any time. Suppose we have a
+  /// person currently loaded and the widget loads a new person. What happens
+  /// if the [Image] fails to load?
+  ///
+  /// * Option A ([gaplessPlayback] = false): The new person's name is coupled
+  /// with a blank image.
+  ///
+  /// * Option B ([gaplessPlayback] = true): The widget displays the avatar of
+  /// the previous person and the name of the newly loaded person.
+  ///
+  /// This is why the default value is false. Most of the time, when you change
+  /// the image provider you're not just changing the image, you're removing the
+  /// old widget and adding a new one and not expecting them to have any
+  /// relationship. With [gaplessPlayback] on you might accidentally break this
+  /// expectation and re-use the old widget.
   final bool gaplessPlayback;
 
   /// A Semantic description of the image.

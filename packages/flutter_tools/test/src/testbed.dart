@@ -58,7 +58,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 ///
 /// Example:
 ///
-/// Testing that a filesystem operation works as expected
+/// Testing that a filesystem operation works as expected:
 ///
 ///     void main() {
 ///       group('Example', () {
@@ -732,7 +732,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isSingleWidgetReloadEnabled = false,
     this.isAndroidEnabled = true,
     this.isIOSEnabled = true,
-    this.isFuchsiaEnabled = true,
+    this.isFuchsiaEnabled = false,
 });
 
   @override
@@ -916,11 +916,6 @@ class FakeCache implements Cache {
   }
 
   @override
-  Future<String> getThirdPartyFile(String urlStr, String serviceName) {
-    throw UnsupportedError('Not supported in the fake Cache');
-  }
-
-  @override
   String getVersionFor(String artifactName) {
     throw UnsupportedError('Not supported in the fake Cache');
   }
@@ -947,10 +942,6 @@ class FakeCache implements Cache {
 
   @override
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
-  }
-
-  @override
-  Future<void> downloadFile(Uri url, File location) async {
   }
 
   @override

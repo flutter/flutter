@@ -9,7 +9,7 @@ import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
 import '../android/android.dart' as android_common;
-import '../android/android_sdk.dart' as android_sdk;
+import '../android/android_workflow.dart';
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/context.dart';
@@ -32,18 +32,19 @@ import '../runner/flutter_command.dart';
 import '../template.dart';
 
 const List<String> _kAvailablePlatforms = <String>[
-        'ios',
-        'android',
-        'windows',
-        'linux',
-        'macos',
-        'web',
-      ];
+  'ios',
+  'android',
+  'windows',
+  'linux',
+  'macos',
+  'web',
+];
 
 const String _kNoPlatformsErrorMessage = '''
 The plugin project was generated without specifying the `--platforms` flag, no new platforms are added.
 To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
-directory. You can also find detailed instructions on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
+directory. You can also find detailed instructions on how to add platforms in the `pubspec.yaml`
+at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
 ''';
 
 class CreateCommand extends FlutterCommand {
@@ -612,7 +613,9 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       );
     }
 
-    if (willAddPlatforms) {
+    final bool addPlatformsToExistingPlugin = willAddPlatforms && existingPlatforms.isNotEmpty;
+
+    if (addPlatformsToExistingPlugin) {
       // If adding new platforms to an existing plugin project, prints
       // a help message containing the platforms maps need to be added to the `platforms` key in the pubspec.
       platformsToAdd.removeWhere(existingPlatforms.contains);
@@ -747,17 +750,22 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
     final String pluginClassSnakeCase = snakeCase(pluginClass);
     final String pluginClassCapitalSnakeCase = pluginClassSnakeCase.toUpperCase();
     final String appleIdentifier = _createUTIIdentifier(organization, projectName);
+    final String androidIdentifier = _createAndroidIdentifier(organization, projectName);
+    // Linux uses the same scheme as the Android identifier.
+    // https://developer.gnome.org/gio/stable/GApplication.html#g-application-id-is-valid
+    final String linuxIdentifier = androidIdentifier;
 
     return <String, dynamic>{
       'organization': organization,
       'projectName': projectName,
-      'androidIdentifier': _createAndroidIdentifier(organization, projectName),
+      'androidIdentifier': androidIdentifier,
       'iosIdentifier': appleIdentifier,
       'macosIdentifier': appleIdentifier,
+      'linuxIdentifier': linuxIdentifier,
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidMinApiLevel': android_common.minApiLevel,
-      'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
+      'androidSdkVersion': kAndroidSdkMinVersion,
       'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
       'pluginClassSnakeCase': pluginClassSnakeCase,
@@ -783,7 +791,10 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
     final Template template = await Template.fromName(
       templateName,
       fileSystem: globals.fs,
+      logger: globals.logger,
+      templateRenderer: globals.templateRenderer,
       templateManifest: templateManifest,
+      pub: pub,
     );
     return template.render(directory, context, overwriteExisting: overwrite);
   }

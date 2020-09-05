@@ -14,7 +14,6 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
-import '../base/utils.dart';
 import '../dart/analysis.dart';
 import 'analyze_base.dart';
 
@@ -67,7 +66,7 @@ class AnalyzeOnce extends AnalyzeBase {
       }
     }
 
-    if (argResults['flutter-repo'] as bool) {
+    if (isFlutterRepo) {
       // check for conflicting dependencies
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
@@ -87,9 +86,6 @@ class AnalyzeOnce extends AnalyzeBase {
 
     final Completer<void> analysisCompleter = Completer<void>();
     final List<AnalysisError> errors = <AnalysisError>[];
-
-    final String sdkPath = argResults['dart-sdk'] as String ??
-      artifacts.getArtifactPath(Artifact.engineDartSdkPath);
 
     final AnalysisServer server = AnalysisServer(
       sdkPath,
@@ -152,11 +148,8 @@ class AnalyzeOnce extends AnalyzeBase {
       timer?.stop();
     }
 
-    // count missing dartdocs
-    final int undocumentedMembers = errors.where((AnalysisError error) {
-      return error.code == 'public_member_api_docs';
-    }).length;
-    if (!(argResults['dartdocs'] as bool)) {
+    final int undocumentedMembers = AnalyzeBase.countMissingDartDocs(errors);
+    if (!isDartDocs) {
       errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
     }
 
@@ -177,31 +170,28 @@ class AnalyzeOnce extends AnalyzeBase {
       logger.printStatus(error.toString(), hangingIndent: 7);
     }
 
+    final int errorCount = errors.length;
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
-
     final String dartDocMessage = AnalyzeBase.generateDartDocMessage(undocumentedMembers);
+    final String errorsMessage = AnalyzeBase.generateErrorsMessage(
+      issueCount: errorCount,
+      seconds: seconds,
+      undocumentedMembers: undocumentedMembers,
+      dartDocMessage: dartDocMessage,
+    );
 
-    // We consider any level of error to be an error exit (we don't report different levels).
-    if (errors.isNotEmpty) {
-      final int errorCount = errors.length;
+    if (errorCount > 0) {
       logger.printStatus('');
-      if (undocumentedMembers > 0) {
-        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartDocMessage)');
-      } else {
-        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s)');
-      }
+      // We consider any level of error to be an error exit (we don't report different levels).
+      throwToolExit(errorsMessage);
+    }
+
+    if (argResults['congratulate'] as bool) {
+      logger.printStatus(errorsMessage);
     }
 
     if (server.didServerErrorOccur) {
       throwToolExit('Server error(s) occurred. (ran in ${seconds}s)');
-    }
-
-    if (argResults['congratulate'] as bool) {
-      if (undocumentedMembers > 0) {
-        logger.printStatus('No issues found! (ran in ${seconds}s; $dartDocMessage)');
-      } else {
-        logger.printStatus('No issues found! (ran in ${seconds}s)');
-      }
     }
   }
 }

@@ -233,6 +233,9 @@ void main() {
 
       expect(mockUsage.enabled, false);
 
+      // Verify that we flushed the analytics queue.
+      verify(mockUsage.ensureAnalyticsSent());
+
       // Verify that we only send the analytics disable event, and no other
       // info.
       verifyNever(mockUsage.sendCommand(

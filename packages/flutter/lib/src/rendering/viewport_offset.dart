@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter/animation.dart';
@@ -51,7 +49,6 @@ ScrollDirection flipScrollDirection(ScrollDirection direction) {
     case ScrollDirection.reverse:
       return ScrollDirection.forward;
   }
-  return null;
 }
 
 /// Which part of the content inside the viewport should be visible.
@@ -181,8 +178,8 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// animation, use [jumpTo].
   Future<void> animateTo(
     double to, {
-    @required Duration duration,
-    @required Curve curve,
+    required Duration duration,
+    required Curve curve,
   });
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
@@ -194,9 +191,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// underscroll.
   Future<void> moveTo(
     double to, {
-    Duration duration,
-    Curve curve,
-    bool clamp,
+    Duration? duration,
+    Curve? curve,
+    bool? clamp,
   }) {
     assert(to != null);
     if (duration == null || duration == Duration.zero) {
@@ -208,7 +205,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   }
 
   /// The direction in which the user is trying to change [pixels], relative to
-  /// the viewport's [RenderViewport.axisDirection].
+  /// the viewport's [RenderViewportBase.axisDirection].
   ///
   /// If the _user_ is not scrolling, this will return [ScrollDirection.idle]
   /// even if there is (for example) a [ScrollActivity] currently animating the
@@ -248,7 +245,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// `super.debugFillDescription(description)`.
   @mustCallSuper
   void debugFillDescription(List<String> description) {
-    description.add('offset: ${pixels?.toStringAsFixed(1)}');
+    description.add('offset: ${pixels.toStringAsFixed(1)}');
   }
 }
 
@@ -280,8 +277,8 @@ class _FixedViewportOffset extends ViewportOffset {
   @override
   Future<void> animateTo(
     double to, {
-    @required Duration duration,
-    @required Curve curve,
+    required Duration duration,
+    required Curve curve,
   }) async { }
 
   @override

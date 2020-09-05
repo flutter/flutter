@@ -21,6 +21,6 @@ To measure startup time on a device:
 flutter run --profile --trace-startup
 ```
 
-Results should be in the logs.
+The results should be in the logs.
 
 Additional results should be in the file `build/start_up_info.json`.

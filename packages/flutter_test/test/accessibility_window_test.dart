@@ -10,11 +10,13 @@ void main() {
     tester.binding.window.devicePixelRatioTestValue = 1.2;
     tester.binding.window.physicalSizeTestValue = const Size(250, 300);
 
-    final RaisedButton invalidButton = RaisedButton(
+    final Widget invalidButton = ElevatedButton(
       onPressed: () {},
+      style: ElevatedButton.styleFrom(
+        primary: Colors.orangeAccent, // background fill color
+        onPrimary: Colors.orange, // text foreground color
+      ),
       child: const Text('Button'),
-      textColor: Colors.orange,
-      color: Colors.orangeAccent,
     );
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: invalidButton)));
 
@@ -26,11 +28,13 @@ void main() {
     tester.binding.window.devicePixelRatioTestValue = 4.2;
     tester.binding.window.physicalSizeTestValue = const Size(2500, 3000);
 
-    final RaisedButton invalidButton = RaisedButton(
+    final Widget invalidButton = ElevatedButton(
       onPressed: () {},
+      style: ElevatedButton.styleFrom(
+        primary: Colors.orangeAccent, // background fill color
+        onPrimary: Colors.orange, // text foreground color
+      ),
       child: const Text('Button'),
-      textColor: Colors.orange,
-      color: Colors.orangeAccent,
     );
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: invalidButton)));
 

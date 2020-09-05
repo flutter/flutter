@@ -431,7 +431,7 @@ void main() {
             ),
           ),
           persistentFooterButtons: <Widget>[
-            FlatButton(
+            TextButton(
               onPressed: () {
                 didPressButton = true;
               },
@@ -657,7 +657,7 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(),
           child: Scaffold(
-            body: FlatButton(
+            body: TextButton(
               key: testKey,
               onPressed: () { },
               child: const Text(''),
@@ -665,7 +665,7 @@ void main() {
           ),
         ),
       ));
-      expect(tester.element(find.byKey(testKey)).size, const Size(88.0, 48.0));
+      expect(tester.element(find.byKey(testKey)).size, const Size(64.0, 48.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
 
@@ -1117,17 +1117,25 @@ void main() {
         Scaffold(
           resizeToAvoidBottomInset: false,
           body: const Placeholder(),
-          bottomNavigationBar: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.add),
-                title: Text('test'),
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.add),
-                title: Text('test'),
-              ),
-            ],
+          bottomNavigationBar: Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  return BottomNavigationBar(
+                    items: const <BottomNavigationBarItem>[
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.add),
+                        title: Text('test'),
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.add),
+                        title: Text('test'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
           ),
         ),
       );

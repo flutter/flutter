@@ -66,9 +66,13 @@ class IconTreeShaker {
     }
   }
 
-  /// The MIME type for ttf fonts.
+  /// The MIME types for supported font sets.
   static const Set<String> kTtfMimeTypes = <String>{
     'font/ttf', // based on internet search
+    'font/opentype',
+    'font/otf',
+    'application/x-font-opentype',
+    'application/x-font-otf',
     'application/x-font-ttf', // based on running locally.
   };
 
@@ -262,6 +266,7 @@ class IconTreeShaker {
   ) async {
     final List<String> cmd = <String>[
       dart.path,
+      '--disable-dart-dev',
       constFinder.path,
       '--kernel-file', appDill.path,
       '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
@@ -378,5 +383,7 @@ class IconTreeShakerException implements Exception {
   final String message;
 
   @override
-  String toString() => 'FontSubset error: $message';
+  String toString() => 'IconTreeShakerException: $message\n\n'
+    'To disable icon tree shaking, pass --no-tree-shake-icons to the requested '
+    'flutter build command';
 }

@@ -105,7 +105,23 @@ class FileSystemUtils {
       if (!file.existsSync()) {
         return file;
       }
-      i++;
+      i += 1;
+    }
+  }
+
+  /// Appends a number to a directory name in order to make it unique under a
+  /// directory.
+  Directory getUniqueDirectory(Directory dir, String baseName) {
+    final FileSystem fs = dir.fileSystem;
+    int i = 1;
+
+    while (true) {
+      final String name = '${baseName}_${i.toString().padLeft(2, '0')}';
+      final Directory directory = fs.directory(_fileSystem.path.join(dir.path, name));
+      if (!directory.existsSync()) {
+        return directory;
+      }
+      i += 1;
     }
   }
 
@@ -139,7 +155,7 @@ class FileSystemUtils {
         && referenceFile.statSync().modified.isAfter(entity.statSync().modified);
   }
 
-  /// Return the absolute path of the user's home directory
+  /// Return the absolute path of the user's home directory.
   String get homeDirPath {
     String path = _platform.isWindows
       ? _platform.environment['USERPROFILE']

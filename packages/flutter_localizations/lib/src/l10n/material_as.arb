@@ -70,14 +70,14 @@
   "dateRangePickerHelpText": "পৰিসৰ বাছনি কৰক",
   "calendarModeButtonLabel": "কেলেণ্ডাৰলৈ সলনি কৰক",
   "inputDateModeButtonLabel": "ইনপুটলৈ সলনি কৰক",
-  "timePickerDialHelpText": "SELECT TIME",
-  "timePickerInputHelpText": "ENTER TIME",
-  "timePickerHourLabel": "Hour",
-  "timePickerMinuteLabel": "Minute",
-  "invalidTimeLabel": "Enter a valid time",
-  "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "timePickerDialHelpText": "সময় বাছনি কৰক",
+  "timePickerInputHelpText": "সময় দিয়ক",
+  "timePickerHourLabel": "ঘণ্টা",
+  "timePickerMinuteLabel": "মিনিট",
+  "invalidTimeLabel": "এটা মান্য সময় দিয়ক",
+  "dialModeButtonLabel": "ডায়েল বাছনিকৰ্তাৰ ম’ডলৈ সলনি কৰক",
+  "inputTimeModeButtonLabel": "পাঠ ইনপুটৰ ম’ডলৈ সলনি কৰক",
   "licensesPackageDetailTextZero": "No licenses",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses"
+  "licensesPackageDetailTextOne": "১ খন অনুজ্ঞাপত্ৰ",
+  "licensesPackageDetailTextOther": "$licenseCount খন অনুজ্ঞাপত্ৰ"
 }

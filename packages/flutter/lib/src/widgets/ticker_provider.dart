@@ -43,7 +43,7 @@ class TickerMode extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@template flutter.widgets.child}
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Whether tickers in the given subtree should be enabled or disabled.

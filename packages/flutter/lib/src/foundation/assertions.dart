@@ -99,7 +99,7 @@ abstract class StackFilter {
   /// Filters the list of [StackFrame]s by updating corresponding indices in
   /// `reasons`.
   ///
-  /// To elide a frame or number of frames, set the string
+  /// To elide a frame or number of frames, set the string.
   void filter(List<StackFrame> stackFrames, List<String?> reasons);
 }
 
@@ -679,7 +679,7 @@ class FlutterErrorDetails with Diagnosticable {
         }
       }
       properties.add(ErrorSpacer());
-      properties.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', stack!, stackFilter: stackFilter));
+      properties.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', stack, stackFilter: stackFilter));
     }
     if (informationCollector != null) {
       properties.add(ErrorSpacer());
@@ -868,7 +868,13 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// If the error handler throws an exception, it will not be caught by the
   /// Flutter framework.
-  static FlutterExceptionHandler onError = (FlutterErrorDetails details) => presentError(details);
+  ///
+  /// Set this to null to silently catch and ignore errors. This is not
+  /// recommended.
+  ///
+  /// Do not call [onError] directly, instead, call [reportError], which
+  /// forwards to [onError] if it is not null.
+  static FlutterExceptionHandler? onError = (FlutterErrorDetails details) => presentError(details);
 
   /// Called by the Flutter framework before attempting to parse a [StackTrace].
   ///
@@ -1078,11 +1084,13 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
     return diagnostics.map((DiagnosticsNode node) => renderer.render(node).trimRight()).join('\n');
   }
 
-  /// Calls [onError] with the given details.
+  /// Calls [onError] with the given details, unless it is null.
   static void reportError(FlutterErrorDetails details) {
     assert(details != null);
     assert(details.exception != null);
-    onError(details);
+    if (onError != null) {
+      onError!(details);
+    }
   }
 }
 

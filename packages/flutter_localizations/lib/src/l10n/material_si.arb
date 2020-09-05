@@ -70,14 +70,14 @@
   "dateRangePickerHelpText": "පරාසය තෝරන්න",
   "calendarModeButtonLabel": "දින දර්ශනය වෙත මාරු වන්න",
   "inputDateModeButtonLabel": "ආදානය වෙත මාරු වන්න",
-  "timePickerDialHelpText": "SELECT TIME",
-  "timePickerInputHelpText": "ENTER TIME",
-  "timePickerHourLabel": "Hour",
-  "timePickerMinuteLabel": "Minute",
-  "invalidTimeLabel": "Enter a valid time",
-  "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "timePickerDialHelpText": "වේලාව තෝරන්න",
+  "timePickerInputHelpText": "දිනය ඇතුළු කරන්න",
+  "timePickerHourLabel": "පැය",
+  "timePickerMinuteLabel": "මිනිත්තු",
+  "invalidTimeLabel": "වලංගු වේලාවක් ඇතුළු කරන්න",
+  "dialModeButtonLabel": "ඩයලන තෝරක ප්‍රකාරයට මාරු කරන්න",
+  "inputTimeModeButtonLabel": "පෙළ ආදාන ප්‍රකාරයට මාරු කරන්න",
   "licensesPackageDetailTextZero": "No licenses",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses"
+  "licensesPackageDetailTextOne": "බලපත්‍ර 1",
+  "licensesPackageDetailTextOther": "බලපත්‍ර $licenseCount"
 }

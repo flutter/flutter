@@ -1017,6 +1017,28 @@ flutter:
     expect(logger.errorText,
       contains('flutter.plugin.platforms should be a map with the platform name as the key'));
   });
+
+    testWithoutContext('FlutterManifest validates plugin format not support.', () {
+    const String manifest = '''
+name: test
+flutter:
+  plugin:
+    android:
+      package: com.example
+      pluginClass: SomeClass
+    ios:
+      pluginClass: SomeClass
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText,
+      contains('Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '));
+  });
 }
 
 Matcher matchesManifest({

@@ -11,7 +11,7 @@ import 'dart:ui' as ui show Image, ImageByteFormat, ColorFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:quiver/testing/async.dart';
+import 'package:fake_async/fake_async.dart';
 
 import '../flutter_test_alternative.dart';
 import '../painting/mocks_for_image_cache.dart';

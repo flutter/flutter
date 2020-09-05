@@ -824,6 +824,66 @@ void main() {
     expect(box.size, equals(const Size(76, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
+
+    testWidgets('FlatButton height parameter is used when provided', (WidgetTester tester) async {
+      const double buttonHeight = 100;
+      const double buttonDefaultMinHeight = 36.0;
+
+      Future<void> buildWidget({double buttonHeight}) {
+        return tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: FlatButton(
+              height: buttonHeight,
+              child: const Text('button'),
+              onPressed: () {
+                /*ununsed*/
+              },
+            ),
+          ),
+        );
+      }
+
+      final Finder rawMaterialButtonFinder = find.byType(RawMaterialButton);
+
+      // If height is not provided we expect the default height to be used.
+      await buildWidget();
+      expect(tester.widget<RawMaterialButton>(rawMaterialButtonFinder).constraints.minHeight, buttonDefaultMinHeight);
+
+      // When the height is provided we expect that is used by the internal widget.
+      await buildWidget(buttonHeight: buttonHeight);
+      expect(tester.widget<RawMaterialButton>(rawMaterialButtonFinder).constraints.minHeight, buttonHeight);
+    });
+
+    testWidgets('FlatButton minWidth parameter is used when provided', (WidgetTester tester) async {
+      const double buttonMinWidth = 100;
+      const double buttonDefaultMinWidth = 88.0;
+
+      Future<void> buildWidget({double buttonMinWidth}) {
+        return tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: FlatButton(
+              minWidth: buttonMinWidth,
+              child: const Text('button'),
+              onPressed: () {
+                /*ununsed*/
+              },
+            ),
+          ),
+        );
+      }
+
+      final Finder rawMaterialButtonFinder = find.byType(RawMaterialButton);
+
+      // If minWidth is not provided we expect the default minWidth to be used.
+      await buildWidget();
+      expect(tester.widget<RawMaterialButton>(rawMaterialButtonFinder).constraints.minWidth, buttonDefaultMinWidth);
+
+      // When minWidth is provided we expect that the internal widget uses it.
+      await buildWidget(buttonMinWidth: buttonMinWidth);
+      expect(tester.widget<RawMaterialButton>(rawMaterialButtonFinder).constraints.minWidth, buttonMinWidth);
+    });
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {

@@ -121,7 +121,7 @@ class ButtonStyle with Diagnosticable {
   /// The style for a button's [Text] widget descendants.
   ///
   /// The color of the [textStyle] is typically not used directly, the
-  /// [foreground] color is used instead.
+  /// [foregroundColor] is used instead.
   final MaterialStateProperty<TextStyle> textStyle;
 
   /// The button's background fill color.

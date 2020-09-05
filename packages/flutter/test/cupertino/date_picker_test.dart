@@ -1215,6 +1215,31 @@ void main() {
         matchesGoldenFile('date_picker_test.datetime.drag.png'),
       );
     });
+
+    testWidgets('DatePicker displays hours and minutes correctly in RTL', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Center(
+              child: SizedBox(
+                width: 500,
+                height: 400,
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.dateAndTime,
+                  initialDateTime: DateTime(2019, 1, 1, 4),
+                  onDateTimeChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final double hourLeft = tester.getTopLeft(find.text('4')).dx;
+      final double minuteLeft = tester.getTopLeft(find.text('00')).dx;
+      expect(hourLeft, lessThan(minuteLeft));
+    });
   });
 
   testWidgets('TimerPicker golden tests', (WidgetTester tester) async {

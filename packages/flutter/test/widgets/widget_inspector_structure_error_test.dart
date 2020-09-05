@@ -76,7 +76,7 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
           equals('true'));
 
         // Creates an error.
-        final FlutterErrorDetails expectedError = FlutterErrorDetailsForRendering(
+        final FlutterErrorDetails expectedError = FlutterErrorDetails(
           library: 'rendering library',
           context: ErrorDescription('during layout'),
           exception: StackTrace.current,

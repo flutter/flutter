@@ -65,7 +65,7 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
   AssetBundle createBundle() => ManifestAssetBundle();
 }
 
-/// An asset bundle based on a pubspec.yaml
+/// An asset bundle based on a pubspec.yaml file.
 class ManifestAssetBundle implements AssetBundle {
   /// Constructs an [ManifestAssetBundle] that gathers the set of assets from the
   /// pubspec.yaml manifest.
@@ -652,12 +652,13 @@ class _AssetDirectoryCache {
 ///
 /// Given package: 'test_package' and an assets directory like this:
 ///
-/// assets/foo
-/// assets/var1/foo
-/// assets/var2/foo
-/// assets/bar
+/// - assets/foo
+/// - assets/var1/foo
+/// - assets/var2/foo
+/// - assets/bar
 ///
-/// returns
+/// This will return:
+/// ```
 /// {
 ///   asset: packages/test_package/assets/foo: [
 ///     asset: packages/test_package/assets/foo,
@@ -668,7 +669,7 @@ class _AssetDirectoryCache {
 ///     asset: packages/test_package/assets/bar,
 ///   ],
 /// }
-///
+/// ```
 
 Map<_Asset, List<_Asset>> _parseAssets(
   PackageConfig packageConfig,

@@ -176,11 +176,12 @@ class Plugin {
   /// Create a YamlMap that represents the supported platforms.
   ///
   /// For example, if the `platforms` contains 'ios' and 'android', the return map looks like:
-  ///    android:
-  ///      package: io.flutter.plugins.sample
-  ///      pluginClass: SamplePlugin
-  ///    ios:
-  ///      pluginClass: SamplePlugin
+  ///
+  ///     android:
+  ///       package: io.flutter.plugins.sample
+  ///       pluginClass: SamplePlugin
+  ///     ios:
+  ///       pluginClass: SamplePlugin
   static YamlMap createPlatformsYamlMap(List<String> platforms, String pluginClass, String androidPackage) {
     final Map<String, dynamic> map = <String, dynamic>{};
     for (final String platform in platforms) {
@@ -210,6 +211,14 @@ class Plugin {
           'The flutter.plugin.platforms key cannot be used in combination with the old '
           'flutter.plugin.{androidPackage,iosPrefix,pluginClass} keys. '
           'See: https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin';
+      return <String>[errorMessage];
+    }
+
+    if (!usesOldPluginFormat && !usesNewPluginFormat) {
+      const String errorMessage =
+          'Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '
+          'An instruction to format the `pubspec.yaml` can be found here: '
+          'https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms';
       return <String>[errorMessage];
     }
 
@@ -264,6 +273,7 @@ class Plugin {
 
   static List<String> _validateLegacyYaml(YamlMap yaml) {
     final List<String> errors = <String>[];
+
     if (yaml['androidPackage'] != null && yaml['androidPackage'] is! String) {
       errors.add('The "androidPackage" must either be null or a string.');
     }
@@ -301,7 +311,14 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
   if (!globals.fs.isFileSync(pubspecPath)) {
     return null;
   }
-  final dynamic pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync());
+  dynamic pubspec;
+
+  try {
+    pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync());
+  } on YamlException catch (err) {
+    globals.printTrace('Failed to parse plugin manifest for $name: $err');
+    // Do nothing, potentially not a plugin.
+  }
   if (pubspec == null) {
     return null;
   }
@@ -644,12 +661,6 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       break;
     case AndroidEmbeddingVersion.v1:
     default:
-      globals.printStatus(
-        'Your Flutter application is created using an older version of the '
-        "Android embedding. It's being deprecated in favor of Android embedding "
-        'v2. Follow the steps on https://flutter.dev/go/android-project-migration '
-        'to migrate your project.'
-      );
       for (final Map<String, dynamic> plugin in androidPlugins) {
         if (!(plugin['supportsEmbeddingV1'] as bool) && plugin['supportsEmbeddingV2'] as bool) {
           throwToolExit(
@@ -882,7 +893,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   final List<Map<String, dynamic>> iosPlugins = _extractPlatformMaps(plugins, IOSPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'ios',
-    'deploymentTarget': '8.0',
+    'deploymentTarget': '9.0',
     'framework': 'Flutter',
     'plugins': iosPlugins,
   };

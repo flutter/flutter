@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
-import 'package:mockito/mockito.dart';
+import '../flutter_test_alternative.dart' show Fake;
 
 void main() {
   group('PhysicalShape', () {
@@ -263,11 +263,65 @@ void main() {
       final double belowBaseline = math.max(belowBaseline1, belowBaseline2);
       expect(rowBox.size.height, greaterThan(textBox1.size.height));
       expect(rowBox.size.height, greaterThan(textBox2.size.height));
-      expect(rowBox.size.height, closeTo(aboveBaseline + belowBaseline, .001));
+      expect(rowBox.size.height, moreOrLessEquals(aboveBaseline + belowBaseline, epsilon: .001));
       expect(tester.getTopLeft(find.byKey(key1)).dy, 0);
       expect(
         tester.getTopLeft(find.byKey(key2)).dy,
-        closeTo(aboveBaseline1 - aboveBaseline2, .001),
+        moreOrLessEquals(aboveBaseline1 - aboveBaseline2, epsilon: .001),
+      );
+    });
+
+    testWidgets('baseline aligned children account for a larger, no-baseline child size', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/58898
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      const double fontSize1 = 54;
+      const double fontSize2 = 14;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Container(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: <Widget>[
+                  Text('big text',
+                    key: key1,
+                    style: const TextStyle(fontSize: fontSize1),
+                  ),
+                  Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
+                    key: key2,
+                    style: const TextStyle(fontSize: fontSize2),
+                  ),
+                  const FlutterLogo(size: 250),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderBox textBox1 = tester.renderObject(find.byKey(key1));
+      final RenderBox textBox2 = tester.renderObject(find.byKey(key2));
+      final RenderBox rowBox = tester.renderObject(find.byType(Row));
+
+      // The two Texts are baseline aligned, so some portion of them extends
+      // both above and below the baseline. The first has a huge font size, so
+      // it extends higher above the baseline than usual. The second has many
+      // lines, but being aligned by the first line's baseline, they hang far
+      // below the baseline. The FlutterLogo extends further than both Texts,
+      // so the size of the parent row should contain the FlutterLogo as well.
+      const double ahemBaselineLocation = 0.8; // https://web-platform-tests.org/writing-tests/ahem.html
+      const double aboveBaseline1 = fontSize1 * ahemBaselineLocation;
+      const double aboveBaseline2 = fontSize2 * ahemBaselineLocation;
+      expect(rowBox.size.height, greaterThan(textBox1.size.height));
+      expect(rowBox.size.height, greaterThan(textBox2.size.height));
+      expect(rowBox.size.height, 250);
+      expect(tester.getTopLeft(find.byKey(key1)).dy, 0);
+      expect(
+        tester.getTopLeft(find.byKey(key2)).dy,
+        moreOrLessEquals(aboveBaseline1 - aboveBaseline2, epsilon: .001),
       );
     });
   });
@@ -299,8 +353,7 @@ void main() {
 
     setUp(() {
       mockContext = _MockPaintingContext();
-      mockCanvas = _MockCanvas();
-      when(mockContext.canvas).thenReturn(mockCanvas);
+      mockCanvas = mockContext.canvas;
     });
 
     testWidgets('ColoredBox - no size, no child', (WidgetTester tester) async {
@@ -318,8 +371,10 @@ void main() {
 
       renderColoredBox.paint(mockContext, Offset.zero);
 
-      verifyNever(mockCanvas.drawRect(any, any));
-      verifyNever(mockContext.paintChild(any, any));
+      expect(mockCanvas.rects, isEmpty);
+      expect(mockCanvas.paints, isEmpty);
+      expect(mockContext.children, isEmpty);
+      expect(mockContext.offets, isEmpty);
     });
 
     testWidgets('ColoredBox - no size, child', (WidgetTester tester) async {
@@ -340,8 +395,10 @@ void main() {
 
       renderColoredBox.paint(mockContext, Offset.zero);
 
-      verifyNever(mockCanvas.drawRect(any, any));
-      verify(mockContext.paintChild(renderSizedBox, Offset.zero)).called(1);
+      expect(mockCanvas.rects, isEmpty);
+      expect(mockCanvas.paints, isEmpty);
+      expect(mockContext.children.single, renderSizedBox);
+      expect(mockContext.offets.single, Offset.zero);
     });
 
     testWidgets('ColoredBox - size, no child', (WidgetTester tester) async {
@@ -351,11 +408,10 @@ void main() {
 
       renderColoredBox.paint(mockContext, Offset.zero);
 
-      final List<dynamic> drawRect = verify(mockCanvas.drawRect(captureAny, captureAny)).captured;
-      expect(drawRect.length, 2);
-      expect(drawRect[0], const Rect.fromLTWH(0, 0, 800, 600));
-      expect(drawRect[1].color, colorToPaint);
-      verifyNever(mockContext.paintChild(any, any));
+      expect(mockCanvas.rects.single, const Rect.fromLTWH(0, 0, 800, 600));
+      expect(mockCanvas.paints.single.color, colorToPaint);
+      expect(mockContext.children, isEmpty);
+      expect(mockContext.offets, isEmpty);
     });
 
     testWidgets('ColoredBox - size, child', (WidgetTester tester) async {
@@ -368,11 +424,10 @@ void main() {
 
       renderColoredBox.paint(mockContext, Offset.zero);
 
-      final List<dynamic> drawRect = verify(mockCanvas.drawRect(captureAny, captureAny)).captured;
-      expect(drawRect.length, 2);
-      expect(drawRect[0], const Rect.fromLTWH(0, 0, 800, 600));
-      expect(drawRect[1].color, colorToPaint);
-      verify(mockContext.paintChild(renderSizedBox, Offset.zero)).called(1);
+      expect(mockCanvas.rects.single, const Rect.fromLTWH(0, 0, 800, 600));
+      expect(mockCanvas.paints.single.color, colorToPaint);
+      expect(mockContext.children.single, renderSizedBox);
+      expect(mockContext.offets.single, Offset.zero);
     });
 
     testWidgets('ColoredBox - properties', (WidgetTester tester) async {
@@ -596,5 +651,28 @@ class DoesNotHitRenderBox extends Matcher {
   }
 }
 
-class _MockPaintingContext extends Mock implements PaintingContext {}
-class _MockCanvas extends Mock implements Canvas {}
+class _MockPaintingContext extends Fake implements PaintingContext {
+  final List<RenderObject> children = <RenderObject>[];
+  final List<Offset> offets = <Offset>[];
+
+  @override
+  final _MockCanvas canvas = _MockCanvas();
+
+  @override
+  void paintChild(RenderObject child, Offset offset) {
+    children.add(child);
+    offets.add(offset);
+  }
+}
+
+class _MockCanvas extends Fake implements Canvas {
+  final List<Rect> rects = <Rect>[];
+  final List<Paint> paints = <Paint>[];
+  bool didPaint = false;
+
+  @override
+  void drawRect(Rect rect, Paint paint) {
+    rects.add(rect);
+    paints.add(paint);
+  }
+}

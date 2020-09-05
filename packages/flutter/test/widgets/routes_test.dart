@@ -11,8 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
+import '../flutter_test_alternative.dart' show Fake;
 import 'semantics_tester.dart';
 
 final List<String> results = <String>[];
@@ -452,60 +452,64 @@ void main() {
   group('PageRouteObserver', () {
     test('calls correct listeners', () {
       final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware1 = MockRouteAware();
+      final MockRouteAware pageRouteAware1 = MockRouteAware();
       final MockPageRoute route1 = MockPageRoute();
       observer.subscribe(pageRouteAware1, route1);
-      verify(pageRouteAware1.didPush()).called(1);
+      expect(pageRouteAware1.didPushCount, 1);
 
-      final RouteAware pageRouteAware2 = MockRouteAware();
+      final MockRouteAware pageRouteAware2 = MockRouteAware();
       final MockPageRoute route2 = MockPageRoute();
       observer.didPush(route2, route1);
-      verify(pageRouteAware1.didPushNext()).called(1);
+      expect(pageRouteAware1.didPushNextCount, 1);
 
       observer.subscribe(pageRouteAware2, route2);
-      verify(pageRouteAware2.didPush()).called(1);
+      expect(pageRouteAware2.didPushCount, 1);
 
       observer.didPop(route2, route1);
-      verify(pageRouteAware2.didPop()).called(1);
-      verify(pageRouteAware1.didPopNext()).called(1);
+      expect(pageRouteAware2.didPopCount, 1);
+      expect(pageRouteAware1.didPopNextCount, 1);
     });
 
     test('does not call listeners for non-PageRoute', () {
       final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware = MockRouteAware();
+      final MockRouteAware pageRouteAware = MockRouteAware();
       final MockPageRoute pageRoute = MockPageRoute();
       final MockRoute route = MockRoute();
       observer.subscribe(pageRouteAware, pageRoute);
-      verify(pageRouteAware.didPush());
+      expect(pageRouteAware.didPushCount, 1);
 
       observer.didPush(route, pageRoute);
       observer.didPop(route, pageRoute);
-      verifyNoMoreInteractions(pageRouteAware);
+
+      expect(pageRouteAware.didPushCount, 1);
+      expect(pageRouteAware.didPopCount, 0);
     });
 
     test('does not call listeners when already subscribed', () {
       final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware = MockRouteAware();
+      final MockRouteAware pageRouteAware = MockRouteAware();
       final MockPageRoute pageRoute = MockPageRoute();
       observer.subscribe(pageRouteAware, pageRoute);
       observer.subscribe(pageRouteAware, pageRoute);
-      verify(pageRouteAware.didPush()).called(1);
+      expect(pageRouteAware.didPushCount, 1);
     });
 
     test('does not call listeners when unsubscribed', () {
       final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware = MockRouteAware();
+      final MockRouteAware pageRouteAware = MockRouteAware();
       final MockPageRoute pageRoute = MockPageRoute();
       final MockPageRoute nextPageRoute = MockPageRoute();
       observer.subscribe(pageRouteAware, pageRoute);
       observer.subscribe(pageRouteAware, nextPageRoute);
-      verify(pageRouteAware.didPush()).called(2);
+      expect(pageRouteAware.didPushCount, 2);
 
       observer.unsubscribe(pageRouteAware);
 
       observer.didPush(nextPageRoute, pageRoute);
       observer.didPop(nextPageRoute, pageRoute);
-      verifyNoMoreInteractions(pageRouteAware);
+
+      expect(pageRouteAware.didPushCount, 2);
+      expect(pageRouteAware.didPopCount, 0);
     });
   });
 
@@ -672,6 +676,109 @@ void main() {
     // built.
     expect(find.text('first', skipOffstage: false), findsOneWidget);
     expect(find.text('second'), findsOneWidget);
+  });
+
+  group('PageRouteBuilder', () {
+    testWidgets('reverseTransitionDuration defaults to 300ms', (WidgetTester tester) async {
+      // Default PageRouteBuilder reverse transition duration should be 300ms.
+      await tester.pumpWidget(
+        MaterialApp(
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push<void>(
+                      PageRouteBuilder<void>(
+                        settings: settings,
+                        pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
+                          return const Text('Page Two');
+                        },
+                      )
+                    );
+                  },
+                  child: const Text('Open page'),
+                );
+              },
+            );
+          },
+        )
+      );
+
+      // Open the new route.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Open page'), findsNothing);
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Pop the new route.
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') should be present halfway through the reverse transition.
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') should be present at the very end of the reverse transition.
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') have transitioned out after 300ms.
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(find.text('Page Two'), findsNothing);
+      expect(find.text('Open page'), findsOneWidget);
+    });
+
+    testWidgets('reverseTransitionDuration can be customized', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                    PageRouteBuilder<void>(
+                      settings: settings,
+                      pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
+                        return const Text('Page Two');
+                      },
+                      // modified value, default PageRouteBuilder reverse transition duration should be 300ms.
+                      reverseTransitionDuration: const Duration(milliseconds: 150),
+                    )
+                  );
+                },
+                child: const Text('Open page'),
+              );
+            },
+          );
+        })
+      );
+
+      // Open the new route.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Open page'), findsNothing);
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Pop the new route.
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') should be present halfway through the reverse transition.
+      await tester.pump(const Duration(milliseconds: 75));
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') should be present at the very end of the reverse transition.
+      await tester.pump(const Duration(milliseconds: 75));
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') have transitioned out after 500ms.
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(find.text('Page Two'), findsNothing);
+      expect(find.text('Open page'), findsOneWidget);
+    });
   });
 
   group('TransitionRoute', () {
@@ -970,7 +1077,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
-            return RaisedButton(
+            return ElevatedButton(
               onPressed: () {
                 showGeneralDialog<void>(
                   context: context,
@@ -990,7 +1097,7 @@ void main() {
       ));
 
       // Open the dialog.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pump();
       expect(find.byType(ModalBarrier), findsNWidgets(2));
 
@@ -1004,7 +1111,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
-            return RaisedButton(
+            return ElevatedButton(
               onPressed: () {
                 showGeneralDialog<void>(
                   context: context,
@@ -1022,7 +1129,7 @@ void main() {
       ));
 
       // Open the dialog.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pump();
       expect(find.byType(ModalBarrier), findsNWidgets(2));
       final ModalBarrier barrier = find.byType(ModalBarrier).evaluate().last.widget as ModalBarrier;
@@ -1047,7 +1154,7 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute<dynamic>(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   onPressed: () {
                     showGeneralDialog<void>(
                       context: context,
@@ -1067,7 +1174,7 @@ void main() {
       ));
 
       // Open the dialog.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
 
       expect(rootObserver.dialogCount, 1);
       expect(nestedObserver.dialogCount, 0);
@@ -1084,7 +1191,7 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute<dynamic>(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   onPressed: () {
                     showGeneralDialog<void>(
                       useRootNavigator: false,
@@ -1105,7 +1212,7 @@ void main() {
       ));
 
       // Open the dialog.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
 
       expect(rootObserver.dialogCount, 0);
       expect(nestedObserver.dialogCount, 1);
@@ -1120,7 +1227,7 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute<dynamic>(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   onPressed: () {
                     showGeneralDialog<void>(
                       context: context,
@@ -1138,7 +1245,7 @@ void main() {
       ));
 
       // Open the dialog.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       expect(rootObserver.dialogRoutes.length, equals(1));
       final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
       expect(route.barrierDismissible, isNotNull);
@@ -1154,7 +1261,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push<void>(
                     MaterialPageRoute<void>(
@@ -1175,7 +1282,7 @@ void main() {
       ));
 
       // Open the new route.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
       expect(find.text('Open page'), findsNothing);
       expect(find.byKey(containerKey), findsOneWidget);
@@ -1204,7 +1311,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push<void>(
                     ModifiedReverseTransitionDurationRoute<void>(
@@ -1227,7 +1334,7 @@ void main() {
       ));
 
       // Open the new route.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
       expect(find.text('Open page'), findsNothing);
       expect(find.byKey(containerKey), findsOneWidget);
@@ -1263,7 +1370,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push<void>(
                     ModifiedReverseTransitionDurationRoute<void>(
@@ -1286,7 +1393,7 @@ void main() {
       ));
 
       // Open the new route.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200)); // jump partway through the forward transition
       expect(find.byKey(containerKey), findsOneWidget);
@@ -1324,7 +1431,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: RaisedButton(
+                child: ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push<void>(
@@ -1358,21 +1465,21 @@ void main() {
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1.0),
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1.0),
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1.0),
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
       );
 
       await tester.pumpAndSettle();
@@ -1386,7 +1493,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: RaisedButton(
+                child: ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push<void>(
@@ -1421,21 +1528,21 @@ void main() {
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1.0),
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1.0),
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1.0),
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
       );
 
       await tester.pumpAndSettle();
@@ -1451,7 +1558,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: RaisedButton(
+                child: ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push<void>(
@@ -1687,11 +1794,36 @@ class ModifiedReverseTransitionDurationRoute<T> extends MaterialPageRoute<T> {
   final Duration reverseTransitionDuration;
 }
 
-class MockPageRoute extends Mock implements PageRoute<dynamic> { }
+class MockPageRoute extends Fake implements PageRoute<dynamic> { }
 
-class MockRoute extends Mock implements Route<dynamic> { }
+class MockRoute extends Fake implements Route<dynamic> { }
 
-class MockRouteAware extends Mock implements RouteAware { }
+class MockRouteAware extends Fake implements RouteAware {
+  int didPushCount = 0;
+  int didPushNextCount = 0;
+  int didPopCount = 0;
+  int didPopNextCount = 0;
+
+  @override
+  void didPush() {
+    didPushCount += 1;
+  }
+
+  @override
+  void didPushNext() {
+    didPushNextCount += 1;
+  }
+
+  @override
+  void didPop() {
+    didPopCount += 1;
+  }
+
+  @override
+  void didPopNext() {
+    didPopNextCount += 1;
+  }
+}
 
 class TestPageRouteBuilder extends PageRouteBuilder<void> {
   TestPageRouteBuilder({RoutePageBuilder pageBuilder}) : super(pageBuilder: pageBuilder);

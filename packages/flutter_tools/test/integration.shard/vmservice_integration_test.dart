@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io'; // ignore: dart_io_import
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:matcher/matcher.dart';
 import 'package:vm_service/vm_service.dart';
@@ -38,6 +39,15 @@ void main() {
       await flutter?.stop();
       tryToDelete(tempDir);
     });
+
+    test('getSupportedProtocols includes DDS', () async {
+      final ProtocolList protocolList =
+          await vmService.getSupportedProtocols();
+      expect(protocolList.protocols, hasLength(2));
+      for (final Protocol protocol in protocolList.protocols) {
+        expect(protocol.protocolName, anyOf('VM Service', 'DDS'));
+      }
+    }, skip: DartDevelopmentService.ddsDisabled);
 
     test('flutterVersion can be called', () async {
       final Response response =

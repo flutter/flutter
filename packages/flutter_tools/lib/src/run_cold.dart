@@ -23,12 +23,16 @@ class ColdRunner extends ResidentRunner {
     this.applicationBinary,
     bool ipv6 = false,
     bool stayResident = true,
-  }) : super(devices,
-             target: target,
-             debuggingOptions: debuggingOptions,
-             hotMode: false,
-             stayResident: stayResident,
-             ipv6: ipv6);
+    bool machine = false,
+  }) : super(
+          devices,
+          target: target,
+          debuggingOptions: debuggingOptions,
+          hotMode: false,
+          stayResident: stayResident,
+          ipv6: ipv6,
+          machine: machine,
+        );
 
   final bool traceStartup;
   final bool awaitFirstFrameWhenTracing;
@@ -181,10 +185,8 @@ class ColdRunner extends ResidentRunner {
   @override
   void printHelp({ @required bool details }) {
     globals.printStatus('Flutter run key commands.');
-    if (supportsServiceProtocol) {
-      if (details) {
-        printHelpDetails();
-      }
+    if (details) {
+      printHelpDetails();
     }
     commandHelp.h.print();
     if (_didAttach) {

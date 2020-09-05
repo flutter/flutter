@@ -10,4 +10,4 @@ intended to be a general-purpose tool.
   - groups
   - group transforms
   - group opacities
-  - paths (strokes are not supported, only fills, eliptical arc curve commands are not supported)
+  - paths (strokes are not supported, only fills, elliptical arc curve commands are not supported)

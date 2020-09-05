@@ -10,12 +10,12 @@
 
 I added the following tests:
 
-*Replace this with a list of the tests that you added as part of this PR. A change in behaviour with no test covering it
+*Replace this with a list of the tests that you added as part of this PR. A change in behavior with no test covering it
 will likely get reverted accidentally sooner or later. PRs must include tests for all changed/updated/fixed behaviors. See [Test Coverage].*
 
 ## Checklist
 
-Before you create this PR confirm that it meets all requirements listed below by checking the relevant checkboxes (`[x]`). This will ensure a smooth and quick review process.
+Before you create this PR, confirm that it meets all requirements listed below by checking the relevant checkboxes (`[x]`). This will ensure a smooth and quick review process.
 
 - [ ] I read the [Contributor Guide] and followed the process outlined there for submitting PRs.
 - [ ] I signed the [CLA].

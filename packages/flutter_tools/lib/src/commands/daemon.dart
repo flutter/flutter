@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
@@ -26,6 +27,7 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../web/web_runner.dart';
+import '../widget_cache.dart';
 
 const String protocolVersion = '0.6.0';
 
@@ -80,6 +82,7 @@ class Daemon {
     _registerDomain(appDomain = AppDomain(this));
     _registerDomain(deviceDomain = DeviceDomain(this));
     _registerDomain(emulatorDomain = EmulatorDomain(this));
+    _registerDomain(devToolsDomain = DevToolsDomain(this));
 
     // Start listening.
     _commandSubscription = commandStream.listen(
@@ -96,6 +99,7 @@ class Daemon {
   AppDomain appDomain;
   DeviceDomain deviceDomain;
   EmulatorDomain emulatorDomain;
+  DevToolsDomain devToolsDomain;
   StreamSubscription<Map<String, dynamic>> _commandSubscription;
   int _outgoingRequestId = 1;
   final Map<String, Completer<dynamic>> _outgoingRequestCompleters = <String, Completer<dynamic>>{};
@@ -180,6 +184,7 @@ class Daemon {
   void _send(Map<String, dynamic> map) => sendCommand(map);
 
   Future<void> shutdown({ dynamic error }) async {
+    await devToolsDomain?.dispose();
     await _commandSubscription?.cancel();
     for (final Domain domain in _domainMap.values) {
       await domain.dispose();
@@ -448,6 +453,7 @@ class AppDomain extends Domain {
     String dillOutputPath,
     bool ipv6 = false,
     String isolateFilter,
+    bool machine = true,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -464,9 +470,9 @@ class AppDomain extends Domain {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       flutterProject: flutterProject,
-      viewFilter: isolateFilter,
       target: target,
       buildInfo: options.buildInfo,
+      widgetCache: WidgetCache(featureFlags: featureFlags),
     );
 
     ResidentRunner runner;
@@ -480,6 +486,7 @@ class AppDomain extends Domain {
         ipv6: ipv6,
         stayResident: true,
         urlTunneller: options.webEnableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
+        machine: machine,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -491,6 +498,7 @@ class AppDomain extends Domain {
         dillOutputPath: dillOutputPath,
         ipv6: ipv6,
         hostIsIde: true,
+        machine: machine,
       );
     } else {
       runner = ColdRunner(
@@ -499,6 +507,7 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         ipv6: ipv6,
+        machine: machine,
       );
     }
 
@@ -876,6 +885,29 @@ class DeviceDomain extends Domain {
       }
     }
     return null;
+  }
+}
+
+class DevToolsDomain extends Domain {
+  DevToolsDomain(Daemon daemon) : super(daemon, 'devtools') {
+    registerHandler('serve', serve);
+  }
+
+  DevtoolsLauncher _devtoolsLauncher;
+
+  Future<Map<String, dynamic>> serve([ Map<String, dynamic> args ]) async {
+    _devtoolsLauncher ??= DevtoolsLauncher.instance;
+    final DevToolsServerAddress server = await _devtoolsLauncher.serve();
+
+    return<String, dynamic>{
+      'host': server?.host,
+      'port': server?.port,
+    };
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _devtoolsLauncher?.close();
   }
 }
 

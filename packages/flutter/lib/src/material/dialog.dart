@@ -208,7 +208,7 @@ class Dialog extends StatelessWidget {
 ///           ),
 ///         ),
 ///         actions: <Widget>[
-///           FlatButton(
+///           TextButton(
 ///             child: Text('Approve'),
 ///             onPressed: () {
 ///               Navigator.of(context).pop();
@@ -281,8 +281,8 @@ class AlertDialog extends StatelessWidget {
 
   /// Style for the text in the [title] of this [AlertDialog].
   ///
-  /// If null, [DialogTheme.titleTextStyle] is used, if that's null, defaults to
-  /// [ThemeData.textTheme.headline6].
+  /// If null, [DialogTheme.titleTextStyle] is used. If that's null, defaults to
+  /// [TextTheme.headline6] of [ThemeData.textTheme].
   final TextStyle titleTextStyle;
 
   /// The (optional) content of the dialog is displayed in the center of the
@@ -304,16 +304,16 @@ class AlertDialog extends StatelessWidget {
 
   /// Style for the text in the [content] of this [AlertDialog].
   ///
-  /// If null, [DialogTheme.contentTextStyle] is used, if that's null, defaults
-  /// to [ThemeData.textTheme.subtitle1].
+  /// If null, [DialogTheme.contentTextStyle] is used. If that's null, defaults
+  /// to [TextTheme.subtitle1] of [ThemeData.textTheme].
   final TextStyle contentTextStyle;
 
   /// The (optional) set of actions that are displayed at the bottom of the
   /// dialog.
   ///
-  /// Typically this is a list of [FlatButton] widgets. It is recommended to
-  /// set the [textAlign] to [TextAlign.end] for the [Text] within the
-  /// [FlatButton], so that buttons whose labels wrap to an extra line align
+  /// Typically this is a list of [TextButton] widgets. It is recommended to
+  /// set the [Text.textAlign] to [TextAlign.end] for the [Text] within the
+  /// [TextButton], so that buttons whose labels wrap to an extra line align
   /// with the overall [ButtonBar]'s alignment within the dialog.
   ///
   /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
@@ -341,8 +341,8 @@ class AlertDialog extends StatelessWidget {
   ///   title: Text('Title'),
   ///   content: Container(width: 200, height: 200, color: Colors.green),
   ///   actions: <Widget>[
-  ///     RaisedButton(onPressed: () {}, child: Text('Button 1')),
-  ///     RaisedButton(onPressed: () {}, child: Text('Button 2')),
+  ///     ElevatedButton(onPressed: () {}, child: Text('Button 1')),
+  ///     ElevatedButton(onPressed: () {}, child: Text('Button 2')),
   ///   ],
   ///   actionsPadding: EdgeInsets.symmetric(horizontal: 8.0),
   /// )
@@ -366,7 +366,7 @@ class AlertDialog extends StatelessWidget {
   /// bottom and "ends" at the top.
   ///
   /// If null then it will use the surrounding
-  /// [ButtonBarTheme.overflowDirection]. If that is null, it will
+  /// [ButtonBarThemeData.overflowDirection]. If that is null, it will
   /// default to [VerticalDirection.down].
   ///
   /// See also:
@@ -396,7 +396,7 @@ class AlertDialog extends StatelessWidget {
   /// between the entire button bar and the edges of the dialog.
   ///
   /// If this property is null, then it will use the surrounding
-  /// [ButtonBarTheme.buttonPadding]. If that is null, it will default to
+  /// [ButtonBarThemeData.buttonPadding]. If that is null, it will default to
   /// 8.0 logical pixels on the left and right.
   ///
   /// See also:
@@ -420,7 +420,7 @@ class AlertDialog extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///  * [SemanticsConfiguration.namesRoute], for a description of how this
   ///    value is used.
   final String semanticLabel;
 
@@ -613,7 +613,7 @@ class AlertDialog extends StatelessWidget {
 ///
 ///  * [SimpleDialog], for a dialog in which to use this widget.
 ///  * [showDialog], which actually displays the dialog and returns its result.
-///  * [FlatButton], which are commonly used as actions in other kinds of
+///  * [TextButton], which are commonly used as actions in other kinds of
 ///    dialogs, such as [AlertDialog]s.
 ///  * <https://material.io/design/components/dialogs.html#simple-dialog>
 class SimpleDialogOption extends StatelessWidget {
@@ -764,8 +764,8 @@ class SimpleDialog extends StatelessWidget {
 
   /// Style for the text in the [title] of this [SimpleDialog].
   ///
-  /// If null, [DialogTheme.titleTextStyle] is used, if that's null, defaults to
-  /// [ThemeData.textTheme.headline6].
+  /// If null, [DialogTheme.titleTextStyle] is used. If that's null, defaults to
+  /// [TextTheme.headline6] of [ThemeData.textTheme].
   final TextStyle titleTextStyle;
 
   /// The (optional) content of the dialog is displayed in a
@@ -804,7 +804,7 @@ class SimpleDialog extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///  * [SemanticsConfiguration.namesRoute], for a description of how this
   ///    value is used.
   final String semanticLabel;
 

@@ -3,7 +3,7 @@
 "Devicelab" (a.k.a. [Cocoon](https://github.com/flutter/cocoon)) is a physical
 lab that tests Flutter on real Android and iOS devices.
 
-This package contains the code for test framework and the tests. More generally
+This package contains the code for the test framework and the tests. More generally
 the tests are referred to as "tasks" in the API, but since we primarily use it
 for testing, this document refers to them as "tests".
 
@@ -26,7 +26,7 @@ start the build.
 
 **Task is running** (blue with clock): an agent is currently building the task.
 
-**Task succeeded** (green): an agent reported a successful completion of the
+**Task succeeded** (green): an agent reported the successful completion of the
 task.
 
 **Task is flaky** (yellow): the task was attempted multiple time, but only the
@@ -37,10 +37,10 @@ latest attempt succeeded (we currently only try twice).
 **Task is rerunning** (orange): the task is being rerun.
 
 **Task was skipped** (transparent): the task is not scheduled for a build. This
-usually happens when a task is removed from `manifest.yaml` file.
+usually happens when a task is removed from the `manifest.yaml` file.
 
 In addition to color-coding, a task may display a question mark. This means
-that the task was marked as flaky manually. The status of such task is ignored
+that the task was marked as flaky manually. The status of such a task is ignored
 when considering whether the build is broken or not. For example, if a flaky
 task fails, GitHub will not prevent PR submissions. However, if the latest
 status of a non-flaky task is red, all pending PRs will contain a warning about
@@ -83,7 +83,7 @@ If the task fails, the agent reports the failure to the server, the server
 increments the counter counting the number of attempts it took to run the task
 and puts the task back in the pool of available tasks. If a task does not
 succeed after a certain number of attempts (as of this writing the limit is 2),
-the task is marked as failed and is displayed using red color on the dashboard.
+the task is marked as failed and is displayed using a red color on the dashboard.
 
 # Running tests locally
 
@@ -94,7 +94,7 @@ reproduce a CI test failure locally.
 
 ## Prerequisites
 
-You must set `ANDROID_SDK_ROOT` environment variable to run
+You must set the `ANDROID_SDK_ROOT` environment variable to run
 tests on Android. If you have a local build of the Flutter engine, then you have
 a copy of the Android SDK at `.../engine/src/third_party/android_tools/sdk`.
 
@@ -102,9 +102,9 @@ You can find where your Android SDK is using `flutter doctor`.
 
 ## Warnings
 
-Running devicelab will do things to your environment.
+Running the devicelab will do things to your environment.
 
-Notably, it will start and stop gradle, for instance.
+Notably, it will start and stop Gradle, for instance.
 
 ## Running all tests
 
@@ -141,9 +141,8 @@ To run multiple tests, repeat option `-t` (`--task`) multiple times:
 ```
 
 To run tests from a specific stage, use option `-s` (`--stage`).
-Currently there are only three stages defined, `devicelab`,
+Currently, there are only three stages defined, `devicelab`,
 `devicelab_ios` and `devicelab_win`.
-
 
 ```sh
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart -s {NAME_OF_STAGE}
@@ -169,7 +168,7 @@ against a local engine build. The test runs the same benchmark a specified
 number of times against both engines, then outputs a tab-separated spreadsheet
 with the results and stores them in a JSON file for future reference. The
 results can be copied to a Google Spreadsheet for further inspection and the
-JSON file can be reprocessed with the summarize.dart command for more detailed
+JSON file can be reprocessed with the `summarize.dart` command for more detailed
 output.
 
 Example:
@@ -188,7 +187,7 @@ engine build. `--local-engine` is required for A/B test.
 `--ab-result-file=filename` can be used to provide an alternate location to output
 the JSON results file (defaults to `ABresults#.json`). A single `#` character can be
 used to indicate where to insert a serial number if a file with that name already
-exists, otherwise the file will be overwritten.
+exists, otherwise, the file will be overwritten.
 
 A/B can run exactly one task. Multiple tasks are not supported.
 
@@ -286,17 +285,17 @@ your test edit `manifest.yaml` and add the following in the "tasks" dictionary:
 
 Where:
 
- - `{NAME_OF_TEST}` is the name of your test that also matches the name of the
- file in `bin/tasks` without the `.dart` extension.
- - `{DESCRIPTION}` is the plain English description of your test that helps
- others understand what this test is testing.
- - `{STAGE}` is `devicelab` if you want to run on Android, or `devicelab_ios` if
- you want to run on iOS.
- - `{CAPABILITIES}` is an array that lists the capabilities required of
- the test agent (the computer that runs the test) to run your test. As of writing,
- the available  capabilities are: `linux`, `linux/android`, `linux-vm`,
-`mac`, `mac/ios`, `mac/iphonexs`, `mac/ios32`, `mac-catalina/ios`,
-`mac-catalina/android`, `ios/gl-render-image`, `windows`, `windows/android`.
+- `{NAME_OF_TEST}` is the name of your test that also matches the name of the
+  file in `bin/tasks` without the `.dart` extension.
+- `{DESCRIPTION}` is the plain English description of your test that helps
+  others understand what this test is testing.
+- `{STAGE}` is `devicelab` if you want to run on Android, or `devicelab_ios` if
+  you want to run on iOS.
+- `{CAPABILITIES}` is an array that lists the capabilities required of
+  the test agent (the computer that runs the test) to run your test. As of writing,
+  the available capabilities are: `linux`, `linux/android`, `linux-vm`,
+  `mac`, `mac/ios`, `mac/iphonexs`, `mac/ios32`, `mac-catalina/ios`,
+  `mac-catalina/android`, `ios/gl-render-image`, `windows`, `windows/android`.
 
 If your test needs to run on multiple operating systems, create a separate test
 for each operating system.

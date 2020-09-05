@@ -23,6 +23,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
 import '../web/web_runner.dart';
+import '../widget_cache.dart';
 import 'daemon.dart';
 
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
@@ -51,6 +52,13 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
             'By default, this is not enabled to reduce the overhead. '
             'This is only available in profile or debug build. ',
       )
+      ..addFlag('purge-persistent-cache',
+        negatable: false,
+        help: 'Removes all existing persistent caches. This allows reproducing '
+            'shader compilation jank that normally only happens the first time '
+            'an app is run, or for reliable testing of compilation jank fixes '
+            '(e.g. shader warm-up).',
+      )
       ..addOption('route',
         help: 'Which route to load when running the app.',
       )
@@ -65,14 +73,15 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesIpv6Flag();
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    usesIsolateFilterOption(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
+    usesDeviceTimeoutOption();
   }
 
   bool get traceStartup => boolArg('trace-startup');
   bool get cacheSkSL => boolArg('cache-sksl');
   bool get dumpSkpOnShaderCompilation => boolArg('dump-skp-on-shader-compilation');
+  bool get purgePersistentCache => boolArg('purge-persistent-cache');
 
   String get route => stringArg('route');
 }
@@ -218,6 +227,7 @@ class RunCommand extends RunCommandBase {
               'Currently this is only supported on Android devices. This option '
               'cannot be paired with --use-application-binary.'
       );
+      addDdsOptions(verboseHelp: verboseHelp);
   }
 
   @override
@@ -384,6 +394,7 @@ class RunCommand extends RunCommandBase {
         buildInfo,
         startPaused: boolArg('start-paused'),
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+        disableDds: boolArg('disable-dds'),
         dartFlags: stringArg('dart-flags') ?? '',
         useTestFonts: boolArg('use-test-fonts'),
         enableSoftwareRendering: boolArg('enable-software-rendering'),
@@ -394,6 +405,7 @@ class RunCommand extends RunCommandBase {
         endlessTraceBuffer: boolArg('endless-trace-buffer'),
         dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
         cacheSkSL: cacheSkSL,
+        purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
         verboseSystemLogs: boolArg('verbose-system-logs'),
@@ -412,6 +424,7 @@ class RunCommand extends RunCommandBase {
         fastStart: boolArg('fast-start')
           && !runningWithPrebuiltApplication
           && devices.every((Device device) => device.supportsFastStart),
+        nullAssertions: boolArg('null-assertions'),
       );
     }
   }
@@ -450,6 +463,7 @@ class RunCommand extends RunCommandBase {
           packagesFilePath: globalResults['packages'] as String,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
+          machine: true,
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());
@@ -513,11 +527,11 @@ class RunCommand extends RunCommandBase {
           flutterProject: flutterProject,
           fileSystemRoots: stringsArg('filesystem-root'),
           fileSystemScheme: stringArg('filesystem-scheme'),
-          viewFilter: stringArg('isolate-filter'),
           experimentalFlags: expFlags,
           target: stringArg('target'),
           buildInfo: getBuildInfo(),
           userIdentifier: userIdentifier,
+          widgetCache: WidgetCache(featureFlags: featureFlags),
         ),
     ];
     // Only support "web mode" with a single web device due to resident runner

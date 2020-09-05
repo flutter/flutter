@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'simulation.dart';
 
 /// A simulation that applies limits to another simulation.
@@ -50,10 +48,10 @@ class ClampedSimulation extends Simulation {
   final double dxMax;
 
   @override
-  double x(double time) => simulation.x(time).clamp(xMin, xMax) as double;
+  double x(double time) => simulation.x(time).clamp(xMin, xMax);
 
   @override
-  double dx(double time) => simulation.dx(time).clamp(dxMin, dxMax) as double;
+  double dx(double time) => simulation.dx(time).clamp(dxMin, dxMax);
 
   @override
   bool isDone(double time) => simulation.isDone(time);

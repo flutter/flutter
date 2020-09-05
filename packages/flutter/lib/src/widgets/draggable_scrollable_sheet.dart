@@ -22,7 +22,7 @@ import 'scroll_simulation.dart';
 
 /// The signature of a method that provides a [BuildContext] and
 /// [ScrollController] for building a widget that may overflow the draggable
-/// [Axis] of the containing [DraggableScrollSheet].
+/// [Axis] of the containing [DraggableScrollableSheet].
 ///
 /// Users should apply the [scrollController] to a [ScrollView] subclass, such
 /// as a [SingleChildScrollView], [ListView] or [GridView], to have the whole

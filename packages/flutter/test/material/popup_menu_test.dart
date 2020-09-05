@@ -836,6 +836,90 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('PopupMenuItem merges the semantics of its descendants', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PopupMenuButton<int>(
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<int>>[
+                PopupMenuItem<int>(
+                  value: 1,
+                  child: Row(
+                    children: <Widget>[
+                      Semantics(
+                        child: const Text('test1'),
+                      ),
+                      Semantics(
+                        child: const Text('test2'),
+                      ),
+                    ],
+                  ),
+                ),
+              ];
+            },
+            child: const SizedBox(
+              height: 100.0,
+              width: 100.0,
+              child: Text('XXX'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('XXX'));
+    await tester.pumpAndSettle();
+
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                children: <TestSemantics>[
+                  TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.scopesRoute,
+                      SemanticsFlag.namesRoute,
+                    ],
+                    label: 'Popup menu',
+                    textDirection: TextDirection.ltr,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasImplicitScrolling,
+                        ],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: 'test1\ntest2',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              TestSemantics(),
+            ],
+          ),
+        ],
+      ),
+      ignoreId: true, ignoreTransform: true, ignoreRect: true,
+    ));
+
+    semantics.dispose();
+  });
+
   testWidgets('disabled PopupMenuItem has correct semantics', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/45044.
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1017,7 +1101,7 @@ void main() {
           child: Center(
             child: Builder(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   onPressed: () {
                     // Ensure showMenu throws an assertion without a position
                     expect(() {
@@ -1356,7 +1440,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showMenu<int>(
                     context: context,
@@ -1377,7 +1461,7 @@ void main() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.menuCount, 0);
     expect(nestedObserver.menuCount, 1);
@@ -1394,7 +1478,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showMenu<int>(
                     context: context,
@@ -1416,7 +1500,7 @@ void main() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.menuCount, 1);
     expect(nestedObserver.menuCount, 0);

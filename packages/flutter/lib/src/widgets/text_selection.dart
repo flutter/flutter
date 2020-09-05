@@ -67,14 +67,6 @@ enum TextSelectionHandleType {
 /// [start] handle always moves the [start]/[baseOffset] of the selection.
 enum _TextSelectionHandlePosition { start, end }
 
-/// Signature for reporting changes to the selection component of a
-/// [TextEditingValue] for the purposes of a [TextSelectionOverlay]. The
-/// [caretRect] argument gives the location of the caret in the coordinate space
-/// of the [RenderBox] given by the [TextSelectionOverlay.renderObject].
-///
-/// Used by [TextSelectionOverlay.onSelectionOverlayChanged].
-typedef TextSelectionOverlayChanged = void Function(TextEditingValue value, Rect caretRect);
-
 /// Signature for when a pointer that's dragging to select text has moved again.
 ///
 /// The first argument [startDetails] contains the details of the event that
@@ -439,8 +431,6 @@ class TextSelectionOverlay {
       OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.start)),
       OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.end)),
     ];
-
-
 
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles);
   }
@@ -871,8 +861,8 @@ abstract class TextSelectionGestureDetectorBuilderDelegate {
 ///
 /// The class implements sensible defaults for many user interactions
 /// with an [EditableText] (see the documentation of the various gesture handler
-/// methods, e.g. [onTapDown], [onForcePress], etc.). Subclasses of
-/// [EditableTextSelectionHandlesProvider] can change the behavior performed in
+/// methods, e.g. [onTapDown], [onForcePressStart], etc.). Subclasses of
+/// [TextSelectionGestureDetectorBuilder] can change the behavior performed in
 /// responds to these gesture events by overriding the corresponding handler
 /// methods of this class.
 ///
@@ -1065,7 +1055,7 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onDoubleTapDown].
   ///
-  /// By default, it selects a word through [renderEditable.selectWord] if
+  /// By default, it selects a word through [RenderEditable.selectWord] if
   /// selectionEnabled and shows toolbar if necessary.
   ///
   /// See also:
@@ -1099,7 +1089,8 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onDragSelectionUpdate].
   ///
-  /// By default, it updates the selection location specified in [details].
+  /// By default, it updates the selection location specified in the provided
+  /// details objects.
   ///
   /// See also:
   ///
@@ -1196,7 +1187,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   final GestureTapDownCallback onTapDown;
 
   /// Called when a pointer has tapped down and the force of the pointer has
-  /// just become greater than [ForcePressGestureDetector.startPressure].
+  /// just become greater than [ForcePressGestureRecognizer.startPressure].
   final GestureForcePressStartCallback onForcePressStart;
 
   /// Called when a pointer that had previously triggered [onForcePressStart] is
@@ -1204,7 +1195,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   final GestureForcePressEndCallback onForcePressEnd;
 
   /// Called for each distinct tap except for every second tap of a double tap.
-  /// For example, if the detector was configured [onSingleTapDown] and
+  /// For example, if the detector was configured with [onTapDown] and
   /// [onDoubleTapDown], three quick taps would be recognized as a single tap
   /// down, followed by a double tap down, followed by a single tap down.
   final GestureTapUpCallback onSingleTapUp;
@@ -1521,7 +1512,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   bool get disposed => _disposed;
 
   /// Check the [Clipboard] and update [value] if needed.
-  void update() {
+  Future<void> update() async {
     // iOS 14 added a notification that appears when an app accesses the
     // clipboard. To avoid the notification, don't access the clipboard on iOS,
     // and instead always shown the paste button, even when the clipboard is
@@ -1541,15 +1532,26 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
         break;
     }
 
-    Clipboard.getData(Clipboard.kTextPlain).then((ClipboardData data) {
-      final ClipboardStatus clipboardStatus = data != null && data.text != null && data.text.isNotEmpty
-          ? ClipboardStatus.pasteable
-          : ClipboardStatus.notPasteable;
-      if (_disposed || clipboardStatus == value) {
+    ClipboardData data;
+    try {
+      data = await Clipboard.getData(Clipboard.kTextPlain);
+    } catch (stacktrace) {
+      // In the case of an error from the Clipboard API, set the value to
+      // unknown so that it will try to update again later.
+      if (_disposed || value == ClipboardStatus.unknown) {
         return;
       }
-      value = clipboardStatus;
-    });
+      value = ClipboardStatus.unknown;
+      return;
+    }
+
+    final ClipboardStatus clipboardStatus = data != null && data.text != null && data.text.isNotEmpty
+        ? ClipboardStatus.pasteable
+        : ClipboardStatus.notPasteable;
+    if (_disposed || clipboardStatus == value) {
+      return;
+    }
+    value = clipboardStatus;
   }
 
   @override

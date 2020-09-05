@@ -220,8 +220,10 @@ class TabController extends ChangeNotifier {
       _animationController
         .animateTo(_index.toDouble(), duration: duration, curve: curve)
         .whenCompleteOrCancel(() {
-          _indexIsChangingCount -= 1;
-          notifyListeners();
+          if (_animationController != null) { // don't notify if we've been disposed
+            _indexIsChangingCount -= 1;
+            notifyListeners();
+          }
         });
     } else {
       _indexIsChangingCount += 1;

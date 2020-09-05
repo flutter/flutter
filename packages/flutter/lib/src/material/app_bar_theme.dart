@@ -31,7 +31,7 @@ import 'theme.dart';
 ///    application.
 @immutable
 class AppBarTheme with Diagnosticable {
-  /// Creates a theme that can be used for [ThemeData.AppBarTheme].
+  /// Creates a theme that can be used for [ThemeData.appBarTheme].
   const AppBarTheme({
     this.brightness,
     this.color,
@@ -48,7 +48,7 @@ class AppBarTheme with Diagnosticable {
   /// If null, [AppBar] uses [ThemeData.primaryColorBrightness].
   final Brightness brightness;
 
-  /// Default value for [AppBar.color].
+  /// Default value for [AppBar.backgroundColor].
   ///
   /// If null, [AppBar] uses [ThemeData.primaryColor].
   final Color color;

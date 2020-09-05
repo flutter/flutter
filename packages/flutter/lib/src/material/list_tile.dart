@@ -115,8 +115,8 @@ class ListTileTheme extends InheritedTheme {
 
   /// The tile's internal padding.
   ///
-  /// Insets a [ListTile]'s contents: its [leading], [title], [subtitle],
-  /// and [trailing] widgets.
+  /// Insets a [ListTile]'s contents: its [ListTile.leading], [ListTile.title],
+  /// [ListTile.subtitle], and [ListTile.trailing] widgets.
   final EdgeInsetsGeometry contentPadding;
 
   /// If specified, defines the background color for `ListTile` when
@@ -654,6 +654,8 @@ enum ListTileControlAffinity {
 ///  * [CheckboxListTile], [RadioListTile], and [SwitchListTile], widgets
 ///    that combine [ListTile] with other controls.
 ///  * <https://material.io/design/components/lists.html>
+///  * Cookbook: [Use lists](https://flutter.dev/docs/cookbook/lists/basic-list)
+///  * Cookbook: [Implement swipe to dismiss](https://flutter.dev/docs/cookbook/gestures/dismissible)
 class ListTile extends StatelessWidget {
   /// Creates a list tile.
   ///
@@ -734,7 +736,7 @@ class ListTile extends StatelessWidget {
   ///
   /// To show right-aligned metadata (assuming left-to-right reading order;
   /// left-aligned for right-to-left reading order), consider using a [Row] with
-  /// [MainAxisAlign.baseline] alignment whose first item is [Expanded] and
+  /// [CrossAxisAlignment.baseline] alignment whose first item is [Expanded] and
   /// whose second child is the metadata text, instead of using the [trailing]
   /// property.
   final Widget trailing;
@@ -764,17 +766,17 @@ class ListTile extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
-  ///    within a [Theme].
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
+  ///    widgets within a [Theme].
   final VisualDensity visualDensity;
 
   /// The shape of the tile's [InkWell].
   ///
   /// Defines the tile's [InkWell.customBorder].
   ///
-  /// If this property is null then [ThemeData.cardTheme.shape] is used.
-  /// If that's null then the shape will be a [RoundedRectangleBorder] with a
-  /// circular corner radius of 4.0.
+  /// If this property is null then [CardTheme.shape] of [ThemeData.cardTheme]
+  /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
+  /// with a circular corner radius of 4.0.
   final ShapeBorder shape;
 
   /// The tile's internal padding.
@@ -1162,7 +1164,6 @@ class _ListTileElement extends RenderObjectElement {
   _ListTileElement(_ListTile widget) : super(widget);
 
   final Map<_ListTileSlot, Element> slotToChild = <_ListTileSlot, Element>{};
-  final Map<Element, _ListTileSlot> childToSlot = <Element, _ListTileSlot>{};
 
   @override
   _ListTile get widget => super.widget as _ListTile;
@@ -1177,11 +1178,10 @@ class _ListTileElement extends RenderObjectElement {
 
   @override
   void forgetChild(Element child) {
-    assert(slotToChild.values.contains(child));
-    assert(childToSlot.keys.contains(child));
-    final _ListTileSlot slot = childToSlot[child];
-    childToSlot.remove(child);
-    slotToChild.remove(slot);
+    assert(slotToChild.containsValue(child));
+    assert(child.slot is _ListTileSlot);
+    assert(slotToChild.containsKey(child.slot));
+    slotToChild.remove(child.slot);
     super.forgetChild(child);
   }
 
@@ -1190,11 +1190,9 @@ class _ListTileElement extends RenderObjectElement {
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
       slotToChild.remove(slot);
-      childToSlot.remove(oldChild);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -1211,12 +1209,10 @@ class _ListTileElement extends RenderObjectElement {
     final Element oldChild = slotToChild[slot];
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
-      childToSlot.remove(oldChild);
       slotToChild.remove(slot);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -1248,26 +1244,22 @@ class _ListTileElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, dynamic slotValue) {
+  void insertRenderObjectChild(RenderObject child, _ListTileSlot slot) {
     assert(child is RenderBox);
-    assert(slotValue is _ListTileSlot);
-    final _ListTileSlot slot = slotValue as _ListTileSlot;
     _updateRenderObject(child as RenderBox, slot);
-    assert(renderObject.childToSlot.keys.contains(child));
-    assert(renderObject.slotToChild.keys.contains(slot));
+    assert(renderObject.children.keys.contains(slot));
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, _ListTileSlot slot) {
     assert(child is RenderBox);
-    assert(renderObject.childToSlot.keys.contains(child));
-    _updateRenderObject(null, renderObject.childToSlot[child]);
-    assert(!renderObject.childToSlot.keys.contains(child));
-    assert(!renderObject.slotToChild.keys.contains(slot));
+    assert(renderObject.children[slot] == child);
+    _updateRenderObject(null, slot);
+    assert(!renderObject.children.keys.contains(slot));
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, dynamic slotValue) {
+  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
     assert(false, 'not reachable');
   }
 }
@@ -1298,18 +1290,15 @@ class _RenderListTile extends RenderBox {
   // The minimum padding on the top and bottom of the title and subtitle widgets.
   static const double _minVerticalPadding = 4.0;
 
-  final Map<_ListTileSlot, RenderBox> slotToChild = <_ListTileSlot, RenderBox>{};
-  final Map<RenderBox, _ListTileSlot> childToSlot = <RenderBox, _ListTileSlot>{};
+  final Map<_ListTileSlot, RenderBox> children = <_ListTileSlot, RenderBox>{};
 
   RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _ListTileSlot slot) {
     if (oldChild != null) {
       dropChild(oldChild);
-      childToSlot.remove(oldChild);
-      slotToChild.remove(slot);
+      children.remove(slot);
     }
     if (newChild != null) {
-      childToSlot[newChild] = slot;
-      slotToChild[slot] = newChild;
+      children[slot] = newChild;
       adoptChild(newChild);
     }
     return newChild;

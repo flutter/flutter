@@ -32,7 +32,7 @@ import 'theme.dart';
 ///    application.
 @immutable
 class BottomNavigationBarThemeData with Diagnosticable {
-  /// Creates a theme that can be used for [ThemeData.BottomNavigationBarTheme].
+  /// Creates a theme that can be used for [ThemeData.bottomNavigationBarTheme].
   const BottomNavigationBarThemeData({
     this.backgroundColor,
     this.elevation,
@@ -70,13 +70,13 @@ class BottomNavigationBarThemeData with Diagnosticable {
   final IconThemeData unselectedIconTheme;
 
   /// The color of the selected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.label].
+  /// [BottomNavigationBarItem.title].
   ///
   /// See [BottomNavigationBar.selectedItemColor].
   final Color selectedItemColor;
 
   /// The color of the unselected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.label]s.
+  /// [BottomNavigationBarItem.title]s.
   ///
   /// See [BottomNavigationBar.unselectedItemColor].
   final Color unselectedItemColor;

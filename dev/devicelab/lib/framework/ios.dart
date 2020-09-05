@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:path/path.dart' as path;
+
 import 'utils.dart';
 
 typedef SimulatorFunction = Future<void> Function(String deviceId);
@@ -102,9 +104,45 @@ Future<bool> containsBitcode(String pathToBinary) async {
   return !emptyBitcodeMarkerFound;
 }
 
+Future<bool> dartObservatoryBonjourServiceFound(String appBundlePath) async =>
+  (await eval(
+    'plutil',
+    <String>[
+      '-extract',
+      'NSBonjourServices',
+      'xml1',
+      '-o',
+      '-',
+      path.join(
+        appBundlePath,
+        'Info.plist',
+      ),
+    ],
+    canFail: true,
+  )).contains('_dartobservatory._tcp');
+
+Future<bool> localNetworkUsageFound(String appBundlePath) async =>
+  await exec(
+    'plutil',
+    <String>[
+      '-extract',
+      'NSLocalNetworkUsageDescription',
+      'xml1',
+      '-o',
+      '-',
+      path.join(
+        appBundlePath,
+        'Info.plist',
+      ),
+    ],
+    canFail: true,
+  ) == 0;
+
 /// Creates and boots a new simulator, passes the new simulator's identifier to
-/// `testFunction`, then shuts down and deletes simulator.
-Future<void> testWithNewiOSSimulator(
+/// `testFunction`.
+///
+/// Remember to call removeIOSimulator in the test teardown.
+Future<void> testWithNewIOSSimulator(
   String deviceName,
   SimulatorFunction testFunction, {
   String deviceTypeId = 'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
@@ -160,7 +198,10 @@ Future<void> testWithNewiOSSimulator(
   );
 
   await testFunction(deviceId);
+}
 
+/// Shuts down and deletes simulator with deviceId.
+Future<void> removeIOSimulator(String deviceId) async {
   if (deviceId != null && deviceId != '') {
     await eval(
       'xcrun',

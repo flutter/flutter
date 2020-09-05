@@ -274,13 +274,13 @@ void main() {
     // rendering widths in tests.
     // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(boxes[0].toRect().width, anyOf(14.0, 13.0));
-    expect(boxes[0].toRect().height, closeTo(13.0, 0.0001));
+    expect(boxes[0].toRect().height, moreOrLessEquals(13.0, epsilon: 0.0001));
     expect(boxes[1].toRect().width, anyOf(27.0, 26.0));
-    expect(boxes[1].toRect().height, closeTo(26.0, 0.0001));
+    expect(boxes[1].toRect().height, moreOrLessEquals(26.0, epsilon: 0.0001));
     expect(boxes[2].toRect().width, anyOf(27.0, 26.0));
-    expect(boxes[2].toRect().height, closeTo(26.0, 0.0001));
+    expect(boxes[2].toRect().height, moreOrLessEquals(26.0, epsilon: 0.0001));
     expect(boxes[3].toRect().width, anyOf(14.0, 13.0));
-    expect(boxes[3].toRect().height, closeTo(13.0, 0.0001));
+    expect(boxes[3].toRect().height, moreOrLessEquals(13.0, epsilon: 0.0001));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
 
   test('toStringDeep', () {
@@ -326,97 +326,6 @@ void main() {
     expect(paragraph.locale, const Locale('ja', 'JP'));
   });
 
-  test('can compute IntrinsicHeight for widget span', () {
-    // Regression test for https://github.com/flutter/flutter/issues/59316
-    const double screenWidth = 100.0;
-    const String sentence = 'one two';
-    List<RenderBox> renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
-    ];
-    RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(
-        children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence))
-        ]
-      ),
-      textScaleFactor: 1.0,
-      children: renderBoxes,
-      textDirection: TextDirection.ltr,
-      applyTextScaleFactorToWidgetSpan: true,
-    );
-    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
-    final double singleLineHeight = paragraph.computeMaxIntrinsicHeight(screenWidth);
-    expect(singleLineHeight, 14.0);
-
-    pumpFrame();
-    renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
-    ];
-    paragraph = RenderParagraph(
-      const TextSpan(
-        children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence))
-        ]
-      ),
-      textScaleFactor: 2.0,
-      children: renderBoxes,
-      textDirection: TextDirection.ltr,
-      applyTextScaleFactorToWidgetSpan: true,
-    );
-
-    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
-    final double maxIntrinsicHeight = paragraph.computeMaxIntrinsicHeight(screenWidth);
-    final double minIntrinsicHeight = paragraph.computeMinIntrinsicHeight(screenWidth);
-    // intrinsicHeight = singleLineHeight * textScaleFactor * two lines.
-    expect(maxIntrinsicHeight, singleLineHeight * 2.0 * 2);
-    expect(maxIntrinsicHeight, minIntrinsicHeight);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
-
-  test('can compute IntrinsicWidth for widget span', () {
-    // Regression test for https://github.com/flutter/flutter/issues/59316
-    const double screenWidth = 1000.0;
-    const double fixedHeight = 1000.0;
-    const String sentence = 'one two';
-    List<RenderBox> renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
-    ];
-    RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(
-        children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence))
-        ]
-      ),
-      textScaleFactor: 1.0,
-      children: renderBoxes,
-      textDirection: TextDirection.ltr,
-      applyTextScaleFactorToWidgetSpan: true,
-    );
-    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
-    final double widthForOneLine = paragraph.computeMaxIntrinsicWidth(fixedHeight);
-    expect(widthForOneLine, 98.0);
-
-    pumpFrame();
-    renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
-    ];
-    paragraph = RenderParagraph(
-      const TextSpan(
-        children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence))
-        ]
-      ),
-      textScaleFactor: 2.0,
-      children: renderBoxes,
-      textDirection: TextDirection.ltr,
-      applyTextScaleFactorToWidgetSpan: true,
-    );
-
-    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
-    final double maxIntrinsicWidth = paragraph.computeMaxIntrinsicWidth(fixedHeight);
-    // maxIntrinsicWidth = widthForOneLine * textScaleFactor
-    expect(maxIntrinsicWidth, widthForOneLine * 2.0);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
-
   test('inline widgets test', () {
     const TextSpan text = TextSpan(
       text: 'a',
@@ -453,6 +362,93 @@ void main() {
     expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
     expect(boxes[3], const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
     expect(boxes[4], const TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+  test('can compute IntrinsicHeight for widget span', () {
+    // Regression test for https://github.com/flutter/flutter/issues/59316
+    const double screenWidth = 100.0;
+    const String sentence = 'one two';
+    List<RenderBox> renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+    ];
+    RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        children: <InlineSpan> [
+          WidgetSpan(child: Text(sentence))
+        ]
+      ),
+      textScaleFactor: 1.0,
+      children: renderBoxes,
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
+    final double singleLineHeight = paragraph.computeMaxIntrinsicHeight(screenWidth);
+    expect(singleLineHeight, 14.0);
+
+    pumpFrame();
+    renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+    ];
+    paragraph = RenderParagraph(
+      const TextSpan(
+        children: <InlineSpan> [
+          WidgetSpan(child: Text(sentence))
+        ]
+      ),
+      textScaleFactor: 2.0,
+      children: renderBoxes,
+      textDirection: TextDirection.ltr,
+    );
+
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
+    final double maxIntrinsicHeight = paragraph.computeMaxIntrinsicHeight(screenWidth);
+    final double minIntrinsicHeight = paragraph.computeMinIntrinsicHeight(screenWidth);
+    // intrinsicHeight = singleLineHeight * textScaleFactor * two lines.
+    expect(maxIntrinsicHeight, singleLineHeight * 2.0 * 2);
+    expect(maxIntrinsicHeight, minIntrinsicHeight);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+  test('can compute IntrinsicWidth for widget span', () {
+    // Regression test for https://github.com/flutter/flutter/issues/59316
+    const double screenWidth = 1000.0;
+    const double fixedHeight = 1000.0;
+    const String sentence = 'one two';
+    List<RenderBox> renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+    ];
+    RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        children: <InlineSpan> [
+          WidgetSpan(child: Text(sentence))
+        ]
+      ),
+      textScaleFactor: 1.0,
+      children: renderBoxes,
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
+    final double widthForOneLine = paragraph.computeMaxIntrinsicWidth(fixedHeight);
+    expect(widthForOneLine, 98.0);
+
+    pumpFrame();
+    renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+    ];
+    paragraph = RenderParagraph(
+      const TextSpan(
+        children: <InlineSpan> [
+          WidgetSpan(child: Text(sentence))
+        ]
+      ),
+      textScaleFactor: 2.0,
+      children: renderBoxes,
+      textDirection: TextDirection.ltr,
+    );
+
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
+    final double maxIntrinsicWidth = paragraph.computeMaxIntrinsicWidth(fixedHeight);
+    // maxIntrinsicWidth = widthForOneLine * textScaleFactor
+    expect(maxIntrinsicWidth, widthForOneLine * 2.0);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
   test('inline widgets multiline test', () {

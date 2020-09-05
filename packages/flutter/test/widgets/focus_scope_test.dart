@@ -77,7 +77,7 @@ class TestFocusState extends State<TestFocus> {
 }
 
 void main() {
-  group(FocusScope, () {
+  group('FocusScope', () {
     testWidgets('Can focus', (WidgetTester tester) async {
       final GlobalKey<TestFocusState> key = GlobalKey();
 
@@ -1078,7 +1078,7 @@ void main() {
     });
   });
 
-  group(Focus, () {
+  group('Focus', () {
     testWidgets('Focus.of stops at the nearest Focus widget.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -1596,7 +1596,7 @@ void main() {
       expect(semantics, hasSemantics(expectedSemantics));
     });
   });
-  group(ExcludeFocus, () {
+  group('ExcludeFocus', () {
     testWidgets("Descendants of ExcludeFocus aren't focusable.", (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -1634,6 +1634,76 @@ void main() {
       expect(gotFocus, isNull);
       expect(containerNode.hasFocus, isFalse);
       expect(unfocusableNode.hasFocus, isFalse);
+    });
+    // Regression test for https://github.com/flutter/flutter/issues/61700
+    testWidgets("ExcludeFocus doesn't transfer focus to another descendant.", (WidgetTester tester) async {
+      final FocusNode parentFocusNode = FocusNode(debugLabel: 'group');
+      final FocusNode focusNode1 = FocusNode(debugLabel: 'node 1');
+      final FocusNode focusNode2 = FocusNode(debugLabel: 'node 2');
+      await tester.pumpWidget(
+        ExcludeFocus(
+          excluding: false,
+          child: Focus(
+            focusNode: parentFocusNode,
+            child: Column(
+              children: <Widget>[
+                Focus(
+                  autofocus: true,
+                  focusNode: focusNode1,
+                  child: Container(),
+                ),
+                Focus(
+                  focusNode: focusNode2,
+                  child: Container(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(parentFocusNode.hasFocus, isTrue);
+      expect(focusNode1.hasPrimaryFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+
+      // Move focus to the second node to create some focus history for the scope.
+      focusNode2.requestFocus();
+      await tester.pump();
+
+      expect(parentFocusNode.hasFocus, isTrue);
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasPrimaryFocus, isTrue);
+
+      // Now turn off the focus for the subtree.
+      await tester.pumpWidget(
+        ExcludeFocus(
+          excluding: true,
+          child: Focus(
+            focusNode: parentFocusNode,
+            child: Column(
+              children: <Widget>[
+                Focus(
+                  autofocus: true,
+                  focusNode: focusNode1,
+                  child: Container(),
+                ),
+                Focus(
+                  focusNode: focusNode2,
+                  child: Container(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(parentFocusNode.hasFocus, isFalse);
+      expect(parentFocusNode.enclosingScope.hasPrimaryFocus, isTrue);
     });
     testWidgets("ExcludeFocus doesn't introduce a Semantics node", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);

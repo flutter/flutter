@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -27,8 +25,8 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
   /// Only valid when asserts are enabled. In release builds, always returns
   /// null.
   @visibleForTesting
-  MouseCursor debugDeviceActiveCursor(int device) {
-    MouseCursor result;
+  MouseCursor? debugDeviceActiveCursor(int device) {
+    MouseCursor? result;
     assert(() {
       result = _lastSession[device]?.cursor;
       return true;
@@ -66,7 +64,7 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
       return;
     }
 
-    final MouseCursorSession lastSession = _lastSession[device];
+    final MouseCursorSession? lastSession = _lastSession[device];
     final MouseCursor nextCursor = _findFirstCursor(details.nextAnnotations.keys);
     if (lastSession?.cursor == nextCursor)
       return;
@@ -160,7 +158,7 @@ abstract class MouseCursorSession {
 ///
 /// A [MouseCursor] object is used by being assigned to a [MouseRegion] or
 /// another widget that exposes the [MouseRegion] API, such as
-/// [InkWell.mouseCursor].
+/// [InkResponse.mouseCursor].
 ///
 /// {@tool snippet --template=stateless_widget_material}
 /// This sample creates a rectangular region that is wrapped by a [MouseRegion]
@@ -273,7 +271,7 @@ class _DeferringMouseCursor extends MouseCursor {
   String get debugDescription => 'defer';
 
   /// Returns the first cursor that is not a [MouseCursor.defer].
-  static MouseCursor firstNonDeferred(Iterable<MouseCursor> cursors) {
+  static MouseCursor? firstNonDeferred(Iterable<MouseCursor> cursors) {
     for (final MouseCursor cursor in cursors) {
       assert(cursor != null);
       if (cursor != MouseCursor.defer)
@@ -361,7 +359,7 @@ class _SystemMouseCursorSession extends MouseCursorSession {
 ///  * macOS: API name in Objective C
 ///
 /// If the platform that the application is running on is not listed for a cursor,
-/// using this cursor falls back to [basic].
+/// using this cursor falls back to [SystemMouseCursors.basic].
 ///
 /// [SystemMouseCursors] enumerates the complete set of system cursors supported
 /// by Flutter, which are hard-coded in the engine. Therefore, manually
@@ -370,7 +368,7 @@ class SystemMouseCursor extends MouseCursor {
   // Application code shouldn't directly instantiate system mouse cursors, since
   // the supported system cursors are enumerated in [SystemMouseCursors].
   const SystemMouseCursor._({
-    @required this.kind,
+    required this.kind,
   }) : assert(kind != null);
 
   /// A string that identifies the kind of the cursor.
@@ -386,7 +384,7 @@ class SystemMouseCursor extends MouseCursor {
   _SystemMouseCursorSession createSession(int device) => _SystemMouseCursorSession(this, device);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is SystemMouseCursor
@@ -419,7 +417,7 @@ class SystemMouseCursor extends MouseCursor {
 class SystemMouseCursors {
   // This class only contains static members, and should not be instantiated or
   // extended.
-  factory SystemMouseCursors._() => null;
+  factory SystemMouseCursors._() => throw Error();
 
   // The mapping in this class must be kept in sync with the following files in
   // the engine:
@@ -433,11 +431,12 @@ class SystemMouseCursors {
 
   /// Hide the cursor.
   ///
-  /// Any cursor other than [none] or [uncontrolled] unhides the cursor.
+  /// Any cursor other than [none] or [MouseCursor.uncontrolled] unhides the
+  /// cursor.
   static const SystemMouseCursor none = SystemMouseCursor._(kind: 'none');
 
 
-  //// STATUS ////
+  // STATUS
 
   /// The platform-dependent basic cursor.
   ///
@@ -549,7 +548,7 @@ class SystemMouseCursors {
   static const SystemMouseCursor help = SystemMouseCursor._(kind: 'help');
 
 
-  //// SELECTION ////
+  // SELECTION
 
   /// A cursor indicating selectable text.
   ///
@@ -603,7 +602,7 @@ class SystemMouseCursors {
   static const SystemMouseCursor precise = SystemMouseCursor._(kind: 'precise');
 
 
-  //// DRAG-AND-DROP ////
+  // DRAG-AND-DROP
 
   /// A cursor indicating moving something.
   ///
@@ -695,7 +694,7 @@ class SystemMouseCursors {
   static const SystemMouseCursor disappearing = SystemMouseCursor._(kind: 'disappearing');
 
 
-  //// RESIZING AND SCROLLING ////
+  // RESIZING AND SCROLLING
 
   /// A cursor indicating scrolling in any direction.
   ///
@@ -896,7 +895,7 @@ class SystemMouseCursors {
   static const SystemMouseCursor resizeRow = SystemMouseCursor._(kind: 'resizeRow');
 
 
-  //// OTHER OPERATIONS ////
+  // OTHER OPERATIONS
 
   /// A cursor indicating zooming in.
   ///

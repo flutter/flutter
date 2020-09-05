@@ -206,6 +206,7 @@ void main() {
     expect(selectableText.autofocus, false);
     expect(selectableText.dragStartBehavior, DragStartBehavior.start);
     expect(selectableText.cursorWidth, 2.0);
+    expect(selectableText.cursorHeight, isNull);
     expect(selectableText.enableInteractiveSelection, true);
   });
 
@@ -250,6 +251,7 @@ void main() {
     expect(selectableText.autofocus, false);
     expect(selectableText.dragStartBehavior, DragStartBehavior.start);
     expect(selectableText.cursorWidth, 2.0);
+    expect(selectableText.cursorHeight, isNull);
     expect(selectableText.enableInteractiveSelection, true);
   });
 
@@ -1775,8 +1777,8 @@ void main() {
     //  ---------   rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
-    expect(tester.getBottomLeft(find.byKey(keyA)).dy, closeTo(rowBottomY - 4.0, 0.001));
-    expect(tester.getBottomLeft(find.text('abc')).dy, closeTo(rowBottomY - 2.0, 0.001));
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, moreOrLessEquals(rowBottomY - 4.0, epsilon: 1e-3));
+    expect(tester.getBottomLeft(find.text('abc')).dy, moreOrLessEquals(rowBottomY - 2.0, epsilon: 1e-3));
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
@@ -1822,8 +1824,8 @@ void main() {
     //  ---------   rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
-    expect(tester.getBottomLeft(find.byKey(keyA)).dy, closeTo(rowBottomY - 4.0, 0.001));
-    expect(tester.getBottomLeft(find.text('abc')).dy, closeTo(rowBottomY - 2.0, 0.001));
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, moreOrLessEquals(rowBottomY - 4.0, epsilon: 1e-3));
+    expect(tester.getBottomLeft(find.text('abc')).dy, moreOrLessEquals(rowBottomY - 2.0, epsilon: 1e-3));
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
@@ -2708,7 +2710,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'long press moves cursor to the exact long press position and shows toolbar',
+    'long press selects word and shows toolbar (iOS)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -2728,13 +2730,16 @@ void main() {
       final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
       final TextEditingController controller = editableTextWidget.controller;
 
-      // Collapsed cursor for iOS long press.
+      // The longpressed word is selected.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 4, affinity: TextAffinity.upstream),
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 7,
+        ),
       );
 
-      // Collapsed toolbar shows 2 buttons.
+      // Toolbar shows one button.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
@@ -2826,10 +2831,14 @@ void main() {
       final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
       final TextEditingController controller = editableTextWidget.controller;
 
-      // Long press on iOS shows collapsed selection cursor.
+      // The longpressed word is selected.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 4, affinity: TextAffinity.upstream),
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 7,
+          affinity: TextAffinity.downstream,
+        ),
       );
       // Cursor move doesn't trigger a toolbar initially.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -2840,7 +2849,11 @@ void main() {
       // The selection position is now moved with the drag.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.downstream),
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 8,
+          affinity: TextAffinity.downstream,
+        ),
       );
       // Still no toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -2851,7 +2864,11 @@ void main() {
       // The selection position is now moved with the drag.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream),
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 12,
+          affinity: TextAffinity.downstream,
+        ),
       );
       // Still no toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -2862,7 +2879,11 @@ void main() {
       // The selection isn't affected by the gesture lift.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream),
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 12,
+          affinity: TextAffinity.downstream,
+        ),
       );
       // The toolbar now shows up.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
@@ -2904,7 +2925,7 @@ void main() {
 
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 21),
+      const TextSelection(baseOffset: 13, extentOffset: 23),
     );
     expect(find.byType(CupertinoButton), findsNothing);
 
@@ -2913,21 +2934,33 @@ void main() {
     await tester.pump();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 64, affinity: TextAffinity.downstream),
+      const TextSelection(
+        baseOffset: 13,
+        extentOffset: 66,
+        affinity: TextAffinity.downstream,
+      ),
     );
     // Keep moving out.
     await gesture.moveBy(const Offset(1, 0));
     await tester.pump();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
+      const TextSelection(
+        baseOffset: 13,
+        extentOffset: 66,
+        affinity: TextAffinity.downstream,
+      ),
     );
     await gesture.moveBy(const Offset(1, 0));
     await tester.pump();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
-    ); // We're at the edge now.
+      const TextSelection(
+        baseOffset: 13,
+        extentOffset: 66,
+        affinity: TextAffinity.downstream,
+      ),
+    );
     expect(find.byType(CupertinoButton), findsNothing);
 
     await gesture.up();
@@ -2936,7 +2969,11 @@ void main() {
     // The selection isn't affected by the gesture lift.
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
+      const TextSelection(
+        baseOffset: 13,
+        extentOffset: 66,
+        affinity: TextAffinity.downstream,
+      ),
     );
     // The toolbar now shows up.
     expect(find.byType(CupertinoButton), findsNWidgets(1));
@@ -2955,10 +2992,13 @@ void main() {
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
     expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-125, epsilon: 1));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    skip: true, // https://github.com/flutter/flutter/issues/64059
+  );
 
   testWidgets(
-    'long tap after a double tap select is not affected',
+    'long tap still selects after a double tap select',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -2989,10 +3029,10 @@ void main() {
       await tester.longPressAt(selectableTextStart + const Offset(100.0, 5.0));
       await tester.pump();
 
-      // Plain collapsed selection at the exact tap position.
+      // Selected the "word" where the tap happened, which is the first space.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 7),
+        const TextSelection(baseOffset: 7, extentOffset: 8),
       );
 
       // Long press toolbar.
@@ -3115,7 +3155,7 @@ void main() {
 
     final Offset offset = tester.getTopLeft(find.byType(SelectableText)) + const Offset(150.0, 5.0);
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
       offset,
@@ -3151,7 +3191,7 @@ void main() {
 
     final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final Offset offset = selectableTextStart + const Offset(150.0, 5.0);
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
@@ -3192,7 +3232,7 @@ void main() {
 
     final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final Offset offset = selectableTextStart + const Offset(150.0, 5.0);
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
@@ -3256,6 +3296,7 @@ void main() {
       minLines: 2,
       maxLines: 10,
       cursorWidth: 1.0,
+      cursorHeight: 1.0,
       cursorRadius: Radius.zero,
       cursorColor: Color(0xff00ff00),
       scrollPhysics: ClampingScrollPhysics(),
@@ -3277,6 +3318,7 @@ void main() {
       'textDirection: ltr',
       'textScaleFactor: 1.0',
       'cursorWidth: 1.0',
+      'cursorHeight: 1.0',
       'cursorRadius: Radius.circular(0.0)',
       'cursorColor: Color(0xff00ff00)',
       'selection disabled',
@@ -3890,4 +3932,43 @@ void main() {
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
+
+  testWidgets('The handles show after pressing Select All', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: SelectableText('abc def ghi'),
+        ),
+      ),
+    );
+
+    // Long press at 'e' in 'def'.
+    final Offset ePos = textOffsetToPosition(tester, 5);
+    await tester.longPressAt(ePos);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Select all'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    EditableTextState editableText = tester.state(find.byType(EditableText));
+    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+    expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+
+    await tester.tap(find.text('Select all'));
+    await tester.pump();
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Select all'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    editableText = tester.state(find.byType(EditableText));
+    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
+  );
 }

@@ -298,7 +298,7 @@ class CommonFinders {
   /// ## Sample code
   ///
   /// ```dart
-  /// expect(find.BySemanticsLabel('Back'), findsOneWidget);
+  /// expect(find.bySemanticsLabel('Back'), findsOneWidget);
   /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips

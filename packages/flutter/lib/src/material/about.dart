@@ -19,7 +19,6 @@ import 'card.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'dialog.dart';
-import 'flat_button.dart';
 import 'floating_action_button.dart';
 import 'floating_action_button_location.dart';
 import 'ink_decoration.dart';
@@ -31,6 +30,7 @@ import 'page_transitions_theme.dart';
 import 'progress_indicator.dart';
 import 'scaffold.dart';
 import 'scrollbar.dart';
+import 'text_button.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
@@ -61,7 +61,7 @@ import 'theme.dart';
 ///          children: <TextSpan>[
 ///            TextSpan(
 ///              style: textStyle,
-///              text: 'Flutter is Google’s UI toolkit for building beautiful, '
+///              text: "Flutter is Google's UI toolkit for building beautiful, "
 ///              'natively compiled applications for mobile, web, and desktop '
 ///              'from a single codebase. Learn more about Flutter at '
 ///            ),
@@ -90,14 +90,14 @@ import 'theme.dart';
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2014 The Flutter Authors',
+///              applicationLegalese: '\u{a9} 2014 The Flutter Authors',
 ///              aboutBoxChildren: aboutBoxChildren,
 ///            ),
 ///          ),
 ///        ),
 ///      ),
 ///      body: Center(
-///        child: RaisedButton(
+///        child: ElevatedButton(
 ///          child: Text('Show About Example'),
 ///          onPressed: () {
 ///            showAboutDialog(
@@ -105,7 +105,7 @@ import 'theme.dart';
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2014 The Flutter Authors',
+///              applicationLegalese: '\u{a9} 2014 The Flutter Authors',
 ///              children: aboutBoxChildren,
 ///            );
 ///          },
@@ -406,7 +406,7 @@ class AboutDialog extends StatelessWidget {
         ],
       ),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
           child: Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
           onPressed: () {
             showLicensePage(
@@ -418,7 +418,7 @@ class AboutDialog extends StatelessWidget {
             );
           },
         ),
-        FlatButton(
+        TextButton(
           child: Text(MaterialLocalizations.of(context).closeButtonLabel),
           onPressed: () {
             Navigator.pop(context);
@@ -917,7 +917,11 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     if (widget.scrollController == null) {
       page = Scaffold(
         appBar: AppBar(
-          title: _PackageLicensePageTitle(title, subtitle, theme.primaryTextTheme),
+          title: _PackageLicensePageTitle(
+            title,
+            subtitle,
+            theme.appBarTheme.textTheme ?? theme.primaryTextTheme,
+          ),
         ),
         body: Center(
           child: Material(

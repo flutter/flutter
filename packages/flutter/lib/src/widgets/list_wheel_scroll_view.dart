@@ -300,12 +300,12 @@ class FixedExtentScrollController extends ScrollController {
 /// Metrics for a [ScrollPosition] to a scroll view with fixed item sizes.
 ///
 /// The metrics are available on [ScrollNotification]s generated from a scroll
-/// views such as [ListWheelScrollView]s with a [FixedExtentScrollController] and
-/// exposes the current [itemIndex] and the scroll view's [itemExtent].
+/// views such as [ListWheelScrollView]s with a [FixedExtentScrollController]
+/// and exposes the current [itemIndex] and the scroll view's extents.
 ///
-/// `FixedExtent` refers to the fact that the scrollable items have the same size.
-/// This is distinct from `Fixed` in the parent class name's [FixedScrollMetric]
-/// which refers to its immutability.
+/// `FixedExtent` refers to the fact that the scrollable items have the same
+/// size. This is distinct from `Fixed` in the parent class name's
+/// [FixedScrollMetrics] which refers to its immutability.
 class FixedExtentMetrics extends FixedScrollMetrics {
   /// Creates an immutable snapshot of values associated with a
   /// [ListWheelScrollView].
@@ -434,12 +434,14 @@ class _FixedExtentScrollable extends Scrollable {
     ScrollPhysics physics,
     @required this.itemExtent,
     @required ViewportBuilder viewportBuilder,
+    String restorationId,
   }) : super (
     key: key,
     axisDirection: axisDirection,
     controller: controller,
     physics: physics,
     viewportBuilder: viewportBuilder,
+    restorationId: restorationId,
   );
 
   final double itemExtent;
@@ -563,7 +565,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
 ///
 /// When the list is at the zero scroll offset, the first child is aligned with
 /// the middle of the viewport. When the list is at the final scroll offset,
-/// the last child is aligned with the middle of the viewport
+/// the last child is aligned with the middle of the viewport.
 ///
 /// The children are rendered as if rotating on a wheel instead of scrolling on
 /// a plane.
@@ -585,6 +587,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.onSelectedItemChanged,
     this.renderChildrenOutsideViewport = false,
     this.clipBehavior = Clip.hardEdge,
+    this.restorationId,
     @required List<Widget> children,
   }) : assert(children != null),
        assert(diameterRatio != null),
@@ -625,6 +628,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.onSelectedItemChanged,
     this.renderChildrenOutsideViewport = false,
     this.clipBehavior = Clip.hardEdge,
+    this.restorationId,
     @required this.childDelegate,
   }) : assert(childDelegate != null),
        assert(diameterRatio != null),
@@ -713,6 +717,9 @@ class ListWheelScrollView extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  /// {@macro flutter.widgets.scrollable.restorationId}
+  final String restorationId;
+
   @override
   _ListWheelScrollViewState createState() => _ListWheelScrollViewState();
 }
@@ -765,6 +772,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
         controller: scrollController,
         physics: widget.physics,
         itemExtent: widget.itemExtent,
+        restorationId: widget.restorationId,
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return ListWheelViewport(
             diameterRatio: widget.diameterRatio,
@@ -899,7 +907,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, int slot) {
+  void insertRenderObjectChild(RenderObject child, int slot) {
     final RenderListWheelViewport renderObject = this.renderObject;
     assert(renderObject.debugValidateChild(child));
     renderObject.insert(child as RenderBox, after: _childElements[slot - 1]?.renderObject as RenderBox);
@@ -907,7 +915,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, dynamic slot) {
+  void moveRenderObjectChild(RenderObject child, int oldSlot, int newSlot) {
     const String moveChildRenderObjectErrorMessage =
         'Currently we maintain the list in contiguous increasing order, so '
         'moving children around is not allowed.';
@@ -915,7 +923,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, int slot) {
     assert(child.parent == renderObject);
     renderObject.remove(child as RenderBox);
   }
@@ -1035,7 +1043,7 @@ class ListWheelViewport extends RenderObjectWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   @override

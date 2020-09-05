@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'simulation.dart';
@@ -118,7 +116,7 @@ class BoundedFrictionSimulation extends FrictionSimulation {
 
   @override
   double x(double time) {
-    return super.x(time).clamp(_minX, _maxX) as double;
+    return super.x(time).clamp(_minX, _maxX);
   }
 
   @override

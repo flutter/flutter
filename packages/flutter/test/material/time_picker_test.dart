@@ -39,7 +39,7 @@ class _TimePickerLauncher extends StatelessWidget {
         child: Center(
           child: Builder(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   child: const Text('X'),
                   onPressed: () async {
                     onChanged(await showTimePicker(
@@ -69,7 +69,7 @@ Future<Offset> startPicker(
 }
 
 Future<void> finishPicker(WidgetTester tester) async {
-  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(RaisedButton)));
+  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(ElevatedButton)));
   await tester.tap(find.text(materialLocalizations.okButtonLabel));
   await tester.pumpAndSettle(const Duration(seconds: 1));
 }
@@ -499,7 +499,7 @@ void _tests() {
           child: Center(
             child: Builder(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
                     showTimePicker(
@@ -551,7 +551,7 @@ void _tests() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showTimePicker(
                     context: context,
@@ -567,7 +567,7 @@ void _tests() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.pickerCount, 1);
     expect(nestedObserver.pickerCount, 0);
@@ -584,7 +584,7 @@ void _tests() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showTimePicker(
                     context: context,
@@ -601,7 +601,7 @@ void _tests() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.pickerCount, 0);
     expect(nestedObserver.pickerCount, 1);
@@ -616,7 +616,7 @@ void _tests() {
           child: Center(
             child: Builder(
                 builder: (BuildContext context) {
-                  return RaisedButton(
+                  return ElevatedButton(
                     child: const Text('X'),
                     onPressed: () async {
                       await showTimePicker(
@@ -643,54 +643,100 @@ void _tests() {
     expect(find.text(helperText), findsOneWidget);
   });
 
-  // TODO(rami-a): Re-enable and fix test.
-  testWidgets('text scale affects certain elements and not others',
-          (WidgetTester tester) async {
-        await mediaQueryBoilerplate(
-          tester,
-          false,
-          textScaleFactor: 1.0,
-          initialTime: const TimeOfDay(hour: 7, minute: 41),
-        );
-        await tester.tap(find.text('X'));
-        await tester.pumpAndSettle();
+  testWidgets('OK Cancel button layout', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showTimePicker(
+                      context: context,
+                      initialTime: const TimeOfDay(hour: 7, minute: 0),
+                      builder: (BuildContext context, Widget child) {
+                        return Directionality(
+                          textDirection: textDirection,
+                          child: child,
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
 
-        final double minutesDisplayHeight = tester.getSize(find.text('41')).height;
-        final double amHeight = tester.getSize(find.text('AM')).height;
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    expect(tester.getBottomRight(find.text('OK')).dx, 638);
+    expect(tester.getBottomLeft(find.text('OK')).dx, 610);
+    expect(tester.getBottomRight(find.text('CANCEL')).dx, 576);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
 
-        await tester.tap(find.text('OK')); // dismiss the dialog
-        await tester.pumpAndSettle();
+    await tester.pumpWidget(buildFrame(TextDirection.rtl));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    expect(tester.getBottomLeft(find.text('OK')).dx, 162);
+    expect(tester.getBottomRight(find.text('OK')).dx, 190);
+    expect(tester.getBottomLeft(find.text('CANCEL')).dx, 224);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+  });
 
-        // Verify that the time display is not affected by text scale.
-        await mediaQueryBoilerplate(
-          tester,
-          false,
-          textScaleFactor: 2.0,
-          initialTime: const TimeOfDay(hour: 7, minute: 41),
-        );
-        await tester.tap(find.text('X'));
-        await tester.pumpAndSettle();
+  testWidgets('text scale affects certain elements and not others', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(
+      tester,
+      false,
+      textScaleFactor: 1.0,
+      initialTime: const TimeOfDay(hour: 7, minute: 41),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
 
-        final double amHeight2x = tester.getSize(find.text('AM')).height;
-        expect(tester.getSize(find.text('41')).height, equals(minutesDisplayHeight));
-        expect(amHeight2x, greaterThanOrEqualTo(amHeight * 2));
+    final double minutesDisplayHeight = tester.getSize(find.text('41')).height;
+    final double amHeight = tester.getSize(find.text('AM')).height;
 
-        await tester.tap(find.text('OK')); // dismiss the dialog
-        await tester.pumpAndSettle();
+    await tester.tap(find.text('OK')); // dismiss the dialog
+    await tester.pumpAndSettle();
 
-        // Verify that text scale for AM/PM is at most 2x.
-        await mediaQueryBoilerplate(
-          tester,
-          false,
-          textScaleFactor: 3.0,
-          initialTime: const TimeOfDay(hour: 7, minute: 41),
-        );
-        await tester.tap(find.text('X'));
-        await tester.pumpAndSettle();
+    // Verify that the time display is not affected by text scale.
+    await mediaQueryBoilerplate(
+      tester,
+      false,
+      textScaleFactor: 2.0,
+      initialTime: const TimeOfDay(hour: 7, minute: 41),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
 
-        expect(tester.getSize(find.text('41')).height, equals(minutesDisplayHeight));
-        expect(tester.getSize(find.text('AM')).height, equals(amHeight2x));
-      });
+    final double amHeight2x = tester.getSize(find.text('AM')).height;
+    expect(tester.getSize(find.text('41')).height, equals(minutesDisplayHeight));
+    expect(amHeight2x, greaterThanOrEqualTo(amHeight * 2));
+
+    await tester.tap(find.text('OK')); // dismiss the dialog
+    await tester.pumpAndSettle();
+
+    // Verify that text scale for AM/PM is at most 2x.
+    await mediaQueryBoilerplate(
+      tester,
+      false,
+      textScaleFactor: 3.0,
+      initialTime: const TimeOfDay(hour: 7, minute: 41),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.text('41')).height, equals(minutesDisplayHeight));
+    expect(tester.getSize(find.text('AM')).height, equals(amHeight2x));
+  });
 }
 
 void _testsInput() {
@@ -751,7 +797,7 @@ void _testsInput() {
 
     // Invalid minute.
     await tester.enterText(find.byType(TextField).first, '8');
-    await tester.enterText(find.byType(TextField).last, '150');
+    await tester.enterText(find.byType(TextField).last, '95');
     await finishPicker(tester);
     expect(result, null);
 
@@ -759,6 +805,16 @@ void _testsInput() {
     await tester.enterText(find.byType(TextField).last, '15');
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 8, minute: 15)));
+  });
+
+  // Fixes regression that was reverted in https://github.com/flutter/flutter/pull/64094#pullrequestreview-469836378.
+  testWidgets('Ensure hour/minute fields are top-aligned with the separator', (WidgetTester tester) async {
+    await startPicker(tester, (TimeOfDay time) { }, entryMode: TimePickerEntryMode.input);
+    final double hourFieldTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourTextField')).dy;
+    final double minuteFieldTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField')).dy;
+    final double separatorTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment')).dy;
+    expect(hourFieldTop, separatorTop);
+    expect(minuteFieldTop, separatorTop);
   });
 }
 
@@ -805,7 +861,7 @@ Future<void> mediaQueryBoilerplate(
             child: Navigator(
               onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute<void>(builder: (BuildContext context) {
-                  return FlatButton(
+                  return TextButton(
                     onPressed: () {
                       showTimePicker(
                         context: context,

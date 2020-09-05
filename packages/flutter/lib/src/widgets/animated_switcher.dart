@@ -120,7 +120,7 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 ///             style: Theme.of(context).textTheme.headline4,
 ///           ),
 ///         ),
-///         RaisedButton(
+///         ElevatedButton(
 ///           child: const Text('Increment'),
 ///           onPressed: () {
 ///             setState(() {

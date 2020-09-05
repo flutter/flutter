@@ -186,7 +186,6 @@ void main() {
               key: key,
               textDirection: TextDirection.ltr,
               textScaleFactor: textScaleFactor,
-              applyTextScaleFactorToWidgetSpan: true,
             ),
           ),
         ),
@@ -215,7 +214,6 @@ void main() {
               key: key,
               textDirection: TextDirection.ltr,
               textScaleFactor: textScaleFactor,
-              applyTextScaleFactorToWidgetSpan: true,
             ),
           ),
         ),
@@ -508,6 +506,13 @@ void main() {
     );
     // The expected visual order of the text is:
     //   hello world RIS OD you OD WOH YOB good bye
+    // There are five unique text areas, they are, in visual order but
+    // showing the logical text:
+    //   [hello world][SIR][HOW DO you DO][BOY][good bye]
+    // The direction of each varies based on the first bit of that area.
+    // The presence of the bidi formatting characters in the text is a
+    // bit dubious, but that's what we do currently, and it's not really
+    // clear what the perfect behavior would be...
     final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
@@ -515,33 +520,31 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               rect: const Rect.fromLTRB(-4.0, -4.0, 480.0, 18.0),
-              label: 'hello world ',
-              textDirection: TextDirection.ltr, // text direction is declared as LTR.
+              label: 'hello world${Unicode.RLE}${Unicode.RLO} ',
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              rect: const Rect.fromLTRB(416.0, -4.0, 466.0, 18.0),
+              label: 'BOY',
+              textDirection: TextDirection.rtl,
+              actions: <SemanticsAction>[SemanticsAction.longPress],
+            ),
+            TestSemantics(
+              rect: const Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
+              label: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO ',
+              textDirection: TextDirection.rtl,
             ),
             TestSemantics(
               rect: const Rect.fromLTRB(150.0, -4.0, 200.0, 18.0),
-              label: 'RIS',
-              textDirection: TextDirection.rtl,  // in the last string we switched to RTL using RLE.
+              label: 'SIR',
+              textDirection: TextDirection.rtl,
               actions: <SemanticsAction>[SemanticsAction.tap],
               flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
-              rect: const Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
-              label: ' OD you OD WOH ', // Still RTL.
-              textDirection: TextDirection.rtl,
-            ),
-            TestSemantics(
-              rect: const Rect.fromLTRB(416.0, -4.0, 466.0, 18.0),
-              label: 'YOB',
-              textDirection: TextDirection.rtl, // Still RTL.
-              actions: <SemanticsAction>[
-                SemanticsAction.longPress,
-              ],
-            ),
-            TestSemantics(
               rect: const Rect.fromLTRB(472.0, -4.0, 606.0, 18.0),
-              label: ' good bye',
-              textDirection: TextDirection.rtl, // Begin as RTL but pop to LTR.
+              label: '${Unicode.PDF}${Unicode.PDF} good bye',
+              textDirection: TextDirection.rtl,
             ),
           ],
         ),
@@ -556,7 +559,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: true); // https://github.com/flutter/flutter/issues/20891
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
   testWidgets('TapGesture recognizers contribute link semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -864,7 +867,7 @@ void main() {
     final Size textSizeLongestLine = tester.getSize(find.byType(Text));
     expect(textSizeLongestLine.width, equals(630.0));
     expect(textSizeLongestLine.height, equals(fontHeight * 2));
-  }, skip: isBrowser);  // https://github.com/flutter/flutter/issues/44020
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44020
 
   testWidgets('textWidthBasis with textAlign still obeys parent alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -914,7 +917,39 @@ void main() {
     expect(tester.getSize(find.text('RIGHT ALIGNED, PARENT')).width, lessThan(width));
     expect(tester.getSize(find.text('LEFT ALIGNED, LONGEST LINE')).width, lessThan(width));
     expect(tester.getSize(find.text('RIGHT ALIGNED, LONGEST LINE')).width, equals(width));
-  }, skip: isBrowser);  // https://github.com/flutter/flutter/issues/44020
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44020
+
+  testWidgets(
+    'textWidthBasis.longestLine confines the width of the paragraph '
+    'when given loose constraints',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/62550.
+      await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 400,
+              child: Center(
+                child: RichText(
+                  text: const TextSpan(text: 'fwefwefwewfefewfwe fwfwfwefweabcdefghijklmnopqrstuvwxyz'),
+                  textWidthBasis: TextWidthBasis.longestLine,
+                  textDirection: TextDirection.ltr,
+                ),
+              ),
+            ),
+          ),
+        );
+
+      expect(find.byType(RichText), paints..something((Symbol method, List<dynamic> arguments) {
+        if (method != #drawParagraph)
+          return false;
+        final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
+        if (paragraph.width > paragraph.longestLine)
+          throw 'paragraph width (${paragraph.width}) greater than its longest line (${paragraph.longestLine}).';
+        if (paragraph.width >= 400)
+          throw 'paragraph.width (${paragraph.width}) >= 400';
+        return true;
+      }));
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44020
 
   testWidgets('Paragraph.getBoxesForRange returns nothing when selection range is zero length', (WidgetTester tester) async {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());

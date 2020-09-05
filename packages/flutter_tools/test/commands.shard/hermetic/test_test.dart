@@ -185,6 +185,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     bool web = false,
     String randomSeed,
     @override List<String> extraFrontEndOptions,
+    bool nullAssertions = false,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;

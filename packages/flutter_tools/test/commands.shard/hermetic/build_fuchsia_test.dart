@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_kernel_compiler.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
@@ -20,6 +21,7 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
+import '../../src/testbed.dart';
 
 // Defined globally for mocks to use.
 FileSystem fileSystem;
@@ -47,6 +49,23 @@ void main() {
   });
 
   group('Fuchsia build fails gracefully when', () {
+    testUsingContext('The feature is disabled', () async {
+      final BuildCommand command = BuildCommand();
+      fileSystem.directory('fuchsia').createSync(recursive: true);
+      fileSystem.file('.packages').createSync();
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+
+      expect(
+        createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
+        throwsToolExit(message: '"build fuchsia" is currently disabled'),
+      );
+    }, overrides: <Type, Generator>{
+      Platform: () => linuxPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: false),
+    });
     testUsingContext('there is no Fuchsia project', () async {
       final BuildCommand command = BuildCommand();
 
@@ -58,6 +77,7 @@ void main() {
       Platform: () => linuxPlatform,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     });
 
     testUsingContext('there is no cmx file', () async {
@@ -74,6 +94,7 @@ void main() {
       Platform: () => linuxPlatform,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     });
 
     testUsingContext('on Windows platform', () async {
@@ -95,6 +116,7 @@ void main() {
       Platform: () => windowsPlatform,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     });
 
     testUsingContext('there is no Fuchsia kernel compiler', () async {
@@ -117,6 +139,7 @@ void main() {
       Platform: () => linuxPlatform,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     });
   });
 
@@ -145,6 +168,7 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     FuchsiaSdk: () => fuchsiaSdk,
+    FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
   });
 }
 

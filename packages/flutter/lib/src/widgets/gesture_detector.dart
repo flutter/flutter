@@ -226,7 +226,12 @@ class GestureDetector extends StatelessWidget {
     this.onSecondaryTapDown,
     this.onSecondaryTapUp,
     this.onSecondaryTapCancel,
+    this.onTertiaryTapDown,
+    this.onTertiaryTapUp,
+    this.onTertiaryTapCancel,
+    this.onDoubleTapDown,
     this.onDoubleTap,
+    this.onDoubleTapCancel,
     this.onLongPress,
     this.onLongPressStart,
     this.onLongPressMoveUpdate,
@@ -391,6 +396,54 @@ class GestureDetector extends StatelessWidget {
   ///  * [kSecondaryButton], the button this callback responds to.
   final GestureTapCancelCallback onSecondaryTapCancel;
 
+  /// A pointer that might cause a tap with a tertiary button has contacted the
+  /// screen at a particular location.
+  ///
+  /// This is called after a short timeout, even if the winning gesture has not
+  /// yet been selected. If the tap gesture wins, [onTertiaryTapUp] will be
+  /// called, otherwise [onTertiaryTapCancel] will be called.
+  ///
+  /// See also:
+  ///
+  ///  * [kTertiaryButton], the button this callback responds to.
+  final GestureTapDownCallback onTertiaryTapDown;
+
+  /// A pointer that will trigger a tap with a tertiary button has stopped
+  /// contacting the screen at a particular location.
+  ///
+  /// This triggers in the case of the tap gesture winning. If the tap gesture
+  /// did not win, [onTertiaryTapCancel] is called instead.
+  ///
+  /// See also:
+  ///
+  ///  * [kTertiaryButton], the button this callback responds to.
+  final GestureTapUpCallback onTertiaryTapUp;
+
+  /// The pointer that previously triggered [onTertiaryTapDown] will not end up
+  /// causing a tap.
+  ///
+  /// This is called after [onTertiaryTapDown], and instead of
+  /// [onTertiaryTapUp], if the tap gesture did not win.
+  ///
+  /// See also:
+  ///
+  ///  * [kTertiaryButton], the button this callback responds to.
+  final GestureTapCancelCallback onTertiaryTapCancel;
+
+  /// A pointer that might cause a double tap has contacted the screen at a
+  /// particular location.
+  ///
+  /// Triggered immediately after the down event of the second tap.
+  ///
+  /// If the user completes the double tap and the gesture wins, [onDoubleTap]
+  /// will be called after this callback. Otherwise, [onDoubleTapCancel] will
+  /// be called after this callback.
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
+  final GestureTapDownCallback onDoubleTapDown;
+
   /// The user has tapped the screen with a primary button at the same location
   /// twice in quick succession.
   ///
@@ -398,6 +451,14 @@ class GestureDetector extends StatelessWidget {
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   final GestureTapCallback onDoubleTap;
+
+  /// The pointer that previously triggered [onDoubleTapDown] will not end up
+  /// causing a double tap.
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
+  final GestureTapCancelCallback onDoubleTapCancel;
 
   /// Called when a long press gesture with a primary button has been recognized.
   ///
@@ -689,9 +750,9 @@ class GestureDetector extends StatelessWidget {
   ///
   /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
-  /// Only the [onStart] callbacks for the [VerticalDragGestureRecognizer],
-  /// [HorizontalDragGestureRecognizer] and [PanGestureRecognizer] are affected
-  /// by this setting.
+  /// Only the [DragGestureRecognizer.onStart] callbacks for the
+  /// [VerticalDragGestureRecognizer], [HorizontalDragGestureRecognizer] and
+  /// [PanGestureRecognizer] are affected by this setting.
   ///
   /// See also:
   ///
@@ -702,15 +763,17 @@ class GestureDetector extends StatelessWidget {
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
-    if (
-      onTapDown != null ||
-      onTapUp != null ||
-      onTap != null ||
-      onTapCancel != null ||
-      onSecondaryTap != null ||
-      onSecondaryTapDown != null ||
-      onSecondaryTapUp != null ||
-      onSecondaryTapCancel != null
+    if (onTapDown != null ||
+        onTapUp != null ||
+        onTap != null ||
+        onTapCancel != null ||
+        onSecondaryTap != null ||
+        onSecondaryTapDown != null ||
+        onSecondaryTapUp != null ||
+        onSecondaryTapCancel != null||
+        onTertiaryTapDown != null ||
+        onTertiaryTapUp != null ||
+        onTertiaryTapCancel != null
     ) {
       gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
         () => TapGestureRecognizer(debugOwner: this),
@@ -723,7 +786,10 @@ class GestureDetector extends StatelessWidget {
             ..onSecondaryTap = onSecondaryTap
             ..onSecondaryTapDown = onSecondaryTapDown
             ..onSecondaryTapUp = onSecondaryTapUp
-            ..onSecondaryTapCancel = onSecondaryTapCancel;
+            ..onSecondaryTapCancel = onSecondaryTapCancel
+            ..onTertiaryTapDown = onTertiaryTapDown
+            ..onTertiaryTapUp = onTertiaryTapUp
+            ..onTertiaryTapCancel = onTertiaryTapCancel;
         },
       );
     }
@@ -732,7 +798,10 @@ class GestureDetector extends StatelessWidget {
       gestures[DoubleTapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<DoubleTapGestureRecognizer>(
         () => DoubleTapGestureRecognizer(debugOwner: this),
         (DoubleTapGestureRecognizer instance) {
-          instance.onDoubleTap = onDoubleTap;
+          instance
+            ..onDoubleTapDown = onDoubleTapDown
+            ..onDoubleTap = onDoubleTap
+            ..onDoubleTapCancel = onDoubleTapCancel;
         },
       );
     }
@@ -741,21 +810,8 @@ class GestureDetector extends StatelessWidget {
         onLongPressUp != null ||
         onLongPressStart != null ||
         onLongPressMoveUpdate != null ||
-        onLongPressEnd != null) {
-      gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-        () => LongPressGestureRecognizer(debugOwner: this),
-        (LongPressGestureRecognizer instance) {
-          instance
-            ..onLongPress = onLongPress
-            ..onLongPressStart = onLongPressStart
-            ..onLongPressMoveUpdate = onLongPressMoveUpdate
-            ..onLongPressEnd =onLongPressEnd
-            ..onLongPressUp = onLongPressUp;
-        },
-      );
-    }
-
-    if (onSecondaryLongPress != null ||
+        onLongPressEnd != null ||
+        onSecondaryLongPress != null ||
         onSecondaryLongPressUp != null ||
         onSecondaryLongPressStart != null ||
         onSecondaryLongPressMoveUpdate != null ||
@@ -764,10 +820,15 @@ class GestureDetector extends StatelessWidget {
         () => LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
+            ..onLongPress = onLongPress
+            ..onLongPressStart = onLongPressStart
+            ..onLongPressMoveUpdate = onLongPressMoveUpdate
+            ..onLongPressEnd = onLongPressEnd
+            ..onLongPressUp = onLongPressUp
             ..onSecondaryLongPress = onSecondaryLongPress
             ..onSecondaryLongPressStart = onSecondaryLongPressStart
             ..onSecondaryLongPressMoveUpdate = onSecondaryLongPressMoveUpdate
-            ..onSecondaryLongPressEnd =onSecondaryLongPressEnd
+            ..onSecondaryLongPressEnd = onSecondaryLongPressEnd
             ..onSecondaryLongPressUp = onSecondaryLongPressUp;
         },
       );
@@ -865,6 +926,7 @@ class GestureDetector extends StatelessWidget {
       child: child,
     );
   }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -1223,7 +1285,7 @@ abstract class SemanticsGestureDelegate {
   /// object of the gesture detector.
   ///
   /// This method is called when the widget is created, updated, or during
-  /// [RawGestureDetector.replaceGestureRecognizers].
+  /// [RawGestureDetectorState.replaceGestureRecognizers].
   void assignSemantics(RenderSemanticsGestureHandler renderObject);
 
   @override
@@ -1268,7 +1330,7 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
       if (tap.onTapDown != null)
         tap.onTapDown(TapDownDetails());
       if (tap.onTapUp != null)
-        tap.onTapUp(TapUpDetails());
+        tap.onTapUp(TapUpDetails(kind: PointerDeviceKind.unknown));
       if (tap.onTap != null)
         tap.onTap();
     };

@@ -126,9 +126,15 @@ class DefaultTextStyle extends InheritedTheme {
   /// Whether the text should break at soft line breaks.
   ///
   /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
+  ///
+  /// This also decides the [overflow] property's behavior. If this is true or null,
+  /// the glyph causing overflow, and those that follow, will not be rendered.
   final bool softWrap;
 
   /// How visual overflow should be handled.
+  ///
+  /// If [softWrap] is true or null, the glyph causing overflow, and those that follow,
+  /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   final TextOverflow overflow;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
@@ -322,7 +328,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// To make [Text] react to touch events, wrap it in a [GestureDetector] widget
 /// with a [GestureDetector.onTap] handler.
 ///
-/// In a material design application, consider using a [FlatButton] instead, or
+/// In a material design application, consider using a [TextButton] instead, or
 /// if that isn't appropriate, at least using an [InkWell] instead of
 /// [GestureDetector].
 ///
@@ -341,6 +347,10 @@ class Text extends StatelessWidget {
   /// closest enclosing [DefaultTextStyle].
   ///
   /// The [data] parameter must not be null.
+  ///
+  /// The [overflow] property's behavior is affected by the [softWrap] argument.
+  /// If the [softWrap] is true or null, the glyph causing overflow, and those that follow,
+  /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   const Text(
     this.data, {
     Key key,
@@ -361,7 +371,6 @@ class Text extends StatelessWidget {
          'A non-null String must be provided to a Text widget.',
        ),
        textSpan = null,
-       _applyTextScaleFactorToWidgetSpan = true,
        super(key: key);
 
   /// Creates a text widget with a [InlineSpan].
@@ -389,19 +398,11 @@ class Text extends StatelessWidget {
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
-    @Deprecated(
-      'This parameter is a temporary flag to migrate the internal tests and '
-      'should not be used in other contexts. For more details, please check '
-      'https://github.com/flutter/flutter/issues/59316. '
-      'This feature was deprecated after v1.19.0.'
-    )
-    bool applyTextScaleFactorToWidgetSpan = false,
   }) : assert(
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',
        ),
        data = null,
-       _applyTextScaleFactorToWidgetSpan = applyTextScaleFactorToWidgetSpan,
        super(key: key);
 
   /// The text to display.
@@ -504,8 +505,6 @@ class Text extends StatelessWidget {
   /// {@macro flutter.dart:ui.textHeightBehavior}
   final ui.TextHeightBehavior textHeightBehavior;
 
-  final bool _applyTextScaleFactorToWidgetSpan;
-
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -525,7 +524,6 @@ class Text extends StatelessWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
-      applyTextScaleFactorToWidgetSpan: _applyTextScaleFactorToWidgetSpan,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,

@@ -84,7 +84,7 @@ void main() {
       ', asyncScanning: $asyncScanning', () async {
       final DateTime past = DateTime.now().subtract(const Duration(seconds: 1));
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final PackageConfig packageConfig = PackageConfig.empty;
+      const PackageConfig packageConfig = PackageConfig.empty;
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: fileSystem,
         platform: FakePlatform(),
@@ -126,7 +126,7 @@ void main() {
     testWithoutContext('Picks up changes to the .packages file and updates PackageConfig'
       ', asyncScanning: $asyncScanning', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final PackageConfig packageConfig = PackageConfig.empty;
+      const PackageConfig packageConfig = PackageConfig.empty;
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: fileSystem,
         platform: FakePlatform(),

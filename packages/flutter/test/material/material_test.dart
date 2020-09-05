@@ -185,11 +185,11 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 1));
     final RenderPhysicalShape modelC = getModel(tester);
-    expect(modelC.elevation, closeTo(0.0, 0.001));
+    expect(modelC.elevation, moreOrLessEquals(0.0, epsilon: 0.001));
 
     await tester.pump(kThemeChangeDuration ~/ 2);
     final RenderPhysicalShape modelD = getModel(tester);
-    expect(modelD.elevation, isNot(closeTo(0.0, 0.001)));
+    expect(modelD.elevation, isNot(moreOrLessEquals(0.0, epsilon: 0.001)));
 
     await tester.pump(kThemeChangeDuration);
     final RenderPhysicalShape modelE = getModel(tester);
@@ -229,10 +229,11 @@ void main() {
         home: Scaffold(
           body: Stack(
             children: <Widget>[
-              RaisedButton(
+              ElevatedButton(
                 onPressed: () {
                   pressed = true;
                 },
+                child: null,
               ),
               Material(
                 type: MaterialType.transparency,
@@ -246,7 +247,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
     expect(pressed, isTrue);
   });
 

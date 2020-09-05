@@ -282,7 +282,7 @@ void main() {
   testWidgets('back gesture while OS changes', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
-        child: FlatButton(
+        child: TextButton(
           child: const Text('PUSH'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
@@ -582,7 +582,7 @@ void main() {
         home: Scaffold(
           key: scaffoldKey,
           body: Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               onPressed: () {
                 Navigator.push<void>(scaffoldKey.currentContext, MaterialPageRoute<void>(
                   builder: (BuildContext context) {

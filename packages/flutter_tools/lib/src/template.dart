@@ -8,10 +8,11 @@ import 'package:package_config/package_config_types.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
+import 'base/template.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
-import 'globals.dart' as globals hide fs;
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the '.tmpl' extension. All files
@@ -32,8 +33,12 @@ import 'globals.dart' as globals hide fs;
 class Template {
   Template(Directory templateSource, Directory baseDir, this.imageSourceDir, {
     @required FileSystem fileSystem,
+    @required Logger logger,
+    @required TemplateRenderer templateRenderer,
     @required Set<Uri> templateManifest,
   }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _templateRenderer = templateRenderer,
        _templateManifest = templateManifest {
     _templateFilePaths = <String, String>{};
 
@@ -42,14 +47,9 @@ class Template {
     }
 
     final List<FileSystemEntity> templateFiles = templateSource.listSync(recursive: true);
-
-    for (final FileSystemEntity entity in templateFiles) {
-      if (entity is! File) {
-        // We are only interesting in template *file* URIs.
-        continue;
-      }
+    for (final FileSystemEntity entity in templateFiles.whereType<File>()) {
       if (_templateManifest != null && !_templateManifest.contains(Uri.file(entity.absolute.path))) {
-        globals.logger.printTrace('Skipping ${entity.absolute.path}, missing from the template manifest.');
+        _logger.printTrace('Skipping ${entity.absolute.path}, missing from the template manifest.');
         // Skip stale files in the flutter_tools directory.
         continue;
       }
@@ -68,20 +68,28 @@ class Template {
   static Future<Template> fromName(String name, {
     @required FileSystem fileSystem,
     @required Set<Uri> templateManifest,
+    @required Logger logger,
+    @required TemplateRenderer templateRenderer,
+    @required Pub pub,
   }) async {
     // All named templates are placed in the 'templates' directory
     final Directory templateDir = _templateDirectoryInPackage(name, fileSystem);
-    final Directory imageDir = await _templateImageDirectory(name, fileSystem);
+    final Directory imageDir = await _templateImageDirectory(name, fileSystem, logger, pub);
     return Template(
       templateDir,
       templateDir, imageDir,
       fileSystem: fileSystem,
+      logger: logger,
+      templateRenderer: templateRenderer,
       templateManifest: templateManifest,
     );
   }
 
   final FileSystem _fileSystem;
+  final Logger _logger;
   final Set<Uri> _templateManifest;
+  final TemplateRenderer _templateRenderer;
+
   static const String templateExtension = '.tmpl';
   static const String copyTemplateExtension = '.copy.tmpl';
   static const String imageTemplateExtension = '.img.tmpl';
@@ -102,7 +110,7 @@ class Template {
     try {
       destination.createSync(recursive: true);
     } on FileSystemException catch (err) {
-      globals.printError(err.toString());
+      _logger.printError(err.toString());
       throwToolExit('Failed to flutter create at ${destination.path}.');
       return 0;
     }
@@ -129,9 +137,10 @@ class Template {
         return null;
       }
 
-      // TODO(cyanglaz): do not add iOS folder by default when 1.20.0 is released.
-      // Also need to update the flutter SDK min constraint in the pubspec.yaml to 1.20.0.
-      // https://github.com/flutter/flutter/issues/59787
+      final bool ios = context['ios'] as bool;
+      if (relativeDestinationPath.contains('ios') && !ios) {
+        return null;
+      }
 
       // Only build a web project if explicitly asked.
       final bool web = context['web'] as bool;
@@ -197,22 +206,22 @@ class Template {
         if (overwriteExisting) {
           finalDestinationFile.deleteSync(recursive: true);
           if (printStatusWhenWriting) {
-            globals.printStatus('  $relativePathForLogging (overwritten)');
+            _logger.printStatus('  $relativePathForLogging (overwritten)');
           }
         } else {
           // The file exists but we cannot overwrite it, move on.
           if (printStatusWhenWriting) {
-            globals.printTrace('  $relativePathForLogging (existing - skipped)');
+            _logger.printTrace('  $relativePathForLogging (existing - skipped)');
           }
           return;
         }
       } else {
         if (printStatusWhenWriting) {
-          globals.printStatus('  $relativePathForLogging (created)');
+          _logger.printStatus('  $relativePathForLogging (created)');
         }
       }
 
-      fileCount++;
+      fileCount += 1;
 
       finalDestinationFile.createSync(recursive: true);
       final File sourceFile = _fileSystem.file(absoluteSourcePath);
@@ -221,6 +230,7 @@ class Template {
       //         not need mustache rendering but needs to be directly copied.
 
       if (sourceFile.path.endsWith(copyTemplateExtension)) {
+        _validateReadPermissions(sourceFile);
         sourceFile.copySync(finalDestinationFile.path);
 
         return;
@@ -232,6 +242,7 @@ class Template {
       if (sourceFile.path.endsWith(imageTemplateExtension)) {
         final File imageSourceFile = _fileSystem.file(_fileSystem.path.join(
             imageSourceDir.path, relativeDestinationPath.replaceAll(imageTemplateExtension, '')));
+        _validateReadPermissions(imageSourceFile);
         imageSourceFile.copySync(finalDestinationFile.path);
 
         return;
@@ -241,8 +252,9 @@ class Template {
       //         rendering via mustache.
 
       if (sourceFile.path.endsWith(templateExtension)) {
+         _validateReadPermissions(sourceFile);
         final String templateContents = sourceFile.readAsStringSync();
-        final String renderedContents = globals.templateRenderer.renderString(templateContents, context);
+        final String renderedContents = _templateRenderer.renderString(templateContents, context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
 
@@ -251,11 +263,19 @@ class Template {
 
       // Step 5: This file does not end in .tmpl but is in a directory that
       //         does. Directly copy the file to the destination.
-
+      _validateReadPermissions(sourceFile);
       sourceFile.copySync(finalDestinationFile.path);
     });
 
     return fileCount;
+  }
+
+  /// Attempt open/close the file to ensure that read permissions are correct.
+  ///
+  /// If this fails with a certain error code, the [ErrorHandlingFileSystem] will
+  /// trigger a tool exit with a better message.
+  void _validateReadPermissions(File file) {
+    file.openSync().closeSync();
   }
 }
 
@@ -267,25 +287,25 @@ Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
 
 // Returns the directory containing the 'name' template directory in
 // flutter_template_images, to resolve image placeholder against.
-Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem) async {
+Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Logger logger, Pub pub) async {
   final String toolPackagePath = fileSystem.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools');
   final String packageFilePath = fileSystem.path.join(toolPackagePath, kPackagesFileName);
   // Ensure that .packgaes is present.
   if (!fileSystem.file(packageFilePath).existsSync()) {
-    await _ensurePackageDependencies(toolPackagePath);
+    await _ensurePackageDependencies(toolPackagePath, pub);
   }
   PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packageFilePath),
-    logger: globals.logger,
+    logger: logger,
   );
   Uri imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
   // Ensure that the template image package is present.
   if (imagePackageLibDir == null || !fileSystem.directory(imagePackageLibDir).existsSync()) {
-    await _ensurePackageDependencies(toolPackagePath);
+    await _ensurePackageDependencies(toolPackagePath, pub);
     packageConfig = await loadPackageConfigWithLogging(
       fileSystem.file(packageFilePath),
-      logger: globals.logger,
+      logger: logger,
     );
     imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
   }
@@ -297,7 +317,7 @@ Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem) as
 
 // Runs 'pub get' for the given path to ensure that .packages is created and
 // all dependencies are present.
-Future<void> _ensurePackageDependencies(String packagePath) async {
+Future<void> _ensurePackageDependencies(String packagePath, Pub pub) async {
   await pub.get(
     context: PubContext.pubGet,
     directory: packagePath,

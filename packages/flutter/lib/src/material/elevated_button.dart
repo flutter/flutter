@@ -30,16 +30,16 @@ import 'theme_data.dart';
 /// An elevated button is a label [child] displayed on a [Material]
 /// widget whose [Material.elevation] increases when the button is
 /// pressed. The label's [Text] and [Icon] widgets are displayed in
-/// [style]'s [ButtonStyle.onForegroundColor] and the button's filled
+/// [style]'s [ButtonStyle.foregroundColor] and the button's filled
 /// background is the [ButtonStyle.backgroundColor].
 ///
 /// The elevated button's default style is defined by
 /// [defaultStyleOf].  The style of this elevated button can be
-/// overridden with its [style] parameter. The style of all contained
+/// overridden with its [style] parameter. The style of all elevated
 /// buttons in a subtree can be overridden with the
-/// [ElevatedButtonTheme], and the style of all of the contained
+/// [ElevatedButtonTheme], and the style of all of the elevated
 /// buttons in an app can be overridden with the [Theme]'s
-/// [ThemeData.ElevatedButtonTheme] property.
+/// [ThemeData.elevatedButtonTheme] property.
 ///
 /// The static [styleFrom] method is a convenient way to create a
 /// elevated button [ButtonStyle] from simple values.
@@ -99,13 +99,13 @@ class ElevatedButton extends ButtonStyleButton {
   /// [ButtonStyle] given simple values.
   ///
   /// The [onPrimary], and [onSurface] colors are used to to create a
-  /// [MaterialStateProperty] [foreground] value in the same way that
-  /// [defaultStyleOf] uses the [ColorScheme] colors with the same
+  /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value in the same
+  /// way that [defaultStyleOf] uses the [ColorScheme] colors with the same
   /// names. Specify a value for [onPrimary] to specify the color of the
-  /// button's text and icons as well as the overlay colors used to
-  /// indicate the hover, focus, and pressed states. Use primary for
-  /// the button's background fill color and [onSurface]
-  /// to specify the button's disabled text, icon, and fill color.
+  /// button's text and icons as well as the overlay colors used to indicate the
+  /// hover, focus, and pressed states. Use [primary] for the button's background
+  /// fill color and [onSurface] to specify the button's disabled text, icon,
+  /// and fill color.
   ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
@@ -129,7 +129,7 @@ class ElevatedButton extends ButtonStyleButton {
   ///
   /// ```dart
   /// ElevatedButton(
-  ///   style: TextButton.styleFrom(primary: Colors.green),
+  ///   style: ElevatedButton.styleFrom(primary: Colors.green),
   /// )
   /// ```
   static ButtonStyle styleFrom({
@@ -206,8 +206,8 @@ class ElevatedButton extends ButtonStyleButton {
   /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been
   /// abbreviated for readability.
   ///
-  /// The color of the [textStyle] is not used, the [foreground] color
-  /// is used instead.
+  /// The color of the [ButtonStyle.textStyle] is not used, the
+  /// [ButtonStyle.foregroundColor] color is used instead.
   ///
   /// * `textStyle` - Theme.textTheme.button
   /// * `backgroundColor`
@@ -408,141 +408,6 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
 
 class _ElevatedButtonWithIconChild extends StatelessWidget {
   const _ElevatedButtonWithIconChild({ Key key, this.label, this.icon }) : super(key: key);
-
-  final Widget label;
-  final Widget icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final double scale = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1;
-    final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1));
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), label],
-    );
-  }
-}
-
-/// Please use [ElevatedButton].
-@Deprecated(
-  'This class was briefly released with the wrong name. The correct name is ElevatedButton. '
-  'This feature was deprecated after v1.20.0-2.0.pre.'
-)
-class ContainedButton extends ElevatedButton {
-  /// Please use [new ElevatedButton].
-  const ContainedButton({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
-    bool autofocus = false,
-    Clip clipBehavior = Clip.none,
-    @required Widget child,
-  }) : super(
-    key: key,
-    onPressed: onPressed,
-    onLongPress: onLongPress,
-    style: style,
-    focusNode: focusNode,
-    autofocus: autofocus,
-    clipBehavior: clipBehavior,
-    child: child,
-  );
-
-  /// Please use [new ElevatedButton.icon].
-  factory ContainedButton.icon({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
-    bool autofocus,
-    Clip clipBehavior,
-    @required Widget icon,
-    @required Widget label,
-  }) = _ContainedButtonWithIcon;
-
-  /// Please use [ElevatedButton.styleFrom].
-  static ButtonStyle styleFrom({
-    Color primary,
-    Color onPrimary,
-    Color onSurface,
-    Color shadowColor,
-    double elevation,
-    TextStyle textStyle,
-    EdgeInsetsGeometry padding,
-    Size minimumSize,
-    BorderSide side,
-    OutlinedBorder shape,
-    MouseCursor enabledMouseCursor,
-    MouseCursor disabledMouseCursor,
-    VisualDensity visualDensity,
-    MaterialTapTargetSize tapTargetSize,
-    Duration animationDuration,
-    bool enableFeedback,
-  }) {
-    return ElevatedButton.styleFrom(
-      primary: primary,
-      onPrimary: onPrimary,
-      onSurface: onSurface,
-      shadowColor: shadowColor,
-      elevation: elevation,
-      textStyle: textStyle,
-      padding: padding,
-      minimumSize: minimumSize,
-      side: side,
-      shape: shape,
-      enabledMouseCursor: enabledMouseCursor,
-      disabledMouseCursor: disabledMouseCursor,
-      visualDensity: visualDensity,
-      tapTargetSize: tapTargetSize,
-      animationDuration: animationDuration,
-      enableFeedback: enableFeedback,
-    );
-  }
-}
-
-class _ContainedButtonWithIcon extends ContainedButton {
-  _ContainedButtonWithIcon({
-    Key key,
-    @required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
-    bool autofocus,
-    Clip clipBehavior,
-    @required Widget icon,
-    @required Widget label,
-  }) : assert(icon != null),
-       assert(label != null),
-       super(
-         key: key,
-         onPressed: onPressed,
-         onLongPress: onLongPress,
-         style: style,
-         focusNode: focusNode,
-         autofocus: autofocus ?? false,
-         clipBehavior: clipBehavior ?? Clip.none,
-         child: _ContainedButtonWithIconChild(icon: icon, label: label),
-      );
-
-  @override
-  ButtonStyle defaultStyleOf(BuildContext context) {
-    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
-      const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
-      const EdgeInsets.symmetric(horizontal: 8),
-      const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
-      MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1,
-    );
-    return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding)
-    );
-  }
-}
-
-class _ContainedButtonWithIconChild extends StatelessWidget {
-  const _ContainedButtonWithIconChild({ Key key, this.label, this.icon }) : super(key: key);
 
   final Widget label;
   final Widget icon;

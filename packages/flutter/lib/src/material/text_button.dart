@@ -103,15 +103,15 @@ class TextButton extends ButtonStyleButton {
   /// [ButtonStyle] given simple values.
   ///
   /// The [primary], and [onSurface] colors are used to to create a
-  /// [MaterialStateProperty] [foreground] value in the same way that
-  /// [defaultStyleOf] uses the [ColorScheme] colors with the same
-  /// names. Specify a value for [primary] to specify the color of the
-  /// button's text and icons as well as the overlay colors used to
-  /// indicate the hover, focus, and pressed states. Use [onSurface]
-  /// to specify the button's disabled text and icon color.
+  /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value in the same
+  /// way that [defaultStyleOf] uses the [ColorScheme] colors with the same
+  /// names. Specify a value for [primary] to specify the color of the button's
+  /// text and icons as well as the overlay colors used to indicate the hover,
+  /// focus, and pressed states. Use [onSurface] to specify the button's
+  /// disabled text and icon color.
   ///
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
-  /// parameters are used to construct [ButtonStyle].mouseCursor.
+  /// parameters are used to construct [ButtonStyle.mouseCursor].
   ///
   /// All of the other parameters are either used directly or used to
   /// create a [MaterialStateProperty] with a single value for all
@@ -200,8 +200,8 @@ class TextButton extends ButtonStyleButton {
   /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been
   /// abbreviated for readability.
   ///
-  /// The color of the [textStyle] is not used, the [foreground] color
-  /// is used instead.
+  /// The color of the [ButtonStyle.textStyle] is not used, the
+  /// [ButtonStyle.foregroundColor] color is used instead.
   ///
   /// * `textStyle` - Theme.textTheme.button
   /// * `backgroundColor` - transparent

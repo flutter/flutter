@@ -20,6 +20,7 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'text_selection_theme.dart';
 import 'theme.dart';
 
 const double _kHandleSize = 22.0;
@@ -795,12 +796,16 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style text selection handles.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
+    final ThemeData theme = Theme.of(context);
+    final Color handleColor = theme.useTextSelectionTheme ?
+      TextSelectionTheme.of(context).selectionHandleColor ?? theme.colorScheme.primary :
+      theme.textSelectionHandleColor;
     final Widget handle = SizedBox(
       width: _kHandleSize,
       height: _kHandleSize,
       child: CustomPaint(
         painter: _TextSelectionHandlePainter(
-          color: Theme.of(context).textSelectionHandleColor,
+          color: handleColor,
         ),
       ),
     );

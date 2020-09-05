@@ -118,7 +118,7 @@ class MergeableMaterial extends StatefulWidget {
 
   /// The z-coordinate at which to place all the [Material] slices.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24.
   ///
   /// Defaults to 2, the appropriate elevation for cards.
   ///
