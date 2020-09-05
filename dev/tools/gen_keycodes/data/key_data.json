@@ -352,7 +352,7 @@
       "xkb": null,
       "windows": null,
       "macos": null,
-      "ios": null
+      "ios": 0
     },
     "keyCodes": {
       "android": null,
@@ -2046,8 +2046,7 @@
       ],
       "windows": [
         "ESCAPE"
-      ],
-      "ios": "UIKeyInputEscape"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -2755,8 +2754,7 @@
       ],
       "windows": [
         "F1"
-      ],
-      "ios": "UIKeyInputF1"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -2802,8 +2800,7 @@
       ],
       "windows": [
         "F2"
-      ],
-      "ios": "UIKeyInputF2"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -2849,8 +2846,7 @@
       ],
       "windows": [
         "F3"
-      ],
-      "ios": "UIKeyInputF3"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -2896,8 +2892,7 @@
       ],
       "windows": [
         "F4"
-      ],
-      "ios": "UIKeyInputF4"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -2942,8 +2937,7 @@
       ],
       "windows": [
         "F5"
-      ],
-      "ios": "UIKeyInputF5"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -2987,8 +2981,7 @@
       ],
       "windows": [
         "F6"
-      ],
-      "ios": "UIKeyInputF6"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -3032,8 +3025,7 @@
       ],
       "windows": [
         "F7"
-      ],
-      "ios": "UIKeyInputF7"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -3077,8 +3069,7 @@
       ],
       "windows": [
         "F8"
-      ],
-      "ios": "UIKeyInputF8"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -3122,8 +3113,7 @@
       ],
       "windows": [
         "F9"
-      ],
-      "ios": "UIKeyInputF9"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -3167,8 +3157,7 @@
       ],
       "windows": [
         "F10"
-      ],
-      "ios": "UIKeyInputF10"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -3212,8 +3201,7 @@
       ],
       "windows": [
         "F11"
-      ],
-      "ios": "UIKeyInputF11"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -3257,8 +3245,7 @@
       ],
       "windows": [
         "F12"
-      ],
-      "ios": "UIKeyInputF12"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -3390,7 +3377,7 @@
       "xkb": 127,
       "windows": 69,
       "macos": null,
-      "ios": null
+      "ios": 72
     },
     "keyCodes": {
       "android": [
@@ -3470,8 +3457,7 @@
       ],
       "windows": [
         "HOME"
-      ],
-      "ios": "UIKeyInputHome"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -3515,8 +3501,7 @@
         "Page_Up",
         "KP_Page_Up"
       ],
-      "windows": null,
-      "ios": "UIKeyInputPageUp"
+      "windows": null
     },
     "scanCodes": {
       "android": [
@@ -3607,8 +3592,7 @@
       ],
       "windows": [
         "END"
-      ],
-      "ios": "UIKeyInputEnd"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -3652,8 +3636,7 @@
         "Page_Down",
         "KP_Page_Down"
       ],
-      "windows": null,
-      "ios": "UIKeyInputPageDown"
+      "windows": null
     },
     "scanCodes": {
       "android": [
@@ -3698,8 +3681,7 @@
       ],
       "windows": [
         "RIGHT"
-      ],
-      "ios": "UIKeyInputRightArrow"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -3745,8 +3727,7 @@
       ],
       "windows": [
         "LEFT"
-      ],
-      "ios": "UIKeyInputLeftArrow"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -3792,8 +3773,7 @@
       ],
       "windows": [
         "DOWN"
-      ],
-      "ios": "UIKeyInputDownArrow"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -3839,8 +3819,7 @@
       ],
       "windows": [
         "UP"
-      ],
-      "ios": "UIKeyInputUpArrow"
+      ]
     },
     "scanCodes": {
       "android": [
@@ -5454,7 +5433,7 @@
       "xkb": 145,
       "windows": 57367,
       "macos": null,
-      "ios": 129
+      "ios": 123
     },
     "keyCodes": {
       "android": [
@@ -6083,7 +6062,7 @@
       "xkb": 187,
       "windows": null,
       "macos": null,
-      "ios": null
+      "ios": 182
     },
     "keyCodes": {
       "android": [
@@ -6115,7 +6094,7 @@
       "xkb": 188,
       "windows": null,
       "macos": null,
-      "ios": null
+      "ios": 183
     },
     "keyCodes": {
       "android": [
@@ -6143,7 +6122,7 @@
       "xkb": null,
       "windows": null,
       "macos": null,
-      "ios": null
+      "ios": 187
     },
     "keyCodes": {
       "android": null,
@@ -6169,7 +6148,7 @@
       "xkb": null,
       "windows": null,
       "macos": null,
-      "ios": null
+      "ios": 208
     },
     "keyCodes": {
       "android": null,
@@ -6195,7 +6174,7 @@
       "xkb": null,
       "windows": null,
       "macos": null,
-      "ios": null
+      "ios": 209
     },
     "keyCodes": {
       "android": null,
@@ -6221,7 +6200,7 @@
       "xkb": null,
       "windows": null,
       "macos": null,
-      "ios": null
+      "ios": 210
     },
     "keyCodes": {
       "android": null,
@@ -6247,7 +6226,7 @@
       "xkb": null,
       "windows": null,
       "macos": null,
-      "ios": null
+      "ios": 211
     },
     "keyCodes": {
       "android": null,
@@ -6273,7 +6252,7 @@
       "xkb": null,
       "windows": null,
       "macos": null,
-      "ios": null
+      "ios": 212
     },
     "keyCodes": {
       "android": null,
@@ -6299,7 +6278,7 @@
       "xkb": 126,
       "windows": null,
       "macos": null,
-      "ios": null
+      "ios": 215
     },
     "keyCodes": {
       "android": null,
@@ -6325,7 +6304,7 @@
       "xkb": null,
       "windows": null,
       "macos": null,
-      "ios": null
+      "ios": 216
     },
     "keyCodes": {
       "android": null,
@@ -6351,7 +6330,7 @@
       "xkb": null,
       "windows": null,
       "macos": null,
-      "ios": null
+      "ios": 217
     },
     "keyCodes": {
       "android": null,
@@ -6757,7 +6736,9 @@
       "windows": null
     },
     "scanCodes": {
-      "android": null,
+      "android": [
+        370
+      ],
       "usb": 786529,
       "linux": 370,
       "xkb": 378,
@@ -7023,7 +7004,9 @@
       "windows": null
     },
     "scanCodes": {
-      "android": null,
+      "android": [
+        405
+      ],
       "usb": 786563,
       "linux": 405,
       "xkb": 413,
@@ -7214,7 +7197,8 @@
       "linux": 207,
       "xkb": 215,
       "windows": null,
-      "macos": null
+      "macos": null,
+      "ios": null
     },
     "keyCodes": {
       "android": [
@@ -7251,7 +7235,7 @@
       "xkb": 209,
       "windows": null,
       "macos": null,
-      "ios": 72
+      "ios": null
     },
     "keyCodes": {
       "android": [
@@ -7470,7 +7454,7 @@
       "xkb": 174,
       "windows": 57380,
       "macos": null,
-      "ios": 120
+      "ios": null
     },
     "keyCodes": {
       "android": [

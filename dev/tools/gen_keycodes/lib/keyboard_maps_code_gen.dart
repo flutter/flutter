@@ -198,6 +198,28 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     return macOsFunctionKeyMap.toString().trimRight();
   }
 
+  /// This generates the map of iOS key codes to physical keys.
+  String get iOSScanCodeMap {
+    final StringBuffer iOSScanCodeMap = StringBuffer();
+    for (final Key entry in keyData.data) {
+      if (entry.iOSScanCode != null) {
+        iOSScanCodeMap.writeln('  ${toHex(entry.iOSScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
+      }
+    }
+    return iOSScanCodeMap.toString().trimRight();
+  }
+
+  /// This generates the map of macOS number pad key codes to logical keys.
+  String get iOSNumpadMap {
+    final StringBuffer iOSNumPadMap = StringBuffer();
+    for (final Key entry in numpadKeyData) {
+      if (entry.iOSScanCode != null) {
+        iOSNumPadMap.writeln('  ${toHex(entry.iOSScanCode)}: LogicalKeyboardKey.${entry.constantName},');
+      }
+    }
+    return iOSNumPadMap.toString().trimRight();
+  }
+
   /// This generates the map of Fuchsia key codes to logical keys.
   String get fuchsiaKeyCodeMap {
     final StringBuffer fuchsiaKeyCodeMap = StringBuffer();
@@ -267,6 +289,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       'MACOS_SCAN_CODE_MAP': macOsScanCodeMap,
       'MACOS_NUMPAD_MAP': macOsNumpadMap,
       'MACOS_FUNCTION_KEY_MAP': macOsFunctionKeyMap,
+      'IOS_SCAN_CODE_MAP': iOSScanCodeMap,
+      'IOS_NUMPAD_MAP': iOSNumpadMap,
       'GLFW_KEY_CODE_MAP': glfwKeyCodeMap,
       'GLFW_NUMPAD_MAP': glfwNumpadMap,
       'GTK_KEY_CODE_MAP': gtkKeyCodeMap,

@@ -325,16 +325,18 @@ class KeyData {
     input = input.replaceAll(commentRegExp, '');
     input.replaceAllMapped(usbMapRegExp, (Match match) {
       if (match != null) {
+        final int usbHidCode = getHex(match.group(1));
         final int macScanCode = getHex(match.group(5));
         final int linuxScanCode = getHex(match.group(2));
         final int xKbScanCode = getHex(match.group(3));
         final int windowsScanCode = getHex(match.group(4));
         final Key newEntry = Key(
-          usbHidCode: getHex(match.group(1)),
+          usbHidCode: usbHidCode,
           linuxScanCode: linuxScanCode == 0 ? null : linuxScanCode,
           xKbScanCode: xKbScanCode == 0 ? null : xKbScanCode,
           windowsScanCode: windowsScanCode == 0 ? null : windowsScanCode,
           macOsScanCode: macScanCode == 0xffff ? null : macScanCode,
+          iOSScanCode: (usbHidCode & 0x070000) == 0x070000 ? (usbHidCode ^ 0x070000) : null,
           name: match.group(6) == 'NULL' ? null : match.group(6),
           // The input data has a typo...
           chromiumName: shoutingToLowerCamel(match.group(7)).replaceAll('Minimium', 'Minimum'),
@@ -375,6 +377,7 @@ class Key {
     this.windowsKeyNames,
     this.windowsKeyCodes,
     this.macOsScanCode,
+    this.iOSScanCode,
     @required this.chromiumName,
     this.androidKeyNames,
     this.androidScanCodes,
@@ -429,6 +432,8 @@ class Key {
   List<String> windowsKeyNames;
   /// The macOS scan code of the key from Chromium's header file.
   int macOsScanCode;
+  /// The iOS scan code of the key from UIKey's documentation (USB Hid table)
+  int iOSScanCode;
   /// The name of the key, mostly derived from the DomKey name in Chromium,
   /// but where there was no DomKey representation, derived from the Chromium
   /// symbol name.
@@ -484,6 +489,7 @@ class Key {
         'xkb': xKbScanCode,
         'windows': windowsScanCode,
         'macos': macOsScanCode,
+        'ios': iOSScanCode,
       },
       'keyCodes': <String, List<int>>{
         'android': androidKeyCodes,
@@ -551,7 +557,8 @@ class Key {
     return """'$constantName': (name: "$name", usbHidCode: ${toHex(usbHidCode)}, """
         'linuxScanCode: ${toHex(linuxScanCode)}, xKbScanCode: ${toHex(xKbScanCode)}, '
         'windowsKeyCode: ${toHex(windowsScanCode)}, macOsScanCode: ${toHex(macOsScanCode)}, '
-        'windowsScanCode: ${toHex(windowsScanCode)}, chromiumSymbolName: $chromiumName';
+        'windowsScanCode: ${toHex(windowsScanCode)}, chromiumSymbolName: $chromiumName '
+        'iOSScanCode: ${toHex(iOSScanCode)})';
   }
 
   /// Returns the static map of printable representations.

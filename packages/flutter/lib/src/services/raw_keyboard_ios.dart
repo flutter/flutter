@@ -1,12 +1,39 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_key.dart';
 import 'keyboard_maps.dart';
 import 'raw_keyboard.dart';
 
+/// Maps iOS specific string values of nonvisible keys to logical keys
+///
+/// See: https://developer.apple.com/documentation/uikit/uikeycommand/input_strings_for_special_keys?language=objc
+const Map<String, LogicalKeyboardKey> _kiOSToLogicalMap = <String, LogicalKeyboardKey>{
+  'UIKeyInputEscape': LogicalKeyboardKey.escape,
+  'UIKeyInputF1': LogicalKeyboardKey.f1,
+  'UIKeyInputF2': LogicalKeyboardKey.f2,
+  'UIKeyInputF3': LogicalKeyboardKey.f3,
+  'UIKeyInputF4': LogicalKeyboardKey.f4,
+  'UIKeyInputF5': LogicalKeyboardKey.f5,
+  'UIKeyInputF6': LogicalKeyboardKey.f6,
+  'UIKeyInputF7': LogicalKeyboardKey.f7,
+  'UIKeyInputF8': LogicalKeyboardKey.f8,
+  'UIKeyInputF9': LogicalKeyboardKey.f9,
+  'UIKeyInputF10': LogicalKeyboardKey.f10,
+  'UIKeyInputF11': LogicalKeyboardKey.f11,
+  'UIKeyInputF12': LogicalKeyboardKey.f12,
+  'UIKeyInputUpArrow': LogicalKeyboardKey.arrowUp,
+  'UIKeyInputDownArrow': LogicalKeyboardKey.arrowDown,
+  'UIKeyInputLeftArrow': LogicalKeyboardKey.arrowLeft,
+  'UIKeyInputRightArrow': LogicalKeyboardKey.arrowRight,
+  'UIKeyInputHome': LogicalKeyboardKey.home,
+  'UIKeyInputEnd': LogicalKeyboardKey.enter,
+  'UIKeyInputPageUp': LogicalKeyboardKey.pageUp,
+  'UIKeyInputPageDown': LogicalKeyboardKey.pageDown
+};
 /// Platform-specific key event data for iOS.
 ///
 /// This object contains information about key events obtained from iOS'
@@ -77,7 +104,7 @@ class RawKeyEventDataIOS extends RawKeyEventData {
     }
 
     // Look to see if the [keyLabel] is one we know about and have a mapping for.
-    final LogicalKeyboardKey? newKey = kIOStoLogicalKey[keyLabel];
+    final LogicalKeyboardKey? newKey = _kiOSToLogicalMap[keyLabel];
     if (newKey != null) {
       return newKey;
     }
