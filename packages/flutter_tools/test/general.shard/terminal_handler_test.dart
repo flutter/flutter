@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
@@ -153,19 +152,6 @@ void main() {
       when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
       await terminalHandler.processTerminalInput('I');
 
-    });
-
-    testUsingContext('l - list flutter views', () async {
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
-      when(mockResidentRunner.isRunningDebug).thenReturn(true);
-      when(mockResidentRunner.flutterDevices).thenReturn(<FlutterDevice>[mockFlutterDevice]);
-      when(mockResidentRunner.listFlutterViews()).thenAnswer((Invocation invocation) async {
-        return <FlutterView>[];
-      });
-
-      await terminalHandler.processTerminalInput('l');
-
-      expect(testLogger.statusText, contains('Connected views:\n'));
     });
 
     testUsingContext('L - debugDumpLayerTree with service protocol', () async {

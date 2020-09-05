@@ -134,7 +134,8 @@ void main() {
   });
 
   test('Flutter.Frame event fired', () async {
-    window.onReportTimings(<FrameTiming>[FrameTiming.fromTimeStamps(
+    window.onReportTimings(<FrameTiming>[FrameTiming(
+      vsyncStart: 5000,
       buildStart: 10000,
       buildFinish: 15000,
       rasterStart: 16000,
@@ -147,9 +148,10 @@ void main() {
     final Map<String, dynamic> event = events.first;
     expect(event['number'], isNonNegative);
     expect(event['startTime'], 10000);
-    expect(event['elapsed'], 10000);
+    expect(event['elapsed'], 15000);
     expect(event['build'], 5000);
     expect(event['raster'], 4000);
+    expect(event['vsyncOverhead'], 5000);
   });
 
   test('TimingsCallback exceptions are caught', () {

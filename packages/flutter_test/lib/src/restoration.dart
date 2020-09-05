@@ -55,6 +55,14 @@ class TestRestorationManager extends RestorationManager {
     handleRestorationUpdateFromEngine(enabled: true, data: data.binary);
   }
 
+  /// Disabled state restoration.
+  ///
+  /// To turn restoration back on call [restoreFrom].
+  void disableRestoration() {
+    _restorationData = null;
+    handleRestorationUpdateFromEngine(enabled: false, data: null);
+  }
+
   @override
   Future<void> sendToEngine(Uint8List encodedData) async {
     _restorationData = TestRestorationData._(encodedData);

@@ -6,6 +6,8 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   testWidgets('Heroes work', (WidgetTester tester) async {
@@ -147,4 +149,101 @@ void main() {
     expect(key2.currentState, isA<NavigatorState>());
     expect(key1.currentState, isNull);
   });
+
+  testWidgets('CupertinoApp.router works', (WidgetTester tester) async {
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: const RouteInformation(
+        location: 'initial',
+      ),
+    );
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.location);
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = const RouteInformation(
+          location: 'popped',
+        );
+        return route.didPop(result);
+      }
+    );
+    await tester.pumpWidget(CupertinoApp.router(
+      routeInformationProvider: provider,
+      routeInformationParser: SimpleRouteInformationParser(),
+      routerDelegate: delegate,
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
+  });
+}
+
+typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
+typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
+
+class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
+  SimpleRouteInformationParser();
+
+  @override
+  Future<RouteInformation> parseRouteInformation(RouteInformation information) {
+    return SynchronousFuture<RouteInformation>(information);
+  }
+
+  @override
+  RouteInformation restoreRouteInformation(RouteInformation configuration) {
+    return configuration;
+  }
+}
+
+class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
+  SimpleNavigatorRouterDelegate({
+    @required this.builder,
+    this.onPopPage,
+  });
+
+  @override
+  GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  RouteInformation get routeInformation => _routeInformation;
+  RouteInformation _routeInformation;
+  set routeInformation(RouteInformation newValue) {
+    _routeInformation = newValue;
+    notifyListeners();
+  }
+
+  SimpleRouterDelegateBuilder builder;
+  SimpleNavigatorRouterDelegatePopPage<void> onPopPage;
+
+  @override
+  Future<void> setNewRoutePath(RouteInformation configuration) {
+    _routeInformation = configuration;
+    return SynchronousFuture<void>(null);
+  }
+
+  bool _handlePopPage(Route<void> route, void data) {
+    return onPopPage(route, data, this);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      key: navigatorKey,
+      onPopPage: _handlePopPage,
+      pages: <Page<void>>[
+        // We need at least two pages for the pop to propagate through.
+        // Otherwise, the navigator will bubble the pop to the system navigator.
+        CupertinoPage<void>(
+          builder: (BuildContext context) => const Text('base'),
+        ),
+        CupertinoPage<void>(
+          key: ValueKey<String>(routeInformation?.location),
+          builder: (BuildContext context) => builder(context, routeInformation),
+        )
+      ],
+    );
+  }
 }

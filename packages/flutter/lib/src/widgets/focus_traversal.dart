@@ -1528,15 +1528,34 @@ class FocusTraversalOrder extends InheritedWidget {
 ///       order = LexicalFocusOrder(widget.order.toString());
 ///     }
 ///
+///     Color overlayColor(Set<MaterialState> states) {
+///       if (states.contains(MaterialState.focused)) {
+///         return Colors.red;
+///       }
+///       if (states.contains(MaterialState.hovered)) {
+///         return Colors.blue;
+///       }
+///       return null;  // defer to the default overlayColor
+///     }
+///
+///     Color foregroundColor(Set<MaterialState> states) {
+///       if (states.contains(MaterialState.focused) || states.contains(MaterialState.hovered)) {
+///         return Colors.white;
+///       }
+///       return null;  // defer to the default foregroundColor
+///     }
+///
 ///     return FocusTraversalOrder(
 ///       order: order,
 ///       child: Padding(
 ///         padding: const EdgeInsets.all(8.0),
-///         child: OutlineButton(
+///         child: OutlinedButton(
 ///           focusNode: focusNode,
 ///           autofocus: widget.autofocus,
-///           focusColor: Colors.red,
-///           hoverColor: Colors.blue,
+///           style: ButtonStyle(
+///             overlayColor: MaterialStateProperty.resolveWith<Color>(overlayColor),
+///             foregroundColor: MaterialStateProperty.resolveWith<Color>(foregroundColor),
+///           ),
 ///           onPressed: () => _handleOnPressed(),
 ///           child: Text(widget.name),
 ///         ),

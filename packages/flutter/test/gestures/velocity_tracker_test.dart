@@ -78,4 +78,71 @@ void main() {
     final VelocityTracker tracker = VelocityTracker();
     expect(tracker.getVelocity(), Velocity.zero);
   });
+
+  test('FreeScrollStartVelocityTracker.getVelocity throws when no points', () {
+    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker();
+    AssertionError exception;
+    try {
+      tracker.getVelocity();
+    } on AssertionError catch (e) {
+      exception = e;
+    }
+
+    expect(exception?.toString(), contains('at least 1 point'));
+  });
+
+  test('FreeScrollStartVelocityTracker.getVelocity throws when the new point precedes the previous point', () {
+    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker();
+    AssertionError exception;
+
+    tracker.addPosition(const Duration(hours: 1), Offset.zero);
+    try {
+      tracker.getVelocity();
+      tracker.addPosition(const Duration(seconds: 1), Offset.zero);
+    } on AssertionError catch (e) {
+      exception = e;
+    }
+
+    expect(exception?.toString(), contains('has a smaller timestamp'));
+  });
+
+  test('Estimate does not throw when there are more than 1 point', () {
+    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker();
+    Offset position = Offset.zero;
+    Duration time = Duration.zero;
+    const Offset positionDelta = Offset(0, -1);
+    const Duration durationDelta = Duration(seconds: 1);
+    AssertionError exception;
+
+    for (int i = 0; i < 5; i+=1) {
+      position += positionDelta;
+      time += durationDelta;
+      tracker.addPosition(time, position);
+
+      try {
+        tracker.getVelocity();
+      } on AssertionError catch (e) {
+        exception = e;
+      }
+      expect(exception, isNull);
+    }
+  });
+
+  test('Makes consistent velocity estimates with consistent velocity', () {
+    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker();
+    Offset position = Offset.zero;
+    Duration time = Duration.zero;
+    const Offset positionDelta = Offset(0, -1);
+    const Duration durationDelta = Duration(seconds: 1);
+
+    for (int i = 0; i < 10; i+=1) {
+      position += positionDelta;
+      time += durationDelta;
+      tracker.addPosition(time, position);
+
+      if (i >= 3) {
+        expect(tracker.getVelocity().pixelsPerSecond, positionDelta);
+      }
+    }
+  });
 }

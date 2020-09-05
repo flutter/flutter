@@ -237,6 +237,8 @@ class UserMessages {
   String pkgConfigTooOld(String minimumVersion) => 'pkg-config $minimumVersion or later is required.';
   String get gtkLibrariesMissing => 'GTK 3.0 development libraries are required for Linux development.\n'
       'They are likely available from your distribution (e.g.: apt install libgtk-3-dev)';
+  String get blkidLibraryMissing => 'The blkid development library is required for Linux development.\n'
+      'It is likely available from your distribution (e.g.: apt install libblkid-dev)';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';
@@ -254,7 +256,7 @@ class UserMessages {
       'Found $count devices with name or id matching $deviceId:';
   String get flutterMultipleDevicesFound => 'Multiple devices found:';
   String flutterChooseDevice(int option, String name, String deviceId) => '[$option]: $name ($deviceId)';
-  String get flutterChooseOne => 'Please choose one:';
+  String get flutterChooseOne => 'Please choose one (To quit, press "q/Q")';
   String get flutterSpecifyDeviceWithAllOption =>
       'More than one device connected; please specify a device with '
       "the '-d <deviceId>' flag, or use '-d all' to act on all devices.";

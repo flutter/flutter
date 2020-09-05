@@ -21,7 +21,6 @@ import 'focus_scope.dart';
 import 'framework.dart';
 import 'heroes.dart';
 import 'overlay.dart';
-import 'route_notification_messages.dart';
 import 'routes.dart';
 import 'ticker_provider.dart';
 
@@ -3308,8 +3307,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         _RouteEntry.isPresentPredicate, orElse: () => null);
       final String routeName = lastEntry?.route?.settings?.name;
       if (routeName != _lastAnnouncedRouteName) {
-        RouteNotificationMessages.maybeNotifyRouteChange(
-          routeName, _lastAnnouncedRouteName);
+        SystemNavigator.routeUpdated(
+          routeName: routeName,
+          previousRouteName: _lastAnnouncedRouteName
+        );
         _lastAnnouncedRouteName = routeName;
       }
     }

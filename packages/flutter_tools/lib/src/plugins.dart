@@ -311,7 +311,14 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
   if (!globals.fs.isFileSync(pubspecPath)) {
     return null;
   }
-  final dynamic pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync());
+  dynamic pubspec;
+
+  try {
+    pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync());
+  } on YamlException catch (err) {
+    globals.printTrace('Failed to parse plugin manifest for $name: $err');
+    // Do nothing, potentially not a plugin.
+  }
   if (pubspec == null) {
     return null;
   }
@@ -654,12 +661,6 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       break;
     case AndroidEmbeddingVersion.v1:
     default:
-      globals.printStatus(
-        'Your Flutter application is created using an older version of the '
-        "Android embedding. It's being deprecated in favor of Android embedding "
-        'v2. Follow the steps on https://flutter.dev/go/android-project-migration '
-        'to migrate your project.'
-      );
       for (final Map<String, dynamic> plugin in androidPlugins) {
         if (!(plugin['supportsEmbeddingV1'] as bool) && plugin['supportsEmbeddingV2'] as bool) {
           throwToolExit(

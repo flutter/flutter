@@ -306,7 +306,21 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
       return false;
     }
     assert(context != null);
-    final LogicalKeySet keySet = keysPressed ?? LogicalKeySet.fromSet(RawKeyboard.instance.keysPressed);
+    LogicalKeySet keySet = keysPressed;
+    if (keySet == null) {
+      assert(RawKeyboard.instance.keysPressed.isNotEmpty,
+        'Received a key down event when no keys are in keysPressed. '
+        "This state can occur if the key event being sent doesn't properly "
+        'set its modifier flags. This was the event: $event and its data: '
+        '${event.data}');
+      // Avoid the crash in release mode, since it's easy to miss a particular
+      // bad key sequence in testing, and so shouldn't crash the app in release.
+      if (RawKeyboard.instance.keysPressed.isNotEmpty) {
+        keySet = LogicalKeySet.fromSet(RawKeyboard.instance.keysPressed);
+      } else {
+        return false;
+      }
+    }
     Intent matchedIntent = _shortcuts[keySet];
     if (matchedIntent == null) {
       // If there's not a more specific match, We also look for any keys that
