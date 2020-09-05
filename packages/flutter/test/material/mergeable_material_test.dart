@@ -161,7 +161,8 @@ void main() {
     RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(200.0));
 
-    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Sharp);
+    matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -196,7 +197,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(box.size.height, equals(200.0));
 
-    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Sharp);
+    matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
   });
 
   testWidgets('MergeableMaterial paints shadows', (WidgetTester tester) async {
@@ -340,7 +342,8 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(200));
 
-    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Sharp);
+    matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -416,7 +419,9 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(200));
 
-    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Sharp);
+    matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
+
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -573,7 +578,8 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(200));
 
-    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Sharp);
+    matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -611,7 +617,9 @@ void main() {
 
     expect(box.size.height, equals(300));
 
-    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Sharp);
+    matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Sharp);
+    matches(getBorderRadius(tester, 2), RadiusType.Sharp, RadiusType.Round);
   });
 
   testWidgets('MergeableMaterial remove slice', (WidgetTester tester) async {
@@ -652,7 +660,9 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(300));
 
-    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Sharp);
+    matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Sharp);
+    matches(getBorderRadius(tester, 2), RadiusType.Sharp, RadiusType.Round);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -684,7 +694,8 @@ void main() {
     await tester.pump();
     expect(box.size.height, equals(200));
 
-    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Sharp);
+    matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
   });
 
   testWidgets('MergeableMaterial insert chunk', (WidgetTester tester) async {
@@ -718,7 +729,8 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(200));
 
-    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Sharp);
+    matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -1105,9 +1117,9 @@ void main() {
     int offset = 1;
 
     expect(isDivider(boxes[offset], false, true), isTrue);
-    expect(isDivider(boxes[offset + 1], true, true), isTrue);
     expect(isDivider(boxes[offset + 2], true, true), isTrue);
-    expect(isDivider(boxes[offset + 3], true, false), isTrue);
+    expect(isDivider(boxes[offset + 4], true, true), isTrue);
+    expect(isDivider(boxes[offset + 6], true, false), isTrue);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -1161,10 +1173,10 @@ void main() {
     offset = 1;
 
     expect(isDivider(boxes[offset], false, true), isTrue);
-    expect(isDivider(boxes[offset + 1], true, false), isTrue);
+    expect(isDivider(boxes[offset + 2], true, false), isTrue);
     // offset + 2 is gap
-    expect(isDivider(boxes[offset + 3], false, true), isTrue);
-    expect(isDivider(boxes[offset + 4], true, false), isTrue);
+    expect(isDivider(boxes[offset + 4], false, true), isTrue);
+    expect(isDivider(boxes[offset + 6], true, false), isTrue);
   });
 
   testWidgets('MergeableMaterial respects dividerColor', (WidgetTester tester) async {
@@ -1242,10 +1254,10 @@ void main() {
       ),
     );
 
-    // Get the ColoredBox for the first MaterialSlice. The first ColoredBox should have materialSliceColor.
-    expect(tester.widget<ColoredBox>(find.byType(ColoredBox).first).color, materialSliceColor);
+    BoxDecoration boxDecoration = tester.widget<Container>(find.byType(Container).first).decoration as BoxDecoration;
+    expect(boxDecoration.color, materialSliceColor);
 
-    // Get the ColoredBox for the second MaterialSlice. The second ColoredBox should have themeCardColor.
-    expect(tester.widget<ColoredBox>(find.byType(ColoredBox).last).color, themeCardColor);
+    boxDecoration = tester.widget<Container>(find.byType(Container).last).decoration as BoxDecoration;
+    expect(boxDecoration.color, themeCardColor);
   });
 }

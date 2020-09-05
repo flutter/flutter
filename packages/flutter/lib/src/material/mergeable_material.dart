@@ -543,15 +543,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       if (_children[i] is MaterialGap) {
         assert(slices.isNotEmpty);
         widgets.add(
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: _borderRadius(i - 1, widgets.isEmpty, false),
-              shape: BoxShape.rectangle,
-            ),
-            child: ListBody(
-              mainAxis: widget.mainAxis,
-              children: slices,
-            ),
+          ListBody(
+            mainAxis: widget.mainAxis,
+            children: slices,
           ),
         );
         slices = <Widget>[];
@@ -603,11 +597,22 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           );
         }
 
+        BorderRadius _sliceBorderRadius;
+
+        if (i == _children.length - 1)
+          _sliceBorderRadius = _borderRadius(i, i == 0, true);
+        else
+          _sliceBorderRadius = _borderRadius(i, i == 0, false);
+
         slices.add(
-          Material(
-            type: MaterialType.transparency,
-            child: ColoredBox(
+          Container(
+            decoration: BoxDecoration(
               color: (_children[i] as MaterialSlice).color ?? Theme.of(context).cardColor,
+              borderRadius: _sliceBorderRadius,
+              shape: BoxShape.rectangle
+            ),
+            child: Material(
+              type: MaterialType.transparency,
               child: child,
             ),
           ),
@@ -617,15 +622,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
     if (slices.isNotEmpty) {
       widgets.add(
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: _borderRadius(i - 1, widgets.isEmpty, true),
-            shape: BoxShape.rectangle,
-          ),
-          child: ListBody(
-            mainAxis: widget.mainAxis,
-            children: slices,
-          ),
+        ListBody(
+          mainAxis: widget.mainAxis,
+          children: slices,
         ),
       );
       slices = <Widget>[];
