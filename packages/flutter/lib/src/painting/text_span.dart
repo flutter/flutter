@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show ParagraphBuilder;
 
 import 'package:flutter/foundation.dart';
@@ -68,6 +67,7 @@ class TextSpan extends InlineSpan {
   /// [children] should be set.
   const TextSpan({
     this.text,
+    this.tabSize,
     this.children,
     TextStyle? style,
     this.recognizer,
@@ -83,6 +83,8 @@ class TextSpan extends InlineSpan {
   @override
   final String? text;
 
+  /// Specify the tab size
+  final int? tabSize;
 
   /// Additional spans to include as children.
   ///
@@ -204,8 +206,7 @@ class TextSpan extends InlineSpan {
     final bool hasStyle = style != null;
     if (hasStyle)
       builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
-    if (text != null)
-      builder.addText(text!);
+    if (text != null) builder.addText(tabSize == null ? text! : text!.replaceAll("\t", " " * tabSize!));
     if (children != null) {
       for (final InlineSpan child in children!) {
         assert(child != null);
@@ -216,8 +217,7 @@ class TextSpan extends InlineSpan {
         );
       }
     }
-    if (hasStyle)
-      builder.pop();
+    if (hasStyle) builder.pop();
   }
 
   /// Walks this [TextSpan] and its descendants in pre-order and calls [visitor]
@@ -228,13 +228,11 @@ class TextSpan extends InlineSpan {
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
     if (text != null) {
-      if (!visitor(this))
-        return false;
+      if (!visitor(this)) return false;
     }
     if (children != null) {
       for (final InlineSpan child in children!) {
-        if (!child.visitChildren(visitor))
-          return false;
+        if (!child.visitChildren(visitor)) return false;
       }
     }
     return true;
@@ -247,14 +245,11 @@ class TextSpan extends InlineSpan {
   /// When `visitor` returns true, the walk will continue. When `visitor`
   /// returns false, then the walk will end.
   @override
-  @Deprecated(
-    'Use to visitChildren instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
+  @Deprecated('Use to visitChildren instead. '
+      'This feature was deprecated after v1.7.3.')
   bool visitTextSpan(bool visitor(TextSpan span)) {
     if (text != null) {
-      if (!visitor(this))
-        return false;
+      if (!visitor(this)) return false;
     }
     if (children != null) {
       for (final InlineSpan child in children!) {
@@ -263,8 +258,7 @@ class TextSpan extends InlineSpan {
           'visitTextSpan is deprecated. Use visitChildren to support InlineSpans',
         );
         final TextSpan textSpanChild = child as TextSpan;
-        if (!textSpanChild.visitTextSpan(visitor))
-          return false;
+        if (!textSpanChild.visitTextSpan(visitor)) return false;
       }
     }
     return true;
@@ -272,7 +266,8 @@ class TextSpan extends InlineSpan {
 
   /// Returns the text span that contains the given position in the text.
   @override
-  InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
+  InlineSpan? getSpanForPositionVisitor(
+      TextPosition position, Accumulator offset) {
     if (text == null) {
       return null;
     }
@@ -289,11 +284,8 @@ class TextSpan extends InlineSpan {
   }
 
   @override
-  void computeToPlainText(
-    StringBuffer buffer, {
-    bool includeSemanticsLabels = true,
-    bool includePlaceholders = true
-  }) {
+  void computeToPlainText(StringBuffer buffer,
+      {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     assert(debugAssertIsValid());
     if (semanticsLabel != null && includeSemanticsLabels) {
       buffer.write(semanticsLabel);
@@ -302,7 +294,8 @@ class TextSpan extends InlineSpan {
     }
     if (children != null) {
       for (final InlineSpan child in children!) {
-        child.computeToPlainText(buffer,
+        child.computeToPlainText(
+          buffer,
           includeSemanticsLabels: includeSemanticsLabels,
           includePlaceholders: includePlaceholders,
         );
@@ -311,7 +304,8 @@ class TextSpan extends InlineSpan {
   }
 
   @override
-  void computeSemanticsInformation(List<InlineSpanSemanticsInformation> collector) {
+  void computeSemanticsInformation(
+      List<InlineSpanSemanticsInformation> collector) {
     assert(debugAssertIsValid());
     if (text != null || semanticsLabel != null) {
       collector.add(InlineSpanSemanticsInformation(
@@ -340,11 +334,11 @@ class TextSpan extends InlineSpan {
   }
 
   @override
-  void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
-    if (
-      recognizer != null &&
-      (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer)
-    ) {
+  void describeSemantics(Accumulator offset, List<int> semanticsOffsets,
+      List<dynamic> semanticsElements) {
+    if (recognizer != null &&
+        (recognizer is TapGestureRecognizer ||
+            recognizer is LongPressGestureRecognizer)) {
       final int length = semanticsLabel?.length ?? text!.length;
       semanticsOffsets.add(offset.value);
       semanticsOffsets.add(offset.value + length);
@@ -369,12 +363,14 @@ class TextSpan extends InlineSpan {
           // `child` has a non-nullable return type, but might be null when
           // running with weak checking, so we need to null check it anyway (and
           // ignore the warning that the null-handling logic is dead code).
-          if (child == null) { // ignore: dead_code
+          if (child == null) {
+            // ignore: dead_code
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('TextSpan contains a null child.'),
               ErrorDescription(
                   'A TextSpan object with a non-null child list should not have any nulls in its child list.'),
-              toDiagnosticsNode(name: 'The full text in question was',
+              toDiagnosticsNode(
+                  name: 'The full text in question was',
                   style: DiagnosticsTreeStyle.errorProperty),
             ]);
           }
@@ -388,32 +384,27 @@ class TextSpan extends InlineSpan {
 
   @override
   RenderComparison compareTo(InlineSpan other) {
-    if (identical(this, other))
-      return RenderComparison.identical;
-    if (other.runtimeType != runtimeType)
-      return RenderComparison.layout;
+    if (identical(this, other)) return RenderComparison.identical;
+    if (other.runtimeType != runtimeType) return RenderComparison.layout;
     final TextSpan textSpan = other as TextSpan;
     if (textSpan.text != text ||
         children?.length != textSpan.children?.length ||
         (style == null) != (textSpan.style == null))
       return RenderComparison.layout;
-    RenderComparison result = recognizer == textSpan.recognizer ?
-      RenderComparison.identical :
-      RenderComparison.metadata;
+    RenderComparison result = recognizer == textSpan.recognizer
+        ? RenderComparison.identical
+        : RenderComparison.metadata;
     if (style != null) {
       final RenderComparison candidate = style!.compareTo(textSpan.style!);
-      if (candidate.index > result.index)
-        result = candidate;
-      if (result == RenderComparison.layout)
-        return result;
+      if (candidate.index > result.index) result = candidate;
+      if (result == RenderComparison.layout) return result;
     }
     if (children != null) {
       for (int index = 0; index < children!.length; index += 1) {
-        final RenderComparison candidate = children![index].compareTo(textSpan.children![index]);
-        if (candidate.index > result.index)
-          result = candidate;
-        if (result == RenderComparison.layout)
-          return result;
+        final RenderComparison candidate =
+            children![index].compareTo(textSpan.children![index]);
+        if (candidate.index > result.index) result = candidate;
+        if (result == RenderComparison.layout) return result;
       }
     }
     return result;
@@ -421,27 +412,24 @@ class TextSpan extends InlineSpan {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    if (super != other)
-      return false;
-    return other is TextSpan
-        && other.text == text
-        && other.recognizer == recognizer
-        && other.semanticsLabel == semanticsLabel
-        && listEquals<InlineSpan>(other.children, children);
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    if (super != other) return false;
+    return other is TextSpan &&
+        other.text == text &&
+        other.recognizer == recognizer &&
+        other.semanticsLabel == semanticsLabel &&
+        listEquals<InlineSpan>(other.children, children);
   }
 
   @override
   int get hashCode => hashValues(
-    super.hashCode,
-    text,
-    recognizer,
-    semanticsLabel,
-    hashList(children),
-  );
+        super.hashCode,
+        text,
+        recognizer,
+        semanticsLabel,
+        hashList(children),
+      );
 
   @override
   String toStringShort() => objectRuntimeType(this, 'TextSpan');
@@ -450,19 +438,18 @@ class TextSpan extends InlineSpan {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
 
-    properties.add(
-      StringProperty(
-        'text',
-        text,
-        showName: false,
-        defaultValue: null,
-      )
-    );
+    properties.add(StringProperty(
+      'text',
+      text,
+      showName: false,
+      defaultValue: null,
+    ));
     if (style == null && text == null && children == null)
       properties.add(DiagnosticsNode.message('(empty)'));
 
     properties.add(DiagnosticsProperty<GestureRecognizer>(
-      'recognizer', recognizer,
+      'recognizer',
+      recognizer,
       description: recognizer?.runtimeType.toString(),
       defaultValue: null,
     ));
@@ -474,15 +461,15 @@ class TextSpan extends InlineSpan {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    if (children == null)
-      return const <DiagnosticsNode>[];
+    if (children == null) return const <DiagnosticsNode>[];
     return children!.map<DiagnosticsNode>((InlineSpan child) {
       // `child` has a non-nullable return type, but might be null when running
       // with weak checking, so we need to null check it anyway (and ignore the
       // warning that the null-handling logic is dead code).
       if (child != null) {
         return child.toDiagnosticsNode();
-      } else { // ignore: dead_code
+      } else {
+        // ignore: dead_code
         return DiagnosticsNode.message('<null child>');
       }
     }).toList();
