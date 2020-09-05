@@ -2102,8 +2102,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     // Check if the new value is the same as the current local value, or is the same
     // as the pre-formatting value of the previous pass (repeat call).
-    final bool textChanged = _value?.text != value?.text ||
-        _lastFormattedValue?.text != value.text;
+    final bool textChanged = _value?.text != value?.text || _lastFormattedValue?.text != value.text;
     final bool isRepeat = value == _lastFormattedUnmodifiedTextEditingValue;
 
     // There's no need to format when starting to compose or when continuing

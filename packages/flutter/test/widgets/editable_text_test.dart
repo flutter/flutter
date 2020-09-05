@@ -5416,6 +5416,41 @@ void main() {
     expect(state.currentTextEditingValue.text, '12345');
     expect(state.currentTextEditingValue.composing, TextRange.empty);
   });
+
+  testWidgets('Apply formatters for texts added via TextEditingController', (WidgetTester tester) async {
+    // This formatter just upperCase the text.
+    final TextInputFormatter formatter = TextInputFormatter.withFunction((oldValue, newValue) {
+      return newValue.copyWith(text: newValue.text.toUpperCase());
+    });
+
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        inputFormatters: <TextInputFormatter>[formatter],
+        style: textStyle,
+        cursorColor: cursorColor,
+        selectionControls: materialTextSelectionControls,
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+    // This was supposed to rebuild the widget and call _formatAndSetValue
+    // controller.text = 'flutter';
+    // Since the line above does not update the widget the line bellow
+    // is a workaround simulating changes from controller.text.
+    state.updateEditingValue(const TextEditingValue(text: 'flutter'));
+
+    // The current editingValue is now formatted.
+    expect(state.textEditingValue.text, equals('FLUTTER'));
+    expect(state.currentTextEditingValue.text, equals('FLUTTER'));
+    // The text displayed is now formatted too.
+    expect(find.text('FLUTTER'), findsOneWidget);
+  });
 }
 
 class MockTextFormatter extends TextInputFormatter {
