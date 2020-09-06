@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter_tools/src/base/utils.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
+import '../../base/utils.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
