@@ -129,11 +129,16 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
       );
       return;
     }
+    final double beforePaddingPaintExtent = calculatePaintOffset(
+      constraints,
+      from: 0.0,
+      to: beforePadding,
+    );
     child!.layout(
       constraints.copyWith(
         scrollOffset: math.max(0.0, constraints.scrollOffset - beforePadding),
         cacheOrigin: math.min(0.0, constraints.cacheOrigin + beforePadding),
-        overlap: 0.0,
+        overlap: math.max(0.0, constraints.overlap - beforePaddingPaintExtent),
         remainingPaintExtent: constraints.remainingPaintExtent - calculatePaintOffset(constraints, from: 0.0, to: beforePadding),
         remainingCacheExtent: constraints.remainingCacheExtent - calculateCacheOffset(constraints, from: 0.0, to: beforePadding),
         crossAxisExtent: math.max(0.0, constraints.crossAxisExtent - crossAxisPadding),
@@ -148,11 +153,6 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
       );
       return;
     }
-    final double beforePaddingPaintExtent = calculatePaintOffset(
-      constraints,
-      from: 0.0,
-      to: beforePadding,
-    );
     final double afterPaddingPaintExtent = calculatePaintOffset(
       constraints,
       from: beforePadding + childLayoutGeometry.scrollExtent,
