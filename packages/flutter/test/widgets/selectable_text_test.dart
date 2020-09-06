@@ -3971,4 +3971,33 @@ void main() {
       TargetPlatform.windows,
     }),
   );
+
+  testWidgets('onSelectionChanged is called when selection changes', (WidgetTester tester) async {
+    int onSelectionChangedCallCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SelectableText(
+            'abc def ghi',
+            onSelectionChanged: (TextSelection selection, SelectionChangedCause cause) {
+              onSelectionChangedCallCount += 1;
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Long press to select 'abc'.
+    final Offset aLocation = textOffsetToPosition(tester, 1);
+    await tester.longPressAt(aLocation);
+    await tester.pump();
+    expect(onSelectionChangedCallCount, equals(1));
+
+    // Tap on 'Select all' option to select the whole text.
+    await tester.longPressAt(textOffsetToPosition(tester, 5));
+    await tester.pump();
+    await tester.tap(find.text('Select all'));
+    expect(onSelectionChangedCallCount, equals(2));
+  });
 }
