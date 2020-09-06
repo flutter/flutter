@@ -55,14 +55,8 @@ Future<vm_service.VmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) 
 Future<void> _kDefaultDartDevelopmentServiceStarter(
   Device device,
   Uri observatoryUri,
-  bool disableServiceAuthCodes,
 ) async {
-  await device.dds.startDartDevelopmentService(
-    observatoryUri,
-    0,
-    true,
-    disableServiceAuthCodes,
-  );
+  await device.dds.startDartDevelopmentService(observatoryUri, true);
 }
 
 /// Read the log for a particular device.
@@ -744,7 +738,7 @@ class FuchsiaIsolateDiscoveryProtocol {
   final String _isolateName;
   final Completer<Uri> _foundUri = Completer<Uri>();
   final Future<vm_service.VmService> Function(Uri) _vmServiceConnector;
-  final Future<void> Function(Device, Uri, bool) _ddsStarter;
+  final Future<void> Function(Device, Uri) _ddsStarter;
   // whether to only poll once.
   final bool _pollOnce;
   Timer _pollingTimer;
@@ -787,8 +781,8 @@ class FuchsiaIsolateDiscoveryProtocol {
         final int localPort = await _device.portForwarder.forward(port);
         try {
           final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$localPort');
-          await _ddsStarter(_device, uri, true);
-          service = await _vmServiceConnector(_device.dds.uri);
+          await _ddsStarter(_device, uri);
+          service = await _vmServiceConnector(uri);
           _ports[port] = service;
         } on SocketException catch (err) {
           globals.printTrace('Failed to connect to $localPort: $err');

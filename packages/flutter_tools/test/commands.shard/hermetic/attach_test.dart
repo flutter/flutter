@@ -90,8 +90,8 @@ void main() {
         when(portForwarder.unforward(any))
           .thenAnswer((_) async {});
         when(device.dds).thenReturn(mockDds);
-        when(mockDds.startDartDevelopmentService(any, any, false, any)).thenReturn(null);
-        when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
+        when(mockDds.startDartDevelopmentService(any, false)).thenReturn(null);
+
         final HttpClientRequest httpClientRequest = MockHttpClientRequest();
         httpClient = MockHttpClient();
         when(httpClient.putUrl(any))
@@ -317,8 +317,7 @@ void main() {
       )).thenReturn(mockHotRunner);
       when(mockHotRunner.exited).thenReturn(false);
       when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
-      when(mockDds.startDartDevelopmentService(any, any, false, any)).thenReturn(null);
-      when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
+      when(mockDds.startDartDevelopmentService(any, false)).thenReturn(null);
 
       testDeviceManager.addDevice(device);
       when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
@@ -343,6 +342,8 @@ void main() {
         '-v',
         '--device-user',
         '10',
+        '--device-timeout',
+        '15',
       ]);
       final VerificationResult verificationResult = verify(
         mockHotRunnerFactory.build(
@@ -397,8 +398,7 @@ void main() {
       )).thenReturn(mockHotRunner);
       when(mockHotRunner.exited).thenReturn(false);
       when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
-      when(mockDds.startDartDevelopmentService(any, any, false, any)).thenReturn(null);
-      when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
+      when(mockDds.startDartDevelopmentService(any, false)).thenReturn(null);
 
       testDeviceManager.addDevice(device);
 
@@ -444,9 +444,8 @@ void main() {
           .thenAnswer((_) async {});
         when(device.dds)
           .thenReturn(mockDds);
-        when(mockDds.startDartDevelopmentService(any, any, any, any))
+        when(mockDds.startDartDevelopmentService(any, any))
           .thenReturn(null);
-        when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
       });
 
       testUsingContext('succeeds in ipv4 mode', () async {

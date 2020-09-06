@@ -66,12 +66,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         help: 'A file to write the attached vmservice uri to after an'
           ' application is started.',
         valueHelp: 'project/example/out.txt'
-      )
-      ..addFlag('disable-service-auth-codes',
-        negatable: false,
-        hide: !verboseHelp,
-        help: 'No longer require an authentication code to connect to the VM '
-              'service (not recommended).');
+      );
     usesWebOptions(hide: !verboseHelp);
     usesTargetOption();
     usesPortOptions();
@@ -80,14 +75,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
-    addDdsOptions(verboseHelp: verboseHelp);
+    usesDeviceTimeoutOption();
   }
 
   bool get traceStartup => boolArg('trace-startup');
   bool get cacheSkSL => boolArg('cache-sksl');
   bool get dumpSkpOnShaderCompilation => boolArg('dump-skp-on-shader-compilation');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
-  bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
+
   String get route => stringArg('route');
 }
 
@@ -211,6 +206,11 @@ class RunCommand extends RunCommandBase {
               'results out to "refresh_benchmark.json", and exit. This flag is '
               'intended for use in generating automated flutter benchmarks.',
       )
+      ..addFlag('disable-service-auth-codes',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'No longer require an authentication code to connect to the VM '
+              'service (not recommended).')
       ..addFlag('web-initialize-platform',
         negatable: true,
         defaultsTo: true,
@@ -227,6 +227,7 @@ class RunCommand extends RunCommandBase {
               'Currently this is only supported on Android devices. This option '
               'cannot be paired with --use-application-binary.'
       );
+      addDdsOptions(verboseHelp: verboseHelp);
   }
 
   @override

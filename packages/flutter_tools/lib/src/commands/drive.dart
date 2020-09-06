@@ -146,7 +146,7 @@ class DriveCommand extends RunCommandBase {
   @override
   Future<void> validateCommand() async {
     if (userIdentifier != null) {
-      final Device device = await findTargetDevice();
+      final Device device = await findTargetDevice(timeout: deviceDiscoveryTimeout);
       if (device is! AndroidDevice) {
         throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
       }
@@ -161,7 +161,7 @@ class DriveCommand extends RunCommandBase {
       throwToolExit(null);
     }
 
-    _device = await findTargetDevice();
+    _device = await findTargetDevice(timeout: deviceDiscoveryTimeout);
     if (device == null) {
       throwToolExit(null);
     }
@@ -240,12 +240,7 @@ class DriveCommand extends RunCommandBase {
           // If there's another flutter_tools instance still connected to the target
           // application, DDS will already be running remotely and this call will fail.
           // We can ignore this and continue to use the remote DDS instance.
-          await device.dds.startDartDevelopmentService(
-            Uri.parse(observatoryUri),
-            hostVmservicePort,
-            ipv6,
-            disableServiceAuthCodes,
-          );
+          await device.dds.startDartDevelopmentService(Uri.parse(observatoryUri), ipv6);
         } on dds.DartDevelopmentServiceException catch(_) {
           globals.printTrace('Note: DDS is already connected to $observatoryUri.');
         }
@@ -393,9 +388,9 @@ $ex
   }
 }
 
-Future<Device> findTargetDevice() async {
+Future<Device> findTargetDevice({ @required Duration timeout }) async {
   final DeviceManager deviceManager = globals.deviceManager;
-  final List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
+  final List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current(), timeout: timeout);
 
   if (deviceManager.hasSpecifiedDeviceId) {
     if (devices.isEmpty) {
@@ -483,7 +478,7 @@ Future<LaunchResult> _startApp(
     debuggingOptions: DebuggingOptions.enabled(
       command.getBuildInfo(),
       startPaused: true,
-      hostVmServicePort: (webUri != null || command.disableDds) ? command.hostVmservicePort : 0,
+      hostVmServicePort: command.hostVmservicePort,
       verboseSystemLogs: command.verboseSystemLogs,
       cacheSkSL: command.cacheSkSL,
       dumpSkpOnShaderCompilation: command.dumpSkpOnShaderCompilation,
