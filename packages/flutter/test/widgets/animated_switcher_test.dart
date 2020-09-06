@@ -50,11 +50,11 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 10));
     transition = tester.widget(find.byType(FadeTransition).at(0));
-    expect(transition.opacity.value, closeTo(0.4, 0.01));
+    expect(transition.opacity.value, moreOrLessEquals(0.4, epsilon: 0.01));
     transition = tester.widget(find.byType(FadeTransition).at(1));
-    expect(transition.opacity.value, closeTo(0.4, 0.01));
+    expect(transition.opacity.value, moreOrLessEquals(0.4, epsilon: 0.01));
     transition = tester.widget(find.byType(FadeTransition).at(2));
-    expect(transition.opacity.value, closeTo(0.1, 0.01));
+    expect(transition.opacity.value, moreOrLessEquals(0.1, epsilon: 0.01));
     await tester.pumpAndSettle();
   });
 
@@ -338,11 +338,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(StatefulTestState.generation, equals(3));
     transition = tester.widget(find.byType(FadeTransition).at(0));
-    expect(transition.opacity.value, closeTo(0.4, 0.01));
+    expect(transition.opacity.value, moreOrLessEquals(0.4, epsilon: 0.01));
     transition = tester.widget(find.byType(FadeTransition).at(1));
-    expect(transition.opacity.value, closeTo(0.4, 0.01));
+    expect(transition.opacity.value, moreOrLessEquals(0.4, epsilon: 0.01));
     transition = tester.widget(find.byType(FadeTransition).at(2));
-    expect(transition.opacity.value, closeTo(0.1, 0.01));
+    expect(transition.opacity.value, moreOrLessEquals(0.1, epsilon: 0.01));
     await tester.pumpAndSettle();
     expect(StatefulTestState.generation, equals(3));
   });
