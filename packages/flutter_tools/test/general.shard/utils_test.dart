@@ -5,6 +5,10 @@
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
 
@@ -21,7 +25,6 @@ baz=qux
       expect(file.values, hasLength(2));
     });
   });
-
   group('Version', () {
     testWithoutContext('can parse and compare', () {
       expect(Version.unknown.toString(), equals('unknown'));
@@ -68,6 +71,21 @@ baz=qux
       expect(snakeCase('ABc'), equals('a_bc'));
       expect(snakeCase('ABC'), equals('a_b_c'));
     });
+  });
+  test('Version.json info is correct',(){
+    final FlutterProject project = FlutterProject(globals.fs.systemTempDirectory,FlutterManifest.createFromString('''
+    name: test
+    version: 1.0.0+3
+    ''',logger: null),FlutterManifest.createFromString('''
+    name: test
+    version: 1.0.0+3
+    ''',logger: null));
+
+    final dynamic versionInfo = jsonDecode(getVersionInfo(project));
+    expect(versionInfo['app_name'],'test');
+    expect(versionInfo['version'],'1.0.0');
+    expect(versionInfo['build_number'],'3');
+
   });
 
   group('text wrapping', () {
