@@ -624,7 +624,7 @@ void main() {
     });
 
 
-testWidgets('Scale with mouse returns onInteraction properties',(WidgetTester tester) async{
+    testWidgets('Scale with mouse returns onInteraction properties',(WidgetTester tester) async{
       final TransformationController transformationController = TransformationController();
       double currentScale;
       Velocity currentVelocity;
@@ -634,13 +634,13 @@ testWidgets('Scale with mouse returns onInteraction properties',(WidgetTester te
             body: Center(
               child: InteractiveViewer(
                 transformationController: transformationController,
-                onInteractionStart: (details){
-                  
+                onInteractionStart: (ScaleStartDetails details){
+
                 },
-                onInteractionUpdate: (details){
-                  currentScale = details.scale; 
+                onInteractionUpdate: (ScaleUpdateDetails details){
+                  currentScale = details.scale;
                 },
-                onInteractionEnd: (details){
+                onInteractionEnd: (ScaleEndDetails details){
                   currentVelocity = details.velocity;
                 },
                 child: Container(width: 200.0, height: 200.0),
@@ -653,9 +653,11 @@ testWidgets('Scale with mouse returns onInteraction properties',(WidgetTester te
       final Offset center = tester.getCenter(find.byType(InteractiveViewer));
       await scrollAt(center, tester, const Offset(0.0, -20.0));
       await tester.pumpAndSettle();
+      const Velocity noMovement = Velocity(pixelsPerSecond: Offset(0,0));
+      final double afterScaling = transformationController.value.getMaxScaleOnAxis();
 
-      expect(transformationController.value.getMaxScaleOnAxis(),equals(currentScale));
-      expect(currentVelocity,equals(Velocity(pixelsPerSecond: Offset(0,0))));
+      expect(afterScaling,equals(currentScale));
+      expect(currentVelocity,equals(noMovement));
     });
 
     testWidgets('viewport changes size', (WidgetTester tester) async {
