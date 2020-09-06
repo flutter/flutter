@@ -1044,8 +1044,10 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final AppPrivateCommandCallback onAppPrivateCommand;
 
+  /// {@template flutter.widgets.editableText.onSelectionChanged}
   /// Called when the user changes the selection of text (including the cursor
   /// location).
+  /// {@endtemplate}
   final SelectionChangedCallback onSelectionChanged;
 
   /// {@macro flutter.widgets.textSelection.onSelectionHandleTapped}
