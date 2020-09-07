@@ -693,6 +693,42 @@ void main() {
       semantics.dispose();
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
   });
+
+  testWidgets('Open Search delegate and then Close using Floating Action Button', (WidgetTester tester)async{
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final List<String> selectedResults = <String>[];
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+      results: selectedResults,
+    ));
+
+    // We are on the homepage
+    expect(find.text('HomeBody'), findsOneWidget);
+    expect(find.text('HomeTitle'), findsOneWidget);
+    expect(find.text('Suggestions'), findsNothing);
+
+    // Open search
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsNothing);
+    expect(find.text('HomeTitle'), findsNothing);
+    expect(find.text('Suggestions'), findsOneWidget);
+    expect(selectedResults, hasLength(0));
+
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.focusNode.hasFocus, isTrue);
+
+    // Close  search using Floating action Button
+    await tester.tap(find.byTooltip('exit'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsOneWidget);
+    expect(find.text('HomeTitle'), findsOneWidget);
+    expect(find.text('Suggestions'), findsNothing);
+    expect(selectedResults, <String>['Result']);
+  });
 }
 
 class TestHomePage extends StatelessWidget {
@@ -754,7 +790,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     TextStyle searchFieldStyle,
     String searchHint,
     TextInputAction textInputAction = TextInputAction.search,
-  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction, searchFieldStyle: searchFieldStyle);
+  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction, searchFieldStyle: searchFieldStyle,showFloatingActionButton: true,floatingActionButtonResult: result);
 
   final String suggestions;
   final String result;
