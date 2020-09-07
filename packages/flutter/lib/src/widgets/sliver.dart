@@ -1257,12 +1257,12 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       // manually.
       int lo = 0;
       int hi = 1;
-      const int maxShift = kIsWeb ? 31 : 63;
-      const int halfMax = 1 << (maxShift - 1);
-      const int max = (1 << maxShift) - 1;
+      const int max = kIsWeb
+        ? 9007199254740992 // max safe integer on JS (from 0 to this number x != x+1)
+        : ((1 << 63) - 1);
       while (_build(hi - 1) != null) {
         lo = hi - 1;
-        if (hi < halfMax) {
+        if (hi < max ~/ 2) {
           hi *= 2;
         } else if (hi < max) {
           hi = max;
