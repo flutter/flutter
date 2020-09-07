@@ -35,9 +35,8 @@ namespace {
 
 const char* kDartVMArgs[] = {
     // clang-format off
-    // TODO(FL-117): Re-enable causal async stack traces when this issue is
-    // addressed.
     "--no_causal_async_stacks",
+    "--lazy_async_stacks",
 
     "--systrace_timeline",
     "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,VM",
