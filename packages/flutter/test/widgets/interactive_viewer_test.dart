@@ -17,12 +17,18 @@ import 'gesture_utils.dart';
 void main() {
   // Helper function for comparing all dimensions of a Vector3 with some
   // precision.
-  void expectCloseToVector3(Vector3 a, Vector3 b, double precision) {
+  void expectCloseToVector3(Vector3 a, Vector3 b, [double precision = 0.000000000001]) {
     expect(a.x, closeTo(b.x, precision));
     expect(a.y, closeTo(b.y, precision));
     expect(a.z, closeTo(b.z, precision));
   }
 
+  void expectCloseToOffset(Offset a, Offset b) {
+    expect(a.dx, closeTo(b.dx, 0.0000000000001));
+    expect(a.dy, closeTo(b.dy, 0.0000000000001));
+  }
+
+  /*
   group('InteractiveViewer', () {
     testWidgets('child fits in viewport', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
@@ -798,20 +804,168 @@ void main() {
       expect(closestPoint.y, moreOrLessEquals(205.8, epsilon: 0.1));
     });
   });
+  */
+
+  group('getAxisAlignedBoundingBox', () {
+    test("a square that's already axis aligned", () {
+      const double dimension = 300.0;
+      final Quad quad = Quad.points(
+        Vector3(0.0, 0.0, 0.0),
+        Vector3(dimension, 0.0, 0.0),
+        Vector3(dimension, dimension, 0.0),
+        Vector3(0.0, dimension, 0.0),
+      );
+      final Quad aabb = InteractiveViewer.getAxisAlignedBoundingBox(quad);
+      expectCloseToVector3(aabb.point0, quad.point0);
+      expectCloseToVector3(aabb.point1, quad.point1);
+      expectCloseToVector3(aabb.point2, quad.point2);
+      expectCloseToVector3(aabb.point3, quad.point3);
+    });
+
+    test('a square at 45 degrees', () {
+      const double dimension = 300.0;
+      final double dimensionNext = dimension * math.sqrt(2);
+      final double overhang = (dimension - dimensionNext) / 2;
+      final Quad quad = Quad.points(
+        Vector3(dimension / 2, -overhang, 0.0),
+        Vector3(dimension + overhang, dimension / 2, 0.0),
+        Vector3(dimension / 2, dimension + overhang, 0.0),
+        Vector3(-overhang, dimension / 2, 0.0),
+      );
+      final Quad aabb = InteractiveViewer.getAxisAlignedBoundingBox(quad);
+      expectCloseToVector3(aabb.point0, Vector3(-overhang, -overhang, 0.0));
+      expectCloseToVector3(aabb.point1, Vector3(dimension + overhang, -overhang, 0.0));
+      expectCloseToVector3(aabb.point2, Vector3(dimension + overhang, dimension + overhang, 0.0));
+      expectCloseToVector3(aabb.point3, Vector3(-overhang, dimension + overhang, 0.0));
+    });
+  });
 
   group('getAxisAlignedBoundingBoxWithRotation', () {
     test('45 degrees', () {
-      const Rect rect = Rect.fromLTRB(0.0, 0.0, 300.0, 300.0);
-
+      const double dimension = 300.0;
+      const Rect rect = Rect.fromLTRB(0.0, 0.0, dimension, dimension);
       final Quad aabb = InteractiveViewer.getAxisAlignedBoundingBoxWithRotation(rect, math.pi/4);
+      final double dimensionNext = dimension * math.sqrt(2);
+      final double overhang = (dimensionNext - dimension) / 2;
 
-      final double xy = rect.width / 2;
+      expectCloseToVector3(aabb.point0, Vector3(-overhang, -overhang, 0.0));
+      expectCloseToVector3(aabb.point1, Vector3(rect.width + overhang, -overhang, 0.0));
+      expectCloseToVector3(aabb.point2, Vector3(rect.width + overhang, rect.height + overhang, 0.0));
+      expectCloseToVector3(aabb.point3, Vector3(-overhang, rect.height + overhang, 0.0));
+    });
 
-      const double precision = 0.0000000000001;
-      expectCloseToVector3(aabb.point0, Vector3(xy, -xy, 0.0), precision);
-      expectCloseToVector3(aabb.point1, Vector3(rect.width + xy, xy, 0.0), precision);
-      expectCloseToVector3(aabb.point2, Vector3(xy, rect.height + xy, 0.0), precision);
-      expectCloseToVector3(aabb.point3, Vector3(-xy, xy, 0.0), precision);
+    test('90 degrees', () {
+      const Rect rect = Rect.fromLTRB(0.0, 0.0, 300.0, 300.0);
+      final Quad aabb = InteractiveViewer.getAxisAlignedBoundingBoxWithRotation(rect, math.pi/2);
+
+      expectCloseToVector3(aabb.point0, Vector3(0.0, 0.0, 0.0));
+      expectCloseToVector3(aabb.point1, Vector3(rect.width, 0.0, 0.0));
+      expectCloseToVector3(aabb.point2, Vector3(rect.width, rect.height, 0.0));
+      expectCloseToVector3(aabb.point3, Vector3(0.0, rect.height, 0.0));
+    });
+
+    test('135 degrees', () {
+      const double dimension = 300.0;
+      const Rect rect = Rect.fromLTRB(0.0, 0.0, dimension, dimension);
+      final Quad aabb = InteractiveViewer.getAxisAlignedBoundingBoxWithRotation(rect, 3 * math.pi / 4);
+      final double dimensionNext = dimension * math.sqrt(2);
+      final double overhang = (dimensionNext - dimension) / 2;
+
+      expectCloseToVector3(aabb.point0, Vector3(-overhang, -overhang, 0.0));
+      expectCloseToVector3(aabb.point1, Vector3(rect.width + overhang, -overhang, 0.0));
+      expectCloseToVector3(aabb.point2, Vector3(rect.width + overhang, rect.height + overhang, 0.0));
+      expectCloseToVector3(aabb.point3, Vector3(-overhang, rect.height + overhang, 0.0));
+    });
+
+    test('180 degrees', () {
+      const Rect rect = Rect.fromLTRB(0.0, 0.0, 300.0, 300.0);
+      final Quad aabb = InteractiveViewer.getAxisAlignedBoundingBoxWithRotation(rect, math.pi);
+
+      expectCloseToVector3(aabb.point0, Vector3(0.0, 0.0, 0.0));
+      expectCloseToVector3(aabb.point1, Vector3(rect.width, 0.0, 0.0));
+      expectCloseToVector3(aabb.point2, Vector3(rect.width, rect.height, 0.0));
+      expectCloseToVector3(aabb.point3, Vector3(0.0, rect.height, 0.0));
+    });
+
+    test('360 degrees', () {
+      const Rect rect = Rect.fromLTRB(0.0, 0.0, 300.0, 300.0);
+      final Quad aabb = InteractiveViewer.getAxisAlignedBoundingBoxWithRotation(rect, math.pi * 2);
+
+      expectCloseToVector3(aabb.point0, Vector3(0.0, 0.0, 0.0));
+      expectCloseToVector3(aabb.point1, Vector3(rect.width, 0.0, 0.0));
+      expectCloseToVector3(aabb.point2, Vector3(rect.width, rect.height, 0.0));
+      expectCloseToVector3(aabb.point3, Vector3(0.0, rect.height, 0.0));
+    });
+
+    test('405 degrees', () {
+      const double dimension = 300.0;
+      const Rect rect = Rect.fromLTRB(0.0, 0.0, dimension, dimension);
+      final Quad aabb = InteractiveViewer.getAxisAlignedBoundingBoxWithRotation(rect, 9 * math.pi / 4);
+      final double dimensionNext = dimension * math.sqrt(2);
+      final double overhang = (dimensionNext - dimension) / 2;
+
+      expectCloseToVector3(aabb.point0, Vector3(-overhang, -overhang, 0.0));
+      expectCloseToVector3(aabb.point1, Vector3(rect.width + overhang, -overhang, 0.0));
+      expectCloseToVector3(aabb.point2, Vector3(rect.width + overhang, rect.height + overhang, 0.0));
+      expectCloseToVector3(aabb.point3, Vector3(-overhang, rect.height + overhang, 0.0));
+    });
+  });
+
+  group('pointAt', () {
+    test('origin and 90 degrees', () {
+      const double d = 10.0;
+      expectCloseToOffset(pointAt(Offset.zero, 0.0, d), Offset(d, 0.0));
+      expectCloseToOffset(pointAt(Offset.zero, math.pi/2, d), Offset(0.0, d));
+      expectCloseToOffset(pointAt(Offset.zero, math.pi, d), Offset(-d, 0.0));
+      expectCloseToOffset(pointAt(Offset.zero, 3*math.pi/2, d), Offset(0.0, -d));
+      expectCloseToOffset(pointAt(Offset.zero, 2*math.pi, d), Offset(d, 0.0));
+      expectCloseToOffset(pointAt(Offset.zero, 5*math.pi/2, d), Offset(0.0, d));
+      expectCloseToOffset(pointAt(Offset.zero, 3*math.pi, d), Offset(-d, 0.0));
+      expectCloseToOffset(pointAt(Offset.zero, 7*math.pi/2, d), Offset(0.0, -d));
+      expectCloseToOffset(pointAt(Offset.zero, 4*math.pi, d), Offset(d, 0.0));
+    });
+
+    test('origin and 45 degrees', () {
+      const double d = 10.0;
+      final double a = d * math.sin(math.pi / 4);
+      expectCloseToOffset(pointAt(Offset.zero, math.pi/4, d), Offset(a, a));
+      expectCloseToOffset(pointAt(Offset.zero, 3*math.pi/4, d), Offset(-a, a));
+      expectCloseToOffset(pointAt(Offset.zero, 5*math.pi/4, d), Offset(-a, -a));
+      expectCloseToOffset(pointAt(Offset.zero, 7*math.pi/4, d), Offset(a, -a));
+      expectCloseToOffset(pointAt(Offset.zero, 9*math.pi/4, d), Offset(a, a));
+      expectCloseToOffset(pointAt(Offset.zero, 11*math.pi/4, d), Offset(-a, a));
+      expectCloseToOffset(pointAt(Offset.zero, 13*math.pi/4, d), Offset(-a, -a));
+      expectCloseToOffset(pointAt(Offset.zero, 15*math.pi/4, d), Offset(a, -a));
+    });
+
+    test('origin and 30 degrees', () {
+      const double angle = math.pi / 6;
+      const double d = 10.0;
+      final double a = d * math.sin(math.pi / 3);
+      const double b = d / 2;
+      expectCloseToOffset(pointAt(Offset.zero, angle, d), Offset(a, b));
+      expectCloseToOffset(pointAt(Offset.zero, 2 * angle, d), Offset(b, a));
+      expectCloseToOffset(pointAt(Offset.zero, 4 * angle, d), Offset(-b, a));
+      expectCloseToOffset(pointAt(Offset.zero, 5 * angle, d), Offset(-a, b));
+      expectCloseToOffset(pointAt(Offset.zero, 7 * angle, d), Offset(-a, -b));
+      expectCloseToOffset(pointAt(Offset.zero, 8 * angle, d), Offset(-b, -a));
+      expectCloseToOffset(pointAt(Offset.zero, 10 * angle, d), Offset(b, -a));
+      expectCloseToOffset(pointAt(Offset.zero, 11 * angle, d), Offset(a, -b));
+      expectCloseToOffset(pointAt(Offset.zero, 13 * angle, d), Offset(a, b));
+    });
+
+    test('off origin and 90 degrees', () {
+      const Offset start = Offset(20.0, 20.0);
+      const double d = 10.0;
+      expectCloseToOffset(pointAt(start, 0.0, d), const Offset(30.0, 20.0));
+      expectCloseToOffset(pointAt(start, math.pi/2, d), const Offset(20.0, 20.0 + d));
+      expectCloseToOffset(pointAt(start, math.pi, d), const Offset(20.0 - d, 20.0));
+      expectCloseToOffset(pointAt(start, 3*math.pi/2, d), const Offset(20.0, 20.0 - d));
+      expectCloseToOffset(pointAt(start, 2*math.pi, d), const Offset(20.0 + d, 20.0));
+      expectCloseToOffset(pointAt(start, 5*math.pi/2, d), const Offset(20.0, 20.0 + d));
+      expectCloseToOffset(pointAt(start, 3*math.pi, d), const Offset(20.0 - d, 20.0));
+      expectCloseToOffset(pointAt(start, 7*math.pi/2, d), const Offset(20.0, 20.0 - d));
+      expectCloseToOffset(pointAt(start, 4*math.pi, d), const Offset(20.0 + d, 20.0));
     });
   });
 

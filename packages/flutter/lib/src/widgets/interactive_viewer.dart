@@ -442,24 +442,69 @@ class InteractiveViewer extends StatefulWidget {
     return closestOverall;
   }
 
+  /// Returns the axis aligned bounding box of the given quad.
+  @visibleForTesting
+  static Quad getAxisAlignedBoundingBox(Quad quad) {
+    final double left = math.min(
+      quad.point0.x,
+      math.min(
+        quad.point1.x,
+        math.min(quad.point2.x, quad.point3.x),
+      ),
+    );
+    final double top = math.min(
+      quad.point0.y,
+      math.min(
+        quad.point1.y,
+        math.min(quad.point2.y, quad.point3.y),
+      ),
+    );
+    final double right = math.max(
+      quad.point0.x,
+      math.max(
+        quad.point1.x,
+        math.max(quad.point2.x, quad.point3.x),
+      ),
+    );
+    final double bottom = math.max(
+      quad.point0.y,
+      math.max(
+        quad.point1.y,
+        math.max(quad.point2.y, quad.point3.y),
+      ),
+    );
+    return Quad.points(
+      Vector3(left, top, 0.0),
+      Vector3(right, top, 0.0),
+      Vector3(right, bottom, 0.0),
+      Vector3(left, bottom, 0.0),
+    );
+  }
 
+  /// Returns the axis aligned bounding box of the given Rect after it has been
+  /// rotated by the given rotation.
   @visibleForTesting
   static Quad getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
-    // TODO(justinmc): Hardcode Quad same as rect if no rotation.
-    // TODO(justinmc): Might have to mod rotation by 90deg.
-    final double hypotenuse = rect.width * math.sin(rotation);
-    final double a = hypotenuse * math.sin(rotation);
-    final double b = math.sqrt(math.pow(hypotenuse, 2) - math.pow(a, 2));
+    // Distance center of rect to any corner.
+    //final double d = math.sqrt(math.pow(rect.width, 2) + math.pow(rect.height, 2)) / 2;
 
-    final Quad value = Quad.points(
-      Vector3(rect.left + a, rect.top - b, 0),
-      Vector3(rect.right + b, rect.top + a, 0),
-      Vector3(rect.right - a, rect.bottom + b, 0),
-      Vector3(rect.left - b, rect.bottom - a, 0),
+    final double diagonal = math.sqrt(math.pow(rect.height, 2) + math.pow(rect.height, 2));
+    final double directionOfBR = math.asin(rect.height / diagonal);
+    final double directionOfBL = math.pi - directionOfBR;
+    final double directionOfTL = math.pi + directionOfBR;
+    final double directionOfTR = 2 * math.pi - directionOfBR;
+    // The corners of the rectangle after rotation.
+    final Offset br = pointAt(rect.center, directionOfBR + rotation, diagonal / 2);
+    final Offset bl = pointAt(rect.center, directionOfBL + rotation, diagonal / 2);
+    final Offset tl = pointAt(rect.center, directionOfTL + rotation, diagonal / 2);
+    final Offset tr = pointAt(rect.center, directionOfTR + rotation, diagonal / 2);
+    final Quad out = Quad.points(
+      Vector3(tl.dx, tl.dy, 0.0),
+      Vector3(tr.dx, tr.dy, 0.0),
+      Vector3(br.dx, br.dy, 0.0),
+      Vector3(bl.dx, bl.dy, 0.0),
     );
-
-    //print('justin for $rect and $rotation, hypotenuse is $hypotenuse, a is $a, b is $b. aabb is ${_stringifyQuad(value)}');
-    return value;
+    return getAxisAlignedBoundingBox(out);
   }
 
   @override _InteractiveViewerState createState() => _InteractiveViewerState();
@@ -554,7 +599,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
     // If the given translation fits completely within the boundaries, allow it.
     final Offset offendingDistance = _exceedsBy(boundariesAabbQuad, nextViewport);
-    //print('justin ${_stringifyQuad(nextViewport)} exceeds ${_stringifyQuad(boundariesAabbQuad)} by $offendingDistance');
+    print('justin ${_stringifyQuad(nextViewport)} \nexceeds ${_stringifyQuad(boundariesAabbQuad)} \nby $offendingDistance\n\n');
+    // TODO(justinmc): At this point, I see that nextViewport appears to be
+    // incorrect? boundariesAabbQuad looks right. In the app, I clearly see past
+    // the child, but numerically nextViewport is not exceeding the boundary.
+    // Calculations for aabb and exceeds seem to be right.
     if (offendingDistance == Offset.zero) {
       return nextMatrix;
     }
@@ -1198,4 +1247,12 @@ Axis _getPanAxis(Offset point1, Offset point2) {
   final double x = point2.dx - point1.dx;
   final double y = point2.dy - point1.dy;
   return x.abs() > y.abs() ? Axis.horizontal : Axis.vertical;
+}
+
+// Returns the point located at the given distance and angle from the start.
+// Direction is in radians. A direction of zero points to the right of start.
+@visibleForTesting
+Offset pointAt(Offset start, double direction, double distance) {
+  final Offset fromOrigin = Offset.fromDirection(direction, distance);
+  return fromOrigin + start;
 }
