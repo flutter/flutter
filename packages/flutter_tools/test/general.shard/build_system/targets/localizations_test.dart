@@ -7,6 +7,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
+import 'package:flutter_tools/src/localizations/gen_l10n.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -17,28 +19,6 @@ void main() {
   testUsingContext('generateLocalizations forwards arguments correctly', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Logger logger = BufferLogger.test();
-    final String projectDir = fileSystem.path.join('path', 'to', 'flutter_project');
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: <String>[
-          'dart',
-          '--disable-dart-dev',
-          'dev/tools/localization/bin/gen_l10n.dart',
-          '--gen-inputs-and-outputs-list=/',
-          '--project-dir=$projectDir',
-          '--arb-dir=arb',
-          '--template-arb-file=example.arb',
-          '--output-localization-file=bar',
-          '--untranslated-messages-file=untranslated',
-          '--output-class=Foo',
-          '--header-file=header',
-          '--header=HEADER',
-          '--use-deferred-loading',
-          '--preferred-supported-locales=en_US',
-          '--no-synthetic-package',
-        ],
-      ),
-    ]);
     final Directory flutterProjectDirectory = fileSystem
       .directory(fileSystem.path.join('path', 'to', 'flutter_project'))
       ..createSync(recursive: true);
@@ -60,24 +40,40 @@ void main() {
       untranslatedMessagesFile: Uri.file('untranslated'),
       useSyntheticPackage: false,
     );
-    await generateLocalizations(
+
+    final LocalizationsGenerator mockLocalizationsGenerator = MockLocalizationsGenerator();
+    generateLocalizations(
+      localizationsGenerator: mockLocalizationsGenerator,
       options: options,
       logger: logger,
-      fileSystem: fileSystem,
-      processManager: processManager,
-      projectDir: flutterProjectDirectory,
-      dartBinaryPath: 'dart',
-      flutterRoot: '',
+      projectDir: fileSystem.currentDirectory,
       dependenciesDir: fileSystem.currentDirectory,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    verify(
+      mockLocalizationsGenerator.initialize(
+      inputPathString: 'arb',
+      outputPathString: null,
+      templateArbFileName: 'example.arb',
+      outputFileString: 'bar',
+      classNameString: 'Foo',
+      preferredSupportedLocaleString: 'en_US',
+      headerString: 'HEADER',
+      headerFile: 'header',
+      useDeferredLoading: true,
+      inputsAndOutputsListPath: '/',
+      useSyntheticPackage: false,
+      projectPathString: '/',
+      ),
+    ).called(1);
+    verify(mockLocalizationsGenerator.loadResources()).called(1);
+    verify(mockLocalizationsGenerator.writeOutputFiles()).called(1);
+    verify(mockLocalizationsGenerator.outputUnimplementedMessages('untranslated', logger)).called(1);
   });
 
   testUsingContext('generateLocalizations throws exception on missing flutter: generate: true flag', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
     final Directory arbDirectory = fileSystem.directory('arb')
       ..createSync();
     arbDirectory.childFile('foo.arb').createSync();
@@ -103,15 +99,13 @@ flutter:
       useSyntheticPackage: true,
     );
 
+    final LocalizationsGenerator mockLocalizationsGenerator = MockLocalizationsGenerator();
     expect(
       () => generateLocalizations(
+        localizationsGenerator: mockLocalizationsGenerator,
         options: options,
         logger: logger,
-        fileSystem: fileSystem,
-        processManager: processManager,
         projectDir: fileSystem.currentDirectory,
-        dartBinaryPath: 'dart',
-        flutterRoot: '',
         dependenciesDir: fileSystem.currentDirectory,
       ),
       throwsA(isA<Exception>()),
@@ -186,3 +180,5 @@ use-deferred-loading: string
     );
   });
 }
+
+class MockLocalizationsGenerator extends Mock implements LocalizationsGenerator {}
