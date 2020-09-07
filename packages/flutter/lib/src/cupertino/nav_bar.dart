@@ -1102,15 +1102,19 @@ class _NavigationBarStaticComponents {
 
     return KeyedSubtree(
       key: leadingKey,
-      child: Padding(
-        padding: EdgeInsetsDirectional.only(
-          start: padding?.start ?? _kNavBarEdgePadding,
-        ),
-        child: IconTheme.merge(
-          data: const IconThemeData(
-            size: 32.0,
+      child: Align(
+        widthFactor: 1.0,
+        alignment: Alignment.center,
+        child: Padding(
+          padding: EdgeInsetsDirectional.only(
+            start: padding?.start ?? _kNavBarEdgePadding,
           ),
-          child: leadingContent,
+          child: IconTheme.merge(
+            data: const IconThemeData(
+              size: 32.0,
+            ),
+            child: leadingContent,
+          ),
         ),
       ),
     );

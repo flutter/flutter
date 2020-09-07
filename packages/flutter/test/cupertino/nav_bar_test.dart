@@ -1187,6 +1187,24 @@ void main() {
     expect(barItems2.length, greaterThan(0));
     expect(barItems2.any((RichText t) => t.textScaleFactor != 1), isFalse);
   });
+
+  testWidgets(
+      'Modify the reading position of the text in CupertinoNavigationBar',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+              leading: Text("lead"),
+              middle: Text("Title"),
+              trailing: Text("Trailing")),
+          child: Center(child: Text("Test!")),
+        ),
+      ),
+    );
+
+    expect(tester.getCenter(find.text('lead')).dy, 22.0);
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
