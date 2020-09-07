@@ -97,6 +97,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   DarwinArch activeArch,
   bool codesign = true,
   String deviceID,
+  bool configOnly = false,
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
@@ -187,6 +188,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildInfo: buildInfo,
   );
   await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
+  if (configOnly) {
+    return XcodeBuildResult(success: true);
+  }
 
   final List<String> buildCommands = <String>[
     '/usr/bin/env',
