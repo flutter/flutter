@@ -9,9 +9,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../material.dart';
 import 'app_bar.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'floating_action_button.dart';
 import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material_localizations.dart';
@@ -90,7 +92,6 @@ Future<T> showSearch<T>({
 /// call. Call [SearchDelegate.close] before re-using the same delegate instance
 /// for another [showSearch] call.
 abstract class SearchDelegate<T> {
-
   /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
   /// [textInputAction].
   ///
@@ -124,6 +125,11 @@ abstract class SearchDelegate<T> {
     this.searchFieldStyle,
     this.keyboardType,
     this.textInputAction = TextInputAction.search,
+    this.showFloatingActionButton = false,
+    this.floatingActionButtonSize = 56.0,
+    this.floatingActionButtonIconSize = 44.0,
+    this.floatingActionButtonResult,
+    this.elevation = 10.0,
   });
 
   /// Suggestions shown in the body of the search page while the user types a
@@ -261,6 +267,25 @@ abstract class SearchDelegate<T> {
       ..popUntil((Route<dynamic> route) => route == _route)
       ..pop(result);
   }
+
+  /// The value for the result in the [close] function to pop with the result.
+  /// Is null by default
+  final T floatingActionButtonResult;
+
+  /// The boolean for displaying Floating Action Button.
+  /// Initially set to false.
+  final bool showFloatingActionButton;
+
+  /// The Floating Action Button Size
+  /// It is defaulted to 56.0
+  final double floatingActionButtonSize;
+
+  /// The Icon size for the close Icon inside of the Floating Action Button.
+  /// The size is defaulted to 44.0
+  final double floatingActionButtonIconSize;
+
+  /// This is the elevation for the [FloatingActionButton]
+  final double elevation;
 
   /// The hint text that is shown in the search field when it is empty.
   ///
@@ -537,6 +562,22 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
           ),
           actions: widget.delegate.buildActions(context),
         ),
+        floatingActionButton: widget.delegate.showFloatingActionButton
+            ? FloatingActionButton(
+                onPressed: () => widget.delegate
+                    .close(context, widget.delegate.floatingActionButtonResult),
+                isExtended: false,
+                backgroundColor: theme.primaryColor,
+                tooltip: 'exit',
+                splashColor: theme.splashColor,
+                elevation: widget.delegate.elevation,
+                child: Icon(
+                  Icons.arrow_back,
+                  size: widget.delegate.floatingActionButtonIconSize,
+                  color: theme.primaryIconTheme.color,
+                ),
+              )
+            : null,
         body: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           child: body,
