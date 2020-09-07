@@ -621,5 +621,5 @@ class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
   }
 
   @override
-  int get hashCode => identityHashCode(subKey);
+  int get hashCode => hashValues(subKey, state);
 }
