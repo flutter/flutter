@@ -58,6 +58,7 @@ template("aot_snapshot") {
 
     args = [
       "--no_causal_async_stacks",
+      "--lazy_async_stacks",
       "--deterministic",
       "--snapshot_kind=app-aot-elf",
       "--elf=" + rebase_path(snapshot_path),
