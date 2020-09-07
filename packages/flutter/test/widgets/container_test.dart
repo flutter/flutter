@@ -555,6 +555,37 @@ void main() {
     await tester.tap(find.byType(Container));
     expect(tapped, false);
   });
+
+  testWidgets('using clipBehaviour and shadow, should not clip the shadow', (WidgetTester tester) async {
+    final Container container = Container(
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          color: Colors.red,
+          boxShadow: const <BoxShadow>[
+            BoxShadow(
+              color: Colors.blue,
+              offset: Offset.zero,
+              spreadRadius: 10,
+              blurRadius: 20.0,
+            ),
+          ]),
+      child: const SizedBox(width: 50, height: 50),
+    );
+
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: Padding(
+          padding: const EdgeInsets.all(30.0),
+          child: container,
+      )),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('container.clipBehaviour.with.shadow.png'),
+    );
+  });
 }
 
 class _MockPaintingContext extends Fake implements PaintingContext {

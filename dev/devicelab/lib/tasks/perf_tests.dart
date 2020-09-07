@@ -341,6 +341,23 @@ TaskFunction createFramePolicyIntegrationTest() {
   };
 }
 
+Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations) {
+  final Map<String, dynamic> tally = <String, dynamic>{};
+  for (final Map<String, dynamic> item in results) {
+    item.forEach((String key, dynamic value) {
+      if (tally.containsKey(key)) {
+        tally[key] = (tally[key] as int) + (value as int);
+      } else {
+        tally[key] = value;
+      }
+    });
+  }
+  tally.forEach((String key, dynamic value) {
+    tally[key] = (value as int) ~/ iterations;
+  });
+  return tally;
+}
+
 /// Measure application startup performance.
 class StartupTest {
   const StartupTest(this.testDirectory, { this.reportMetrics = true });
@@ -353,21 +370,28 @@ class StartupTest {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
-      await flutter('run', options: <String>[
-        '--verbose',
-        '--profile',
-        '--trace-startup',
-        '-d',
-        deviceId,
-      ]);
-      final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/start_up_info.json').readAsStringSync(),
-      ) as Map<String, dynamic>;
+      const int iterations = 3;
+      final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
+      for (int i = 0; i < iterations; ++i) {
+        await flutter('run', options: <String>[
+          '--verbose',
+          '--profile',
+          '--trace-startup',
+          '-d',
+          deviceId,
+        ]);
+        final Map<String, dynamic> data = json.decode(
+          file('$testDirectory/build/start_up_info.json').readAsStringSync(),
+        ) as Map<String, dynamic>;
+        results.add(data);
+      }
+
+      final Map<String, dynamic> averageResults = _average(results, iterations);
 
       if (!reportMetrics)
-        return TaskResult.success(data);
+        return TaskResult.success(averageResults);
 
-      return TaskResult.success(data, benchmarkScoreKeys: <String>[
+      return TaskResult.success(averageResults, benchmarkScoreKeys: <String>[
         'timeToFirstFrameMicros',
         'timeToFirstFrameRasterizedMicros',
       ]);
@@ -1125,11 +1149,15 @@ class DevToolsMemoryTest {
         .listen((String line) {
           print('run stdout: $line');
           final RegExpMatch match = RegExp(r'An Observatory debugger and profiler on .+ is available at: ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)').firstMatch(line);
-          if (match != null) {
+          if (match != null && !observatoryUri.isCompleted) {
             observatoryUri.complete(match[1]);
             _observatoryUri = match[1];
           }
-        }, onDone: () { observatoryUri.complete(null); });
+        }, onDone: () {
+          if (!observatoryUri.isCompleted) {
+            observatoryUri.complete();
+          }
+        });
     _forwardStream(_runProcess.stderr, 'run stderr');
 
     _observatoryUri = await observatoryUri.future;
