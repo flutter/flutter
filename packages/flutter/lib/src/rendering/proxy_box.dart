@@ -2664,7 +2664,7 @@ typedef PointerSignalEventListener = void Function(PointerSignalEvent event);
 /// Calls callbacks in response to common pointer events.
 ///
 /// It responds to events that can construct gestures, such as when the
-/// pointer is pressed, moved, released or canceled.
+/// pointer is pointer is pressed and moved, and then released or canceled.
 ///
 /// It does not respond to events that are exclusive to mouse, such as when the
 /// mouse enters and exits a region without pressing any buttons. For

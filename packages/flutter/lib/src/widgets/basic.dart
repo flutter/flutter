@@ -5793,22 +5793,23 @@ class Listener extends SingleChildRenderObjectWidget {
   /// Called when a pointer that triggered an [onPointerDown] changes position.
   final PointerMoveEventListener onPointerMove;
 
-  /// Called when a pointer changes into a position within this widget without
+  /// Called when a pointer moves into a position within this widget without
   /// buttons pressed.
   ///
   /// Usually this is only fired for pointers which report their location when
-  /// not down (e.g. mouse pointers). Certain devices also fires this event on
+  /// not down (e.g. mouse pointers). Certain devices also fire this event on
   /// single taps in accessibility mode.
   ///
   /// This callback is not triggered by the movement of the widget.
   ///
-  /// The time that this callback is triggered is during the callback of a
-  /// pointer event, which is always between frames.
+  /// This callback is triggered during the callback of a pointer event, which is
+  /// always between frames.
   ///
   /// See also:
   ///
-  ///  * [MouseRegion.onHover], which does the same job. The [Listener] one is
-  ///    preferred, since hover events are similar to other regular events.
+  ///  * [MouseRegion.onHover], which does the same job. Prefer using
+  ///    [Listener.onPointerHover], since hover events are similar to other regular
+  ///    events.
   final PointerHoverEventListener onPointerHover;
 
   /// Called when a pointer that triggered an [onPointerDown] is no longer in
@@ -5998,11 +5999,11 @@ class MouseRegion extends StatefulWidget {
   ///    internally implemented.
   final PointerEnterEventListener onEnter;
 
-  /// Triggered when a pointer changes into a position within this widget without
+  /// Triggered when a pointer moves into a position within this widget without
   /// buttons pressed.
   ///
   /// Usually this is only fired for pointers which report their location when
-  /// not down (e.g. mouse pointers). Certain devices also fires this event on
+  /// not down (e.g. mouse pointers). Certain devices also fire this event on
   /// single taps in accessibility mode.
   ///
   /// This callback is not triggered by the movement of the widget.
@@ -6012,8 +6013,9 @@ class MouseRegion extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [Listener.onPointerHover], which does the same job. The [Listener]
-  ///    one is preferred, since hover events are similar to other regular events.
+  ///  * [Listener.onPointerHover], which does the same job. Prefer using
+  ///    [Listener.onPointerHover], since hover events are similar to other regular
+  ///    events.
   final PointerHoverEventListener onHover;
 
   /// Triggered when a mouse pointer has exited this widget when the widget is
