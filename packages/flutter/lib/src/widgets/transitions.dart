@@ -315,6 +315,51 @@ class SlideTransition extends AnimatedWidget {
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/scale_transition.mp4}
 ///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// The following code implements the [ScaleTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// AnimationController _controller;
+/// Animation<double> _animation;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 2),
+///     vsync: this,
+///   )..repeat(reverse: true);
+///   _animation = CurvedAnimation(
+///     parent: _controller,
+///     curve: Curves.fastOutSlowIn,
+///   );
+/// }
+///
+/// @override
+/// void dispose() {
+///   super.dispose();
+///   _controller.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: ScaleTransition(
+///         scale: _animation,
+///         child: const Padding(
+///           padding: EdgeInsets.all(8.0),
+///           child: FlutterLogo(size: 150.0),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [PositionedTransition], a widget that animates its child from a start
