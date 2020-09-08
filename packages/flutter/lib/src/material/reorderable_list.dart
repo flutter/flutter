@@ -600,7 +600,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 // A global key that takes its identity from the object and uses a value of a
 // particular type to identify itself.
 //
-// The difference with GlobalObjectKey is that it uses == instead of identical
+// The difference with GlobalObjectKey is that it uses [==] instead of [identical]
 // of the objects used to generate widgets.
 @optionalTypeArgs
 class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
