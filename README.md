@@ -7,3 +7,5 @@ For instructions on how to use it, see that repository's [CONTRIBUTING.md](https
 To update your checkout to use the latest buildroot, run `gclient sync`.
 
 To submit patches to this buildroot repository, create a branch, push to that branch, then submit a PR on GitHub for that branch.
+
+To point the engine to a new version of buildroot after your patch is merged, update the buildroot hash in the engine's [DEPS file](https://github.com/flutter/engine/blob/master/DEPS).
