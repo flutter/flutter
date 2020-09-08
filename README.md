@@ -35,7 +35,7 @@ smooth natural scrolling, and platform awareness.
 
 Browse the <a href="https://flutter.io/widgets/">widget catalog</a>.
 
-## Modern, reactive framework
+## Modern, Reactive Framework
 
 Easily compose your UI with Flutter's
 modern functional-reactive framework and
