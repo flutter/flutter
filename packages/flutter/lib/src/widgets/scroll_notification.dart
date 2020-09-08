@@ -265,11 +265,11 @@ class UserScrollNotification extends ScrollNotification {
   UserScrollNotification({
     required ScrollMetrics metrics,
     required BuildContext context,
-    this.direction,
+    required this.direction,
   }) : super(metrics: metrics, context: context);
 
   /// The direction in which the user is scrolling.
-  final ScrollDirection? direction;
+  final ScrollDirection direction;
 
   @override
   void debugFillDescription(List<String> description) {
