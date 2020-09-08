@@ -124,10 +124,14 @@ function upgrade_flutter () (
   if [[ ! -f "$SNAPSHOT_PATH" || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$revision" || "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
     # Waits for the update lock to be acquired. Placing this check inside the
     # conditional allows the majority of flutter/dart installations to bypass
-    # the lock entirely, but as a result it might download and snapshot the
-    # tool multiple times if the snapshot or SDK is invalidated outside of a
-    # `flutter upgrade`.
+    # the lock entirely, but as a result this required a second verification that
+    # the SDK is up to date.
     _wait_for_lock
+
+    # A different shell process might have updated the tool/SDK.
+    if [[ -f "$SNAPSHOT_PATH" && -s "$STAMP_PATH" && "$(cat "$STAMP_PATH")" == "$revision" && "$FLUTTER_TOOLS_DIR/pubspec.yaml" -ot "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
+      exit $?
+    fi
 
     rm -f "$FLUTTER_ROOT/version"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
