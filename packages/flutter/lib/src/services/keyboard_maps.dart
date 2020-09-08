@@ -1180,7 +1180,7 @@ const Map<int, LogicalKeyboardKey> kMacOsFunctionKeyMap = <int, LogicalKeyboardK
 /// Maps iOS-specific key code values representing [PhysicalKeyboardKey].
 ///
 /// iOS doesn't provide a scan code, but a virtual keycode to represent a physical key.
-const Map<int, PhysicalKeyboardKey> kIOSToPhysicalKey = <int, PhysicalKeyboardKey>{
+const Map<int, PhysicalKeyboardKey> kIosToPhysicalKey = <int, PhysicalKeyboardKey>{
   0x00000000: PhysicalKeyboardKey.usbReserved,
   0x00000001: PhysicalKeyboardKey.usbErrorRollOver,
   0x00000002: PhysicalKeyboardKey.usbPostFail,
@@ -1345,7 +1345,7 @@ const Map<int, PhysicalKeyboardKey> kIOSToPhysicalKey = <int, PhysicalKeyboardKe
 /// A map of iOS key codes which have printable representations, but appear
 /// on the number pad. Used to provide different key objects for keys like
 /// KEY_EQUALS and NUMPAD_EQUALS.
-const Map<int, LogicalKeyboardKey> kIOSNumPadMap = <int, LogicalKeyboardKey>{
+const Map<int, LogicalKeyboardKey> kIosNumPadMap = <int, LogicalKeyboardKey>{
   0x00000054: LogicalKeyboardKey.numpadDivide,
   0x00000055: LogicalKeyboardKey.numpadMultiply,
   0x00000056: LogicalKeyboardKey.numpadSubtract,

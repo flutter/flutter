@@ -336,7 +336,7 @@ class KeyData {
           xKbScanCode: xKbScanCode == 0 ? null : xKbScanCode,
           windowsScanCode: windowsScanCode == 0 ? null : windowsScanCode,
           macOsScanCode: macScanCode == 0xffff ? null : macScanCode,
-          iOSScanCode: (usbHidCode & 0x070000) == 0x070000 ? (usbHidCode ^ 0x070000) : null,
+          iosScanCode: (usbHidCode & 0x070000) == 0x070000 ? (usbHidCode ^ 0x070000) : null,
           name: match.group(6) == 'NULL' ? null : match.group(6),
           // The input data has a typo...
           chromiumName: shoutingToLowerCamel(match.group(7)).replaceAll('Minimium', 'Minimum'),
@@ -377,7 +377,7 @@ class Key {
     this.windowsKeyNames,
     this.windowsKeyCodes,
     this.macOsScanCode,
-    this.iOSScanCode,
+    this.iosScanCode,
     @required this.chromiumName,
     this.androidKeyNames,
     this.androidScanCodes,
@@ -406,7 +406,7 @@ class Key {
       windowsKeyCodes: (map['keyCodes']['windows'] as List<dynamic>)?.cast<int>(),
       windowsKeyNames: (map['names']['windows'] as List<dynamic>)?.cast<String>(),
       macOsScanCode: map['scanCodes']['macos'] as int,
-      iOSScanCode: map['scanCodes']['ios'] as int,
+      iosScanCode: map['scanCodes']['ios'] as int,
       glfwKeyNames: (map['names']['glfw'] as List<dynamic>)?.cast<String>(),
       glfwKeyCodes: (map['keyCodes']['glfw'] as List<dynamic>)?.cast<int>(),
       gtkKeyNames: (map['names']['gtk'] as List<dynamic>)?.cast<String>(),
@@ -433,7 +433,7 @@ class Key {
   /// The macOS scan code of the key from Chromium's header file.
   int macOsScanCode;
   /// The iOS scan code of the key from UIKey's documentation (USB Hid table)
-  int iOSScanCode;
+  int iosScanCode;
   /// The name of the key, mostly derived from the DomKey name in Chromium,
   /// but where there was no DomKey representation, derived from the Chromium
   /// symbol name.
@@ -489,7 +489,7 @@ class Key {
         'xkb': xKbScanCode,
         'windows': windowsScanCode,
         'macos': macOsScanCode,
-        'ios': iOSScanCode,
+        'ios': iosScanCode,
       },
       'keyCodes': <String, List<int>>{
         'android': androidKeyCodes,
@@ -558,7 +558,7 @@ class Key {
         'linuxScanCode: ${toHex(linuxScanCode)}, xKbScanCode: ${toHex(xKbScanCode)}, '
         'windowsKeyCode: ${toHex(windowsScanCode)}, macOsScanCode: ${toHex(macOsScanCode)}, '
         'windowsScanCode: ${toHex(windowsScanCode)}, chromiumSymbolName: $chromiumName '
-        'iOSScanCode: ${toHex(iOSScanCode)})';
+        'iOSScanCode: ${toHex(iosScanCode)})';
   }
 
   /// Returns the static map of printable representations.

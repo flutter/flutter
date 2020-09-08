@@ -301,7 +301,7 @@ abstract class RawKeyEvent with Diagnosticable {
             modifiers: message['modifiers'] as int? ?? 0);
         break;
       case 'ios':
-        data = RawKeyEventDataIOS(
+        data = RawKeyEventDataIos(
             characters: message['characters'] as String? ?? '',
             charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
             keyCode: message['keyCode'] as int? ?? 0,
@@ -332,16 +332,17 @@ abstract class RawKeyEvent with Diagnosticable {
         );
         break;
       default:
-        // Raw key events are not yet implemented on other platforms,
-        // but this exception isn't hit, because the engine never sends these
-        // messages.
+        /// This exception would only be hit on platforms that haven't yet
+        /// implemented raw key events, but will only be triggered if the
+        /// engine for those platforms sends raw key event messages in the
+        /// first place.
         throw FlutterError('Unknown keymap for key events: $keymap');
     }
 
     final String type = message['type'] as String;
     switch (type) {
       case 'keydown':
-        return RawKeyDownEvent(data: data, character: message['character'] as String); // Missing for Mac/iOS?
+        return RawKeyDownEvent(data: data, character: message['character'] as String);
       case 'keyup':
         return RawKeyUpEvent(data: data);
       default:

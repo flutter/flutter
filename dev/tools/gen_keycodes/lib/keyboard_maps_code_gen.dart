@@ -199,25 +199,25 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of iOS key codes to physical keys.
-  String get iOSScanCodeMap {
-    final StringBuffer iOSScanCodeMap = StringBuffer();
+  String get iosScanCodeMap {
+    final StringBuffer iosScanCodeMap = StringBuffer();
     for (final Key entry in keyData.data) {
-      if (entry.iOSScanCode != null) {
-        iOSScanCodeMap.writeln('  ${toHex(entry.iOSScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
+      if (entry.iosScanCode != null) {
+        iosScanCodeMap.writeln('  ${toHex(entry.iosScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
     }
-    return iOSScanCodeMap.toString().trimRight();
+    return iosScanCodeMap.toString().trimRight();
   }
 
-  /// This generates the map of macOS number pad key codes to logical keys.
-  String get iOSNumpadMap {
-    final StringBuffer iOSNumPadMap = StringBuffer();
+  /// This generates the map of iOS number pad key codes to logical keys.
+  String get iosNumpadMap {
+    final StringBuffer iosNumPadMap = StringBuffer();
     for (final Key entry in numpadKeyData) {
-      if (entry.iOSScanCode != null) {
-        iOSNumPadMap.writeln('  ${toHex(entry.iOSScanCode)}: LogicalKeyboardKey.${entry.constantName},');
+      if (entry.iosScanCode != null) {
+        iosNumPadMap.writeln('  ${toHex(entry.iosScanCode)}: LogicalKeyboardKey.${entry.constantName},');
       }
     }
-    return iOSNumPadMap.toString().trimRight();
+    return iosNumPadMap.toString().trimRight();
   }
 
   /// This generates the map of Fuchsia key codes to logical keys.
@@ -289,8 +289,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       'MACOS_SCAN_CODE_MAP': macOsScanCodeMap,
       'MACOS_NUMPAD_MAP': macOsNumpadMap,
       'MACOS_FUNCTION_KEY_MAP': macOsFunctionKeyMap,
-      'IOS_SCAN_CODE_MAP': iOSScanCodeMap,
-      'IOS_NUMPAD_MAP': iOSNumpadMap,
+      'IOS_SCAN_CODE_MAP': iosScanCodeMap,
+      'IOS_NUMPAD_MAP': iosNumpadMap,
       'GLFW_KEY_CODE_MAP': glfwKeyCodeMap,
       'GLFW_NUMPAD_MAP': glfwNumpadMap,
       'GTK_KEY_CODE_MAP': gtkKeyCodeMap,

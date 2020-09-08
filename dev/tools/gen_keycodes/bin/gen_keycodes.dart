@@ -270,7 +270,7 @@ Future<void> main(List<String> rawArguments) async {
         codeGenerator = MacOsCodeGenerator(data);
         break;
       case 'ios':
-        codeGenerator = IOSCodeGenerator(data);
+        codeGenerator = IosCodeGenerator(data);
         break;
       case 'windows':
         codeGenerator = WindowsCodeGenerator(data);

@@ -415,10 +415,10 @@ void main() {
       );
       // Set only the generic "shift down" modifier, without setting a side.
       data['modifiers'] |=
-          RawKeyEventDataIOS.modifierShift |
-          RawKeyEventDataIOS.modifierOption |
-          RawKeyEventDataIOS.modifierCommand |
-          RawKeyEventDataIOS.modifierControl;
+          RawKeyEventDataIos.modifierShift |
+          RawKeyEventDataIos.modifierOption |
+          RawKeyEventDataIos.modifierCommand |
+          RawKeyEventDataIos.modifierControl;
       // dispatch the modified data.
       await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
@@ -1076,21 +1076,21 @@ void main() {
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
   });
 
-  group('RawKeyEventDataIOS', () {
+  group('RawKeyEventDataIos', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
-      RawKeyEventDataIOS.modifierOption | RawKeyEventDataIOS.modifierLeftOption: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.left),
-      RawKeyEventDataIOS.modifierOption | RawKeyEventDataIOS.modifierRightOption: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.right),
-      RawKeyEventDataIOS.modifierShift | RawKeyEventDataIOS.modifierLeftShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.left),
-      RawKeyEventDataIOS.modifierShift | RawKeyEventDataIOS.modifierRightShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.right),
-      RawKeyEventDataIOS.modifierControl | RawKeyEventDataIOS.modifierLeftControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.left),
-      RawKeyEventDataIOS.modifierControl | RawKeyEventDataIOS.modifierRightControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.right),
-      RawKeyEventDataIOS.modifierCommand | RawKeyEventDataIOS.modifierLeftCommand: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.left),
-      RawKeyEventDataIOS.modifierCommand | RawKeyEventDataIOS.modifierRightCommand: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.right),
-      RawKeyEventDataIOS.modifierOption: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.all),
-      RawKeyEventDataIOS.modifierShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.all),
-      RawKeyEventDataIOS.modifierControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.all),
-      RawKeyEventDataIOS.modifierCommand: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.all),
-      RawKeyEventDataIOS.modifierCapsLock: _ModifierCheck(ModifierKey.capsLockModifier, KeyboardSide.all),
+      RawKeyEventDataIos.modifierOption | RawKeyEventDataIos.modifierLeftOption: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.left),
+      RawKeyEventDataIos.modifierOption | RawKeyEventDataIos.modifierRightOption: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.right),
+      RawKeyEventDataIos.modifierShift | RawKeyEventDataIos.modifierLeftShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.left),
+      RawKeyEventDataIos.modifierShift | RawKeyEventDataIos.modifierRightShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.right),
+      RawKeyEventDataIos.modifierControl | RawKeyEventDataIos.modifierLeftControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.left),
+      RawKeyEventDataIos.modifierControl | RawKeyEventDataIos.modifierRightControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.right),
+      RawKeyEventDataIos.modifierCommand | RawKeyEventDataIos.modifierLeftCommand: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.left),
+      RawKeyEventDataIos.modifierCommand | RawKeyEventDataIos.modifierRightCommand: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.right),
+      RawKeyEventDataIos.modifierOption: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.all),
+      RawKeyEventDataIos.modifierShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.all),
+      RawKeyEventDataIos.modifierControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.all),
+      RawKeyEventDataIos.modifierCommand: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.all),
+      RawKeyEventDataIos.modifierCapsLock: _ModifierCheck(ModifierKey.capsLockModifier, KeyboardSide.all),
     };
 
     test('modifier keys are recognized individually', () {
@@ -1103,7 +1103,7 @@ void main() {
           'charactersIgnoringModifiers': 'a',
           'modifiers': modifier,
         });
-        final RawKeyEventDataIOS data = event.data as RawKeyEventDataIOS;
+        final RawKeyEventDataIos data = event.data as RawKeyEventDataIos;
         for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key) {
             expect(
@@ -1124,7 +1124,7 @@ void main() {
     });
     test('modifier keys are recognized when combined', () {
       for (final int modifier in modifierTests.keys) {
-        if (modifier == RawKeyEventDataIOS.modifierCapsLock) {
+        if (modifier == RawKeyEventDataIos.modifierCapsLock) {
           // No need to combine caps lock key with itself.
           continue;
         }
@@ -1134,16 +1134,16 @@ void main() {
           'keyCode': 0x04,
           'characters': 'a',
           'charactersIgnoringModifiers': 'a',
-          'modifiers': modifier | RawKeyEventDataIOS.modifierCapsLock,
+          'modifiers': modifier | RawKeyEventDataIos.modifierCapsLock,
         });
-        final RawKeyEventDataIOS data = event.data as RawKeyEventDataIOS;
+        final RawKeyEventDataIos data = event.data as RawKeyEventDataIos;
         for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key || key == ModifierKey.capsLockModifier) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
               isTrue,
               reason: '$key should be pressed with metaState $modifier '
-                  "and additional key ${RawKeyEventDataIOS.modifierCapsLock}, but isn't.",
+                  "and additional key ${RawKeyEventDataIos.modifierCapsLock}, but isn't.",
             );
             if (key != ModifierKey.capsLockModifier) {
               expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
@@ -1155,7 +1155,7 @@ void main() {
               data.isModifierPressed(key, side: modifierTests[modifier].side),
               isFalse,
               reason: '$key should not be pressed with metaState $modifier '
-                  'and additional key ${RawKeyEventDataIOS.modifierCapsLock}.',
+                  'and additional key ${RawKeyEventDataIos.modifierCapsLock}.',
             );
           }
         }
@@ -1171,7 +1171,7 @@ void main() {
         'charactersIgnoringModifiers': unmodifiedCharacter,
         'modifiers': 0x0,
       });
-      final RawKeyEventDataIOS data = keyAEvent.data as RawKeyEventDataIOS;
+      final RawKeyEventDataIos data = keyAEvent.data as RawKeyEventDataIos;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
@@ -1185,7 +1185,7 @@ void main() {
         'charactersIgnoringModifiers': '',
         'modifiers': 0x0,
       });
-      final RawKeyEventDataIOS data = escapeKeyEvent.data as RawKeyEventDataIOS;
+      final RawKeyEventDataIos data = escapeKeyEvent.data as RawKeyEventDataIos;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isEmpty);
@@ -1198,9 +1198,9 @@ void main() {
         'keyCode': 0x000000e1,
         'characters': '',
         'charactersIgnoringModifiers': '',
-        'modifiers': RawKeyEventDataIOS.modifierLeftShift,
+        'modifiers': RawKeyEventDataIos.modifierLeftShift,
       });
-      final RawKeyEventDataIOS data = shiftLeftKeyEvent.data as RawKeyEventDataIOS;
+      final RawKeyEventDataIos data = shiftLeftKeyEvent.data as RawKeyEventDataIos;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isEmpty);
@@ -1213,9 +1213,9 @@ void main() {
         'keyCode': 0x00000050,
         'characters': '',
         'charactersIgnoringModifiers': 'UIKeyInputLeftArrow',
-        'modifiers': RawKeyEventDataIOS.modifierFunction,
+        'modifiers': RawKeyEventDataIos.modifierFunction,
       });
-      final RawKeyEventDataIOS data = leftArrowKey.data as RawKeyEventDataIOS;
+      final RawKeyEventDataIos data = leftArrowKey.data as RawKeyEventDataIos;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
       expect(data.logicalKey.keyLabel, isEmpty);

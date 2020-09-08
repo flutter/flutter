@@ -62,7 +62,7 @@ class KeyEventSimulator {
         map = kMacOsToPhysicalKey;
         break;
       case 'ios':
-        map = kIOSToPhysicalKey;
+        map = kIosToPhysicalKey;
         break;
       case 'linux':
         map = kLinuxToPhysicalKey;
@@ -141,7 +141,7 @@ class KeyEventSimulator {
         map = kMacOsToPhysicalKey;
         break;
       case 'ios':
-        map = kIOSToPhysicalKey;
+        map = kIosToPhysicalKey;
         break;
       case 'linux':
         map = kLinuxToPhysicalKey;
@@ -521,28 +521,28 @@ class KeyEventSimulator {
       pressed.remove(newKey);
     }
     if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
-      result |= RawKeyEventDataIOS.modifierLeftShift | RawKeyEventDataIOS.modifierShift;
+      result |= RawKeyEventDataIos.modifierLeftShift | RawKeyEventDataIos.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
-      result |= RawKeyEventDataIOS.modifierRightShift | RawKeyEventDataIOS.modifierShift;
+      result |= RawKeyEventDataIos.modifierRightShift | RawKeyEventDataIos.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
-      result |= RawKeyEventDataIOS.modifierLeftCommand | RawKeyEventDataIOS.modifierCommand;
+      result |= RawKeyEventDataIos.modifierLeftCommand | RawKeyEventDataIos.modifierCommand;
     }
     if (pressed.contains(LogicalKeyboardKey.metaRight)) {
-      result |= RawKeyEventDataIOS.modifierRightCommand | RawKeyEventDataIOS.modifierCommand;
+      result |= RawKeyEventDataIos.modifierRightCommand | RawKeyEventDataIos.modifierCommand;
     }
     if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
-      result |= RawKeyEventDataIOS.modifierLeftControl | RawKeyEventDataIOS.modifierControl;
+      result |= RawKeyEventDataIos.modifierLeftControl | RawKeyEventDataIos.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.controlRight)) {
-      result |= RawKeyEventDataIOS.modifierRightControl | RawKeyEventDataIOS.modifierControl;
+      result |= RawKeyEventDataIos.modifierRightControl | RawKeyEventDataIos.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.altLeft)) {
-      result |= RawKeyEventDataIOS.modifierLeftOption | RawKeyEventDataIOS.modifierOption;
+      result |= RawKeyEventDataIos.modifierLeftOption | RawKeyEventDataIos.modifierOption;
     }
     if (pressed.contains(LogicalKeyboardKey.altRight)) {
-      result |= RawKeyEventDataIOS.modifierRightOption | RawKeyEventDataIOS.modifierOption;
+      result |= RawKeyEventDataIos.modifierRightOption | RawKeyEventDataIos.modifierOption;
     }
     final Set<LogicalKeyboardKey> functionKeys = <LogicalKeyboardKey>{
       LogicalKeyboardKey.f1,
@@ -568,13 +568,13 @@ class KeyEventSimulator {
       LogicalKeyboardKey.f21,
     };
     if (pressed.intersection(functionKeys).isNotEmpty) {
-      result |= RawKeyEventDataIOS.modifierFunction;
+      result |= RawKeyEventDataIos.modifierFunction;
     }
     if (pressed.intersection(kMacOsNumPadMap.values.toSet()).isNotEmpty) {
-      result |= RawKeyEventDataIOS.modifierNumericPad;
+      result |= RawKeyEventDataIos.modifierNumericPad;
     }
     if (pressed.contains(LogicalKeyboardKey.capsLock)) {
-      result |= RawKeyEventDataIOS.modifierCapsLock;
+      result |= RawKeyEventDataIos.modifierCapsLock;
     }
     return result;
   }
