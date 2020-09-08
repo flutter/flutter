@@ -177,10 +177,6 @@ void main() {
       MaterialApp(
         home: Material(
           child: DataTable(
-            headingTextStyle: const TextStyle(
-              fontSize: 14.0,
-              letterSpacing: 0.0, // Will overflow if letter spacing is larger than 0.0.
-            ),
             columns: <DataColumn>[
               DataColumn(
                 label: Text('X' * 2000),
@@ -199,7 +195,6 @@ void main() {
         ),
       ),
     );
-
     expect(tester.renderObject<RenderBox>(find.byType(Text).first).size.width, greaterThan(800.0));
     expect(tester.renderObject<RenderBox>(find.byType(Row).first).size.width, greaterThan(800.0));
     expect(tester.takeException(), isNull); // column overflows table, but text doesn't overflow cell
@@ -697,7 +692,7 @@ void main() {
     );
 
     // custom first column padding
-    padding = find.widgetWithText(Padding, 'Frozen yogurt').first;
+    padding = find.widgetWithText(Padding, 'Frozen yogurt');
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
@@ -957,9 +952,9 @@ void main() {
     );
 
     Table table = tester.widget(find.byType(Table));
-    TableRow tableRow = table.children.last;
+    TableRow tableRow = table.children.first;
     BoxDecoration boxDecoration = tableRow.decoration as BoxDecoration;
-    expect(boxDecoration.border.top.width, 1.0);
+    expect(boxDecoration.border.bottom.width, 1.0);
 
     const double thickness =  4.2;
     await tester.pumpWidget(
@@ -974,58 +969,9 @@ void main() {
       ),
     );
     table = tester.widget(find.byType(Table));
-    tableRow = table.children.last;
+    tableRow = table.children.first;
     boxDecoration = tableRow.decoration as BoxDecoration;
-    expect(boxDecoration.border.top.width, thickness);
-  });
-
-  testWidgets('DataTable set show bottom border', (WidgetTester tester) async {
-    const List<DataColumn> columns = <DataColumn>[
-      DataColumn(label: Text('column1')),
-      DataColumn(label: Text('column2')),
-    ];
-
-    const List<DataCell> cells = <DataCell>[
-      DataCell(Text('cell1')),
-      DataCell(Text('cell2')),
-    ];
-
-    const List<DataRow> rows = <DataRow>[
-      DataRow(cells: cells),
-      DataRow(cells: cells),
-    ];
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: DataTable(
-            showBottomBorder: true,
-            columns: columns,
-            rows: rows,
-          ),
-        ),
-      ),
-    );
-
-    Table table = tester.widget(find.byType(Table));
-    TableRow tableRow = table.children.last;
-    BoxDecoration boxDecoration = tableRow.decoration as BoxDecoration;
-    expect(boxDecoration.border.bottom.width, 1.0);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: DataTable(
-            columns: columns,
-            rows: rows,
-          ),
-        ),
-      ),
-    );
-    table = tester.widget(find.byType(Table));
-    tableRow = table.children.last;
-    boxDecoration = tableRow.decoration as BoxDecoration;
-    expect(boxDecoration.border.bottom.width, 0.0);
+    expect(boxDecoration.border.bottom.width, thickness);
   });
 
   testWidgets('DataTable column heading cell - with and without sorting', (WidgetTester tester) async {
@@ -1279,7 +1225,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content1')));
     await tester.pump(const Duration(milliseconds: 200)); // splash is well underway
     final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
-    expect(box, paints..circle(x: 68.0, y: 24.0, color: pressedColor));
+    expect(box, paints..circle(x: 64.0, y: 24.0, color: pressedColor));
     await gesture.up();
   });
 }
