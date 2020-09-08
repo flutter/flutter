@@ -3,11 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
-import 'package:file/local.dart';
 
 import '../src/common.dart';
-
-const FileSystem fileSystem = LocalFileSystem();
+import 'test_utils.dart';
 
 void main() {
   final String flutterTools = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools');
@@ -138,7 +136,6 @@ void main() {
 
   test('no unauthorized imports of package:file/local.dart', () {
     final List<String> allowedPath = <String>[
-      fileSystem.path.join(flutterTools, 'test', 'general.shard', 'forbidden_imports_test.dart'),
       fileSystem.path.join(flutterTools, 'test', 'integration.shard', 'test_utils.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'file_system.dart'),
     ];
