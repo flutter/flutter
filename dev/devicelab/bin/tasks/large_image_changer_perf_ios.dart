@@ -7,9 +7,14 @@ import 'dart:async';
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:flutter_devicelab/tasks/sample_catalog_generator.dart';
+import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
-Future<void> main(List<String> args) async {
-  deviceOperatingSystem = DeviceOperatingSystem.android;
-  await task(() => samplePageCatalogGenerator(extractCloudAuthTokenArg(args)));
+Future<void> main() async {
+  deviceOperatingSystem = DeviceOperatingSystem.ios;
+  await task(PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/large_image_changer.dart',
+    'large_image_changer',
+    measureCpuGpu: true,
+  ).run);
 }
