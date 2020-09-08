@@ -310,7 +310,7 @@ class RangeMaintainingTestScrollBehavior extends ScrollBehavior {
 
   @override
   GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
-    return (PointerEvent ev) => VelocityTracker();
+    return (PointerEvent event) => VelocityTracker(event.kind);
   }
 
   @override
