@@ -3,15 +3,25 @@
 // found in the LICENSE file.
 
 // @dart = 2.10
-import 'dart:ui';
-
+import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
-import 'test_util.dart';
+import 'package:ui/ui.dart';
 
-// These tests should be kept in sync with the web tests in
-// lib/web_ui/test/lerp_test.dart.
+/// The epsilon of tolerable double precision error.
+///
+/// This is used in various places in the framework to allow for floating point
+/// precision loss in calculations. Differences below this threshold are safe
+/// to disregard.
+const double precisionErrorTolerance = 1e-10;
+
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+// These tests should be kept in sync with the VM tests in
+// testing/dart/lerp_test.dart.
+void testMain() {
   test('lerpDouble should return null if and only if both inputs are null', () {
     expect(lerpDouble(null, null, 1.0), isNull);
     expect(lerpDouble(5.0, null, 0.25), isNotNull);
@@ -127,4 +137,26 @@ void main() {
   });
 }
 
-final Matcher throwsAssertionError = throwsA(const TypeMatcher<AssertionError>());
+/// Asserts that `callback` throws an [AssertionError].
+///
+/// Verifies that the specified callback throws an [AssertionError] when
+/// running in with assertions enabled. When asserts are not enabled, such as
+/// when running using a release-mode VM with default settings, this acts as a
+/// no-op.
+void expectAssertion(Function callback) {
+  bool assertsEnabled = false;
+  assert(() {
+    assertsEnabled = true;
+    return true;
+  }());
+  if (assertsEnabled) {
+    bool threw = false;
+    try {
+      callback();
+    } catch (e) {
+      expect(e is AssertionError, true);
+      threw = true;
+    }
+    expect(threw, true);
+  }
+}
