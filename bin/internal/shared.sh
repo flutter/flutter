@@ -114,9 +114,6 @@ function _wait_for_lock () {
 function upgrade_flutter () (
   mkdir -p "$FLUTTER_ROOT/bin/cache"
 
-  # Waits for the update lock to be acquired.
-  _wait_for_lock
-
   local revision="$(cd "$FLUTTER_ROOT"; git rev-parse HEAD)"
 
   # Invalidate cache if:
@@ -125,6 +122,13 @@ function upgrade_flutter () (
   #  * Contents of STAMP_PATH is not our local git HEAD revision, or
   #  * pubspec.yaml last modified after pubspec.lock
   if [[ ! -f "$SNAPSHOT_PATH" || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$revision" || "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
+    # Waits for the update lock to be acquired. Placing this check inside the
+    # conditional allows the majority of flutter/dart installations to bypass
+    # the lock entirely, but as a result it might download and snapshot the
+    # tool multiple times if the snapshot or SDK is invalidated outside of a
+    # `flutter upgrade`.
+    _wait_for_lock
+
     rm -f "$FLUTTER_ROOT/version"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
