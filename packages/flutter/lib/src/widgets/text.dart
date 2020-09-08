@@ -120,7 +120,7 @@ class DefaultTextStyle extends InheritedTheme {
   /// The text style to apply.
   final TextStyle style;
 
-  /// How every line of the text in Text widget should be aligned horizontally.
+  /// How each line of text in the Text widget should be aligned horizontally.
   final TextAlign textAlign;
 
   /// Whether the text should break at soft line breaks.
