@@ -157,4 +157,8 @@ Future<void> cleanupSystem() async {
   } else {
     print('Could not determine JAVA_HOME; not shutting down Gradle.');
   }
+  // Removes the .gradle directory because sometimes gradle fails in updating
+  // itself and leaves corrupted zip archives, which could cause the next
+  // devicelab task to fail. https://github.com/flutter/flutter/issues/65277
+  rmTree(dir('${Platform.environment['HOME']}/.gradle'));
 }
