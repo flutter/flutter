@@ -698,12 +698,20 @@ class _AppBarState extends State<AppBar> {
       appBar = Stack(
         fit: StackFit.passthrough,
         children: <Widget>[
-          widget.flexibleSpace,
-          // Creates a material widget to prevent the flexibleSpace from
-          // obscuring the ink splashes produced by appBar children.
-          Material(
-            type: MaterialType.transparency,
-            child: appBar,
+          Semantics(
+            sortKey: const OrdinalSortKey(1.0),
+            explicitChildNodes: true,
+            child: widget.flexibleSpace,
+          ),
+          Semantics(
+            sortKey: const OrdinalSortKey(0.0),
+            explicitChildNodes: true,
+            // Creates a material widget to prevent the flexibleSpace from
+            // obscuring the ink splashes produced by appBar children.
+            child: Material(
+              type: MaterialType.transparency,
+              child: appBar,
+            ),
           ),
         ],
       );
