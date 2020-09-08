@@ -1194,11 +1194,11 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
-          navigationBar: const CupertinoNavigationBar(
-              leading: Text("lead"),
-              middle: Text("Title"),
-              trailing: Text("Trailing")),
-          child: Center(child: Text("Test!")),
+          navigationBar: CupertinoNavigationBar(
+              leading: Text('lead'),
+              middle: Text('Title'),
+              trailing: Text('Trailing')),
+          child: Center(child: Text('Test!')),
         ),
       ),
     );
