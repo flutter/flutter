@@ -691,7 +691,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// Use [nearestScope] to start at this node instead of above it.
   FocusScopeNode? get enclosingScope {
-    return ancestors.cast<FocusNode?>().firstWhere((FocusNode? node) => node is FocusScopeNode, orElse: () => null) as FocusScopeNode?;
+    for (final FocusNode node in ancestors) {
+      if (node is FocusScopeNode)
+        return node;
+    }
+    return null;
   }
 
   /// Returns the size of the attached widget's [RenderObject], in logical
