@@ -44,7 +44,7 @@ class StocksAppState extends State<StocksApp> {
   final StockRouteInformationParser _routeInformationParser = StockRouteInformationParser();
   StockRouterDelegate _routerDelegate;
   RouterState _routerState;
-  
+
   @override
   void initState() {
     super.initState();
@@ -198,8 +198,7 @@ class StockRouterDelegate extends RouterDelegate<StockRoutePath> with ChangeNoti
         key: navigatorKey,
         pages: _buildPages(context),
         onPopPage: _handlePopPage,
-      ), 
+      ),
     );
   }
 }
-

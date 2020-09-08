@@ -185,5 +185,3 @@ class StockState extends State<StockStateScope> {
     );
   }
 }
-
-
