@@ -11,6 +11,7 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/platform/darwin/platform_version.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/runtime/ptrace_check.h"
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/shell.h"
@@ -113,6 +114,16 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     _dartProject.reset([[FlutterDartProject alloc] init]);
   else
     _dartProject.reset([project retain]);
+
+  if (!EnableTracingIfNecessary([_dartProject.get() settings])) {
+    NSLog(
+        @"Cannot create a FlutterEngine instance in debug mode without Flutter tooling or "
+        @"Xcode.\n\nTo launch in debug mode in iOS 14+, run flutter run from Flutter tools, run "
+        @"from an IDE with a Flutter IDE plugin or run the iOS project from Xcode.\nAlternatively "
+        @"profile and release mode apps can be launched from the home screen.");
+    [self release];
+    return nil;
+  }
 
   _pluginPublications = [NSMutableDictionary new];
   _registrars = [[NSMutableDictionary alloc] init];
@@ -514,6 +525,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                                     _threadHost.ui_thread->GetTaskRunner(),          // ui
                                     _threadHost.io_thread->GetTaskRunner()           // io
   );
+
   // Create the shell. This is a blocking operation.
   _shell = flutter::Shell::Create(std::move(task_runners),  // task runners
                                   std::move(platformData),  // window data

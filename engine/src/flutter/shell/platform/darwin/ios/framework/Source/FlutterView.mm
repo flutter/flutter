@@ -40,7 +40,12 @@
 }
 
 - (instancetype)initWithDelegate:(id<FlutterViewEngineDelegate>)delegate opaque:(BOOL)opaque {
-  FML_DCHECK(delegate) << "Delegate must not be nil.";
+  if (delegate == nil) {
+    NSLog(@"FlutterView delegate was nil.");
+    [self release];
+    return nil;
+  }
+
   self = [super initWithFrame:CGRectNull];
 
   if (self) {

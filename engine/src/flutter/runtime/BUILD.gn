@@ -55,8 +55,7 @@ source_set("runtime") {
     "embedder_resources.h",
     "platform_data.cc",
     "platform_data.h",
-    "ptrace_ios.cc",
-    "ptrace_ios.h",
+    "ptrace_check.h",
     "runtime_controller.cc",
     "runtime_controller.h",
     "runtime_delegate.cc",
@@ -66,6 +65,11 @@ source_set("runtime") {
     "skia_concurrent_executor.cc",
     "skia_concurrent_executor.h",
   ]
+
+  if (is_ios && flutter_runtime_mode == "debug") {
+    # These contain references to private APIs and this TU must only be compiled in debug runtime modes.
+    sources += [ "ptrace_check.cc" ]
+  }
 
   public_deps = [ "//third_party/rapidjson" ]
 
