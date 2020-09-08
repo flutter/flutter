@@ -120,22 +120,24 @@ Future<String> _evalApkAnalyzer(
   final String javaBinary = path.join(javaHome, 'bin', 'java');
   assert(canRun(javaBinary));
 
-  final String androidTools = path.join(_androidHome, 'tools');
-  final String libs = path.join(androidTools, 'lib');
-  assert(Directory(libs).existsSync());
+  final String apkAnalyzer = path.join(
+    _androidHome,
+    'cmdline-tools',
+    'latest',
+    'bin',
+    Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer',
+  );
 
-  final String classSeparator =  Platform.isWindows ? ';' : ':';
   return eval(
-    javaBinary,
+    apkAnalyzer,
     <String>[
-      '-Dcom.android.sdklib.toolsdir=$androidTools',
-      '-classpath',
-      '.$classSeparator$libs${Platform.pathSeparator}*',
-      'com.android.tools.apk.analyzer.ApkAnalyzerCli',
       ...args,
     ],
     printStdout: printStdout,
     workingDirectory: workingDirectory,
+    environment: <String, String>{
+      'JAVA_HOME': javaHome,
+    }
   );
 }
 
