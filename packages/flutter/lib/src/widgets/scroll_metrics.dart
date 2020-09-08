@@ -72,19 +72,19 @@ abstract class ScrollMetrics {
   /// [minScrollExtent]. It can be infinity, if the scroll is unbounded.
   double get maxScrollExtent;
 
-  /// Whether [minScrollExtent] and [maxScrollExtent] properties are available.
+  /// Whether the [minScrollExtent] and the [maxScrollExtent] properties are available.
   bool get hasScrollExtents;
 
   /// The current scroll position, in logical pixels along the [axisDirection].
   double get pixels;
 
-  /// Whether [pixels] property is available.
+  /// Whether the [pixels] property is available.
   bool get hasPixels;
 
   /// The extent of the viewport along the [axisDirection].
   double get viewportDimension;
 
-  /// Whether [viewportDimension] property is available.
+  /// Whether the [viewportDimension] property is available.
   bool get hasViewportDimension;
 
   /// The direction in which the scroll view scrolls.

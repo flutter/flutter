@@ -94,7 +94,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// the value changes due to [correctBy]).
   double get pixels;
 
-  /// Whether [pixels] property is available.
+  /// Whether the [pixels] property is available.
   bool get hasPixels;
 
   /// Called when the viewport's extents are established.
