@@ -144,7 +144,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   double? _maxScrollExtent;
 
   @override
-  bool get hasScrollExtents => _minScrollExtent != null && _maxScrollExtent != null;
+  bool get hasContentDimensions => _minScrollExtent != null && _maxScrollExtent != null;
 
   /// The additional velocity added for a [forcePixels] change in a single
   /// frame.
@@ -218,7 +218,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(other != null);
     assert(other.context == context);
     assert(_pixels == null);
-    if (other.hasScrollExtents) {
+    if (other.hasContentDimensions) {
       _minScrollExtent = other.minScrollExtent;
       _maxScrollExtent = other.maxScrollExtent;
     }

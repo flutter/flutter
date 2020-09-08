@@ -48,8 +48,8 @@ abstract class ScrollMetrics {
     AxisDirection? axisDirection,
   }) {
     return FixedScrollMetrics(
-      minScrollExtent: minScrollExtent ?? (hasScrollExtents ? this.minScrollExtent : null),
-      maxScrollExtent: maxScrollExtent ?? (hasScrollExtents ? this.maxScrollExtent : null),
+      minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
+      maxScrollExtent: maxScrollExtent ?? (hasContentDimensions ? this.maxScrollExtent : null),
       pixels: pixels ?? (hasPixels ? this.pixels : null),
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
@@ -73,7 +73,7 @@ abstract class ScrollMetrics {
   double get maxScrollExtent;
 
   /// Whether the [minScrollExtent] and the [maxScrollExtent] properties are available.
-  bool get hasScrollExtents;
+  bool get hasContentDimensions;
 
   /// The current scroll position, in logical pixels along the [axisDirection].
   double get pixels;
@@ -151,7 +151,7 @@ class FixedScrollMetrics extends ScrollMetrics {
   final double? _maxScrollExtent;
 
   @override
-  bool get hasScrollExtents => _minScrollExtent != null && _maxScrollExtent != null;
+  bool get hasContentDimensions => _minScrollExtent != null && _maxScrollExtent != null;
 
   @override
   double get pixels => _pixels!;
