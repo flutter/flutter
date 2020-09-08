@@ -582,8 +582,8 @@ FILE: ../../../flutter/runtime/embedder_resources.h
 FILE: ../../../flutter/runtime/fixtures/runtime_test.dart
 FILE: ../../../flutter/runtime/platform_data.cc
 FILE: ../../../flutter/runtime/platform_data.h
-FILE: ../../../flutter/runtime/ptrace_ios.cc
-FILE: ../../../flutter/runtime/ptrace_ios.h
+FILE: ../../../flutter/runtime/ptrace_check.cc
+FILE: ../../../flutter/runtime/ptrace_check.h
 FILE: ../../../flutter/runtime/runtime_controller.cc
 FILE: ../../../flutter/runtime/runtime_controller.h
 FILE: ../../../flutter/runtime/runtime_delegate.cc
