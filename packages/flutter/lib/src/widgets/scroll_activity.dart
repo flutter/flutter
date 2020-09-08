@@ -64,8 +64,8 @@ abstract class ScrollActivity {
   ScrollActivity(this._delegate);
 
   /// The delegate that this activity will use to actuate the scroll view.
-  ScrollActivityDelegate? get delegate => _delegate;
-  ScrollActivityDelegate? _delegate;
+  ScrollActivityDelegate get delegate => _delegate;
+  ScrollActivityDelegate _delegate;
 
   /// Updates the activity's link to the [ScrollActivityDelegate].
   ///
@@ -138,9 +138,7 @@ abstract class ScrollActivity {
 
   /// Called when the scroll view stops performing this activity.
   @mustCallSuper
-  void dispose() {
-    _delegate = null;
-  }
+  void dispose() { }
 
   @override
   String toString() => describeIdentity(this);
@@ -158,7 +156,7 @@ class IdleScrollActivity extends ScrollActivity {
 
   @override
   void applyNewDimensions() {
-    delegate!.goBallistic(0.0);
+    delegate.goBallistic(0.0);
   }
 
   @override
@@ -213,7 +211,7 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
 
   @override
   void cancel() {
-    delegate!.goBallistic(0.0);
+    delegate.goBallistic(0.0);
   }
 
   @override
@@ -531,17 +529,17 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   void resetActivity() {
-    delegate!.goBallistic(velocity);
+    delegate.goBallistic(velocity);
   }
 
   @override
   void applyNewDimensions() {
-    delegate!.goBallistic(velocity);
+    delegate.goBallistic(velocity);
   }
 
   void _tick() {
     if (!applyMoveTo(_controller.value))
-      delegate!.goIdle();
+      delegate.goIdle();
   }
 
   /// Move the position to the given location.
@@ -553,11 +551,11 @@ class BallisticScrollActivity extends ScrollActivity {
   /// and returns true if the overflow was zero.
   @protected
   bool applyMoveTo(double value) {
-    return delegate!.setPixels(value) == 0.0;
+    return delegate.setPixels(value) == 0.0;
   }
 
   void _end() {
-    delegate?.goBallistic(0.0);
+    delegate.goBallistic(0.0);
   }
 
   @override
@@ -635,12 +633,12 @@ class DrivenScrollActivity extends ScrollActivity {
   Future<void> get done => _completer.future;
 
   void _tick() {
-    if (delegate!.setPixels(_controller.value) != 0.0)
-      delegate!.goIdle();
+    if (delegate.setPixels(_controller.value) != 0.0)
+      delegate.goIdle();
   }
 
   void _end() {
-    delegate?.goBallistic(velocity);
+    delegate.goBallistic(velocity);
   }
 
   @override
