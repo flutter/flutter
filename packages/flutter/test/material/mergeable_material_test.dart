@@ -1058,11 +1058,10 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
   });
 
-  bool isDivider(Widget widget, bool top, bool bottom) {
-    final DecoratedBox box = widget as DecoratedBox;
+  bool isDivider(BoxDecoration decoration, bool top, bool bottom) {
     const BorderSide side = BorderSide(color: Color(0x1F000000), width: 0.5);
 
-    return box.decoration == BoxDecoration(
+    return decoration == BoxDecoration(
       border: Border(
         top: top ? side : BorderSide.none,
         bottom: bottom ? side : BorderSide.none,
@@ -1113,13 +1112,18 @@ void main() {
       ),
     );
 
-    List<Widget> boxes = tester.widgetList(find.byType(DecoratedBox)).toList();
-    int offset = 1;
+    List<Widget> animatedContainer = tester.widgetList(find.byType(AnimatedContainer)).toList();
+    List<BoxDecoration> boxes = <BoxDecoration>[];
+    for(final Widget container in animatedContainer) {
+      boxes.add((container as AnimatedContainer).decoration as BoxDecoration);
+    }
+
+    int offset = 0;
 
     expect(isDivider(boxes[offset], false, true), isTrue);
+    expect(isDivider(boxes[offset + 1], true, true), isTrue);
     expect(isDivider(boxes[offset + 2], true, true), isTrue);
-    expect(isDivider(boxes[offset + 4], true, true), isTrue);
-    expect(isDivider(boxes[offset + 6], true, false), isTrue);
+    expect(isDivider(boxes[offset + 3], true, false), isTrue);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -1169,14 +1173,19 @@ void main() {
     // Wait for dividers to shrink.
     await tester.pump(const Duration(milliseconds: 200));
 
-    boxes = tester.widgetList(find.byType(DecoratedBox)).toList();
-    offset = 1;
+    animatedContainer = tester.widgetList(find.byType(AnimatedContainer)).toList();
+    boxes = <BoxDecoration>[];
+
+    for(final Widget container in animatedContainer) {
+      boxes.add((container as AnimatedContainer).decoration as BoxDecoration);
+    }
+
+    offset = 0;
 
     expect(isDivider(boxes[offset], false, true), isTrue);
-    expect(isDivider(boxes[offset + 2], true, false), isTrue);
-    // offset + 2 is gap
-    expect(isDivider(boxes[offset + 4], false, true), isTrue);
-    expect(isDivider(boxes[offset + 6], true, false), isTrue);
+    expect(isDivider(boxes[offset + 1], true, false), isTrue);
+    expect(isDivider(boxes[offset + 2], false, true), isTrue);
+    expect(isDivider(boxes[offset + 3], true, false), isTrue);
   });
 
   testWidgets('MergeableMaterial respects dividerColor', (WidgetTester tester) async {
