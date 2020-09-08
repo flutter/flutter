@@ -275,7 +275,7 @@ class AnsiTerminal implements Terminal {
       assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
       charactersToDisplay = List<String>.of(charactersToDisplay);
       charactersToDisplay[defaultChoiceIndex] = bolden(charactersToDisplay[defaultChoiceIndex]);
-      acceptedCharacters.add('\n');
+      acceptedCharacters.add('');
     }
     String choice;
     singleCharMode = true;
@@ -288,11 +288,11 @@ class AnsiTerminal implements Terminal {
         // prompt ends with ': '
         logger.printStatus(': ', emphasis: true, newline: false);
       }
-      choice = await keystrokes.first;
+      choice = (await keystrokes.first).trim();
       logger.printStatus(choice);
     }
     singleCharMode = false;
-    if (defaultChoiceIndex != null && choice == '\n') {
+    if (defaultChoiceIndex != null && choice == '') {
       choice = acceptedCharacters[defaultChoiceIndex];
     }
     return choice;
