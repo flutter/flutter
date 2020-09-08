@@ -112,11 +112,21 @@
                          htons(port), txtData.length, txtData.bytes, registrationCallback, NULL);
 
   if (err != 0) {
-    FML_LOG(ERROR) << "Failed to register observatory port with mDNS.";
+    FML_LOG(ERROR) << "Failed to register observatory port with mDNS with error " << err << ".";
     if (@available(iOS 14.0, *)) {
-      FML_LOG(ERROR) << "Make sure the 'NSBonjourServices' key is set in your Info.plist for '"
-                     << registrationType << "' for the Debug/Profile configurations."
-                     << "(See also: https://developer.apple.com/news/?id=0oi77447)";
+      FML_LOG(ERROR)
+          << "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒\n"
+          << "On iOS 14+, local network broadcast in apps need to be declared in "
+          << "the app's Info.plist. Debug and profile Flutter apps and modules host "
+          << "VM services on the local network to support debugging features such "
+          << "as hot reload and DevTools.\n\nTo make your Flutter app or module "
+          << "attachable and debuggable, add a '" << registrationType << "' value "
+          << "to the 'NSBonjourServices' key in your Info.plist for the Debug/"
+          << "Profile configurations.\n\n"
+          << "For more information, see "
+          // Update link to a specific header as needed.
+          << "https://flutter.dev/docs/development/add-to-app/ios/project-setup"
+          << "\n▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒";
     }
   } else {
     DNSServiceSetDispatchQueue(_dnsServiceRef, dispatch_get_main_queue());
