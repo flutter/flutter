@@ -1679,6 +1679,8 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 /// ```
 /// {@end-tool}
 ///
+/// ## Implementing the `of` method
+///
 /// The convention is to provide a static method `of` on the [InheritedWidget]
 /// which does the call to [BuildContext.dependOnInheritedWidgetOfExactType]. This
 /// allows the class to define its own fallback logic in case there isn't
@@ -1696,6 +1698,61 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 /// for that inherited widget using [BuildContext.dependOnInheritedWidgetOfExactType]
 /// and then returns the [ThemeData].
 ///
+/// ## Calling the `of` method
+///
+/// When using the `of` method, the `context` must be a descendant of the
+/// [InheritedWidget], meaning it must be "below" the [InheritedWidget] in the
+/// tree.
+///
+/// {@tool snippet}
+///
+/// In this example, the `context` used is the one from the [Builder], which is
+/// a child of the FrogColor widget, so this works.
+///
+/// ```dart
+/// class MyPage extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       body: FrogColor(
+///         color: Colors.green,
+///         child: Builder(
+///           builder: (BuildContext innerContext) {
+///             return Text(
+///               'Hello Frog',
+///               style: TextStyle(color: FrogColor.of(innerContext).color),
+///             );
+///           },
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+///
+/// In this example, the `context` used is the one from the MyOtherPage widget,
+/// which is a parent of the FrogColor widget, so this does not work.
+///
+/// ```dart
+/// class MyOtherPage extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       body: FrogColor(
+///         color: Colors.green,
+///         child: Text(
+///           'Hello Frog',
+///           style: TextStyle(color: FrogColor.of(context).color),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
 /// {@youtube 560 315 https://www.youtube.com/watch?v=1t-8rBCGBYw}
 ///
 /// See also:
