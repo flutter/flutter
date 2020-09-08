@@ -20,7 +20,7 @@ and Android.
 
 <img src="https://user-images.githubusercontent.com/919717/28131204-0f8c3cda-66ee-11e7-9428-6a0513eac75d.gif" alt="Make a change in your code, and your app is changed instantly.">
 
-## Expressive, beautiful UIs
+## Expressive, Beautiful UIs
 
 Delight your users with Flutter's built-in
 beautiful Material Design and
