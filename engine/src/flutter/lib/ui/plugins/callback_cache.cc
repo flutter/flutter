@@ -1,6 +1,7 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// FLUTTER_NOLINT
 
 #include <fstream>
 #include <iterator>
@@ -129,7 +130,7 @@ void DartCallbackCache::LoadCacheFromDisk() {
   Document d;
   d.Parse(cache_contents.c_str());
   if (d.HasParseError() || !d.IsArray()) {
-    FML_LOG(WARNING) << "Could not parse callback cache, aborting restore";
+    FML_LOG(INFO) << "Could not parse callback cache, aborting restore";
     // TODO(bkonyi): log and bail (delete cache?)
     return;
   }
