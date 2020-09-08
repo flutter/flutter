@@ -2299,7 +2299,7 @@ abstract class BuildContext {
   /// [InheritedWidget] subclasses that supports partial updates, like
   /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({ Object aspect });
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({ Object? aspect });
 
   /// Obtains the element corresponding to the nearest widget of the given type,
   /// which must be the type of a concrete [InheritedWidget] subclass.
