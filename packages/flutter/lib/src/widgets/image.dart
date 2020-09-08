@@ -1080,7 +1080,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   bool _isListeningToStream = false;
   late bool _invertColors;
   int? _frameNumber;
-  bool? _wasSynchronouslyLoaded;
+  bool _wasSynchronouslyLoaded = false;
   late DisposableBuildContext<State<Image>> _scrollAwareContext;
   Object? _lastException;
   StackTrace? _lastStack;
@@ -1185,7 +1185,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageInfo = imageInfo;
       _loadingProgress = null;
       _frameNumber = _frameNumber == null ? 0 : _frameNumber! + 1;
-      _wasSynchronouslyLoaded = _wasSynchronouslyLoaded! | synchronousCall;
+      _wasSynchronouslyLoaded = _wasSynchronouslyLoaded | synchronousCall;
     });
   }
 
@@ -1269,7 +1269,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     }
 
     if (widget.frameBuilder != null)
-      result = widget.frameBuilder!(context, result, _frameNumber, _wasSynchronouslyLoaded!);
+      result = widget.frameBuilder!(context, result, _frameNumber, _wasSynchronouslyLoaded);
 
     if (widget.loadingBuilder != null)
       result = widget.loadingBuilder!(context, result, _loadingProgress);
