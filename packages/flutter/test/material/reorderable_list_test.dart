@@ -273,6 +273,7 @@ void main() {
           );
         }
 
+        // The key should not be changed when the widget is rebuilt.
         await tester.pumpWidget(build());
         final Element e0 = tester.element(find.byKey(firstBox));
         await tester.pumpWidget(build());
@@ -818,6 +819,7 @@ void main() {
           );
         }
 
+        // The key should not be changed when the widget is rebuilt.
         await tester.pumpWidget(build());
         final Element e0 = tester.element(find.byKey(firstBox));
         await tester.pumpWidget(build());
