@@ -7,6 +7,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+import '../../widgets.dart';
+import 'theme.dart';
 import 'typography.dart';
 
 /// Material design text theme.
@@ -341,6 +343,17 @@ class TextTheme with Diagnosticable {
   )
   TextStyle get body1 => bodyText2;
 
+  /// Helper function for getting the [TextTheme] from the closest [Theme]
+  /// instance that encloses the given context.
+  ///
+  /// For more information see [Theme.of].
+  ///
+  /// See also:
+  ///
+  /// * [Theme.of]
+  static TextTheme of(BuildContext context, { bool shadowThemeOnly = false }) {
+    return Theme.of(context, shadowThemeOnly: shadowThemeOnly).textTheme;
+  }
 
   /// Creates a copy of this text theme but with the given fields replaced with
   /// the new values.

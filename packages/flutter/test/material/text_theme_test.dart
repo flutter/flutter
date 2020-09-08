@@ -208,4 +208,28 @@ void main() {
     expect(lerped.subtitle2, null);
     expect(lerped.overline, null);
   });
+
+  testWidgets('TextTheme retrieved from Theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          textTheme: const TextTheme(
+            headline1: TextStyle(color: Colors.red),
+          ),
+        ),
+        home: Scaffold(
+          body: Builder(builder: (BuildContext context) {
+            return Text(
+              'text',
+              style: TextTheme.of(context).headline1,
+            );
+          }),
+        ),
+      ),
+    );
+
+    expect(
+        Theme.of(tester.element(find.text('text'))).textTheme.headline1.color,
+        equals(Colors.red));
+  });
 }
