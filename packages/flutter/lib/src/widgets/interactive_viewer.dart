@@ -660,7 +660,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       _viewport.width / _boundaryRect.width,
       _viewport.height / _boundaryRect.height,
     );
-    if (clampedTotalScale < minScale) {
+    if (minScale > widget.minScale && minScale < widget.maxScale
+        && clampedTotalScale < minScale) {
       final double minCurrentScale = minScale / currentScale;
       return matrix.clone()..scale(minCurrentScale);
     }
