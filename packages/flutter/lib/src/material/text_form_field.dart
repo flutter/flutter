@@ -88,7 +88,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///         },
 ///         child: FocusTraversalGroup(
 ///           child: Form(
-///             autovalidate: true,
+///             autovalidateMode: AutovalidateMode.always,
 ///             onChanged: () {
 ///               Form.of(primaryFocus.context).save();
 ///             },
@@ -158,6 +158,11 @@ class TextFormField extends FormField<String> {
     SmartDashesType smartDashesType,
     SmartQuotesType smartQuotesType,
     bool enableSuggestions = true,
+    @Deprecated(
+      'Use autoValidateMode parameter which provide more specific '
+      'behaviour related to auto validation. '
+      'This feature was deprecated after v1.19.0.'
+    )
     bool autovalidate = false,
     bool maxLengthEnforced = true,
     int maxLines = 1,
