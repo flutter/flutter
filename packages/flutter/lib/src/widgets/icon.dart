@@ -152,7 +152,7 @@ class Icon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(this.textDirection != null || debugCheckHasDirectionality(context));
-    final TextDirection? textDirection = this.textDirection ?? Directionality.of(context);
+    final TextDirection textDirection = this.textDirection ?? Directionality.of(context)!;
 
     final IconThemeData iconTheme = IconTheme.of(context);
 
@@ -165,7 +165,7 @@ class Icon extends StatelessWidget {
       );
     }
 
-    final double iconOpacity = iconTheme.opacity!;
+    final double iconOpacity = iconTheme.opacity ?? 1.0;
     Color iconColor = color ?? iconTheme.color!;
     if (iconOpacity != 1.0)
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
@@ -196,8 +196,6 @@ class Icon extends StatelessWidget {
           );
           break;
         case TextDirection.ltr:
-          break;
-        case null:
           break;
       }
     }
