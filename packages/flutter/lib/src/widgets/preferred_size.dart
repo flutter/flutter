@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -43,9 +45,9 @@ abstract class PreferredSizeWidget implements Widget {
 class PreferredSize extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a widget that has a preferred size.
   const PreferredSize({
-    Key? key,
-    required this.child,
-    required this.preferredSize,
+    Key key,
+    @required this.child,
+    @required this.preferredSize,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
