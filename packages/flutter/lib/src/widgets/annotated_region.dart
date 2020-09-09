@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -13,7 +15,7 @@ import 'framework.dart';
 ///
 ///  * [Layer.find], for an example of how this value is retrieved.
 ///  * [AnnotatedRegionLayer], the layer pushed into the layer tree.
-class AnnotatedRegion<T extends Object> extends SingleChildRenderObjectWidget {
+class AnnotatedRegion<T> extends SingleChildRenderObjectWidget {
   /// Creates a new annotated region to insert [value] into the layer tree.
   ///
   /// Neither [child] nor [value] may be null.
@@ -21,9 +23,9 @@ class AnnotatedRegion<T extends Object> extends SingleChildRenderObjectWidget {
   /// [sized] defaults to true and controls whether the annotated region will
   /// clip its child.
   const AnnotatedRegion({
-    Key? key,
-    required Widget child,
-    required this.value,
+    Key key,
+    @required Widget child,
+    @required this.value,
     this.sized = true,
   }) : assert(value != null),
        assert(child != null),
