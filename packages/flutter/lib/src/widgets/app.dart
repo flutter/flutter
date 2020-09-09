@@ -528,11 +528,13 @@ class WidgetsApp extends StatefulWidget {
   /// Defaults to [Window.defaultRouteName], which may be overridden by the code
   /// that launched the application.
   ///
-  /// If the route name starts with a slash and has multiple slashes in it, then
-  /// it is treated as a "deep link", and before this route is pushed, the
-  /// routes leading to this one are pushed also. For example, if the route was
-  /// `/a/b/c`, then the app would start with the three routes `/a`, `/a/b`, and
-  /// `/a/b/c` loaded, in that order.
+  /// If the route name starts with a slash, then it is treated as a "deep link",
+  /// and before this route is pushed, the routes leading to this one are pushed
+  /// also. For example, if the route was `/a/b/c`, then the app would start
+  /// with the four routes `/`, `/a`, `/a/b`, and `/a/b/c` loaded, in that order.
+  /// Even if the route was just `/a`, the app would start with `/` and `/a`
+  /// loaded. You can use the [onGenerateInitialRoutes] property to override
+  /// this behavior.
   ///
   /// Intermediate routes aren't required to exist. In the example above, `/a`
   /// and `/a/b` could be skipped if they have no matching route. But `/a/b/c` is
