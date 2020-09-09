@@ -839,7 +839,7 @@ class TextStyle with Diagnosticable {
       fontFamily: fontFamily ?? this.fontFamily,
       fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize! * fontSizeFactor + fontSizeDelta,
-      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1) as int], // ignore: unnecessary_cast
+      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)],
       fontStyle: fontStyle ?? this.fontStyle,
       letterSpacing: letterSpacing == null ? null : letterSpacing! * letterSpacingFactor + letterSpacingDelta,
       wordSpacing: wordSpacing == null ? null : wordSpacing! * wordSpacingFactor + wordSpacingDelta,

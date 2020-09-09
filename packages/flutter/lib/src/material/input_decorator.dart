@@ -2765,10 +2765,10 @@ class InputDecoration {
   ///
   /// If `isOutline` property of [border] is false and if [filled] is true then
   /// `contentPadding` is `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense]
-  /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false`.
+  /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false.
   /// If `isOutline` property of [border] is false and if [filled] is false then
   /// `contentPadding` is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
-  /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false`.
+  /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false.
   ///
   /// If `isOutline` property of [border] is true then `contentPadding` is
   /// `EdgeInsets.fromLTRB(12, 20, 12, 12)` when [isDense] is true

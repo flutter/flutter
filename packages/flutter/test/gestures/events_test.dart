@@ -38,6 +38,26 @@ void main() {
     expect(isSingleButton(0x220), isFalse);
   });
 
+  test('computed hit slop values are based on pointer device kind', () {
+    expect(computeHitSlop(PointerDeviceKind.mouse), kPrecisePointerHitSlop);
+    expect(computeHitSlop(PointerDeviceKind.stylus), kPrecisePointerHitSlop);
+    expect(computeHitSlop(PointerDeviceKind.invertedStylus), kPrecisePointerHitSlop);
+    expect(computeHitSlop(PointerDeviceKind.touch), kTouchSlop);
+    expect(computeHitSlop(PointerDeviceKind.unknown), kTouchSlop);
+
+    expect(computePanSlop(PointerDeviceKind.mouse), kPrecisePointerPanSlop);
+    expect(computePanSlop(PointerDeviceKind.stylus), kPrecisePointerPanSlop);
+    expect(computePanSlop(PointerDeviceKind.invertedStylus), kPrecisePointerPanSlop);
+    expect(computePanSlop(PointerDeviceKind.touch), kPanSlop);
+    expect(computePanSlop(PointerDeviceKind.unknown), kPanSlop);
+
+    expect(computeScaleSlop(PointerDeviceKind.mouse), kPrecisePointerScaleSlop);
+    expect(computeScaleSlop(PointerDeviceKind.stylus), kPrecisePointerScaleSlop);
+    expect(computeScaleSlop(PointerDeviceKind.invertedStylus), kPrecisePointerScaleSlop);
+    expect(computeScaleSlop(PointerDeviceKind.touch), kScaleSlop);
+    expect(computeScaleSlop(PointerDeviceKind.unknown), kScaleSlop);
+  });
+
   group('fromMouseEvent', () {
     const PointerEvent hover = PointerHoverEvent(
       timeStamp: Duration(days: 1),

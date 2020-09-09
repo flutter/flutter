@@ -274,13 +274,13 @@ void main() {
     // rendering widths in tests.
     // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(boxes[0].toRect().width, anyOf(14.0, 13.0));
-    expect(boxes[0].toRect().height, closeTo(13.0, 0.0001));
+    expect(boxes[0].toRect().height, moreOrLessEquals(13.0, epsilon: 0.0001));
     expect(boxes[1].toRect().width, anyOf(27.0, 26.0));
-    expect(boxes[1].toRect().height, closeTo(26.0, 0.0001));
+    expect(boxes[1].toRect().height, moreOrLessEquals(26.0, epsilon: 0.0001));
     expect(boxes[2].toRect().width, anyOf(27.0, 26.0));
-    expect(boxes[2].toRect().height, closeTo(26.0, 0.0001));
+    expect(boxes[2].toRect().height, moreOrLessEquals(26.0, epsilon: 0.0001));
     expect(boxes[3].toRect().width, anyOf(14.0, 13.0));
-    expect(boxes[3].toRect().height, closeTo(13.0, 0.0001));
+    expect(boxes[3].toRect().height, moreOrLessEquals(13.0, epsilon: 0.0001));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
 
   test('toStringDeep', () {
