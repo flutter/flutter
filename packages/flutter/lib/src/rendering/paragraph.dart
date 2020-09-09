@@ -747,10 +747,10 @@ class RenderParagraph extends RenderBox
   /// {@macro flutter.painting.textPainter.getFullHeightForCaret}
   ///
   /// Valid only after [layout].
-  double? getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
+  double? getFullHeightForCaret(TextPosition position) {
     assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
-    return _textPainter.getFullHeightForCaret(position, caretPrototype);
+    return _textPainter.getFullHeightForCaret(position, Rect.zero);
   }
 
   /// Returns a list of rects that bound the given selection.

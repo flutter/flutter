@@ -43,9 +43,7 @@ void main() {
     );
     layout(paragraph);
 
-    const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
-
-    final double height5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5), caret);
+    final double height5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5));
     expect(height5, equals(10.0));
   });
 
