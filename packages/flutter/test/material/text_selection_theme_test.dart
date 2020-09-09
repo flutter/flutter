@@ -72,7 +72,7 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
     expect(renderEditable.cursorColor, primaryColor.withAlpha(0));
-    expect(Color(renderEditable.selectionColor.value), primaryColor.withOpacity(0.12));
+    expect(Color(renderEditable.selectionColor.value), primaryColor.withOpacity(0.40));
 
     // Test the selection handle color.
     await tester.pumpWidget(
