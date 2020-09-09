@@ -1189,7 +1189,7 @@ void main() {
   });
 
   testWidgets(
-      'Modify the reading position of the text in CupertinoNavigationBar',
+      'Leading positon of the text in CupertinoNavigationBar should be centered vertically',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
@@ -1203,6 +1203,7 @@ void main() {
       ),
     );
 
+    // 44 is the standard height of the nav bar.
     expect(tester.getCenter(find.text('lead')).dy, 22.0);
   });
 }
