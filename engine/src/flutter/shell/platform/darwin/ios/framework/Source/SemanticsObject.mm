@@ -453,7 +453,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 - (void)accessibilityElementDidBecomeFocused {
   if (![self isAccessibilityBridgeAlive])
     return;
-  [self bridge]->AccessibilityFocusDidChange([self uid]);
+  [self bridge]->AccessibilityObjectDidBecomeFocused([self uid]);
   if ([self node].HasFlag(flutter::SemanticsFlags::kIsHidden) ||
       [self node].HasFlag(flutter::SemanticsFlags::kIsHeader)) {
     [self bridge]->DispatchSemanticsAction([self uid], flutter::SemanticsAction::kShowOnScreen);
@@ -467,6 +467,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 - (void)accessibilityElementDidLoseFocus {
   if (![self isAccessibilityBridgeAlive])
     return;
+  [self bridge]->AccessibilityObjectDidLoseFocus([self uid]);
   if ([self node].HasAction(flutter::SemanticsAction::kDidLoseAccessibilityFocus)) {
     [self bridge]->DispatchSemanticsAction([self uid],
                                            flutter::SemanticsAction::kDidLoseAccessibilityFocus);
