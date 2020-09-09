@@ -14,7 +14,7 @@ void main() {
     );
     final List<String> stdoutLines = process.stdout.toString().split('\n');
     final List<String> stderrLines = process.stderr.toString().split('\n')
-      ..removeWhere((String line) => line.startsWith('Analyzer output:'));
+      ..removeWhere((String line) => line.startsWith('Analyzer output:') || line.startsWith('Building flutter tool...'));
     expect(process.exitCode, isNot(equals(0)));
     expect(stderrLines, <String>[
       'known_broken_documentation.dart:30:9: new Opacity(',
