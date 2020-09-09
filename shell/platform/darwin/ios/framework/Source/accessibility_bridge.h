@@ -61,7 +61,8 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   void DispatchSemanticsAction(int32_t id,
                                flutter::SemanticsAction action,
                                std::vector<uint8_t> args) override;
-  void AccessibilityFocusDidChange(int32_t id) override;
+  void AccessibilityObjectDidBecomeFocused(int32_t id) override;
+  void AccessibilityObjectDidLoseFocus(int32_t id) override;
 
   UIView<UITextInput>* textInputView() override;
 
@@ -85,6 +86,9 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   FlutterViewController* view_controller_;
   PlatformViewIOS* platform_view_;
   FlutterPlatformViewsController* platform_views_controller_;
+  // If the this id is kSemanticObjectIdInvalid, it means either nothing has
+  // been focused or the focus is currently outside of the flutter application
+  // (i.e. the status bar or keyboard)
   int32_t last_focused_semantics_object_id_;
   fml::scoped_nsobject<NSMutableDictionary<NSNumber*, SemanticsObject*>> objects_;
   fml::scoped_nsprotocol<FlutterBasicMessageChannel*> accessibility_channel_;

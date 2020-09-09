@@ -450,7 +450,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
 
   XCTAssertEqual([accessibility_notifications count], 0ul);
   // Simulates the focusing on the node 1.
-  bridge->AccessibilityFocusDidChange(1);
+  bridge->AccessibilityObjectDidBecomeFocused(1);
 
   flutter::SemanticsNodeUpdates second_update;
   // Simulates the removal of the node 1
@@ -520,7 +520,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
 
   XCTAssertEqual([accessibility_notifications count], 0ul);
   // Simulates the focusing on the node 1.
-  bridge->AccessibilityFocusDidChange(1);
+  bridge->AccessibilityObjectDidBecomeFocused(1);
 
   flutter::SemanticsNodeUpdates second_update;
   // Simulates the removal of the node 2.
@@ -535,6 +535,80 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   // Since we have focused on the node 1 right before the layout changed, the bridge should refocus
   // the node 1.
   XCTAssertEqual([focusObject uid], 1);
+  XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
+                 UIAccessibilityLayoutChangedNotification);
+}
+
+- (void)testAnnouncesLayoutChangeWhenFocusMovedOutside {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*task_runners=*/runners);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+
+  NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
+      [[[NSMutableArray alloc] init] autorelease];
+  auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
+  ios_delegate->on_PostAccessibilityNotification_ =
+      [accessibility_notifications](UIAccessibilityNotifications notification, id argument) {
+        [accessibility_notifications addObject:@{
+          @"notification" : @(notification),
+          @"argument" : argument ? argument : [NSNull null],
+        }];
+      };
+  __block auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil,
+                                                     /*ios_delegate=*/std::move(ios_delegate));
+
+  flutter::CustomAccessibilityActionUpdates actions;
+  flutter::SemanticsNodeUpdates first_update;
+
+  flutter::SemanticsNode node_one;
+  node_one.id = 1;
+  node_one.label = "route1";
+  first_update[node_one.id] = node_one;
+  flutter::SemanticsNode node_two;
+  node_two.id = 2;
+  node_two.label = "route2";
+  first_update[node_two.id] = node_two;
+  flutter::SemanticsNode root_node;
+  root_node.id = kRootNodeId;
+  root_node.label = "root";
+  root_node.childrenInTraversalOrder = {1, 2};
+  root_node.childrenInHitTestOrder = {1, 2};
+  first_update[root_node.id] = root_node;
+  bridge->UpdateSemantics(/*nodes=*/first_update, /*actions=*/actions);
+
+  XCTAssertEqual([accessibility_notifications count], 0ul);
+  // Simulates the focusing on the node 1.
+  bridge->AccessibilityObjectDidBecomeFocused(1);
+  // Simulates that the focus move outside of flutter.
+  bridge->AccessibilityObjectDidLoseFocus(1);
+
+  flutter::SemanticsNodeUpdates second_update;
+  // Simulates the removal of the node 2.
+  flutter::SemanticsNode new_root_node;
+  new_root_node.id = kRootNodeId;
+  new_root_node.label = "root";
+  new_root_node.childrenInTraversalOrder = {1};
+  new_root_node.childrenInHitTestOrder = {1};
+  second_update[root_node.id] = new_root_node;
+  bridge->UpdateSemantics(/*nodes=*/second_update, /*actions=*/actions);
+  NSNull* focusObject = accessibility_notifications[0][@"argument"];
+  // Since the focus is moved outside of the app right before the layout
+  // changed, the bridge should not try to refocus anything .
+  XCTAssertEqual(focusObject, [NSNull null]);
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
                  UIAccessibilityLayoutChangedNotification);
 }
@@ -591,7 +665,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   [accessibility_notifications removeAllObjects];
 
   // Simulates the focusing on the node 1.
-  bridge->AccessibilityFocusDidChange(1);
+  bridge->AccessibilityObjectDidBecomeFocused(1);
 
   flutter::SemanticsNodeUpdates second_update;
   // Simulates the scrolling on the node 1.
