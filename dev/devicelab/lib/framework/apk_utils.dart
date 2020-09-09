@@ -427,6 +427,7 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
     args,
     workingDirectory: workingDirectory,
     environment: <String, String>{'JAVA_HOME': javaHome, 'GRADLE_EXIT_CONSOLE': '1'},
+    runInShell: true,
   );
 }
 
