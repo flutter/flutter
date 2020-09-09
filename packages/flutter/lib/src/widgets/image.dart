@@ -1196,6 +1196,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     assert(widget.loadingBuilder != null);
     setState(() {
       _loadingProgress = event;
+      _lastStack = null;
+      _lastException = null;
     });
   }
 
