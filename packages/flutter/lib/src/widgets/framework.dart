@@ -1679,6 +1679,8 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 /// ```
 /// {@end-tool}
 ///
+/// ## Implementing the `of` method
+///
 /// The convention is to provide a static method `of` on the [InheritedWidget]
 /// which does the call to [BuildContext.dependOnInheritedWidgetOfExactType]. This
 /// allows the class to define its own fallback logic in case there isn't
@@ -1696,6 +1698,61 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 /// for that inherited widget using [BuildContext.dependOnInheritedWidgetOfExactType]
 /// and then returns the [ThemeData].
 ///
+/// ## Calling the `of` method
+///
+/// When using the `of` method, the `context` must be a descendant of the
+/// [InheritedWidget], meaning it must be "below" the [InheritedWidget] in the
+/// tree.
+///
+/// {@tool snippet}
+///
+/// In this example, the `context` used is the one from the [Builder], which is
+/// a child of the FrogColor widget, so this works.
+///
+/// ```dart
+/// class MyPage extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       body: FrogColor(
+///         color: Colors.green,
+///         child: Builder(
+///           builder: (BuildContext innerContext) {
+///             return Text(
+///               'Hello Frog',
+///               style: TextStyle(color: FrogColor.of(innerContext).color),
+///             );
+///           },
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+///
+/// In this example, the `context` used is the one from the MyOtherPage widget,
+/// which is a parent of the FrogColor widget, so this does not work.
+///
+/// ```dart
+/// class MyOtherPage extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       body: FrogColor(
+///         color: Colors.green,
+///         child: Text(
+///           'Hello Frog',
+///           style: TextStyle(color: FrogColor.of(context).color),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
 /// {@youtube 560 315 https://www.youtube.com/watch?v=1t-8rBCGBYw}
 ///
 /// See also:
@@ -2027,33 +2084,52 @@ typedef ElementVisitor = void Function(Element element);
 /// widget can be used: the build context passed to the [Builder.builder]
 /// callback will be that of the [Builder] itself.
 ///
-/// For example, in the following snippet, the [ScaffoldState.showSnackBar]
+/// For example, in the following snippet, the [ScaffoldState.showBottomSheet]
 /// method is called on the [Scaffold] widget that the build method itself
 /// creates. If a [Builder] had not been used, and instead the `context`
 /// argument of the build method itself had been used, no [Scaffold] would have
 /// been found, and the [Scaffold.of] function would have returned null.
 ///
 /// ```dart
-///   @override
-///   Widget build(BuildContext context) {
-///     // here, Scaffold.of(context) returns null
-///     return Scaffold(
-///       appBar: AppBar(title: Text('Demo')),
-///       body: Builder(
-///         builder: (BuildContext context) {
-///           return TextButton(
-///             child: Text('BUTTON'),
-///             onPressed: () {
-///               // here, Scaffold.of(context) returns the locally created Scaffold
-///               Scaffold.of(context).showSnackBar(SnackBar(
-///                 content: Text('Hello.')
-///               ));
-///             }
-///           );
-///         }
-///       )
-///     );
-///   }
+/// @override
+/// Widget build(BuildContext context) {
+///   // here, Scaffold.of(context) returns null
+///   return Scaffold(
+///     appBar: AppBar(title: Text('Demo')),
+///     body: Builder(
+///       builder: (BuildContext context) {
+///         return TextButton(
+///           child: Text('BUTTON'),
+///           onPressed: () {
+///             Scaffold.of(context).showBottomSheet<void>(
+///               (BuildContext context) {
+///                 return Container(
+///                   alignment: Alignment.center,
+///                   height: 200,
+///                   color: Colors.amber,
+///                   child: Center(
+///                     child: Column(
+///                       mainAxisSize: MainAxisSize.min,
+///                       children: <Widget>[
+///                         const Text('BottomSheet'),
+///                         ElevatedButton(
+///                           child: const Text('Close BottomSheet'),
+///                           onPressed: () {
+///                             Navigator.pop(context),
+///                           },
+///                         )
+///                       ],
+///                     ),
+///                   ),
+///                 );
+///               },
+///             );
+///           },
+///         );
+///       },
+///     )
+///   );
+/// }
 /// ```
 ///
 /// The [BuildContext] for a particular widget can change location over time as
