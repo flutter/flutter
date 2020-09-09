@@ -22,13 +22,13 @@ function retry_upgrade {
   local remaining_tries=$((total_tries - 1))
   while [[ "$remaining_tries" -gt 0 ]]; do
     (cd "$FLUTTER_TOOLS_DIR" && "$PUB" upgrade "$VERBOSITY" --no-precompile) && break
-    echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)"
+    >&2 echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)"
     remaining_tries=$((remaining_tries - 1))
     sleep 5
   done
 
   if [[ "$remaining_tries" == 0 ]]; then
-    echo "Command 'pub upgrade' still failed after $total_tries tries, giving up."
+    >&2 echo "Command 'pub upgrade' still failed after $total_tries tries, giving up."
     return 1
   fi
   return 0
@@ -94,14 +94,14 @@ function _wait_for_lock () {
       # Print with a return so that if the Dart code also prints this message
       # when it does its own lock, the message won't appear twice. Be sure that
       # the clearing printf below has the same number of space characters.
-      printf "Waiting for another flutter command to release the startup lock...\r";
+      printf "Waiting for another flutter command to release the startup lock...\r" >&2;
       waiting_message_displayed="true"
     fi
     sleep .1;
   done
   if [[ $waiting_message_displayed == "true" ]]; then
     # Clear the waiting message so it doesn't overlap any following text.
-    printf "                                                                  \r";
+    printf "                                                                  \r" >&2;
   fi
   unset waiting_message_displayed
   # If the lock file is acquired, make sure that it is removed on exit.
@@ -138,7 +138,7 @@ function upgrade_flutter () (
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
     VERBOSITY="--verbosity=error"
 
-    echo Building flutter tool...
+    >&2 echo Building flutter tool...
     if [[ "$CI" == "true" || "$BOT" == "true" || "$CONTINUOUS_INTEGRATION" == "true" || "$CHROME_HEADLESS" == "1" ]]; then
       PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_bot"
       VERBOSITY="--verbosity=normal"
@@ -186,24 +186,24 @@ function shared::execute() {
 
   # Test if running as superuser – but don't warn if running within Docker
   if [[ "$EUID" == "0" && ! -f /.dockerenv ]]; then
-    echo "   Woah! You appear to be trying to run flutter as root."
-    echo "   We strongly recommend running the flutter tool without superuser privileges."
-    echo "  /"
-    echo "📎"
+    >&2 echo "   Woah! You appear to be trying to run flutter as root."
+    >&2 echo "   We strongly recommend running the flutter tool without superuser privileges."
+    >&2 echo "  /"
+    >&2 echo "📎"
   fi
 
   # Test if Git is available on the Host
   if ! hash git 2>/dev/null; then
-    echo "Error: Unable to find git in your PATH."
+    >&2 echo "Error: Unable to find git in your PATH."
     exit 1
   fi
   # Test if the flutter directory is a git clone (otherwise git rev-parse HEAD
   # would fail)
   if [[ ! -e "$FLUTTER_ROOT/.git" ]]; then
-    echo "Error: The Flutter directory is not a clone of the GitHub project."
-    echo "       The flutter tool requires Git in order to operate properly;"
-    echo "       to install Flutter, see the instructions at:"
-    echo "       https://flutter.dev/get-started"
+    >&2 echo "Error: The Flutter directory is not a clone of the GitHub project."
+    >&2 echo "       The flutter tool requires Git in order to operate properly;"
+    >&2 echo "       to install Flutter, see the instructions at:"
+    >&2 echo "       https://flutter.dev/get-started"
     exit 1
   fi
 
@@ -225,7 +225,7 @@ function shared::execute() {
       "$DART" "$@"
       ;;
     *)
-      echo "Error! Executable name $BIN_NAME not recognized!"
+      >&2 echo "Error! Executable name $BIN_NAME not recognized!"
       exit 1
       ;;
   esac
