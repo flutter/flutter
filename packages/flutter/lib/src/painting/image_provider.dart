@@ -386,7 +386,7 @@ abstract class ImageProvider<T extends Object> {
     _createErrorHandlerAndKey(
       configuration,
       (T key, ImageErrorListener innerHandleError) {
-        completer.complete(PaintingBinding.instance!.imageCache!.statusForKey(key));
+        completer.complete(PaintingBinding.instance.imageCache!.statusForKey(key));
       },
       (T? key, dynamic exception, StackTrace? stack) async {
         if (handleError != null) {
@@ -491,7 +491,7 @@ abstract class ImageProvider<T extends Object> {
     // the image we want before getting to this method. We should avoid calling
     // load again, but still update the image cache with LRU information.
     if (stream.completer != null) {
-      final ImageStreamCompleter? completer = PaintingBinding.instance!.imageCache!.putIfAbsent(
+      final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache!.putIfAbsent(
         key,
         () => stream.completer!,
         onError: handleError,
@@ -499,9 +499,9 @@ abstract class ImageProvider<T extends Object> {
       assert(identical(completer, stream.completer));
       return;
     }
-    final ImageStreamCompleter? completer = PaintingBinding.instance!.imageCache!.putIfAbsent(
+    final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache!.putIfAbsent(
       key,
-      () => load(key, PaintingBinding.instance!.instantiateImageCodec),
+      () => load(key, PaintingBinding.instance.instantiateImageCodec),
       onError: handleError,
     );
     if (completer != null) {
@@ -667,14 +667,14 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
     try {
       data = await key.bundle.load(key.name);
     } on FlutterError {
-      PaintingBinding.instance!.imageCache!.evict(key);
+      PaintingBinding.instance.imageCache!.evict(key);
       rethrow;
     }
     // `key.bundle.load` has a non-nullable return type, but might be null when
     // running with weak checking, so we need to null check it anyway (and
     // ignore the warning that the null-handling logic is dead code).
     if (data == null) { // ignore: dead_code
-      PaintingBinding.instance!.imageCache!.evict(key);
+      PaintingBinding.instance.imageCache!.evict(key);
       throw StateError('Unable to read data');
     }
     return await decode(data.buffer.asUint8List());
@@ -884,7 +884,7 @@ class FileImage extends ImageProvider<FileImage> {
 
     if (bytes.lengthInBytes == 0) {
       // The file may become available later.
-      PaintingBinding.instance!.imageCache!.evict(key);
+      PaintingBinding.instance.imageCache!.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
 

@@ -80,14 +80,14 @@ class _TapTracker {
   void startTrackingPointer(PointerRoute route, Matrix4? transform) {
     if (!_isTrackingPointer) {
       _isTrackingPointer = true;
-      GestureBinding.instance!.pointerRouter.addRoute(pointer, route, transform);
+      GestureBinding.instance.pointerRouter.addRoute(pointer, route, transform);
     }
   }
 
   void stopTrackingPointer(PointerRoute route) {
     if (_isTrackingPointer) {
       _isTrackingPointer = false;
-      GestureBinding.instance!.pointerRouter.removeRoute(pointer, route);
+      GestureBinding.instance.pointerRouter.removeRoute(pointer, route);
     }
   }
 
@@ -234,7 +234,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     _stopDoubleTapTimer();
     final _TapTracker tracker = _TapTracker(
       event: event,
-      entry: GestureBinding.instance!.gestureArena.add(event.pointer, this),
+      entry: GestureBinding.instance.gestureArena.add(event.pointer, this),
       doubleTapMinTime: kDoubleTapMinTime,
     );
     _trackers[event.pointer] = tracker;
@@ -303,14 +303,14 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
       final _TapTracker tracker = _firstTap!;
       _firstTap = null;
       _reject(tracker);
-      GestureBinding.instance!.gestureArena.release(tracker.pointer);
+      GestureBinding.instance.gestureArena.release(tracker.pointer);
     }
     _clearTrackers();
   }
 
   void _registerFirstTap(_TapTracker tracker) {
     _startDoubleTapTimer();
-    GestureBinding.instance!.gestureArena.hold(tracker.pointer);
+    GestureBinding.instance.gestureArena.hold(tracker.pointer);
     // Note, order is important below in order for the clear -> reject logic to
     // work properly.
     _freezeTracker(tracker);
@@ -375,7 +375,7 @@ class _TapGesture extends _TapTracker {
   }) : _lastPosition = OffsetPair.fromEventPosition(event),
        super(
     event: event as PointerDownEvent,
-    entry: GestureBinding.instance!.gestureArena.add(event.pointer, gestureRecognizer),
+    entry: GestureBinding.instance.gestureArena.add(event.pointer, gestureRecognizer),
     doubleTapMinTime: kDoubleTapMinTime,
   ) {
     startTrackingPointer(handleEvent, event.transform);

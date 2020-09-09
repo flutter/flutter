@@ -27,7 +27,7 @@ set timeDilation(double value) {
     return;
   // We need to resetEpoch first so that we capture start of the epoch with the
   // current time dilation.
-  SchedulerBinding.instance?.resetEpoch();
+  SchedulerBinding.instance.resetEpoch();
   _timeDilation = value;
 }
 
@@ -212,6 +212,14 @@ mixin SchedulerBinding on BindingBase {
     }
   }
 
+  /// The current [SchedulerBinding], if one has been created.
+  ///
+  /// Provides access to the features exposed by this mixin. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
+  static SchedulerBinding get instance => BindingBase.checkInstance(_instance);
+  static SchedulerBinding? _instance;
+
   final List<TimingsCallback> _timingsCallbacks = <TimingsCallback>[];
 
   /// Add a [TimingsCallback] that receives [FrameTiming] sent from
@@ -309,10 +317,6 @@ mixin SchedulerBinding on BindingBase {
       }
     }
   }
-
-  /// The current [SchedulerBinding], if one has been created.
-  static SchedulerBinding? get instance => _instance;
-  static SchedulerBinding? _instance;
 
   @override
   void initServiceExtensions() {

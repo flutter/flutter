@@ -22,7 +22,7 @@ import 'binding.dart';
 /// [PaintingBinding.instantiateImageCodec], and therefore can be mocked in
 /// tests.
 Future<ui.Image> decodeImageFromList(Uint8List bytes) async {
-  final ui.Codec codec = await PaintingBinding.instance!.instantiateImageCodec(bytes);
+  final ui.Codec codec = await PaintingBinding.instance.instantiateImageCodec(bytes);
   final ui.FrameInfo frameInfo = await codec.getNextFrame();
   return frameInfo.image;
 }

@@ -195,7 +195,7 @@ class RestorationManager extends ChangeNotifier {
 
     _isReplacing = _rootBucketIsValid && enabled;
     if (_isReplacing) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _isReplacing = false;
       });
     }
@@ -281,7 +281,7 @@ class RestorationManager extends ChangeNotifier {
     _bucketsNeedingSerialization.add(bucket);
     if (!_serializationScheduled) {
       _serializationScheduled = true;
-      SchedulerBinding.instance!.addPostFrameCallback((Duration _) => _doSerialization());
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _doSerialization());
     }
   }
 
@@ -344,7 +344,7 @@ class RestorationManager extends ChangeNotifier {
   /// current restoration data is directly sent to the engine.
   void flushData() {
     assert(!_debugDoingUpdate);
-    if (SchedulerBinding.instance!.hasScheduledFrame) {
+    if (SchedulerBinding.instance.hasScheduledFrame) {
       return;
     }
     _doSerialization();

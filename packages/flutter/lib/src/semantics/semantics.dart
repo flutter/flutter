@@ -2627,7 +2627,7 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    final ui.SemanticsUpdateBuilder builder = SemanticsBinding.instance!.createSemanticsUpdateBuilder();
+    final ui.SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
     for (final SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
@@ -2648,7 +2648,7 @@ class SemanticsOwner extends ChangeNotifier {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId)!;
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
-    SemanticsBinding.instance!.window.updateSemantics(builder.build());
+    SemanticsBinding.instance.window.updateSemantics(builder.build());
     notifyListeners();
   }
 

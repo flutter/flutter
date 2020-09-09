@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -36,7 +35,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   /// The current [ServicesBinding], if one has been created.
-  static ServicesBinding? get instance => _instance;
+  ///
+  /// Provides access to the features exposed by this mixin. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
+  static ServicesBinding get instance => BindingBase.checkInstance(_instance);
   static ServicesBinding? _instance;
 
   /// The default instance of [BinaryMessenger].
@@ -53,7 +56,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   BinaryMessenger createBinaryMessenger() {
     return const _DefaultBinaryMessenger._();
   }
-
 
   /// Called when the operating system notifies the application of a memory
   /// pressure situation.

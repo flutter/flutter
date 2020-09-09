@@ -14,16 +14,20 @@ export 'dart:ui' show AccessibilityFeatures;
 /// The glue between the semantics layer and the Flutter engine.
 // TODO(jonahwilliams): move the remaining semantic related bindings here.
 mixin SemanticsBinding on BindingBase {
-  /// The current [SemanticsBinding], if one has been created.
-  static SemanticsBinding? get instance => _instance;
-  static SemanticsBinding? _instance;
-
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
     _accessibilityFeatures = window.accessibilityFeatures;
   }
+
+  /// The current [SemanticsBinding], if one has been created.
+  ///
+  /// Provides access to the features exposed by this mixin. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
+  static SemanticsBinding get instance => BindingBase.checkInstance(_instance);
+  static SemanticsBinding? _instance;
 
   /// Called when the platform accessibility features change.
   ///

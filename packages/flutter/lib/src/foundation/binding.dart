@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show  Window, window, Brightness;
+import 'dart:ui' as ui show Window, window, Brightness;
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -15,9 +15,13 @@ import 'assertions.dart';
 import 'basic_types.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'diagnostics.dart';
 import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
+
+/// Examples can assume:
+/// class BarBinding extends BaseBinding { }
 
 /// Signature for service extensions.
 ///
@@ -28,21 +32,100 @@ import 'print.dart';
 /// "method" key will be set to the full name of the method.
 typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<String, String> parameters);
 
-/// Base class for mixins that provide singleton services (also known as
-/// "bindings").
+/// Base class for mixins that provide singleton services.
 ///
-/// To use this class in an `on` clause of a mixin, inherit from it and implement
-/// [initInstances()]. The mixin is guaranteed to only be constructed once in
-/// the lifetime of the app (more precisely, it will assert if constructed twice
-/// in checked mode).
+/// The Flutter engine ([dart:ui]) exposes some low-level services,
+/// but these are typically not suitable for direct use, for example
+/// because they only provide a single callback which an application
+/// may wish to multiplex to allow multiple listeners.
 ///
-/// The top-most layer used to write the application will have a concrete class
-/// that inherits from [BindingBase] and uses all the various [BindingBase]
-/// mixins (such as [ServicesBinding]). For example, the Widgets library in
-/// Flutter introduces a binding called [WidgetsFlutterBinding]. The relevant
-/// library defines how to create the binding. It could be implied (for example,
-/// [WidgetsFlutterBinding] is automatically started from [runApp]), or the
-/// application might be required to explicitly call the constructor.
+/// Bindings provide the glue between these low-level APIs and the
+/// higher-level framework APIs. They _bind_ the two together, whence
+/// the name.
+///
+/// ## Implementing a binding mixin
+///
+/// A library would typically create a new binding mixin to expose a
+/// feature in [dart:ui]. This is rare in general, but it is something
+/// that an alternative framework would do, e.g. if a framework were
+/// to replace the [widgets] library with an alternative API but still
+/// wished to leverage the [services] and [foundation] libraries.
+///
+/// To create a binding mixin, declare a mixin `on` the [BindingBase] class
+/// and whatever other bindings the concrete binding must implement for
+/// this binding mixin to be useful.
+///
+/// The mixin is guaranteed to only be constructed once in the
+/// lifetime of the app; this is handled by [initInstance].
+///
+/// A binding mixin must at a minimum implement the following features:
+///
+/// * The [initInstances] method, which must call `super.initInstances` and
+///   set an `_instance` static field to `this`.
+/// * An [instance] static getter, which must return that field using [checkInstance].
+///
+/// In addition, it should implement whatever singleton features the library needs.
+///
+/// As a general rule, the less can be placed in the binding, the
+/// better. Prefer having APIs that takes objects rather than having
+/// them refer to global singletons. Bindings are best limited to
+/// exposing features that literally only exist once, for example, the
+/// APIs in [dart:ui].
+///
+/// {@tool snippet}
+///
+/// Here is a basic example of a binding that implements these features. It relies on
+/// another fictional binding called `BarBinding`.
+///
+/// ```dart
+/// mixin FooBinding on BindingBase, BarBinding {
+///   @override
+///   void initInstances() {
+///     super.initInstances();
+///     _instance = this;
+///     // ...binding initialization...
+///   }
+///
+///   static FooBinding get instance => BindingBase.checkInstance(_instance);
+///   static FooBinding? _instance;
+///
+///   // ...binding features...
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ## Implementing a binding class
+///
+/// The top-most layer used to write the application (e.g. the Flutter
+/// [widgets] library) will have a concrete class that inherits from
+/// [BindingBase] and uses all the various [BindingBase] mixins (such
+/// as [ServicesBinding]). The [widgets] library in Flutter introduces
+/// a binding called [WidgetsFlutterBinding].
+///
+/// A binding _class_ should mix in the relevant bindings from each
+/// layer that it wishes to expose, and should have an
+/// `ensureInitialized` method that constructs the class if that
+/// layer's mixin's `_instance` field is null. This allows the binding
+/// to be overriden by developers who have more specific needs, while
+/// still allowing other code to call `ensureInitialized` when a binding
+/// is needed.
+///
+/// {@tool snippet}
+///
+/// A typical binding class is shown below. The `ensureInitialized` method's
+/// return type is the library's binding mixin, rather than the concrete
+/// class.
+///
+/// ```dart
+/// class FooLibraryBinding extends BindingBase with FooBinding, BarBinding {
+///   static FooBinding ensureInitialized() {
+///     if (FooBinding._instance == null)
+///       FooLibraryBinding();
+///     return FooBinding.instance;
+///   }
+/// }
+/// /// ```
+/// {@end-tool}
 abstract class BindingBase {
   /// Default abstract constructor for bindings.
   ///
@@ -91,10 +174,33 @@ abstract class BindingBase {
   /// the platform and otherwise configure their services. Subclasses must call
   /// "super.initInstances()".
   ///
-  /// By convention, if the service is to be provided as a singleton, it should
-  /// be exposed as `MixinClassName.instance`, a static getter that returns
+  /// {@tool snippet}
+  ///
+  /// By convention, if the service is to be provided as a singleton,
+  /// it should be exposed as `MixinClassName.instance`, a static
+  /// getter with a non-nullable return type that returns
   /// `MixinClassName._instance`, a static field that is set by
-  /// `initInstances()`.
+  /// `initInstances()`. To improve the developer experience, the
+  /// return value should actually be
+  /// `BindingBase.checkInstance(_instance)` (see [checkInstance]), as
+  /// in the example below.
+  ///
+  /// ```dart
+  /// mixin FooBinding on BindingBase {
+  ///   @override
+  ///   void initInstances() {
+  ///     super.initInstances();
+  ///     _instance = this;
+  ///     // ...binding initialization...
+  ///   }
+  ///
+  ///   static FooBinding get instance => BindingBase.checkInstance(_instance);
+  ///   static FooBinding? _instance;
+  ///
+  ///   // ...binding features...
+  /// }
+  /// ```
+  /// {@end-tool}
   @protected
   @mustCallSuper
   void initInstances() {
@@ -103,6 +209,72 @@ abstract class BindingBase {
       _debugInitialized = true;
       return true;
     }());
+  }
+
+  /// A method that shows a useful error message if the given binding
+  /// instance is not initialized.
+  ///
+  /// See [initInstances] for advice on using this method.
+  ///
+  /// This method either returns the argument or throws an exception.
+  /// In release mode it always returns the argument.
+  ///
+  /// The type argument `T` should be the kind of binding mixin (e.g.
+  /// `SchedulerBinding`) that is calling the method. It is used in
+  /// error messages.
+  @protected
+  static T checkInstance<T extends BindingBase>(T? instance) {
+    assert(() {
+      if (!_debugInitialized && instance == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Binding has not yet been initialized.'),
+          ErrorDescription('The "instance" getter on the $T binding mixin is only available once that binding has been initialized.'),
+          ErrorHint(
+            'Typically, this is done by calling "WidgetsFlutterBinding.ensureInitialized()" or "runApp()" (the '
+            'latter calls the former). Typically this call is done in the "void main()" method. The "ensureInitialized" method '
+            'is idempotent; calling it multiple times is not harmful. After calling that method, the "instance" getter will '
+            'return the binding.',
+          ),
+          ErrorHint(
+            'In a test, one can call "TestWidgetsFlutterBinding.ensureInitialized()" as the first line in the test\'s "main()" method '
+            'to initialize the binding.',
+          ),
+          ErrorHint(
+            'If $T is a custom binding mixin, there must also be a custom binding class, like WidgetsFlutterBinding, '
+            'but that mixes in the selected binding, and that is the class that must be constructed before using the "instance" getter.',
+          ),
+        ]);
+      }
+      if (!_debugInitialized) {
+        assert(instance != null);
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Binding initialized without calling initInstances.'),
+          ErrorDescription('An instance of $T is non-null, but BindingBase.initInstances() has not yet been called.'),
+          ErrorHint(
+            'This could happen because a binding mixin was somehow used outside of the normal binding mechanisms, or because '
+            'the binding\'s initInstances() method did not call "super.initInstances()".'
+          ),
+        ]);
+      }
+      if (instance == null) {
+        assert(_debugInitialized);
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Binding mixin instance is null but bindings are already initialized.'),
+          ErrorDescription(
+            'The "instance" property of the $T binding mixin was accessed, but that binding was not initialized when '
+            'the "initInstances()" method was called.'
+          ),
+          ErrorHint(
+            'This probably indicates that the $T mixin was not mixed into the class that was used to setup the binding. '
+            'If this is a custom binding mixin, there must also be a custom binding class, like WidgetsFlutterBinding, '
+            'but that mixes in the selected binding. If this is a test binding, check that the binding being initialized '
+            'is the same as the one into which the test binding is mixed.'
+          ),
+        ]);
+      }
+      return true;
+    }());
+    return instance!;
   }
 
   /// Called when the binding is initialized, to register service

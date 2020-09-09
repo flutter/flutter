@@ -193,15 +193,19 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     window.onPointerDataPacket = _handlePointerDataPacket;
   }
 
+  /// The singleton instance of this object.
+  ///
+  /// Provides access to the features exposed by this mixin. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
+  static GestureBinding get instance => BindingBase.checkInstance(_instance);
+  static GestureBinding? _instance;
+
   @override
   void unlocked() {
     super.unlocked();
     _flushPointerEventQueue();
   }
-
-  /// The singleton instance of this object.
-  static GestureBinding? get instance => _instance;
-  static GestureBinding? _instance;
 
   final Queue<PointerEvent> _pendingPointerEvents = Queue<PointerEvent>();
 

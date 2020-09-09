@@ -373,12 +373,12 @@ class RenderUiKitView extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    GestureBinding.instance!.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
   }
 
   @override
   void detach() {
-    GestureBinding.instance!.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
     _gestureRecognizer!.reset();
     super.detach();
   }

@@ -277,7 +277,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   void dispose() {
     resolve(GestureDisposition.rejected);
     for (final int pointer in _trackedPointers)
-      GestureBinding.instance!.pointerRouter.removeRoute(pointer, handleEvent);
+      GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
     _trackedPointers.clear();
     assert(_entries.isEmpty);
     super.dispose();
@@ -307,7 +307,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   GestureArenaEntry _addPointerToArena(int pointer) {
     if (_team != null)
       return _team!.add(pointer, this);
-    return GestureBinding.instance!.gestureArena.add(pointer, this);
+    return GestureBinding.instance.gestureArena.add(pointer, this);
   }
 
   /// Causes events related to the given pointer ID to be routed to this recognizer.
@@ -321,7 +321,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// Use [stopTrackingPointer] to remove the route added by this function.
   @protected
   void startTrackingPointer(int pointer, [Matrix4? transform]) {
-    GestureBinding.instance!.pointerRouter.addRoute(pointer, handleEvent, transform);
+    GestureBinding.instance.pointerRouter.addRoute(pointer, handleEvent, transform);
     _trackedPointers.add(pointer);
     assert(!_entries.containsValue(pointer));
     _entries[pointer] = _addPointerToArena(pointer);
@@ -336,7 +336,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @protected
   void stopTrackingPointer(int pointer) {
     if (_trackedPointers.contains(pointer)) {
-      GestureBinding.instance!.pointerRouter.removeRoute(pointer, handleEvent);
+      GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
       _trackedPointers.remove(pointer);
       if (_trackedPointers.isEmpty)
         didStopTrackingLastPointer(pointer);

@@ -14,21 +14,15 @@ import 'package:path/path.dart' as path;
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
 
-
 import 'binding.dart';
 
-/// Ensure the [WidgetsBinding] is initialized.
+/// Ensure the appropriate test binding is initialized.
 WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String> environment]) {
   environment ??= Platform.environment;
-  if (WidgetsBinding.instance == null) {
-    if (environment.containsKey('FLUTTER_TEST') && environment['FLUTTER_TEST'] != 'false') {
-      AutomatedTestWidgetsFlutterBinding();
-    } else {
-      LiveTestWidgetsFlutterBinding();
-    }
+  if (environment.containsKey('FLUTTER_TEST') && environment['FLUTTER_TEST'] != 'false') {
+    return AutomatedTestWidgetsFlutterBinding.ensureInitialized();
   }
-  assert(WidgetsBinding.instance is TestWidgetsFlutterBinding);
-  return WidgetsBinding.instance;
+  return LiveTestWidgetsFlutterBinding.ensureInitialized();
 }
 
 /// Setup mocking of the global [HttpClient].

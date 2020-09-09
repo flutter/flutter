@@ -3393,12 +3393,12 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
   @override
   void attach(covariant PipelineOwner owner) {
     super.attach(owner);
-    PaintingBinding.instance!.systemFonts.addListener(systemFontsDidChange);
+    PaintingBinding.instance.systemFonts.addListener(systemFontsDidChange);
   }
 
   @override
   void detach() {
-    PaintingBinding.instance!.systemFonts.removeListener(systemFontsDidChange);
+    PaintingBinding.instance.systemFonts.removeListener(systemFontsDidChange);
     super.detach();
   }
 }
