@@ -1147,6 +1147,36 @@ void main() {
     // once animation settles the dialog is padded by the new viewInsets
     expect(tester.getRect(find.byType(Placeholder)), placeholderRectWithoutInsets.translate(10, 10));
   });
+
+  testWidgets('Default cupertino dialog golden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            child: const RepaintBoundary(
+              child: CupertinoAlertDialog(
+                title: Text('Title'),
+                content: Text('text'),
+                actions: <Widget>[
+                  CupertinoDialogAction(child: Text('No')),
+                  CupertinoDialogAction(child: Text('OK')),
+                ],
+              ),
+            ),
+          );
+        }
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('dialog_test.cupertino.default.png'),
+    );
+  });
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
