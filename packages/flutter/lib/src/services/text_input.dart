@@ -880,6 +880,8 @@ class TextInputConnection {
     TextInput._instance._requestAutofill();
   }
 
+  /// Requests that the text input control update itself according to the new
+  /// [TextInputConfiguration].
   void updateConfig(TextInputConfiguration configuration) {
     assert(attached);
     TextInput._instance._updateConfig(configuration);
