@@ -128,8 +128,7 @@ template("dart_snapshot_aot") {
     outputs = [ elf_object ]
 
     args = [
-      "--no-causal_async_stacks",
-      "--lazy_async_stacks",
+      "--causal_async_stacks",
       "--deterministic",
       "--snapshot_kind=app-aot-elf",
       "--elf=" + rebase_path(elf_object),
