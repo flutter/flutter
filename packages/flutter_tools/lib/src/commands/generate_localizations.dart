@@ -65,14 +65,16 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       help: 'The Dart class name to use for the output localization and '
         'localizations delegate classes.',
     );
-    argParser.addOption(
+    argParser.addMultiOption(
       'preferred-supported-locales',
+      valueHelp: 'locale',
       help: 'The list of preferred supported locales for the application. '
         'By default, the tool will generate the supported locales list in '
         'alphabetical order. Use this flag if you would like to default to '
         'a different locale. \n\n'
-        "For example, pass in ['en_US'] if you would like your app to "
-        'default to American English if a device supports it.',
+        'For example, pass in `en_US` if you would like your app to '
+        'default to American English if a device supports it.'
+        '(Pass this option multiple times for defining multiple items',
     );
     argParser.addOption(
       'header',
@@ -169,7 +171,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     final String templateArbFileName = stringArg('template-arb-file');
     final String untranslatedMessagesFile = stringArg('untranslated-messages-file');
     final String classNameString = stringArg('output-class');
-    final String preferredSupportedLocaleString = stringArg('preferred-supported-locales');
+    final List<String> preferredSupportedLocale = stringsArg('preferred-supported-locales');
     final String headerString = stringArg('header');
     final String headerFile = stringArg('header-file');
     final bool useDeferredLoading = boolArg('use-deferred-loading');
@@ -187,7 +189,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
           templateArbFileName: templateArbFileName,
           outputFileString: outputFileString,
           classNameString: classNameString,
-          preferredSupportedLocaleString: preferredSupportedLocaleString,
+          preferredSupportedLocale: preferredSupportedLocale,
           headerString: headerString,
           headerFile: headerFile,
           useDeferredLoading: useDeferredLoading,
