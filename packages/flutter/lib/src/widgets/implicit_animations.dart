@@ -868,7 +868,8 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
-/// The following code implements the [AnimatedAlign] as seen in the video above.
+/// The following code implements the [AnimatedAlign] widget, using a [curve] of
+/// [Curves.fastOutSlowIn].
 ///
 /// ```dart
 /// bool selected = false;
