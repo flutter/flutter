@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:meta/meta.dart';
 
 import 'base/file_system.dart';
+import 'build_info.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
 import 'resident_runner.dart';
