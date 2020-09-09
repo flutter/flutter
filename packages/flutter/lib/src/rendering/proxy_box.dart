@@ -1523,9 +1523,9 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect? _cachedRect;
-  Path? _cachedPath;
+  late Path _cachedPath;
 
-  Path? _getClipPath(Rect rect) {
+  Path _getClipPath(Rect rect) {
     if (rect != _cachedRect) {
       _cachedRect = rect;
       _cachedPath = Path()..addOval(_cachedRect!);
@@ -1558,7 +1558,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
         needsCompositing,
         offset,
         _clip!,
-        _getClipPath(_clip!)!,
+        _getClipPath(_clip!),
         super.paint,
         clipBehavior: clipBehavior,
         oldLayer: layer as ClipPathLayer,
@@ -1573,7 +1573,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawPath(_getClipPath(_clip!)!.shift(offset), _debugPaint!);
+        context.canvas.drawPath(_getClipPath(_clip!).shift(offset), _debugPaint!);
         _debugText!.paint(context.canvas, offset + Offset((_clip!.width - _debugText!.width) / 2.0, -_debugText!.text!.style!.fontSize! * 1.1));
       }
       return true;

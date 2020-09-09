@@ -646,7 +646,7 @@ class CupertinoTextField extends StatefulWidget {
   }
 }
 
-class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin implements TextSelectionGestureDetectorBuilderDelegate {
+class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField> implements TextSelectionGestureDetectorBuilderDelegate {
   final GlobalKey _clearGlobalKey = GlobalKey();
 
   RestorableTextEditingController _controller;

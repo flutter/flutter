@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -123,8 +121,8 @@ abstract class AnimatedWidget extends StatefulWidget {
   ///
   /// The [listenable] argument is required.
   const AnimatedWidget({
-    Key key,
-    @required this.listenable,
+    Key? key,
+    required this.listenable,
   }) : assert(listenable != null),
        super(key: key);
 
@@ -255,8 +253,8 @@ class SlideTransition extends AnimatedWidget {
   ///
   /// The [position] argument must not be null.
   const SlideTransition({
-    Key key,
-    @required Animation<Offset> position,
+    Key? key,
+    required Animation<Offset> position,
     this.transformHitTests = true,
     this.textDirection,
     this.child,
@@ -281,7 +279,7 @@ class SlideTransition extends AnimatedWidget {
   ///
   /// If [textDirection] is [TextDirection.ltr], the x offset is applied in the
   /// reading direction such that x offsets move the child towards the right.
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
 
   /// Whether hit testing should be affected by the slide animation.
   ///
@@ -294,7 +292,7 @@ class SlideTransition extends AnimatedWidget {
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -315,6 +313,51 @@ class SlideTransition extends AnimatedWidget {
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/scale_transition.mp4}
 ///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// The following code implements the [ScaleTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// AnimationController _controller;
+/// Animation<double> _animation;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 2),
+///     vsync: this,
+///   )..repeat(reverse: true);
+///   _animation = CurvedAnimation(
+///     parent: _controller,
+///     curve: Curves.fastOutSlowIn,
+///   );
+/// }
+///
+/// @override
+/// void dispose() {
+///   super.dispose();
+///   _controller.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: ScaleTransition(
+///         scale: _animation,
+///         child: const Padding(
+///           padding: EdgeInsets.all(8.0),
+///           child: FlutterLogo(size: 150.0),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [PositionedTransition], a widget that animates its child from a start
@@ -329,8 +372,8 @@ class ScaleTransition extends AnimatedWidget {
   /// The [scale] argument must not be null. The [alignment] argument defaults
   /// to [Alignment.center].
   const ScaleTransition({
-    Key key,
-    @required Animation<double> scale,
+    Key? key,
+    required Animation<double> scale,
     this.alignment = Alignment.center,
     this.child,
   }) : assert(scale != null),
@@ -352,7 +395,7 @@ class ScaleTransition extends AnimatedWidget {
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -372,6 +415,52 @@ class ScaleTransition extends AnimatedWidget {
 /// Here's an illustration of the [RotationTransition] widget, with it's [turns]
 /// animated by a [CurvedAnimation] set to [Curves.elasticOut]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/rotation_transition.mp4}
+///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// The following code implements the [RotationTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// AnimationController _controller;
+/// Animation<double> _animation;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 2),
+///     vsync: this,
+///   )..repeat(reverse: true);
+///   _animation = CurvedAnimation(
+///     parent: _controller,
+///     curve: Curves.elasticOut,
+///   );
+/// }
+///
+/// @override
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: RotationTransition(
+///         turns: _animation,
+///         child: const Padding(
+///           padding: EdgeInsets.all(8.0),
+///           child: FlutterLogo(size: 150.0),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ScaleTransition], a widget that animates the scale of a transformed
@@ -383,8 +472,8 @@ class RotationTransition extends AnimatedWidget {
   ///
   /// The [turns] argument must not be null.
   const RotationTransition({
-    Key key,
-    @required Animation<double> turns,
+    Key? key,
+    required Animation<double> turns,
     this.alignment = Alignment.center,
     this.child,
   }) : assert(turns != null),
@@ -406,7 +495,7 @@ class RotationTransition extends AnimatedWidget {
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -436,6 +525,51 @@ class RotationTransition extends AnimatedWidget {
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/size_transition.mp4}
 ///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// This code defines a widget that uses [SizeTransition] to change the size
+/// of [FlutterLogo] continually. It is built with a [Scaffold]
+/// where the internal widget has space to change its size.
+///
+/// ```dart
+/// AnimationController _controller;
+/// Animation<double> _animation;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 3),
+///     vsync: this,
+///   )..repeat();
+///   _animation = CurvedAnimation(
+///     parent: _controller,
+///     curve: Curves.fastOutSlowIn,
+///   );
+/// }
+///
+/// @override
+/// void dispose() {
+///   super.dispose();
+///   _controller.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: SizeTransition(
+///       sizeFactor: _animation,
+///       axis: Axis.horizontal,
+///       axisAlignment: -1,
+///       child: Center(
+///           child: FlutterLogo(size: 200.0),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AnimatedCrossFade], for a widget that automatically animates between
@@ -454,9 +588,9 @@ class SizeTransition extends AnimatedWidget {
   /// defaults to 0.0, which centers the child along the main axis during the
   /// transition.
   const SizeTransition({
-    Key key,
+    Key? key,
     this.axis = Axis.vertical,
-    @required Animation<double> sizeFactor,
+    required Animation<double> sizeFactor,
     this.axisAlignment = 0.0,
     this.child,
   }) : assert(axis != null),
@@ -494,7 +628,7 @@ class SizeTransition extends AnimatedWidget {
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -536,10 +670,10 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   ///
   /// The [opacity] argument must not be null.
   const FadeTransition({
-    Key key,
-    @required this.opacity,
+    Key? key,
+    required this.opacity,
     this.alwaysIncludeSemantics = false,
-    Widget child,
+    Widget? child,
   }) : assert(opacity != null),
        super(key: key, child: child);
 
@@ -651,10 +785,10 @@ class SliverFadeTransition extends SingleChildRenderObjectWidget {
   ///
   /// The [opacity] argument must not be null.
   const SliverFadeTransition({
-    Key key,
-    @required this.opacity,
+    Key? key,
+    required this.opacity,
     this.alwaysIncludeSemantics = false,
-    Widget sliver,
+    Widget? sliver,
   }) : assert(opacity != null),
       super(key: key, child: sliver);
 
@@ -710,12 +844,12 @@ class RelativeRectTween extends Tween<RelativeRect> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as [RelativeRect.fill].
-  RelativeRectTween({ RelativeRect begin, RelativeRect end })
+  RelativeRectTween({ RelativeRect? begin, RelativeRect? end })
     : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  RelativeRect lerp(double t) => RelativeRect.lerp(begin, end, t);
+  RelativeRect lerp(double t) => RelativeRect.lerp(begin, end, t)!;
 }
 
 /// Animated version of [Positioned] which takes a specific
@@ -801,9 +935,9 @@ class PositionedTransition extends AnimatedWidget {
   ///
   /// The [rect] argument must not be null.
   const PositionedTransition({
-    Key key,
-    @required Animation<RelativeRect> rect,
-    @required this.child,
+    Key? key,
+    required Animation<RelativeRect> rect,
+    required this.child,
   }) : assert(rect != null),
        super(key: key, listenable: rect);
 
@@ -834,6 +968,61 @@ class PositionedTransition extends AnimatedWidget {
 /// animated by a [CurvedAnimation] set to [Curves.elasticInOut]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/relative_positioned_transition.mp4}
 ///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// The following code implements the [RelativePositionedTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// AnimationController _controller;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 2),
+///     vsync: this,
+///   )..repeat(reverse: true);
+/// }
+///
+/// @override
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   final double smallLogo = 100;
+///   final double bigLogo = 200;
+///
+///   return LayoutBuilder(
+///     builder: (context, constraints) {
+///       final Size biggest = constraints.biggest;
+///       return Stack(
+///         children: [
+///           RelativePositionedTransition(
+///             size: biggest,
+///             rect: RectTween(
+///               begin: Rect.fromLTWH(0, 0, bigLogo, bigLogo),
+///               end: Rect.fromLTWH(biggest.width - smallLogo, biggest.height - smallLogo, smallLogo, smallLogo),
+///             ).animate(CurvedAnimation(
+///               parent: _controller,
+///               curve: Curves.elasticInOut,
+///             )),
+///             child: Padding(
+///               padding: const EdgeInsets.all(8),
+///               child: FlutterLogo()
+///             ),
+///           ),
+///         ],
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [PositionedTransition], a widget that animates its child from a start
@@ -853,10 +1042,10 @@ class RelativePositionedTransition extends AnimatedWidget {
   /// current value of the [rect] argument assuming that the stack has the given
   /// [size]. Both [rect] and [size] must not be null.
   const RelativePositionedTransition({
-    Key key,
-    @required Animation<Rect> rect,
-    @required this.size,
-    @required this.child,
+    Key? key,
+    required Animation<Rect> rect,
+    required this.size,
+    required this.child,
   }) : assert(rect != null),
        assert(size != null),
        assert(child != null),
@@ -982,10 +1171,10 @@ class DecoratedBoxTransition extends AnimatedWidget {
   ///
   ///  * [new DecoratedBox]
   const DecoratedBoxTransition({
-    Key key,
-    @required this.decoration,
+    Key? key,
+    required this.decoration,
     this.position = DecorationPosition.background,
-    @required this.child,
+    required this.child,
   }) : assert(decoration != null),
        assert(child != null),
        super(key: key, listenable: decoration);
@@ -1042,9 +1231,9 @@ class AlignTransition extends AnimatedWidget {
   ///
   ///  * [new Align].
   const AlignTransition({
-    Key key,
-    @required Animation<AlignmentGeometry> alignment,
-    @required this.child,
+    Key? key,
+    required Animation<AlignmentGeometry> alignment,
+    required this.child,
     this.widthFactor,
     this.heightFactor,
   }) : assert(alignment != null),
@@ -1055,10 +1244,10 @@ class AlignTransition extends AnimatedWidget {
   Animation<AlignmentGeometry> get alignment => listenable as Animation<AlignmentGeometry>;
 
   /// If non-null, the child's width factor, see [Align.widthFactor].
-  final double widthFactor;
+  final double? widthFactor;
 
   /// If non-null, the child's height factor, see [Align.heightFactor].
-  final double heightFactor;
+  final double? heightFactor;
 
   /// The widget below this widget in the tree.
   ///
@@ -1089,9 +1278,9 @@ class DefaultTextStyleTransition extends AnimatedWidget {
   /// Creates an animated [DefaultTextStyle] whose [TextStyle] animation updates
   /// the widget.
   const DefaultTextStyleTransition({
-    Key key,
-    @required Animation<TextStyle> style,
-    @required this.child,
+    Key? key,
+    required Animation<TextStyle> style,
+    required this.child,
     this.textAlign,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
@@ -1104,7 +1293,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
   Animation<TextStyle> get style => listenable as Animation<TextStyle>;
 
   /// How the text should be aligned horizontally.
-  final TextAlign textAlign;
+  final TextAlign? textAlign;
 
   /// Whether the text should break at soft line breaks.
   ///
@@ -1118,7 +1307,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// See [DefaultTextStyle.maxLines] for more details.
-  final int maxLines;
+  final int? maxLines;
 
   /// The widget below this widget in the tree.
   ///
@@ -1222,9 +1411,9 @@ class AnimatedBuilder extends AnimatedWidget {
   ///
   /// The [animation] and [builder] arguments must not be null.
   const AnimatedBuilder({
-    Key key,
-    @required Listenable animation,
-    @required this.builder,
+    Key? key,
+    required Listenable animation,
+    required this.builder,
     this.child,
   }) : assert(animation != null),
        assert(builder != null),
@@ -1245,7 +1434,7 @@ class AnimatedBuilder extends AnimatedWidget {
   ///
   /// Using this pre-built child is entirely optional, but can improve
   /// performance significantly in some cases and is therefore a good practice.
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
