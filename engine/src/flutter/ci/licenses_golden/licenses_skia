@@ -1,4 +1,4 @@
-Signature: a864e5c7fbb10c5285bb6beadd429d11
+Signature: dbb06a6b15e5ad40d57fc324ea4b4efb
 
 UNUSED LICENSES:
 
@@ -2755,11 +2755,8 @@ FILE: ../../../third_party/skia/include/private/SkOnce.h
 FILE: ../../../third_party/skia/include/private/SkTFitsIn.h
 FILE: ../../../third_party/skia/include/private/SkTLogic.h
 FILE: ../../../third_party/skia/include/utils/SkCanvasStateUtils.h
-FILE: ../../../third_party/skia/include/utils/SkLua.h
-FILE: ../../../third_party/skia/include/utils/SkLuaCanvas.h
 FILE: ../../../third_party/skia/samplecode/SampleChart.cpp
 FILE: ../../../third_party/skia/samplecode/SampleClock.cpp
-FILE: ../../../third_party/skia/samplecode/SampleLua.cpp
 FILE: ../../../third_party/skia/samplecode/SampleManyRects.cpp
 FILE: ../../../third_party/skia/samplecode/SampleStringArt.cpp
 FILE: ../../../third_party/skia/samplecode/SampleUnpremul.cpp
@@ -2840,8 +2837,6 @@ FILE: ../../../third_party/skia/src/shaders/SkPerlinNoiseShader.cpp
 FILE: ../../../third_party/skia/src/utils/SkCanvasStack.cpp
 FILE: ../../../third_party/skia/src/utils/SkCanvasStack.h
 FILE: ../../../third_party/skia/src/utils/SkCanvasStateUtils.cpp
-FILE: ../../../third_party/skia/src/utils/SkLua.cpp
-FILE: ../../../third_party/skia/src/utils/SkLuaCanvas.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2013 Google Inc.
 
