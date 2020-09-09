@@ -34,12 +34,13 @@ DART_SDK_DIR="${ENGINE_SRC_DIR}/out/host_debug_unopt/dart-sdk"
 GN="${FLUTTER_DIR}/tools/gn"
 DART_TOOL_DIR="${WEB_UI_DIR}/.dart_tool"
 PUB_PATH="$DART_SDK_DIR/bin/pub"
+DART2JS_PATH="$DART_SDK_DIR/bin/dart2js"
 SNAPSHOT_PATH="${DART_TOOL_DIR}/felt.snapshot"
 STAMP_PATH="${DART_TOOL_DIR}/felt.snapshot.stamp"
 SCRIPT_PATH="${DEV_DIR}/felt.dart"
 REVISION="$(cd "$FLUTTER_DIR"; git rev-parse HEAD)"
 
-if [ ! -f "${PUB_PATH}" ]
+if [ ! -f "${PUB_PATH}" -o ! -f "${DART2JS_PATH}" ]
 then
   echo "Compiling the Dart SDK."
   gclient sync
