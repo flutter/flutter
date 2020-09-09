@@ -45,7 +45,7 @@ void main() {
       fontFamily: '.SF Pro Display',
       fontSize: 21.0,
       fontWeight: FontWeight.w400,
-      letterSpacing: -0.41,
+      letterSpacing: -0.6,
       color: CupertinoColors.black,
     ));
   });
@@ -122,7 +122,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(CupertinoPicker), paints..path(color: const Color(0x33000000), style: PaintingStyle.stroke));
+    expect(find.byType(CupertinoPicker), paints..rrect(color: const Color.fromRGBO(118, 118, 128, 0.12)));
     expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF123456)));
 
     await tester.pumpWidget(
@@ -147,7 +147,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(CupertinoPicker), paints..path(color: const Color(0x33FFFFFF), style: PaintingStyle.stroke));
+    expect(find.byType(CupertinoPicker), paints..rrect(color: const Color.fromRGBO(118, 118, 128, 0.24)));
     expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF654321)));
   });
 
