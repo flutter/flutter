@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter/animation.dart';
@@ -51,7 +49,6 @@ ScrollDirection flipScrollDirection(ScrollDirection direction) {
     case ScrollDirection.reverse:
       return ScrollDirection.forward;
   }
-  return null;
 }
 
 /// Which part of the content inside the viewport should be visible.
@@ -96,6 +93,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// This object notifies its listeners when this value changes (except when
   /// the value changes due to [correctBy]).
   double get pixels;
+
+  /// Whether the [pixels] property is available.
+  bool get hasPixels;
 
   /// Called when the viewport's extents are established.
   ///
@@ -181,8 +181,8 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// animation, use [jumpTo].
   Future<void> animateTo(
     double to, {
-    @required Duration duration,
-    @required Curve curve,
+    required Duration duration,
+    required Curve curve,
   });
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
@@ -194,9 +194,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// underscroll.
   Future<void> moveTo(
     double to, {
-    Duration duration,
-    Curve curve,
-    bool clamp,
+    Duration? duration,
+    Curve? curve,
+    bool? clamp,
   }) {
     assert(to != null);
     if (duration == null || duration == Duration.zero) {
@@ -248,7 +248,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// `super.debugFillDescription(description)`.
   @mustCallSuper
   void debugFillDescription(List<String> description) {
-    description.add('offset: ${pixels?.toStringAsFixed(1)}');
+    if (hasPixels) {
+      description.add('offset: ${pixels.toStringAsFixed(1)}');
+    }
   }
 }
 
@@ -260,6 +262,9 @@ class _FixedViewportOffset extends ViewportOffset {
 
   @override
   double get pixels => _pixels;
+
+  @override
+  bool get hasPixels => true;
 
   @override
   bool applyViewportDimension(double viewportDimension) => true;
@@ -280,8 +285,8 @@ class _FixedViewportOffset extends ViewportOffset {
   @override
   Future<void> animateTo(
     double to, {
-    @required Duration duration,
-    @required Curve curve,
+    required Duration duration,
+    required Curve curve,
   }) async { }
 
   @override

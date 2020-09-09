@@ -21,6 +21,7 @@ import '../base/net.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/targets/web.dart';
 import '../cache.dart';
 import '../dart/language_version.dart';
 import '../dart/pub.dart';
@@ -469,6 +470,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           entrypoint: globals.fs.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
+          nullAssertions: debuggingOptions.nullAssertions,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {
@@ -487,6 +489,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             debuggingOptions.buildInfo,
             debuggingOptions.initializePlatform,
             false,
+            kNoneWorker,
           );
         }
         await device.device.startApp(
@@ -556,6 +559,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions.buildInfo,
           debuggingOptions.initializePlatform,
           false,
+          kNoneWorker,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');

@@ -4,10 +4,10 @@
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
 
+#include <memory>
+
 #include "run_loop.h"
 #include "win32_window.h"
-
-#include <memory>
 
 // A window that does nothing but host a Flutter view.
 class FlutterWindow : public Win32Window {
@@ -22,6 +22,8 @@ class FlutterWindow : public Win32Window {
   // Win32Window:
   bool OnCreate() override;
   void OnDestroy() override;
+  LRESULT MessageHandler(HWND window, UINT const message, WPARAM const wparam,
+                         LPARAM const lparam) noexcept override;
 
  private:
   // The run loop driving events for this window.
