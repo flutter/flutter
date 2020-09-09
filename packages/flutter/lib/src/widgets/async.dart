@@ -202,7 +202,7 @@ enum ConnectionState {
 ///  * [FutureBuilder], which builds itself based on a snapshot from interacting
 ///    with a [Future].
 @immutable
-class AsyncSnapshot<T extends Object> {
+class AsyncSnapshot<T> {
   /// Creates an [AsyncSnapshot] with the specified [connectionState],
   /// and optionally either [data] or [error] (but not both).
   const AsyncSnapshot._(this.connectionState, this.data, this.error)
@@ -300,7 +300,7 @@ class AsyncSnapshot<T extends Object> {
 ///    itself based on a snapshot from interacting with a [Stream].
 ///  * [FutureBuilder], which delegates to an [AsyncWidgetBuilder] to build
 ///    itself based on a snapshot from interacting with a [Future].
-typedef AsyncWidgetBuilder<T extends Object> = Widget Function(BuildContext context, AsyncSnapshot<T> snapshot);
+typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnapshot<T> snapshot);
 
 /// Widget that builds itself based on the latest snapshot of interaction with
 /// a [Stream].
