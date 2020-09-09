@@ -401,6 +401,10 @@ Application::Application(
   settings_.task_observer_remove = std::bind(
       &CurrentMessageLoopRemoveAfterTaskObserver, std::placeholders::_1);
 
+  // TODO(FL-117): Re-enable causal async stack traces when this issue is
+  // addressed.
+  settings_.dart_flags = {"--no_causal_async_stacks"};
+
   // Disable code collection as it interferes with JIT code warmup
   // by decreasing usage counters and flushing code which is still useful.
   settings_.dart_flags.push_back("--no-collect_code");
