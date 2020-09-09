@@ -4078,7 +4078,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(!_debugLocked);
-    assert(_history.isNotEmpty, 'You may have accidentally called Navigator.pop() in the wrong context.');
+    assert(_history.isNotEmpty, 'There is no navigation history in the current context. You may need to check Navigator routes.');
     // Hides the HeroControllerScope for the widget subtree so that the other
     // nested navigator underneath will not pick up the hero controller above
     // this level.

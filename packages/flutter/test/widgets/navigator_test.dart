@@ -1658,7 +1658,8 @@ void main() {
       final dynamic exception = tester.takeException();
       expect(exception, isNotNull);
       expect(exception, isAssertionError);
-      expect(exception.toString(), contains('You may have accidentally called Navigator.pop() in the wrong context.'));
+      expect(exception.toString(), contains('There is no navigation history in the current context.'));
+      expect(exception.toString(), contains('You may need to check Navigator routes.'));
     });
   });
 
