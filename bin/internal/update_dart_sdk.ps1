@@ -38,7 +38,6 @@ if ((Test-Path $engineStamp) -and ($engineVersion -eq (Get-Content $engineStamp)
     return
 }
 
-Write-Host "Downloading Dart SDK from Flutter engine $engineVersion..."
 $dartSdkBaseUrl = $Env:FLUTTER_STORAGE_BASE_URL
 if (-not $dartSdkBaseUrl) {
     $dartSdkBaseUrl = "https://storage.googleapis.com"
@@ -71,7 +70,6 @@ Catch {
     $ProgressPreference = $OriginalProgressPreference
 }
 
-Write-Host "Unzipping Dart SDK..."
 If (Get-Command 7z -errorAction SilentlyContinue) {
     # The built-in unzippers are painfully slow. Use 7-Zip, if available.
     & 7z x $dartSdkZip "-o$cachePath" -bd | Out-Null

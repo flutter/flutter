@@ -27,11 +27,11 @@ IF NOT EXIST "%flutter_root%\.git" (
   ECHO        The flutter tool requires Git in order to operate properly;
   ECHO        to set up Flutter, run the following command:
   ECHO        git clone -b stable https://github.com/flutter/flutter.git
-  EXIT /B 1
+  EXIT 1
 )
 
 REM Include shared scripts in shared.bat
-SET shared_bin=%FLUTTER_ROOT%/bin/internal/shared.bat
+SET shared_bin=%FLUTTER_ROOT%\bin\internal\shared.bat
 CALL "%shared_bin%"
 
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools

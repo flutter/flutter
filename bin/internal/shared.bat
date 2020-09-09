@@ -34,9 +34,9 @@ WHERE /Q pwsh.exe && (
 ) || WHERE /Q PowerShell.exe && (
     SET powershell_executable=PowerShell.exe
 ) || (
-    ECHO Error: PowerShell executable not found.
-    ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH.
-    EXIT /B 1
+    ECHO Error: PowerShell executable not found.                        1>&2
+    ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
+    EXIT 1
 )
 
 REM Ensure that bin/cache exists.
@@ -44,13 +44,13 @@ IF NOT EXIST "%cache_dir%" MKDIR "%cache_dir%"
 
 REM If the cache still doesn't exist, fail with an error that we probably don't have permissions.
 IF NOT EXIST "%cache_dir%" (
-  ECHO Error: Unable to create cache directory at
-  ECHO            %cache_dir%
-  ECHO.
-  ECHO        This may be because flutter doesn't have write permissions for
-  ECHO        this path. Try moving the flutter directory to a writable location,
-  ECHO        such as within your home directory.
-  EXIT /B 1
+  ECHO Error: Unable to create cache directory at                                 1>&2
+  ECHO            %cache_dir%                                                     1>&2
+  ECHO.                                                                           1>&2
+  ECHO        This may be because flutter doesn't have write permissions for      1>&2
+  ECHO        this path. Try moving the flutter directory to a writable location, 1>&2
+  ECHO        such as within your home directory.                                 1>&2
+  EXIT 1
 )
 
 :acquire_lock
@@ -88,19 +88,22 @@ GOTO :after_subroutine
   EXIT /B
 
   :do_sdk_update_and_snapshot
-    ECHO Checking Dart SDK version...
-    SET update_dart_bin=%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1
+    ECHO Checking Dart SDK version... 1>&2
+    SET update_dart_bin=%FLUTTER_ROOT%\bin\internal\update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
     SET "update_dart_bin=!update_dart_bin:'=''!"
     REM PowerShell command must have exit code set in order to prevent all non-zero exit codes from being translated
     REM into 1. The exit code 2 is used to detect the case where the major version is incorrect and there should be
     REM no subsequent retries.
+    REM PowerShell redirects all output streams to stdout by default, redirect these to stderr to avoid breaking
+    REM machine mode that parses stdout as structured data.
+    ECHO Downloading Dart SDK from Flutter engine %dart_required_version%... 1>&2
     %powershell_executable% -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'; exit $LASTEXITCODE;"
     IF "%ERRORLEVEL%" EQU "2" (
       EXIT 1
     )
     IF "%ERRORLEVEL%" NEQ "0" (
-      ECHO Error: Unable to update Dart SDK. Retrying...
+      ECHO Error: Unable to update Dart SDK. Retrying... 1>&2
       timeout /t 5 /nobreak
       GOTO :do_sdk_update_and_snapshot
     )
@@ -108,7 +111,7 @@ GOTO :after_subroutine
   :do_snapshot
     IF EXIST "%FLUTTER_ROOT%\version" DEL "%FLUTTER_ROOT%\version"
     ECHO: > "%cache_dir%\.dartignore"
-    ECHO Building flutter tool...
+    ECHO Building flutter tool... 1>&2
     PUSHD "%flutter_tools_dir%"
 
     REM Makes changes to PUB_ENVIRONMENT only visible to commands within SETLOCAL/ENDLOCAL
@@ -131,17 +134,17 @@ GOTO :after_subroutine
       SET /A total_tries=10
       SET /A remaining_tries=%total_tries%-1
       :retry_pub_upgrade
-        ECHO Running pub upgrade...
+        ECHO Running pub upgrade... 1>&2
         CALL "%pub%" upgrade "%VERBOSITY%" --no-precompile
         IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
-        ECHO Error (%ERRORLEVEL%): Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left)
+        ECHO Error (%ERRORLEVEL%): Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left) 1>&2
         timeout /t 5 /nobreak 2>NUL
         SET /A remaining_tries-=1
         IF "%remaining_tries%" EQU "0" GOTO upgrade_retries_exhausted
         GOTO :retry_pub_upgrade
       :upgrade_retries_exhausted
         SET exit_code=%ERRORLEVEL%
-        ECHO Error: 'pub upgrade' still failing after %total_tries% tries, giving up.
+        ECHO Error: 'pub upgrade' still failing after %total_tries% tries, giving up. 1>&2
         GOTO final_exit
       :upgrade_succeeded
     ENDLOCAL
@@ -154,7 +157,7 @@ GOTO :after_subroutine
       "%dart%" "%FLUTTER_TOOL_ARGS%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
     )
     IF "%ERRORLEVEL%" NEQ "0" (
-      ECHO Error: Unable to create dart snapshot for flutter tool.
+      ECHO Error: Unable to create dart snapshot for flutter tool. 1>&2
       SET exit_code=%ERRORLEVEL%
       GOTO :final_exit
     )
