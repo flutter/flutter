@@ -1653,11 +1653,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    // The x coordinates of p1 and p2 were derived empirically, not analytically.
     expect(tabBarBox, paints..line(
       strokeWidth: indicatorWeight,
-      p1: const Offset(2476.0, indicatorY),
-      p2: const Offset(2574.0, indicatorY),
+      p1: const Offset(4951.0, indicatorY),
+      p2: const Offset(5049.0, indicatorY),
     ));
 
     await tester.pump(const Duration(milliseconds: 501));
