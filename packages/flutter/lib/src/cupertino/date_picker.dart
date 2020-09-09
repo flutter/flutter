@@ -58,6 +58,22 @@ void _animateColumnControllerToItem(FixedExtentScrollController controller, int 
   );
 }
 
+const EdgeInsets _leftEdgeInsets = EdgeInsets.only(left: CupertinoPicker.defaultHighlighterHorizontalMargin);
+const EdgeInsets _rightEdgeInsets = EdgeInsets.only(right: CupertinoPicker.defaultHighlighterHorizontalMargin);
+
+const BorderRadius _leftBorderRadius = BorderRadius.horizontal(left: Radius.circular(CupertinoPicker.defaultHighlighterRadius));
+const BorderRadius _rightBorderRadius = BorderRadius.horizontal(right: Radius.circular(CupertinoPicker.defaultHighlighterRadius));
+
+
+Container _buildMagnifier(BuildContext context, [EdgeInsetsGeometry margin = EdgeInsets.zero, BorderRadiusGeometry borderRadius = BorderRadius.zero]) => Container(
+  margin: margin,
+  decoration: BoxDecoration(
+    borderRadius: borderRadius,
+    color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemFillColor, context),
+  ),
+);
+
+
 // Lays out the date picker based on how much space each single column needs.
 //
 // Each column is a child of this delegate, indexed from 0 to number of columns - 1.
@@ -453,7 +469,7 @@ class CupertinoDatePicker extends StatefulWidget {
   }
 }
 
-typedef _ColumnBuilder = Widget Function(double offAxisFraction, TransitionBuilder itemPositioningBuilder);
+typedef _ColumnBuilder = Widget Function(double offAxisFraction, TransitionBuilder itemPositioningBuilder, Widget magnifier);
 
 class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   // Fraction of the farthest column's vanishing point vs its width. Eyeballed
@@ -658,7 +674,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   }
 
   // Builds the date column. The date is displayed in medium date format (e.g. Fri Aug 31).
-  Widget _buildMediumDatePicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
+  Widget _buildMediumDatePicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder, Widget magnifier) {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
         if (notification is ScrollStartNotification) {
@@ -711,6 +727,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             Text(dateText, style: _themeTextStyle(context)),
           );
         },
+        magnifier: magnifier,
       ),
     );
   }
@@ -734,7 +751,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         && !(widget.maximumDate?.isBefore(rangeStart) ?? false);
   }
 
-  Widget _buildHourPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
+  Widget _buildHourPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder, Widget magnifier) {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
         if (notification is ScrollStartNotification) {
@@ -794,11 +811,12 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           );
         }),
         looping: true,
+        magnifier: magnifier,
       )
     );
   }
 
-  Widget _buildMinutePicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
+  Widget _buildMinutePicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder, Widget magnifier) {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
         if (notification is ScrollStartNotification) {
@@ -843,11 +861,12 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           );
         }),
         looping: true,
+        magnifier: magnifier,
       ),
     );
   }
 
-  Widget _buildAmPmPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
+  Widget _buildAmPmPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder, Widget magnifier) {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
         if (notification is ScrollStartNotification) {
@@ -883,6 +902,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             ),
           );
         }),
+        magnifier: magnifier,
       ),
     );
   }
@@ -982,16 +1002,23 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     for (int i = 0; i < columnWidths.length; i++) {
       double offAxisFraction = 0.0;
-      if (i == 0)
+      Widget magnifier;
+      if (i == 0) {
         offAxisFraction = -_kMaximumOffAxisFraction * textDirectionFactor;
-      else if (i >= 2 || columnWidths.length == 2)
+        magnifier = _buildMagnifier(context, _leftEdgeInsets, _leftBorderRadius);
+      } else
+        if (i >= 2 || columnWidths.length == 2)
         offAxisFraction = _kMaximumOffAxisFraction * textDirectionFactor;
 
       EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
-      if (i == columnWidths.length - 1)
+      if (i == columnWidths.length - 1) {
         padding = padding.flipped;
+        magnifier = _buildMagnifier(context, _rightEdgeInsets, _rightBorderRadius);
+      }
       if (textDirectionFactor == -1)
         padding = padding.flipped;
+
+      magnifier ??= _buildMagnifier(context);
 
       pickers.add(LayoutId(
         id: i,
@@ -1012,6 +1039,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
               ),
             );
           },
+          magnifier,
         ),
       ));
     }
@@ -1116,7 +1144,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
   // Let `DateTime` handle the year/month overflow.
   DateTime _lastDayInMonth(int year, int month) => DateTime(year, month + 1, 0);
 
-  Widget _buildDayPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
+  Widget _buildDayPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder, Widget magnifier) {
     final int daysInCurrentMonth = _lastDayInMonth(selectedYear, selectedMonth).day;
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
@@ -1153,11 +1181,12 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           );
         }),
         looping: true,
+        magnifier: magnifier,
       ),
     );
   }
 
-  Widget _buildMonthPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
+  Widget _buildMonthPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder, Widget magnifier) {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
         if (notification is ScrollStartNotification) {
@@ -1196,11 +1225,12 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           );
         }),
         looping: true,
+        magnifier: magnifier,
       ),
     );
   }
 
-  Widget _buildYearPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
+  Widget _buildYearPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder, Widget magnifier) {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
         if (notification is ScrollStartNotification) {
@@ -1242,6 +1272,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
             ),
           );
         },
+        magnifier: magnifier,
       ),
     );
   }
@@ -1354,6 +1385,15 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       if (textDirectionFactor == -1)
         padding = const EdgeInsets.only(left: _kDatePickerPadSize);
 
+      Widget magnifier;
+      if (i == 0)
+        magnifier = _buildMagnifier(context, _leftEdgeInsets, _leftBorderRadius);
+      else if (i == columnWidths.length - 1)
+        magnifier = _buildMagnifier(context, _rightEdgeInsets, _rightBorderRadius);
+      else
+        magnifier = _buildMagnifier(context);
+
+
       pickers.add(LayoutId(
         id: i,
         child: pickerBuilders[i](
@@ -1371,6 +1411,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
               ),
             );
           },
+          magnifier,
         ),
       ));
     }
@@ -1681,7 +1722,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     );
   }
 
-  Widget _buildHourPicker(EdgeInsetsDirectional additionalPadding) {
+  Widget _buildHourPicker(EdgeInsetsDirectional additionalPadding, Widget magnifier) {
     return CupertinoPicker(
       scrollController: FixedExtentScrollController(initialItem: selectedHour),
       offAxisFraction: -0.5 * textDirectionFactor,
@@ -1709,10 +1750,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           child: _buildPickerNumberLabel(localizations.timerPickerHour(index), additionalPadding),
         );
       }),
+      magnifier: magnifier,
     );
   }
 
-  Widget _buildHourColumn(EdgeInsetsDirectional additionalPadding) {
+  Widget _buildHourColumn(EdgeInsetsDirectional additionalPadding, Widget magnifier) {
     return Stack(
       children: <Widget>[
         NotificationListener<ScrollEndNotification>(
@@ -1720,7 +1762,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             setState(() { lastSelectedHour = selectedHour; });
             return false;
           },
-          child: _buildHourPicker(additionalPadding),
+          child: _buildHourPicker(additionalPadding, magnifier),
         ),
         _buildLabel(
           localizations.timerPickerHourLabel(lastSelectedHour ?? selectedHour),
@@ -1730,7 +1772,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     );
   }
 
-  Widget _buildMinutePicker(EdgeInsetsDirectional additionalPadding) {
+  Widget _buildMinutePicker(EdgeInsetsDirectional additionalPadding, Widget magnifier) {
     double offAxisFraction;
     switch (widget.mode) {
       case CupertinoTimerPickerMode.hm:
@@ -1775,10 +1817,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           child: _buildPickerNumberLabel(localizations.timerPickerMinute(minute), additionalPadding),
         );
       }),
+      magnifier: magnifier,
     );
   }
 
-  Widget _buildMinuteColumn(EdgeInsetsDirectional additionalPadding) {
+  Widget _buildMinuteColumn(EdgeInsetsDirectional additionalPadding, Widget magnifier) {
     return Stack(
       children: <Widget>[
         NotificationListener<ScrollEndNotification>(
@@ -1786,7 +1829,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             setState(() { lastSelectedMinute = selectedMinute; });
             return false;
           },
-          child: _buildMinutePicker(additionalPadding),
+          child: _buildMinutePicker(additionalPadding, magnifier),
         ),
         _buildLabel(
           localizations.timerPickerMinuteLabel(lastSelectedMinute ?? selectedMinute),
@@ -1796,7 +1839,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     );
   }
 
-  Widget _buildSecondPicker(EdgeInsetsDirectional additionalPadding) {
+  Widget _buildSecondPicker(EdgeInsetsDirectional additionalPadding, Widget magnifier) {
     final double offAxisFraction = 0.5 * textDirectionFactor;
 
     return CupertinoPicker(
@@ -1831,10 +1874,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           child: _buildPickerNumberLabel(localizations.timerPickerSecond(second), additionalPadding),
         );
       }),
+      magnifier: magnifier,
     );
   }
 
-  Widget _buildSecondColumn(EdgeInsetsDirectional additionalPadding) {
+  Widget _buildSecondColumn(EdgeInsetsDirectional additionalPadding, Widget magnifier) {
     return Stack(
       children: <Widget>[
         NotificationListener<ScrollEndNotification>(
@@ -1842,7 +1886,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             setState(() { lastSelectedSecond = selectedSecond; });
             return false;
           },
-          child: _buildSecondPicker(additionalPadding),
+          child: _buildSecondPicker(additionalPadding, magnifier),
         ),
         _buildLabel(
           localizations.timerPickerSecondLabel(lastSelectedSecond ?? selectedSecond),
@@ -1873,28 +1917,31 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     double totalWidth = _kPickerWidth;
     assert(paddingValue >= 0);
 
+    final Widget leftMagnifier = _buildMagnifier(context, EdgeInsets.zero, _leftBorderRadius);
+    final Widget rightMagnifier = _buildMagnifier(context, EdgeInsets.zero, _rightBorderRadius);
+
     switch (widget.mode) {
       case CupertinoTimerPickerMode.hm:
         // Pad the widget to make it as wide as `_kPickerWidth`.
         columns = <Widget>[
-          _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
-          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2)),
+          _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding), leftMagnifier),
+          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2), rightMagnifier),
         ];
         break;
       case CupertinoTimerPickerMode.ms:
         // Pad the widget to make it as wide as `_kPickerWidth`.
         columns = <Widget>[
-          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
-          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2)),
+          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding), leftMagnifier),
+          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2), rightMagnifier),
         ];
         break;
       case CupertinoTimerPickerMode.hms:
         const double paddingValue = _kTimerPickerHalfColumnPadding * 2;
         totalWidth = _kTimerPickerColumnIntrinsicWidth * 3 + 4 * _kTimerPickerHalfColumnPadding + paddingValue;
         columns = <Widget>[
-          _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
-          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: _kTimerPickerHalfColumnPadding)),
-          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2)),
+          _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding), leftMagnifier),
+          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: _kTimerPickerHalfColumnPadding), _buildMagnifier(context)),
+          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2), rightMagnifier),
         ];
         break;
     }

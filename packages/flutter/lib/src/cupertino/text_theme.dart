@@ -80,7 +80,7 @@ const TextStyle _kDefaultPickerTextStyle = TextStyle(
   fontFamily: '.SF Pro Display',
   fontSize: 21.0,
   fontWeight: FontWeight.w400,
-  letterSpacing: -0.41,
+  letterSpacing: -0.6,
   color: CupertinoColors.label,
 );
 

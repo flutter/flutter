@@ -572,6 +572,20 @@ class CupertinoColors {
     highContrastElevatedColor: Color.fromARGB(255, 0, 122, 255),
     darkHighContrastElevatedColor: Color.fromARGB(255, 9, 132, 255),
   );
+
+  /// The color for tertiarySystemFillColor, equivalent to
+  /// [UIColor.link](https://developer.apple.com/documentation/uikit/uicolor/3255076-tertiarysystemfill).
+  static const CupertinoDynamicColor tertiarySystemFillColor = CupertinoDynamicColor(
+    debugLabel: 'tertiarySystemFillColor',
+    color: Color.fromRGBO(118, 118, 128, 0.12),
+    darkColor: Color.fromRGBO(118, 118, 128, 0.24),
+    highContrastColor: Color.fromRGBO(118, 118, 128, 0.12),
+    darkHighContrastColor: Color.fromRGBO(118, 118, 128, 0.24),
+    elevatedColor: Color.fromRGBO(118, 118, 128, 0.12),
+    darkElevatedColor: Color.fromRGBO(118, 118, 128, 0.24),
+    highContrastElevatedColor: Color.fromRGBO(118, 118, 128, 0.12),
+    darkHighContrastElevatedColor: Color.fromRGBO(118, 118, 128, 0.24),
+  );
 }
 
 /// A [Color] subclass that represents a family of colors, and the correct effective

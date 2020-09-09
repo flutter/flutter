@@ -12,11 +12,6 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
-/// Color of the 'magnifier' lens border.
-const Color _kHighlighterBorder = CupertinoDynamicColor.withBrightness(
-  color: Color(0x33000000),
-  darkColor: Color(0x33FFFFFF),
-);
 // Eyeballed values comparing with a native picker to produce the right
 // curvatures and densities.
 const double _kDefaultDiameterRatio = 1.07;
@@ -81,6 +76,7 @@ class CupertinoPicker extends StatefulWidget {
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required List<Widget> children,
+    this.magnifier,
     bool looping = false,
   }) : assert(children != null),
        assert(diameterRatio != null),
@@ -125,6 +121,7 @@ class CupertinoPicker extends StatefulWidget {
     @required this.onSelectedItemChanged,
     @required IndexedWidgetBuilder itemBuilder,
     int childCount,
+    this.magnifier,
   }) : assert(itemBuilder != null),
        assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
@@ -193,6 +190,15 @@ class CupertinoPicker extends StatefulWidget {
   /// A delegate that lazily instantiates children.
   final ListWheelChildDelegate childDelegate;
 
+  /// the [magnifier] widget overlaid on top of [ListWheelScrollView].
+  final Widget magnifier;
+
+  /// default margin of the 'magnifier'.
+  static const double defaultHighlighterHorizontalMargin = 9;
+  /// default radius of the 'magnifier'.
+  static const double defaultHighlighterRadius = 8;
+
+
   @override
   State<StatefulWidget> createState() => _CupertinoPickerState();
 }
@@ -253,21 +259,22 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     }
   }
 
-  /// Draws the magnifier borders.
-  Widget _buildMagnifierScreen() {
-    final Color resolvedBorderColor = CupertinoDynamicColor.resolve(_kHighlighterBorder, context);
+  /// Draws the magnifier.
+  Widget _buildMagnifierScreen(Widget magnifier) {
+    final double height = widget.itemExtent * widget.magnification;
 
     return IgnorePointer(
       child: Center(
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(width: 0.0, color: resolvedBorderColor),
-              bottom: BorderSide(width: 0.0, color: resolvedBorderColor),
-            ),
-          ),
+        child: ConstrainedBox(
           constraints: BoxConstraints.expand(
-            height: widget.itemExtent * widget.magnification,
+            height: height,
+          ),
+          child: magnifier ?? Container(
+            margin: const EdgeInsets.symmetric(horizontal: CupertinoPicker.defaultHighlighterHorizontalMargin),
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(CupertinoPicker.defaultHighlighterRadius)),
+              color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemFillColor, context),
+            ),
           ),
         ),
       ),
@@ -301,7 +308,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               ),
             ),
           ),
-          _buildMagnifierScreen(),
+          _buildMagnifierScreen(widget.magnifier),
         ],
       ),
     );
