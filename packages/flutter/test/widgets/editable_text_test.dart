@@ -5419,7 +5419,8 @@ void main() {
 
   testWidgets('Apply formatters for texts added via TextEditingController', (WidgetTester tester) async {
     // This formatter just upperCase the text.
-    final TextInputFormatter formatter = TextInputFormatter.withFunction((oldValue, newValue) {
+    final TextInputFormatter formatter = TextInputFormatter.withFunction((
+        TextEditingValue oldValue, TextEditingValue newValue) {
       return newValue.copyWith(text: newValue.text.toUpperCase());
     });
 
