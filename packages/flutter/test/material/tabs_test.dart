@@ -1671,6 +1671,82 @@ void main() {
     ));
   });
 
+  testWidgets('Tab indicator animation test', (WidgetTester tester) async {
+    const double indicatorWeight = 8.0;
+
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(text: 'Tab $index');
+    });
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            indicatorWeight: indicatorWeight,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+
+    // Initial indicator position.
+    const double indicatorY = 54.0 - indicatorWeight / 2.0;
+    double indicatorLeft = indicatorWeight / 2.0;
+    double indicatorRight = 200.0 - (indicatorWeight / 2.0);
+
+    expect(tabBarBox, paints..line(
+      strokeWidth: indicatorWeight,
+      p1: Offset(indicatorLeft, indicatorY),
+      p2: Offset(indicatorRight, indicatorY),
+    ));
+
+    // Select tab 1.
+    controller.animateTo(1, duration: const Duration(milliseconds: 1000), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    indicatorLeft = 100.0 + indicatorWeight / 2.0;
+    indicatorRight = 300.0 - (indicatorWeight / 2.0);
+
+    expect(tabBarBox, paints..line(
+      strokeWidth: indicatorWeight,
+      p1: Offset(indicatorLeft, indicatorY),
+      p2: Offset(indicatorRight, indicatorY),
+    ));
+
+    // Select tab 2 when animation is running.
+    controller.animateTo(2, duration: const Duration(milliseconds: 1000), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    indicatorLeft = 250.0 + indicatorWeight / 2.0;
+    indicatorRight = 450.0 - (indicatorWeight / 2.0);
+
+    expect(tabBarBox, paints..line(
+      strokeWidth: indicatorWeight,
+      p1: Offset(indicatorLeft, indicatorY),
+      p2: Offset(indicatorRight, indicatorY),
+    ));
+
+    // Final indicator position.
+    await tester.pumpAndSettle();
+    indicatorLeft = 400.0 + indicatorWeight / 2.0;
+    indicatorRight = 600.0 - (indicatorWeight / 2.0);
+
+    expect(tabBarBox, paints..line(
+      strokeWidth: indicatorWeight,
+      p1: Offset(indicatorLeft, indicatorY),
+      p2: Offset(indicatorRight, indicatorY),
+    ));
+  });
+
   testWidgets('correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
