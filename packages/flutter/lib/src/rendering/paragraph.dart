@@ -735,11 +735,6 @@ class RenderParagraph extends RenderBox
     }
   }
 
-  /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
-  /// This does not required the layout to be updated.
-  double get preferredLineHeight => _textPainter.preferredLineHeight;
-
-
   /// Returns the offset at which to paint the caret.
   ///
   /// Valid only after [layout].
@@ -749,7 +744,7 @@ class RenderParagraph extends RenderBox
     return _textPainter.getOffsetForCaret(position, caretPrototype);
   }
 
-  /// Returns the tight bounded height of the glyph at the given [position].
+  /// {@macro flutter.painting.textPainter.getFullHeightForCaret}
   ///
   /// Valid only after [layout].
   double? getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
@@ -793,17 +788,6 @@ class RenderParagraph extends RenderBox
     assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getWordBoundary(position);
-  }
-
-  /// Returns the text range of the line at the given offset.
-  ///
-  /// The newline, if any, is included in the range.
-  ///
-  /// Valid only after [layout].
-  TextRange getLineBoundary(TextPosition position) {
-    assert(!debugNeedsLayout);
-    _layoutTextWithConstraints(constraints);
-    return _textPainter.getLineBoundary(position);
   }
 
   /// Returns the size of the text as laid out.
