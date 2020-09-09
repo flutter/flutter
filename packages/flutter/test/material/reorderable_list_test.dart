@@ -263,6 +263,7 @@ void main() {
                 width: 100,
                 height: 100,
                 child: ReorderableListView(
+                  scrollDirection: Axis.vertical,
                   children: const <Widget>[
                     SizedBox(key: firstBox, width: 10, height: 10),
                   ],
@@ -809,6 +810,7 @@ void main() {
                 width: 100,
                 height: 100,
                 child: ReorderableListView(
+                  scrollDirection: Axis.horizontal,
                   children: const <Widget>[
                     SizedBox(key: firstBox, width: 10, height: 10),
                   ],
