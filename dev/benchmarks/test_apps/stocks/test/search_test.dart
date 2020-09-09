@@ -19,9 +19,9 @@ void main() {
     expect(find.text('AAPL'), findsNothing);
     expect(find.text('BANA'), findsNothing);
 
-    final stock_state.StockState app = tester.widget<stock_state.StockStateScope>(
+    final stock_state.StockStateScope app = tester.widget<stock_state.StockStateScope>(
       find.byType(stock_state.StockStateScope)
-    ).notifier;
+    );
     app.stocks.add(<List<String>>[
       // "Symbol","Name","LastSale","MarketCap","IPOyear","Sector","industry","Summary Quote"
       <String>['AAPL', 'Apple', '', '', '', '', '', ''],
