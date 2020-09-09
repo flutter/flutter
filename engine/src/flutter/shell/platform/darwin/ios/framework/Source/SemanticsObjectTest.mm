@@ -33,7 +33,8 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
     SemanticsActionObservation observation(id, action);
     observations.push_back(observation);
   }
-  void AccessibilityFocusDidChange(int32_t id) override {}
+  void AccessibilityObjectDidBecomeFocused(int32_t id) override {}
+  void AccessibilityObjectDidLoseFocus(int32_t id) override {}
   FlutterPlatformViewsController* GetPlatformViewsController() const override { return nil; }
   std::vector<SemanticsActionObservation> observations;
 
