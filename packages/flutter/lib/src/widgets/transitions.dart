@@ -526,8 +526,8 @@ class SizeTransition extends AnimatedWidget {
 ///
 /// {@tool dartpad --template=stateful_widget_material_ticker}
 ///
-/// The following code implements the [FadeTransition] as seen in the video
-/// above:
+/// The following code implements the [FadeTransition] using
+/// the Flutter logo:
 ///
 /// ```dart
 /// AnimationController _controller;
