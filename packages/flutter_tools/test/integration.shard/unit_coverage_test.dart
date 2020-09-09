@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:process/process.dart';
 
 import '../src/common.dart';
@@ -21,7 +20,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('Can parse and output summaries for code coverage', () async {
+  testWithoutContext('Can parse and output summaries for code coverage', () async {
     final File coverageFile = tempDir.childFile('info.lcov')
       ..writeAsStringSync('''
 SF:lib/src/artifacts.dart
@@ -51,8 +50,8 @@ LH:6
 end_of_record
 ''');
 
-    final String dartScript = globals.fs.path.join(getFlutterRoot(), 'bin', 'dart');
-    final String coverageScript = globals.fs.path.join(getFlutterRoot(), 'packages', 'flutter_tools', 'tool', 'unit_coverage.dart');
+    final String dartScript = fileSystem.path.join(getFlutterRoot(), 'bin', 'dart');
+    final String coverageScript = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools', 'tool', 'unit_coverage.dart');
     final ProcessResult result = await const LocalProcessManager().run(<String>[
       dartScript,
       coverageScript,
