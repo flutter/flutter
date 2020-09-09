@@ -158,7 +158,7 @@ void Animator::BeginFrame(fml::TimePoint vsync_start_time,
     task_runners_.GetUITaskRunner()->PostDelayedTask(
         [self = weak_factory_.GetWeakPtr(),
          notify_idle_task_id = notify_idle_task_id_]() {
-          if (!self.get()) {
+          if (!self) {
             return;
           }
           // If our (this task's) task id is the same as the current one
@@ -228,7 +228,7 @@ void Animator::RequestFrame(bool regenerate_layer_tree) {
 
   task_runners_.GetUITaskRunner()->PostTask([self = weak_factory_.GetWeakPtr(),
                                              frame_number = frame_number_]() {
-    if (!self.get()) {
+    if (!self) {
       return;
     }
     TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending", frame_number);

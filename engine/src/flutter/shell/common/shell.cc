@@ -1225,7 +1225,7 @@ void Shell::OnFrameRasterized(const FrameTiming& timing) {
     frame_timings_report_scheduled_ = true;
     task_runners_.GetRasterTaskRunner()->PostDelayedTask(
         [self = weak_factory_gpu_->GetWeakPtr()]() {
-          if (!self.get()) {
+          if (!self) {
             return;
           }
           self->frame_timings_report_scheduled_ = false;
