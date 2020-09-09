@@ -107,6 +107,23 @@ AndroidShellHolder::AndroidShellHolder(
                                     ui_runner,        // ui
                                     io_runner         // io
   );
+  task_runners.GetRasterTaskRunner()->PostTask([]() {
+    // Android describes -8 as "most important display threads, for
+    // compositing the screen and retrieving input events". Conservatively
+    // set the raster thread to slightly lower priority than it.
+    if (::setpriority(PRIO_PROCESS, gettid(), -5) != 0) {
+      // Defensive fallback. Depending on the OEM, it may not be possible
+      // to set priority to -5.
+      if (::setpriority(PRIO_PROCESS, gettid(), -2) != 0) {
+        FML_LOG(ERROR) << "Failed to set GPU task runner priority";
+      }
+    }
+  });
+  task_runners.GetUITaskRunner()->PostTask([]() {
+    if (::setpriority(PRIO_PROCESS, gettid(), -1) != 0) {
+      FML_LOG(ERROR) << "Failed to set UI task runner priority";
+    }
+  });
 
   shell_ =
       Shell::Create(task_runners,              // task runners
@@ -118,28 +135,7 @@ AndroidShellHolder::AndroidShellHolder(
 
   platform_view_ = weak_platform_view;
   FML_DCHECK(platform_view_);
-
   is_valid_ = shell_ != nullptr;
-
-  if (is_valid_) {
-    shell_->GetTaskRunners().GetRasterTaskRunner()->PostTask([]() {
-      // Android describes -8 as "most important display threads, for
-      // compositing the screen and retrieving input events". Conservatively
-      // set the raster thread to slightly lower priority than it.
-      if (::setpriority(PRIO_PROCESS, gettid(), -5) != 0) {
-        // Defensive fallback. Depending on the OEM, it may not be possible
-        // to set priority to -5.
-        if (::setpriority(PRIO_PROCESS, gettid(), -2) != 0) {
-          FML_LOG(ERROR) << "Failed to set GPU task runner priority";
-        }
-      }
-    });
-    shell_->GetTaskRunners().GetUITaskRunner()->PostTask([]() {
-      if (::setpriority(PRIO_PROCESS, gettid(), -1) != 0) {
-        FML_LOG(ERROR) << "Failed to set UI task runner priority";
-      }
-    });
-  }
 }
 
 AndroidShellHolder::~AndroidShellHolder() {
