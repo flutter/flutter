@@ -95,8 +95,6 @@ GOTO :after_subroutine
     REM PowerShell command must have exit code set in order to prevent all non-zero exit codes from being translated
     REM into 1. The exit code 2 is used to detect the case where the major version is incorrect and there should be
     REM no subsequent retries.
-    REM PowerShell redirects all output streams to stdout by default, redirect these to stderr to avoid breaking
-    REM machine mode that parses stdout as structured data.
     ECHO Downloading Dart SDK from Flutter engine %dart_required_version%... 1>&2
     %powershell_executable% -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'; exit $LASTEXITCODE;"
     IF "%ERRORLEVEL%" EQU "2" (

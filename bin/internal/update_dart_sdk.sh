@@ -102,7 +102,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     >&2 echo
     >&2 echo "Failed to retrieve the Dart SDK from: $DART_SDK_URL"
     >&2 echo "If you're located in China, please see this page:"
-    e>&2 cho "  https://flutter.dev/community/china"
+    >&2 echo "  https://flutter.dev/community/china"
     >&2 echo
     rm -f -- "$DART_SDK_ZIP"
     exit 1
