@@ -397,14 +397,14 @@ class CupertinoColors {
   /// [UIColor.tertiarySystemFill](https://developer.apple.com/documentation/uikit/uicolor/3255076-tertiarysystemfill).
   static const CupertinoDynamicColor tertiarySystemFill = CupertinoDynamicColor(
     debugLabel: 'tertiarySystemFill',
-    color: Color.fromARGB(30, 118, 118, 128),
-    darkColor: Color.fromARGB(61, 118, 118, 128),
-    highContrastColor: Color.fromARGB(51, 118, 118, 128),
-    darkHighContrastColor: Color.fromARGB(81, 118, 118, 128),
-    elevatedColor: Color.fromARGB(30, 118, 118, 128),
-    darkElevatedColor: Color.fromARGB(61, 118, 118, 128),
-    highContrastElevatedColor: Color.fromARGB(51, 118, 118, 128),
-    darkHighContrastElevatedColor: Color.fromARGB(81, 118, 118, 128),
+    color: Color.fromRGBO(118, 118, 128, 0.12),
+    darkColor: Color.fromRGBO(118, 118, 128, 0.24),
+    highContrastColor: Color.fromRGBO(118, 118, 128, 0.2),
+    darkHighContrastColor: Color.fromRGBO(118, 118, 128, 0.325),
+    elevatedColor: Color.fromRGBO(118, 118, 128, 0.12),
+    darkElevatedColor: Color.fromRGBO(118, 118, 128, 0.24),
+    highContrastElevatedColor: Color.fromRGBO(118, 118, 128, 0.2),
+    darkHighContrastElevatedColor: Color.fromRGBO(118, 118, 128, 0.325),
   );
 
   /// An overlay fill color for large areas containing complex content, equivalent
@@ -571,20 +571,6 @@ class CupertinoColors {
     darkElevatedColor: Color.fromARGB(255, 9, 132, 255),
     highContrastElevatedColor: Color.fromARGB(255, 0, 122, 255),
     darkHighContrastElevatedColor: Color.fromARGB(255, 9, 132, 255),
-  );
-
-  /// The color for tertiarySystemFillColor, equivalent to
-  /// [UIColor.link](https://developer.apple.com/documentation/uikit/uicolor/3255076-tertiarysystemfill).
-  static const CupertinoDynamicColor tertiarySystemFillColor = CupertinoDynamicColor(
-    debugLabel: 'tertiarySystemFillColor',
-    color: Color.fromRGBO(118, 118, 128, 0.12),
-    darkColor: Color.fromRGBO(118, 118, 128, 0.24),
-    highContrastColor: Color.fromRGBO(118, 118, 128, 0.2),
-    darkHighContrastColor: Color.fromRGBO(118, 118, 128, 0.325),
-    elevatedColor: Color.fromRGBO(118, 118, 128, 0.12),
-    darkElevatedColor: Color.fromRGBO(118, 118, 128, 0.24),
-    highContrastElevatedColor: Color.fromRGBO(118, 118, 128, 0.2),
-    darkHighContrastElevatedColor: Color.fromRGBO(118, 118, 128, 0.325),
   );
 }
 

@@ -273,7 +273,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             margin: const EdgeInsets.symmetric(horizontal: CupertinoPicker.defaultHighlighterHorizontalMargin),
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all(Radius.circular(CupertinoPicker.defaultHighlighterRadius)),
-              color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemFillColor, context),
+              color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemFill, context),
             ),
           ),
         ),

@@ -69,7 +69,7 @@ Container _buildMagnifier(BuildContext context, [EdgeInsetsGeometry margin = Edg
   margin: margin,
   decoration: BoxDecoration(
     borderRadius: borderRadius,
-    color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemFillColor, context),
+    color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemFill, context),
   ),
 );
 
