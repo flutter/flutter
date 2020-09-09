@@ -1212,6 +1212,21 @@ void main() {
     );
   });
 
+  testWidgets('Element diagnostics with null child', (WidgetTester tester) async {
+    await tester.pumpWidget(const NullChildTest());
+    final NullChildElement test = tester.element<NullChildElement>(find.byType(NullChildTest));
+    test.includeChild = true;
+    expect(
+      tester.binding.renderViewElement.toStringDeep(),
+      equalsIgnoringHashCodes(
+        '[root](renderObject: RenderView#4a0f0)\n'
+        '└NullChildTest(dirty)\n'
+        ' └<null child>\n',
+      ),
+    );
+    test.includeChild = false;
+  });
+
   testWidgets('scheduleBuild while debugBuildingDirtyElements is true', (WidgetTester tester) async {
     /// ignore here is required for testing purpose because changing the flag properly is hard
     // ignore: invalid_use_of_protected_member
@@ -1579,6 +1594,30 @@ class _DecorateState extends State<Decorate> {
     widget.build.call(context.isDecorated);
     return Container();
   }
+}
+
+class NullChildTest extends Widget {
+  const NullChildTest({ Key key }) : super(key: key);
+  @override
+  Element createElement() => NullChildElement(this);
+}
+
+class NullChildElement extends Element {
+  NullChildElement(Widget widget) : super(widget);
+
+  bool includeChild = false;
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    if (includeChild)
+      visitor(null);
+  }
+
+  @override
+  void performRebuild() { }
+
+  @override
+  bool get debugDoingBuild => throw UnimplementedError();
 }
 
 class DirtyElementWithCustomBuildOwner extends Element {

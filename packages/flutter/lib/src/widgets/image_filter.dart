@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -16,9 +18,9 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   ///
   /// The [imageFilter] must not be null.
   const ImageFiltered({
-    Key? key,
-    required this.imageFilter,
-    Widget? child,
+    Key key,
+    @required this.imageFilter,
+    Widget child,
   }) : assert(imageFilter != null),
        super(key: key, child: child);
 
@@ -65,7 +67,7 @@ class _ImageFilterRenderObject extends RenderProxyBox {
       final ImageFilterLayer filterLayer = layer as ImageFilterLayer;
       filterLayer.imageFilter = imageFilter;
     }
-    context.pushLayer(layer!, super.paint, offset);
+    context.pushLayer(layer, super.paint, offset);
     assert(layer != null);
   }
 }

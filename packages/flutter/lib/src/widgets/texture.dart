@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/rendering.dart';
 import 'framework.dart';
 
@@ -36,8 +38,8 @@ class Texture extends LeafRenderObjectWidget {
   /// Creates a widget backed by the texture identified by [textureId], and use
   /// [filterQuality] to set texture's [FilterQuality].
   const Texture({
-    Key? key,
-    required this.textureId,
+    Key key,
+    @required this.textureId,
     this.filterQuality = FilterQuality.low,
   }) : assert(textureId != null),
        super(key: key);
