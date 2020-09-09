@@ -95,14 +95,14 @@ class HotRunner extends ResidentRunner {
   /// each attached device's devfs. Replacing the existing file is not safe and does
   /// not work at all on the windows embedder, because the old dill file will still be
   /// memory-mapped by the embedder. To work around this issue, the tool will alternate
-  /// names for the uploaded dill, sometimes inserting `.left`. Since the active dill will
+  /// names for the uploaded dill, sometimes inserting `.swap`. Since the active dill will
   /// never be replaced, there is no risk of writing the file while the embedder is attempting
   /// to read from it. This also avoids filling up the devfs, if a incrementing counter was
   /// used instead.
   ///
   /// This is only used for hot restart, incremental dills uploaded as part of the hot
   /// reload process do not have this issue.
-  bool _leftIdentifier = false;
+  bool _swap = false;
 
   bool _didAttach = false;
 
@@ -410,7 +410,7 @@ class HotRunner extends ResidentRunner {
         bundleDirty: !isFirstUpload && rebuildBundle,
         fullRestart: fullRestart,
         projectRootPath: projectRootPath,
-        pathToReload: getReloadPath(fullRestart: fullRestart, leftIdentifier: _leftIdentifier),
+        pathToReload: getReloadPath(fullRestart: fullRestart, swap: _swap),
         invalidatedFiles: invalidationResult.uris,
         packageConfig: invalidationResult.packageConfig,
         dillOutputPath: dillOutputPath,
@@ -558,7 +558,7 @@ class HotRunner extends ResidentRunner {
     }
     await Future.wait(operations);
 
-    await _launchFromDevFS('$mainPath${_leftIdentifier ? '.left' : ''}.dill');
+    await _launchFromDevFS('$mainPath${_swap ? '.swap' : ''}.dill');
     restartTimer.stop();
     globals.printTrace('Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
     _addBenchmarkData('hotRestartMillisecondsToFrame',
@@ -585,7 +585,7 @@ class HotRunner extends ResidentRunner {
       await Future.wait(isolateNotifications);
     }
     // Toggle the main dill name after successfully uploading.
-    _leftIdentifier =! _leftIdentifier;
+    _swap =! _swap;
 
     return OperationResult.ok;
   }
@@ -826,7 +826,7 @@ class HotRunner extends ResidentRunner {
     Map<String, dynamic> firstReloadDetails;
     try {
       final String entryPath = globals.fs.path.relative(
-        getReloadPath(fullRestart: false, leftIdentifier: _leftIdentifier),
+        getReloadPath(fullRestart: false, swap: _swap),
         from: projectRootPath,
       );
       final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];

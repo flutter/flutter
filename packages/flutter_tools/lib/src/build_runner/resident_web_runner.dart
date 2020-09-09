@@ -699,7 +699,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       fullRestart: fullRestart,
       dillOutputPath: dillOutputPath,
       projectRootPath: projectRootPath,
-      pathToReload: getReloadPath(fullRestart: fullRestart, leftIdentifier: false),
+      pathToReload: getReloadPath(fullRestart: fullRestart, swap: false),
       invalidatedFiles: invalidationResult.uris,
       packageConfig: invalidationResult.packageConfig,
       trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,

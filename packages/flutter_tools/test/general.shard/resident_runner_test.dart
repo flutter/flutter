@@ -1164,7 +1164,7 @@ void main() {
         method: kRunInViewMethod,
         args: <String, Object>{
           'viewId': fakeFlutterView.id,
-          'mainScript': 'lib/main.dart.left.dill',
+          'mainScript': 'lib/main.dart.swap.dill',
           'assetDirectory': 'build/flutter_assets',
         },
       ),
