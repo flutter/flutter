@@ -96,7 +96,15 @@ void main() {
     environment.defines[kBuildMode] = 'release';
     final Directory webResources = environment.projectDir.childDirectory('web');
     webResources.childFile('index.html')
-      .createSync(recursive: true);
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+<html>
+  <script src="main.dart.js" type="application/javascript"></script>
+  <script>
+    navigator.serviceWorker.register('flutter_service_worker.js');
+  </script>
+</html>
+''');
     webResources.childFile('foo.txt')
       .writeAsStringSync('A');
     environment.buildDir.childFile('main.dart.js').createSync();
@@ -117,6 +125,11 @@ void main() {
 
     expect(environment.outputDir.childFile('foo.txt')
       .readAsStringSync(), 'B');
+    // Appends number to requests for service worker and main.dart.js
+    expect(environment.outputDir.childFile('index.html').readAsStringSync(), allOf(
+      contains('<script src="main.dart.js?v='),
+      contains('flutter_service_worker.js?v='),
+    ));
   }));
 
   test('WebEntrypointTarget generates an entrypoint for a file outside of main', () => testbed.run(() async {
@@ -462,14 +475,20 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
+  test('Generated service worker is empty with none-strategy', () {
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[], serviceWorkerStrategy: ServiceWorkerStrategy.none);
+
+    expect(result, '');
+  });
+
   test('Generated service worker correctly inlines file hashes', () {
-    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[]);
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[], serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst);
 
     expect(result, contains('{\n  "/foo": "abcd"\n};'));
   });
 
   test('Generated service worker includes core files', () {
-    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>['foo', 'bar']);
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>['foo', 'bar'], serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst);
 
     expect(result, contains('"foo",\n"bar"'));
   });

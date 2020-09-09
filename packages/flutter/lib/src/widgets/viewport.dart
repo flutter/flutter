@@ -7,6 +7,7 @@
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 
 export 'package:flutter/rendering.dart' show
@@ -51,6 +52,9 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// rebuild this widget when the [offset] changes.
   ///
   /// The [offset] argument must not be null.
+  ///
+  /// The [cacheExtent] must be specified if the [cacheExtentStyle] is
+  /// not [CacheExtentStyle.pixel].
   Viewport({
     Key key,
     this.axisDirection = AxisDirection.down,
@@ -117,6 +121,10 @@ class Viewport extends MultiChildRenderObjectWidget {
   final Key center;
 
   /// {@macro flutter.rendering.viewport.cacheExtent}
+  ///
+  /// See also:
+  ///
+  ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
   final double cacheExtent;
 
   /// {@macro flutter.rendering.viewport.cacheExtentStyle}
@@ -136,10 +144,20 @@ class Viewport extends MultiChildRenderObjectWidget {
     assert(axisDirection != null);
     switch (axisDirection) {
       case AxisDirection.up:
+        assert(debugCheckHasDirectionality(
+          context,
+          why: 'to determine the cross-axis direction when the viewport has an \'up\' axisDirection',
+          alternative: 'Alternatively, consider specifying the \'crossAxisDirection\' argument on the Viewport.',
+        ));
         return textDirectionToAxisDirection(Directionality.of(context));
       case AxisDirection.right:
         return AxisDirection.down;
       case AxisDirection.down:
+        assert(debugCheckHasDirectionality(
+          context,
+          why: 'to determine the cross-axis direction when the viewport has a \'down\' axisDirection',
+          alternative: 'Alternatively, consider specifying the \'crossAxisDirection\' argument on the Viewport.',
+        ));
         return textDirectionToAxisDirection(Directionality.of(context));
       case AxisDirection.left:
         return AxisDirection.down;

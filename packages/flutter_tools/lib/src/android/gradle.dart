@@ -397,7 +397,7 @@ Future<void> buildGradleApp({
       environment: gradleEnvironment,
       mapFunction: consumeLog,
     );
-  } on ProcessException catch(exception) {
+  } on ProcessException catch (exception) {
     consumeLog(exception.toString());
     // Rethrow the exception if the error isn't handled by any of the
     // `localGradleErrors`.
@@ -522,6 +522,7 @@ Future<void> _performCodeSizeAnalysis(
   final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
     fileSystem: globals.fs,
     logger: globals.logger,
+    flutterUsage: globals.flutterUsage,
   );
   final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
   final BuildInfo buildInfo = androidBuildInfo.buildInfo;
