@@ -1917,8 +1917,8 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     double totalWidth = _kPickerWidth;
     assert(paddingValue >= 0);
 
-    final Widget leftMagnifier = _buildMagnifier(context, EdgeInsets.zero, _leftBorderRadius);
-    final Widget rightMagnifier = _buildMagnifier(context, EdgeInsets.zero, _rightBorderRadius);
+    final Widget leftMagnifier = _buildMagnifier(context, _leftEdgeInsets, _leftBorderRadius);
+    final Widget rightMagnifier = _buildMagnifier(context, _rightEdgeInsets, _rightBorderRadius);
 
     switch (widget.mode) {
       case CupertinoTimerPickerMode.hm:
