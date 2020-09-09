@@ -579,12 +579,12 @@ class CupertinoColors {
     debugLabel: 'tertiarySystemFillColor',
     color: Color.fromRGBO(118, 118, 128, 0.12),
     darkColor: Color.fromRGBO(118, 118, 128, 0.24),
-    highContrastColor: Color.fromRGBO(118, 118, 128, 0.12),
-    darkHighContrastColor: Color.fromRGBO(118, 118, 128, 0.24),
+    highContrastColor: Color.fromRGBO(118, 118, 128, 0.2),
+    darkHighContrastColor: Color.fromRGBO(118, 118, 128, 0.325),
     elevatedColor: Color.fromRGBO(118, 118, 128, 0.12),
     darkElevatedColor: Color.fromRGBO(118, 118, 128, 0.24),
-    highContrastElevatedColor: Color.fromRGBO(118, 118, 128, 0.12),
-    darkHighContrastElevatedColor: Color.fromRGBO(118, 118, 128, 0.24),
+    highContrastElevatedColor: Color.fromRGBO(118, 118, 128, 0.2),
+    darkHighContrastElevatedColor: Color.fromRGBO(118, 118, 128, 0.325),
   );
 }
 
