@@ -36,17 +36,19 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder text(String text, { bool skipOffstage = true }) => _TextFinder(text, skipOffstage: skipOffstage);
 
-  /// Finds [Text] and [EditableText] widgets which contain the `text` argument.
+  /// Finds [Text] and [EditableText] widgets which contain the given
+  /// `pattern` argument.
   ///
   /// ## Sample code
   ///
   /// ```dart
   /// expect(find.textContain('Back'), findsOneWidget);
+  /// expect(find.textContain(RegExp(r'(\w+)')), findsOneWidget);
   /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder textContaining(String text, { bool skipOffstage = true }) => _TextContainingFinder(text, skipOffstage: skipOffstage);
+  Finder textContaining(Pattern pattern, { bool skipOffstage = true }) => _TextContainingFinder(pattern, skipOffstage: skipOffstage);
 
   /// Looks for widgets that contain a [Text] descendant with `text`
   /// in it.
@@ -569,23 +571,23 @@ class _TextFinder extends MatchFinder {
 }
 
 class _TextContainingFinder extends MatchFinder {
-  _TextContainingFinder(this.text, {bool skipOffstage = true})
+  _TextContainingFinder(this.pattern, {bool skipOffstage = true})
       : super(skipOffstage: skipOffstage);
 
-  final String text;
+  final Pattern pattern;
 
   @override
-  String get description => 'text containing "$text"';
+  String get description => 'text containing $pattern';
 
   @override
   bool matches(Element candidate) {
     final Widget widget = candidate.widget;
     if (widget is Text) {
       if (widget.data != null)
-        return widget.data.contains(text);
-      return widget.textSpan.toPlainText().contains(text);
+        return widget.data.contains(pattern);
+      return widget.textSpan.toPlainText().contains(pattern);
     } else if (widget is EditableText) {
-      return widget.controller.text.contains(text);
+      return widget.controller.text.contains(pattern);
     }
     return false;
   }
