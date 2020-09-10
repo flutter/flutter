@@ -7,10 +7,12 @@
 import 'package:flutter/widgets.dart';
 
 import '../color_scheme.dart';
+import '../colors.dart';
 import '../icon_button.dart';
 import '../material.dart';
 import '../text_theme.dart';
 import '../theme.dart';
+import 'date_picker_theme.dart';
 
 // This is an internal implementation file. Even though there are public
 // classes and functions defined here, they are only meant to be used by the
@@ -96,11 +98,19 @@ class DatePickerHeader extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final TextTheme textTheme = theme.textTheme;
+    final DatePickerThemeData pickerTheme = DatePickerTheme.of(context);
 
     // The header should use the primary color in light themes and surface color in dark
     final bool isDark = colorScheme.brightness == Brightness.dark;
     final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
     final Color onPrimarySurfaceColor = isDark ? colorScheme.onSurface : colorScheme.onPrimary;
+
+    final Decoration themeDecoration = orientation == Orientation.landscape
+      ? pickerTheme.headerLandscapeDecoration ?? pickerTheme.headerDecoration
+      : pickerTheme.headerDecoration;
+    final Decoration decoration = themeDecoration ?? BoxDecoration(
+      color: primarySurfaceColor,
+    );
 
     final TextStyle helpStyle = textTheme.overline?.copyWith(
       color: onPrimarySurfaceColor,
@@ -108,7 +118,7 @@ class DatePickerHeader extends StatelessWidget {
 
     final Text help = Text(
       helpText,
-      style: helpStyle,
+      style: pickerTheme.headerHelpTextStyle ?? helpStyle,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
@@ -119,37 +129,47 @@ class DatePickerHeader extends StatelessWidget {
       maxLines: orientation == Orientation.portrait ? 1 : 2,
       overflow: TextOverflow.ellipsis,
     );
-    final IconButton icon = IconButton(
+
+    Widget icon = IconButton(
       icon: Icon(this.icon),
-      color: onPrimarySurfaceColor,
+      color: pickerTheme.headerIconTheme?.color ?? onPrimarySurfaceColor,
       tooltip: iconTooltip,
       onPressed: onIconPressed,
     );
+    if (pickerTheme.headerIconTheme != null) {
+      icon = IconTheme(
+        data: pickerTheme.headerIconTheme,
+        child: icon,
+      );
+    }
 
     switch (orientation) {
       case Orientation.portrait:
          return SizedBox(
            height: _datePickerHeaderPortraitHeight,
-           child: Material(
-             color: primarySurfaceColor,
-             child: Padding(
-               padding: const EdgeInsetsDirectional.only(
-                 start: 24,
-                 end: 12,
-               ),
-               child: Column(
-                 crossAxisAlignment: CrossAxisAlignment.start,
-                 children: <Widget>[
-                   const SizedBox(height: 16),
-                   Flexible(child: help),
-                   const SizedBox(height: 38),
-                   Row(
-                     children: <Widget>[
-                       Expanded(child: title),
-                       icon,
-                     ],
-                   ),
-                 ],
+           child: DecoratedBox(
+             decoration: decoration,
+             child: Material(
+               color: Colors.transparent,
+               child: Padding(
+                 padding: const EdgeInsetsDirectional.only(
+                   start: 24,
+                   end: 12,
+                 ),
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: <Widget>[
+                     const SizedBox(height: 16),
+                     Flexible(child: help),
+                     const SizedBox(height: 38),
+                     Row(
+                       children: <Widget>[
+                         Expanded(child: title),
+                         icon,
+                       ],
+                     ),
+                   ],
+                 ),
                ),
              ),
            ),
@@ -157,34 +177,39 @@ class DatePickerHeader extends StatelessWidget {
       case Orientation.landscape:
         return SizedBox(
           width: _datePickerHeaderLandscapeWidth,
-          child: Material(
-            color: primarySurfaceColor,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: _headerPaddingLandscape,
-                  ),
-                  child: help,
-                ),
-                SizedBox(height: isShort ? 16 : 56),
-                Expanded(
-                  child: Padding(
+          child: DecoratedBox(
+            decoration: pickerTheme.headerDecoration ?? BoxDecoration(
+              color: primarySurfaceColor,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const SizedBox(height: 16),
+                  Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: _headerPaddingLandscape,
                     ),
-                    child: title,
+                    child: help,
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
+                  SizedBox(height: isShort ? 16 : 56),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: _headerPaddingLandscape,
+                      ),
+                      child: title,
+                    ),
                   ),
-                  child: icon,
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                    ),
+                    child: icon,
+                  ),
+                ],
+              ),
             ),
           ),
         );

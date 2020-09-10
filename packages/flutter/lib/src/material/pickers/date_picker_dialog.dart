@@ -6,6 +6,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -31,7 +32,6 @@ const Size _inputLandscapeDialogSize = Size(496, 160.0);
 const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 const double _inputFormPortraitHeight = 98.0;
 const double _inputFormLandscapeHeight = 108.0;
-
 
 /// Shows a dialog containing a Material Design date picker.
 ///
@@ -364,6 +364,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
+    final DatePickerThemeData pickerTheme = DatePickerTheme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Orientation orientation = MediaQuery.of(context).orientation;
     final TextTheme textTheme = theme.textTheme;
@@ -374,12 +375,13 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     final String dateText = _selectedDate != null
       ? localizations.formatMediumDate(_selectedDate)
       : localizations.unspecifiedDate;
-    final Color dateColor = colorScheme.brightness == Brightness.light
-      ? colorScheme.onPrimary
-      : colorScheme.onSurface;
+    final Color dateColor = pickerTheme.headerForegroundColor ??
+      (colorScheme.brightness == Brightness.light
+        ? colorScheme.onPrimary
+        : colorScheme.onSurface);
     final TextStyle dateStyle = orientation == Orientation.landscape
-      ? textTheme.headline5?.copyWith(color: dateColor)
-      : textTheme.headline4?.copyWith(color: dateColor);
+      ? (pickerTheme.headerCompactTitleTextStyle ?? textTheme.headline5)?.copyWith(color: dateColor)
+      : (pickerTheme.headerTitleTextStyle ?? textTheme.headline4)?.copyWith(color: dateColor);
 
     final Widget actions = Container(
       alignment: AlignmentDirectional.centerEnd,
@@ -468,6 +470,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
     return Dialog(
+      backgroundColor: pickerTheme.backgroundColor,
       child: AnimatedContainer(
         width: dialogSize.width,
         height: dialogSize.height,
@@ -514,6 +517,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       ),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
       clipBehavior: Clip.antiAlias,
+      shape: pickerTheme.dialogShape,
     );
   }
 }
