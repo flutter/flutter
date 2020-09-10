@@ -2664,6 +2664,19 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// needed, prefer removing the widget from the tree entirely rather than
 /// keeping it alive in an [Offstage] subtree.
 ///
+/// {@tool snippet}
+///
+/// This example shows a [FlutterLogo] widget when the `_offstage` member field is false,
+/// and hides it when it is true:
+///
+/// ```dart
+/// Offstage(
+//    offstage: _offstage,
+//    child: const FlutterLogo(),
+//  )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Visibility], which can hide a child more efficiently (albeit less
