@@ -497,9 +497,6 @@ TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
   DestroyShell(std::move(shell));
 }
 
-#if !defined(OS_FUCHSIA)
-// TODO(sanjayc77): https://github.com/flutter/flutter/issues/53179. Add
-// support for raster thread merger for Fuchsia.
 TEST_F(ShellTest, ExternalEmbedderNoThreadMerger) {
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
@@ -548,8 +545,14 @@ TEST_F(ShellTest, ExternalEmbedderNoThreadMerger) {
   DestroyShell(std::move(shell));
 }
 
+// TODO(https://github.com/flutter/flutter/issues/59816): Enable on fuchsia.
 TEST_F(ShellTest,
-       ExternalEmbedderEndFrameIsCalledWhenPostPrerollResultIsResubmit) {
+#if defined(OS_FUCHSIA)
+       DISABLED_ExternalEmbedderEndFrameIsCalledWhenPostPrerollResultIsResubmit
+#else
+       ExternalEmbedderEndFrameIsCalledWhenPostPrerollResultIsResubmit
+#endif
+) {
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
   bool end_frame_called = false;
@@ -597,7 +600,14 @@ TEST_F(ShellTest,
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, OnPlatformViewDestroyDisablesThreadMerger) {
+// TODO(https://github.com/flutter/flutter/issues/59816): Enable on fuchsia.
+TEST_F(ShellTest,
+#if defined(OS_FUCHSIA)
+       DISABLED_OnPlatformViewDestroyDisablesThreadMerger
+#else
+       OnPlatformViewDestroyDisablesThreadMerger
+#endif
+) {
   auto settings = CreateSettingsForFixture();
   fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger;
   auto end_frame_callback =
@@ -653,7 +663,14 @@ TEST_F(ShellTest, OnPlatformViewDestroyDisablesThreadMerger) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, OnPlatformViewDestroyAfterMergingThreads) {
+// TODO(https://github.com/flutter/flutter/issues/59816): Enable on fuchsia.
+TEST_F(ShellTest,
+#if defined(OS_FUCHSIA)
+       DISABLED_OnPlatformViewDestroyAfterMergingThreads
+#else
+       OnPlatformViewDestroyAfterMergingThreads
+#endif
+) {
   const size_t ThreadMergingLease = 10;
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
@@ -719,7 +736,14 @@ TEST_F(ShellTest, OnPlatformViewDestroyAfterMergingThreads) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, OnPlatformViewDestroyWhenThreadsAreMerging) {
+// TODO(https://github.com/flutter/flutter/issues/59816): Enable on fuchsia.
+TEST_F(ShellTest,
+#if defined(OS_FUCHSIA)
+       DISABLED_OnPlatformViewDestroyWhenThreadsAreMerging
+#else
+       OnPlatformViewDestroyWhenThreadsAreMerging
+#endif
+) {
   const size_t kThreadMergingLease = 10;
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
@@ -792,8 +816,14 @@ TEST_F(ShellTest, OnPlatformViewDestroyWhenThreadsAreMerging) {
   DestroyShell(std::move(shell));
 }
 
+// TODO(https://github.com/flutter/flutter/issues/59816): Enable on fuchsia.
 TEST_F(ShellTest,
-       OnPlatformViewDestroyWithThreadMergerWhileThreadsAreUnmerged) {
+#if defined(OS_FUCHSIA)
+       DISABLED_OnPlatformViewDestroyWithThreadMergerWhileThreadsAreUnmerged
+#else
+       OnPlatformViewDestroyWithThreadMergerWhileThreadsAreUnmerged
+#endif
+) {
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
   auto end_frame_callback =
@@ -894,9 +924,15 @@ TEST_F(ShellTest, OnPlatformViewDestroyWithoutRasterThreadMerger) {
 
   DestroyShell(std::move(shell));
 }
-#endif
 
-TEST_F(ShellTest, OnPlatformViewDestroyWithStaticThreadMerging) {
+// TODO(https://github.com/flutter/flutter/issues/59816): Enable on fuchsia.
+TEST_F(ShellTest,
+#if defined(OS_FUCHSIA)
+       DISABLED_OnPlatformViewDestroyWithStaticThreadMerging
+#else
+       OnPlatformViewDestroyWithStaticThreadMerging
+#endif
+) {
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
   auto end_frame_callback =
