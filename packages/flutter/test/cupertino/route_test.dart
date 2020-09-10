@@ -1474,7 +1474,11 @@ void main() {
   });
 
   testWidgets('Popping routes should cancel down events', (WidgetTester tester) async {
-    await tester.pumpWidget(TestPostRouteCancel());
+    // The test target, _TestPostRouteCancel, shows on the home route how many
+    // [PointerCancelEvent] it has received. Initially it will show "Home 0".
+    // After the route is popped, it should show "Home 1", meaning it received
+    // one [PointerCancelEvent].
+    await tester.pumpWidget(_TestPostRouteCancel());
 
     final TestGesture gesture = await tester.createGesture();
     await gesture.down(tester.getCenter(find.text('Home 0')));
@@ -1489,7 +1493,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Hold'), findsNothing);
     expect(find.byType(CupertinoButton), findsOneWidget);
-    // expect(find.text('Home 0'), findsOneWidget);
     expect(find.text('Home 1'), findsOneWidget);
   });
 }
@@ -1605,12 +1608,12 @@ Widget buildNavigator({
 //
 // Holding the 'Hold' button at the moment of popping will force the navigator to
 // cancel the down event, increasing the Home counter by 1.
-class TestPostRouteCancel extends StatefulWidget {
+class _TestPostRouteCancel extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _TestPostRouteCancelState();
 }
 
-class _TestPostRouteCancelState extends State<TestPostRouteCancel> {
+class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
 
   int counter = 0;
 

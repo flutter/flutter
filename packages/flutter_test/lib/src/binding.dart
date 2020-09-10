@@ -196,7 +196,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// prepare the binding for the next test.
   void reset() {
     _restorationManager = createRestorationManager();
-    resetGesture();
+    resetGestureBinding();
   }
 
   @override
@@ -489,13 +489,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// events from the device).
   Offset localToGlobal(Offset point) => point;
 
-  /// The source of the current pointer event.
-  ///
-  /// The [pointerEventSource] is set as the `source` parameter of
-  /// [handlePointerEvent] and can be used in the immediate enclosing
-  /// [dispatchEvent].
-  @protected
-  TestBindingEventSource pointerEventSource = TestBindingEventSource.device;
+  // The source of the current pointer event.
+  //
+  // The [pointerEventSource] is set as the `source` parameter of
+  // [handlePointerEvent] and can be used in the immediate enclosing
+  // [dispatchEvent].
+  TestBindingEventSource _pointerEventSource = TestBindingEventSource.device;
 
   @override
   void handlePointerEvent(
@@ -503,11 +502,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     TestBindingEventSource source = TestBindingEventSource.device,
   }) {
     final TestBindingEventSource previousSource = source;
-    pointerEventSource = source;
+    _pointerEventSource = source;
     try {
       super.handlePointerEvent(event);
     } finally {
-      pointerEventSource = previousSource;
+      _pointerEventSource = previousSource;
     }
   }
 
@@ -1529,7 +1528,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void dispatchEvent(PointerEvent event, HitTestResult hitTestResult) {
-    switch (pointerEventSource) {
+    switch (_pointerEventSource) {
       case TestBindingEventSource.test:
         super.dispatchEvent(event, hitTestResult);
         break;

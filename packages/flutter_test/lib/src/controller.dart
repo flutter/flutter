@@ -775,12 +775,6 @@ abstract class WidgetController {
   }
 
   /// Forwards the given pointer event to the binding.
-  // Future<void> sendEventToBinding(PointerEvent event, HitTestResult result) {
-  //   return TestAsyncUtils.guard<void>(() async {
-  //     binding.dispatchEvent(event, result);
-  //   });
-  // }
-
   Future<void> sendEventToBinding(PointerEvent event) {
     return TestAsyncUtils.guard<void>(() async {
       binding.handlePointerEvent(event);
