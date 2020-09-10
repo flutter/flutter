@@ -58,21 +58,9 @@ void _animateColumnControllerToItem(FixedExtentScrollController controller, int 
   );
 }
 
-const EdgeInsets _leftEdgeInsets = EdgeInsets.only(left: CupertinoPicker.defaultHighlighterHorizontalMargin);
-const EdgeInsets _rightEdgeInsets = EdgeInsets.only(right: CupertinoPicker.defaultHighlighterHorizontalMargin);
-
-const BorderRadius _leftBorderRadius = BorderRadius.horizontal(left: Radius.circular(CupertinoPicker.defaultHighlighterRadius));
-const BorderRadius _rightBorderRadius = BorderRadius.horizontal(right: Radius.circular(CupertinoPicker.defaultHighlighterRadius));
-
-
-Container _buildMagnifier(BuildContext context, [EdgeInsetsGeometry margin = EdgeInsets.zero, BorderRadiusGeometry borderRadius = BorderRadius.zero]) => Container(
-  margin: margin,
-  decoration: BoxDecoration(
-    borderRadius: borderRadius,
-    color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemFill, context),
-  ),
-);
-
+const Widget _leftMagnifier = CupertinoPickerDefaultMagnifier(useRightStyle: false,);
+const Widget _centerMagnifier = CupertinoPickerDefaultMagnifier(useLeftStyle: false, useRightStyle: false,);
+const Widget _rightMagnifier = CupertinoPickerDefaultMagnifier(useLeftStyle: false);
 
 // Lays out the date picker based on how much space each single column needs.
 //
@@ -1005,19 +993,19 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       Widget magnifier;
       if (i == 0) {
         offAxisFraction = -_kMaximumOffAxisFraction * textDirectionFactor;
-        magnifier = _buildMagnifier(context, _leftEdgeInsets, _leftBorderRadius);
+        magnifier = _leftMagnifier;
       } else if (i >= 2 || columnWidths.length == 2)
         offAxisFraction = _kMaximumOffAxisFraction * textDirectionFactor;
 
       EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
       if (i == columnWidths.length - 1) {
         padding = padding.flipped;
-        magnifier = _buildMagnifier(context, _rightEdgeInsets, _rightBorderRadius);
+        magnifier = _rightMagnifier;
       }
       if (textDirectionFactor == -1)
         padding = padding.flipped;
 
-      magnifier ??= _buildMagnifier(context);
+      magnifier ??= _centerMagnifier;
 
       pickers.add(LayoutId(
         id: i,
@@ -1386,11 +1374,11 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
       Widget magnifier;
       if (i == 0)
-        magnifier = _buildMagnifier(context, _leftEdgeInsets, _leftBorderRadius);
+        magnifier = _leftMagnifier;
       else if (i == columnWidths.length - 1)
-        magnifier = _buildMagnifier(context, _rightEdgeInsets, _rightBorderRadius);
+        magnifier = _rightMagnifier;
       else
-        magnifier = _buildMagnifier(context);
+        magnifier = _centerMagnifier;
 
 
       pickers.add(LayoutId(
@@ -1916,31 +1904,28 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     double totalWidth = _kPickerWidth;
     assert(paddingValue >= 0);
 
-    final Widget leftMagnifier = _buildMagnifier(context, _leftEdgeInsets, _leftBorderRadius);
-    final Widget rightMagnifier = _buildMagnifier(context, _rightEdgeInsets, _rightBorderRadius);
-
     switch (widget.mode) {
       case CupertinoTimerPickerMode.hm:
         // Pad the widget to make it as wide as `_kPickerWidth`.
         columns = <Widget>[
-          _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding), leftMagnifier),
-          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2), rightMagnifier),
+          _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding), _leftMagnifier),
+          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2), _rightMagnifier),
         ];
         break;
       case CupertinoTimerPickerMode.ms:
         // Pad the widget to make it as wide as `_kPickerWidth`.
         columns = <Widget>[
-          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding), leftMagnifier),
-          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2), rightMagnifier),
+          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding), _leftMagnifier),
+          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2), _rightMagnifier),
         ];
         break;
       case CupertinoTimerPickerMode.hms:
         const double paddingValue = _kTimerPickerHalfColumnPadding * 2;
         totalWidth = _kTimerPickerColumnIntrinsicWidth * 3 + 4 * _kTimerPickerHalfColumnPadding + paddingValue;
         columns = <Widget>[
-          _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding), leftMagnifier),
-          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: _kTimerPickerHalfColumnPadding), _buildMagnifier(context)),
-          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2), rightMagnifier),
+          _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding), _leftMagnifier),
+          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: _kTimerPickerHalfColumnPadding), _centerMagnifier),
+          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2), _rightMagnifier),
         ];
         break;
     }

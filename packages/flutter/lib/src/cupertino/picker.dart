@@ -193,12 +193,6 @@ class CupertinoPicker extends StatefulWidget {
   /// the [magnifier] widget overlaid on top of [ListWheelScrollView].
   final Widget magnifier;
 
-  /// default margin of the 'magnifier'.
-  static const double defaultHighlighterHorizontalMargin = 9;
-  /// default radius of the 'magnifier'.
-  static const double defaultHighlighterRadius = 8;
-
-
   @override
   State<StatefulWidget> createState() => _CupertinoPickerState();
 }
@@ -269,13 +263,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
           constraints: BoxConstraints.expand(
             height: height,
           ),
-          child: magnifier ?? Container(
-            margin: const EdgeInsets.symmetric(horizontal: CupertinoPicker.defaultHighlighterHorizontalMargin),
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(CupertinoPicker.defaultHighlighterRadius)),
-              color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemFill, context),
-            ),
-          ),
+          child: magnifier ?? const CupertinoPickerDefaultMagnifier(),
         ),
       ),
     );
@@ -316,6 +304,57 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     return DecoratedBox(
       decoration: BoxDecoration(color: resolvedBackgroundColor),
       child: result,
+    );
+  }
+}
+
+/// An picker default magnifier, grey rrect first introduced in iOS 14
+class CupertinoPickerDefaultMagnifier extends StatelessWidget {
+
+  /// Create a magnifier, it can be easily configured with the default style.
+  /// The default background is [CupertinoColors.tertiarySystemFill],
+  /// which also has default radius and margin on the left and right sides.
+  const CupertinoPickerDefaultMagnifier({
+    Key key,
+    this.background = CupertinoColors.tertiarySystemFill,
+    this.useLeftStyle = true,
+    this.useRightStyle = true,
+  }) : assert(background != null),
+       assert(useLeftStyle != null),
+       assert(useRightStyle != null),
+       super(key: key);
+
+  /// Whether to use the default radius and margin on the left side
+  final bool useLeftStyle;
+
+  /// Whether to use the default radius and margin on the right side
+  final bool useRightStyle;
+
+  /// The color to fill in the background of the magnifier, Support for using [CupertinoDynamicColor].
+  final Color background;
+
+  /// default margin of the 'magnifier'.
+  static const double _defaultMagnifierHorizontalMargin = 9;
+
+  /// default radius of the 'magnifier'.
+  static const double _defaultMagnifierRadius = 8;
+
+  @override
+  Widget build(BuildContext context) {
+    const Radius radius = Radius.circular(_defaultMagnifierRadius);
+
+    return Container(
+      margin: EdgeInsets.only(
+        left: useLeftStyle ? _defaultMagnifierHorizontalMargin : 0,
+        right: useRightStyle ? _defaultMagnifierHorizontalMargin : 0,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.horizontal(
+          left: useLeftStyle ? radius : Radius.zero,
+          right: useRightStyle ? radius : Radius.zero,
+        ),
+        color: CupertinoDynamicColor.resolve(background, context),
+      ),
     );
   }
 }
