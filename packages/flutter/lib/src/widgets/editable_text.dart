@@ -1566,15 +1566,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
-    if (kIsWeb && oldWidget.readOnly != widget.readOnly) {
-      _textInputConnection.updateConfig(textInputConfiguration);
+    if (kIsWeb && _hasInputConnection) {
+      if (oldWidget.readOnly != widget.readOnly) {
+        _textInputConnection!.updateConfig(textInputConfiguration);
+      }
     }
 
     if (widget.style != oldWidget.style) {
       final TextStyle style = widget.style;
       // The _textInputConnection will pick up the new style when it attaches in
       // _openInputConnection.
-      if (_textInputConnection != null && _textInputConnection!.attached) {
+      if (_hasInputConnection) {
         _textInputConnection!.setStyle(
           fontFamily: style.fontFamily,
           fontSize: style.fontSize,
