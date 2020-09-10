@@ -603,11 +603,10 @@ Future<void> _runFrameworkTests() async {
     deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'));
     deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp'));
 
-    final String workingDirectory = path.join(flutterRoot, 'packages', 'flutter', 'test_private');
     await runCommand(
       pub,
       args,
-      workingDirectory: workingDirectory,
+      workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_private'),
       environment: pubEnvironment,
     );
   }

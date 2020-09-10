@@ -19,9 +19,8 @@ The tests are run like so:
 pub run --enable-experiment=non-nullable test_private.dart
 ```
 
-One limitation is that the copied code needs to be separable enough to be
-copied, so it needs to be in its own separate files, or extracted out of a
-larger file by the script (not a method currently employed).
+One limitation is that the copied private API needs to be separable enough to be
+copied, so it needs to be in its own separate files.
 
 To add a private test, add a manifest file of the form (assuming
 "my_private_test" is the name of the test) to the [test](test) subdir:

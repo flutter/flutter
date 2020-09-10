@@ -8,7 +8,6 @@ environment:
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
-  args: 1.6.0
   meta: 1.3.0-nullsafety.2
   path: 1.8.0-nullsafety
   process: 4.0.0-nullsafety.1
@@ -21,4 +20,4 @@ dependencies:
 
 dev_dependencies:
 
-# PUBSPEC CHECKSUM: ede7
+# PUBSPEC CHECKSUM: a9ea

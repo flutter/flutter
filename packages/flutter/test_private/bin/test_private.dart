@@ -109,7 +109,7 @@ File makeAbsolute(File file, {Directory? workingDirectory}) {
 ///
 /// The pubspec file is copied to the root of the test area too, but renamed to
 /// "pubspec.yaml".
-class TestCase extends Object {
+class TestCase {
   TestCase.fromManifest(this.manifest, this.tmpdir) {
     _json = jsonDecode(manifest.readAsStringSync()) as Map<String, dynamic>;
     tmpdir.createSync(recursive: true);
@@ -198,7 +198,7 @@ Stream<TestCase> getTestCases(Directory tmpdir) async* {
       // .dart_tool, which contains a (non-hidden) .json file.
       continue;
     }
-    if (entity is File && path.basename(entity.path).endsWith('.json')) {
+    if (entity is File && path.basename(entity.path).endsWith('_test.json')) {
       print('Found manifest ${entity.path}');
       final Directory testTmpDir =
           Directory(path.join(tmpdir.absolute.path, path.basenameWithoutExtension(entity.path)));
