@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -90,11 +90,10 @@ Future<T> showSearch<T>({
 /// call. Call [SearchDelegate.close] before re-using the same delegate instance
 /// for another [showSearch] call.
 abstract class SearchDelegate<T> {
-
   /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
   /// [textInputAction].
   ///
-  /// {@tool snippet}
+  /// {@tool sample}
   /// ```dart
   /// class CustomSearchHintDelegate extends SearchDelegate {
   ///   CustomSearchHintDelegate({
@@ -201,6 +200,10 @@ abstract class SearchDelegate<T> {
       primaryIconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
       primaryColorBrightness: Brightness.light,
       primaryTextTheme: theme.textTheme,
+      inputDecorationTheme: InputDecorationTheme(
+        border: InputBorder.none,
+        hintStyle: theme.inputDecorationTheme.hintStyle,
+      ),
     );
   }
 
@@ -245,7 +248,8 @@ abstract class SearchDelegate<T> {
   ///
   ///  * [showResults] to show the search results.
   void showSuggestions(BuildContext context) {
-    assert(_focusNode != null, '_focusNode must be set by route before showSuggestions is called.');
+    assert(_focusNode != null,
+        '_focusNode must be set by route before showSuggestions is called.');
     _focusNode.requestFocus();
     _currentBody = _SearchBody.suggestions;
   }
@@ -299,9 +303,11 @@ abstract class SearchDelegate<T> {
 
   final TextEditingController _queryTextController = TextEditingController();
 
-  final ProxyAnimation _proxyAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
+  final ProxyAnimation _proxyAnimation =
+      ProxyAnimation(kAlwaysDismissedAnimation);
 
-  final ValueNotifier<_SearchBody> _currentBodyNotifier = ValueNotifier<_SearchBody>(null);
+  final ValueNotifier<_SearchBody> _currentBodyNotifier =
+      ValueNotifier<_SearchBody>(null);
 
   _SearchBody get _currentBody => _currentBodyNotifier.value;
   set _currentBody(_SearchBody value) {
@@ -447,7 +453,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     if (widget.delegate != oldWidget.delegate) {
       oldWidget.delegate._queryTextController.removeListener(_onQueryChanged);
       widget.delegate._queryTextController.addListener(_onQueryChanged);
-      oldWidget.delegate._currentBodyNotifier.removeListener(_onSearchBodyChanged);
+      oldWidget.delegate._currentBodyNotifier
+          .removeListener(_onSearchBodyChanged);
       widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
       oldWidget.delegate._focusNode = null;
       widget.delegate._focusNode = focusNode;
@@ -455,7 +462,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   }
 
   void _onFocusChanged() {
-    if (focusNode.hasFocus && widget.delegate._currentBody != _SearchBody.suggestions) {
+    if (focusNode.hasFocus &&
+        widget.delegate._currentBody != _SearchBody.suggestions) {
       widget.delegate.showSuggestions(context);
     }
   }
@@ -476,12 +484,10 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
-    final String searchFieldLabel = widget.delegate.searchFieldLabel
-      ?? MaterialLocalizations.of(context).searchFieldLabel;
-    final TextStyle searchFieldStyle = widget.delegate.searchFieldStyle
-      ?? theme.inputDecorationTheme.hintStyle;
+    final String searchFieldLabel = widget.delegate.searchFieldLabel ??
+        MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
-    switch(widget.delegate._currentBody) {
+    switch (widget.delegate._currentBody) {
       case _SearchBody.suggestions:
         body = KeyedSubtree(
           key: const ValueKey<_SearchBody>(_SearchBody.suggestions),
@@ -498,13 +504,10 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     String routeName;
     switch (theme.platform) {
       case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
         routeName = '';
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
         routeName = searchFieldLabel;
     }
 
@@ -513,33 +516,30 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       scopesRoute: true,
       namesRoute: true,
       label: routeName,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: theme.primaryColor,
-          iconTheme: theme.primaryIconTheme,
-          textTheme: theme.primaryTextTheme,
-          brightness: theme.primaryColorBrightness,
-          leading: widget.delegate.buildLeading(context),
-          title: TextField(
-            controller: widget.delegate._queryTextController,
-            focusNode: focusNode,
-            style: theme.textTheme.headline6,
-            textInputAction: widget.delegate.textInputAction,
-            keyboardType: widget.delegate.keyboardType,
-            onSubmitted: (String _) {
-              widget.delegate.showResults(context);
-            },
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: searchFieldLabel,
-              hintStyle: searchFieldStyle,
+      child: Theme(
+        data: theme,
+        child: Scaffold(
+          appBar: AppBar(
+            leading: widget.delegate.buildLeading(context),
+            title: TextField(
+              controller: widget.delegate._queryTextController,
+              focusNode: focusNode,
+              style: theme.textTheme.title,
+              textInputAction: widget.delegate.textInputAction,
+              keyboardType: widget.delegate.keyboardType,
+              onSubmitted: (String _) {
+                widget.delegate.showResults(context);
+              },
+              decoration: InputDecoration(
+                hintText: searchFieldLabel,
+              ),
             ),
+            actions: widget.delegate.buildActions(context),
           ),
-          actions: widget.delegate.buildActions(context),
-        ),
-        body: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          child: body,
+          body: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: body,
+          ),
         ),
       ),
     );
