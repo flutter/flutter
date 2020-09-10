@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -9,10 +11,10 @@ import 'framework.dart';
 
 class _GridPaperPainter extends CustomPainter {
   const _GridPaperPainter({
-    required this.color,
-    required this.interval,
-    required this.divisions,
-    required this.subdivisions,
+    this.color,
+    this.interval,
+    this.divisions,
+    this.subdivisions,
   });
 
   final Color color;
@@ -58,7 +60,7 @@ class _GridPaperPainter extends CustomPainter {
 class GridPaper extends StatelessWidget {
   /// Creates a widget that draws a rectilinear grid of 1-pixel-wide lines.
   const GridPaper({
-    Key? key,
+    Key key,
     this.color = const Color(0x7FC3E8F3),
     this.interval = 100.0,
     this.divisions = 2,
@@ -103,7 +105,7 @@ class GridPaper extends StatelessWidget {
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
-  final Widget? child;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {

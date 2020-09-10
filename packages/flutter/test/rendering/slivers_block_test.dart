@@ -79,9 +79,6 @@ class ViewportOffsetSpy extends ViewportOffset {
   @override
   double get pixels => _pixels;
 
-  @override
-  bool get hasPixels => true;
-
   bool corrected = false;
 
   @override

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback;
@@ -118,7 +120,7 @@ abstract class WidgetsBindingObserver {
   /// The default implementation is to call the [didPushRoute] directly with the
   /// [RouteInformation.location].
   Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
-    return didPushRoute(routeInformation.location!);
+    return didPushRoute(routeInformation.location);
   }
 
   /// Called when the application's dimensions change. For example,
@@ -241,7 +243,7 @@ abstract class WidgetsBindingObserver {
   /// settings.
   ///
   /// This method exposes notifications from [Window.onLocaleChanged].
-  void didChangeLocales(List<Locale>? locale) { }
+  void didChangeLocales(List<Locale> locale) { }
 
   /// Called when the system puts the app in the background or returns
   /// the app to the foreground.
@@ -281,7 +283,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     // [super.initInstances] is called, as it requires [ServicesBinding] to
     // properly setup the [defaultBinaryMessenger] instance.
     _buildOwner = BuildOwner();
-    buildOwner!.onBuildScheduled = _handleBuildScheduled;
+    buildOwner.onBuildScheduled = _handleBuildScheduled;
     window.onLocaleChanged = handleLocaleChanged;
     window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
@@ -374,8 +376,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// If you need the binding to be constructed before calling [runApp],
   /// you can ensure a Widget binding has been constructed by calling the
   /// `WidgetsFlutterBinding.ensureInitialized()` function.
-  static WidgetsBinding? get instance => _instance;
-  static WidgetsBinding? _instance;
+  static WidgetsBinding get instance => _instance;
+  static WidgetsBinding _instance;
 
   @override
   void initServiceExtensions() {
@@ -433,12 +435,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       registerServiceExtension(
         name: 'fastReassemble',
         callback: (Map<String, Object> params) async {
-          final FastReassemblePredicate? fastReassemblePredicate = _debugFastReassembleMethod;
+          final FastReassemblePredicate fastReassemblePredicate = _debugFastReassembleMethod;
           _debugFastReassembleMethod = null;
           if (fastReassemblePredicate == null) {
             throw FlutterError('debugFastReassembleMethod must be set to use fastReassemble.');
           }
-          void markElementsDirty(Element? element) {
+          void markElementsDirty(Element element) {
             if (element == null) {
               return;
             }
@@ -509,7 +511,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   Future<void> _forceRebuild() {
     if (renderViewElement != null) {
-      buildOwner!.reassemble(renderViewElement!);
+      buildOwner.reassemble(renderViewElement);
       return endOfFrame;
     }
     return Future<void>.value();
@@ -517,11 +519,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   /// The [BuildOwner] in charge of executing the build pipeline for the
   /// widget tree rooted at this binding.
-  BuildOwner? get buildOwner => _buildOwner;
+  BuildOwner get buildOwner => _buildOwner;
   // Initialization of [_buildOwner] has to be done within the [initInstances]
   // method, as it requires [ServicesBinding] to properly setup the
   // [defaultBinaryMessenger] instance.
-  BuildOwner? _buildOwner;
+  BuildOwner _buildOwner;
 
   /// The object in charge of the focus tree.
   ///
@@ -529,7 +531,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// the [FocusScopeNode] for a given [BuildContext].
   ///
   /// See [FocusManager] for more details.
-  FocusManager get focusManager => _buildOwner!.focusManager;
+  FocusManager get focusManager => _buildOwner.focusManager;
 
   final List<WidgetsBindingObserver> _observers = <WidgetsBindingObserver>[];
 
@@ -609,7 +611,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// notification is received.
   @protected
   @mustCallSuper
-  void dispatchLocalesChanged(List<Locale>? locales) {
+  void dispatchLocalesChanged(List<Locale> locales) {
     for (final WidgetsBindingObserver observer in _observers)
       observer.didChangeLocales(locales);
   }
@@ -886,7 +888,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       return true;
     }());
 
-    TimingsCallback? firstFrameCallback;
+    TimingsCallback firstFrameCallback;
     if (_needToReportFirstFrame) {
       assert(!_firstFrameCompleter.isCompleted);
 
@@ -896,21 +898,21 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         }
-        SchedulerBinding.instance!.removeTimingsCallback(firstFrameCallback!);
+        SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback);
         firstFrameCallback = null;
         _firstFrameCompleter.complete();
       };
       // Callback is only invoked when [Window.render] is called. When
       // [sendFramesToEngine] is set to false during the frame, it will not
       // be called and we need to remove the callback (see below).
-      SchedulerBinding.instance!.addTimingsCallback(firstFrameCallback!);
+      SchedulerBinding.instance.addTimingsCallback(firstFrameCallback);
     }
 
     try {
       if (renderViewElement != null)
-        buildOwner!.buildScope(renderViewElement!);
+        buildOwner.buildScope(renderViewElement);
       super.drawFrame();
-      buildOwner!.finalizeTree();
+      buildOwner.finalizeTree();
     } finally {
       assert(() {
         debugBuildingDirtyElements = false;
@@ -927,7 +929,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       // This frame is deferred and not the first frame sent to the engine that
       // should be reported.
       _needToReportFirstFrame = true;
-      SchedulerBinding.instance!.removeTimingsCallback(firstFrameCallback!);
+      SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback);
     }
   }
 
@@ -935,8 +937,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// [RenderView] object at the root of the rendering hierarchy).
   ///
   /// This is initialized the first time [runApp] is called.
-  Element? get renderViewElement => _renderViewElement;
-  Element? _renderViewElement;
+  Element get renderViewElement => _renderViewElement;
+  Element _renderViewElement;
 
   bool _readyToProduceFrames = false;
 
@@ -969,7 +971,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       container: renderView,
       debugShortDescription: '[root]',
       child: rootWidget,
-    ).attachToRenderTree(buildOwner!, renderViewElement as RenderObjectToWidgetElement<RenderBox>);
+    ).attachToRenderTree(buildOwner, renderViewElement as RenderObjectToWidgetElement<RenderBox>);
   }
 
   /// Whether the [renderViewElement] has been initialized.
@@ -986,7 +988,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }());
 
     if (renderViewElement != null)
-      buildOwner!.reassemble(renderViewElement!);
+      buildOwner.reassemble(renderViewElement);
     return super.performReassemble();
   }
 
@@ -1027,7 +1029,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// Second-best (and n-best) matching locales should be obtained by calling this
   /// method again with the matched locale of the first call omitted from
   /// `supportedLocales`.
-  Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
+  Locale computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return window.computePlatformResolvedLocale(supportedLocales);
   }
 }
@@ -1082,14 +1084,14 @@ typedef FastReassemblePredicate = bool Function(Object);
 /// the provided predicate and use it to mark specific elements dirty wherever
 /// [Element.widget] is a `Foo`. Afterwards, the internal field will be nulled
 /// out.
-FastReassemblePredicate? get debugFastReassembleMethod => _debugFastReassembleMethod;
-set debugFastReassembleMethod(FastReassemblePredicate? fastReassemblePredicate) {
+FastReassemblePredicate get debugFastReassembleMethod => _debugFastReassembleMethod;
+set debugFastReassembleMethod(FastReassemblePredicate fastReassemblePredicate) {
   assert(() {
     _debugFastReassembleMethod = fastReassemblePredicate;
     return true;
   }());
 }
-FastReassemblePredicate? _debugFastReassembleMethod;
+FastReassemblePredicate _debugFastReassembleMethod;
 
 /// Print a string representation of the currently running app.
 void debugDumpApp() {
@@ -1100,8 +1102,8 @@ void debugDumpApp() {
     return true;
   }());
   debugPrint('${WidgetsBinding.instance.runtimeType} - $mode');
-  if (WidgetsBinding.instance!.renderViewElement != null) {
-    debugPrint(WidgetsBinding.instance!.renderViewElement!.toStringDeep());
+  if (WidgetsBinding.instance.renderViewElement != null) {
+    debugPrint(WidgetsBinding.instance.renderViewElement.toStringDeep());
   } else {
     debugPrint('<no tree currently mounted>');
   }
@@ -1121,20 +1123,20 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   /// Used by [WidgetsBinding] to attach the root widget to the [RenderView].
   RenderObjectToWidgetAdapter({
     this.child,
-    required this.container,
+    this.container,
     this.debugShortDescription,
   }) : super(key: GlobalObjectKey(container));
 
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
-  final Widget? child;
+  final Widget child;
 
   /// The [RenderObject] that is the parent of the [Element] created by this widget.
   final RenderObjectWithChildMixin<T> container;
 
   /// A short description of this widget used by debugging aids.
-  final String? debugShortDescription;
+  final String debugShortDescription;
 
   @override
   RenderObjectToWidgetElement<T> createElement() => RenderObjectToWidgetElement<T>(this);
@@ -1152,24 +1154,24 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   /// the given element will have an update scheduled to switch to this widget.
   ///
   /// Used by [runApp] to bootstrap applications.
-  RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [ RenderObjectToWidgetElement<T>? element ]) {
+  RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [ RenderObjectToWidgetElement<T> element ]) {
     if (element == null) {
       owner.lockState(() {
         element = createElement();
         assert(element != null);
-        element!.assignOwner(owner);
+        element.assignOwner(owner);
       });
-      owner.buildScope(element!, () {
-        element!.mount(null, null);
+      owner.buildScope(element, () {
+        element.mount(null, null);
       });
       // This is most likely the first time the framework is ready to produce
       // a frame. Ensure that we are asked for one.
-      SchedulerBinding.instance!.ensureVisualUpdate();
+      SchedulerBinding.instance.ensureVisualUpdate();
     } else {
       element._newWidget = this;
       element.markNeedsBuild();
     }
-    return element!;
+    return element;
   }
 
   @override
@@ -1197,14 +1199,14 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   @override
   RenderObjectToWidgetAdapter<T> get widget => super.widget as RenderObjectToWidgetAdapter<T>;
 
-  Element? _child;
+  Element _child;
 
   static const Object _rootChildSlot = Object();
 
   @override
   void visitChildren(ElementVisitor visitor) {
     if (_child != null)
-      visitor(_child!);
+      visitor(_child);
   }
 
   @override
@@ -1215,7 +1217,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element parent, dynamic newSlot) {
     assert(parent == null);
     super.mount(parent, newSlot);
     _rebuild();
@@ -1230,14 +1232,14 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
 
   // When we are assigned a new widget, we store it here
   // until we are ready to update to it.
-  Widget? _newWidget;
+  Widget _newWidget;
 
   @override
   void performRebuild() {
     if (_newWidget != null) {
       // _newWidget can be null if, for instance, we were rebuilt
       // due to a reassemble.
-      final Widget newWidget = _newWidget!;
+      final Widget newWidget = _newWidget;
       _newWidget = null;
       update(newWidget as RenderObjectToWidgetAdapter<T>);
     }
@@ -1303,6 +1305,6 @@ class WidgetsFlutterBinding extends BindingBase with GestureBinding, SchedulerBi
   static WidgetsBinding ensureInitialized() {
     if (WidgetsBinding.instance == null)
       WidgetsFlutterBinding();
-    return WidgetsBinding.instance!;
+    return WidgetsBinding.instance;
   }
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -29,11 +31,11 @@ class BouncingScrollSimulation extends Simulation {
   /// for the `spring` description if it is omitted; these defaults assume
   /// that the unit of length is the logical pixel.
   BouncingScrollSimulation({
-    required double position,
-    required double velocity,
-    required this.leadingExtent,
-    required this.trailingExtent,
-    required this.spring,
+    @required double position,
+    @required double velocity,
+    @required this.leadingExtent,
+    @required this.trailingExtent,
+    @required this.spring,
     Tolerance tolerance = Tolerance.defaultTolerance,
   }) : assert(position != null),
        assert(velocity != null),
@@ -89,9 +91,9 @@ class BouncingScrollSimulation extends Simulation {
   /// The spring used used to return [x] to either [leadingExtent] or [trailingExtent].
   final SpringDescription spring;
 
-  late FrictionSimulation _frictionSimulation;
-  late Simulation _springSimulation;
-  late double _springTime;
+  FrictionSimulation _frictionSimulation;
+  Simulation _springSimulation;
+  double _springTime;
   double _timeOffset = 0.0;
 
   Simulation _underscrollSimulation(double x, double dx) {
@@ -143,8 +145,8 @@ class BouncingScrollSimulation extends Simulation {
 class ClampingScrollSimulation extends Simulation {
   /// Creates a scroll physics simulation that matches Android scrolling.
   ClampingScrollSimulation({
-    required this.position,
-    required this.velocity,
+    @required this.position,
+    @required this.velocity,
     this.friction = 0.015,
     Tolerance tolerance = Tolerance.defaultTolerance,
   }) : assert(_flingVelocityPenetration(0.0) == _initialVelocityPenetration),
@@ -165,8 +167,8 @@ class ClampingScrollSimulation extends Simulation {
   /// The more friction the particle experiences, the sooner it stops.
   final double friction;
 
-  late double _duration;
-  late double _distance;
+  double _duration;
+  double _distance;
 
   // See DECELERATION_RATE.
   static final double _kDecelerationRate = math.log(0.78) / math.log(0.9);
@@ -214,13 +216,13 @@ class ClampingScrollSimulation extends Simulation {
 
   @override
   double x(double time) {
-    final double t = (time / _duration).clamp(0.0, 1.0);
+    final double t = (time / _duration).clamp(0.0, 1.0) as double;
     return position + _distance * _flingDistancePenetration(t) * velocity.sign;
   }
 
   @override
   double dx(double time) {
-    final double t = (time / _duration).clamp(0.0, 1.0);
+    final double t = (time / _duration).clamp(0.0, 1.0) as double;
     return _distance * _flingVelocityPenetration(t) * velocity.sign / _duration;
   }
 
