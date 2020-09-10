@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
+void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible, { double paintExtent }) {
   final RenderSliver target = key.currentContext.findRenderObject() as RenderSliver;
   expect(target.parent, isA<RenderViewport>());
   final SliverPhysicalParentData parentData = target.parentData as SliverPhysicalParentData;
@@ -16,6 +16,9 @@ void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
   expect(actual, ideal);
   final SliverGeometry geometry = target.geometry;
   expect(geometry.visible, visible);
+
+  if (paintExtent != null)
+    expect(geometry.paintExtent, paintExtent);
 }
 
 void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect ideal) {
@@ -99,6 +102,7 @@ void main() {
         ' │   200.0)\n'
         ' │ maxExtent: EXCEPTION (FlutterError)\n'
         ' │ child position: 0.0\n'
+        ' │ effective scroll offset: 0.0\n'
         ' │\n'
         ' └─child: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
         '   │ parentData: <none> (can use size)\n'
@@ -295,9 +299,273 @@ void main() {
     expect(tester.getTopLeft(find.byType(Container)), Offset.zero);
     expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 50.0));
   });
+
+  group('Can float when showOnScreen is called', () {
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+
+    testWidgets('showOnScreen, without snapping', (WidgetTester tester) async {
+      const double bigHeight = 550.0;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              const BigSliver(height: bigHeight),
+              SliverPersistentHeader(key: key1, delegate: ExpandHappyTestDelegate(), pinned: true),
+              SliverPersistentHeader(key: key2, delegate: ExpandHappyTestDelegate(maxExtentOverride: 800), pinned: true),
+              const BigSliver(height: bigHeight),
+              const BigSliver(height: bigHeight),
+            ],
+          ),
+        ),
+      );
+
+      final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      final RenderSliverPinnedPersistentHeader pinnedHeader1 = tester
+        .renderObject<RenderSliverPinnedPersistentHeader>(find.byKey(key1, skipOffstage: false));
+      final RenderSliverPinnedPersistentHeader pinnedHeader2 = tester
+        .renderObject<RenderSliverPinnedPersistentHeader>(find.byKey(key2, skipOffstage: false));
+
+      final double max = bigHeight * 3.0 + pinnedHeader1.maxExtent + pinnedHeader2.maxExtent - 600.0; // 600 is the height of the test viewport
+
+      pinnedHeader1.showOnScreen();
+      await tester.pump();
+
+      // The viewport has to move down by 150px to reveal pinnedHeader1.
+      expect(position.pixels, bigHeight + 200 - 600);
+      expect(position.minScrollExtent, 0.0);
+      expect(position.maxScrollExtent, max);
+
+      // pinnedHeader1 should be fully expanded and fully revealed.
+      verifyPaintPosition(key1, const Offset(0.0, 600.0 - 200.0), true, paintExtent: 200);
+      // pinnedHeader2 not visible.
+      verifyPaintPosition(key2, const Offset(0.0, 600.0), false, paintExtent: 0);
+      // Despite being invisible, pinnedHeader2's child is at its full extent.
+      expect(pinnedHeader2.child.size.height, 800);
+
+      // Move the viewport further down so pinnedHeader1 have a layoutExtent of
+      // 10px.
+      await position.moveTo(bigHeight + 190.0);
+      await tester.pump();
+
+      // Now pinnedHeader1 is pinned at top with minExtent.
+      verifyPaintPosition(key1, const Offset(0.0, 0.0), true, paintExtent: 100);
+      verifyPaintPosition(key2, const Offset(0.0, 100.0), true, paintExtent: 600.0 - 100.0);
+      // pinnedHeader2 is at its full extent.
+      expect(pinnedHeader2.child.size.height, 800);
+
+      // Let pinnedHeader2 shrink to its minExtent:
+      await position.moveTo(bigHeight + 200.0 + 800);
+      await tester.pump();
+      verifyPaintPosition(key1, const Offset(0.0, 0.0), true, paintExtent: 100);
+      verifyPaintPosition(key2, const Offset(0.0, 100.0), true, paintExtent: 100.0);
+      expect(pinnedHeader2.child.size.height, 100);
+
+      pinnedHeader1.showOnScreen();
+      await tester.pump();
+
+      // pinnedHeader1 should be fully expanded again.
+      verifyPaintPosition(key1, const Offset(0.0, 0.0), true, paintExtent: 200);
+      // pinnedHeader2 still at minExtent.
+      verifyPaintPosition(key2, const Offset(0.0, 200.0), true, paintExtent: 100.0);
+      expect(pinnedHeader2.child.size.height, 100);
+
+      // pinnedHeader1 is in a forced floating state. With an offset greater
+      // then 200 pinnedHeader1 should have started contracting where it not for
+      // the floating status.
+      expect(position.pixels, greaterThan(200));
+
+      // pinnedHeader1 does not expand when the viewport slightly moves up, in
+      // the forced floating state.
+      await position.moveTo(position.pixels - 10);
+      await tester.pump();
+      verifyPaintPosition(key1, const Offset(0.0, 0.0), true, paintExtent: 200);
+      // pinnedHeader2 still at minExtent
+      verifyPaintPosition(key2, const Offset(0.0, 200.0), true, paintExtent: 100.0);
+
+      // Move back to the original position:
+      await position.moveTo(position.pixels + 10);
+      await tester.pump();
+      // pinnedHeader1 shrunk by 10px, still in forced floating.
+      verifyPaintPosition(key1, const Offset(0.0, 0.0), true, paintExtent: 190);
+      // pinnedHeader2 still at minExtent
+      verifyPaintPosition(key2, const Offset(0.0, 190.0), true, paintExtent: 100.0);
+
+      // Calling showOnScreen on pinnedHeader2.
+      pinnedHeader2.showOnScreen();
+      await tester.pump();
+
+      // pinnedHeader1 still at maxExtent (forced floating).
+      verifyPaintPosition(key1, const Offset(0.0, 0.0), true, paintExtent: 190);
+      // pinnedHeader2 at maxExtent too.
+      verifyPaintPosition(key2, const Offset(0.0, 190.0), true, paintExtent: 600.0 - 190.0);
+      // pinnedHeader2's child is at full extent.
+      expect(pinnedHeader2.child.size.height, 800);
+    });
+
+    testWidgets('showOnScreen with snapping', (WidgetTester tester) async {
+      const double bigHeight = 550.0;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              const BigSliver(height: bigHeight),
+              SliverPersistentHeader(
+                key: key1,
+                delegate: ExpandHappyTestDelegate(
+                  snapConfiguration: FloatingHeaderSnapConfiguration(),
+                ),
+                pinned: true,
+              ),
+              SliverPersistentHeader(
+                key: key2,
+                delegate: ExpandHappyTestDelegate(
+                  maxExtentOverride: 800,
+                  snapConfiguration: FloatingHeaderSnapConfiguration(),
+                ),
+                pinned: true,
+              ),
+              const BigSliver(height: bigHeight),
+              const BigSliver(height: bigHeight),
+            ],
+          ),
+        ),
+      );
+
+      final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      final RenderSliverPinnedPersistentHeader pinnedHeader1 = tester
+        .renderObject<RenderSliverPinnedPersistentHeader>(find.byKey(key1, skipOffstage: false));
+      final RenderSliverPinnedPersistentHeader pinnedHeader2 = tester
+        .renderObject<RenderSliverPinnedPersistentHeader>(find.byKey(key2, skipOffstage: false));
+
+      final double max = bigHeight * 3.0 + pinnedHeader1.maxExtent + pinnedHeader2.maxExtent - 600.0; // 600 is the height of the test viewport
+
+      pinnedHeader1.showOnScreen();
+      await tester.pump();
+
+      // The viewport has to move down by 150px to reveal pinnedHeader1.
+      expect(position.pixels, bigHeight + 200 - 600);
+      expect(position.minScrollExtent, 0.0);
+      expect(position.maxScrollExtent, max);
+
+      // pinnedHeader1 should be fully expanded and fully revealed.
+      verifyPaintPosition(key1, const Offset(0.0, 600.0 - 200.0), true, paintExtent: 200);
+      // pinnedHeader2 not visible.
+      verifyPaintPosition(key2, const Offset(0.0, 600.0), false, paintExtent: 0);
+      // Despite being invisible, pinnedHeader2's child is at its full extent.
+      expect(pinnedHeader2.child.size.height, 800);
+
+      // maybeStartSnapAnimation should do nothing because pinnHeader1 is not in
+      // forced floating mode.
+      pinnedHeader1.maybeStartSnapAnimation(ScrollDirection.reverse);
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      // Same as before.
+      verifyPaintPosition(key1, const Offset(0.0, 600.0 - 200.0), true, paintExtent: 200);
+      verifyPaintPosition(key2, const Offset(0.0, 600.0), false, paintExtent: 0);
+      expect(pinnedHeader2.child.size.height, 800);
+    });
+
+    testWidgets('showOnScreen with snapping: maybeStartSnapAnimation', (WidgetTester tester) async {
+      const double bigHeight = 550.0;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              const BigSliver(height: bigHeight),
+              SliverPersistentHeader(
+                key: key1,
+                delegate: ExpandHappyTestDelegate(
+                  snapConfiguration: FloatingHeaderSnapConfiguration(),
+                ),
+                pinned: true,
+              ),
+              SliverPersistentHeader(
+                key: key2,
+                delegate: ExpandHappyTestDelegate(
+                  maxExtentOverride: 800,
+                  snapConfiguration: FloatingHeaderSnapConfiguration(),
+                ),
+                pinned: true,
+              ),
+              const BigSliver(height: bigHeight),
+              const BigSliver(height: bigHeight),
+            ],
+          ),
+        ),
+      );
+
+      final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      final RenderSliverPinnedPersistentHeader pinnedHeader1 = tester
+        .renderObject<RenderSliverPinnedPersistentHeader>(find.byKey(key1, skipOffstage: false));
+      final RenderSliverPinnedPersistentHeader pinnedHeader2 = tester
+        .renderObject<RenderSliverPinnedPersistentHeader>(find.byKey(key2, skipOffstage: false));
+
+      // Let pinnedHeader1 shrink to its minExtent, and pinnedHeader2 to 300.
+      await position.moveTo(bigHeight + 200.0 + 500);
+      await tester.pump();
+      verifyPaintPosition(key1, const Offset(0.0, 0.0), true, paintExtent: 100);
+      verifyPaintPosition(key2, const Offset(0.0, 100.0), true, paintExtent: 300.0);
+      expect(pinnedHeader1.child.size.height, 100);
+      expect(pinnedHeader2.child.size.height, 300);
+
+      // Call showOnScreen on headers.
+      pinnedHeader1.showOnScreen();
+      pinnedHeader2.showOnScreen();
+      await tester.pump();
+
+      verifyPaintPosition(key1, const Offset(0.0, 0.0), true, paintExtent: 200);
+      verifyPaintPosition(key2, const Offset(0.0, 200.0), true, paintExtent: 600.0 - 200.0);
+      expect(pinnedHeader1.child.size.height, 200);
+      expect(pinnedHeader2.child.size.height, 800);
+
+      // Wrong direction, should do nothing.
+      pinnedHeader1.maybeStartSnapAnimation(ScrollDirection.forward);
+      await tester.pump();
+      await tester.pumpAndSettle();
+      verifyPaintPosition(key1, const Offset(0.0, 0.0), true, paintExtent: 200);
+      verifyPaintPosition(key2, const Offset(0.0, 200.0), true, paintExtent: 600.0 - 200.0);
+      expect(pinnedHeader1.child.size.height, 200);
+      expect(pinnedHeader2.child.size.height, 800);
+
+      pinnedHeader2.maybeStartSnapAnimation(ScrollDirection.forward);
+      await tester.pump();
+      await tester.pumpAndSettle();
+      verifyPaintPosition(key1, const Offset(0.0, 0.0), true, paintExtent: 200);
+      verifyPaintPosition(key2, const Offset(0.0, 200.0), true, paintExtent: 600.0 - 200.0);
+      expect(pinnedHeader1.child.size.height, 200);
+      expect(pinnedHeader2.child.size.height, 800);
+
+      // Let pinnedHeader1 snap.
+      pinnedHeader1.maybeStartSnapAnimation(ScrollDirection.reverse);
+      await tester.pump();
+      await tester.pumpAndSettle();
+      verifyPaintPosition(key1, const Offset(0.0, 0.0), true, paintExtent: 100);
+      verifyPaintPosition(key2, const Offset(0.0, 100.0), true, paintExtent: 600.0 - 100.0);
+      expect(pinnedHeader1.child.size.height, 100);
+      expect(pinnedHeader2.child.size.height, 800);
+
+      // pinnedHeader1 snaps, to 300 instead of minExtent.
+      pinnedHeader2.maybeStartSnapAnimation(ScrollDirection.reverse);
+      await tester.pump();
+      await tester.pumpAndSettle();
+      verifyPaintPosition(key1, const Offset(0.0, 0.0), true, paintExtent: 100);
+      verifyPaintPosition(key2, const Offset(0.0, 100.0), true, paintExtent: 300);
+      expect(pinnedHeader1.child.size.height, 100);
+      expect(pinnedHeader2.child.size.height, 300);
+    });
+  });
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
+
+  @override
+  TickerProvider get vsync => const TestVSync();
+
   @override
   double get maxExtent => 200.0;
 
@@ -311,6 +579,22 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(TestDelegate oldDelegate) => false;
+}
+
+class ExpandHappyTestDelegate extends TestDelegate {
+  ExpandHappyTestDelegate({ this.maxExtentOverride, this.snapConfiguration });
+
+  final double maxExtentOverride;
+
+  @override
+  final FloatingHeaderSnapConfiguration snapConfiguration;
+
+  @override
+  double get maxExtent => maxExtentOverride ?? super.maxExtent;
+
+
+  @override
+  PersistentHeaderShowOnScreenConfiguration get showOnScreenConfiguration => PersistentHeaderShowOnScreenConfiguration.maxExpansion;
 }
 
 class TestDelegateThatCanThrow extends SliverPersistentHeaderDelegate {

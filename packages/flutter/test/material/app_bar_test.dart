@@ -1975,7 +1975,7 @@ void main() {
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
   });
 
-  testWidgets('SliverAppBar configures the delegate properly', (WidgetTester tester) async {
+  testWidgets('SliverAppBar provides a TickerProvider when needed', (WidgetTester tester) async {
     Future<void> buildAndVerifyDelegate({ bool pinned, bool floating, bool snap }) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -1999,15 +1999,43 @@ void main() {
       // Ensure we have a non-null vsync when it's needed.
       if (!floating || (delegate.snapConfiguration == null && delegate.showOnScreenConfiguration == null))
         expect(delegate.vsync, isNotNull);
-
-      expect(delegate.showOnScreenConfiguration != null, snap && floating);
     }
 
     await buildAndVerifyDelegate(pinned: false, floating: true, snap: false);
     await buildAndVerifyDelegate(pinned: false, floating: true, snap: true);
-
     await buildAndVerifyDelegate(pinned: true, floating: true, snap: false);
     await buildAndVerifyDelegate(pinned: true, floating: true, snap: true);
+  });
+
+  testWidgets('SliverAppBar passes the showOnScreenConfiguration to its render object', (WidgetTester tester) async {
+     Future<void> buildAndVerifyConfig({ PersistentHeaderShowOnScreenConfiguration config }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                title: const Text('Jumbo'),
+                pinned: true,
+                showOnScreenConfiguration: config,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final PersistentHeaderShowOnScreenConfiguration showOnScreenConfig = tester
+        .renderObject<RenderSliverPinnedPersistentHeader>(find.byType(SliverPersistentHeader))
+        .showOnScreenConfiguration;
+
+      expect(config, showOnScreenConfig);
+      expect(config?.minShowOnScreenExtent, showOnScreenConfig?.minShowOnScreenExtent);
+      expect(config?.maxShowOnScreenExtent, showOnScreenConfig?.maxShowOnScreenExtent);
+    }
+
+    await buildAndVerifyConfig(config: PersistentHeaderShowOnScreenConfiguration.maxExpansion);
+    await buildAndVerifyConfig(config: PersistentHeaderShowOnScreenConfiguration.neverExpands);
+    await buildAndVerifyConfig(config: PersistentHeaderShowOnScreenConfiguration(minShowOnScreenExtent: 200)); // ignore: prefer_const_constructors
+    await buildAndVerifyConfig();
   });
 
   testWidgets('AppBar respects toolbarHeight', (WidgetTester tester) async {

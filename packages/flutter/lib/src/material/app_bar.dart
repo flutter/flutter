@@ -826,7 +826,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.leadingWidth,
   }) : assert(primary || topPadding == 0.0),
        assert(
-         !floating || (snapConfiguration == null && showOnScreenConfiguration == null) || vsync != null,
+         !(floating || pinned) || (snapConfiguration == null && showOnScreenConfiguration == null) || vsync != null,
          'vsync cannot be null when snapConfiguration or showOnScreenConfiguration is not null, and floating is true',
        ),
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
@@ -921,7 +921,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         leadingWidth: leadingWidth,
       ),
     );
-    return floating ? _FloatingAppBar(child: appBar) : appBar;
+    return floating || pinned ? _FloatingAppBar(child: appBar) : appBar;
   }
 
   @override
@@ -1076,6 +1076,7 @@ class SliverAppBar extends StatefulWidget {
     this.shape,
     this.toolbarHeight = kToolbarHeight,
     this.leadingWidth,
+    this.showOnScreenConfiguration = PersistentHeaderShowOnScreenConfiguration.noConstraints,
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),
@@ -1085,7 +1086,7 @@ class SliverAppBar extends StatefulWidget {
        assert(snap != null),
        assert(stretch != null),
        assert(toolbarHeight != null),
-       assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
+       assert(floating || pinned || !snap, 'The "snap" argument only makes sense for floating or pinned app bars.'),
        assert(stretchTriggerOffset > 0.0),
        assert(collapsedHeight == null || collapsedHeight > toolbarHeight, 'The "collapsedHeight" argument has to be larger than [toolbarHeight].'),
        super(key: key);
@@ -1382,6 +1383,19 @@ class SliverAppBar extends StatefulWidget {
   /// offset specified by [stretchTriggerOffset].
   final AsyncCallback onStretchTrigger;
 
+  /// Defines how this [SliverAppBar] should respond to show on screen requests.
+  ///
+  /// When [RenderObject.showOnScreen] is called on this [SliverAppBar]'s
+  /// descendant [RenderObject]s, the [SliverAppBar] may have to expand itself
+  /// to fully reveal the specified area. [showOnScreenConfiguration] can be use
+  /// to control how much this [SliverAppBar] should expand in response to
+  /// [RenderObject.showOnScreen] calls.
+  ///
+  /// Defaults to [PersistentHeaderShowOnScreenConfiguration.noConstraints],
+  /// with which the [SliverAppBar] will make the least amount of expansion
+  /// required to reveal the specified area.
+  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
+
   /// Defines the height of the toolbar component of an [AppBar].
   ///
   /// By default, the value of `toolbarHeight` is [kToolbarHeight].
@@ -1401,10 +1415,9 @@ class SliverAppBar extends StatefulWidget {
 class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMixin {
   FloatingHeaderSnapConfiguration _snapConfiguration;
   OverScrollHeaderStretchConfiguration _stretchConfiguration;
-  PersistentHeaderShowOnScreenConfiguration _showOnScreenConfiguration;
 
   void _updateSnapConfiguration() {
-    if (widget.snap && widget.floating) {
+    if (widget.snap && (widget.floating || widget.pinned)) {
       _snapConfiguration = FloatingHeaderSnapConfiguration(
         curve: Curves.easeOut,
         duration: const Duration(milliseconds: 200),
@@ -1412,10 +1425,6 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     } else {
       _snapConfiguration = null;
     }
-
-    _showOnScreenConfiguration = widget.floating & widget.snap
-      ? const PersistentHeaderShowOnScreenConfiguration(minShowOnScreenExtent: double.infinity)
-      : null;
   }
 
   void _updateStretchConfiguration() {
@@ -1439,7 +1448,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   @override
   void didUpdateWidget(SliverAppBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating)
+    if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating || widget.pinned != oldWidget.pinned)
       _updateSnapConfiguration();
     if (widget.stretch != oldWidget.stretch)
       _updateStretchConfiguration();
@@ -1488,7 +1497,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           shape: widget.shape,
           snapConfiguration: _snapConfiguration,
           stretchConfiguration: _stretchConfiguration,
-          showOnScreenConfiguration: _showOnScreenConfiguration,
+          showOnScreenConfiguration: widget.showOnScreenConfiguration,
           toolbarHeight: widget.toolbarHeight,
           leadingWidth: widget.leadingWidth,
         ),

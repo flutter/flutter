@@ -334,6 +334,11 @@ class _SliverScrollingPersistentHeader extends _SliverPersistentHeaderRenderObje
       stretchConfiguration: delegate.stretchConfiguration
     );
   }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderSliverScrollingPersistentHeaderForWidgets renderObject) {
+    renderObject.stretchConfiguration = delegate.stretchConfiguration;
+  }
 }
 
 class _RenderSliverScrollingPersistentHeaderForWidgets extends RenderSliverScrollingPersistentHeader
@@ -359,9 +364,20 @@ class _SliverPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectW
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
     return _RenderSliverPinnedPersistentHeaderForWidgets(
+      vsync: delegate.vsync,
+      snapConfiguration: delegate.snapConfiguration,
       stretchConfiguration: delegate.stretchConfiguration,
       showOnScreenConfiguration: delegate.showOnScreenConfiguration,
     );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderSliverPinnedPersistentHeaderForWidgets renderObject) {
+    renderObject
+      ..vsync = delegate.vsync
+      ..snapConfiguration = delegate.snapConfiguration
+      ..stretchConfiguration = delegate.stretchConfiguration
+      ..showOnScreenConfiguration = delegate.showOnScreenConfiguration;
   }
 }
 
@@ -369,10 +385,14 @@ class _RenderSliverPinnedPersistentHeaderForWidgets extends RenderSliverPinnedPe
   with _RenderSliverPersistentHeaderForWidgetsMixin {
   _RenderSliverPinnedPersistentHeaderForWidgets({
     RenderBox child,
+    @required TickerProvider vsync,
+    FloatingHeaderSnapConfiguration snapConfiguration,
     OverScrollHeaderStretchConfiguration stretchConfiguration,
     PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration,
   }) : super(
+    vsync: vsync,
     child: child,
+    snapConfiguration: snapConfiguration,
     stretchConfiguration: stretchConfiguration,
     showOnScreenConfiguration: showOnScreenConfiguration,
   );
