@@ -217,7 +217,7 @@ FlutterDesktopPluginRegistrarRef FlutterWindowsEngine::GetRegistrar() {
 }
 
 void FlutterWindowsEngine::SetPluginRegistrarDestructionCallback(
-    FlutterDesktopOnRegistrarDestroyed callback) {
+    FlutterDesktopOnPluginRegistrarDestroyed callback) {
   plugin_registrar_destruction_callback_ = callback;
 }
 

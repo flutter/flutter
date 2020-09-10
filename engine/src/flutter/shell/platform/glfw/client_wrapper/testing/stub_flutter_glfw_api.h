@@ -89,8 +89,8 @@ class StubFlutterGlfwApi {
   // Called for FlutterDesktopShutDownEngine.
   virtual bool ShutDownEngine() { return true; }
 
-  // Called for FlutterDesktopRegistrarEnableInputBlocking.
-  virtual void RegistrarEnableInputBlocking(const char* channel) {}
+  // Called for FlutterDesktopPluginRegistrarEnableInputBlocking.
+  virtual void PluginRegistrarEnableInputBlocking(const char* channel) {}
 };
 
 // A test helper that owns a stub implementation, making it the test stub for

@@ -17,7 +17,7 @@ namespace flutter {
 
 PluginRegistrar::PluginRegistrar(FlutterDesktopPluginRegistrarRef registrar)
     : registrar_(registrar) {
-  auto core_messenger = FlutterDesktopRegistrarGetMessenger(registrar_);
+  auto core_messenger = FlutterDesktopPluginRegistrarGetMessenger(registrar_);
   messenger_ = std::make_unique<BinaryMessengerImpl>(core_messenger);
 }
 

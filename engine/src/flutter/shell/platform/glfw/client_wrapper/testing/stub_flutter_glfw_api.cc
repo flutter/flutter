@@ -183,10 +183,10 @@ FlutterDesktopPluginRegistrarRef FlutterDesktopGetPluginRegistrar(
   return reinterpret_cast<FlutterDesktopPluginRegistrarRef>(2);
 }
 
-void FlutterDesktopRegistrarEnableInputBlocking(
+void FlutterDesktopPluginRegistrarEnableInputBlocking(
     FlutterDesktopPluginRegistrarRef registrar,
     const char* channel) {
   if (s_stub_implementation) {
-    s_stub_implementation->RegistrarEnableInputBlocking(channel);
+    s_stub_implementation->PluginRegistrarEnableInputBlocking(channel);
   }
 }

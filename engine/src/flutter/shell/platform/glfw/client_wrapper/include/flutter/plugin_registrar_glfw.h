@@ -23,7 +23,7 @@ class PluginRegistrarGlfw : public PluginRegistrar {
   explicit PluginRegistrarGlfw(FlutterDesktopPluginRegistrarRef core_registrar)
       : PluginRegistrar(core_registrar) {
     window_ = std::make_unique<FlutterWindow>(
-        FlutterDesktopRegistrarGetWindow(core_registrar));
+        FlutterDesktopPluginRegistrarGetWindow(core_registrar));
   }
 
   virtual ~PluginRegistrarGlfw() = default;
@@ -39,7 +39,8 @@ class PluginRegistrarGlfw : public PluginRegistrar {
   // If set, then the parent window should disable input callbacks
   // while waiting for the handler for messages on that channel to run.
   void EnableInputBlockingForChannel(const std::string& channel) {
-    FlutterDesktopRegistrarEnableInputBlocking(registrar(), channel.c_str());
+    FlutterDesktopPluginRegistrarEnableInputBlocking(registrar(),
+                                                     channel.c_str());
   }
 
  private:
