@@ -500,8 +500,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   final GlobalKey _childKey = GlobalKey();
   final GlobalKey _parentKey = GlobalKey();
-  Animation<Offset>? _animation;
-  late AnimationController _controller;
+  Animation<Offset>? _animationInertia;
+  late AnimationController _controllerInertia;
   Animation<Matrix4>? _animationIncrementalZoom;
   late AnimationController _controllerIncrementalZoom;
   Offset? _doubleTapLocalPosition;
@@ -763,12 +763,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       widget.onInteractionStart!(details);
     }
 
-    if (_controller.isAnimating) {
-      // TODO(justinmc): dispose method for this animtaion, and rename the variables.
-      _controller.stop();
-      _controller.reset();
-      _animation?.removeListener(_onAnimate);
-      _animation = null;
+    if (_controllerInertia.isAnimating) {
+      _disposeInertiaAnimation();
     }
     if (_controllerIncrementalZoom.isAnimating) {
       _disposeIncrementalZoomAnimation();
@@ -897,8 +893,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _rotationStart = null;
     _referenceFocalPoint = null;
 
-    _animation?.removeListener(_onAnimate);
-    _controller.reset();
+    _disposeInertiaAnimation();
 
     if (!_gestureIsSupported(_gestureType)) {
       _panAxis = null;
@@ -927,16 +922,16 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       details.velocity.pixelsPerSecond.distance,
       _kDrag,
     );
-    _animation = Tween<Offset>(
+    _animationInertia = Tween<Offset>(
       begin: translation,
       end: Offset(frictionSimulationX.finalX, frictionSimulationY.finalX),
     ).animate(CurvedAnimation(
-      parent: _controller,
+      parent: _controllerInertia,
       curve: Curves.decelerate,
     ));
-    _controller.duration = Duration(milliseconds: (tFinal * 1000).round());
-    _animation!.addListener(_onAnimate);
-    _controller.forward();
+    _controllerInertia.duration = Duration(milliseconds: (tFinal * 1000).round());
+    _animationInertia!.addListener(_onAnimateInertia);
+    _controllerInertia.forward();
   }
 
   // Handle mousewheel scroll events.
@@ -945,6 +940,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return;
     }
     if (event is PointerScrollEvent) {
+      _disposeInertiaAnimation();
       _disposeIncrementalZoomAnimation();
       final RenderBox childRenderBox = _childKey.currentContext!.findRenderObject() as RenderBox;
       final Size childSize = childRenderBox.size;
@@ -973,22 +969,19 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   }
 
   // Handle inertia drag animation.
-  void _onAnimate() {
-    if (!_controller.isAnimating) {
-      _panAxis = null;
-      _animation?.removeListener(_onAnimate);
-      _animation = null;
-      _controller.reset();
+  void _onAnimateInertia() {
+    if (!_controllerInertia.isAnimating) {
+      _disposeInertiaAnimation();
       return;
     }
-    // Translate such that the resulting translation is _animation.value.
+    // Translate such that the resulting translation is _animationInertia.value.
     final Vector3 translationVector = _transformationController.value.getTranslation();
     final Offset translation = Offset(translationVector.x, translationVector.y);
     final Offset translationScene = _transformationController.toScene(
       translation,
     );
     final Offset animationScene = _transformationController.toScene(
-      _animation!.value,
+      _animationInertia!.value,
     );
     final Offset translationChangeScene = animationScene - translationScene;
     _transformationController.value = _matrixTranslate(
@@ -1005,6 +998,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return;
     }
     _transformationController.value = _animationIncrementalZoom!.value;
+  }
+
+  void _disposeInertiaAnimation() {
+    _panAxis = null;
+    _animationInertia?.removeListener(_onAnimateInertia);
+    _animationInertia = null;
+    _controllerInertia.reset();
   }
 
   // Stop and clean up the incremental zoom animation.
@@ -1027,7 +1027,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _transformationController = widget.transformationController
         ?? TransformationController();
     _transformationController.addListener(_onTransformationControllerChange);
-    _controller = AnimationController(vsync: this);
+    _controllerInertia = AnimationController(vsync: this);
     _controllerIncrementalZoom = AnimationController(vsync: this);
   }
 
@@ -1058,7 +1058,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   @override
   void dispose() {
-    _controller.dispose();
+    _disposeInertiaAnimation();
+    _disposeIncrementalZoomAnimation();
+    _controllerInertia.dispose();
     _controllerIncrementalZoom.dispose();
     _transformationController.removeListener(_onTransformationControllerChange);
     if (widget.transformationController == null) {
