@@ -398,13 +398,13 @@ class CupertinoColors {
   static const CupertinoDynamicColor tertiarySystemFill = CupertinoDynamicColor(
     debugLabel: 'tertiarySystemFill',
     color: Color.fromARGB(30, 118, 118, 128),
-    darkColor: Color.fromARGB(61,118, 118, 128),
+    darkColor: Color.fromARGB(61, 118, 118, 128),
     highContrastColor: Color.fromARGB(51, 118, 118, 128),
-    darkHighContrastColor: Color.fromARGB(81,118, 118, 128),
+    darkHighContrastColor: Color.fromARGB(81, 118, 118, 128),
     elevatedColor: Color.fromARGB(30, 118, 118, 128),
-    darkElevatedColor: Color.fromARGB(61,118, 118, 128),
+    darkElevatedColor: Color.fromARGB(61, 118, 118, 128),
     highContrastElevatedColor: Color.fromARGB(51, 118, 118, 128),
-    darkHighContrastElevatedColor: Color.fromARGB(81,118, 118, 128),
+    darkHighContrastElevatedColor: Color.fromARGB(81, 118, 118, 128),
   );
 
   /// An overlay fill color for large areas containing complex content, equivalent
