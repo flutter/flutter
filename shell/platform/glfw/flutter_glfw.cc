@@ -138,7 +138,7 @@ struct FlutterDesktopPluginRegistrar {
   FlutterDesktopEngineState* engine;
 
   // Callback to be called on registrar destruction.
-  FlutterDesktopOnRegistrarDestroyed destruction_handler;
+  FlutterDesktopOnPluginRegistrarDestroyed destruction_handler;
 };
 
 // State associated with the messenger used to communicate with the engine.
@@ -963,24 +963,24 @@ bool FlutterDesktopShutDownEngine(FlutterDesktopEngineRef engine) {
   return (result == kSuccess);
 }
 
-void FlutterDesktopRegistrarEnableInputBlocking(
+void FlutterDesktopPluginRegistrarEnableInputBlocking(
     FlutterDesktopPluginRegistrarRef registrar,
     const char* channel) {
   registrar->engine->message_dispatcher->EnableInputBlockingForChannel(channel);
 }
 
-FlutterDesktopMessengerRef FlutterDesktopRegistrarGetMessenger(
+FlutterDesktopMessengerRef FlutterDesktopPluginRegistrarGetMessenger(
     FlutterDesktopPluginRegistrarRef registrar) {
   return registrar->engine->messenger.get();
 }
 
-void FlutterDesktopRegistrarSetDestructionHandler(
+void FlutterDesktopPluginRegistrarSetDestructionHandler(
     FlutterDesktopPluginRegistrarRef registrar,
-    FlutterDesktopOnRegistrarDestroyed callback) {
+    FlutterDesktopOnPluginRegistrarDestroyed callback) {
   registrar->destruction_handler = callback;
 }
 
-FlutterDesktopWindowRef FlutterDesktopRegistrarGetWindow(
+FlutterDesktopWindowRef FlutterDesktopPluginRegistrarGetWindow(
     FlutterDesktopPluginRegistrarRef registrar) {
   FlutterDesktopWindowControllerState* controller =
       registrar->engine->window_controller;
