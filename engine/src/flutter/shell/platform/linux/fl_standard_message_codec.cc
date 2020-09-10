@@ -6,6 +6,7 @@
 #include "flutter/shell/platform/linux/fl_standard_message_codec_private.h"
 
 #include <gmodule.h>
+#include <cstring>
 
 // See lib/src/services/message_codecs.dart in Flutter source for description of
 // encoding.
