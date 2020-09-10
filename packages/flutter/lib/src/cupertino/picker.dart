@@ -190,7 +190,9 @@ class CupertinoPicker extends StatefulWidget {
   /// A delegate that lazily instantiates children.
   final ListWheelChildDelegate childDelegate;
 
-  /// the [magnifier] widget overlaid on top of [ListWheelScrollView].
+  /// The [magnifier] widget overlaid on top of [ListWheelScrollView],
+  /// it will be vertically centered and will be the same size as the magnified item,
+  /// default to use [CupertinoPickerDefaultMagnifier].
   final Widget magnifier;
 
   @override
