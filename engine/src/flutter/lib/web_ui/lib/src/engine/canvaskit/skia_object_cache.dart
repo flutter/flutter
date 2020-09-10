@@ -264,9 +264,8 @@ class SkiaObjectBox {
   bool _isDeleted = false;
 
   /// Deletes Skia objects when their wrappers are garbage collected.
-  static final SkObjectFinalizationRegistry<SkiaObjectBox> boxRegistry =
-      SkObjectFinalizationRegistry<SkiaObjectBox>(
-          js.allowInterop((SkiaObjectBox box) {
+  static final SkObjectFinalizationRegistry boxRegistry =
+      SkObjectFinalizationRegistry(js.allowInterop((SkiaObjectBox box) {
     box.delete();
   }));
 
