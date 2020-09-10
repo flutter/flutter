@@ -802,7 +802,7 @@ void main() {
   testWidgets('Dismissible.behavior should behave correctly during hit testing', (WidgetTester tester) async {
     bool didReceivePointerDown = false;
 
-    Widget buildStack(Widget child) {
+    Widget buildStack({Widget child}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
