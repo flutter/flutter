@@ -356,6 +356,10 @@ AccessibilityBridge::GetFlutterSemanticsAction(
     // Scroll node to make it visible.
     case fuchsia::accessibility::semantics::Action::SHOW_ON_SCREEN:
       return flutter::SemanticsAction::kShowOnScreen;
+    case fuchsia::accessibility::semantics::Action::INCREMENT:
+      return flutter::SemanticsAction::kIncrease;
+    case fuchsia::accessibility::semantics::Action::DECREMENT:
+      return flutter::SemanticsAction::kDecrease;
     default:
       FML_DLOG(WARNING) << "Unexpected action "
                         << static_cast<int32_t>(fuchsia_action)
