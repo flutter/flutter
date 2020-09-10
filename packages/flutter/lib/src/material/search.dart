@@ -121,6 +121,7 @@ abstract class SearchDelegate<T> {
   SearchDelegate({
     this.searchFieldLabel,
     this.searchFieldStyle,
+    this.searchFieldDecoration,
     this.keyboardType,
     this.textInputAction = TextInputAction.search,
   });
@@ -200,10 +201,11 @@ abstract class SearchDelegate<T> {
       primaryIconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
       primaryColorBrightness: Brightness.light,
       primaryTextTheme: theme.textTheme,
-      inputDecorationTheme: InputDecorationTheme(
-        border: InputBorder.none,
-        hintStyle: theme.inputDecorationTheme.hintStyle,
-      ),
+      inputDecorationTheme: searchFieldDecoration ??
+          InputDecorationTheme(
+            hintStyle: searchFieldStyle ?? theme.inputDecorationTheme.hintStyle,
+            border: InputBorder.none,
+          ),
     );
   }
 
@@ -277,6 +279,13 @@ abstract class SearchDelegate<T> {
   /// If this value is set to null, the value of the ambient [Theme]'s
   /// [InputDecorationTheme.hintStyle] will be used instead.
   final TextStyle searchFieldStyle;
+
+  /// The [InputDecoration] for the search field, use
+  /// this if you just want to customize the [TextField]
+  ///
+  /// If this value is not null, [searchFieldStyle]
+  /// will be ignored so this can be used.
+  final InputDecorationTheme searchFieldDecoration;
 
   /// The type of action button to use for the keyboard.
   ///
@@ -483,7 +492,12 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
+    print("[DEBUG] searchFieldLabel: ${widget.delegate.searchFieldLabel}");
+    print("[DEBUG] searchFieldStyle: ${widget.delegate.searchFieldStyle}");
+    print(
+        "[DEBUG] searchFieldDecoration: ${widget.delegate.searchFieldDecoration}");
     final ThemeData theme = widget.delegate.appBarTheme(context);
+    print("[DEBUG] theme.inputDecorationTheme: ${theme.inputDecorationTheme}");
     final String searchFieldLabel = widget.delegate.searchFieldLabel ??
         MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
@@ -504,10 +518,13 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     String routeName;
     switch (theme.platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         routeName = '';
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         routeName = searchFieldLabel;
     }
 
@@ -530,9 +547,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
               onSubmitted: (String _) {
                 widget.delegate.showResults(context);
               },
-              decoration: InputDecoration(
-                hintText: searchFieldLabel,
-              ),
+              decoration: InputDecoration(hintText: searchFieldLabel),
             ),
             actions: widget.delegate.buildActions(context),
           ),

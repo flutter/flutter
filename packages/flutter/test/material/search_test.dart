@@ -136,10 +136,10 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final TextField textField =
-        tester.widget<TextField>(find.byType(TextField));
-    final Color hintColor = textField.decoration.hintStyle.color;
-    expect(hintColor, delegate.hintTextColor);
+    final ThemeData textFieldTheme =
+        Theme.of(tester.element(find.byType(TextField)));
+    final Color hintColor = textFieldTheme.inputDecorationTheme.hintStyle.color;
+    expect(hintColor, _TestSearchDelegate.hintTextColor);
   });
 
   testWidgets('Requests suggestions', (WidgetTester tester) async {
@@ -559,20 +559,19 @@ void main() {
   });
 
   testWidgets('Custom searchFieldStyle value', (WidgetTester tester) async {
-    const TextStyle searchStyle = TextStyle(color: Colors.red, fontSize: 3);
+    const TextStyle searchFieldStyle =
+        TextStyle(color: Colors.red, fontSize: 3);
 
     final _TestSearchDelegate delegate =
-        _TestSearchDelegate(searchFieldStyle: searchStyle);
+        _TestSearchDelegate(searchFieldStyle: searchFieldStyle);
 
-    await tester.pumpWidget(TestHomePage(
-      delegate: delegate,
-    ));
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final TextField textField =
-        tester.widget<TextField>(find.byType(TextField));
-    final TextStyle hintStyle = textField.decoration.hintStyle;
+    final ThemeData textFieldTheme =
+        Theme.of(tester.element(find.byType(TextField)));
+    final TextStyle hintStyle = textFieldTheme.inputDecorationTheme.hintStyle;
     expect(hintStyle, delegate.searchFieldStyle);
   });
 
@@ -728,27 +727,22 @@ void main() {
             <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
   });
 
-  testWidgets('Custom inputDecorationTheme value', (WidgetTester tester) async {
-    final inputDecorationTheme = InputDecorationTheme(
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        borderSide: BorderSide(color: Colors.blue, width: 2),
-      ),
+  testWidgets('Custom searchFieldDecoration value',
+      (WidgetTester tester) async {
+    const InputDecorationTheme searchFieldDecoration = InputDecorationTheme(
+      hintStyle: TextStyle(color: _TestSearchDelegate.hintTextColor),
     );
     final _TestSearchDelegate delegate = _TestSearchDelegate(
-      inputDecorationTheme: inputDecorationTheme,
+      searchFieldDecoration: searchFieldDecoration,
     );
 
-    await tester.pumpWidget(TestHomePage(
-      delegate: delegate,
-    ));
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final TextField textField =
-        tester.widget<TextField>(find.byType(TextField));
-    final OutlineInputBorder border = textField.decoration.border;
-    expect(border, inputDecorationTheme.border);
+    final ThemeData textFieldTheme =
+        Theme.of(tester.element(find.byType(TextField)));
+    expect(textFieldTheme.inputDecorationTheme, searchFieldDecoration);
   });
 }
 
@@ -808,29 +802,32 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.suggestions = 'Suggestions',
     this.result = 'Result',
     this.actions = const <Widget>[],
-    InputDecorationTheme inputDecorationTheme,
+    InputDecorationTheme searchFieldDecoration,
     TextStyle searchFieldStyle,
     String searchHint,
     TextInputAction textInputAction = TextInputAction.search,
   }) : super(
-            searchFieldLabel: searchHint,
-            textInputAction: textInputAction,
-            searchFieldStyle: searchFieldStyle);
+          searchFieldLabel: searchHint,
+          textInputAction: textInputAction,
+          searchFieldStyle: searchFieldStyle,
+          searchFieldDecoration: searchFieldDecoration,
+        );
 
   final String suggestions;
   final String result;
   final List<Widget> actions;
-  final Color hintTextColor = Colors.green;
+  static const Color hintTextColor = Colors.green;
 
   @override
   ThemeData appBarTheme(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return theme.copyWith(
-      inputDecorationTheme: inputDecorationTheme ??
+      inputDecorationTheme: searchFieldDecoration ??
           InputDecorationTheme(
-            hintStyle: TextStyle(
-              color: hintTextColor,
-            ),
+            hintStyle: searchFieldStyle ??
+                const TextStyle(
+                  color: hintTextColor,
+                ),
           ),
     );
   }
