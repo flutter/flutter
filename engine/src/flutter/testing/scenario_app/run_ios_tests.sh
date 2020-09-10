@@ -33,9 +33,6 @@ if [[ $# -eq 1 ]]; then
   FLUTTER_ENGINE="$1"
 fi
 
-# Delete after LUCI push.
-"$SCRIPT_DIR/compile_ios_jit.sh" "$SRC_DIR/out/host_debug_unopt" "$SRC_DIR/out/$FLUTTER_ENGINE/clang_x64"
-
 cd ios/Scenarios
 set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme Scenarios \
