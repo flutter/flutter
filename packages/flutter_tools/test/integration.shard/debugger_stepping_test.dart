@@ -5,7 +5,6 @@
 import 'dart:io';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../src/common.dart';
 import 'test_data/stepping_project.dart';
@@ -13,7 +12,7 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
-  test('can step over statements', () async {
+  testWithoutContext('can step over statements', () async {
     final Directory tempDir = createResolvedTempDirectorySync('debugger_stepping_test.');
 
     final SteppingProject _project = SteppingProject();

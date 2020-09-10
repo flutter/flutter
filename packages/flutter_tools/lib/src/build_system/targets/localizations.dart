@@ -3,15 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:yaml/yaml.dart';
 
-import '../../artifacts.dart';
 import '../../base/file_system.dart';
-import '../../base/io.dart';
 import '../../base/logger.dart';
 import '../../convert.dart';
 import '../../globals.dart' as globals;
+import '../../localizations/gen_l10n.dart';
+import '../../localizations/gen_l10n_types.dart';
+import '../../localizations/localizations_utils.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -19,25 +19,13 @@ import '../depfile.dart';
 const String _kDependenciesFileName = 'gen_l10n_inputs_and_outputs.json';
 
 /// Run the localizations generation script with the configuration [options].
-Future<void> generateLocalizations({
-  @required LocalizationOptions options,
-  @required String flutterRoot,
-  @required FileSystem fileSystem,
-  @required ProcessManager processManager,
-  @required Logger logger,
+void generateLocalizations({
   @required Directory projectDir,
-  @required String dartBinaryPath,
   @required Directory dependenciesDir,
-}) async {
-  final String genL10nPath = fileSystem.path.join(
-    flutterRoot,
-    'dev',
-    'tools',
-    'localization',
-    'bin',
-    'gen_l10n.dart',
-  );
-
+  @required LocalizationOptions options,
+  @required LocalizationsGenerator localizationsGenerator,
+  @required Logger logger,
+}) {
   // If generating a synthetic package, generate a warning if
   // flutter: generate is not set.
   final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDir);
@@ -53,35 +41,35 @@ Future<void> generateLocalizations({
     throw Exception();
   }
 
-  final ProcessResult result = await processManager.run(<String>[
-    dartBinaryPath,
-    '--disable-dart-dev',
-    genL10nPath,
-    '--gen-inputs-and-outputs-list=${dependenciesDir.path}',
-    '--project-dir=${projectDir.path}',
-    if (options.arbDirectory != null)
-      '--arb-dir=${options.arbDirectory.toFilePath()}',
-    if (options.templateArbFile != null)
-      '--template-arb-file=${options.templateArbFile.toFilePath()}',
-    if (options.outputLocalizationsFile != null)
-      '--output-localization-file=${options.outputLocalizationsFile.toFilePath()}',
-    if (options.untranslatedMessagesFile != null)
-      '--untranslated-messages-file=${options.untranslatedMessagesFile.toFilePath()}',
-    if (options.outputClass != null)
-      '--output-class=${options.outputClass}',
-    if (options.headerFile != null)
-      '--header-file=${options.headerFile.toFilePath()}',
-    if (options.header != null)
-      '--header=${options.header}',
-    if (options.deferredLoading != null)
-      '--use-deferred-loading',
-    if (options.preferredSupportedLocales != null)
-      '--preferred-supported-locales=${options.preferredSupportedLocales}',
-    if (!options.useSyntheticPackage)
-      '--no-synthetic-package'
-  ]);
-  if (result.exitCode != 0) {
-    logger.printError(result.stdout + result.stderr as String);
+  precacheLanguageAndRegionTags();
+
+  final String inputPathString = options?.arbDirectory?.toFilePath() ?? globals.fs.path.join('lib', 'l10n');
+  final String templateArbFileName = options?.templateArbFile?.toFilePath() ?? 'app_en.arb';
+  final String outputFileString = options?.outputLocalizationsFile?.toFilePath() ?? 'app_localizations.dart';
+
+  try {
+    localizationsGenerator
+      ..initialize(
+        inputsAndOutputsListPath: dependenciesDir.path,
+        projectPathString: projectDir.path,
+        inputPathString: inputPathString,
+        templateArbFileName: templateArbFileName,
+        outputFileString: outputFileString,
+        classNameString: options.outputClass ?? 'AppLocalizations',
+        preferredSupportedLocale: options.preferredSupportedLocales,
+        headerString: options.header,
+        headerFile: options?.headerFile?.toFilePath(),
+        useDeferredLoading: options.deferredLoading ?? false,
+        useSyntheticPackage: options.useSyntheticPackage ?? true,
+      )
+      ..loadResources()
+      ..writeOutputFiles()
+      ..outputUnimplementedMessages(
+        options?.untranslatedMessagesFile?.toFilePath(),
+        logger,
+      );
+  } on L10nException catch (e) {
+    logger.printError(e.message);
     throw Exception();
   }
 }
@@ -132,19 +120,17 @@ class GenerateLocalizationsTarget extends Target {
       fileSystem: environment.fileSystem,
     );
 
-    await generateLocalizations(
-      fileSystem: environment.fileSystem,
-      flutterRoot: environment.flutterRootDir.path,
+    generateLocalizations(
       logger: environment.logger,
-      processManager: environment.processManager,
       options: options,
       projectDir: environment.projectDir,
-      dartBinaryPath: environment.artifacts
-        .getArtifactPath(Artifact.engineDartBinary),
       dependenciesDir: environment.buildDir,
+      localizationsGenerator: LocalizationsGenerator(environment.fileSystem),
     );
-    final Map<String, Object> dependencies = json
-      .decode(environment.buildDir.childFile(_kDependenciesFileName).readAsStringSync()) as Map<String, Object>;
+
+    final Map<String, Object> dependencies = json.decode(
+      environment.buildDir.childFile(_kDependenciesFileName).readAsStringSync()
+    ) as Map<String, Object>;
     final Depfile depfile = Depfile(
       <File>[
         configFile,
@@ -207,7 +193,7 @@ class LocalizationOptions {
   final String outputClass;
 
   /// The `--preferred-supported-locales` argument.
-  final String preferredSupportedLocales;
+  final List<String> preferredSupportedLocales;
 
   /// The `--header-file` argument.
   ///
@@ -254,7 +240,7 @@ LocalizationOptions parseLocalizationsOptions({
     untranslatedMessagesFile: _tryReadUri(yamlMap, 'untranslated-messages-file', logger),
     header: _tryReadString(yamlMap, 'header', logger),
     outputClass: _tryReadString(yamlMap, 'output-class', logger),
-    preferredSupportedLocales: _tryReadString(yamlMap, 'preferred-supported-locales', logger),
+    preferredSupportedLocales: _tryReadStringList(yamlMap, 'preferred-supported-locales', logger),
     headerFile: _tryReadUri(yamlMap, 'header-file', logger),
     deferredLoading: _tryReadBool(yamlMap, 'use-deferred-loading', logger),
     useSyntheticPackage: _tryReadBool(yamlMap, 'synthetic-package', logger) ?? true,
@@ -285,6 +271,21 @@ String _tryReadString(YamlMap yamlMap, String key, Logger logger) {
     throw Exception();
   }
   return value as String;
+}
+
+List<String> _tryReadStringList(YamlMap yamlMap, String key, Logger logger) {
+  final Object value = yamlMap[key];
+  if (value == null) {
+    return null;
+  }
+  if (value is String) {
+    return <String>[value];
+  }
+  if (value is Iterable) {
+    return value.map((dynamic e) => e.toString()).toList();
+  }
+  logger.printError('"$value" must be String or List.');
+  throw Exception();
 }
 
 // Try to read a valid `Uri` or null from `yamlMap`, otherwise throw.

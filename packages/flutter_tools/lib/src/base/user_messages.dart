@@ -113,9 +113,7 @@ class UserMessages {
       'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
   String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion, Platform platform) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
-      'To update using sdkmanager, run:\n'
-      '  "$managerPath" "platforms;android-$sdkMinVersion" "build-tools;$buildToolsMinVersion"\n'
-      'or visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
+      'To update the Android SDK visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
 
   // Messages used in AndroidStudioValidator
   String androidStudioVersion(String version) => 'version $version';
@@ -256,7 +254,7 @@ class UserMessages {
       'Found $count devices with name or id matching $deviceId:';
   String get flutterMultipleDevicesFound => 'Multiple devices found:';
   String flutterChooseDevice(int option, String name, String deviceId) => '[$option]: $name ($deviceId)';
-  String get flutterChooseOne => 'Please choose one:';
+  String get flutterChooseOne => 'Please choose one (To quit, press "q/Q")';
   String get flutterSpecifyDeviceWithAllOption =>
       'More than one device connected; please specify a device with '
       "the '-d <deviceId>' flag, or use '-d all' to act on all devices.";

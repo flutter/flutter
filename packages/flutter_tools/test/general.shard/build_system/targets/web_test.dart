@@ -475,14 +475,20 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
+  test('Generated service worker is empty with none-strategy', () {
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[], serviceWorkerStrategy: ServiceWorkerStrategy.none);
+
+    expect(result, '');
+  });
+
   test('Generated service worker correctly inlines file hashes', () {
-    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[]);
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[], serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst);
 
     expect(result, contains('{\n  "/foo": "abcd"\n};'));
   });
 
   test('Generated service worker includes core files', () {
-    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>['foo', 'bar']);
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>['foo', 'bar'], serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst);
 
     expect(result, contains('"foo",\n"bar"'));
   });

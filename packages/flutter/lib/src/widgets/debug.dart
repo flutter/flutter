@@ -255,7 +255,7 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 ///  * alternative: provide additional advice specific to the situation,
 ///    especially an alternative to providing a Directionality ancestor.
 ///    For example, "Alternatively, consider specifying the 'textDirection'
-///    argument.". Should be a funny punctuated sentence.
+///    argument.". Should be a fully punctuated sentence.
 ///
 /// Each one can be null, in which case it is skipped (this is the default).
 /// If they are non-null, they are included in the order above, interspersed

@@ -78,7 +78,12 @@ class Form extends StatefulWidget {
   const Form({
     Key key,
     @required this.child,
-    this.autovalidate = false,
+    @Deprecated(
+      'Use autoValidateMode parameter which provide more specific '
+      'behaviour related to auto validation. '
+      'This feature was deprecated after v1.19.0.'
+    )
+    bool autovalidate = false,
     this.onWillPop,
     this.onChanged,
     AutovalidateMode autovalidateMode,
@@ -113,11 +118,6 @@ class Form extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.child}
   final Widget child;
-
-  /// If true, form fields will validate and update their error text
-  /// immediately after every change. Otherwise, you must call
-  /// [FormState.validate] to validate.
-  final bool autovalidate;
 
   /// Enables the form to veto attempts by the user to dismiss the [ModalRoute]
   /// that contains the form.
@@ -319,7 +319,12 @@ class FormField<T> extends StatefulWidget {
     this.onSaved,
     this.validator,
     this.initialValue,
-    this.autovalidate = false,
+    @Deprecated(
+      'Use autoValidateMode parameter which provide more specific '
+      'behaviour related to auto validation. '
+      'This feature was deprecated after v1.19.0.'
+    )
+    bool autovalidate = false,
     this.enabled = true,
     AutovalidateMode autovalidateMode,
   }) : assert(builder != null),
@@ -360,12 +365,6 @@ class FormField<T> extends StatefulWidget {
   /// An optional value to initialize the form field to, or null otherwise.
   final T initialValue;
 
-  /// If true, this form field will validate and update its error text
-  /// immediately after every change. Otherwise, you must call
-  /// [FormFieldState.validate] to validate. If part of a [Form] that
-  /// auto-validates, this value will be ignored.
-  final bool autovalidate;
-
   /// Whether the form is able to receive user input.
   ///
   /// Defaults to true. If [autovalidateMode] is not [AutovalidateMode.disabled],
@@ -382,8 +381,8 @@ class FormField<T> extends StatefulWidget {
   /// will auto validate even without user interaction and
   /// if [AutovalidateMode.disabled] the auto validation will be disabled.
   ///
-  /// Defaults to [AutovalidateMode.disabled] if [autovalidate] is false which
-  /// means no auto validation will occur. If [autovalidate] is true then this
+  /// Defaults to [AutovalidateMode.disabled] if `autovalidate` is false which
+  /// means no auto validation will occur. If `autovalidate` is true then this
   /// is set to [AutovalidateMode.always] for backward compatibility.
   /// {@endtemplate}
   final AutovalidateMode autovalidateMode;

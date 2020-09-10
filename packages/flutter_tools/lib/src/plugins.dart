@@ -929,20 +929,30 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   }
 }
 
+/// The relative path from a project's main CMake file to the plugin symlink
+/// directory to use in the generated plugin CMake file.
+///
+/// Because the generated file is checked in, it can't use absolute paths. It is
+/// designed to be included by the main CMakeLists.txt, so it relative to
+/// that file, rather than the generated file.
+String _cmakeRelativePluginSymlinkDirectoryPath(CmakeBasedProject project) {
+  final String makefileDirPath = project.cmakeFile.parent.absolute.path;
+  // CMake alway uses posix-style path separators, regardless of the platform.
+  final path.Context cmakePathContext = path.Context(style: path.Style.posix);
+  final List<String> relativePathComponents = globals.fs.path.split(globals.fs.path.relative(
+    project.pluginSymlinkDirectory.absolute.path,
+    from: makefileDirPath,
+  ));
+  return cmakePathContext.joinAll(relativePathComponents);
+}
+
 Future<void> _writeLinuxPluginFiles(FlutterProject project, List<Plugin> plugins) async {
   final List<Plugin>nativePlugins = _filterNativePlugins(plugins, LinuxPlugin.kConfigKey);
   final List<Map<String, dynamic>> linuxPlugins = _extractPlatformMaps(nativePlugins, LinuxPlugin.kConfigKey);
-  // The generated file is checked in, so can't use absolute paths. It is
-  // included by the main CMakeLists.txt, so relative paths must be relative to
-  // that file's directory.
-  final String makefileDirPath = project.linux.cmakeFile.parent.absolute.path;
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'linux',
     'plugins': linuxPlugins,
-    'pluginsDir': globals.fs.path.relative(
-      project.linux.pluginSymlinkDirectory.absolute.path,
-      from: makefileDirPath,
-    ),
+    'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.linux),
   };
   await _writeLinuxPluginRegistrant(project.linux.managedDirectory, context);
   await _writePluginCmakefile(project.linux.generatedPluginCmakeFile, context);
@@ -1005,19 +1015,10 @@ List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
 Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins) async {
   final List<Plugin>nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
   final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(nativePlugins, WindowsPlugin.kConfigKey);
-  // The generated file is checked in, so can't use absolute paths. It is
-  // included by the main CMakeLists.txt, so relative paths must be relative to
-  // that file's directory.
-  final String makefileDirPath = project.windows.cmakeFile.parent.absolute.path;
-  final path.Context cmakePathContext = path.Context(style: path.Style.posix);
-  final List<String> relativePathComponents = globals.fs.path.split(globals.fs.path.relative(
-    project.windows.pluginSymlinkDirectory.absolute.path,
-    from: makefileDirPath,
-  ));
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'windows',
     'plugins': windowsPlugins,
-    'pluginsDir': cmakePathContext.joinAll(relativePathComponents),
+    'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windows),
   };
   await _writeCppPluginRegistrant(project.windows.managedDirectory, context);
   await _writePluginCmakefile(project.windows.generatedPluginCmakeFile, context);
