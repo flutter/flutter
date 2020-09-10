@@ -825,9 +825,9 @@ void main() {
 
     await tester.pumpWidget(
       buildStack(
-        child: Dismissible(
-          key: const ValueKey<int>(1),
-          child: const SizedBox(
+        child: const Dismissible(
+          key: ValueKey<int>(1),
+          child: SizedBox(
             width: 100.0,
             height: 100.0,
           ),
