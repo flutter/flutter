@@ -492,12 +492,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    print("[DEBUG] searchFieldLabel: ${widget.delegate.searchFieldLabel}");
-    print("[DEBUG] searchFieldStyle: ${widget.delegate.searchFieldStyle}");
-    print(
-        "[DEBUG] searchFieldDecoration: ${widget.delegate.searchFieldDecoration}");
     final ThemeData theme = widget.delegate.appBarTheme(context);
-    print("[DEBUG] theme.inputDecorationTheme: ${theme.inputDecorationTheme}");
     final String searchFieldLabel = widget.delegate.searchFieldLabel ??
         MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
