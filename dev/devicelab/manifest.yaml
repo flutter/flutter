@@ -479,6 +479,7 @@ tasks:
       Measures the runtime performance of platform views in the Complex Layout sample app on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
+    flaky: true
 
   flutter_gallery_ios32__start_up:
     description: >
