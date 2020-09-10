@@ -22,8 +22,9 @@ class DevicesCommand extends FlutterCommand {
       'timeout',
       abbr: 't',
       defaultsTo: null,
-      help: 'Time in seconds to wait for devices to attach. Longer timeouts may be necessary for networked devices.'
+      help: '(deprecated) Use --device-timeout instead',
     );
+    usesDeviceTimeoutOption();
   }
 
   @override
@@ -32,20 +33,25 @@ class DevicesCommand extends FlutterCommand {
   @override
   final String description = 'List all connected devices.';
 
-  Duration get timeout {
-    if (argResults['timeout'] == null) {
-      return null;
-    }
-    if (_timeout == null) {
+  @override
+  Duration get deviceDiscoveryTimeout {
+    if (argResults['timeout'] != null) {
       final int timeoutSeconds = int.tryParse(stringArg('timeout'));
       if (timeoutSeconds == null) {
         throwToolExit( 'Could not parse -t/--timeout argument. It must be an integer.');
       }
-      _timeout = Duration(seconds: timeoutSeconds);
+      return Duration(seconds: timeoutSeconds);
     }
-    return _timeout;
+    return super.deviceDiscoveryTimeout;
   }
-  Duration _timeout;
+
+  @override
+  Future<void> validateCommand() {
+    if (argResults['timeout'] != null) {
+      globals.printError('--timeout has been deprecated, use --${FlutterOptions.kDeviceTimeout} instead');
+    }
+    return super.validateCommand();
+  }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -56,7 +62,7 @@ class DevicesCommand extends FlutterCommand {
         exitCode: 1);
     }
 
-    final List<Device> devices = await globals.deviceManager.refreshAllConnectedDevices(timeout: timeout);
+    final List<Device> devices = await globals.deviceManager.refreshAllConnectedDevices(timeout: deviceDiscoveryTimeout);
 
     if (boolArg('machine')) {
       await printDevicesAsJson(devices);
@@ -68,8 +74,8 @@ class DevicesCommand extends FlutterCommand {
         status.writeln('Run "flutter emulators" to list and start any available device emulators.');
         status.writeln();
         status.write('If you expected your device to be detected, please run "flutter doctor" to diagnose potential issues. ');
-        if (timeout == null) {
-          status.write('You may also try increasing the time to wait for connected devices with the --timeout flag. ');
+        if (deviceDiscoveryTimeout == null) {
+          status.write('You may also try increasing the time to wait for connected devices with the --${FlutterOptions.kDeviceTimeout} flag. ');
         }
         status.write('Visit https://flutter.dev/setup/ for troubleshooting tips.');
 
