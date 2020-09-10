@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../painting/mocks_for_image_cache.dart';
+import '../painting/image_data.dart';
 import '../rendering/rendering_tester.dart';
 
 List<int> selectedTabs;
@@ -42,7 +46,7 @@ void main() {
 
   BottomNavigationBarItem tabGenerator(int index) {
     return BottomNavigationBarItem(
-      icon: const ImageIcon(TestImageProvider(24, 24)),
+      icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
       title: Text('Tab ${index + 1}'),
     );
   }
@@ -407,7 +411,7 @@ void main() {
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
 
-  testWidgets('Tab contents are not inset when resizeToAvoidBottomInset overriden', (WidgetTester tester) async {
+  testWidgets('Tab contents are not inset when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
     BuildContext innerContext;
 
     await tester.pumpWidget(
@@ -434,15 +438,22 @@ void main() {
     expect(MediaQuery.of(innerContext).padding.bottom, 50);
   });
 
-  testWidgets('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overriden', (WidgetTester tester) async {
-    final Widget child = Directionality(
-      textDirection: TextDirection.ltr,
-      child: CupertinoTabScaffold(
-        resizeToAvoidBottomInset: false,
-        tabBar: _buildTabBar(),
-        tabBuilder: (BuildContext context, int index) {
-          return const Placeholder();
-        },
+  testWidgets('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
+    final Widget child = Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultCupertinoLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: CupertinoTabScaffold(
+          resizeToAvoidBottomInset: false,
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
       ),
     );
 
@@ -1072,7 +1083,7 @@ void main() {
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
                   10,
-                  (int i) => BottomNavigationBarItem(icon: const ImageIcon(TestImageProvider(24, 23)), title: Text('$i')),
+                  (int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), title: Text('$i')),
                 ),
               ),
               tabBuilder: (BuildContext context, int index) => const Text('content'),
@@ -1107,14 +1118,14 @@ void main() {
 
 CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
   return CupertinoTabBar(
-    items: const <BottomNavigationBarItem>[
+    items: <BottomNavigationBarItem>[
       BottomNavigationBarItem(
-        icon: ImageIcon(TestImageProvider(24, 24)),
-        title: Text('Tab 1'),
+        icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+        title: const Text('Tab 1'),
       ),
       BottomNavigationBarItem(
-        icon: ImageIcon(TestImageProvider(24, 24)),
-        title: Text('Tab 2'),
+        icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+        title: const Text('Tab 2'),
       ),
     ],
     currentIndex: selectedTab,

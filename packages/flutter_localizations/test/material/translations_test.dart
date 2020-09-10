@@ -2,11 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
+
+import 'package:path/path.dart' as path;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../test_utils.dart';
+
+final String rootDirectoryPath = Directory.current.parent.path;
 
 void main() {
   for (final String language in kMaterialSupportedLanguages) {
@@ -465,31 +472,32 @@ void main() {
     expect(localizations.okButtonLabel, '確定');
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/53036.
-  testWidgets('`nb` uses `no` as its synonym when `nb` arb file is not present', (WidgetTester tester) async {
-    final File nbMaterialArbFile = File('lib/src/l10n/material_nb.arb');
-    final File noMaterialArbFile = File('lib/src/l10n/material_no.arb');
+  // Regression test for https://github.com/flutter/flutter/issues/36704.
+  testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
+    final File file = File(
+      path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'material_kn.arb'),
+    );
 
-    // No need to run test if `nb` arb file exists or if `no` arb file does not exist.
-    if (noMaterialArbFile.existsSync() && !nbMaterialArbFile.existsSync()) {
-      Locale locale = const Locale.fromSubtags(languageCode: 'no', scriptCode: null, countryCode: null);
-      expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
-      MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-      expect(localizations, isA<MaterialLocalizationNo>());
+    final Map<String, dynamic> bundle = json.decode(
+      file.readAsStringSync(),
+    ) as Map<String, dynamic>;
 
-      final String alertDialogLabelNo = localizations.alertDialogLabel;
-      final String anteMeridiemAbbreviationNo = localizations.anteMeridiemAbbreviation;
-      final String closeButtonLabelNo = localizations.closeButtonLabel;
-      final String okButtonLabelNo = localizations.okButtonLabel;
+    // Encodes the arb resource values if they have not already been
+    // encoded.
+    encodeBundleTranslations(bundle);
 
-      locale = const Locale.fromSubtags(languageCode: 'nb', scriptCode: null, countryCode: null);
-      expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
-      localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-      expect(localizations, isA<MaterialLocalizationNb>());
-      expect(localizations.alertDialogLabel, alertDialogLabelNo);
-      expect(localizations.anteMeridiemAbbreviation, anteMeridiemAbbreviationNo);
-      expect(localizations.closeButtonLabel, closeButtonLabelNo);
-      expect(localizations.okButtonLabel, okButtonLabelNo);
+    // Generates the encoded arb output file in as a string.
+    final String encodedArbFile = generateArbString(bundle);
+
+    // After encoding the bundles, the generated string should match
+    // the existing material_kn.arb.
+    if (Platform.isWindows) {
+      // On Windows, the character '\n' can output the two-character sequence
+      // '\r\n' (and when reading the file back, '\r\n' is translated back
+      // into a single '\n' character).
+      expect(file.readAsStringSync().replaceAll('\r\n', '\n'), encodedArbFile);
+    } else {
+      expect(file.readAsStringSync(), encodedArbFile);
     }
   });
 }

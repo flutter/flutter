@@ -6,21 +6,17 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/terminal.dart';
-import '../base/utils.dart';
-import '../cache.dart';
 import '../dart/analysis.dart';
-import '../dart/sdk.dart' as sdk;
-import 'analyze.dart';
 import 'analyze_base.dart';
 
-/// An aspect of the [AnalyzeCommand] to perform once time analysis.
 class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(
     ArgResults argResults,
@@ -30,8 +26,9 @@ class AnalyzeOnce extends AnalyzeBase {
     @required Logger logger,
     @required Platform platform,
     @required ProcessManager processManager,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     @required List<String> experiments,
+    @required Artifacts artifacts,
     this.workingDirectory,
   }) : super(
         argResults,
@@ -43,6 +40,7 @@ class AnalyzeOnce extends AnalyzeBase {
         processManager: processManager,
         terminal: terminal,
         experiments: experiments,
+        artifacts: artifacts,
       );
 
   /// The working directory for testing analysis using dartanalyzer.
@@ -68,7 +66,7 @@ class AnalyzeOnce extends AnalyzeBase {
       }
     }
 
-    if (argResults['flutter-repo'] as bool) {
+    if (isFlutterRepo) {
       // check for conflicting dependencies
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
@@ -86,11 +84,8 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Nothing to analyze.', exitCode: 0);
     }
 
-    // analyze all
     final Completer<void> analysisCompleter = Completer<void>();
     final List<AnalysisError> errors = <AnalysisError>[];
-
-    final String sdkPath = argResults['dart-sdk'] as String ?? sdk.dartSdkPath;
 
     final AnalysisServer server = AnalysisServer(
       sdkPath,
@@ -103,47 +98,58 @@ class AnalyzeOnce extends AnalyzeBase {
       experiments: experiments,
     );
 
-    StreamSubscription<bool> subscription;
-    subscription = server.onAnalyzing.listen((bool isAnalyzing) {
-      if (!isAnalyzing) {
-        analysisCompleter.complete();
-        subscription?.cancel();
-        subscription = null;
+    Stopwatch timer;
+    Status progress;
+    try {
+      StreamSubscription<bool> subscription;
+
+      void handleAnalysisStatus(bool isAnalyzing) {
+        if (!isAnalyzing) {
+          analysisCompleter.complete();
+          subscription?.cancel();
+          subscription = null;
+        }
       }
-    });
-    server.onErrors.listen((FileAnalysisErrors fileErrors) {
-      // Record the issues found (but filter out to do comments).
-      errors.addAll(fileErrors.errors.where((AnalysisError error) => error.type != 'TODO'));
-    });
 
-    await server.start();
-    // Completing the future in the callback can't fail.
-    unawaited(server.onExit.then<void>((int exitCode) {
-      if (!analysisCompleter.isCompleted) {
-        analysisCompleter.completeError('analysis server exited: $exitCode');
+      subscription = server.onAnalyzing.listen((bool isAnalyzing) => handleAnalysisStatus(isAnalyzing));
+
+      void handleAnalysisErrors(FileAnalysisErrors fileErrors) {
+        fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
+
+        errors.addAll(fileErrors.errors);
       }
-    }));
 
-    Cache.releaseLockEarly();
+      server.onErrors.listen(handleAnalysisErrors);
 
-    // collect results
-    final Stopwatch timer = Stopwatch()..start();
-    final String message = directories.length > 1
-        ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
-        : fileSystem.path.basename(directories.first);
-    final Status progress = argResults['preamble'] as bool
-        ? logger.startProgress('Analyzing $message...', timeout: timeoutConfiguration.slowOperation)
-        : null;
+      await server.start();
+      // Completing the future in the callback can't fail.
+      unawaited(server.onExit.then<void>((int exitCode) {
+        if (!analysisCompleter.isCompleted) {
+          analysisCompleter.completeError('analysis server exited: $exitCode');
+        }
+      }));
 
-    await analysisCompleter.future;
-    progress?.cancel();
-    timer.stop();
+      // collect results
+      timer = Stopwatch()..start();
+      final String message = directories.length > 1
+          ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
+          : fileSystem.path.basename(directories.first);
+      progress = argResults['preamble'] as bool
+          ? logger.startProgress(
+            'Analyzing $message...',
+            timeout: timeoutConfiguration.slowOperation,
+          )
+          : null;
 
-    // count missing dartdocs
-    final int undocumentedMembers = errors.where((AnalysisError error) {
-      return error.code == 'public_member_api_docs';
-    }).length;
-    if (!(argResults['dartdocs'] as bool)) {
+      await analysisCompleter.future;
+    } finally {
+      await server.dispose();
+      progress?.cancel();
+      timer?.stop();
+    }
+
+    final int undocumentedMembers = AnalyzeBase.countMissingDartDocs(errors);
+    if (!isDartDocs) {
       errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
     }
 
@@ -164,36 +170,28 @@ class AnalyzeOnce extends AnalyzeBase {
       logger.printStatus(error.toString(), hangingIndent: 7);
     }
 
+    final int errorCount = errors.length;
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
+    final String dartDocMessage = AnalyzeBase.generateDartDocMessage(undocumentedMembers);
+    final String errorsMessage = AnalyzeBase.generateErrorsMessage(
+      issueCount: errorCount,
+      seconds: seconds,
+      undocumentedMembers: undocumentedMembers,
+      dartDocMessage: dartDocMessage,
+    );
 
-    String dartdocMessage;
-    if (undocumentedMembers == 1) {
-      dartdocMessage = 'one public member lacks documentation';
-    } else {
-      dartdocMessage = '$undocumentedMembers public members lack documentation';
+    if (errorCount > 0) {
+      logger.printStatus('');
+      // We consider any level of error to be an error exit (we don't report different levels).
+      throwToolExit(errorsMessage);
     }
 
-    // We consider any level of error to be an error exit (we don't report different levels).
-    if (errors.isNotEmpty) {
-      final int errorCount = errors.length;
-      logger.printStatus('');
-      if (undocumentedMembers > 0) {
-        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartdocMessage)');
-      } else {
-        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s)');
-      }
+    if (argResults['congratulate'] as bool) {
+      logger.printStatus(errorsMessage);
     }
 
     if (server.didServerErrorOccur) {
       throwToolExit('Server error(s) occurred. (ran in ${seconds}s)');
-    }
-
-    if (argResults['congratulate'] as bool) {
-      if (undocumentedMembers > 0) {
-        logger.printStatus('No issues found! (ran in ${seconds}s; $dartdocMessage)');
-      } else {
-        logger.printStatus('No issues found! (ran in ${seconds}s)');
-      }
     }
   }
 }

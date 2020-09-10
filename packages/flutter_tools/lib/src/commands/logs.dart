@@ -18,6 +18,7 @@ class LogsCommand extends FlutterCommand {
       abbr: 'c',
       help: 'Clear log history before reading from logs.',
     );
+    usesDeviceTimeoutOption();
   }
 
   @override
@@ -47,8 +48,6 @@ class LogsCommand extends FlutterCommand {
     }
 
     final DeviceLogReader logReader = await device.getLogReader();
-
-    Cache.releaseLockEarly();
 
     globals.printStatus('Showing $logReader logs:');
 

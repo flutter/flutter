@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
+import '../rendering/rendering_tester.dart';
 import 'semantics_tester.dart';
 import 'states.dart';
 
@@ -948,5 +951,41 @@ void main() {
     expect(semantics, includesNodeWith(label: 'Page #3', flags: <SemanticsFlag>[SemanticsFlag.isHidden]));
 
     semantics.dispose();
+  });
+
+  testWidgets('PageView respects clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          children: <Widget>[Container(height: 2000.0)],
+        ),
+      ),
+    );
+
+    // 1st, check that the render object has received the default clip behavior.
+    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    // 2nd, check that the painting context has received the default clip behavior.
+    final TestClipPaintingContext context = TestClipPaintingContext();
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.hardEdge));
+
+    // 3rd, pump a new widget to check that the render object can update its clip behavior.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          children: <Widget>[Container(height: 2000.0)],
+          clipBehavior: Clip.antiAlias,
+        ),
+      ),
+    );
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+
+    // 4th, check that a non-default clip behavior can be sent to the painting context.
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.antiAlias));
   });
 }

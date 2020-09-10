@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,7 +17,7 @@ void main() {
           backgroundColor: color,
           content: const Text('I am a banner'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action'),
               onPressed: () { },
             ),
@@ -37,7 +39,7 @@ void main() {
           contentTextStyle: contentTextStyle,
           content: const Text(contentText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action'),
               onPressed: () { },
             ),
@@ -58,11 +60,11 @@ void main() {
         home: MaterialBanner(
           content: const Text(contentText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action 1'),
               onPressed: () { },
             ),
-            FlatButton(
+            TextButton(
               child: const Text('Action 2'),
               onPressed: () { },
             ),
@@ -72,9 +74,9 @@ void main() {
     );
 
     final Offset contentBottomLeft = tester.getBottomLeft(find.text(contentText));
-    final Offset actionsTopRight = tester.getTopLeft(find.byType(ButtonBar));
-    expect(contentBottomLeft.dy, lessThan(actionsTopRight.dy));
-    expect(contentBottomLeft.dx, greaterThan(actionsTopRight.dx));
+    final Offset actionsTopLeft = tester.getTopLeft(find.byType(OverflowBar));
+    expect(contentBottomLeft.dy, lessThan(actionsTopLeft.dy));
+    expect(contentBottomLeft.dx, lessThan(actionsTopLeft.dx));
   });
 
   testWidgets('Actions laid out beside content if only one action', (WidgetTester tester) async {
@@ -85,7 +87,7 @@ void main() {
         home: MaterialBanner(
           content: const Text(contentText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action'),
               onPressed: () { },
             ),
@@ -95,7 +97,7 @@ void main() {
     );
 
     final Offset contentBottomLeft = tester.getBottomLeft(find.text(contentText));
-    final Offset actionsTopRight = tester.getTopRight(find.byType(ButtonBar));
+    final Offset actionsTopRight = tester.getTopRight(find.byType(OverflowBar));
     expect(contentBottomLeft.dy, greaterThan(actionsTopRight.dy));
     expect(contentBottomLeft.dx, lessThan(actionsTopRight.dx));
   });
@@ -107,7 +109,7 @@ void main() {
         home: MaterialBanner(
           content: const Text('Content'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action'),
               onPressed: () { },
             ),
@@ -116,9 +118,9 @@ void main() {
       ),
     );
 
-    final Offset actionsTopRight = tester.getTopRight(find.byType(ButtonBar));
+    final Offset actionsTopRight = tester.getTopRight(find.byType(OverflowBar));
     final Offset bannerTopRight = tester.getTopRight(find.byType(MaterialBanner));
-    expect(actionsTopRight.dx, bannerTopRight.dx);
+    expect(actionsTopRight.dx + 8, bannerTopRight.dx); // actions OverflowBar is padded by 8
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/39574
@@ -130,7 +132,7 @@ void main() {
           child: MaterialBanner(
             content: const Text('Content'),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: const Text('Action'),
                 onPressed: () { },
               ),
@@ -140,9 +142,9 @@ void main() {
       ),
     );
 
-    final Offset actionsTopLeft = tester.getTopLeft(find.byType(ButtonBar));
+    final Offset actionsTopLeft = tester.getTopLeft(find.byType(OverflowBar));
     final Offset bannerTopLeft = tester.getTopLeft(find.byType(MaterialBanner));
-    expect(actionsTopLeft.dx, bannerTopLeft.dx);
+    expect(actionsTopLeft.dx - 8, bannerTopLeft.dx); // actions OverflowBar is padded by 8
   });
 
   testWidgets('Actions laid out below content if forced override', (WidgetTester tester) async {
@@ -154,7 +156,7 @@ void main() {
           forceActionsBelow: true,
           content: const Text(contentText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Action'),
               onPressed: () { },
             ),
@@ -164,9 +166,92 @@ void main() {
     );
 
     final Offset contentBottomLeft = tester.getBottomLeft(find.text(contentText));
-    final Offset actionsTopRight = tester.getTopLeft(find.byType(ButtonBar));
-    expect(contentBottomLeft.dy, lessThan(actionsTopRight.dy));
-    expect(contentBottomLeft.dx, greaterThan(actionsTopRight.dx));
+    final Offset actionsTopLeft = tester.getTopLeft(find.byType(OverflowBar));
+    expect(contentBottomLeft.dy, lessThan(actionsTopLeft.dy));
+    expect(contentBottomLeft.dx, lessThan(actionsTopLeft.dx));
+  });
+
+  testWidgets('Action widgets layout', (WidgetTester tester) async {
+    // This regression test ensures that the action widgets layout matches what
+    // it was, before ButtonBar was replaced by OverflowBar.
+
+    Widget buildFrame(int actionCount, TextDirection textDirection) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: MaterialBanner(
+            content: const SizedBox(width: 100, height: 100),
+            actions: List<Widget>.generate(actionCount, (int index) {
+              return SizedBox(
+                width: 64,
+                height: 48,
+                key: ValueKey<int>(index),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    final Finder action0 = find.byKey(const ValueKey<int>(0));
+    final Finder action1 = find.byKey(const ValueKey<int>(1));
+    final Finder action2 = find.byKey(const ValueKey<int>(2));
+
+    // The action coordinates that follow were obtained by running
+    // the test code, before ButtonBar was replaced by OverflowBar.
+
+    await tester.pumpWidget(buildFrame(1, TextDirection.ltr));
+    expect(tester.getTopLeft(action0), const Offset(728, 28));
+
+    await tester.pumpWidget(buildFrame(1, TextDirection.rtl));
+    expect(tester.getTopLeft(action0), const Offset(8, 28));
+
+    await tester.pumpWidget(buildFrame(3, TextDirection.ltr));
+    expect(tester.getTopLeft(action0), const Offset(584, 130));
+    expect(tester.getTopLeft(action1), const Offset(656, 130));
+    expect(tester.getTopLeft(action2), const Offset(728, 130));
+
+    await tester.pumpWidget(buildFrame(3, TextDirection.rtl));
+    expect(tester.getTopLeft(action0), const Offset(152, 130));
+    expect(tester.getTopLeft(action1), const Offset(80, 130));
+    expect(tester.getTopLeft(action2), const Offset(8, 130));
+  });
+
+  testWidgets('Action widgets layout with overflow', (WidgetTester tester) async {
+    // This regression test ensures that the action widgets layout matches what
+    // it was, before ButtonBar was replaced by OverflowBar.
+
+    const int actionCount = 4;
+    Widget buildFrame(TextDirection textDirection) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: MaterialBanner(
+            content: const SizedBox(width: 100, height: 100),
+            actions: List<Widget>.generate(actionCount, (int index) {
+              return SizedBox(
+                width: 200,
+                height: 10,
+                key: ValueKey<int>(index),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    // The action coordinates that follow were obtained by running
+    // the test code, before ButtonBar was replaced by OverflowBar.
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+    for (int index = 0; index < actionCount; index += 1) {
+      expect(tester.getTopLeft(find.byKey(ValueKey<int>(index))), Offset(8, 134.0 + index * 10));
+    }
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl));
+    for (int index = 0; index < actionCount; index += 1) {
+      expect(tester.getTopLeft(find.byKey(ValueKey<int>(index))), Offset(592, 134.0 + index * 10));
+    }
   });
 }
 

@@ -9,14 +9,14 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals;
+import '../../globals.dart' as globals hide fs, logger, processManager, artifacts;
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
-import 'dart.dart';
+import 'common.dart';
 import 'icon_tree_shaker.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
@@ -33,11 +33,11 @@ abstract class AotAssemblyBase extends Target {
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       reportTimings: false,
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
       xcode: globals.xcode,
-      artifacts: globals.artifacts,
-      processManager: globals.processManager,
+      artifacts: environment.artifacts,
+      processManager: environment.processManager,
     );
     final String buildOutputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {
@@ -46,49 +46,67 @@ abstract class AotAssemblyBase extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_assembly');
     }
-    final List<String> extraGenSnapshotOptions = parseExtraGenSnapshotOptions(environment);
+    final List<String> extraGenSnapshotOptions = decodeDartDefines(environment.defines, kExtraGenSnapshotOptions);
     final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
-    final List<DarwinArch> iosArchs = environment.defines[kIosArchs]
+    final List<DarwinArch> darwinArchs = environment.defines[kIosArchs]
       ?.split(' ')
       ?.map(getIOSArchForName)
       ?.toList()
       ?? <DarwinArch>[DarwinArch.arm64];
     if (targetPlatform != TargetPlatform.ios) {
-      throw Exception('aot_assembly is only supported for iOS applications');
+      throw Exception('aot_assembly is only supported for iOS applications.');
     }
+    if (darwinArchs.contains(DarwinArch.x86_64)) {
+      throw Exception(
+        'release/profile builds are only supported for physical devices. '
+        'attempted to build for $darwinArchs.'
+      );
+    }
+    final String codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 
     // If we're building multiple iOS archs the binaries need to be lipo'd
     // together.
     final List<Future<int>> pending = <Future<int>>[];
-    for (final DarwinArch iosArch in iosArchs) {
+    for (final DarwinArch darwinArch in darwinArchs) {
+      final List<String> archExtraGenSnapshotOptions = List<String>.of(extraGenSnapshotOptions);
+      if (codeSizeDirectory != null) {
+        final File codeSizeFile = environment.fileSystem
+          .directory(codeSizeDirectory)
+          .childFile('snapshot.${getNameForDarwinArch(darwinArch)}.json');
+        final File precompilerTraceFile = environment.fileSystem
+          .directory(codeSizeDirectory)
+          .childFile('trace.${getNameForDarwinArch(darwinArch)}.json');
+        archExtraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
+        archExtraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
+      }
       pending.add(snapshotter.build(
         platform: targetPlatform,
         buildMode: buildMode,
         mainPath: environment.buildDir.childFile('app.dill').path,
         packagesPath: environment.projectDir.childFile('.packages').path,
-        outputPath: globals.fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch)),
-        darwinArch: iosArch,
+        outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(darwinArch)),
+        darwinArch: darwinArch,
         bitcode: bitcode,
         quiet: true,
         splitDebugInfo: splitDebugInfo,
         dartObfuscation: dartObfuscation,
-        extraGenSnapshotOptions: extraGenSnapshotOptions,
+        extraGenSnapshotOptions: archExtraGenSnapshotOptions,
       ));
     }
     final List<int> results = await Future.wait(pending);
     if (results.any((int result) => result != 0)) {
       throw Exception('AOT snapshotter exited with code ${results.join()}');
     }
-    final String resultPath = globals.fs.path.join(environment.buildDir.path, 'App.framework', 'App');
-    globals.fs.directory(resultPath).parent.createSync(recursive: true);
-    final ProcessResult result = await globals.processManager.run(<String>[
+    final String resultPath = environment.fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App');
+    environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
+    final ProcessResult result = await environment.processManager.run(<String>[
       'lipo',
-      ...iosArchs.map((DarwinArch iosArch) =>
-          globals.fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
+      ...darwinArchs.map((DarwinArch iosArch) =>
+          environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
       '-create',
       '-output',
       resultPath,
@@ -187,7 +205,7 @@ class DebugUniveralFramework extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App')
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
   ];
 
   @override
@@ -200,7 +218,10 @@ class DebugUniveralFramework extends Target {
       ?? <DarwinArch>{DarwinArch.arm64};
     final File iphoneFile = environment.buildDir.childFile('iphone_framework');
     final File simulatorFile = environment.buildDir.childFile('simulator_framework');
-    final File lipoOutputFile = environment.buildDir.childFile('App');
+    final File lipoOutputFile = environment.buildDir
+      .childDirectory('App.framework')
+      .childFile('App');
+    lipoOutputFile.parent.createSync(recursive: true);
     final RunResult iphoneResult = await createStubAppFramework(
       iphoneFile,
       SdkType.iPhone,
@@ -250,7 +271,7 @@ abstract class IosAssetBundle extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App'),
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     ...IconTreeShaker.inputs,
   ];
@@ -280,16 +301,18 @@ abstract class IosAssetBundle extends Target {
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
     if (buildMode == BuildMode.debug) {
       // Copy the App.framework to the output directory.
-      environment.buildDir.childFile('App')
+      environment.buildDir
+        .childDirectory('App.framework')
+        .childFile('App')
         .copySync(frameworkDirectory.childFile('App').path);
 
-      final String vmSnapshotData = globals.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
-      final String isolateSnapshotData = globals.artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
+      final String vmSnapshotData = environment.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
+      final String isolateSnapshotData = environment.artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
       environment.buildDir.childFile('app.dill')
           .copySync(assetDirectory.childFile('kernel_blob.bin').path);
-      globals.fs.file(vmSnapshotData)
+      environment.fileSystem.file(vmSnapshotData)
           .copySync(assetDirectory.childFile('vm_snapshot_data').path);
-      globals.fs.file(isolateSnapshotData)
+      environment.fileSystem.file(isolateSnapshotData)
           .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
     } else {
       environment.buildDir.childDirectory('App.framework').childFile('App')
@@ -297,10 +320,14 @@ abstract class IosAssetBundle extends Target {
     }
 
     // Copy the assets.
-    final Depfile assetDepfile = await copyAssets(environment, assetDirectory);
+    final Depfile assetDepfile = await copyAssets(
+      environment,
+      assetDirectory,
+      targetPlatform: TargetPlatform.ios,
+    );
     final DepfileService depfileService = DepfileService(
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
     );
     depfileService.writeToFile(
       assetDepfile,
@@ -391,7 +418,8 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool in
     throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
   }
 
-  final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_stub_source.');
+  final Directory tempDir = outputFile.fileSystem.systemTempDirectory
+    .createTempSync('flutter_tools_stub_source.');
   try {
     final File stubSource = tempDir.childFile('debug_app.cc')
       ..writeAsStringSync(r'''
@@ -429,20 +457,10 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool in
   } finally {
     try {
       tempDir.deleteSync(recursive: true);
-    } on FileSystemException catch (_) {
+    } on FileSystemException {
       // Best effort. Sometimes we can't delete things from system temp.
     } on Exception catch (e) {
       throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
     }
   }
-}
-
-/// iOS and macOS build scripts may pass extraGenSnapshotOptions as an empty
-/// string.
-List<String> parseExtraGenSnapshotOptions(Environment environment) {
-  final String value = environment.defines[kExtraGenSnapshotOptions];
-  if (value == null || value.trim().isEmpty) {
-    return <String>[];
-  }
-  return value.split(',');
 }

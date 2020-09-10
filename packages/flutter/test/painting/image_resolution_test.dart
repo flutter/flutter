@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -145,7 +147,7 @@ void main() {
         expect(bundleKey.scale, 1.0);
       }));
     });
-  }, skip: isBrowser);
+  });
 
   group('Regression - When assets available are 1.0 and 3.0 check devices with a range of scales', () {
     const String mainAssetPath = 'assets/normalFolder/normalFile.png';
@@ -201,6 +203,6 @@ void main() {
     test('Typical case 4.0', () {
       _buildBundleAndTestVariantLogic(4.0, 3.0, variantPath);
     });
-  }, skip: isBrowser);
+  });
 
 }

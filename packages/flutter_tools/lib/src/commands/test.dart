@@ -9,9 +9,10 @@ import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../bundle.dart';
 import '../cache.dart';
-import '../codegen.dart';
+import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
@@ -31,6 +32,9 @@ class TestCommand extends FlutterCommand {
   }) : assert(testWrapper != null) {
     requiresPubspecYaml();
     usesPubOption();
+    addNullSafetyModeOptions(hide: !verboseHelp);
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    addEnableExperimentation(hide: !verboseHelp);
     argParser
       ..addMultiOption('name',
         help: 'A regular expression matching substrings of the names of tests to run.',
@@ -128,8 +132,6 @@ class TestCommand extends FlutterCommand {
               'This flag is ignored if --start-paused or coverage are requested. '
               'The vmservice will be enabled no matter what in those cases.'
       );
-    usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    addEnableExperimentation(hide: !verboseHelp);
   }
 
   /// The interface for starting and configuring the tester.
@@ -155,7 +157,6 @@ class TestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await globals.cache.updateAll(await requiredArtifacts);
     if (!globals.fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
@@ -163,16 +164,38 @@ class TestCommand extends FlutterCommand {
         "called *_test.dart and must reside in the package's 'test' "
         'directory (or one of its subdirectories).');
     }
+    final FlutterProject flutterProject = FlutterProject.current();
     if (shouldRunPub) {
-      await pub.get(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
+      if (flutterProject.manifest.generateSyntheticPackage) {
+        final Environment environment = Environment(
+          artifacts: globals.artifacts,
+          logger: globals.logger,
+          cacheDir: globals.cache.getRoot(),
+          engineVersion: globals.flutterVersion.engineRevision,
+          fileSystem: globals.fs,
+          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+          outputDir: globals.fs.directory(getBuildDirectory()),
+          processManager: globals.processManager,
+          projectDir: flutterProject.directory,
+        );
+
+        await generateLocalizationsSyntheticPackage(
+          environment: environment,
+          buildSystem: globals.buildSystem,
+        );
+      }
+
+      await pub.get(
+        context: PubContext.getVerifyContext(name),
+        skipPubspecYamlCheck: true,
+        generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
+      );
     }
     final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');
     final String tags = stringArg('tags');
     final String excludeTags = stringArg('exclude-tags');
-    final FlutterProject flutterProject = FlutterProject.current();
-    final List<String> dartExperiments = stringsArg(FlutterOptions.kEnableExperiment);
 
     if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
       await _buildTestAsset();
@@ -223,7 +246,7 @@ class TestCommand extends FlutterCommand {
     final bool machine = boolArg('machine');
     CoverageCollector collector;
     if (boolArg('coverage') || boolArg('merge-coverage')) {
-      final String projectName = FlutterProject.current().manifest.appName;
+      final String projectName = flutterProject.manifest.appName;
       collector = CoverageCollector(
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
@@ -235,22 +258,6 @@ class TestCommand extends FlutterCommand {
       watcher = EventPrinter(parent: collector);
     } else if (collector != null) {
       watcher = collector;
-    }
-
-    Cache.releaseLockEarly();
-
-    // Run builders once before all tests.
-    if (flutterProject.hasBuilders) {
-      final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
-      codegenDaemon.startBuild();
-      await for (final CodegenStatus status in codegenDaemon.buildResults) {
-        if (status == CodegenStatus.Succeeded) {
-          break;
-        }
-        if (status == CodegenStatus.Failed) {
-          throwToolExit('Code generation failed.');
-        }
-      }
     }
 
     final bool disableServiceAuthCodes =
@@ -278,7 +285,8 @@ class TestCommand extends FlutterCommand {
       flutterProject: flutterProject,
       web: stringArg('platform') == 'chrome',
       randomSeed: stringArg('test-randomize-ordering-seed'),
-      dartExperiments: dartExperiments,
+      extraFrontEndOptions: getBuildInfo(forcedBuildMode: BuildMode.debug).extraFrontEndOptions,
+      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
     );
 
     if (collector != null) {
@@ -299,7 +307,7 @@ class TestCommand extends FlutterCommand {
 
   Future<void> _buildTestAsset() async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    final int build = await assetBundle.build();
+    final int build = await assetBundle.build(packagesPath: '.packages');
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }

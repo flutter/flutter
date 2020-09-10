@@ -2,17 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:io' as io;
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
-
-class MockPlatform extends Mock implements Platform {}
+import '../../src/context.dart';
 
 void main() {
-  group('ensureDirectoryExists', () {
+  group('fsUtils', () {
     MemoryFileSystem fs;
     FileSystemUtils fsUtils;
 
@@ -20,18 +24,36 @@ void main() {
       fs = MemoryFileSystem();
       fsUtils = FileSystemUtils(
         fileSystem: fs,
-        platform: MockPlatform(),
+        platform: FakePlatform(),
       );
     });
 
-    testWithoutContext('recursively creates a directory if it does not exist', () async {
+    testWithoutContext('ensureDirectoryExists recursively creates a directory if it does not exist', () async {
       fsUtils.ensureDirectoryExists('foo/bar/baz.flx');
       expect(fs.isDirectorySync('foo/bar'), true);
     });
 
-    testWithoutContext('throws tool exit on failure to create', () async {
+    testWithoutContext('ensureDirectoryExists throws tool exit on failure to create', () async {
       fs.file('foo').createSync();
       expect(() => fsUtils.ensureDirectoryExists('foo/bar.flx'), throwsToolExit());
+    });
+
+    testWithoutContext('getUniqueFile creates a unique file name', () async {
+      final File fileA = fsUtils.getUniqueFile(fs.currentDirectory, 'foo', 'json')
+        ..createSync();
+      final File fileB = fsUtils.getUniqueFile(fs.currentDirectory, 'foo', 'json');
+
+      expect(fileA.path, '/foo_01.json');
+      expect(fileB.path, '/foo_02.json');
+    });
+
+    testWithoutContext('getUniqueDirectory creates a unique directory name', () async {
+      final Directory directoryA = fsUtils.getUniqueDirectory(fs.currentDirectory, 'foo')
+        ..createSync();
+      final Directory directoryB = fsUtils.getUniqueDirectory(fs.currentDirectory, 'foo');
+
+      expect(directoryA.path, '/foo_01');
+      expect(directoryB.path, '/foo_02');
     });
   });
 
@@ -55,7 +77,7 @@ void main() {
 
       final FileSystemUtils fsUtils = FileSystemUtils(
         fileSystem: sourceMemoryFs,
-        platform: MockPlatform(),
+        platform: FakePlatform(),
       );
       fsUtils.copyDirectorySync(sourceDirectory, targetDirectory);
 
@@ -75,7 +97,7 @@ void main() {
       final MemoryFileSystem fileSystem = MemoryFileSystem();
       final FileSystemUtils fsUtils = FileSystemUtils(
         fileSystem: fileSystem,
-        platform: MockPlatform(),
+        platform: FakePlatform(),
       );
       final Directory origin = fileSystem.directory('/origin');
       origin.createSync();
@@ -121,4 +143,40 @@ void main() {
       expect(fsUtils.escapePath(r'foo\cool.dart'), r'foo\cool.dart');
     });
   });
+
+  group('LocalFileSystem', () {
+    MockIoProcessSignal mockSignal;
+    ProcessSignal signalUnderTest;
+    StreamController<io.ProcessSignal> controller;
+
+    setUp(() {
+      mockSignal = MockIoProcessSignal();
+      signalUnderTest = ProcessSignal(mockSignal);
+      controller = StreamController<io.ProcessSignal>();
+      when(mockSignal.watch()).thenAnswer((Invocation invocation) => controller.stream);
+    });
+
+    testUsingContext('deletes system temp entry on a fatal signal', () async {
+      final Completer<void> completer = Completer<void>();
+      final Signals signals = Signals.test();
+      final LocalFileSystem localFileSystem = LocalFileSystem.test(
+        signals: signals,
+        fatalSignals: <ProcessSignal>[signalUnderTest],
+      );
+      final Directory temp = localFileSystem.systemTempDirectory;
+
+      signals.addHandler(signalUnderTest, (ProcessSignal s) {
+        completer.complete();
+      });
+
+      expect(temp.existsSync(), isTrue);
+
+      controller.add(mockSignal);
+      await completer.future;
+
+      expect(temp.existsSync(), isFalse);
+    });
+  });
 }
+
+class MockIoProcessSignal extends Mock implements io.ProcessSignal {}

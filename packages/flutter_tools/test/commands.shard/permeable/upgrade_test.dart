@@ -4,17 +4,16 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -161,7 +160,7 @@ void main() {
       Platform: () => fakePlatform,
     });
 
-    testUsingContext('fetchRemoteRevision', () async {
+    testUsingContext('fetchRemoteRevision returns revision if git succeeds', () async {
       const String revision = 'abc123';
       when(processManager.run(
         <String>['git', 'fetch', '--tags'],
@@ -181,6 +180,60 @@ void main() {
           ..stdout = revision;
       });
       expect(await realCommandRunner.fetchRemoteRevision(), revision);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
+    });
+
+    testUsingContext('fetchRemoteRevision throws toolExit if HEAD is detached', () async {
+      when(processManager.run(
+        <String>['git', 'fetch', '--tags'],
+        environment:anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory')),
+      ).thenAnswer((Invocation invocation) async {
+        return FakeProcessResult()..exitCode = 0;
+      });
+      when(processManager.run(
+        <String>['git', 'rev-parse', '--verify', '@{u}'],
+        environment:anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory')),
+      ).thenThrow(const ProcessException(
+        'git',
+        <String>['rev-parse', '--verify', '@{u}'],
+        'fatal: HEAD does not point to a branch',
+      ));
+      expect(
+        () async => await realCommandRunner.fetchRemoteRevision(),
+        throwsToolExit(message: 'You are not currently on a release branch.'),
+      );
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
+    });
+
+    testUsingContext('fetchRemoteRevision throws toolExit if no upstream configured', () async {
+      when(processManager.run(
+        <String>['git', 'fetch', '--tags'],
+        environment:anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory')),
+      ).thenAnswer((Invocation invocation) async {
+        return FakeProcessResult()..exitCode = 0;
+      });
+      when(processManager.run(
+        <String>['git', 'rev-parse', '--verify', '@{u}'],
+        environment:anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory')),
+      ).thenThrow(const ProcessException(
+        'git',
+        <String>['rev-parse', '--verify', '@{u}'],
+        'fatal: no upstream configured for branch',
+      ));
+      expect(
+        () async => await realCommandRunner.fetchRemoteRevision(),
+        throwsToolExit(
+          message: 'Unable to upgrade Flutter: no origin repository configured\.',
+        ),
+      );
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
@@ -270,13 +323,13 @@ void main() {
         fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>[
-              'git', 'tag', '--contains', 'HEAD',
+              'git', 'tag', '--points-at', 'HEAD',
             ],
             stdout: '',
           ),
           const FakeCommand(
             command: <String>[
-              'git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags',
+              'git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags',
             ],
             stdout: 'v1.12.16-19-gb45b676af',
           ),

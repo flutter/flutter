@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -125,7 +127,7 @@ void main() {
     ];
   }
 
-  test('Ellastic overshoots its bounds', () {
+  test('Elastic overshoots its bounds', () {
     expect(Curves.elasticIn, hasOneLineDescription);
     expect(Curves.elasticOut, hasOneLineDescription);
     expect(Curves.elasticInOut, hasOneLineDescription);
@@ -259,17 +261,19 @@ void main() {
       startHandle: const Offset(0.0, -0.3),
       endHandle: const Offset(1.3, 1.3),
     );
-    expect(curve.transform(0.0).dx, closeTo(0.0, 1e-6));
-    expect(curve.transform(0.0).dy, closeTo(0.0, 1e-6));
-    expect(curve.transform(0.25).dx, closeTo(0.0966945, 1e-6));
-    expect(curve.transform(0.25).dy, closeTo(0.2626806, 1e-6));
-    expect(curve.transform(0.5).dx, closeTo(0.33, 1e-6));
-    expect(curve.transform(0.5).dy, closeTo(0.25, 1e-6));
-    expect(curve.transform(0.75).dx, closeTo(0.570260, 1e-6));
-    expect(curve.transform(0.75).dy, closeTo(0.883085, 1e-6));
-    expect(curve.transform(1.0).dx, closeTo(1.0, 1e-6));
-    expect(curve.transform(1.0).dy, closeTo(1.0, 1e-6));
+    const double tolerance = 1e-6;
+    expect(curve.transform(0.0).dx, moreOrLessEquals(0.0, epsilon: tolerance));
+    expect(curve.transform(0.0).dy, moreOrLessEquals(0.0, epsilon: tolerance));
+    expect(curve.transform(0.25).dx, moreOrLessEquals(0.0966945, epsilon: tolerance));
+    expect(curve.transform(0.25).dy, moreOrLessEquals(0.2626806, epsilon: tolerance));
+    expect(curve.transform(0.5).dx, moreOrLessEquals(0.33, epsilon: tolerance));
+    expect(curve.transform(0.5).dy, moreOrLessEquals(0.25, epsilon: tolerance));
+    expect(curve.transform(0.75).dx, moreOrLessEquals(0.570260, epsilon: tolerance));
+    expect(curve.transform(0.75).dy, moreOrLessEquals(0.883085, epsilon: tolerance));
+    expect(curve.transform(1.0).dx, moreOrLessEquals(1.0, epsilon: tolerance));
+    expect(curve.transform(1.0).dy, moreOrLessEquals(1.0, epsilon: tolerance));
   });
+
   test('CatmullRomSpline enforces contract', () {
     expect(() {
       CatmullRomSpline(null);
@@ -293,6 +297,7 @@ void main() {
       CatmullRomSpline(const <Offset>[Offset.zero, Offset.zero, Offset.zero, Offset.zero], tension: 2.0);
     }, throwsAssertionError);
   });
+
   test('CatmullRomSpline interpolates values properly when precomputed', () {
     final CatmullRomSpline curve = CatmullRomSpline.precompute(
       const <Offset>[
@@ -308,17 +313,19 @@ void main() {
       startHandle: const Offset(0.0, -0.3),
       endHandle: const Offset(1.3, 1.3),
     );
-    expect(curve.transform(0.0).dx, closeTo(0.0, 1e-6));
-    expect(curve.transform(0.0).dy, closeTo(0.0, 1e-6));
-    expect(curve.transform(0.25).dx, closeTo(0.0966945, 1e-6));
-    expect(curve.transform(0.25).dy, closeTo(0.2626806, 1e-6));
-    expect(curve.transform(0.5).dx, closeTo(0.33, 1e-6));
-    expect(curve.transform(0.5).dy, closeTo(0.25, 1e-6));
-    expect(curve.transform(0.75).dx, closeTo(0.570260, 1e-6));
-    expect(curve.transform(0.75).dy, closeTo(0.883085, 1e-6));
-    expect(curve.transform(1.0).dx, closeTo(1.0, 1e-6));
-    expect(curve.transform(1.0).dy, closeTo(1.0, 1e-6));
+    const double tolerance = 1e-6;
+    expect(curve.transform(0.0).dx, moreOrLessEquals(0.0, epsilon: tolerance));
+    expect(curve.transform(0.0).dy, moreOrLessEquals(0.0, epsilon: tolerance));
+    expect(curve.transform(0.25).dx, moreOrLessEquals(0.0966945, epsilon: tolerance));
+    expect(curve.transform(0.25).dy, moreOrLessEquals(0.2626806, epsilon: tolerance));
+    expect(curve.transform(0.5).dx, moreOrLessEquals(0.33, epsilon: tolerance));
+    expect(curve.transform(0.5).dy, moreOrLessEquals(0.25, epsilon: tolerance));
+    expect(curve.transform(0.75).dx, moreOrLessEquals(0.570260, epsilon: tolerance));
+    expect(curve.transform(0.75).dy, moreOrLessEquals(0.883085, epsilon: tolerance));
+    expect(curve.transform(1.0).dx, moreOrLessEquals(1.0, epsilon: tolerance));
+    expect(curve.transform(1.0).dy, moreOrLessEquals(1.0, epsilon: tolerance));
   });
+
   test('CatmullRomSpline enforces contract when precomputed', () {
     expect(() {
       CatmullRomSpline.precompute(null);
@@ -342,6 +349,7 @@ void main() {
       CatmullRomSpline.precompute(const <Offset>[Offset.zero, Offset.zero, Offset.zero, Offset.zero], tension: 2.0);
     }, throwsAssertionError);
   });
+
   test('CatmullRomCurve interpolates given points correctly', () {
     final CatmullRomCurve curve = CatmullRomCurve(
       const <Offset>[
@@ -354,15 +362,16 @@ void main() {
 
     // These values are approximations.
     const double tolerance = 1e-6;
-    expect(curve.transform(0.0), closeTo(0.0, tolerance));
-    expect(curve.transform(0.01), closeTo(0.012874734350170863, tolerance));
-    expect(curve.transform(0.2), closeTo(0.24989646045277542, tolerance));
-    expect(curve.transform(0.33), closeTo(0.250037698527661, tolerance));
-    expect(curve.transform(0.5), closeTo(0.9999057323235939, tolerance));
-    expect(curve.transform(0.6), closeTo(0.9357294964536621, tolerance));
-    expect(curve.transform(0.8), closeTo(0.7500423402378034, tolerance));
-    expect(curve.transform(1.0), closeTo(1.0, tolerance));
+    expect(curve.transform(0.0), moreOrLessEquals(0.0, epsilon: tolerance));
+    expect(curve.transform(0.01), moreOrLessEquals(0.012874734350170863, epsilon: tolerance));
+    expect(curve.transform(0.2), moreOrLessEquals(0.24989646045277542, epsilon: tolerance));
+    expect(curve.transform(0.33), moreOrLessEquals(0.250037698527661, epsilon: tolerance));
+    expect(curve.transform(0.5), moreOrLessEquals(0.9999057323235939, epsilon: tolerance));
+    expect(curve.transform(0.6), moreOrLessEquals(0.9357294964536621, epsilon: tolerance));
+    expect(curve.transform(0.8), moreOrLessEquals(0.7500423402378034, epsilon: tolerance));
+    expect(curve.transform(1.0), moreOrLessEquals(1.0, epsilon: tolerance));
   });
+
   test('CatmullRomCurve interpolates given points correctly when precomputed', () {
     final CatmullRomCurve curve = CatmullRomCurve.precompute(
       const <Offset>[
@@ -375,15 +384,16 @@ void main() {
 
     // These values are approximations.
     const double tolerance = 1e-6;
-    expect(curve.transform(0.0), closeTo(0.0, tolerance));
-    expect(curve.transform(0.01), closeTo(0.012874734350170863, tolerance));
-    expect(curve.transform(0.2), closeTo(0.24989646045277542, tolerance));
-    expect(curve.transform(0.33), closeTo(0.250037698527661, tolerance));
-    expect(curve.transform(0.5), closeTo(0.9999057323235939, tolerance));
-    expect(curve.transform(0.6), closeTo(0.9357294964536621, tolerance));
-    expect(curve.transform(0.8), closeTo(0.7500423402378034, tolerance));
-    expect(curve.transform(1.0), closeTo(1.0, tolerance));
+    expect(curve.transform(0.0), moreOrLessEquals(0.0, epsilon: tolerance));
+    expect(curve.transform(0.01), moreOrLessEquals(0.012874734350170863, epsilon: tolerance));
+    expect(curve.transform(0.2), moreOrLessEquals(0.24989646045277542, epsilon: tolerance));
+    expect(curve.transform(0.33), moreOrLessEquals(0.250037698527661, epsilon: tolerance));
+    expect(curve.transform(0.5), moreOrLessEquals(0.9999057323235939, epsilon: tolerance));
+    expect(curve.transform(0.6), moreOrLessEquals(0.9357294964536621, epsilon: tolerance));
+    expect(curve.transform(0.8), moreOrLessEquals(0.7500423402378034, epsilon: tolerance));
+    expect(curve.transform(1.0), moreOrLessEquals(1.0, epsilon: tolerance));
   });
+
   test('CatmullRomCurve enforces contract', () {
     expect(() {
       CatmullRomCurve(null);
@@ -505,6 +515,7 @@ void main() {
       );
     }, throwsAssertionError);
   });
+
   test('CatmullRomCurve enforces contract when precomputed', () {
     expect(() {
       CatmullRomCurve.precompute(null);

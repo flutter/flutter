@@ -23,11 +23,11 @@ enum _OverflowSide {
 // the indicators.
 class _OverflowRegionData {
   const _OverflowRegionData({
-    this.rect,
+    required this.rect,
     this.label = '',
     this.labelOffset = Offset.zero,
     this.rotation = 0.0,
-    this.side,
+    required this.side,
   });
 
   final Rect rect;
@@ -199,7 +199,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     return regions;
   }
 
-  void _reportOverflow(RelativeRect overflow, List<DiagnosticsNode> overflowHints) {
+  void _reportOverflow(RelativeRect overflow, List<DiagnosticsNode>? overflowHints) {
     overflowHints ??= <DiagnosticsNode>[];
     if (overflowHints.isEmpty) {
       overflowHints.add(ErrorDescription(
@@ -240,15 +240,14 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     // TODO(jacobr): add the overflows in pixels as structured data so they can
     // be visualized in debugging tools.
     FlutterError.reportError(
-      FlutterErrorDetailsForRendering(
+      FlutterErrorDetails(
         exception: FlutterError('A $runtimeType overflowed by $overflowText.'),
         library: 'rendering library',
         context: ErrorDescription('during layout'),
-        renderObject: this,
         informationCollector: () sync* {
           if (debugCreator != null)
-            yield DiagnosticsDebugCreator(debugCreator);
-          yield* overflowHints;
+            yield DiagnosticsDebugCreator(debugCreator as Object);
+          yield* overflowHints!;
           yield describeForError('The specific $runtimeType in question is');
           // TODO(jacobr): this line is ascii art that it would be nice to
           // handle a little more generically in GUI debugging clients in the
@@ -270,7 +269,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     Offset offset,
     Rect containerRect,
     Rect childRect, {
-    List<DiagnosticsNode> overflowHints,
+    List<DiagnosticsNode>? overflowHints,
   }) {
     final RelativeRect overflow = RelativeRect.fromRect(containerRect, childRect);
 
@@ -284,7 +283,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     final List<_OverflowRegionData> overflowRegions = _calculateOverflowRegions(overflow, containerRect);
     for (final _OverflowRegionData region in overflowRegions) {
       context.canvas.drawRect(region.rect.shift(offset), _indicatorPaint);
-      final TextSpan textSpan = _indicatorLabel[region.side.index].text as TextSpan;
+      final TextSpan? textSpan = _indicatorLabel[region.side.index].text as TextSpan?;
       if (textSpan?.text != region.label) {
         _indicatorLabel[region.side.index].text = TextSpan(
           text: region.label,

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -61,14 +63,20 @@ void main() {
             TestSemantics(
               id: 2,
               rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
-              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
               children: <TestSemantics>[
                 TestSemantics(
                   id: 3,
-                  label: 'Hello!',
-                  textDirection: TextDirection.ltr,
-                  rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-                  transform: Matrix4.translationValues(395.0, 295.0, 0.0),
+                  rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 4,
+                      label: 'Hello!',
+                      textDirection: TextDirection.ltr,
+                      rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+                      transform: Matrix4.translationValues(395.0, 295.0, 0.0),
+                    ),
+                  ],
                 ),
               ],
             ),

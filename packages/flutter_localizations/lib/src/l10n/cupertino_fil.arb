@@ -18,5 +18,7 @@
   "cutButtonLabel": "I-cut",
   "copyButtonLabel": "Kopyahin",
   "pasteButtonLabel": "I-paste",
-  "selectAllButtonLabel": "Piliin Lahat"
+  "selectAllButtonLabel": "Piliin Lahat",
+  "tabSemanticsLabel": "Tab $tabIndex ng $tabCount",
+  "modalBarrierDismissLabel": "I-dismiss"
 }

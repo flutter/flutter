@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -75,5 +77,5 @@ void main() {
       '   Unable to load asset: key\n'
       '   HTTP status code: 404\n',
     );
-  }, skip: true);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }

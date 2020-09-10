@@ -2,27 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../input_border.dart';
 import '../input_decorator.dart';
 import '../material_localizations.dart';
-import '../text_field.dart';
 import '../text_form_field.dart';
+import '../theme.dart';
 
 import 'date_picker_common.dart';
 import 'date_utils.dart' as utils;
 
-const double _inputPortraitHeight = 98.0;
-const double _inputLandscapeHeight = 108.0;
-
-/// A [TextFormField] configured to accept and validate a date entered by the user.
+/// A [TextFormField] configured to accept and validate a date entered by a user.
 ///
-/// The text entered into this field will be constrained to only allow digits
-/// and separators. When saved or submitted, the text will be parsed into a
-/// [DateTime] according to the ambient locale. If the input text doesn't parse
-/// into a date, the [errorFormatText] message will be displayed under the field.
+/// When the field is saved or submitted, the text will be parsed into a
+/// [DateTime] according to the ambient locale's compact date format. If the
+/// input text doesn't parse into a date, the [errorFormatText] message will
+/// be displayed under the field.
 ///
 /// [firstDate], [lastDate], and [selectableDayPredicate] provide constraints on
 /// what days are valid. If the input date isn't in the date range or doesn't pass
@@ -191,11 +190,9 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   String _validateDate(String text) {
     final DateTime date = _parseDate(text);
     if (date == null) {
-      // TODO(darrenaustin): localize 'Invalid format.'
-      return widget.errorFormatText ?? 'Invalid format.';
+      return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
     } else if (!_isValidAcceptableDate(date)) {
-      // TODO(darrenaustin): localize 'Out of range.'
-      return widget.errorInvalidText ?? 'Out of range.';
+      return widget.errorInvalidText ?? MaterialLocalizations.of(context).dateOutOfRangeLabel;
     }
     return null;
   }
@@ -224,58 +221,21 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
   @override
   Widget build(BuildContext context) {
-    return OrientationBuilder(builder: (BuildContext context, Orientation orientation) {
-      assert(orientation != null);
-
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        height: orientation == Orientation.portrait ? _inputPortraitHeight : _inputLandscapeHeight,
-        child: Column(
-          children: <Widget>[
-            const Spacer(),
-            TextFormField(
-              decoration: InputDecoration(
-                border: const UnderlineInputBorder(),
-                filled: true,
-                // TODO(darrenaustin): localize 'mm/dd/yyyy' and 'Enter Date'
-                hintText: widget.fieldHintText ?? 'mm/dd/yyyy',
-                labelText: widget.fieldLabelText ?? 'Enter Date',
-              ),
-              validator: _validateDate,
-              inputFormatters: <TextInputFormatter>[
-                // TODO(darrenaustin): localize date separator '/'
-                _DateTextInputFormatter('/'),
-              ],
-              keyboardType: TextInputType.datetime,
-              onSaved: _handleSaved,
-              onFieldSubmitted: _handleSubmitted,
-              autofocus: widget.autofocus,
-              controller: _controller,
-            ),
-            const Spacer(),
-          ],
-        ),
-      );
-    });
-  }
-}
-
-class _DateTextInputFormatter extends TextInputFormatter {
-
-  _DateTextInputFormatter(this.separator);
-
-  final String separator;
-
-  final WhitelistingTextInputFormatter _filterFormatter =
-    // Only allow digits and separators (slash, dot, comma, hyphen, space).
-    WhitelistingTextInputFormatter(RegExp(r'[\d\/\.,-\s]+'));
-
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    final TextEditingValue filteredValue = _filterFormatter.formatEditUpdate(oldValue, newValue);
-    return filteredValue.copyWith(
-      // Replace any separator character with the given separator
-      text: filteredValue.text.replaceAll(RegExp(r'[\D]'), separator),
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final InputDecorationTheme inputTheme = Theme.of(context).inputDecorationTheme;
+    return TextFormField(
+      decoration: InputDecoration(
+        border: inputTheme.border ?? const UnderlineInputBorder(),
+        filled: inputTheme.filled ?? true,
+        hintText: widget.fieldHintText ?? localizations.dateHelpText,
+        labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
+      ),
+      validator: _validateDate,
+      keyboardType: TextInputType.datetime,
+      onSaved: _handleSaved,
+      onFieldSubmitted: _handleSubmitted,
+      autofocus: widget.autofocus,
+      controller: _controller,
     );
   }
 }

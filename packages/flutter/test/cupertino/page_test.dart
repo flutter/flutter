@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -41,7 +43,7 @@ void main() {
     expect(widget2TopLeft.dx, greaterThan(widget1InitialTopLeft.dx));
 
     // Will need to be changed if the animation curve or duration changes.
-    expect(widget1TransientTopLeft.dx, closeTo(130, 1.0));
+    expect(widget1TransientTopLeft.dx, moreOrLessEquals(130, epsilon: 1.0));
 
     await tester.pumpAndSettle();
 
@@ -66,7 +68,7 @@ void main() {
     expect(widget2TopLeft.dx, greaterThan(widget1InitialTopLeft.dx));
 
     // Will need to be changed if the animation curve or duration changes.
-    expect(widget1TransientTopLeft.dx, closeTo(249, 1.0));
+    expect(widget1TransientTopLeft.dx, moreOrLessEquals(249, epsilon: 1.0));
 
     await tester.pumpAndSettle();
 

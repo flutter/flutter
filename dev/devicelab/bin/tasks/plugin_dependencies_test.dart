@@ -40,6 +40,7 @@ Future<void> main() async {
             '--org',
             'io.flutter.devicelab.plugin_a',
             '--template=plugin',
+            '--platforms=android,ios',
             pluginADirectory.path,
           ],
         );
@@ -55,6 +56,7 @@ Future<void> main() async {
             '--org',
             'io.flutter.devicelab.plugin_b',
             '--template=plugin',
+            '--platforms=android,ios',
             pluginBDirectory.path,
           ],
         );
@@ -70,10 +72,16 @@ Future<void> main() async {
             '--org',
             'io.flutter.devicelab.plugin_c',
             '--template=plugin',
+            '--platforms=ios',
             pluginCDirectory.path,
           ],
         );
       });
+
+      checkDirectoryNotExists(path.join(
+        pluginCDirectory.path,
+        'android',
+      ));
 
       final File pluginCpubspec = File(path.join(pluginCDirectory.path, 'pubspec.yaml'));
       await pluginCpubspec.writeAsString('''
@@ -94,6 +102,27 @@ environment:
   sdk: ">=2.0.0-dev.28.0 <3.0.0"
   flutter: ">=1.5.0 <2.0.0"
 ''', flush: true);
+
+      section('Create plugin D without ios/ directory');
+
+      final Directory pluginDDirectory = Directory(path.join(tempDir.path, 'plugin_d'));
+      await inDirectory(tempDir, () async {
+        await flutter(
+          'create',
+          options: <String>[
+            '--org',
+            'io.flutter.devicelab.plugin_d',
+            '--template=plugin',
+            '--platforms=android',
+            pluginDDirectory.path,
+          ],
+        );
+      });
+
+      checkDirectoryNotExists(path.join(
+        pluginDDirectory.path,
+        'ios',
+      ));
 
       section('Write dummy Kotlin code in plugin B');
 
@@ -117,7 +146,7 @@ public class DummyPluginBClass {
 }
 ''', flush: true);
 
-      section('Make plugin A depend on plugin B and plugin C');
+      section('Make plugin A depend on plugin B, C, and D');
 
       final File pluginApubspec = File(path.join(pluginADirectory.path, 'pubspec.yaml'));
       String pluginApubspecContent = await pluginApubspec.readAsString();
@@ -127,7 +156,9 @@ public class DummyPluginBClass {
         '  plugin_b:\n'
         '    path: ${pluginBDirectory.path}\n'
         '  plugin_c:\n'
-        '    path: ${pluginCDirectory.path}\n',
+        '    path: ${pluginCDirectory.path}\n'
+        '  plugin_d:\n'
+        '    path: ${pluginDDirectory.path}\n',
       );
       await pluginApubspec.writeAsString(pluginApubspecContent, flush: true);
 
@@ -184,7 +215,7 @@ public class DummyPluginAClass {
         '['
           '{'
             '"name":"plugin_a",'
-            '"dependencies":["plugin_b","plugin_c"]'
+            '"dependencies":["plugin_b","plugin_c","plugin_d"]'
           '},'
           '{'
             '"name":"plugin_b",'
@@ -192,6 +223,10 @@ public class DummyPluginAClass {
           '},'
           '{'
             '"name":"plugin_c",'
+            '"dependencies":[]'
+          '},'
+          '{'
+            '"name":"plugin_d",'
             '"dependencies":[]'
           '}'
         ']';
@@ -203,7 +238,7 @@ public class DummyPluginAClass {
         );
       }
 
-      section('Build plugin A example app');
+      section('Build plugin A example Android app');
 
       final StringBuffer stderr = StringBuffer();
       await inDirectory(exampleApp, () async {
@@ -232,6 +267,56 @@ public class DummyPluginAClass {
 
       if (!pluginAExampleApk) {
         return TaskResult.failure('Failed to build plugin A example APK');
+      }
+
+      if (Platform.isMacOS) {
+        section('Build plugin A example iOS app');
+
+        await inDirectory(exampleApp, () async {
+          await evalFlutter(
+            'build',
+            options: <String>[
+              'ios',
+              '--no-codesign',
+            ],
+          );
+        });
+
+        final Directory appBundle = Directory(path.join(
+          pluginADirectory.path,
+          'example',
+          'build',
+          'ios',
+          'iphoneos',
+          'Runner.app',
+        ));
+
+        if (!exists(appBundle)) {
+          return TaskResult.failure('Failed to build plugin A example iOS app');
+        }
+
+        checkDirectoryExists(path.join(
+          appBundle.path,
+          'Frameworks',
+          'plugin_a.framework',
+        ));
+        checkDirectoryExists(path.join(
+          appBundle.path,
+          'Frameworks',
+          'plugin_b.framework',
+        ));
+        checkDirectoryExists(path.join(
+          appBundle.path,
+          'Frameworks',
+          'plugin_c.framework',
+        ));
+
+        // Plugin D is Android only and should not be embedded.
+        checkDirectoryNotExists(path.join(
+          appBundle.path,
+          'Frameworks',
+          'plugin_d.framework',
+        ));
       }
 
       return TaskResult.success(null);

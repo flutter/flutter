@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import 'typography.dart';
-
-// Eventually we'll get rid of the deprecated members, but for now, we have to use them
-// in order to implement them.
-// ignore_for_file: deprecated_member_use_from_same_package
 
 /// Material design text theme.
 ///
@@ -233,7 +231,7 @@ class TextTheme with Diagnosticable {
   /// Used for auxiliary text associated with images.
   final TextStyle caption;
 
-  /// Used for text on [RaisedButton] and [FlatButton].
+  /// Used for text on [ElevatedButton], [TextButton] and [OutlinedButton].
   final TextStyle button;
 
   /// The smallest style.
@@ -687,7 +685,7 @@ class TextTheme with Diagnosticable {
 
   /// Linearly interpolate between two text themes.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static TextTheme lerp(TextTheme a, TextTheme b, double t) {
     assert(t != null);
     return TextTheme(

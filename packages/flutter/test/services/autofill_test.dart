@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert' show utf8;
 
 import 'package:flutter/services.dart';
@@ -32,6 +34,7 @@ void main() {
         config = AutofillConfiguration(
           uniqueIdentifier: null,
           autofillHints: const <String>['test'],
+          currentEditingValue: const TextEditingValue(),
         );
       } catch (e) {
         expect(e.toString(), contains('uniqueIdentifier != null'));
@@ -43,6 +46,7 @@ void main() {
         config = AutofillConfiguration(
           uniqueIdentifier: 'id',
           autofillHints: null,
+          currentEditingValue: const TextEditingValue(),
         );
       } catch (e) {
         expect(e.toString(), contains('autofillHints != null'));
@@ -57,6 +61,7 @@ void main() {
         const AutofillConfiguration config = AutofillConfiguration(
           uniqueIdentifier: 'id',
           autofillHints: <String>[],
+          currentEditingValue: TextEditingValue(),
         );
 
         json = config.toJson();
@@ -147,6 +152,11 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
+  void performPrivateCommand(String action, Map<String, dynamic> data) {
+    latestMethodCall = 'performPrivateCommand';
+  }
+
+  @override
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     latestMethodCall = 'updateFloatingCursor';
   }
@@ -212,7 +222,13 @@ class FakeTextChannel implements MethodChannel {
   }
 
   @override
+  bool checkMethodCallHandler(Future<void> Function(MethodCall call) handler) => throw UnimplementedError();
+
+  @override
   void setMockMethodCallHandler(Future<void> Function(MethodCall call) handler)  => throw UnimplementedError();
+
+  @override
+  bool checkMockMethodCallHandler(Future<void> Function(MethodCall call) handler) => throw UnimplementedError();
 
   void validateOutgoingMethodCalls(List<MethodCall> calls) {
     expect(outgoingCalls.length, calls.length);

@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'material.dart';
 import 'material_localizations.dart';
-import 'scaffold.dart' show Scaffold;
+import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 
 /// Asserts that the given context has a [Material] ancestor.
 ///
@@ -76,8 +78,8 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
           'to be provided by a Localizations widget ancestor.'
         ),
         ErrorDescription(
-          'Localizations are used to generate many different messages, labels, '
-          'and abbreviations which are used by the material library.'
+          'The material library uses Localizations to generate messages, '
+          'labels, and abbreviations.'
         ),
         ErrorHint(
           'To introduce a MaterialLocalizations, either use a '
@@ -116,6 +118,37 @@ bool debugCheckHasScaffold(BuildContext context) {
         ErrorHint(
           'Typically, the Scaffold widget is introduced by the MaterialApp or '
           'WidgetsApp widget at the top of your application widget tree.'
+        )
+      ]);
+    }
+    return true;
+  }());
+  return true;
+}
+
+/// Asserts that the given context has a [ScaffoldMessenger] ancestor.
+///
+/// Used by various widgets to make sure that they are only used in an
+/// appropriate context.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasScaffoldMessenger(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasScaffoldMessenger(BuildContext context) {
+  assert(() {
+    if (context.widget is! ScaffoldMessenger && context.findAncestorWidgetOfExactType<ScaffoldMessenger>() == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No ScaffoldMessenger widget found.'),
+        ErrorDescription('${context.widget.runtimeType} widgets require a ScaffoldMessenger widget ancestor.'),
+        ...context.describeMissingAncestor(expectedAncestorType: ScaffoldMessenger),
+        ErrorHint(
+          'Typically, the ScaffoldMessenger widget is introduced by the MaterialApp '
+          'at the top of your application widget tree.'
         )
       ]);
     }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -31,8 +33,13 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 /// If a [controller] is not specified, [initialValue] can be used to give
 /// the automatically generated controller an initial value.
 ///
-/// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
-/// This will ensure we discard any resources used by the object.
+/// Remember to call [TextEditingController.dispose] of the [TextEditingController]
+/// when it is no longer needed. This will ensure we discard any resources used
+/// by the object.
+///
+/// By default, `decoration` will apply the [ThemeData.inputDecorationTheme] for
+/// the current context to the [InputDecoration], see
+/// [InputDecoration.applyDefaults].
 ///
 /// For a documentation about the various parameters, see [TextField].
 ///
@@ -64,7 +71,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 /// This example shows how to move the focus to the next field when the user
-/// presses the ENTER key.
+/// presses the SPACE key.
 ///
 /// ```dart imports
 /// import 'package:flutter/services.dart';
@@ -76,13 +83,12 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///     child: Center(
 ///       child: Shortcuts(
 ///         shortcuts: <LogicalKeySet, Intent>{
-///           // Pressing enter on the field will now move to the next field.
-///           LogicalKeySet(LogicalKeyboardKey.enter):
-///               NextFocusIntent(),
+///           // Pressing space in the field will now move to the next field.
+///           LogicalKeySet(LogicalKeyboardKey.space): const NextFocusIntent(),
 ///         },
 ///         child: FocusTraversalGroup(
 ///           child: Form(
-///             autovalidate: true,
+///             autovalidateMode: AutovalidateMode.always,
 ///             onChanged: () {
 ///               Form.of(primaryFocus.context).save();
 ///             },
@@ -91,7 +97,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///                 return Padding(
 ///                   padding: const EdgeInsets.all(8.0),
 ///                   child: ConstrainedBox(
-///                     constraints: BoxConstraints.tight(Size(200, 50)),
+///                     constraints: BoxConstraints.tight(const Size(200, 50)),
 ///                     child: TextFormField(
 ///                       onSaved: (String value) {
 ///                         print('Value for field $index saved as "$value"');
@@ -117,7 +123,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///    integration.
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
-///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
   ///
@@ -152,6 +158,11 @@ class TextFormField extends FormField<String> {
     SmartDashesType smartDashesType,
     SmartQuotesType smartQuotesType,
     bool enableSuggestions = true,
+    @Deprecated(
+      'Use autoValidateMode parameter which provide more specific '
+      'behaviour related to auto validation. '
+      'This feature was deprecated after v1.19.0.'
+    )
     bool autovalidate = false,
     bool maxLengthEnforced = true,
     int maxLines = 1,
@@ -167,6 +178,7 @@ class TextFormField extends FormField<String> {
     List<TextInputFormatter> inputFormatters,
     bool enabled,
     double cursorWidth = 2.0,
+    double cursorHeight,
     Radius cursorRadius,
     Color cursorColor,
     Brightness keyboardAppearance,
@@ -174,6 +186,8 @@ class TextFormField extends FormField<String> {
     bool enableInteractiveSelection = true,
     InputCounterWidgetBuilder buildCounter,
     ScrollPhysics scrollPhysics,
+    Iterable<String> autofillHints,
+    AutovalidateMode autovalidateMode,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -183,6 +197,11 @@ class TextFormField extends FormField<String> {
        assert(autocorrect != null),
        assert(enableSuggestions != null),
        assert(autovalidate != null),
+       assert(
+         autovalidate == false ||
+         autovalidate == true && autovalidateMode == null,
+         'autovalidate and autovalidateMode should not be used together.'
+       ),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
@@ -200,66 +219,70 @@ class TextFormField extends FormField<String> {
        assert(maxLength == null || maxLength > 0),
        assert(enableInteractiveSelection != null),
        super(
-    key: key,
-    initialValue: controller != null ? controller.text : (initialValue ?? ''),
-    onSaved: onSaved,
-    validator: validator,
-    autovalidate: autovalidate,
-    enabled: enabled ?? decoration?.enabled ?? true,
-    builder: (FormFieldState<String> field) {
-      final _TextFormFieldState state = field as _TextFormFieldState;
-      final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
-        .applyDefaults(Theme.of(field.context).inputDecorationTheme);
-      void onChangedHandler(String value) {
-        if (onChanged != null) {
-          onChanged(value);
-        }
-        field.didChange(value);
-      }
-      return TextField(
-        controller: state._effectiveController,
-        focusNode: focusNode,
-        decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-        keyboardType: keyboardType,
-        textInputAction: textInputAction,
-        style: style,
-        strutStyle: strutStyle,
-        textAlign: textAlign,
-        textAlignVertical: textAlignVertical,
-        textDirection: textDirection,
-        textCapitalization: textCapitalization,
-        autofocus: autofocus,
-        toolbarOptions: toolbarOptions,
-        readOnly: readOnly,
-        showCursor: showCursor,
-        obscuringCharacter: obscuringCharacter,
-        obscureText: obscureText,
-        autocorrect: autocorrect,
-        smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-        smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-        enableSuggestions: enableSuggestions,
-        maxLengthEnforced: maxLengthEnforced,
-        maxLines: maxLines,
-        minLines: minLines,
-        expands: expands,
-        maxLength: maxLength,
-        onChanged: onChangedHandler,
-        onTap: onTap,
-        onEditingComplete: onEditingComplete,
-        onSubmitted: onFieldSubmitted,
-        inputFormatters: inputFormatters,
-        enabled: enabled ?? decoration?.enabled ?? true,
-        cursorWidth: cursorWidth,
-        cursorRadius: cursorRadius,
-        cursorColor: cursorColor,
-        scrollPadding: scrollPadding,
-        scrollPhysics: scrollPhysics,
-        keyboardAppearance: keyboardAppearance,
-        enableInteractiveSelection: enableInteractiveSelection,
-        buildCounter: buildCounter,
-      );
-    },
-  );
+       key: key,
+       initialValue: controller != null ? controller.text : (initialValue ?? ''),
+       onSaved: onSaved,
+       validator: validator,
+       enabled: enabled ?? decoration?.enabled ?? true,
+       autovalidateMode: autovalidate
+           ? AutovalidateMode.always
+           : (autovalidateMode ?? AutovalidateMode.disabled),
+       builder: (FormFieldState<String> field) {
+         final _TextFormFieldState state = field as _TextFormFieldState;
+         final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
+             .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+         void onChangedHandler(String value) {
+           if (onChanged != null) {
+             onChanged(value);
+           }
+           field.didChange(value);
+         }
+         return TextField(
+           controller: state._effectiveController,
+           focusNode: focusNode,
+           decoration: effectiveDecoration.copyWith(errorText: field.errorText),
+           keyboardType: keyboardType,
+           textInputAction: textInputAction,
+           style: style,
+           strutStyle: strutStyle,
+           textAlign: textAlign,
+           textAlignVertical: textAlignVertical,
+           textDirection: textDirection,
+           textCapitalization: textCapitalization,
+           autofocus: autofocus,
+           toolbarOptions: toolbarOptions,
+           readOnly: readOnly,
+           showCursor: showCursor,
+           obscuringCharacter: obscuringCharacter,
+           obscureText: obscureText,
+           autocorrect: autocorrect,
+           smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+           smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+           enableSuggestions: enableSuggestions,
+           maxLengthEnforced: maxLengthEnforced,
+           maxLines: maxLines,
+           minLines: minLines,
+           expands: expands,
+           maxLength: maxLength,
+           onChanged: onChangedHandler,
+           onTap: onTap,
+           onEditingComplete: onEditingComplete,
+           onSubmitted: onFieldSubmitted,
+           inputFormatters: inputFormatters,
+           enabled: enabled ?? decoration?.enabled ?? true,
+           cursorWidth: cursorWidth,
+           cursorHeight: cursorHeight,
+           cursorRadius: cursorRadius,
+           cursorColor: cursorColor,
+           scrollPadding: scrollPadding,
+           scrollPhysics: scrollPhysics,
+           keyboardAppearance: keyboardAppearance,
+           enableInteractiveSelection: enableInteractiveSelection,
+           buildCounter: buildCounter,
+           autofillHints: autofillHints,
+         );
+       },
+     );
 
   /// Controls the text being edited.
   ///

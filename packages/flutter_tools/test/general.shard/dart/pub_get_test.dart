@@ -6,19 +6,18 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
-import 'package:quiver/testing/async.dart';
-import 'package:platform/platform.dart';
-
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
+import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -198,10 +197,10 @@ void main() {
   });
 
   testWithoutContext('analytics sent on success', () async {
-    MockDirectory.findCache = true;
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final MockUsage usage = MockUsage();
     final Pub pub = Pub(
-      fileSystem: MockFileSystem(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: MockProcessManager(0),
       botDetector: const BotDetectorAlwaysNo(),
@@ -212,8 +211,16 @@ void main() {
         }
       ),
     );
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion": 2,"packages": []}');
 
-    await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+    await pub.get(
+      context: PubContext.flutterTests,
+      generateSyntheticPackage: true,
+      checkLastModified: false,
+    );
 
     verify(usage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
   });
@@ -243,10 +250,10 @@ void main() {
   });
 
   testWithoutContext('analytics sent on failed version solve', () async {
-    MockDirectory.findCache = true;
     final MockUsage usage = MockUsage();
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final Pub pub = Pub(
-      fileSystem: MockFileSystem(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: MockProcessManager(
         1,
@@ -260,6 +267,7 @@ void main() {
       usage: usage,
       botDetector: const BotDetectorAlwaysNo(),
     );
+    fileSystem.file('pubspec.yaml').writeAsStringSync('name: foo');
 
     try {
       await pub.get(context: PubContext.flutterTests, checkLastModified: false);
@@ -339,8 +347,6 @@ void main() {
     expect(logger.statusText, 'Running "flutter pub get" in /...\n');
     expect(logger.errorText, isEmpty);
     expect(fileSystem.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
-    expect(fileSystem.file('.dart_tool/package_config.json').lastModifiedSync(), isNot(DateTime(2000))); // because pub changes it to 2002
-    expect(fileSystem.file('.dart_tool/package_config.json').lastModifiedSync(), isNot(DateTime(2002))); // because we set the timestamp again after pub
     logger.clear();
 
     // bad scenario 1: pub doesn't update file; doesn't matter, because we do instead
@@ -353,8 +359,6 @@ void main() {
     expect(logger.statusText, 'Running "flutter pub get" in /...\n');
     expect(logger.errorText, isEmpty);
     expect(fileSystem.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
-    expect(fileSystem.file('.dart_tool/package_config.json').lastModifiedSync(), isNot(DateTime(2000))); // because we set the timestamp
-    expect(fileSystem.file('.dart_tool/package_config.json').lastModifiedSync(), isNot(DateTime(2002))); // just in case FakeProcessManager is buggy
     logger.clear();
 
     // bad scenario 2: pub changes pubspec.yaml instead
@@ -371,7 +375,6 @@ void main() {
     expect(logger.statusText, 'Running "flutter pub get" in /...\n');
     expect(logger.errorText, isEmpty);
     expect(fileSystem.file('pubspec.yaml').lastModifiedSync(), DateTime(2002)); // because fake pub above touched it
-    expect(fileSystem.file('.dart_tool/package_config.json').lastModifiedSync(), DateTime(2000)); // because nothing touched it
 
     // bad scenario 3: pubspec.yaml was created in the future
     fileSystem.file('.dart_tool/package_config.json')

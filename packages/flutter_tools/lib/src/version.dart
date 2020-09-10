@@ -24,7 +24,7 @@ enum Channel {
 }
 
 /// The flutter GitHub repository.
-const String _flutterGit = 'https://github.com/flutter/flutter.git';
+String get _flutterGit => globals.platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
 
 /// Retrieve a human-readable name for a given [channel].
 ///
@@ -259,6 +259,13 @@ class FlutterVersion {
         branch: '$_versionCheckRemote/$branch',
         lenient: false,
       );
+    } on VersionCheckError catch (error) {
+      if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
+        globals.logger.printError('Warning: the Flutter git upstream was overriden '
+        'by the environment variable FLUTTER_GIT_URL = $_flutterGit');
+      }
+      globals.logger.printError(error.toString());
+      rethrow;
     } finally {
       await _removeVersionCheckRemoteIfExists();
     }
@@ -692,7 +699,7 @@ String _shortGitRevision(String revision) {
   return revision.length > 10 ? revision.substring(0, 10) : revision;
 }
 
-/// Version of Flutter SDK parsed from git
+/// Version of Flutter SDK parsed from Git.
 class GitTagVersion {
   const GitTagVersion({
     this.x,
@@ -725,7 +732,7 @@ class GitTagVersion {
   /// The Z in vX.Y.Z.
   final int z;
 
-  /// the F in vX.Y.Z+hotfix.F
+  /// the F in vX.Y.Z+hotfix.F.
   final int hotfix;
 
   /// Number of commits since the vX.Y.Z tag.
@@ -734,10 +741,10 @@ class GitTagVersion {
   /// The git hash (or an abbreviation thereof) for this commit.
   final String hash;
 
-  /// The N in X.Y.Z-dev.N.M
+  /// The N in X.Y.Z-dev.N.M.
   final int devVersion;
 
-  /// The M in X.Y.Z-dev.N.M
+  /// The M in X.Y.Z-dev.N.M.
   final int devPatch;
 
   /// The git tag that is this version's closest ancestor.
@@ -749,26 +756,24 @@ class GitTagVersion {
       if (channel == 'dev' || channel == 'beta' || channel == 'stable') {
         globals.printTrace('Skipping request to fetchTags - on well known channel $channel.');
       } else {
-        _runGit('git fetch $_flutterGit --tags', processUtils, workingDirectory);
+        _runGit('git fetch $_flutterGit --tags -f', processUtils, workingDirectory);
       }
     }
     final List<String> tags = _runGit(
-      'git tag --contains HEAD', processUtils, workingDirectory).split('\n');
+      'git tag --points-at HEAD', processUtils, workingDirectory).trim().split('\n');
 
     // Check first for a stable tag
     final RegExp stableTagPattern = RegExp(r'^\d+\.\d+\.\d+$');
     for (final String tag in tags) {
-      final String trimmedTag = tag.trim();
-      if (stableTagPattern.hasMatch(trimmedTag)) {
-        return parse(trimmedTag);
+      if (stableTagPattern.hasMatch(tag.trim())) {
+        return parse(tag);
       }
     }
     // Next check for a dev tag
     final RegExp devTagPattern = RegExp(r'^\d+\.\d+\.\d+-\d+\.\d+\.pre$');
     for (final String tag in tags) {
-      final String trimmedTag = tag.trim();
-      if (devTagPattern.hasMatch(trimmedTag)) {
-        return parse(trimmedTag);
+      if (devTagPattern.hasMatch(tag.trim())) {
+        return parse(tag);
       }
     }
 
@@ -776,7 +781,7 @@ class GitTagVersion {
     // recent tag and number of commits past.
     return parse(
       _runGit(
-        'git describe --match *.*.*-*.*.pre --first-parent --long --tags',
+        'git describe --match *.*.* --first-parent --long --tags',
         processUtils,
         workingDirectory,
       )
@@ -851,7 +856,7 @@ class GitTagVersion {
     if (devPatch != null && devVersion != null) {
       return '$x.$y.$z-${devVersion + 1}.0.pre.$commits';
     }
-    return '$x.$y.${z + 1}.pre.$commits';
+    return '$x.$y.${z + 1}-0.0.pre.$commits';
   }
 }
 

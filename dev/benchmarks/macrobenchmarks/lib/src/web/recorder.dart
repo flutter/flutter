@@ -111,6 +111,17 @@ abstract class Recorder {
   /// prefix.
   final String name;
 
+  /// Returns the recorded profile.
+  ///
+  /// This value is only available while the benchmark is running.
+  Profile get profile;
+
+  /// Whether the benchmark should continue running.
+  ///
+  /// Returns `false` if the benchmark collected enough data and it's time to
+  /// stop.
+  bool shouldContinue() => profile.shouldContinue();
+
   /// Called once before all runs of this benchmark recorder.
   ///
   /// This is useful for doing one-time setup work that's needed for the
@@ -159,14 +170,18 @@ abstract class RawRecorder extends Recorder {
   void body(Profile profile);
 
   @override
+  Profile get profile => _profile;
+  Profile _profile;
+
+  @override
   @nonVirtual
   Future<Profile> run() async {
-    final Profile profile = Profile(name: name);
+    _profile = Profile(name: name);
     do {
       await Future<void>.delayed(Duration.zero);
-      body(profile);
-    } while (profile.shouldContinue());
-    return profile;
+      body(_profile);
+    } while (shouldContinue());
+    return _profile;
   }
 }
 
@@ -198,6 +213,10 @@ abstract class RawRecorder extends Recorder {
 abstract class SceneBuilderRecorder extends Recorder {
   SceneBuilderRecorder({@required String name}) : super._(name, true);
 
+  @override
+  Profile get profile => _profile;
+  Profile _profile;
+
   /// Called from [Window.onBeginFrame].
   @mustCallSuper
   void onBeginFrame() {}
@@ -212,11 +231,11 @@ abstract class SceneBuilderRecorder extends Recorder {
   @override
   Future<Profile> run() {
     final Completer<Profile> profileCompleter = Completer<Profile>();
-    final Profile profile = Profile(name: name);
+    _profile = Profile(name: name);
 
     window.onBeginFrame = (_) {
       try {
-        startMeasureFrame();
+        startMeasureFrame(profile);
         onBeginFrame();
       } catch (error, stackTrace) {
         profileCompleter.completeError(error, stackTrace);
@@ -225,22 +244,22 @@ abstract class SceneBuilderRecorder extends Recorder {
     };
     window.onDrawFrame = () {
       try {
-        profile.record('drawFrameDuration', () {
+        _profile.record('drawFrameDuration', () {
           final SceneBuilder sceneBuilder = SceneBuilder();
           onDrawFrame(sceneBuilder);
-          profile.record('sceneBuildDuration', () {
+          _profile.record('sceneBuildDuration', () {
             final Scene scene = sceneBuilder.build();
-            profile.record('windowRenderDuration', () {
+            _profile.record('windowRenderDuration', () {
               window.render(scene);
             }, reported: false);
           }, reported: false);
         }, reported: true);
         endMeasureFrame();
 
-        if (profile.shouldContinue()) {
+        if (shouldContinue()) {
           window.scheduleFrame();
         } else {
-          profileCompleter.complete(profile);
+          profileCompleter.complete(_profile);
         }
       } catch (error, stackTrace) {
         profileCompleter.completeError(error, stackTrace);
@@ -314,7 +333,10 @@ abstract class SceneBuilderRecorder extends Recorder {
 /// }
 /// ```
 abstract class WidgetRecorder extends Recorder implements FrameRecorder {
-  WidgetRecorder({@required String name}) : super._(name, true);
+  WidgetRecorder({
+    @required String name,
+    this.useCustomWarmUp = false,
+  }) : super._(name, true);
 
   /// Creates a widget to be benchmarked.
   ///
@@ -323,18 +345,25 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
   /// pumping frames automatically.
   Widget createWidget();
 
+  final List<VoidCallback> _didStopCallbacks = <VoidCallback>[];
   @override
-  VoidCallback didStop;
+  void registerDidStop(VoidCallback fn) {
+    _didStopCallbacks.add(fn);
+  }
 
+  @override
   Profile profile;
   Completer<void> _runCompleter;
+
+  /// Whether to delimit warm-up frames in a custom way.
+  final bool useCustomWarmUp;
 
   Stopwatch _drawFrameStopwatch;
 
   @override
   @mustCallSuper
   void frameWillDraw() {
-    startMeasureFrame();
+    startMeasureFrame(profile);
     _drawFrameStopwatch = Stopwatch()..start();
   }
 
@@ -344,10 +373,11 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     endMeasureFrame();
     profile.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed, reported: true);
 
-    if (profile.shouldContinue()) {
+    if (shouldContinue()) {
       window.scheduleFrame();
     } else {
-      didStop();
+      for (final VoidCallback fn in _didStopCallbacks)
+        fn();
       _runCompleter.complete();
     }
   }
@@ -360,7 +390,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
   @override
   Future<Profile> run() async {
     _runCompleter = Completer<void>();
-    final Profile localProfile = profile = Profile(name: name);
+    final Profile localProfile = profile = Profile(name: name, useCustomWarmUp: useCustomWarmUp);
     final _RecordingWidgetsBinding binding =
         _RecordingWidgetsBinding.ensureInitialized();
     final Widget widget = createWidget();
@@ -411,9 +441,13 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
   /// consider using [WidgetRecorder].
   Widget createWidget();
 
+  final List<VoidCallback> _didStopCallbacks = <VoidCallback>[];
   @override
-  VoidCallback didStop;
+  void registerDidStop(VoidCallback fn) {
+    _didStopCallbacks.add(fn);
+  }
 
+  @override
   Profile profile;
   Completer<void> _runCompleter;
 
@@ -439,7 +473,7 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
   @mustCallSuper
   void frameWillDraw() {
     if (showWidget) {
-      startMeasureFrame();
+      startMeasureFrame(profile);
       _drawFrameStopwatch = Stopwatch()..start();
     }
   }
@@ -453,11 +487,12 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
       profile.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed, reported: true);
     }
 
-    if (profile.shouldContinue()) {
+    if (shouldContinue()) {
       showWidget = !showWidget;
       _hostState._setStateTrampoline();
     } else {
-      didStop();
+      for (final VoidCallback fn in _didStopCallbacks)
+        fn();
       _runCompleter.complete();
     }
   }
@@ -517,7 +552,8 @@ class _WidgetBuildRecorderHostState extends State<_WidgetBuildRecorderHost> {
 /// calculations will only apply to the latest [_kMeasuredSampleCount] data
 /// points.
 class Timeseries {
-  Timeseries(this.name, this.isReported);
+  Timeseries(this.name, this.isReported, {this.useCustomWarmUp = false})
+      : _warmUpFrameCount = useCustomWarmUp ? 0 : null;
 
   /// The label of this timeseries used for debugging and result inspection.
   final String name;
@@ -532,6 +568,18 @@ class Timeseries {
   /// but that are too fine-grained to be useful for tracking on the dashboard.
   final bool isReported;
 
+  /// Whether to delimit warm-up frames in a custom way.
+  final bool useCustomWarmUp;
+
+  /// The number of frames ignored as warm-up frames, used only
+  /// when [useCustomWarmUp] is true.
+  int _warmUpFrameCount;
+
+  /// The number of frames ignored as warm-up frames.
+  int get warmUpFrameCount => useCustomWarmUp
+      ? _warmUpFrameCount
+      : count - _kMeasuredSampleCount;
+
   /// List of all the values that have been recorded.
   ///
   /// This list has no limit.
@@ -545,11 +593,15 @@ class Timeseries {
   ///
   /// See [TimeseriesStats] for more details.
   TimeseriesStats computeStats() {
+    final int finalWarmUpFrameCount = warmUpFrameCount;
+
+    assert(finalWarmUpFrameCount >= 0 && finalWarmUpFrameCount < count);
+
     // The first few values we simply discard and never look at. They're from the warm-up phase.
-    final List<double> warmUpValues = _allValues.sublist(0, _allValues.length - _kMeasuredSampleCount);
+    final List<double> warmUpValues = _allValues.sublist(0, finalWarmUpFrameCount);
 
     // Values we analyze.
-    final List<double> candidateValues = _allValues.sublist(_allValues.length - _kMeasuredSampleCount);
+    final List<double> candidateValues = _allValues.sublist(finalWarmUpFrameCount);
 
     // The average that includes outliers.
     final double dirtyAverage = _computeAverage(name, candidateValues);
@@ -607,13 +659,16 @@ class Timeseries {
   }
 
   /// Adds a value to this timeseries.
-  void add(double value) {
+  void add(double value, {@required bool isWarmUpValue}) {
     if (value < 0.0) {
       throw StateError(
         'Timeseries $name: negative metric values are not supported. Got: $value',
       );
     }
     _allValues.add(value);
+    if (useCustomWarmUp && isWarmUpValue) {
+      _warmUpFrameCount += 1;
+    }
   }
 }
 
@@ -727,10 +782,35 @@ class AnnotatedSample {
 
 /// Base class for a profile collected from running a benchmark.
 class Profile {
-  Profile({@required this.name}) : assert(name != null);
+  Profile({@required this.name, this.useCustomWarmUp = false})
+      : assert(name != null),
+        _isWarmingUp = useCustomWarmUp;
 
   /// The name of the benchmark that produced this profile.
   final String name;
+
+  /// Whether to delimit warm-up frames in a custom way.
+  final bool useCustomWarmUp;
+
+  /// Whether we are measuring warm-up frames currently.
+  bool get isWarmingUp => _isWarmingUp;
+
+  bool _isWarmingUp;
+
+  /// Stop the warm-up phase.
+  ///
+  /// Call this method only when [useCustomWarmUp] and [isWarmingUp] are both
+  /// true.
+  /// Call this method only once for each profile.
+  void stopWarmingUp() {
+    if (!useCustomWarmUp) {
+      throw Exception('`stopWarmingUp` should be used only when `useCustomWarmUp` is true.');
+    } else if (!_isWarmingUp) {
+      throw Exception('Warm-up already stopped.');
+    } else {
+      _isWarmingUp = false;
+    }
+  }
 
   /// This data will be used to display cards in the Flutter Dashboard.
   final Map<String, Timeseries> scoreData = <String, Timeseries>{};
@@ -752,7 +832,10 @@ class Profile {
   /// Set [reported] to `false` to store the data, but not show it on the
   /// dashboard UI.
   void addDataPoint(String key, Duration duration, { @required bool reported }) {
-    scoreData.putIfAbsent(key, () => Timeseries(key, reported)).add(duration.inMicroseconds.toDouble());
+    scoreData.putIfAbsent(
+        key,
+        () => Timeseries(key, reported, useCustomWarmUp: useCustomWarmUp),
+    ).add(duration.inMicroseconds.toDouble(), isWarmUpValue: isWarmingUp);
   }
 
   /// Decides whether the data collected so far is sufficient to stop, or
@@ -867,9 +950,8 @@ String _ratioToPercent(double value) {
 /// Implemented by recorders that use [_RecordingWidgetsBinding] to receive
 /// frame life-cycle calls.
 abstract class FrameRecorder {
-  /// Called by the recorder when it stops recording and doesn't need to collect
-  /// any more data.
-  set didStop(VoidCallback cb);
+  /// Add a callback that will be called by the recorder when it stops recording.
+  void registerDidStop(VoidCallback cb);
 
   /// Called just before calling [SchedulerBinding.handleDrawFrame].
   void frameWillDraw();
@@ -923,9 +1005,9 @@ class _RecordingWidgetsBinding extends BindingBase
     }
     final FlutterExceptionHandler originalOnError = FlutterError.onError;
 
-    recorder.didStop = () {
+    recorder.registerDidStop(() {
       _benchmarkStopped = true;
-    };
+    });
 
     // Fail hard and fast on errors. Benchmarks should not have any errors.
     FlutterError.onError = (FlutterErrorDetails details) {
@@ -986,6 +1068,20 @@ class _RecordingWidgetsBinding extends BindingBase
 
 int _currentFrameNumber = 1;
 
+/// If [_calledStartMeasureFrame] is true, we have called [startMeasureFrame]
+/// but have not its pairing [endMeasureFrame] yet.
+///
+/// This flag ensures that [startMeasureFrame] and [endMeasureFrame] are always
+/// called in pairs, with [startMeasureFrame] followed by [endMeasureFrame].
+bool _calledStartMeasureFrame = false;
+
+/// Whether we are recording a measured frame.
+///
+/// This flag ensures that we always stop measuring a frame if we
+/// have started one. Because we want to skip warm-up frames, this flag
+/// is necessary.
+bool _isMeasuringFrame = false;
+
 /// Adds a marker indication the beginning of frame rendering.
 ///
 /// This adds an event to the performance trace used to find measured frames in
@@ -993,22 +1089,53 @@ int _currentFrameNumber = 1;
 /// benchmarks are only interested in a subset of frames. For example,
 /// [WidgetBuildRecorder] only measures frames that build widgets, and ignores
 /// frames that clear the screen.
-void startMeasureFrame() {
-  html.window.performance.mark('measured_frame_start#$_currentFrameNumber');
+///
+/// Warm-up frames are not measured. If [profile.isWarmingUp] is true,
+/// this function does nothing.
+void startMeasureFrame(Profile profile) {
+  if (_calledStartMeasureFrame) {
+    throw Exception('`startMeasureFrame` called twice in a row.');
+  }
+
+  _calledStartMeasureFrame = true;
+
+  if (!profile.isWarmingUp) {
+    // Tell the browser to mark the beginning of the frame.
+    html.window.performance.mark('measured_frame_start#$_currentFrameNumber');
+
+    _isMeasuringFrame = true;
+  }
 }
 
 /// Signals the end of a measured frame.
 ///
 /// See [startMeasureFrame] for details on what this instrumentation is used
 /// for.
+///
+/// Warm-up frames are not measured. If [profile.isWarmingUp] was true
+/// when the corresponding [startMeasureFrame] was called,
+/// this function does nothing.
 void endMeasureFrame() {
-  html.window.performance.mark('measured_frame_end#$_currentFrameNumber');
-  html.window.performance.measure(
-    'measured_frame',
-    'measured_frame_start#$_currentFrameNumber',
-    'measured_frame_end#$_currentFrameNumber',
-  );
-  _currentFrameNumber += 1;
+  if (!_calledStartMeasureFrame) {
+    throw Exception('`startMeasureFrame` has not been called before calling `endMeasureFrame`');
+  }
+
+  _calledStartMeasureFrame = false;
+
+  if (_isMeasuringFrame) {
+    // Tell the browser to mark the end of the frame, and measure the duration.
+    html.window.performance.mark('measured_frame_end#$_currentFrameNumber');
+    html.window.performance.measure(
+      'measured_frame',
+      'measured_frame_start#$_currentFrameNumber',
+      'measured_frame_end#$_currentFrameNumber',
+    );
+
+    // Increment the current frame number.
+    _currentFrameNumber += 1;
+
+    _isMeasuringFrame = false;
+  }
 }
 
 /// A function that receives a benchmark value from the framework.

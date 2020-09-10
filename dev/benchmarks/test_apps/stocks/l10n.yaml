@@ -1,0 +1,18 @@
+# Options used by the localizations tool
+## `arb-dir` sets the input directory. The output directory will match
+## the input directory if the output directory is not set.
+arb-dir: lib/i18n
+## `header-file` is the file that contains a custom
+## header for each of the generated files.
+header-file: header.txt
+## `output-class` is the name of the localizations class your
+## Flutter application will use. The file will need to be
+## imported throughout your application.
+output-class: StockStrings
+## `output-localization-file` is the name of the generated file.
+output-localization-file: stock_strings.dart
+## `template-arb-file` describes the template arb file that the tool
+## will use to check and validate the remaining arb files when
+## generating Flutter's localization files.
+synthetic-package: false
+template-arb-file: stocks_en.arb

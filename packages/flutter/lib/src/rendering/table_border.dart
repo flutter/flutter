@@ -148,12 +148,12 @@ class TableBorder {
   /// borders.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static TableBorder lerp(TableBorder a, TableBorder b, double t) {
+  static TableBorder? lerp(TableBorder? a, TableBorder? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return b.scale(t);
+      return b!.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
     return TableBorder(
@@ -195,8 +195,8 @@ class TableBorder {
   void paint(
     Canvas canvas,
     Rect rect, {
-    @required Iterable<double> rows,
-    @required Iterable<double> columns,
+    required Iterable<double> rows,
+    required Iterable<double> columns,
   }) {
     // properties can't be null
     assert(top != null);

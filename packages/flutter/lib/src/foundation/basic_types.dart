@@ -205,7 +205,7 @@ class _LazyListIterator<E> implements Iterator<E> {
   E get current {
     assert(_index >= 0); // called "current" before "moveNext()"
     if (_index < 0 || _index == _owner._results.length)
-      return null;
+      throw StateError('current can not be call after moveNext has returned false');
     return _owner._results[_index];
   }
 
@@ -237,4 +237,11 @@ class Factory<T> {
   String toString() {
     return 'Factory(type: $type)';
   }
+}
+
+/// Linearly interpolate between two `Duration`s.
+Duration lerpDuration(Duration a, Duration b, double t) {
+  return Duration(
+    microseconds: (a.inMicroseconds + (b.inMicroseconds - a.inMicroseconds) * t).round(),
+  );
 }

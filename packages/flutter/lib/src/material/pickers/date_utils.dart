@@ -2,28 +2,44 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
 
 // Common date utility functions used by the date picker implementation
 
-// NOTE: This is an internal implementation file. Even though there are public
+// This is an internal implementation file. Even though there are public
 // classes and functions defined here, they are only meant to be used by the
 // date picker implementation and are not exported as part of the Material library.
 // See pickers.dart for exactly what is considered part of the public API.
 
 import '../material_localizations.dart';
 
+import 'date_picker_common.dart';
+
 /// Returns a [DateTime] with just the date of the original, but no time set.
 DateTime dateOnly(DateTime date) {
   return DateTime(date.year, date.month, date.day);
 }
 
+/// Returns a [DateTimeRange] with the dates of the original without any times set.
+DateTimeRange datesOnly(DateTimeRange range) {
+  return DateTimeRange(start: dateOnly(range.start), end: dateOnly(range.end));
+}
+
 /// Returns true if the two [DateTime] objects have the same day, month, and
-/// year.
+/// year, or are both null.
 bool isSameDay(DateTime dateA, DateTime dateB) {
   return
-    dateA.year == dateB.year &&
-    dateA.month == dateB.month &&
-    dateA.day == dateB.day;
+    dateA?.year == dateB?.year &&
+    dateA?.month == dateB?.month &&
+    dateA?.day == dateB?.day;
+}
+
+/// Returns true if the two [DateTime] objects have the same month, and
+/// year, or are both null.
+bool isSameMonth(DateTime dateA, DateTime dateB) {
+  return
+    dateA?.year == dateB?.year &&
+    dateA?.month == dateB?.month;
 }
 
 /// Determines the number of months between two [DateTime] objects.
@@ -54,6 +70,11 @@ int monthDelta(DateTime startDate, DateTime endDate) {
 /// any additional date information.
 DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
   return DateTime(monthDate.year, monthDate.month + monthsToAdd);
+}
+
+/// Returns a [DateTime] with the added number of days and no time set.
+DateTime addDaysToDate(DateTime date, int days) {
+  return DateTime(date.year, date.month, date.day + days);
 }
 
 /// Computes the offset from the first day of the week that the first day of
@@ -119,4 +140,32 @@ int getDaysInMonth(int year, int month) {
   }
   const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   return daysInMonth[month - 1];
+}
+
+/// Returns a locale-appropriate string to describe the start of a date range.
+///
+/// If `startDate` is null, then it defaults to 'Start Date', otherwise if it
+/// is in the same year as the `endDate` then it will use the short month
+/// day format (i.e. 'Jan 21'). Otherwise it will return the short date format
+/// (i.e. 'Jan 21, 2020').
+String formatRangeStartDate(MaterialLocalizations localizations, DateTime startDate, DateTime endDate) {
+  return startDate == null
+    ? localizations.dateRangeStartLabel
+    : (endDate == null || startDate.year == endDate.year)
+      ? localizations.formatShortMonthDay(startDate)
+      : localizations.formatShortDate(startDate);
+}
+
+/// Returns an locale-appropriate string to describe the end of a date range.
+///
+/// If `endDate` is null, then it defaults to 'End Date', otherwise if it
+/// is in the same year as the `startDate` and the `currentDate` then it will
+/// just use the short month day format (i.e. 'Jan 21'), otherwise it will
+/// include the year (i.e. 'Jan 21, 2020').
+String formatRangeEndDate(MaterialLocalizations localizations, DateTime startDate, DateTime endDate, DateTime currentDate) {
+  return endDate == null
+    ? localizations.dateRangeEndLabel
+    : (startDate != null && startDate.year == endDate.year && startDate.year == currentDate.year)
+      ? localizations.formatShortMonthDay(endDate)
+      : localizations.formatShortDate(endDate);
 }

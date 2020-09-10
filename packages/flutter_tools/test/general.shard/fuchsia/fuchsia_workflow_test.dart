@@ -2,46 +2,85 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
-
-class MockFile extends Mock implements File {}
+import '../../src/testbed.dart';
 
 void main() {
-  group('Fuchsia workflow', () {
-    final MockFile devFinder = MockFile();
-    final MockFile sshConfig = MockFile();
-    when(devFinder.absolute).thenReturn(devFinder);
-    when(sshConfig.absolute).thenReturn(sshConfig);
+  final FileSystem fileSystem = MemoryFileSystem.test();
+  final File devFinder = fileSystem.file('dev_finder');
+  final File sshConfig = fileSystem.file('ssh_config');
 
-    testUsingContext('can not list and launch devices if there is not ssh config and dev finder', () {
-      expect(fuchsiaWorkflow.canLaunchDevices, false);
-      expect(fuchsiaWorkflow.canListDevices, false);
-      expect(fuchsiaWorkflow.canListEmulators, false);
-    }, overrides: <Type, Generator>{
-      FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: null, sshConfig: null),
-    });
+  testWithoutContext('Fuchsia workflow does not apply to host platform if feature is disabled', () {
+    final FuchsiaWorkflow fuchsiaWorkflow = FuchsiaWorkflow(
+      featureFlags: TestFeatureFlags(isFuchsiaEnabled: false),
+      fuchsiaArtifacts: FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
+      platform: FakePlatform(operatingSystem: 'linux'),
+    );
 
-    testUsingContext('can not list and launch devices if there is not ssh config and dev finder', () {
-      expect(fuchsiaWorkflow.canLaunchDevices, false);
-      expect(fuchsiaWorkflow.canListDevices, true);
-      expect(fuchsiaWorkflow.canListEmulators, false);
-    }, overrides: <Type, Generator>{
-      FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: devFinder, sshConfig: null),
-    });
+    expect(fuchsiaWorkflow.appliesToHostPlatform, false);
+  });
 
-    testUsingContext('can list and launch devices supported with sufficient SDK artifacts', () {
-      expect(fuchsiaWorkflow.canLaunchDevices, true);
-      expect(fuchsiaWorkflow.canListDevices, true);
-      expect(fuchsiaWorkflow.canListEmulators, false);
-    }, overrides: <Type, Generator>{
-      FuchsiaArtifacts: () =>
-          FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
-    });
+  testWithoutContext('Fuchsia workflow does not apply to host platform on Windows', () {
+    final FuchsiaWorkflow fuchsiaWorkflow = FuchsiaWorkflow(
+      featureFlags: TestFeatureFlags(isFuchsiaEnabled: true),
+      fuchsiaArtifacts: FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
+      platform: FakePlatform(operatingSystem: 'windows'),
+    );
+
+    expect(fuchsiaWorkflow.appliesToHostPlatform, false);
+  });
+
+  testWithoutContext('Fuchsia workflow can not list and launch devices if there is no ssh config and dev finder', () {
+    final FuchsiaWorkflow fuchsiaWorkflow = FuchsiaWorkflow(
+      featureFlags: TestFeatureFlags(),
+      fuchsiaArtifacts: FuchsiaArtifacts(devFinder: null, sshConfig: null),
+      platform: FakePlatform(operatingSystem: 'linux'),
+    );
+
+    expect(fuchsiaWorkflow.canLaunchDevices, false);
+    expect(fuchsiaWorkflow.canListDevices, false);
+    expect(fuchsiaWorkflow.canListEmulators, false);
+  });
+
+  testWithoutContext('Fuchsia workflow can not list and launch devices if there is no ssh config and dev finder', () {
+    final FuchsiaWorkflow fuchsiaWorkflow = FuchsiaWorkflow(
+      featureFlags: TestFeatureFlags(),
+      fuchsiaArtifacts: FuchsiaArtifacts(devFinder: devFinder, sshConfig: null),
+      platform: FakePlatform(operatingSystem: 'linux'),
+    );
+
+    expect(fuchsiaWorkflow.canLaunchDevices, false);
+    expect(fuchsiaWorkflow.canListDevices, true);
+    expect(fuchsiaWorkflow.canListEmulators, false);
+  });
+
+  testWithoutContext('Fuchsia workflow can list and launch devices supported with sufficient SDK artifacts', () {
+    final FuchsiaWorkflow fuchsiaWorkflow = FuchsiaWorkflow(
+      featureFlags: TestFeatureFlags(),
+      fuchsiaArtifacts: FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
+      platform: FakePlatform(operatingSystem: 'linux'),
+    );
+
+    expect(fuchsiaWorkflow.canLaunchDevices, true);
+    expect(fuchsiaWorkflow.canListDevices, true);
+    expect(fuchsiaWorkflow.canListEmulators, false);
+  });
+
+  testWithoutContext('Fuchsia workflow can list and launch devices supported with sufficient SDK artifacts on macOS', () {
+    final FuchsiaWorkflow fuchsiaWorkflow = FuchsiaWorkflow(
+      featureFlags: TestFeatureFlags(),
+      fuchsiaArtifacts: FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
+      platform: FakePlatform(operatingSystem: 'macOS'),
+    );
+
+    expect(fuchsiaWorkflow.canLaunchDevices, true);
+    expect(fuchsiaWorkflow.canListDevices, true);
+    expect(fuchsiaWorkflow.canListEmulators, false);
   });
 }

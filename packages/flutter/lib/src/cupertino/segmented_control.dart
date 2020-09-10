@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 import 'dart:math' as math;
 
@@ -182,7 +184,7 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
   /// Defaults to the selectedColor at 20% opacity if null.
   final Color pressedColor;
 
-  /// The CupertinoSegmentedControl will be placed inside this padding
+  /// The CupertinoSegmentedControl will be placed inside this padding.
   ///
   /// Defaults to EdgeInsets.symmetric(horizontal: 16.0)
   final EdgeInsetsGeometry padding;
@@ -382,6 +384,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
       );
 
       child = GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTapDown: (TapDownDetails event) {
           _onTapDown(currentKey);
         },
@@ -717,13 +720,12 @@ class _RenderSegmentedControl<T> extends RenderBox
     while (child != null) {
       final _SegmentedControlContainerBoxParentData childParentData = child.parentData as _SegmentedControlContainerBoxParentData;
       if (childParentData.surroundingRect.contains(position)) {
-        final Offset center = (Offset.zero & child.size).center;
-        return result.addWithRawTransform(
-          transform: MatrixUtils.forceToPoint(center),
-          position: center,
-          hitTest: (BoxHitTestResult result, Offset position) {
-            assert(position == center);
-            return child.hitTest(result, position: center);
+        return result.addWithPaintOffset(
+          offset: childParentData.offset,
+          position: position,
+          hitTest: (BoxHitTestResult result, Offset localOffset) {
+            assert(localOffset == position - childParentData.offset);
+            return child.hitTest(result, position: localOffset);
           },
         );
       }

@@ -11,8 +11,8 @@ import 'package:flutter_devicelab/framework/utils.dart';
 
 final List<String> flutterAssets = <String>[
   'assets/flutter_assets/AssetManifest.json',
-  'assets/flutter_assets/LICENSE',
-  'assets/flutter_assets/fonts/MaterialIcons-Regular.ttf',
+  'assets/flutter_assets/NOTICES',
+  'assets/flutter_assets/fonts/MaterialIcons-Regular.otf',
   'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',
 ];
 
@@ -46,6 +46,18 @@ Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject
 
   try {
     await testFunction(pluginProject);
+  } finally {
+    rmTree(tempDir);
+  }
+}
+
+/// Runs the given [testFunction] on a freshly generated Flutter module project.
+Future<void> runModuleProjectTest(Future<void> testFunction(FlutterModuleProject moduleProject)) async {
+  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_module_test.');
+  final FlutterModuleProject moduleProject = await FlutterModuleProject.create(tempDir, 'hello_module');
+
+  try {
+    await testFunction(moduleProject);
   } finally {
     rmTree(tempDir);
   }
@@ -93,7 +105,7 @@ String get _androidHome {
   final String androidHome = Platform.environment['ANDROID_HOME'] ??
       Platform.environment['ANDROID_SDK_ROOT'];
   if (androidHome == null || androidHome.isEmpty) {
-    throw Exception('Unset env flag: `ANDROID_HOME` or `ANDROID_SDK_ROOT`.');
+    throw Exception('Environment variable `ANDROID_SDK_ROOT` is not set.');
   }
   return androidHome;
 }
@@ -148,7 +160,6 @@ class ApkExtractor {
         'packages',
         apkFile.path,
       ],
-      printStdout: false,
     );
     _classes = Set<String>.from(
       packages
@@ -214,6 +225,7 @@ class FlutterProject {
 
   String get rootPath => path.join(parent.path, name);
   String get androidPath => path.join(rootPath, 'android');
+  String get iosPath => path.join(rootPath, 'ios');
 
   Future<void> addCustomBuildType(String name, {String initWith}) async {
     final File buildScript = File(
@@ -338,7 +350,7 @@ class FlutterPluginProject {
 
   static Future<FlutterPluginProject> create(Directory directory, String name) async {
     await inDirectory(directory, () async {
-      await flutter('create', options: <String>['--template=plugin', name]);
+      await flutter('create', options: <String>['--template=plugin', '--platforms=ios,android', name]);
     });
     return FlutterPluginProject(directory, name);
   }
@@ -355,6 +367,22 @@ class FlutterPluginProject {
   Future<void> runGradleTask(String task, {List<String> options}) async {
     return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
   }
+}
+
+class FlutterModuleProject {
+  FlutterModuleProject(this.parent, this.name);
+
+  final Directory parent;
+  final String name;
+
+  static Future<FlutterModuleProject> create(Directory directory, String name) async {
+    await inDirectory(directory, () async {
+      await flutter('create', options: <String>['--template=module', name]);
+    });
+    return FlutterModuleProject(directory, name);
+  }
+
+  String get rootPath => path.join(parent.path, name);
 }
 
 Future<void> _runGradleTask({String workingDirectory, String task, List<String> options}) async {

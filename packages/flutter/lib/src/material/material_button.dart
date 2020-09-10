@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -18,6 +20,20 @@ import 'theme_data.dart';
 
 /// A utility class for building Material buttons that depend on the
 /// ambient [ButtonTheme] and [Theme].
+///
+/// ### This class is obsolete.
+///
+/// FlatButton, RaisedButton, and OutlineButton have been replaced by
+/// TextButton, ElevatedButton, and OutlinedButton respectively.
+/// ButtonTheme has been replaced by TextButtonTheme,
+/// ElevatedButtonTheme, and OutlinedButtonTheme. The appearance of the
+/// new widgets can be customized by specifying a [ButtonStyle]
+/// or by creating a one-off style using a `styleFrom` method like
+/// [TextButton.styleFrom]. The original button classes
+/// will be deprecated soon, please migrate code that uses them.
+/// There's a detailed migration guide for the new button and button
+/// theme classes in
+/// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
 ///
 /// The button's size will expand to fit the child widget, if necessary.
 ///
@@ -53,6 +69,7 @@ class MaterialButton extends StatelessWidget {
     @required this.onPressed,
     this.onLongPress,
     this.onHighlightChanged,
+    this.mouseCursor,
     this.textTheme,
     this.textColor,
     this.disabledTextColor,
@@ -115,6 +132,9 @@ class MaterialButton extends StatelessWidget {
   /// [State.setState] is not allowed).
   final ValueChanged<bool> onHighlightChanged;
 
+  /// {@macro flutter.material.button.mouseCursor}
+  final MouseCursor mouseCursor;
+
   /// Defines the button's base colors, and the defaults for the button's minimum
   /// size, internal padding, and shape.
   ///
@@ -123,8 +143,9 @@ class MaterialButton extends StatelessWidget {
 
   /// The color to use for this button's text.
   ///
-  /// The button's [Material.textStyle] will be the current theme's button
-  /// text style, [ThemeData.textTheme.button], configured with this color.
+  /// The button's [Material.textStyle] will be the current theme's button text
+  /// style, [TextTheme.button] of [ThemeData.textTheme], configured with this
+  /// color.
   ///
   /// The default text color depends on the button theme's text theme,
   /// [ButtonThemeData.textTheme].
@@ -140,8 +161,9 @@ class MaterialButton extends StatelessWidget {
 
   /// The color to use for this button's text when the button is disabled.
   ///
-  /// The button's [Material.textStyle] will be the current theme's button
-  /// text style, [ThemeData.textTheme.button], configured with this color.
+  /// The button's [Material.textStyle] will be the current theme's button text
+  /// style, [TextTheme.button] of [ThemeData.textTheme], configured with this
+  /// color.
   ///
   /// The default value is the theme's disabled color,
   /// [ThemeData.disabledColor].
@@ -318,8 +340,8 @@ class MaterialButton extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
-  ///    within a [Theme].
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
+  ///    widgets within a [Theme].
   final VisualDensity visualDensity;
 
   /// The shape of the button's [Material].
@@ -387,6 +409,7 @@ class MaterialButton extends StatelessWidget {
       onLongPress: onLongPress,
       enableFeedback: enableFeedback,
       onHighlightChanged: onHighlightChanged,
+      mouseCursor: mouseCursor,
       fillColor: buttonTheme.getFillColor(this),
       textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
       focusColor: focusColor ?? buttonTheme.getFocusColor(this) ?? theme.focusColor,
@@ -410,6 +433,7 @@ class MaterialButton extends StatelessWidget {
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
+      disabledElevation: disabledElevation ?? 0.0,
     );
   }
 

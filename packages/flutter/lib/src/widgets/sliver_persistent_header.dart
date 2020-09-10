@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart' show TickerProvider;
 
 import 'framework.dart';
 
@@ -57,6 +60,12 @@ abstract class SliverPersistentHeaderDelegate {
   /// different value.
   double get maxExtent;
 
+  /// A [TickerProvider] to use when animating the header's size changes.
+  ///
+  /// Must not be null if the persistent header is a floating header, and
+  /// [snapConfiguration] or [showOnScreenConfiguration] is not null.
+  TickerProvider get vsync => null;
+
   /// Specifies how floating headers should animate in and out of view.
   ///
   /// If the value of this property is null, then floating headers will
@@ -78,6 +87,12 @@ abstract class SliverPersistentHeaderDelegate {
   ///
   /// Defaults to null.
   OverScrollHeaderStretchConfiguration get stretchConfiguration => null;
+
+  /// Specifies how floating headers and pinned pinned headers should behave in
+  /// response to [RenderObject.showOnScreen] calls.
+  ///
+  /// Defaults to null.
+  PersistentHeaderShowOnScreenConfiguration get showOnScreenConfiguration => null;
 
   /// Whether this delegate is meaningfully different from the old delegate.
   ///
@@ -234,18 +249,18 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(covariant RenderBox child, dynamic slot) {
+  void insertRenderObjectChild(covariant RenderBox child, dynamic slot) {
     assert(renderObject.debugValidateChild(child));
     renderObject.child = child;
   }
 
   @override
-  void moveChildRenderObject(covariant RenderObject child, dynamic slot) {
+  void moveRenderObjectChild(covariant RenderObject child, dynamic oldSlot, dynamic newSlot) {
     assert(false);
   }
 
   @override
-  void removeChildRenderObject(covariant RenderObject child) {
+  void removeRenderObjectChild(covariant RenderObject child, dynamic slot) {
     renderObject.child = null;
   }
 
@@ -344,7 +359,8 @@ class _SliverPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectW
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
     return _RenderSliverPinnedPersistentHeaderForWidgets(
-      stretchConfiguration: delegate.stretchConfiguration
+      stretchConfiguration: delegate.stretchConfiguration,
+      showOnScreenConfiguration: delegate.showOnScreenConfiguration,
     );
   }
 }
@@ -354,9 +370,11 @@ class _RenderSliverPinnedPersistentHeaderForWidgets extends RenderSliverPinnedPe
   _RenderSliverPinnedPersistentHeaderForWidgets({
     RenderBox child,
     OverScrollHeaderStretchConfiguration stretchConfiguration,
+    PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration,
   }) : super(
     child: child,
     stretchConfiguration: stretchConfiguration,
+    showOnScreenConfiguration: showOnScreenConfiguration,
   );
 }
 
@@ -372,15 +390,19 @@ class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjec
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
     return _RenderSliverFloatingPersistentHeaderForWidgets(
+      vsync: delegate.vsync,
       snapConfiguration: delegate.snapConfiguration,
       stretchConfiguration: delegate.stretchConfiguration,
+      showOnScreenConfiguration: delegate.showOnScreenConfiguration,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderSliverFloatingPersistentHeaderForWidgets renderObject) {
+    renderObject.vsync = delegate.vsync;
     renderObject.snapConfiguration = delegate.snapConfiguration;
     renderObject.stretchConfiguration = delegate.stretchConfiguration;
+    renderObject.showOnScreenConfiguration = delegate.showOnScreenConfiguration;
   }
 }
 
@@ -388,12 +410,16 @@ class _RenderSliverFloatingPinnedPersistentHeaderForWidgets extends RenderSliver
   with _RenderSliverPersistentHeaderForWidgetsMixin {
   _RenderSliverFloatingPinnedPersistentHeaderForWidgets({
     RenderBox child,
+    @required TickerProvider vsync,
     FloatingHeaderSnapConfiguration snapConfiguration,
     OverScrollHeaderStretchConfiguration stretchConfiguration,
+    PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration,
   }) : super(
     child: child,
+    vsync: vsync,
     snapConfiguration: snapConfiguration,
     stretchConfiguration: stretchConfiguration,
+    showOnScreenConfiguration: showOnScreenConfiguration,
   );
 }
 
@@ -409,15 +435,19 @@ class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRende
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
     return _RenderSliverFloatingPinnedPersistentHeaderForWidgets(
+      vsync: delegate.vsync,
       snapConfiguration: delegate.snapConfiguration,
       stretchConfiguration: delegate.stretchConfiguration,
+      showOnScreenConfiguration: delegate.showOnScreenConfiguration,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderSliverFloatingPinnedPersistentHeaderForWidgets renderObject) {
+    renderObject.vsync = delegate.vsync;
     renderObject.snapConfiguration = delegate.snapConfiguration;
     renderObject.stretchConfiguration = delegate.stretchConfiguration;
+    renderObject.showOnScreenConfiguration = delegate.showOnScreenConfiguration;
   }
 }
 
@@ -425,11 +455,15 @@ class _RenderSliverFloatingPersistentHeaderForWidgets extends RenderSliverFloati
   with _RenderSliverPersistentHeaderForWidgetsMixin {
   _RenderSliverFloatingPersistentHeaderForWidgets({
     RenderBox child,
+    @required TickerProvider vsync,
     FloatingHeaderSnapConfiguration snapConfiguration,
     OverScrollHeaderStretchConfiguration stretchConfiguration,
+    PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration,
   }) : super(
     child: child,
+    vsync: vsync,
     snapConfiguration: snapConfiguration,
     stretchConfiguration: stretchConfiguration,
+    showOnScreenConfiguration: showOnScreenConfiguration,
   );
 }

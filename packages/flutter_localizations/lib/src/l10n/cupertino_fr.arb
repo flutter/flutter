@@ -18,5 +18,7 @@
   "cutButtonLabel": "Couper",
   "copyButtonLabel": "Copier",
   "pasteButtonLabel": "Coller",
-  "selectAllButtonLabel": "Tout sélect."
+  "selectAllButtonLabel": "Tout sélect.",
+  "tabSemanticsLabel": "Onglet $tabIndex sur $tabCount",
+  "modalBarrierDismissLabel": "Ignorer"
 }

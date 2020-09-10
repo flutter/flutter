@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // This file contains tests that are only supported by the Dart VM. For
 // example, on the Web there's no way to express large integers.
 @TestOn('!chrome')

@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show Color;
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 /// Interactive states that some of the Material widgets can take on when
 /// receiving input from the user.
@@ -13,9 +18,15 @@ import 'dart:ui' show Color;
 ///
 /// See also:
 ///
-///  * [MaterialStateColor], a color that has a `resolve` method that can
-///    return a different color depending on the state of the widget that it
-///    is used in.
+///  * [MaterialStateProperty], an interface for objects that "resolve" to
+///    different values depending on a widget's material state.
+///  * [MaterialStateColor], a [Color] that implements `MaterialStateProperty`
+///    which is used in APIs that need to accept either a [Color] or a
+///    `MaterialStateProperty<Color>`.
+///  * [MaterialStateMouseCursor], a [MouseCursor] that implements `MaterialStateProperty`.
+///    which is used in APIs that need to accept either a [MouseCursor] or a
+///    [MaterialStateProperty<MouseCursor>].
+
 enum MaterialState {
   /// The state when the user drags their mouse cursor over the given widget.
   ///
@@ -67,80 +78,52 @@ enum MaterialState {
 /// set of states.
 typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 
-/// Defines a [Color] whose value depends on a set of [MaterialState]s which
-/// represent the interactive state of a component.
+/// Defines a [Color] that is also a [MaterialStateProperty].
 ///
-/// This is useful for improving the accessibility of text in different states
-/// of a component. For example, in a [FlatButton] with blue text, the text will
-/// become more difficult to read when the button is hovered, focused, or pressed,
-/// because the contrast ratio between the button and the text will decrease. To
-/// solve this, you can use [MaterialStateColor] to make the text darker when the
-/// [FlatButton] is hovered, focused, or pressed.
+/// This class exists to enable widgets with [Color] valued properties
+/// to also accept [MaterialStateProperty<Color>] values. A material
+/// state color property represents a color which depends on
+/// a widget's "interactive state". This state is represented as a
+/// [Set] of [MaterialState]s, like [MaterialState.pressed],
+/// [MaterialState.focused] and [MaterialState.hovered].
 ///
 /// To use a [MaterialStateColor], you can either:
 ///   1. Create a subclass of [MaterialStateColor] and implement the abstract `resolve` method.
 ///   2. Use [MaterialStateColor.resolveWith] and pass in a callback that
 ///      will be used to resolve the color in the given states.
 ///
-/// This should only be used as parameters when they are documented to take
-/// [MaterialStateColor], otherwise only the default state will be used.
+/// If a [MaterialStateColor] is used for a property or a parameter that doesn't
+/// support resolving [MaterialStateProperty<Color>]s, then its default color
+/// value will be used for all states.
+///
+/// To define a `const` [MaterialStateColor], you'll need to extend
+/// [MaterialStateColor] and override its [resolve] method. You'll also need
+/// to provide a `defaultValue` to the super constructor, so that we can know
+/// at compile-time what its default color is.
 ///
 /// {@tool snippet}
 ///
-/// This example shows how you could pass a `MaterialStateColor` to `FlatButton.textColor`.
-/// Here, the text color will be `Colors.blue[900]` when the button is being
-/// pressed, hovered, or focused. Otherwise, the text color will be `Colors.blue[600]`.
+/// This example defines a `MaterialStateColor` with a const constructor.
 ///
 /// ```dart
-/// Color getTextColor(Set<MaterialState> states) {
-///   const Set<MaterialState> interactiveStates = <MaterialState>{
-///     MaterialState.pressed,
-///     MaterialState.hovered,
-///     MaterialState.focused,
-///   };
-///   if (states.any(interactiveStates.contains)) {
-///     return Colors.blue[900];
-///   }
-///   return Colors.blue[600];
-/// }
+/// class MyColor extends MaterialStateColor {
+///   static const int _defaultColor = 0xcafefeed;
+///   static const int _pressedColor = 0xdeadbeef;
 ///
-/// FlatButton(
-///   child: Text('FlatButton'),
-///   onPressed: () {},
-///   textColor: MaterialStateColor.resolveWith(getTextColor),
-/// ),
+///   const MyColor() : super(_defaultColor);
+///
+///   @override
+///   Color resolve(Set<MaterialState> states) {
+///     if (states.contains(MaterialState.pressed)) {
+///       return const Color(_pressedColor);
+///     }
+///     return const Color(_defaultColor);
+///   }
+/// }
 /// ```
 /// {@end-tool}
 abstract class MaterialStateColor extends Color implements MaterialStateProperty<Color> {
   /// Creates a [MaterialStateColor].
-  ///
-  /// If you want a `const` [MaterialStateColor], you'll need to extend
-  /// [MaterialStateColor] and override the [resolve] method. You'll also need
-  /// to provide a `defaultValue` to the super constructor, so that we can know
-  /// at compile-time what the value of the default [Color] is.
-  ///
-  /// {@tool snippet}
-  ///
-  /// In this next example, we see how you can create a `MaterialStateColor` by
-  /// extending the abstract class and overriding the `resolve` method.
-  ///
-  /// ```dart
-  /// class TextColor extends MaterialStateColor {
-  ///   static const int _defaultColor = 0xcafefeed;
-  ///   static const int _pressedColor = 0xdeadbeef;
-  ///
-  ///   const TextColor() : super(_defaultColor);
-  ///
-  ///   @override
-  ///   Color resolve(Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.pressed)) {
-  ///       return const Color(_pressedColor);
-  ///     }
-  ///     return const Color(_defaultColor);
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
   const MaterialStateColor(int defaultValue) : super(defaultValue);
 
   /// Creates a [MaterialStateColor] from a [MaterialPropertyResolver<Color>]
@@ -178,27 +161,202 @@ class _MaterialStateColor extends MaterialStateColor {
   Color resolve(Set<MaterialState> states) => _resolve(states);
 }
 
-/// Interface for classes that can return a value of type `T` based on a set of
-/// [MaterialState]s.
+/// Defines a [MouseCursor] whose value depends on a set of [MaterialState]s which
+/// represent the interactive state of a component.
 ///
-/// For example, [MaterialStateColor] implements `MaterialStateProperty<Color>`
-/// because it has a `resolve` method that returns a different [Color] depending
-/// on the given set of [MaterialState]s.
+/// This kind of [MouseCursor] is useful when the set of interactive
+/// actions a widget supports varies with its state. For example, a
+/// mouse pointer hovering over a disabled [ListTile] should not
+/// display [SystemMouseCursors.click], since a disabled list tile
+/// doesn't respond to mouse clicks. [ListTile]'s default mouse cursor
+/// is a [MaterialStateMouseCursor.clickable], which resolves to
+/// [SystemMouseCursors.basic] when the button is disabled.
+///
+/// To use a [MaterialStateMouseCursor], you should create a subclass of
+/// [MaterialStateMouseCursor] and implement the abstract `resolve` method.
+///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// This example defines a mouse cursor that resolves to
+/// [SystemMouseCursors.forbidden] when its widget is disabled.
+///
+/// ```dart imports
+/// import 'package:flutter/rendering.dart';
+/// ```
+///
+/// ```dart preamble
+/// class ListTileCursor extends MaterialStateMouseCursor {
+///   @override
+///   MouseCursor resolve(Set<MaterialState> states) {
+///     if (states.contains(MaterialState.disabled)) {
+///       return SystemMouseCursors.forbidden;
+///     }
+///     return SystemMouseCursors.click;
+///   }
+///   @override
+///   String get debugDescription => 'ListTileCursor()';
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return ListTile(
+///     title: Text('Disabled ListTile'),
+///     enabled: false,
+///     mouseCursor: ListTileCursor(),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// This class should only be used for parameters which are documented to take
+/// [MaterialStateMouseCursor], otherwise only the default state will be used.
+///
+/// See also:
+///
+///  * [MouseCursor] for introduction on the mouse cursor system.
+///  * [SystemMouseCursors], which defines cursors that are supported by
+///    native platforms.
+abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialStateProperty<MouseCursor> {
+  /// Creates a [MaterialStateMouseCursor].
+  const MaterialStateMouseCursor();
+
+  @protected
+  @override
+  MouseCursorSession createSession(int device) {
+    return resolve(<MaterialState>{}).createSession(device);
+  }
+
+  /// Returns a [MouseCursor] that's to be used when a Material component is in
+  /// the specified state.
+  ///
+  /// This method should never return null.
+  @override
+  MouseCursor resolve(Set<MaterialState> states);
+
+  /// A mouse cursor for clickable material widgets, which resolves differently
+  /// when the widget is disabled.
+  ///
+  /// By default this cursor resolves to [SystemMouseCursors.click]. If the widget is
+  /// disabled, the cursor resolves to [SystemMouseCursors.basic].
+  ///
+  /// This cursor is the default for many Material widgets.
+  static const MaterialStateMouseCursor clickable = _EnabledAndDisabledMouseCursor(
+    enabledCursor: SystemMouseCursors.click,
+    disabledCursor: SystemMouseCursors.basic,
+    name: 'clickable',
+  );
+
+  /// A mouse cursor for material widgets related to text, which resolves differently
+  /// when the widget is disabled.
+  ///
+  /// By default this cursor resolves to [SystemMouseCursors.text]. If the widget is
+  /// disabled, the cursor resolves to [SystemMouseCursors.basic].
+  ///
+  /// This cursor is the default for many Material widgets.
+  static const MaterialStateMouseCursor textable = _EnabledAndDisabledMouseCursor(
+    enabledCursor: SystemMouseCursors.text,
+    disabledCursor: SystemMouseCursors.basic,
+    name: 'textable',
+  );
+}
+
+class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
+  const _EnabledAndDisabledMouseCursor({
+    this.enabledCursor,
+    this.disabledCursor,
+    this.name,
+  });
+
+  final MouseCursor enabledCursor;
+  final MouseCursor disabledCursor;
+  final String name;
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return disabledCursor;
+    }
+    return enabledCursor;
+  }
+
+  @override
+  String get debugDescription => 'MaterialStateMouseCursor($name)';
+}
+
+/// Interface for classes that [resolve] to a value of type `T` based
+/// on a widget's interactive "state", which is defined as a set
+/// of [MaterialState]s.
+///
+/// Material state properties represent values that depend on a widget's material
+/// "state".  The state is encoded as a set of [MaterialState] values, like
+/// [MaterialState.focused], [MaterialState.hovered], [MaterialState.pressed].  For
+/// example the [InkWell.overlayColor] defines the color that fills the ink well
+/// when it's pressed (the "splash color"), focused, or hovered. The [InkWell]
+/// uses the overlay color's [resolve] method to compute the color for the
+/// ink well's current state.
+///
+/// [ButtonStyle], which is used to configure the appearance of
+/// buttons like [TextButton], [ElevatedButton], and [OutlinedButton],
+/// has many material state properties.  The button widgets keep track
+/// of their current material state and [resolve] the button style's
+/// material state properties when their value is needed.
+///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// This example shows how you can override the default text and icon
+/// color (the "foreground color") of a [TextButton] with a
+/// [MaterialStateProperty]. In this example, the button's text color
+/// will be `Colors.blue` when the button is being pressed, hovered,
+/// or focused. Otherwise, the text color will be `Colors.red`.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   Color getColor(Set<MaterialState> states) {
+///     const Set<MaterialState> interactiveStates = <MaterialState>{
+///       MaterialState.pressed,
+///       MaterialState.hovered,
+///       MaterialState.focused,
+///     };
+///     if (states.any(interactiveStates.contains)) {
+///       return Colors.blue;
+///     }
+///     return Colors.red;
+///   }
+///   return TextButton(
+///     style: ButtonStyle(
+///       foregroundColor: MaterialStateProperty.resolveWith(getColor),
+///     ),
+///     onPressed: () {},
+///     child: Text('TextButton'),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [MaterialStateColor], a [Color] that implements `MaterialStateProperty`
+///    which is used in APIs that need to accept either a [Color] or a
+///    `MaterialStateProperty<Color>`.
+///  * [MaterialStateMouseCursor], a [MouseCursor] that implements `MaterialStateProperty`.
+///    which is used in APIs that need to accept either a [MouseCursor] or a
+///    [MaterialStateProperty<MouseCursor>].
 abstract class MaterialStateProperty<T> {
 
-  /// Returns a different value of type `T` depending on the given `states`.
+  /// Returns a value of type `T` that depends on [states].
   ///
-  /// Some widgets (such as [RawMaterialButton]) keep track of their set of
-  /// [MaterialState]s, and will call `resolve` with the current states at build
-  /// time for specified properties (such as [RawMaterialButton.textStyle]'s color).
+  /// Widgets like [TextButton] and [ElevatedButton] apply this method to their
+  /// current [MaterialState]s to compute colors and other visual parameters
+  /// at build time.
   T resolve(Set<MaterialState> states);
 
-  /// Returns the value resolved in the given set of states if `value` is a
+  /// Resolves the value for the given set of states if `value` is a
   /// [MaterialStateProperty], otherwise returns the value itself.
   ///
   /// This is useful for widgets that have parameters which can optionally be a
-  /// [MaterialStateProperty]. For example, [RaisedButton.textColor] can be a
-  /// [Color] or a [MaterialStateProperty<Color>].
+  /// [MaterialStateProperty]. For example, [InkWell.mouseCursor] can be a
+  /// [MouseCursor] or a [MaterialStateProperty<MouseCursor>].
   static T resolveAs<T>(T value, Set<MaterialState> states) {
     if (value is MaterialStateProperty<T>) {
       final MaterialStateProperty<T> property = value;
@@ -209,14 +367,30 @@ abstract class MaterialStateProperty<T> {
 
   /// Convenience method for creating a [MaterialStateProperty] from a
   /// [MaterialPropertyResolver] function alone.
-  static MaterialStateProperty<T> resolveWith<T>(MaterialPropertyResolver<T> callback) => _MaterialStateProperty<T>(callback);
+  static MaterialStateProperty<T> resolveWith<T>(MaterialPropertyResolver<T> callback) => _MaterialStatePropertyWith<T>(callback);
+
+  /// Convenience method for creating a [MaterialStateProperty] that resolves
+  /// to a single value for all states.
+  static MaterialStateProperty<T> all<T>(T value) => _MaterialStatePropertyAll<T>(value);
 }
 
-class _MaterialStateProperty<T> implements MaterialStateProperty<T> {
-  _MaterialStateProperty(this._resolve);
+class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {
+  _MaterialStatePropertyWith(this._resolve);
 
   final MaterialPropertyResolver<T> _resolve;
 
   @override
   T resolve(Set<MaterialState> states) => _resolve(states);
+}
+
+class _MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
+  _MaterialStatePropertyAll(this.value);
+
+  final T value;
+
+  @override
+  T resolve(Set<MaterialState> states) => value;
+
+  @override
+  String toString() => 'MaterialStateProperty.all($value)';
 }

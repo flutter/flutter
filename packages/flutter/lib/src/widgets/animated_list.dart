@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
@@ -510,6 +512,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 /// class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
 ///   final GlobalKey<SliverAnimatedListState> _listKey = GlobalKey<SliverAnimatedListState>();
 ///   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+///   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 ///   ListModel<int> _list;
 ///   int _selectedItem;
 ///   int _nextItem; // The next item inserted when the user presses the '+' button.
@@ -567,7 +570,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///         _selectedItem = null;
 ///       });
 ///     } else {
-///       _scaffoldKey.currentState.showSnackBar(SnackBar(
+///       _scaffoldMessengerKey.currentState.showSnackBar(SnackBar(
 ///         content: Text(
 ///           'Select an item to remove from the list.',
 ///           style: TextStyle(fontSize: 20),
@@ -579,6 +582,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
+///       scaffoldMessengerKey: _scaffoldMessengerKey,
 ///       home: Scaffold(
 ///         key: _scaffoldKey,
 ///         body: CustomScrollView(

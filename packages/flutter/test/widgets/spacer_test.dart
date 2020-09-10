@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -43,14 +45,14 @@ void main() {
     final Rect spacer3Rect = tester.getRect(find.byType(Spacer).at(2));
     final Rect spacer4Rect = tester.getRect(find.byType(Spacer).at(3));
     expect(spacer1Rect.size.height, 0.0);
-    expect(spacer1Rect.size.width, closeTo(93.8, 0.1));
-    expect(spacer1Rect.left, closeTo(696.3, 0.1));
-    expect(spacer2Rect.size.width, closeTo(93.8, 0.1));
-    expect(spacer2Rect.left, closeTo(592.5, 0.1));
+    expect(spacer1Rect.size.width, moreOrLessEquals(93.8, epsilon: 0.1));
+    expect(spacer1Rect.left, moreOrLessEquals(696.3, epsilon: 0.1));
+    expect(spacer2Rect.size.width, moreOrLessEquals(93.8, epsilon: 0.1));
+    expect(spacer2Rect.left, moreOrLessEquals(592.5, epsilon: 0.1));
     expect(spacer3Rect.size.width, spacer2Rect.size.width * 2.0);
-    expect(spacer3Rect.left, closeTo(395.0, 0.1));
+    expect(spacer3Rect.left, moreOrLessEquals(395.0, epsilon: 0.1));
     expect(spacer4Rect.size.width, spacer3Rect.size.width * 2.0);
-    expect(spacer4Rect.left, closeTo(10.0, 0.1));
+    expect(spacer4Rect.left, moreOrLessEquals(10.0, epsilon: 0.1));
   });
 
   testWidgets('Spacer takes up space.', (WidgetTester tester) async {

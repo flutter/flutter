@@ -10,6 +10,7 @@
 library foundation;
 
 export 'package:meta/meta.dart' show
+  factory,
   immutable,
   mustCallSuper,
   nonVirtual,
@@ -51,7 +52,6 @@ export 'src/foundation/object.dart';
 export 'src/foundation/observer_list.dart';
 export 'src/foundation/platform.dart';
 export 'src/foundation/print.dart';
-export 'src/foundation/profile.dart';
 export 'src/foundation/serialization.dart';
 export 'src/foundation/stack_frame.dart';
 export 'src/foundation/synchronous_future.dart';

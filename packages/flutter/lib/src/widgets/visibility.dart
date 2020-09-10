@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -159,7 +161,7 @@ class Visibility extends StatelessWidget {
 
   /// Whether to maintain space for where the widget would have been.
   ///
-  /// To set this, [maintainAnimation] must also be set.
+  /// To set this, [maintainAnimation] and [maintainState] must also be set.
   ///
   /// Maintaining the size when the widget is not [visible] is not notably more
   /// expensive than just keeping animations running without maintaining the

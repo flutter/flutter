@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'button.dart';
 import 'colors.dart';
@@ -61,6 +64,151 @@ const TextStyle _kToolbarButtonDisabledFontStyle = TextStyle(
 
 // Eyeballed value.
 const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
+
+// Generates the child that's passed into CupertinoTextSelectionToolbar.
+class _CupertinoTextSelectionToolbarWrapper extends StatefulWidget {
+  const _CupertinoTextSelectionToolbarWrapper({
+    Key key,
+    this.arrowTipX,
+    this.barTopY,
+    this.clipboardStatus,
+    this.handleCut,
+    this.handleCopy,
+    this.handlePaste,
+    this.handleSelectAll,
+    this.isArrowPointingDown,
+  }) : super(key: key);
+
+  final double arrowTipX;
+  final double barTopY;
+  final ClipboardStatusNotifier clipboardStatus;
+  final VoidCallback handleCut;
+  final VoidCallback handleCopy;
+  final VoidCallback handlePaste;
+  final VoidCallback handleSelectAll;
+  final bool isArrowPointingDown;
+
+  @override
+  _CupertinoTextSelectionToolbarWrapperState createState() => _CupertinoTextSelectionToolbarWrapperState();
+}
+
+class _CupertinoTextSelectionToolbarWrapperState extends State<_CupertinoTextSelectionToolbarWrapper> {
+  ClipboardStatusNotifier _clipboardStatus;
+
+  void _onChangedClipboardStatus() {
+    setState(() {
+      // Inform the widget that the value of clipboardStatus has changed.
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
+    _clipboardStatus.addListener(_onChangedClipboardStatus);
+    _clipboardStatus.update();
+  }
+
+  @override
+  void didUpdateWidget(_CupertinoTextSelectionToolbarWrapper oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.clipboardStatus == null && widget.clipboardStatus != null) {
+      _clipboardStatus.removeListener(_onChangedClipboardStatus);
+      _clipboardStatus.dispose();
+      _clipboardStatus = widget.clipboardStatus;
+    } else if (oldWidget.clipboardStatus != null) {
+      if (widget.clipboardStatus == null) {
+        _clipboardStatus = ClipboardStatusNotifier();
+        _clipboardStatus.addListener(_onChangedClipboardStatus);
+        oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+      } else if (widget.clipboardStatus != oldWidget.clipboardStatus) {
+        _clipboardStatus = widget.clipboardStatus;
+        _clipboardStatus.addListener(_onChangedClipboardStatus);
+        oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+      }
+    }
+    if (widget.handlePaste != null) {
+      _clipboardStatus.update();
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // When used in an Overlay, this can be disposed after its creator has
+    // already disposed _clipboardStatus.
+    if (!_clipboardStatus.disposed) {
+      _clipboardStatus.removeListener(_onChangedClipboardStatus);
+      if (widget.clipboardStatus == null) {
+        _clipboardStatus.dispose();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Don't render the menu until the state of the clipboard is known.
+    if (widget.handlePaste != null
+        && _clipboardStatus.value == ClipboardStatus.unknown) {
+      return const SizedBox(width: 0.0, height: 0.0);
+    }
+
+    final List<Widget> items = <Widget>[];
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    final EdgeInsets arrowPadding = widget.isArrowPointingDown
+      ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
+      : EdgeInsets.only(top: _kToolbarArrowSize.height);
+    final Widget onePhysicalPixelVerticalDivider =
+        SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+
+    void addToolbarButton(
+      String text,
+      VoidCallback onPressed,
+    ) {
+      if (items.isNotEmpty) {
+        items.add(onePhysicalPixelVerticalDivider);
+      }
+
+      items.add(CupertinoButton(
+        child: Text(
+          text,
+          overflow: TextOverflow.ellipsis,
+          style: _kToolbarButtonFontStyle,
+        ),
+        borderRadius: null,
+        color: _kToolbarBackgroundColor,
+        minSize: _kToolbarHeight,
+        onPressed: onPressed,
+        padding: _kToolbarButtonPadding.add(arrowPadding),
+        pressedOpacity: 0.7,
+      ));
+    }
+
+    if (widget.handleCut != null) {
+      addToolbarButton(localizations.cutButtonLabel, widget.handleCut);
+    }
+    if (widget.handleCopy != null) {
+      addToolbarButton(localizations.copyButtonLabel, widget.handleCopy);
+    }
+    if (widget.handlePaste != null
+        && _clipboardStatus.value == ClipboardStatus.pasteable) {
+      addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste);
+    }
+    if (widget.handleSelectAll != null) {
+      addToolbarButton(localizations.selectAllButtonLabel, widget.handleSelectAll);
+    }
+
+    return CupertinoTextSelectionToolbar._(
+      barTopY: widget.barTopY,
+      arrowTipX: widget.arrowTipX,
+      isArrowPointingDown: widget.isArrowPointingDown,
+      child: items.isEmpty ? null : _CupertinoTextSelectionToolbarContent(
+        isArrowPointingDown: widget.isArrowPointingDown,
+        children: items,
+      ),
+    );
+  }
+}
 
 /// An iOS-style toolbar that appears in response to text selection.
 ///
@@ -312,6 +460,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
+    ClipboardStatusNotifier clipboardStatus,
   ) {
     assert(debugCheckHasMediaQuery(context));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
@@ -331,56 +480,22 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
     ) as double;
 
-    // The y-coordinate has to be calculated instead of directly quoting postion.dy,
+    // The y-coordinate has to be calculated instead of directly quoting position.dy,
     // since the caller (TextSelectionOverlay._buildToolbar) does not know whether
     // the toolbar is going to be facing up or down.
     final double localBarTopY = isArrowPointingDown
       ? endpoints.first.point.dy - textLineHeight - _kToolbarContentDistance - _kToolbarHeight
       : endpoints.last.point.dy + _kToolbarContentDistance;
 
-    final List<Widget> items = <Widget>[];
-    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
-    final EdgeInsets arrowPadding = isArrowPointingDown
-      ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
-      : EdgeInsets.only(top: _kToolbarArrowSize.height);
-
-    void addToolbarButtonIfNeeded(
-      String text,
-      bool Function(TextSelectionDelegate) predicate,
-      void Function(TextSelectionDelegate) onPressed,
-    ) {
-      if (!predicate(delegate)) {
-        return;
-      }
-
-      items.add(CupertinoButton(
-        child: Text(
-          text,
-          overflow: TextOverflow.ellipsis,
-          style: _kToolbarButtonFontStyle,
-        ),
-        color: _kToolbarBackgroundColor,
-        minSize: _kToolbarHeight,
-        padding: _kToolbarButtonPadding.add(arrowPadding),
-        borderRadius: null,
-        pressedOpacity: 0.7,
-        onPressed: () => onPressed(delegate),
-      ));
-    }
-
-    addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
-    addToolbarButtonIfNeeded(localizations.copyButtonLabel, canCopy, handleCopy);
-    addToolbarButtonIfNeeded(localizations.pasteButtonLabel, canPaste, handlePaste);
-    addToolbarButtonIfNeeded(localizations.selectAllButtonLabel, canSelectAll, handleSelectAll);
-
-    return CupertinoTextSelectionToolbar._(
-      barTopY: localBarTopY + globalEditableRegion.top,
+    return _CupertinoTextSelectionToolbarWrapper(
       arrowTipX: arrowTipX,
+      barTopY: localBarTopY + globalEditableRegion.top,
+      clipboardStatus: clipboardStatus,
+      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
+      handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
+      handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
       isArrowPointingDown: isArrowPointingDown,
-      child: items.isEmpty ? null : _CupertinoTextSelectionToolbarContent(
-        isArrowPointingDown: isArrowPointingDown,
-        children: items,
-      ),
     );
   }
 
@@ -633,7 +748,6 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   List<Element> _children;
   final Map<_CupertinoTextSelectionToolbarItemsSlot, Element> slotToChild = <_CupertinoTextSelectionToolbarItemsSlot, Element>{};
-  final Map<Element, _CupertinoTextSelectionToolbarItemsSlot> childToSlot = <Element, _CupertinoTextSelectionToolbarItemsSlot>{};
 
   // We keep a set of forgotten children to avoid O(n^2) work walking _children
   // repeatedly to remove children.
@@ -660,13 +774,11 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderObject child, dynamic slot) {
     if (slot is _CupertinoTextSelectionToolbarItemsSlot) {
       assert(child is RenderBox);
-      assert(slot is _CupertinoTextSelectionToolbarItemsSlot);
       _updateRenderObject(child as RenderBox, slot);
-      assert(renderObject.childToSlot.containsKey(child));
-      assert(renderObject.slotToChild.containsKey(slot));
+      assert(renderObject.slottedChildren.containsKey(slot));
       return;
     }
     if (slot is IndexedSlot) {
@@ -679,9 +791,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   // This is not reachable for children that don't have an IndexedSlot.
   @override
-  void moveChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
+  void moveRenderObjectChild(RenderObject child, IndexedSlot<Element> oldSlot, IndexedSlot<Element> newSlot) {
     assert(child.parent == renderObject);
-    renderObject.move(child as RenderBox, after: slot?.value?.renderObject as RenderBox);
+    renderObject.move(child as RenderBox, after: newSlot?.value?.renderObject as RenderBox);
   }
 
   static bool _shouldPaint(Element child) {
@@ -689,18 +801,18 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, dynamic slot) {
     // Check if the child is in a slot.
-    if (renderObject.childToSlot.containsKey(child)) {
+    if (slot is _CupertinoTextSelectionToolbarItemsSlot) {
       assert(child is RenderBox);
-      assert(renderObject.childToSlot.containsKey(child));
-      _updateRenderObject(null, renderObject.childToSlot[child]);
-      assert(!renderObject.childToSlot.containsKey(child));
-      assert(!renderObject.slotToChild.containsKey(slot));
+      assert(renderObject.slottedChildren.containsKey(slot));
+      _updateRenderObject(null, slot);
+      assert(!renderObject.slottedChildren.containsKey(slot));
       return;
     }
 
     // Otherwise look for it in the list of children.
+    assert(slot is IndexedSlot);
     assert(child.parent == renderObject);
     renderObject.remove(child as RenderBox);
   }
@@ -716,12 +828,11 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   @override
   void forgetChild(Element child) {
-    assert(slotToChild.values.contains(child) || _children.contains(child));
+    assert(slotToChild.containsValue(child) || _children.contains(child));
     assert(!_forgottenChildren.contains(child));
     // Handle forgetting a child in children or in a slot.
-    if (childToSlot.containsKey(child)) {
-      final _CupertinoTextSelectionToolbarItemsSlot slot = childToSlot[child];
-      childToSlot.remove(child);
+    if (slotToChild.containsKey(child.slot)) {
+      final _CupertinoTextSelectionToolbarItemsSlot slot = child.slot as _CupertinoTextSelectionToolbarItemsSlot;
       slotToChild.remove(slot);
     } else {
       _forgottenChildren.add(child);
@@ -735,11 +846,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
       slotToChild.remove(slot);
-      childToSlot.remove(oldChild);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -764,12 +873,11 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     // Visit slot children.
-    childToSlot.forEach((Element child, _) {
-      if (!_shouldPaint(child) || _forgottenChildren.contains(child)) {
-        return;
+    for (final Element child in slotToChild.values) {
+      if (_shouldPaint(child) && !_forgottenChildren.contains(child)) {
+        visitor(child);
       }
-      visitor(child);
-    });
+    }
     // Visit list children.
     _children
         .where((Element child) => !_forgottenChildren.contains(child) && _shouldPaint(child))
@@ -803,21 +911,22 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
        _page = page,
        super();
 
-  final Map<_CupertinoTextSelectionToolbarItemsSlot, RenderBox> slotToChild = <_CupertinoTextSelectionToolbarItemsSlot, RenderBox>{};
-  final Map<RenderBox, _CupertinoTextSelectionToolbarItemsSlot> childToSlot = <RenderBox, _CupertinoTextSelectionToolbarItemsSlot>{};
+  final Map<_CupertinoTextSelectionToolbarItemsSlot, RenderBox> slottedChildren = <_CupertinoTextSelectionToolbarItemsSlot, RenderBox>{};
 
   RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _CupertinoTextSelectionToolbarItemsSlot slot) {
     if (oldChild != null) {
       dropChild(oldChild);
-      childToSlot.remove(oldChild);
-      slotToChild.remove(slot);
+      slottedChildren.remove(slot);
     }
     if (newChild != null) {
-      childToSlot[newChild] = slot;
-      slotToChild[slot] = newChild;
+      slottedChildren[slot] = newChild;
       adoptChild(newChild);
     }
     return newChild;
+  }
+
+  bool _isSlottedChild(RenderBox child) {
+    return child == _backButton || child == _nextButton || child == _nextButtonDisabled;
   }
 
   int _page;
@@ -885,7 +994,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       childParentData.shouldPaint = false;
 
       // Skip slotted children and children on pages after the visible page.
-      if (childToSlot.containsKey(child) || currentPage > _page) {
+      if (_isSlottedChild(child) || currentPage > _page) {
         return;
       }
 
@@ -1049,9 +1158,9 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     super.attach(owner);
 
     // Attach slot children.
-    childToSlot.forEach((RenderBox child, _) {
+    for (final RenderBox child in slottedChildren.values) {
       child.attach(owner);
-    });
+    }
   }
 
   @override
@@ -1060,9 +1169,9 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     super.detach();
 
     // Detach slot children.
-    childToSlot.forEach((RenderBox child, _) {
+    for (final RenderBox child in slottedChildren.values) {
       child.detach();
-    });
+    }
   }
 
   @override

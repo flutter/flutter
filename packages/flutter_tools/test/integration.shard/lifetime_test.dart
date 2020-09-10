@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
@@ -13,8 +12,8 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 /// This duration is arbitrary but is ideally:
-/// a) long enough to ensure that if the app is crashing at startup, we notice
-/// b) as short as possible, to avoid inflating build times
+/// a) Long enough to ensure that if the app is crashing at startup, we notice.
+/// b) As short as possible, to avoid inflating build times.
 const Duration requiredLifespan = Duration(seconds: 5);
 
 void main() {
@@ -33,13 +32,13 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('flutter run does not terminate when a debugger is attached', () async {
+  testWithoutContext('flutter run does not terminate when a debugger is attached', () async {
     await _flutter.run(withDebugger: true);
     await Future<void>.delayed(requiredLifespan);
     expect(_flutter.hasExited, equals(false));
   });
 
-  test('fluter run does not terminate when a debugger is attached and pause-on-exceptions', () async {
+  testWithoutContext('fluter run does not terminate when a debugger is attached and pause-on-exceptions', () async {
     await _flutter.run(withDebugger: true, pauseOnExceptions: true);
     await Future<void>.delayed(requiredLifespan);
     expect(_flutter.hasExited, equals(false));

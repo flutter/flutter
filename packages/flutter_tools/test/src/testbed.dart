@@ -58,7 +58,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 ///
 /// Example:
 ///
-/// Testing that a filesystem operation works as expected
+/// Testing that a filesystem operation works as expected:
 ///
 ///     void main() {
 ///       group('Example', () {
@@ -377,6 +377,11 @@ class FakeHttpClientRequest implements HttpClientRequest {
 
   @override
   void writeln([Object obj = '']) {}
+
+  // TODO(zichangguo): remove the ignore after the change in dart:io lands.
+  @override
+  // ignore: override_on_non_overriding_member
+  void abort([Object exception, StackTrace stackTrace]) {}
 }
 
 class FakeHttpClientResponse implements HttpClientResponse {
@@ -724,7 +729,10 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
-    this.isAndroidEmbeddingV2Enabled = false,
+    this.isSingleWidgetReloadEnabled = false,
+    this.isAndroidEnabled = true,
+    this.isIOSEnabled = true,
+    this.isFuchsiaEnabled = false,
 });
 
   @override
@@ -740,7 +748,16 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowsEnabled;
 
   @override
-  final bool isAndroidEmbeddingV2Enabled;
+  final bool isSingleWidgetReloadEnabled;
+
+  @override
+  final bool isAndroidEnabled;
+
+  @override
+  final bool isIOSEnabled;
+
+  @override
+  final bool isFuchsiaEnabled;
 
   @override
   bool isEnabled(Feature feature) {
@@ -753,8 +770,14 @@ class TestFeatureFlags implements FeatureFlags {
         return isMacOSEnabled;
       case flutterWindowsDesktopFeature:
         return isWindowsEnabled;
-      case flutterAndroidEmbeddingV2Feature:
-        return isAndroidEmbeddingV2Enabled;
+      case singleWidgetReload:
+        return isSingleWidgetReloadEnabled;
+      case flutterAndroidFeature:
+        return isAndroidEnabled;
+      case flutterIOSFeature:
+        return isIOSEnabled;
+      case flutterFuchsiaFeature:
+        return isFuchsiaEnabled;
     }
     return false;
   }
@@ -893,11 +916,6 @@ class FakeCache implements Cache {
   }
 
   @override
-  Future<String> getThirdPartyFile(String urlStr, String serviceName) {
-    throw UnsupportedError('Not supported in the fake Cache');
-  }
-
-  @override
   String getVersionFor(String artifactName) {
     throw UnsupportedError('Not supported in the fake Cache');
   }
@@ -927,11 +945,10 @@ class FakeCache implements Cache {
   }
 
   @override
-  Future<void> downloadFile(Uri url, File location) async {
-  }
-
-  @override
   Future<bool> doesRemoteExist(String message, Uri url) async {
     return true;
   }
+
+  @override
+  void clearStampFiles() {}
 }

@@ -42,8 +42,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final RenderBox childBox = _childKey.currentContext.findRenderObject() as RenderBox;
-      final Offset localCenter = childBox.paintBounds.center;
-      _childCenter = childBox.localToGlobal(localCenter);
+      _childCenter = childBox.paintBounds.center;
     });
     _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2));
     _controller.repeat();

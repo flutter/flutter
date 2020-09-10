@@ -32,6 +32,9 @@ String localEngineSrcPath;
 /// Whether to exit on first test failure.
 bool exitOnFirstTestFailure;
 
+/// The device-id to run test on.
+String deviceId;
+
 /// Runs tasks.
 ///
 /// The tasks are chosen depending on the command-line options
@@ -75,6 +78,7 @@ Future<void> main(List<String> rawArgs) async {
   localEngine = args['local-engine'] as String;
   localEngineSrcPath = args['local-engine-src-path'] as String;
   exitOnFirstTestFailure = args['exit'] as bool;
+  deviceId = args['device-id'] as String;
 
   if (args.wasParsed('ab')) {
     await _runABTest();
@@ -91,6 +95,7 @@ Future<void> _runTasks() async {
       silent: silent,
       localEngine: localEngine,
       localEngineSrcPath: localEngineSrcPath,
+      deviceId: deviceId,
     );
 
     print('Task result:');
@@ -125,7 +130,7 @@ Future<void> _runABTest() async {
 
   print('$taskName A/B test. Will run $runsPerTest times.');
 
-  final ABTest abTest = ABTest();
+  final ABTest abTest = ABTest(localEngine, taskName);
   for (int i = 1; i <= runsPerTest; i++) {
     section('Run #$i');
 
@@ -133,6 +138,7 @@ Future<void> _runABTest() async {
     final Map<String, dynamic> defaultEngineResult = await runTask(
       taskName,
       silent: silent,
+      deviceId: deviceId,
     );
 
     print('Default engine result:');
@@ -151,6 +157,7 @@ Future<void> _runABTest() async {
       silent: silent,
       localEngine: localEngine,
       localEngineSrcPath: localEngineSrcPath,
+      deviceId: deviceId,
     );
 
     print('Task localEngineResult:');
@@ -168,6 +175,10 @@ Future<void> _runABTest() async {
       print(abTest.printSummary());
     }
   }
+  abTest.finalize();
+
+  final File jsonFile = _uniqueFile(args['ab-result-file'] as String ?? 'ABresults#.json');
+  jsonFile.writeAsString(const JsonEncoder.withIndent('  ').convert(abTest.jsonMap));
 
   if (!silent) {
     section('Raw results');
@@ -176,6 +187,23 @@ Future<void> _runABTest() async {
 
   section('Final A/B results');
   print(abTest.printSummary());
+
+  print('');
+  print('Results saved to ${jsonFile.path}');
+}
+
+File _uniqueFile(String filenameTemplate) {
+  final List<String> parts = filenameTemplate.split('#');
+  if (parts.length != 2) {
+    return File(filenameTemplate);
+  }
+  File file = File(parts[0] + parts[1]);
+  int i = 1;
+  while (file.existsSync()) {
+    file = File(parts[0]+i.toString()+parts[1]);
+    i++;
+  }
+  return file;
 }
 
 void addTasks({
@@ -208,8 +236,11 @@ final ArgParser _argParser = ArgParser()
     abbr: 't',
     splitCommas: true,
     help: 'Either:\n'
-        ' - the name of a task defined in manifest.yaml. Example: complex_layout__start_up.\n'
-        ' - the path to a Dart file corresponding to a task, which resides in bin/tasks. Example: bin/tasks/complex_layout__start_up.dart.\n'
+        ' - the name of a task defined in manifest.yaml.\n'
+        '   Example: complex_layout__start_up.\n'
+        ' - the path to a Dart file corresponding to a task,\n'
+        '   which resides in bin/tasks.\n'
+        '   Example: bin/tasks/complex_layout__start_up.dart.\n'
         '\n'
         'This option may be repeated to specify multiple tasks.',
     callback: (List<String> value) {
@@ -230,6 +261,15 @@ final ArgParser _argParser = ArgParser()
     },
   )
   ..addOption(
+    'device-id',
+    abbr: 'd',
+    help: 'Target device id (prefixes are allowed, names are not supported).\n'
+          'The option will be ignored if the test target does not run on a\n'
+          'mobile device. This still respects the device operating system\n'
+          'settings in the test case, and will results in error if no device\n'
+          'with given ID/ID prefix is found.',
+  )
+  ..addOption(
     'ab',
     help: 'Runs an A/B test comparing the default engine with the local\n'
           'engine build for one task. This option does not support running\n'
@@ -244,6 +284,12 @@ final ArgParser _argParser = ArgParser()
         throw ArgParserException('Option --ab must be a number, but was "$value".');
       }
     },
+  )
+  ..addOption(
+    'ab-result-file',
+    help: 'The filename in which to place the json encoded results of an A/B test.\n'
+          'The filename may contain a single # character to be replaced by a sequence\n'
+          'number if the name already exists.',
   )
   ..addFlag(
     'all',

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -58,6 +60,7 @@ void main() {
       final String result = await channel.invokeMethod('sayHello', 'hello');
       expect(result, equals('hello world'));
     });
+
     test('can invoke list method and get result', () async {
       ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
@@ -88,7 +91,6 @@ void main() {
       );
       expect(await channel.invokeListMethod<String>('sayHello', 'hello'), null);
     });
-
 
     test('can invoke map method and get result', () async {
       ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
@@ -143,6 +145,7 @@ void main() {
         fail('PlatformException expected');
       }
     });
+
     test('can invoke unimplemented method', () async {
       ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
@@ -158,6 +161,7 @@ void main() {
         fail('MissingPluginException expected');
       }
     });
+
     test('can invoke unimplemented method (optional)', () async {
       ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch8',
@@ -166,6 +170,7 @@ void main() {
       final String result = await optionalMethodChannel.invokeMethod<String>('sayHello', 'hello');
       expect(result, isNull);
     });
+
     test('can handle method call with no registered plugin', () async {
       channel.setMethodCallHandler(null);
       final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
@@ -175,6 +180,7 @@ void main() {
       });
       expect(envelope, isNull);
     });
+
     test('can handle method call of unimplemented method', () async {
       channel.setMethodCallHandler((MethodCall call) async {
         throw MissingPluginException();
@@ -186,6 +192,7 @@ void main() {
       });
       expect(envelope, isNull);
     });
+
     test('can handle method call with successful result', () async {
       channel.setMethodCallHandler((MethodCall call) async => '${call.arguments}, world');
       final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
@@ -195,6 +202,7 @@ void main() {
       });
       expect(jsonMethod.decodeEnvelope(envelope), equals('hello, world'));
     });
+
     test('can handle method call with expressive error result', () async {
       channel.setMethodCallHandler((MethodCall call) async {
         throw PlatformException(code: 'bad', message: 'sayHello failed', details: null);
@@ -214,6 +222,7 @@ void main() {
         fail('PlatformException expected');
       }
     });
+
     test('can handle method call with other error result', () async {
       channel.setMethodCallHandler((MethodCall call) async {
         throw ArgumentError('bad');
@@ -232,6 +241,26 @@ void main() {
       } catch (e) {
         fail('PlatformException expected');
       }
+    });
+
+    test('can check the handler', () {
+      Future<dynamic> handler(MethodCall call) => Future<dynamic>.value(null);
+
+      const MethodChannel channel = MethodChannel('test_handler');
+      expect(channel.checkMethodCallHandler(null), true);
+      expect(channel.checkMethodCallHandler(handler), false);
+      channel.setMethodCallHandler(handler);
+      expect(channel.checkMethodCallHandler(handler), true);
+    });
+
+    test('can check the mock handler', () {
+      Future<dynamic> handler(MethodCall call) => Future<dynamic>.value(null);
+
+      const MethodChannel channel = MethodChannel('test_handler');
+      expect(channel.checkMockMethodCallHandler(null), true);
+      expect(channel.checkMockMethodCallHandler(handler), false);
+      channel.setMockMethodCallHandler(handler);
+      expect(channel.checkMockMethodCallHandler(handler), true);
     });
   });
   group('EventChannel', () {

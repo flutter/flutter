@@ -15,14 +15,12 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
-import '../device.dart';
 import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
 
@@ -236,12 +234,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
   Future<void> runCommand(ArgResults topLevelResults) async {
     final Map<Type, dynamic> contextOverrides = <Type, dynamic>{};
 
-    // Check for verbose.
-    if (topLevelResults['verbose'] as bool) {
-      // Override the logger.
-      contextOverrides[Logger] = VerboseLogger(globals.logger);
-    }
-
     // Don't set wrapColumns unless the user said to: if it's set, then all
     // wrapping will occur at this width explicitly, and won't adapt if the
     // terminal size changes during a run.
@@ -318,14 +310,18 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         // See if the user specified a specific device.
-        deviceManager.specifiedDeviceId = topLevelResults['device-id'] as String;
+        globals.deviceManager.specifiedDeviceId = topLevelResults['device-id'] as String;
 
         if (topLevelResults['version'] as bool) {
           globals.flutterUsage.sendCommand('version');
           globals.flutterVersion.fetchTagsAndUpdate();
           String status;
           if (machineFlag) {
-            status = const JsonEncoder.withIndent('  ').convert(globals.flutterVersion.toJson());
+            final Map<String, Object> jsonOut = globals.flutterVersion.toJson();
+            if (jsonOut != null) {
+              jsonOut['flutterRoot'] = Cache.flutterRoot;
+            }
+            status = const JsonEncoder.withIndent('  ').convert(jsonOut);
           } else {
             status = globals.flutterVersion.toString();
           }

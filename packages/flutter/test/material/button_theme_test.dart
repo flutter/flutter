@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -314,7 +316,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(menu, findsNothing);
 
-    // Same test as above execpt RTL
+    // Same test as above except RTL
     await tester.pumpWidget(
       buildFrame(
         alignedDropdown: true,

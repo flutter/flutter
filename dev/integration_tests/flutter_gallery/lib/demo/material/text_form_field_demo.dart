@@ -95,7 +95,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     ));
   }
 
-  bool _autovalidate = false;
+  AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
   bool _formWasEdited = false;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -104,7 +104,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
   void _handleSubmitted() {
     final FormState form = _formKey.currentState;
     if (!form.validate()) {
-      _autovalidate = true; // Start validating on every change.
+      _autovalidateMode = AutovalidateMode.always; // Start validating on every change.
       showInSnackBar('Please fix the errors in red before submitting.');
     } else {
       form.save();
@@ -180,7 +180,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
         bottom: false,
         child: Form(
           key: _formKey,
-          autovalidate: _autovalidate,
+          autovalidateMode: _autovalidateMode,
           onWillPop: _warnUserAboutInvalidData,
           child: Scrollbar(
             child: SingleChildScrollView(
@@ -217,7 +217,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     validator: _validatePhoneNumber,
                     // TextInputFormatters are applied in sequence.
                     inputFormatters: <TextInputFormatter> [
-                      WhitelistingTextInputFormatter.digitsOnly,
+                      FilteringTextInputFormatter.digitsOnly,
                       // Fit the validating format.
                       _phoneNumberFormatter,
                     ],

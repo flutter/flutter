@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import '../bundle.dart';
 import '../commands/build_linux.dart';
 import '../commands/build_macos.dart';
 import '../commands/build_windows.dart';
@@ -22,14 +21,14 @@ import 'build_web.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({ bool verboseHelp = false }) {
-    addSubcommand(BuildAarCommand());
+    addSubcommand(BuildAarCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildApkCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildAotCommand());
     addSubcommand(BuildIOSCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildIOSFrameworkCommand(
       buildSystem: globals.buildSystem,
-      bundleBuilder: BundleBuilder(),
+      verboseHelp: verboseHelp,
     ));
     addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildWebCommand(verboseHelp: verboseHelp));

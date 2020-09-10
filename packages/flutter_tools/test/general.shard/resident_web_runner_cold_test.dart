@@ -7,20 +7,20 @@ import 'dart:async';
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_runner/devfs_web.dart';
+import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
-import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
@@ -90,6 +90,32 @@ void main() {
       ),
       outputPreferences: OutputPreferences.test(),
     )),
+  }));
+
+  // Regression test for https://github.com/flutter/flutter/issues/60613
+  test('ResidentWebRunner calls appFailedToStart if initial compilation fails', () => testbed.run(() async {
+    _setupMocks();
+    when(mockBuildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+      return BuildResult(success: false);
+    });
+    expect(() async => await residentWebRunner.run(), throwsToolExit());
+    expect(await residentWebRunner.waitForAppToFinish(), 1);
+
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => mockBuildSystem,
+  }));
+
+  // Regression test for https://github.com/flutter/flutter/issues/60613
+  test('ResidentWebRunner calls appFailedToStart if error is thrown during startup', () => testbed.run(() async {
+    _setupMocks();
+    when(mockBuildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+      throw Exception('foo');
+    });
+    expect(() async => await residentWebRunner.run(), throwsA(isA<Exception>()));
+    expect(await residentWebRunner.waitForAppToFinish(), 1);
+
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => mockBuildSystem,
   }));
 
   test('Can full restart after attaching', () => testbed.run(() async {

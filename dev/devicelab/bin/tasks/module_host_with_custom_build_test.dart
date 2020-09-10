@@ -13,8 +13,6 @@ import 'package:path/path.dart' as path;
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 
-final bool useAndroidEmbeddingV2 = Platform.environment['ENABLE_ANDROID_EMBEDDING_V2'] == 'true';
-
 /// Tests that the Android app containing a Flutter module can be built when
 /// it has custom build types and flavors.
 Future<void> main() async {
@@ -60,7 +58,7 @@ Future<void> main() async {
             flutterDirectory.path,
             'dev',
             'integration_tests',
-             useAndroidEmbeddingV2 ? 'module_host_with_custom_build_v2_embedding' : 'module_host_with_custom_build',
+            'module_host_with_custom_build_v2_embedding',
           ),
         ),
         hostAppDir,

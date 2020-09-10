@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -25,6 +27,8 @@ const Duration _kDefaultHighlightFadeDuration = Duration(milliseconds: 200);
 ///  * [Material], which is the widget on which the ink highlight is painted.
 ///  * [InkSplash], which is an ink feature that shows a reaction to user input
 ///    on a [Material].
+///  * [Ink], a convenience widget for drawing images and other decorations on
+///    Material widgets.
 class InkHighlight extends InteractiveInkFeature {
   /// Begin a highlight animation.
   ///
@@ -41,6 +45,7 @@ class InkHighlight extends InteractiveInkFeature {
     @required Color color,
     @required TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
+    double radius,
     BorderRadius borderRadius,
     ShapeBorder customBorder,
     RectCallback rectCallback,
@@ -51,6 +56,7 @@ class InkHighlight extends InteractiveInkFeature {
        assert(textDirection != null),
        assert(fadeDuration != null),
        _shape = shape,
+       _radius = radius,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
        _textDirection = textDirection,
@@ -69,6 +75,7 @@ class InkHighlight extends InteractiveInkFeature {
   }
 
   final BoxShape _shape;
+  final double _radius;
   final BorderRadius _borderRadius;
   final ShapeBorder _customBorder;
   final RectCallback _rectCallback;
@@ -112,7 +119,7 @@ class InkHighlight extends InteractiveInkFeature {
     }
     switch (_shape) {
       case BoxShape.circle:
-        canvas.drawCircle(rect.center, Material.defaultSplashRadius, paint);
+        canvas.drawCircle(rect.center, _radius ?? Material.defaultSplashRadius, paint);
         break;
       case BoxShape.rectangle:
         if (_borderRadius != BorderRadius.zero) {

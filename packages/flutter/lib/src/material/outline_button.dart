@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -22,6 +25,17 @@ const Duration _kPressDuration = Duration(milliseconds: 150);
 const Duration _kElevationDuration = Duration(milliseconds: 75);
 
 /// Similar to a [FlatButton] with a thin grey rounded rectangle border.
+///
+/// ### This class is obsolete, please use [OutlinedButton] instead.
+///
+/// FlatButton, RaisedButton, and OutlineButton have been replaced by
+/// TextButton, ElevatedButton, and OutlinedButton respectively.
+/// ButtonTheme has been replaced by TextButtonTheme,
+/// ElevatedButtonTheme, and OutlinedButtonTheme. The original classes
+/// will be deprecated soon, please migrate code that uses them.
+/// There's a detailed migration guide for the new button and button
+/// theme classes in
+/// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
 ///
 /// The outline button's border shape is defined by [shape]
 /// and its appearance is defined by [borderSide], [disabledBorderColor],
@@ -45,6 +59,22 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 /// Outline buttons have a minimum size of 88.0 by 36.0 which can be overridden
 /// with [ButtonTheme].
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// Here is an example of a basic [OutlineButton].
+///
+/// ```dart
+///   Widget build(BuildContext context) {
+///     return OutlineButton(
+///       onPressed: () {
+///         print('Received click');
+///       },
+///       child: Text('Click Me'),
+///     );
+///   }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [RaisedButton], a filled material design button with a shadow.
@@ -63,6 +93,7 @@ class OutlineButton extends MaterialButton {
     Key key,
     @required VoidCallback onPressed,
     VoidCallback onLongPress,
+    MouseCursor mouseCursor,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -81,6 +112,7 @@ class OutlineButton extends MaterialButton {
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
     bool autofocus = false,
+    MaterialTapTargetSize materialTapTargetSize,
     Widget child,
   }) : assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(clipBehavior != null),
@@ -89,6 +121,7 @@ class OutlineButton extends MaterialButton {
          key: key,
          onPressed: onPressed,
          onLongPress: onLongPress,
+         mouseCursor: mouseCursor,
          textTheme: textTheme,
          textColor: textColor,
          disabledTextColor: disabledTextColor,
@@ -103,6 +136,7 @@ class OutlineButton extends MaterialButton {
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
+         materialTapTargetSize: materialTapTargetSize,
          autofocus: autofocus,
          child: child,
        );
@@ -119,6 +153,7 @@ class OutlineButton extends MaterialButton {
     Key key,
     @required VoidCallback onPressed,
     VoidCallback onLongPress,
+    MouseCursor mouseCursor,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -137,6 +172,7 @@ class OutlineButton extends MaterialButton {
     Clip clipBehavior,
     FocusNode focusNode,
     bool autofocus,
+    MaterialTapTargetSize materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
   }) = _OutlineButtonWithIcon;
@@ -146,7 +182,7 @@ class OutlineButton extends MaterialButton {
   /// By default the border's color does not change when the button
   /// is pressed.
   ///
-  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty<Color>].
+  /// This field is ignored if [BorderSide.color] is a [MaterialStateProperty<Color>].
   final Color highlightedBorderColor;
 
   /// The outline border's color when the button is not [enabled].
@@ -154,7 +190,7 @@ class OutlineButton extends MaterialButton {
   /// By default the outline border's color does not change when the
   /// button is disabled.
   ///
-  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty<Color>].
+  /// This field is ignored if [BorderSide.color] is a [MaterialStateProperty<Color>].
   final Color disabledBorderColor;
 
   /// Defines the color of the border when the button is enabled but not
@@ -166,7 +202,7 @@ class OutlineButton extends MaterialButton {
   /// If null the default border's style is [BorderStyle.solid], its
   /// [BorderSide.width] is 1.0, and its color is a light shade of grey.
   ///
-  /// If [borderSide.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// If [BorderSide.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
   /// is used in all states and both [highlightedBorderColor] and [disabledBorderColor]
   /// are ignored.
   final BorderSide borderSide;
@@ -175,8 +211,10 @@ class OutlineButton extends MaterialButton {
   Widget build(BuildContext context) {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     return _OutlineButton(
+      autofocus: autofocus,
       onPressed: onPressed,
       onLongPress: onLongPress,
+      mouseCursor: mouseCursor,
       brightness: buttonTheme.getBrightness(this),
       textTheme: textTheme,
       textColor: buttonTheme.getTextColor(this),
@@ -195,6 +233,7 @@ class OutlineButton extends MaterialButton {
       shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior,
       focusNode: focusNode,
+      materialTapTargetSize: materialTapTargetSize,
       child: child,
     );
   }
@@ -217,6 +256,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
     Key key,
     @required VoidCallback onPressed,
     VoidCallback onLongPress,
+    MouseCursor mouseCursor,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -235,6 +275,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
     bool autofocus = false,
+    MaterialTapTargetSize materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
   }) : assert(highlightElevation == null || highlightElevation >= 0.0),
@@ -246,6 +287,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
          key: key,
          onPressed: onPressed,
          onLongPress: onLongPress,
+         mouseCursor: mouseCursor,
          textTheme: textTheme,
          textColor: textColor,
          disabledTextColor: disabledTextColor,
@@ -264,6 +306,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
          clipBehavior: clipBehavior,
          focusNode: focusNode,
          autofocus: autofocus,
+         materialTapTargetSize: materialTapTargetSize,
          child: Row(
            mainAxisSize: MainAxisSize.min,
            children: <Widget>[
@@ -280,6 +323,7 @@ class _OutlineButton extends StatefulWidget {
     Key key,
     @required this.onPressed,
     this.onLongPress,
+    this.mouseCursor,
     this.brightness,
     this.textTheme,
     this.textColor,
@@ -300,6 +344,7 @@ class _OutlineButton extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.child,
+    this.materialTapTargetSize,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
        assert(highlightedBorderColor != null),
        assert(clipBehavior != null),
@@ -308,6 +353,7 @@ class _OutlineButton extends StatefulWidget {
 
   final VoidCallback onPressed;
   final VoidCallback onLongPress;
+  final MouseCursor mouseCursor;
   final Brightness brightness;
   final ButtonTextTheme textTheme;
   final Color textColor;
@@ -328,6 +374,7 @@ class _OutlineButton extends StatefulWidget {
   final FocusNode focusNode;
   final bool autofocus;
   final Widget child;
+  final MaterialTapTargetSize materialTapTargetSize;
 
   bool get enabled => onPressed != null || onLongPress != null;
 
@@ -450,6 +497,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
       animation: _controller,
       builder: (BuildContext context, Widget child) {
         return RaisedButton(
+          autofocus: widget.autofocus,
           textColor: widget.textColor,
           disabledTextColor: widget.disabledTextColor,
           color: _getFillColor(),
@@ -460,6 +508,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           disabledColor: Colors.transparent,
           onPressed: widget.onPressed,
           onLongPress: widget.onLongPress,
+          mouseCursor: widget.mouseCursor,
           elevation: 0.0,
           disabledElevation: 0.0,
           focusElevation: 0.0,
@@ -475,6 +524,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           clipBehavior: widget.clipBehavior,
           focusNode: widget.focusNode,
           animationDuration: _kElevationDuration,
+          materialTapTargetSize: widget.materialTapTargetSize,
           child: widget.child,
         );
       },

@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:platform/platform.dart';
-
 import 'context.dart';
+import 'platform.dart';
 
 UserMessages get userMessages => context.get<UserMessages>();
 
@@ -23,6 +22,8 @@ class UserMessages {
       'Framework revision $revision ($age), $date';
   String engineRevision(String revision) => 'Engine revision $revision';
   String dartRevision(String revision) => 'Dart version $revision';
+  String pubMirrorURL(String url) => 'Pub download mirror $url';
+  String flutterMirrorURL(String url) => 'Flutter download mirror $url';
   String get flutterBinariesDoNotRun =>
       'Downloaded executables cannot execute on host.\n'
       'See https://github.com/flutter/flutter/issues/6207 for more information';
@@ -95,9 +96,8 @@ class UserMessages {
   String get androidLicensesNone => 'Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
   String androidLicensesUnknown(Platform platform) =>
       'Android license status unknown.\n'
-      'Try re-installing or updating your Android SDK Manager.\n'
-      'See https://developer.android.com/studio/#downloads or visit '
-      'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
+      'Run `flutter doctor --android-licenses` to accept the SDK licenses.\n'
+      'See ${_androidSdkInstallUrl(platform)} for more details.';
   String androidSdkManagerOutdated(String managerPath) =>
       'A newer version of the Android SDK is required. To update, run:\n'
       '$managerPath --update\n';
@@ -137,8 +137,8 @@ class UserMessages {
 
   // Messages used in XcodeValidator
   String xcodeLocation(String location) => 'Xcode at $location';
-  String xcodeOutdated(int versionMajor, int versionMinor) =>
-      'Flutter requires a minimum Xcode version of $versionMajor.$versionMinor.0.\n'
+  String xcodeOutdated(int versionMajor, int versionMinor, int versionPatch) =>
+      'Flutter requires a minimum Xcode version of $versionMajor.$versionMinor.$versionPatch.\n'
       'Download the latest version or update via the Mac App Store.';
   String get xcodeEula => "Xcode end user license agreement not signed; open Xcode or run the command 'sudo xcodebuild -license'.";
   String get xcodeMissingSimct =>
@@ -193,24 +193,52 @@ class UserMessages {
   // Messages used in VisualStudioValidator
   String visualStudioVersion(String name, String version) => '$name version $version';
   String visualStudioLocation(String location) => 'Visual Studio at $location';
+  String windows10SdkVersion(String version) => 'Windows 10 SDK version $version';
   String visualStudioMissingComponents(String workload, List<String> components) =>
       'Visual Studio is missing necessary components. Please re-run the '
       'Visual Studio installer for the "$workload" workload, and include these components:\n'
-      '  ${components.join('\n  ')}';
-  String visualStudioMissing(String workload, List<String> components) =>
+      '  ${components.join('\n  ')}\n'
+      '  Windows 10 SDK';
+  String get windows10SdkNotFound =>
+      'Unable to locate a Windows 10 SDK. If building fails, install the Windows 10 SDK in Visual Studio.';
+  String visualStudioMissing(String workload) =>
       'Visual Studio not installed; this is necessary for Windows development.\n'
       'Download at https://visualstudio.microsoft.com/downloads/.\n'
-      'Please install the "$workload" workload, including the following components:\n  ${components.join('\n  ')}';
-  String visualStudioTooOld(String minimumVersion, String workload, List<String> components) =>
+      'Please install the "$workload" workload, including all of its default components';
+  String visualStudioTooOld(String minimumVersion, String workload) =>
       'Visual Studio $minimumVersion or later is required.\n'
       'Download at https://visualstudio.microsoft.com/downloads/.\n'
-      'Please install the "$workload" workload, including the following components:\n  ${components.join('\n  ')}';
+      'Please install the "$workload" workload, including all of its default components';
   String get visualStudioIsPrerelease => 'The current Visual Studio installation is a pre-release version. It may not be '
       'supported by Flutter yet.';
   String get visualStudioNotLaunchable =>
       'The current Visual Studio installation is not launchable. Please reinstall Visual Studio.';
   String get visualStudioIsIncomplete => 'The current Visual Studio installation is incomplete. Please reinstall Visual Studio.';
   String get visualStudioRebootRequired => 'Visual Studio requires a reboot of your system to complete installation.';
+
+  // Messages used in LinuxDoctorValidator
+  String get clangMissing => 'clang++ is required for Linux development.\n'
+      'It is likely available from your distribution (e.g.: apt install clang), or '
+      'can be downloaded from https://releases.llvm.org/';
+  String clangTooOld(String minimumVersion) => 'clang++ $minimumVersion or later is required.';
+  String get cmakeMissing => 'CMake is required for Linux development.\n'
+      'It is likely available from your distribution (e.g.: apt install cmake), or '
+      'can be downloaded from https://cmake.org/download/';
+  String cmakeTooOld(String minimumVersion) => 'cmake $minimumVersion or later is required.';
+  String ninjaVersion(String version) => 'ninja version $version';
+  String get ninjaMissing => 'ninja is required for Linux development.\n'
+      'It is likely available from your distribution (e.g.: apt install ninja-build), or '
+      'can be downloaded from https://github.com/ninja-build/ninja/releases';
+  String ninjaTooOld(String minimumVersion) => 'ninja $minimumVersion or later is required.';
+  String pkgConfigVersion(String version) => 'pkg-config version $version';
+  String get pkgConfigMissing => 'pgk-config is required for Linux development.\n'
+      'It is likely available from your distribution (e.g.: apt install pkg-config), or '
+      'can be downloaded from https://www.freedesktop.org/wiki/Software/pkg-config/';
+  String pkgConfigTooOld(String minimumVersion) => 'pkg-config $minimumVersion or later is required.';
+  String get gtkLibrariesMissing => 'GTK 3.0 development libraries are required for Linux development.\n'
+      'They are likely available from your distribution (e.g.: apt install libgtk-3-dev)';
+  String get blkidLibraryMissing => 'The blkid development library is required for Linux development.\n'
+      'It is likely available from your distribution (e.g.: apt install libblkid-dev)';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';
@@ -221,8 +249,14 @@ class UserMessages {
       "matching '$deviceId'";
   String get flutterNoDevicesFound => 'No devices found';
   String get flutterNoSupportedDevices => 'No supported devices connected.';
+  String flutterMissPlatformProjects(List<String> unsupportedDevicesType) =>
+      'If you would like your app to run on ${unsupportedDevicesType.join(' or ')}, consider running `flutter create .` to generate projects for these platforms.';
+  String get flutterFoundButUnsupportedDevices => 'The following devices were found, but are not supported by this project:';
   String flutterFoundSpecifiedDevices(int count, String deviceId) =>
       'Found $count devices with name or id matching $deviceId:';
+  String get flutterMultipleDevicesFound => 'Multiple devices found:';
+  String flutterChooseDevice(int option, String name, String deviceId) => '[$option]: $name ($deviceId)';
+  String get flutterChooseOne => 'Please choose one (To quit, press "q/Q")';
   String get flutterSpecifyDeviceWithAllOption =>
       'More than one device connected; please specify a device with '
       "the '-d <deviceId>' flag, or use '-d all' to act on all devices.";

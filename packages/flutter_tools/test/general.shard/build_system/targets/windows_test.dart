@@ -4,15 +4,18 @@
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/build_system/targets/dart.dart';
-import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/depfile.dart';
+import 'package:flutter_tools/src/build_system/targets/assets.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/windows.dart';
+import 'package:flutter_tools/src/convert.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -49,7 +52,7 @@ void main() {
       logger: BufferLogger.test(),
       defines: <String, String>{
         kBuildMode: 'debug',
-      }
+      },
     );
     final DepfileService depfileService = DepfileService(
       logger: BufferLogger.test(),
@@ -67,6 +70,11 @@ void main() {
       mode: anyNamed('mode'),
       platform: anyNamed('platform')
     )).thenReturn(r'C:\bin\cache\artifacts\engine\windows-x64\cpp_client_wrapper\');
+    when(artifacts.getArtifactPath(
+      Artifact.icuData,
+      mode: anyNamed('mode'),
+      platform: anyNamed('platform')
+    )).thenReturn(r'C:\bin\cache\artifacts\engine\windows-x64\icudtl.dat');
     for (final String path in kRequiredFiles) {
       fileSystem.file(path).createSync(recursive: true);
     }
@@ -143,16 +151,86 @@ void main() {
       logger: BufferLogger.test(),
       defines: <String, String>{
         kBuildMode: 'debug',
-      }
+      },
+      inputs: <String, String>{
+        kBundleSkSLPath: 'bundle.sksl',
+      },
+      engineVersion: '2',
     );
 
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
+    // sksl bundle
+    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
+      <String, Object>{
+        'engineRevision': '2',
+        'platform': 'ios',
+        'data': <String, Object>{
+          'A': 'B',
+        }
+      }
+    ));
 
     await const DebugBundleWindowsAssets().build(environment);
 
     // Depfile is created and dill is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
     expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\io.flutter.shaders.json'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('ProfileBundleWindowsAssets creates correct bundle structure', () async {
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: MockArtifacts(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      defines: <String, String>{
+        kBuildMode: 'profile',
+      }
+    );
+
+    environment.buildDir.childFile('app.so').createSync(recursive: true);
+
+    await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)).build(environment);
+    await const ProfileBundleWindowsAssets().build(environment);
+
+    // Depfile is created and so is copied.
+    expect(environment.buildDir.childFile('flutter_assets.d'), exists);
+    expect(fileSystem.file(r'C:\windows\app.so'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('ReleaseBundleWindowsAssets creates correct bundle structure', () async {
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: MockArtifacts(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      defines: <String, String>{
+        kBuildMode: 'release',
+      }
+    );
+
+    environment.buildDir.childFile('app.so').createSync(recursive: true);
+
+    await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)).build(environment);
+    await const ReleaseBundleWindowsAssets().build(environment);
+
+    // Depfile is created and so is copied.
+    expect(environment.buildDir.childFile('flutter_assets.d'), exists);
+    expect(fileSystem.file(r'C:\windows\app.so'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
     expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

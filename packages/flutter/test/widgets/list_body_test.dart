@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/src/foundation/assertions.dart';
 import 'package:flutter/src/painting/basic_types.dart';
 import 'package:flutter_test/flutter_test.dart';

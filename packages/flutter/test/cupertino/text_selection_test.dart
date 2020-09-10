@@ -2,14 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import '../widgets/text.dart' show textOffsetToPosition;
+
+class MockClipboard {
+  Object _clipboardData = <String, dynamic>{
+    'text': null,
+  };
+
+  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
+    switch (methodCall.method) {
+      case 'Clipboard.getData':
+        return _clipboardData;
+      case 'Clipboard.setData':
+        _clipboardData = methodCall.arguments;
+        break;
+    }
+  }
+}
 
 class _LongCupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
   const _LongCupertinoLocalizationsDelegate();
@@ -49,6 +68,9 @@ class _LongCupertinoLocalizations extends DefaultCupertinoLocalizations {
 const _LongCupertinoLocalizations longLocalizations = _LongCupertinoLocalizations();
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  final MockClipboard mockClipboard = MockClipboard();
+  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
   // Returns true iff the button is visually enabled.
   bool appearsEnabled(WidgetTester tester, String text) {
@@ -154,6 +176,59 @@ void main() {
     });
   });
 
+  // TODO(justinmc): https://github.com/flutter/flutter/issues/60145
+  testWidgets('Paste always appears regardless of clipboard content on iOS', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Make sure the clipboard is empty to start.
+    await Clipboard.setData(const ClipboardData(text: ''));
+
+    // Double tap to select the first word.
+    const int index = 4;
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+
+    // Paste is showing even though clipboard is empty.
+    expect(find.text('Paste'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Cut'), findsOneWidget);
+
+    // Tap copy to add something to the clipboard and close the menu.
+    await tester.tapAt(tester.getCenter(find.text('Copy')));
+    await tester.pumpAndSettle();
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+
+    // Double tap to show the menu again.
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+
+    // Paste still shows.
+    expect(find.text('Paste'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Cut'), findsOneWidget);
+  },
+    skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
   group('Text selection menu overflow (iOS)', () {
     testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
@@ -181,7 +256,7 @@ void main() {
 
       // Long press on an empty space to show the selection menu.
       await tester.longPressAt(textOffsetToPosition(tester, 4));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsOneWidget);
@@ -203,7 +278,10 @@ void main() {
       expect(find.text('Select All'), findsNothing);
       expect(find.text('◀'), findsNothing);
       expect(find.text('▶'), findsNothing);
-    }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+    },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    );
 
     testWidgets('When a menu item doesn\'t fit, a second page is used.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Paste can't fit.
@@ -271,7 +349,10 @@ void main() {
       expect(find.text('◀'), findsNothing);
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '▶'), true);
-    }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+    },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    );
 
     testWidgets('A smaller menu puts each button on its own page.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that two buttons can't fit on
@@ -370,7 +451,10 @@ void main() {
       expect(find.text('◀'), findsNothing);
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '▶'), true);
-    }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+    },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    );
 
     testWidgets('Handles very long locale strings', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
@@ -405,7 +489,7 @@ void main() {
       // Long press on an empty space to show the selection menu, with only the
       // paste button visible.
       await tester.longPressAt(textOffsetToPosition(tester, 4));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
       expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(longLocalizations.pasteButtonLabel), findsOneWidget);
@@ -485,6 +569,9 @@ void main() {
       expect(find.text('◀'), findsNothing);
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '▶'), true);
-    }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+    },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    );
   });
 }

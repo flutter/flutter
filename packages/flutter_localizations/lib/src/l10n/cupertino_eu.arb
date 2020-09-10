@@ -18,5 +18,7 @@
   "cutButtonLabel": "Ebaki",
   "copyButtonLabel": "Kopiatu",
   "pasteButtonLabel": "Itsatsi",
-  "selectAllButtonLabel": "Hautatu guztiak"
+  "selectAllButtonLabel": "Hautatu guztiak",
+  "tabSemanticsLabel": "$tabIndex/$tabCount fitxa",
+  "modalBarrierDismissLabel": "Baztertu"
 }

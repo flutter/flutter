@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -19,15 +20,9 @@ import 'build.dart';
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({ @required bool verboseHelp }) {
-    addTreeShakeIconsFlag();
-    addSplitDebugInfoOption();
-    usesTargetOption();
-    addBuildModeFlags();
-    addDartObfuscationOption();
-    usesExtraFrontendOptions();
+    addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesBuildNumberOption();
     usesBuildNameOption();
-    addEnableExperimentation(hide: !verboseHelp);
   }
 
   @override
@@ -42,11 +37,10 @@ class BuildMacosCommand extends BuildSubCommand {
   };
 
   @override
-  String get description => 'build the macOS desktop target.';
+  String get description => 'Build a macOS desktop application.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
     final BuildInfo buildInfo = getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     if (!featureFlags.isMacOSEnabled) {
@@ -60,6 +54,12 @@ class BuildMacosCommand extends BuildSubCommand {
       buildInfo: buildInfo,
       targetOverride: targetFile,
       verboseLogging: globals.logger.isVerbose,
+      sizeAnalyzer: SizeAnalyzer(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        appFilenamePattern: 'App',
+        flutterUsage: globals.flutterUsage,
+      ),
     );
     return FlutterCommandResult.success();
   }

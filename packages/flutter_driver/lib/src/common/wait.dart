@@ -31,6 +31,9 @@ class WaitForCondition extends Command {
 
   @override
   String get kind => 'waitForCondition';
+
+  @override
+  bool get requiresRootWidgetAttached => condition.requiresRootWidgetAttached;
 }
 
 /// A Flutter Driver command that waits until there are no more transient callbacks in the queue.
@@ -132,9 +135,9 @@ class SerializationException implements Exception {
 ///
 /// This class is sent from the driver script running on the host to the driver
 /// extension on device to perform waiting on a given condition. In the extension,
-/// it will be converted to a [WaitCondition] that actually defines the wait logic.
+/// it will be converted to a `WaitCondition` that actually defines the wait logic.
 ///
-/// If you subclass this, you also need to implement a [WaitCondition] in the extension.
+/// If you subclass this, you also need to implement a `WaitCondition` in the extension.
 abstract class SerializableWaitCondition {
   /// A const constructor to allow subclasses to be const.
   const SerializableWaitCondition();
@@ -148,6 +151,20 @@ abstract class SerializableWaitCondition {
       'conditionName': conditionName
     };
   }
+
+  /// Whether this command requires the widget tree to be initialized before
+  /// the command may be run.
+  ///
+  /// This defaults to true to force the application under test to call [runApp]
+  /// before attempting to remotely drive the application. Subclasses may
+  /// override this to return false if they allow invocation before the
+  /// application has started.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBinding.isRootWidgetAttached], which indicates whether the
+  ///    widget tree has been initialized.
+  bool get requiresRootWidgetAttached => true;
 }
 
 /// A condition that waits until no transient callbacks are scheduled.
@@ -208,6 +225,9 @@ class FirstFrameRasterized extends SerializableWaitCondition {
 
   @override
   String get conditionName => 'FirstFrameRasterizedCondition';
+
+  @override
+  bool get requiresRootWidgetAttached => false;
 }
 
 /// A condition that waits until there are no pending platform messages.

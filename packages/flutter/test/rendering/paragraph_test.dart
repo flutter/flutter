@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/gestures.dart';
@@ -34,6 +36,17 @@ void main() {
     expect(offset50.dy, greaterThan(offset5.dy));
   });
 
+  test('getFullHeightForCaret control test', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(text: _kText,style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+
+    final double height5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5));
+    expect(height5, equals(10.0));
+  });
+
   test('getPositionForOffset control test', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(text: _kText),
@@ -49,7 +62,7 @@ void main() {
 
     final TextPosition positionBelow = paragraph.getPositionForOffset(const Offset(5.0, 20.0));
     expect(positionBelow.offset, greaterThan(position40.offset));
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61015
 
   test('getBoxesForSelection control test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -70,9 +83,7 @@ void main() {
 
     expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
     expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
-  },
-  // Ahem-based tests don't yet quite work on Windows or some MacOS environments
-  skip: isLinux || isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
 
   test('getWordBoundary control test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -89,7 +100,7 @@ void main() {
 
     final TextRange range85 = paragraph.getWordBoundary(const TextPosition(offset: 75));
     expect(range85.textInside(_kText), equals("Queen's"));
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61017
 
   test('overflow test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -165,7 +176,7 @@ void main() {
 
     relayoutWith(maxLines: 100, softWrap: true, overflow: TextOverflow.fade);
     expect(paragraph.debugHasOverflowShader, isFalse);
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
 
   test('maxLines', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -194,7 +205,7 @@ void main() {
 
     layoutAt(3);
     expect(paragraph.size.height, 30.0);
-  }, skip: isWindows || isBrowser); // Ahem-based tests don't yet quite work on Windows
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
 
   test('changing color does not do layout', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -274,14 +285,14 @@ void main() {
     // rendering widths in tests.
     // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(boxes[0].toRect().width, anyOf(14.0, 13.0));
-    expect(boxes[0].toRect().height, closeTo(13.0, 0.0001));
+    expect(boxes[0].toRect().height, moreOrLessEquals(13.0, epsilon: 0.0001));
     expect(boxes[1].toRect().width, anyOf(27.0, 26.0));
-    expect(boxes[1].toRect().height, closeTo(26.0, 0.0001));
+    expect(boxes[1].toRect().height, moreOrLessEquals(26.0, epsilon: 0.0001));
     expect(boxes[2].toRect().width, anyOf(27.0, 26.0));
-    expect(boxes[2].toRect().height, closeTo(26.0, 0.0001));
+    expect(boxes[2].toRect().height, moreOrLessEquals(26.0, epsilon: 0.0001));
     expect(boxes[3].toRect().width, anyOf(14.0, 13.0));
-    expect(boxes[3].toRect().height, closeTo(13.0, 0.0001));
-  }, skip: isBrowser);
+    expect(boxes[3].toRect().height, moreOrLessEquals(13.0, epsilon: 0.0001));
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
 
   test('toStringDeep', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -362,8 +373,94 @@ void main() {
     expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
     expect(boxes[3], const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
     expect(boxes[4], const TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
-  // Ahem-based tests don't yet quite work on Windows or some MacOS environments
-  }, skip: isWindows || isMacOS || isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+  test('can compute IntrinsicHeight for widget span', () {
+    // Regression test for https://github.com/flutter/flutter/issues/59316
+    const double screenWidth = 100.0;
+    const String sentence = 'one two';
+    List<RenderBox> renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+    ];
+    RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        children: <InlineSpan> [
+          WidgetSpan(child: Text(sentence))
+        ]
+      ),
+      textScaleFactor: 1.0,
+      children: renderBoxes,
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
+    final double singleLineHeight = paragraph.computeMaxIntrinsicHeight(screenWidth);
+    expect(singleLineHeight, 14.0);
+
+    pumpFrame();
+    renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+    ];
+    paragraph = RenderParagraph(
+      const TextSpan(
+        children: <InlineSpan> [
+          WidgetSpan(child: Text(sentence))
+        ]
+      ),
+      textScaleFactor: 2.0,
+      children: renderBoxes,
+      textDirection: TextDirection.ltr,
+    );
+
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
+    final double maxIntrinsicHeight = paragraph.computeMaxIntrinsicHeight(screenWidth);
+    final double minIntrinsicHeight = paragraph.computeMinIntrinsicHeight(screenWidth);
+    // intrinsicHeight = singleLineHeight * textScaleFactor * two lines.
+    expect(maxIntrinsicHeight, singleLineHeight * 2.0 * 2);
+    expect(maxIntrinsicHeight, minIntrinsicHeight);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+  test('can compute IntrinsicWidth for widget span', () {
+    // Regression test for https://github.com/flutter/flutter/issues/59316
+    const double screenWidth = 1000.0;
+    const double fixedHeight = 1000.0;
+    const String sentence = 'one two';
+    List<RenderBox> renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+    ];
+    RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        children: <InlineSpan> [
+          WidgetSpan(child: Text(sentence))
+        ]
+      ),
+      textScaleFactor: 1.0,
+      children: renderBoxes,
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
+    final double widthForOneLine = paragraph.computeMaxIntrinsicWidth(fixedHeight);
+    expect(widthForOneLine, 98.0);
+
+    pumpFrame();
+    renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+    ];
+    paragraph = RenderParagraph(
+      const TextSpan(
+        children: <InlineSpan> [
+          WidgetSpan(child: Text(sentence))
+        ]
+      ),
+      textScaleFactor: 2.0,
+      children: renderBoxes,
+      textDirection: TextDirection.ltr,
+    );
+
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
+    final double maxIntrinsicWidth = paragraph.computeMaxIntrinsicWidth(fixedHeight);
+    // maxIntrinsicWidth = widthForOneLine * textScaleFactor
+    expect(maxIntrinsicWidth, widthForOneLine * 2.0);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
   test('inline widgets multiline test', () {
     const TextSpan text = TextSpan(
@@ -415,6 +512,38 @@ void main() {
     // Wraps
     expect(boxes[7], const TextBox.fromLTRBD(0.0, 28.0, 14.0, 42.0, TextDirection.ltr));
     expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0 , TextDirection.ltr));
-  // Ahem-based tests don't yet quite work on Windows or some MacOS environments
-  }, skip: isWindows || isMacOS || isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+  test('Supports gesture recognizer semantics', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      TextSpan(text: _kText, children: <InlineSpan>[
+        TextSpan(text: 'one', recognizer: TapGestureRecognizer()..onTap = () {}),
+        TextSpan(text: 'two', recognizer: LongPressGestureRecognizer()..onLongPress = () {}),
+        TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()..onDoubleTap = () {}),
+      ]),
+      textDirection: TextDirection.rtl,
+    );
+    layout(paragraph);
+
+    paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+  test('Asserts on unsupported gesture recognizer', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      TextSpan(text: _kText, children: <InlineSpan>[
+        TextSpan(text: 'three', recognizer: MultiTapGestureRecognizer()..onTap = (int id) {}),
+      ]),
+      textDirection: TextDirection.rtl,
+    );
+    layout(paragraph);
+
+    bool failed = false;
+    try {
+      paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
+    } catch(e) {
+      failed = true;
+      expect(e.message, 'MultiTapGestureRecognizer is not supported.');
+    }
+    expect(failed, true);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 }

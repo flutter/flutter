@@ -28,5 +28,7 @@
   "cutButtonLabel": "גזירה",
   "copyButtonLabel": "העתקה",
   "pasteButtonLabel": "הדבקה",
-  "selectAllButtonLabel": "בחירת הכול"
+  "selectAllButtonLabel": "בחירת הכול",
+  "tabSemanticsLabel": "כרטיסייה $tabIndex מתוך $tabCount",
+  "modalBarrierDismissLabel": "סגירה"
 }

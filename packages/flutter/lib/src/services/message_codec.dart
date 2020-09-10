@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -23,12 +24,12 @@ abstract class MessageCodec<T> {
   /// Encodes the specified [message] in binary.
   ///
   /// Returns null if the message is null.
-  ByteData encodeMessage(T message);
+  ByteData? encodeMessage(T message);
 
   /// Decodes the specified [message] from binary.
   ///
   /// Returns null if the message is null.
-  T decodeMessage(ByteData message);
+  T decodeMessage(ByteData? message);
 }
 
 /// An command object representing the invocation of a named method.
@@ -66,7 +67,7 @@ abstract class MethodCodec {
   ByteData encodeMethodCall(MethodCall methodCall);
 
   /// Decodes the specified [methodCall] from binary.
-  MethodCall decodeMethodCall(ByteData methodCall);
+  MethodCall decodeMethodCall(ByteData? methodCall);
 
   /// Decodes the specified result [envelope] from binary.
   ///
@@ -79,9 +80,9 @@ abstract class MethodCodec {
 
   /// Encodes an error result into a binary envelope.
   ///
-  /// The specified error [code], human-readable error [message], and error
+  /// The specified error [code], human-readable error [message] and error
   /// [details] correspond to the fields of [PlatformException].
-  ByteData encodeErrorEnvelope({ @required String code, String message, dynamic details });
+  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details});
 }
 
 
@@ -103,22 +104,33 @@ class PlatformException implements Exception {
   /// [message], and with the optional error [details] which must be a valid
   /// value for the [MethodCodec] involved in the interaction.
   PlatformException({
-    @required this.code,
+    required this.code,
     this.message,
     this.details,
+    this.stacktrace,
   }) : assert(code != null);
 
   /// An error code.
   final String code;
 
   /// A human-readable error message, possibly null.
-  final String message;
+  final String? message;
 
   /// Error details, possibly null.
   final dynamic details;
 
+  /// Native stacktrace for the error, possibly null.
+  /// This is strictly for native platform stacktrace.
+  /// The stacktrace info on dart platform can be found within the try-catch block for example:
+  /// try {
+  ///   ...
+  /// } catch (e, stacktrace) {
+  ///   print(stacktrace);
+  /// }
+  final String? stacktrace;
+
   @override
-  String toString() => 'PlatformException($code, $message, $details)';
+  String toString() => 'PlatformException($code, $message, $details, $stacktrace)';
 }
 
 /// Thrown to indicate that a platform interaction failed to find a handling
@@ -137,7 +149,7 @@ class MissingPluginException implements Exception {
   MissingPluginException([this.message]);
 
   /// A human-readable error message, possibly null.
-  final String message;
+  final String? message;
 
   @override
   String toString() => 'MissingPluginException($message)';

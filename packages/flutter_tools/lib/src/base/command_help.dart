@@ -5,14 +5,15 @@
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import 'logger.dart';
+import 'platform.dart';
 import 'terminal.dart';
 
 // ignore_for_file: non_constant_identifier_names
 
 const String fire = '🔥';
+const String image = '🖼️';
 const int maxLineWidth = 84;
 
 /// Encapsulates the help text construction and printing.
@@ -34,6 +35,13 @@ class CommandHelp {
   final Platform _platform;
 
   final OutputPreferences _outputPreferences;
+
+  CommandHelpOption _I;
+  CommandHelpOption get I => _I ??= _makeOption(
+    'I',
+    'Toggle oversized image inversion $image.',
+    'debugInvertOversizedImages',
+  );
 
   CommandHelpOption _L;
   CommandHelpOption get L => _L ??= _makeOption(
@@ -76,6 +84,13 @@ class CommandHelp {
     'debugProfileWidgetBuilds',
   );
 
+  CommandHelpOption _b;
+  CommandHelpOption get b => _b ??= _makeOption(
+    'b',
+    'Toggle the platform brightness setting (dark and light mode).',
+    'debugBrightnessOverride',
+  );
+
   CommandHelpOption _c;
   CommandHelpOption get c => _c ??= _makeOption(
     'c',
@@ -86,6 +101,12 @@ class CommandHelp {
   CommandHelpOption get d => _d ??= _makeOption(
     'd',
     'Detach (terminate "flutter run" but leave application running).',
+  );
+
+  CommandHelpOption _g;
+  CommandHelpOption get g => _g ??= _makeOption(
+    'g',
+    'Run source code generators.'
   );
 
   CommandHelpOption _h;
@@ -209,11 +230,11 @@ class CommandHelpOption {
 
   final OutputPreferences _outputPreferences;
 
-  /// The key associated with this command
+  /// The key associated with this command.
   final String key;
-  /// A description of what this command does
+  /// A description of what this command does.
   final String description;
-  /// Text shown in parenthesis to give the context
+  /// Text shown in parenthesis to give the context.
   final String inParenthesis;
 
   bool get _hasTextInParenthesis => inParenthesis != null && inParenthesis.isNotEmpty;
@@ -248,6 +269,13 @@ class CommandHelpOption {
     // pad according to the raw text
     message.write(''.padLeft(width - parentheticalText.length));
     message.write(_terminal.color(parentheticalText, TerminalColor.grey));
+
+    // Terminals seem to require this because we have both boldened and colored
+    // a line. Otherwise the next line comes out bold until a reset bold.
+    if (_terminal.supportsColor) {
+      message.write(AnsiTerminal.resetBold);
+    }
+
     return message.toString();
   }
 

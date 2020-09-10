@@ -5,10 +5,10 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
@@ -53,19 +53,19 @@ void main() {
     return _testFile('trivial', missingDependencyTests, missingDependencyTests);
   });
 
-  testUsingContext('flutter test should report which user created widget caused the error', () async {
+  testUsingContext('flutter test should report which user-created widget caused the error', () async {
     Cache.flutterRoot = '../..';
     return _testFile('print_user_created_ancestor', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--track-widget-creation']);
   });
 
-  testUsingContext('flutter test should report which user created widget caused the error - no flag', () async {
+  testUsingContext('flutter test should report which user-created widget caused the error - no flag', () async {
     Cache.flutterRoot = '../..';
     return _testFile('print_user_created_ancestor_no_flag', automatedTestsDirectory, flutterTestDirectory,
        extraArguments: const <String>['--no-track-widget-creation']);
   });
 
-  testUsingContext('flutter test should report correct created widget caused the error', () async {
+  testUsingContext('flutter test should report the correct user-created widget that caused the error', () async {
     Cache.flutterRoot = '../..';
     return _testFile('print_correct_local_widget', automatedTestsDirectory, flutterTestDirectory,
       extraArguments: const <String>['--track-widget-creation']);
@@ -218,7 +218,7 @@ Future<void> _testFile(
 
   expect(exec.exitCode, exitCode);
   final List<String> output = (exec.stdout as String).split('\n');
-  if (output.first == 'Waiting for another flutter command to release the startup lock...') {
+  if (output.first.startsWith('Waiting for another flutter command to release the startup lock...')) {
     output.removeAt(0);
   }
   if (output.first.startsWith('Running "flutter pub get" in')) {
@@ -302,7 +302,6 @@ Future<ProcessResult> _runFlutterTest(
   }
 
   final List<String> args = <String>[
-    ...dartVmFlags,
     globals.fs.path.absolute(globals.fs.path.join('bin', 'flutter_tools.dart')),
     'test',
     '--no-color',
@@ -319,7 +318,7 @@ Future<ProcessResult> _runFlutterTest(
   _testExclusionLock = testExclusionCompleter.future;
   try {
     return await Process.run(
-      globals.fs.path.join(dartSdkPath, 'bin', 'dart'),
+      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       args,
       workingDirectory: workingDirectory,
       stdoutEncoding: utf8,

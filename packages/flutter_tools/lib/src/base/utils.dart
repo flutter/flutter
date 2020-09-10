@@ -9,7 +9,6 @@ import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 
 import '../convert.dart';
-import '../globals.dart' as globals;
 import 'file_system.dart';
 
 /// Convert `foo_bar` to `fooBar`.
@@ -102,6 +101,12 @@ class ItemListNotifier<T> {
 
     addedItems.forEach(_addedController.add);
     removedItems.forEach(_removedController.add);
+  }
+
+  void removeItem(T item) {
+    if (_items.remove(item)) {
+      _removedController.add(item);
+    }
   }
 
   /// Close the streams.
@@ -200,12 +205,16 @@ const int kMinColumnWidth = 10;
 ///
 /// The [indent] and [hangingIndent] must be smaller than [columnWidth] when
 /// added together.
-String wrapText(String text, { int columnWidth, int hangingIndent, int indent, bool shouldWrap }) {
+String wrapText(String text, {
+  @required int columnWidth,
+  @required bool shouldWrap,
+  int hangingIndent,
+  int indent,
+}) {
   if (text == null || text.isEmpty) {
     return '';
   }
   indent ??= 0;
-  columnWidth ??= globals.outputPreferences.wrapColumn;
   columnWidth -= indent;
   assert(columnWidth >= 0);
 
@@ -281,34 +290,17 @@ class _AnsiRun {
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// simply split at the newlines, but not wrapped. If [shouldWrap] is specified,
 /// then it overrides the [outputPreferences.wrapText] setting.
-List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, @required bool shouldWrap }) {
+List<String> _wrapTextAsLines(String text, {
+  int start = 0,
+  int columnWidth,
+  @required bool shouldWrap,
+}) {
   if (text == null || text.isEmpty) {
     return <String>[''];
   }
   assert(columnWidth != null);
   assert(columnWidth >= 0);
   assert(start >= 0);
-  shouldWrap ??= globals.outputPreferences.wrapText;
-
-  /// Returns true if the code unit at [index] in [text] is a whitespace
-  /// character.
-  ///
-  /// Based on: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
-  bool isWhitespace(_AnsiRun run) {
-    final int rune = run.character.isNotEmpty ? run.character.codeUnitAt(0) : 0x0;
-    return rune >= 0x0009 && rune <= 0x000D ||
-        rune == 0x0020 ||
-        rune == 0x0085 ||
-        rune == 0x1680 ||
-        rune == 0x180E ||
-        rune >= 0x2000 && rune <= 0x200A ||
-        rune == 0x2028 ||
-        rune == 0x2029 ||
-        rune == 0x202F ||
-        rune == 0x205F ||
-        rune == 0x3000 ||
-        rune == 0xFEFF;
-  }
 
   // Splits a string so that the resulting list has the same number of elements
   // as there are visible characters in the string, but elements may include one
@@ -389,4 +381,24 @@ List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, @re
     result.add(joinRun(splitLine, currentLineStart));
   }
   return result;
+}
+
+/// Returns true if the code unit at [index] in [text] is a whitespace
+/// character.
+///
+/// Based on: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
+bool isWhitespace(_AnsiRun run) {
+  final int rune = run.character.isNotEmpty ? run.character.codeUnitAt(0) : 0x0;
+  return rune >= 0x0009 && rune <= 0x000D ||
+      rune == 0x0020 ||
+      rune == 0x0085 ||
+      rune == 0x1680 ||
+      rune == 0x180E ||
+      rune >= 0x2000 && rune <= 0x200A ||
+      rune == 0x2028 ||
+      rune == 0x2029 ||
+      rune == 0x202F ||
+      rune == 0x205F ||
+      rune == 0x3000 ||
+      rune == 0xFEFF;
 }

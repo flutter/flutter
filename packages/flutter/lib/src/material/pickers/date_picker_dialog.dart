@@ -2,20 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../button_bar.dart';
-import '../button_theme.dart';
 import '../color_scheme.dart';
 import '../debug.dart';
 import '../dialog.dart';
-import '../dialog_theme.dart';
-import '../flat_button.dart';
 import '../icons.dart';
 import '../material_localizations.dart';
+import '../text_button.dart';
 import '../text_theme.dart';
 import '../theme.dart';
 
@@ -30,6 +29,9 @@ const Size _calendarLandscapeDialogSize = Size(496.0, 346.0);
 const Size _inputPortraitDialogSize = Size(330.0, 270.0);
 const Size _inputLandscapeDialogSize = Size(496, 160.0);
 const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
+const double _inputFormPortraitHeight = 98.0;
+const double _inputFormLandscapeHeight = 108.0;
+
 
 /// Shows a dialog containing a Material Design date picker.
 ///
@@ -60,17 +62,16 @@ const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 /// this can be used to only allow weekdays for selection. If provided, it must
 /// return true for [initialDate].
 ///
-/// Optional strings for the [cancelText], [confirmText], [errorFormatText],
-/// [errorInvalidText], [fieldHintText], [fieldLabelText], and [helpText] allow
-/// you to override the default text used for various parts of the dialog:
+/// The following optional string parameters allow you to override the default
+/// text used for various parts of the dialog:
 ///
+///   * [helpText], label displayed at the top of the dialog.
 ///   * [cancelText], label on the cancel button.
 ///   * [confirmText], label on the ok button.
 ///   * [errorFormatText], message used when the input text isn't in a proper date format.
 ///   * [errorInvalidText], message used when the input text isn't a selectable date.
 ///   * [fieldHintText], text used to prompt the user when no text has been entered in the field.
 ///   * [fieldLabelText], label for the date text input field.
-///   * [helpText], label on the top of the dialog.
 ///
 /// An optional [locale] argument can be used to set the locale for the date
 /// picker. It defaults to the ambient locale provided by [Localizations].
@@ -92,6 +93,14 @@ const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 /// calendar date picker initially appear in the [DatePickerMode.year] or
 /// [DatePickerMode.day] mode. It defaults to [DatePickerMode.day], and
 /// must be non-null.
+///
+/// See also:
+///
+///  * [showDateRangePicker], which shows a material design date range picker
+///    used to select a range of dates.
+///  * [CalendarDatePicker], which provides the calendar grid used by the date picker dialog.
+///  * [InputDatePickerFormField], which provides a text input field for entering dates.
+///
 Future<DateTime> showDatePicker({
   @required BuildContext context,
   @required DateTime initialDate,
@@ -304,7 +313,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     Navigator.pop(context);
   }
 
-  void _handelEntryModeToggle() {
+  void _handleEntryModeToggle() {
     setState(() {
       switch (_entryMode) {
         case DatePickerEntryMode.calendar:
@@ -346,6 +355,11 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     return null;
   }
 
+  static final Map<LogicalKeySet, Intent> _formShortcutMap = <LogicalKeySet, Intent>{
+    // Pressing enter on the field will move focus to the next field or control.
+    LogicalKeySet(LogicalKeyboardKey.enter): const NextFocusIntent(),
+  };
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -359,8 +373,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
     final String dateText = _selectedDate != null
       ? localizations.formatMediumDate(_selectedDate)
-      // TODO(darrenaustin): localize 'Date'
-      : 'Date';
+      : localizations.unspecifiedDate;
     final Color dateColor = colorScheme.brightness == Brightness.light
       ? colorScheme.onPrimary
       : colorScheme.onSurface;
@@ -368,19 +381,23 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       ? textTheme.headline5?.copyWith(color: dateColor)
       : textTheme.headline4?.copyWith(color: dateColor);
 
-    final Widget actions = ButtonBar(
-      buttonTextTheme: ButtonTextTheme.primary,
-      layoutBehavior: ButtonBarLayoutBehavior.constrained,
-      children: <Widget>[
-        FlatButton(
-          child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
-          onPressed: _handleCancel,
-        ),
-        FlatButton(
-          child: Text(widget.confirmText ?? localizations.okButtonLabel),
-          onPressed: _handleOk,
-        ),
-      ],
+    final Widget actions = Container(
+      alignment: AlignmentDirectional.centerEnd,
+      constraints: const BoxConstraints(minHeight: 52.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: OverflowBar(
+        spacing: 8,
+        children: <Widget>[
+          TextButton(
+            child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
+            onPressed: _handleCancel,
+          ),
+          TextButton(
+            child: Text(widget.confirmText ?? localizations.okButtonLabel),
+            onPressed: _handleOk,
+          ),
+        ],
+      ),
     );
 
     Widget picker;
@@ -399,48 +416,57 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           initialCalendarMode: widget.initialCalendarMode,
         );
         entryModeIcon = Icons.edit;
-        // TODO(darrenaustin): localize 'Switch to input'
-        entryModeTooltip = 'Switch to input';
+        entryModeTooltip = localizations.inputDateModeButtonLabel;
         break;
 
       case DatePickerEntryMode.input:
         picker = Form(
           key: _formKey,
           autovalidate: _autoValidate,
-          child: InputDatePickerFormField(
-            initialDate: _selectedDate,
-            firstDate: widget.firstDate,
-            lastDate: widget.lastDate,
-            onDateSubmitted: _handleDateChanged,
-            onDateSaved: _handleDateChanged,
-            selectableDayPredicate: widget.selectableDayPredicate,
-            errorFormatText: widget.errorFormatText,
-            errorInvalidText: widget.errorInvalidText,
-            fieldHintText: widget.fieldHintText,
-            fieldLabelText: widget.fieldLabelText,
-            autofocus: true,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            height: orientation == Orientation.portrait ? _inputFormPortraitHeight : _inputFormLandscapeHeight,
+            child: Shortcuts(
+              shortcuts: _formShortcutMap,
+              child: Column(
+                children: <Widget>[
+                  const Spacer(),
+                  InputDatePickerFormField(
+                    initialDate: _selectedDate,
+                    firstDate: widget.firstDate,
+                    lastDate: widget.lastDate,
+                    onDateSubmitted: _handleDateChanged,
+                    onDateSaved: _handleDateChanged,
+                    selectableDayPredicate: widget.selectableDayPredicate,
+                    errorFormatText: widget.errorFormatText,
+                    errorInvalidText: widget.errorInvalidText,
+                    fieldHintText: widget.fieldHintText,
+                    fieldLabelText: widget.fieldLabelText,
+                    autofocus: true,
+                  ),
+                  const Spacer(),
+                ],
+              ),
+            ),
           ),
         );
         entryModeIcon = Icons.calendar_today;
-        // TODO(darrenaustin): localize 'Switch to calendar'
-        entryModeTooltip = 'Switch to calendar';
+        entryModeTooltip = localizations.calendarModeButtonLabel;
         break;
     }
 
     final Widget header = DatePickerHeader(
-      // TODO(darrenaustin): localize 'SELECT DATE'
-      helpText: widget.helpText ?? 'SELECT DATE',
+      helpText: widget.helpText ?? localizations.datePickerHelpText,
       titleText: dateText,
       titleStyle: dateStyle,
       orientation: orientation,
       isShort: orientation == Orientation.landscape,
       icon: entryModeIcon,
       iconTooltip: entryModeTooltip,
-      onIconPressed: _handelEntryModeToggle,
+      onIconPressed: _handleEntryModeToggle,
     );
 
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
-    final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
     return Dialog(
       child: AnimatedContainer(
         width: dialogSize.width,
@@ -487,12 +513,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         ),
       ),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      // The default dialog shape is radius 2 rounded rect, but the spec has
-      // been updated to 4, so we will use that here for the Date Picker, but
-      // only if there isn't one provided in the theme.
-      shape: dialogTheme.shape ?? const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(4.0))
-      ),
       clipBehavior: Clip.antiAlias,
     );
   }

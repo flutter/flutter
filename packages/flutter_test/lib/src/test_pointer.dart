@@ -57,7 +57,7 @@ class TestPointer {
   /// Set when the object is constructed. Defaults to 1.
   final int pointer;
 
-  /// The kind of pointer device to simulate. Defaults to
+  /// The kind of pointing device to simulate. Defaults to
   /// [PointerDeviceKind.touch].
   final PointerDeviceKind kind;
 
@@ -341,10 +341,10 @@ class TestGesture {
 
   /// Dispatch a pointer down event at the given `downLocation`, caching the
   /// hit test result.
-  Future<void> down(Offset downLocation) async {
+  Future<void> down(Offset downLocation, { Duration timeStamp = Duration.zero }) async {
     return TestAsyncUtils.guard<void>(() async {
       _result = _hitTester(downLocation);
-      return _dispatcher(_pointer.down(downLocation), _result);
+      return _dispatcher(_pointer.down(downLocation, timeStamp: timeStamp), _result);
     });
   }
 
@@ -416,10 +416,10 @@ class TestGesture {
   }
 
   /// End the gesture by releasing the pointer.
-  Future<void> up() {
+  Future<void> up({ Duration timeStamp = Duration.zero }) {
     return TestAsyncUtils.guard<void>(() async {
       assert(_pointer._isDown);
-      await _dispatcher(_pointer.up(), _result);
+      await _dispatcher(_pointer.up(timeStamp: timeStamp), _result);
       assert(!_pointer._isDown);
       _result = null;
     });
@@ -428,12 +428,39 @@ class TestGesture {
   /// End the gesture by canceling the pointer (as would happen if the
   /// system showed a modal dialog on top of the Flutter application,
   /// for instance).
-  Future<void> cancel() {
+  Future<void> cancel({ Duration timeStamp = Duration.zero }) {
     return TestAsyncUtils.guard<void>(() async {
       assert(_pointer._isDown);
-      await _dispatcher(_pointer.cancel(), _result);
+      await _dispatcher(_pointer.cancel(timeStamp: timeStamp), _result);
       assert(!_pointer._isDown);
       _result = null;
     });
   }
+}
+
+/// A record of input [PointerEvent] list with the timeStamp of when it is
+/// injected.
+///
+/// The [timeDelay] is used to indicate the time when the event packet should
+/// be sent.
+///
+/// This is a simulation of how the framework is receiving input events from
+/// the engine. See [GestureBinding] and [PointerDataPacket].
+class PointerEventRecord {
+  /// Creates a pack of [PointerEvent]s.
+  PointerEventRecord(this.timeDelay, this.events);
+
+  /// The time delay of when the event record should be sent.
+  ///
+  /// This value is used as the time delay relative to the start of
+  /// [WidgetTester.handlePointerEventRecord] call.
+  final Duration timeDelay;
+
+  /// The event list of the record.
+  ///
+  /// This can be considered as a simulation of the events expanded from the
+  /// [PointerDataPacket].
+  ///
+  /// See [PointerEventConverter.expand].
+  final List<PointerEvent> events;
 }

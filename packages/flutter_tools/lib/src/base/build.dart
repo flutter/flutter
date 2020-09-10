@@ -241,7 +241,7 @@ class AOTSnapshotter {
     final List<String> commonBuildOptions = <String>[
       '-arch', targetArch,
       if (isIOS)
-        '-miphoneos-version-min=8.0',
+        '-miphoneos-version-min=9.0',
     ];
 
     const String embedBitcodeArg = '-fembed-bitcode';
@@ -298,6 +298,8 @@ class AOTSnapshotter {
       TargetPlatform.android_x64,
       TargetPlatform.ios,
       TargetPlatform.darwin_x64,
+      TargetPlatform.linux_x64,
+      TargetPlatform.windows_x64,
     ].contains(platform);
   }
 }

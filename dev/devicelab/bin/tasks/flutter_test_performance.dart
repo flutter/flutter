@@ -59,7 +59,7 @@ Future<int> runTest({bool coverage = false}) async {
     } else if (step.index < TestStep.runningPubGet.index && entry == 'Running "flutter pub get" in automated_tests...') {
       // ignore this line
       step = TestStep.runningPubGet;
-    } else if (step.index < TestStep.testWritesFirstCarriageReturn.index && entry == '') {
+    } else if (step.index <= TestStep.testWritesFirstCarriageReturn.index && entry.trim() == '') {
       // we have a blank line at the start
       step = TestStep.testWritesFirstCarriageReturn;
     } else {

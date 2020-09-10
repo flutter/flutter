@@ -18,5 +18,7 @@
   "cutButtonLabel": "Կտրել",
   "copyButtonLabel": "Պատճենել",
   "pasteButtonLabel": "Տեղադրել",
-  "selectAllButtonLabel": "Նշել բոլորը"
+  "selectAllButtonLabel": "Նշել բոլորը",
+  "tabSemanticsLabel": "Ներդիր $tabIndex՝ $tabCount-ից",
+  "modalBarrierDismissLabel": "Փակել"
 }

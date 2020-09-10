@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/animation.dart';
 import 'package:meta/meta.dart';
@@ -340,8 +342,6 @@ void main() {
     final SliverMultiBoxAdaptorParentData candidate = SliverMultiBoxAdaptorParentData();
     expect(candidate.keepAlive, isFalse);
     expect(candidate.index, isNull);
-    expect(candidate.toString(), 'index=null; layoutOffset=None');
-    candidate.keepAlive = null;
     expect(candidate.toString(), 'index=null; layoutOffset=None');
     candidate.keepAlive = true;
     expect(candidate.toString(), 'index=null; keepAlive; layoutOffset=None');

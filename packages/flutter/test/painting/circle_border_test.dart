@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -9,6 +11,18 @@ import '../rendering/mock_canvas.dart';
 import 'common_matchers.dart';
 
 void main() {
+  test('CircleBorder defaults', () {
+    const CircleBorder border = CircleBorder();
+    expect(border.side, BorderSide.none);
+  });
+
+  test('CircleBorder copyWith, ==, hashCode', () {
+    expect(const CircleBorder(), const CircleBorder().copyWith());
+    expect(const CircleBorder().hashCode, const CircleBorder().copyWith().hashCode);
+    const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
+    expect(const CircleBorder().copyWith(side: side), const CircleBorder(side: side));
+  });
+
   test('CircleBorder', () {
     const CircleBorder c10 = CircleBorder(side: BorderSide(width: 10.0));
     const CircleBorder c15 = CircleBorder(side: BorderSide(width: 15.0));
@@ -26,5 +40,5 @@ void main() {
       paints
         ..circle(x: 25.0, y: 40.0, radius: 10.0, strokeWidth: 10.0),
     );
-  }, skip: isBrowser);
+  });
 }

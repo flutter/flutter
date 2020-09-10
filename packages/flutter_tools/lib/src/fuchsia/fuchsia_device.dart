@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -14,6 +15,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/time.dart';
 import '../build_info.dart';
@@ -46,19 +48,27 @@ final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
 final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 
 // Enables testing the fuchsia isolate discovery
-Future<VMService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) {
-  return VMService.connect(uri);
+Future<vm_service.VmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) {
+  return connectToVmService(uri);
+}
+
+Future<void> _kDefaultDartDevelopmentServiceStarter(
+  Device device,
+  Uri observatoryUri,
+) async {
+  await device.dds.startDartDevelopmentService(observatoryUri, true);
 }
 
 /// Read the log for a particular device.
 class _FuchsiaLogReader extends DeviceLogReader {
-  _FuchsiaLogReader(this._device, [this._app]);
+  _FuchsiaLogReader(this._device, this._systemClock, [this._app]);
 
   // \S matches non-whitespace characters.
   static final RegExp _flutterLogOutput = RegExp(r'INFO: \S+\(flutter\): ');
 
   final FuchsiaDevice _device;
   final ApplicationPackage _app;
+  final SystemClock _systemClock;
 
   @override
   String get name => _device.name;
@@ -77,7 +87,7 @@ class _FuchsiaLogReader extends DeviceLogReader {
     }
     // Get the starting time of the log processor to filter logs from before
     // the process attached.
-    final DateTime startTime = systemClock.now();
+    final DateTime startTime = _systemClock.now();
     // Determine if line comes from flutter, and optionally whether it matches
     // the correct fuchsia module.
     final RegExp matchRegExp = _app == null
@@ -135,55 +145,74 @@ class _FuchsiaLogSink implements EventSink<String> {
   }
 }
 
+/// Device discovery for Fuchsia devices.
 class FuchsiaDevices extends PollingDeviceDiscovery {
-  FuchsiaDevices() : super('Fuchsia devices');
+  FuchsiaDevices({
+    @required Platform platform,
+    @required FuchsiaWorkflow fuchsiaWorkflow,
+    @required FuchsiaSdk fuchsiaSdk,
+    @required Logger logger,
+  }) : _platform = platform,
+       _fuchsiaWorkflow = fuchsiaWorkflow,
+       _fuchsiaSdk = fuchsiaSdk,
+       _logger = logger,
+       super('Fuchsia devices');
+
+  final Platform _platform;
+  final FuchsiaWorkflow _fuchsiaWorkflow;
+  final FuchsiaSdk _fuchsiaSdk;
+  final Logger _logger;
 
   @override
-  bool get supportsPlatform => isFuchsiaSupportedPlatform();
+  bool get supportsPlatform => isFuchsiaSupportedPlatform(_platform);
 
   @override
-  bool get canListAnything => fuchsiaWorkflow.canListDevices;
+  bool get canListAnything => _fuchsiaWorkflow.canListDevices;
 
   @override
   Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
-    if (!fuchsiaWorkflow.canListDevices) {
+    if (!_fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final String text = await fuchsiaSdk.listDevices(timeout: timeout);
+    final List<String> text = (await _fuchsiaSdk.listDevices(timeout: timeout))
+      ?.split('\n');
     if (text == null || text.isEmpty) {
       return <Device>[];
     }
-    final List<FuchsiaDevice> devices = await parseListDevices(text);
+    final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
+    for (final String line in text) {
+      final FuchsiaDevice device = await _parseDevice(line);
+      if (device == null) {
+        continue;
+      }
+      devices.add(device);
+    }
     return devices;
   }
 
   @override
   Future<List<String>> getDiagnostics() async => const <String>[];
-}
 
-@visibleForTesting
-Future<List<FuchsiaDevice>> parseListDevices(String text) async {
-  final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
-  for (final String rawLine in text.trim().split('\n')) {
-    final String line = rawLine.trim();
+  Future<FuchsiaDevice> _parseDevice(String text) async {
+    final String line = text.trim();
     // ['ip', 'device name']
     final List<String> words = line.split(' ');
     if (words.length < 2) {
-      continue;
+      return null;
     }
     final String name = words[1];
-    final String resolvedHost = await fuchsiaSdk.fuchsiaDevFinder.resolve(
+    final String resolvedHost = await _fuchsiaSdk.fuchsiaDevFinder.resolve(
       name,
       local: false,
     );
     if (resolvedHost == null) {
-      globals.printError('Failed to resolve host for Fuchsia device `$name`');
-      continue;
+      _logger.printError('Failed to resolve host for Fuchsia device `$name`');
+      return null;
     }
-    devices.add(FuchsiaDevice(resolvedHost, name: name));
+    return FuchsiaDevice(resolvedHost, name: name);
   }
-  return devices;
 }
+
 
 class FuchsiaDevice extends Device {
   FuchsiaDevice(String id, {this.name}) : super(
@@ -215,19 +244,31 @@ class FuchsiaDevice extends Device {
   bool get supportsStartPaused => false;
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async => false;
+  Future<bool> isAppInstalled(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => false;
 
   @override
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  Future<bool> installApp(ApplicationPackage app) => Future<bool>.value(false);
+  Future<bool> installApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) => Future<bool>.value(false);
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app) async => false;
+  Future<bool> uninstallApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => false;
 
   @override
   bool isSupported() => true;
+
+  @override
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
   @override
   Future<LaunchResult> startApp(
@@ -238,6 +279,7 @@ class FuchsiaDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
+    String userIdentifier,
   }) async {
     if (!prebuiltApplication) {
       await buildFuchsia(fuchsiaProject: FlutterProject.current().fuchsia,
@@ -409,7 +451,10 @@ class FuchsiaDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(covariant FuchsiaApp app) async {
+  Future<bool> stopApp(
+    covariant FuchsiaApp app, {
+    String userIdentifier,
+  }) async {
     final int appKey = await FuchsiaTilesCtl.findAppKey(this, app.id);
     if (appKey != -1) {
       if (!await fuchsiaDeviceTools.tilesCtl.remove(this, appKey)) {
@@ -450,7 +495,7 @@ class FuchsiaDevice extends Device {
   }
 
   @override
-  bool get supportsScreenshot => isFuchsiaSupportedPlatform();
+  bool get supportsScreenshot => isFuchsiaSupportedPlatform(globals.platform);
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
@@ -513,7 +558,7 @@ class FuchsiaDevice extends Device {
     bool includePastLogs = false,
   }) {
     assert(!includePastLogs, 'Past log reading not supported on Fuchsia.');
-    return _logReader ??= _FuchsiaLogReader(this, app);
+    return _logReader ??= _FuchsiaLogReader(this, globals.systemClock, app);
   }
   _FuchsiaLogReader _logReader;
 
@@ -534,6 +579,32 @@ class FuchsiaDevice extends Device {
 
   /// [true] if the current host address is IPv6.
   bool get ipv6 => _ipv6 ??= isIPv6Address(id);
+
+  /// Return the address that the device should use to communicate with the
+  /// host.
+  Future<String> get hostAddress async {
+    if (_cachedHostAddress != null) {
+      return _cachedHostAddress;
+    }
+    final RunResult result = await shell('echo \$SSH_CONNECTION');
+    void fail() {
+      throwToolExit('Failed to get local address, aborting.\n$result');
+    }
+    if (result.exitCode != 0) {
+      fail();
+    }
+    final List<String> splitResult = result.stdout.split(' ');
+    if (splitResult.isEmpty) {
+      fail();
+    }
+    final String addr = splitResult[0].replaceAll('%', '%25');
+    if (addr.isEmpty) {
+      fail();
+    }
+    return _cachedHostAddress = addr;
+  }
+
+  String _cachedHostAddress;
 
   /// List the ports currently running a dart observatory.
   Future<List<int>> servicePorts() async {
@@ -619,15 +690,14 @@ class FuchsiaDevice extends Device {
         // netstat shows that the local port is actually being used on the IPv6
         // loopback (::1).
         final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$port');
-        final VMService vmService = await VMService.connect(uri);
+        final vm_service.VmService vmService = await connectToVmService(uri);
         final List<FlutterView> flutterViews = await vmService.getFlutterViews();
         for (final FlutterView flutterView in flutterViews) {
           if (flutterView.uiIsolate == null) {
             continue;
           }
-          final Uri address = vmService.httpAddress;
           if (flutterView.uiIsolate.name.contains(isolateName)) {
-            return address.port;
+            return vmService.httpAddress.port;
           }
         }
       } on SocketException catch (err) {
@@ -658,15 +728,17 @@ class FuchsiaIsolateDiscoveryProtocol {
     this._device,
     this._isolateName, [
     this._vmServiceConnector = _kDefaultFuchsiaIsolateDiscoveryConnector,
+    this._ddsStarter = _kDefaultDartDevelopmentServiceStarter,
     this._pollOnce = false,
   ]);
 
   static const Duration _pollDuration = Duration(seconds: 10);
-  final Map<int, VMService> _ports = <int, VMService>{};
+  final Map<int, vm_service.VmService> _ports = <int, vm_service.VmService>{};
   final FuchsiaDevice _device;
   final String _isolateName;
   final Completer<Uri> _foundUri = Completer<Uri>();
-  final Future<VMService> Function(Uri) _vmServiceConnector;
+  final Future<vm_service.VmService> Function(Uri) _vmServiceConnector;
+  final Future<void> Function(Device, Uri) _ddsStarter;
   // whether to only poll once.
   final bool _pollOnce;
   Timer _pollingTimer;
@@ -702,13 +774,14 @@ class FuchsiaIsolateDiscoveryProtocol {
   Future<void> _findIsolate() async {
     final List<int> ports = await _device.servicePorts();
     for (final int port in ports) {
-      VMService service;
+      vm_service.VmService service;
       if (_ports.containsKey(port)) {
         service = _ports[port];
       } else {
         final int localPort = await _device.portForwarder.forward(port);
         try {
           final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$localPort');
+          await _ddsStarter(_device, uri);
           service = await _vmServiceConnector(uri);
           _ports[port] = service;
         } on SocketException catch (err) {
@@ -721,11 +794,10 @@ class FuchsiaIsolateDiscoveryProtocol {
         if (flutterView.uiIsolate == null) {
           continue;
         }
-        final Uri address = service.httpAddress;
         if (flutterView.uiIsolate.name.contains(_isolateName)) {
           _foundUri.complete(_device.ipv6
-              ? Uri.parse('http://[$_ipv6Loopback]:${address.port}/')
-              : Uri.parse('http://$_ipv4Loopback:${address.port}/'));
+              ? Uri.parse('http://[$_ipv6Loopback]:${service.httpAddress.port}/')
+              : Uri.parse('http://$_ipv4Loopback:${service.httpAddress.port}/'));
           _status.stop();
           return;
         }

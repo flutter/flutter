@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'framework.dart';
 
 /// Provides non-leaking access to a [BuildContext].
 ///
 /// A [BuildContext] is only valid if it is pointing to an active [Element].
-/// Once the [Element.dispose] method is called, the [BuildContext] should not
-/// be accessed further. This class makes it possible for a [StatefulWidget] to
-/// share its build context safely with other objects.
+/// Once the [Element] is unmounted, the [BuildContext] should not be accessed
+/// further. This class makes it possible for a [StatefulWidget] to share its
+/// build context safely with other objects.
 ///
 /// Creators of this object must guarantee the following:
 ///

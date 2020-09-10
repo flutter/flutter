@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show Brightness;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -69,7 +71,6 @@ void main() {
     expect(data.boldText, false);
     expect(data.highContrast, false);
     expect(data.platformBrightness, Brightness.light);
-    expect(data.physicalDepth, equals(WidgetsBinding.instance.window.physicalDepth));
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
@@ -82,7 +83,6 @@ void main() {
     expect(copied.viewPadding, data.viewPadding);
     expect(copied.viewInsets, data.viewInsets);
     expect(copied.systemGestureInsets, data.systemGestureInsets);
-    expect(copied.physicalDepth, data.physicalDepth);
     expect(copied.alwaysUse24HourFormat, data.alwaysUse24HourFormat);
     expect(copied.accessibleNavigation, data.accessibleNavigation);
     expect(copied.invertColors, data.invertColors);
@@ -102,7 +102,6 @@ void main() {
     const EdgeInsets customViewPadding = EdgeInsets.all(11.24031);
     const EdgeInsets customViewInsets = EdgeInsets.all(1.67262);
     const EdgeInsets customSystemGestureInsets = EdgeInsets.all(1.5556);
-    const double customPhysicalDepth = 120.0;
 
     final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     final MediaQueryData copied = data.copyWith(
@@ -113,7 +112,6 @@ void main() {
       viewPadding: customViewPadding,
       viewInsets: customViewInsets,
       systemGestureInsets: customSystemGestureInsets,
-      physicalDepth: customPhysicalDepth,
       alwaysUse24HourFormat: true,
       accessibleNavigation: true,
       invertColors: true,
@@ -129,7 +127,6 @@ void main() {
     expect(copied.viewPadding, customViewPadding);
     expect(copied.viewInsets, customViewInsets);
     expect(copied.systemGestureInsets, customSystemGestureInsets);
-    expect(copied.physicalDepth, customPhysicalDepth);
     expect(copied.alwaysUse24HourFormat, true);
     expect(copied.accessibleNavigation, true);
     expect(copied.invertColors, true);
@@ -538,6 +535,33 @@ void main() {
     expect(insideBrightness, Brightness.dark);
   });
 
+  testWidgets('MediaQuery.highContrastOf', (WidgetTester tester) async {
+    bool outsideHighContrast;
+    bool insideHighContrast;
+
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          outsideHighContrast = MediaQuery.highContrastOf(context);
+          return MediaQuery(
+            data: const MediaQueryData(
+              highContrast: true,
+            ),
+            child: Builder(
+              builder: (BuildContext context) {
+                insideHighContrast = MediaQuery.highContrastOf(context);
+                return Container();
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(outsideHighContrast, false);
+    expect(insideHighContrast, true);
+  });
+
   testWidgets('MediaQuery.boldTextOverride', (WidgetTester tester) async {
     bool outsideBoldTextOverride;
     bool insideBoldTextOverride;
@@ -647,17 +671,6 @@ void main() {
       MediaQueryData(viewPadding: null);
     } on AssertionError catch (error) {
       expect(error.toString(), contains('viewPadding != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('The assert was never called when it should have been');
-  });
-
-  test('physicalDepth parameter in MediaQueryData cannot be null', () {
-    try {
-      MediaQueryData(physicalDepth: null);
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('physicalDepth != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }

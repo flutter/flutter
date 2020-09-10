@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
@@ -11,13 +13,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 class TestImageInfo implements ImageInfo {
-  const TestImageInfo(this.value, { this.image, this.scale = 1.0 });
+  const TestImageInfo(this.value, { this.image, this.scale = 1.0, this.debugLabel });
 
   @override
   final ui.Image image;
 
   @override
   final double scale;
+
+  @override
+  final String debugLabel;
 
   final int value;
 
@@ -26,7 +31,9 @@ class TestImageInfo implements ImageInfo {
 }
 
 class TestImageProvider extends ImageProvider<int> {
-  const TestImageProvider(this.key, this.imageValue, { this.image });
+  const TestImageProvider(this.key, this.imageValue, { this.image = const TestImage() })
+      : assert(image != null);
+
   final int key;
   final int imageValue;
   final ui.Image image;

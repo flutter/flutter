@@ -3,107 +3,38 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import 'android_studio.dart';
 
-AndroidSdk get androidSdk => context.get<AndroidSdk>();
-
+// ANDROID_HOME is deprecated.
+// See https://developer.android.com/studio/command-line/variables.html#envar
 const String kAndroidHome = 'ANDROID_HOME';
 const String kAndroidSdkRoot = 'ANDROID_SDK_ROOT';
-
-// Android SDK layout:
-
-// $ANDROID_HOME/platform-tools/adb
-
-// $ANDROID_HOME/build-tools/19.1.0/aapt, dx, zipalign
-// $ANDROID_HOME/build-tools/22.0.1/aapt
-// $ANDROID_HOME/build-tools/23.0.2/aapt
-// $ANDROID_HOME/build-tools/24.0.0-preview/aapt
-// $ANDROID_HOME/build-tools/25.0.2/apksigner
-
-// $ANDROID_HOME/platforms/android-22/android.jar
-// $ANDROID_HOME/platforms/android-23/android.jar
-// $ANDROID_HOME/platforms/android-N/android.jar
 
 final RegExp _numberedAndroidPlatformRe = RegExp(r'^android-([0-9]+)$');
 final RegExp _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 
-/// The minimum Android SDK version we support.
-const int minimumAndroidSdkVersion = 25;
+// Android SDK layout:
 
-/// Locate ADB. Prefer to use one from an Android SDK, if we can locate that.
-/// This should be used over accessing androidSdk.adbPath directly because it
-/// will work for those users who have Android Platform Tools installed but
-/// not the full SDK.
-String getAdbPath([ AndroidSdk existingSdk ]) {
-  if (existingSdk?.adbPath != null) {
-    return existingSdk.adbPath;
-  }
+// $ANDROID_SDK_ROOT/platform-tools/adb
 
-  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+// $ANDROID_SDK_ROOT/build-tools/19.1.0/aapt, dx, zipalign
+// $ANDROID_SDK_ROOT/build-tools/22.0.1/aapt
+// $ANDROID_SDK_ROOT/build-tools/23.0.2/aapt
+// $ANDROID_SDK_ROOT/build-tools/24.0.0-preview/aapt
+// $ANDROID_SDK_ROOT/build-tools/25.0.2/apksigner
 
-  if (sdk?.latestVersion == null) {
-    return globals.os.which('adb')?.path;
-  } else {
-    return sdk?.adbPath;
-  }
-}
-
-/// Locate 'emulator'. Prefer to use one from an Android SDK, if we can locate that.
-/// This should be used over accessing androidSdk.emulatorPath directly because it
-/// will work for those users who have Android Tools installed but
-/// not the full SDK.
-String getEmulatorPath([ AndroidSdk existingSdk ]) {
-  return existingSdk?.emulatorPath ??
-    AndroidSdk.locateAndroidSdk()?.emulatorPath;
-}
-
-/// Locate the path for storing AVD emulator images. Returns null if none found.
-String getAvdPath() {
-
-  final List<String> searchPaths = <String>[
-    globals.platform.environment['ANDROID_AVD_HOME'],
-    if (globals.platform.environment['HOME'] != null)
-      globals.fs.path.join(globals.platform.environment['HOME'], '.android', 'avd'),
-  ];
-
-
-  if (globals.platform.isWindows) {
-    final String homeDrive = globals.platform.environment['HOMEDRIVE'];
-    final String homePath = globals.platform.environment['HOMEPATH'];
-
-    if (homeDrive != null && homePath != null) {
-      // Can't use path.join for HOMEDRIVE/HOMEPATH
-      // https://github.com/dart-lang/path/issues/37
-      final String home = homeDrive + homePath;
-      searchPaths.add(globals.fs.path.join(home, '.android', 'avd'));
-    }
-  }
-
-  return searchPaths.where((String p) => p != null).firstWhere(
-    (String p) => globals.fs.directory(p).existsSync(),
-    orElse: () => null,
-  );
-}
-
-/// Locate 'avdmanager'. Prefer to use one from an Android SDK, if we can locate that.
-/// This should be used over accessing androidSdk.avdManagerPath directly because it
-/// will work for those users who have Android Tools installed but
-/// not the full SDK.
-String getAvdManagerPath([ AndroidSdk existingSdk ]) {
-  return existingSdk?.avdManagerPath ??
-    AndroidSdk.locateAndroidSdk()?.avdManagerPath;
-}
-
+// $ANDROID_SDK_ROOT/platforms/android-22/android.jar
+// $ANDROID_SDK_ROOT/platforms/android-23/android.jar
+// $ANDROID_SDK_ROOT/platforms/android-N/android.jar
 class AndroidSdk {
   AndroidSdk(this.directory) {
     reinitialize();
@@ -240,6 +171,32 @@ class AndroidSdk {
   String get emulatorPath => getEmulatorPath();
 
   String get avdManagerPath => getAvdManagerPath();
+
+  /// Locate the path for storing AVD emulator images. Returns null if none found.
+  String getAvdPath() {
+    final List<String> searchPaths = <String>[
+      globals.platform.environment['ANDROID_AVD_HOME'],
+      if (globals.platform.environment['HOME'] != null)
+        globals.fs.path.join(globals.platform.environment['HOME'], '.android', 'avd'),
+    ];
+
+    if (globals.platform.isWindows) {
+      final String homeDrive = globals.platform.environment['HOMEDRIVE'];
+      final String homePath = globals.platform.environment['HOMEPATH'];
+
+      if (homeDrive != null && homePath != null) {
+        // Can't use path.join for HOMEDRIVE/HOMEPATH
+        // https://github.com/dart-lang/path/issues/37
+        final String home = homeDrive + homePath;
+        searchPaths.add(globals.fs.path.join(home, '.android', 'avd'));
+      }
+    }
+
+    return searchPaths.where((String p) => p != null).firstWhere(
+      (String p) => globals.fs.directory(p).existsSync(),
+      orElse: () => null,
+    );
+  }
 
   Directory get _platformsDir => globals.fs.directory(globals.fs.path.join(directory, 'platforms'));
 

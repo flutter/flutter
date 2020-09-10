@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
@@ -29,6 +31,14 @@ void main() {
         () => const AsyncSnapshot<String>.nothing().requireData,
         throwsStateError,
       );
+    });
+    test('AsyncSnapshot basic constructors', () {
+      expect(const AsyncSnapshot<int>.nothing().connectionState, ConnectionState.none);
+      expect(const AsyncSnapshot<int>.nothing().data, isNull);
+      expect(const AsyncSnapshot<int>.nothing().error, isNull);
+      expect(const AsyncSnapshot<int>.waiting().connectionState, ConnectionState.waiting);
+      expect(const AsyncSnapshot<int>.waiting().data, isNull);
+      expect(const AsyncSnapshot<int>.waiting().error, isNull);
     });
   });
   group('Async smoke tests', () {

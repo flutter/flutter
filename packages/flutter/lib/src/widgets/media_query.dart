@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:ui' show Brightness;
@@ -95,13 +97,13 @@ class MediaQueryData {
     this.viewInsets = EdgeInsets.zero,
     this.systemGestureInsets = EdgeInsets.zero,
     this.viewPadding = EdgeInsets.zero,
-    this.physicalDepth = double.maxFinite,
     this.alwaysUse24HourFormat = false,
     this.accessibleNavigation = false,
     this.invertColors = false,
     this.highContrast = false,
     this.disableAnimations = false,
     this.boldText = false,
+    this.navigationMode = NavigationMode.traditional,
   }) : assert(size != null),
        assert(devicePixelRatio != null),
        assert(textScaleFactor != null),
@@ -110,13 +112,13 @@ class MediaQueryData {
        assert(viewInsets != null),
        assert(systemGestureInsets != null),
        assert(viewPadding != null),
-       assert(physicalDepth != null),
        assert(alwaysUse24HourFormat != null),
        assert(accessibleNavigation != null),
        assert(invertColors != null),
        assert(highContrast != null),
        assert(disableAnimations != null),
-       assert(boldText != null);
+       assert(boldText != null),
+       assert(navigationMode != null);
 
   /// Creates data for a media query based on the given window.
   ///
@@ -133,13 +135,13 @@ class MediaQueryData {
       viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
       viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
       systemGestureInsets = EdgeInsets.fromWindowPadding(window.systemGestureInsets, window.devicePixelRatio),
-      physicalDepth = window.physicalDepth,
       accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
       invertColors = window.accessibilityFeatures.invertColors,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
       boldText = window.accessibilityFeatures.boldText,
       highContrast = window.accessibilityFeatures.highContrast,
-      alwaysUse24HourFormat = window.alwaysUse24HourFormat;
+      alwaysUse24HourFormat = window.alwaysUse24HourFormat,
+      navigationMode = NavigationMode.traditional;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -251,7 +253,7 @@ class MediaQueryData {
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// For apps that might be deployed on Android Q devices with full gesture
-  /// navigation enabled, use [MediaQuery.systemGestureInsets] with [Padding]
+  /// navigation enabled, use [systemGestureInsets] with [Padding]
   /// to avoid having the left and right edges of the [Slider] from appearing
   /// within the area reserved for system gesture navigation.
   ///
@@ -286,19 +288,6 @@ class MediaQueryData {
   /// {@end-tool}
   final EdgeInsets systemGestureInsets;
 
-  /// The physical depth is the maximum elevation that the Window allows.
-  ///
-  /// Physical layers drawn at or above this elevation will have their elevation
-  /// clamped to this value. This can happen if the physical layer itself has
-  /// an elevation larger than the available depth, or if some ancestor of the
-  /// layer causes it to have a cumulative elevation that is larger than the
-  /// available depth.
-  ///
-  /// The default value is [double.maxFinite], which is used for platforms that
-  /// do not specify a maximum elevation. This property is currently only
-  /// expected to be set to a non-default value on Fuchsia.
-  final double physicalDepth;
-
   /// Whether to use 24-hour format when formatting time.
   ///
   /// The behavior of this flag is different across platforms:
@@ -320,7 +309,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [Window.accessibilityFeatures], where the setting originates.
   final bool accessibleNavigation;
 
   /// Whether the device is inverting the colors of the platform.
@@ -329,7 +318,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [Window.accessibilityFeatures], where the setting originates.
   final bool invertColors;
 
   /// Whether the user requested a high contrast between foreground and background
@@ -344,7 +333,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [Window.accessibilityFeatures], where the setting originates.
   final bool disableAnimations;
 
   /// Whether the platform is requesting that text be drawn with a bold font
@@ -352,8 +341,25 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [Window.accessibilityFeatures], where the setting originates.
   final bool boldText;
+
+  /// Describes the navigation mode requested by the platform.
+  ///
+  /// Some user interfaces are better navigated using a directional pad (DPAD)
+  /// or arrow keys, and for those interfaces, some widgets need to handle these
+  /// directional events differently. In order to know when to do that, these
+  /// widgets will look for the navigation mode in effect for their context.
+  ///
+  /// For instance, in a television interface, [NavigationMode.directional]
+  /// should be set, so that directional navigation is used to navigate away
+  /// from a text field using the DPAD. In contrast, on a regular desktop
+  /// application with the `navigationMode` set to [NavigationMode.traditional],
+  /// the arrow keys are used to move the cursor instead of navigating away.
+  ///
+  /// The [NavigationMode] values indicate the type of navigation to be used in
+  /// a widget subtree for those widgets sensitive to it.
+  final NavigationMode navigationMode;
 
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
@@ -372,13 +378,13 @@ class MediaQueryData {
     EdgeInsets viewPadding,
     EdgeInsets viewInsets,
     EdgeInsets systemGestureInsets,
-    double physicalDepth,
     bool alwaysUse24HourFormat,
     bool highContrast,
     bool disableAnimations,
     bool invertColors,
     bool accessibleNavigation,
     bool boldText,
+    NavigationMode navigationMode,
   }) {
     return MediaQueryData(
       size: size ?? this.size,
@@ -389,13 +395,13 @@ class MediaQueryData {
       viewPadding: viewPadding ?? this.viewPadding,
       viewInsets: viewInsets ?? this.viewInsets,
       systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
-      physicalDepth: physicalDepth ?? this.physicalDepth,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
       highContrast: highContrast ?? this.highContrast,
       disableAnimations: disableAnimations ?? this.disableAnimations,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
+      navigationMode: navigationMode ?? this.navigationMode,
     );
   }
 
@@ -557,13 +563,13 @@ class MediaQueryData {
         && other.padding == padding
         && other.viewPadding == viewPadding
         && other.viewInsets == viewInsets
-        && other.physicalDepth == physicalDepth
         && other.alwaysUse24HourFormat == alwaysUse24HourFormat
         && other.highContrast == highContrast
         && other.disableAnimations == disableAnimations
         && other.invertColors == invertColors
         && other.accessibleNavigation == accessibleNavigation
-        && other.boldText == boldText;
+        && other.boldText == boldText
+        && other.navigationMode == navigationMode;
   }
 
   @override
@@ -576,13 +582,13 @@ class MediaQueryData {
       padding,
       viewPadding,
       viewInsets,
-      physicalDepth,
       alwaysUse24HourFormat,
       highContrast,
       disableAnimations,
       invertColors,
       accessibleNavigation,
       boldText,
+      navigationMode,
     );
   }
 
@@ -596,13 +602,13 @@ class MediaQueryData {
       'padding: $padding',
       'viewPadding: $viewPadding',
       'viewInsets: $viewInsets',
-      'physicalDepth: $physicalDepth',
       'alwaysUse24HourFormat: $alwaysUse24HourFormat',
       'accessibleNavigation: $accessibleNavigation',
       'highContrast: $highContrast',
       'disableAnimations: $disableAnimations',
       'invertColors: $invertColors',
       'boldText: $boldText',
+      'navigationMode: ${describeEnum(navigationMode)}',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
@@ -837,6 +843,17 @@ class MediaQuery extends InheritedWidget {
     return MediaQuery.of(context, nullOk: true)?.platformBrightness ?? Brightness.light;
   }
 
+  /// Returns highContrast for the nearest MediaQuery ancestor or false, if no
+  /// such ancestor exists.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQueryData.highContrast], which indicates the platform's
+  ///    desire to increase contrast.
+  static bool highContrastOf(BuildContext context) {
+    return MediaQuery.of(context, nullOk: true)?.highContrast ?? false;
+  }
+
   /// Returns the boldText accessibility setting for the nearest MediaQuery
   /// ancestor, or false if no such ancestor exists.
   static bool boldTextOverride(BuildContext context) {
@@ -851,4 +868,32 @@ class MediaQuery extends InheritedWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
   }
+}
+
+/// Describes the navigation mode to be set by a [MediaQuery] widget.
+///
+/// The different modes indicate the type of navigation to be used in a widget
+/// subtree for those widgets sensitive to it.
+///
+/// Use `MediaQuery.of(context).navigationMode` to determine the navigation mode
+/// in effect for the given context. Use a [MediaQuery] widget to set the
+/// navigation mode for its descendant widgets.
+enum NavigationMode {
+  /// This indicates a traditional keyboard-and-mouse navigation modality.
+  ///
+  /// This navigation mode is where the arrow keys can be used for secondary
+  /// modification operations, like moving sliders or cursors, and disabled
+  /// controls will lose focus and not be traversable.
+  traditional,
+
+  /// This indicates a directional-based navigation mode.
+  ///
+  /// This navigation mode indicates that arrow keys should be reserved for
+  /// navigation operations, and secondary modifications operations, like moving
+  /// sliders or cursors, will use alternative bindings or be disabled.
+  ///
+  /// Some behaviors are also affected by this mode. For instance, disabled
+  /// controls will retain focus when disabled, and will be able to receive
+  /// focus (although they remain disabled) when traversed.
+  directional,
 }

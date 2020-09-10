@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -500,7 +502,7 @@ void _defineTests() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
-  }, skip: isBrowser);
+  }, skip: true); // TODO(abrusher): Enable once engine PR #20385 lands.
 
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {

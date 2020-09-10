@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:ui' show TextDirection;
 
 export 'dart:ui' show
@@ -141,7 +142,6 @@ Axis flipAxis(Axis direction) {
     case Axis.vertical:
       return Axis.horizontal;
   }
-  return null;
 }
 
 /// A direction in which boxes flow vertically.
@@ -169,27 +169,27 @@ enum VerticalDirection {
 
 /// A direction along either the horizontal or vertical [Axis].
 enum AxisDirection {
-  /// Zero is at the bottom and positive values are above it: ⇈
+  /// Zero is at the bottom and positive values are above it: `⇈`
   ///
   /// Alphabetical content with a [GrowthDirection.forward] would have the A at
   /// the bottom and the Z at the top. This is an unusual configuration.
   up,
 
-  /// Zero is on the left and positive values are to the right of it: ⇉
+  /// Zero is on the left and positive values are to the right of it: `⇉`
   ///
   /// Alphabetical content with a [GrowthDirection.forward] would have the A on
   /// the left and the Z on the right. This is the ordinary reading order for a
   /// horizontal set of tabs in an English application, for example.
   right,
 
-  /// Zero is at the top and positive values are below it: ⇊
+  /// Zero is at the top and positive values are below it: `⇊`
   ///
   /// Alphabetical content with a [GrowthDirection.forward] would have the A at
   /// the top and the Z at the bottom. This is the ordinary reading order for a
   /// vertical list.
   down,
 
-  /// Zero is to the right and positive values are to the left of it: ⇇
+  /// Zero is to the right and positive values are to the left of it: `⇇`
   ///
   /// Alphabetical content with a [GrowthDirection.forward] would have the A at
   /// the right and the Z at the left. This is the ordinary reading order for a
@@ -212,7 +212,6 @@ Axis axisDirectionToAxis(AxisDirection axisDirection) {
     case AxisDirection.right:
       return Axis.horizontal;
   }
-  return null;
 }
 
 /// Returns the [AxisDirection] in which reading occurs in the given [TextDirection].
@@ -227,7 +226,6 @@ AxisDirection textDirectionToAxisDirection(TextDirection textDirection) {
     case TextDirection.ltr:
       return AxisDirection.right;
   }
-  return null;
 }
 
 /// Returns the opposite of the given [AxisDirection].
@@ -251,7 +249,6 @@ AxisDirection flipAxisDirection(AxisDirection axisDirection) {
     case AxisDirection.left:
       return AxisDirection.right;
   }
-  return null;
 }
 
 /// Returns whether traveling along the given axis direction visits coordinates
@@ -269,5 +266,4 @@ bool axisDirectionIsReversed(AxisDirection axisDirection) {
     case AxisDirection.right:
       return false;
   }
-  return null;
 }

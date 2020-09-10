@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -120,6 +122,7 @@ void main() {
 
   testWidgets('Passes cursor attributes to underlying TextField', (WidgetTester tester) async {
     const double cursorWidth = 3.14;
+    const double cursorHeight = 6.28;
     const Radius cursorRadius = Radius.circular(4);
     const Color cursorColor = Colors.purple;
 
@@ -129,6 +132,7 @@ void main() {
           child: Center(
             child: TextFormField(
               cursorWidth: cursorWidth,
+              cursorHeight: cursorHeight,
               cursorRadius: cursorRadius,
               cursorColor: cursorColor,
             ),
@@ -142,6 +146,7 @@ void main() {
 
     final TextField textFieldWidget = tester.widget(textFieldFinder);
     expect(textFieldWidget.cursorWidth, cursorWidth);
+    expect(textFieldWidget.cursorHeight, cursorHeight);
     expect(textFieldWidget.cursorRadius, cursorRadius);
     expect(textFieldWidget.cursorColor, cursorColor);
   });
@@ -189,7 +194,7 @@ void main() {
     expect(_value, 'Soup');
   });
 
-  testWidgets('autovalidate is passed to super', (WidgetTester tester) async {
+  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
     int _validateCalled = 0;
 
     await tester.pumpWidget(
@@ -197,7 +202,7 @@ void main() {
         home: Material(
           child: Center(
             child: TextFormField(
-              autovalidate: true,
+              autovalidateMode: AutovalidateMode.always,
               validator: (String value) {
                 _validateCalled++;
                 return null;
@@ -223,7 +228,7 @@ void main() {
           child: Center(
             child: TextFormField(
               enabled: true,
-              autovalidate: true,
+              autovalidateMode: AutovalidateMode.always,
               validator: (String value) {
                 _validateCalled += 1;
                 return null;
@@ -336,8 +341,8 @@ void main() {
     await tester.pump();
 
     // Context menu should not have paste.
-    expect(find.text('SELECT ALL'), findsOneWidget);
-    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('Select all'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
@@ -424,5 +429,64 @@ void main() {
 
     expect(find.text('initialValue'), findsNothing);
     expect(find.text('changedValue'), findsOneWidget);
+  });
+
+  testWidgets('autofillHints is passed to super', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              autofillHints: const <String>[AutofillHints.countryName],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextField widget = tester.widget(find.byType(TextField));
+    expect(widget.autofillHints, equals(const <String>[AutofillHints.countryName]));
+  });
+
+  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
+    int _validateCalled = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Scaffold(
+            body: TextFormField(
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: (String value) {
+                _validateCalled++;
+                return null;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(_validateCalled, 0);
+    await tester.enterText(find.byType(TextField), 'a');
+    await tester.pump();
+    expect(_validateCalled, 1);
+  });
+
+  testWidgets('autovalidateMode and autovalidate should not be used at the same time', (WidgetTester tester) async {
+    expect(() async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Scaffold(
+              body: TextFormField(
+                autovalidate: true,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+              ),
+            ),
+          ),
+        ),
+      );
+      }, throwsAssertionError);
   });
 }

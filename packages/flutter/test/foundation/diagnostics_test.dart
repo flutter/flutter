@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:ui';
 
@@ -901,6 +903,14 @@ void main() {
     expect(describeEnum(ExampleEnum.hello), equals('hello'));
     expect(describeEnum(ExampleEnum.world), equals('world'));
     expect(describeEnum(ExampleEnum.deferToChild), equals('deferToChild'));
+    expect(
+      () => describeEnum('Hello World'),
+      throwsA(isAssertionError.having(
+        (AssertionError e) => e.message,
+        'message',
+        'The provided object "Hello World" is not an enum.'),
+      ),
+    );
   });
 
   test('string property test', () {

@@ -50,6 +50,8 @@ import '../gen_material_localizations.dart';
 import '../localizations_utils.dart';
 import '../localizations_validator.dart';
 
+import 'encode_kn_arb_files.dart';
+
 /// This is the core of this script; it generates the code used for translations.
 String generateArbBasedLocalizationSubclasses({
   @required Map<LocaleInfo, Map<String, String>> localeToResources,
@@ -76,11 +78,6 @@ String generateArbBasedLocalizationSubclasses({
   assert(supportedLanguagesConstant.isNotEmpty);
   assert(supportedLanguagesDocMacro.isNotEmpty);
 
-  // See https://github.com/flutter/flutter/issues/53036 for context on why
-  // 'no' is being used as a synonym for 'nb'. It only uses this synonym
-  // if 'nb' is not detected as a valid arb file.
-  bool isNbSynonymOfNo = false;
-
   final StringBuffer output = StringBuffer();
   output.writeln(generateHeader('dart dev/tools/localization/bin/gen_localizations.dart --overwrite'));
 
@@ -104,12 +101,6 @@ String generateArbBasedLocalizationSubclasses({
     languageToLocales[locale.languageCode] ??= <LocaleInfo>[];
     languageToLocales[locale.languageCode].add(locale);
     allResourceIdentifiers.addAll(localeToResources[locale].keys.toList()..sort());
-  }
-
-  if (languageToLocales['no'] != null && languageToLocales['nb'] == null) {
-    languageToLocales['nb'] ??= <LocaleInfo>[];
-    languageToLocales['nb'].add(LocaleInfo.fromString('nb'));
-    isNbSynonymOfNo = true;
   }
 
   // We generate one class per supported language (e.g.
@@ -141,21 +132,6 @@ String generateArbBasedLocalizationSubclasses({
   final LocaleInfo canonicalLocale = LocaleInfo.fromString('en');
   for (final String languageName in languageCodes) {
     final LocaleInfo languageLocale = LocaleInfo.fromString(languageName);
-
-    // See https://github.com/flutter/flutter/issues/53036 for context on why
-    // 'no' is being used as a synonym for 'nb'. It only uses this synonym
-    // if 'nb' is not detected as a valid arb file.
-    if (languageName == 'nb' && isNbSynonymOfNo) {
-      output.writeln(generateClassDeclaration(
-        languageLocale,
-        generatedClassPrefix,
-        '${generatedClassPrefix}No'),
-      );
-      output.writeln(generateConstructor(languageLocale));
-      output.writeln('}');
-      supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)}, which, in this library, is a synonym of `no`');
-      continue;
-    }
 
     output.writeln(generateClassDeclaration(languageLocale, generatedClassPrefix, baseClass));
     output.writeln(generateConstructor(languageLocale));
@@ -524,6 +500,16 @@ void main(List<String> rawArgs) {
     validateEnglishLocalizations(File(path.join(directory.path, 'cupertino_en.arb')));
   } on ValidationError catch (exception) {
     exitWithError('$exception');
+  }
+
+  // Only rewrite material_kn.arb and cupertino_en.arb if overwriting the
+  // Material and Cupertino localizations files.
+  if (options.writeToFile) {
+    // Encodes the material_kn.arb file and the cupertino_en.arb files before
+    // generating localizations. This prevents a subset of Emacs users from
+    // crashing when opening up the Flutter source code.
+    // See https://github.com/flutter/flutter/issues/36704 for more context.
+    encodeKnArbFiles(directory);
   }
 
   precacheLanguageAndRegionTags();

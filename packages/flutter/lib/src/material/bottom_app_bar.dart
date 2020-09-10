@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -70,8 +72,9 @@ class BottomAppBar extends StatefulWidget {
 
   /// The bottom app bar's background color.
   ///
-  /// If this property is null then [ThemeData.bottomAppBarTheme.color] is used,
-  /// if that's null then [ThemeData.bottomAppBarColor] is used.
+  /// If this property is null then [BottomAppBarTheme.color] of
+  /// [ThemeData.bottomAppBarTheme] is used. If that's null then
+  /// [ThemeData.bottomAppBarColor] is used.
   final Color color;
 
   /// The z-coordinate at which to place this bottom app bar relative to its
@@ -80,14 +83,16 @@ class BottomAppBar extends StatefulWidget {
   /// This controls the size of the shadow below the bottom app bar. The
   /// value is non-negative.
   ///
-  /// If this property is null then [ThemeData.bottomAppBarTheme.elevation] is used,
-  /// if that's null, the default value is 8.
+  /// If this property is null then [BottomAppBarTheme.elevation] of
+  /// [ThemeData.bottomAppBarTheme] is used. If that's null, the default value
+  /// is 8.
   final double elevation;
 
   /// The notch that is made for the floating action button.
   ///
-  /// If this property is null then [ThemeData.bottomAppBarTheme.shape] is used,
-  /// if that's null then the shape will be rectangular with no notch.
+  /// If this property is null then [BottomAppBarTheme.shape] of
+  /// [ThemeData.bottomAppBarTheme] is used. If that's null then the shape will
+  /// be rectangular with no notch.
   final NotchedShape shape;
 
   /// {@macro flutter.widgets.Clip}

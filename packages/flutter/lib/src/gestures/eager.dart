@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'arena.dart';
 import 'events.dart';
 import 'recognizer.dart';
@@ -15,7 +16,7 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Create an eager gesture recognizer.
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
-  EagerGestureRecognizer({ PointerDeviceKind kind }) : super(kind: kind);
+  EagerGestureRecognizer({ PointerDeviceKind? kind }) : super(kind: kind);
 
   @override
   void addAllowedPointer(PointerDownEvent event) {

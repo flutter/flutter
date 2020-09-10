@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:async';
 import 'dart:developer';
 import 'dart:ui' as ui;
@@ -89,7 +90,10 @@ abstract class ShaderWarmUp {
     final ui.Picture picture = recorder.endRecording();
     final TimelineTask shaderWarmUpTask = TimelineTask();
     shaderWarmUpTask.start('Warm-up shader');
-    await picture.toImage(size.width.ceil(), size.height.ceil());
+    // Picture.toImage is not yet implemented on the web.
+    if (!kIsWeb) {
+      await picture.toImage(size.width.ceil(), size.height.ceil());
+    }
     shaderWarmUpTask.finish();
   }
 }

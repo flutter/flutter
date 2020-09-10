@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -49,6 +51,8 @@ class BouncingScrollSimulation extends Simulation {
       _springSimulation = _overscrollSimulation(position, velocity);
       _springTime = double.negativeInfinity;
     } else {
+      // Taken from UIScrollView.decelerationRate (.normal = 0.998)
+      // 0.998^1000 = ~0.135
       _frictionSimulation = FrictionSimulation(0.135, position, velocity);
       final double finalX = _frictionSimulation.finalX;
       if (velocity > 0.0 && finalX > trailingExtent) {

@@ -307,13 +307,22 @@ class IOSSimulator extends Device {
   @override
   bool get supportsHotRestart => true;
 
+  @override
+  Future<bool> get supportsHardwareRendering async => false;
+
+  @override
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
+
   Map<ApplicationPackage, _IOSSimulatorLogReader> _logReaders;
   _IOSSimulatorDevicePortForwarder _portForwarder;
 
   String get xcrunPath => globals.fs.path.join('/usr', 'bin', 'xcrun');
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app) {
+  Future<bool> isAppInstalled(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) {
     return _simControl.isInstalled(id, app.id);
   }
 
@@ -321,7 +330,10 @@ class IOSSimulator extends Device {
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  Future<bool> installApp(covariant IOSApp app) async {
+  Future<bool> installApp(
+    covariant IOSApp app, {
+    String userIdentifier,
+  }) async {
     try {
       final IOSApp iosApp = app;
       await _simControl.install(id, iosApp.simulatorBundlePath);
@@ -332,7 +344,10 @@ class IOSSimulator extends Device {
   }
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app) async {
+  Future<bool> uninstallApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async {
     try {
       await _simControl.uninstall(id, app.id);
       return true;
@@ -348,10 +363,10 @@ class IOSSimulator extends Device {
       return false;
     }
 
-    // Check if the device is part of a blacklisted category.
+    // Check if the device is part of a blocked category.
     // We do not yet support WatchOS or tvOS devices.
-    final RegExp blacklist = RegExp(r'Apple (TV|Watch)', caseSensitive: false);
-    if (blacklist.hasMatch(name)) {
+    final RegExp blocklist = RegExp(r'Apple (TV|Watch)', caseSensitive: false);
+    if (blocklist.hasMatch(name)) {
       _supportMessage = 'Flutter does not support Apple TV or Apple Watch.';
       return false;
     }
@@ -378,6 +393,7 @@ class IOSSimulator extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
+    String userIdentifier,
   }) async {
     if (!prebuiltApplication && package is BuildableIOSApp) {
       globals.printTrace('Building ${package.name} for $id.');
@@ -395,6 +411,7 @@ class IOSSimulator extends Device {
     }
 
     // Prepare launch arguments.
+    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
     final List<String> args = <String>[
       '--enable-dart-profiling',
       if (debuggingOptions.debuggingEnabled) ...<String>[
@@ -406,7 +423,8 @@ class IOSSimulator extends Device {
         if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
         if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
         if (debuggingOptions.useTestFonts) '--use-test-fonts',
-        if (debuggingOptions.traceWhitelist != null) '--trace-whitelist="${debuggingOptions.traceWhitelist}"',
+        if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
+        if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags'
         '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
       ],
     ];
@@ -489,7 +507,10 @@ class IOSSimulator extends Device {
   }
 
   @override
-  Future<bool> stopApp(ApplicationPackage app) async {
+  Future<bool> stopApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async {
     // Currently we don't have a way to stop an app running on iOS.
     return false;
   }
@@ -525,7 +546,7 @@ class IOSSimulator extends Device {
     covariant IOSApp app,
     bool includePastLogs = false,
   }) {
-    assert(app is IOSApp);
+    assert(app == null || app is IOSApp);
     assert(!includePastLogs, 'Past log reading not supported on iOS simulators.');
     _logReaders ??= <ApplicationPackage, _IOSSimulatorLogReader>{};
     return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));
@@ -685,7 +706,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   // Match the log prefix (in order to shorten it):
   // * Xcode 8: Sep 13 15:28:51 cbracken-macpro localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
   // * Xcode 9: 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
-  static final RegExp _mapRegex = RegExp(r'\S+ +\S+ +\S+ +(\S+ +)?(\S+)\[\d+\]\)?: (\(.*?\))? *(.*)$');
+  static final RegExp _mapRegex = RegExp(r'\S+ +\S+ +(?:\S+) (.+?(?=\[))\[\d+\]\)?: (\(.*?\))? *(.*)$');
 
   // Jan 31 19:23:28 --- last message repeated 1 time ---
   static final RegExp _lastMessageSingleRegex = RegExp(r'\S+ +\S+ +\S+ --- last message repeated 1 time ---$');
@@ -700,12 +721,16 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   String _filterDeviceLine(String string) {
     final Match match = _mapRegex.matchAsPrefix(string);
     if (match != null) {
-      final String category = match.group(2);
-      final String tag = match.group(3);
-      final String content = match.group(4);
 
-      // Filter out non-Flutter originated noise from the engine.
-      if (_appName != null && category != _appName) {
+      // The category contains the text between the date and the PID. Depending on which version of iOS being run,
+      // it can contain "hostname App Name" or just "App Name".
+      final String category = match.group(1);
+      final String tag = match.group(2);
+      final String content = match.group(3);
+
+      // Filter out log lines from an app other than this one (category doesn't match the app name).
+      // If the hostname is included in the category, check that it doesn't end with the app name.
+      if (_appName != null && !category.endsWith(_appName)) {
         return null;
       }
 
@@ -725,7 +750,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
       if (_appName == null) {
         return '$category: $content';
-      } else if (category == _appName) {
+      } else if (category == _appName || category.endsWith(' $_appName')) {
         return content;
       }
 
@@ -843,11 +868,12 @@ int compareIosVersions(String v1, String v2) {
 /// Matches on device type given an identifier.
 ///
 /// Example device type identifiers:
-///   ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-5
-///   ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-6
-///   ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-6s-Plus
-///   ✗ com.apple.CoreSimulator.SimDeviceType.iPad-2
-///   ✗ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-38mm
+///
+/// - ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-5
+/// - ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-6
+/// - ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-6s-Plus
+/// - ✗ com.apple.CoreSimulator.SimDeviceType.iPad-2
+/// - ✗ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-38mm
 final RegExp _iosDeviceTypePattern =
     RegExp(r'com.apple.CoreSimulator.SimDeviceType.iPhone-(\d+)(.*)');
 

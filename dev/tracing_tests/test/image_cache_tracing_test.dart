@@ -5,6 +5,8 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:isolate' as isolate;
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,11 +33,20 @@ void main() {
 
   test('Image cache tracing', () async {
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+    final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
     PaintingBinding.instance.imageCache.putIfAbsent(
       'Test',
       () => completer1,
     );
     PaintingBinding.instance.imageCache.clear();
+
+    // ignore: invalid_use_of_protected_member
+    completer2.setImage(const ImageInfo(image: TestImage()));
+    PaintingBinding.instance.imageCache.putIfAbsent(
+      'Test2',
+      () => completer2,
+    );
+    PaintingBinding.instance.imageCache.evict('Test2');
 
     final Timeline timeline = await vmService.getVMTimeline();
     _expectTimelineEvents(
@@ -58,6 +69,14 @@ void main() {
             'currentSizeInBytes': 0,
             'isolateId': isolateId,
           }
+        },
+        <String, dynamic>{
+          'name': 'ImageCache.putIfAbsent',
+          'args': <String, dynamic>{'key': 'Test2', 'isolateId': isolateId}
+        },
+        <String, dynamic>{
+          'name': 'ImageCache.evict',
+          'args': <String, dynamic>{'sizeInBytes': 0, 'isolateId': isolateId}
         },
       ],
     );
@@ -92,3 +111,19 @@ bool _mapsEqual(Map<String, dynamic> expectedArgs, Map<String, dynamic> args) {
 }
 
 class TestImageStreamCompleter extends ImageStreamCompleter {}
+
+class TestImage implements ui.Image {
+  const TestImage({this.height = 0, this.width = 0});
+  @override
+  final int height;
+  @override
+  final int width;
+
+  @override
+  void dispose() { }
+
+  @override
+  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) {
+    throw UnimplementedError();
+  }
+}

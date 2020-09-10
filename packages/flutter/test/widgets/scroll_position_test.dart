@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -226,5 +228,42 @@ void main() {
       alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
     );
     expect(controller.position.pixels, equals(0.0));
+  });
+
+  testWidgets('jumpTo recomends deferred loading', (WidgetTester tester) async {
+    int loadedWithDeferral = 0;
+    int buildCount = 0;
+    const double height = 500;
+    await tester.pumpWidget(MaterialApp(
+      home: ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          buildCount += 1;
+          if (Scrollable.recommendDeferredLoadingForContext(context)) {
+            loadedWithDeferral += 1;
+          }
+          return const SizedBox(height: height);
+        },
+      ),
+    ));
+
+    // The two visible on screen should have loaded without deferral.
+    expect(buildCount, 2);
+    expect(loadedWithDeferral, 0);
+
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    position.jumpTo(height * 100);
+    await tester.pump();
+
+    // All but the first two that were loaded normally should have gotten a
+    // recommendation to defer.
+    expect(buildCount, 102);
+    expect(loadedWithDeferral, 100);
+
+    position.jumpTo(height * 102);
+    await tester.pump();
+
+    // The smaller jump should not have recommended deferral.
+    expect(buildCount, 104);
+    expect(loadedWithDeferral, 100);
   });
 }

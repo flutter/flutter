@@ -10,16 +10,26 @@ import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 import '../framework/framework.dart';
 import '../framework/utils.dart';
+import '../versions/gallery.dart' show galleryVersion;
 
 class NewGalleryPerfTest extends PerfTest {
-  NewGalleryPerfTest(this.galleryDir) : super(galleryDir.path, 'test_driver/transitions_perf.dart', 'transitions');
+  NewGalleryPerfTest(
+    this.galleryDir, {
+    String timelineFileName = 'transitions',
+    String dartDefine = '',
+  }) : super(
+    galleryDir.path,
+    'test_driver/transitions_perf.dart',
+    timelineFileName,
+    dartDefine: dartDefine,
+  );
 
   @override
   Future<TaskResult> run() async {
     // Manually roll the new gallery version for now. If the new gallery repo
     // turns out to be updated frequently in the future, we can set up an auto
     // roller to update this version.
-    await getNewGallery('59489e5571ddf554fc62ef52e9b16f1fed291026', galleryDir);
+    await getNewGallery(galleryVersion, galleryDir);
     return await super.run();
   }
 

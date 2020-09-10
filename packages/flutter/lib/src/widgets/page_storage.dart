@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
@@ -128,8 +130,13 @@ class PageStorageBucket {
 /// Usually you don't need to explicitly use a [PageStorage], since it's already
 /// included in routes.
 ///
-/// [PageStorageKey] is used by [Scrollable] if
-/// `keepScrollOffset` is enabled to save their [ScrollPosition]s.
+/// [PageStorageKey] is used by [Scrollable] if [ScrollController.keepScrollOffset]
+/// is enabled to save their [ScrollPosition]s. When more than one
+/// scrollable ([ListView], [SingleChildScrollView], [TextField], etc.) appears
+/// within the widget's closest ancestor [PageStorage] (such as within the same route),
+/// if you want to save all of their positions independently,
+/// you should give each of them unique [PageStorageKey]s, or set some of their
+/// `keepScrollOffset` false to prevent saving.
 ///
 /// {@tool dartpad --template=freeform}
 ///
@@ -177,7 +184,7 @@ class PageStorageBucket {
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       appBar: AppBar(
-///         title: Text("Persistance Example"),
+///         title: Text("Persistence Example"),
 ///       ),
 ///       body: PageStorage(
 ///         child: pages[currentTab],
@@ -193,11 +200,11 @@ class PageStorageBucket {
 ///         items: <BottomNavigationBarItem>[
 ///           BottomNavigationBarItem(
 ///             icon: Icon(Icons.home),
-///             title: Text('page 1'),
+///             label: 'page 1',
 ///           ),
 ///           BottomNavigationBarItem(
 ///             icon: Icon(Icons.settings),
-///             title: Text('page2'),
+///             label: 'page2',
 ///           ),
 ///         ],
 ///       ),

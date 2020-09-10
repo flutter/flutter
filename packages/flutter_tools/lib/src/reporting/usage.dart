@@ -57,13 +57,14 @@ enum CustomDimensions {
   commandResultEventMaxRss,  // cd44
   commandRunAndroidEmbeddingVersion, // cd45
   commandPackagesAndroidEmbeddingVersion, // cd46
+  nullSafety, // cd47
 }
 
 String cdKey(CustomDimensions cd) => 'cd${cd.index + 1}';
 
-Map<String, String> _useCdKeys(Map<CustomDimensions, String> parameters) {
-  return parameters.map((CustomDimensions k, String v) =>
-      MapEntry<String, String>(cdKey(k), v));
+Map<String, String> _useCdKeys(Map<CustomDimensions, Object> parameters) {
+  return parameters.map((CustomDimensions k, Object v) =>
+      MapEntry<String, String>(cdKey(k), v.toString()));
 }
 
 abstract class Usage {
@@ -87,7 +88,7 @@ abstract class Usage {
 
   /// Uses the global [Usage] instance to send a 'command' to analytics.
   static void command(String command, {
-    Map<CustomDimensions, String> parameters,
+    Map<CustomDimensions, Object> parameters,
   }) => globals.flutterUsage.sendCommand(command, parameters: _useCdKeys(parameters));
 
   /// Whether this is the first run of the tool.
@@ -306,7 +307,7 @@ class _DefaultUsage implements Usage {
 
     final Map<String, String> paramsWithLocalTime = <String, String>{
       ...?parameters,
-      cdKey(CustomDimensions.localTime): formatDateTime(systemClock.now()),
+      cdKey(CustomDimensions.localTime): formatDateTime(globals.systemClock.now()),
     };
     _analytics.sendScreenView(command, parameters: paramsWithLocalTime);
   }
@@ -325,7 +326,7 @@ class _DefaultUsage implements Usage {
 
     final Map<String, String> paramsWithLocalTime = <String, String>{
       ...?parameters,
-      cdKey(CustomDimensions.localTime): formatDateTime(systemClock.now()),
+      cdKey(CustomDimensions.localTime): formatDateTime(globals.systemClock.now()),
     };
 
     _analytics.sendEvent(

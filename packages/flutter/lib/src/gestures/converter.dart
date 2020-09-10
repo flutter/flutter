@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:ui' as ui show PointerData, PointerChange, PointerSignalKind;
 
 import 'events.dart';
@@ -32,7 +33,7 @@ int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
 /// [dart:ui.Window.onPointerDataPacket], and converts them to [PointerEvent]
 /// objects.
 class PointerEventConverter {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   PointerEventConverter._();
@@ -47,6 +48,7 @@ class PointerEventConverter {
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) sync* {
     for (final ui.PointerData datum in data) {
       final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
+      assert(position != null);
       final Offset delta = Offset(datum.physicalDeltaX, datum.physicalDeltaY) / devicePixelRatio;
       final double radiusMinor = _toLogicalPixels(datum.radiusMinor, devicePixelRatio);
       final double radiusMajor = _toLogicalPixels(datum.radiusMajor, devicePixelRatio);
@@ -72,6 +74,7 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
+              embedderId: datum.embedderId,
             );
             break;
           case ui.PointerChange.hover:
@@ -95,6 +98,7 @@ class PointerEventConverter {
               orientation: datum.orientation,
               tilt: datum.tilt,
               synthesized: datum.synthesized,
+              embedderId: datum.embedderId,
             );
             break;
           case ui.PointerChange.down:
@@ -117,6 +121,7 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
+              embedderId: datum.embedderId,
             );
             break;
           case ui.PointerChange.move:
@@ -142,6 +147,7 @@ class PointerEventConverter {
               tilt: datum.tilt,
               platformData: datum.platformData,
               synthesized: datum.synthesized,
+              embedderId: datum.embedderId,
             );
             break;
           case ui.PointerChange.up:
@@ -165,6 +171,7 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
+              embedderId: datum.embedderId,
             );
             break;
           case ui.PointerChange.cancel:
@@ -187,6 +194,7 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
+              embedderId: datum.embedderId,
             );
             break;
           case ui.PointerChange.remove:
@@ -201,11 +209,12 @@ class PointerEventConverter {
               distanceMax: datum.distanceMax,
               radiusMin: radiusMin,
               radiusMax: radiusMax,
+              embedderId: datum.embedderId,
             );
             break;
         }
       } else {
-        switch (datum.signalKind) {
+        switch (datum.signalKind!) {
           case ui.PointerSignalKind.scroll:
             final Offset scrollDelta =
                 Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
@@ -215,6 +224,7 @@ class PointerEventConverter {
               device: datum.device,
               position: position,
               scrollDelta: scrollDelta,
+              embedderId: datum.embedderId,
             );
             break;
           case ui.PointerSignalKind.none:
@@ -228,6 +238,5 @@ class PointerEventConverter {
     }
   }
 
-  static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) =>
-      physicalPixels == null ? null : physicalPixels / devicePixelRatio;
+  static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) => physicalPixels / devicePixelRatio;
 }

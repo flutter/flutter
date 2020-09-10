@@ -18,5 +18,7 @@
   "cutButtonLabel": "برش",
   "copyButtonLabel": "کپی",
   "pasteButtonLabel": "جای‌گذاری",
-  "selectAllButtonLabel": "انتخاب همه"
+  "selectAllButtonLabel": "انتخاب همه",
+  "tabSemanticsLabel": "برگه $tabIndex از $tabCount",
+  "modalBarrierDismissLabel": "نپذیرفتن"
 }

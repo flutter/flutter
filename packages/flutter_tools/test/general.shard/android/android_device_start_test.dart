@@ -7,6 +7,8 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:mockito/mockito.dart';
@@ -55,11 +57,16 @@ void main() {
     TargetPlatform.android_arm64,
     TargetPlatform.android_x64,
   ]) {
-    testUsingContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
-      const String deviceId = '1234';
+    testWithoutContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
       final String arch = getNameForAndroidArch(
         getAndroidArchForName(getNameForTargetPlatform(targetPlatform)));
-      final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
+      final AndroidDevice device = AndroidDevice('1234', modelID: 'TestModel',
+        fileSystem: fileSystem,
+        processManager: processManager,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(operatingSystem: 'linux'),
+        androidSdk: androidSdk,
+      );
       final File apkFile = fileSystem.file('app.apk')..createSync();
       final AndroidApk apk = AndroidApk(
         id: 'FlutterApp',
@@ -117,16 +124,17 @@ void main() {
 
       expect(launchResult.started, true);
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => androidSdk,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
   }
 
-  testUsingContext('AndroidDevice.startApp does not allow release builds on x86', () async {
-    const String deviceId = '1234';
-    final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
+  testWithoutContext('AndroidDevice.startApp does not allow release builds on x86', () async {
+    final AndroidDevice device = AndroidDevice('1234', modelID: 'TestModel',
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'linux'),
+      androidSdk: androidSdk,
+    );
     final File apkFile = fileSystem.file('app.apk')..createSync();
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
@@ -155,15 +163,16 @@ void main() {
 
     expect(launchResult.started, false);
     expect(processManager.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    AndroidSdk: () => androidSdk,
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
   });
 
-  testUsingContext('AndroidDevice.startApp forwards all supported debugging options', () async {
-    const String deviceId = '1234';
-    final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
+  testWithoutContext('AndroidDevice.startApp forwards all supported debugging options', () async {
+    final AndroidDevice device = AndroidDevice('1234', modelID: 'TestModel',
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'linux'),
+      androidSdk: androidSdk,
+    );
     final File apkFile = fileSystem.file('app.apk')..createSync();
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
@@ -179,17 +188,27 @@ void main() {
       command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
     ));
     processManager.addCommand(const FakeCommand(
-      command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+      command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', '--user', '10', 'FlutterApp'],
     ));
     processManager.addCommand(const FakeCommand(
-      command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', 'FlutterApp'],
+      command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'FlutterApp'],
     ));
     processManager.addCommand(kAdbVersionCommand);
     processManager.addCommand(kStartServer);
     // TODO(jonahwilliams): investigate why this doesn't work.
     // This doesn't work with the current Android log reader implementation.
     processManager.addCommand(const FakeCommand(
-      command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app.apk'],
+      command: <String>[
+        'adb',
+        '-s',
+        '1234',
+        'install',
+        '-t',
+        '-r',
+        '--user',
+        '10',
+        'app.apk'
+      ],
       stdout: '\n\nObservatory listening on http://127.0.0.1:456\n\n',
     ));
     processManager.addCommand(kShaCommand);
@@ -198,6 +217,8 @@ void main() {
         'adb',
         '-s',
         '1234',
+        'shell',
+        '-x',
         'logcat',
         '-v',
         'time',
@@ -223,18 +244,20 @@ void main() {
         '--ez', 'enable-software-rendering', 'true',
         '--ez', 'skia-deterministic-rendering', 'true',
         '--ez', 'trace-skia', 'true',
-        '--ez', 'trace-whitelist', 'bar,baz',
+        '--ez', 'trace-allowlist', 'bar,baz',
         '--ez', 'trace-systrace', 'true',
         '--ez', 'endless-trace-buffer', 'true',
         '--ez', 'dump-skp-on-shader-compilation', 'true',
         '--ez', 'cache-sksl', 'true',
+        '--ez', 'purge-persistent-cache', 'true',
         '--ez', 'enable-checked-mode', 'true',
         '--ez', 'verify-entry-points', 'true',
         '--ez', 'start-paused', 'true',
         '--ez', 'disable-service-auth-codes', 'true',
-        '--es', 'dart-flags', 'foo',
+        '--es', 'dart-flags', 'foo,--null_assertions',
         '--ez', 'use-test-fonts', 'true',
         '--ez', 'verbose-logging', 'true',
+        '--user', '10',
         'FlutterActivity',
       ],
     ));
@@ -250,24 +273,23 @@ void main() {
         enableSoftwareRendering: true,
         skiaDeterministicRendering: true,
         traceSkia: true,
-        traceWhitelist: 'bar,baz',
+        traceAllowlist: 'bar,baz',
         traceSystrace: true,
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,
         cacheSkSL: true,
+        purgePersistentCache: true,
         useTestFonts: true,
         verboseSystemLogs: true,
+        nullAssertions: true,
       ),
       platformArgs: <String, dynamic>{},
+      userIdentifier: '10',
     );
 
     // This fails to start due to observatory discovery issues.
     expect(launchResult.started, false);
     expect(processManager.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    AndroidSdk: () => androidSdk,
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
   });
 }
 

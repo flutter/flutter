@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -459,6 +461,46 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
+  testWidgets('IconButton keeps focus when disabled in directional navigation mode.', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'IconButton');
+    await tester.pumpWidget(
+      wrap(
+        child: MediaQuery(
+          data: const MediaQueryData(
+            navigationMode: NavigationMode.directional,
+          ),
+          child: IconButton(
+            focusNode: focusNode,
+            autofocus: true,
+            onPressed: () {},
+            icon: const Icon(Icons.link),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await tester.pumpWidget(
+      wrap(
+        child: MediaQuery(
+          data: const MediaQueryData(
+            navigationMode: NavigationMode.directional,
+          ),
+          child: IconButton(
+            focusNode: focusNode,
+            autofocus: true,
+            onPressed: null,
+            icon: const Icon(Icons.link),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+  });
+
   testWidgets("Disabled IconButton can't be traversed to when disabled.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: 'IconButton 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'IconButton 2');
@@ -597,6 +639,49 @@ void main() {
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(60, 40)));
+  });
+
+  testWidgets('IconButton.mouseCursor changes cursor on hover', (WidgetTester tester) async {
+    // Test argument works
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              mouseCursor: SystemMouseCursors.forbidden,
+              icon: const Icon(Icons.play_arrow),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(IconButton)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+
+    // Test default is click
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.play_arrow),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 }
 

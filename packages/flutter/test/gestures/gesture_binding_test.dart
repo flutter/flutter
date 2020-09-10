@@ -2,23 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../flutter_test_alternative.dart';
 
 typedef HandleEventCallback = void Function(PointerEvent event);
 
-class TestGestureFlutterBinding extends BindingBase with GestureBinding {
+class TestGestureFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
   HandleEventCallback callback;
+  FrameCallback frameCallback;
+  Duration frameTime;
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
     if (callback != null)
       callback(event);
+  }
+
+  @override
+  Duration get currentSystemFrameTimeStamp {
+    assert(frameTime != null);
+    return frameTime;
+  }
+
+  @override
+  int scheduleFrameCallback(FrameCallback callback, {bool rescheduling = false}) {
+    frameCallback = callback;
+    return 0;
   }
 }
 
@@ -27,6 +44,7 @@ TestGestureFlutterBinding _binding = TestGestureFlutterBinding();
 void ensureTestGestureBinding() {
   _binding ??= TestGestureFlutterBinding();
   assert(GestureBinding.instance != null);
+  assert(SchedulerBinding.instance != null);
 }
 
 void main() {

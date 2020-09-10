@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -24,7 +26,7 @@ abstract class PreferredSizeWidget implements Widget {
   /// In many cases it's only necessary to define one preferred dimension.
   /// For example the [Scaffold] only depends on its app bar's preferred
   /// height. In that case implementations of this method can just return
-  /// `new Size.fromHeight(myAppBarHeight)`;
+  /// `new Size.fromHeight(myAppBarHeight)`.
   Size get preferredSize;
 }
 

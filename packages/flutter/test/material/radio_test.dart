@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -235,7 +237,24 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          id: 2,
+          id: 1,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasCheckedState,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isInMutuallyExclusiveGroup,
+            SemanticsFlag.isFocusable,  // This flag is delayed by 1 frame.
+          ],
+        ),
+      ],
+    ), ignoreRect: true, ignoreTransform: true));
+
+    await tester.pump();
+
+    // Now the isFocusable should be gone.
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 1,
           flags: <SemanticsFlag>[
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
@@ -256,7 +275,7 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           flags: <SemanticsFlag>[
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.isChecked,
@@ -612,5 +631,86 @@ void main() {
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(60, 36)));
+  });
+
+  testWidgets('Radio changes mouse cursor when hovered', (WidgetTester tester) async {
+    const Key key = ValueKey<int>(1);
+    // Test Radio() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Radio<int>(
+                  key: key,
+                  mouseCursor: SystemMouseCursors.text,
+                  value: 1,
+                  onChanged: (int v) {},
+                  groupValue: 2,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byKey(key)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Radio<int>(
+                  value: 1,
+                  onChanged: (int v) {},
+                  groupValue: 2,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Radio<int>(
+                  value: 1,
+                  onChanged: null,
+                  groupValue: 2,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 }

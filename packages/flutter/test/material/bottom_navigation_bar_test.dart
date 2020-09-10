@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -10,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import '../rendering/mock_canvas.dart';
-import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('BottomNavigationBar callback test', (WidgetTester tester) async {
@@ -951,7 +952,6 @@ void main() {
     expect(builderIconSize, 12.0);
   });
 
-
   testWidgets('BottomNavigationBar responds to textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -1023,6 +1023,133 @@ void main() {
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
     expect(box.size.height, equals(66.0));
+  });
+
+  testWidgets('BottomNavigationBar does not grow with textScaleFactor when labels are provided', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                label: 'A',
+                icon: Icon(Icons.ac_unit),
+              ),
+              BottomNavigationBarItem(
+                label: 'B',
+                icon: Icon(Icons.battery_alert),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox defaultBox = tester.renderObject(find.byType(BottomNavigationBar));
+    expect(defaultBox.size.height, equals(kBottomNavigationBarHeight));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                label: 'A',
+                icon: Icon(Icons.ac_unit),
+              ),
+              BottomNavigationBarItem(
+                label: 'B',
+                icon: Icon(Icons.battery_alert),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox shiftingBox = tester.renderObject(find.byType(BottomNavigationBar));
+    expect(shiftingBox.size.height, equals(kBottomNavigationBarHeight));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaleFactor: 2.0),
+          child: Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  label: 'A',
+                  icon: Icon(Icons.ac_unit),
+                ),
+                BottomNavigationBarItem(
+                  label: 'B',
+                  icon: Icon(Icons.battery_alert),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
+    expect(box.size.height, equals(kBottomNavigationBarHeight));
+  });
+
+  testWidgets('BottomNavigationBar shows tool tips with text scaling on long press when labels are provided', (WidgetTester tester) async {
+    const String label = 'Foo';
+
+    Widget buildApp({ double textScaleFactor }) {
+      return MediaQuery(
+        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        child: Localizations(
+          locale: const Locale('en', 'US'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return Scaffold(
+                        bottomNavigationBar: BottomNavigationBar(
+                          items: const <BottomNavigationBarItem>[
+                            BottomNavigationBarItem(
+                              label: label,
+                              icon: Icon(Icons.ac_unit),
+                            ),
+                            BottomNavigationBarItem(
+                              label: 'B',
+                              icon: Icon(Icons.battery_alert),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(textScaleFactor: 1.0));
+    expect(find.text(label), findsOneWidget);
+    await tester.longPress(find.text(label));
+    expect(find.text(label), findsNWidgets(2));
+    expect(tester.getSize(find.text(label).last), equals(const Size(42.0, 14.0)));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
+    expect(find.text(label), findsOneWidget);
+    await tester.longPress(find.text(label));
+    expect(tester.getSize(find.text(label).last), equals(const Size(168.0, 56.0)));
   });
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
@@ -1181,8 +1308,6 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar.fixed semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
     await tester.pumpWidget(
       boilerplate(
         textDirection: TextDirection.ltr,
@@ -1205,47 +1330,37 @@ void main() {
       ),
     );
 
-    final TestSemantics expected = TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
-          children: <TestSemantics>[
-            TestSemantics(
-              children: <TestSemantics>[
-                TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isFocusable,
-                    SemanticsFlag.isSelected,
-                  ],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-                  label: 'AC\nTab 1 of 3',
-                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-                  label: 'Alarm\nTab 2 of 3',
-                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-                  label: 'Hot Tub\nTab 3 of 3',
-                  textDirection: TextDirection.ltr,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
+    expect(
+      tester.getSemantics(find.text('AC')),
+      matchesSemantics(
+        label: 'AC\nTab 1 of 3',
+        textDirection: TextDirection.ltr,
+        isFocusable: true,
+        isSelected: true,
+        hasTapAction: true,
+      ),
     );
-    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
-
-    semantics.dispose();
+    expect(
+      tester.getSemantics(find.text('Alarm')),
+      matchesSemantics(
+        label: 'Alarm\nTab 2 of 3',
+        textDirection: TextDirection.ltr,
+        isFocusable: true,
+        hasTapAction: true,
+      ),
+    );
+    expect(
+      tester.getSemantics(find.text('Hot Tub')),
+      matchesSemantics(
+        label: 'Hot Tub\nTab 3 of 3',
+        textDirection: TextDirection.ltr,
+        isFocusable: true,
+        hasTapAction: true,
+      ),
+    );
   });
 
   testWidgets('BottomNavigationBar.shifting semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
     await tester.pumpWidget(
       boilerplate(
         textDirection: TextDirection.ltr,
@@ -1269,42 +1384,34 @@ void main() {
       ),
     );
 
-    final TestSemantics expected = TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
-          children: <TestSemantics>[
-            TestSemantics(
-              children: <TestSemantics>[
-                TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isFocusable,
-                    SemanticsFlag.isSelected,
-                  ],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-                  label: 'AC\nTab 1 of 3',
-                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-                  label: 'Alarm\nTab 2 of 3',
-                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-                  label: 'Hot Tub\nTab 3 of 3',
-                  textDirection: TextDirection.ltr,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
+    expect(
+      tester.getSemantics(find.text('AC')),
+      matchesSemantics(
+        label: 'AC\nTab 1 of 3',
+        textDirection: TextDirection.ltr,
+        isFocusable: true,
+        isSelected: true,
+        hasTapAction: true,
+      ),
     );
-    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
-
-    semantics.dispose();
+    expect(
+      tester.getSemantics(find.text('Alarm')),
+      matchesSemantics(
+        label: 'Alarm\nTab 2 of 3',
+        textDirection: TextDirection.ltr,
+        isFocusable: true,
+        hasTapAction: true,
+      ),
+    );
+    expect(
+      tester.getSemantics(find.text('Hot Tub')),
+      matchesSemantics(
+        label: 'Hot Tub\nTab 3 of 3',
+        textDirection: TextDirection.ltr,
+        isFocusable: true,
+        hasTapAction: true,
+      ),
+    );
   });
 
   testWidgets('BottomNavigationBar handles items.length changes', (WidgetTester tester) async {
@@ -1357,7 +1464,7 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             return Scaffold(
               body: Center(
-                child: RaisedButton(
+                child: ElevatedButton(
                   child: const Text('green'),
                   onPressed: () {
                     setState(() {
@@ -1551,8 +1658,6 @@ void main() {
     });
 
   testWidgets('BottomNavigationBar.fixed [showSelectedLabels]=false and [showUnselectedLabels]=false semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
     await tester.pumpWidget(
       boilerplate(
         textDirection: TextDirection.ltr,
@@ -1573,41 +1678,28 @@ void main() {
       ),
     );
 
-    final TestSemantics expected = TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
-          children: <TestSemantics>[
-            TestSemantics(
-              children: <TestSemantics>[
-                TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isFocusable,
-                    SemanticsFlag.isSelected,
-                  ],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-                  label: 'Red\nTab 1 of 2',
-                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-                  label: 'Green\nTab 2 of 2',
-                  textDirection: TextDirection.ltr,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
+    expect(
+      tester.getSemantics(find.text('Red')),
+      matchesSemantics(
+        label: 'Red\nTab 1 of 2',
+        textDirection: TextDirection.ltr,
+        isFocusable: true,
+        isSelected: true,
+        hasTapAction: true,
+      ),
     );
-    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
-
-    semantics.dispose();
+    expect(
+      tester.getSemantics(find.text('Green')),
+      matchesSemantics(
+        label: 'Green\nTab 2 of 2',
+        textDirection: TextDirection.ltr,
+        isFocusable: true,
+        hasTapAction: true,
+      ),
+    );
   });
 
   testWidgets('BottomNavigationBar.shifting [showSelectedLabels]=false and [showUnselectedLabels]=false semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
     await tester.pumpWidget(
       boilerplate(
         textDirection: TextDirection.ltr,
@@ -1629,55 +1721,92 @@ void main() {
       ),
     );
 
-    final TestSemantics expected = TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
-          children: <TestSemantics>[
-            TestSemantics(
-              children: <TestSemantics>[
-                TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isSelected,
-                    SemanticsFlag.isFocusable,
-                  ],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-                  label: 'Red\nTab 1 of 2',
-                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-                  label: 'Green\nTab 2 of 2',
-                  textDirection: TextDirection.ltr,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
+    expect(
+      tester.getSemantics(find.text('Red')),
+      matchesSemantics(
+        label: 'Red\nTab 1 of 2',
+        textDirection: TextDirection.ltr,
+        isFocusable: true,
+        isSelected: true,
+        hasTapAction: true,
+      ),
     );
-    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
-
-    semantics.dispose();
+    expect(
+      tester.getSemantics(find.text('Green')),
+      matchesSemantics(
+        label: 'Green\nTab 2 of 2',
+        textDirection: TextDirection.ltr,
+        isFocusable: true,
+        hasTapAction: true,
+      ),
+    );
   });
 
+  testWidgets('BottomNavigationBar changes mouse cursor when the tile is hovered over', (WidgetTester tester) async {
+    // Test BottomNavigationBar() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: BottomNavigationBar(
+              mouseCursor: SystemMouseCursors.text,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(Icons.ac_unit), title: Text('AC')),
+                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), title: Text('Alarm')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.text('AC')));
+    addTearDown(gesture.removePointer);
+
+    await tester.pumpAndSettle();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: BottomNavigationBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(Icons.ac_unit), title: Text('AC')),
+                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), title: Text('Alarm')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
 }
 
 Widget boilerplate({ Widget bottomNavigationBar, @required TextDirection textDirection }) {
   assert(textDirection != null);
-  return Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: const <LocalizationsDelegate<dynamic>>[
-      DefaultMaterialLocalizations.delegate,
-      DefaultWidgetsLocalizations.delegate,
-    ],
-    child: Directionality(
-      textDirection: textDirection,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: Material(
-          child: Scaffold(
-            bottomNavigationBar: bottomNavigationBar,
+  return MaterialApp(
+    home: Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: textDirection,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Material(
+            child: Scaffold(
+              bottomNavigationBar: bottomNavigationBar,
+            ),
           ),
         ),
       ),

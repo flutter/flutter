@@ -18,5 +18,7 @@
   "cutButtonLabel": "Leikkaa",
   "copyButtonLabel": "Kopioi",
   "pasteButtonLabel": "Liitä",
-  "selectAllButtonLabel": "Valitse kaikki"
+  "selectAllButtonLabel": "Valitse kaikki",
+  "tabSemanticsLabel": "Välilehti $tabIndex/$tabCount",
+  "modalBarrierDismissLabel": "Ohita"
 }

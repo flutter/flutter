@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:ui' show lerpDouble;
 
@@ -152,8 +154,9 @@ class BottomSheet extends StatefulWidget {
   /// a bottom sheet with rounded corners and an edge-to-edge [Image] at the
   /// top.
   ///
-  /// If this property is null then [ThemeData.bottomSheetTheme.clipBehavior] is
-  /// used. If that's null then the behavior will be [Clip.none].
+  /// If this property is null then [BottomSheetThemeData.clipBehavior] of
+  /// [ThemeData.bottomSheetTheme] is used. If that's null then the behavior
+  /// will be [Clip.none].
   final Clip clipBehavior;
 
   @override
@@ -369,6 +372,22 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 
     return AnimatedBuilder(
       animation: widget.route.animation,
+      child: BottomSheet(
+        animationController: widget.route._animationController,
+        onClosing: () {
+          if (widget.route.isCurrent) {
+            Navigator.pop(context);
+          }
+        },
+        builder: widget.route.builder,
+        backgroundColor: widget.backgroundColor,
+        elevation: widget.elevation,
+        shape: widget.shape,
+        clipBehavior: widget.clipBehavior,
+        enableDrag: widget.enableDrag,
+        onDragStart: handleDragStart,
+        onDragEnd: handleDragEnd,
+      ),
       builder: (BuildContext context, Widget child) {
         // Disable the initial animation when accessible navigation is on so
         // that the semantics are added to the tree at the correct time.
@@ -383,22 +402,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
           child: ClipRect(
             child: CustomSingleChildLayout(
               delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
-              child: BottomSheet(
-                animationController: widget.route._animationController,
-                onClosing: () {
-                  if (widget.route.isCurrent) {
-                    Navigator.pop(context);
-                  }
-                },
-                builder: widget.route.builder,
-                backgroundColor: widget.backgroundColor,
-                elevation: widget.elevation,
-                shape: widget.shape,
-                clipBehavior: widget.clipBehavior,
-                enableDrag: widget.enableDrag,
-                onDragStart: handleDragStart,
-                onDragEnd: handleDragEnd,
-              ),
+              child: child,
             ),
           ),
         );
@@ -485,7 +489,8 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   }
 }
 
-// TODO(guidezpl): Look into making this public. A copy of this class is in scaffold.dart, for now.
+// TODO(guidezpl): Look into making this public. A copy of this class is in
+//  scaffold.dart, for now, https://github.com/flutter/flutter/issues/51627
 /// A curve that progresses linearly until a specified [startingPoint], at which
 /// point [curve] will begin. Unlike [Interval], [curve] will not start at zero,
 /// but will use [startingPoint] as the Y position.
@@ -579,6 +584,10 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// parameters can be passed in to customize the appearance and behavior of
 /// modal bottom sheets.
 ///
+/// The optional `routeSettings` parameter sets the [RouteSettings] of the modal bottom sheet
+/// sheet. This is particularly useful in the case that a user wants to observe
+/// [PopupRoute]s within a [NavigatorObserver].
+///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
@@ -592,7 +601,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Center(
-///     child: RaisedButton(
+///     child: ElevatedButton(
 ///       child: const Text('showModalBottomSheet'),
 ///       onPressed: () {
 ///         showModalBottomSheet<void>(
@@ -607,7 +616,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///                   mainAxisSize: MainAxisSize.min,
 ///                   children: <Widget>[
 ///                     const Text('Modal BottomSheet'),
-///                     RaisedButton(
+///                     ElevatedButton(
 ///                       child: const Text('Close BottomSheet'),
 ///                       onPressed: () => Navigator.pop(context),
 ///                     )
@@ -644,6 +653,7 @@ Future<T> showModalBottomSheet<T>({
   bool useRootNavigator = false,
   bool isDismissible = true,
   bool enableDrag = true,
+  RouteSettings routeSettings,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -666,6 +676,7 @@ Future<T> showModalBottomSheet<T>({
     isDismissible: isDismissible,
     modalBarrierColor: barrierColor,
     enableDrag: enableDrag,
+    settings: routeSettings,
   ));
 }
 

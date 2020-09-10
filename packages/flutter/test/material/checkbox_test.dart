@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -99,6 +101,15 @@ void main() {
       ),
     ));
 
+    expect(tester.getSemantics(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_CheckboxRenderObjectWidget')), matchesSemantics(
+      hasCheckedState: true,
+      hasEnabledState: true,
+      // isFocusable is delayed by 1 frame.
+      isFocusable: true,
+    ));
+
+    await tester.pump();
+    // isFocusable should be false now after the 1 frame delay.
     expect(tester.getSemantics(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_CheckboxRenderObjectWidget')), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
@@ -602,4 +613,174 @@ void main() {
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(60, 36)));
   });
+
+  testWidgets('Checkbox stops hover animation when removed from the tree.', (WidgetTester tester) async {
+    const Key checkboxKey = Key('checkbox');
+    bool checkboxVal = true;
+
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: StatefulBuilder(
+                builder: (_, StateSetter setState) => Checkbox(
+                  key: checkboxKey,
+                  value: checkboxVal,
+                  onChanged: (bool newValue) => setState(() {checkboxVal = newValue;}),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(checkboxKey), findsOneWidget);
+    final Offset checkboxCenter = tester.getCenter(find.byKey(checkboxKey));
+    final TestGesture testGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await testGesture.moveTo(checkboxCenter);
+
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 25)); // hover animation duration is 50 ms. It is half-way.
+
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: Container(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Hover animation should not trigger an exception when the checkbox is removed
+    // before the hover animation should complete.
+    expect(tester.takeException(), isNull);
+
+    await testGesture.removePointer();
+  });
+
+
+  testWidgets('Checkbox changes mouse cursor when hovered', (WidgetTester tester) async {
+    // Test Checkbox() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Checkbox(
+                  mouseCursor: SystemMouseCursors.text,
+                  value: true,
+                  onChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Checkbox)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Checkbox(
+                  value: true,
+                  onChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Checkbox(
+                  value: true,
+                  onChanged: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Test cursor when tristate
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Checkbox(
+                  value: null,
+                  tristate: true,
+                  onChanged: null,
+                  mouseCursor: _SelectedGrabMouseCursor(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    await tester.pumpAndSettle();
+  });
+}
+
+class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
+  const _SelectedGrabMouseCursor();
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.selected)) {
+      return SystemMouseCursors.grab;
+    }
+    return SystemMouseCursors.basic;
+  }
+
+  @override
+  String get debugDescription => '_SelectedGrabMouseCursor()';
 }

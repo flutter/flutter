@@ -224,7 +224,7 @@ class _PestoLogoState extends State<PestoLogo> {
         child: SizedBox(
           width: kLogoWidth,
           child: Stack(
-            overflow: Overflow.visible,
+            clipBehavior: Clip.none,
             children: <Widget>[
               Positioned.fromRect(
                 rect: _imageRectTween.lerp(widget.t),

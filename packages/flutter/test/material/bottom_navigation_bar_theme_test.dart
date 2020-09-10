@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -93,7 +95,7 @@ void main() {
     expect(description[10], 'type: BottomNavigationBarType.fixed');
   });
 
-  testWidgets('BottomNavigationBar is themable', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar is themeable', (WidgetTester tester) async {
     const Color backgroundColor = Color(0xFF000001);
     const Color selectedItemColor = Color(0xFF000002);
     const Color unselectedItemColor = Color(0xFF000003);

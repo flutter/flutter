@@ -5,19 +5,21 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:platform/platform.dart';
-
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/build_info.dart';
-import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:mockito/mockito.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
+import 'package:flutter_tools/src/vmservice.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -65,6 +67,12 @@ void main() {
       restoreTestRunner();
       tryToDelete(tempDir);
     });
+
+    void applyDdsMocks(Device device) {
+      final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
+      when(device.dds).thenReturn(mockDds);
+      when(mockDds.startDartDevelopmentService(any, any)).thenReturn(null);
+    }
 
     testUsingContext('returns 1 when test file is not found', () async {
       testDeviceManager.addDevice(MockDevice());
@@ -165,8 +173,31 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('returns 0 when test ends successfully', () async {
+    testUsingContext('returns 1 when targeted device is not Android with --device-user', () async {
       testDeviceManager.addDevice(MockDevice());
+
+      final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
+      globals.fs.file(testApp).createSync(recursive: true);
+
+      final List<String> args = <String>[
+        'drive',
+        '--target=$testApp',
+        '--no-pub',
+        '--device-user',
+        '10',
+      ];
+
+      expect(() async => await createTestCommandRunner(command).run(args),
+        throwsToolExit(message: '--device-user is only supported for Android'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('returns 0 when test ends successfully', () async {
+      final MockAndroidDevice mockDevice = MockAndroidDevice();
+      applyDdsMocks(mockDevice);
+      testDeviceManager.addDevice(mockDevice);
 
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -180,7 +211,6 @@ void main() {
         expect(environment, <String, String>{
           'VM_SERVICE_URL': 'null',
         });
-        return null;
       });
       appStopper = expectAsync1((DriveCommand command) async {
         return true;
@@ -194,6 +224,8 @@ void main() {
         'drive',
         '--target=$testApp',
         '--no-pub',
+        '--device-user',
+        '10',
       ];
       await createTestCommandRunner(command).run(args);
       expect(testLogger.errorText, isEmpty);
@@ -203,7 +235,9 @@ void main() {
     });
 
     testUsingContext('returns exitCode set by test runner', () async {
-      testDeviceManager.addDevice(MockDevice());
+      final MockDevice mockDevice = MockDevice();
+      applyDdsMocks(mockDevice);
+      testDeviceManager.addDevice(mockDevice);
 
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -247,7 +281,7 @@ void main() {
         when(mockDevice.name).thenReturn('specified-device');
         when(mockDevice.id).thenReturn('123');
 
-        final Device device = await findTargetDevice();
+        final Device device = await findTargetDevice(timeout: null);
         expect(device.name, 'specified-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -259,7 +293,7 @@ void main() {
       Platform platform() => FakePlatform(operatingSystem: operatingSystem);
 
       testUsingContext('returns null if no devices found', () async {
-        expect(await findTargetDevice(), isNull);
+        expect(await findTargetDevice(timeout: null), isNull);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -271,7 +305,7 @@ void main() {
         when(mockDevice.name).thenReturn('mock-android-device');
         testDeviceManager.addDevice(mockDevice);
 
-        final Device device = await findTargetDevice();
+        final Device device = await findTargetDevice(timeout: null);
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -303,7 +337,7 @@ void main() {
         testDeviceManager.addDevice(mockDevice);
         testDeviceManager.addDevice(mockUnsupportedDevice);
 
-        final Device device = await findTargetDevice();
+        final Device device = await findTargetDevice(timeout: null);
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -332,7 +366,7 @@ void main() {
         when(mockDevice.isLocalEmulator)
             .thenAnswer((Invocation invocation) => Future<bool>.value(true));
 
-        final Device device = await findTargetDevice();
+        final Device device = await findTargetDevice(timeout: null);
         expect(device.name, 'mock-simulator');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -350,6 +384,7 @@ void main() {
 
       Future<Device> appStarterSetup() async {
         final Device mockDevice = MockDevice();
+        applyDdsMocks(mockDevice);
         testDeviceManager.addDevice(mockDevice);
 
         final FakeDeviceLogReader mockDeviceLogReader = FakeDeviceLogReader();
@@ -357,14 +392,16 @@ void main() {
         final MockLaunchResult mockLaunchResult = MockLaunchResult();
         when(mockLaunchResult.started).thenReturn(true);
         when(mockDevice.startApp(
-            null,
-            mainPath: anyNamed('mainPath'),
-            route: anyNamed('route'),
-            debuggingOptions: anyNamed('debuggingOptions'),
-            platformArgs: anyNamed('platformArgs'),
-            prebuiltApplication: anyNamed('prebuiltApplication'),
+          null,
+          mainPath: anyNamed('mainPath'),
+          route: anyNamed('route'),
+          debuggingOptions: anyNamed('debuggingOptions'),
+          platformArgs: anyNamed('platformArgs'),
+          prebuiltApplication: anyNamed('prebuiltApplication'),
+          userIdentifier: anyNamed('userIdentifier'),
         )).thenAnswer((_) => Future<LaunchResult>.value(mockLaunchResult));
-        when(mockDevice.isAppInstalled(any)).thenAnswer((_) => Future<bool>.value(false));
+        when(mockDevice.isAppInstalled(any, userIdentifier: anyNamed('userIdentifier')))
+          .thenAnswer((_) => Future<bool>.value(false));
 
         testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
         testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -406,6 +443,7 @@ void main() {
                 debuggingOptions: anyNamed('debuggingOptions'),
                 platformArgs: anyNamed('platformArgs'),
                 prebuiltApplication: false,
+                userIdentifier: anyNamed('userIdentifier'),
         ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -434,6 +472,7 @@ void main() {
                 debuggingOptions: anyNamed('debuggingOptions'),
                 platformArgs: anyNamed('platformArgs'),
                 prebuiltApplication: false,
+                userIdentifier: anyNamed('userIdentifier'),
         ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -462,6 +501,7 @@ void main() {
                 debuggingOptions: anyNamed('debuggingOptions'),
                 platformArgs: anyNamed('platformArgs'),
                 prebuiltApplication: true,
+                userIdentifier: anyNamed('userIdentifier'),
         ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -480,6 +520,7 @@ void main() {
 
       Future<Device> appStarterSetup() async {
         final Device mockDevice = MockDevice();
+        applyDdsMocks(mockDevice);
         testDeviceManager.addDevice(mockDevice);
 
         final FakeDeviceLogReader mockDeviceLogReader = FakeDeviceLogReader();
@@ -493,11 +534,12 @@ void main() {
           debuggingOptions: anyNamed('debuggingOptions'),
           platformArgs: anyNamed('platformArgs'),
           prebuiltApplication: anyNamed('prebuiltApplication'),
+          userIdentifier: anyNamed('userIdentifier'),
         )).thenAnswer((Invocation invocation) async {
           debuggingOptions = invocation.namedArguments[#debuggingOptions] as DebuggingOptions;
           return mockLaunchResult;
         });
-        when(mockDevice.isAppInstalled(any))
+        when(mockDevice.isAppInstalled(any, userIdentifier: anyNamed('userIdentifier')))
             .thenAnswer((_) => Future<bool>.value(false));
 
         testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
@@ -546,6 +588,7 @@ void main() {
             debuggingOptions: anyNamed('debuggingOptions'),
             platformArgs: anyNamed('platformArgs'),
             prebuiltApplication: false,
+            userIdentifier: anyNamed('userIdentifier'),
           ));
           expect(optionValue(), setToTrue ? isTrue : isFalse);
         }, overrides: <Type, Generator>{
@@ -575,6 +618,11 @@ void main() {
       testOptionThatDefaultsToFalse(
         '--cache-sksl',
         () => debuggingOptions.cacheSkSL,
+      );
+
+      testOptionThatDefaultsToFalse(
+        '--purge-persistent-cache',
+        () => debuggingOptions.purgePersistentCache,
       );
     });
   });
@@ -730,6 +778,28 @@ void main() {
       expect(getDesiredCapabilities(Browser.androidChrome, false), expected);
     });
   });
+
+  testUsingContext('Can write SkSL file with provided output file', () async {
+    final MockDevice device = MockDevice();
+    when(device.name).thenReturn('foo');
+    when(device.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    final File outputFile = globals.fs.file('out/foo');
+
+    final String result = await sharedSkSlWriter(
+      device,
+      <String, Object>{'foo': 'bar'},
+      outputFile: outputFile,
+    );
+
+    expect(result, 'out/foo');
+    expect(outputFile, exists);
+    expect(outputFile.readAsStringSync(), '{"platform":"android","name":"foo","engineRevision":null,"data":{"foo":"bar"}}');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 }
 
 class MockDevice extends Mock implements Device {
@@ -739,5 +809,5 @@ class MockDevice extends Mock implements Device {
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice { }
-
+class MockDartDevelopmentService extends Mock implements DartDevelopmentService { }
 class MockLaunchResult extends Mock implements LaunchResult { }

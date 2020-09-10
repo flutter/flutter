@@ -8,11 +8,8 @@
 # that the app doesn't crash upon startup.
 #
 # When adding a test, ensure that there's at least a `print()` statement under lib/*.dart.
-tests=(
-  "dev/integration_tests/release_smoke_test"
-  "dev/integration_tests/abstract_method_smoke_test"
-  "dev/integration_tests/android_embedding_v2_smoke_test"
-)
+#
+# The first and only parameter should be the path to an integration test.
 
 # The devices where the tests are run.
 #
@@ -21,7 +18,9 @@ tests=(
 devices=(
   # Pixel 3
   "model=blueline,version=28"
-  "model=blueline,version=29"
+
+  # Pixel 4
+  "model=flame,version=29"
 
   # Moto Z XT1650
   "model=griffin,version=24"
@@ -79,6 +78,4 @@ function test_app_bundle() {
   popd
 }
 
-for test in ${tests[*]}; do
-  test_app_bundle $test
-done
+test_app_bundle "$1"

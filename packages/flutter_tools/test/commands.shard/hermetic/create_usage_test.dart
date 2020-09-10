@@ -39,10 +39,14 @@ void main() {
         // Set up enough of the packages to satisfy the templating code.
         final File packagesFile = globals.fs.file(
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', '.packages'));
+        final File flutterManifest = globals.fs.file(
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'template_manifest.json'))
+            ..createSync(recursive: true);
         final Directory templateImagesDirectory = globals.fs.directory('flutter_template_images');
         templateImagesDirectory.createSync(recursive: true);
         packagesFile.createSync(recursive: true);
         packagesFile.writeAsStringSync('flutter_template_images:file:///${templateImagesDirectory.uri}');
+        flutterManifest.writeAsStringSync('{"files":[]}');
       }, overrides: <Type, Generator>{
         DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
       });

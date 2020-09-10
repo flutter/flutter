@@ -72,6 +72,14 @@
     "description": "The title for the Flutter licenses page."
   },
 
+  "licensesPackageDetailTextZero": "No licenses",
+  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
+  "@licensesPackageDetailText": {
+    "description": "The subtitle and detail text for a package displayed on the Flutter licenses page. The value of $licenseCount is an integer which indicates the number of licenses the package has.",
+    "plural": "licenseCount"
+  },
+
   "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount",
   "@pageRowsInfoTitle": {
     "description": "The text shown in the footer of a paginated data table when the exact overall row count is known. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
@@ -118,12 +126,12 @@
     "description": "The label for continue buttons and menu items."
   },
 
-  "copyButtonLabel": "COPY",
+  "copyButtonLabel": "Copy",
   "@copyButtonLabel": {
     "description": "The label for copy buttons and menu items."
   },
 
-  "cutButtonLabel": "CUT",
+  "cutButtonLabel": "Cut",
   "@cutButtonLabel": {
     "description": "The label for cut buttons and menu items."
   },
@@ -133,12 +141,12 @@
     "description": "The label for OK buttons and menu items."
   },
 
-  "pasteButtonLabel": "PASTE",
+  "pasteButtonLabel": "Paste",
   "@pasteButtonLabel": {
     "description": "The label for paste buttons and menu items."
   },
 
-  "selectAllButtonLabel": "SELECT ALL",
+  "selectAllButtonLabel": "Select all",
   "@selectAllButtonLabel": {
     "description": "The label for select-all buttons and menu items."
   },
@@ -170,7 +178,134 @@
 
   "modalBarrierDismissLabel": "Dismiss",
   "@modalBarrierDismissLabel": {
-    "description": "Label read out by accessibility tools (TalkBack or VocieOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can for example be found behind a alert or popup to block user interaction with elements behind it."
+    "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can for example be found behind a alert or popup to block user interaction with elements behind it."
+  },
+
+  "dateSeparator": "/",
+  "@dateSeparator": {
+    "description": "The character string used to separate the parts of a compact date format. For example 'mm/dd/yyyy' has a separator of '/'."
+  },
+
+  "dateHelpText": "mm/dd/yyyy",
+  "@dateHelpText": {
+    "description": "The help text used on an empty text input date field to indicate the date format being asked for."
+  },
+
+  "selectYearSemanticsLabel": "Select year",
+  "@selectYearSemanticsLabel": {
+    "description": "The accessibility label used to announce when the user has entered the year selection mode in the date picker."
+  },
+
+  "unspecifiedDate": "Date",
+  "@unspecifiedDate": {
+    "description": "The label used to indicate a date that has not been entered or selected in the date picker."
+  },
+
+  "unspecifiedDateRange": "Date Range",
+  "@unspecifiedDateRange": {
+    "description": "The label used to indicate a date range that has not been entered or selected in the date range picker."
+  },
+
+  "dateInputLabel": "Enter Date",
+  "@dateInputLabel": {
+    "description": "The label used to describe the input text field used in in the date picker."
+  },
+
+  "dateRangeStartLabel": "Start Date",
+  "@dateRangeStartLabel": {
+    "description": "The label used to describe the starting date input text field used in in the date range picker."
+  },
+
+  "dateRangeEndLabel": "End Date",
+  "@dateRangeEndLabel": {
+    "description": "The label used to describe the ending date input text field used in in the date range picker."
+  },
+
+  "dateRangeStartDateSemanticLabel": "Start date $fullDate",
+  "@dateRangeStartDateSemanticLabel": {
+    "description": "Accessibility announcement that is used when the user navigates to the selected start date in the date range picker.",
+    "parameters": "$fullDate"
+  },
+
+  "dateRangeEndDateSemanticLabel": "End date $fullDate",
+  "@dateRangeEndDateSemanticLabel": {
+    "description": "Accessibility announcement that is used when the user navigates to the selected end date in the date range picker.",
+    "parameters": "$fullDate"
+  },
+
+  "invalidDateFormatLabel": "Invalid format.",
+  "@invalidDateFormatLabel": {
+    "description": "Error message displayed to the user when they have entered a text string in an input field of the date picker that is not in a valid date format."
+  },
+
+  "invalidDateRangeLabel": "Invalid range.",
+  "@invalidDateRangeLabel": {
+    "description": "Error message displayed to the user when they have entered an invalid date range in the input fields of the date range picker."
+  },
+
+  "dateOutOfRangeLabel": "Out of range.",
+  "@dateOutOfRangeLabel": {
+    "description": "Error message displayed to the user when they have entered a date that is outside the valid range for the date picker."
+  },
+
+  "saveButtonLabel": "SAVE",
+  "@saveButtonLabel": {
+    "description": "Label for a 'SAVE' button used in full screen dialogs."
+  },
+
+  "datePickerHelpText": "SELECT DATE",
+  "@datePickerHelpText": {
+    "description": "Label used in the header of the date picker dialog"
+  },
+
+  "dateRangePickerHelpText": "SELECT RANGE",
+  "@dateRangePickerHelpText": {
+    "description": "Label used in the header of the date range picker dialog."
+  },
+
+  "calendarModeButtonLabel": "Switch to calendar",
+  "@calendarModeButtonLabel": {
+    "description": "Tooltip used for the calendar mode button of the date pickers."
+  },
+
+  "inputDateModeButtonLabel": "Switch to input",
+  "@inputDateModeButtonLabel": {
+    "description": "Tooltip used for the text input mode button of the date pickers."
+  },
+
+  "timePickerDialHelpText": "SELECT TIME",
+  "@timePickerDialHelpText": {
+    "description": "Label used in the header of the time picker dialog when using the clock dial to select a time."
+  },
+
+  "timePickerInputHelpText": "ENTER TIME",
+  "@timePickerInputHelpText": {
+    "description": "Label used in the header of the time picker dialog when using the text input to enter a time."
+  },
+
+  "timePickerHourLabel": "Hour",
+  "@timePickerHourLabel": {
+    "description": "Label indicating the text field for inputting an hour when entering a time."
+  },
+
+  "timePickerMinuteLabel": "Minute",
+  "@timePickerMinuteLabel": {
+    "description": "Label indicating the text field for inputting a minute when entering a time."
+  },
+
+  "invalidTimeLabel": "Enter a valid time",
+  "@invalidTimeLabel": {
+    "description": "Error message displayed to the user when they have entered an invalid time."
+  },
+
+  "dialModeButtonLabel": "Switch to dial picker mode",
+  "@dialModeButtonLabel": {
+    "description": "Tooltip used for the clock dial mode button of the time picker."
+  },
+
+  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "@inputTimeModeButtonLabel": {
+    "description": "Tooltip used for the text input mode button of the time picker."
   },
 
   "signedInLabel": "Signed in",

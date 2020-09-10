@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -71,7 +73,7 @@ void main() {
           builder: (BuildContext context) {
             return GestureDetector(
               onTap: () {
-                Scaffold.of(context).showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: const Text(text),
                   duration: const Duration(seconds: 2),
                   action: SnackBarAction(label: 'ACTION', onPressed: () {}),
@@ -108,7 +110,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context).showSnackBar(SnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: const Text(text),
                     duration: const Duration(seconds: 2),
                     action: SnackBarAction(label: 'ACTION', onPressed: () {}),
@@ -151,7 +153,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context).showSnackBar(SnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     backgroundColor: backgroundColor,
                     elevation: elevation,
                     shape: shape,
@@ -198,7 +200,7 @@ void main() {
           builder: (BuildContext context) {
             return GestureDetector(
               onTap: () {
-                Scaffold.of(context).showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: const Text('I am a snack bar.'),
                   duration: const Duration(seconds: 2),
                   action: SnackBarAction(label: 'ACTION', onPressed: () {}),
@@ -240,7 +242,7 @@ void main() {
           builder: (BuildContext context) {
             return GestureDetector(
               onTap: () {
-                Scaffold.of(context).showSnackBar(SnackBar(
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: const Text('I am a snack bar.'),
                   duration: const Duration(seconds: 2),
                   action: SnackBarAction(label: 'ACTION', onPressed: () {}),

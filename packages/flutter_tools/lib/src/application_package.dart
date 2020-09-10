@@ -6,9 +6,8 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
-import 'package:xml/xml.dart' as xml;
+import 'package:xml/xml.dart';
 
-import 'android/android_sdk.dart';
 import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/context.dart';
@@ -32,6 +31,7 @@ class ApplicationPackageFactory {
 
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
+    BuildInfo buildInfo,
     File applicationBinary,
   }) async {
     switch (platform) {
@@ -40,7 +40,7 @@ class ApplicationPackageFactory {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        if (androidSdk?.licensesAvailable == true  && androidSdk?.latestVersion == null) {
+        if (globals.androidSdk?.licensesAvailable == true  && globals.androidSdk?.latestVersion == null) {
           await checkGradleDependencies();
         }
         return applicationBinary == null
@@ -48,10 +48,10 @@ class ApplicationPackageFactory {
             : AndroidApk.fromApk(applicationBinary);
       case TargetPlatform.ios:
         return applicationBinary == null
-            ? await IOSApp.fromIosProject(FlutterProject.current().ios)
+            ? await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo)
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.tester:
-        return FlutterTesterApp.fromCurrentDirectory();
+        return FlutterTesterApp.fromCurrentDirectory(globals.fs);
       case TargetPlatform.darwin_x64:
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
@@ -109,7 +109,7 @@ class AndroidApk extends ApplicationPackage {
 
   /// Creates a new AndroidApk from an existing APK.
   factory AndroidApk.fromApk(File apk) {
-    final String aaptPath = androidSdk?.latestVersion?.aaptPath;
+    final String aaptPath = globals.androidSdk?.latestVersion?.aaptPath;
     if (aaptPath == null) {
       globals.printError(userMessages.aaptNotFound);
       return null;
@@ -188,10 +188,10 @@ class AndroidApk extends ApplicationPackage {
     }
 
     final String manifestString = manifest.readAsStringSync();
-    xml.XmlDocument document;
+    XmlDocument document;
     try {
-      document = xml.parse(manifestString);
-    } on xml.XmlParserException catch (exception) {
+      document = XmlDocument.parse(manifestString);
+    } on XmlParserException catch (exception) {
       String manifestLocation;
       if (androidProject.isUsingGradle) {
         manifestLocation = globals.fs.path.join(androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');
@@ -203,7 +203,7 @@ class AndroidApk extends ApplicationPackage {
       throwToolExit('XML Parser error message: ${exception.toString()}');
     }
 
-    final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
+    final Iterable<XmlElement> manifests = document.findElements('manifest');
     if (manifests.isEmpty) {
       globals.printError('AndroidManifest.xml has no manifest element.');
       globals.printError('Please check ${manifest.path} for errors.');
@@ -212,20 +212,20 @@ class AndroidApk extends ApplicationPackage {
     final String packageId = manifests.first.getAttribute('package');
 
     String launchActivity;
-    for (final xml.XmlElement activity in document.findAllElements('activity')) {
+    for (final XmlElement activity in document.findAllElements('activity')) {
       final String enabled = activity.getAttribute('android:enabled');
       if (enabled != null && enabled == 'false') {
         continue;
       }
 
-      for (final xml.XmlElement element in activity.findElements('intent-filter')) {
+      for (final XmlElement element in activity.findElements('intent-filter')) {
         String actionName = '';
         String categoryName = '';
-        for (final xml.XmlNode node in element.children) {
-          if (node is! xml.XmlElement) {
+        for (final XmlNode node in element.children) {
+          if (node is! XmlElement) {
             continue;
           }
-          final xml.XmlElement xmlElement = node as xml.XmlElement;
+          final XmlElement xmlElement = node as XmlElement;
           final String name = xmlElement.getAttribute('android:name');
           if (name == 'android.intent.action.MAIN') {
             actionName = name;
@@ -262,7 +262,7 @@ class AndroidApk extends ApplicationPackage {
   String get name => file.basename;
 }
 
-/// Tests whether a [Directory] is an iOS bundle directory
+/// Tests whether a [Directory] is an iOS bundle directory.
 bool _isBundleDirectory(Directory dir) => dir.path.endsWith('.app');
 
 abstract class IOSApp extends ApplicationPackage {
@@ -328,7 +328,7 @@ abstract class IOSApp extends ApplicationPackage {
     );
   }
 
-  static Future<IOSApp> fromIosProject(IosProject project) {
+  static Future<IOSApp> fromIosProject(IosProject project, BuildInfo buildInfo) {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       return null;
     }
@@ -345,7 +345,7 @@ abstract class IOSApp extends ApplicationPackage {
       globals.printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
       return null;
     }
-    return BuildableIOSApp.fromProject(project);
+    return BuildableIOSApp.fromProject(project, buildInfo);
   }
 
   @override
@@ -357,18 +357,22 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  BuildableIOSApp(this.project, String projectBundleId)
-    : super(projectBundleId: projectBundleId);
+  BuildableIOSApp(this.project, String projectBundleId, String hostAppBundleName)
+    : _hostAppBundleName = hostAppBundleName,
+      super(projectBundleId: projectBundleId);
 
-  static Future<BuildableIOSApp> fromProject(IosProject project) async {
-    final String projectBundleId = await project.productBundleIdentifier;
-    return BuildableIOSApp(project, projectBundleId);
+  static Future<BuildableIOSApp> fromProject(IosProject project, BuildInfo buildInfo) async {
+    final String projectBundleId = await project.productBundleIdentifier(buildInfo);
+    final String hostAppBundleName = await project.hostAppBundleName(buildInfo);
+    return BuildableIOSApp(project, projectBundleId, hostAppBundleName);
   }
 
   final IosProject project;
 
+  final String _hostAppBundleName;
+
   @override
-  String get name => project.hostAppBundleName;
+  String get name => _hostAppBundleName;
 
   @override
   String get simulatorBundlePath => _buildAppPath('iphonesimulator');
@@ -377,7 +381,7 @@ class BuildableIOSApp extends IOSApp {
   String get deviceBundlePath => _buildAppPath('iphoneos');
 
   String _buildAppPath(String type) {
-    return globals.fs.path.join(getIosBuildDirectory(), type, name);
+    return globals.fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);
   }
 }
 
@@ -413,7 +417,10 @@ class ApplicationPackageStore {
   MacOSApp macOS;
   WindowsApp windows;
 
-  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
+  Future<ApplicationPackage> getPackageForPlatform(
+    TargetPlatform platform,
+    BuildInfo buildInfo,
+  ) async {
     switch (platform) {
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
@@ -423,7 +430,7 @@ class ApplicationPackageStore {
         android ??= await AndroidApk.fromAndroidProject(FlutterProject.current().android);
         return android;
       case TargetPlatform.ios:
-        iOS ??= await IOSApp.fromIosProject(FlutterProject.current().ios);
+        iOS ??= await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo);
         return iOS;
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
@@ -558,7 +565,9 @@ class ApkManifestData {
     }
 
     final _Element application = manifest.firstElement('application');
-    assert(application != null);
+    if (application == null) {
+      return null;
+    }
 
     final Iterable<_Element> activities = application.allElements('activity');
 

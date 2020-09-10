@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -17,6 +20,7 @@ void main() {
   const Duration _kScrollbarTimeToFade = Duration(milliseconds: 1200);
   const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
   const Duration _kScrollbarResizeDuration = Duration(milliseconds: 100);
+  const Duration _kLongPressDuration = Duration(milliseconds: 100);
 
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -135,10 +139,10 @@ void main() {
       }
     });
 
-    // Longpress on the scrollbar thumb and expect a vibration after it resizes.
+    // Long press on the scrollbar thumb and expect a vibration after it resizes.
     expect(hapticFeedbackCalls, 0);
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 50.0));
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(_kLongPressDuration);
     expect(hapticFeedbackCalls, 0);
     await tester.pump(_kScrollbarResizeDuration);
     // Allow the haptic feedback some slack.
@@ -162,6 +166,155 @@ void main() {
     // Let the thumb fade out so all timers have resolved.
     await tester.pump(_kScrollbarTimeToFade);
     await tester.pump(_kScrollbarFadeDuration);
+  });
+
+  testWidgets('Scrollbar changes thickness and radius when dragged', (WidgetTester tester) async {
+    const double thickness = 20;
+    const double thicknessWhileDragging = 40;
+    const double radius = 10;
+    const double radiusWhileDragging = 20;
+
+    const double inset = 3;
+    const double scaleFactor = 2;
+    final Size screenSize = tester.binding.window.physicalSize / tester.binding.window.devicePixelRatio;
+
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: CupertinoScrollbar(
+              thickness: thickness,
+              thicknessWhileDragging: thicknessWhileDragging,
+              radius: const Radius.circular(radius),
+              radiusWhileDragging: const Radius.circular(radiusWhileDragging),
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  width: screenSize.width * scaleFactor,
+                  height: screenSize.height * scaleFactor,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(scrollController.offset, 0.0);
+
+    // Scroll a bit to cause the scrollbar thumb to be shown;
+    // undo the scroll to put the thumb back at the top.
+    const double scrollAmount = 10.0;
+    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    await scrollGesture.moveBy(const Offset(0.0, -scrollAmount));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await scrollGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pump();
+    await scrollGesture.up();
+    await tester.pump();
+
+    // Long press on the scrollbar thumb and expect it to grow
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(780.0, 50.0));
+    await tester.pump(_kLongPressDuration);
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          screenSize.width - inset - thickness,
+          inset,
+          thickness,
+          (screenSize.height - 2 * inset) / scaleFactor,
+        ),
+        const Radius.circular(radius),
+      ),
+    ));
+    await tester.pump(_kScrollbarResizeDuration ~/ 2);
+    const double midpointThickness = (thickness + thicknessWhileDragging) / 2;
+    const double midpointRadius = (radius + radiusWhileDragging) / 2;
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          screenSize.width - inset - midpointThickness,
+          inset,
+          midpointThickness,
+          (screenSize.height - 2 * inset) / scaleFactor,
+        ),
+        const Radius.circular(midpointRadius),
+      ),
+    ));
+    await tester.pump(_kScrollbarResizeDuration ~/ 2);
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          screenSize.width - inset - thicknessWhileDragging,
+          inset,
+          thicknessWhileDragging,
+          (screenSize.height - 2 * inset) / scaleFactor,
+        ),
+        const Radius.circular(radiusWhileDragging),
+      ),
+    ));
+
+    // Let the thumb fade out so all timers have resolved.
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+    await tester.pump(_kScrollbarTimeToFade);
+    await tester.pump(_kScrollbarFadeDuration);
+  });
+
+  testWidgets('When isAlwaysShown is true, must pass a controller',
+      (WidgetTester tester) async {
+    Widget viewWithScroll() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoScrollbar(
+            isAlwaysShown: true,
+            child: const SingleChildScrollView(
+              child: SizedBox(
+                width: 4000.0,
+                height: 4000.0,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    expect(() async {
+      await tester.pumpWidget(viewWithScroll());
+    }, throwsAssertionError);
+  });
+
+  testWidgets('When isAlwaysShown is true, must pass a controller that is attached to a scroll view',
+      (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoScrollbar(
+            controller: controller,
+            isAlwaysShown: true,
+            child: const SingleChildScrollView(
+              child: SizedBox(
+                width: 4000.0,
+                height: 4000.0,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
   });
 
   testWidgets('On first render with isAlwaysShown: true, the thumb shows',
@@ -287,6 +440,59 @@ void main() {
   });
 
   testWidgets(
+      'With isAlwaysShown: false, set isAlwaysShown: true. The thumb should be always shown directly',
+      (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    bool isAlwaysShown = false;
+    Widget viewWithScroll() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: Stack(
+                children: <Widget>[
+                  CupertinoScrollbar(
+                    isAlwaysShown: isAlwaysShown,
+                    controller: controller,
+                    child: SingleChildScrollView(
+                      controller: controller,
+                      child: const SizedBox(
+                        width: 4000.0,
+                        height: 4000.0,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    child: CupertinoButton(
+                      onPressed: () {
+                        setState(() {
+                          isAlwaysShown = !isAlwaysShown;
+                        });
+                      },
+                      child: const Text('change isAlwaysShown'),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
+
+    await tester.tap(find.byType(CupertinoButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+  });
+
+  testWidgets(
       'With isAlwaysShown: false, fling a scroll. While it is still scrolling, set isAlwaysShown: true. The thumb should not fade even after the scrolling stops',
       (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -332,6 +538,7 @@ void main() {
 
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
     await tester.fling(
       find.byType(SingleChildScrollView),
       const Offset(0.0, -10.0),
@@ -340,7 +547,13 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect());
 
     await tester.tap(find.byType(CupertinoButton));
+    await tester.pump();
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+
+    // Wait for the timer delay to expire.
+    await tester.pump(const Duration(milliseconds: 600)); // _kScrollbarTimeToFade
     await tester.pumpAndSettle();
+    // Scrollbar thumb is showing after scroll finishes and timer ends.
     expect(find.byType(CupertinoScrollbar), paints..rrect());
   });
 

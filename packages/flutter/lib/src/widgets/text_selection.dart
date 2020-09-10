@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -12,6 +14,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
+import 'binding.dart';
 import 'constants.dart';
 import 'container.dart';
 import 'editable_text.dart';
@@ -63,14 +66,6 @@ enum TextSelectionHandleType {
 /// The text position that a give selection handle manipulates. Dragging the
 /// [start] handle always moves the [start]/[baseOffset] of the selection.
 enum _TextSelectionHandlePosition { start, end }
-
-/// Signature for reporting changes to the selection component of a
-/// [TextEditingValue] for the purposes of a [TextSelectionOverlay]. The
-/// [caretRect] argument gives the location of the caret in the coordinate space
-/// of the [RenderBox] given by the [TextSelectionOverlay.renderObject].
-///
-/// Used by [TextSelectionOverlay.onSelectionOverlayChanged].
-typedef TextSelectionOverlayChanged = void Function(TextEditingValue value, Rect caretRect);
 
 /// Signature for when a pointer that's dragging to select text has moved again.
 ///
@@ -137,6 +132,7 @@ abstract class TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
+    ClipboardStatusNotifier clipboardStatus,
   );
 
   /// Returns the size of the selection handle.
@@ -165,13 +161,16 @@ abstract class TextSelectionControls {
     return delegate.copyEnabled && !delegate.textEditingValue.selection.isCollapsed;
   }
 
-  /// Whether the current [Clipboard] content can be pasted into the text field
-  /// managed by the given `delegate`.
+  /// Whether the text field managed by the given `delegate` supports pasting
+  /// from the clipboard.
   ///
   /// Subclasses can use this to decide if they should expose the paste
   /// functionality to the user.
+  ///
+  /// This does not consider the contents of the clipboard. Subclasses may want
+  /// to, for example, disallow pasting when the clipboard contains an empty
+  /// string.
   bool canPaste(TextSelectionDelegate delegate) {
-    // TODO(goderbauer): return false when clipboard is empty, https://github.com/flutter/flutter/issues/11254
     return delegate.pasteEnabled;
   }
 
@@ -213,11 +212,12 @@ abstract class TextSelectionControls {
   ///
   /// This is called by subclasses when their copy affordance is activated by
   /// the user.
-  void handleCopy(TextSelectionDelegate delegate) {
+  void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier clipboardStatus) {
     final TextEditingValue value = delegate.textEditingValue;
     Clipboard.setData(ClipboardData(
       text: value.selection.textInside(value.text),
     ));
+    clipboardStatus?.update();
     delegate.textEditingValue = TextEditingValue(
       text: value.text,
       selection: TextSelection.collapsed(offset: value.selection.end),
@@ -294,6 +294,7 @@ class TextSelectionOverlay {
     this.selectionDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
+    this.clipboardStatus,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
@@ -365,6 +366,13 @@ class TextSelectionOverlay {
   /// {@endtemplate}
   final VoidCallback onSelectionHandleTapped;
 
+  /// Maintains the status of the clipboard for determining if its contents can
+  /// be pasted or not.
+  ///
+  /// Useful because the actual value of the clipboard can only be checked
+  /// asynchronously (see [Clipboard.getData]).
+  final ClipboardStatusNotifier clipboardStatus;
+
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
 
@@ -423,8 +431,6 @@ class TextSelectionOverlay {
       OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.start)),
       OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.end)),
     ];
-
-
 
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles);
   }
@@ -576,6 +582,7 @@ class TextSelectionOverlay {
           midpoint,
           endpoints,
           selectionDelegate,
+          clipboardStatus,
         ),
       ),
     );
@@ -854,8 +861,8 @@ abstract class TextSelectionGestureDetectorBuilderDelegate {
 ///
 /// The class implements sensible defaults for many user interactions
 /// with an [EditableText] (see the documentation of the various gesture handler
-/// methods, e.g. [onTapDown], [onFrocePress], etc.). Subclasses of
-/// [EditableTextSelectionHandlesProvider] can change the behavior performed in
+/// methods, e.g. [onTapDown], [onForcePressStart], etc.). Subclasses of
+/// [TextSelectionGestureDetectorBuilder] can change the behavior performed in
 /// responds to these gesture events by overriding the corresponding handler
 /// methods of this class.
 ///
@@ -1048,7 +1055,7 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onDoubleTapDown].
   ///
-  /// By default, it selects a word through [renderEditable.selectWord] if
+  /// By default, it selects a word through [RenderEditable.selectWord] if
   /// selectionEnabled and shows toolbar if necessary.
   ///
   /// See also:
@@ -1082,7 +1089,8 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onDragSelectionUpdate].
   ///
-  /// By default, it updates the selection location specified in [details].
+  /// By default, it updates the selection location specified in the provided
+  /// details objects.
   ///
   /// See also:
   ///
@@ -1179,7 +1187,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   final GestureTapDownCallback onTapDown;
 
   /// Called when a pointer has tapped down and the force of the pointer has
-  /// just become greater than [ForcePressGestureDetector.startPressure].
+  /// just become greater than [ForcePressGestureRecognizer.startPressure].
   final GestureForcePressStartCallback onForcePressStart;
 
   /// Called when a pointer that had previously triggered [onForcePressStart] is
@@ -1187,7 +1195,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   final GestureForcePressEndCallback onForcePressEnd;
 
   /// Called for each distinct tap except for every second tap of a double tap.
-  /// For example, if the detector was configured [onSingleTapDown] and
+  /// For example, if the detector was configured with [onTapDown] and
   /// [onDoubleTapDown], three quick taps would be recognized as a single tap
   /// down, followed by a double tap down, followed by a single tap down.
   final GestureTapUpCallback onSingleTapUp;
@@ -1485,4 +1493,117 @@ class _TransparentTapGestureRecognizer extends TapGestureRecognizer {
       super.rejectGesture(pointer);
     }
   }
+}
+
+/// A [ValueNotifier] whose [value] indicates whether the current contents of
+/// the clipboard can be pasted.
+///
+/// The contents of the clipboard can only be read asynchronously, via
+/// [Clipboard.getData], so this maintains a value that can be used
+/// synchronously. Call [update] to asynchronously update value if needed.
+class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with WidgetsBindingObserver {
+  /// Create a new ClipboardStatusNotifier.
+  ClipboardStatusNotifier({
+    ClipboardStatus value = ClipboardStatus.unknown,
+  }) : super(value);
+
+  bool _disposed = false;
+  /// True iff this instance has been disposed.
+  bool get disposed => _disposed;
+
+  /// Check the [Clipboard] and update [value] if needed.
+  Future<void> update() async {
+    // iOS 14 added a notification that appears when an app accesses the
+    // clipboard. To avoid the notification, don't access the clipboard on iOS,
+    // and instead always shown the paste button, even when the clipboard is
+    // empty.
+    // TODO(justinmc): Use the new iOS 14 clipboard API method hasStrings that
+    // won't trigger the notification.
+    // https://github.com/flutter/flutter/issues/60145
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        value = ClipboardStatus.pasteable;
+        return;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        break;
+    }
+
+    ClipboardData data;
+    try {
+      data = await Clipboard.getData(Clipboard.kTextPlain);
+    } catch (stacktrace) {
+      // In the case of an error from the Clipboard API, set the value to
+      // unknown so that it will try to update again later.
+      if (_disposed || value == ClipboardStatus.unknown) {
+        return;
+      }
+      value = ClipboardStatus.unknown;
+      return;
+    }
+
+    final ClipboardStatus clipboardStatus = data != null && data.text != null && data.text.isNotEmpty
+        ? ClipboardStatus.pasteable
+        : ClipboardStatus.notPasteable;
+    if (_disposed || clipboardStatus == value) {
+      return;
+    }
+    value = clipboardStatus;
+  }
+
+  @override
+  void addListener(VoidCallback listener) {
+    if (!hasListeners) {
+      WidgetsBinding.instance.addObserver(this);
+    }
+    if (value == ClipboardStatus.unknown) {
+      update();
+    }
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    super.removeListener(listener);
+    if (!hasListeners) {
+      WidgetsBinding.instance.removeObserver(this);
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        update();
+        break;
+      case AppLifecycleState.detached:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+        // Nothing to do.
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    _disposed = true;
+  }
+}
+
+/// An enumeration of the status of the content on the user's clipboard.
+enum ClipboardStatus {
+  /// The clipboard content can be pasted, such as a String of nonzero length.
+  pasteable,
+
+  /// The status of the clipboard is unknown. Since getting clipboard data is
+  /// asynchronous (see [Clipboard.getData]), this status often exists while
+  /// waiting to receive the clipboard contents for the first time.
+  unknown,
+
+  /// The content on the clipboard is not pasteable, such as when it is empty.
+  notPasteable,
 }

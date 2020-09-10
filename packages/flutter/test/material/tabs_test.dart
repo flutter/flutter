@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -214,6 +217,11 @@ class TestScrollPhysics extends ScrollPhysics {
     return TestScrollPhysics(parent: buildParent(ancestor));
   }
 
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    return offset == 10 ? 20 : offset;
+  }
+
   static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(
     mass: 0.5,
     stiffness: 500.0,
@@ -391,7 +399,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.index, 5);
     // The center of the FFFFFF item is now at the TabBar's center
-    expect(tester.getCenter(find.text('FFFFFF')).dx, closeTo(400.0, 1.0));
+    expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(400.0, epsilon: 1.0));
   });
 
 
@@ -1051,6 +1059,43 @@ void main() {
     expect(_mainTabController.index, 2);
   });
 
+  testWidgets('TabBarView can warp when child is kept alive and contains ink', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/57662.
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: 3,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBarView(
+          controller: controller,
+          children: const <Widget>[
+            Text('Page 1'),
+            Text('Page 2'),
+            KeepAliveInk('Page 3'),
+          ],
+        ),
+      ),
+    );
+
+    expect(controller.index, equals(0));
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 3'), findsNothing);
+
+    controller.index = 2;
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 3'), findsOneWidget);
+
+    controller.index = 0;
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 3'), findsNothing);
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('TabBarView scrolls end close to a new page with custom physics', (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
@@ -1105,6 +1150,34 @@ void main() {
     // Left enough to get to page 0
     pageController.jumpTo(100.0);
     expect(tabController.index, 0);
+  });
+
+  testWidgets('TabBar accepts custom physics', (WidgetTester tester) async {
+    final List<Tab> tabs = List<Tab>.generate(20, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          isScrollable: true,
+          controller: controller,
+          tabs: tabs,
+          physics: const TestScrollPhysics(),
+        ),
+      ),
+    );
+
+    final TabBar tabBar = tester.widget(find.byType(TabBar));
+    final double position = tabBar.physics.applyPhysicsToUserOffset(null, 10);
+
+    expect(position, equals(20));
   });
 
   testWidgets('Scrollable TabBar with a non-zero TabController initialIndex', (WidgetTester tester) async {
@@ -2028,6 +2101,45 @@ void main() {
     expect(() => Tab(text: 'foo', child: Container()), throwsAssertionError);
   });
 
+  testWidgets('Tabs changes mouse cursor when a tab is hovered', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B'];
+    await tester.pumpWidget(MaterialApp(home: DefaultTabController(
+        length: tabs.length,
+        child: Scaffold(
+          body: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TabBar(
+              mouseCursor: SystemMouseCursors.text,
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Tab).first));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(MaterialApp(home: DefaultTabController(
+        length: tabs.length,
+        child: Scaffold(
+          body: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            ),
+          ),
+        ),
+      ),
+    ));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
 
   testWidgets('TabController changes', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/14812
@@ -2351,7 +2463,7 @@ void main() {
                   tabs: List<Widget>.generate(controller.length, (int index) => Tab(text: 'Tab$index')),
                 ),
                 actions: <Widget>[
-                  FlatButton(
+                  TextButton(
                     child: const Text('Change TabController length'),
                     onPressed: () {
                       setState(() {
@@ -2475,4 +2587,241 @@ void main() {
 
     expect(tabBarWithText.preferredSize, tabBarWithTextChild.preferredSize);
    });
+
+  testWidgets('Setting TabController index should make TabBar indicator immediately pop into the position', (WidgetTester tester) async {
+    const List<Tab> tabs = <Tab>[
+      Tab(text: 'A'), Tab(text: 'B'), Tab(text: 'C')
+    ];
+    const Color indicatorColor = Color(0xFFFF0000);
+    TabController tabController;
+
+    Widget buildTabControllerFrame(BuildContext context, TabController controller) {
+      tabController = controller;
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              controller: controller,
+              tabs: tabs,
+              indicatorColor: indicatorColor,
+            ),
+          ),
+          body: TabBarView(
+            controller: controller,
+            children: tabs.map((Tab tab) {
+              return Center(child: Text(tab.text));
+            }).toList(),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(TabControllerFrame(
+      builder: buildTabControllerFrame,
+      length: tabs.length,
+      initialIndex: 0,
+    ));
+
+    final RenderBox box = tester.renderObject(find.byType(TabBar));
+    final TabIndicatorRecordingCanvas canvas = TabIndicatorRecordingCanvas(indicatorColor);
+    final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
+
+    box.paint(context, Offset.zero);
+    double expectedIndicatorLeft = canvas.indicatorRect.left;
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    void pageControllerListener() {
+      // Whenever TabBarView scrolls due to changing TabController's index,
+      // check if indicator stays idle in its expectedIndicatorLeft
+      box.paint(context, Offset.zero);
+      expect(canvas.indicatorRect.left, expectedIndicatorLeft);
+    }
+
+    // Moving from index 0 to 2 (distanced tabs)
+    tabController.index = 2;
+    box.paint(context, Offset.zero);
+    expectedIndicatorLeft = canvas.indicatorRect.left;
+    pageController.addListener(pageControllerListener);
+    await tester.pumpAndSettle();
+
+    // Moving from index 2 to 1 (neighboring tabs)
+    tabController.index = 1;
+    box.paint(context, Offset.zero);
+    expectedIndicatorLeft = canvas.indicatorRect.left;
+    await tester.pumpAndSettle();
+    pageController.removeListener(pageControllerListener);
+  });
+
+  testWidgets('Setting BouncingScrollPhysics on TabBarView does not include ClampingScrollPhysics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/57708
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 10,
+        child: Scaffold(
+          body: TabBarView(
+            physics: const BouncingScrollPhysics(),
+            children: List<Widget>.generate(10, (int i) => Center(child: Text('index $i'))),
+          ),
+        ),
+      )
+    ));
+
+    final PageView pageView = tester.widget<PageView>(find.byType(PageView));
+    expect(pageView.physics.toString().contains('ClampingScrollPhysics'), isFalse);
+  });
+
+  testWidgets('TabController changes offset attribute', (WidgetTester tester) async {
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: 2,
+    );
+
+    Color firstColor;
+    Color secondColor;
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          controller: controller,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.black,
+          tabs: <Widget>[
+            Builder(builder: (BuildContext context) {
+              firstColor = DefaultTextStyle.of(context).style.color;
+              return const Text('First');
+            }),
+            Builder(builder: (BuildContext context) {
+              secondColor = DefaultTextStyle.of(context).style.color;
+              return const Text('Second');
+            }),
+          ],
+        ),
+      ),
+    );
+
+    expect(firstColor, equals(Colors.white));
+    expect(secondColor, equals(Colors.black));
+
+    controller.offset = 0.6;
+    await tester.pump();
+
+    expect(firstColor, equals(Color.lerp(Colors.white, Colors.black, 0.6)));
+    expect(secondColor, equals(Color.lerp(Colors.black, Colors.white, 0.6)));
+
+    controller.index = 1;
+    await tester.pump();
+
+    expect(firstColor, equals(Colors.black));
+    expect(secondColor, equals(Colors.white));
+
+    controller.offset = 0.6;
+    await tester.pump();
+
+    expect(firstColor, equals(Colors.black));
+    expect(secondColor, equals(Colors.white));
+  });
+
+  testWidgets('Crash on dispose', (WidgetTester tester) async {
+    await tester.pumpWidget(Padding(padding: const EdgeInsets.only(right: 200.0), child: TabBarDemo()));
+    await tester.tap(find.byIcon(Icons.directions_bike));
+    // There was a time where this would throw an exception
+    // because we tried to send a notification on dispose.
+  });
+
+  testWidgets('TabController\'s animation value should be in sync with TabBarView\'s scroll value when user interrupts ballistic scroll', (WidgetTester tester) async {
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: 3,
+    );
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SizedBox.expand(
+        child: Center(
+          child: SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    expect(tabController.index, 0);
+    expect(position.pixels, 0.0);
+
+    pageController.jumpTo(300.0);
+    await tester.pump();
+    expect(tabController.animation.value, pageController.page);
+
+    // Touch TabBarView while ballistic scrolling is happening and
+    // check if tabController's animation value properly follows page value.
+    await tester.startGesture(tester.getCenter(find.byType(PageView)));
+    await tester.pump();
+    expect(tabController.animation.value, pageController.page);
+  });
+}
+
+class KeepAliveInk extends StatefulWidget {
+  const KeepAliveInk(this.title, {Key key}) : super(key: key);
+  final String title;
+  @override
+  State<StatefulWidget> createState() {
+    return _KeepAliveInkState();
+  }
+}
+
+class _KeepAliveInkState extends State<KeepAliveInk> with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Ink(
+      child: Text(widget.title),
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+
+class TabBarDemo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: const TabBar(
+              tabs: <Widget>[
+                Tab(icon: Icon(Icons.directions_car)),
+                Tab(icon: Icon(Icons.directions_transit)),
+                Tab(icon: Icon(Icons.directions_bike)),
+              ],
+            ),
+            title: const Text('Tabs Demo'),
+          ),
+          body: const TabBarView(
+            children: <Widget>[
+              Icon(Icons.directions_car),
+              Icon(Icons.directions_transit),
+              Icon(Icons.directions_bike),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

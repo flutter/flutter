@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -67,8 +69,8 @@ void main() {
       '   No MaterialLocalizations found.\n'
       '   BackButton widgets require MaterialLocalizations to be provided\n'
       '   by a Localizations widget ancestor.\n'
-      '   Localizations are used to generate many different messages,\n'
-      '   labels, and abbreviations which are used by the material library.\n'
+      '   The material library uses Localizations to generate messages,\n'
+      '   labels, and abbreviations.\n'
       '   To introduce a MaterialLocalizations, either use a MaterialApp at\n'
       '   the root of your application to include them automatically, or\n'
       '   add a Localization widget with a MaterialLocalizations delegate.\n'
@@ -135,10 +137,13 @@ void main() {
       '     _FocusMarker\n'
       '     Semantics\n'
       '     FocusScope\n'
+      '     _ActionsMarker\n'
+      '     Actions\n'
       '     PageStorage\n'
       '     Offstage\n'
       '     _ModalScopeStatus\n'
       '     _ModalScope<dynamic>-[LabeledGlobalKey<_ModalScopeState<dynamic>>#00000]\n'
+      '     Semantics\n'
       '     _EffectiveTickerMode\n'
       '     TickerMode\n'
       '     _OverlayEntryWidget-[LabeledGlobalKey<_OverlayEntryWidgetState>#00000]\n'
@@ -150,6 +155,7 @@ void main() {
       '     AbsorbPointer\n'
       '     _PointerListener\n'
       '     Listener\n'
+      '     HeroControllerScope\n'
       '     Navigator-[GlobalObjectKey<NavigatorState> _WidgetsAppState#00000]\n'
       '     IconTheme\n'
       '     IconTheme\n'
@@ -158,6 +164,8 @@ void main() {
       '     _InheritedTheme\n'
       '     Theme\n'
       '     AnimatedTheme\n'
+      '     _ScaffoldMessengerScope\n'
+      '     ScaffoldMessenger\n'
       '     Builder\n'
       '     DefaultTextStyle\n'
       '     CustomPaint\n'
@@ -182,11 +190,58 @@ void main() {
       '     Focus\n'
       '     Shortcuts\n'
       '     WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]\n'
+      '     HeroControllerScope\n'
       '     ScrollConfiguration\n'
       '     MaterialApp\n'
       '     [root]\n'
       '   Typically, the Scaffold widget is introduced by the MaterialApp\n'
       '   or WidgetsApp widget at the top of your application widget tree.\n',
     ));
+  });
+
+  testWidgets('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(),
+        child: Scaffold(
+          key: _scaffoldKey,
+          body: Container(),
+        ),
+      ),
+    ));
+    FlutterError error;
+    try {
+      _scaffoldKey.currentState.showSnackBar(const SnackBar(content: Text('Something is missing here')));
+    } on FlutterError catch (e) {
+      error = e;
+    } finally {
+      expect(error.diagnostics.length, 5);
+      expect(error.diagnostics[2], isA<DiagnosticsProperty<Element>>());
+      expect(error.diagnostics[3], isA<DiagnosticsBlock>());
+      expect(error.diagnostics[4].level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics[4].toStringDeep(),
+        equalsIgnoringHashCodes(
+          'Typically, the ScaffoldMessenger widget is introduced by the\n'
+          'MaterialApp at the top of your application widget tree.\n',
+        ),
+      );
+      expect(error.toStringDeep(), equalsIgnoringHashCodes(
+        'FlutterError\n'
+          '   No ScaffoldMessenger widget found.\n'
+          '   Scaffold widgets require a ScaffoldMessenger widget ancestor.\n'
+          '   The specific widget that could not find a ScaffoldMessenger\n'
+          '   ancestor was:\n'
+          '     Scaffold-[LabeledGlobalKey<ScaffoldState>#d60fa]\n'
+          '   The ancestors of this widget were:\n'
+          '     MediaQuery\n'
+          '     Directionality\n'
+          '     [root]\n'
+          '   Typically, the ScaffoldMessenger widget is introduced by the\n'
+          '   MaterialApp at the top of your application widget tree.\n'
+      ));
+    }
   });
 }

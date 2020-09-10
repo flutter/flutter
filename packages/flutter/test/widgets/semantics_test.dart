@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math';
 import 'dart:ui';
 
@@ -540,7 +542,7 @@ void main() {
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
     semantics.dispose();
-  });
+  }, skip: true); // TODO(abrusher): Enable once engine PR #20385 lands.
 
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

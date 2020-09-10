@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show kSecondaryButton, PointerDeviceKind;
 
@@ -163,7 +166,33 @@ void main() {
     hovered = false;
   });
 
-  testWidgets('ModalBarrier pops the Navigator when dismissed by primay tap', (WidgetTester tester) async {
+  testWidgets('ModalBarrier plays system alert sound when user tries to dismiss it', (WidgetTester tester) async {
+    final List<String> playedSystemSounds = <String>[];
+    try {
+      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+        if (methodCall.method == 'SystemSound.play')
+          playedSystemSounds.add(methodCall.arguments as String);
+      });
+
+      final Widget subject = Stack(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          tapTarget,
+          const ModalBarrier(dismissible: false),
+        ],
+      );
+
+      await tester.pumpWidget(subject);
+      await tester.tap(find.text('target'));
+      await tester.pumpWidget(subject);
+    } finally {
+      SystemChannels.platform.setMockMethodCallHandler(null);
+    }
+    expect(playedSystemSounds, hasLength(1));
+    expect(playedSystemSounds[0], SystemSoundType.alert.toString());
+  });
+
+  testWidgets('ModalBarrier pops the Navigator when dismissed by primary tap', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const FirstWidget(),
       '/modal': (BuildContext context) => const SecondWidget(),
@@ -372,6 +401,24 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics));
 
     semantics.dispose();
+  });
+
+  testWidgets('ModalBarrier uses default mouse cursor', (WidgetTester tester) async {
+    await tester.pumpWidget(Stack(
+      textDirection: TextDirection.ltr,
+      children: const <Widget>[
+        MouseRegion(cursor: SystemMouseCursors.click),
+        ModalBarrier(dismissible: false),
+      ],
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(ModalBarrier)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 }
 

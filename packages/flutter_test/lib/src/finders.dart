@@ -298,7 +298,7 @@ class CommonFinders {
   /// ## Sample code
   ///
   /// ```dart
-  /// expect(find.BySemanticsLabel('Back'), findsOneWidget);
+  /// expect(find.bySemanticsLabel('Back'), findsOneWidget);
   /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
@@ -306,7 +306,7 @@ class CommonFinders {
   Finder bySemanticsLabel(Pattern label, { bool skipOffstage = true }) {
     if (WidgetsBinding.instance.pipelineOwner.semanticsOwner == null)
       throw StateError('Semantics are not enabled. '
-                       'Make sure to call tester.enableSemantics() before using '
+                       'Make sure to call tester.ensureSemantics() before using '
                        'this finder, and call dispose on its return value after.');
     return byElementPredicate(
       (Element element) {

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
@@ -112,5 +114,22 @@ Future<void> main() async {
         'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
       ],
     );
+  });
+
+  test('ShapeDecoration equality', () {
+    const ShapeDecoration a = ShapeDecoration(
+      color: Color(0xFFFFFFFF),
+      shadows: <BoxShadow>[BoxShadow()],
+      shape: Border(),
+    );
+
+    const ShapeDecoration b = ShapeDecoration(
+      color: Color(0xFFFFFFFF),
+      shadows: <BoxShadow>[BoxShadow()],
+      shape: Border(),
+    );
+
+    expect(a.hashCode, equals(b.hashCode));
+    expect(a, equals(b));
   });
 }

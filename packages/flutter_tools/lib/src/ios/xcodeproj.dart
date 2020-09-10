@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -13,6 +12,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -125,7 +125,7 @@ String parsedBuildName({
   @required BuildInfo buildInfo,
 }) {
   final String buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
-  return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse);
+  return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse, globals.logger);
 }
 
 /// Build number parsed and validated from build info and manifest. Used for CFBundleVersion.
@@ -134,14 +134,22 @@ String parsedBuildNumber({
   @required BuildInfo buildInfo,
 }) {
   String buildNumberToParse = buildInfo?.buildNumber ?? manifest.buildNumber;
-  final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse);
+  final String buildNumber = validatedBuildNumberForPlatform(
+    TargetPlatform.ios,
+    buildNumberToParse,
+    globals.logger,
+  );
   if (buildNumber != null && buildNumber.isNotEmpty) {
     return buildNumber;
   }
   // Drop back to parsing build name if build number is not present. Build number is optional in the manifest, but
   // FLUTTER_BUILD_NUMBER is required as the backing value for the required CFBundleVersion.
   buildNumberToParse = buildInfo?.buildName ?? manifest.buildName;
-  return validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse);
+  return validatedBuildNumberForPlatform(
+    TargetPlatform.ios,
+    buildNumberToParse,
+    globals.logger,
+  );
 }
 
 /// List of lines of build settings. Example: 'FLUTTER_BUILD_DIR=build'
@@ -164,16 +172,6 @@ List<String> _xcodeBuildSettingsLines({
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
   if (targetOverride != null) {
     xcodeBuildSettings.add('FLUTTER_TARGET=$targetOverride');
-  }
-
-  // This is an optional path to split debug info
-  if (buildInfo.splitDebugInfoPath != null) {
-    xcodeBuildSettings.add('SPLIT_DEBUG_INFO=${buildInfo.splitDebugInfoPath}');
-  }
-
-  // This is an optional path to obfuscate and output a mapping.
-  if (buildInfo.dartObfuscation) {
-    xcodeBuildSettings.add('DART_OBFUSCATION=true');
   }
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
@@ -226,31 +224,9 @@ List<String> _xcodeBuildSettingsLines({
     }
   }
 
-  if (buildInfo.trackWidgetCreation) {
-    xcodeBuildSettings.add('TRACK_WIDGET_CREATION=true');
+  for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {
+    xcodeBuildSettings.add('${config.key}=${config.value}');
   }
-
-  if (buildInfo.treeShakeIcons) {
-    xcodeBuildSettings.add('TREE_SHAKE_ICONS=true');
-  }
-
-  if (buildInfo.dartDefines?.isNotEmpty ?? false) {
-    xcodeBuildSettings.add('DART_DEFINES=${buildInfo.dartDefines.join(',')}');
-  }
-
-  if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false) {
-    xcodeBuildSettings.add(
-      'EXTRA_FRONT_END_OPTIONS='
-      '${buildInfo.extraFrontEndOptions.join(',')}',
-    );
-  }
-  if (buildInfo.extraGenSnapshotOptions?.isNotEmpty ?? false) {
-    xcodeBuildSettings.add(
-      'EXTRA_GEN_SNAPSHOT_OPTIONS='
-      '${buildInfo.extraGenSnapshotOptions.join(',')}',
-    );
-  }
-
   return xcodeBuildSettings;
 }
 
@@ -285,13 +261,15 @@ class XcodeProjectInterpreter {
       return;
     }
     try {
-      final RunResult result = _processUtils.runSync(
-        <String>[_executable, '-version'],
-      );
-      if (result.exitCode != 0) {
-        return;
+      if (_versionText == null) {
+        final RunResult result = _processUtils.runSync(
+          <String>[_executable, '-version'],
+        );
+        if (result.exitCode != 0) {
+          return;
+        }
+        _versionText = result.stdout.trim().replaceAll('\n', ', ');
       }
-      _versionText = result.stdout.trim().replaceAll('\n', ', ');
       final Match match = _versionRegex.firstMatch(versionText);
       if (match == null) {
         return;
@@ -299,7 +277,8 @@ class XcodeProjectInterpreter {
       final String version = match.group(1);
       final List<String> components = version.split('.');
       _majorVersion = int.parse(components[0]);
-      _minorVersion = components.length == 1 ? 0 : int.parse(components[1]);
+      _minorVersion = components.length < 2 ? 0 : int.parse(components[1]);
+      _patchVersion = components.length < 3 ? 0 : int.parse(components[2]);
     } on ProcessException {
       // Ignored, leave values null.
     }
@@ -331,11 +310,22 @@ class XcodeProjectInterpreter {
     return _minorVersion;
   }
 
+  int _patchVersion;
+  int get patchVersion {
+    if (_patchVersion == null) {
+      _updateVersion();
+    }
+    return _patchVersion;
+  }
+
   /// Asynchronously retrieve xcode build settings. This one is preferred for
   /// new call-sites.
+  ///
+  /// If [scheme] is null, xcodebuild will return build settings for the first discovered
+  /// target (by default this is Runner).
   Future<Map<String, String>> getBuildSettings(
-    String projectPath,
-    String target, {
+    String projectPath, {
+    String scheme,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     final Status status = Status.withSpinner(
@@ -348,8 +338,8 @@ class XcodeProjectInterpreter {
       _executable,
       '-project',
       _fileSystem.path.absolute(projectPath),
-      '-target',
-      target,
+      if (scheme != null)
+        ...<String>['-scheme', scheme],
       '-showBuildSettings',
       ...environmentVariablesAsXcodeBuildSettings(_platform)
     ];
@@ -406,13 +396,13 @@ class XcodeProjectInterpreter {
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],
       throwOnError: true,
-      whiteListFailures: (int c) => c == missingProjectExitCode,
+      allowedFailures: (int c) => c == missingProjectExitCode,
       workingDirectory: projectPath,
     );
     if (result.exitCode == missingProjectExitCode) {
       throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
     }
-    return XcodeProjectInfo.fromXcodeBuildOutput(result.toString());
+    return XcodeProjectInfo.fromXcodeBuildOutput(result.toString(), _logger);
   }
 }
 
@@ -456,9 +446,14 @@ String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettin
 ///
 /// Represents the output of `xcodebuild -list`.
 class XcodeProjectInfo {
-  XcodeProjectInfo(this.targets, this.buildConfigurations, this.schemes);
+  XcodeProjectInfo(
+    this.targets,
+    this.buildConfigurations,
+    this.schemes,
+    Logger logger
+  ) : _logger = logger;
 
-  factory XcodeProjectInfo.fromXcodeBuildOutput(String output) {
+  factory XcodeProjectInfo.fromXcodeBuildOutput(String output, Logger logger) {
     final List<String> targets = <String>[];
     final List<String> buildConfigurations = <String>[];
     final List<String> schemes = <String>[];
@@ -482,24 +477,20 @@ class XcodeProjectInfo {
     if (schemes.isEmpty) {
       schemes.add('Runner');
     }
-    return XcodeProjectInfo(targets, buildConfigurations, schemes);
+    return XcodeProjectInfo(targets, buildConfigurations, schemes, logger);
   }
 
   final List<String> targets;
   final List<String> buildConfigurations;
   final List<String> schemes;
+  final Logger _logger;
 
-  bool get definesCustomTargets => !(targets.contains('Runner') && targets.length == 1);
   bool get definesCustomSchemes => !(schemes.contains('Runner') && schemes.length == 1);
-  bool get definesCustomBuildConfigurations {
-    return !(buildConfigurations.contains('Debug') &&
-        buildConfigurations.contains('Release') &&
-        buildConfigurations.length == 2);
-  }
 
   /// The expected scheme for [buildInfo].
+  @visibleForTesting
   static String expectedSchemeFor(BuildInfo buildInfo) {
-    return toTitleCase(buildInfo.flavor ?? 'runner');
+    return toTitleCase(buildInfo?.flavor ?? 'runner');
   }
 
   /// The expected build configuration for [buildInfo] and [scheme].
@@ -532,6 +523,16 @@ class XcodeProjectInfo {
     return _uniqueMatch(schemes, (String candidate) {
       return candidate.toLowerCase() == expectedScheme.toLowerCase();
     });
+  }
+
+  void reportFlavorNotFoundAndExit() {
+    _logger.printError('');
+    if (definesCustomSchemes) {
+      _logger.printError('The Xcode project defines schemes: ${schemes.join(', ')}');
+      throwToolExit('You must specify a --flavor option to select one of the available schemes.');
+    } else {
+      throwToolExit('The Xcode project does not define custom schemes. You cannot use the --flavor option.');
+    }
   }
 
   /// Returns unique build configuration matching [buildInfo] and [scheme], or

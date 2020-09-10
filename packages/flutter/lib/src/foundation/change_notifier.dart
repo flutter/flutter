@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
 import 'diagnostics.dart';
-import 'observer_list.dart';
 
 /// An object that maintains a list of listeners.
 ///
@@ -63,7 +64,7 @@ abstract class Listenable {
   /// will lead to memory leaks or exceptions.
   ///
   /// The list may contain nulls; they are ignored.
-  factory Listenable.merge(List<Listenable> listenables) = _MergingListenable;
+  factory Listenable.merge(List<Listenable?> listenables) = _MergingListenable;
 
   /// Register a closure to be called when the object notifies its listeners.
   void addListener(VoidCallback listener);
@@ -77,6 +78,12 @@ abstract class Listenable {
 ///
 /// This interface is implemented by [ValueNotifier<T>] and [Animation<T>], and
 /// allows other APIs to accept either of those implementations interchangeably.
+///
+/// See also:
+///
+///  * [ValueListenableBuilder], a widget that uses a builder callback to
+///    rebuild whenever a [ValueListenable] object triggers its notifications,
+///    providing the builder with the value of the object.
 abstract class ValueListenable<T> extends Listenable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -87,18 +94,22 @@ abstract class ValueListenable<T> extends Listenable {
   T get value;
 }
 
+class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
+  _ListenerEntry(this.listener);
+  final VoidCallback listener;
+}
+
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
-/// [ChangeNotifier] is optimized for small numbers (one or two) of listeners.
-/// It is O(N) for adding and removing listeners and O(N²) for dispatching
+/// It is O(1) for adding listeners and O(N) for removing listeners and dispatching
 /// notifications (where N is the number of listeners).
 ///
 /// See also:
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
-  ObserverList<VoidCallback> _listeners = ObserverList<VoidCallback>();
+  LinkedList<_ListenerEntry>? _listeners = LinkedList<_ListenerEntry>();
 
   bool _debugAssertNotDisposed() {
     assert(() {
@@ -131,7 +142,7 @@ class ChangeNotifier implements Listenable {
   @protected
   bool get hasListeners {
     assert(_debugAssertNotDisposed());
-    return _listeners.isNotEmpty;
+    return _listeners!.isNotEmpty;
   }
 
   /// Register a closure to be called when the object changes.
@@ -140,7 +151,7 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    _listeners.add(listener);
+    _listeners!.add(_ListenerEntry(listener));
   }
 
   /// Remove a previously registered closure from the list of closures that are
@@ -165,7 +176,12 @@ class ChangeNotifier implements Listenable {
   @override
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    _listeners.remove(listener);
+    for (final _ListenerEntry entry in _listeners!) {
+      if (entry.listener == listener) {
+        entry.unlink();
+        return;
+      }
+    }
   }
 
   /// Discards any resources used by the object. After this is called, the
@@ -199,27 +215,29 @@ class ChangeNotifier implements Listenable {
   @visibleForTesting
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
-    if (_listeners != null) {
-      final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
-      for (final VoidCallback listener in localListeners) {
-        try {
-          if (_listeners.contains(listener))
-            listener();
-        } catch (exception, stack) {
-          FlutterError.reportError(FlutterErrorDetails(
-            exception: exception,
-            stack: stack,
-            library: 'foundation library',
-            context: ErrorDescription('while dispatching notifications for $runtimeType'),
-            informationCollector: () sync* {
-              yield DiagnosticsProperty<ChangeNotifier>(
-                'The $runtimeType sending notification was',
-                this,
-                style: DiagnosticsTreeStyle.errorProperty,
-              );
-            },
-          ));
-        }
+    if (_listeners!.isEmpty)
+      return;
+
+    final List<_ListenerEntry> localListeners = List<_ListenerEntry>.from(_listeners!);
+
+    for (final _ListenerEntry entry in localListeners) {
+      try {
+        if (entry.list != null)
+          entry.listener();
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'foundation library',
+          context: ErrorDescription('while dispatching notifications for $runtimeType'),
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<ChangeNotifier>(
+              'The $runtimeType sending notification was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          },
+        ));
       }
     }
   }
@@ -228,18 +246,18 @@ class ChangeNotifier implements Listenable {
 class _MergingListenable extends Listenable {
   _MergingListenable(this._children);
 
-  final List<Listenable> _children;
+  final List<Listenable?> _children;
 
   @override
   void addListener(VoidCallback listener) {
-    for (final Listenable child in _children) {
+    for (final Listenable? child in _children) {
       child?.addListener(listener);
     }
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    for (final Listenable child in _children) {
+    for (final Listenable? child in _children) {
       child?.removeListener(listener);
     }
   }

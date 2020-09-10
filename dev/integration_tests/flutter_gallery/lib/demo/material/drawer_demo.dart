@@ -254,7 +254,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
         return AlertDialog(
           title: const Text('Account switching not implemented.'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('OK'),
               onPressed: () {
                 Navigator.pop(context);

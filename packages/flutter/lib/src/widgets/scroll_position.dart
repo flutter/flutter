@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -126,6 +128,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   ///  * [ScrollController.keepScrollOffset] and [PageController.keepPage], which
   ///    create scroll positions and initialize this property.
+  // TODO(goderbauer): Deprecate this when state restoration supports all features of PageStorage.
   final bool keepScrollOffset;
 
   /// A label that is used in the [toString] output.
@@ -141,6 +144,24 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @override
   double get maxScrollExtent => _maxScrollExtent;
   double _maxScrollExtent;
+
+  /// The additional velocity added for a [forcePixels] change in a single
+  /// frame.
+  ///
+  /// This value is used by [recommendDeferredLoading] in addition to the
+  /// [activity]'s [ScrollActivity.velocity] to ask the [physics] whether or
+  /// not to defer loading. It accounts for the fact that a [forcePixels] call
+  /// may involve a [ScrollActivity] with 0 velocity, but the scrollable is
+  /// still instantaneously moving from its current position to a potentially
+  /// very far position, and which is of interest to callers of
+  /// [recommendDeferredLoading].
+  ///
+  /// For example, if a scrollable is currently at 5000 pixels, and we [jumpTo]
+  /// 0 to get back to the top of the list, we would have an implied velocity of
+  /// -5000 and an `activity.velocity` of 0. The jump may be going past a
+  /// number of resource intensive widgets which should avoid doing work if the
+  /// position jumps past them.
+  double _impliedVelocity = 0;
 
   @override
   double get pixels => _pixels;
@@ -223,7 +244,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// If there is any overscroll, it is reported using [didOverscrollBy].
   double setPixels(double newPixels) {
     assert(_pixels != null);
-    assert(SchedulerBinding.instance.schedulerPhase.index <= SchedulerPhase.transientCallbacks.index);
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks, 'A scrollable\'s position should not change during the build, layout, and paint phases, otherwise the rendering will be confused.');
     if (newPixels != pixels) {
       final double overscroll = applyBoundaryConditions(newPixels);
       assert(() {
@@ -309,7 +330,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void correctBy(double correction) {
     assert(
       _pixels != null,
-      'An initial pixels value must exist by caling correctPixels on the ScrollPosition',
+      'An initial pixels value must exist by calling correctPixels on the ScrollPosition',
     );
     _pixels += correction;
     _didChangeViewportDimensionOrReceiveCorrection = true;
@@ -340,8 +361,13 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   void forcePixels(double value) {
     assert(pixels != null);
+    assert(value != null);
+    _impliedVelocity = value - _pixels;
     _pixels = value;
     notifyListeners();
+    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      _impliedVelocity = 0;
+    });
   }
 
   /// Called whenever scrolling ends, to store the current scroll offset in a
@@ -356,6 +382,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// The default implementation writes the [pixels] using the nearest
   /// [PageStorage] found from the [context]'s [ScrollContext.storageContext]
   /// property.
+  // TODO(goderbauer): Deprecate this when state restoration supports all features of PageStorage.
   @protected
   void saveScrollOffset() {
     PageStorage.of(context.storageContext)?.writeState(context.storageContext, pixels);
@@ -376,6 +403,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// This method is called from the constructor, so layout has not yet
   /// occurred, and the viewport dimensions aren't yet known when it is called.
+  // TODO(goderbauer): Deprecate this when state restoration supports all features of PageStorage.
   @protected
   void restoreScrollOffset() {
     if (pixels == null) {
@@ -383,6 +411,42 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       if (value != null)
         correctPixels(value);
     }
+  }
+
+  /// Called by [context] to restore the scroll offset to the provided value.
+  ///
+  /// The provided value has previously been provided to the [context] by
+  /// calling [ScrollContext.saveOffset], e.g. from [saveOffset].
+  ///
+  /// This method may be called right after the scroll position is created
+  /// before layout has occurred. In that case, `initialRestore` is set to true
+  /// and the viewport dimensions will not be known yet. If the [context]
+  /// doesn't have any information to restore the scroll offset this method is
+  /// not called.
+  ///
+  /// The method may be called multiple times in the lifecycle of a
+  /// [ScrollPosition] to restore it to different scroll offsets.
+  void restoreOffset(double offset, {bool initialRestore = false}) {
+    assert(initialRestore != null);
+    assert(offset != null);
+    if (initialRestore) {
+      correctPixels(offset);
+    } else {
+      jumpTo(offset);
+    }
+  }
+
+  /// Called whenever scrolling ends, to persist the current scroll offset for
+  /// state restoration purposes.
+  ///
+  /// The default implementation stores the current value of [pixels] on the
+  /// [context] by calling [ScrollContext.saveOffset]. At a later point in time
+  /// or after the application restarts, the [context] may restore the scroll
+  /// position to the persisted offset by calling [restoreOffset].
+  @protected
+  void saveOffset() {
+    assert(pixels != null);
+    context.saveOffset(pixels);
   }
 
   /// Returns the overscroll by applying the boundary conditions.
@@ -428,6 +492,96 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       // relies on both values being computed into applyContentDimensions.
     }
     return true;
+  }
+
+  bool _pendingDimensions = false;
+  ScrollMetrics _lastMetrics;
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    assert(minScrollExtent != null);
+    assert(maxScrollExtent != null);
+    assert(haveDimensions == (_lastMetrics != null));
+    if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
+        !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
+        _didChangeViewportDimensionOrReceiveCorrection) {
+      assert(minScrollExtent != null);
+      assert(maxScrollExtent != null);
+      assert(minScrollExtent <= maxScrollExtent);
+      _minScrollExtent = minScrollExtent;
+      _maxScrollExtent = maxScrollExtent;
+      final ScrollMetrics currentMetrics = haveDimensions ? copyWith() : null;
+      _didChangeViewportDimensionOrReceiveCorrection = false;
+      _pendingDimensions = true;
+      if (haveDimensions && !correctForNewDimensions(_lastMetrics, currentMetrics)) {
+        return false;
+      }
+      _haveDimensions = true;
+    }
+    assert(haveDimensions);
+    if (_pendingDimensions) {
+      applyNewDimensions();
+      _pendingDimensions = false;
+    }
+    assert(!_didChangeViewportDimensionOrReceiveCorrection, 'Use correctForNewDimensions() (and return true) to change the scroll offset during applyContentDimensions().');
+    _lastMetrics = copyWith();
+    return true;
+  }
+
+  /// Verifies that the new content and viewport dimensions are acceptable.
+  ///
+  /// Called by [applyContentDimensions] to determine its return value.
+  ///
+  /// Should return true if the current scroll offset is correct given
+  /// the new content and viewport dimensions.
+  ///
+  /// Otherwise, should call [correctPixels] to correct the scroll
+  /// offset given the new dimensions, and then return false.
+  ///
+  /// This is only called when [haveDimensions] is true.
+  ///
+  /// The default implementation defers to [ScrollPhysics.adjustPositionForNewDimensions].
+  @protected
+  bool correctForNewDimensions(ScrollMetrics oldPosition, ScrollMetrics newPosition) {
+    final double newPixels = physics.adjustPositionForNewDimensions(
+      oldPosition: oldPosition,
+      newPosition: newPosition,
+      isScrolling: activity.isScrolling,
+      velocity: activity.velocity,
+    );
+    if (newPixels != pixels) {
+      correctPixels(newPixels);
+      return false;
+    }
+    return true;
+  }
+
+  /// Notifies the activity that the dimensions of the underlying viewport or
+  /// contents have changed.
+  ///
+  /// Called after [applyViewportDimension] or [applyContentDimensions] have
+  /// changed the [minScrollExtent], the [maxScrollExtent], or the
+  /// [viewportDimension]. When this method is called, it should be called
+  /// _after_ any corrections are applied to [pixels] using [correctPixels], not
+  /// before.
+  ///
+  /// The default implementation informs the [activity] of the new dimensions by
+  /// calling its [ScrollActivity.applyNewDimensions] method.
+  ///
+  /// See also:
+  ///
+  ///  * [applyViewportDimension], which is called when new
+  ///    viewport dimensions are established.
+  ///  * [applyContentDimensions], which is called after new
+  ///    viewport dimensions are established, and also if new content dimensions
+  ///    are established, and which calls [ScrollPosition.applyNewDimensions].
+  @protected
+  @mustCallSuper
+  void applyNewDimensions() {
+    assert(pixels != null);
+    assert(_pendingDimensions);
+    activity.applyNewDimensions();
+    _updateSemanticActions(); // will potentially request a semantics update.
   }
 
   Set<SemanticsAction> _semanticActions;
@@ -477,52 +631,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
     _semanticActions = actions;
     context.setSemanticsActions(_semanticActions);
-  }
-
-  @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
-    assert(minScrollExtent != null);
-    assert(maxScrollExtent != null);
-    if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
-        !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
-        _didChangeViewportDimensionOrReceiveCorrection) {
-      assert(minScrollExtent != null);
-      assert(maxScrollExtent != null);
-      assert(minScrollExtent <= maxScrollExtent);
-      _minScrollExtent = minScrollExtent;
-      _maxScrollExtent = maxScrollExtent;
-      _haveDimensions = true;
-      applyNewDimensions();
-      _didChangeViewportDimensionOrReceiveCorrection = false;
-    }
-    return true;
-  }
-
-  /// Notifies the activity that the dimensions of the underlying viewport or
-  /// contents have changed.
-  ///
-  /// Called after [applyViewportDimension] or [applyContentDimensions] have
-  /// changed the [minScrollExtent], the [maxScrollExtent], or the
-  /// [viewportDimension]. When this method is called, it should be called
-  /// _after_ any corrections are applied to [pixels] using [correctPixels], not
-  /// before.
-  ///
-  /// The default implementation informs the [activity] of the new dimensions by
-  /// calling its [ScrollActivity.applyNewDimensions] method.
-  ///
-  /// See also:
-  ///
-  ///  * [applyViewportDimension], which is called when new
-  ///    viewport dimensions are established.
-  ///  * [applyContentDimensions], which is called after new
-  ///    viewport dimensions are established, and also if new content dimensions
-  ///    are established, and which calls [ScrollPosition.applyNewDimensions].
-  @protected
-  @mustCallSuper
-  void applyNewDimensions() {
-    assert(pixels != null);
-    activity.applyNewDimensions();
-    _updateSemanticActions(); // will potentially request a semantics update.
   }
 
   /// Animates the position such that the given object is as visible as possible
@@ -726,6 +834,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// This also saves the scroll offset using [saveScrollOffset].
   void didEndScroll() {
     activity.dispatchScrollEndNotification(copyWith(), context.notificationContext);
+    saveOffset();
     if (keepScrollOffset)
       saveScrollOffset();
   }
@@ -749,7 +858,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// deferred.
   ///
   /// The actual work of this is delegated to the [physics] via
-  /// [ScrollPhysics.recommendDeferredScrolling] called with the current
+  /// [ScrollPhysics.recommendDeferredLoading] called with the current
   /// [activity]'s [ScrollActivity.velocity].
   ///
   /// Returning true from this method indicates that the [ScrollPhysics]
@@ -759,7 +868,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(context != null);
     assert(activity != null);
     assert(activity.velocity != null);
-    return physics.recommendDeferredLoading(activity.velocity, copyWith(), context);
+    assert(_impliedVelocity != null);
+    return physics.recommendDeferredLoading(
+      activity.velocity + _impliedVelocity,
+      copyWith(),
+      context,
+    );
   }
 
   @override

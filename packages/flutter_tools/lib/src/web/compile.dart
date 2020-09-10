@@ -10,7 +10,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/dart.dart';
+import '../build_system/targets/common.dart';
 import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/web.dart';
 import '../cache.dart';
@@ -28,7 +28,7 @@ Future<void> buildWeb(
   BuildInfo buildInfo,
   bool initializePlatform,
   bool csp,
-  List<String> experiments,
+  String serviceWorkerStrategy,
 ) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
@@ -50,11 +50,13 @@ Future<void> buildWeb(
         kTargetFile: target,
         kInitializePlatform: initializePlatform.toString(),
         kHasWebPlugins: hasWebPlugins.toString(),
-        kDartDefines: buildInfo.dartDefines.join(','),
+        kDartDefines: encodeDartDefines(buildInfo.dartDefines),
         kCspMode: csp.toString(),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
-        if (experiments.isNotEmpty)
-          kEnableExperiment: experiments?.join(','),
+        if (serviceWorkerStrategy != null)
+         kServiceWorkerStrategy: serviceWorkerStrategy,
+        if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false)
+          kExtraFrontEndOptions: encodeDartDefines(buildInfo.extraFrontEndOptions),
       },
       artifacts: globals.artifacts,
       fileSystem: globals.fs,

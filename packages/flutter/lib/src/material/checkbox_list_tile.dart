@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/widgets.dart';
 
 import 'checkbox.dart';
@@ -17,10 +19,12 @@ import 'theme_data.dart';
 /// The entire list tile is interactive: tapping anywhere in the tile toggles
 /// the checkbox.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=RkSqPAn9szs}
+///
 /// The [value], [onChanged], [activeColor] and [checkColor] properties of this widget are
 /// identical to the similarly-named properties on the [Checkbox] widget.
 ///
-/// The [title], [subtitle], [isThreeLine], and [dense] properties are like
+/// The [title], [subtitle], [isThreeLine], [dense], and [contentPadding] properties are like
 /// those of the same name on [ListTile].
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
@@ -248,11 +252,12 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// The following arguments are required:
   ///
-  /// * [value], which determines whether the checkbox is checked, and must not
-  ///   be null.
-  ///
+  /// * [value], which determines whether the checkbox is checked. The [value]
+  ///   can only be null if [tristate] is true.
   /// * [onChanged], which is called when the value of the checkbox should
   ///   change. It can be set to null to disable the checkbox.
+  ///
+  /// The value of [tristate] must not be null.
   const CheckboxListTile({
     Key key,
     @required this.value,
@@ -267,7 +272,10 @@ class CheckboxListTile extends StatelessWidget {
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
     this.autofocus = false,
-  }) : assert(value != null),
+    this.contentPadding,
+    this.tristate = false,
+  }) : assert(tristate != null),
+       assert(tristate || value != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
@@ -276,8 +284,6 @@ class CheckboxListTile extends StatelessWidget {
        super(key: key);
 
   /// Whether this checkbox is checked.
-  ///
-  /// This property must not be null.
   final bool value;
 
   /// Called when the value of the checkbox should change.
@@ -356,6 +362,41 @@ class CheckboxListTile extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// Defines insets surrounding the tile's contents.
+  ///
+  /// This value will surround the [Checkbox], [title], [subtitle], and [secondary]
+  /// widgets in [CheckboxListTile].
+  ///
+  /// When the value is null, the `contentPadding` is `EdgeInsets.symmetric(horizontal: 16.0)`.
+  final EdgeInsetsGeometry contentPadding;
+
+  /// If true the checkbox's [value] can be true, false, or null.
+  ///
+  /// Checkbox displays a dash when its value is null.
+  ///
+  /// When a tri-state checkbox ([tristate] is true) is tapped, its [onChanged]
+  /// callback will be applied to true if the current value is false, to null if
+  /// value is true, and to false if value is null (i.e. it cycles through false
+  /// => true => null => false when tapped).
+  ///
+  /// If tristate is false (the default), [value] must not be null.
+  final bool tristate;
+
+  void _handleValueChange() {
+    assert(onChanged != null);
+    switch (value) {
+      case false:
+        onChanged(true);
+        break;
+      case true:
+        onChanged(tristate ? null : false);
+        break;
+      default: // case null:
+        onChanged(false);
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final Widget control = Checkbox(
@@ -365,6 +406,7 @@ class CheckboxListTile extends StatelessWidget {
       checkColor: checkColor,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       autofocus: autofocus,
+      tristate: tristate,
     );
     Widget leading, trailing;
     switch (controlAffinity) {
@@ -389,9 +431,10 @@ class CheckboxListTile extends StatelessWidget {
           isThreeLine: isThreeLine,
           dense: dense,
           enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged(!value); } : null,
+          onTap: onChanged != null ? _handleValueChange : null,
           selected: selected,
           autofocus: autofocus,
+          contentPadding: contentPadding,
         ),
       ),
     );

@@ -18,5 +18,7 @@
   "cutButtonLabel": "ამოჭრა",
   "copyButtonLabel": "კოპირება",
   "pasteButtonLabel": "ჩასმა",
-  "selectAllButtonLabel": "ყველას არჩევა"
+  "selectAllButtonLabel": "ყველას არჩევა",
+  "tabSemanticsLabel": "ჩანართი $tabIndex / $tabCount-დან",
+  "modalBarrierDismissLabel": "დახურვა"
 }

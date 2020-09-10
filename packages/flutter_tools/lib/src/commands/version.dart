@@ -13,7 +13,6 @@ import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
-import '../version.dart';
 
 class VersionCommand extends FlutterCommand {
   VersionCommand() : super() {
@@ -29,6 +28,9 @@ class VersionCommand extends FlutterCommand {
       help: 'Whether to run "flutter pub get" after switching versions.',
     );
   }
+
+  @override
+  bool get deprecated => true;
 
   @override
   final String name = 'version';
@@ -87,7 +89,7 @@ class VersionCommand extends FlutterCommand {
       }
     }
 
-    final String version = argResults.rest[0].replaceFirst('v', '');
+    final String version = argResults.rest[0].replaceFirst(RegExp('^v'), '');
     final List<String> matchingTags = tags.where((String tag) => tag.contains(version)).toList();
     String matchingTag;
     // TODO(fujino): make this a tool exit and fix tests
@@ -127,15 +129,12 @@ class VersionCommand extends FlutterCommand {
       throwToolExit('Unable to checkout version branch for version $version: $e');
     }
 
-    final FlutterVersion flutterVersion = FlutterVersion();
-
-    globals.printStatus('Switching Flutter to version ${flutterVersion.frameworkVersion}${withForce ? ' with force' : ''}');
+    globals.printStatus('Switching Flutter to version $matchingTag${withForce ? ' with force' : ''}');
 
     // Check for and download any engine and pkg/ updates.
     // We run the 'flutter' shell script re-entrantly here
     // so that it will download the updated Dart and so forth
     // if necessary.
-    globals.printStatus('');
     globals.printStatus('Downloading engine...');
     int code = await processUtils.stream(<String>[
       globals.fs.path.join('bin', 'flutter'),
@@ -147,9 +146,6 @@ class VersionCommand extends FlutterCommand {
       throwToolExit(null, exitCode: code);
     }
 
-    globals.printStatus('');
-    globals.printStatus(flutterVersion.toString());
-
     final String projectRoot = findProjectRoot();
     if (projectRoot != null && boolArg('pub')) {
       globals.printStatus('');
@@ -158,6 +154,7 @@ class VersionCommand extends FlutterCommand {
         directory: projectRoot,
         upgrade: true,
         checkLastModified: false,
+        generateSyntheticPackage: false,
       );
     }
 

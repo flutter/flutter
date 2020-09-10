@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback;
@@ -16,6 +18,7 @@ import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
+import 'router.dart';
 import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
@@ -93,7 +96,7 @@ abstract class WidgetsBindingObserver {
   /// [SystemChannels.navigation].
   Future<bool> didPopRoute() => Future<bool>.value(false);
 
-  /// Called when the host tells the app to push a new route onto the
+  /// Called when the host tells the application to push a new route onto the
   /// navigator.
   ///
   /// Observers are expected to return true if they were able to
@@ -103,6 +106,22 @@ abstract class WidgetsBindingObserver {
   /// This method exposes the `pushRoute` notification from
   /// [SystemChannels.navigation].
   Future<bool> didPushRoute(String route) => Future<bool>.value(false);
+
+  /// Called when the host tells the application to push a new
+  /// [RouteInformation] and a restoration state onto the router.
+  ///
+  /// Observers are expected to return true if they were able to
+  /// handle the notification. Observers are notified in registration
+  /// order until one returns true.
+  ///
+  /// This method exposes the `pushRouteInformation` notification from
+  /// [SystemChannels.navigation].
+  ///
+  /// The default implementation is to call the [didPushRoute] directly with the
+  /// [RouteInformation.location].
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
+    return didPushRoute(routeInformation.location);
+  }
 
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
@@ -413,24 +432,26 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
-      // Register the ability to quickly mark elements as dirty.
-      // The performance of this method may be improved with additional
-      // information from https://github.com/flutter/flutter/issues/46195.
       registerServiceExtension(
         name: 'fastReassemble',
         callback: (Map<String, Object> params) async {
-          final String className = params['class'] as String;
+          final FastReassemblePredicate fastReassemblePredicate = _debugFastReassembleMethod;
+          _debugFastReassembleMethod = null;
+          if (fastReassemblePredicate == null) {
+            throw FlutterError('debugFastReassembleMethod must be set to use fastReassemble.');
+          }
           void markElementsDirty(Element element) {
             if (element == null) {
               return;
             }
-            if (element.widget?.runtimeType?.toString()?.startsWith(className) ?? false) {
+            if (fastReassemblePredicate(element.widget)) {
               element.markNeedsBuild();
             }
             element.visitChildElements(markElementsDirty);
           }
           markElementsDirty(renderViewElement);
-          return <String, String>{'Success': 'true'};
+          await endOfFrame;
+          return <String, String>{'type': 'Success'};
         },
       );
 
@@ -446,6 +467,18 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }
 
     assert(() {
+      registerBoolServiceExtension(
+        name: 'invertOversizedImages',
+        getter: () async => debugInvertOversizedImages,
+        setter: (bool value) async {
+          if (debugInvertOversizedImages != value) {
+            debugInvertOversizedImages = value;
+            return _forceRebuild();
+          }
+          return Future<void>.value();
+        },
+      );
+
       registerBoolServiceExtension(
         name: 'debugAllowBanner',
         getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
@@ -561,7 +594,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   /// Called when the system locale changes.
   ///
-  /// Calls [dispatchLocaleChanged] to notify the binding observers.
+  /// Calls [dispatchLocalesChanged] to notify the binding observers.
   ///
   /// See [Window.onLocaleChanged].
   @protected
@@ -638,12 +671,28 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }
   }
 
+  Future<void> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+      if (
+        await observer.didPushRouteInformation(
+          RouteInformation(
+            location: routeArguments['location'] as String,
+            state: routeArguments['state'] as Object,
+          )
+        )
+      )
+      return;
+    }
+  }
+
   Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
     switch (methodCall.method) {
       case 'popRoute':
         return handlePopRoute();
       case 'pushRoute':
         return handlePushRoute(methodCall.arguments as String);
+      case 'pushRouteInformation':
+        return _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>);
     }
     return Future<dynamic>.value();
   }
@@ -679,7 +728,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// A future that completes when the Flutter engine has rasterized the first
   /// frame.
   ///
-  /// {@macro flutter.frame_rasterize_vs_presented}
+  /// {@macro flutter.frame_rasterized_vs_presented}
   ///
   /// See also:
   ///
@@ -877,6 +926,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }
     _needToReportFirstFrame = false;
     if (firstFrameCallback != null && !sendFramesToEngine) {
+      // This frame is deferred and not the first frame sent to the engine that
+      // should be reported.
+      _needToReportFirstFrame = true;
       SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback);
     }
   }
@@ -939,6 +991,47 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       buildOwner.reassemble(renderViewElement);
     return super.performReassemble();
   }
+
+  /// Computes the locale the current platform would resolve to.
+  ///
+  /// This method is meant to be used as part of a
+  /// [WidgetsApp.localeListResolutionCallback]. Since this method may return
+  /// null, a Flutter/dart algorithm should still be provided as a fallback in
+  /// case a native resolved locale cannot be determined or if the native
+  /// resolved locale is undesirable.
+  ///
+  /// This method may return a null [Locale] if the platform does not support
+  /// native locale resolution, or if the resolution failed.
+  ///
+  /// The first `supportedLocale` is treated as the default locale and will be returned
+  /// if no better match is found.
+  ///
+  /// Android and iOS are currently supported.
+  ///
+  /// On Android, the algorithm described in
+  /// https://developer.android.com/guide/topics/resources/multilingual-support
+  /// is used to determine the resolved locale. Depending on the android version
+  /// of the device, either the modern (>= API 24) or legacy (< API 24) algorithm
+  /// will be used.
+  ///
+  /// On iOS, the result of `preferredLocalizationsFromArray` method of `NSBundle`
+  /// is returned. See:
+  /// https://developer.apple.com/documentation/foundation/nsbundle/1417249-preferredlocalizationsfromarray?language=objc
+  /// for details on the used method.
+  ///
+  /// iOS treats script code as necessary for a match, so a user preferred locale of
+  /// `zh_Hans_CN` will not resolve to a supported locale of `zh_CN`.
+  ///
+  /// Since implementation may vary by platform and has potential to be heavy,
+  /// it is recommended to cache the results of this method if the value is
+  /// used multiple times.
+  ///
+  /// Second-best (and n-best) matching locales should be obtained by calling this
+  /// method again with the matched locale of the first call omitted from
+  /// `supportedLocales`.
+  Locale computePlatformResolvedLocale(List<Locale> supportedLocales) {
+    return window.computePlatformResolvedLocale(supportedLocales);
+  }
 }
 
 /// Inflate the given widget and attach it to the screen.
@@ -946,7 +1039,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 /// The widget is given constraints during layout that force it to fill the
 /// entire screen. If you wish to align your widget to one side of the screen
 /// (e.g., the top), consider using the [Align] widget. If you wish to center
-/// your widget, you can also use the [Center] widget
+/// your widget, you can also use the [Center] widget.
 ///
 /// Calling [runApp] again will detach the previous root widget from the screen
 /// and attach the given widget in its place. The new widget tree is compared
@@ -969,6 +1062,36 @@ void runApp(Widget app) {
     ..scheduleAttachRootWidget(app)
     ..scheduleWarmUpFrame();
 }
+
+/// A function that should validate that the provided object is assignable to a
+/// given type.
+typedef FastReassemblePredicate = bool Function(Object);
+
+/// Debug-only functionality used to perform faster hot reloads.
+///
+/// This field is set by expression evaluation in the flutter tool and is
+/// used to invalidate specific types of [Element]s. This setter
+/// should not be referenced in user code and is only public so that expression
+/// evaluation can be done in the context of an almost-arbitrary Dart library.
+///
+/// For example, expression evaluation might be performed with the following code:
+///
+/// ```dart
+/// (debugFastReassembleMethod=(Object x) => x is Foo)()
+/// ```
+///
+/// And then followed by a call to `ext.flutter.fastReassemble`. This will read
+/// the provided predicate and use it to mark specific elements dirty wherever
+/// [Element.widget] is a `Foo`. Afterwards, the internal field will be nulled
+/// out.
+FastReassemblePredicate get debugFastReassembleMethod => _debugFastReassembleMethod;
+set debugFastReassembleMethod(FastReassemblePredicate fastReassemblePredicate) {
+  assert(() {
+    _debugFastReassembleMethod = fastReassemblePredicate;
+    return true;
+  }());
+}
+FastReassemblePredicate _debugFastReassembleMethod;
 
 /// Print a string representation of the currently running app.
 void debugDumpApp() {
@@ -1145,19 +1268,19 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   RenderObjectWithChildMixin<T> get renderObject => super.renderObject as RenderObjectWithChildMixin<T>;
 
   @override
-  void insertChildRenderObject(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderObject child, dynamic slot) {
     assert(slot == _rootChildSlot);
     assert(renderObject.debugValidateChild(child));
     renderObject.child = child as T;
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, dynamic slot) {
+  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
     assert(false);
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, dynamic slot) {
     assert(renderObject.child == child);
     renderObject.child = null;
   }

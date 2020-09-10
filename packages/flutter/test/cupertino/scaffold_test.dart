@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../painting/mocks_for_image_cache.dart';
+import '../painting/image_data.dart';
 import '../rendering/mock_canvas.dart';
 
 /// Integration tests testing both [CupertinoPageScaffold] and [CupertinoTabScaffold].
@@ -159,7 +163,7 @@ void main() {
     expect(tester.getSize(find.byType(Container)).height, 600.0);
   });
 
-  testWidgets('Contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overriden', (WidgetTester tester) async {
+  testWidgets('Contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
     const Widget child = CupertinoPageScaffold(
       resizeToAvoidBottomInset: false,
       navigationBar: CupertinoNavigationBar(
@@ -206,14 +210,14 @@ void main() {
         home: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
             backgroundColor: CupertinoColors.white,
-            items: const <BottomNavigationBarItem>[
+            items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 1'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                title: const Text('Tab 1'),
               ),
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 2'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                title: const Text('Tab 2'),
               ),
             ],
           ),
@@ -246,14 +250,14 @@ void main() {
           ),
           child: CupertinoTabScaffold(
             tabBar: CupertinoTabBar(
-              items: const <BottomNavigationBarItem>[
+              items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                  icon: ImageIcon(TestImageProvider(24, 24)),
-                  title: Text('Tab 1'),
+                  icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                  title: const Text('Tab 1'),
                 ),
                 BottomNavigationBarItem(
-                  icon: ImageIcon(TestImageProvider(24, 24)),
-                  title: Text('Tab 2'),
+                  icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                  title: const Text('Tab 2'),
                 ),
               ],
             ),
@@ -296,14 +300,14 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
-            items: const <BottomNavigationBarItem>[
+            items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 1'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                title: const Text('Tab 1'),
               ),
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 2'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                title: const Text('Tab 2'),
               ),
             ],
           ),

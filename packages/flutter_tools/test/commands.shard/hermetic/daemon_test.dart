@@ -13,6 +13,8 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:mockito/mockito.dart';
+import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -21,10 +23,14 @@ import '../../src/mocks.dart';
 void main() {
   Daemon daemon;
   NotifyingLogger notifyingLogger;
+  BufferLogger bufferLogger;
+  DevtoolsLauncher mockDevToolsLauncher;
 
   group('daemon', () {
     setUp(() {
-      notifyingLogger = NotifyingLogger();
+      bufferLogger = BufferLogger.test();
+      notifyingLogger = NotifyingLogger(verbose: false, parent: bufferLogger);
+      mockDevToolsLauncher = MockDevToolsLauncher();
     });
 
     tearDown(() {
@@ -194,7 +200,7 @@ void main() {
         responses.add,
         notifyingLogger: notifyingLogger,
       );
-      final MockPollingDeviceDiscovery discoverer = MockPollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(MockAndroidDevice());
       commands.add(<String, dynamic>{'id': 0, 'method': 'device.getDevices'});
@@ -216,7 +222,7 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      final MockPollingDeviceDiscovery discoverer = MockPollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(MockAndroidDevice());
 
@@ -296,6 +302,81 @@ void main() {
       await output.close();
       await input.close();
     });
+
+    testUsingContext('devtools.serve command should return host and port on success', () async {
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
+      daemon = Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+      );
+      when(mockDevToolsLauncher.serve()).thenAnswer((_) async => DevToolsServerAddress('127.0.0.1', 1234));
+
+      commands.add(<String, dynamic>{'id': 0, 'method': 'devtools.serve'});
+      final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> response) => response['id'] == 0);
+      expect(response['result'], isNotEmpty);
+      expect(response['result']['host'], '127.0.0.1');
+      expect(response['result']['port'], 1234);
+      await responses.close();
+      await commands.close();
+    }, overrides: <Type, Generator>{
+      DevtoolsLauncher: () => mockDevToolsLauncher,
+    });
+
+    testUsingContext('devtools.serve command should return null fields if null returned', () async {
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
+      daemon = Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+      );
+      when(mockDevToolsLauncher.serve()).thenAnswer((_) async => null);
+
+      commands.add(<String, dynamic>{'id': 0, 'method': 'devtools.serve'});
+      final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> response) => response['id'] == 0);
+      expect(response['result'], isNotEmpty);
+      expect(response['result']['host'], null);
+      expect(response['result']['port'], null);
+      await responses.close();
+      await commands.close();
+    }, overrides: <Type, Generator>{
+      DevtoolsLauncher: () => mockDevToolsLauncher,
+    });
+  });
+
+  testUsingContext('notifyingLogger outputs trace messages in verbose mode', () async {
+    final NotifyingLogger logger = NotifyingLogger(verbose: true, parent: bufferLogger);
+
+    logger.printTrace('test');
+
+    expect(bufferLogger.errorText, contains('test'));
+  });
+
+  testUsingContext('notifyingLogger ignores trace messages in non-verbose mode', () async {
+    final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
+
+    final Future<LogMessage> messageResult = logger.onMessage.first;
+    logger.printTrace('test');
+    logger.printStatus('hello');
+
+    final LogMessage message = await messageResult;
+
+    expect(message.level, 'status');
+    expect(message.message, 'hello');
+    expect(bufferLogger.errorText, contains('test'));
+  });
+
+  testUsingContext('notifyingLogger buffers messages sent before a subscription', () async {
+    final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
+
+    logger.printStatus('hello');
+
+    final LogMessage message = await logger.onMessage.first;
+
+    expect(message.level, 'status');
+    expect(message.message, 'hello');
   });
 
   group('daemon serialization', () {
@@ -308,6 +389,89 @@ void main() {
         jsonEncodeObject(OperationResult(1, 'foo')),
         '{"code":1,"message":"foo"}',
       );
+    });
+  });
+
+  group('daemon queue', () {
+    DebounceOperationQueue<int, String> queue;
+    const Duration debounceDuration = Duration(seconds: 1);
+
+    setUp(() {
+      queue = DebounceOperationQueue<int, String>();
+    });
+
+    testWithoutContext(
+        'debounces/merges same operation type and returns same result',
+        () async {
+      await runFakeAsync((FakeAsync time) async {
+        final List<Future<int>> operations = <Future<int>>[
+          queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
+          queue.queueAndDebounce('OP1', debounceDuration, () async => 2),
+        ];
+
+        time.elapse(debounceDuration * 5);
+        final List<int> results = await Future.wait(operations);
+
+        expect(results, orderedEquals(<int>[1, 1]));
+      });
+    });
+
+    testWithoutContext('does not merge results outside of the debounce duration',
+        () async {
+      await runFakeAsync((FakeAsync time) async {
+        final List<Future<int>> operations = <Future<int>>[
+          queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
+          Future<int>.delayed(debounceDuration * 2).then((_) =>
+              queue.queueAndDebounce('OP1', debounceDuration, () async => 2)),
+        ];
+
+        time.elapse(debounceDuration * 5);
+        final List<int> results = await Future.wait(operations);
+
+        expect(results, orderedEquals(<int>[1, 2]));
+      });
+    });
+
+    testWithoutContext('does not merge results of different operations',
+        () async {
+      await runFakeAsync((FakeAsync time) async {
+        final List<Future<int>> operations = <Future<int>>[
+          queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
+          queue.queueAndDebounce('OP2', debounceDuration, () async => 2),
+        ];
+
+        time.elapse(debounceDuration * 5);
+        final List<int> results = await Future.wait(operations);
+
+        expect(results, orderedEquals(<int>[1, 2]));
+      });
+    });
+
+    testWithoutContext('does not run any operations concurrently', () async {
+      // Crete a function thats slow, but throws if another instance of the
+      // function is running.
+      bool isRunning = false;
+      Future<int> f(int ret) async {
+        if (isRunning) {
+          throw 'Functions ran concurrently!';
+        }
+        isRunning = true;
+        await Future<void>.delayed(debounceDuration * 2);
+        isRunning = false;
+        return ret;
+      }
+
+      await runFakeAsync((FakeAsync time) async {
+        final List<Future<int>> operations = <Future<int>>[
+          queue.queueAndDebounce('OP1', debounceDuration, () => f(1)),
+          queue.queueAndDebounce('OP2', debounceDuration, () => f(2)),
+        ];
+
+        time.elapse(debounceDuration * 5);
+        final List<int> results = await Future.wait(operations);
+
+        expect(results, orderedEquals(<int>[1, 2]));
+      });
     });
   });
 }
@@ -336,3 +500,5 @@ class MockIOSWorkflow extends IOSWorkflow {
   @override
   final bool canListDevices;
 }
+
+class MockDevToolsLauncher extends Mock implements DevtoolsLauncher {}

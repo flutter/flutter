@@ -74,13 +74,13 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// The arguments [duration], [curve], [alignment], and [vsync] must
   /// not be null.
   RenderAnimatedSize({
-    @required TickerProvider vsync,
-    @required Duration duration,
-    Duration reverseDuration,
+    required TickerProvider vsync,
+    required Duration duration,
+    Duration? reverseDuration,
     Curve curve = Curves.linear,
     AlignmentGeometry alignment = Alignment.center,
-    TextDirection textDirection,
-    RenderBox child,
+    TextDirection? textDirection,
+    RenderBox? child,
   }) : assert(vsync != null),
        assert(duration != null),
        assert(curve != null),
@@ -100,11 +100,11 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     );
   }
 
-  AnimationController _controller;
-  CurvedAnimation _animation;
+  late final AnimationController _controller;
+  late final CurvedAnimation _animation;
   final SizeTween _sizeTween = SizeTween();
-  bool _hasVisualOverflow;
-  double _lastValue;
+  late bool _hasVisualOverflow;
+  double? _lastValue;
 
   /// The state this size animation is in.
   ///
@@ -114,7 +114,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   RenderAnimatedSizeState _state = RenderAnimatedSizeState.start;
 
   /// The duration of the animation.
-  Duration get duration => _controller.duration;
+  Duration get duration => _controller.duration!;
   set duration(Duration value) {
     assert(value != null);
     if (value == _controller.duration)
@@ -123,8 +123,8 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   }
 
   /// The duration of the animation when running in reverse.
-  Duration get reverseDuration => _controller.reverseDuration;
-  set reverseDuration(Duration value) {
+  Duration? get reverseDuration => _controller.reverseDuration;
+  set reverseDuration(Duration? value) {
     if (value == _controller.reverseDuration)
       return;
     _controller.reverseDuration = value;
@@ -162,7 +162,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     super.detach();
   }
 
-  Size get _animatedSize {
+  Size? get _animatedSize {
     return _sizeTween.evaluate(_animation);
   }
 
@@ -179,7 +179,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       return;
     }
 
-    child.layout(constraints, parentUsesSize: true);
+    child!.layout(constraints, parentUsesSize: true);
 
     assert(_state != null);
     switch (_state) {
@@ -197,11 +197,11 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         break;
     }
 
-    size = constraints.constrain(_animatedSize);
+    size = constraints.constrain(_animatedSize!);
     alignChild();
 
-    if (size.width < _sizeTween.end.width ||
-        size.height < _sizeTween.end.height)
+    if (size.width < _sizeTween.end!.width ||
+        size.height < _sizeTween.end!.height)
       _hasVisualOverflow = true;
   }
 
@@ -215,7 +215,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// We have the initial size to animate from, but we do not have the target
   /// size to animate to, so we set both ends to child's size.
   void _layoutStart() {
-    _sizeTween.begin = _sizeTween.end = debugAdoptSize(child.size);
+    _sizeTween.begin = _sizeTween.end = debugAdoptSize(child!.size);
     _state = RenderAnimatedSizeState.stable;
   }
 
@@ -225,14 +225,14 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// If during animation the size of the child changes we restart the
   /// animation.
   void _layoutStable() {
-    if (_sizeTween.end != child.size) {
+    if (_sizeTween.end != child!.size) {
       _sizeTween.begin = size;
-      _sizeTween.end = debugAdoptSize(child.size);
+      _sizeTween.end = debugAdoptSize(child!.size);
       _restartAnimation();
       _state = RenderAnimatedSizeState.changed;
     } else if (_controller.value == _controller.upperBound) {
       // Animation finished. Reset target sizes.
-      _sizeTween.begin = _sizeTween.end = debugAdoptSize(child.size);
+      _sizeTween.begin = _sizeTween.end = debugAdoptSize(child!.size);
     } else if (!_controller.isAnimating) {
       _controller.forward(); // resume the animation after being detached
     }
@@ -245,9 +245,9 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// changes again, we match the child's size, restart animation and go to
   /// unstable state.
   void _layoutChanged() {
-    if (_sizeTween.end != child.size) {
+    if (_sizeTween.end != child!.size) {
       // Child size changed again. Match the child's size and restart animation.
-      _sizeTween.begin = _sizeTween.end = debugAdoptSize(child.size);
+      _sizeTween.begin = _sizeTween.end = debugAdoptSize(child!.size);
       _restartAnimation();
       _state = RenderAnimatedSizeState.unstable;
     } else {
@@ -262,9 +262,9 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   ///
   /// Continue tracking the child's size until is stabilizes.
   void _layoutUnstable() {
-    if (_sizeTween.end != child.size) {
+    if (_sizeTween.end != child!.size) {
       // Still unstable. Continue tracking the child.
-      _sizeTween.begin = _sizeTween.end = debugAdoptSize(child.size);
+      _sizeTween.begin = _sizeTween.end = debugAdoptSize(child!.size);
       _restartAnimation();
     } else {
       // Child size stabilized.

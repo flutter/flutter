@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:process/process.dart';
+
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
@@ -13,13 +15,14 @@ import 'artifacts.dart';
 import 'asset.dart';
 import 'base/config.dart';
 import 'base/context.dart';
+import 'base/error_handling_io.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/process.dart';
-import 'base/signals.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
+import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -31,9 +34,10 @@ import 'emulator.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
-import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
+import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow, fuchsiaWorkflow;
 import 'globals.dart' as globals;
 import 'ios/ios_workflow.dart';
+import 'ios/iproxy.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
 import 'macos/cocoapods.dart';
@@ -80,7 +84,10 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         userMessages: globals.userMessages,
       ),
-      AndroidWorkflow: () => AndroidWorkflow(),
+      AndroidWorkflow: () => AndroidWorkflow(
+        androidSdk: globals.androidSdk,
+        featureFlags: featureFlags,
+      ),
       ApplicationPackageFactory: () => ApplicationPackageFactory(),
       Artifacts: () => CachedArtifacts(
         fileSystem: globals.fs,
@@ -88,7 +95,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
       ),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
-      BuildSystem: () => BuildSystem(
+      BuildSystem: () => FlutterBuildSystem(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
@@ -123,16 +130,45 @@ Future<T> runInContext<T>(
         client: globals.httpClientFactory?.call() ?? HttpClient(),
       ),
       DevFSConfig: () => DevFSConfig(),
-      DeviceManager: () => DeviceManager(),
+      DeviceManager: () => FlutterDeviceManager(
+        logger: globals.logger,
+        processManager: globals.processManager,
+        platform: globals.platform,
+        androidSdk: globals.androidSdk,
+        iosSimulatorUtils: globals.iosSimulatorUtils,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+        iosWorkflow: globals.iosWorkflow,
+        artifacts: globals.artifacts,
+        flutterVersion: globals.flutterVersion,
+        androidWorkflow: androidWorkflow,
+        config: globals.config,
+        fuchsiaWorkflow: fuchsiaWorkflow,
+        xcDevice: globals.xcdevice,
+        macOSWorkflow: MacOSWorkflow(
+          platform: globals.platform,
+          featureFlags: featureFlags,
+        ),
+      ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
-      EmulatorManager: () => EmulatorManager(),
-      FeatureFlags: () => const FeatureFlags(),
+      EmulatorManager: () => EmulatorManager(
+        androidSdk: globals.androidSdk,
+        processManager: globals.processManager,
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        androidWorkflow: androidWorkflow,
+      ),
+      FeatureFlags: () => const FlutterFeatureFlags(),
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
-      FuchsiaWorkflow: () => FuchsiaWorkflow(),
+      FuchsiaWorkflow: () => FuchsiaWorkflow(
+        featureFlags: featureFlags,
+        platform: globals.platform,
+        fuchsiaArtifacts: globals.fuchsiaArtifacts,
+      ),
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
@@ -140,8 +176,17 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         xcode: globals.xcode,
       ),
-      IOSWorkflow: () => const IOSWorkflow(),
-      KernelCompilerFactory: () => const KernelCompilerFactory(),
+      IOSWorkflow: () => IOSWorkflow(
+        featureFlags: featureFlags,
+        xcode: globals.xcode,
+        platform: globals.platform,
+      ),
+      KernelCompilerFactory: () => KernelCompilerFactory(
+        logger: globals.logger,
+        processManager: globals.processManager,
+        artifacts: globals.artifacts,
+        fileSystem: globals.fs,
+      ),
       Logger: () => globals.platform.isWindows
         ? WindowsStdoutLogger(
             terminal: globals.terminal,
@@ -155,7 +200,10 @@ Future<T> runInContext<T>(
             outputPreferences: globals.outputPreferences,
             timeoutConfiguration: timeoutConfiguration,
           ),
-      MacOSWorkflow: () => const MacOSWorkflow(),
+      MacOSWorkflow: () => MacOSWorkflow(
+        featureFlags: featureFlags,
+        platform: globals.platform,
+      ),
       MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
       OperatingSystemUtils: () => OperatingSystemUtils(
         fileSystem: globals.fs,
@@ -169,6 +217,10 @@ Future<T> runInContext<T>(
         platform: globals.platform,
       ),
       ProcessInfo: () => ProcessInfo(),
+      ProcessManager: () => ErrorHandlingProcessManager(
+        delegate: const LocalProcessManager(),
+        platform: globals.platform,
+      ),
       ProcessUtils: () => ProcessUtils(
         processManager: globals.processManager,
         logger: globals.logger,
@@ -180,9 +232,9 @@ Future<T> runInContext<T>(
         botDetector: globals.botDetector,
         platform: globals.platform,
         usage: globals.flutterUsage,
+        toolStampFile: globals.cache.getStampFileFor('flutter_tools'),
       ),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
-      Signals: () => Signals(),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),
@@ -218,6 +270,15 @@ Future<T> runInContext<T>(
         cache: globals.cache,
         platform: globals.platform,
         xcode: globals.xcode,
+        iproxy: IProxy(
+          iproxyPath: globals.artifacts.getArtifactPath(
+            Artifact.iproxy,
+            platform: TargetPlatform.ios,
+          ),
+          logger: globals.logger,
+          processManager: globals.processManager,
+          dyLdLibEntry: globals.cache.dyLdLibEntry,
+        ),
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,

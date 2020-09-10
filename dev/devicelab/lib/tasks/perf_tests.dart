@@ -3,22 +3,24 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show json;
+import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-import '../framework/adb.dart';
-import '../framework/framework.dart';
-import '../framework/ios.dart';
-import '../framework/utils.dart';
+import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
-TaskFunction createComplexLayoutScrollPerfTest() {
+TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'complex_layout_scroll_perf',
+    measureCpuGpu: measureCpuGpu,
   ).run;
 }
 
@@ -42,7 +44,7 @@ TaskFunction createUiKitViewScrollPerfTest() {
 TaskFunction createAndroidTextureScrollPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
-    'test_driver/android_texture_scroll_perf.dart',
+    'test_driver/android_view_scroll_perf.dart',
     'platform_views_scroll_perf',
     testDriver: 'test_driver/scroll_perf_test.dart',
   ).run;
@@ -50,9 +52,9 @@ TaskFunction createAndroidTextureScrollPerfTest() {
 
 TaskFunction createAndroidViewScrollPerfTest() {
   return PerfTest(
-    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout_hybrid_composition',
     'test_driver/android_view_scroll_perf.dart',
-    'platform_views_scroll_perf',
+    'platform_views_scroll_perf_hybrid_composition',
     testDriver: 'test_driver/scroll_perf_test.dart',
   ).run;
 }
@@ -68,60 +70,109 @@ TaskFunction createHomeScrollPerfTest() {
 TaskFunction createCullOpacityPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/cull_opacity_perf.dart',
+    'test_driver/run_app.dart',
     'cull_opacity_perf',
+    testDriver: 'test_driver/cull_opacity_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createCullOpacityPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/cull_opacity_perf_e2e.dart',
   ).run;
 }
 
 TaskFunction createCubicBezierPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/cubic_bezier_perf.dart',
+    'test_driver/run_app.dart',
     'cubic_bezier_perf',
+    testDriver: 'test_driver/cubic_bezier_perf_test.dart',
   ).run;
 }
 
-TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
+TaskFunction createCubicBezierPerfSkSLWarmupTest() {
+  return PerfTestWithSkSL(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'cubic_bezier_perf',
+    testDriver: 'test_driver/cubic_bezier_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
+  return PerfTestWithSkSL(
+    '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
+    'test_driver/transitions_perf.dart',
+    'transitions',
+  ).run;
+}
+
+TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupE2ETest() {
+  return PerfTestWithSkSL.e2e(
+    '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
+    'test_driver/transitions_perf_e2e.dart',
+    testDriver: 'test_driver/transitions_perf_e2e_test.dart',
+  ).run;
+}
+
+TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/backdrop_filter_perf.dart',
+    'test_driver/run_app.dart',
     'backdrop_filter_perf',
-    needsMeasureCpuGPu: needsMeasureCpuGpu,
+    measureCpuGpu: measureCpuGpu,
+    testDriver: 'test_driver/backdrop_filter_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
-TaskFunction createPostBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
+TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/post_backdrop_filter_perf.dart',
+    'test_driver/run_app.dart',
     'post_backdrop_filter_perf',
-    needsMeasureCpuGPu: needsMeasureCpuGpu,
+    measureCpuGpu: measureCpuGpu,
+    testDriver: 'test_driver/post_backdrop_filter_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
-TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
+TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/simple_animation_perf.dart',
+    'test_driver/run_app.dart',
     'simple_animation_perf',
-    needsMeasureCpuGPu: needsMeasureCpuGpu,
+    measureCpuGpu: measureCpuGpu,
+    testDriver: 'test_driver/simple_animation_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
-TaskFunction createAnimatedPlaceholderPerfTest({bool needsMeasureCpuGpu = false}) {
+TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/animated_placeholder_perf.dart',
+    'test_driver/run_app.dart',
     'animated_placeholder_perf',
-    needsMeasureCpuGPu: needsMeasureCpuGpu,
+    measureCpuGpu: measureCpuGpu,
+    testDriver: 'test_driver/animated_placeholder_perf_test.dart',
   ).run;
 }
 
 TaskFunction createPictureCachePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/picture_cache_perf.dart',
+    'test_driver/run_app.dart',
     'picture_cache_perf',
+    testDriver: 'test_driver/picture_cache_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createPictureCachePerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/picture_cache_perf_e2e.dart',
   ).run;
 }
 
@@ -195,25 +246,116 @@ TaskFunction createBasicMaterialCompileTest() {
 TaskFunction createTextfieldPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/textfield_perf.dart',
+    'test_driver/run_app.dart',
     'textfield_perf',
+    testDriver: 'test_driver/textfield_perf_test.dart',
   ).run;
 }
 
 TaskFunction createColorFilterAndFadePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/color_filter_and_fade_perf.dart',
+    'test_driver/run_app.dart',
     'color_filter_and_fade_perf',
+    testDriver: 'test_driver/color_filter_and_fade_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
 TaskFunction createFadingChildAnimationPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/fading_child_animation_perf.dart',
+    'test_driver/run_app.dart',
     'fading_child_animation_perf',
+    testDriver: 'test_driver/fading_child_animation_perf_test.dart',
+    saveTraceFile: true,
   ).run;
+}
+
+TaskFunction createImageFilteredTransformAnimationPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'imagefiltered_transform_animation_perf',
+    testDriver: 'test_driver/imagefiltered_transform_animation_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
+TaskFunction createsMultiWidgetConstructPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'multi_widget_construction_perf',
+    testDriver: 'test_driver/multi_widget_construction_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createsMultiWidgetConstructPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/multi_widget_construction_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createFramePolicyIntegrationTest() {
+  final String testDirectory =
+      '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
+  const String testTarget = 'test/frame_policy.dart';
+  return () {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      final Device device = await devices.workingDevice;
+      await device.unlock();
+      final String deviceId = device.deviceId;
+      await flutter('packages', options: <String>['get']);
+
+      await flutter('drive', options: <String>[
+        '-v',
+        '--verbose-system-logs',
+        '--profile',
+        '-t', testTarget,
+        '-d',
+        deviceId,
+      ]);
+      final Map<String, dynamic> data = json.decode(
+        file('$testDirectory/build/frame_policy_event_delay.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+      final Map<String, dynamic> fullLiveData = data['fullyLive'] as Map<String, dynamic>;
+      final Map<String, dynamic> benchmarkLiveData = data['benchmarkLive'] as Map<String, dynamic>;
+      final Map<String, dynamic> dataFormated = <String, dynamic>{
+        'average_delay_fullyLive_millis':
+          fullLiveData['average_delay_millis'],
+        'average_delay_benchmarkLive_millis':
+          benchmarkLiveData['average_delay_millis'],
+        '90th_percentile_delay_fullyLive_millis':
+          fullLiveData['90th_percentile_delay_millis'],
+        '90th_percentile_delay_benchmarkLive_millis':
+          benchmarkLiveData['90th_percentile_delay_millis'],
+      };
+
+      return TaskResult.success(
+        dataFormated,
+        benchmarkScoreKeys: dataFormated.keys.toList(),
+      );
+    });
+  };
+}
+
+Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations) {
+  final Map<String, dynamic> tally = <String, dynamic>{};
+  for (final Map<String, dynamic> item in results) {
+    item.forEach((String key, dynamic value) {
+      if (tally.containsKey(key)) {
+        tally[key] = (tally[key] as int) + (value as int);
+      } else {
+        tally[key] = value;
+      }
+    });
+  }
+  tally.forEach((String key, dynamic value) {
+    tally[key] = (value as int) ~/ iterations;
+  });
+  return tally;
 }
 
 /// Measure application startup performance.
@@ -228,21 +370,28 @@ class StartupTest {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
-      await flutter('run', options: <String>[
-        '--verbose',
-        '--profile',
-        '--trace-startup',
-        '-d',
-        deviceId,
-      ]);
-      final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/start_up_info.json').readAsStringSync(),
-      ) as Map<String, dynamic>;
+      const int iterations = 3;
+      final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
+      for (int i = 0; i < iterations; ++i) {
+        await flutter('run', options: <String>[
+          '--verbose',
+          '--profile',
+          '--trace-startup',
+          '-d',
+          deviceId,
+        ]);
+        final Map<String, dynamic> data = json.decode(
+          file('$testDirectory/build/start_up_info.json').readAsStringSync(),
+        ) as Map<String, dynamic>;
+        results.add(data);
+      }
+
+      final Map<String, dynamic> averageResults = _average(results, iterations);
 
       if (!reportMetrics)
-        return TaskResult.success(data);
+        return TaskResult.success(averageResults);
 
-      return TaskResult.success(data, benchmarkScoreKeys: <String>[
+      return TaskResult.success(averageResults, benchmarkScoreKeys: <String>[
         'timeToFirstFrameMicros',
         'timeToFirstFrameRasterizedMicros',
       ]);
@@ -257,9 +406,25 @@ class PerfTest {
     this.testDirectory,
     this.testTarget,
     this.timelineFileName, {
-    this.needsMeasureCpuGPu = false,
+    this.measureCpuGpu = false,
+    this.saveTraceFile = false,
     this.testDriver,
-  });
+    this.needsFullTimeline = true,
+    this.benchmarkScoreKeys,
+    this.dartDefine = '',
+    String resultFilename,
+  }): _resultFilename = resultFilename;
+
+  const PerfTest.e2e(
+    this.testDirectory,
+    this.testTarget, {
+    this.measureCpuGpu = false,
+    this.testDriver =  'test_driver/e2e_test.dart',
+    this.needsFullTimeline = false,
+    this.benchmarkScoreKeys = _kCommonScoreKeys,
+    this.dartDefine = '',
+    String resultFilename = 'e2e_perf_summary',
+  }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
   final String testDirectory;
@@ -267,12 +432,54 @@ class PerfTest {
   final String testTarget;
   // The prefix name of the filename such as `<timelineFileName>.timeline_summary.json`.
   final String timelineFileName;
+  String get traceFilename => '$timelineFileName.timeline';
+  String get resultFilename => _resultFilename ?? '$timelineFileName.timeline_summary';
+  final String _resultFilename;
   /// The test file to run on the host.
   final String testDriver;
   /// Whether to collect CPU and GPU metrics.
-  final bool needsMeasureCpuGPu;
+  final bool measureCpuGpu;
+  /// Whether to collect full timeline, meaning if `--trace-startup` flag is needed.
+  final bool needsFullTimeline;
+  /// Whether to save the trace timeline file `*.timeline.json`.
+  final bool saveTraceFile;
+
+  /// The keys of the values that need to be reported.
+  ///
+  /// If it's `null`, then report:
+  /// ```Dart
+  /// <String>[
+  ///   'average_frame_build_time_millis',
+  ///   'worst_frame_build_time_millis',
+  ///   '90th_percentile_frame_build_time_millis',
+  ///   '99th_percentile_frame_build_time_millis',
+  ///   'average_frame_rasterizer_time_millis',
+  ///   'worst_frame_rasterizer_time_millis',
+  ///   '90th_percentile_frame_rasterizer_time_millis',
+  ///   '99th_percentile_frame_rasterizer_time_millis',
+  ///   'average_vsync_transitions_missed',
+  ///   '90th_percentile_vsync_transitions_missed',
+  ///   '99th_percentile_vsync_transitions_missed',
+  ///   if (measureCpuGpu) 'average_cpu_usage',
+  ///   if (measureCpuGpu) 'average_gpu_usage',
+  /// ]
+  /// ```
+  final List<String> benchmarkScoreKeys;
+
+  /// Additional flags for `--dart-define` to control the test
+  final String dartDefine;
 
   Future<TaskResult> run() {
+    return internalRun();
+  }
+
+  @protected
+  Future<TaskResult> internalRun({
+      bool cacheSkSL = false,
+      bool noBuild = false,
+      String existingApp,
+      String writeSkslFileName,
+  }) {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
@@ -281,18 +488,31 @@ class PerfTest {
 
       await flutter('drive', options: <String>[
         '-v',
+        '--verbose-system-logs',
         '--profile',
-        '--trace-startup', // Enables "endless" timeline event buffering.
-        '-t',
-        testTarget,
+        if (needsFullTimeline)
+          '--trace-startup', // Enables "endless" timeline event buffering.
+        '-t', testTarget,
+        if (noBuild) '--no-build',
         if (testDriver != null)
-          '--driver', testDriver,
+          ...<String>['--driver', testDriver],
+        if (existingApp != null)
+          ...<String>['--use-existing-app', existingApp],
+        if (writeSkslFileName != null)
+          ...<String>['--write-sksl-on-exit', writeSkslFileName],
+        if (cacheSkSL) '--cache-sksl',
+        if (dartDefine.isNotEmpty)
+          ...<String>['--dart-define', dartDefine],
         '-d',
         deviceId,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync(),
+        file('$testDirectory/build/$resultFilename.json').readAsStringSync(),
       ) as Map<String, dynamic>;
+      final List<String> detailFiles = <String>[
+        if (saveTraceFile)
+          '$testDirectory/build/$traceFilename.json',
+      ];
 
       if (data['frame_count'] as int < 5) {
         return TaskResult.failure(
@@ -301,29 +521,186 @@ class PerfTest {
         );
       }
 
-      if (needsMeasureCpuGPu) {
-        await inDirectory<void>('$testDirectory/build', () async {
-          data.addAll(await measureIosCpuGpu(deviceId: deviceId));
-        });
-      }
-
-      return TaskResult.success(data, benchmarkScoreKeys: <String>[
-        'average_frame_build_time_millis',
-        'worst_frame_build_time_millis',
-        '90th_percentile_frame_build_time_millis',
-        '99th_percentile_frame_build_time_millis',
-        'average_frame_rasterizer_time_millis',
-        'worst_frame_rasterizer_time_millis',
-        '90th_percentile_frame_rasterizer_time_millis',
-        '99th_percentile_frame_rasterizer_time_millis',
-        'average_vsync_transitions_missed',
-        '90th_percentile_vsync_transitions_missed',
-        '99th_percentile_vsync_transitions_missed',
-        if (needsMeasureCpuGPu) 'cpu_percentage',
-        if (needsMeasureCpuGPu) 'gpu_percentage',
-      ]);
+      return TaskResult.success(
+        data,
+        detailFiles: detailFiles.isNotEmpty ? detailFiles : null,
+        benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
+          ..._kCommonScoreKeys,
+          'average_vsync_transitions_missed',
+          '90th_percentile_vsync_transitions_missed',
+          '99th_percentile_vsync_transitions_missed',
+          if (measureCpuGpu) 'average_cpu_usage',
+          if (measureCpuGpu) 'average_gpu_usage',
+        ],
+      );
     });
   }
+}
+
+const List<String> _kCommonScoreKeys = <String>[
+  'average_frame_build_time_millis',
+  'worst_frame_build_time_millis',
+  '90th_percentile_frame_build_time_millis',
+  '99th_percentile_frame_build_time_millis',
+  'average_frame_rasterizer_time_millis',
+  'worst_frame_rasterizer_time_millis',
+  '90th_percentile_frame_rasterizer_time_millis',
+  '99th_percentile_frame_rasterizer_time_millis',
+];
+
+class PerfTestWithSkSL extends PerfTest {
+  PerfTestWithSkSL(
+    String testDirectory,
+    String testTarget,
+    String timelineFileName, {
+    bool measureCpuGpu = false,
+    String testDriver,
+    bool needsFullTimeline = true,
+    List<String> benchmarkScoreKeys,
+  }) : super(
+    testDirectory,
+    testTarget,
+    timelineFileName,
+    measureCpuGpu: measureCpuGpu,
+    testDriver: testDriver,
+    needsFullTimeline: needsFullTimeline,
+    benchmarkScoreKeys: benchmarkScoreKeys,
+  );
+
+
+  PerfTestWithSkSL.e2e(
+    String testDirectory,
+    String testTarget, {
+    String testDriver =  'test_driver/e2e_test.dart',
+    String resultFilename = 'e2e_perf_summary',
+  }) : super.e2e(
+    testDirectory,
+    testTarget,
+    testDriver: testDriver,
+    needsFullTimeline: false,
+    resultFilename: resultFilename,
+  );
+
+  @override
+  Future<TaskResult> run() async {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      // Some initializations
+      _device = await devices.workingDevice;
+      _flutterPath = path.join(flutterDirectory.path, 'bin', 'flutter');
+
+      // Prepare the SkSL by running the driver test.
+      await _generateSkSL();
+
+      // Build the app with SkSL artifacts and run that app
+      final String observatoryUri = await _buildAndRun();
+
+      // Attach to the running app and run the final driver test to get metrics.
+      final TaskResult result = await internalRun(
+        existingApp: observatoryUri,
+      );
+
+      _runProcess.kill();
+      await _runProcess.exitCode;
+
+      return result;
+    });
+  }
+
+  Future<void> _generateSkSL() async {
+    // `flutter drive` without `flutter run`, and `flutter drive --existing-app`
+    // with `flutter run` may generate different SkSLs. Hence we run both
+    // versions to generate as many SkSLs as possible.
+    //
+    // 1st, `flutter drive --existing-app` with `flutter run`. The
+    // `--write-sksl-on-exit` option doesn't seem to be compatible with
+    // `flutter drive --existing-app` as it will complain web socket connection
+    // issues.
+    final String observatoryUri = await _runApp(cacheSkSL: true);
+    await super.internalRun(cacheSkSL: true, existingApp: observatoryUri);
+    _runProcess.kill();
+    await _runProcess.exitCode;
+
+    // 2nd, `flutter drive` without `flutter run`. The --no-build option ensures
+    // that we won't remove the SkSLs generated earlier.
+    await super.internalRun(
+      cacheSkSL: true,
+      noBuild: true,
+      writeSkslFileName: _skslJsonFileName,
+    );
+  }
+
+  Future<String> _runApp({String appBinary, bool cacheSkSL = false}) async {
+    if (File(_vmserviceFileName).existsSync()) {
+      File(_vmserviceFileName).deleteSync();
+    }
+
+    _runProcess = await startProcess(
+      _flutterPath,
+      <String>[
+        'run',
+        '--verbose',
+        '--verbose-system-logs',
+        '--profile',
+        if (cacheSkSL) '--cache-sksl',
+        '-d', _device.deviceId,
+        '-t', testTarget,
+        '--endless-trace-buffer',
+        if (appBinary != null) ...<String>['--use-application-binary', _appBinary],
+        '--vmservice-out-file', _vmserviceFileName,
+      ],
+    );
+
+    final Stream<List<int>> broadcastOut = _runProcess.stdout.asBroadcastStream();
+    _forwardStream(broadcastOut, 'run stdout');
+    _forwardStream(_runProcess.stderr, 'run stderr');
+
+    final File file = await waitForFile(_vmserviceFileName);
+    return file.readAsStringSync();
+  }
+
+  // Return the VMService URI.
+  Future<String> _buildAndRun() async {
+    await flutter('build', options: <String>[
+      if (_isAndroid) 'apk' else 'ios',
+      '--profile',
+      '--bundle-sksl-path', _skslJsonFileName,
+      '-t', testTarget,
+    ]);
+
+    return _runApp(appBinary: _appBinary);
+  }
+
+  String get _skslJsonFileName => '$testDirectory/flutter_01.sksl.json';
+  String get _vmserviceFileName => '$testDirectory/$_kVmserviceOutFileName';
+
+  bool get _isAndroid => deviceOperatingSystem == DeviceOperatingSystem.android;
+
+  String get _appBinary {
+    if (_isAndroid) {
+      return '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+    }
+    for (final FileSystemEntity entry in Directory('$testDirectory/build/ios/iphoneos/').listSync()) {
+      if (entry.path.endsWith('.app')) {
+        return entry.path;
+      }
+    }
+    throw 'No app found.';
+  }
+
+  Stream<String> _transform(Stream<List<int>> stream) =>
+      stream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
+
+  void _forwardStream(Stream<List<int>> stream, String label) {
+    _transform(stream).listen((String line) {
+      print('$label: $line');
+    });
+  }
+
+  String _flutterPath;
+  Device _device;
+  Process _runProcess;
+
+  static const String _kVmserviceOutFileName = 'vmservice.out';
 }
 
 /// Measures how long it takes to compile a Flutter app to JavaScript and how
@@ -350,9 +727,7 @@ class WebCompileTest {
     rmTree(sampleDir);
 
     await inDirectory<void>(Directory.systemTemp, () async {
-      await flutter('create', options: <String>['--template=app', sampleAppName], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
+      await flutter('create', options: <String>['--template=app', sampleAppName]);
     });
 
     metrics.addAll(await runSingleBuildTest(
@@ -379,9 +754,7 @@ class WebCompileTest {
         '-v',
         '--release',
         '--no-pub',
-      ], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
+      ]);
       watch?.stop();
       final String outputFileName = path.join(directory, 'build/web/main.dart.js');
       metrics.addAll(await getSize(outputFileName, metric: metric));
@@ -451,7 +824,15 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        final String appPath =  '$cwd/build/ios/Release-iphoneos/Runner.app/';
+        final Directory appBuildDirectory = dir(path.join(cwd, 'build/ios/Release-iphoneos'));
+        final Directory appBundle = appBuildDirectory
+            .listSync()
+            .whereType<Directory>()
+            .singleWhere((Directory directory) => path.extension(directory.path) == '.app', orElse: () => null);
+        if (appBundle == null) {
+          throw 'Failed to find app bundle in ${appBuildDirectory.path}';
+        }
+        final String appPath =  appBundle.path;
         // IPAs are created manually, https://flutter.dev/ios-release/
         await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
@@ -474,6 +855,8 @@ class CompileTest {
         break;
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.fake:
+        throw Exception('Unsupported option for fake devices');
     }
 
     metrics.addAll(<String, dynamic>{
@@ -498,6 +881,8 @@ class CompileTest {
         break;
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.fake:
+        throw Exception('Unsupported option for fake devices');
     }
     watch.start();
     await flutter('build', options: options);
@@ -539,7 +924,7 @@ class CompileTest {
 
     final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so'];
     final _UnzipListEntry libapp = fileToMetadata['lib/armeabi-v7a/libapp.so'];
-    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/LICENSE'];
+    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/NOTICES'];
 
     return <String, dynamic>{
       'libflutter_uncompressed_bytes': libflutter.uncompressedSize,
@@ -686,6 +1071,134 @@ class MemoryTest {
     _endMemory.add(endMemoryUsage['total_kb'] as int);
     _diffMemory.add((endMemoryUsage['total_kb'] as int) - (_startMemoryUsage['total_kb'] as int));
   }
+}
+
+class DevToolsMemoryTest {
+  DevToolsMemoryTest(this.project, this.driverTest);
+
+  final String project;
+  final String driverTest;
+
+  Future<TaskResult> run() {
+    return inDirectory<TaskResult>(project, () async {
+      _device = await devices.workingDevice;
+      await _device.unlock();
+      await flutter('packages', options: <String>['get']);
+
+      await _launchApp();
+      if (_observatoryUri == null) {
+        return  TaskResult.failure('Observatory URI not found.');
+      }
+
+      await _launchDevTools();
+
+      await flutter(
+        'drive',
+        options: <String>[
+          '--use-existing-app', _observatoryUri,
+          '-d', _device.deviceId,
+          '--profile',
+          driverTest,
+        ],
+      );
+
+      _devToolsProcess.kill();
+      await _devToolsProcess.exitCode;
+
+      _runProcess.kill();
+      await _runProcess.exitCode;
+
+      final Map<String, dynamic> data = json.decode(
+        file('$project/$_kJsonFileName').readAsStringSync(),
+      ) as Map<String, dynamic>;
+      final List<dynamic> samples = data['samples']['data'] as List<dynamic>;
+      int maxRss = 0;
+      int maxAdbTotal = 0;
+      for (final dynamic sample in samples) {
+        maxRss = math.max(maxRss, sample['rss'] as int);
+        if (sample['adb_memoryInfo'] != null) {
+          maxAdbTotal = math.max(maxAdbTotal, sample['adb_memoryInfo']['Total'] as int);
+        }
+      }
+      return TaskResult.success(
+          <String, dynamic>{'maxRss': maxRss, 'maxAdbTotal': maxAdbTotal},
+          benchmarkScoreKeys: <String>['maxRss', 'maxAdbTotal'],
+      );
+    });
+  }
+
+  Future<void> _launchApp() async {
+    print('launching $project$driverTest on device...');
+    final String flutterPath = path.join(flutterDirectory.path, 'bin', 'flutter');
+    _runProcess = await startProcess(
+      flutterPath,
+      <String>[
+        'run',
+        '--verbose',
+        '--profile',
+        '-d', _device.deviceId,
+        driverTest,
+      ],
+    );
+
+    // Listen for Observatory URI and forward stdout/stderr
+    final Completer<String> observatoryUri = Completer<String>();
+    _runProcess.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          print('run stdout: $line');
+          final RegExpMatch match = RegExp(r'An Observatory debugger and profiler on .+ is available at: ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)').firstMatch(line);
+          if (match != null && !observatoryUri.isCompleted) {
+            observatoryUri.complete(match[1]);
+            _observatoryUri = match[1];
+          }
+        }, onDone: () {
+          if (!observatoryUri.isCompleted) {
+            observatoryUri.complete();
+          }
+        });
+    _forwardStream(_runProcess.stderr, 'run stderr');
+
+    _observatoryUri = await observatoryUri.future;
+  }
+
+  Future<void> _launchDevTools() async {
+    await exec(pubBin, <String>[
+      'global',
+      'activate',
+      'devtools',
+      '0.2.5',
+    ]);
+    _devToolsProcess = await startProcess(
+      pubBin,
+      <String>[
+        'global',
+        'run',
+        'devtools',
+        '--vm-uri', _observatoryUri,
+        '--profile-memory', _kJsonFileName,
+      ],
+    );
+    _forwardStream(_devToolsProcess.stdout, 'devtools stdout');
+    _forwardStream(_devToolsProcess.stderr, 'devtools stderr');
+  }
+
+  void _forwardStream(Stream<List<int>> stream, String label) {
+    stream
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          print('$label: $line');
+        });
+  }
+
+  Device _device;
+  String _observatoryUri;
+  Process _runProcess;
+  Process _devToolsProcess;
+
+  static const String _kJsonFileName = 'devtools_memory.json';
 }
 
 enum ReportedDurationTestFlavor {

@@ -11,12 +11,14 @@
   "alertDialogLabel": "Benachrichtigung",
   "timerPickerHourLabelOne": "Stunde",
   "timerPickerHourLabelOther": "Stunden",
-  "timerPickerMinuteLabelOne": "min",
-  "timerPickerMinuteLabelOther": "min",
+  "timerPickerMinuteLabelOne": "Min.",
+  "timerPickerMinuteLabelOther": "Min.",
   "timerPickerSecondLabelOne": "s",
   "timerPickerSecondLabelOther": "s",
   "cutButtonLabel": "Ausschneiden",
   "copyButtonLabel": "Kopieren",
   "pasteButtonLabel": "Einsetzen",
-  "selectAllButtonLabel": "Alles auswählen"
+  "selectAllButtonLabel": "Alles auswählen",
+  "tabSemanticsLabel": "Tab $tabIndex von $tabCount",
+  "modalBarrierDismissLabel": "Schließen"
 }

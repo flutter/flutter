@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -168,7 +170,7 @@ void main() {
     expect(material.color, modalBackgroundColor);
   });
 
-  testWidgets('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for peristent bottom sheets', (WidgetTester tester) async {
+  testWidgets('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for persistent bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;

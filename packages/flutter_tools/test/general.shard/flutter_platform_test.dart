@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/build_info.dart';
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
 import 'package:meta/meta.dart';
-
-import 'package:platform/platform.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:test_core/backend.dart'; // ignore: deprecated_member_use
@@ -16,6 +17,13 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
+  FileSystem fileSystem;
+
+  setUp(() {
+    fileSystem = MemoryFileSystem.test();
+    fileSystem.file('.packages').writeAsStringSync('\n');
+  });
+
   group('FlutterPlatform', () {
     testUsingContext('ensureConfiguration throws an error if an '
       'explicitObservatoryPort is specified and more than one test file', () async {
@@ -23,11 +31,14 @@ void main() {
         buildMode: BuildMode.debug,
         shellPath: '/',
         explicitObservatoryPort: 1234,
-        dartExperiments: <String>[],
+        extraFrontEndOptions: <String>[],
       );
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
 
       expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsToolExit());
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('ensureConfiguration throws an error if a precompiled '
@@ -36,11 +47,14 @@ void main() {
         buildMode: BuildMode.debug,
         shellPath: '/',
         precompiledDillPath: 'example.dill',
-        dartExperiments: <String>[],
+        extraFrontEndOptions: <String>[],
       );
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
 
       expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsToolExit());
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     group('The FLUTTER_TEST environment variable is passed to the test process', () {
@@ -50,10 +64,12 @@ void main() {
       final Map<Type, Generator> contextOverrides = <Type, Generator>{
         Platform: () => mockPlatform,
         ProcessManager: () => mockProcessManager,
+        FileSystem: () => fileSystem,
       };
 
       setUp(() {
         mockPlatform = MockPlatform();
+        when(mockPlatform.isWindows).thenReturn(false);
         mockProcessManager = MockProcessManager();
         flutterPlatform = TestFlutterPlatform();
       });
@@ -113,7 +129,7 @@ void main() {
         shellPath: 'abc',
         enableObservatory: false,
         startPaused: true,
-        dartExperiments: <String>[],
+        extraFrontEndOptions: <String>[],
       ), throwsAssertionError);
 
       expect(() => installHook(
@@ -122,7 +138,7 @@ void main() {
         enableObservatory: false,
         startPaused: false,
         observatoryPort: 123,
-        dartExperiments: <String>[],
+        extraFrontEndOptions: <String>[],
       ), throwsAssertionError);
 
       FlutterPlatform capturedPlatform;
@@ -143,7 +159,7 @@ void main() {
         observatoryPort: 200,
         serverType: InternetAddressType.IPv6,
         icudtlPath: 'ghi',
-        dartExperiments: <String>[],
+        extraFrontEndOptions: <String>[],
         platformPluginRegistration: (FlutterPlatform platform) {
           capturedPlatform = platform;
         });
@@ -192,7 +208,7 @@ class TestFlutterPlatform extends FlutterPlatform {
     startPaused: false,
     enableObservatory: false,
     buildTestAssets: false,
-    dartExperiments: <String>[],
+    extraFrontEndOptions: <String>[],
   );
 
   @override

@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -13,7 +14,6 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -185,9 +185,9 @@ void main() {
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
         when(processManager.runSync('git fetch https://github.com/flutter/flutter.git --tags'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync('git tag --contains HEAD'.split(' '),
+        when(processManager.runSync('git tag --points-at HEAD'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync('git describe --match *.*.*-*.*.pre --first-parent --long --tags'.split(' '),
+        when(processManager.runSync('git describe --match *.*.* --first-parent --long --tags'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
         when(processManager.runSync(FlutterVersion.gitLog('-n 1 --pretty=format:%ad --date=iso'.split(' ')),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);

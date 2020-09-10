@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:mime/mime.dart' as mime;
 
 import '../../artifacts.dart';
 import '../../base/common.dart';
@@ -13,21 +14,20 @@ import '../../base/logger.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
 import '../build_system.dart';
-import 'dart.dart';
+import 'common.dart';
 
 /// The build define controlling whether icon fonts should be stripped down to
 /// only the glyphs used by the application.
 const String kIconTreeShakerFlag = 'TreeShakeIcons';
 
 /// Whether icon font subsetting is enabled by default.
-const bool kIconTreeShakerEnabledDefault = false;
+const bool kIconTreeShakerEnabledDefault = true;
 
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
-  try {
-    return (object as List<dynamic>).cast<Map<String, dynamic>>();
-  } on TypeError catch (_) {
-    throw IconTreeShakerException._(errorMessage);
+  if (object is List<dynamic>) {
+    return object.cast<Map<String, dynamic>>();
   }
+  throw IconTreeShakerException._(errorMessage);
 }
 
 /// A class that wraps the functionality of the const finder package and the
@@ -66,6 +66,16 @@ class IconTreeShaker {
     }
   }
 
+  /// The MIME types for supported font sets.
+  static const Set<String> kTtfMimeTypes = <String>{
+    'font/ttf', // based on internet search
+    'font/opentype',
+    'font/otf',
+    'application/x-font-opentype',
+    'application/x-font-otf',
+    'application/x-font-ttf', // based on running locally.
+  };
+
   /// The [Source] inputs that targets using this should depend on.
   ///
   /// See [Target.inputs].
@@ -77,6 +87,7 @@ class IconTreeShaker {
 
   final Environment _environment;
   final String _fontManifest;
+  Future<void> _iconDataProcessing;
   Map<String, _IconTreeShakerData> _iconData;
 
   final ProcessManager _processManager;
@@ -89,10 +100,10 @@ class IconTreeShaker {
                    && _environment.defines[kIconTreeShakerFlag] == 'true'
                    && _environment.defines[kBuildMode] != 'debug';
 
-  /// Fills the [_iconData] map.
-  Future<Map<String, _IconTreeShakerData>> _getIconData(Environment environment) async {
+  // Fills the [_iconData] map.
+  Future<void> _getIconData(Environment environment) async {
     if (!enabled) {
-      return null;
+      return;
     }
 
     final File appDill = environment.buildDir.childFile('app.dill');
@@ -119,12 +130,14 @@ class IconTreeShaker {
     );
 
     if (fonts.length != iconData.length) {
-      throwToolExit('Expected to find fonts for ${iconData.keys}, but found '
-                    '${fonts.keys}. This usually means you are refering to '
-                    'font families in an IconData class but not including them '
-                    'in the assets section of your pubspec.yaml, are missing '
-                    'the package that would include them, or are missing '
-                    '"uses-material-design: true".');
+      environment.logger.printStatus(
+        'Expected to find fonts for ${iconData.keys}, but found '
+        '${fonts.keys}. This usually means you are refering to '
+        'font families in an IconData class but not including them '
+        'in the assets section of your pubspec.yaml, are missing '
+        'the package that would include them, or are missing '
+        '"uses-material-design: true".',
+      );
     }
 
     final Map<String, _IconTreeShakerData> result = <String, _IconTreeShakerData>{};
@@ -135,13 +148,11 @@ class IconTreeShaker {
         codePoints: iconData[entry.key],
       );
     }
-    return result;
+    _iconData = result;
   }
 
-  /// Calls font-subset, which transforms the `inputPath` font file to a
-  /// subsetted version at `outputPath`.
-  ///
-  /// The `relativePath` parameter
+  /// Calls font-subset, which transforms the [input] font file to a
+  /// subsetted version at [outputPath].
   ///
   /// All parameters are required.
   ///
@@ -150,15 +161,24 @@ class IconTreeShaker {
   /// If the font-subset subprocess fails, it will [throwToolExit].
   /// Otherwise, it will return true.
   Future<bool> subsetFont({
-    @required String inputPath,
+    @required File input,
     @required String outputPath,
     @required String relativePath,
   }) async {
     if (!enabled) {
       return false;
     }
-
-    _iconData ??= await _getIconData(_environment);
+    if (input.lengthSync() < 12) {
+      return false;
+    }
+    final String mimeType = mime.lookupMimeType(
+      input.path,
+      headerBytes: await input.openRead(0, 12).first,
+    );
+    if (!kTtfMimeTypes.contains(mimeType)) {
+      return false;
+    }
+    await (_iconDataProcessing ??= _getIconData(_environment));
     assert(_iconData != null);
 
     final _IconTreeShakerData iconTreeShakerData = _iconData[relativePath];
@@ -176,7 +196,7 @@ class IconTreeShaker {
     final List<String> cmd = <String>[
       fontSubset.path,
       outputPath,
-      inputPath,
+      input.path,
     ];
     final String codePoints = iconTreeShakerData.codePoints.join(' ');
     _logger.printTrace('Running font-subset: ${cmd.join(' ')}, '
@@ -186,9 +206,7 @@ class IconTreeShaker {
       fontSubsetProcess.stdin.writeln(codePoints);
       await fontSubsetProcess.stdin.flush();
       await fontSubsetProcess.stdin.close();
-    } on Exception catch (_) {
-      // handled by checking the exit code.
-    } on OSError catch (_) {  // ignore: dead_code_on_catch_subtype
+    } on Exception {
       // handled by checking the exit code.
     }
 
@@ -248,6 +266,7 @@ class IconTreeShaker {
   ) async {
     final List<String> cmd = <String>[
       dart.path,
+      '--disable-dart-dev',
       constFinder.path,
       '--kernel-file', appDill.path,
       '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
@@ -364,5 +383,7 @@ class IconTreeShakerException implements Exception {
   final String message;
 
   @override
-  String toString() => 'FontSubset error: $message';
+  String toString() => 'IconTreeShakerException: $message\n\n'
+    'To disable icon tree shaking, pass --no-tree-shake-icons to the requested '
+    'flutter build command';
 }

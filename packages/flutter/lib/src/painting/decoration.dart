@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -56,7 +57,7 @@ abstract class Decoration with Diagnosticable {
   /// [EdgeInsetsGeometry.resolve] to obtain an absolute [EdgeInsets]. (For
   /// example, [BorderDirectional] will return an [EdgeInsetsDirectional] for
   /// its [padding].)
-  EdgeInsetsGeometry get padding => EdgeInsets.zero;
+  EdgeInsetsGeometry? get padding => EdgeInsets.zero;
 
   /// Whether this decoration is complex enough to benefit from caching its painting.
   bool get isComplex => false;
@@ -87,7 +88,7 @@ abstract class Decoration with Diagnosticable {
   ///
   /// Instead of calling this directly, use [Decoration.lerp].
   @protected
-  Decoration lerpFrom(Decoration a, double t) => null;
+  Decoration? lerpFrom(Decoration? a, double t) => null;
 
   /// Linearly interpolates from `this` to another [Decoration] (which may be of
   /// a different class).
@@ -116,7 +117,7 @@ abstract class Decoration with Diagnosticable {
   ///
   /// Instead of calling this directly, use [Decoration.lerp].
   @protected
-  Decoration lerpTo(Decoration b, double t) => null;
+  Decoration? lerpTo(Decoration? b, double t) => null;
 
   /// Linearly interpolates between two [Decoration]s.
   ///
@@ -125,12 +126,12 @@ abstract class Decoration with Diagnosticable {
   /// interpolated, then the interpolation is done via null (at `t == 0.5`).
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static Decoration lerp(Decoration a, Decoration b, double t) {
+  static Decoration? lerp(Decoration? a, Decoration? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return b.lerpFrom(null, t) ?? b;
+      return b!.lerpFrom(null, t) ?? b;
     if (b == null)
       return a.lerpTo(null, t) ?? a;
     if (t == 0.0)
@@ -157,17 +158,29 @@ abstract class Decoration with Diagnosticable {
   /// is what [Container] uses), the `textDirection` parameter will be populated
   /// based on the ambient [Directionality] (by way of the [RenderDecoratedBox]
   /// renderer).
-  bool hitTest(Size size, Offset position, { TextDirection textDirection }) => true;
+  bool hitTest(Size size, Offset position, { TextDirection? textDirection }) => true;
 
   /// Returns a [BoxPainter] that will paint this decoration.
   ///
   /// The `onChanged` argument configures [BoxPainter.onChanged]. It can be
   /// omitted if there is no chance that the painter will change (for example,
   /// if it is a [BoxDecoration] with definitely no [DecorationImage]).
+  @factory
   BoxPainter createBoxPainter([ VoidCallback onChanged ]);
 
   /// Returns a closed [Path] that describes the outer edge of this decoration.
-  Path getClipPath(Rect rect, TextDirection textDirection) => null;
+  ///
+  /// The default implementation throws. Subclasses must override this implementation
+  /// to describe the clip path that should be applied to the decoration when it is
+  /// used in a [Container] with an explicit [Clip] behavior.
+  ///
+  /// See also:
+  ///
+  ///  * [Container.clipBehavior], which, if set, uses this method to determine
+  ///    the clip path to use.
+  Path getClipPath(Rect rect, TextDirection textDirection) {
+    throw UnsupportedError('${objectRuntimeType(this, 'This Decoration subclass')} does not expect to be used for clipping.');
+  }
 }
 
 /// A stateful class that can paint a particular [Decoration].
@@ -217,7 +230,7 @@ abstract class BoxPainter {
   ///
   /// Resources might not start to load until after [paint] has been called,
   /// because they might depend on the configuration.
-  final VoidCallback onChanged;
+  final VoidCallback? onChanged;
 
   /// Discard any resources being held by the object.
   ///

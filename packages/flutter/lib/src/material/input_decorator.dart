@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
@@ -17,6 +19,7 @@ import 'theme_data.dart';
 
 const Duration _kTransitionDuration = Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
+const double _kFinalLabelScale = 0.75;
 
 // Defines the gap in the InputDecorator's outline border where the
 // floating label will appear.
@@ -465,7 +468,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 }
 
-/// Defines the behaviour of the floating label
+/// Defines the behavior of the floating label.
 enum FloatingLabelBehavior {
   /// The label will always be positioned within the content, or hidden.
   never,
@@ -642,18 +645,15 @@ class _RenderDecoration extends RenderBox {
        _expands = expands;
 
   static const double subtextGap = 8.0;
-  final Map<_DecorationSlot, RenderBox> slotToChild = <_DecorationSlot, RenderBox>{};
-  final Map<RenderBox, _DecorationSlot> childToSlot = <RenderBox, _DecorationSlot>{};
+  final Map<_DecorationSlot, RenderBox> children = <_DecorationSlot, RenderBox>{};
 
   RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _DecorationSlot slot) {
     if (oldChild != null) {
       dropChild(oldChild);
-      childToSlot.remove(oldChild);
-      slotToChild.remove(slot);
+      children.remove(slot);
     }
     if (newChild != null) {
-      childToSlot[newChild] = slot;
-      slotToChild[slot] = newChild;
+      children[slot] = newChild;
       adoptChild(newChild);
     }
     return newChild;
@@ -781,20 +781,22 @@ class _RenderDecoration extends RenderBox {
     markNeedsLayout();
   }
 
+  TextAlignVertical get _defaultTextAlignVertical => _isOutlineAligned
+      ? TextAlignVertical.center
+      : TextAlignVertical.top;
   TextAlignVertical get textAlignVertical {
     if (_textAlignVertical == null) {
-      return _isOutlineAligned ? TextAlignVertical.center : TextAlignVertical.top;
+      return _defaultTextAlignVertical;
     }
     return _textAlignVertical;
   }
   TextAlignVertical _textAlignVertical;
   set textAlignVertical(TextAlignVertical value) {
-    assert(value != null);
     if (_textAlignVertical == value) {
       return;
     }
     // No need to relayout if the effective value is still the same.
-    if (textAlignVertical.y == value.y) {
+    if (textAlignVertical.y == (value?.y ?? _defaultTextAlignVertical.y)) {
       _textAlignVertical = value;
       return;
     }
@@ -979,9 +981,17 @@ class _RenderDecoration extends RenderBox {
       + _boxSize(suffix).width
       + _boxSize(suffixIcon).width
       + contentPadding.right));
+    // Increase the available width for the label when it is scaled down.
+    final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress);
+    final double labelWidth = math.max(0.0, constraints.maxWidth - (
+      _boxSize(icon).width
+      + contentPadding.left
+      + _boxSize(prefixIcon).width
+      + _boxSize(suffixIcon).width
+      + contentPadding.right));
     boxToBaseline[label] = _layoutLineBox(
       label,
-      boxConstraints.copyWith(maxWidth: inputWidth),
+      boxConstraints.copyWith(maxWidth: labelWidth * invertedLabelScale),
     );
     boxToBaseline[hint] = _layoutLineBox(
       hint,
@@ -1075,7 +1085,7 @@ class _RenderDecoration extends RenderBox {
       + contentPadding.bottom
       + densityOffset.dy,
     );
-    final double minContainerHeight = decoration.isDense || expands
+    final double minContainerHeight = decoration.isDense || decoration.isCollapsed || expands
       ? 0.0
       : kMinInteractiveDimension + densityOffset.dy;
     final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight + densityOffset.dy;
@@ -1450,11 +1460,10 @@ class _RenderDecoration extends RenderBox {
       final bool isOutlineBorder = decoration.border != null && decoration.border.isOutline;
       // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
       // Center the scaled label relative to the border.
-      const double finalLabelScale = 0.75;
       final double floatingY = decoration.fixTextFieldOutlineLabel
-        ? isOutlineBorder ? (-labelHeight * finalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top
+        ? isOutlineBorder ? (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top
         : isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
-      final double scale = lerpDouble(1.0, finalLabelScale, t);
+      final double scale = lerpDouble(1.0, _kFinalLabelScale, t);
       double dx;
       switch (textDirection) {
         case TextDirection.rtl:
@@ -1489,7 +1498,7 @@ class _RenderDecoration extends RenderBox {
   bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     assert(position != null);
     for (final RenderBox child in _children) {
-      // TODO(hansmuller): label must be handled specially since we've transformed it
+      // The label must be handled specially since we've transformed it.
       final Offset offset = _boxParentData(child).offset;
       final bool isHit = result.addWithPaintOffset(
         offset: offset,
@@ -1517,11 +1526,10 @@ class _RenderDecoration extends RenderBox {
   }
 }
 
-class _RenderDecorationElement extends RenderObjectElement {
-  _RenderDecorationElement(_Decorator widget) : super(widget);
+class _DecorationElement extends RenderObjectElement {
+  _DecorationElement(_Decorator widget) : super(widget);
 
   final Map<_DecorationSlot, Element> slotToChild = <_DecorationSlot, Element>{};
-  final Map<Element, _DecorationSlot> childToSlot = <Element, _DecorationSlot>{};
 
   @override
   _Decorator get widget => super.widget as _Decorator;
@@ -1536,11 +1544,10 @@ class _RenderDecorationElement extends RenderObjectElement {
 
   @override
   void forgetChild(Element child) {
-    assert(slotToChild.values.contains(child));
-    assert(childToSlot.keys.contains(child));
-    final _DecorationSlot slot = childToSlot[child];
-    childToSlot.remove(child);
-    slotToChild.remove(slot);
+    assert(slotToChild.containsValue(child));
+    assert(child.slot is _DecorationSlot);
+    assert(slotToChild.containsKey(child.slot));
+    slotToChild.remove(child.slot);
     super.forgetChild(child);
   }
 
@@ -1549,11 +1556,9 @@ class _RenderDecorationElement extends RenderObjectElement {
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
       slotToChild.remove(slot);
-      childToSlot.remove(oldChild);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -1577,12 +1582,10 @@ class _RenderDecorationElement extends RenderObjectElement {
     final Element oldChild = slotToChild[slot];
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
-      childToSlot.remove(oldChild);
       slotToChild.remove(slot);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -1642,26 +1645,22 @@ class _RenderDecorationElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, dynamic slotValue) {
+  void insertRenderObjectChild(RenderObject child, _DecorationSlot slot) {
     assert(child is RenderBox);
-    assert(slotValue is _DecorationSlot);
-    final _DecorationSlot slot = slotValue as _DecorationSlot;
     _updateRenderObject(child as RenderBox, slot);
-    assert(renderObject.childToSlot.keys.contains(child));
-    assert(renderObject.slotToChild.keys.contains(slot));
+    assert(renderObject.children.keys.contains(slot));
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, _DecorationSlot slot) {
     assert(child is RenderBox);
-    assert(renderObject.childToSlot.keys.contains(child));
-    _updateRenderObject(null, renderObject.childToSlot[child]);
-    assert(!renderObject.childToSlot.keys.contains(child));
-    assert(!renderObject.slotToChild.keys.contains(slot));
+    assert(renderObject.children[slot] == child);
+    _updateRenderObject(null, slot);
+    assert(!renderObject.children.keys.contains(slot));
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, dynamic slotValue) {
+  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
     assert(false, 'not reachable');
   }
 }
@@ -1689,7 +1688,7 @@ class _Decorator extends RenderObjectWidget {
   final bool expands;
 
   @override
-  _RenderDecorationElement createElement() => _RenderDecorationElement(this);
+  _DecorationElement createElement() => _DecorationElement(this);
 
   @override
   _RenderDecoration createRenderObject(BuildContext context) {
@@ -1707,10 +1706,11 @@ class _Decorator extends RenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderDecoration renderObject) {
     renderObject
      ..decoration = decoration
-     ..textDirection = textDirection
-     ..textBaseline = textBaseline
      ..expands = expands
-     ..isFocused = isFocused;
+     ..isFocused = isFocused
+     ..textAlignVertical = textAlignVertical
+     ..textBaseline = textBaseline
+     ..textDirection = textDirection;
   }
 }
 
@@ -1769,7 +1769,7 @@ class InputDecorator extends StatefulWidget {
   /// be null.
   const InputDecorator({
     Key key,
-    this.decoration,
+    @required this.decoration,
     this.baseStyle,
     this.textAlign,
     this.textAlignVertical,
@@ -1778,7 +1778,8 @@ class InputDecorator extends StatefulWidget {
     this.expands = false,
     this.isEmpty = false,
     this.child,
-  }) : assert(isFocused != null),
+  }) : assert(decoration != null),
+       assert(isFocused != null),
        assert(isHovering != null),
        assert(expands != null),
        assert(isEmpty != null),
@@ -1786,9 +1787,10 @@ class InputDecorator extends StatefulWidget {
 
   /// The text and styles to use when decorating the child.
   ///
-  /// If null, `const InputDecoration()` is used. Null [InputDecoration]
-  /// properties are initialized with the corresponding values from
-  /// [ThemeData.inputDecorationTheme].
+  /// Null [InputDecoration] properties are initialized with the corresponding
+  /// values from [ThemeData.inputDecorationTheme].
+  ///
+  /// Must not be null.
   final InputDecoration decoration;
 
   /// The style on which to base the label, hint, counter, and error styles
@@ -1821,9 +1823,7 @@ class InputDecorator extends StatefulWidget {
   /// Whether the input field has focus.
   ///
   /// Determines the position of the label text and the color and weight of the
-  /// border, as well as the container fill color, which is a blend of
-  /// [InputDecoration.focusColor] with [InputDecoration.fillColor] when
-  /// focused, and [InputDecoration.fillColor] when not.
+  /// border.
   ///
   /// Defaults to false.
   ///
@@ -1841,12 +1841,6 @@ class InputDecorator extends StatefulWidget {
   /// true, and [InputDecoration.fillColor] when not.
   ///
   /// Defaults to false.
-  ///
-  /// See also:
-  ///
-  ///  * [InputDecoration.focusColor], which is also blended into the hover
-  ///    color and fill color when [isFocused] is true to produce the final
-  ///    color.
   final bool isHovering;
 
   /// If true, the height of the input field will be as large as possible.
@@ -1877,7 +1871,9 @@ class InputDecorator extends StatefulWidget {
 
   /// Whether the label needs to get out of the way of the input, either by
   /// floating or disappearing.
-  bool get _labelShouldWithdraw => !isEmpty || isFocused;
+  ///
+  /// Will withdraw when not empty, or when focused while enabled.
+  bool get _labelShouldWithdraw => !isEmpty || (isFocused && decoration.enabled);
 
   @override
   _InputDecoratorState createState() => _InputDecoratorState();
@@ -1916,7 +1912,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final bool labelIsInitiallyFloating = widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always
         || (widget.decoration.floatingLabelBehavior != FloatingLabelBehavior.never &&
-            // ignore: deprecated_member_use_from_same_package
             widget.decoration.hasFloatingPlaceholder &&
             widget._labelShouldWithdraw);
 
@@ -1961,11 +1956,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextAlign get textAlign => widget.textAlign;
-  bool get isFocused => widget.isFocused && decoration.enabled;
+  bool get isFocused => widget.isFocused;
   bool get isHovering => widget.isHovering && decoration.enabled;
   bool get isEmpty => widget.isEmpty;
   bool get _floatingLabelEnabled {
-    // ignore: deprecated_member_use_from_same_package
     return decoration.hasFloatingPlaceholder && decoration.floatingLabelBehavior != FloatingLabelBehavior.never;
   }
 
@@ -1975,11 +1969,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (widget.decoration != old.decoration)
       _effectiveDecoration = null;
 
-    final bool floatBehaviourChanged = widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior
-        // ignore: deprecated_member_use_from_same_package
+    final bool floatBehaviorChanged = widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior
         || widget.decoration.hasFloatingPlaceholder != old.decoration.hasFloatingPlaceholder;
 
-    if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviourChanged) {
+    if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviorChanged) {
       if (_floatingLabelEnabled
           && (widget._labelShouldWithdraw || widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always))
         _floatingLabelController.forward();
@@ -2058,7 +2051,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getDefaultIconColor(ThemeData themeData) {
-    if (!decoration.enabled)
+    if (!decoration.enabled && !isFocused)
       return themeData.disabledColor;
 
     switch (themeData.brightness) {
@@ -2072,9 +2065,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   // True if the label will be shown and the hint will not.
-  // If we're not focused, there's no value, and labelText was provided,
-  // then the label appears where the hint would.
-  bool get _hasInlineLabel => !widget._labelShouldWithdraw && decoration.labelText != null;
+  // If we're not focused, there's no value, labelText was provided, and
+  // floatingLabelBehavior isn't set to always, then the label appears where the
+  // hint would.
+  bool get _hasInlineLabel {
+    return !widget._labelShouldWithdraw
+        && decoration.labelText != null
+        && decoration.floatingLabelBehavior != FloatingLabelBehavior.always;
+  }
 
   // If the label is a floating placeholder, it's always shown.
   bool get _shouldShowLabel => _hasInlineLabel || _floatingLabelEnabled;
@@ -2120,7 +2118,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
 
     Color borderColor;
-    if (decoration.enabled) {
+    if (decoration.enabled || isFocused) {
       borderColor = decoration.errorText == null
         ? _getDefaultBorderColor(themeData)
         : themeData.errorColor;
@@ -2481,11 +2479,10 @@ class InputDecoration {
   /// Creates a bundle of the border, labels, icons, and styles used to
   /// decorate a Material Design text field.
   ///
-  /// Unless specified by [ThemeData.inputDecorationTheme],
-  /// [InputDecorator] defaults [isDense] to false, and [filled] to false,
-  /// and [maxLines] to 1. The default border is an instance
-  /// of [UnderlineInputBorder]. If [border] is [InputBorder.none] then
-  /// no border is drawn.
+  /// Unless specified by [ThemeData.inputDecorationTheme], [InputDecorator]
+  /// defaults [isDense] to false and [filled] to false. The default border is
+  /// an instance of [UnderlineInputBorder]. If [border] is [InputBorder.none]
+  /// then no border is drawn.
   ///
   /// The [enabled] argument must not be null.
   ///
@@ -2506,11 +2503,12 @@ class InputDecoration {
     this.errorStyle,
     this.errorMaxLines,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
-    this.hasFloatingPlaceholder = true, // ignore: deprecated_member_use_from_same_package
+    this.hasFloatingPlaceholder = true,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
+    this.isCollapsed = false,
     this.isDense,
     this.contentPadding,
     this.prefixIcon,
@@ -2541,8 +2539,7 @@ class InputDecoration {
     this.alignLabelWithHint,
   }) : assert(enabled != null),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
-       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
-       isCollapsed = false;
+       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
 
   /// Defines an [InputDecorator] that is the same size as the input field.
   ///
@@ -2552,10 +2549,9 @@ class InputDecoration {
   const InputDecoration.collapsed({
     @required this.hintText,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
-    // ignore: deprecated_member_use_from_same_package
     this.hasFloatingPlaceholder = true,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
     this.hintStyle,
@@ -2566,9 +2562,8 @@ class InputDecoration {
     this.border = InputBorder.none,
     this.enabled = true,
   }) : assert(enabled != null),
-       // ignore: deprecated_member_use_from_same_package
        assert(!(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
-        'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always'),
+              'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always'),
        icon = null,
        labelText = null,
        labelStyle = null,
@@ -2614,7 +2609,7 @@ class InputDecoration {
   ///
   /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
-  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
   /// See [Icon], [ImageIcon].
@@ -2639,12 +2634,12 @@ class InputDecoration {
   /// input field and the current [Theme].
   final TextStyle labelStyle;
 
-  /// Text that provides context about the input [child]'s value, such as how
-  /// the value will be used.
+  /// Text that provides context about the [InputDecorator.child]'s value, such
+  /// as how the value will be used.
   ///
-  /// If non-null, the text is displayed below the input [child], in the same
-  /// location as [errorText]. If a non-null [errorText] value is specified then
-  /// the helper text is not shown.
+  /// If non-null, the text is displayed below the [InputDecorator.child], in
+  /// the same location as [errorText]. If a non-null [errorText] value is
+  /// specified then the helper text is not shown.
   final String helperText;
 
   /// The style to use for the [helperText].
@@ -2665,16 +2660,17 @@ class InputDecoration {
 
   /// Text that suggests what sort of input the field accepts.
   ///
-  /// Displayed on top of the input [child] (i.e., at the same location on the
-  /// screen where text may be entered in the input [child]) when the input
-  /// [isEmpty] and either (a) [labelText] is null or (b) the input has the focus.
+  /// Displayed on top of the [InputDecorator.child] (i.e., at the same location
+  /// on the screen where text may be entered in the [InputDecorator.child])
+  /// when the input [isEmpty] and either (a) [labelText] is null or (b) the
+  /// input has the focus.
   final String hintText;
 
   /// The style to use for the [hintText].
   ///
   /// Also used for the [labelText] when the [labelText] is displayed on
   /// top of the input field (i.e., at the same location on the screen where
-  /// text may be entered in the input [child]).
+  /// text may be entered in the [InputDecorator.child]).
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
@@ -2689,7 +2685,7 @@ class InputDecoration {
   /// used to handle the overflow when it is limited to single line.
   final int hintMaxLines;
 
-  /// Text that appears below the input [child] and the border.
+  /// Text that appears below the [InputDecorator.child] and the border.
   ///
   /// If non-null, the border's color animates to red and the [helperText] is
   /// not shown.
@@ -2728,7 +2724,7 @@ class InputDecoration {
   /// Defaults to true.
   ///
   @Deprecated(
-    'Use floatingLabelBehaviour instead. '
+    'Use floatingLabelBehavior instead. '
     'This feature was deprecated after v1.13.2.'
   )
   final bool hasFloatingPlaceholder;
@@ -2750,7 +2746,7 @@ class InputDecoration {
   /// {@endtemplate}
   final FloatingLabelBehavior floatingLabelBehavior;
 
-  /// Whether the input [child] is part of a dense form (i.e., uses less vertical
+  /// Whether the [InputDecorator.child] is part of a dense form (i.e., uses less vertical
   /// space).
   ///
   /// Defaults to false.
@@ -2758,10 +2754,9 @@ class InputDecoration {
 
   /// The padding for the input decoration's container.
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [decoration.icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// The decoration's container is the area which is filled if [filled] is true
+  /// and bordered per the [border]. It's the area adjacent to [icon] and above
+  /// the widgets that contain [helperText], [errorText], and [counterText].
   ///
   /// By default the `contentPadding` reflects [isDense] and the type of the
   /// [border].
@@ -2770,12 +2765,12 @@ class InputDecoration {
   ///
   /// If `isOutline` property of [border] is false and if [filled] is true then
   /// `contentPadding` is `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense]
-  /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false`.
+  /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false.
   /// If `isOutline` property of [border] is false and if [filled] is false then
   /// `contentPadding` is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
-  /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false`.
+  /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false.
   ///
-  /// If `isOutline` property of [border] is true then `contentPaddding` is
+  /// If `isOutline` property of [border] is true then `contentPadding` is
   /// `EdgeInsets.fromLTRB(12, 20, 12, 12)` when [isDense] is true
   /// and `EdgeInsets.fromLTRB(12, 24, 12, 16)` when [isDense] is false.
   final EdgeInsetsGeometry contentPadding;
@@ -2784,7 +2779,7 @@ class InputDecoration {
   ///
   /// A collapsed decoration cannot have [labelText], [errorText], an [icon].
   ///
-  /// To create a collapsed input decoration, use [InputDecoration..collapsed].
+  /// To create a collapsed input decoration, use [InputDecoration.collapsed].
   final bool isCollapsed;
 
   /// An icon that appears before the [prefix] or [prefixText] and before
@@ -2810,7 +2805,7 @@ class InputDecoration {
   ///
   /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
-  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
   /// See also:
@@ -2936,7 +2931,7 @@ class InputDecoration {
   ///
   /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
-  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
   /// See also:
@@ -3064,8 +3059,7 @@ class InputDecoration {
 
   /// If true the decoration's container is filled with [fillColor].
   ///
-  /// When [isFocused] is true, the [focusColor] is also blended into the final
-  /// fill color.  When [isHovering] is true, the [hoverColor] is also blended
+  /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
   /// into the final fill color.
   ///
   /// Typically this field set to true if [border] is an
@@ -3073,7 +3067,7 @@ class InputDecoration {
   ///
   /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
-  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
   /// This property is false by default.
@@ -3081,31 +3075,21 @@ class InputDecoration {
 
   /// The base fill color of the decoration's container color.
   ///
-  /// When [isFocused] is true, the [focusColor] is also blended into the final
-  /// fill color.  When [isHovering] is true, the [hoverColor] is also blended
-  /// into the final fill color.
+  /// When [InputDecorator.isHovering] is true, the
+  /// [hoverColor] is also blended into the final fill color.
   ///
   /// By default the fillColor is based on the current [Theme].
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [decoration.icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
-  ///
-  /// This color is blended with [focusColor] if the decoration is focused.
+  /// The decoration's container is the area which is filled if [filled] is true
+  /// and bordered per the [border]. It's the area adjacent to [icon] and above
+  /// the widgets that contain [helperText], [errorText], and [counterText].
   final Color fillColor;
 
-  /// The color to blend with [fillColor] and fill the decoration's container
-  /// with, if [filled] is true and the container has input focus.
-  ///
-  /// When [isHovering] is true, the [hoverColor] is also blended into the final
-  /// fill color.
-  ///
   /// By default the [focusColor] is based on the current [Theme].
   ///
   /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
-  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   final Color focusColor;
 
@@ -3113,17 +3097,16 @@ class InputDecoration {
   /// is being hovered over by a mouse.
   ///
   /// If [filled] is true, the color is blended with [fillColor] and fills the
-  /// decoration's container. When [isFocused] is true, the [focusColor] is also
-  /// blended into the final fill color.
+  /// decoration's container.
   ///
-  /// If [filled] is false, and [isFocused] is false, the color is blended over
-  /// the [enabledBorder]'s color.
+  /// If [filled] is false, and [InputDecorator.isFocused] is false, the color
+  /// is blended over the [enabledBorder]'s color.
   ///
   /// By default the [hoverColor] is based on the current [Theme].
   ///
   /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
-  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   final Color hoverColor;
 
@@ -3303,8 +3286,6 @@ class InputDecoration {
 
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
-  ///
-  /// Always sets [isCollapsed] to false.
   InputDecoration copyWith({
     Widget icon,
     String labelText,
@@ -3320,6 +3301,7 @@ class InputDecoration {
     int errorMaxLines,
     bool hasFloatingPlaceholder,
     FloatingLabelBehavior floatingLabelBehavior,
+    bool isCollapsed,
     bool isDense,
     EdgeInsetsGeometry contentPadding,
     Widget prefixIcon,
@@ -3362,9 +3344,9 @@ class InputDecoration {
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
-      // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder: hasFloatingPlaceholder ?? this.hasFloatingPlaceholder,
       floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
+      isCollapsed: isCollapsed ?? this.isCollapsed,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
       prefixIcon: prefixIcon ?? this.prefixIcon,
@@ -3409,9 +3391,9 @@ class InputDecoration {
       hintStyle: hintStyle ?? theme.hintStyle,
       errorStyle: errorStyle ?? theme.errorStyle,
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
-      // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder: hasFloatingPlaceholder ?? theme.hasFloatingPlaceholder,
       floatingLabelBehavior: floatingLabelBehavior ?? theme.floatingLabelBehavior,
+      isCollapsed: isCollapsed ?? theme.isCollapsed,
       isDense: isDense ?? theme.isDense,
       contentPadding: contentPadding ?? theme.contentPadding,
       prefixStyle: prefixStyle ?? theme.prefixStyle,
@@ -3450,7 +3432,6 @@ class InputDecoration {
         && other.errorText == errorText
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
-        // ignore: deprecated_member_use_from_same_package
         && other.hasFloatingPlaceholder == hasFloatingPlaceholder
         && other.floatingLabelBehavior == floatingLabelBehavior
         && other.isDense == isDense
@@ -3499,7 +3480,7 @@ class InputDecoration {
       errorText,
       errorStyle,
       errorMaxLines,
-      hasFloatingPlaceholder,// ignore: deprecated_member_use_from_same_package
+      hasFloatingPlaceholder,
       floatingLabelBehavior,
       isDense,
       contentPadding,
@@ -3548,7 +3529,6 @@ class InputDecoration {
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
       if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
-      // ignore: deprecated_member_use_from_same_package
       if (hasFloatingPlaceholder == false) 'hasFloatingPlaceholder: false',
       if (floatingLabelBehavior != null) 'floatingLabelBehavior: $floatingLabelBehavior',
       if (isDense ?? false) 'isDense: $isDense',
@@ -3609,10 +3589,9 @@ class InputDecorationTheme with Diagnosticable {
     this.errorStyle,
     this.errorMaxLines,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
-    // ignore: deprecated_member_use_from_same_package
     this.hasFloatingPlaceholder = true,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
     this.isDense = false,
@@ -3636,15 +3615,14 @@ class InputDecorationTheme with Diagnosticable {
        assert(isCollapsed != null),
        assert(filled != null),
        assert(alignLabelWithHint != null),
-       // ignore: deprecated_member_use_from_same_package
        assert(!(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
         'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always');
 
   /// The style to use for [InputDecoration.labelText] when the label is
   /// above (i.e., vertically adjacent to) the input field.
   ///
-  /// When the [labelText] is on top of the input field, the text uses the
-  /// [hintStyle] instead.
+  /// When the [InputDecoration.labelText] is on top of the input field, the
+  /// text uses the [hintStyle] instead.
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
@@ -3653,24 +3631,25 @@ class InputDecorationTheme with Diagnosticable {
   /// The style to use for [InputDecoration.helperText].
   final TextStyle helperStyle;
 
-  /// The maximum number of lines the [helperText] can occupy.
+  /// The maximum number of lines the [InputDecoration.helperText] can occupy.
   ///
-  /// Defaults to null, which means that the [helperText] will be limited
-  /// to a single line with [TextOverflow.ellipsis].
+  /// Defaults to null, which means that the [InputDecoration.helperText] will
+  /// be limited to a single line with [TextOverflow.ellipsis].
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the helper.
   ///
   /// See also:
   ///
-  ///  * [errorMaxLines], the equivalent but for the [errorText].
+  ///  * [errorMaxLines], the equivalent but for the [InputDecoration.errorText].
   final int helperMaxLines;
 
   /// The style to use for the [InputDecoration.hintText].
   ///
-  /// Also used for the [labelText] when the [labelText] is displayed on
-  /// top of the input field (i.e., at the same location on the screen where
-  /// text may be entered in the input field).
+  /// Also used for the [InputDecoration.labelText] when the
+  /// [InputDecoration.labelText] is displayed on top of the input field (i.e.,
+  /// at the same location on the screen where text may be entered in the input
+  /// field).
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
@@ -3682,17 +3661,17 @@ class InputDecorationTheme with Diagnosticable {
   /// input field and the current [Theme].
   final TextStyle errorStyle;
 
-  /// The maximum number of lines the [errorText] can occupy.
+  /// The maximum number of lines the [InputDecoration.errorText] can occupy.
   ///
-  /// Defaults to null, which means that the [errorText] will be limited
-  /// to a single line with [TextOverflow.ellipsis].
+  /// Defaults to null, which means that the [InputDecoration.errorText] will be
+  /// limited to a single line with [TextOverflow.ellipsis].
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
   ///
   /// See also:
   ///
-  ///  * [helperMaxLines], the equivalent but for the [helperText].
+  ///  * [helperMaxLines], the equivalent but for the [InputDecoration.helperText].
   final int errorMaxLines;
 
   /// Whether the placeholder text floats to become a label on focus.
@@ -3704,7 +3683,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// Defaults to true.
   @Deprecated(
-    'Use floatingLabelBehaviour instead. '
+    'Use floatingLabelBehavior instead. '
     'This feature was deprecated after v1.13.2.'
   )
   final bool hasFloatingPlaceholder;
@@ -3959,7 +3938,7 @@ class InputDecorationTheme with Diagnosticable {
     TextStyle errorStyle,
     int errorMaxLines,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
     bool hasFloatingPlaceholder,
@@ -3989,7 +3968,6 @@ class InputDecorationTheme with Diagnosticable {
       hintStyle: hintStyle ?? this.hintStyle,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
-      // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder: hasFloatingPlaceholder ?? this.hasFloatingPlaceholder,
       floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
       isDense: isDense ?? this.isDense,
@@ -4021,7 +3999,6 @@ class InputDecorationTheme with Diagnosticable {
       hintStyle,
       errorStyle,
       errorMaxLines,
-      // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder,
       floatingLabelBehavior,
       isDense,
@@ -4088,7 +4065,6 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
     properties.add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
     properties.add(IntProperty('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
-    // ignore: deprecated_member_use_from_same_package
     properties.add(DiagnosticsProperty<bool>('hasFloatingPlaceholder', hasFloatingPlaceholder, defaultValue: defaultTheme.hasFloatingPlaceholder));
     properties.add(DiagnosticsProperty<FloatingLabelBehavior>('floatingLabelBehavior', floatingLabelBehavior, defaultValue: defaultTheme.floatingLabelBehavior));
     properties.add(DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));

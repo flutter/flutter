@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -49,7 +51,7 @@ const double _kSegmentMinPadding = 9.25;
 
 // The threshold value used in hasDraggedTooFar, for checking against the square
 // L2 distance from the location of the current drag pointer, to the closest
-// vertice of the CupertinoSlidingSegmentedControl's Rect.
+// vertex of the CupertinoSlidingSegmentedControl's Rect.
 //
 // Both the mechanism and the value are speculated.
 const double _kTouchYDistanceThreshold = 50.0 * 50.0;
@@ -64,7 +66,7 @@ final SpringSimulation _kThumbSpringAnimationSimulation = SpringSimulation(
   const SpringDescription(mass: 1, stiffness: 503.551, damping: 44.8799),
   0,
   1,
-  0, // Everytime a new spring animation starts the previous animation stops.
+  0, // Every time a new spring animation starts the previous animation stops.
 );
 
 const Duration _kSpringAnimationDuration = Duration(milliseconds: 412);
@@ -1025,13 +1027,12 @@ class _RenderSegmentedControl<T> extends RenderBox
       final _SegmentedControlContainerBoxParentData childParentData =
         child.parentData as _SegmentedControlContainerBoxParentData;
       if ((childParentData.offset & child.size).contains(position)) {
-        final Offset center = (Offset.zero & child.size).center;
-        return result.addWithRawTransform(
-          transform: MatrixUtils.forceToPoint(center),
-          position: center,
-          hitTest: (BoxHitTestResult result, Offset position) {
-            assert(position == center);
-            return child.hitTest(result, position: center);
+        return result.addWithPaintOffset(
+          offset: childParentData.offset,
+          position: position,
+          hitTest: (BoxHitTestResult result, Offset localOffset) {
+            assert(localOffset == position - childParentData.offset);
+            return child.hitTest(result, position: localOffset);
           },
         );
       }

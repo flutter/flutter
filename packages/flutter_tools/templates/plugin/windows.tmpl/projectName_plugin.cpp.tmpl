@@ -1,4 +1,4 @@
-#include "{{projectName}}_plugin.h"
+#include "include/{{projectName}}/{{projectName}}_plugin.h"
 
 // This must be included before many other Windows headers.
 #include <windows.h>
@@ -72,8 +72,7 @@ void {{pluginClass}}::HandleMethodCall(
     } else if (IsWindows7OrGreater()) {
       version_stream << "7";
     }
-    flutter::EncodableValue response(version_stream.str());
-    result->Success(&response);
+    result->Success(flutter::EncodableValue(version_stream.str()));
   } else {
     result->NotImplemented();
   }

@@ -18,5 +18,7 @@
   "cutButtonLabel": "切り取り",
   "copyButtonLabel": "コピー",
   "pasteButtonLabel": "貼り付け",
-  "selectAllButtonLabel": "すべて選択"
+  "selectAllButtonLabel": "すべて選択",
+  "tabSemanticsLabel": "タブ: $tabIndex/$tabCount",
+  "modalBarrierDismissLabel": "閉じる"
 }

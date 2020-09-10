@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:async';
 import 'dart:ui' show TextDirection;
 
@@ -18,7 +19,7 @@ import 'semantics_event.dart' show AnnounceSemanticsEvent, TooltipSemanticsEvent
 /// When possible, prefer using mechanisms like [Semantics] to implicitly
 /// trigger announcements over using this event.
 class SemanticsService {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   SemanticsService._();

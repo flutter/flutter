@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
+import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
 import '../base/bot_detector.dart';
@@ -14,8 +14,10 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
+import '../dart/package_map.dart';
 import '../reporting/reporting.dart';
 
 /// The [Pub] instance.
@@ -39,7 +41,7 @@ class PubContext {
     for (final String item in _values) {
       if (!_validContext.hasMatch(item)) {
         throw ArgumentError.value(
-            _values, 'value', 'Must match RegExp ${_validContext.pattern}');
+          _values, 'value', 'Must match RegExp ${_validContext.pattern}');
       }
     }
   }
@@ -80,6 +82,7 @@ abstract class Pub {
     @required Platform platform,
     @required BotDetector botDetector,
     @required Usage usage,
+    File toolStampFile,
   }) = _DefaultPub;
 
   /// Runs `pub get`.
@@ -94,6 +97,7 @@ abstract class Pub {
     bool offline = false,
     bool checkLastModified = true,
     bool skipPubspecYamlCheck = false,
+    bool generateSyntheticPackage = false,
     String flutterRootOverride,
   });
 
@@ -139,7 +143,9 @@ class _DefaultPub implements Pub {
     @required Platform platform,
     @required BotDetector botDetector,
     @required Usage usage,
-  }) : _fileSystem = fileSystem,
+    File toolStampFile,
+  }) : _toolStampFile = toolStampFile,
+       _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _botDetector = botDetector,
@@ -155,6 +161,7 @@ class _DefaultPub implements Pub {
   final Platform _platform;
   final BotDetector _botDetector;
   final Usage _usage;
+  final File _toolStampFile;
 
   @override
   Future<void> get({
@@ -165,6 +172,7 @@ class _DefaultPub implements Pub {
     bool offline = false,
     bool checkLastModified = true,
     bool skipPubspecYamlCheck = false,
+    bool generateSyntheticPackage = false,
     String flutterRootOverride,
   }) async {
     directory ??= _fileSystem.currentDirectory.path;
@@ -173,6 +181,8 @@ class _DefaultPub implements Pub {
       _fileSystem.path.join(directory, 'pubspec.yaml'));
     final File packageConfigFile = _fileSystem.file(
       _fileSystem.path.join(directory, '.dart_tool', 'package_config.json'));
+    final Directory generatedDirectory = _fileSystem.directory(
+      _fileSystem.path.join(directory, '.dart_tool', 'flutter_gen'));
 
     if (!skipPubspecYamlCheck && !pubSpecYaml.existsSync()) {
       if (!skipIfAbsent) {
@@ -223,7 +233,7 @@ class _DefaultPub implements Pub {
     }
 
     if (!packageConfigFile.existsSync()) {
-      throwToolExit('$directory: pub did not create .packages file.');
+      throwToolExit('$directory: pub did not create .dart_tools/package_config.json file.');
     }
     if (pubSpecYaml.lastModifiedSync() != originalPubspecYamlModificationTime) {
       throwToolExit(
@@ -232,8 +242,6 @@ class _DefaultPub implements Pub {
     }
     // We don't check if dotPackages was actually modified, because as far as we can tell sometimes
     // pub will decide it does not need to actually modify it.
-    // Since we rely on the file having a more recent timestamp, though, we do manually force the
-    // file to be more recently modified.
     final DateTime now = DateTime.now();
     if (now.isBefore(originalPubspecYamlModificationTime)) {
       _logger.printError(
@@ -243,18 +251,10 @@ class _DefaultPub implements Pub {
         'The timestamp was: $originalPubspecYamlModificationTime\n'
         'The time now is: $now'
       );
-    } else {
-      packageConfigFile.setLastModifiedSync(now);
-      final DateTime newDotPackagesTimestamp = packageConfigFile.lastModifiedSync();
-      if (newDotPackagesTimestamp.isBefore(originalPubspecYamlModificationTime)) {
-        _logger.printError(
-          'Warning: Failed to set timestamp of "${_fileSystem.path.absolute(packageConfigFile.path)}". '
-          'Tried to set timestamp to $now, but new timestamp is $newDotPackagesTimestamp.'
-        );
-        if (newDotPackagesTimestamp.isAfter(now)) {
-          _logger.printError('Maybe the file was concurrently modified?');
-        }
-      }
+    }
+    // Insert references to synthetic flutter package.
+    if (generateSyntheticPackage) {
+      await _updatePackageConfig(packageConfigFile, generatedDirectory);
     }
   }
 
@@ -342,7 +342,6 @@ class _DefaultPub implements Pub {
     String directory,
     @required io.Stdio stdio,
   }) async {
-    Cache.releaseLockEarly();
     final io.Process process = await _processUtils.start(
       _pubCommand(arguments),
       workingDirectory: directory,
@@ -402,6 +401,12 @@ class _DefaultPub implements Pub {
     if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified)) {
       return true;
     }
+
+    if (_toolStampFile != null &&
+        _toolStampFile.existsSync() &&
+        _toolStampFile.lastModifiedSync().isAfter(dotPackagesLastModified)) {
+      return true;
+    }
     return false;
   }
 
@@ -453,5 +458,28 @@ class _DefaultPub implements Pub {
       environment[_kPubCacheEnvironmentKey] = pubCache;
     }
     return environment;
+  }
+
+  /// Insert the flutter_gen synthetic package into the package configuration file if
+  /// there is an l10n.yaml.
+  Future<void> _updatePackageConfig(File packageConfigFile, Directory generatedDirectory) async {
+    if (!packageConfigFile.existsSync()) {
+      return;
+    }
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(packageConfigFile, logger: _logger);
+    final Package flutterGen = Package('flutter_gen', generatedDirectory.uri, languageVersion: LanguageVersion(2, 8));
+    if (packageConfig.packages.any((Package package) => package.name == 'flutter_gen')) {
+      return;
+    }
+    final PackageConfig newPackageConfig = PackageConfig(
+      <Package>[
+        ...packageConfig.packages,
+        flutterGen,
+      ],
+    );
+    // There is no current API for saving a package_config without hitting the real filesystem.
+    if (packageConfigFile.fileSystem is LocalFileSystem) {
+      await savePackageConfig(newPackageConfig, packageConfigFile.parent.parent);
+    }
   }
 }

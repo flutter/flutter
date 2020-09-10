@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -14,17 +13,19 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
-const int kAndroidSdkMinVersion = 28;
+const int kAndroidSdkMinVersion = 29;
 final Version kAndroidJavaMinVersion = Version(1, 8, 0);
 final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
@@ -44,17 +45,31 @@ final RegExp licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitiv
 final RegExp licenseAccepted = RegExp(r'All SDK package licenses accepted.');
 
 class AndroidWorkflow implements Workflow {
-  @override
-  bool get appliesToHostPlatform => true;
+  AndroidWorkflow({
+    @required AndroidSdk androidSdk,
+    @required FeatureFlags featureFlags,
+  }) : _androidSdk = androidSdk,
+       _featureFlags = featureFlags;
+
+  final AndroidSdk _androidSdk;
+  final FeatureFlags _featureFlags;
 
   @override
-  bool get canListDevices => getAdbPath(androidSdk) != null;
+  bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled;
 
   @override
-  bool get canLaunchDevices => androidSdk != null && androidSdk.validateSdkWellFormed().isEmpty;
+  bool get canListDevices => _androidSdk != null
+    && _androidSdk.adbPath != null;
 
   @override
-  bool get canListEmulators => getEmulatorPath(androidSdk) != null;
+  bool get canLaunchDevices => _androidSdk != null
+    && _androidSdk.adbPath != null
+    && _androidSdk.validateSdkWellFormed().isEmpty;
+
+  @override
+  bool get canListEmulators => _androidSdk != null
+    && _androidSdk.adbPath != null
+    && _androidSdk.emulatorPath != null;
 }
 
 class AndroidValidator extends DoctorValidator {
@@ -168,7 +183,7 @@ class AndroidValidator extends DoctorValidator {
 
     String sdkVersionText;
     if (_androidSdk.latestVersion != null) {
-      if (_androidSdk.latestVersion.sdkLevel < 28 || _androidSdk.latestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
+      if (_androidSdk.latestVersion.sdkLevel < kAndroidSdkMinVersion || _androidSdk.latestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
         messages.add(ValidationMessage.error(
           _userMessages.androidSdkBuildToolsOutdated(
             _androidSdk.sdkManagerPath,
@@ -242,13 +257,13 @@ class AndroidLicenseValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     // Match pre-existing early termination behavior
-    if (androidSdk == null || androidSdk.latestVersion == null ||
-        androidSdk.validateSdkWellFormed().isNotEmpty ||
+    if (globals.androidSdk == null || globals.androidSdk.latestVersion == null ||
+        globals.androidSdk.validateSdkWellFormed().isNotEmpty ||
         ! await _checkJavaVersionNoOutput()) {
       return ValidationResult(ValidationType.missing, messages);
     }
 
-    final String sdkVersionText = userMessages.androidStatusInfo(androidSdk.latestVersion.buildToolsVersionName);
+    final String sdkVersionText = userMessages.androidStatusInfo(globals.androidSdk.latestVersion.buildToolsVersionName);
 
     // Check for licenses.
     switch (await licensesAccepted) {
@@ -325,8 +340,8 @@ class AndroidLicenseValidator extends DoctorValidator {
 
     try {
       final Process process = await processUtils.start(
-        <String>[androidSdk.sdkManagerPath, '--licenses'],
-        environment: androidSdk.sdkManagerEnv,
+        <String>[globals.androidSdk.sdkManagerPath, '--licenses'],
+        environment: globals.androidSdk.sdkManagerEnv,
       );
       process.stdin.write('n\n');
       // We expect logcat streams to occasionally contain invalid utf-8,
@@ -351,19 +366,19 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   /// Run the Android SDK manager tool in order to accept SDK licenses.
   static Future<bool> runLicenseManager() async {
-    if (androidSdk == null) {
+    if (globals.androidSdk == null) {
       globals.printStatus(userMessages.androidSdkShort);
       return false;
     }
 
     if (!_canRunSdkManager()) {
-      throwToolExit(userMessages.androidMissingSdkManager(androidSdk.sdkManagerPath, globals.platform));
+      throwToolExit(userMessages.androidMissingSdkManager(globals.androidSdk.sdkManagerPath, globals.platform));
     }
 
     try {
       final Process process = await processUtils.start(
-        <String>[androidSdk.sdkManagerPath, '--licenses'],
-        environment: androidSdk.sdkManagerEnv,
+        <String>[globals.androidSdk.sdkManagerPath, '--licenses'],
+        environment: globals.androidSdk.sdkManagerEnv,
       );
 
       // The real stdin will never finish streaming. Pipe until the child process
@@ -393,7 +408,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       return exitCode == 0;
     } on ProcessException catch (e) {
       throwToolExit(userMessages.androidCannotRunSdkManager(
-        androidSdk.sdkManagerPath,
+        globals.androidSdk.sdkManagerPath,
         e.toString(),
         globals.platform,
       ));
@@ -402,8 +417,8 @@ class AndroidLicenseValidator extends DoctorValidator {
   }
 
   static bool _canRunSdkManager() {
-    assert(androidSdk != null);
-    final String sdkManagerPath = androidSdk.sdkManagerPath;
+    assert(globals.androidSdk != null);
+    final String sdkManagerPath = globals.androidSdk.sdkManagerPath;
     return globals.processManager.canRun(sdkManagerPath);
   }
 }

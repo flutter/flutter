@@ -184,7 +184,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     Directory coverageDirectory,
     bool web = false,
     String randomSeed,
-    @override List<String> dartExperiments,
+    @override List<String> extraFrontEndOptions,
+    bool nullAssertions = false,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;

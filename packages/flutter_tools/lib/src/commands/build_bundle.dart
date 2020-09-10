@@ -136,7 +136,7 @@ class BuildBundleCommand extends BuildSubCommand {
       extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
       fileSystemScheme: stringArg('filesystem-scheme'),
       fileSystemRoots: stringsArg('filesystem-root'),
-      treeShakeIcons: boolArg('tree-shake-icons'),
+      treeShakeIcons: buildInfo.treeShakeIcons,
     );
     return FlutterCommandResult.success();
   }

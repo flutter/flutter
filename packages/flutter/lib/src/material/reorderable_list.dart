@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';
@@ -361,7 +363,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // Handles up the logic for dragging and reordering items in the list.
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
-    final GlobalObjectKey keyIndexGlobalKey = GlobalObjectKey(toWrap.key);
+    final _ReorderableListViewChildGlobalKey keyIndexGlobalKey = _ReorderableListViewChildGlobalKey(toWrap.key, this);
     // We pass the toWrapWithGlobalKey into the Draggable so that when a list
     // item gets dragged, the accessibility framework can preserve the selected
     // state of the dragging item.
@@ -384,8 +386,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         if (startIndex != endIndex)
           widget.onReorder(startIndex, endIndex);
         // Animates leftover space in the drop area closed.
-        // TODO(djshuckerow): bring the animation in line with the Material
-        // specifications.
         _ghostController.reverse(from: 0.1);
         _entranceController.reverse(from: 0.1);
         _dragging = null;
@@ -574,6 +574,11 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           );
           break;
       }
+
+      // If the reorderable list only has one child element, reordering
+      // should not be allowed.
+      final bool hasMoreThanOneChildElement = widget.children.length > 1;
+
       return SingleChildScrollView(
         scrollDirection: widget.scrollDirection,
         padding: widget.padding,
@@ -581,13 +586,40 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         reverse: widget.reverse,
         child: _buildContainerForScrollDirection(
           children: <Widget>[
-            if (widget.reverse) _wrap(finalDropArea, widget.children.length, constraints),
+            if (widget.reverse && hasMoreThanOneChildElement) _wrap(finalDropArea, widget.children.length, constraints),
             if (widget.header != null) widget.header,
             for (int i = 0; i < widget.children.length; i += 1) _wrap(widget.children[i], i, constraints),
-            if (!widget.reverse) _wrap(finalDropArea, widget.children.length, constraints),
+            if (!widget.reverse && hasMoreThanOneChildElement) _wrap(finalDropArea, widget.children.length, constraints),
           ],
         ),
       );
     });
   }
+}
+
+// A global key that takes its identity from the object and uses a value of a
+// particular type to identify itself.
+//
+// The difference with GlobalObjectKey is that it uses [==] instead of [identical]
+// of the objects used to generate widgets.
+@optionalTypeArgs
+class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
+
+  const _ReorderableListViewChildGlobalKey(this.subKey, this.state) : super(subKey);
+
+  final Key subKey;
+
+  final _ReorderableListContentState state;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _ReorderableListViewChildGlobalKey
+        && other.subKey == subKey
+        && other.state == state;
+  }
+
+  @override
+  int get hashCode => hashValues(subKey, state);
 }

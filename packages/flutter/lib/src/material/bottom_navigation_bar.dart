@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection' show Queue;
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'bottom_navigation_bar_theme.dart';
@@ -16,6 +19,7 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'text_theme.dart';
 import 'theme.dart';
+import 'tooltip.dart';
 
 /// Defines the layout and behavior of a [BottomNavigationBar].
 ///
@@ -109,15 +113,15 @@ enum BottomNavigationBarType {
 ///       items: const <BottomNavigationBarItem>[
 ///         BottomNavigationBarItem(
 ///           icon: Icon(Icons.home),
-///           title: Text('Home'),
+///           label: 'Home',
 ///         ),
 ///         BottomNavigationBarItem(
 ///           icon: Icon(Icons.business),
-///           title: Text('Business'),
+///           label: 'Business',
 ///         ),
 ///         BottomNavigationBarItem(
 ///           icon: Icon(Icons.school),
-///           title: Text('School'),
+///           label: 'School',
 ///         ),
 ///       ],
 ///       currentIndex: _selectedIndex,
@@ -151,7 +155,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// are non-null, they will be used instead of [selectedItemColor] and
   /// [unselectedItemColor].
   ///
-  /// If custom [IconThemData]s are used, you must provide both
+  /// If custom [IconThemeData]s are used, you must provide both
   /// [selectedIconTheme] and [unselectedIconTheme], and both
   /// [IconThemeData.color] and [IconThemeData.size] must be set.
   ///
@@ -162,7 +166,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// former is preferred, [fixedColor] only exists for the sake of
   /// backwards compatibility.
   ///
-  /// The [showSelectedLabels] argument must not be non-null.
+  /// The [showSelectedLabels] argument must be non-null.
   ///
   /// The [showUnselectedLabels] argument defaults to `true` if [type] is
   /// [BottomNavigationBarType.fixed] and `false` if [type] is
@@ -187,11 +191,13 @@ class BottomNavigationBar extends StatefulWidget {
     this.unselectedLabelStyle,
     this.showSelectedLabels = true,
     this.showUnselectedLabels,
+    this.mouseCursor,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
-        items.every((BottomNavigationBarItem item) => item.title != null) == true,
-        'Every item must have a non-null title',
+        items.every((BottomNavigationBarItem item) => item.title != null) ||
+        items.every((BottomNavigationBarItem item) => item.label != null),
+        'Every item must have a non-null title or label',
        ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(elevation == null || elevation >= 0.0),
@@ -242,7 +248,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// The color of the [BottomNavigationBar] itself.
   ///
   /// If [type] is [BottomNavigationBarType.shifting] and the
-  /// [items]s, have [BottomNavigationBarItem.backgroundColor] set, the [item]'s
+  /// [items] have [BottomNavigationBarItem.backgroundColor] set, the [items]'
   /// backgroundColor will splash and overwrite this color.
   final Color backgroundColor;
 
@@ -252,13 +258,13 @@ class BottomNavigationBar extends StatefulWidget {
   final double iconSize;
 
   /// The color of the selected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.label].
+  /// [BottomNavigationBarItem.title].
   ///
   /// If null then the [ThemeData.primaryColor] is used.
   final Color selectedItemColor;
 
   /// The color of the unselected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.label]s.
+  /// [BottomNavigationBarItem.title]s.
   ///
   /// If null then the [TextTheme.caption]'s color is used.
   final Color unselectedItemColor;
@@ -275,7 +281,7 @@ class BottomNavigationBar extends StatefulWidget {
   final IconThemeData selectedIconTheme;
 
   /// The size, opacity, and color of the icon in the currently unselected
-  /// [BottomNavigationBarItem.icon]s
+  /// [BottomNavigationBarItem.icon]s.
   ///
   /// If this is not provided, the size will default to [iconSize], the color
   /// will default to [unselectedItemColor].
@@ -295,7 +301,8 @@ class BottomNavigationBar extends StatefulWidget {
 
   /// The font size of the [BottomNavigationBarItem] labels when they are selected.
   ///
-  /// If [selectedLabelStyle.fontSize] is non-null, it will be used instead of this.
+  /// If [TextStyle.fontSize] of [selectedLabelStyle] is non-null, it will be
+  /// used instead of this.
   ///
   /// Defaults to `14.0`.
   final double selectedFontSize;
@@ -303,7 +310,8 @@ class BottomNavigationBar extends StatefulWidget {
   /// The font size of the [BottomNavigationBarItem] labels when they are not
   /// selected.
   ///
-  /// If [unselectedLabelStyle.fontSize] is non-null, it will be used instead of this.
+  /// If [TextStyle.fontSize] of [unselectedLabelStyle] is non-null, it will be
+  /// used instead of this.
   ///
   /// Defaults to `12.0`.
   final double unselectedFontSize;
@@ -313,6 +321,12 @@ class BottomNavigationBar extends StatefulWidget {
 
   /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
   final bool showSelectedLabels;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// tiles.
+  ///
+  /// If this property is null, [SystemMouseCursors.click] will be used.
+  final MouseCursor mouseCursor;
 
   @override
   _BottomNavigationBarState createState() => _BottomNavigationBarState();
@@ -337,12 +351,14 @@ class _BottomNavigationTile extends StatelessWidget {
     this.showSelectedLabels,
     this.showUnselectedLabels,
     this.indexLabel,
+    @required this.mouseCursor,
     }) : assert(type != null),
          assert(item != null),
          assert(animation != null),
          assert(selected != null),
          assert(selectedLabelStyle != null),
-         assert(unselectedLabelStyle != null);
+         assert(unselectedLabelStyle != null),
+         assert(mouseCursor != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -359,6 +375,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final String indexLabel;
   final bool showSelectedLabels;
   final bool showUnselectedLabels;
+  final MouseCursor mouseCursor;
 
   @override
   Widget build(BuildContext context) {
@@ -443,50 +460,64 @@ class _BottomNavigationTile extends StatelessWidget {
         break;
     }
 
-    return Expanded(
-      flex: size,
-      child: Semantics(
-        container: true,
-        selected: selected,
-        child: Stack(
+    Widget result = InkResponse(
+      onTap: onTap,
+      mouseCursor: mouseCursor,
+      child: Padding(
+        padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            InkResponse(
-              onTap: onTap,
-              child: Padding(
-                padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    _TileIcon(
-                      colorTween: colorTween,
-                      animation: animation,
-                      iconSize: iconSize,
-                      selected: selected,
-                      item: item,
-                      selectedIconTheme: selectedIconTheme ?? bottomTheme.selectedIconTheme,
-                      unselectedIconTheme: unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
-                    ),
-                    _Label(
-                      colorTween: colorTween,
-                      animation: animation,
-                      item: item,
-                      selectedLabelStyle: selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
-                      unselectedLabelStyle: unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
-                      showSelectedLabels: showSelectedLabels ?? bottomTheme.showUnselectedLabels,
-                      showUnselectedLabels: showUnselectedLabels ?? bottomTheme.showUnselectedLabels,
-                    ),
-                  ],
-                ),
-              ),
+            _TileIcon(
+              colorTween: colorTween,
+              animation: animation,
+              iconSize: iconSize,
+              selected: selected,
+              item: item,
+              selectedIconTheme: selectedIconTheme ?? bottomTheme.selectedIconTheme,
+              unselectedIconTheme: unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
             ),
-            Semantics(
-              label: indexLabel,
+            _Label(
+              colorTween: colorTween,
+              animation: animation,
+              item: item,
+              selectedLabelStyle: selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
+              unselectedLabelStyle: unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
+              showSelectedLabels: showSelectedLabels ?? bottomTheme.showUnselectedLabels,
+              showUnselectedLabels: showUnselectedLabels ?? bottomTheme.showUnselectedLabels,
             ),
           ],
         ),
       ),
+    );
+
+    if (item.label != null) {
+      result = Tooltip(
+        message: item.label,
+        preferBelow: false,
+        verticalOffset: selectedIconSize + selectedFontSize,
+        child: result,
+      );
+    }
+
+    result = Semantics(
+      selected: selected,
+      container: true,
+      child: Stack(
+        children: <Widget>[
+          result,
+          Semantics(
+            label: indexLabel,
+          ),
+        ],
+      ),
+    );
+
+    return Expanded(
+      flex: size,
+      child: result,
     );
   }
 }
@@ -595,7 +626,7 @@ class _Label extends StatelessWidget {
           ),
         ),
         alignment: Alignment.bottomCenter,
-        child: item.title,
+        child: item.title ?? Text(item.label),
       ),
     );
 
@@ -622,11 +653,25 @@ class _Label extends StatelessWidget {
       );
     }
 
-    return Align(
+    text = Align(
       alignment: Alignment.bottomCenter,
       heightFactor: 1.0,
       child: Container(child: text),
     );
+
+    if (item.label != null) {
+      // Do not grow text in bottom navigation bar when we can show a tooltip
+      // instead.
+      final MediaQueryData mediaQueryData = MediaQuery.of(context);
+      text = MediaQuery(
+        data: mediaQueryData.copyWith(
+          textScaleFactor: math.min(1.0, mediaQueryData.textScaleFactor),
+        ),
+        child: text,
+      );
+    }
+
+    return text;
   }
 }
 
@@ -833,6 +878,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         );
         break;
     }
+    final MouseCursor effectiveMouseCursor = widget.mouseCursor ?? SystemMouseCursors.click;
 
     final List<Widget> tiles = <Widget>[];
     for (int i = 0; i < widget.items.length; i++) {
@@ -855,6 +901,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         showSelectedLabels: widget.showSelectedLabels ?? bottomTheme.showSelectedLabels,
         showUnselectedLabels: widget.showUnselectedLabels ?? bottomTheme.showUnselectedLabels ?? _defaultShowUnselected,
         indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
+        mouseCursor: effectiveMouseCursor,
       ));
     }
     return tiles;
@@ -875,6 +922,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasMediaQuery(context));
+    assert(Overlay.of(context, debugRequiredFor: widget) != null);
 
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 

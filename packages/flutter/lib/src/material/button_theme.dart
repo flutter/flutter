@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -49,6 +51,16 @@ enum ButtonBarLayoutBehavior {
 }
 
 /// Used with [ButtonThemeData] to configure the color and geometry of buttons.
+///
+/// ### This class is obsolete.
+///
+/// Please use one or more of the new buttons and their themes
+/// instead: [TextButton] and [TextButtonTheme], [ElevatedButton] and
+/// [ElevatedButtonTheme], [OutlinedButton] and
+/// [OutlinedButtonTheme]. The original classes will be deprecated
+/// soon, please migrate code that uses them.  There's a detailed
+/// migration guide for the new button and button theme classes in
+/// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
 ///
 /// A button theme can be specified as part of the overall Material theme
 /// using [ThemeData.buttonTheme]. The Material theme's button theme data
@@ -120,10 +132,6 @@ class ButtonTheme extends InheritedTheme {
   }) : assert(data != null),
        super(key: key, child: child);
 
-  // TODO(darrenaustin): remove after this deprecation warning has been on
-  // stable for a couple of releases.
-  // See https://github.com/flutter/flutter/issues/37333
-  //
   /// Creates a button theme that is appropriate for button bars, as used in
   /// dialog footers and in the headers of data tables.
   ///
@@ -245,6 +253,23 @@ class ButtonTheme extends InheritedTheme {
 
 /// Used with [ButtonTheme] to configure the color and geometry of buttons.
 ///
+/// ### This class is obsolete.
+///
+/// Please use one or more of the new buttons and their themes instead:
+///
+///  * [TextButton], [TextButtonTheme], [TextButtonThemeData],
+///  * [ElevatedButton], [ElevatedButtonTheme], [ElevatedButtonThemeData],
+///  * [OutlinedButton], [OutlinedButtonTheme], [OutlinedButtonThemeData]
+///
+/// FlatButton, RaisedButton, and OutlineButton have been replaced by
+/// TextButton, ElevatedButton, and OutlinedButton respectively.
+/// ButtonTheme has been replaced by TextButtonTheme,
+/// ElevatedButtonTheme, and OutlinedButtonTheme. The original classes
+/// will be deprecated soon, please migrate code that uses them.
+/// There's a detailed migration guide for the new button and button
+/// theme classes in
+/// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
+///
 /// A button theme can be specified as part of the overall Material theme
 /// using [ThemeData.buttonTheme]. The Material theme's button theme data
 /// can be overridden with [ButtonTheme].
@@ -253,7 +278,7 @@ class ButtonThemeData with Diagnosticable {
   /// Create a button theme object that can be used with [ButtonTheme]
   /// or [ThemeData].
   ///
-  /// The [textTheme], [minWidth], [height], [alignedDropDown], and
+  /// The [textTheme], [minWidth], [height], [alignedDropdown], and
   /// [layoutBehavior] parameters must not be null. The [minWidth] and
   /// [height] parameters must greater than or equal to zero.
   ///
@@ -406,7 +431,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// If the button is in the focused, hovering, or highlighted state, then the
   /// [focusColor], [hoverColor], or [highlightColor] will take precedence over
-  /// the [focusColor].
+  /// the [buttonColor].
   ///
   /// See also:
   ///
@@ -598,7 +623,8 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// If [button] is not [MaterialButton.enabled], the value of
   /// [getDisabledTextColor] is returned. If the button is enabled and
-  /// [buttonTextColor] is non-null, then [buttonTextColor] is returned.
+  /// [MaterialButton.textColor] is non-null, then [MaterialButton.textColor]
+  /// is returned.
   ///
   /// Otherwise the text color depends on the value of [getTextTheme]
   /// and [getBrightness].
@@ -606,10 +632,10 @@ class ButtonThemeData with Diagnosticable {
   ///  * [ButtonTextTheme.normal]: [Colors.white] is used if [getBrightness]
   ///    resolves to [Brightness.dark]. [Colors.black87] is used if
   ///    [getBrightness] resolves to [Brightness.light].
-  ///  * [ButtonTextTheme.accent]: [colorScheme.secondary].
+  ///  * [ButtonTextTheme.accent]: [ColorScheme.secondary] of [colorScheme].
   ///  * [ButtonTextTheme.primary]: If [getFillColor] is dark then [Colors.white],
   ///    otherwise if [button] is a [FlatButton] or an [OutlineButton] then
-  ///    [colorScheme.primary], otherwise [Colors.black].
+  ///    [ColorScheme.primary] of [colorScheme], otherwise [Colors.black].
   Color getTextColor(MaterialButton button) {
     if (!button.enabled)
       return getDisabledTextColor(button);
@@ -856,9 +882,9 @@ class ButtonThemeData with Diagnosticable {
 
   /// The minimum size of the [button]'s tap target.
   ///
-  /// Returns the button's [MaterialButton.tapTargetSize] if it is non-null.
+  /// Returns the button's [MaterialButton.materialTapTargetSize] if it is non-null.
   ///
-  /// Otherwise the value of the [materialTapTargetSize] constructor
+  /// Otherwise the value of the `materialTapTargetSize` constructor
   /// parameter is returned if that's non-null.
   ///
   /// Otherwise [MaterialTapTargetSize.padded] is returned.

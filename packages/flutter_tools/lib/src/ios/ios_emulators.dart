@@ -19,6 +19,9 @@ class IOSEmulators extends EmulatorDiscovery {
 
   @override
   Future<List<Emulator>> get emulators async => getEmulators();
+
+  @override
+  bool get canLaunchAnything => canListAnything;
 }
 
 class IOSEmulator extends Emulator {

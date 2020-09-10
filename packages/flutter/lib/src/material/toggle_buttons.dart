@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -22,6 +24,8 @@ import 'toggle_buttons_theme.dart';
 /// if a button is in an unselected or selected state. They are both
 /// correlated by their index in the list. The length of [isSelected] has to
 /// match the length of the [children] list.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=kVEguaQWGAY}
 ///
 /// ## Customizing toggle buttons
 /// Each toggle's behavior can be configured by the [onPressed] callback, which
@@ -166,6 +170,7 @@ class ToggleButtons extends StatelessWidget {
     @required this.children,
     @required this.isSelected,
     this.onPressed,
+    this.mouseCursor,
     this.textStyle,
     this.constraints,
     this.color,
@@ -217,6 +222,9 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// When the callback is null, all toggle buttons will be disabled.
   final void Function(int index) onPressed;
+
+  /// {@macro flutter.material.button.mouseCursor}
+  final MouseCursor mouseCursor;
 
   /// The [TextStyle] to apply to any text in these toggle buttons.
   ///
@@ -601,6 +609,7 @@ class ToggleButtons extends StatelessWidget {
             onPressed: onPressed != null
               ? () { onPressed(index); }
               : null,
+            mouseCursor: mouseCursor,
             leadingBorderSide: leadingBorderSide,
             horizontalBorderSide: horizontalBorderSide,
             trailingBorderSide: trailingBorderSide,
@@ -667,6 +676,7 @@ class _ToggleButton extends StatelessWidget {
     this.splashColor,
     this.focusNode,
     this.onPressed,
+    this.mouseCursor,
     this.leadingBorderSide,
     this.horizontalBorderSide,
     this.trailingBorderSide,
@@ -725,6 +735,9 @@ class _ToggleButton extends StatelessWidget {
   ///
   /// If this is null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
+
+  /// {@macro flutter.material.button.mouseCursor}
+  final MouseCursor mouseCursor;
 
   /// The width and color of the button's leading side border.
   final BorderSide leadingBorderSide;
@@ -821,6 +834,7 @@ class _ToggleButton extends StatelessWidget {
         focusNode: focusNode,
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         onPressed: onPressed,
+        mouseCursor: mouseCursor,
         child: child,
       ),
     );

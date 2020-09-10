@@ -18,9 +18,9 @@ class SpringDescription {
   ///
   /// See [mass], [stiffness], and [damping] for the units of the arguments.
   const SpringDescription({
-    this.mass,
-    this.stiffness,
-    this.damping,
+    required this.mass,
+    required this.stiffness,
+    required this.damping,
   });
 
   /// Creates a spring given the mass (m), stiffness (k), and damping ratio (ζ).
@@ -31,8 +31,8 @@ class SpringDescription {
   /// See [mass] and [stiffness] for the units for those arguments. The damping
   /// ratio is unitless.
   SpringDescription.withDampingRatio({
-    this.mass,
-    this.stiffness,
+    required this.mass,
+    required this.stiffness,
     double ratio = 1.0,
   }) : damping = ratio * 2.0 * math.sqrt(mass * stiffness);
 
@@ -277,7 +277,7 @@ class _UnderdampedSolution implements _SpringSolution {
     final double power = math.pow(math.e, _r * time) as double;
     final double cosine = math.cos(_w * time);
     final double sine = math.sin(_w * time);
-    return      power * (_c2 * _w * cosine - _c1 * _w * sine) +
+    return power * (_c2 * _w * cosine - _c1 * _w * sine) +
            _r * power * (_c2 *      sine   + _c1 *      cosine);
   }
 

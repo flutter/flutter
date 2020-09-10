@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -82,7 +84,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: FlatButton(
+                child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(
@@ -136,7 +138,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: FlatButton(
+                child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute<void>(
@@ -181,7 +183,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: FlatButton(
+                child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute<void>(
@@ -234,11 +236,11 @@ void main() {
         builder: (BuildContext context) {
           return AlertDialog(
             actions: <Widget> [
-              FlatButton(
+              TextButton(
                 child: const Text('YES'),
                 onPressed: () { Navigator.of(context).pop(true); },
               ),
-              FlatButton(
+              TextButton(
                 child: const Text('NO'),
                 onPressed: () { Navigator.of(context).pop(false); },
               ),
@@ -255,7 +257,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: FlatButton(
+                child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute<void>(
@@ -341,7 +343,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: FlatButton(
+                child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(route);

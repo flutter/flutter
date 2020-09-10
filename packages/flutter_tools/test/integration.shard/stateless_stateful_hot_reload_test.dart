@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../src/common.dart';
 import 'test_data/stateless_stateful_project.dart';
@@ -30,7 +29,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('Can switch between stateless and stateful', () async {
+  testWithoutContext('Can switch between stateless and stateful', () async {
     await _flutter.run();
     await _flutter.hotReload();
     final StringBuffer stdout = StringBuffer();

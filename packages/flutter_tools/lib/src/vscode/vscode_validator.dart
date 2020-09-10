@@ -7,6 +7,7 @@ import 'dart:async';
 import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../doctor.dart';
+import '../globals.dart' as globals;
 import 'vscode.dart';
 
 class VsCodeValidator extends DoctorValidator {
@@ -16,7 +17,7 @@ class VsCodeValidator extends DoctorValidator {
 
   static Iterable<DoctorValidator> get installedValidators {
     return VsCode
-        .allInstalled()
+        .allInstalled(globals.fs, globals.platform)
         .map<DoctorValidator>((VsCode vsCode) => VsCodeValidator(vsCode));
   }
 

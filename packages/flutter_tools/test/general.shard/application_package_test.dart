@@ -12,15 +12,15 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/fuchsia/application_package.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -91,6 +91,7 @@ void main() {
 
       final ApplicationPackage applicationPackage = await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
+        buildInfo: null,
         applicationBinary: apkFile,
       );
       expect(applicationPackage.name, 'app.apk');
@@ -117,6 +118,7 @@ void main() {
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
+        buildInfo: null,
         applicationBinary: globals.fs.file('app.apk'),
       );
       verify(
@@ -134,6 +136,7 @@ void main() {
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
+        buildInfo: null,
       );
       verifyNever(
         mockProcessManager.run(
@@ -203,6 +206,12 @@ void main() {
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity');
     }, overrides: noColorTerminalOverride);
+
+    testUsingContext('Parses manifest with missing application tag', () async {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithoutApplication);
+
+      expect(data, isNull);
+    });
   });
 
   group('PrebuiltIOSApp', () {
@@ -286,7 +295,7 @@ void main() {
       when(os.unzip(any, any)).thenAnswer((Invocation invocation) {
         final File zipFile = invocation.positionalArguments[0] as File;
         if (zipFile.path != 'app.ipa') {
-          return null;
+          return;
         }
         final Directory targetDirectory = invocation.positionalArguments[1] as Directory;
         final String bundlePath1 =
@@ -307,7 +316,7 @@ void main() {
       when(os.unzip(any, any)).thenAnswer((Invocation invocation) {
         final File zipFile = invocation.positionalArguments[0] as File;
         if (zipFile.path != 'app.ipa') {
-          return null;
+          return;
         }
         final Directory targetDirectory = invocation.positionalArguments[1] as Directory;
         final Directory bundleAppDir = globals.fs.directory(
@@ -328,7 +337,7 @@ void main() {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
       final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios) as BuildableIOSApp;
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp;
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -338,7 +347,7 @@ void main() {
       globals.fs.file('.packages').createSync();
       globals.fs.file('ios/FooBar.xcodeproj').createSync(recursive: true);
       final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios) as BuildableIOSApp;
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp;
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -348,7 +357,7 @@ void main() {
       globals.fs.file('.packages').createSync();
       globals.fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
       final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios) as BuildableIOSApp;
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp;
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -639,6 +648,26 @@ N: android=http://schemas.android.com/apk/res/android
               A: android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")
             E: category (line=46)
               A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")
+''';
+
+const String _aaptDataWithoutApplication = '''
+N: android=http://schemas.android.com/apk/res/android
+  N: dist=http://schemas.android.com/apk/distribution
+    E: manifest (line=7)
+      A: android:versionCode(0x0101021b)=(type 0x10)0x1
+      A: android:versionName(0x0101021c)="1.0" (Raw: "1.0")
+      A: android:compileSdkVersion(0x01010572)=(type 0x10)0x1c
+      A: android:compileSdkVersionCodename(0x01010573)="9" (Raw: "9")
+      A: package="io.flutter.examples.hello_world" (Raw: "io.flutter.examples.hello_world")
+      A: platformBuildVersionCode=(type 0x10)0x1
+      A: platformBuildVersionName=(type 0x4)0x3f800000
+      E: uses-sdk (line=13)
+        A: android:minSdkVersion(0x0101020c)=(type 0x10)0x10
+        A: android:targetSdkVersion(0x01010270)=(type 0x10)0x1c
+      E: dist:module (line=17)
+        A: dist:instant=(type 0x12)0xffffffff
+      E: uses-permission (line=24)
+        A: android:name(0x01010003)="android.permission.INTERNET" (Raw: "android.permission.INTERNET")
 ''';
 
 

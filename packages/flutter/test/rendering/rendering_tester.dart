@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -19,7 +23,15 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   /// while drawing the frame. If [onErrors] is null and [FlutterError] caught at least
   /// one error, this function fails the test. A test may override [onErrors] and
   /// inspect errors using [takeFlutterErrorDetails].
-  TestRenderingFlutterBinding({ this.onErrors });
+  ///
+  /// Errors caught between frames will cause the test to fail unless
+  /// [FlutterError.onError] has been overridden.
+  TestRenderingFlutterBinding({ this.onErrors }) {
+    FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.dumpErrorToConsole(details);
+      Zone.current.parent.handleUncaughtError(details.exception, details.stack);
+    };
+  }
 
   final List<FlutterErrorDetails> _errors = <FlutterErrorDetails>[];
 
@@ -284,3 +296,26 @@ class FakeTicker implements Ticker {
     return DiagnosticsProperty<Ticker>(name, this, style: DiagnosticsTreeStyle.errorProperty);
   }
 }
+
+class TestClipPaintingContext extends PaintingContext {
+  TestClipPaintingContext() : super(ContainerLayer(), Rect.zero);
+
+  @override
+  ClipRectLayer pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.hardEdge, ClipRectLayer oldLayer}) {
+    this.clipBehavior = clipBehavior;
+    return null;
+  }
+
+  Clip clipBehavior = Clip.none;
+}
+
+void expectOverflowedErrors() {
+  final FlutterErrorDetails errorDetails = renderer.takeFlutterErrorDetails();
+  final bool overflowed = errorDetails.toString().contains('overflowed');
+  if (!overflowed) {
+    FlutterError.reportError(errorDetails);
+  }
+}
+
+RenderConstrainedBox get box200x200 =>
+    RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(height: 200.0, width: 200.0));

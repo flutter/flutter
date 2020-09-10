@@ -38,7 +38,8 @@ class FuchsiaDevFinder {
 
   /// Returns a list of attached devices as a list of strings with entries
   /// formatted as follows:
-  /// 192.168.42.172 scare-cable-skip-joy
+  ///
+  ///     192.168.42.172 scare-cable-skip-joy
   Future<List<String>> list({ Duration timeout }) async {
     if (_fuchsiaArtifacts.devFinder == null ||
         !_fuchsiaArtifacts.devFinder.existsSync()) {

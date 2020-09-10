@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,6 +13,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'semantics_tester.dart';
+
+/// Used to test removal of nodes while sorting.
+class SkipAllButFirstAndLastPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
+  @override
+  Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) {
+    return <FocusNode>[
+      descendants.first,
+      if (currentNode != descendants.first && currentNode != descendants.last) currentNode,
+      descendants.last,
+    ];
+  }
+}
 
 void main() {
   group(WidgetOrderTraversalPolicy, () {
@@ -51,6 +64,49 @@ void main() {
 
       expect(firstFocusNode.hasFocus, isTrue);
       expect(secondFocusNode.hasFocus, isFalse);
+      expect(scope.hasFocus, isTrue);
+    });
+
+    testWidgets('Find the initial focus if there is none yet and traversing backwards.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final GlobalKey key3 = GlobalKey(debugLabel: '3');
+      final GlobalKey key4 = GlobalKey(debugLabel: '4');
+      final GlobalKey key5 = GlobalKey(debugLabel: '5');
+      await tester.pumpWidget(FocusTraversalGroup(
+        policy: WidgetOrderTraversalPolicy(),
+        child: FocusScope(
+          key: key1,
+          child: Column(
+            children: <Widget>[
+              Focus(
+                key: key2,
+                child: Container(key: key3, width: 100, height: 100),
+              ),
+              Focus(
+                key: key4,
+                child: Container(key: key5, width: 100, height: 100),
+              ),
+            ],
+          ),
+        ),
+      ));
+
+      final Element firstChild = tester.element(find.byKey(key3));
+      final Element secondChild = tester.element(find.byKey(key5));
+      final FocusNode firstFocusNode = Focus.of(firstChild);
+      final FocusNode secondFocusNode = Focus.of(secondChild);
+      final FocusNode scope = Focus.of(firstChild).enclosingScope;
+
+      expect(firstFocusNode.hasFocus, isFalse);
+      expect(secondFocusNode.hasFocus, isFalse);
+
+      secondFocusNode.previousFocus();
+
+      await tester.pump();
+
+      expect(firstFocusNode.hasFocus, isFalse);
+      expect(secondFocusNode.hasFocus, isTrue);
       expect(scope.hasFocus, isTrue);
     });
 
@@ -243,6 +299,40 @@ void main() {
       expect(firstFocusNode.hasFocus, isTrue);
       expect(secondFocusNode.hasFocus, isFalse);
       expect(scope.hasFocus, isTrue);
+    });
+
+    testWidgets('Move focus to next/previous node while skipping nodes in policy', (WidgetTester tester) async {
+      final List<FocusNode> nodes =
+      List<FocusNode>.generate(7, (int index) => FocusNode(debugLabel: 'Node $index'));
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          policy: SkipAllButFirstAndLastPolicy(),
+          child: Column(
+            children: List<Widget>.generate(
+              nodes.length,
+              (int index) => Focus(
+                focusNode: nodes[index],
+                child: const SizedBox(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      nodes[2].requestFocus();
+      await tester.pump();
+
+      expect(nodes[2].hasPrimaryFocus, isTrue);
+
+      primaryFocus.nextFocus();
+      await tester.pump();
+
+      expect(nodes[6].hasPrimaryFocus, isTrue);
+
+      primaryFocus.previousFocus();
+      await tester.pump();
+
+      expect(nodes[0].hasPrimaryFocus, isTrue);
     });
 
     testWidgets('Find the initial focus when a route is pushed or popped.', (WidgetTester tester) async {
@@ -1256,7 +1346,7 @@ void main() {
       expect(scope.hasFocus, isTrue);
     });
 
-    testWidgets('Directional focus avoids hysterisis.', (WidgetTester tester) async {
+    testWidgets('Directional focus avoids hysteresis.', (WidgetTester tester) async {
       final List<GlobalKey> keys = <GlobalKey>[
         GlobalKey(debugLabel: 'row 1:1'),
         GlobalKey(debugLabel: 'row 2:1'),
@@ -1592,7 +1682,7 @@ void main() {
       expect(Focus.of(lowerLeftKey.currentContext).hasPrimaryFocus, isTrue);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
-    }, skip: kIsWeb);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Focus traversal inside a vertical scrollable scrolls to stay visible.', (WidgetTester tester) async {
       final List<int> items = List<int>.generate(11, (int index) => index).toList();
@@ -1690,7 +1780,7 @@ void main() {
       await tester.pump();
       expect(topNode.hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
-    }, skip: kIsWeb);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Focus traversal inside a horizontal scrollable scrolls to stay visible.', (WidgetTester tester) async {
       final List<int> items = List<int>.generate(11, (int index) => index).toList();
@@ -1788,7 +1878,7 @@ void main() {
       await tester.pump();
       expect(leftNode.hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
-    }, skip: kIsWeb);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Arrow focus traversal actions can be re-enabled for text fields.', (WidgetTester tester) async {
       final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
@@ -1959,6 +2049,84 @@ void main() {
     testWidgets("Focus traversal group doesn't introduce a Semantics node", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(FocusTraversalGroup(child: Container()));
+      final TestSemantics expectedSemantics = TestSemantics.root();
+      expect(semantics, hasSemantics(expectedSemantics));
+    });
+    testWidgets("Descendants of FocusTraversalGroup aren't focusable if descendantsAreFocusable is false.", (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final FocusNode focusNode = FocusNode();
+      bool gotFocus;
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          descendantsAreFocusable: false,
+          child: Focus(
+            onFocusChange: (bool focused) => gotFocus = focused,
+            child: Focus(
+              key: key1,
+              focusNode: focusNode,
+              child: Container(key: key2),
+            ),
+          ),
+        ),
+      );
+
+      final Element childWidget = tester.element(find.byKey(key1));
+      final FocusNode unfocusableNode = Focus.of(childWidget);
+      final Element containerWidget = tester.element(find.byKey(key2));
+      final FocusNode containerNode = Focus.of(containerWidget);
+
+      unfocusableNode.requestFocus();
+      await tester.pump();
+
+      expect(gotFocus, isNull);
+      expect(containerNode.hasFocus, isFalse);
+      expect(unfocusableNode.hasFocus, isFalse);
+
+      containerNode.requestFocus();
+      await tester.pump();
+
+      expect(gotFocus, isNull);
+      expect(containerNode.hasFocus, isFalse);
+      expect(unfocusableNode.hasFocus, isFalse);
+    });
+  });
+  group(RawKeyboardListener, () {
+    testWidgets('Raw keyboard listener introduces a Semantics node by default', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(
+        RawKeyboardListener(
+          focusNode: focusNode,
+          child: Container(),
+        ),
+      );
+      final TestSemantics expectedSemantics = TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isFocusable,
+            ],
+          ),
+        ],
+      );
+      expect(semantics, hasSemantics(
+        expectedSemantics,
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
+    });
+    testWidgets("Raw keyboard listener doesn't introduce a Semantics node when specified", (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(
+          RawKeyboardListener(
+              focusNode: focusNode,
+              includeSemantics: false,
+              child: Container(),
+          ),
+      );
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
     });

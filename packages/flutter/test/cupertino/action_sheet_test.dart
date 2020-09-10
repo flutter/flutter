@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 
@@ -780,46 +782,46 @@ void main() {
     expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, 600.0);
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(470.0, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(470.0, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(374.3, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(374.3, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(337.1, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(337.1, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(325.3, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(325.3, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(320.8, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(320.8, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(319.3, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(319.3, epsilon: 0.1));
 
     // Action sheet has reached final height
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(319.3, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(319.3, epsilon: 0.1));
 
     // Exit animation
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump();
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(319.3, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(319.3, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(449.3, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(449.3, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(544.9, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(544.9, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(582.1, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(582.1, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(593.9, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(593.9, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(598.5, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(598.5, epsilon: 0.1));
 
     // Action sheet has disappeared
     await tester.pump(const Duration(milliseconds: 60));
@@ -857,23 +859,23 @@ void main() {
     expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, 600.0);
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(470.0, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(470.0, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(374.3, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(374.3, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(337.1, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(337.1, epsilon: 0.1));
 
     // Exit animation
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump(const Duration(milliseconds: 60));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(374.3, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(374.3, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(470.0, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(470.0, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
     expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, 600.0);
@@ -921,30 +923,52 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.scopesRoute,
-                    SemanticsFlag.namesRoute,
-                  ],
-                  label: 'Alert',
                   children: <TestSemantics>[
                     TestSemantics(
                       flags: <SemanticsFlag>[
-                        SemanticsFlag.hasImplicitScrolling,
+                        SemanticsFlag.scopesRoute,
+                        SemanticsFlag.namesRoute,
                       ],
+                      label: 'Alert',
                       children: <TestSemantics>[
                         TestSemantics(
-                          label: 'The title',
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasImplicitScrolling,
+                          ],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: 'The title',
+                            ),
+                            TestSemantics(
+                              label: 'The message',
+                            ),
+                          ],
                         ),
                         TestSemantics(
-                          label: 'The message',
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasImplicitScrolling,
+                          ],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                              ],
+                              label: 'One',
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                              ],
+                              label: 'Two',
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    TestSemantics(
-                      flags: <SemanticsFlag>[
-                        SemanticsFlag.hasImplicitScrolling,
-                      ],
-                      children: <TestSemantics>[
                         TestSemantics(
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isButton,
@@ -952,29 +976,11 @@ void main() {
                           actions: <SemanticsAction>[
                             SemanticsAction.tap,
                           ],
-                          label: 'One',
-                        ),
-                        TestSemantics(
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.isButton,
-                          ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.tap,
-                          ],
-                          label: 'Two',
+                          label: 'Cancel',
                         ),
                       ],
                     ),
-                    TestSemantics(
-                      flags: <SemanticsFlag>[
-                        SemanticsFlag.isButton,
-                      ],
-                      actions: <SemanticsAction>[
-                        SemanticsAction.tap,
-                      ],
-                      label: 'Cancel',
-                    ),
-                  ],
+                  ]
                 ),
               ],
             ),

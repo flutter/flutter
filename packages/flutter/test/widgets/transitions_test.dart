@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -139,13 +141,13 @@ void main() {
       expect(actualDecoration.color, const Color(0xFF505050));
       expect(actualDecoration.border, isA<Border>());
       final Border border = actualDecoration.border as Border;
-      expect(border.left.width, closeTo(1.9, 0.1));
+      expect(border.left.width, moreOrLessEquals(1.9, epsilon: 0.1));
       expect(border.left.style, BorderStyle.solid);
       expect(border.left.color, const Color(0xFF151515));
-      expect(actualDecoration.borderRadius.resolve(TextDirection.ltr).topLeft.x, closeTo(6.8, 0.1));
+      expect(actualDecoration.borderRadius.resolve(TextDirection.ltr).topLeft.x, moreOrLessEquals(6.8, epsilon: 0.1));
       expect(actualDecoration.shape, BoxShape.rectangle);
-      expect(actualDecoration.boxShadow[0].blurRadius, closeTo(3.1, 0.1));
-      expect(actualDecoration.boxShadow[0].spreadRadius, closeTo(1.2, 0.1));
+      expect(actualDecoration.boxShadow[0].blurRadius, moreOrLessEquals(3.1, epsilon: 0.1));
+      expect(actualDecoration.boxShadow[0].spreadRadius, moreOrLessEquals(1.2, epsilon: 0.1));
       // Scaling a shadow doesn't change the color.
       expect(actualDecoration.boxShadow[0].color, const Color(0x66000000));
     });

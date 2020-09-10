@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -66,8 +68,8 @@ Future<T> showSearch<T>({
 ///
 /// The search page always shows an [AppBar] at the top where users can
 /// enter their search queries. The buttons shown before and after the search
-/// query text field can be customized via [SearchDelegate.leading] and
-/// [SearchDelegate.actions].
+/// query text field can be customized via [SearchDelegate.buildLeading] and
+/// [SearchDelegate.buildActions].
 ///
 /// The body below the [AppBar] can either show suggested queries (returned by
 /// [SearchDelegate.buildSuggestions]) or - once the user submits a search  - the
@@ -172,7 +174,7 @@ abstract class SearchDelegate<T> {
   /// clear the query and show the suggestions again (via [showSuggestions]) if
   /// the results are currently shown.
   ///
-  /// Returns null if no widget should be shown
+  /// Returns null if no widget should be shown.
   ///
   /// See also:
   ///
@@ -266,12 +268,14 @@ abstract class SearchDelegate<T> {
 
   /// The hint text that is shown in the search field when it is empty.
   ///
-  /// If this value is set to null, the value of MaterialLocalizations.of(context).searchFieldLabel will be used instead.
+  /// If this value is set to null, the value of
+  /// `MaterialLocalizations.of(context).searchFieldLabel` will be used instead.
   final String searchFieldLabel;
 
   /// The style of the [searchFieldLabel].
   ///
-  /// If this value is set to null, the value of the ambient [Theme]'s [ThemeData.inputDecorationTheme.hintStyle] will be used instead.
+  /// If this value is set to null, the value of the ambient [Theme]'s
+  /// [InputDecorationTheme.hintStyle] will be used instead.
   final TextStyle searchFieldStyle;
 
   /// The type of action button to use for the keyboard.
@@ -335,7 +339,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
       delegate._route == null,
       'The ${delegate.runtimeType} instance is currently used by another active '
       'search. Please close that search by calling close() on the SearchDelegate '
-      'before openening another search with the same delegate instance.',
+      'before opening another search with the same delegate instance.',
     );
     delegate._route = this;
   }

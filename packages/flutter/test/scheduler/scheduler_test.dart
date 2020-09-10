@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
-import 'dart:ui' show window, FrameTiming;
+import 'dart:ui' show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -132,12 +134,13 @@ void main() {
   });
 
   test('Flutter.Frame event fired', () async {
-    window.onReportTimings(<FrameTiming>[FrameTiming(<int>[
-      // build start, build finish
-      10000, 15000,
-      // raster start, raster finish
-      16000, 20000,
-    ])]);
+    window.onReportTimings(<FrameTiming>[FrameTiming(
+      vsyncStart: 5000,
+      buildStart: 10000,
+      buildFinish: 15000,
+      rasterStart: 16000,
+      rasterFinish: 20000,
+    )]);
 
     final List<Map<String, dynamic>> events = scheduler.getEventsDispatched('Flutter.Frame');
     expect(events, hasLength(1));
@@ -145,9 +148,10 @@ void main() {
     final Map<String, dynamic> event = events.first;
     expect(event['number'], isNonNegative);
     expect(event['startTime'], 10000);
-    expect(event['elapsed'], 10000);
+    expect(event['elapsed'], 15000);
     expect(event['build'], 5000);
     expect(event['raster'], 4000);
+    expect(event['vsyncOverhead'], 5000);
   });
 
   test('TimingsCallback exceptions are caught', () {

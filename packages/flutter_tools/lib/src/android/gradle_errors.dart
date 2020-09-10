@@ -191,7 +191,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       // a plugin already migrated to AndroidX.
       globals.printStatus(
         'AndroidX incompatibilities may have caused this build to fail. '
-        'Please migrate your app to AndroidX. See https://goo.gl/CP92wY.'
+        'Please migrate your app to AndroidX. See https://goo.gl/CP92wY .'
       );
       BuildEvent(
         'gradle-android-x-failure',

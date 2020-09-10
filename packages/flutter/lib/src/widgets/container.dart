@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -43,50 +45,6 @@ import 'image.dart';
 /// )
 /// ```
 /// {@end-tool}
-///
-/// ## Layout behavior
-///
-/// _See [BoxConstraints] for an introduction to box layout models._
-///
-/// Since [Container] combines a number of other widgets each with their own
-/// layout behavior, [Container]'s layout behavior is somewhat complicated.
-///
-/// Summary: [Container] tries, in order: to honor [alignment], to size itself to
-/// the [child], to honor the `width`, `height`, and [constraints], to expand to
-/// fit the parent, to be as small as possible.
-///
-/// More specifically:
-///
-/// If the widget has no child, no `height`, no `width`, no [constraints],
-/// and the parent provides unbounded constraints, then [Container] tries to
-/// size as small as possible.
-///
-/// If the widget has no child and no [alignment], but a `height`, `width`, or
-/// [constraints] are provided, then the [Container] tries to be as small as
-/// possible given the combination of those constraints and the parent's
-/// constraints.
-///
-/// If the widget has no child, no `height`, no `width`, no [constraints], and
-/// no [alignment], but the parent provides bounded constraints, then
-/// [Container] expands to fit the constraints provided by the parent.
-///
-/// If the widget has an [alignment], and the parent provides unbounded
-/// constraints, then the [Container] tries to size itself around the child.
-///
-/// If the widget has an [alignment], and the parent provides bounded
-/// constraints, then the [Container] tries to expand to fit the parent, and
-/// then positions the child within itself as per the [alignment].
-///
-/// Otherwise, the widget has a [child] but no `height`, no `width`, no
-/// [constraints], and no [alignment], and the [Container] passes the
-/// constraints from the parent to the child and sizes itself to match the
-/// child.
-///
-/// The [margin] and [padding] properties also affect the layout, as described
-/// in the documentation for those properties. (Their effects merely augment the
-/// rules described above.) The [decoration] can implicitly increase the
-/// [padding] (e.g. borders in a [BoxDecoration] contribute to the [padding]);
-/// see [Decoration.padding].
 ///
 /// See also:
 ///
@@ -183,6 +141,11 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// possible. Containers with children size themselves to their children. The
 /// `width`, `height`, and [constraints] arguments to the constructor override
 /// this.
+///
+/// By default, containers return false for all hit tests. If the [color]
+/// property is specified, the hit testing is handled by [ColoredBox], which
+/// always returns true. If the [decoration] or [foregroundDecoration] properties
+/// are specified, hit testing is handled by [Decoration.hitTest].
 ///
 /// ## Layout behavior
 ///
@@ -288,6 +251,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///  * [Border], which has a sample which uses [Container] heavily.
 ///  * [Ink], which paints a [Decoration] on a [Material], allowing
 ///    [InkResponse] and [InkWell] splashes to paint over them.
+///  * Cookbook: [Animate the properties of a container](https://flutter.dev/docs/cookbook/animation/animated-container)
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
@@ -317,6 +281,7 @@ class Container extends StatelessWidget {
        assert(decoration == null || decoration.debugAssertIsValid()),
        assert(constraints == null || constraints.debugAssertIsValid()),
        assert(clipBehavior != null),
+       assert(decoration != null || clipBehavior == Clip.none),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
          'To provide both, use "decoration: BoxDecoration(color: color)".'
@@ -397,9 +362,14 @@ class Container extends StatelessWidget {
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
 
-  /// The clip behavior when [Container.decoration] has a clipPath.
+  /// The clip behavior when [Container.decoration] is not null.
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.none]. Must be [Clip.none] if [decoration] is null.
+  ///
+  /// If a clip is to be applied, the [Decoration.getClipPath] method
+  /// for the provided decoration must return a clip path. (This is not
+  /// supported by all decorations; the default implementation of that
+  /// method throws an [UnsupportedError].)
   final Clip clipBehavior;
 
   EdgeInsetsGeometry get _paddingIncludingDecoration {
@@ -433,6 +403,18 @@ class Container extends StatelessWidget {
     if (color != null)
       current = ColoredBox(color: color, child: current);
 
+    if (clipBehavior != Clip.none) {
+      assert(decoration != null);
+      current = ClipPath(
+        clipper: _DecorationClipper(
+          textDirection: Directionality.of(context),
+          decoration: decoration
+        ),
+        clipBehavior: clipBehavior,
+        child: current,
+      );
+    }
+
     if (decoration != null)
       current = DecoratedBox(decoration: decoration, child: current);
 
@@ -452,17 +434,6 @@ class Container extends StatelessWidget {
 
     if (transform != null)
       current = Transform(transform: transform, child: current);
-
-    if (clipBehavior != Clip.none) {
-      current = ClipPath(
-        clipper: _DecorationClipper(
-          textDirection: Directionality.of(context),
-          decoration: decoration
-        ),
-        clipBehavior: clipBehavior,
-        child: current,
-      );
-    }
 
     return current;
   }
@@ -489,7 +460,7 @@ class _DecorationClipper extends CustomClipper<Path> {
   _DecorationClipper({
     TextDirection textDirection,
     @required this.decoration
-  }) : assert (decoration != null),
+  }) : assert(decoration != null),
        textDirection = textDirection ?? TextDirection.ltr;
 
   final TextDirection textDirection;

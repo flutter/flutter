@@ -18,7 +18,7 @@ import '_isolates_io.dart'
 typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 
 // The signature of [compute].
-typedef _ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debugLabel });
+typedef _ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q message, { String? debugLabel });
 
 /// Spawn an isolate, run `callback` on that isolate, passing it `message`, and
 /// (eventually) return the value returned by `callback`.

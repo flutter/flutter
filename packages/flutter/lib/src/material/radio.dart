@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -9,6 +11,7 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'debug.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
@@ -108,6 +111,7 @@ class Radio<T> extends StatefulWidget {
     @required this.value,
     @required this.groupValue,
     @required this.onChanged,
+    this.mouseCursor,
     this.toggleable = false,
     this.activeColor,
     this.focusColor,
@@ -156,6 +160,20 @@ class Radio<T> extends StatefulWidget {
   /// )
   /// ```
   final ValueChanged<T> onChanged;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  final MouseCursor mouseCursor;
 
   /// Set to true if this radio button is allowed to be returned to an
   /// indeterminate state by selecting it again when selected.
@@ -240,8 +258,8 @@ class Radio<T> extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
-  ///    within a [Theme].
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
+  ///    widgets within a [Theme].
   final VisualDensity visualDensity;
 
   /// The color for the radio's [Material] when it has the input focus.
@@ -325,17 +343,29 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     }
     size += (widget.visualDensity ?? themeData.visualDensity).baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
+    final bool selected = widget.value == widget.groupValue;
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      <MaterialState>{
+        if (!enabled) MaterialState.disabled,
+        if (_hovering) MaterialState.hovered,
+        if (_focused) MaterialState.focused,
+        if (selected) MaterialState.selected,
+      },
+    );
+
     return FocusableActionDetector(
       actions: _actionMap,
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
+      mouseCursor: effectiveMouseCursor,
       enabled: enabled,
       onShowFocusHighlight: _handleHighlightChanged,
       onShowHoverHighlight: _handleHoverChanged,
       child: Builder(
         builder: (BuildContext context) {
           return _RadioRenderObjectWidget(
-            selected: widget.value == widget.groupValue,
+            selected: selected,
             activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
             inactiveColor: _getInactiveColor(themeData),
             focusColor: widget.focusColor ?? themeData.focusColor,

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -126,18 +128,6 @@ class NonExistentPositionDelegate extends MultiChildLayoutDelegate {
   void performLayout(Size size) {
     positionChild(0, const Offset(0, 0));
     positionChild(1, const Offset(0, 0));
-  }
-
-  @override
-  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
-}
-
-// Used in the 'performLayout error control test' test case
-//  to trigger an error when positioning with null offset
-class NullOffsetPositionDelegate extends MultiChildLayoutDelegate {
-  @override
-  void performLayout(Size size) {
-    positionChild(0, null);
   }
 
   @override
@@ -366,17 +356,6 @@ void main() {
           '   The NonExistentPositionDelegate custom multichild layout delegate\n'
           '   tried to position out a non-existent child:\n'
           '   There is no child with the id "1".\n'
-      );
-    });
-
-    testWidgets('positionChild on non existent child', (WidgetTester tester) async {
-      expectFlutterErrorMessage(
-        tester: tester,
-        delegate: NullOffsetPositionDelegate(),
-        message:
-          'FlutterError\n'
-          '   The NullOffsetPositionDelegate custom multichild layout delegate\n'
-          '   provided a null position for the child with id "0".\n',
       );
     });
 

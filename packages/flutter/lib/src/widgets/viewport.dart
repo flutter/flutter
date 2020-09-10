@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 
 export 'package:flutter/rendering.dart' show
@@ -49,6 +52,9 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// rebuild this widget when the [offset] changes.
   ///
   /// The [offset] argument must not be null.
+  ///
+  /// The [cacheExtent] must be specified if the [cacheExtentStyle] is
+  /// not [CacheExtentStyle.pixel].
   Viewport({
     Key key,
     this.axisDirection = AxisDirection.down,
@@ -58,12 +64,14 @@ class Viewport extends MultiChildRenderObjectWidget {
     this.center,
     this.cacheExtent,
     this.cacheExtentStyle = CacheExtentStyle.pixel,
+    this.clipBehavior = Clip.hardEdge,
     List<Widget> slivers = const <Widget>[],
   }) : assert(offset != null),
        assert(slivers != null),
        assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
        assert(cacheExtentStyle != null),
        assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
+       assert(clipBehavior != null),
        super(key: key, children: slivers);
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
@@ -113,10 +121,19 @@ class Viewport extends MultiChildRenderObjectWidget {
   final Key center;
 
   /// {@macro flutter.rendering.viewport.cacheExtent}
+  ///
+  /// See also:
+  ///
+  ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
   final double cacheExtent;
 
   /// {@macro flutter.rendering.viewport.cacheExtentStyle}
   final CacheExtentStyle cacheExtentStyle;
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
 
   /// Given a [BuildContext] and an [AxisDirection], determine the correct cross
   /// axis direction.
@@ -127,10 +144,20 @@ class Viewport extends MultiChildRenderObjectWidget {
     assert(axisDirection != null);
     switch (axisDirection) {
       case AxisDirection.up:
+        assert(debugCheckHasDirectionality(
+          context,
+          why: 'to determine the cross-axis direction when the viewport has an \'up\' axisDirection',
+          alternative: 'Alternatively, consider specifying the \'crossAxisDirection\' argument on the Viewport.',
+        ));
         return textDirectionToAxisDirection(Directionality.of(context));
       case AxisDirection.right:
         return AxisDirection.down;
       case AxisDirection.down:
+        assert(debugCheckHasDirectionality(
+          context,
+          why: 'to determine the cross-axis direction when the viewport has a \'down\' axisDirection',
+          alternative: 'Alternatively, consider specifying the \'crossAxisDirection\' argument on the Viewport.',
+        ));
         return textDirectionToAxisDirection(Directionality.of(context));
       case AxisDirection.left:
         return AxisDirection.down;
@@ -147,6 +174,7 @@ class Viewport extends MultiChildRenderObjectWidget {
       offset: offset,
       cacheExtent: cacheExtent,
       cacheExtentStyle: cacheExtentStyle,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -158,7 +186,8 @@ class Viewport extends MultiChildRenderObjectWidget {
       ..anchor = anchor
       ..offset = offset
       ..cacheExtent = cacheExtent
-      ..cacheExtentStyle = cacheExtentStyle;
+      ..cacheExtentStyle = cacheExtentStyle
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -263,6 +292,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
     this.axisDirection = AxisDirection.down,
     this.crossAxisDirection,
     @required this.offset,
+    this.clipBehavior = Clip.hardEdge,
     List<Widget> slivers = const <Widget>[],
   }) : assert(offset != null),
        super(key: key, children: slivers);
@@ -295,12 +325,18 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   /// Typically a [ScrollPosition].
   final ViewportOffset offset;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
   @override
   RenderShrinkWrappingViewport createRenderObject(BuildContext context) {
     return RenderShrinkWrappingViewport(
       axisDirection: axisDirection,
       crossAxisDirection: crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection),
       offset: offset,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -309,7 +345,8 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
     renderObject
       ..axisDirection = axisDirection
       ..crossAxisDirection = crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection)
-      ..offset = offset;
+      ..offset = offset
+      ..clipBehavior = clipBehavior;
   }
 
   @override

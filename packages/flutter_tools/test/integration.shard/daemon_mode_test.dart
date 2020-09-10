@@ -9,7 +9,6 @@ import 'dart:io';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:process/process.dart';
 
 import '../src/common.dart';
@@ -18,13 +17,13 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
-  test('device.getDevices', () async {
+  testWithoutContext('device.getDevices', () async {
     final Directory tempDir = createResolvedTempDirectorySync('daemon_mode_test.');
 
     final BasicProject _project = BasicProject();
     await _project.setUpIn(tempDir);
 
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
     const ProcessManager processManager = LocalProcessManager();
     final Process process = await processManager.start(
@@ -47,7 +46,7 @@ void main() {
       'id': 1,
       'method': 'device.enable',
     })}]');
-    response = await stream.first;
+    response = await stream.firstWhere((Map<String, Object> json) => json['id'] == 1);
     expect(response['id'], 1);
     expect(response['error'], isNull);
 

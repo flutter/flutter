@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -54,6 +56,33 @@ void main() {
     });
 
     group('in vertical mode', () {
+      testWidgets('reorder is not triggered when children length is less or equals to 1', (WidgetTester tester) async {
+        bool onReorderWasCalled = false;
+        final List<String> currentListItems = listItems.take(1).toList();
+        final ReorderableListView reorderableListView = ReorderableListView(
+          header: const Text('Header'),
+          children: currentListItems.map<Widget>(listItemToWidget).toList(),
+          scrollDirection: Axis.vertical,
+          onReorder: (_, __) => onReorderWasCalled = true,
+        );
+        final List<String> currentOriginalListItems = originalListItems.take(1).toList();
+        await tester.pumpWidget(MaterialApp(
+          home: SizedBox(
+            height: itemHeight * 10,
+            child: reorderableListView,
+          ),
+        ));
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 1')));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        await drag.moveTo(tester.getBottomLeft(find.text('Item 1')) * 2);
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        await drag.up();
+        expect(onReorderWasCalled, false);
+        expect(currentListItems, orderedEquals(<String>['Item 1']));
+      });
+
       testWidgets('reorders its contents only when a drag finishes', (WidgetTester tester) async {
         await tester.pumpWidget(build());
         expect(listItems, orderedEquals(originalListItems));
@@ -222,6 +251,35 @@ void main() {
         expect(findState(const Key('B')).checked, false);
         expect(findState(const Key('C')).checked, false);
         expect(findState(const Key('A')).checked, true);
+      });
+
+      testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
+        const Key firstBox = Key('key');
+        Widget build() {
+          return MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: ReorderableListView(
+                  scrollDirection: Axis.vertical,
+                  children: const <Widget>[
+                    SizedBox(key: firstBox, width: 10, height: 10),
+                  ],
+                  onReorder: (_, __) {},
+                ),
+              ),
+            ),
+          );
+        }
+
+        // When the widget is rebuilt, the state of child should be consistent.
+        await tester.pumpWidget(build());
+        final Element e0 = tester.element(find.byKey(firstBox));
+        await tester.pumpWidget(build());
+        final Element e1 = tester.element(find.byKey(firstBox));
+        expect(e0, equals(e1));
       });
 
       testWidgets('Uses the PrimaryScrollController when available', (WidgetTester tester) async {
@@ -545,6 +603,33 @@ void main() {
     });
 
     group('in horizontal mode', () {
+      testWidgets('reorder is not triggered when children length is less or equals to 1', (WidgetTester tester) async {
+        bool onReorderWasCalled = false;
+        final List<String> currentListItems = listItems.take(1).toList();
+        final ReorderableListView reorderableListView = ReorderableListView(
+          header: const Text('Header'),
+          children: currentListItems.map<Widget>(listItemToWidget).toList(),
+          scrollDirection: Axis.horizontal,
+          onReorder: (_, __) => onReorderWasCalled = true,
+        );
+        final List<String> currentOriginalListItems = originalListItems.take(1).toList();
+        await tester.pumpWidget(MaterialApp(
+          home: SizedBox(
+            height: itemHeight * 10,
+            child: reorderableListView,
+          ),
+        ));
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 1')));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        await drag.moveTo(tester.getBottomLeft(find.text('Item 1')) * 2);
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        await drag.up();
+        expect(onReorderWasCalled, false);
+        expect(currentListItems, orderedEquals(<String>['Item 1']));
+      });
+
       testWidgets('allows reordering from the very top to the very bottom', (WidgetTester tester) async {
         await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
         expect(listItems, orderedEquals(originalListItems));
@@ -713,6 +798,35 @@ void main() {
         expect(findState(const Key('B')).checked, false);
         expect(findState(const Key('C')).checked, false);
         expect(findState(const Key('A')).checked, true);
+      });
+
+      testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
+        const Key firstBox = Key('key');
+        Widget build() {
+          return MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: ReorderableListView(
+                  scrollDirection: Axis.horizontal,
+                  children: const <Widget>[
+                    SizedBox(key: firstBox, width: 10, height: 10),
+                  ],
+                  onReorder: (_, __) {},
+                ),
+              ),
+            ),
+          );
+        }
+
+        // When the widget is rebuilt, the state of child should be consistent.
+        await tester.pumpWidget(build());
+        final Element e0 = tester.element(find.byKey(firstBox));
+        await tester.pumpWidget(build());
+        final Element e1 = tester.element(find.byKey(firstBox));
+        expect(e0, equals(e1));
       });
 
       group('Accessibility (a11y/Semantics)', () {

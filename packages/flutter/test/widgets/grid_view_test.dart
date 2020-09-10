@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../rendering/mock_canvas.dart';
+import '../rendering/rendering_tester.dart';
 import 'states.dart';
 
 void main() {
@@ -563,5 +567,143 @@ void main() {
 
     expect(tester.getTopLeft(find.byKey(target)), const Offset(606.0, 0.0));
     expect(tester.getBottomRight(find.byKey(target)), const Offset(800.0, 194.0));
+  });
+
+  testWidgets('GridView does not cache itemBuilder calls', (WidgetTester tester) async {
+    final Map<int, int> counters = <int, int>{};
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: GridView.builder(
+        itemCount: 1000,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+        itemBuilder: (BuildContext context, int index) {
+          counters[index] ??= 0;
+          counters[index] += 1;
+          return SizedBox(
+            key: ValueKey<int>(index),
+            width: 200,
+            height: 200,
+          );
+        },
+      ),
+    ));
+
+    expect(find.byKey(const ValueKey<int>(4)), findsOneWidget);
+    expect(counters[4], 1);
+
+    await tester.fling(find.byType(GridView), const Offset(0, -300), 5000);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<int>(4)), findsNothing);
+    expect(counters[4], 1);
+
+    await tester.fling(find.byType(GridView), const Offset(0, 300), 5000);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<int>(4)), findsOneWidget);
+    expect(counters[4], 2);
+  });
+
+  testWidgets('GridView respects clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+          children: <Widget>[Container(height: 2000.0)],
+        ),
+      ),
+    );
+
+    // 1st, check that the render object has received the default clip behavior.
+    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    // 2nd, check that the painting context has received the default clip behavior.
+    final TestClipPaintingContext context = TestClipPaintingContext();
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.hardEdge));
+
+    // 3rd, pump a new widget to check that the render object can update its clip behavior.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+          children: <Widget>[Container(height: 2000.0)],
+          clipBehavior: Clip.antiAlias,
+        ),
+      ),
+    );
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+
+    // 4th, check that a non-default clip behavior can be sent to the painting context.
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('GridView.builder respects clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+          itemCount: 10,
+          itemBuilder: (BuildContext _, int __) => Container(height: 2000.0),
+          clipBehavior: Clip.antiAlias,
+        ),
+      ),
+    );
+    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('GridView.custom respects clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.custom(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+          childrenDelegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) => Container(height: 2000.0),
+            childCount: 1,
+          ),
+          clipBehavior: Clip.antiAlias,
+        ),
+      ),
+    );
+    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('GridView.count respects clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.count(
+          crossAxisCount: 3,
+          children: <Widget>[Container(height: 2000.0)],
+          clipBehavior: Clip.antiAlias,
+        ),
+      ),
+    );
+    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('GridView.extent respects clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.extent(
+          maxCrossAxisExtent: 1000,
+          children: <Widget>[Container(height: 2000.0)],
+          clipBehavior: Clip.antiAlias,
+        ),
+      ),
+    );
+    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 }

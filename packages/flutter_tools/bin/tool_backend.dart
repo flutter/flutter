@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Do not add package imports to this file.
 import 'dart:convert'; // ignore: dart_convert_import.
 import 'dart:io'; // ignore: dart_io_import.
-import 'package:path/path.dart' as path; // ignore: package_path_import.
 
 /// Executes the required flutter tasks for a desktop build.
 Future<void> main(List<String> arguments) async {
@@ -18,10 +18,12 @@ Future<void> main(List<String> arguments) async {
   final String flutterEngine = Platform.environment['FLUTTER_ENGINE'];
   final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
   final String flutterTarget = Platform.environment['FLUTTER_TARGET']
-    ?? path.join('lib', 'main.dart');
+    ?? pathJoin(<String>['lib', 'main.dart']);
+  final String codeSizeDirectory = Platform.environment['CODE_SIZE_DIRECTORY'];
   final String localEngine = Platform.environment['LOCAL_ENGINE'];
   final String projectDirectory = Platform.environment['PROJECT_DIR'];
   final String splitDebugInfo = Platform.environment['SPLIT_DEBUG_INFO'];
+  final String bundleSkSLPath = Platform.environment['BUNDLE_SKSL_PATH'];
   final bool trackWidgetCreation = Platform.environment['TRACK_WIDGET_CREATION'] == 'true';
   final bool treeShakeIcons = Platform.environment['TREE_SHAKE_ICONS'] == 'true';
   final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] == 'true';
@@ -41,15 +43,17 @@ or
 ''');
     exit(1);
   }
+  final String flutterExecutable = pathJoin(<String>[
+    flutterRoot,
+    'bin',
+    if (Platform.isWindows)
+      'flutter.bat'
+    else
+      'flutter'
+  ]);
+  final String bundlePlatform = targetPlatform == 'windows-x64' ? 'windows' : 'linux';
+  final String target = '${buildMode}_bundle_${bundlePlatform}_assets';
 
-  final String flutterExecutable = path.join(
-    flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
-  final String target = targetPlatform == 'windows-x64'
-    ? 'debug_bundle_windows_assets'
-    : 'debug_bundle_linux_assets';
-
-  // TODO(jonahwilliams): currently all builds are debug builds. Remove the
-  // hardcoded mode when profile and release support is added.
   final Process assembleProcess = await Process.start(
     flutterExecutable,
     <String>[
@@ -61,10 +65,14 @@ or
       '--output=build',
       '-dTargetPlatform=$targetPlatform',
       '-dTrackWidgetCreation=$trackWidgetCreation',
-      '-dBuildMode=debug',
+      '-dBuildMode=$buildMode',
       '-dTargetFile=$flutterTarget',
       '-dTreeShakeIcons="$treeShakeIcons"',
       '-dDartObfuscation=$dartObfuscation',
+      if (bundleSkSLPath != null)
+        '-iBundleSkSLPath=$bundleSkSLPath',
+      if (codeSizeDirectory != null)
+        '-dCodeSizeDirectory=$codeSizeDirectory',
       if (splitDebugInfo != null)
         '-dSplitDebugInfo=$splitDebugInfo',
       if (dartDefines != null)
@@ -72,7 +80,7 @@ or
       if (extraGenSnapshotOptions != null)
         '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
       if (extraFrontEndOptions != null)
-        '-dExtraFrontEndOptions=$extraFrontEndOptions',
+        '--ExtraFrontEndOptions=$extraFrontEndOptions',
       target,
     ],
   );
@@ -88,4 +96,12 @@ or
   if (await assembleProcess.exitCode != 0) {
     exit(1);
   }
+}
+
+/// Perform a simple path join on the segments based on the current platform.
+///
+/// Does not normalize paths that have repeated separators.
+String pathJoin(List<String> segments) {
+  final String separator = Platform.isWindows ? r'\' : '/';
+  return segments.join(separator);
 }
