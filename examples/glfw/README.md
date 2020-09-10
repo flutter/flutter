@@ -19,7 +19,7 @@ The example has the following dependencies:
  * [Flutter](https://flutter.dev/) - This can be installed from the [Flutter webpage](https://flutter.dev/docs/get-started/install)
  * [Flutter Engine](https://flutter.dev) - This can be built or downloaded, see [Custom Flutter Engine Embedders](https://github.com/flutter/flutter/wiki/Custom-Flutter-Engine-Embedders) for more information.
 
-In order to run the example you should be able to go into this directory and run
+In order to **build** and **run** the example you should be able to go into this directory and run
 `./run.sh`.
 
 ## Troubleshooting
