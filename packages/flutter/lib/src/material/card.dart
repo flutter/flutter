@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 
 import 'card_theme.dart';
@@ -104,7 +102,7 @@ class Card extends StatelessWidget {
   /// The [elevation] must be null or non-negative. The [borderOnForeground]
   /// must not be null.
   const Card({
-    Key key,
+    Key? key,
     this.color,
     this.shadowColor,
     this.elevation,
@@ -124,14 +122,14 @@ class Card extends StatelessWidget {
   ///
   /// If this property is null then [CardTheme.color] of [ThemeData.cardTheme]
   /// is used. If that's null then [ThemeData.cardColor] is used.
-  final Color color;
+  final Color? color;
 
   /// The color to paint the shadow below the card.
   ///
   /// If null then the ambient [CardTheme]'s shadowColor is used.
   /// If that's null too, then the overall theme's [ThemeData.shadowColor]
   /// (default black) is used.
-  final Color shadowColor;
+  final Color? shadowColor;
 
   /// The z-coordinate at which to place this card. This controls the size of
   /// the shadow below the card.
@@ -140,7 +138,7 @@ class Card extends StatelessWidget {
   ///
   /// If this property is null then [CardTheme.elevation] of
   /// [ThemeData.cardTheme] is used. If that's null, the default value is 1.0.
-  final double elevation;
+  final double? elevation;
 
   /// The shape of the card's [Material].
   ///
@@ -149,7 +147,7 @@ class Card extends StatelessWidget {
   /// If this property is null then [CardTheme.shape] of [ThemeData.cardTheme]
   /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
   /// with a circular corner radius of 4.0.
-  final ShapeBorder shape;
+  final ShapeBorder? shape;
 
   /// Whether to paint the [shape] border in front of the [child].
   ///
@@ -161,7 +159,7 @@ class Card extends StatelessWidget {
   ///
   /// If this property is null then [CardTheme.clipBehavior] of
   /// [ThemeData.cardTheme] is used. If that's null then the behavior will be [Clip.none].
-  final Clip clipBehavior;
+  final Clip? clipBehavior;
 
   /// The empty space that surrounds the card.
   ///
@@ -170,7 +168,7 @@ class Card extends StatelessWidget {
   /// If this property is null then [CardTheme.margin] of
   /// [ThemeData.cardTheme] is used. If that's null, the default margin is 4.0
   /// logical pixels on all sides: `EdgeInsets.all(4.0)`.
-  final EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry? margin;
 
   /// Whether this widget represents a single semantic container, or if false
   /// a collection of individual semantic nodes.
@@ -188,13 +186,13 @@ class Card extends StatelessWidget {
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
-  final Widget child;
+  final Widget? child;
 
   static const double _defaultElevation = 1.0;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context)!;
     final CardTheme cardTheme = CardTheme.of(context);
 
     return Semantics(

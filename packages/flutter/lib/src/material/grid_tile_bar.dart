@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -25,7 +23,7 @@ class GridTileBar extends StatelessWidget {
   ///
   /// Typically used to with [GridTile].
   const GridTileBar({
-    Key key,
+    Key? key,
     this.backgroundColor,
     this.leading,
     this.title,
@@ -36,31 +34,31 @@ class GridTileBar extends StatelessWidget {
   /// The color to paint behind the child widgets.
   ///
   /// Defaults to transparent.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// A widget to display before the title.
   ///
   /// Typically an [Icon] or an [IconButton] widget.
-  final Widget leading;
+  final Widget? leading;
 
   /// The primary content of the list item.
   ///
   /// Typically a [Text] widget.
-  final Widget title;
+  final Widget? title;
 
   /// Additional content displayed below the title.
   ///
   /// Typically a [Text] widget.
-  final Widget subtitle;
+  final Widget? subtitle;
 
   /// A widget to display after the title.
   ///
   /// Typically an [Icon] or an [IconButton] widget.
-  final Widget trailing;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
-    BoxDecoration decoration;
+    BoxDecoration? decoration;
     if (backgroundColor != null)
       decoration = BoxDecoration(color: backgroundColor);
 
@@ -69,7 +67,7 @@ class GridTileBar extends StatelessWidget {
       end: trailing != null ? 8.0 : 16.0,
     );
 
-    final ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context)!;
     final ThemeData darkTheme = ThemeData(
       brightness: Brightness.dark,
       accentColor: theme.accentColor,
@@ -98,13 +96,13 @@ class GridTileBar extends StatelessWidget {
                         style: darkTheme.textTheme.subtitle1,
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
-                        child: title,
+                        child: title!,
                       ),
                       DefaultTextStyle(
                         style: darkTheme.textTheme.caption,
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
-                        child: subtitle,
+                        child: subtitle!,
                       ),
                     ],
                   ),
@@ -115,7 +113,7 @@ class GridTileBar extends StatelessWidget {
                     style: darkTheme.textTheme.subtitle1,
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
-                    child: title ?? subtitle,
+                    child: title ?? subtitle!,
                   ),
                 ),
               if (trailing != null)

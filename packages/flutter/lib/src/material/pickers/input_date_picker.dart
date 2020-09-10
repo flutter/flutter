@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -50,10 +48,10 @@ class InputDatePickerFormField extends StatefulWidget {
   /// [firstDate], [lastDate], and [autofocus] must be non-null.
   ///
   InputDatePickerFormField({
-    Key key,
-    DateTime initialDate,
-    @required DateTime firstDate,
-    @required DateTime lastDate,
+    Key? key,
+    DateTime? initialDate,
+    required DateTime firstDate,
+    required DateTime lastDate,
     this.onDateSubmitted,
     this.onDateSaved,
     this.selectableDayPredicate,
@@ -74,21 +72,21 @@ class InputDatePickerFormField extends StatefulWidget {
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.'
     );
     assert(
-      initialDate == null || !this.initialDate.isBefore(this.firstDate),
+      initialDate == null || !this.initialDate!.isBefore(this.firstDate),
       'initialDate ${this.initialDate} must be on or after firstDate ${this.firstDate}.'
     );
     assert(
-      initialDate == null || !this.initialDate.isAfter(this.lastDate),
+      initialDate == null || !this.initialDate!.isAfter(this.lastDate),
       'initialDate ${this.initialDate} must be on or before lastDate ${this.lastDate}.'
     );
     assert(
-      selectableDayPredicate == null || initialDate == null || selectableDayPredicate(this.initialDate),
+      selectableDayPredicate == null || initialDate == null || selectableDayPredicate!(this.initialDate!),
       'Provided initialDate ${this.initialDate} must satisfy provided selectableDayPredicate.'
     );
   }
 
   /// If provided, it will be used as the default value of the field.
-  final DateTime initialDate;
+  final DateTime? initialDate;
 
   /// The earliest allowable [DateTime] that the user can input.
   final DateTime firstDate;
@@ -99,36 +97,36 @@ class InputDatePickerFormField extends StatefulWidget {
   /// An optional method to call when the user indicates they are done editing
   /// the text in the field. Will only be called if the input represents a valid
   /// [DateTime].
-  final ValueChanged<DateTime> onDateSubmitted;
+  final ValueChanged<DateTime>? onDateSubmitted;
 
   /// An optional method to call with the final date when the form is
   /// saved via [FormState.save]. Will only be called if the input represents
   /// a valid [DateTime].
-  final ValueChanged<DateTime> onDateSaved;
+  final ValueChanged<DateTime>? onDateSaved;
 
   /// Function to provide full control over which [DateTime] can be selected.
-  final SelectableDayPredicate selectableDayPredicate;
+  final SelectableDayPredicate? selectableDayPredicate;
 
   /// The error text displayed if the entered date is not in the correct format.
-  final String errorFormatText;
+  final String? errorFormatText;
 
   /// The error text displayed if the date is not valid.
   ///
   /// A date is not valid if it is earlier than [firstDate], later than
   /// [lastDate], or doesn't pass the [selectableDayPredicate].
-  final String errorInvalidText;
+  final String? errorInvalidText;
 
   /// The hint text displayed in the [TextField].
   ///
   /// If this is null, it will default to the date format string. For example,
   /// 'mm/dd/yyyy' for en_US.
-  final String fieldHintText;
+  final String? fieldHintText;
 
   /// The label text displayed in the [TextField].
   ///
   /// If this is null, it will default to the words representing the date format
   /// string. For example, 'Month, Day, Year' for en_US.
-  final String fieldLabelText;
+  final String? fieldLabelText;
 
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
@@ -139,8 +137,8 @@ class InputDatePickerFormField extends StatefulWidget {
 
 class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   final TextEditingController _controller = TextEditingController();
-  DateTime _selectedDate;
-  String _inputText;
+  DateTime? _selectedDate;
+  String? _inputText;
   bool _autoSelected = false;
 
   @override
@@ -166,7 +164,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       if (widget.autofocus && !_autoSelected) {
         textEditingValue = textEditingValue.copyWith(selection: TextSelection(
           baseOffset: 0,
-          extentOffset: _inputText.length,
+          extentOffset: _inputText!.length,
         ));
         _autoSelected = true;
       }
@@ -174,21 +172,21 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     }
   }
 
-  DateTime _parseDate(String text) {
+  DateTime _parseDate(String? text) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return localizations.parseCompactDate(text);
   }
 
-  bool _isValidAcceptableDate(DateTime date) {
+  bool _isValidAcceptableDate(DateTime? date) {
     return
       date != null &&
       !date.isBefore(widget.firstDate) &&
       !date.isAfter(widget.lastDate) &&
-      (widget.selectableDayPredicate == null || widget.selectableDayPredicate(date));
+      (widget.selectableDayPredicate == null || widget.selectableDayPredicate!(date));
   }
 
-  String _validateDate(String text) {
-    final DateTime date = _parseDate(text);
+  String? _validateDate(String? text) {
+    final DateTime? date = _parseDate(text);
     if (date == null) {
       return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
     } else if (!_isValidAcceptableDate(date)) {
@@ -197,13 +195,13 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     return null;
   }
 
-  void _handleSaved(String text) {
+  void _handleSaved(String? text) {
     if (widget.onDateSaved != null) {
       final DateTime date = _parseDate(text);
       if (_isValidAcceptableDate(date)) {
         _selectedDate = date;
         _inputText = text;
-        widget.onDateSaved(date);
+        widget.onDateSaved!(date);
       }
     }
   }
@@ -214,7 +212,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       if (_isValidAcceptableDate(date)) {
         _selectedDate = date;
         _inputText = text;
-        widget.onDateSubmitted(date);
+        widget.onDateSubmitted!(date);
       }
     }
   }
@@ -222,7 +220,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   @override
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final InputDecorationTheme inputTheme = Theme.of(context).inputDecorationTheme;
+    final InputDecorationTheme inputTheme = Theme.of(context)!.inputDecorationTheme;
     return TextFormField(
       decoration: InputDecoration(
         border: inputTheme.border ?? const UnderlineInputBorder(),

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 
 import 'checkbox.dart';
@@ -259,9 +257,9 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// The value of [tristate] must not be null.
   const CheckboxListTile({
-    Key key,
-    @required this.value,
-    @required this.onChanged,
+    Key? key,
+    required this.value,
+    required this.onChanged,
     this.activeColor,
     this.checkColor,
     this.title,
@@ -284,7 +282,7 @@ class CheckboxListTile extends StatelessWidget {
        super(key: key);
 
   /// Whether this checkbox is checked.
-  final bool value;
+  final bool? value;
 
   /// Called when the value of the checkbox should change.
   ///
@@ -309,32 +307,32 @@ class CheckboxListTile extends StatelessWidget {
   ///   title: Text('Throw away your shot'),
   /// )
   /// ```
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool?>? onChanged;
 
   /// The color to use when this checkbox is checked.
   ///
   /// Defaults to accent color of the current [Theme].
-  final Color activeColor;
+  final Color? activeColor;
 
   /// The color to use for the check icon when this checkbox is checked.
   ///
   /// Defaults to Color(0xFFFFFFFF).
-  final Color checkColor;
+  final Color? checkColor;
 
   /// The primary content of the list tile.
   ///
   /// Typically a [Text] widget.
-  final Widget title;
+  final Widget? title;
 
   /// Additional content displayed below the title.
   ///
   /// Typically a [Text] widget.
-  final Widget subtitle;
+  final Widget? subtitle;
 
   /// A widget to display on the opposite side of the tile from the checkbox.
   ///
   /// Typically an [Icon] widget.
-  final Widget secondary;
+  final Widget? secondary;
 
   /// Whether this list tile is intended to display three lines of text.
   ///
@@ -345,7 +343,7 @@ class CheckboxListTile extends StatelessWidget {
   /// Whether this list tile is part of a vertically dense list.
   ///
   /// If this property is null then its value is based on [ListTileTheme.dense].
-  final bool dense;
+  final bool? dense;
 
   /// Whether to render icons and text in the [activeColor].
   ///
@@ -368,7 +366,7 @@ class CheckboxListTile extends StatelessWidget {
   /// widgets in [CheckboxListTile].
   ///
   /// When the value is null, the `contentPadding` is `EdgeInsets.symmetric(horizontal: 16.0)`.
-  final EdgeInsetsGeometry contentPadding;
+  final EdgeInsetsGeometry? contentPadding;
 
   /// If true the checkbox's [value] can be true, false, or null.
   ///
@@ -386,13 +384,13 @@ class CheckboxListTile extends StatelessWidget {
     assert(onChanged != null);
     switch (value) {
       case false:
-        onChanged(true);
+        onChanged!(true);
         break;
       case true:
-        onChanged(tristate ? null : false);
+        onChanged!(tristate ? null : false);
         break;
       default: // case null:
-        onChanged(false);
+        onChanged!(false);
         break;
     }
   }
@@ -408,7 +406,7 @@ class CheckboxListTile extends StatelessWidget {
       autofocus: autofocus,
       tristate: tristate,
     );
-    Widget leading, trailing;
+    Widget? leading, trailing;
     switch (controlAffinity) {
       case ListTileControlAffinity.leading:
         leading = control;
@@ -422,7 +420,7 @@ class CheckboxListTile extends StatelessWidget {
     }
     return MergeSemantics(
       child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).accentColor,
+        selectedColor: activeColor ?? Theme.of(context)!.accentColor,
         child: ListTile(
           leading: leading,
           title: title,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -24,13 +22,13 @@ class InputDateRangePicker extends StatefulWidget {
   /// Creates a row with two text fields configured to accept the start and end dates
   /// of a date range.
   InputDateRangePicker({
-    Key key,
-    DateTime initialStartDate,
-    DateTime initialEndDate,
-    @required DateTime firstDate,
-    @required DateTime lastDate,
-    @required this.onStartDateChanged,
-    @required this.onEndDateChanged,
+    Key? key,
+    DateTime? initialStartDate,
+    DateTime? initialEndDate,
+    required DateTime firstDate,
+    required DateTime lastDate,
+    required this.onStartDateChanged,
+    required this.onEndDateChanged,
     this.helpText,
     this.errorFormatText,
     this.errorInvalidText,
@@ -54,10 +52,10 @@ class InputDateRangePicker extends StatefulWidget {
         super(key: key);
 
   /// The [DateTime] that represents the start of the initial date range selection.
-  final DateTime initialStartDate;
+  final DateTime? initialStartDate;
 
   /// The [DateTime] that represents the end of the initial date range selection.
-  final DateTime initialEndDate;
+  final DateTime? initialEndDate;
 
   /// The earliest allowable [DateTime] that the user can select.
   final DateTime firstDate;
@@ -66,38 +64,38 @@ class InputDateRangePicker extends StatefulWidget {
   final DateTime lastDate;
 
   /// Called when the user changes the start date of the selected range.
-  final ValueChanged<DateTime> onStartDateChanged;
+  final ValueChanged<DateTime>? onStartDateChanged;
 
   /// Called when the user changes the end date of the selected range.
-  final ValueChanged<DateTime> onEndDateChanged;
+  final ValueChanged<DateTime>? onEndDateChanged;
 
   /// The text that is displayed at the top of the header.
   ///
   /// This is used to indicate to the user what they are selecting a date for.
-  final String helpText;
+  final String? helpText;
 
   /// Error text used to indicate the text in a field is not a valid date.
-  final String errorFormatText;
+  final String? errorFormatText;
 
   /// Error text used to indicate the date in a field is not in the valid range
   /// of [firstDate] - [lastDate].
-  final String errorInvalidText;
+  final String? errorInvalidText;
 
   /// Error text used to indicate the dates given don't form a valid date
   /// range (i.e. the start date is after the end date).
-  final String errorInvalidRangeText;
+  final String? errorInvalidRangeText;
 
   /// Hint text shown when the start date field is empty.
-  final String fieldStartHintText;
+  final String? fieldStartHintText;
 
   /// Hint text shown when the end date field is empty.
-  final String fieldEndHintText;
+  final String? fieldEndHintText;
 
   /// Label used for the start date field.
-  final String fieldStartLabelText;
+  final String? fieldStartLabelText;
 
   /// Label used for the end date field.
-  final String fieldEndLabelText;
+  final String? fieldEndLabelText;
 
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
@@ -114,14 +112,14 @@ class InputDateRangePicker extends StatefulWidget {
 /// The current state of an [InputDateRangePicker]. Can be used to
 /// [validate] the date field entries.
 class InputDateRangePickerState extends State<InputDateRangePicker> {
-  String _startInputText;
-  String _endInputText;
-  DateTime _startDate;
-  DateTime _endDate;
-  TextEditingController _startController;
-  TextEditingController _endController;
-  String _startErrorText;
-  String _endErrorText;
+  late String _startInputText;
+  late String _endInputText;
+  DateTime? _startDate;
+  DateTime? _endDate;
+  late TextEditingController _startController;
+  late TextEditingController _endController;
+  String? _startErrorText;
+  String? _endErrorText;
   bool _autoSelected = false;
 
   @override
@@ -164,10 +162,10 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
   /// return false and display an appropriate error message under one of the
   /// text fields.
   bool validate() {
-    String startError = _validateDate(_startDate);
-    final String endError = _validateDate(_endDate);
+    String? startError = _validateDate(_startDate);
+    final String? endError = _validateDate(_endDate);
     if (startError == null && endError == null) {
-      if (_startDate.isAfter(_endDate)) {
+      if (_startDate!.isAfter(_endDate!)) {
         startError = widget.errorInvalidRangeText ?? MaterialLocalizations.of(context).invalidDateRangeLabel;
       }
     }
@@ -183,7 +181,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
     return localizations.parseCompactDate(text);
   }
 
-  String _validateDate(DateTime date) {
+  String? _validateDate(DateTime? date) {
     if (date == null) {
       return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
     } else if (date.isBefore(widget.firstDate) || date.isAfter(widget.lastDate)) {
@@ -207,7 +205,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
     setState(() {
       _startInputText = text;
       _startDate = _parseDate(text);
-      widget.onStartDateChanged?.call(_startDate);
+      widget.onStartDateChanged?.call(_startDate!);
     });
     if (widget.autovalidate) {
       validate();
@@ -218,7 +216,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
     setState(() {
       _endInputText = text;
       _endDate = _parseDate(text);
-      widget.onEndDateChanged?.call(_endDate);
+      widget.onEndDateChanged?.call(_endDate!);
     });
     if (widget.autovalidate) {
       validate();
@@ -228,7 +226,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
   @override
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final InputDecorationTheme inputTheme = Theme.of(context).inputDecorationTheme;
+    final InputDecorationTheme inputTheme = Theme.of(context)!.inputDecorationTheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[

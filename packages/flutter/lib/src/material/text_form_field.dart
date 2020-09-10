@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -135,28 +133,28 @@ class TextFormField extends FormField<String> {
   /// For documentation about the various parameters, see the [TextField] class
   /// and [new TextField], the constructor.
   TextFormField({
-    Key key,
+    Key? key,
     this.controller,
-    String initialValue,
-    FocusNode focusNode,
-    InputDecoration decoration = const InputDecoration(),
-    TextInputType keyboardType,
+    String? initialValue,
+    FocusNode? focusNode,
+    InputDecoration? decoration = const InputDecoration(),
+    TextInputType? keyboardType,
     TextCapitalization textCapitalization = TextCapitalization.none,
-    TextInputAction textInputAction,
-    TextStyle style,
-    StrutStyle strutStyle,
-    TextDirection textDirection,
+    TextInputAction? textInputAction,
+    TextStyle? style,
+    StrutStyle? strutStyle,
+    TextDirection? textDirection,
     TextAlign textAlign = TextAlign.start,
-    TextAlignVertical textAlignVertical,
+    TextAlignVertical? textAlignVertical,
     bool autofocus = false,
     bool readOnly = false,
-    ToolbarOptions toolbarOptions,
-    bool showCursor,
+    ToolbarOptions? toolbarOptions,
+    bool? showCursor,
     String obscuringCharacter = '•',
     bool obscureText = false,
     bool autocorrect = true,
-    SmartDashesType smartDashesType,
-    SmartQuotesType smartQuotesType,
+    SmartDashesType? smartDashesType,
+    SmartQuotesType? smartQuotesType,
     bool enableSuggestions = true,
     @Deprecated(
       'Use autoValidateMode parameter which provide more specific '
@@ -165,29 +163,29 @@ class TextFormField extends FormField<String> {
     )
     bool autovalidate = false,
     bool maxLengthEnforced = true,
-    int maxLines = 1,
-    int minLines,
+    int? maxLines = 1,
+    int? minLines,
     bool expands = false,
-    int maxLength,
-    ValueChanged<String> onChanged,
-    GestureTapCallback onTap,
-    VoidCallback onEditingComplete,
-    ValueChanged<String> onFieldSubmitted,
-    FormFieldSetter<String> onSaved,
-    FormFieldValidator<String> validator,
-    List<TextInputFormatter> inputFormatters,
-    bool enabled,
+    int? maxLength,
+    ValueChanged<String>? onChanged,
+    GestureTapCallback? onTap,
+    VoidCallback? onEditingComplete,
+    ValueChanged<String>? onFieldSubmitted,
+    FormFieldSetter<String>? onSaved,
+    FormFieldValidator<String>? validator,
+    List<TextInputFormatter>? inputFormatters,
+    bool? enabled,
     double cursorWidth = 2.0,
-    double cursorHeight,
-    Radius cursorRadius,
-    Color cursorColor,
-    Brightness keyboardAppearance,
+    double? cursorHeight,
+    Radius? cursorRadius,
+    Color? cursorColor,
+    Brightness? keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     bool enableInteractiveSelection = true,
-    InputCounterWidgetBuilder buildCounter,
-    ScrollPhysics scrollPhysics,
-    Iterable<String> autofillHints,
-    AutovalidateMode autovalidateMode,
+    InputCounterWidgetBuilder? buildCounter,
+    ScrollPhysics? scrollPhysics,
+    Iterable<String>? autofillHints,
+    AutovalidateMode? autovalidateMode,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -230,7 +228,7 @@ class TextFormField extends FormField<String> {
        builder: (FormFieldState<String> field) {
          final _TextFormFieldState state = field as _TextFormFieldState;
          final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
-             .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+             .applyDefaults(Theme.of(field.context)!.inputDecorationTheme);
          void onChangedHandler(String value) {
            if (onChanged != null) {
              onChanged(value);
@@ -288,16 +286,16 @@ class TextFormField extends FormField<String> {
   ///
   /// If null, this widget will create its own [TextEditingController] and
   /// initialize its [TextEditingController.text] with [initialValue].
-  final TextEditingController controller;
+  final TextEditingController? controller;
 
   @override
   _TextFormFieldState createState() => _TextFormFieldState();
 }
 
 class _TextFormFieldState extends FormFieldState<String> {
-  TextEditingController _controller;
+  TextEditingController? _controller;
 
-  TextEditingController get _effectiveController => widget.controller ?? _controller;
+  TextEditingController? get _effectiveController => widget.controller ?? _controller;
 
   @override
   TextFormField get widget => super.widget as TextFormField;
@@ -308,7 +306,7 @@ class _TextFormFieldState extends FormFieldState<String> {
     if (widget.controller == null) {
       _controller = TextEditingController(text: widget.initialValue);
     } else {
-      widget.controller.addListener(_handleControllerChanged);
+      widget.controller!.addListener(_handleControllerChanged);
     }
   }
 
@@ -320,9 +318,9 @@ class _TextFormFieldState extends FormFieldState<String> {
       widget.controller?.addListener(_handleControllerChanged);
 
       if (oldWidget.controller != null && widget.controller == null)
-        _controller = TextEditingController.fromValue(oldWidget.controller.value);
+        _controller = TextEditingController.fromValue(oldWidget.controller!.value);
       if (widget.controller != null) {
-        setValue(widget.controller.text);
+        setValue(widget.controller!.text);
         if (oldWidget.controller == null)
           _controller = null;
       }
@@ -336,18 +334,18 @@ class _TextFormFieldState extends FormFieldState<String> {
   }
 
   @override
-  void didChange(String value) {
+  void didChange(String? value) {
     super.didChange(value);
 
-    if (_effectiveController.text != value)
-      _effectiveController.text = value;
+    if (_effectiveController!.text != value)
+      _effectiveController!.text = value;
   }
 
   @override
   void reset() {
     super.reset();
     setState(() {
-      _effectiveController.text = widget.initialValue;
+      _effectiveController!.text = widget.initialValue!;
     });
   }
 
@@ -359,7 +357,7 @@ class _TextFormFieldState extends FormFieldState<String> {
     // notifications for changes originating from within this class -- for
     // example, the reset() method. In such cases, the FormField value will
     // already have been set.
-    if (_effectiveController.text != value)
-      didChange(_effectiveController.text);
+    if (_effectiveController!.text != value)
+      didChange(_effectiveController!.text);
   }
 }

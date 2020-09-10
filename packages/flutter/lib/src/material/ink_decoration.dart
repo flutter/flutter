@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -121,10 +119,10 @@ class Ink extends StatefulWidget {
   /// If there is no intention to render anything on this decoration, consider
   /// using a [Container] with a [BoxDecoration] instead.
   Ink({
-    Key key,
+    Key? key,
     this.padding,
-    Color color,
-    Decoration decoration,
+    Color? color,
+    Decoration? decoration,
     this.width,
     this.height,
     this.child,
@@ -155,14 +153,14 @@ class Ink extends StatefulWidget {
   ///
   /// See [paintImage] for a description of the meaning of these arguments.
   Ink.image({
-    Key key,
+    Key? key,
     this.padding,
-    @required ImageProvider image,
-    ImageErrorListener onImageError,
-    ColorFilter colorFilter,
-    BoxFit fit,
+    required ImageProvider image,
+    ImageErrorListener? onImageError,
+    ColorFilter? colorFilter,
+    BoxFit? fit,
     AlignmentGeometry alignment = Alignment.center,
-    Rect centerSlice,
+    Rect? centerSlice,
     ImageRepeat repeat = ImageRepeat.noRepeat,
     bool matchTextDirection = false,
     this.width,
@@ -190,14 +188,14 @@ class Ink extends StatefulWidget {
   /// The [child] contained by the container.
   ///
   /// {@macro flutter.widgets.child}
-  final Widget child;
+  final Widget? child;
 
   /// Empty space to inscribe inside the [decoration]. The [child], if any, is
   /// placed inside this padding.
   ///
   /// This padding is in addition to any padding inherent in the [decoration];
   /// see [Decoration.padding].
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
 
   /// The decoration to paint on the nearest ancestor [Material] widget.
   ///
@@ -207,23 +205,23 @@ class Ink extends StatefulWidget {
   ///
   /// A shorthand for specifying just an image is also available using the
   /// [Ink.image] constructor.
-  final Decoration decoration;
+  final Decoration? decoration;
 
   /// A width to apply to the [decoration] and the [child]. The width includes
   /// any [padding].
-  final double width;
+  final double? width;
 
   /// A height to apply to the [decoration] and the [child]. The height includes
   /// any [padding].
-  final double height;
+  final double? height;
 
-  EdgeInsetsGeometry get _paddingIncludingDecoration {
-    if (decoration == null || decoration.padding == null)
+  EdgeInsetsGeometry? get _paddingIncludingDecoration {
+    if (decoration == null || decoration!.padding == null)
       return padding;
-    final EdgeInsetsGeometry decorationPadding = decoration.padding;
+    final EdgeInsetsGeometry? decorationPadding = decoration!.padding;
     if (padding == null)
       return decorationPadding;
-    return padding.add(decorationPadding);
+    return padding!.add(decorationPadding!);
   }
 
   @override
@@ -238,7 +236,7 @@ class Ink extends StatefulWidget {
 }
 
 class _InkState extends State<Ink> {
-  InkDecoration _ink;
+  InkDecoration? _ink;
 
   void _handleRemoved() {
     _ink = null;
@@ -261,11 +259,11 @@ class _InkState extends State<Ink> {
         onRemoved: _handleRemoved,
       );
     } else {
-      _ink.decoration = widget.decoration;
-      _ink.configuration = createLocalImageConfiguration(context);
+      _ink!.decoration = widget.decoration;
+      _ink!.configuration = createLocalImageConfiguration(context);
     }
-    Widget current = widget.child;
-    final EdgeInsetsGeometry effectivePadding = widget._paddingIncludingDecoration;
+    Widget? current = widget.child;
+    final EdgeInsetsGeometry? effectivePadding = widget._paddingIncludingDecoration;
     if (effectivePadding != null)
       current = Padding(padding: effectivePadding, child: current);
     return current ?? Container();
@@ -306,11 +304,11 @@ class _InkState extends State<Ink> {
 class InkDecoration extends InkFeature {
   /// Draws a decoration on a [Material].
   InkDecoration({
-    @required Decoration decoration,
-    @required ImageConfiguration configuration,
-    @required MaterialInkController controller,
-    @required RenderBox referenceBox,
-    VoidCallback onRemoved,
+    required Decoration? decoration,
+    required ImageConfiguration configuration,
+    required MaterialInkController controller,
+    required RenderBox referenceBox,
+    VoidCallback? onRemoved,
   }) : assert(configuration != null),
        _configuration = configuration,
        super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
@@ -318,15 +316,15 @@ class InkDecoration extends InkFeature {
     controller.addInkFeature(this);
   }
 
-  BoxPainter _painter;
+  BoxPainter? _painter;
 
   /// What to paint on the [Material].
   ///
   /// The decoration is painted at the position and size of the [referenceBox],
   /// on the [Material] that owns the [controller].
-  Decoration get decoration => _decoration;
-  Decoration _decoration;
-  set decoration(Decoration value) {
+  Decoration? get decoration => _decoration;
+  Decoration? _decoration;
+  set decoration(Decoration? value) {
     if (value == _decoration)
       return;
     _decoration = value;
@@ -364,17 +362,17 @@ class InkDecoration extends InkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     if (_painter == null)
       return;
-    final Offset originOffset = MatrixUtils.getAsTranslation(transform);
+    final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
     final ImageConfiguration sizedConfiguration = configuration.copyWith(
       size: referenceBox.size,
     );
     if (originOffset == null) {
       canvas.save();
       canvas.transform(transform.storage);
-      _painter.paint(canvas, Offset.zero, sizedConfiguration);
+      _painter!.paint(canvas, Offset.zero, sizedConfiguration);
       canvas.restore();
     } else {
-      _painter.paint(canvas, originOffset, sizedConfiguration);
+      _painter!.paint(canvas, originOffset, sizedConfiguration);
     }
   }
 }

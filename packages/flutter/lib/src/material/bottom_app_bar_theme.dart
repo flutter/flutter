@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -39,20 +37,20 @@ class BottomAppBarTheme with Diagnosticable {
   /// Default value for [BottomAppBar.color].
   ///
   /// If null, [BottomAppBar] uses [ThemeData.bottomAppBarColor].
-  final Color color;
+  final Color? color;
 
   /// Default value for [BottomAppBar.elevation].
-  final double elevation;
+  final double? elevation;
 
   /// Default value for [BottomAppBar.shape].
-  final NotchedShape shape;
+  final NotchedShape? shape;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   BottomAppBarTheme copyWith({
-    Color color,
-    double elevation,
-    NotchedShape shape,
+    Color? color,
+    double? elevation,
+    NotchedShape? shape,
   }) {
     return BottomAppBarTheme(
       color: color ?? this.color,
@@ -63,7 +61,7 @@ class BottomAppBarTheme with Diagnosticable {
 
   /// The [ThemeData.bottomAppBarTheme] property of the ambient [Theme].
   static BottomAppBarTheme of(BuildContext context) {
-    return Theme.of(context).bottomAppBarTheme;
+    return Theme.of(context)!.bottomAppBarTheme;
   }
 
   /// Linearly interpolate between two BAB themes.
@@ -71,7 +69,7 @@ class BottomAppBarTheme with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BottomAppBarTheme lerp(BottomAppBarTheme a, BottomAppBarTheme b, double t) {
+  static BottomAppBarTheme lerp(BottomAppBarTheme? a, BottomAppBarTheme? b, double t) {
     assert(t != null);
     return BottomAppBarTheme(
       color: Color.lerp(a?.color, b?.color, t),

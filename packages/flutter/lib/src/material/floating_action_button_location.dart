@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -495,13 +493,12 @@ mixin FabStartOffsetX on StandardFabLocation {
   @override
   double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
     assert(scaffoldGeometry.textDirection != null);
-    switch (scaffoldGeometry.textDirection) {
+    switch (scaffoldGeometry.textDirection!) {
       case TextDirection.rtl:
         return StandardFabLocation._rightOffsetX(scaffoldGeometry, adjustment);
       case TextDirection.ltr:
         return StandardFabLocation._leftOffsetX(scaffoldGeometry, adjustment);
     }
-    return null;
   }
 }
 
@@ -520,13 +517,12 @@ mixin FabEndOffsetX on StandardFabLocation {
   @override
   double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
     assert(scaffoldGeometry.textDirection != null);
-    switch (scaffoldGeometry.textDirection) {
+    switch (scaffoldGeometry.textDirection!) {
       case TextDirection.rtl:
         return StandardFabLocation._leftOffsetX(scaffoldGeometry, adjustment);
       case TextDirection.ltr:
         return StandardFabLocation._rightOffsetX(scaffoldGeometry, adjustment);
     }
-    return null;
   }
 }
 
@@ -722,7 +718,7 @@ abstract class FloatingActionButtonAnimator {
   /// [progress] is the current progress of the transition animation.
   /// When [progress] is 0.0, the returned [Offset] should be equal to [begin].
   /// when [progress] is 1.0, the returned [Offset] should be equal to [end].
-  Offset getOffset({ @required Offset begin, @required Offset end, @required double progress });
+  Offset getOffset({ required Offset begin, required Offset end, required double progress });
 
   /// Animates the scale of the [FloatingActionButton].
   ///
@@ -741,7 +737,7 @@ abstract class FloatingActionButtonAnimator {
   ///     );
   ///   }
   /// ```
-  Animation<double> getScaleAnimation({ @required Animation<double> parent });
+  Animation<double> getScaleAnimation({ required Animation<double> parent });
 
   /// Animates the rotation of [Scaffold.floatingActionButton].
   ///
@@ -759,7 +755,7 @@ abstract class FloatingActionButtonAnimator {
   ///   return Tween<double>(begin: 0.0, end: 1.0).animate(parent);
   /// }
   /// ```
-  Animation<double> getRotationAnimation({ @required Animation<double> parent });
+  Animation<double> getRotationAnimation({ required Animation<double> parent });
 
   /// Gets the progress value to restart a motion animation from when the animation is interrupted.
   ///
@@ -783,7 +779,7 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
   const _ScalingFabMotionAnimator();
 
   @override
-  Offset getOffset({ Offset begin, Offset end, double progress }) {
+  Offset getOffset({ required Offset begin, required Offset end, required double progress }) {
     if (progress < 0.5) {
       return begin;
     } else {
@@ -792,7 +788,7 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
   }
 
   @override
-  Animation<double> getScaleAnimation({ Animation<double> parent }) {
+  Animation<double> getScaleAnimation({ required Animation<double> parent }) {
     // Animate the scale down from 1 to 0 in the first half of the animation
     // then from 0 back to 1 in the second half.
     const Curve curve = Interval(0.5, 1.0, curve: Curves.ease);
@@ -814,7 +810,7 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
   static final Animatable<double> _thresholdCenterTween = CurveTween(curve: const Threshold(0.5));
 
   @override
-  Animation<double> getRotationAnimation({ Animation<double> parent }) {
+  Animation<double> getRotationAnimation({ required Animation<double> parent }) {
     // This rotation will turn on the way in, but not on the way out.
     return _AnimationSwap<double>(
       parent.drive(_rotationTween),
