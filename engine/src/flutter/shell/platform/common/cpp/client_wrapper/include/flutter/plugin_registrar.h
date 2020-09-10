@@ -91,8 +91,8 @@ class PluginRegistrarManager {
     auto insert_result =
         registrars_.emplace(registrar_ref, std::make_unique<T>(registrar_ref));
     auto& registrar_pair = *(insert_result.first);
-    FlutterDesktopRegistrarSetDestructionHandler(registrar_pair.first,
-                                                 OnRegistrarDestroyed);
+    FlutterDesktopPluginRegistrarSetDestructionHandler(registrar_pair.first,
+                                                       OnRegistrarDestroyed);
     return static_cast<T*>(registrar_pair.second.get());
   }
 

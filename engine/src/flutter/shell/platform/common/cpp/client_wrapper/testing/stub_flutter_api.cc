@@ -38,17 +38,17 @@ ScopedStubFlutterApi::~ScopedStubFlutterApi() {
 
 // Forwarding dummy implementations of the C API.
 
-FlutterDesktopMessengerRef FlutterDesktopRegistrarGetMessenger(
+FlutterDesktopMessengerRef FlutterDesktopPluginRegistrarGetMessenger(
     FlutterDesktopPluginRegistrarRef registrar) {
   // The stub ignores this, so just return an arbitrary non-zero value.
   return reinterpret_cast<FlutterDesktopMessengerRef>(1);
 }
 
-void FlutterDesktopRegistrarSetDestructionHandler(
+void FlutterDesktopPluginRegistrarSetDestructionHandler(
     FlutterDesktopPluginRegistrarRef registrar,
-    FlutterDesktopOnRegistrarDestroyed callback) {
+    FlutterDesktopOnPluginRegistrarDestroyed callback) {
   if (s_stub_implementation) {
-    s_stub_implementation->RegistrarSetDestructionHandler(callback);
+    s_stub_implementation->PluginRegistrarSetDestructionHandler(callback);
   }
 }
 

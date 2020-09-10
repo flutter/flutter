@@ -34,9 +34,9 @@ class StubFlutterApi {
 
   virtual ~StubFlutterApi() {}
 
-  // Called for FlutterDesktopRegistrarSetDestructionHandler.
-  virtual void RegistrarSetDestructionHandler(
-      FlutterDesktopOnRegistrarDestroyed callback) {}
+  // Called for FlutterDesktopPluginRegistrarSetDestructionHandler.
+  virtual void PluginRegistrarSetDestructionHandler(
+      FlutterDesktopOnPluginRegistrarDestroyed callback) {}
 
   // Called for FlutterDesktopMessengerSend.
   virtual bool MessengerSend(const char* channel,
