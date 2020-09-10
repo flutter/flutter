@@ -1006,8 +1006,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       if (i == 0) {
         offAxisFraction = -_kMaximumOffAxisFraction * textDirectionFactor;
         magnifier = _buildMagnifier(context, _leftEdgeInsets, _leftBorderRadius);
-      } else
-        if (i >= 2 || columnWidths.length == 2)
+      } else if (i >= 2 || columnWidths.length == 2)
         offAxisFraction = _kMaximumOffAxisFraction * textDirectionFactor;
 
       EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
