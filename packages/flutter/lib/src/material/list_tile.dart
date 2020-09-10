@@ -233,7 +233,8 @@ enum ListTileControlAffinity {
 /// {@tool snippet}
 ///
 /// This example uses an [Expanded] within a [Row] to demonstrate how to
-/// overcome the issue with a [ListTile] attempting to expand horizontally.
+/// overcome the issue with a [ListTile] attempting to expand horizontally
+/// without proper constraints.
 ///
 /// ```dart
 /// Row(
