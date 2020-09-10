@@ -633,5 +633,19 @@ TEST_F(AccessibilityBridgeTest, Actions) {
       2u, fuchsia::accessibility::semantics::Action::DEFAULT,
       unhandled_callback);
   EXPECT_EQ(accessibility_delegate_.actions.size(), 3u);
+
+  accessibility_bridge_->OnAccessibilityActionRequested(
+      0u, fuchsia::accessibility::semantics::Action::INCREMENT,
+      handled_callback);
+  EXPECT_EQ(accessibility_delegate_.actions.size(), 4u);
+  EXPECT_EQ(accessibility_delegate_.actions.back(),
+            std::make_pair(0, flutter::SemanticsAction::kIncrease));
+
+  accessibility_bridge_->OnAccessibilityActionRequested(
+      0u, fuchsia::accessibility::semantics::Action::DECREMENT,
+      handled_callback);
+  EXPECT_EQ(accessibility_delegate_.actions.size(), 5u);
+  EXPECT_EQ(accessibility_delegate_.actions.back(),
+            std::make_pair(0, flutter::SemanticsAction::kDecrease));
 }
 }  // namespace flutter_runner_test
