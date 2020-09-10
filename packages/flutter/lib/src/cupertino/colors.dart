@@ -397,14 +397,14 @@ class CupertinoColors {
   /// [UIColor.tertiarySystemFill](https://developer.apple.com/documentation/uikit/uicolor/3255076-tertiarysystemfill).
   static const CupertinoDynamicColor tertiarySystemFill = CupertinoDynamicColor(
     debugLabel: 'tertiarySystemFill',
-    color: Color.fromRGBO(118, 118, 128, 0.12),
-    darkColor: Color.fromRGBO(118, 118, 128, 0.24),
-    highContrastColor: Color.fromRGBO(118, 118, 128, 0.2),
-    darkHighContrastColor: Color.fromRGBO(118, 118, 128, 0.325),
-    elevatedColor: Color.fromRGBO(118, 118, 128, 0.12),
-    darkElevatedColor: Color.fromRGBO(118, 118, 128, 0.24),
-    highContrastElevatedColor: Color.fromRGBO(118, 118, 128, 0.2),
-    darkHighContrastElevatedColor: Color.fromRGBO(118, 118, 128, 0.325),
+    color: Color.fromARGB(30, 118, 118, 128),
+    darkColor: Color.fromARGB(61,118, 118, 128),
+    highContrastColor: Color.fromARGB(51, 118, 118, 128),
+    darkHighContrastColor: Color.fromARGB(81,118, 118, 128),
+    elevatedColor: Color.fromARGB(30, 118, 118, 128),
+    darkElevatedColor: Color.fromARGB(61,118, 118, 128),
+    highContrastElevatedColor: Color.fromARGB(51, 118, 118, 128),
+    darkHighContrastElevatedColor: Color.fromARGB(81,118, 118, 128),
   );
 
   /// An overlay fill color for large areas containing complex content, equivalent
