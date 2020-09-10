@@ -31,11 +31,11 @@ class BottomNavigationBarItem {
       'This feature was deprecated after v1.19.0.'
     )
     this.title,
-    this.label,
+    @required this.label,
     Widget activeIcon,
     this.backgroundColor,
   }) : activeIcon = activeIcon ?? icon,
-       assert(label == null || title == null),
+       assert(label != null || title == null),
        assert(icon != null);
 
   /// The icon of the item.
