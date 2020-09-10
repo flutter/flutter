@@ -5768,7 +5768,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// }
 /// ```
 /// {@end-tool}
-class Listener extends SingleChildRenderObjectWidget {
+class Listener extends StatelessWidget {
   /// Creates a widget that forwards point events to callbacks.
   ///
   /// The [behavior] argument defaults to [HitTestBehavior.deferToChild].
@@ -5783,7 +5783,8 @@ class Listener extends SingleChildRenderObjectWidget {
     this.behavior = HitTestBehavior.deferToChild,
     Widget child,
   }) : assert(behavior != null),
-       super(key: key, child: child);
+       _child = child,
+       super(key: key);
 
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
@@ -5792,6 +5793,10 @@ class Listener extends SingleChildRenderObjectWidget {
 
   /// Called when a pointer that triggered an [onPointerDown] changes position.
   final PointerMoveEventListener onPointerMove;
+
+  /// Called when a pointer that triggered an [onPointerDown] is no longer in
+  /// contact with the screen.
+  final PointerUpEventListener onPointerUp;
 
   /// Called when a pointer moves into a position within this widget without
   /// buttons pressed.
@@ -5812,10 +5817,6 @@ class Listener extends SingleChildRenderObjectWidget {
   ///    events.
   final PointerHoverEventListener onPointerHover;
 
-  /// Called when a pointer that triggered an [onPointerDown] is no longer in
-  /// contact with the screen.
-  final PointerUpEventListener onPointerUp;
-
   /// Called when the input from a pointer that triggered an [onPointerDown] is
   /// no longer directed towards this receiver.
   final PointerCancelEventListener onPointerCancel;
@@ -5829,6 +5830,52 @@ class Listener extends SingleChildRenderObjectWidget {
   final PointerSignalEventListener onPointerSignal;
 
   /// How to behave during hit testing.
+  final HitTestBehavior behavior;
+
+  // The widget listened to by the listener.
+  //
+  // The reason why we don't expose it is that once the deprecated methods are
+  // removed, Listener will no longer need to store the child, but will pass
+  // the child to `super` instead.
+  final Widget _child;
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO(dkwingsmt): Remove the extra wrapper, and make `Listener` a
+    // StatelessWidget. https://github.com/flutter/flutter/issues/65586
+    return _PointerListener(
+      onPointerDown: onPointerDown,
+      onPointerUp: onPointerUp,
+      onPointerMove: onPointerMove,
+      onPointerHover: onPointerHover,
+      onPointerCancel: onPointerCancel,
+      onPointerSignal: onPointerSignal,
+      behavior: behavior,
+      child: _child,
+    );
+  }
+}
+
+class _PointerListener extends SingleChildRenderObjectWidget {
+  const _PointerListener({
+    Key key,
+    this.onPointerDown,
+    this.onPointerMove,
+    this.onPointerUp,
+    this.onPointerHover,
+    this.onPointerCancel,
+    this.onPointerSignal,
+    this.behavior = HitTestBehavior.deferToChild,
+    Widget child,
+  }) : assert(behavior != null),
+       super(key: key, child: child);
+
+  final PointerDownEventListener onPointerDown;
+  final PointerMoveEventListener onPointerMove;
+  final PointerUpEventListener onPointerUp;
+  final PointerHoverEventListener onPointerHover;
+  final PointerCancelEventListener onPointerCancel;
+  final PointerSignalEventListener onPointerSignal;
   final HitTestBehavior behavior;
 
   @override
@@ -5863,7 +5910,6 @@ class Listener extends SingleChildRenderObjectWidget {
       if (onPointerDown != null) 'down',
       if (onPointerMove != null) 'move',
       if (onPointerUp != null) 'up',
-      if (onPointerHover != null) 'hover',
       if (onPointerCancel != null) 'cancel',
       if (onPointerSignal != null) 'signal',
     ];
