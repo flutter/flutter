@@ -201,7 +201,9 @@ class Table extends RenderObjectWidget {
   /// determine the intrinsic size of the column.
   ///
   /// The keys of this map (column indexes) are zero-based.
-  final Map<int, TableColumnWidth> columnWidths;
+  ///
+  /// If this is set to null, then an empty map is assumed.
+  final Map<int, TableColumnWidth>/*?*/ columnWidths;
 
   /// How to determine with widths of columns that don't have an explicit sizing
   /// algorithm.
@@ -303,16 +305,16 @@ class _TableElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
+  void insertRenderObjectChild(RenderObject child, IndexedSlot<Element> slot) {
     renderObject.setupParentData(child);
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, dynamic slot) {
+  void moveRenderObjectChild(RenderObject child, IndexedSlot<Element> oldSlot, IndexedSlot<Element> newSlot) {
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, IndexedSlot<Element> slot) {
     final TableCellParentData childParentData = child.parentData as TableCellParentData;
     renderObject.setChild(childParentData.x, childParentData.y, null);
   }

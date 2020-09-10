@@ -315,6 +315,51 @@ class SlideTransition extends AnimatedWidget {
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/scale_transition.mp4}
 ///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// The following code implements the [ScaleTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// AnimationController _controller;
+/// Animation<double> _animation;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 2),
+///     vsync: this,
+///   )..repeat(reverse: true);
+///   _animation = CurvedAnimation(
+///     parent: _controller,
+///     curve: Curves.fastOutSlowIn,
+///   );
+/// }
+///
+/// @override
+/// void dispose() {
+///   super.dispose();
+///   _controller.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: ScaleTransition(
+///         scale: _animation,
+///         child: const Padding(
+///           padding: EdgeInsets.all(8.0),
+///           child: FlutterLogo(size: 150.0),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [PositionedTransition], a widget that animates its child from a start
@@ -372,6 +417,52 @@ class ScaleTransition extends AnimatedWidget {
 /// Here's an illustration of the [RotationTransition] widget, with it's [turns]
 /// animated by a [CurvedAnimation] set to [Curves.elasticOut]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/rotation_transition.mp4}
+///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// The following code implements the [RotationTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// AnimationController _controller;
+/// Animation<double> _animation;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 2),
+///     vsync: this,
+///   )..repeat(reverse: true);
+///   _animation = CurvedAnimation(
+///     parent: _controller,
+///     curve: Curves.elasticOut,
+///   );
+/// }
+///
+/// @override
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: RotationTransition(
+///         turns: _animation,
+///         child: const Padding(
+///           padding: EdgeInsets.all(8.0),
+///           child: FlutterLogo(size: 150.0),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ScaleTransition], a widget that animates the scale of a transformed
@@ -435,6 +526,51 @@ class RotationTransition extends AnimatedWidget {
 /// Here's an illustration of the [SizeTransition] widget, with it's [sizeFactor]
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/size_transition.mp4}
+///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// This code defines a widget that uses [SizeTransition] to change the size
+/// of [FlutterLogo] continually. It is built with a [Scaffold]
+/// where the internal widget has space to change its size.
+///
+/// ```dart
+/// AnimationController _controller;
+/// Animation<double> _animation;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 3),
+///     vsync: this,
+///   )..repeat();
+///   _animation = CurvedAnimation(
+///     parent: _controller,
+///     curve: Curves.fastOutSlowIn,
+///   );
+/// }
+///
+/// @override
+/// void dispose() {
+///   super.dispose();
+///   _controller.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: SizeTransition(
+///       sizeFactor: _animation,
+///       axis: Axis.horizontal,
+///       axisAlignment: -1,
+///       child: Center(
+///           child: FlutterLogo(size: 200.0),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -834,6 +970,61 @@ class PositionedTransition extends AnimatedWidget {
 /// animated by a [CurvedAnimation] set to [Curves.elasticInOut]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/relative_positioned_transition.mp4}
 ///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// The following code implements the [RelativePositionedTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// AnimationController _controller;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 2),
+///     vsync: this,
+///   )..repeat(reverse: true);
+/// }
+///
+/// @override
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   final double smallLogo = 100;
+///   final double bigLogo = 200;
+///
+///   return LayoutBuilder(
+///     builder: (context, constraints) {
+///       final Size biggest = constraints.biggest;
+///       return Stack(
+///         children: [
+///           RelativePositionedTransition(
+///             size: biggest,
+///             rect: RectTween(
+///               begin: Rect.fromLTWH(0, 0, bigLogo, bigLogo),
+///               end: Rect.fromLTWH(biggest.width - smallLogo, biggest.height - smallLogo, smallLogo, smallLogo),
+///             ).animate(CurvedAnimation(
+///               parent: _controller,
+///               curve: Curves.elasticInOut,
+///             )),
+///             child: Padding(
+///               padding: const EdgeInsets.all(8),
+///               child: FlutterLogo()
+///             ),
+///           ),
+///         ],
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [PositionedTransition], a widget that animates its child from a start
@@ -898,6 +1089,74 @@ class RelativePositionedTransition extends AnimatedWidget {
 /// Here's an illustration of the [DecoratedBoxTransition] widget, with it's
 /// [decoration] animated by a [CurvedAnimation] set to [Curves.decelerate]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/decorated_box_transition.mp4}
+///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// The following code implements the [DecoratedBoxTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// final DecorationTween decorationTween = DecorationTween(
+///   begin: BoxDecoration(
+///     color: const Color(0xFFFFFFFF),
+///     border: Border.all(style: BorderStyle.none),
+///     borderRadius: BorderRadius.circular(60.0),
+///     shape: BoxShape.rectangle,
+///     boxShadow: const <BoxShadow>[
+///       BoxShadow(
+///         color: Color(0x66666666),
+///         blurRadius: 10.0,
+///         spreadRadius: 3.0,
+///         offset: Offset(0, 6.0),
+///       )
+///     ],
+///   ),
+///   end: BoxDecoration(
+///     color: const Color(0xFFFFFFFF),
+///     border: Border.all(
+///       style: BorderStyle.none,
+///     ),
+///     borderRadius: BorderRadius.zero,
+///     // No shadow.
+///   ),
+/// );
+///
+/// AnimationController _controller;
+///
+/// @override
+/// void initState() {
+///   _controller = AnimationController(
+///     vsync: this,
+///     duration: const Duration(seconds: 3),
+///   )..repeat(reverse: true);
+///   super.initState();
+/// }
+///
+/// @override
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
+///
+///  @override
+///  Widget build(BuildContext context) {
+///    return Container(
+///      color: Colors.white,
+///      child: Center(
+///        child: DecoratedBoxTransition(
+///          position: DecorationPosition.background,
+///          decoration: decorationTween.animate(_controller),
+///          child: Container(
+///            width: 200,
+///            height: 200,
+///            padding: const EdgeInsets.all(10),
+///            child: const FlutterLogo(),
+///          ),
+///        ),
+///      ),
+///    );
+///  }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

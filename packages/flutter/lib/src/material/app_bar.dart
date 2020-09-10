@@ -137,7 +137,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///           icon: const Icon(Icons.add_alert),
 ///           tooltip: 'Show Snackbar',
 ///           onPressed: () {
-///             scaffoldKey.currentState.showSnackBar(snackBar);
+///             ScaffoldMessenger.of(context).showSnackBar(snackBar);
 ///           },
 ///         ),
 ///         IconButton(
@@ -172,6 +172,12 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
 ///    can expand and collapse.
 ///  * <https://material.io/design/components/app-bars-top.html>
+///  * Cookbook: [Place a floating app bar above a list](https://flutter.dev/docs/cookbook/lists/floating-app-bar)
+///  * See our
+///    [AppBar Basics sample](https://flutter.dev/docs/catalog/samples/basic-app-bar)
+///    and our advanced samples with app bars with
+///    [tabs](https://flutter.dev/docs/catalog/samples/tabbed-app-bar) or
+///    [custom bottom widgets](https://flutter.dev/docs/catalog/samples/app-bar-bottom).
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///
@@ -692,12 +698,20 @@ class _AppBarState extends State<AppBar> {
       appBar = Stack(
         fit: StackFit.passthrough,
         children: <Widget>[
-          widget.flexibleSpace,
-          // Creates a material widget to prevent the flexibleSpace from
-          // obscuring the ink splashes produced by appBar children.
-          Material(
-            type: MaterialType.transparency,
-            child: appBar,
+          Semantics(
+            sortKey: const OrdinalSortKey(1.0),
+            explicitChildNodes: true,
+            child: widget.flexibleSpace,
+          ),
+          Semantics(
+            sortKey: const OrdinalSortKey(0.0),
+            explicitChildNodes: true,
+            // Creates a material widget to prevent the flexibleSpace from
+            // obscuring the ink splashes produced by appBar children.
+            child: Material(
+              type: MaterialType.transparency,
+              child: appBar,
+            ),
           ),
         ],
       );
@@ -811,12 +825,18 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.topPadding,
     @required this.floating,
     @required this.pinned,
+    @required this.vsync,
     @required this.snapConfiguration,
     @required this.stretchConfiguration,
+    @required this.showOnScreenConfiguration,
     @required this.shape,
     @required this.toolbarHeight,
     @required this.leadingWidth,
   }) : assert(primary || topPadding == 0.0),
+       assert(
+         !floating || (snapConfiguration == null && showOnScreenConfiguration == null) || vsync != null,
+         'vsync cannot be null when snapConfiguration or showOnScreenConfiguration is not null, and floating is true',
+       ),
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
 
   final Widget leading;
@@ -855,10 +875,16 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => math.max(topPadding + (expandedHeight ?? (toolbarHeight ?? kToolbarHeight) + _bottomHeight), minExtent);
 
   @override
+  final TickerProvider vsync;
+
+  @override
   final FloatingHeaderSnapConfiguration snapConfiguration;
 
   @override
   final OverScrollHeaderStretchConfiguration stretchConfiguration;
+
+  @override
+  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
@@ -929,8 +955,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || topPadding != oldDelegate.topPadding
         || pinned != oldDelegate.pinned
         || floating != oldDelegate.floating
+        || vsync != oldDelegate.vsync
         || snapConfiguration != oldDelegate.snapConfiguration
         || stretchConfiguration != oldDelegate.stretchConfiguration
+        || showOnScreenConfiguration != oldDelegate.showOnScreenConfiguration
         || forceElevated != oldDelegate.forceElevated
         || toolbarHeight != oldDelegate.toolbarHeight
         || leadingWidth != leadingWidth;
@@ -1319,9 +1347,14 @@ class SliverAppBar extends StatefulWidget {
   /// into view.
   ///
   /// If [snap] is true then a scroll that exposes the floating app bar will
-  /// trigger an animation that slides the entire app bar into view. Similarly if
-  /// a scroll dismisses the app bar, the animation will slide the app bar
-  /// completely out of view.
+  /// trigger an animation that slides the entire app bar into view. Similarly
+  /// if a scroll dismisses the app bar, the animation will slide the app bar
+  /// completely out of view. Additionally, setting [snap] to true will fully
+  /// expand the floating app bar when the framework tries to reveal the
+  /// contents of the app bar by calling [RenderObject.showOnScreen]. For
+  /// example, when a [TextField] in the floating app bar gains focus, if [snap]
+  /// is true, the framework will always fully expand the floating app bar, in
+  /// order to reveal the focused [TextField].
   ///
   /// Snapping only applies when the app bar is floating, not when the app bar
   /// appears at the top of its scroll view.
@@ -1376,17 +1409,21 @@ class SliverAppBar extends StatefulWidget {
 class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMixin {
   FloatingHeaderSnapConfiguration _snapConfiguration;
   OverScrollHeaderStretchConfiguration _stretchConfiguration;
+  PersistentHeaderShowOnScreenConfiguration _showOnScreenConfiguration;
 
   void _updateSnapConfiguration() {
     if (widget.snap && widget.floating) {
       _snapConfiguration = FloatingHeaderSnapConfiguration(
-        vsync: this,
         curve: Curves.easeOut,
         duration: const Duration(milliseconds: 200),
       );
     } else {
       _snapConfiguration = null;
     }
+
+    _showOnScreenConfiguration = widget.floating & widget.snap
+      ? const PersistentHeaderShowOnScreenConfiguration(minShowOnScreenExtent: double.infinity)
+      : null;
   }
 
   void _updateStretchConfiguration() {
@@ -1432,6 +1469,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
         floating: widget.floating,
         pinned: widget.pinned,
         delegate: _SliverAppBarDelegate(
+          vsync: this,
           leading: widget.leading,
           automaticallyImplyLeading: widget.automaticallyImplyLeading,
           title: widget.title,
@@ -1458,6 +1496,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           shape: widget.shape,
           snapConfiguration: _snapConfiguration,
           stretchConfiguration: _stretchConfiguration,
+          showOnScreenConfiguration: _showOnScreenConfiguration,
           toolbarHeight: widget.toolbarHeight,
           leadingWidth: widget.leadingWidth,
         ),

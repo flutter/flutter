@@ -120,15 +120,21 @@ class DefaultTextStyle extends InheritedTheme {
   /// The text style to apply.
   final TextStyle style;
 
-  /// How the text should be aligned horizontally.
+  /// How each line of text in the Text widget should be aligned horizontally.
   final TextAlign textAlign;
 
   /// Whether the text should break at soft line breaks.
   ///
   /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
+  ///
+  /// This also decides the [overflow] property's behavior. If this is true or null,
+  /// the glyph causing overflow, and those that follow, will not be rendered.
   final bool softWrap;
 
   /// How visual overflow should be handled.
+  ///
+  /// If [softWrap] is true or null, the glyph causing overflow, and those that follow,
+  /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   final TextOverflow overflow;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
@@ -341,6 +347,10 @@ class Text extends StatelessWidget {
   /// closest enclosing [DefaultTextStyle].
   ///
   /// The [data] parameter must not be null.
+  ///
+  /// The [overflow] property's behavior is affected by the [softWrap] argument.
+  /// If the [softWrap] is true or null, the glyph causing overflow, and those that follow,
+  /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   const Text(
     this.data, {
     Key key,
@@ -388,13 +398,6 @@ class Text extends StatelessWidget {
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
-    @Deprecated(
-      'This parameter is a temporary flag to migrate the internal tests and '
-      'should not be used in other contexts. For more details, please check '
-      'https://github.com/flutter/flutter/issues/59316. '
-      'This feature was deprecated after v1.19.0.'
-    )
-    bool applyTextScaleFactorToWidgetSpan = false,
   }) : assert(
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',

@@ -421,7 +421,7 @@ class ScrollPhysics {
 ///
 /// The second is to enforce the boundary when the position is in range.
 ///
-/// If the current velocity is zero, neither adjustment is made. The
+/// If the current velocity is non-zero, neither adjustment is made. The
 /// assumption is that there is an ongoing animation and therefore
 /// further changing the scroll position would disrupt the experience.
 ///
@@ -496,7 +496,7 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
         enforceBoundary = false;
       }
     }
-    if ((oldPosition.pixels < oldPosition.minScrollExtent) &&
+    if ((oldPosition.pixels < oldPosition.minScrollExtent) ||
         (oldPosition.pixels > oldPosition.maxScrollExtent)) {
       // If the old position was out of range, then we should
       // not try to keep the new position in range.

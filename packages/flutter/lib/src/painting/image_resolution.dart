@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 import 'dart:collection';
@@ -153,11 +152,11 @@ class AssetImage extends AssetBundleImageProvider {
   ///
   /// The image is obtained by calling [AssetBundle.load] on the given [bundle]
   /// using the key given by [keyName].
-  final AssetBundle bundle;
+  final AssetBundle? bundle;
 
   /// The name of the package from which the image is included. See the
   /// documentation for the [AssetImage] class itself for details.
-  final String package;
+  final String? package;
 
   // We assume the main asset is designed for a device pixel ratio of 1.0
   static const double _naturalResolution = 1.0;
@@ -171,16 +170,16 @@ class AssetImage extends AssetBundleImageProvider {
     // that we resolve each future in a new call frame, and thus not in this
     // build/layout/paint sequence.)
     final AssetBundle chosenBundle = bundle ?? configuration.bundle ?? rootBundle;
-    Completer<AssetBundleImageKey> completer;
-    Future<AssetBundleImageKey> result;
+    Completer<AssetBundleImageKey>? completer;
+    Future<AssetBundleImageKey>? result;
 
-    chosenBundle.loadStructuredData<Map<String, List<String>>>(_kAssetManifestFileName, _manifestParser).then<void>(
-      (Map<String, List<String>> manifest) {
+    chosenBundle.loadStructuredData<Map<String, List<String>>?>(_kAssetManifestFileName, _manifestParser).then<void>(
+      (Map<String, List<String>>? manifest) {
         final String chosenName = _chooseVariant(
           keyName,
           configuration,
           manifest == null ? null : manifest[keyName],
-        );
+        )!;
         final double chosenScale = _parseScale(chosenName);
         final AssetBundleImageKey key = AssetBundleImageKey(
           bundle: chosenBundle,
@@ -200,17 +199,17 @@ class AssetImage extends AssetBundleImageProvider {
           result = SynchronousFuture<AssetBundleImageKey>(key);
         }
       }
-    ).catchError((dynamic error, StackTrace stack) {
+    ).catchError((Object error, StackTrace stack) {
       // We had an error. (This guarantees we weren't called synchronously.)
       // Forward the error to the caller.
       assert(completer != null);
       assert(result == null);
-      completer.completeError(error, stack);
+      completer!.completeError(error, stack);
     });
     if (result != null) {
       // The code above ran synchronously, and came up with an answer.
       // Return the SynchronousFuture that we created above.
-      return result;
+      return result!;
     }
     // The code above hasn't yet run its "then" handler yet. Let's prepare a
     // completer for it to use when it does run.
@@ -218,9 +217,9 @@ class AssetImage extends AssetBundleImageProvider {
     return completer.future;
   }
 
-  static Future<Map<String, List<String>>> _manifestParser(String jsonData) {
+  static Future<Map<String, List<String>>?> _manifestParser(String? jsonData) {
     if (jsonData == null)
-      return SynchronousFuture<Map<String, List<String>>>(null);
+      return SynchronousFuture<Map<String, List<String>>?>(null);
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
     final Map<String, dynamic> parsedJson = json.decode(jsonData) as Map<String, dynamic>;
     final Iterable<String> keys = parsedJson.keys;
@@ -228,10 +227,10 @@ class AssetImage extends AssetBundleImageProvider {
         Map<String, List<String>>.fromIterables(keys,
           keys.map<List<String>>((String key) => List<String>.from(parsedJson[key] as List<dynamic>)));
     // TODO(ianh): convert that data structure to the right types.
-    return SynchronousFuture<Map<String, List<String>>>(parsedManifest);
+    return SynchronousFuture<Map<String, List<String>>?>(parsedManifest);
   }
 
-  String _chooseVariant(String main, ImageConfiguration config, List<String> candidates) {
+  String? _chooseVariant(String main, ImageConfiguration config, List<String>? candidates) {
     if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty)
       return main;
     // TODO(ianh): Consider moving this parsing logic into _manifestParser.
@@ -241,15 +240,15 @@ class AssetImage extends AssetBundleImageProvider {
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
     // docs)
-    return _findNearest(mapping, config.devicePixelRatio);
+    return _findNearest(mapping, config.devicePixelRatio!);
   }
 
   // Return the value for the key in a [SplayTreeMap] nearest the provided key.
-  String _findNearest(SplayTreeMap<double, String> candidates, double value) {
+  String? _findNearest(SplayTreeMap<double, String> candidates, double value) {
     if (candidates.containsKey(value))
-      return candidates[value];
-    final double lower = candidates.lastKeyBefore(value);
-    final double upper = candidates.firstKeyAfter(value);
+      return candidates[value]!;
+    final double? lower = candidates.lastKeyBefore(value);
+    final double? upper = candidates.firstKeyAfter(value);
     if (lower == null)
       return candidates[upper];
     if (upper == null)
@@ -273,9 +272,9 @@ class AssetImage extends AssetBundleImageProvider {
       directoryPath = assetUri.pathSegments[assetUri.pathSegments.length - 2];
     }
 
-    final Match match = _extractRatioRegExp.firstMatch(directoryPath);
+    final Match? match = _extractRatioRegExp.firstMatch(directoryPath);
     if (match != null && match.groupCount > 0)
-      return double.parse(match.group(1));
+      return double.parse(match.group(1)!);
     return _naturalResolution; // i.e. default to 1.0x
   }
 

@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class ExpandingBox extends StatefulWidget {
@@ -230,6 +231,40 @@ void main() {
     final Rect bike2 = tester.getRect(find.byIcon(Icons.directions_bike));
     expect(bike2.center, bike1.shift(const Offset(100.0, 0.0)).center);
   });
+
+  testWidgets('Changing the size of the viewport while you are overdragged', (WidgetTester tester) async {
+    Widget build(double height) {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: ScrollConfiguration(
+          behavior: const RangeMaintainingTestScrollBehavior(),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: height,
+              width: 100.0,
+              child: ListView(
+                children: const <Widget>[SizedBox(height: 100.0, child: Placeholder())],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(build(200.0));
+    // to verify that changing the size of the viewport while you are overdragged does not change the
+    // scroll position, we must ensure that:
+    // - velocity is zero
+    // - scroll extents have changed
+    // - position does not change at the same time
+    // - old position is out of old range AND new range
+    await tester.drag(find.byType(Placeholder), const Offset(0.0, 100.0), touchSlopY: 0.0);
+    await tester.pump();
+    final Rect oldPosition = tester.getRect(find.byType(Placeholder));
+    await tester.pumpWidget(build(220.0));
+    final Rect newPosition = tester.getRect(find.byType(Placeholder));
+    expect(oldPosition, newPosition);
+  });
 }
 
 class TabBarDemo extends StatelessWidget {
@@ -259,5 +294,27 @@ class TabBarDemo extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class RangeMaintainingTestScrollBehavior extends ScrollBehavior {
+  const RangeMaintainingTestScrollBehavior();
+
+  @override
+  TargetPlatform getPlatform(BuildContext context) => throw 'should not be called';
+
+  @override
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    return child;
+  }
+
+  @override
+  GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
+    return (PointerEvent event) => VelocityTracker(event.kind);
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
   }
 }

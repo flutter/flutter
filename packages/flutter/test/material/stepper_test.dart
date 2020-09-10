@@ -817,4 +817,33 @@ void main() {
     expect(buttonMaterial('CANCEL').color.value, 0);
     expect(buttonMaterial('CANCEL').textStyle.color.value, 0x61ffffff);
   });
+
+  testWidgets('Vertical and Horizontal Stepper physics test', (WidgetTester tester) async {
+    const ScrollPhysics physics = NeverScrollableScrollPhysics();
+
+    for(final StepperType type in StepperType.values) {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Stepper(
+              physics: physics,
+              type: type,
+              steps: const <Step>[
+                Step(
+                  title: Text('Step 1'),
+                  content: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final ListView listView = tester.widget<ListView>(find.descendant(of: find.byType(Stepper), matching: find.byType(ListView)));
+      expect(listView.physics, physics);
+    }
+  });
 }

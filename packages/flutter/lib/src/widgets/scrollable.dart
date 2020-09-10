@@ -402,11 +402,11 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   }
 
   @override
-  void restoreState(RestorationBucket oldBucket) {
+  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
     registerForRestoration(_persistedScrollOffset, 'offset');
     assert(position != null);
     if (_persistedScrollOffset.value != null) {
-      position.restoreOffset(_persistedScrollOffset.value, initialRestore: oldBucket == null);
+      position.restoreOffset(_persistedScrollOffset.value, initialRestore: initialRestore);
     }
   }
 
@@ -507,6 +507,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
+                  ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior;
               },
             ),
@@ -526,6 +527,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
+                  ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior;
               },
             ),

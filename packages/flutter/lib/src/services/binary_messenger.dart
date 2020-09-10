@@ -49,7 +49,7 @@ abstract class BinaryMessenger {
   ///
   /// This method is useful for tests or test harnesses that want to assert the
   /// handler for the specified channel has not been altered by a previous test.
-  bool checkMessageHandler(String channel, MessageHandler handler);
+  bool checkMessageHandler(String channel, MessageHandler? handler);
 
   /// Set a mock callback for intercepting messages from the [send] method on
   /// this class, on the given channel, without decoding them.
@@ -70,7 +70,7 @@ abstract class BinaryMessenger {
   /// This method is useful for tests or test harnesses that want to assert the
   /// mock handler for the specified channel has not been altered by a previous
   /// test.
-  bool checkMockMessageHandler(String channel, MessageHandler handler);
+  bool checkMockMessageHandler(String channel, MessageHandler? handler);
 }
 
 /// The default instance of [BinaryMessenger].

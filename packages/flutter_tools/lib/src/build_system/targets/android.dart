@@ -6,7 +6,7 @@ import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals;
+import '../../globals.dart' as globals hide fs, artifacts, logger, processManager;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -52,13 +52,13 @@ abstract class AndroidAssetBundle extends Target {
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
     if (buildMode == BuildMode.debug) {
-      final String vmSnapshotData = globals.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
-      final String isolateSnapshotData = globals.artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
+      final String vmSnapshotData = environment.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
+      final String isolateSnapshotData = environment.artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
       environment.buildDir.childFile('app.dill')
           .copySync(outputDirectory.childFile('kernel_blob.bin').path);
-      globals.fs.file(vmSnapshotData)
+      environment.fileSystem.file(vmSnapshotData)
           .copySync(outputDirectory.childFile('vm_snapshot_data').path);
-      globals.fs.file(isolateSnapshotData)
+      environment.fileSystem.file(isolateSnapshotData)
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
     if (_copyAssets) {
@@ -68,8 +68,8 @@ abstract class AndroidAssetBundle extends Target {
         targetPlatform: TargetPlatform.android,
       );
       final DepfileService depfileService = DepfileService(
-        fileSystem: globals.fs,
-        logger: globals.logger,
+        fileSystem: environment.fileSystem,
+        logger: environment.logger,
       );
       depfileService.writeToFile(
         assetDepfile,
@@ -215,11 +215,11 @@ class AndroidAot extends AotElfBase {
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       reportTimings: false,
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
       xcode: globals.xcode,
-      processManager: globals.processManager,
-      artifacts: globals.artifacts,
+      processManager: environment.processManager,
+      artifacts: environment.artifacts,
     );
     final Directory output = environment.buildDir.childDirectory(_androidAbiName);
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
@@ -232,6 +232,19 @@ class AndroidAot extends AotElfBase {
     final List<String> extraGenSnapshotOptions = decodeDartDefines(environment.defines, kExtraGenSnapshotOptions);
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
+    final String codeSizeDirectory = environment.defines[kCodeSizeDirectory];
+
+    if (codeSizeDirectory != null) {
+      final File codeSizeFile = environment.fileSystem
+        .directory(codeSizeDirectory)
+        .childFile('snapshot.$_androidAbiName.json');
+      final File precompilerTraceFile = environment.fileSystem
+        .directory(codeSizeDirectory)
+        .childFile('trace.$_androidAbiName.json');
+      extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
+      extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
+    }
+
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,

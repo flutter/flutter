@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -107,7 +106,7 @@ class FlutterLogoDecoration extends Decoration {
   /// See also:
   ///
   ///  * [Decoration.lerp], which interpolates between arbitrary decorations.
-  static FlutterLogoDecoration lerp(FlutterLogoDecoration a, FlutterLogoDecoration b, double t) {
+  static FlutterLogoDecoration? lerp(FlutterLogoDecoration? a, FlutterLogoDecoration? b, double t) {
     assert(t != null);
     assert(a == null || a.debugAssertIsValid());
     assert(b == null || b.debugAssertIsValid());
@@ -115,7 +114,7 @@ class FlutterLogoDecoration extends Decoration {
       return null;
     if (a == null) {
       return FlutterLogoDecoration._(
-        b.textColor,
+        b!.textColor,
         b.style,
         b.margin * t,
         b._position,
@@ -136,42 +135,47 @@ class FlutterLogoDecoration extends Decoration {
     if (t == 1.0)
       return b;
     return FlutterLogoDecoration._(
-      Color.lerp(a.textColor, b.textColor, t),
+      Color.lerp(a.textColor, b.textColor, t)!,
       t < 0.5 ? a.style : b.style,
-      EdgeInsets.lerp(a.margin, b.margin, t),
+      EdgeInsets.lerp(a.margin, b.margin, t)!,
       a._position + (b._position - a._position) * t,
-      (a._opacity + (b._opacity - a._opacity) * t).clamp(0.0, 1.0) as double,
+      (a._opacity + (b._opacity - a._opacity) * t).clamp(0.0, 1.0),
     );
   }
 
   @override
-  FlutterLogoDecoration lerpFrom(Decoration a, double t) {
+  FlutterLogoDecoration? lerpFrom(Decoration? a, double t) {
     assert(debugAssertIsValid());
     if (a == null || a is FlutterLogoDecoration) {
       assert(a == null || a.debugAssertIsValid());
       return FlutterLogoDecoration.lerp(a as FlutterLogoDecoration, this, t);
     }
-    return super.lerpFrom(a, t) as FlutterLogoDecoration;
+    return super.lerpFrom(a, t) as FlutterLogoDecoration?;
   }
 
   @override
-  FlutterLogoDecoration lerpTo(Decoration b, double t) {
+  FlutterLogoDecoration? lerpTo(Decoration? b, double t) {
     assert(debugAssertIsValid());
     if (b == null || b is FlutterLogoDecoration) {
       assert(b == null || b.debugAssertIsValid());
       return FlutterLogoDecoration.lerp(this, b as FlutterLogoDecoration, t);
     }
-    return super.lerpTo(b, t) as FlutterLogoDecoration;
+    return super.lerpTo(b, t) as FlutterLogoDecoration?;
   }
 
   @override
   // TODO(ianh): better hit testing
-  bool hitTest(Size size, Offset position, { TextDirection textDirection }) => true;
+  bool hitTest(Size size, Offset position, { TextDirection? textDirection }) => true;
 
   @override
-  BoxPainter createBoxPainter([ VoidCallback onChanged ]) {
+  BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
     assert(debugAssertIsValid());
     return _FlutterLogoPainter(this);
+  }
+
+  @override
+  Path getClipPath(Rect rect, TextDirection textDirection) {
+    return Path()..addRect(rect);
   }
 
   @override
@@ -218,8 +222,8 @@ class _FlutterLogoPainter extends BoxPainter {
   final FlutterLogoDecoration _config;
 
   // these are configured assuming a font size of 100.0.
-  TextPainter _textPainter;
-  Rect _textBoundingRect;
+  late TextPainter _textPainter;
+  late Rect _textBoundingRect;
 
   void _prepareText() {
     const String kLabel = 'Flutter';
@@ -323,7 +327,7 @@ class _FlutterLogoPainter extends BoxPainter {
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     offset += _config.margin.topLeft;
-    final Size canvasSize = _config.margin.deflateSize(configuration.size);
+    final Size canvasSize = _config.margin.deflateSize(configuration.size!);
     if (canvasSize.isEmpty)
       return;
     Size logoSize;
@@ -365,7 +369,7 @@ class _FlutterLogoPainter extends BoxPainter {
       // only the mark
       logoTargetSquare = centerSquare;
     }
-    final Rect logoSquare = Rect.lerp(centerSquare, logoTargetSquare, _config._position.abs());
+    final Rect logoSquare = Rect.lerp(centerSquare, logoTargetSquare, _config._position.abs())!;
 
     if (_config._opacity < 1.0) {
       canvas.saveLayer(
@@ -388,7 +392,7 @@ class _FlutterLogoPainter extends BoxPainter {
         final double initialLeftTextPosition = // position of text when just starting the animation
           rect.width / 2.0 - _textBoundingRect.width * scale;
         final Offset textOffset = Offset(
-          rect.left + ui.lerpDouble(initialLeftTextPosition, finalLeftTextPosition, _config._position),
+          rect.left + ui.lerpDouble(initialLeftTextPosition, finalLeftTextPosition, _config._position)!,
           rect.top + (rect.height - _textBoundingRect.height * scale) / 2.0,
         );
         canvas.save();
