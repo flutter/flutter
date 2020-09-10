@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_value.h"
 
 #include <gmodule.h>
+#include <cstring>
 
 struct _FlValue {
   FlValueType type;
