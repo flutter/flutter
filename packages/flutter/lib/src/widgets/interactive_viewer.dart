@@ -11,6 +11,7 @@ import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'implicit_animations.dart';
 import 'ticker_provider.dart';
 
 /// A widget that enables pan and zoom interactions with its child.
@@ -501,6 +502,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   final GlobalKey _parentKey = GlobalKey();
   Animation<Offset>? _animation;
   late AnimationController _controller;
+  Animation<Matrix4>? _animationIncrementalZoom;
+  late AnimationController _controllerIncrementalZoom;
+  Offset? _doubleTapLocalPosition;
   Axis? _panAxis; // Used with alignPanAxis.
   Offset? _referenceFocalPoint; // Point where the current gesture began.
   double? _scaleStart; // Scale value at start of scaling gesture.
@@ -713,6 +717,45 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
   }
 
+  void _onDoubleTapDown(TapDownDetails details) {
+    _doubleTapLocalPosition = details.localPosition;
+  }
+
+  void _onDoubleTap() {
+    // These values were eyeballed from Google Maps on iOS 13.
+    const double kIncrementalZoomScale = 1.4;
+    const Duration kIncrementalZoomDuration = Duration(milliseconds: 300);
+
+    // The end matrix of the animation is the matrix after performing a scale
+    // and then repositioning the focal point to be at the same point in the
+    // viewport as it was before.
+    final Offset focalPointScene = _transformationController.toScene(
+      _doubleTapLocalPosition!,
+    );
+    final Matrix4 matrixScaled = _matrixScale(
+      _transformationController.value,
+      kIncrementalZoomScale,
+    );
+    final Offset focalPointSceneScaled = TransformationController.toSceneForMatrix(
+      _doubleTapLocalPosition!,
+      matrixScaled,
+    );
+    _doubleTapLocalPosition = null;
+    final Matrix4 endMatrix = _matrixTranslate(
+      matrixScaled,
+      focalPointSceneScaled - focalPointScene,
+    );
+
+    _disposeIncrementalZoomAnimation();
+    _animationIncrementalZoom = Matrix4Tween(
+      begin: _transformationController.value,
+      end: endMatrix,
+    ).animate(_controllerIncrementalZoom);
+    _animationIncrementalZoom!.addListener(_onAnimateIncrementalZoom);
+    _controllerIncrementalZoom.duration = kIncrementalZoomDuration;
+    _controllerIncrementalZoom.forward();
+  }
+
   // Handle the start of a gesture. All of pan, scale, and rotate are handled
   // with GestureDetector's scale gesture.
   void _onScaleStart(ScaleStartDetails details) {
@@ -721,10 +764,14 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
 
     if (_controller.isAnimating) {
+      // TODO(justinmc): dispose method for this animtaion, and rename the variables.
       _controller.stop();
       _controller.reset();
       _animation?.removeListener(_onAnimate);
       _animation = null;
+    }
+    if (_controllerIncrementalZoom.isAnimating) {
+      _disposeIncrementalZoomAnimation();
     }
 
     _gestureType = null;
@@ -898,6 +945,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return;
     }
     if (event is PointerScrollEvent) {
+      _disposeIncrementalZoomAnimation();
       final RenderBox childRenderBox = _childKey.currentContext!.findRenderObject() as RenderBox;
       final Size childSize = childRenderBox.size;
       final double scaleChange = 1.0 - event.scrollDelta.dy / childSize.height;
@@ -949,6 +997,23 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     );
   }
 
+  // Handle the incremental zoom animation that happens on a double tap.
+  void _onAnimateIncrementalZoom() {
+    if (!_controllerIncrementalZoom.isAnimating
+        || _animationIncrementalZoom == null) {
+      _disposeIncrementalZoomAnimation();
+      return;
+    }
+    _transformationController.value = _animationIncrementalZoom!.value;
+  }
+
+  // Stop and clean up the incremental zoom animation.
+  void _disposeIncrementalZoomAnimation() {
+    _animationIncrementalZoom?.removeListener(_onAnimateIncrementalZoom);
+    _animationIncrementalZoom = null;
+    _controllerIncrementalZoom.reset();
+  }
+
   void _onTransformationControllerChange() {
     // A change to the TransformationController's value is a change to the
     // state.
@@ -962,9 +1027,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _transformationController = widget.transformationController
         ?? TransformationController();
     _transformationController.addListener(_onTransformationControllerChange);
-    _controller = AnimationController(
-      vsync: this,
-    );
+    _controller = AnimationController(vsync: this);
+    _controllerIncrementalZoom = AnimationController(vsync: this);
   }
 
   @override
@@ -995,6 +1059,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   @override
   void dispose() {
     _controller.dispose();
+    _controllerIncrementalZoom.dispose();
     _transformationController.removeListener(_onTransformationControllerChange);
     if (widget.transformationController == null) {
       _transformationController.dispose();
@@ -1032,6 +1097,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       onPointerSignal: _receivedPointerSignal,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
+        onDoubleTap: _onDoubleTap,
+        onDoubleTapDown: _onDoubleTapDown,
         onScaleEnd: _onScaleEnd,
         onScaleStart: _onScaleStart,
         onScaleUpdate: _onScaleUpdate,
@@ -1060,6 +1127,7 @@ class TransformationController extends ValueNotifier<Matrix4> {
 
   /// Return the scene point at the given viewport point.
   ///
+  /// {@template flutter.widgets.transformationController.toScene}
   /// A viewport point is relative to the parent while a scene point is relative
   /// to the child, regardless of transformation. Calling toScene with a
   /// viewport point essentially returns the scene coordinate that lies
@@ -1088,10 +1156,26 @@ class TransformationController extends ValueNotifier<Matrix4> {
   ///   );
   /// }
   /// ```
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///   *  [toSceneForMatrix], a static method which can be used to perform this
+  ///      operation for any arbitrary matrix.
   Offset toScene(Offset viewportPoint) {
+    return toSceneForMatrix(viewportPoint, value);
+  }
+
+  /// Return the scen point at the given viewport point for the given matrix.
+  ///
+  /// {@macro flutter.widgets.transformationController.toScene}
+  ///
+  /// See also:
+  ///   *  [toScene], the instance method that performs the same operation for
+  ///      the TransformationController's matrix.
+  static Offset toSceneForMatrix(Offset viewportPoint, Matrix4 matrix) {
     // On viewportPoint, perform the inverse transformation of the scene to get
     // where the point would be in the scene before the transformation.
-    final Matrix4 inverseMatrix = Matrix4.inverted(value);
+    final Matrix4 inverseMatrix = Matrix4.inverted(matrix);
     final Vector3 untransformed = inverseMatrix.transform3(Vector3(
       viewportPoint.dx,
       viewportPoint.dy,
