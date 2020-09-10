@@ -218,7 +218,7 @@ class AsyncSnapshot<T> {
   const AsyncSnapshot.waiting() : this._(ConnectionState.waiting, null, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [data].
-  const AsyncSnapshot.withData(ConnectionState state, T? data) : this._(state, data, null);
+  const AsyncSnapshot.withData(ConnectionState state, T data): this._(state, data, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [error].
   const AsyncSnapshot.withError(ConnectionState state, Object error) : this._(state, null, error);
@@ -500,7 +500,9 @@ class StreamBuilder<T extends Object> extends StreamBuilderBase<T, AsyncSnapshot
   final T? initialData;
 
   @override
-  AsyncSnapshot<T> initial() => AsyncSnapshot<T>.withData(ConnectionState.none, initialData);
+  AsyncSnapshot<T> initial() => initialData == null
+      ? AsyncSnapshot<T>.nothing()
+      : AsyncSnapshot<T>.withData(ConnectionState.none, initialData!);
 
   @override
   AsyncSnapshot<T> afterConnected(AsyncSnapshot<T> current) => current.inState(ConnectionState.waiting);
@@ -731,7 +733,9 @@ class _FutureBuilderState<T extends Object> extends State<FutureBuilder<T>> {
   @override
   void initState() {
     super.initState();
-    _snapshot = AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData);
+    _snapshot = widget.initialData == null
+        ? AsyncSnapshot<T>.nothing()
+        : AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData!);
     _subscribe();
   }
 
