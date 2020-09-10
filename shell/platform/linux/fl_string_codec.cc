@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
 
 #include <gmodule.h>
+#include <cstring>
 
 G_DEFINE_QUARK(fl_string_codec_error_quark, fl_string_codec_error)
 
