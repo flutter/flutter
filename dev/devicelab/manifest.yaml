@@ -479,20 +479,13 @@ tasks:
       Measures the runtime performance of platform views in the Complex Layout sample app on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
+    flaky: true
 
   flutter_gallery_ios32__start_up:
     description: >
       Measures the startup time of the Flutter Gallery app on 32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
-
-  flutter_gallery_ios32__transition_perf:
-    description: >
-      Measures the performance of screen transitions in Flutter Gallery on
-      32-bit iOS (iPhone 4S).
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios32"]
-    flaky: true
 
   flavors_test_ios:
     description: >
