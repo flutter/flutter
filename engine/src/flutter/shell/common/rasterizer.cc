@@ -77,9 +77,6 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
                              user_override_resource_cache_bytes_);
   }
   compositor_context_->OnGrContextCreated();
-#if !defined(OS_FUCHSIA)
-  // TODO(sanjayc77): https://github.com/flutter/flutter/issues/53179. Add
-  // support for raster thread merger for Fuchsia.
   if (surface_->GetExternalViewEmbedder() &&
       surface_->GetExternalViewEmbedder()->SupportsDynamicThreadMerging() &&
       !raster_thread_merger_) {
@@ -98,7 +95,6 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
       }
     });
   }
-#endif
 }
 
 void Rasterizer::Teardown() {
