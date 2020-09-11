@@ -729,6 +729,47 @@ void main() {
       await tester.pumpAndSettle();
       expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/65304
+    testWidgets('can view beyond boundary when necessary for a small child', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                constrained: false,
+                minScale: 1.0,
+                maxScale: 1.0,
+                transformationController: transformationController,
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value, equals(Matrix4.identity()));
+
+      // Pinch to zoom does nothing because minScale and maxScale are 1.0.
+      final Offset center = tester.getCenter(find.byType(SizedBox));
+      final Offset scaleStart1 = Offset(center.dx - 10.0, center.dy - 10.0);
+      final Offset scaleStart2 = Offset(center.dx + 10.0, center.dy + 10.0);
+      final Offset scaleEnd1 = Offset(center.dx - 20.0, center.dy - 20.0);
+      final Offset scaleEnd2 = Offset(center.dx + 20.0, center.dy + 20.0);
+      final TestGesture gesture = await tester.createGesture();
+      final TestGesture gesture2 = await tester.createGesture();
+      await gesture.down(scaleStart1);
+      await gesture2.down(scaleStart2);
+      await tester.pump();
+      await gesture.moveTo(scaleEnd1);
+      await gesture2.moveTo(scaleEnd2);
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value, equals(Matrix4.identity()));
+    });
   });
 
   group('getNearestPointOnLine', () {
