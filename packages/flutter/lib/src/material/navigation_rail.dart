@@ -472,12 +472,13 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
               _verticalSpacer,
               if (widget.leading != null)
                 ...<Widget>[
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minWidth: lerpDouble(minWidth, minExtendedWidth, _extendedAnimation.value),
-                    ),
-                    child: widget.leading,
-                  ),
+//                  ConstrainedBox(
+//                    constraints: BoxConstraints(
+//                      minWidth: lerpDouble(minWidth, minExtendedWidth, _extendedAnimation.value),
+//                    ),
+//                    child: widget.leading,
+//                  ),
+                  widget.leading,
                   _verticalSpacer,
                 ],
               Expanded(
@@ -616,6 +617,7 @@ class _RailDestination extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('build');
     final Widget themedIcon = IconTheme(
       data: iconTheme,
       child: icon,
@@ -670,7 +672,7 @@ class _RailDestination extends StatelessWidget {
                       child: styledLabel,
                     ),
                   ),
-                  const SizedBox(width: _horizontalDestinationPadding),
+                  SizedBox(width: _horizontalDestinationPadding * extendedTransitionAnimation.value),
                 ],
               ),
             ),
