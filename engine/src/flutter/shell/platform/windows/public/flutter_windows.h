@@ -5,9 +5,9 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_PUBLIC_FLUTTER_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_PUBLIC_FLUTTER_H_
 
-#include <Windows.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <windows.h>
 
 #include "flutter_export.h"
 #include "flutter_messenger.h"
