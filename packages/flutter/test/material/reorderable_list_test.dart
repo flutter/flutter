@@ -211,6 +211,47 @@ void main() {
         expect(getContentElement().size.height, kDraggingListHeight);
       });
 
+      testWidgets('Vertical drop area golden', (WidgetTester tester) async {
+        final Widget reorderableListView = ReorderableListView(
+          children: <Widget>[
+            Container(
+              key: Key('pink'),
+              width: double.infinity,
+              height: itemHeight,
+              color: Colors.pink,
+            ),
+            Container(
+              key: Key('blue'),
+              width: double.infinity,
+              height: itemHeight,
+              color: Colors.blue,
+            ),
+            Container(
+              key: Key('green'),
+              width: double.infinity,
+              height: itemHeight,
+              color: Colors.green,
+            ),
+          ],
+          scrollDirection: Axis.vertical,
+          onReorder: (int oldIndex, int newIndex) { },
+        );
+        await tester.pumpWidget(MaterialApp(
+          home: SizedBox(
+            height: itemHeight * 3,
+            child: reorderableListView,
+          ),
+        ));
+
+        await tester.startGesture(tester.getCenter(find.byKey(Key('blue'))));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byKey(Key('blue')),
+          matchesGoldenFile('reorderable_list_test.vertical.drop_area.png'),
+        );
+      });
+
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
           return find.byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
@@ -724,6 +765,46 @@ void main() {
         expect(getContentElement().size.width, kDraggingListWidth);
       });
 
+      testWidgets('Horizontal drop area golden', (WidgetTester tester) async {
+        final Widget reorderableListView = ReorderableListView(
+          children: <Widget>[
+            Container(
+              key: Key('pink'),
+              height: double.infinity,
+              width: itemHeight,
+              color: Colors.pink,
+            ),
+            Container(
+              key: Key('blue'),
+              height: double.infinity,
+              width: itemHeight,
+              color: Colors.blue,
+            ),
+            Container(
+              key: Key('green'),
+              height: double.infinity,
+              width: itemHeight,
+              color: Colors.green,
+            ),
+          ],
+          scrollDirection: Axis.horizontal,
+          onReorder: (int oldIndex, int newIndex) { },
+        );
+        await tester.pumpWidget(MaterialApp(
+          home: SizedBox(
+            width: itemHeight * 3,
+            child: reorderableListView,
+          ),
+        ));
+
+        await tester.startGesture(tester.getCenter(find.byKey(Key('blue'))));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byKey(Key('blue')),
+          matchesGoldenFile('reorderable_list_test.horizontal.drop_area.png'),
+        );
+      });
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
