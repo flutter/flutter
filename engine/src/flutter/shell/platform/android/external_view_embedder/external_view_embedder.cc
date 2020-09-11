@@ -77,10 +77,6 @@ void AndroidExternalViewEmbedder::SubmitFrame(
     std::unique_ptr<SurfaceFrame> frame) {
   TRACE_EVENT0("flutter", "AndroidExternalViewEmbedder::SubmitFrame");
 
-  if (should_run_rasterizer_on_platform_thread_) {
-    // Don't submit the current frame if the frame will be resubmitted.
-    return;
-  }
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
     return;
@@ -217,27 +213,25 @@ AndroidExternalViewEmbedder::CreateSurfaceIfNeeded(GrDirectContext* context,
 // |ExternalViewEmbedder|
 PostPrerollResult AndroidExternalViewEmbedder::PostPrerollAction(
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  // This frame may remove existing platform views that aren't contained
-  // in `composition_order_`.
-  //
-  // If this frame doesn't have platform views, it's still required to keep
-  // the rasterizer running on the platform thread for at least one more
-  // frame.
-  //
-  // To keep the rasterizer running on the platform thread one more frame,
-  // `kDefaultMergedLeaseDuration` must be at least `1`.
   if (!FrameHasPlatformLayers()) {
     return PostPrerollResult::kSuccess;
   }
-  if (raster_thread_merger->IsMerged()) {
-    raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
-  } else {
-    // Merge the raster and platform threads in `EndFrame`.
-    should_run_rasterizer_on_platform_thread_ = true;
+  if (!raster_thread_merger->IsMerged()) {
+    // The raster thread merger may be disabled if the rasterizer is being
+    // created or teared down.
+    //
+    // In such cases, the current frame is dropped, and a new frame is attempted
+    // with the same layer tree.
+    //
+    // Eventually, the frame is submitted once this method returns `kSuccess`.
+    // At that point, the raster tasks are handled on the platform thread.
+    raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
     CancelFrame();
-    return PostPrerollResult::kResubmitFrame;
+    return PostPrerollResult::kSkipAndRetryFrame;
   }
+  raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
   // Surface switch requires to resubmit the frame.
+  // TODO(egarciad): https://github.com/flutter/flutter/issues/65652
   if (previous_frame_view_count_ == 0) {
     return PostPrerollResult::kResubmitFrame;
   }
@@ -291,17 +285,6 @@ void AndroidExternalViewEmbedder::CancelFrame() {
 void AndroidExternalViewEmbedder::EndFrame(
     bool should_resubmit_frame,
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  if (should_resubmit_frame && should_run_rasterizer_on_platform_thread_) {
-    raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
-    if (raster_thread_merger->IsMerged()) {
-      // The raster thread merger may be disabled if the rasterizer is being
-      // teared down.
-      //
-      // Therefore, set `should_run_rasterizer_on_platform_thread_` to `false`
-      // only if the thread merger was able to set the lease.
-      should_run_rasterizer_on_platform_thread_ = false;
-    }
-  }
   surface_pool_->RecycleLayers();
   // JNI method must be called on the platform thread.
   if (raster_thread_merger->IsOnPlatformThread()) {

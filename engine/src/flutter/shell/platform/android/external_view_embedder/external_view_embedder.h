@@ -98,10 +98,6 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   // Holds surfaces. Allows to recycle surfaces or allocate new ones.
   const std::unique_ptr<SurfacePool> surface_pool_;
 
-  // Whether the rasterizer task runner should run on the platform thread.
-  // When this is true, the current frame is cancelled and resubmitted.
-  bool should_run_rasterizer_on_platform_thread_ = false;
-
   // The size of the root canvas.
   SkISize frame_size_;
 
