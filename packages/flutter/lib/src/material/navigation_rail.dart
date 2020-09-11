@@ -616,7 +616,6 @@ class _RailDestination extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('build');
     final Widget themedIcon = IconTheme(
       data: iconTheme,
       child: icon,
