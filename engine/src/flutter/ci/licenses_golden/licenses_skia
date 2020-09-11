@@ -1,4 +1,4 @@
-Signature: 23a22d11786d4d278c0b66b086122579
+Signature: bc4e66856b2dffe5af91bd727d295ae9
 
 UNUSED LICENSES:
 
@@ -1369,8 +1369,6 @@ FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphCache.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphImpl.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphImpl.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphStyle.cpp
-FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphUtil.cpp
-FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphUtil.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/Run.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/Run.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/TextLine.cpp
@@ -4088,6 +4086,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/animator/VectorKeyframeAnima
 FILE: ../../../third_party/skia/modules/skottie/src/animator/VectorKeyframeAnimator.h
 FILE: ../../../third_party/skia/modules/skottie/src/effects/BrightnessContrastEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/CornerPinEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/DisplacementMapEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/GlowStyles.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/ShadowStyles.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/AudioLayer.cpp
