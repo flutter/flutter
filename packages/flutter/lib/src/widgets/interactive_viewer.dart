@@ -746,6 +746,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         rotation: details.rotation,
       ));
     }
+
     final Offset focalPointScene = _transformationController.toScene(
       details.localFocalPoint,
     );
@@ -918,6 +919,22 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _transformationController.value,
         focalPointSceneScaled - focalPointScene,
       );
+      if (widget.onInteractionStart != null) {
+        widget.onInteractionStart(
+            ScaleStartDetails(focalPoint: focalPointSceneScaled)
+        );
+      }
+      if (widget.onInteractionUpdate != null) {
+        widget.onInteractionUpdate(ScaleUpdateDetails(
+          rotation: 0.0,
+          scale: scaleChange,
+          horizontalScale: 1.0,
+          verticalScale: 1.0,
+        ));
+      }
+      if (widget.onInteractionEnd != null) {
+        widget.onInteractionEnd(ScaleEndDetails());
+      }
     }
   }
 
