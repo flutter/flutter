@@ -24,12 +24,25 @@ class LayerTree;
 enum class RasterStatus {
   // Frame has successfully rasterized.
   kSuccess,
-  // Frame needs to be resubmitted for rasterization. This is
-  // currently only called when thread configuration change occurs.
+  // Frame is submitted twice. This is only used on Android when
+  // switching the background surface to FlutterImageView.
+  //
+  // On Android, the first frame doesn't make the image available
+  // to the ImageReader right away. The second frame does.
+  //
+  // TODO(egarciad): https://github.com/flutter/flutter/issues/65652
   kResubmit,
+  // Frame is dropped and a new frame with the same layer tree is
+  // attempted.
+  //
+  // This is currently used to wait for the thread merger to merge
+  // the raster and platform threads.
+  //
+  // Since the thread merger may be disabled,
+  kSkipAndRetry,
   // Frame has been successfully rasterized, but "there are additional items in
   // the pipeline waiting to be consumed. This is currently
-  // only called when thread configuration change occurs.
+  // only used when thread configuration change occurs.
   kEnqueuePipeline,
   // Failed to rasterize the frame.
   kFailed

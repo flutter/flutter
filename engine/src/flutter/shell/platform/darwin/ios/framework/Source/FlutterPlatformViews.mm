@@ -247,7 +247,8 @@ void FlutterPlatformViewsController::SetFrameSize(SkISize frame_size) {
 }
 
 void FlutterPlatformViewsController::CancelFrame() {
-  composition_order_ = active_composition_order_;
+  picture_recorders_.clear();
+  composition_order_.clear();
 }
 
 // TODO(cyanglaz): https://github.com/flutter/flutter/issues/56474
@@ -263,17 +264,23 @@ PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   // TODO(cyanglaz): https://github.com/flutter/flutter/issues/56474
   // Rename `has_platform_view` to `view_mutated` when the above issue is resolved.
-  const bool has_platform_view = HasPlatformViewThisOrNextFrame();
-  if (has_platform_view) {
-    if (raster_thread_merger->IsMerged()) {
-      raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
-    } else {
-      // Wait until |EndFrame| to merge the threads.
-      merge_threads_ = true;
-      CancelFrame();
-      return PostPrerollResult::kResubmitFrame;
-    }
+  if (!HasPlatformViewThisOrNextFrame()) {
+    return PostPrerollResult::kSuccess;
   }
+  if (!raster_thread_merger->IsMerged()) {
+    // The raster thread merger may be disabled if the rasterizer is being
+    // created or teared down.
+    //
+    // In such cases, the current frame is dropped, and a new frame is attempted
+    // with the same layer tree.
+    //
+    // Eventually, the frame is submitted once this method returns `kSuccess`.
+    // At that point, the raster tasks are handled on the platform thread.
+    raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
+    CancelFrame();
+    return PostPrerollResult::kSkipAndRetryFrame;
+  }
+  raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
   return PostPrerollResult::kSuccess;
 }
 
@@ -449,15 +456,6 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
                                                  std::shared_ptr<IOSContext> ios_context,
                                                  std::unique_ptr<SurfaceFrame> frame) {
   FML_DCHECK(flutter_view_);
-  if (merge_threads_) {
-    // Threads are about to be merged, we drop everything from this frame
-    // and possibly resubmit the same layer tree in the next frame.
-    // Before merging thread, we know the code is not running on the main thread. Assert that
-    FML_DCHECK(![[NSThread currentThread] isMainThread]);
-    picture_recorders_.clear();
-    composition_order_.clear();
-    return true;
-  }
 
   // Any UIKit related code has to run on main thread.
   // When on a non-main thread, we only allow the rest of the method to run if there is no
@@ -583,12 +581,7 @@ void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
 
 void FlutterPlatformViewsController::EndFrame(
     bool should_resubmit_frame,
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  if (should_resubmit_frame && merge_threads_) {
-    raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
-    merge_threads_ = false;
-  }
-}
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {}
 
 std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLayer(
     GrDirectContext* gr_context,
