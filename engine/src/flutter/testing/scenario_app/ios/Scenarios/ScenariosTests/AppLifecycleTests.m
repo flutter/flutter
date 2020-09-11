@@ -227,7 +227,9 @@ FLUTTER_ASSERT_ARC
   [engine setViewController:nil];
 }
 
-- (void)testFlutterViewControllerDetachingSendsApplicationLifecycle {
+// TODO(cbracken): re-enable this test by removing the skip_ prefix once the source of its flakiness
+// has been identified. https://github.com/flutter/flutter/issues/61620
+- (void)skip_testFlutterViewControllerDetachingSendsApplicationLifecycle {
   XCTestExpectation* engineStartedExpectation = [self expectationWithDescription:@"Engine started"];
 
   // Let the engine finish booting (at the end of which the channels are properly set-up) before
