@@ -16,13 +16,21 @@ const MethodCodec codec = JSONMethodCodec();
 
 void emptyCallback(ByteData date) {}
 
+Future<void> setStrategy(TestLocationStrategy newStrategy) async {
+  await window.browserHistory.setLocationStrategy(newStrategy);
+}
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
-  test('window.defaultRouteName should not change', () {
-    window.locationStrategy = TestLocationStrategy.fromEntry(TestHistoryEntry('initial state', null, '/initial'));
+  setUp(() async {
+    await window.debugSwitchBrowserHistory(useSingle: true);
+  });
+
+  test('window.defaultRouteName should not change', () async {
+    await setStrategy(TestLocationStrategy.fromEntry(TestHistoryEntry('initial state', null, '/initial')));
     expect(window.defaultRouteName, '/initial');
 
     // Changing the URL in the address bar later shouldn't affect [window.defaultRouteName].
@@ -30,17 +38,16 @@ void testMain() {
     expect(window.defaultRouteName, '/initial');
   });
 
-  test('window.defaultRouteName should reset after navigation platform message', () {
-    window.locationStrategy = TestLocationStrategy.fromEntry(TestHistoryEntry('initial state', null, '/initial'));
+  test('window.defaultRouteName should reset after navigation platform message', () async {
+    await setStrategy(TestLocationStrategy.fromEntry(TestHistoryEntry('initial state', null, '/initial')));
     // Reading it multiple times should return the same value.
     expect(window.defaultRouteName, '/initial');
     expect(window.defaultRouteName, '/initial');
-
     window.sendPlatformMessage(
       'flutter/navigation',
       JSONMethodCodec().encodeMethodCall(MethodCall(
-        'routePushed',
-        <String, dynamic>{'previousRouteName': '/foo', 'routeName': '/bar'},
+        'routeUpdated',
+        <String, dynamic>{'routeName': '/bar'},
       )),
       emptyCallback,
     );
@@ -50,22 +57,25 @@ void testMain() {
   });
 
   test('can disable location strategy', () async {
+    await window.debugSwitchBrowserHistory(useSingle: true);
     final testStrategy = TestLocationStrategy.fromEntry(
-      TestHistoryEntry(null, null, '/'),
+      TestHistoryEntry('initial state', null, '/'),
     );
-    window.locationStrategy = testStrategy;
+    await setStrategy(testStrategy);
 
     expect(window.locationStrategy, testStrategy);
     // A single listener should've been setup.
     expect(testStrategy.listeners, hasLength(1));
     // The initial entry should be there, plus another "flutter" entry.
     expect(testStrategy.history, hasLength(2));
-    expect(testStrategy.history[0].state, <String, bool>{'origin': true});
+    expect(testStrategy.history[0].state, <String, dynamic>{'origin': true, 'state': 'initial state'});
     expect(testStrategy.history[1].state, <String, bool>{'flutter': true});
     expect(testStrategy.currentEntry, testStrategy.history[1]);
 
     // Now, let's disable location strategy and make sure things get cleaned up.
     expect(() => jsSetLocationStrategy(null), returnsNormally);
+    // The locationStrategy is teared down asynchronously.
+    await Future<void>.delayed(Duration.zero);
     expect(window.locationStrategy, isNull);
 
     // The listener is removed asynchronously.
@@ -73,8 +83,8 @@ void testMain() {
 
     // No more listeners.
     expect(testStrategy.listeners, isEmpty);
-    // History should've moved back to the initial entry.
-    expect(testStrategy.history[0].state, <String, bool>{'origin': true});
+    // History should've moved back to the initial state.
+    expect(testStrategy.history[0].state, "initial state");
     expect(testStrategy.currentEntry, testStrategy.history[0]);
   });
 

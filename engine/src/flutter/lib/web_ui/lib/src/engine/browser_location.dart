@@ -25,6 +25,9 @@ abstract class LocationStrategy {
   /// The active path in the browser history.
   String get path;
 
+  /// The state of the current browser history entry.
+  dynamic get state;
+
   /// Given a path that's internal to the app, create the external url that
   /// will be used in the browser.
   String prepareExternalUrl(String internalUrl);
@@ -36,7 +39,7 @@ abstract class LocationStrategy {
   void replaceState(dynamic state, String title, String url);
 
   /// Go to the previous history entry.
-  Future<void> back();
+  Future<void> back({int count = 1});
 }
 
 /// This is an implementation of [LocationStrategy] that uses the browser URL's
@@ -83,6 +86,9 @@ class HashLocationStrategy extends LocationStrategy {
   }
 
   @override
+  dynamic get state => _platformLocation.state;
+
+  @override
   String prepareExternalUrl(String internalUrl) {
     // It's convention that if the hash path is empty, we omit the `#`; however,
     // if the empty URL is pushed it won't replace any existing fragment. So
@@ -104,8 +110,8 @@ class HashLocationStrategy extends LocationStrategy {
   }
 
   @override
-  Future<void> back() {
-    _platformLocation.back();
+  Future<void> back({int count = 1}) {
+    _platformLocation.back(count);
     return _waitForPopState();
   }
 
@@ -142,10 +148,11 @@ abstract class PlatformLocation {
   String get pathname;
   String get search;
   String? get hash;
+  dynamic get state;
 
   void pushState(dynamic state, String title, String url);
   void replaceState(dynamic state, String title, String url);
-  void back();
+  void back(int count);
 }
 
 /// An implementation of [PlatformLocation] for the browser.
@@ -185,6 +192,9 @@ class BrowserPlatformLocation extends PlatformLocation {
   String get hash => _location.hash;
 
   @override
+  dynamic get state => _history.state;
+
+  @override
   void pushState(dynamic state, String title, String url) {
     _history.pushState(state, title, url);
   }
@@ -195,7 +205,7 @@ class BrowserPlatformLocation extends PlatformLocation {
   }
 
   @override
-  void back() {
-    _history.back();
+  void back(int count) {
+    _history.go(-count);
   }
 }
