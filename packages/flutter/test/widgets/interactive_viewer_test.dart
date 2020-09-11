@@ -729,6 +729,48 @@ void main() {
       await tester.pumpAndSettle();
       expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
     });
+
+    testWidgets('can double tap to zoom', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      const double maxScale = 2.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                transformationController: transformationController,
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      double scale = transformationController.value.getMaxScaleOnAxis();
+      expect(scale, 1.0);
+
+      // Double tap.
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      await tester.tapAt(center);
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tapAt(center);
+      await tester.pumpAndSettle();
+
+      double oldScale = transformationController.value.getMaxScaleOnAxis();
+      scale = transformationController.value.getMaxScaleOnAxis();
+      expect(scale, greaterThan(oldScale));
+
+      // Double tap a second time.
+      await tester.tapAt(center);
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tapAt(center);
+      await tester.pumpAndSettle();
+
+      // TODO(justinmc): This test is unfinished because other tests are
+      // failing. The addition of onDoubleTap has made the delayed scale bug
+      // happen all the time. That should ideally be fixed, if possible, before
+      // moving forward with double tap.
+    });
   });
 
   group('getNearestPointOnLine', () {
