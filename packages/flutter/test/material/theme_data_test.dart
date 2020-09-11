@@ -288,6 +288,7 @@ void main() {
       elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colors.green)),
       outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(primary: Colors.blue)),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
+      dataTableTheme: const DataTableThemeData(),
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
     );
@@ -376,6 +377,7 @@ void main() {
       elevatedButtonTheme: const ElevatedButtonThemeData(),
       outlinedButtonTheme: const OutlinedButtonThemeData(),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.white),
+      dataTableTheme: const DataTableThemeData(),
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
     );

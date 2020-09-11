@@ -113,9 +113,7 @@ class UserMessages {
       'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
   String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion, Platform platform) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
-      'To update using sdkmanager, run:\n'
-      '  "$managerPath" "platforms;android-$sdkMinVersion" "build-tools;$buildToolsMinVersion"\n'
-      'or visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
+      'To update the Android SDK visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
 
   // Messages used in AndroidStudioValidator
   String androidStudioVersion(String version) => 'version $version';
