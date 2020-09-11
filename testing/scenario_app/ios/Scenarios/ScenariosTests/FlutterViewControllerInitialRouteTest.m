@@ -33,7 +33,9 @@ FLUTTER_ASSERT_ARC
   [super tearDown];
 }
 
-- (void)testSettingInitialRoute {
+// TODO(cbracken): re-enable this test by removing the skip_ prefix once the source of its flakiness
+// has been identified. https://github.com/flutter/flutter/issues/61620
+- (void)skip_testSettingInitialRoute {
   self.flutterViewController =
       [[FlutterViewController alloc] initWithProject:nil
                                         initialRoute:@"myCustomInitialRoute"
