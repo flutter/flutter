@@ -21,23 +21,11 @@ class EventSink {
   EventSink(EventSink const&) = delete;
   EventSink& operator=(EventSink const&) = delete;
 
-  // DEPRECATED. Use the reference version below. This will be removed in the
-  // near future.
-  void Success(const T* event) { SuccessInternal(event); }
-
   // Consumes a successful event
   void Success(const T& event) { SuccessInternal(&event); }
 
   // Consumes a successful event.
   void Success() { SuccessInternal(nullptr); }
-
-  // DEPRECATED. Use the reference version below. This will be removed in the
-  // near future.
-  void Error(const std::string& error_code,
-             const std::string& error_message,
-             const T* error_details) {
-    ErrorInternal(error_code, error_message, error_details);
-  }
 
   // Consumes an error event.
   void Error(const std::string& error_code,
