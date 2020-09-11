@@ -68,7 +68,7 @@ vars = {
   'dart_usage_tag': '3.4.0',
   'dart_watcher_rev': 'fc3c9aae5d31d707b3013b42634dde8d8a1161b4',
 
-  'ocmock_tag': 'v3.4.3',
+  'ocmock_tag': 'v3.7.1',
 
   # Build bot tooling for iOS
   'ios_tools_revision': '69b7c1b160e7107a6a98d948363772dc9caea46f',
@@ -105,7 +105,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'a6c0959d1ac8cdfe6f9ff87892bc4905a73699fe',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'f83d1d75216e97fb696434bca1cb9a4e7a570fb6',
 
    # Fuchsia compatibility
    #
