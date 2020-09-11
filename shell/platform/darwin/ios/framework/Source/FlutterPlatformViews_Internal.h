@@ -279,10 +279,6 @@ class FlutterPlatformViewsController {
   void ApplyMutators(const MutatorsStack& mutators_stack, UIView* embedded_view);
   void CompositeWithParams(int view_id, const EmbeddedViewParams& params);
 
-  // Default to `false`.
-  // If `true`, gpu thread and platform thread should be merged during |EndFrame|.
-  // Always resets to `false` right after the threads are merged.
-  bool merge_threads_ = false;
   // Allocates a new FlutterPlatformViewLayer if needed, draws the pixels within the rect from
   // the picture on the layer's canvas.
   std::shared_ptr<FlutterPlatformViewLayer> GetLayer(GrDirectContext* gr_context,

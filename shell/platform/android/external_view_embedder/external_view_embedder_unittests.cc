@@ -160,7 +160,7 @@ TEST(AndroidExternalViewEmbedder, RasterizerRunsOnPlatformThread) {
       0, std::make_unique<EmbeddedViewParams>());
 
   auto postpreroll_result = embedder->PostPrerollAction(raster_thread_merger);
-  ASSERT_EQ(PostPrerollResult::kResubmitFrame, postpreroll_result);
+  ASSERT_EQ(PostPrerollResult::kSkipAndRetryFrame, postpreroll_result);
 
   EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
   embedder->EndFrame(/*should_resubmit_frame=*/true, raster_thread_merger);
@@ -584,7 +584,7 @@ TEST(AndroidExternalViewEmbedder, DisableThreadMerger) {
       0, std::make_unique<EmbeddedViewParams>());
 
   auto postpreroll_result = embedder->PostPrerollAction(raster_thread_merger);
-  ASSERT_EQ(PostPrerollResult::kResubmitFrame, postpreroll_result);
+  ASSERT_EQ(PostPrerollResult::kSkipAndRetryFrame, postpreroll_result);
 
   EXPECT_CALL(*jni_mock, FlutterViewEndFrame()).Times(0);
   embedder->EndFrame(/*should_resubmit_frame=*/true, raster_thread_merger);

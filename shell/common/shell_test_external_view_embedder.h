@@ -28,9 +28,9 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
   // returns the new `post_preroll_result`.
   void UpdatePostPrerollResult(PostPrerollResult post_preroll_result);
 
-  // Updates the post preroll result to `PostPrerollResult::kResubmitFrame` for
-  // only the next frame.
-  void SetResubmitOnce();
+  // Gets the number of times the SubmitFrame method has been called in
+  // the external view embedder.
+  int GetSubmittedFrameCount();
 
  private:
   // |ExternalViewEmbedder|
@@ -74,10 +74,12 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
   bool SupportsDynamicThreadMerging() override;
 
   const EndFrameCallBack end_frame_call_back_;
+
   PostPrerollResult post_preroll_result_;
-  bool resubmit_once_;
 
   bool support_thread_merging_;
+
+  std::atomic<int> submitted_frame_count_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShellTestExternalViewEmbedder);
 };
