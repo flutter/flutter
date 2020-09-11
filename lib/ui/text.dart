@@ -106,7 +106,7 @@ class FontWeight {
 
 /// A feature tag and value that affect the selection of glyphs in a font.
 ///
-/// {@tool sample}
+/// {@tool sample --template=freeform}
 ///
 /// This example shows usage of several OpenType font features, including
 /// Small Caps (smcp), old-style figures, fractional ligatures and stylistic
