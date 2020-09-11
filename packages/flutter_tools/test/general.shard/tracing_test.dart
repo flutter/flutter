@@ -282,37 +282,35 @@ void main() {
       logger: logger,
     );
 
-    final dynamic kExpectedTimeline = json.decode('''
-{
-  "type": "Timeline",
-  "traceEvents": [
-    {
-      "name": "FlutterEngineMainEnter",
-      "ts": 0,
-      "type": "TimelineEvent"
-    },
-    {
-      "name": "Framework initialization",
-      "ts": 1,
-      "type": "TimelineEvent"
-    },
-    {
-      "name": "Widgets built first useful frame",
-      "ts": 2,
-      "type": "TimelineEvent"
-    },
-    {
-      "name": "Rasterized first useful frame",
-      "ts": 3,
-      "type": "TimelineEvent"
-    }
-  ],
-  "timeOriginMicros": 0,
-  "timeExtentMicros": 4
-}
-''');
+    final Map<String, dynamic> expectedTimeline = <String, dynamic>{
+      'type': 'Timeline',
+      'traceEvents': <dynamic>[
+        <String, dynamic>{
+          'name': 'FlutterEngineMainEnter',
+          'ts': 0,
+          'type': 'TimelineEvent',
+        },
+        <String, dynamic>{
+          'name': 'Framework initialization',
+          'ts': 1,
+          'type': 'TimelineEvent',
+        },
+        <String, dynamic>{
+          'name': 'Widgets built first useful frame',
+          'ts': 2,
+          'type': 'TimelineEvent',
+        },
+        <String, dynamic>{
+          'name': 'Rasterized first useful frame',
+          'ts': 3,
+          'type': 'TimelineEvent',
+        },
+      ],
+      'timeOriginMicros': 0,
+      'timeExtentMicros': 4,
+    };
 
     expect(timelineFile, exists);
-    expect(json.decode(timelineFile.readAsStringSync()), kExpectedTimeline);
+    expect(json.decode(timelineFile.readAsStringSync()), expectedTimeline);
   });
 }
