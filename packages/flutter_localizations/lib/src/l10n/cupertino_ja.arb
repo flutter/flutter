@@ -3,7 +3,7 @@
   "datePickerHourSemanticsLabelOther": "$hour時",
   "datePickerMinuteSemanticsLabelOne": "1分",
   "datePickerMinuteSemanticsLabelOther": "$minute分",
-  "datePickerDateOrder": "mdy",
+  "datePickerDateOrder": "ymd",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",

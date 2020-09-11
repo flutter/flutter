@@ -6358,7 +6358,7 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get cutButtonLabel => '切り取り';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => 'ymd';
 
   @override
   String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
