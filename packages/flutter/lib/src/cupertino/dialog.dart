@@ -22,7 +22,7 @@ import 'scrollbar.dart';
 // to derive values of TextStyle(height and letterSpacing) from
 // Adobe XD template for iOS 13, which can be found in
 // Apple Design Resources(https://developer.apple.com/design/resources/).
-// However the values are not exactly the same, so visual comparison is needed.
+// However the values are not exactly the same as native, so eyeballing is needed.
 const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
   fontFamily: '.SF UI Display',
   inherit: false,
