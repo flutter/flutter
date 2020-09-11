@@ -5,7 +5,6 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../test_utils.dart';
 import 'project.dart';
@@ -46,7 +45,7 @@ class TestsProject extends Project {
     return super.setUpIn(dir);
   }
 
-  String get testFilePath => globals.fs.path.join(dir.path, 'test', 'test.dart');
+  String get testFilePath => fileSystem.path.join(dir.path, 'test', 'test.dart');
 
   Uri get breakpointUri => Uri.file(testFilePath);
   Uri get breakpointAppUri => Uri.parse('org-dartlang-app:///test.dart');

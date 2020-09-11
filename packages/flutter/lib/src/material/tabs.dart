@@ -1347,6 +1347,8 @@ class _TabBarViewState extends State<TabBarView> {
     } else if (notification is ScrollEndNotification) {
       _controller.index = _pageController.page.round();
       _currentIndex = _controller.index;
+      if (!_controller.indexIsChanging)
+        _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0) as double;
     }
     _warpUnderwayCount -= 1;
 

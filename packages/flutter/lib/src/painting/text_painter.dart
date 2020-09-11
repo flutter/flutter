@@ -784,7 +784,9 @@ class TextPainter {
     return _caretMetrics.offset;
   }
 
-  /// Returns the tight bounded height of the glyph at the given [position].
+  /// {@template flutter.painting.textPainter.getFullHeightForCaret}
+  /// Returns the strut bounded height of the glyph at the given `position`.
+  /// {@endtemplate}
   ///
   /// Valid only after [layout] has been called.
   double? getFullHeightForCaret(TextPosition position, Rect caretPrototype) {

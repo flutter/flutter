@@ -336,6 +336,9 @@ abstract class CmakeBasedProject {
 
   /// Includable CMake with rules and variables for plugin builds.
   File get generatedPluginCmakeFile;
+
+  /// The directory to write plugin symlinks.
+  Directory get pluginSymlinkDirectory;
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -1043,6 +1046,9 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   @override
   File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
 
+  @override
+  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
+
   Directory get _editableDirectory => parent.directory.childDirectory('windows');
 
   /// The directory in the project that is managed by Flutter. As much as
@@ -1054,9 +1060,6 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   /// generated on the fly. All generated files that are not intended to be
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
-
-  /// The directory to write plugin symlinks.
-  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
@@ -1097,7 +1100,7 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   @override
   File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
 
-  /// The directory to write plugin symlinks.
+  @override
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}

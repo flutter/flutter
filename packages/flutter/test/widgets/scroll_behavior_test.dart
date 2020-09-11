@@ -27,8 +27,8 @@ class TestScrollBehavior extends ScrollBehavior {
   @override
   GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
       lastCreatedBuilder = flag
-        ? (PointerEvent ev) => VelocityTracker()
-        : (PointerEvent ev) => IOSScrollViewFlingVelocityTracker();
+        ? (PointerEvent ev) => VelocityTracker(ev.kind)
+        : (PointerEvent ev) => IOSScrollViewFlingVelocityTracker(ev.kind);
       return lastCreatedBuilder;
   }
 }

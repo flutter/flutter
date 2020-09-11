@@ -279,17 +279,17 @@ class _PathClose extends _PathCommand {
   }
 }
 
-// Interpolates a value given a set of values equally spaced in time.
-//
-// [interpolator] is the interpolation function used to interpolate between 2
-// points of type T.
-//
-// This is currently done with linear interpolation between every 2 consecutive
-// points. Linear interpolation was smooth enough with the limited set of
-// animations we have tested, so we use it for simplicity. If we find this to
-// not be smooth enough we can try applying spline instead.
-//
-// [progress] is expected to be between 0.0 and 1.0.
+/// Interpolates a value given a set of values equally spaced in time.
+///
+/// [interpolator] is the interpolation function used to interpolate between 2
+/// points of type T.
+///
+/// This is currently done with linear interpolation between every 2 consecutive
+/// points. Linear interpolation was smooth enough with the limited set of
+/// animations we have tested, so we use it for simplicity. If we find this to
+/// not be smooth enough we can try applying spline instead.
+///
+/// [progress] is expected to be between 0.0 and 1.0.
 T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator) {
   assert(progress <= 1.0);
   assert(progress >= 0.0);

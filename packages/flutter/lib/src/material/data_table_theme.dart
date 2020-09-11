@@ -37,7 +37,6 @@ import 'theme.dart';
 class DataTableThemeData with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.dataTableTheme].
   const DataTableThemeData({
-    this.decoration,
     this.dataRowColor,
     this.dataRowHeight,
     this.dataTextStyle,
@@ -48,9 +47,6 @@ class DataTableThemeData with Diagnosticable {
     this.columnSpacing,
     this.dividerThickness,
   });
-
-  /// {@macro flutter.material.dataTable.decoration}
-  final Decoration decoration;
 
   /// {@macro flutter.material.dataTable.dataRowColor}
   /// {@macro flutter.material.dataTable.dataRowColorCode}
@@ -83,7 +79,6 @@ class DataTableThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DataTableThemeData copyWith({
-    Decoration decoration,
     MaterialStateProperty<Color> dataRowColor,
     double dataRowHeight,
     TextStyle dataTextStyle,
@@ -95,7 +90,6 @@ class DataTableThemeData with Diagnosticable {
     double dividerThickness,
   }) {
     return DataTableThemeData(
-      decoration: decoration ?? this.decoration,
       dataRowColor: dataRowColor ?? this.dataRowColor,
       dataRowHeight: dataRowHeight ?? this.dataRowHeight,
       dataTextStyle: dataTextStyle ?? this.dataTextStyle,
@@ -116,7 +110,6 @@ class DataTableThemeData with Diagnosticable {
   static DataTableThemeData lerp(DataTableThemeData a, DataTableThemeData b, double t) {
     assert(t != null);
     return DataTableThemeData(
-      decoration: Decoration.lerp(a.decoration, b.decoration, t),
       dataRowColor: _lerpProperties(a.dataRowColor, b.dataRowColor, t, Color.lerp),
       dataRowHeight: lerpDouble(a.dataRowHeight, b.dataRowHeight, t),
       dataTextStyle: TextStyle.lerp(a.dataTextStyle, b.dataTextStyle, t),
@@ -132,7 +125,6 @@ class DataTableThemeData with Diagnosticable {
   @override
   int get hashCode {
     return hashValues(
-      decoration,
       dataRowColor,
       dataRowHeight,
       dataTextStyle,
@@ -152,7 +144,6 @@ class DataTableThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     return other is DataTableThemeData
-      && other.decoration == decoration
       && other.dataRowColor == dataRowColor
       && other.dataRowHeight == dataRowHeight
       && other.dataTextStyle == dataTextStyle
@@ -167,7 +158,6 @@ class DataTableThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color>>('dataRowColor', dataRowColor, defaultValue: null));
     properties.add(DoubleProperty('dataRowHeight', dataRowHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('dataTextStyle', dataTextStyle, defaultValue: null));

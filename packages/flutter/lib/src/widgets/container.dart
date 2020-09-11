@@ -281,6 +281,7 @@ class Container extends StatelessWidget {
        assert(decoration == null || decoration.debugAssertIsValid()),
        assert(constraints == null || constraints.debugAssertIsValid()),
        assert(clipBehavior != null),
+       assert(decoration != null || clipBehavior == Clip.none),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
          'To provide both, use "decoration: BoxDecoration(color: color)".'
@@ -361,9 +362,14 @@ class Container extends StatelessWidget {
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
 
-  /// The clip behavior when [Container.decoration] has a clipPath.
+  /// The clip behavior when [Container.decoration] is not null.
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.none]. Must be [Clip.none] if [decoration] is null.
+  ///
+  /// If a clip is to be applied, the [Decoration.getClipPath] method
+  /// for the provided decoration must return a clip path. (This is not
+  /// supported by all decorations; the default implementation of that
+  /// method throws an [UnsupportedError].)
   final Clip clipBehavior;
 
   EdgeInsetsGeometry get _paddingIncludingDecoration {
@@ -398,6 +404,7 @@ class Container extends StatelessWidget {
       current = ColoredBox(color: color, child: current);
 
     if (clipBehavior != Clip.none) {
+      assert(decoration != null);
       current = ClipPath(
         clipper: _DecorationClipper(
           textDirection: Directionality.of(context),
@@ -453,7 +460,7 @@ class _DecorationClipper extends CustomClipper<Path> {
   _DecorationClipper({
     TextDirection textDirection,
     @required this.decoration
-  }) : assert (decoration != null),
+  }) : assert(decoration != null),
        textDirection = textDirection ?? TextDirection.ltr;
 
   final TextDirection textDirection;

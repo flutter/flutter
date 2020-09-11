@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import 'base/file_system.dart';
+import 'build_info.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
 import 'resident_runner.dart';
@@ -117,6 +118,8 @@ class ColdRunner extends ResidentRunner {
         await downloadStartupTrace(
           device.vmService,
           awaitFirstFrame: awaitFirstFrameWhenTracing,
+          logger: globals.logger,
+          output: globals.fs.directory(getBuildDirectory()),
         );
       }
       appFinished();

@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
@@ -31,12 +30,12 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('hot reload works without error', () async {
+  testWithoutContext('hot reload works without error', () async {
     await flutter.run();
     await flutter.hotReload();
   });
 
-  test('multiple overlapping hot reload are debounced and queued', () async {
+  testWithoutContext('multiple overlapping hot reload are debounced and queued', () async {
     await flutter.run();
     // Capture how many *real* hot reloads occur.
     int numReloads = 0;
@@ -70,7 +69,7 @@ void main() {
     }
   });
 
-  test('newly added code executes during hot reload', () async {
+  testWithoutContext('newly added code executes during hot reload', () async {
     final StringBuffer stdout = StringBuffer();
     final StreamSubscription<String> subscription = flutter.stdout.listen(stdout.writeln);
     await flutter.run();
@@ -83,7 +82,7 @@ void main() {
     }
   });
 
-  test('fastReassemble behavior triggers hot reload behavior with evaluation of expression', () async {
+  testWithoutContext('fastReassemble behavior triggers hot reload behavior with evaluation of expression', () async {
     final Completer<void> tick1 = Completer<void>();
     final Completer<void> tick2 = Completer<void>();
     final Completer<void> tick3 = Completer<void>();
@@ -150,12 +149,12 @@ void main() {
     }
   });
 
-  test('hot restart works without error', () async {
+  testWithoutContext('hot restart works without error', () async {
     await flutter.run();
     await flutter.hotRestart();
   });
 
-  test('breakpoints are hit after hot reload', () async {
+  testWithoutContext('breakpoints are hit after hot reload', () async {
     Isolate isolate;
     final Completer<void> sawTick1 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage = Completer<void>();
@@ -209,7 +208,7 @@ void main() {
     await subscription.cancel();
   });
 
-  test("hot reload doesn't reassemble if paused", () async {
+  testWithoutContext("hot reload doesn't reassemble if paused", () async {
     final Completer<void> sawTick1 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage1 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage2 = Completer<void>();

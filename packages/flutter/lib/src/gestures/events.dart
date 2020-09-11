@@ -8,6 +8,8 @@ import 'dart:ui' show Offset, PointerDeviceKind;
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'constants.dart';
+
 export 'dart:ui' show Offset, PointerDeviceKind;
 
 /// The bit of [PointerEvent.buttons] that corresponds to a cross-device
@@ -2219,5 +2221,44 @@ class PointerCancelEvent extends PointerEvent {
       original: original as PointerCancelEvent? ?? this,
       embedderId: embedderId ?? this.embedderId,
     );
+  }
+}
+
+/// Determine the approriate hit slop pixels based on the [kind] of pointer.
+double computeHitSlop(PointerDeviceKind kind) {
+  switch (kind) {
+    case PointerDeviceKind.mouse:
+    case PointerDeviceKind.stylus:
+    case PointerDeviceKind.invertedStylus:
+      return kPrecisePointerHitSlop;
+    case PointerDeviceKind.unknown:
+    case PointerDeviceKind.touch:
+      return kTouchSlop;
+  }
+}
+
+/// Determine the approriate pan slop pixels based on the [kind] of pointer.
+double computePanSlop(PointerDeviceKind kind) {
+  switch (kind) {
+    case PointerDeviceKind.mouse:
+    case PointerDeviceKind.stylus:
+    case PointerDeviceKind.invertedStylus:
+      return kPrecisePointerPanSlop;
+    case PointerDeviceKind.unknown:
+    case PointerDeviceKind.touch:
+      return kPanSlop;
+  }
+}
+
+/// Determine the approriate scale slop pixels based on the [kind] of pointer.
+double computeScaleSlop(PointerDeviceKind kind) {
+  switch (kind) {
+    case PointerDeviceKind.mouse:
+    case PointerDeviceKind.stylus:
+    case PointerDeviceKind.invertedStylus:
+      return kPrecisePointerScaleSlop;
+    case PointerDeviceKind.unknown:
+    case PointerDeviceKind.touch:
+      return kScaleSlop;
   }
 }

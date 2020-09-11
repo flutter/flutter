@@ -18,12 +18,9 @@ import 'tooltip_theme.dart';
 
 /// A material design tooltip.
 ///
-/// Tooltips provide text labels that help explain the function of a button or
-/// other user interface action. Wrap the button in a [Tooltip] widget to
-/// show a label when the widget long pressed (or when the user takes some
-/// other appropriate action).
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=EeEfD5fI-5Q}
+/// Tooltips provide text labels which help explain the function of a button or
+/// other user interface action. Wrap the button in a [Tooltip] widget and provide
+/// a message which will be shown when the widget is long pressed.
 ///
 /// Many widgets, such as [IconButton], [FloatingActionButton], and
 /// [PopupMenuButton] have a `tooltip` property that, when non-null, causes the
@@ -32,6 +29,9 @@ import 'tooltip_theme.dart';
 /// Tooltips improve the accessibility of visual widgets by proving a textual
 /// representation of the widget, which, for example, can be vocalized by a
 /// screen reader.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=EeEfD5fI-5Q}
+///
 ///
 /// See also:
 ///

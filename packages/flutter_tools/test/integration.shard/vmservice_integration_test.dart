@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io'; // ignore: dart_io_import
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/dds.dart';
@@ -40,7 +39,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    test('getSupportedProtocols includes DDS', () async {
+    testWithoutContext('getSupportedProtocols includes DDS', () async {
       final ProtocolList protocolList =
           await vmService.getSupportedProtocols();
       expect(protocolList.protocols, hasLength(2));
@@ -49,7 +48,7 @@ void main() {
       }
     }, skip: DartDevelopmentService.ddsDisabled);
 
-    test('flutterVersion can be called', () async {
+    testWithoutContext('flutterVersion can be called', () async {
       final Response response =
           await vmService.callServiceExtension('s0.flutterVersion');
       expect(response.type, 'Success');
@@ -57,13 +56,13 @@ void main() {
       expect(response.json, containsPair('engineRevisionShort', isNotNull));
     });
 
-    test('flutterMemoryInfo can be called', () async {
+    testWithoutContext('flutterMemoryInfo can be called', () async {
       final Response response =
           await vmService.callServiceExtension('s0.flutterMemoryInfo');
       expect(response.type, 'Success');
     });
 
-    test('reloadSources can be called', () async {
+    testWithoutContext('reloadSources can be called', () async {
       final VM vm = await vmService.getVM();
       final IsolateRef isolateRef = vm.isolates.first;
 
@@ -72,13 +71,13 @@ void main() {
       expect(response.type, 'Success');
     });
 
-    test('reloadSources fails on bad params', () async {
+    testWithoutContext('reloadSources fails on bad params', () async {
       final Future<Response> response =
           vmService.callMethod('s0.reloadSources', isolateId: '');
       expect(response, throwsA(const TypeMatcher<RPCError>()));
     });
 
-    test('hotRestart can be called', () async {
+    testWithoutContext('hotRestart can be called', () async {
       final VM vm = await vmService.getVM();
       final IsolateRef isolateRef = vm.isolates.first;
 
@@ -87,19 +86,19 @@ void main() {
       expect(response.type, 'Success');
     });
 
-    test('hotRestart fails on bad params', () async {
+    testWithoutContext('hotRestart fails on bad params', () async {
       final Future<Response> response = vmService.callMethod('s0.hotRestart',
           args: <String, dynamic>{'pause': 'not_a_bool'});
       expect(response, throwsA(const TypeMatcher<RPCError>()));
     });
 
-    test('flutterGetSkSL can be called', () async {
+    testWithoutContext('flutterGetSkSL can be called', () async {
       final Response response = await vmService.callMethod('s0.flutterGetSkSL');
 
       expect(response.type, 'Success');
     });
 
-    test('ext.flutter.brightnessOverride can toggle window brightness', () async {
+    testWithoutContext('ext.flutter.brightnessOverride can toggle window brightness', () async {
       final Isolate isolate = await waitForExtension(vmService);
       final Response response = await vmService.callServiceExtension(
         'ext.flutter.brightnessOverride',
@@ -138,5 +137,5 @@ void main() {
     });
 
     // TODO(devoncarew): These tests fail on cirrus-ci windows.
-  }, skip: Platform.isWindows);
+  }, skip: platform.isWindows);
 }

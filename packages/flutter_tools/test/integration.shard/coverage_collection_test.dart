@@ -4,7 +4,6 @@
 
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../src/common.dart';
 
@@ -23,7 +22,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('Can collect coverage in machine mode', () async {
+  testWithoutContext('Can collect coverage in machine mode', () async {
     final TestProject project = TestProject();
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);

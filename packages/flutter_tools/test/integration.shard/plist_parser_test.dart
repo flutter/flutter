@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -11,10 +10,9 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
-import 'package:process/process.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import 'test_utils.dart';
 
 const String base64PlistXml =
     'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCFET0NUWVBFIHBsaXN0I'
@@ -38,8 +36,6 @@ void main() {
   // `ProcessManager` because doing so wouldn't actually test what we want to
   // test, which is that the underlying tool we're using to parse Plist files
   // works with the way we're calling it.
-  FileSystem fileSystem;
-  ProcessManager processManager;
   File file;
   PlistParser parser;
   BufferLogger logger;
@@ -52,8 +48,6 @@ void main() {
         stdio: null,
       ),
     );
-    fileSystem = LocalFileSystemBlockingSetCurrentDirectory();
-    processManager = const LocalProcessManager();
     parser = PlistParser(
       fileSystem: fileSystem,
       processManager: processManager,
@@ -73,7 +67,7 @@ void main() {
     expect(parser.getValueFromFile(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: !io.Platform.isMacOS);
+  }, skip: !platform.isMacOS);
 
   testWithoutContext('PlistParser.getValueFromFile works with binary file', () {
     file.writeAsBytesSync(base64.decode(base64PlistBinary));
@@ -82,7 +76,7 @@ void main() {
     expect(parser.getValueFromFile(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: !io.Platform.isMacOS);
+  }, skip: !platform.isMacOS);
 
   testWithoutContext('PlistParser.getValueFromFile works with json file', () {
     file.writeAsBytesSync(base64.decode(base64PlistJson));
@@ -91,13 +85,13 @@ void main() {
     expect(parser.getValueFromFile(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: !io.Platform.isMacOS);
+  }, skip: !platform.isMacOS);
 
   testWithoutContext('PlistParser.getValueFromFile returns null for non-existent plist file', () {
     expect(parser.getValueFromFile('missing.plist', 'CFBundleIdentifier'), null);
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: !io.Platform.isMacOS);
+  }, skip: !platform.isMacOS);
 
   testWithoutContext('PlistParser.getValueFromFile returns null for non-existent key within plist', () {
     file.writeAsBytesSync(base64.decode(base64PlistXml));
@@ -106,7 +100,7 @@ void main() {
     expect(parser.getValueFromFile(file.absolute.path, 'BadKey'), null);
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: !io.Platform.isMacOS);
+  }, skip: !platform.isMacOS);
 
   testWithoutContext('PlistParser.getValueFromFile returns null for malformed plist file', () {
     file.writeAsBytesSync(const <int>[1, 2, 3, 4, 5, 6]);
@@ -114,7 +108,7 @@ void main() {
     expect(parser.getValueFromFile(file.path, 'CFBundleIdentifier'), null);
     expect(logger.statusText, isNotEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: !io.Platform.isMacOS);
+  }, skip: !platform.isMacOS);
 
   testWithoutContext('PlistParser.getValueFromFile throws when /usr/bin/plutil is not found', () async {
     expect(
@@ -123,5 +117,5 @@ void main() {
     );
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: io.Platform.isMacOS);
+  }, skip: platform.isMacOS);
 }

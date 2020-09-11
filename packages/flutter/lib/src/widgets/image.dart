@@ -96,7 +96,8 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// The [BuildContext] and [Size] are used to select an image configuration
 /// (see [createLocalImageConfiguration]).
 ///
-/// The `onError` argument can be used to manually handle errors while
+/// The returned future will not complete with error, even if precaching
+/// failed. The `onError` argument can be used to manually handle errors while
 /// pre-caching.
 ///
 /// See also:

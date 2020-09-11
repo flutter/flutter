@@ -16,7 +16,6 @@ void main() {
 
   test('DataTableThemeData defaults', () {
     const DataTableThemeData themeData = DataTableThemeData();
-    expect(themeData.decoration, null);
     expect(themeData.dataRowColor, null);
     expect(themeData.dataRowHeight, null);
     expect(themeData.dataTextStyle, null);
@@ -28,7 +27,6 @@ void main() {
     expect(themeData.dividerThickness, null);
 
     const DataTableTheme theme = DataTableTheme(data: DataTableThemeData());
-    expect(theme.data.decoration, null);
     expect(theme.data.dataRowColor, null);
     expect(theme.data.dataRowHeight, null);
     expect(theme.data.dataTextStyle, null);
@@ -55,7 +53,6 @@ void main() {
   testWidgets('DataTableThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     DataTableThemeData(
-      decoration: const BoxDecoration(color: Color(0xfffffff0)),
       dataRowColor: MaterialStateProperty.resolveWith<Color>(
         (Set<MaterialState> states) => const Color(0xfffffff1),
       ),
@@ -76,20 +73,18 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description[0], 'decoration: BoxDecoration(color: Color(0xfffffff0))');
-    expect(description[1], 'dataRowColor: Instance of \'_MaterialStatePropertyWith<Color>\'');
-    expect(description[2], 'dataRowHeight: 51.0');
-    expect(description[3], 'dataTextStyle: TextStyle(inherit: true, size: 12.0)');
-    expect(description[4], 'headingRowColor: Instance of \'_MaterialStatePropertyWith<Color>\'');
-    expect(description[5], 'headingRowHeight: 52.0');
-    expect(description[6], 'headingTextStyle: TextStyle(inherit: true, size: 14.0)');
-    expect(description[7], 'horizontalMargin: 3.0');
-    expect(description[8], 'columnSpacing: 4.0');
-    expect(description[9], 'dividerThickness: 5.0');
+    expect(description[0], 'dataRowColor: Instance of \'_MaterialStatePropertyWith<Color>\'');
+    expect(description[1], 'dataRowHeight: 51.0');
+    expect(description[2], 'dataTextStyle: TextStyle(inherit: true, size: 12.0)');
+    expect(description[3], 'headingRowColor: Instance of \'_MaterialStatePropertyWith<Color>\'');
+    expect(description[4], 'headingRowHeight: 52.0');
+    expect(description[5], 'headingTextStyle: TextStyle(inherit: true, size: 14.0)');
+    expect(description[6], 'horizontalMargin: 3.0');
+    expect(description[7], 'columnSpacing: 4.0');
+    expect(description[8], 'dividerThickness: 5.0');
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
-    const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
     final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.resolveWith<Color>(
       (Set<MaterialState> states) => const Color(0xfffffff1),
     );
@@ -108,7 +103,6 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           dataTableTheme: DataTableThemeData(
-            decoration: decoration,
             dataRowColor: dataRowColor,
             dataRowHeight: dataRowHeight,
             dataTextStyle: dataTextStyle,
@@ -140,9 +134,6 @@ void main() {
         ),
       ),
     );
-
-    final Finder dataTableInkFinder = find.descendant(of: find.byType(DataTable), matching: find.byType(Ink));
-    expect(tester.widgetList<Ink>(dataTableInkFinder).last.decoration, decoration);
 
     final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
@@ -163,7 +154,6 @@ void main() {
   });
 
   testWidgets('DataTable properties are taken over the theme values', (WidgetTester tester) async {
-    const BoxDecoration themeDecoration = BoxDecoration(color: Color(0xfffffff1));
     final MaterialStateProperty<Color> themeDataRowColor = MaterialStateProperty.resolveWith<Color>(
       (Set<MaterialState> states) => const Color(0xfffffff0),
     );
@@ -178,7 +168,6 @@ void main() {
     const double themeColumnSpacing = 3.0;
     const double themeDividerThickness = 4.0;
 
-    const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
     final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.resolveWith<Color>(
       (Set<MaterialState> states) => const Color(0xfffffff1),
     );
@@ -196,7 +185,6 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           dataTableTheme: DataTableThemeData(
-            decoration: themeDecoration,
             dataRowColor: themeDataRowColor,
             dataRowHeight: themeDataRowHeight,
             dataTextStyle: themeDataTextStyle,
@@ -210,7 +198,6 @@ void main() {
         ),
         home: Scaffold(
           body: DataTable(
-            decoration: decoration,
             dataRowColor: dataRowColor,
             dataRowHeight: dataRowHeight,
             dataTextStyle: dataTextStyle,
@@ -238,9 +225,6 @@ void main() {
         ),
       ),
     );
-
-    final Finder dataTableInkFinder = find.descendant(of: find.byType(DataTable), matching: find.byType(Ink));
-    expect(tester.widgetList<Ink>(dataTableInkFinder).last.decoration, decoration);
 
     final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);

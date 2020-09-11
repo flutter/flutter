@@ -174,6 +174,11 @@ class FlutterLogoDecoration extends Decoration {
   }
 
   @override
+  Path getClipPath(Rect rect, TextDirection textDirection) {
+    return Path()..addRect(rect);
+  }
+
+  @override
   bool operator ==(Object other) {
     assert(debugAssertIsValid());
     if (identical(this, other))

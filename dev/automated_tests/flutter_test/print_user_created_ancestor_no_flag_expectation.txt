@@ -1,14 +1,7 @@
 <<skip until matching line>>
 ══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════
-The following assertion was thrown building Listener
-'package:flutter\/src\/painting\/basic_types\.dart': Failed assertion: line 222 pos 10: 'textDirection
-!= null': is not true\.
-
-Either the assertion indicates an error in the framework itself, or we should provide substantially
-more information in this error message to help you determine and fix the underlying cause\.
-In either case, please report this assertion by filing a bug on GitHub:
-  https:\/\/github\.com\/flutter\/flutter\/issues\/new\?template=BUG\.md
-
+<<skip until matching line>>
+^$
 Widget creation tracking is currently disabled. Enabling it enables improved error messages\. It can
 be enabled by passing `--track-widget-creation` to `flutter run` or `flutter test`\.
 

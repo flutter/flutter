@@ -11,7 +11,7 @@ void main() {
   macroPerfTest(
     'post_backdrop_filter_perf',
     kPostBackdropFilterRouteName,
-    pageDelay: const Duration(seconds: 1),
+    pageDelay: const Duration(seconds: 2),
     duration: const Duration(seconds: 10),
     setupOps: (FlutterDriver driver) async {
       final SerializableFinder backdropFilterCheckbox = find.byValueKey('bdf-checkbox');
@@ -22,7 +22,7 @@ void main() {
 
       final SerializableFinder animateButton = find.byValueKey('bdf-animate');
       await driver.tap(animateButton);
-      await Future<void>.delayed(const Duration(milliseconds: 1000)); // Now animate
+      await Future<void>.delayed(const Duration(milliseconds: 10000)); // Now animate
     },
   );
 }
