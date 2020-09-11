@@ -9,13 +9,18 @@ config("ocmock_config") {
   include_dirs = [ "$ocmock_path" ]
 }
 
-source_set("ocmock_src") {
+static_library("ocmock") {
   configs -= [ "//build/config/compiler:chromium_code" ]
   all_dependent_configs = [ ":ocmock_config" ]
   cflags = [
     "-fvisibility=default",
     "-Wno-misleading-indentation",
   ]
+  if (is_ios) {
+    cflags += [
+      "-mios-simulator-version-min=$ios_testing_deployment_target",
+    ]
+  }
   sources = [
     "$ocmock_path/OCMock/NSInvocation+OCMAdditions.h",
     "$ocmock_path/OCMock/NSInvocation+OCMAdditions.m",
@@ -89,17 +94,5 @@ source_set("ocmock_src") {
     "$ocmock_path/OCMock/OCPartialMockObject.m",
     "$ocmock_path/OCMock/OCProtocolMockObject.h",
     "$ocmock_path/OCMock/OCProtocolMockObject.m",
-  ]
-}
-
-# This is a static library so it can be used by xcode's build system too.
-static_library("ocmock") {
-  if (is_ios) {
-    cflags = [
-      "-mios-simulator-version-min=$ios_testing_deployment_target",
-    ]
-  }
-  public_deps = [
-    ":ocmock_src",
   ]
 }
