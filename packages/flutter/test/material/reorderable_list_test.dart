@@ -177,11 +177,9 @@ void main() {
           return contentElement;
         }
 
-        const double kNonDraggingListHeight = 292.0;
-        // The list view pads the drop area by 0dp.
         const double kDraggingListHeight = 292.0;
         // Drag a normal text item
-        expect(getContentElement().size.height, kNonDraggingListHeight);
+        expect(getContentElement().size.height, kDraggingListHeight);
         TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Normal item')));
         await tester.pump(kLongPressTimeout + kPressTimeout);
         await tester.pumpAndSettle();
@@ -195,7 +193,7 @@ void main() {
         // Drop it
         await drag.up();
         await tester.pumpAndSettle();
-        expect(getContentElement().size.height, kNonDraggingListHeight);
+        expect(getContentElement().size.height, kDraggingListHeight);
 
         // Drag a tall item
         drag = await tester.startGesture(tester.getCenter(find.text('Tall item')));
@@ -210,7 +208,7 @@ void main() {
         // Drop it
         await drag.up();
         await tester.pumpAndSettle();
-        expect(getContentElement().size.height, kNonDraggingListHeight);
+        expect(getContentElement().size.height, kDraggingListHeight);
       });
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
@@ -692,11 +690,9 @@ void main() {
           return contentElement;
         }
 
-        const double kNonDraggingListWidth = 292.0;
-        // The list view pads the drop area by 0dp.
         const double kDraggingListWidth = 292.0;
         // Drag a normal text item
-        expect(getContentElement().size.width, kNonDraggingListWidth);
+        expect(getContentElement().size.width, kDraggingListWidth);
         TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Normal item')));
         await tester.pump(kLongPressTimeout + kPressTimeout);
         await tester.pumpAndSettle();
@@ -710,7 +706,7 @@ void main() {
         // Drop it
         await drag.up();
         await tester.pumpAndSettle();
-        expect(getContentElement().size.width, kNonDraggingListWidth);
+        expect(getContentElement().size.width, kDraggingListWidth);
 
         // Drag a tall item
         drag = await tester.startGesture(tester.getCenter(find.text('Tall item')));
@@ -725,7 +721,7 @@ void main() {
         // Drop it
         await drag.up();
         await tester.pumpAndSettle();
-        expect(getContentElement().size.width, kNonDraggingListWidth);
+        expect(getContentElement().size.width, kDraggingListWidth);
       });
 
 

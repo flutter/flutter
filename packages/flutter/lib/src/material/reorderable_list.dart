@@ -206,9 +206,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // the currently dragging widget, such as when it first builds.
   static const double _defaultDropAreaExtent = 100.0;
 
-  // The additional margin to place around a computed drop area.
-  static const double _dropAreaMargin = 0.0;
-
   // How long an animation to reorder an element in the list takes.
   static const Duration _reorderAnimationDuration = Duration(milliseconds: 200);
 
@@ -264,7 +261,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         dropAreaWithoutMargin = _draggingFeedbackSize.height;
         break;
     }
-    return dropAreaWithoutMargin + _dropAreaMargin;
+    return dropAreaWithoutMargin;
   }
 
   @override
