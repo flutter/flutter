@@ -478,7 +478,6 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                     ),
                     child: widget.leading,
                   ),
-                  widget.leading,
                   _verticalSpacer,
                 ],
               Expanded(
