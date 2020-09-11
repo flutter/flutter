@@ -33,14 +33,9 @@ if [[ $# -eq 1 ]]; then
   FLUTTER_ENGINE="$1"
 fi
 
-echo "iOS Scenarios tests currently disabled due to flakiness"
-echo "See: https://github.com/flutter/flutter/issues/61620"
-
-# TODO(cbracken): re-enable when
-# https://github.com/flutter/flutter/issues/61620 is fixed.
-# cd ios/Scenarios
-# set -o pipefail && xcodebuild -sdk iphonesimulator \
-#   -scheme Scenarios \
-#   -destination 'platform=iOS Simulator,name=iPhone 8' \
-#   test \
-#   FLUTTER_ENGINE="$FLUTTER_ENGINE"
+cd ios/Scenarios
+set -o pipefail && xcodebuild -sdk iphonesimulator \
+  -scheme Scenarios \
+  -destination 'platform=iOS Simulator,name=iPhone 8' \
+  test \
+  FLUTTER_ENGINE="$FLUTTER_ENGINE"
