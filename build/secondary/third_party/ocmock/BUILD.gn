@@ -9,18 +9,15 @@ config("ocmock_config") {
   include_dirs = [ "$ocmock_path" ]
 }
 
-static_library("ocmock") {
+# Target that compiles all sources to .o files but does not produce a static
+# library for use in macOS desktop tests.
+source_set("ocmock_src") {
   configs -= [ "//build/config/compiler:chromium_code" ]
   all_dependent_configs = [ ":ocmock_config" ]
   cflags = [
     "-fvisibility=default",
     "-Wno-misleading-indentation",
   ]
-  if (is_ios) {
-    cflags += [
-      "-mios-simulator-version-min=$ios_testing_deployment_target",
-    ]
-  }
   sources = [
     "$ocmock_path/OCMock/NSInvocation+OCMAdditions.h",
     "$ocmock_path/OCMock/NSInvocation+OCMAdditions.m",
@@ -94,5 +91,19 @@ static_library("ocmock") {
     "$ocmock_path/OCMock/OCPartialMockObject.m",
     "$ocmock_path/OCMock/OCProtocolMockObject.h",
     "$ocmock_path/OCMock/OCProtocolMockObject.m",
+  ]
+}
+
+# Generates a static library, used in iOS unit test targets
+static_library("ocmock") {
+  # Force the static lib to include code from dependencies
+  complete_static_lib = true
+  if (is_ios) {
+    cflags = [
+      "-mios-simulator-version-min=$ios_testing_deployment_target",
+    ]
+  }
+  public_deps = [
+    ":ocmock_src",
   ]
 }
