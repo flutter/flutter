@@ -51,7 +51,7 @@ class _NestedListener extends StatelessWidget {
   }
 }
 
-/// Creates a grid of mouse regions, then continuously hover over them.
+/// Creates a grid of mouse regions, then continuously hovers over them.
 ///
 /// Measures our ability to hit test mouse regions.
 class BenchMouseRegionMixedGridHover extends WidgetRecorder {
