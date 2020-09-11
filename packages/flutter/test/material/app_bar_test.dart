@@ -2038,6 +2038,102 @@ void main() {
     await buildAndVerifyConfig();
   });
 
+  testWidgets('SliverAppBar basic showOnScreen test: no snapping', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CustomScrollView(
+          controller: controller,
+          slivers: const <Widget>[
+            SliverAppBar(
+              title: Text('Jumbo'),
+              pinned: true,
+              showOnScreenConfiguration: PersistentHeaderShowOnScreenConfiguration.maxExpansion,
+              expandedHeight: 500,
+            ),
+            SliverPadding(padding: EdgeInsets.only(top: 1000)),
+          ],
+        ),
+      ),
+    );
+
+    controller.jumpTo(800);
+    await tester.pump();
+
+    final RenderSliverPinnedPersistentHeader pinnedHeader = tester
+      .renderObject<RenderSliverPinnedPersistentHeader>(find.byType(SliverPersistentHeader, skipOffstage: false));
+
+    // Ensure the header is minimized.
+    assert(pinnedHeader.child.size.height == pinnedHeader.minExtent);
+    pinnedHeader.showOnScreen();
+    await tester.pump();
+
+    expect(pinnedHeader.child.size.height, greaterThan(pinnedHeader.minExtent));
+    expect(pinnedHeader.child.size.height, pinnedHeader.maxExtent);
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, 10));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // SliverAppBar does not shrink as we're scrolling towards the wrong direction;
+    expect(pinnedHeader.child.size.height, pinnedHeader.maxExtent);
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -10));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(pinnedHeader.child.size.height, pinnedHeader.maxExtent - 10);
+  });
+
+  testWidgets('SliverAppBar basic showOnScreen test: with snapping', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CustomScrollView(
+          controller: controller,
+          slivers: const <Widget>[
+            SliverAppBar(
+              title: Text('Jumbo'),
+              pinned: true,
+              snap: true,
+              showOnScreenConfiguration: PersistentHeaderShowOnScreenConfiguration.maxExpansion,
+              expandedHeight: 500,
+            ),
+            SliverPadding(padding: EdgeInsets.only(top: 1000)),
+          ],
+        ),
+      ),
+    );
+
+    controller.jumpTo(800);
+    await tester.pump();
+
+    final RenderSliverPinnedPersistentHeader pinnedHeader = tester
+      .renderObject<RenderSliverPinnedPersistentHeader>(find.byType(SliverPersistentHeader, skipOffstage: false));
+
+    // Ensure the header is minimized.
+    assert(pinnedHeader.child.size.height == pinnedHeader.minExtent);
+    pinnedHeader.showOnScreen();
+    await tester.pump();
+
+    expect(pinnedHeader.child.size.height, greaterThan(pinnedHeader.minExtent));
+    expect(pinnedHeader.child.size.height, pinnedHeader.maxExtent);
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, 10));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // SliverAppBar does not shrink as we're scrolling towards the wrong direction;
+    expect(pinnedHeader.child.size.height, pinnedHeader.maxExtent);
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -10));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // Snaps to minExtent.
+    expect(pinnedHeader.child.size.height, pinnedHeader.minExtent);
+  });
+
   testWidgets('AppBar respects toolbarHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

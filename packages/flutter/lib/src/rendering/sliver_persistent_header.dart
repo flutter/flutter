@@ -479,29 +479,6 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverFloatingPe
    );
   }
 
-  //@override
-  //void performLayout() {
-  //  final SliverConstraints constraints = this.constraints;
-  //  final double maxExtent = this.maxExtent;
-  //  final bool overlapsContent = constraints.overlap > 0.0;
-  //  layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: overlapsContent);
-  //  final double effectiveRemainingPaintExtent = math.max(0, constraints.remainingPaintExtent - constraints.overlap);
-  //  final double layoutExtent = (maxExtent - constraints.scrollOffset).clamp(0.0, effectiveRemainingPaintExtent);
-  //  final double stretchOffset = stretchConfiguration != null ?
-  //    constraints.overlap.abs() :
-  //    0.0;
-  //  geometry = SliverGeometry(
-  //    scrollExtent: maxExtent,
-  //    paintOrigin: constraints.overlap,
-  //    paintExtent: math.min(childExtent, effectiveRemainingPaintExtent),
-  //    layoutExtent: layoutExtent,
-  //    maxPaintExtent: maxExtent + stretchOffset,
-  //    maxScrollObstructionExtent: minExtent,
-  //    cacheExtent: layoutExtent > 0.0 ? -constraints.cacheOrigin + layoutExtent : layoutExtent,
-  //    hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
-  //  );
-  //}
-
   @override
   double childMainAxisPosition(RenderBox child) => 0.0;
 
@@ -663,14 +640,14 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     return stretchOffset > 0 ? 0.0 : math.min(0.0, paintExtent - childExtent);
   }
 
-  // endValue: the target scrollOffset when the animation finishes.
+  // endValue: the target scrollOffset when the animation ends.
   void _updateAnimation(Duration duration, double endValue, Curve curve) {
     assert(duration != null);
     assert(endValue != null);
     assert(curve != null);
     assert(
       vsync != null,
-      'vsync must not be null if the floating header changes size animatedly.',
+      'vsync must not be null if the persistent header snaps or reveals with animation.',
     );
 
     final AnimationController effectiveController =
