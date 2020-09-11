@@ -472,12 +472,12 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
               _verticalSpacer,
               if (widget.leading != null)
                 ...<Widget>[
-//                  ConstrainedBox(
-//                    constraints: BoxConstraints(
-//                      minWidth: lerpDouble(minWidth, minExtendedWidth, _extendedAnimation.value),
-//                    ),
-//                    child: widget.leading,
-//                  ),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: lerpDouble(minWidth, minExtendedWidth, _extendedAnimation.value),
+                    ),
+                    child: widget.leading,
+                  ),
                   widget.leading,
                   _verticalSpacer,
                 ],
