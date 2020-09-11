@@ -623,6 +623,46 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), equals(1.0));
     });
 
+    testWidgets('Scale with mouse returns onInteraction properties', (WidgetTester tester) async{
+      final TransformationController transformationController = TransformationController();
+      double scaleChange;
+      Velocity currentVelocity;
+      bool calledStart;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                transformationController: transformationController,
+                onInteractionStart: (ScaleStartDetails details){
+                  calledStart = true;
+                },
+                onInteractionUpdate: (ScaleUpdateDetails details){
+                  scaleChange = details.scale;
+                },
+                onInteractionEnd: (ScaleEndDetails details){
+                  currentVelocity = details.velocity;
+                },
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      await scrollAt(center, tester, const Offset(0.0, -20.0));
+      await tester.pumpAndSettle();
+      const Velocity noMovement = Velocity(pixelsPerSecond: Offset(0,0));
+      final double afterScaling = transformationController.value.getMaxScaleOnAxis();
+
+      expect(scaleChange,greaterThan(1.0));
+      expect(afterScaling, isNot(equals(null)));
+      expect(afterScaling, isNot(equals(1.0)));
+      expect(currentVelocity, equals(noMovement));
+      expect(calledStart, equals(true));
+    });
+
     testWidgets('viewport changes size', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       await tester.pumpWidget(
