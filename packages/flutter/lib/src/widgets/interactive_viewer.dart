@@ -646,27 +646,21 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // Don't allow a scale that results in an overall scale beyond min/max
     // scale.
     final double currentScale = _transformationController.value.getMaxScaleOnAxis();
-    final double totalScale = currentScale * scale;
+    final double totalScale = math.max(
+      currentScale * scale,
+      // Ensure that the scale cannot make the child so big that it can't fit
+      // inside the boundaries (in either direction).
+      math.max(
+        _viewport.width / _boundaryRect.width,
+        _viewport.height / _boundaryRect.height,
+      ),
+    );
     final double clampedTotalScale = totalScale.clamp(
       widget.minScale,
       widget.maxScale,
     ) as double;
     final double clampedScale = clampedTotalScale / currentScale;
-    final Matrix4 nextMatrix = matrix.clone()..scale(clampedScale);
-
-    // Ensure that the scale cannot make the child so big that it can't fit
-    // inside the boundaries (in either direction).
-    final double minScale = math.max(
-      _viewport.width / _boundaryRect.width,
-      _viewport.height / _boundaryRect.height,
-    );
-    if (minScale > widget.minScale && minScale < widget.maxScale
-        && clampedTotalScale < minScale) {
-      final double minCurrentScale = minScale / currentScale;
-      return matrix.clone()..scale(minCurrentScale);
-    }
-
-    return nextMatrix;
+    return matrix.clone()..scale(clampedScale);
   }
 
   // Return a new matrix representing the given matrix after applying the given
