@@ -10,5 +10,5 @@ import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
-  await task(createCubicBezierPerfE2ETest());
+  await task(createCubicBezierPerfSkSlWarmupE2ETest());
 }
