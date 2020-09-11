@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -94,7 +95,7 @@ void main() {
     expect(calls, 2);
   });
 
-  testWidgets('Baseline in LayoutBuilder is passed to child', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder caches baseline', (WidgetTester tester) async {
     int calls = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -114,6 +115,11 @@ void main() {
       ),
     );
     expect(calls, 1);
+    await tester.pump();
+    expect(calls, 1);
+    tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
+    await tester.pump();
+    expect(calls, 2);
   });
 }
 
