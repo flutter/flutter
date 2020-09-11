@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'basic.dart';
 import 'framework.dart';
 import 'navigator.dart';
@@ -11,7 +13,7 @@ import 'routes.dart';
 abstract class PageRoute<T> extends ModalRoute<T> {
   /// Creates a modal route that replaces the entire screen.
   PageRoute({
-    RouteSettings? settings,
+    RouteSettings settings,
     this.fullscreenDialog = false,
   }) : super(settings: settings);
 
@@ -56,8 +58,8 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   /// The [pageBuilder], [transitionsBuilder], [opaque], [barrierDismissible],
   /// [maintainState], and [fullscreenDialog] arguments must not be null.
   PageRouteBuilder({
-    RouteSettings? settings,
-    required this.pageBuilder,
+    RouteSettings settings,
+    @required this.pageBuilder,
     this.transitionsBuilder = _defaultTransitionsBuilder,
     this.transitionDuration = const Duration(milliseconds: 300),
     this.reverseTransitionDuration = const Duration(milliseconds: 300),
@@ -102,10 +104,10 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   final bool barrierDismissible;
 
   @override
-  final Color? barrierColor;
+  final Color barrierColor;
 
   @override
-  final String? barrierLabel;
+  final String barrierLabel;
 
   @override
   final bool maintainState;
@@ -133,7 +135,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
 class TransitionBuilderPage<T> extends Page<T> {
   /// Creates a [TransitionBuilderPage].
   const TransitionBuilderPage({
-    required this.pageBuilder,
+    @required this.pageBuilder,
     this.transitionsBuilder = _defaultTransitionsBuilder,
     this.transitionDuration = const Duration(milliseconds: 300),
     this.reverseTransitionDuration = const Duration(milliseconds: 300),
@@ -143,9 +145,9 @@ class TransitionBuilderPage<T> extends Page<T> {
     this.barrierLabel,
     this.maintainState = true,
     this.fullscreenDialog = false,
-    LocalKey? key,
-    String? name,
-    Object? arguments,
+    LocalKey key,
+    String name,
+    Object arguments,
   }) : assert(pageBuilder != null),
        assert(transitionsBuilder != null),
        assert(opaque != null),
@@ -179,7 +181,7 @@ class TransitionBuilderPage<T> extends Page<T> {
   ///  * [barrierDismissible], which controls the behavior of the barrier when
   ///    tapped.
   ///  * [ModalBarrier], the widget that implements this feature.
-  final Color? barrierColor;
+  final Color barrierColor;
 
   /// {@macro flutter.widgets.modalRoute.barrierLabel}
   ///
@@ -188,7 +190,7 @@ class TransitionBuilderPage<T> extends Page<T> {
   ///  * [barrierDismissible], which controls the behavior of the barrier when
   ///    tapped.
   ///  * [ModalBarrier], the widget that implements this feature.
-  final String? barrierLabel;
+  final String barrierLabel;
 
   /// {@macro flutter.widgets.modalRoute.maintainState}
   final bool maintainState;
@@ -225,10 +227,10 @@ class _PageBasedPageRouteBuilder<T> extends PageRoute<T>{
   bool get barrierDismissible => _page.barrierDismissible;
 
   @override
-  Color? get barrierColor => _page.barrierColor;
+  Color get barrierColor => _page.barrierColor;
 
   @override
-  String? get barrierLabel => _page.barrierLabel;
+  String get barrierLabel => _page.barrierLabel;
 
   @override
   bool get maintainState => _page.maintainState;

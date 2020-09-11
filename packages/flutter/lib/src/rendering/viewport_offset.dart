@@ -94,9 +94,6 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// the value changes due to [correctBy]).
   double get pixels;
 
-  /// Whether the [pixels] property is available.
-  bool get hasPixels;
-
   /// Called when the viewport's extents are established.
   ///
   /// The argument is the dimension of the [RenderViewport] in the main axis
@@ -248,9 +245,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// `super.debugFillDescription(description)`.
   @mustCallSuper
   void debugFillDescription(List<String> description) {
-    if (hasPixels) {
-      description.add('offset: ${pixels.toStringAsFixed(1)}');
-    }
+    description.add('offset: ${pixels.toStringAsFixed(1)}');
   }
 }
 
@@ -262,9 +257,6 @@ class _FixedViewportOffset extends ViewportOffset {
 
   @override
   double get pixels => _pixels;
-
-  @override
-  bool get hasPixels => true;
 
   @override
   bool applyViewportDimension(double viewportDimension) => true;

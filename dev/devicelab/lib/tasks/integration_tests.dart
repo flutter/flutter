@@ -92,8 +92,20 @@ TaskFunction createFlutterCreateOfflineTest() {
   return () async {
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_create_test.');
     String output;
+    // The default create template has an actual online dependency against
+    // a pub package. Make sure it's available in pub cache first before
+    // trying to resolve it offline.
     await inDirectory(tempDir, () async {
-      output = await eval(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>['create', '--offline', 'flutter_create_test']);
+      output = await eval(
+        path.join(flutterDirectory.path, 'bin', 'flutter'),
+        <String>['pub', 'cache', 'add', 'cupertino_icons', '--version', '1.0.0'],
+      );
+    });
+    await inDirectory(tempDir, () async {
+      output = await eval(
+        path.join(flutterDirectory.path, 'bin', 'flutter'),
+        <String>['create', '--offline', 'flutter_create_test'],
+      );
     });
     if (output.contains(RegExp('building flutter tool', caseSensitive: false))) {
       return TaskResult.failure('`flutter create --offline` should not rebuild flutter tool');

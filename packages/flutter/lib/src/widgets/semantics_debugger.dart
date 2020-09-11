@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:ui' show SemanticsFlag;
 
@@ -25,8 +27,8 @@ class SemanticsDebugger extends StatefulWidget {
   ///
   /// [labelStyle] dictates the [TextStyle] used for the semantics labels.
   const SemanticsDebugger({
-    Key? key,
-    required this.child,
+    Key key,
+    @required this.child,
     this.labelStyle = const TextStyle(
       color: Color(0xFF000000),
       fontSize: 10.0,
@@ -49,7 +51,7 @@ class SemanticsDebugger extends StatefulWidget {
 }
 
 class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindingObserver {
-  late _SemanticsClient _client;
+  _SemanticsClient _client;
 
   @override
   void initState() {
@@ -58,9 +60,9 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
     // static here because we might not be in a tree that's attached to that
     // binding. Instead, we should find a way to get to the PipelineOwner from
     // the BuildContext.
-    _client = _SemanticsClient(WidgetsBinding.instance!.pipelineOwner)
+    _client = _SemanticsClient(WidgetsBinding.instance.pipelineOwner)
       ..addListener(_update);
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -68,7 +70,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
     _client
       ..removeListener(_update)
       ..dispose();
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -80,7 +82,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   }
 
   void _update() {
-    SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
       // Semantic information are only available at the end of a frame and our
       // only chance to paint them on the screen is the next frame. To achieve
       // this, we call setState() in a post-frame callback.
@@ -95,10 +97,10 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
     });
   }
 
-  Offset? _lastPointerDownLocation;
+  Offset _lastPointerDownLocation;
   void _handlePointerDown(PointerDownEvent event) {
     setState(() {
-      _lastPointerDownLocation = event.position * WidgetsBinding.instance!.window.devicePixelRatio;
+      _lastPointerDownLocation = event.position * WidgetsBinding.instance.window.devicePixelRatio;
     });
     // TODO(ianh): Use a gesture recognizer so that we can reset the
     // _lastPointerDownLocation when none of the other gesture recognizers win.
@@ -106,7 +108,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
 
   void _handleTap() {
     assert(_lastPointerDownLocation != null);
-    _performAction(_lastPointerDownLocation!, SemanticsAction.tap);
+    _performAction(_lastPointerDownLocation, SemanticsAction.tap);
     setState(() {
       _lastPointerDownLocation = null;
     });
@@ -114,7 +116,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
 
   void _handleLongPress() {
     assert(_lastPointerDownLocation != null);
-    _performAction(_lastPointerDownLocation!, SemanticsAction.longPress);
+    _performAction(_lastPointerDownLocation, SemanticsAction.longPress);
     setState(() {
       _lastPointerDownLocation = null;
     });
@@ -127,17 +129,17 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
       return;
     if (vx.abs() > vy.abs()) {
       if (vx.sign < 0) {
-        _performAction(_lastPointerDownLocation!, SemanticsAction.decrease);
-        _performAction(_lastPointerDownLocation!, SemanticsAction.scrollLeft);
+        _performAction(_lastPointerDownLocation, SemanticsAction.decrease);
+        _performAction(_lastPointerDownLocation, SemanticsAction.scrollLeft);
       } else {
-        _performAction(_lastPointerDownLocation!, SemanticsAction.increase);
-        _performAction(_lastPointerDownLocation!, SemanticsAction.scrollRight);
+        _performAction(_lastPointerDownLocation, SemanticsAction.increase);
+        _performAction(_lastPointerDownLocation, SemanticsAction.scrollRight);
       }
     } else {
       if (vy.sign < 0)
-        _performAction(_lastPointerDownLocation!, SemanticsAction.scrollUp);
+        _performAction(_lastPointerDownLocation, SemanticsAction.scrollUp);
       else
-        _performAction(_lastPointerDownLocation!, SemanticsAction.scrollDown);
+        _performAction(_lastPointerDownLocation, SemanticsAction.scrollDown);
     }
     setState(() {
       _lastPointerDownLocation = null;
@@ -150,7 +152,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
 
   // TODO(abarth): This shouldn't be a static. We should get the pipeline owner
   // from [context] somehow.
-  PipelineOwner get _pipelineOwner => WidgetsBinding.instance!.pipelineOwner;
+  PipelineOwner get _pipelineOwner => WidgetsBinding.instance.pipelineOwner;
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +161,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         _pipelineOwner,
         _client.generation,
         _lastPointerDownLocation, // in physical pixels
-        WidgetsBinding.instance!.window.devicePixelRatio,
+        WidgetsBinding.instance.window.devicePixelRatio,
         widget.labelStyle,
       ),
       child: GestureDetector(
@@ -188,11 +190,11 @@ class _SemanticsClient extends ChangeNotifier {
     );
   }
 
-  SemanticsHandle? _semanticsHandle;
+  SemanticsHandle _semanticsHandle;
 
   @override
   void dispose() {
-    _semanticsHandle!.dispose();
+    _semanticsHandle.dispose();
     _semanticsHandle = null;
     super.dispose();
   }
@@ -210,17 +212,17 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
   final PipelineOwner owner;
   final int generation;
-  final Offset? pointerPosition; // in physical pixels
+  final Offset pointerPosition; // in physical pixels
   final double devicePixelRatio;
   final TextStyle labelStyle;
 
-  SemanticsNode? get _rootSemanticsNode {
+  SemanticsNode get _rootSemanticsNode {
     return owner.semanticsOwner?.rootSemanticsNode;
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    final SemanticsNode? rootNode = _rootSemanticsNode;
+    final SemanticsNode rootNode = _rootSemanticsNode;
     canvas.save();
     canvas.scale(1.0 / devicePixelRatio, 1.0 / devicePixelRatio);
     if (rootNode != null)
@@ -228,7 +230,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     if (pointerPosition != null) {
       final Paint paint = Paint();
       paint.color = const Color(0x7F0090FF);
-      canvas.drawCircle(pointerPosition!, 10.0 * devicePixelRatio, paint);
+      canvas.drawCircle(pointerPosition, 10.0 * devicePixelRatio, paint);
     }
     canvas.restore();
   }
@@ -290,7 +292,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
         label = '${Unicode.FSI}${data.label}${Unicode.PDI}';
         annotations.insert(0, 'MISSING TEXT DIRECTION');
       } else {
-        switch (data.textDirection!) {
+        switch (data.textDirection) {
           case TextDirection.rtl:
             label = '${Unicode.RLI}${data.label}${Unicode.PDF}';
             break;
@@ -343,7 +345,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
   void _paint(Canvas canvas, SemanticsNode node, int rank) {
     canvas.save();
     if (node.transform != null)
-      canvas.transform(node.transform!.storage);
+      canvas.transform(node.transform.storage);
     final Rect rect = node.rect;
     if (!rect.isEmpty) {
       final Color lineColor = Color(0xFF000000 + math.Random(node.id).nextInt(0xFFFFFF));
