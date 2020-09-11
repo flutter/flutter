@@ -95,30 +95,23 @@ void main() {
   });
 
   testWidgets('LayoutBuilder caches baseline', (WidgetTester tester) async {
-    int calls = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Baseline(
-            baseline: 100.0,
+            baseline: 180.0,
             baselineType: TextBaseline.alphabetic,
             child: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
-                return BaselineDetector(() {
-                  calls += 1;
-                });
+                return BaselineDetector(() {});
               },
             ),
           ),
         ),
       ),
     );
-    expect(calls, 1);
-    await tester.pump();
-    expect(calls, 1);
-    tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
-    await tester.pump();
-    expect(calls, 2);
+
+    expect(tester.getRect(find.byType(BaselineDetector)).top, 160.0);
   });
 }
 
@@ -160,7 +153,7 @@ class RenderBaselineDetector extends RenderBox {
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     if (callback != null)
       callback();
-    return 0.0;
+    return 20.0;
   }
 
   void dirty() {
