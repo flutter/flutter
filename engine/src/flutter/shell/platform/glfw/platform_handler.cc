@@ -69,7 +69,7 @@ void PlatformHandler::HandleMethodCall(
     rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
     document.AddMember(rapidjson::Value(kTextKey, allocator),
                        rapidjson::Value(clipboardData, allocator), allocator);
-    result->Success(&document);
+    result->Success(document);
   } else if (method.compare(kSetClipboardDataMethod) == 0) {
     if (!window_) {
       result->Error(kNoWindowError,

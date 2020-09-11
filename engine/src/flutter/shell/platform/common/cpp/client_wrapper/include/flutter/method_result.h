@@ -24,10 +24,6 @@ class MethodResult {
   MethodResult(MethodResult const&) = delete;
   MethodResult& operator=(MethodResult const&) = delete;
 
-  // DEPRECATED. Use the reference versions below. This will be removed in the
-  // near future.
-  void Success(const T* result) { SuccessInternal(result); }
-
   // Sends a success response, indicating that the call completed successfully
   // with the given result.
   void Success(const T& result) { SuccessInternal(&result); }
@@ -35,14 +31,6 @@ class MethodResult {
   // Sends a success response, indicating that the call completed successfully
   // with no result.
   void Success() { SuccessInternal(nullptr); }
-
-  // DEPRECATED. Use the reference versions below. This will be removed in the
-  // near future.
-  void Error(const std::string& error_code,
-             const std::string& error_message,
-             const T* error_details) {
-    ErrorInternal(error_code, error_message, error_details);
-  }
 
   // Sends an error response, indicating that the call was understood but
   // handling failed in some way.
