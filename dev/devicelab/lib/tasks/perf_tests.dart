@@ -298,6 +298,54 @@ TaskFunction createsMultiWidgetConstructPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createsScrollSmoothnessPerfTest() {
+  final String testDirectory =
+      '${flutterDirectory.path}/dev/benchmarks/complex_layout';
+  const String testTarget = 'test/measure_scroll_smoothness.dart';
+  return () {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      final Device device = await devices.workingDevice;
+      await device.unlock();
+      final String deviceId = device.deviceId;
+      await flutter('packages', options: <String>['get']);
+
+      await flutter('drive', options: <String>[
+        '-v',
+        '--verbose-system-logs',
+        '--profile',
+        '-t', testTarget,
+        '-d',
+        deviceId,
+      ]);
+      final Map<String, dynamic> data = json.decode(
+        file('$testDirectory/build/scroll_smoothness_test.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+
+      final Map<String, dynamic> result = <String, dynamic>{};
+      void addResult(dynamic data, String suffix) {
+        assert(data is Map<String, dynamic>);
+        const List<String> metricKeys = <String>[
+          'janky_count',
+          'average_abs_jerk',
+          'dropped_frame_count',
+        ];
+        for (final String key in metricKeys) {
+          result[key+suffix] = data[key];
+        }
+      }
+      addResult(data['resample on with 90Hz input'], '_with_resampler_90Hz');
+      addResult(data['resample on with 59Hz input'], '_with_resampler_59Hz');
+      addResult(data['resample off with 90Hz input'], '_without_resampler_90Hz');
+      addResult(data['resample off with 59Hz input'], '_without_resampler_59Hz');
+
+      return TaskResult.success(
+        result,
+        benchmarkScoreKeys: result.keys.toList(),
+      );
+    });
+  };
+}
+
 TaskFunction createFramePolicyIntegrationTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
