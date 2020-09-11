@@ -42,6 +42,7 @@ if [ ! -d "$SRC_DIR/out/$FLUTTER_ENGINE" ]; then
 fi
 
 autoninja -C "$SRC_DIR/out/$FLUTTER_ENGINE"
+autoninja -C "$SRC_DIR/out/host_debug_unopt"
 
 "$SCRIPT_DIR/compile_ios_jit.sh" "$SRC_DIR/out/host_debug_unopt" "$SRC_DIR/out/$FLUTTER_ENGINE/clang_x64"
 "$SCRIPT_DIR/run_ios_tests.sh" "$FLUTTER_ENGINE"
