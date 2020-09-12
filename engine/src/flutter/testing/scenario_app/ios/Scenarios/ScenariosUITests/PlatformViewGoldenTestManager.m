@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "PlatformViewGoldenTestManager.h"
+
 #import <XCTest/XCTest.h>
 
 @interface PlatformViewGoldenTestManager ()

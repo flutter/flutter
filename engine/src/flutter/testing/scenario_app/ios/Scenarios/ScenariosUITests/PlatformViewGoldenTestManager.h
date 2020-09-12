@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import <Foundation/Foundation.h>
+
 #import "GoldenImage.h"
 
 NS_ASSUME_NONNULL_BEGIN

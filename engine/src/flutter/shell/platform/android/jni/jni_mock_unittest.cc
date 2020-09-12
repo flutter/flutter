@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/jni/jni_mock.h"
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

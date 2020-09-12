@@ -10,6 +10,7 @@
 #endif
 
 #include <glib-object.h>
+
 #include "fl_binary_messenger.h"
 #include "fl_view.h"
 

@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 // FLUTTER_NOLINT
 
+#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/encodable_value.h"
+
 #include <limits>
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/encodable_value.h"
 #include "gtest/gtest.h"
 
 namespace flutter {

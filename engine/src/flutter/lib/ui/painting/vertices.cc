@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/ui/painting/vertices.h"
-#include "flutter/lib/ui/ui_dart_state.h"
 
 #include <algorithm>
 
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 

@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_value.h"
-#include "gtest/gtest.h"
 
 #include <gmodule.h>
+
+#include "gtest/gtest.h"
 
 TEST(FlDartProjectTest, Null) {
   g_autoptr(FlValue) value = fl_value_new_null();

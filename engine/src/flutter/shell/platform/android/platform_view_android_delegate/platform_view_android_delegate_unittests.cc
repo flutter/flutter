@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
+
+#include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

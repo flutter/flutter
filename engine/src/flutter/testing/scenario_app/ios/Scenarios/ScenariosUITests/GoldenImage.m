@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "GoldenImage.h"
+
 #import <XCTest/XCTest.h>
 #include <sys/sysctl.h>
 

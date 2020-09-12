@@ -15,9 +15,10 @@
  */
 
 #include "font_skia.h"
-#include "third_party/skia/include/core/SkFont.h"
 
 #include <minikin/MinikinFont.h>
+
+#include "third_party/skia/include/core/SkFont.h"
 
 namespace txt {
 namespace {

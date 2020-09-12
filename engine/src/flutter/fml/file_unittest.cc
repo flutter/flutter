@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cstring>
 #include <memory>
 #include <vector>
-
-#include "gtest/gtest.h"
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/unique_fd.h"
+#include "gtest/gtest.h"
 
 static bool WriteStringToFile(const fml::UniqueFD& fd,
                               const std::string& contents) {

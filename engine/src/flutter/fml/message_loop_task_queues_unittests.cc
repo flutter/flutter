@@ -4,9 +4,10 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include "flutter/fml/message_loop_task_queues.h"
+
 #include <thread>
 
-#include "flutter/fml/message_loop_task_queues.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "gtest/gtest.h"

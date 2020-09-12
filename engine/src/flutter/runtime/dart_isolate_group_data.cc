@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/runtime/dart_isolate_group_data.h"
+
 #include "flutter/runtime/dart_snapshot.h"
 
 namespace flutter {

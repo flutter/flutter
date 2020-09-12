@@ -9,15 +9,14 @@
 #define FLUTTER_FML_MEMORY_THREAD_CHECKER_H_
 
 #include "flutter/fml/build_config.h"
+#include "flutter/fml/logging.h"
+#include "flutter/fml/macros.h"
 
 #if defined(OS_WIN)
 #include <windows.h>
 #else
 #include <pthread.h>
 #endif
-
-#include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 
 namespace fml {
 

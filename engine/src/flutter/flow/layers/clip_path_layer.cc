@@ -5,9 +5,7 @@
 #include "flutter/flow/layers/clip_path_layer.h"
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
-
 #include "lib/ui/scenic/cpp/commands.h"
-
 #endif
 
 namespace flutter {

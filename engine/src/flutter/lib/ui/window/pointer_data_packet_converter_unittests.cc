@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/ui/window/pointer_data_packet_converter.h"
+
+#include <cstring>
+
 #include "gtest/gtest.h"
 
 namespace flutter {

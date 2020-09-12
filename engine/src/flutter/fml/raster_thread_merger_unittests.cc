@@ -4,11 +4,12 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include "flutter/fml/raster_thread_merger.h"
+
 #include <atomic>
 #include <thread>
 
 #include "flutter/fml/message_loop.h"
-#include "flutter/fml/raster_thread_merger.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/task_runner.h"

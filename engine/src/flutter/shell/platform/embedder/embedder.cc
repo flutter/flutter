@@ -7,6 +7,7 @@
 #define FML_USED_ON_EMBEDDER
 #define RAPIDJSON_HAS_STDSTRING 1
 
+#include <cstring>
 #include <iostream>
 #include <memory>
 #include <string>

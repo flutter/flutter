@@ -6,10 +6,11 @@
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_RUNTIME_DART_UTILS_HANDLE_EXCEPTION_H_
 
 #include <lib/sys/cpp/service_directory.h>
-#include "third_party/dart/runtime/include/dart_api.h"
 
 #include <memory>
 #include <string>
+
+#include "third_party/dart/runtime/include/dart_api.h"
 
 namespace dart_utils {
 

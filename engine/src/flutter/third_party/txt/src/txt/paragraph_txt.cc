@@ -20,6 +20,7 @@
 #include <minikin/Layout.h>
 
 #include <algorithm>
+#include <cstring>
 #include <limits>
 #include <map>
 #include <numeric>

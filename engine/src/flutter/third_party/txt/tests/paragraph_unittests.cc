@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <cstring>
 #include <iostream>
 
 #include "flutter/fml/logging.h"

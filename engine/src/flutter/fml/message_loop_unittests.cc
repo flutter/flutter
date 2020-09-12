@@ -4,12 +4,13 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include "flutter/fml/message_loop.h"
+
 #include <iostream>
 #include <thread>
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/concurrent_message_loop.h"
-#include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/task_runner.h"

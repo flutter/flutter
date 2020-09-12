@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_message_codec.h"
+
 #include <map>
 #include <vector>
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_message_codec.h"
 #include "gtest/gtest.h"
 
 #ifndef USE_LEGACY_ENCODABLE_VALUE

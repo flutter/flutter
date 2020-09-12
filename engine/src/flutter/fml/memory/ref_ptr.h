@@ -8,7 +8,6 @@
 #define FLUTTER_FML_MEMORY_REF_PTR_H_
 
 #include <cstddef>
-
 #include <functional>
 #include <utility>
 

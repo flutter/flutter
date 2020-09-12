@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/event_channel.h"
+
 #include <memory>
 #include <string>
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/binary_messenger.h"
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/event_channel.h"
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/event_stream_handler_functions.h"
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_method_codec.h"
 #include "gtest/gtest.h"

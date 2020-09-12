@@ -6,7 +6,9 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_VULKAN_H_
 
 #include <jni.h>
+
 #include <memory>
+
 #include "flutter/fml/macros.h"
 #include "flutter/shell/gpu/gpu_surface_vulkan_delegate.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"

@@ -6,7 +6,12 @@
 
 #include "flutter/fml/thread.h"
 
+#include <memory>
+#include <string>
+
 #include "flutter/fml/build_config.h"
+#include "flutter/fml/message_loop.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 
 #if defined(OS_WIN)
 #include <windows.h>
@@ -15,12 +20,6 @@
 #else
 #include <pthread.h>
 #endif
-
-#include <memory>
-#include <string>
-
-#include "flutter/fml/message_loop.h"
-#include "flutter/fml/synchronization/waitable_event.h"
 
 namespace fml {
 

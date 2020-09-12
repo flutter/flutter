@@ -28,11 +28,9 @@
 #include "third_party/skia/include/utils/SkNWayCanvas.h"
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
-
 #include "flutter/flow/scene_update_context.h"  //nogncheck
 #include "lib/ui/scenic/cpp/resources.h"        //nogncheck
 #include "lib/ui/scenic/cpp/session.h"          //nogncheck
-
 #endif
 
 namespace flutter {

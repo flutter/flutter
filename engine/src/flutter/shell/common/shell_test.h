@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_COMMON_SHELL_TEST_H_
 #define FLUTTER_SHELL_COMMON_SHELL_TEST_H_
 
+#include "flutter/shell/common/shell.h"
+
 #include <memory>
 
 #include "flutter/common/settings.h"
@@ -15,7 +17,6 @@
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/persistent_cache.h"
 #include "flutter/shell/common/run_configuration.h"
-#include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/shell_test_external_view_embedder.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/vsync_waiters_test.h"

@@ -5,10 +5,10 @@
 #ifndef FLUTTER_FML_DELAYED_TASK_H_
 #define FLUTTER_FML_DELAYED_TASK_H_
 
+#include <queue>
+
 #include "flutter/fml/closure.h"
 #include "flutter/fml/time/time_point.h"
-
-#include <queue>
 
 namespace fml {
 

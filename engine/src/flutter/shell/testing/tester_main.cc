@@ -6,9 +6,11 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <cstdlib>
+#include <cstring>
 
 #include "flutter/assets/asset_manager.h"
 #include "flutter/assets/directory_asset_bundle.h"
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"

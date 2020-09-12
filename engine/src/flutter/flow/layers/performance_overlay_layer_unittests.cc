@@ -4,6 +4,9 @@
 
 #include "flutter/flow/layers/performance_overlay_layer.h"
 
+#include <cstdint>
+#include <sstream>
+
 #include "flutter/flow/flow_test_utils.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/testing/layer_test.h"
@@ -17,9 +20,6 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 #include "third_party/skia/include/utils/SkBase64.h"
-
-#include <cstdint>
-#include <sstream>
 
 namespace flutter {
 namespace testing {

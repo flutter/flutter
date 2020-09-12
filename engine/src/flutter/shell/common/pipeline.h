@@ -5,14 +5,14 @@
 #ifndef FLUTTER_SHELL_COMMON_PIPELINE_H_
 #define FLUTTER_SHELL_COMMON_PIPELINE_H_
 
+#include <deque>
+#include <memory>
+#include <mutex>
+
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/synchronization/semaphore.h"
 #include "flutter/fml/trace_event.h"
-
-#include <deque>
-#include <memory>
-#include <mutex>
 
 namespace flutter {
 

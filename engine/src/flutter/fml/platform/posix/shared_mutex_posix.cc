@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/platform/posix/shared_mutex_posix.h"
+
 #include "flutter/fml/logging.h"
 
 namespace fml {

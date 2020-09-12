@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/runtime/dart_service_isolate.h"
+
 #include "flutter/testing/testing.h"
 
 namespace flutter {

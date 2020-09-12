@@ -5,6 +5,7 @@
 #include "flutter/fml/platform/android/jni_util.h"
 
 #include <sys/prctl.h>
+
 #include <codecvt>
 #include <string>
 

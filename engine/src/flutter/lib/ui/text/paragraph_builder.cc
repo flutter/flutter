@@ -4,6 +4,8 @@
 
 #include "flutter/lib/ui/text/paragraph_builder.h"
 
+#include <cstring>
+
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/logging.h"

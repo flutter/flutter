@@ -13,7 +13,7 @@
 
 #if defined(__cplusplus)
 extern "C" {
-#endif
+#endif  // defined(__cplusplus)
 
 // Opaque reference to a plugin registrar.
 typedef struct FlutterDesktopPluginRegistrar* FlutterDesktopPluginRegistrarRef;

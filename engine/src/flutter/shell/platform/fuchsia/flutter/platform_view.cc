@@ -7,6 +7,8 @@
 #include "platform_view.h"
 
 #include <fuchsia/ui/gfx/cpp/fidl.h>
+
+#include <cstring>
 #include <sstream>
 
 #include "flutter/fml/logging.h"

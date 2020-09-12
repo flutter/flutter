@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "backtrace.h"
+
 #include "gtest/gtest.h"
 #include "logging.h"
 

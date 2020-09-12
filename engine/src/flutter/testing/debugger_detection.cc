@@ -8,19 +8,15 @@
 #include "flutter/fml/logging.h"
 
 #if OS_MACOSX
-
 #include <assert.h>
 #include <stdbool.h>
 #include <sys/sysctl.h>
 #include <sys/types.h>
 #include <unistd.h>
-
 #endif  // OS_MACOSX
 
 #if OS_WIN
-
 #include <windows.h>
-
 #endif  // OS_WIN
 
 namespace flutter {

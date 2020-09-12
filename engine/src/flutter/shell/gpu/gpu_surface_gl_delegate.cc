@@ -4,6 +4,8 @@
 
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 
+#include <cstring>
+
 #include "third_party/skia/include/gpu/gl/GrGLAssembleInterface.h"
 
 namespace flutter {

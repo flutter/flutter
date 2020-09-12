@@ -18,6 +18,7 @@
 #define TXT_ASSET_FONT_MANAGER_H_
 
 #include <memory>
+
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkStream.h"

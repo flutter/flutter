@@ -4,15 +4,15 @@
 
 #define FML_USED_ON_EMBEDDER
 
-#include <gtest/gtest.h>
+#include "flutter/fml/memory/task_runner_checker.h"
 
 #include <thread>
-#include "flutter/fml/memory/task_runner_checker.h"
 
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/raster_thread_merger.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "gtest/gtest.h"
 
 namespace fml {
 namespace testing {

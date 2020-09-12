@@ -12,7 +12,7 @@
 
 #if defined(__cplusplus)
 extern "C" {
-#endif
+#endif  // defined(__cplusplus)
 
 // Opaque reference to a Flutter engine messenger.
 typedef struct FlutterDesktopMessenger* FlutterDesktopMessengerRef;

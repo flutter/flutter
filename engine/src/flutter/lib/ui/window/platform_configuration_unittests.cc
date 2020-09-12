@@ -4,9 +4,9 @@
 
 #define FML_USED_ON_EMBEDDER
 
-#include <memory>
-
 #include "flutter/lib/ui/window/platform_configuration.h"
+
+#include <memory>
 
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/synchronization/waitable_event.h"

@@ -6,6 +6,7 @@
 #define FLUTTER_FML_PLATFORM_DARWIN_PLATFORM_VERSION_H_
 
 #include <sys/types.h>
+
 #include "flutter/fml/macros.h"
 
 namespace fml {

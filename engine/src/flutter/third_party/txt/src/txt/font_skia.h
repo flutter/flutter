@@ -15,6 +15,7 @@
  */
 
 #include <minikin/MinikinFont.h>
+
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkTypeface.h"

@@ -4,9 +4,9 @@
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_method_codec.h"
 
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
-
 #include <gmodule.h>
+
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 
 static constexpr char kMethodKey[] = "method";
 static constexpr char kArgsKey[] = "args";

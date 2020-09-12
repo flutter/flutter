@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/flow/layers/performance_overlay_layer.h"
+
 #include <iomanip>
 #include <iostream>
 #include <string>
 
-#include "flutter/flow/layers/performance_overlay_layer.h"
 #include "third_party/skia/include/core/SkFont.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 

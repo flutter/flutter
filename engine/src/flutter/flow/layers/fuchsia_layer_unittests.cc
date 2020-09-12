@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <deque>
-
-#include "gtest/gtest.h"
-
 #include <fuchsia/ui/scenic/cpp/fidl.h>
 #include <fuchsia/ui/scenic/cpp/fidl_test_base.h>
 #include <lib/async-loop/cpp/loop.h>
@@ -16,6 +12,8 @@
 #include <lib/ui/scenic/cpp/id.h>
 #include <lib/ui/scenic/cpp/view_token_pair.h>
 
+#include <deque>
+
 #include "flutter/flow/layers/child_scene_layer.h"
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/opacity_layer.h"
@@ -24,6 +22,7 @@
 #include "flutter/flow/view_holder.h"
 #include "flutter/fml/platform/fuchsia/message_loop_fuchsia.h"
 #include "flutter/fml/task_runner.h"
+#include "gtest/gtest.h"
 
 namespace flutter {
 namespace testing {

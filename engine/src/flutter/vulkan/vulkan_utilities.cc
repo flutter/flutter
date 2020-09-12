@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 #include "vulkan_utilities.h"
-#include "flutter/fml/build_config.h"
 
 #include <algorithm>
 #include <unordered_set>
+
+#include "flutter/fml/build_config.h"
 
 namespace vulkan {
 
