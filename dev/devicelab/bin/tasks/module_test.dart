@@ -18,12 +18,10 @@ final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
 /// adding Flutter to an existing Android app.
 Future<void> main() async {
   await task(() async {
-
     section('Find Java');
 
     final String javaHome = await findJavaHome();
-    if (javaHome == null)
-      return TaskResult.failure('Could not find Java');
+    if (javaHome == null) return TaskResult.failure('Could not find Java');
     print('\nUsing JAVA_HOME=$javaHome');
 
     section('Create Flutter module project');
@@ -40,22 +38,16 @@ Future<void> main() async {
 
       section('Add read-only asset');
 
-      final File readonlyTxtAssetFile = await File(path.join(
-        projectDir.path,
-        'assets',
-        'read-only.txt'
-      ))
-      .create(recursive: true);
+      final File readonlyTxtAssetFile =
+          await File(path.join(projectDir.path, 'assets', 'read-only.txt')).create(recursive: true);
 
       if (!exists(readonlyTxtAssetFile)) {
         return TaskResult.failure('Failed to create read-only asset');
       }
+      print('zzzzzzzzz: $readonlyTxtAssetFile');
 
       if (!Platform.isWindows) {
-        await exec('chmod', <String>[
-          '444',
-          readonlyTxtAssetFile.path
-        ]);
+        await exec('chmod', <String>['444', readonlyTxtAssetFile.path]);
       }
 
       final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
@@ -87,7 +79,7 @@ Future<void> main() async {
         await exec(
           gradlewExecutable,
           <String>['flutter:assembleDebug'],
-          environment: <String, String>{ 'JAVA_HOME': javaHome },
+          environment: <String, String>{'JAVA_HOME': javaHome},
         );
       });
 
@@ -198,7 +190,8 @@ Future<void> main() async {
         if (!Platform.isWindows) {
           await exec('chmod', <String>['+x', 'gradlew']);
         }
-        await exec(gradlewExecutable,
+        await exec(
+          gradlewExecutable,
           <String>['app:assembleDebug'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
@@ -236,20 +229,17 @@ Future<void> main() async {
       if (!androidManifestDebug.contains('''
         <meta-data
             android:name="flutterProjectType"
-            android:value="module" />''')
-      ) {
+            android:value="module" />''')) {
         return TaskResult.failure("Debug host APK doesn't contain metadata: flutterProjectType = module ");
       }
 
       final String analyticsOutput = analyticsOutputFile.readAsStringSync();
-      if (!analyticsOutput.contains('cd24: android')
-          || !analyticsOutput.contains('cd25: true')
-          || !analyticsOutput.contains('viewName: assemble')) {
-        return TaskResult.failure(
-          'Building outer app produced the following analytics: "$analyticsOutput" '
-          'but not the expected strings: "cd24: android", "cd25: true" and '
-          '"viewName: assemble"'
-        );
+      if (!analyticsOutput.contains('cd24: android') ||
+          !analyticsOutput.contains('cd25: true') ||
+          !analyticsOutput.contains('viewName: assemble')) {
+        return TaskResult.failure('Building outer app produced the following analytics: "$analyticsOutput" '
+            'but not the expected strings: "cd24: android", "cd25: true" and '
+            '"viewName: assemble"');
       }
 
       section('Check file access modes for read-only asset from Flutter module');
@@ -266,6 +256,7 @@ Future<void> main() async {
         'assets',
         'read-only.txt',
       ]);
+      print('zzzzzzz: $readonlyDebugAssetFilePath');
       final File readonlyDebugAssetFile = File(readonlyDebugAssetFilePath);
       if (!exists(readonlyDebugAssetFile)) {
         return TaskResult.failure('Failed to copy read-only asset file');
@@ -280,7 +271,8 @@ Future<void> main() async {
       section('Build release host APK');
 
       await inDirectory(hostApp, () async {
-        await exec(gradlewExecutable,
+        await exec(
+          gradlewExecutable,
           <String>['app:assembleRelease'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
@@ -319,8 +311,7 @@ Future<void> main() async {
       if (!androidManifestRelease.contains('''
         <meta-data
             android:name="flutterProjectType"
-            android:value="module" />''')
-      ) {
+            android:value="module" />''')) {
         return TaskResult.failure("Release host APK doesn't contain metadata: flutterProjectType = module ");
       }
 
