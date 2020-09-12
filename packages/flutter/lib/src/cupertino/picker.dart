@@ -76,7 +76,7 @@ class CupertinoPicker extends StatefulWidget {
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required List<Widget> children,
-    this.magnifier = const CupertinoPickerDefaultMagnifier(),
+    this.selectionOverlay = const CupertinoPickerDefaultMagnifier(),
     bool looping = false,
   }) : assert(children != null),
        assert(diameterRatio != null),
@@ -121,7 +121,7 @@ class CupertinoPicker extends StatefulWidget {
     @required this.onSelectedItemChanged,
     @required IndexedWidgetBuilder itemBuilder,
     int childCount,
-    this.magnifier = const CupertinoPickerDefaultMagnifier(),
+    this.selectionOverlay = const CupertinoPickerDefaultMagnifier(),
   }) : assert(itemBuilder != null),
        assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
@@ -190,10 +190,15 @@ class CupertinoPicker extends StatefulWidget {
   /// A delegate that lazily instantiates children.
   final ListWheelChildDelegate childDelegate;
 
-  /// The [magnifier] widget overlaid on top of [ListWheelScrollView],
-  /// it will be vertically centered and will be the same size as the magnified item,
-  /// default to use [CupertinoPickerDefaultMagnifier].
-  final Widget magnifier;
+  /// A widget overlaid on the picker to highlight the currently selected entry.
+  ///
+  /// The [selectionOverlay] widget drawn above the [CupertinoPicker]'s picker wheel.
+  /// It is vertically centered in the picker and is constrained to have the same height as the
+  /// center row.
+  ///
+  /// If unspecified, it defaults to a [CupertinoPickerDefaultMagnifier] which is a gray
+  /// rounded rectangle overlay in the iOS 14 style.
+  final Widget selectionOverlay;
 
   @override
   State<StatefulWidget> createState() => _CupertinoPickerState();
@@ -298,7 +303,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               ),
             ),
           ),
-          _buildMagnifierScreen(widget.magnifier),
+          _buildMagnifierScreen(widget.selectionOverlay),
         ],
       ),
     );

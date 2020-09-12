@@ -715,7 +715,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             Text(dateText, style: _themeTextStyle(context)),
           );
         },
-        magnifier: magnifier,
+        selectionOverlay: magnifier,
       ),
     );
   }
@@ -799,7 +799,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           );
         }),
         looping: true,
-        magnifier: magnifier,
+        selectionOverlay: magnifier,
       )
     );
   }
@@ -849,7 +849,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           );
         }),
         looping: true,
-        magnifier: magnifier,
+        selectionOverlay: magnifier,
       ),
     );
   }
@@ -890,7 +890,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             ),
           );
         }),
-        magnifier: magnifier,
+        selectionOverlay: magnifier,
       ),
     );
   }
@@ -1168,7 +1168,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           );
         }),
         looping: true,
-        magnifier: magnifier,
+        selectionOverlay: magnifier,
       ),
     );
   }
@@ -1212,7 +1212,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           );
         }),
         looping: true,
-        magnifier: magnifier,
+        selectionOverlay: magnifier,
       ),
     );
   }
@@ -1259,7 +1259,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
             ),
           );
         },
-        magnifier: magnifier,
+        selectionOverlay: magnifier,
       ),
     );
   }
@@ -1737,7 +1737,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           child: _buildPickerNumberLabel(localizations.timerPickerHour(index), additionalPadding),
         );
       }),
-      magnifier: magnifier,
+      selectionOverlay: magnifier,
     );
   }
 
@@ -1804,7 +1804,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           child: _buildPickerNumberLabel(localizations.timerPickerMinute(minute), additionalPadding),
         );
       }),
-      magnifier: magnifier,
+      selectionOverlay: magnifier,
     );
   }
 
@@ -1861,7 +1861,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           child: _buildPickerNumberLabel(localizations.timerPickerSecond(second), additionalPadding),
         );
       }),
-      magnifier: magnifier,
+      selectionOverlay: magnifier,
     );
   }
 
