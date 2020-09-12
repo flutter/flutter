@@ -1,4 +1,4 @@
-Signature: 493035ca06e80d7bd5cc92288d98acd7
+Signature: bd077043d120f34927a8743c1b6a9c43
 
 UNUSED LICENSES:
 
@@ -8387,6 +8387,12 @@ ORIGIN: ../../../third_party/dart/benchmarks/Dynamic/dart/Dynamic.dart + ../../.
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/Dynamic/dart/Dynamic.dart
 FILE: ../../../third_party/dart/benchmarks/Dynamic/dart2/Dynamic.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson/dart/EventLoopLatencyJson.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson/dart/json_benchmark.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson/dart/latency.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson/dart2/EventLoopLatencyJson.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson/dart2/json_benchmark.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson/dart2/latency.dart
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart2/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/MD5/dart/md5.dart
