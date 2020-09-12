@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  test('Can dispose ScrollPosition when hasPixels is false', () {
+  test('Can dispose ScrollPosition when pixels is null', () {
     final ScrollPosition position = ScrollPositionWithSingleContext(
       initialPixels: null,
       keepScrollOffset: false,
@@ -17,7 +17,7 @@ void main() {
       context: ScrollableState(),
     );
 
-    expect(position.hasPixels, false);
+    expect(position.pixels, isNull);
     position.dispose(); // Should not throw/assert.
   });
 

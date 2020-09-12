@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
@@ -19,16 +21,16 @@ import 'scroll_controller.dart';
 class PrimaryScrollController extends InheritedWidget {
   /// Creates a widget that associates a [ScrollController] with a subtree.
   const PrimaryScrollController({
-    Key? key,
-    required this.controller,
-    required Widget child,
+    Key key,
+    @required this.controller,
+    @required Widget child,
   }) : assert(controller != null),
        super(key: key, child: child);
 
   /// Creates a subtree without an associated [ScrollController].
   const PrimaryScrollController.none({
-    Key? key,
-    required Widget child,
+    Key key,
+    @required Widget child,
   }) : controller = null,
        super(key: key, child: child);
 
@@ -38,15 +40,15 @@ class PrimaryScrollController extends InheritedWidget {
   ///
   ///  * [ScrollView.controller], which discusses the purpose of specifying a
   ///    scroll controller.
-  final ScrollController? controller;
+  final ScrollController controller;
 
   /// Returns the [ScrollController] most closely associated with the given
   /// context.
   ///
   /// Returns null if there is no [ScrollController] associated with the given
   /// context.
-  static ScrollController? of(BuildContext context) {
-    final PrimaryScrollController? result = context.dependOnInheritedWidgetOfExactType<PrimaryScrollController>();
+  static ScrollController of(BuildContext context) {
+    final PrimaryScrollController result = context.dependOnInheritedWidgetOfExactType<PrimaryScrollController>();
     return result?.controller;
   }
 

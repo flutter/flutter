@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
@@ -16,7 +18,7 @@ import 'framework.dart';
 ///
 ///  * [ValueListenableBuilder], a widget which invokes this builder each time
 ///    a [ValueListenable] changes value.
-typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T? value, Widget? child);
+typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, Widget child);
 
 /// A widget whose content stays synced with a [ValueListenable].
 ///
@@ -115,9 +117,9 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   /// The [child] is optional but is good practice to use if part of the widget
   /// subtree does not depend on the value of the [valueListenable].
   const ValueListenableBuilder({
-    Key? key,
-    required this.valueListenable,
-    required this.builder,
+    Key key,
+    @required this.valueListenable,
+    @required this.builder,
     this.child,
   }) : assert(valueListenable != null),
        assert(builder != null),
@@ -146,14 +148,14 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   /// the [builder] builds depends on the value of the [valueListenable]. For
   /// example, if the [valueListenable] is a [String] and the [builder] simply
   /// returns a [Text] widget with the [String] value.
-  final Widget? child;
+  final Widget child;
 
   @override
   State<StatefulWidget> createState() => _ValueListenableBuilderState<T>();
 }
 
 class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
-  T? value;
+  T value;
 
   @override
   void initState() {

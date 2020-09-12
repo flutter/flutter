@@ -196,11 +196,28 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     if (firstChild == null) {
       if (!addInitialChild(index: firstIndex, layoutOffset: indexToLayoutOffset(itemExtent, firstIndex))) {
         // There are either no children, or we are past the end of all our children.
+        // If it is the latter, we will need to find the first available child.
         double max;
-        if (firstIndex <= 0) {
+        if (childManager.childCount != null) {
+          max = computeMaxScrollOffset(constraints, itemExtent);
+          // TODO(ianh): null-aware flow analysis flags the next two
+          // branches as entirely dead code, and it's hard to argue with
+          // its logic.
+        } else if (firstIndex <= 0) { // ignore: dead_code
           max = 0.0;
         } else {
-          max = computeMaxScrollOffset(constraints, itemExtent);
+          // We will have to find it manually.
+          int possibleFirstIndex = firstIndex - 1;
+          while (
+            possibleFirstIndex > 0 &&
+            !addInitialChild(
+              index: possibleFirstIndex,
+              layoutOffset: indexToLayoutOffset(itemExtent, possibleFirstIndex),
+            )
+          ) {
+            possibleFirstIndex -= 1;
+          }
+          max = (possibleFirstIndex + 1) * itemExtent;
         }
         geometry = SliverGeometry(
           scrollExtent: max,

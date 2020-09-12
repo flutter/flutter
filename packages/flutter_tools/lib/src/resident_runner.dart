@@ -822,7 +822,15 @@ abstract class ResidentRunner {
   }
 
   String get dillOutputPath => _dillOutputPath ?? globals.fs.path.join(artifactDirectory.path, 'app.dill');
-  String getReloadPath({ bool fullRestart }) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
+  String getReloadPath({
+    bool fullRestart = false,
+    @required bool swap,
+  }) {
+    if (!fullRestart) {
+      return '$mainPath.incremental.dill';
+    }
+    return '$mainPath${swap ? '.swap' : ''}.dill';
+  }
 
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
   bool get isRunningDebug => debuggingOptions.buildInfo.isDebug;

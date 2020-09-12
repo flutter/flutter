@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -41,17 +43,17 @@ abstract class ScrollMetrics {
   /// is useful to examine hypothetical situations, for example "would applying
   /// this delta unmodified take the position [outOfRange]?".
   ScrollMetrics copyWith({
-    double? minScrollExtent,
-    double? maxScrollExtent,
-    double? pixels,
-    double? viewportDimension,
-    AxisDirection? axisDirection,
+    double minScrollExtent,
+    double maxScrollExtent,
+    double pixels,
+    double viewportDimension,
+    AxisDirection axisDirection,
   }) {
     return FixedScrollMetrics(
-      minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
-      maxScrollExtent: maxScrollExtent ?? (hasContentDimensions ? this.maxScrollExtent : null),
-      pixels: pixels ?? (hasPixels ? this.pixels : null),
-      viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
+      minScrollExtent: minScrollExtent ?? this.minScrollExtent,
+      maxScrollExtent: maxScrollExtent ?? this.maxScrollExtent,
+      pixels: pixels ?? this.pixels,
+      viewportDimension: viewportDimension ?? this.viewportDimension,
       axisDirection: axisDirection ?? this.axisDirection,
     );
   }
@@ -72,20 +74,11 @@ abstract class ScrollMetrics {
   /// [minScrollExtent]. It can be infinity, if the scroll is unbounded.
   double get maxScrollExtent;
 
-  /// Whether the [minScrollExtent] and the [maxScrollExtent] properties are available.
-  bool get hasContentDimensions;
-
   /// The current scroll position, in logical pixels along the [axisDirection].
   double get pixels;
 
-  /// Whether the [pixels] property is available.
-  bool get hasPixels;
-
   /// The extent of the viewport along the [axisDirection].
   double get viewportDimension;
-
-  /// Whether the [viewportDimension] property is available.
-  bool get hasViewportDimension;
 
   /// The direction in which the scroll view scrolls.
   AxisDirection get axisDirection;
@@ -132,40 +125,24 @@ abstract class ScrollMetrics {
 class FixedScrollMetrics extends ScrollMetrics {
   /// Creates an immutable snapshot of values associated with a [Scrollable] viewport.
   FixedScrollMetrics({
-    required double? minScrollExtent,
-    required double? maxScrollExtent,
-    required double? pixels,
-    required double? viewportDimension,
-    required this.axisDirection,
-  }) : _minScrollExtent = minScrollExtent,
-       _maxScrollExtent = maxScrollExtent,
-       _pixels = pixels,
-       _viewportDimension = viewportDimension;
+    @required this.minScrollExtent,
+    @required this.maxScrollExtent,
+    @required this.pixels,
+    @required this.viewportDimension,
+    @required this.axisDirection,
+  });
 
   @override
-  double get minScrollExtent => _minScrollExtent!;
-  final double? _minScrollExtent;
+  final double minScrollExtent;
 
   @override
-  double get maxScrollExtent => _maxScrollExtent!;
-  final double? _maxScrollExtent;
+  final double maxScrollExtent;
 
   @override
-  bool get hasContentDimensions => _minScrollExtent != null && _maxScrollExtent != null;
+  final double pixels;
 
   @override
-  double get pixels => _pixels!;
-  final double? _pixels;
-
-  @override
-  bool get hasPixels => _pixels != null;
-
-  @override
-  double get viewportDimension => _viewportDimension!;
-  final double? _viewportDimension;
-
-  @override
-  bool get hasViewportDimension => _viewportDimension != null;
+  final double viewportDimension;
 
   @override
   final AxisDirection axisDirection;
