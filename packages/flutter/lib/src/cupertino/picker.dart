@@ -315,7 +315,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   }
 }
 
-/// An picker default magnifier, grey rrect first introduced in iOS 14
+/// A default selection overlay for [CupertinoPicker]s.
+///
+/// It draws a gray rounded rectangle to match the picker visuals introduced in iOS 14
 class CupertinoPickerDefaultMagnifier extends StatelessWidget {
 
   /// Create a magnifier, it can be easily configured with the default style.
