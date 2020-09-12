@@ -6,9 +6,9 @@
 #include "flutter/shell/platform/glfw/public/flutter_glfw.h"
 
 #include <GLFW/glfw3.h>
-#include <assert.h>
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <cstdlib>
 #include <filesystem>

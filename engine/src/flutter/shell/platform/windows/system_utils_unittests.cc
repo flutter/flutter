@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <wchar.h>
+#include <cwchar>
 
 #include "flutter/shell/platform/windows/system_utils.h"
 #include "gtest/gtest.h"

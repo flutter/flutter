@@ -5,10 +5,10 @@
 #include "tonic/file_loader/file_loader.h"
 
 #include <dirent.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <sys/types.h>
 
+#include <cerrno>
 #include <iostream>
 #include <memory>
 #include <utility>

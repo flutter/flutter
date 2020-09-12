@@ -4,7 +4,7 @@
 
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 
-#include <string.h>
+#include <cstring>
 
 namespace flutter {
 

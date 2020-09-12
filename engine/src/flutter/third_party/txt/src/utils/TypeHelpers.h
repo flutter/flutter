@@ -17,12 +17,12 @@
 #ifndef ANDROID_TYPE_HELPERS_H
 #define ANDROID_TYPE_HELPERS_H
 
+#include <sys/types.h>
+
+#include <cstdint>
+#include <cstring>
 #include <new>
 #include <type_traits>
-
-#include <stdint.h>
-#include <string.h>
-#include <sys/types.h>
 
 // ---------------------------------------------------------------------------
 

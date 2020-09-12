@@ -5,12 +5,12 @@
 #include "vmservice_object.h"
 
 #include <dirent.h>
-#include <errno.h>
-#include <string>
-
 #include <fuchsia/io/cpp/fidl.h>
 #include <lib/syslog/global.h>
 #include <zircon/status.h>
+
+#include <cerrno>
+#include <string>
 
 #include "logging.h"
 

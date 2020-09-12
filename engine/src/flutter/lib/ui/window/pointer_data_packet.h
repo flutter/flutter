@@ -5,8 +5,7 @@
 #ifndef FLUTTER_LIB_UI_WINDOW_POINTER_DATA_PACKET_H_
 #define FLUTTER_LIB_UI_WINDOW_POINTER_DATA_PACKET_H_
 
-#include <string.h>
-
+#include <cstring>
 #include <vector>
 
 #include "flutter/fml/macros.h"

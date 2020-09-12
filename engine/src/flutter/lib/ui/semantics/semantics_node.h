@@ -5,8 +5,7 @@
 #ifndef FLUTTER_LIB_UI_SEMANTICS_SEMANTICS_NODE_H_
 #define FLUTTER_LIB_UI_SEMANTICS_SEMANTICS_NODE_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <vector>

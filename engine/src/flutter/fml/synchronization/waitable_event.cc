@@ -4,12 +4,12 @@
 
 #include "flutter/fml/synchronization/waitable_event.h"
 
+#include <cerrno>
+#include <ctime>
+
 #include "flutter/fml/logging.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
-
-#include <errno.h>
-#include <time.h>
 
 namespace fml {
 

@@ -5,7 +5,8 @@
 #include "files.h"
 
 #include <fcntl.h>
-#include <stdint.h>
+
+#include <cstdint>
 
 #include "inlines.h"
 #include "logging.h"

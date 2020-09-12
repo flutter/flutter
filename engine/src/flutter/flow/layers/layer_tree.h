@@ -5,8 +5,7 @@
 #ifndef FLUTTER_FLOW_LAYERS_LAYER_TREE_H_
 #define FLUTTER_FLOW_LAYERS_LAYER_TREE_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <memory>
 
 #include "flutter/flow/compositor_context.h"
