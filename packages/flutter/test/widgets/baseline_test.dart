@@ -94,7 +94,7 @@ void main() {
     expect(calls, 2);
   });
 
-  testWidgets('LayoutBuilder caches baseline', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder returns child\'s baseline', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
