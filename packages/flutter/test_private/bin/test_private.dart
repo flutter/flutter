@@ -75,12 +75,27 @@ Future<void> main(List<String> args) async {
     }
   }
 
+  bool success = true;
   try {
     await for (final TestCase testCase in getTestCases(tempDir)) {
+      stderr.writeln('Analyzing test case $testCase');
+      if (!testCase.setUp()) {
+        stderr.writeln('Unable to set up $testCase');
+        success = false;
+        break;
+      }
+      if (!await testCase.runAnalyzer()) {
+        stderr.writeln('Test case $testCase failed analysis.');
+        success = false;
+        break;
+      } else {
+        stderr.writeln('Test case $testCase passed analysis.');
+      }
       stderr.writeln('Running test case $testCase');
       if (!await testCase.runTests()) {
         stderr.writeln('Test case $testCase failed.');
-        exit(1);
+        success = false;
+        break;
       } else {
         stderr.writeln('Test case $testCase succeeded.');
       }
@@ -90,7 +105,7 @@ Future<void> main(List<String> args) async {
       tempDir.deleteSync(recursive: true);
     }
   }
-  exit(0);
+  exit(success ? 0 : 1);
 }
 
 File makeAbsolute(File file, {Directory? workingDirectory}) {
@@ -128,14 +143,15 @@ class TestCase {
     }
   }
 
-  Iterable<File> get deps => _getList('deps');
+  Iterable<File> get dependencies => _getList('deps');
+  Iterable<File> get testDependencies => _getList('test_deps');
   Iterable<File> get tests => _getList('tests');
   File get pubspec => File(_json['pubspec'] as String);
 
   bool setUp() {
     // Copy the manifest tests and deps to the same relative path under the
     // tmpdir.
-    for (final File file in deps) {
+    for (final File file in dependencies) {
       try {
         final Directory destDir = Directory(path.join(tmpdir.absolute.path, file.parent.path));
         destDir.createSync(recursive: true);
@@ -143,38 +159,73 @@ class TestCase {
         final String destination = path.join(tmpdir.absolute.path, file.path);
         absFile.copySync(destination);
       } on FileSystemException catch (e) {
-        stderr.writeln('Problem copying manifest file ${file.path} to ${tmpdir.path}: $e');
+        stderr.writeln('Problem copying manifest dep file ${file.path} to ${tmpdir.path}: $e');
         return false;
       }
     }
-    // Copy the test files into the top level of the tmpdir.
+    for (final File file in testDependencies) {
+      try {
+        final Directory destDir = Directory(path.join(tmpdir.absolute.path, 'lib', file.parent.path));
+        destDir.createSync(recursive: true);
+        final File absFile = makeAbsolute(file, workingDirectory: flutterPackageDir);
+        final String destination = path.join(tmpdir.absolute.path, 'lib', file.path);
+        absFile.copySync(destination);
+      } on FileSystemException catch (e) {
+        stderr.writeln('Problem copying manifest test_dep file ${file.path} to ${tmpdir.path}: $e');
+        return false;
+      }
+    }
+    // Copy the test files into the the tmpdir's lib directory.
     for (final File file in tests) {
+      String destination = tmpdir.path;
       try {
         final File absFile = makeAbsolute(file, workingDirectory: privateTestsDir);
-        absFile.copySync(path.join(tmpdir.absolute.path, path.basename(file.path)));
+        // Copy the file, but without the ".tmpl" extension.
+        destination = path.join(tmpdir.absolute.path, 'lib', path.basenameWithoutExtension(file.path));
+        absFile.copySync(destination);
       } on FileSystemException catch (e) {
-        stderr.writeln('Problem copying test ${file.path} to ${tmpdir.path}: $e');
+        stderr.writeln('Problem copying test ${file.path} to $destination: $e');
         return false;
       }
     }
+
     // Copy the pubspec to the right place.
     makeAbsolute(pubspec, workingDirectory: privateTestsDir)
         .copySync(path.join(tmpdir.absolute.path, 'pubspec.yaml'));
+
+    // Copy Flutter's analysis_options.yaml file to the root of the tmpdir.
+    makeAbsolute(File('analysis_options.yaml'), workingDirectory: flutterRoot)
+        .copySync(path.join(tmpdir.absolute.path, 'analysis_options.yaml'));
+
+    return true;
+  }
+
+  Future<bool> runAnalyzer() async {
+    final String flutter = path.join(flutterRoot.path, 'bin', 'flutter');
+    final ProcessRunner runner = ProcessRunner(
+      defaultWorkingDirectory: tmpdir.absolute,
+      printOutputDefault: true,
+    );
+    final ProcessRunnerResult result = await runner.runProcess(
+      <String>[flutter, 'analyze', '--enable-experiment=non-nullable', '--current-package', '--pub', '--congratulate', '.'],
+      failOk: true,
+    );
+    if (result.exitCode != 0) {
+      return false;
+    }
     return true;
   }
 
   Future<bool> runTests() async {
-    if (!setUp()) {
-      return false;
-    }
     final ProcessRunner runner = ProcessRunner(
       defaultWorkingDirectory: tmpdir.absolute,
       printOutputDefault: true,
     );
     final String flutter = path.join(flutterRoot.path, 'bin', 'flutter');
     for (final File test in tests) {
+      final String testPath = path.join(path.dirname(test.path), 'lib', path.basenameWithoutExtension(test.path));
       final ProcessRunnerResult result = await runner.runProcess(
-        <String>[flutter, 'test', test.path],
+        <String>[flutter, 'test', testPath],
         failOk: true,
       );
       if (result.exitCode != 0) {

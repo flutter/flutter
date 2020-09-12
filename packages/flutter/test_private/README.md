@@ -7,7 +7,7 @@ This gets around the problem of parts existing in more than one library by
 making a copy of the code under test.
 
 The test script `bin/test_private.dart` tests private interfaces by copying the
-code under test into a temporary workspace.  The test is then free to make the
+code under test into a temporary workspace. The test is then free to make the
 copied flutter source into a "part" of its own library by declaring a library
 and using the `part` directive with a relative path to include the parts. This
 way the test and the private interface are part of the same library, and the
@@ -46,5 +46,5 @@ directory tree.
 
 Each test gets its own temporary directory tree under a generated temporary
 directory in the system temp dir that is removed at the end of the run, or under
-the path given to `--temp-dir` on the command line.  If a temporary directory is
+the path given to `--temp-dir` on the command line. If a temporary directory is
 given explicitly, it will not be deleted at the end of the run.

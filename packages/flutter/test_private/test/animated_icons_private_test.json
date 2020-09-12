@@ -1,10 +1,12 @@
 {
   "tests": [
-    "animated_icons_private_test.dart"
+    "animated_icons_private_test.dart.tmpl"
   ],
   "pubspec": "pubspec.yaml",
+  "test_deps": [
+    "test/flutter_test_alternative.dart"
+  ],
   "deps": [
-    "test/flutter_test_alternative.dart",
     "lib/src/material/animated_icons/animated_icons.dart",
     "lib/src/material/animated_icons/animated_icons_data.dart",
     "lib/src/material/animated_icons/data/add_event.g.dart",
