@@ -5458,11 +5458,8 @@ void main() {
   });
 
   testWidgets('Apply formatters for texts added via TextEditingController', (WidgetTester tester) async {
-    // This formatter just upperCase the text.
-    final TextInputFormatter formatter = TextInputFormatter.withFunction((
-        TextEditingValue oldValue, TextEditingValue newValue) {
-      return newValue.copyWith(text: newValue.text.toUpperCase());
-    });
+    // This formatter ignores the 'a' letter.
+    final TextInputFormatter formatter = FilteringTextInputFormatter.deny('a');
 
     final Widget widget = MaterialApp(
       home: EditableText(
@@ -5478,19 +5475,16 @@ void main() {
 
     await tester.pumpWidget(widget);
 
+    // Setting a text containing 'a'.
+    controller.text = 'abcd';
+    await tester.pumpAndSettle();
+
+    // We expect the 'a' letter to be removed by the formatter.
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-
-    // This was supposed to rebuild the widget and call _formatAndSetValue
-    // controller.text = 'flutter';
-    // Since the line above does not update the widget the line bellow
-    // is a workaround simulating changes from controller.text.
-    state.updateEditingValue(const TextEditingValue(text: 'flutter'));
-
-    // The current editingValue is now formatted.
-    expect(state.textEditingValue.text, equals('FLUTTER'));
-    expect(state.currentTextEditingValue.text, equals('FLUTTER'));
-    // The text displayed is now formatted too.
-    expect(find.text('FLUTTER'), findsOneWidget);
+    expect(state.textEditingValue.text, equals('bcd'));
+    expect(state.currentTextEditingValue.text, equals('bcd'));
+    // Verify that the displayed text is now formatted too.
+    expect(find.text('bcd'), findsOneWidget);
   });
 }
 
