@@ -18,6 +18,7 @@
 #define LIB_TXT_SRC_PARAGRAPH_BUILDER_TXT_H_
 
 #include "paragraph_builder.h"
+
 #include "styled_runs.h"
 
 namespace txt {

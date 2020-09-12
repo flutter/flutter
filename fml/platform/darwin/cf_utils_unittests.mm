@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/platform/darwin/cf_utils.h"
+
 #include "flutter/testing/testing.h"
 
 namespace fml {

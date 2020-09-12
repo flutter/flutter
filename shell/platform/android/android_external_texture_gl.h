@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_TEXTURE_GL_H_
 
 #include <GLES/gl.h>
+
 #include "flutter/flow/texture.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/shell/platform/android/platform_view_android_jni_impl.h"

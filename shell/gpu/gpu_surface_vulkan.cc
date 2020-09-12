@@ -4,6 +4,7 @@
 // FLUTTER_NOLINT
 
 #include "flutter/shell/gpu/gpu_surface_vulkan.h"
+
 #include "flutter/fml/logging.h"
 
 namespace flutter {

@@ -10,7 +10,7 @@
 
 #ifdef OS_IOS
 #include <pthread.h>
-#endif
+#endif  // OS_IOS
 
 namespace tonic {
 namespace {

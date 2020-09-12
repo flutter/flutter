@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 #include "tonic/logging/dart_error.h"
-#include "tonic/converter/dart_converter.h"
 
 #include "tonic/common/macros.h"
+#include "tonic/converter/dart_converter.h"
 
 namespace tonic {
 namespace DartError {

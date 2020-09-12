@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/ascii_trie.h"
+
 #include "flutter/fml/logging.h"
 
 namespace fml {

@@ -5,6 +5,8 @@
 // Included first as it collides with the X11 headers.
 #include "gtest/gtest.h"
 
+#include <cstring>
+
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"

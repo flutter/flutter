@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 // FLUTTER_NOLINT
 
+#include "flutter/lib/ui/plugins/callback_cache.h"
+
 #include <fstream>
 #include <iterator>
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
-#include "flutter/lib/ui/plugins/callback_cache.h"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"

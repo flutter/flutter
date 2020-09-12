@@ -5,12 +5,11 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_THREAD_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_THREAD_H_
 
+#include <lib/async-loop/cpp/loop.h>
+#include <lib/async/default.h>
 #include <pthread.h>
 
 #include <functional>
-
-#include <lib/async-loop/cpp/loop.h>
-#include <lib/async/default.h>
 
 #include "flutter/fml/macros.h"
 

@@ -5,9 +5,9 @@
 #ifndef FLUTTER_FML_LOG_SETTINGS_H_
 #define FLUTTER_FML_LOG_SETTINGS_H_
 
-#include "flutter/fml/log_level.h"
-
 #include <string>
+
+#include "flutter/fml/log_level.h"
 
 namespace fml {
 

@@ -10,6 +10,7 @@
 #endif
 
 #include <glib-object.h>
+
 #include "fl_plugin_registrar.h"
 
 G_BEGIN_DECLS

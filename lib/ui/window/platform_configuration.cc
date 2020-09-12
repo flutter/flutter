@@ -4,6 +4,8 @@
 
 #include "flutter/lib/ui/window/platform_configuration.h"
 
+#include <cstring>
+
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_message_response_dart.h"

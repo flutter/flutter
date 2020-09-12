@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/ascii_trie.h"
+
 #include "gtest/gtest.h"
 
 using fml::AsciiTrie;

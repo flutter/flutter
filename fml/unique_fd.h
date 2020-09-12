@@ -9,14 +9,10 @@
 #include "flutter/fml/unique_object.h"
 
 #if OS_WIN
-
 #include <windows.h>
-
 #else  // OS_WIN
-
 #include <dirent.h>
 #include <unistd.h>
-
 #endif  // OS_WIN
 
 namespace fml {

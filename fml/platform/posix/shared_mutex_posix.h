@@ -6,6 +6,7 @@
 #define FLUTTER_FML_SYNCHRONIZATION_SHARED_MUTEX_POSIX_H_
 
 #include <shared_mutex>
+
 #include "flutter/fml/synchronization/shared_mutex.h"
 
 namespace fml {

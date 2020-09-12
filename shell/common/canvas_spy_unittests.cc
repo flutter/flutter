@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "canvas_spy.h"
+
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkSurface.h"

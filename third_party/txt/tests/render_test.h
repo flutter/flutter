@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <string>
+
 #include "flutter/fml/macros.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkBitmap.h"

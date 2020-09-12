@@ -5,10 +5,11 @@
 #define FML_USED_ON_EMBEDDER
 
 #include "flutter/fml/message_loop_task_queues.h"
-#include "flutter/fml/make_copyable.h"
-#include "flutter/fml/message_loop_impl.h"
 
 #include <iostream>
+
+#include "flutter/fml/make_copyable.h"
+#include "flutter/fml/message_loop_impl.h"
 
 namespace fml {
 

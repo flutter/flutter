@@ -6,6 +6,7 @@
 
 #include <windows.h>
 
+#include <cstring>
 #include <iostream>
 #include <optional>
 

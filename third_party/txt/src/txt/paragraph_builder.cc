@@ -15,6 +15,7 @@
  */
 
 #include "paragraph_builder.h"
+
 #include "paragraph_builder_txt.h"
 #include "paragraph_style.h"
 #include "third_party/icu/source/common/unicode/unistr.h"

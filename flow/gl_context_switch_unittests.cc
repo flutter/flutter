@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 #define FML_USED_ON_EMBEDDER
 
+#include "flutter/flow/gl_context_switch.h"
+
 #include <functional>
 #include <future>
 #include <memory>
 
-#include "flutter/flow/gl_context_switch.h"
 #include "flutter/flow/testing/gl_context_switch_test.h"
 #include "gtest/gtest.h"
 

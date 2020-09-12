@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_GL_H_
 
 #include <jni.h>
+
 #include <memory>
 
 #include "flutter/fml/macros.h"

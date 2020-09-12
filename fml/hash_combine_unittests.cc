@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/hash_combine.h"
+
 #include "flutter/testing/testing.h"
 
 namespace fml {

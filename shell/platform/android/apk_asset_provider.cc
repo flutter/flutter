@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/shell/platform/android/apk_asset_provider.h"
+
 #include <unistd.h>
 
 #include <algorithm>
 #include <sstream>
 
 #include "flutter/fml/logging.h"
-#include "flutter/shell/platform/android/apk_asset_provider.h"
 
 namespace flutter {
 

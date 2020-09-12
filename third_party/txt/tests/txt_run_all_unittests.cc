@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+#include <cassert>
+
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/icu_util.h"
 #include "flutter/fml/logging.h"
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "txt_test_utils.h"
-
-#include <cassert>
 
 int main(int argc, char** argv) {
   fml::CommandLine cmd = fml::CommandLineFromArgcArgv(argc, argv);
