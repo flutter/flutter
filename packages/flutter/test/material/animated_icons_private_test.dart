@@ -18,7 +18,6 @@ import 'dart:ui' as ui show Paint, Path, Canvas;
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
 
 import '../flutter_test_alternative.dart';
 
@@ -83,16 +82,19 @@ void main () {
 
   group('_AnimatedIconPainter', () {
     const Size size = Size(48.0, 48.0);
-    final MockCanvas mockCanvas = MockCanvas();
+    MockPath mockPath;
+    MockCanvas mockCanvas;
     List<MockPath> generatedPaths;
-    final _UiPathFactory pathFactory = () {
-      final MockPath path = MockPath();
-      generatedPaths.add(path);
-      return path;
-    };
+    _UiPathFactory pathFactory;
 
     setUp(() {
-      generatedPaths = <MockPath> [];
+      generatedPaths = <MockPath>[];
+      mockCanvas = MockCanvas();
+      mockPath = MockPath();
+      pathFactory = () {
+        generatedPaths.add(mockPath);
+        return mockPath;
+      };
     });
 
     test('progress 0', () {
@@ -107,13 +109,13 @@ void main () {
       painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<void>[
-        generatedPaths[0].moveTo(0.0, 0.0),
-        generatedPaths[0].lineTo(48.0, 0.0),
-        generatedPaths[0].lineTo(48.0, 10.0),
-        generatedPaths[0].lineTo(0.0, 10.0),
-        generatedPaths[0].lineTo(0.0, 0.0),
-        generatedPaths[0].close(),
+      generatedPaths[0].verifyCallsInOrder(<MockCall>[
+        MockCall('moveTo', <dynamic>[0.0, 0.0]),
+        MockCall('lineTo', <dynamic>[48.0, 0.0]),
+        MockCall('lineTo', <dynamic>[48.0, 10.0]),
+        MockCall('lineTo', <dynamic>[0.0, 10.0]),
+        MockCall('lineTo', <dynamic>[0.0, 0.0]),
+        MockCall('close'),
       ]);
     });
 
@@ -129,13 +131,13 @@ void main () {
       painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<void>[
-        generatedPaths[0].moveTo(0.0, 38.0),
-        generatedPaths[0].lineTo(48.0, 38.0),
-        generatedPaths[0].lineTo(48.0, 48.0),
-        generatedPaths[0].lineTo(0.0, 48.0),
-        generatedPaths[0].lineTo(0.0, 38.0),
-        generatedPaths[0].close(),
+      generatedPaths[0].verifyCallsInOrder(<MockCall>[
+        MockCall('moveTo', <dynamic>[0.0, 38.0]),
+        MockCall('lineTo', <dynamic>[48.0, 38.0]),
+        MockCall('lineTo', <dynamic>[48.0, 48.0]),
+        MockCall('lineTo', <dynamic>[0.0, 48.0]),
+        MockCall('lineTo', <dynamic>[0.0, 38.0]),
+        MockCall('close'),
       ]);
     });
 
@@ -151,13 +153,13 @@ void main () {
       painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<void>[
-        generatedPaths[0].moveTo(0.0, 38.0),
-        generatedPaths[0].lineTo(48.0, 38.0),
-        generatedPaths[0].lineTo(48.0, 48.0),
-        generatedPaths[0].lineTo(0.0, 48.0),
-        generatedPaths[0].lineTo(0.0, 38.0),
-        generatedPaths[0].close(),
+      generatedPaths[0].verifyCallsInOrder(<MockCall>[
+        MockCall('moveTo', <dynamic>[0.0, 38.0]),
+        MockCall('lineTo', <dynamic>[48.0, 38.0]),
+        MockCall('lineTo', <dynamic>[48.0, 48.0]),
+        MockCall('lineTo', <dynamic>[0.0, 48.0]),
+        MockCall('lineTo', <dynamic>[0.0, 38.0]),
+        MockCall('close'),
       ]);
     });
 
@@ -171,7 +173,10 @@ void main () {
         uiPathFactory: pathFactory,
       );
       painter.paint(mockCanvas, size);
-      verify(mockCanvas.scale(0.5, 0.5));
+      mockCanvas.verifyCallsInOrder(<MockCall>[
+        MockCall('scale', <dynamic>[0.5, 0.5]),
+        MockCall.any('drawPath'),
+      ]);
     });
 
     test('mirror', () {
@@ -184,9 +189,11 @@ void main () {
         uiPathFactory: pathFactory,
       );
       painter.paint(mockCanvas, size);
-      verifyInOrder(<void>[
-        mockCanvas.rotate(math.pi),
-        mockCanvas.translate(-48.0, -48.0),
+      mockCanvas.verifyCallsInOrder(<MockCall>[
+        MockCall('scale', <dynamic>[1.0, 1.0]),
+        MockCall('rotate', <dynamic>[math.pi]),
+        MockCall('translate', <dynamic>[-48.0, -48.0]),
+        MockCall.any('drawPath'),
       ]);
     });
 
@@ -202,13 +209,13 @@ void main () {
       painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<void>[
-        generatedPaths[0].moveTo(0.0, 19.0),
-        generatedPaths[0].lineTo(48.0, 19.0),
-        generatedPaths[0].lineTo(48.0, 29.0),
-        generatedPaths[0].lineTo(0.0, 29.0),
-        generatedPaths[0].lineTo(0.0, 19.0),
-        generatedPaths[0].close(),
+      generatedPaths[0].verifyCallsInOrder(<MockCall>[
+        MockCall('moveTo', <dynamic>[0.0, 19.0]),
+        MockCall('lineTo', <dynamic>[48.0, 19.0]),
+        MockCall('lineTo', <dynamic>[48.0, 29.0]),
+        MockCall('lineTo', <dynamic>[0.0, 29.0]),
+        MockCall('lineTo', <dynamic>[0.0, 19.0]),
+        MockCall('close'),
       ]);
     });
 
@@ -224,11 +231,11 @@ void main () {
       painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<void>[
-        generatedPaths[0].moveTo(0.0, 24.0),
-        generatedPaths[0].cubicTo(16.0, 48.0, 32.0, 48.0, 48.0, 24.0),
-        generatedPaths[0].lineTo(0.0, 24.0),
-        generatedPaths[0].close(),
+      generatedPaths[0].verifyCallsInOrder(<MockCall>[
+        MockCall('moveTo', <dynamic>[0.0, 24.0]),
+        MockCall('cubicTo', <dynamic>[16.0, 48.0, 32.0, 48.0, 48.0, 24.0]),
+        MockCall('lineTo', <dynamic>[0.0, 24.0]),
+        MockCall('close'),
       ]);
     });
 
@@ -244,11 +251,11 @@ void main () {
       painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<void>[
-        generatedPaths[0].moveTo(0.0, 24.0),
-        generatedPaths[0].cubicTo(16.0, 17.0, 32.0, 17.0, 48.0, 24.0),
-        generatedPaths[0].lineTo(0.0, 24.0),
-        generatedPaths[0].close(),
+      generatedPaths[0].verifyCallsInOrder(<MockCall>[
+        MockCall('moveTo', <dynamic>[0.0, 24.0]),
+        MockCall('cubicTo', <dynamic>[16.0, 17.0, 32.0, 17.0, 48.0, 24.0]),
+        MockCall('lineTo', <dynamic>[0.0, 24.0]),
+        MockCall('close', <dynamic>[]),
       ]);
     });
 
@@ -339,8 +346,74 @@ void main () {
 
       expect(painter1.shouldRepaint(painter2), true);
     });
-
   });
+}
+
+// Contains the data from an invocation used for collection of calls and for
+// expectations in Mock class.
+class MockCall {
+  // Creates a mock call with optional positional arguments.
+  MockCall(String memberName, [this.positionalArguments, this.acceptAny = false])
+      : memberSymbol = Symbol(memberName);
+  MockCall.fromSymbol(this.memberSymbol, [this.positionalArguments, this.acceptAny = false]);
+  // Creates a mock call expectation that doesn't care about what the arguments were.
+  MockCall.any(String memberName)
+      : memberSymbol = Symbol(memberName),
+        acceptAny = true,
+        positionalArguments = null;
+
+  final Symbol memberSymbol;
+  String get memberName {
+    final RegExp symbolMatch = RegExp(r'Symbol\("(?<name>.*)"\)');
+    final RegExpMatch match = symbolMatch.firstMatch(memberSymbol.toString());
+    assert(match != null);
+    return match.namedGroup('name');
+  }
+  final List<dynamic> positionalArguments;
+  final bool acceptAny;
+
+  @override
+  String toString() {
+    return '$memberName(${positionalArguments?.join(', ') ?? ''})';
+  }
+}
+
+// A very simplified version of a Mock class.
+//
+// Only verifies positional arguments, and only can verify calls in order.
+class Mock {
+  final List<MockCall> _calls = <MockCall>[];
+
+  // Verify that the given calls happened in the order given.
+  void verifyCallsInOrder(List<MockCall> expected) {
+    int count = 0;
+    expect(expected.length, equals(_calls.length),
+        reason: 'Incorrect number of calls received. '
+            'Expected ${expected.length} and received ${_calls.length}.\n'
+            '  Calls Received: $_calls\n'
+            '  Calls Expected: $expected');
+    for (final MockCall call in _calls) {
+      expect(call.memberSymbol, equals(expected[count].memberSymbol),
+          reason: 'Unexpected call to ${call.memberName}, expected a call to '
+              '${expected[count].memberName} instead.');
+      if (call.positionalArguments != null && !expected[count].acceptAny) {
+        int countArg = 0;
+        for (final dynamic arg in call.positionalArguments) {
+          expect(arg, equals(expected[count].positionalArguments[countArg]),
+              reason: 'Failed at call $count. Positional argument $countArg to ${call.memberName} '
+                  'not as expected. Expected ${expected[count].positionalArguments[countArg]} '
+                  'and received $arg');
+          countArg++;
+        }
+      }
+      count++;
+    }
+  }
+
+  @override
+  void noSuchMethod(Invocation invocation) {
+    _calls.add(MockCall.fromSymbol(invocation.memberName, invocation.positionalArguments));
+  }
 }
 
 const _AnimatedIconData movingBar = _AnimatedIconData(

@@ -521,6 +521,57 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('Pages update does update overlay correctly', (WidgetTester tester) async {
+    // Regression Test for https://github.com/flutter/flutter/issues/64941.
+    List<Page<void>> pages = <Page<void>>[
+      MaterialPage<void>(
+        key: const ValueKey<int>(0),
+        builder: (BuildContext context) => const Text('page 0'),
+      ),
+      MaterialPage<void>(
+        key: const ValueKey<int>(1),
+        builder: (BuildContext context) => const Text('page 1'),
+      ),
+    ];
+    Widget buildNavigator() {
+      return Navigator(
+        pages: pages,
+        onPopPage: (Route<dynamic> route, dynamic result) => false,
+      );
+    }
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: buildNavigator(),
+      ),
+    );
+
+    expect(find.text('page 1'), findsOneWidget);
+    expect(find.text('page 0'), findsNothing);
+
+    // Removes the first page.
+    pages = <Page<void>>[
+      MaterialPage<void>(
+        key: const ValueKey<int>(1),
+        builder: (BuildContext context) => const Text('page 1'),
+      ),
+    ];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: buildNavigator(),
+      ),
+    );
+    // Overlay updates correctly.
+    expect(find.text('page 1'), findsOneWidget);
+    expect(find.text('page 0'), findsNothing);
+
+    await tester.pumpAndSettle();
+    expect(find.text('page 1'), findsOneWidget);
+    expect(find.text('page 0'), findsNothing);
+  });
+
   testWidgets('replaceNamed replaces', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushReplacementNamed(context, '/A'); }),

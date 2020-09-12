@@ -1645,7 +1645,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
-    _formatAndSetValue(value);
+    if (_isSelectionOnlyChange(value)) {
+      _handleSelectionChanged(value.selection, renderEditable, SelectionChangedCause.keyboard);
+    } else {
+      _formatAndSetValue(value);
+    }
 
     if (_hasInputConnection) {
       // To keep the cursor from blinking while typing, we want to restart the
@@ -1653,6 +1657,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _stopCursorTimer(resetCharTicks: false);
       _startCursorTimer();
     }
+  }
+
+  bool _isSelectionOnlyChange(TextEditingValue value) {
+    return value.text == _value.text && value.composing == _value.composing;
   }
 
   @override
