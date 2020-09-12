@@ -1200,12 +1200,12 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     //() => _runDevicelabTest('gradle_deprecated_settings_test', environment: gradleEnvironment),
     //() => _runDevicelabTest('gradle_plugin_bundle_test', environment: gradleEnvironment),
     //() => _runDevicelabTest('gradle_plugin_fat_apk_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment),
+    //() => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment),
     //() => _runDevicelabTest('gradle_r8_test', environment: gradleEnvironment),
 
     //() => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: true),
     //() => _runDevicelabTest('module_custom_host_app_name_test', environment: gradleEnvironment),
-    //() => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
+    () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
     //() => _runDevicelabTest('plugin_dependencies_test', environment: gradleEnvironment),
 
     //if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
