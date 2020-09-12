@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 // FLUTTER_NOLINT
 
-#include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/shell/common/engine.h"
+
+#include <cstring>
+
+#include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"

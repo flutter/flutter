@@ -4,7 +4,7 @@
 
 #include "flutter/fml/posix_wrappers.h"
 
-#include <string.h>
+#include <cstring>
 
 namespace fml {
 

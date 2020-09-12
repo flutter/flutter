@@ -5,7 +5,7 @@
 #ifndef FLUTTER_LIB_UI_WINDOW_POINTER_DATA_H_
 #define FLUTTER_LIB_UI_WINDOW_POINTER_DATA_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace flutter {
 

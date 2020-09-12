@@ -4,12 +4,11 @@
 
 #include "thread.h"
 
-#include <limits.h>
+#include <lib/async-loop/cpp/loop.h>
 #include <unistd.h>
 
 #include <algorithm>
-
-#include <lib/async-loop/cpp/loop.h>
+#include <climits>
 
 #include "flutter/fml/logging.h"
 #include "loop.h"

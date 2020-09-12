@@ -5,7 +5,7 @@
 #ifndef FILESYSTEM_EINTR_WRAPPER_H_
 #define FILESYSTEM_EINTR_WRAPPER_H_
 
-#include <errno.h>
+#include <cerrno>
 
 #include "tonic/common/build_config.h"
 

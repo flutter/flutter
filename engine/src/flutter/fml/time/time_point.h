@@ -5,8 +5,7 @@
 #ifndef FLUTTER_FML_TIME_TIME_POINT_H_
 #define FLUTTER_FML_TIME_TIME_POINT_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <iosfwd>
 
 #include "flutter/fml/time/time_delta.h"

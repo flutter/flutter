@@ -5,7 +5,7 @@
 #ifndef FLUTTER_LIB_UI_COMPOSITING_SCENE_H_
 #define FLUTTER_LIB_UI_COMPOSITING_SCENE_H_
 
-#include <stdint.h>
+#include <cstdint>
 #include <memory>
 
 #include "flutter/flow/layers/layer_tree.h"

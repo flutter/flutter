@@ -7,9 +7,10 @@
 #include <Fileapi.h>
 #include <Shlwapi.h>
 #include <fcntl.h>
-#include <limits.h>
 
 #include <algorithm>
+#include <climits>
+#include <cstring>
 #include <sstream>
 
 #include "flutter/fml/build_config.h"

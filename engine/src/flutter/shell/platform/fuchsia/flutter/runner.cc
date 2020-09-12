@@ -4,14 +4,14 @@
 
 #include "runner.h"
 
+#include <fcntl.h>
 #include <fuchsia/mem/cpp/fidl.h>
 #include <lib/async/cpp/task.h>
 #include <lib/trace-engine/instrumentation.h>
 #include <zircon/status.h>
 #include <zircon/types.h>
 
-#include <fcntl.h>
-#include <stdint.h>
+#include <cstdint>
 #include <sstream>
 #include <utility>
 

@@ -5,8 +5,7 @@
 #ifndef FLUTTER_LIB_UI_COMPOSITING_SCENE_BUILDER_H_
 #define FLUTTER_LIB_UI_COMPOSITING_SCENE_BUILDER_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <memory>
 #include <vector>
 

@@ -6,9 +6,7 @@
 
 #include <zircon/syscalls.h>
 
-#include <stdio.h>
-#include <string.h>
-
+#include <cstring>
 #include <memory>
 #include <vector>
 

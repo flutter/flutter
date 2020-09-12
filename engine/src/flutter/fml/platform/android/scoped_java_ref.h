@@ -6,7 +6,8 @@
 #define FLUTTER_FML_PLATFORM_ANDROID_SCOPED_JAVA_REF_H_
 
 #include <jni.h>
-#include <stddef.h>
+
+#include <cstddef>
 
 #include "flutter/fml/macros.h"
 

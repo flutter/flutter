@@ -4,7 +4,7 @@
 
 #include "flutter/lib/ui/semantics/semantics_node.h"
 
-#include <string.h>
+#include <cstring>
 
 namespace flutter {
 

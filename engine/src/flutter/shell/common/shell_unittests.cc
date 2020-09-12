@@ -5,8 +5,8 @@
 
 #define FML_USED_ON_EMBEDDER
 
-#include <time.h>
 #include <algorithm>
+#include <ctime>
 #include <functional>
 #include <future>
 #include <memory>

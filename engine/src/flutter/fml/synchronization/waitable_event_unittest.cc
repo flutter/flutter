@@ -4,11 +4,10 @@
 
 #include "flutter/fml/synchronization/waitable_event.h"
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
-
 #include <atomic>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
 #include <thread>
 #include <type_traits>
 #include <vector>

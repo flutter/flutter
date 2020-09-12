@@ -6,9 +6,9 @@
 #define FLUTTER_COMMON_SETTINGS_H_
 
 #include <fcntl.h>
-#include <stdint.h>
 
 #include <chrono>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>

@@ -7,13 +7,13 @@
 #include <windows.h>
 
 #include <direct.h>
-#include <errno.h>
 #include <shellapi.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
 #include <algorithm>
+#include <cerrno>
+#include <cstring>
 #include <functional>
 #include <list>
 #include <memory>

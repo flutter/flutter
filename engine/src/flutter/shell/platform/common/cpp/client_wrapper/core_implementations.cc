@@ -13,8 +13,7 @@
 // removed in favor of the normal structure since templates will no longer
 // manually include files.
 
-#include <assert.h>
-
+#include <cassert>
 #include <iostream>
 
 #include "binary_messenger_impl.h"

@@ -4,7 +4,7 @@
 
 #include "flutter/runtime/embedder_resources.h"
 
-#include <string.h>
+#include <cstring>
 
 #include "flutter/fml/logging.h"
 

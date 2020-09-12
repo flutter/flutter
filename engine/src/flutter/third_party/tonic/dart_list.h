@@ -5,7 +5,7 @@
 #ifndef LIB_TONIC_DART_LIST_H_
 #define LIB_TONIC_DART_LIST_H_
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "tonic/converter/dart_converter.h"
