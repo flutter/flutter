@@ -342,10 +342,10 @@ class CupertinoPickerDefaultMagnifier extends StatelessWidget {
   /// The color to fill in the background of the magnifier, Support for using [CupertinoDynamicColor].
   final Color background;
 
-  /// default margin of the 'magnifier'.
+  /// Default margin of the 'magnifier'.
   static const double _defaultMagnifierHorizontalMargin = 9;
 
-  /// default radius of the 'magnifier'.
+  /// Default radius of the 'magnifier'.
   static const double _defaultMagnifierRadius = 8;
 
   @override
