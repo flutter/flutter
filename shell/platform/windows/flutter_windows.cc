@@ -4,10 +4,10 @@
 
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 
-#include <assert.h>
 #include <io.h>
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <cstdlib>
 #include <filesystem>

@@ -4,13 +4,14 @@
 
 #include "dart_runner.h"
 
-#include <errno.h>
 #include <lib/async-loop/loop.h>
 #include <lib/async/default.h>
 #include <lib/syslog/global.h>
 #include <sys/stat.h>
 #include <zircon/status.h>
 #include <zircon/syscalls.h>
+
+#include <cerrno>
 #include <memory>
 #include <thread>
 #include <utility>

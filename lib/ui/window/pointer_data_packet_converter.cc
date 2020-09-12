@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/ui/window/pointer_data_packet_converter.h"
-#include "flutter/fml/logging.h"
 
-#include <string.h>
+#include <cstring>
+
+#include "flutter/fml/logging.h"
 
 namespace flutter {
 

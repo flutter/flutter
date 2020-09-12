@@ -36,8 +36,7 @@
 #ifndef LIB_FML_COMMAND_LINE_H_
 #define LIB_FML_COMMAND_LINE_H_
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <initializer_list>
 #include <string>
 #include <string_view>

@@ -5,10 +5,9 @@
 #ifndef FLUTTER_FML_TIME_TIME_DELTA_H_
 #define FLUTTER_FML_TIME_TIME_DELTA_H_
 
-#include <stdint.h>
-#include <time.h>
-
 #include <chrono>
+#include <cstdint>
+#include <ctime>
 #include <iosfwd>
 #include <limits>
 

@@ -5,9 +5,9 @@
 #include "flutter/fml/log_settings.h"
 
 #include <fcntl.h>
-#include <string.h>
 
 #include <algorithm>
+#include <cstring>
 #include <iostream>
 
 #include "flutter/fml/logging.h"

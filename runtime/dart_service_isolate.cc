@@ -4,8 +4,8 @@
 
 #include "flutter/runtime/dart_service_isolate.h"
 
-#include <string.h>
 #include <algorithm>
+#include <cstring>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/posix_wrappers.h"
