@@ -301,7 +301,7 @@ typedef RefreshCallback = Future<void> Function();
 ///       body: CustomScrollView(
 ///         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
 ///         slivers: <Widget>[
-///           CupertinoSliverNavigationBar(largeTitle: Text('Scroll down')),
+///           const CupertinoSliverNavigationBar(largeTitle: Text('Scroll down')),
 ///           CupertinoSliverRefreshControl(
 ///             refreshTriggerPullDistance: 100.0,
 ///             refreshIndicatorExtent: 60.0,
