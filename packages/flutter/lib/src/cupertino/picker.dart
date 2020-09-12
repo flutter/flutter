@@ -76,7 +76,7 @@ class CupertinoPicker extends StatefulWidget {
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required List<Widget> children,
-    this.selectionOverlay = const CupertinoPickerDefaultMagnifier(),
+    this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
     bool looping = false,
   }) : assert(children != null),
        assert(diameterRatio != null),
@@ -121,7 +121,7 @@ class CupertinoPicker extends StatefulWidget {
     @required this.onSelectedItemChanged,
     @required IndexedWidgetBuilder itemBuilder,
     int childCount,
-    this.selectionOverlay = const CupertinoPickerDefaultMagnifier(),
+    this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
   }) : assert(itemBuilder != null),
        assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
@@ -196,7 +196,7 @@ class CupertinoPicker extends StatefulWidget {
   /// It is vertically centered in the picker and is constrained to have the same height as the
   /// center row.
   ///
-  /// If unspecified, it defaults to a [CupertinoPickerDefaultMagnifier] which is a gray
+  /// If unspecified, it defaults to a [CupertinoPickerDefaultSelectionOverlay] which is a gray
   /// rounded rectangle overlay in the iOS 14 style.
   final Widget selectionOverlay;
 
@@ -260,8 +260,8 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     }
   }
 
-  /// Draws the magnifier.
-  Widget _buildMagnifierScreen(Widget magnifier) {
+  /// Draws the selectionOverlay.
+  Widget _buildSelectionOverlay(Widget selectionOverlay) {
     final double height = widget.itemExtent * widget.magnification;
 
     return IgnorePointer(
@@ -270,7 +270,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
           constraints: BoxConstraints.expand(
             height: height,
           ),
-          child: magnifier,
+          child: selectionOverlay,
         ),
       ),
     );
@@ -303,7 +303,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               ),
             ),
           ),
-          _buildMagnifierScreen(widget.selectionOverlay),
+          _buildSelectionOverlay(widget.selectionOverlay),
         ],
       ),
     );
@@ -318,16 +318,17 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 /// A default selection overlay for [CupertinoPicker]s.
 ///
 /// It draws a gray rounded rectangle to match the picker visuals introduced in iOS 14
-class CupertinoPickerDefaultMagnifier extends StatelessWidget {
+class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
 
-  /// Create a magnifier.
+  /// Create a selection overlay.
   ///
   /// The [background] argument default value is [CupertinoColors.tertiarySystemFill].
-  /// It support use [CupertinoDynamicColor].
+  /// It must be non-null.
   ///
   /// The [capLeftEdge] and [capRightEdge] arguments decides whether there is a default margin and radius on the left and right sides.
-  /// It default value is true.
-  const CupertinoPickerDefaultMagnifier({
+  /// They default value is true.
+  /// They must be non-null.
+  const CupertinoPickerDefaultSelectionOverlay({
     Key key,
     this.background = CupertinoColors.tertiarySystemFill,
     this.capLeftEdge = true,
@@ -343,23 +344,24 @@ class CupertinoPickerDefaultMagnifier extends StatelessWidget {
   /// Whether to use the default radius and margin on the right side
   final bool capRightEdge;
 
-  /// The color to fill in the background of the magnifier, Support for using [CupertinoDynamicColor].
+  /// The color to fill in the background of the [CupertinoPickerDefaultSelectionOverlay].
+  /// It Support for use [CupertinoDynamicColor].
   final Color background;
 
-  /// Default margin of the 'magnifier'.
-  static const double _defaultMagnifierHorizontalMargin = 9;
+  /// Default margin of the 'SelectionOverlay'.
+  static const double _defaultSelectionOverlayHorizontalMargin = 9;
 
-  /// Default radius of the 'magnifier'.
-  static const double _defaultMagnifierRadius = 8;
+  /// Default radius of the 'SelectionOverlay'.
+  static const double _defaultSelectionOverlayRadius = 8;
 
   @override
   Widget build(BuildContext context) {
-    const Radius radius = Radius.circular(_defaultMagnifierRadius);
+    const Radius radius = Radius.circular(_defaultSelectionOverlayRadius);
 
     return Container(
       margin: EdgeInsets.only(
-        left: capLeftEdge ? _defaultMagnifierHorizontalMargin : 0,
-        right: capRightEdge ? _defaultMagnifierHorizontalMargin : 0,
+        left: capLeftEdge ? _defaultSelectionOverlayHorizontalMargin : 0,
+        right: capRightEdge ? _defaultSelectionOverlayHorizontalMargin : 0,
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.horizontal(
