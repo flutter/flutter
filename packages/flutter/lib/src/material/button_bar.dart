@@ -10,8 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'button_bar_theme.dart';
 import 'button_theme.dart';
 import 'dialog.dart';
-import 'flat_button.dart';
-import 'raised_button.dart';
 
 /// An end-aligned row of buttons, laying out into a column if there is not
 /// enough horizontal space.
