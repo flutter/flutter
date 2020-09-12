@@ -3491,7 +3491,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   ///  * [SemanticsNode.parentPaintClipRect] for the source and definition
   ///    of the `parentPaintClipRect` argument.
   ///  * [SemanticsNode.elevationAdjustment] for the source and definition
-  ///   of the `elevationAdjustment` argument.
+  ///    of the `elevationAdjustment` argument.
   void compileChildren({
     required Rect? parentSemanticsClipRect,
     required Rect? parentPaintClipRect,
