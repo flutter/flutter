@@ -320,9 +320,13 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 /// It draws a gray rounded rectangle to match the picker visuals introduced in iOS 14
 class CupertinoPickerDefaultMagnifier extends StatelessWidget {
 
-  /// Create a magnifier, it can be easily configured with the default style.
-  /// The default background is [CupertinoColors.tertiarySystemFill],
-  /// which also has default radius and margin on the left and right sides.
+  /// Create a magnifier.
+  ///
+  /// The [background] argument default value is [CupertinoColors.tertiarySystemFill].
+  /// It support use [CupertinoDynamicColor].
+  ///
+  /// The [useLeftStyle] and [useRightStyle] arguments decides whether there is a default margin and radius on the left and right sides.
+  /// It default value is true.
   const CupertinoPickerDefaultMagnifier({
     Key key,
     this.background = CupertinoColors.tertiarySystemFill,
