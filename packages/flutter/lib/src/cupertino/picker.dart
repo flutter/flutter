@@ -76,7 +76,7 @@ class CupertinoPicker extends StatefulWidget {
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required List<Widget> children,
-    this.magnifier,
+    this.magnifier = const CupertinoPickerDefaultMagnifier(),
     bool looping = false,
   }) : assert(children != null),
        assert(diameterRatio != null),
@@ -121,7 +121,7 @@ class CupertinoPicker extends StatefulWidget {
     @required this.onSelectedItemChanged,
     @required IndexedWidgetBuilder itemBuilder,
     int childCount,
-    this.magnifier,
+    this.magnifier = const CupertinoPickerDefaultMagnifier(),
   }) : assert(itemBuilder != null),
        assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
@@ -265,7 +265,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
           constraints: BoxConstraints.expand(
             height: height,
           ),
-          child: magnifier ?? const CupertinoPickerDefaultMagnifier(),
+          child: magnifier,
         ),
       ),
     );
