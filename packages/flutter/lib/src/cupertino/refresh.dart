@@ -271,9 +271,9 @@ typedef RefreshCallback = Future<void> Function();
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 ///
-/// When the user scrolls down far enough to pass [refreshTriggerPullDistance],
-/// this sample shows an iOS-style pull with [refreshIndicatorExtent] amount of space.
-/// It works until [onRefresh] returns a Future.
+/// When the user scrolls past [refreshTriggerPullDistance],
+/// this sample shows the default ios pull to refresh indicator for 1 second and
+/// adds a new item to the top of the list view.
 ///
 /// ```dart imports
 /// import 'package:flutter/cupertino.dart';
