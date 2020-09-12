@@ -58,9 +58,9 @@ void _animateColumnControllerToItem(FixedExtentScrollController controller, int 
   );
 }
 
-const Widget _leftMagnifier = CupertinoPickerDefaultMagnifier(useRightStyle: false,);
-const Widget _centerMagnifier = CupertinoPickerDefaultMagnifier(useLeftStyle: false, useRightStyle: false,);
-const Widget _rightMagnifier = CupertinoPickerDefaultMagnifier(useLeftStyle: false);
+const Widget _leftMagnifier = CupertinoPickerDefaultMagnifier(capRightEdge: false,);
+const Widget _centerMagnifier = CupertinoPickerDefaultMagnifier(capLeftEdge: false, capRightEdge: false,);
+const Widget _rightMagnifier = CupertinoPickerDefaultMagnifier(capLeftEdge: false);
 
 // Lays out the date picker based on how much space each single column needs.
 //

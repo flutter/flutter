@@ -325,23 +325,23 @@ class CupertinoPickerDefaultMagnifier extends StatelessWidget {
   /// The [background] argument default value is [CupertinoColors.tertiarySystemFill].
   /// It support use [CupertinoDynamicColor].
   ///
-  /// The [useLeftStyle] and [useRightStyle] arguments decides whether there is a default margin and radius on the left and right sides.
+  /// The [capLeftEdge] and [capRightEdge] arguments decides whether there is a default margin and radius on the left and right sides.
   /// It default value is true.
   const CupertinoPickerDefaultMagnifier({
     Key key,
     this.background = CupertinoColors.tertiarySystemFill,
-    this.useLeftStyle = true,
-    this.useRightStyle = true,
+    this.capLeftEdge = true,
+    this.capRightEdge = true,
   }) : assert(background != null),
-       assert(useLeftStyle != null),
-       assert(useRightStyle != null),
+       assert(capLeftEdge != null),
+       assert(capRightEdge != null),
        super(key: key);
 
   /// Whether to use the default radius and margin on the left side
-  final bool useLeftStyle;
+  final bool capLeftEdge;
 
   /// Whether to use the default radius and margin on the right side
-  final bool useRightStyle;
+  final bool capRightEdge;
 
   /// The color to fill in the background of the magnifier, Support for using [CupertinoDynamicColor].
   final Color background;
@@ -358,13 +358,13 @@ class CupertinoPickerDefaultMagnifier extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.only(
-        left: useLeftStyle ? _defaultMagnifierHorizontalMargin : 0,
-        right: useRightStyle ? _defaultMagnifierHorizontalMargin : 0,
+        left: capLeftEdge ? _defaultMagnifierHorizontalMargin : 0,
+        right: capRightEdge ? _defaultMagnifierHorizontalMargin : 0,
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.horizontal(
-          left: useLeftStyle ? radius : Radius.zero,
-          right: useRightStyle ? radius : Radius.zero,
+          left: capLeftEdge ? radius : Radius.zero,
+          right: capRightEdge ? radius : Radius.zero,
         ),
         color: CupertinoDynamicColor.resolve(background, context),
       ),
