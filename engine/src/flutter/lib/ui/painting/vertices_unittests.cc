@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/lib/ui/painting/vertices.h"
+
 #include <memory>
+
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/synchronization/waitable_event.h"
-#include "flutter/lib/ui/painting/vertices.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/shell_test.h"
 #include "flutter/shell/common/thread_host.h"

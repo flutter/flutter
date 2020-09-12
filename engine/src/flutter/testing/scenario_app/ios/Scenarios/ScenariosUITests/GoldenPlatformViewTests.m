@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 #import "GoldenPlatformViewTests.h"
+
 #include <sys/sysctl.h>
+
 #import "PlatformViewGoldenTestManager.h"
 
 static const NSInteger kSecondsToWaitForPlatformView = 30;

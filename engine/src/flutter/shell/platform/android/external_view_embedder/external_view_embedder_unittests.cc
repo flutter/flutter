@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 // FLUTTER_NOLINT
 
+#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
+
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/raster_thread_merger.h"
 #include "flutter/fml/thread.h"
-#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "flutter/shell/platform/android/surface/android_surface_mock.h"
 #include "gmock/gmock.h"

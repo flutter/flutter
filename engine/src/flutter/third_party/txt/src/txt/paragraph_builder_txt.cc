@@ -15,6 +15,7 @@
  */
 
 #include "paragraph_builder_txt.h"
+
 #include "paragraph_txt.h"
 
 namespace txt {

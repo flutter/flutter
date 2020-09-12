@@ -5,11 +5,11 @@
 #ifndef FLUTTER_RUNTIME_PLATFORM_DATA_H_
 #define FLUTTER_RUNTIME_PLATFORM_DATA_H_
 
-#include "flutter/lib/ui/window/viewport_metrics.h"
-
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "flutter/lib/ui/window/viewport_metrics.h"
 
 namespace flutter {
 

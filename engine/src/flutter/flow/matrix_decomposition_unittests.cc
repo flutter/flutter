@@ -4,9 +4,10 @@
 
 #define _USE_MATH_DEFINES
 
+#include "flutter/flow/matrix_decomposition.h"
+
 #include <cmath>
 
-#include "flutter/flow/matrix_decomposition.h"
 #include "gtest/gtest.h"
 
 namespace flutter {

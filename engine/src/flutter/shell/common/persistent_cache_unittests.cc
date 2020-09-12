@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/shell/common/persistent_cache.h"
+
 #include <memory>
 
 #include "flutter/assets/directory_asset_bundle.h"
@@ -13,7 +15,6 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/log_settings.h"
 #include "flutter/fml/unique_fd.h"
-#include "flutter/shell/common/persistent_cache.h"
 #include "flutter/shell/common/shell_test.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/version/version.h"

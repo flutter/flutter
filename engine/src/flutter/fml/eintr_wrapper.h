@@ -5,9 +5,9 @@
 #ifndef FLUTTER_FML_EINTR_WRAPPER_H_
 #define FLUTTER_FML_EINTR_WRAPPER_H_
 
-#include "flutter/fml/build_config.h"
-
 #include <errno.h>
+
+#include "flutter/fml/build_config.h"
 
 #if defined(OS_WIN)
 

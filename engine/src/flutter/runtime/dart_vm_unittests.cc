@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/runtime/dart_vm.h"
+
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/testing/fixture_test.h"
 #include "gtest/gtest.h"

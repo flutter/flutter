@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
+#include <gdk/gdkx.h>
+
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_key_event_plugin.h"
 #include "flutter/shell/platform/linux/fl_mouse_cursor_plugin.h"
@@ -13,8 +15,6 @@
 #include "flutter/shell/platform/linux/fl_text_input_plugin.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
-
-#include <gdk/gdkx.h>
 
 static constexpr int kMicrosecondsPerMillisecond = 1000;
 

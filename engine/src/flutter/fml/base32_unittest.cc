@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/base32.h"
-#include "gtest/gtest.h"
 
 #include <iostream>
+
+#include "gtest/gtest.h"
 
 TEST(Base32Test, CanEncode) {
   {

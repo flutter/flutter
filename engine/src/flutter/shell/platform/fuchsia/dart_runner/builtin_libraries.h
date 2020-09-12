@@ -5,12 +5,11 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_BUILTIN_LIBRARIES_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_BUILTIN_LIBRARIES_H_
 
-#include <memory>
-#include <string>
-
+#include <fuchsia/sys/cpp/fidl.h>
 #include <lib/fdio/namespace.h>
 
-#include <fuchsia/sys/cpp/fidl.h>
+#include <memory>
+#include <string>
 
 namespace dart_runner {
 

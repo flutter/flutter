@@ -5,9 +5,9 @@
 #ifndef FLUTTER_FML_PLATFORM_WIN_MESSAGE_LOOP_WIN_H_
 #define FLUTTER_FML_PLATFORM_WIN_MESSAGE_LOOP_WIN_H_
 
-#include <atomic>
-
 #include <windows.h>
+
+#include <atomic>
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop_impl.h"

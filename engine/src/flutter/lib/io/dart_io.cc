@@ -5,7 +5,6 @@
 #include "flutter/lib/io/dart_io.h"
 
 #include "flutter/fml/logging.h"
-
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/converter/dart_converter.h"

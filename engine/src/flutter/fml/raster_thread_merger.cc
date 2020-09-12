@@ -5,6 +5,7 @@
 #define FML_USED_ON_EMBEDDER
 
 #include "flutter/fml/raster_thread_merger.h"
+
 #include "flutter/fml/message_loop_impl.h"
 
 namespace fml {

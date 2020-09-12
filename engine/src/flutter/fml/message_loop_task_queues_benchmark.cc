@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/fml/message_loop_task_queues.h"
+
 #include <cassert>
 #include <string>
 #include <thread>
 #include <vector>
+
 #include "flutter/benchmarking/benchmarking.h"
-#include "flutter/fml/message_loop_task_queues.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 
 namespace fml {

@@ -10,11 +10,9 @@
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/memory/ref_ptr.h"
 
-#if OS_WIN
-
+#if defined(OS_WIN)
 #include <windows.h>
-
-#endif  // OS_WIN
+#endif  // defined(OS_WIN)
 
 namespace fml {
 class NativeLibrary : public fml::RefCountedThreadSafe<NativeLibrary> {

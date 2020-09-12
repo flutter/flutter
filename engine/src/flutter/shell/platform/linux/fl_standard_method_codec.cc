@@ -4,10 +4,10 @@
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 
+#include <gmodule.h>
+
 #include "flutter/shell/platform/linux/fl_standard_message_codec_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_message_codec.h"
-
-#include <gmodule.h>
 
 // See lib/src/services/message_codecs.dart in Flutter source for description of
 // encoding.

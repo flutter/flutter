@@ -6,6 +6,7 @@
 
 #include <android/native_window_jni.h>
 #include <jni.h>
+
 #include <utility>
 
 #include "unicode/uchar.h"

@@ -4,11 +4,12 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include "flutter/shell/common/pipeline.h"
+
 #include <functional>
 #include <future>
 #include <memory>
 
-#include "flutter/shell/common/pipeline.h"
 #include "gtest/gtest.h"
 
 namespace flutter {

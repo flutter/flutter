@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/message.h"
+
 #include "gtest/gtest.h"
 
 namespace fml {

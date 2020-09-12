@@ -5,11 +5,11 @@
 #include "flutter/fml/backtrace.h"
 
 #include <cxxabi.h>
-#include <sstream>
-
 #include <dlfcn.h>
 #include <execinfo.h>
 #include <signal.h>
+
+#include <sstream>
 
 #include "flutter/fml/logging.h"
 

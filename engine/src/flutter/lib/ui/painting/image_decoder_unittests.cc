@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/lib/ui/painting/image_decoder.h"
+
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/synchronization/waitable_event.h"
-#include "flutter/lib/ui/painting/image_decoder.h"
 #include "flutter/lib/ui/painting/multi_frame_codec.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"

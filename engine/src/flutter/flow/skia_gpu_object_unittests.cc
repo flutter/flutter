@@ -4,14 +4,14 @@
 
 #include "flutter/flow/skia_gpu_object.h"
 
+#include <future>
+
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/testing/thread_test.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
-
-#include <future>
 
 namespace flutter {
 namespace testing {

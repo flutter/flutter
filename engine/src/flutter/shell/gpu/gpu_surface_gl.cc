@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 // FLUTTER_NOLINT
 
-#include "gpu_surface_gl.h"
+#include "flutter/shell/gpu/gpu_surface_gl.h"
 
 #include "flutter/fml/base32.h"
 #include "flutter/fml/logging.h"

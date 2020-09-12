@@ -6,7 +6,6 @@
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_RENDERER_H_
 
 #include <EGL/egl.h>
-
 #include <gtk/gtk.h>
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"

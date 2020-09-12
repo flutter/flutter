@@ -7,13 +7,13 @@
 
 #include "flutter/fml/build_config.h"
 
-#if OS_ANDROID
-#include <android/native_window.h>
-#endif  // OS_ANDROID
-
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "third_party/skia/include/core/SkSize.h"
+
+#if OS_ANDROID
+#include <android/native_window.h>
+#endif  // OS_ANDROID
 
 namespace flutter {
 

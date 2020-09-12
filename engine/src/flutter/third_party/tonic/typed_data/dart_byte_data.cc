@@ -4,6 +4,8 @@
 
 #include "tonic/typed_data/dart_byte_data.h"
 
+#include <cstring>
+
 #include "tonic/logging/dart_error.h"
 
 namespace tonic {

@@ -9,9 +9,6 @@
 #include <string>
 #include <string_view>
 
-#include "rapidjson/document.h"
-#include "third_party/skia/include/utils/SkBase64.h"
-
 #include "flutter/fml/base32.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
@@ -20,6 +17,8 @@
 #include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/version/version.h"
+#include "rapidjson/document.h"
+#include "third_party/skia/include/utils/SkBase64.h"
 
 namespace flutter {
 

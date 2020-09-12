@@ -52,7 +52,7 @@ inline T BitCast(const U& u) {
   memcpy(&t, &u, sizeof(t));
   return t;
 }
-#endif
+#endif  // defined(OS_FUCHSIA)
 
 }  // namespace
 
