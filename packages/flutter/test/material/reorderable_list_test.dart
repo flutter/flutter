@@ -215,19 +215,19 @@ void main() {
         final Widget reorderableListView = ReorderableListView(
           children: <Widget>[
             Container(
-              key: Key('pink'),
+              key: const Key('pink'),
               width: double.infinity,
               height: itemHeight,
               color: Colors.pink,
             ),
             Container(
-              key: Key('blue'),
+              key: const Key('blue'),
               width: double.infinity,
               height: itemHeight,
               color: Colors.blue,
             ),
             Container(
-              key: Key('green'),
+              key: const Key('green'),
               width: double.infinity,
               height: itemHeight,
               color: Colors.green,
@@ -243,11 +243,11 @@ void main() {
           ),
         ));
 
-        await tester.startGesture(tester.getCenter(find.byKey(Key('blue'))));
+        await tester.startGesture(tester.getCenter(find.byKey(const Key('blue'))));
         await tester.pump(kLongPressTimeout + kPressTimeout);
         await tester.pumpAndSettle();
         await expectLater(
-          find.byKey(Key('blue')),
+          find.byKey(const Key('blue')),
           matchesGoldenFile('reorderable_list_test.vertical.drop_area.png'),
         );
       });
@@ -769,19 +769,19 @@ void main() {
         final Widget reorderableListView = ReorderableListView(
           children: <Widget>[
             Container(
-              key: Key('pink'),
+              key: const Key('pink'),
               height: double.infinity,
               width: itemHeight,
               color: Colors.pink,
             ),
             Container(
-              key: Key('blue'),
+              key: const Key('blue'),
               height: double.infinity,
               width: itemHeight,
               color: Colors.blue,
             ),
             Container(
-              key: Key('green'),
+              key: const Key('green'),
               height: double.infinity,
               width: itemHeight,
               color: Colors.green,
@@ -797,11 +797,11 @@ void main() {
           ),
         ));
 
-        await tester.startGesture(tester.getCenter(find.byKey(Key('blue'))));
+        await tester.startGesture(tester.getCenter(find.byKey(const Key('blue'))));
         await tester.pump(kLongPressTimeout + kPressTimeout);
         await tester.pumpAndSettle();
         await expectLater(
-          find.byKey(Key('blue')),
+          find.byKey(const Key('blue')),
           matchesGoldenFile('reorderable_list_test.horizontal.drop_area.png'),
         );
       });
