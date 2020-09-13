@@ -81,7 +81,8 @@ Future<void> main() async {
             '    path: ../plugin_without_android\n',
       );
       modulePubspec.writeAsStringSync(content, flush: true);
-      print('zzzzz3: ${tempDir.listSync(recursive: true)}');
+      print('zzzzz3: ${modulePubspec.readAsLines()}');
+      print('zzzx');
 
       section('Run packages get in module project');
 
