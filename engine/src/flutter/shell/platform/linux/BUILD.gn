@@ -140,6 +140,7 @@ executable("flutter_linux_unittests") {
     "fl_dart_project_test.cc",
     "fl_json_message_codec_test.cc",
     "fl_json_method_codec_test.cc",
+    "fl_key_event_plugin_test.cc",
     "fl_message_codec_test.cc",
     "fl_method_channel_test.cc",
     "fl_method_codec_test.cc",
