@@ -16,12 +16,10 @@ final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradle
 /// Tests that AARs can be built on module projects.
 Future<void> main() async {
   await task(() async {
-
     section('Find Java');
 
     final String javaHome = await findJavaHome();
-    if (javaHome == null)
-      return TaskResult.failure('Could not find Java');
+    if (javaHome == null) return TaskResult.failure('Could not find Java');
     print('\nUsing JAVA_HOME=$javaHome');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
@@ -41,7 +39,14 @@ Future<void> main() async {
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
-          options: <String>['--org', 'io.flutter.devicelab', '--template', 'plugin', '--platforms=android', 'plugin_with_android'],
+          options: <String>[
+            '--org',
+            'io.flutter.devicelab',
+            '--template',
+            'plugin',
+            '--platforms=android',
+            'plugin_with_android'
+          ],
         );
       });
 
@@ -50,7 +55,14 @@ Future<void> main() async {
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
-          options: <String>['--org', 'io.flutter.devicelab', '--template', 'plugin', '--platforms=ios', 'plugin_without_android'],
+          options: <String>[
+            '--org',
+            'io.flutter.devicelab',
+            '--template',
+            'plugin',
+            '--platforms=ios',
+            'plugin_without_android'
+          ],
         );
       });
 
@@ -61,10 +73,10 @@ Future<void> main() async {
       content = content.replaceFirst(
         '\ndependencies:\n',
         '\ndependencies:\n'
-          '  plugin_with_android:\n'
-          '    path: ../plugin_with_android\n'
-          '  plugin_without_android:\n'
-          '    path: ../plugin_without_android\n',
+            '  plugin_with_android:\n'
+            '    path: ../plugin_with_android\n'
+            '  plugin_without_android:\n'
+            '    path: ../plugin_without_android\n',
       );
       modulePubspec.writeAsStringSync(content, flush: true);
 
@@ -95,7 +107,9 @@ Future<void> main() async {
       );
 
       section('Check release Maven artifacts');
-
+      print('zzzz');
+      print(Directory(repoPath).listSync());
+      print('zzzz');
       checkFileExists(path.join(
         repoPath,
         'io',
@@ -155,15 +169,14 @@ Future<void> main() async {
       section('Check assets in release AAR');
 
       checkCollectionContains<String>(
-        <String>[
-          ...flutterAssets,
-          // AOT snapshots
-          'jni/arm64-v8a/libapp.so',
-          'jni/armeabi-v7a/libapp.so',
-          'jni/x86_64/libapp.so',
-        ],
-        await getFilesInAar(
-          path.join(
+          <String>[
+            ...flutterAssets,
+            // AOT snapshots
+            'jni/arm64-v8a/libapp.so',
+            'jni/armeabi-v7a/libapp.so',
+            'jni/x86_64/libapp.so',
+          ],
+          await getFilesInAar(path.join(
             repoPath,
             'io',
             'flutter',
@@ -172,9 +185,7 @@ Future<void> main() async {
             'flutter_release',
             '1.0',
             'flutter_release-1.0.aar',
-          )
-        )
-      );
+          )));
 
       section('Check debug Maven artifacts');
 
