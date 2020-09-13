@@ -108,7 +108,7 @@ Future<void> main() async {
 
       section('Check release Maven artifacts');
       print('zzzz');
-      print(Directory(projectDir.path).listSync(recursive: true));
+      print(tempDir.listSync(recursive: true));
       print('zzzz');
       checkFileExists(path.join(
         repoPath,
