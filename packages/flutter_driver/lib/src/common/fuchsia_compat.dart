@@ -26,9 +26,6 @@ class _DummyPortForwarder implements PortForwarder {
   int get remotePort => _remotePort;
 
   @override
-  String get openPortAddress => InternetAddress.loopbackIPv4.address;
-
-  @override
   Future<void> stop() async { }
 }
 

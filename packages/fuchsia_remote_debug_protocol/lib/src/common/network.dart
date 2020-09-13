@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+import 'dart:core';
 
 /// Determines whether `address` is a valid IPv6 or IPv4 address.
 ///
@@ -17,7 +17,7 @@ void validateAddress(String address) {
 /// Returns true if `address` is a valid IPv6 address.
 bool isIpV6Address(String address) {
   try {
-    InternetAddress(address, type:InternetAddressType.IPv6);
+    Uri.parseIPv6Address(address);
     return true;
   } on FormatException {
     return false;
@@ -27,7 +27,7 @@ bool isIpV6Address(String address) {
 /// Returns true if `address` is a valid IPv4 address.
 bool isIpV4Address(String address) {
   try {
-    InternetAddress(address, type:InternetAddressType.IPv4);
+    Uri.parseIPv4Address(address);
     return true;
   } on FormatException {
     return false;
