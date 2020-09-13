@@ -1279,6 +1279,7 @@ FILE: ../../../flutter/shell/platform/linux/fl_json_method_codec.cc
 FILE: ../../../flutter/shell/platform/linux/fl_json_method_codec_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_key_event_plugin.cc
 FILE: ../../../flutter/shell/platform/linux/fl_key_event_plugin.h
+FILE: ../../../flutter/shell/platform/linux/fl_key_event_plugin_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_message_codec.cc
 FILE: ../../../flutter/shell/platform/linux/fl_message_codec_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_method_call.cc
