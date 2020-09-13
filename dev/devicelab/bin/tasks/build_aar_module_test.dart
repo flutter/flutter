@@ -37,6 +37,8 @@ Future<void> main() async {
       section('Create plugin that supports android platform');
 
       await inDirectory(tempDir, () async {
+        print('zzzzz');
+        print(Directory.current);
         await flutter(
           'create',
           options: <String>[
@@ -48,6 +50,7 @@ Future<void> main() async {
             'plugin_with_android'
           ],
         );
+        print(Directory.current.listSync(recursive: true));
       });
 
       section('Create plugin that doesn\'t support android project');
