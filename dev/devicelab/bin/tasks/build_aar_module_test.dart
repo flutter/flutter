@@ -37,8 +37,6 @@ Future<void> main() async {
       section('Create plugin that supports android platform');
 
       await inDirectory(tempDir, () async {
-        print('zzzzz');
-        print(Directory.current);
         await flutter(
           'create',
           options: <String>[
@@ -50,8 +48,8 @@ Future<void> main() async {
             'plugin_with_android'
           ],
         );
-        print(Directory.current.listSync(recursive: true));
       });
+      print('zzzzz1: ${tempDir.listSync(recursive: true)}');
 
       section('Create plugin that doesn\'t support android project');
 
@@ -68,6 +66,7 @@ Future<void> main() async {
           ],
         );
       });
+      print('zzzzz2: ${tempDir.listSync(recursive: true)}');
 
       section('Add plugins to pubspec.yaml');
 
@@ -82,6 +81,7 @@ Future<void> main() async {
             '    path: ../plugin_without_android\n',
       );
       modulePubspec.writeAsStringSync(content, flush: true);
+      print('zzzzz3: ${tempDir.listSync(recursive: true)}');
 
       section('Run packages get in module project');
 
@@ -91,6 +91,7 @@ Future<void> main() async {
           options: <String>['get'],
         );
       });
+      print('zzzzz4: ${tempDir.listSync(recursive: true)}');
 
       section('Build release AAR');
 
@@ -100,6 +101,7 @@ Future<void> main() async {
           options: <String>['aar', '--verbose'],
         );
       });
+      print('zzzzz5: ${tempDir.listSync(recursive: true)}');
 
       final String repoPath = path.join(
         projectDir.path,
