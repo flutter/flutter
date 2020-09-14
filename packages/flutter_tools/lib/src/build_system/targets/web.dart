@@ -8,7 +8,6 @@ import 'package:package_config/package_config.dart';
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
-import '../../base/utils.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
@@ -268,7 +267,7 @@ class WebReleaseBundle extends Target {
         environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path
       );
     }
-    final String versionInfo = getVersionInfo(FlutterProject.current());
+    final String versionInfo = FlutterProject.current().getVersionInfo();
     environment.outputDir
         .childFile('version.json')
         .writeAsStringSync(versionInfo);

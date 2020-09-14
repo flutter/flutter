@@ -9,7 +9,6 @@ import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 
 import '../convert.dart';
-import '../project.dart';
 import 'file_system.dart';
 
 /// Convert `foo_bar` to `fooBar`.
@@ -403,12 +402,4 @@ bool isWhitespace(_AnsiRun run) {
       rune == 0x3000 ||
       rune == 0xFEFF;
 }
-String getVersionInfo(FlutterProject flutterProject)  {
 
-  final Map<String, String> versionFileJson = <String, String>{
-    'app_name': flutterProject.manifest.appName,
-    'version': flutterProject.manifest.buildName,
-    'build_number': flutterProject.manifest.buildNumber
-  };
-  return jsonEncode(versionFileJson);
-}

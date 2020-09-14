@@ -91,18 +91,17 @@ void main() {
     // Import.
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
   }));
+
   test('version.json is created after release build', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     final Directory webResources = environment.projectDir.childDirectory('web');
     webResources.childFile('index.html')
         .createSync(recursive: true);
-    webResources.childFile('foo.txt')
-        .writeAsStringSync('A');
     environment.buildDir.childFile('main.dart.js').createSync();
     await const WebReleaseBundle().build(environment);
     expect(environment.outputDir.childFile('version.json'),exists);
-
   }));
+
   test('WebReleaseBundle copies dart2js output and resource files to output directory', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     final Directory webResources = environment.projectDir.childDirectory('web');

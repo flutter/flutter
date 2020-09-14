@@ -161,6 +161,7 @@ class UrlLauncherPlugin {}
     ProcessManager: () => FakeProcessManager.any(),
     BuildSystem: () => MockBuildSystem(),
   });
+
   testUsingContext('hidden if feature flag is not enabled', () async {
     expect(BuildWebCommand(verboseHelp: false).hidden, true);
   }, overrides: <Type, Generator>{

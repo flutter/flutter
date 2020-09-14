@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
@@ -262,6 +263,15 @@ class FlutterProject {
       await web.ensureReadyForPlatformSpecificTooling();
     }
     await injectPlugins(this, checkProjects: checkProjects);
+  }
+  String getVersionInfo()  {
+
+    final Map<String, String> versionFileJson = <String, String>{
+      'app_name': manifest.appName,
+      'version': manifest.buildName,
+      'build_number': manifest.buildNumber
+    };
+    return jsonEncode(versionFileJson);
   }
 }
 
