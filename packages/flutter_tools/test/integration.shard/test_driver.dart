@@ -31,9 +31,6 @@ import 'test_utils.dart';
 // taking a long time are printed to the console.
 const bool _printDebugOutputToStdOut = false;
 
-const String kLocalEngineEnvironment = 'FLUTTER_LOCAL_ENGINE';
-const String kLocalEngineLocation = 'FLUTTER_LOCAL_ENGINE_SRC_PATH';
-
 final DateTime startTime = DateTime.now();
 
 const Duration defaultTimeout = Duration(seconds: 5);
@@ -455,10 +452,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           '--disable-service-auth-codes',
         if (machine) '--machine',
         if (!spawnDdsInstance) '--disable-dds',
-        if (platform.environment.containsKey(kLocalEngineEnvironment))
-          '--local-engine=${platform.environment[kLocalEngineEnvironment]}',
-        if (platform.environment.containsKey(kLocalEngineLocation))
-          '--local-engine-src-path=${platform.environment[kLocalEngineLocation]}',
+        ...getLocalEngineArguments(),
         '-d',
         if (chrome)
           ...<String>[
@@ -489,10 +483,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     await _setupProcess(
       <String>[
         'attach',
-        if (platform.environment.containsKey(kLocalEngineEnvironment))
-          '--local-engine=${platform.environment[kLocalEngineEnvironment]}',
-        if (platform.environment.containsKey(kLocalEngineLocation))
-          '--local-engine-src-path=${platform.environment[kLocalEngineLocation]}',
+         ...getLocalEngineArguments(),
         '--machine',
         if (!spawnDdsInstance)
           '--disable-dds',
@@ -716,10 +707,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   }) async {
     await _setupProcess(<String>[
       'test',
-      if (platform.environment.containsKey(kLocalEngineEnvironment))
-        '--local-engine=${platform.environment[kLocalEngineEnvironment]}',
-      if (platform.environment.containsKey(kLocalEngineLocation))
-        '--local-engine-src-path=${platform.environment[kLocalEngineLocation]}',
+       ...getLocalEngineArguments(),
       '--disable-service-auth-codes',
       '--machine',
       if (coverage)
