@@ -137,7 +137,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///           icon: const Icon(Icons.add_alert),
 ///           tooltip: 'Show Snackbar',
 ///           onPressed: () {
-///             ScaffoldMessenger.of(context).showSnackBar(snackBar);
+///             scaffoldKey.currentState.showSnackBar(snackBar);
 ///           },
 ///         ),
 ///         IconButton(
