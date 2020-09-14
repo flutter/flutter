@@ -120,6 +120,9 @@ abstract class Terminal {
   /// will be the character in `acceptedCharacters` at the index given by
   /// `defaultChoiceIndex`.
   ///
+  /// The accepted characters must be a String with a length of 1, excluding any
+  /// whitespace characters such as `\t`, `\n`, or ` `.
+  ///
   /// If [usesTerminalUi] is false, throws a [StateError].
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
