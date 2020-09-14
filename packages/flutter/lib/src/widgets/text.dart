@@ -363,7 +363,7 @@ class Text extends StatelessWidget {
   /// If the [softWrap] is true or null, the glyph causing overflow, and those that follow,
   /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   const Text(
-    this.data, {
+    String this.data, {
     Key? key,
     this.style,
     this.strutStyle,
@@ -395,7 +395,7 @@ class Text extends StatelessWidget {
   ///
   /// See [RichText] which provides a lower-level way to draw text.
   const Text.rich(
-    this.textSpan, {
+    InlineSpan this.textSpan, {
     Key? key,
     this.style,
     this.strutStyle,
