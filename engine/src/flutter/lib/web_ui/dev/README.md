@@ -31,14 +31,6 @@ If you don't want to add `felt` to your path, you can still invoke it using a re
 
 ## Speeding up your builds and tests
 
-You can speed up `ninja` and `dart2js` by adding parallelism and taking advantage of more cores.
-
-To speed up ninja pass `-j` to specify the desired level of parallelism, like so:
-
-```
-felt build [-w] -j 100
-```
-
 If you are a Google employee, you can use an internal instance of Goma to parallelize your builds. Because Goma compiles code on remote servers, this option is effective even on low-powered laptops.
 
 By default, when compiling Dart code to JavaScript, we use 8 `dart2js` workers.
