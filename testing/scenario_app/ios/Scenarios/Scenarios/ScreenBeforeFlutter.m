@@ -9,7 +9,7 @@
 
 @synthesize engine = _engine;
 
-- (id)initWithEngineRunCompletion:(void (^)(void))engineRunCompletion {
+- (id)initWithEngineRunCompletion:(dispatch_block_t)engineRunCompletion {
   self = [super init];
   _engine = [[FlutterEngine alloc] initWithScenario:@"poppable_screen"
                                      withCompletion:engineRunCompletion];
@@ -27,7 +27,7 @@
   showFlutterButton.tintColor = UIColor.whiteColor;
   showFlutterButton.clipsToBounds = YES;
   [showFlutterButton addTarget:self
-                        action:@selector(showFlutter)
+                        action:@selector(showFlutter:)
               forControlEvents:UIControlEventTouchUpInside];
 
   [self.view addSubview:showFlutterButton];
@@ -39,11 +39,11 @@
   [_engine runWithEntrypoint:nil];
 }
 
-- (FlutterViewController*)showFlutter {
+- (FlutterViewController*)showFlutter:(dispatch_block_t)showCompletion {
   FlutterViewController* flutterVC = [[FlutterViewController alloc] initWithEngine:_engine
                                                                            nibName:nil
                                                                             bundle:nil];
-  [self presentViewController:flutterVC animated:NO completion:nil];
+  [self presentViewController:flutterVC animated:NO completion:showCompletion];
   return flutterVC;
 }
 
