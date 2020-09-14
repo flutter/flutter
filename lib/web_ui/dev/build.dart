@@ -21,11 +21,6 @@ class BuildCommand extends Command<bool> with ArgUtils {
         abbr: 'w',
         help: 'Run the build in watch mode so it rebuilds whenever a change'
             'is made.',
-      )
-      ..addOption(
-        'ninja-jobs',
-        abbr: 'j',
-        help: 'Number of parallel jobs to use in the ninja build.',
       );
   }
 
@@ -37,15 +32,12 @@ class BuildCommand extends Command<bool> with ArgUtils {
 
   bool get isWatchMode => boolArg('watch');
 
-  int getNinjaJobCount() => intArg('ninja-jobs');
-
   @override
   FutureOr<bool> run() async {
-    final int ninjaJobCount = getNinjaJobCount();
     final FilePath libPath = FilePath.fromWebUi('lib');
     final Pipeline buildPipeline = Pipeline(steps: <PipelineStep>[
       gn,
-      () => ninja(ninjaJobCount),
+      () => ninja(),
     ]);
     await buildPipeline.start();
 
@@ -78,17 +70,11 @@ Future<void> gn() {
 }
 
 // TODO(mdebbar): Make the ninja step interruptable in the pipeline.
-Future<void> ninja(int ninjaJobs) {
-  if (ninjaJobs == null) {
-    print('Running ninja (with default ninja parallelization)...');
-  } else {
-    print('Running ninja (with $ninjaJobs parallel jobs)...');
-  }
-
-  return runProcess('ninja', <String>[
+Future<void> ninja() {
+  print('Running autoninja...');
+  return runProcess('autoninja', <String>[
     '-C',
     environment.hostDebugUnoptDir.path,
-    if (ninjaJobs != null) ...['-j', '$ninjaJobs'],
   ]);
 }
 
