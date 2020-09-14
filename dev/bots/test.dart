@@ -92,7 +92,6 @@ const List<String> kWebTestFileKnownFailures = <String>[
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
   'test/widgets/editable_text_cursor_test.dart',
-  'test/material/animated_icons_private_test.dart',
   'test/material/data_table_test.dart',
   'test/cupertino/nav_bar_transition_test.dart',
   'test/cupertino/refresh_test.dart',
@@ -578,6 +577,40 @@ Future<void> _runFrameworkTests() async {
     }
   }
 
+  Future<void> runPrivateTests() async {
+    final List<String> args = <String>[
+      'run',
+      '--enable-experiment=non-nullable',
+      '--sound-null-safety',
+      'test_private.dart',
+    ];
+    final Map<String, String> pubEnvironment = <String, String>{
+      'FLUTTER_ROOT': flutterRoot,
+    };
+    if (Directory(pubCache).existsSync()) {
+      pubEnvironment['PUB_CACHE'] = pubCache;
+    }
+
+    // If an existing env variable exists append to it, but only if
+    // it doesn't appear to already include enable-asserts.
+    String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
+    if (!toolsArgs.contains('--enable-asserts')) {
+      toolsArgs += ' --enable-asserts';
+    }
+    pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
+    // The flutter_tool will originally have been snapshotted without asserts.
+    // We need to force it to be regenerated with them enabled.
+    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'));
+    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp'));
+
+    await runCommand(
+      pub,
+      args,
+      workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_private'),
+      environment: pubEnvironment,
+    );
+  }
+
   Future<void> runMisc() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata);
@@ -602,6 +635,7 @@ Future<void> _runFrameworkTests() async {
       options: <String>['--enable-vmservice'],
       tableData: bigqueryApi?.tabledata,
     );
+    await runPrivateTests();
     const String httpClientWarning =
       'Warning: At least one test in this suite creates an HttpClient. When\n'
       'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
