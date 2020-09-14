@@ -1474,14 +1474,10 @@ void main() {
   });
 
   testWidgets('Popping routes should cancel down events', (WidgetTester tester) async {
-    // The test target, _TestPostRouteCancel, shows on the home route how many
-    // [PointerCancelEvent] it has received. Initially it will show "Home 0".
-    // After the route is popped, it should show "Home 1", meaning it received
-    // one [PointerCancelEvent].
     await tester.pumpWidget(_TestPostRouteCancel());
 
     final TestGesture gesture = await tester.createGesture();
-    await gesture.down(tester.getCenter(find.text('Home 0')));
+    await gesture.down(tester.getCenter(find.text('PointerCancelEvents: 0')));
     await gesture.up();
 
     await tester.pumpAndSettle();
@@ -1493,7 +1489,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Hold'), findsNothing);
     expect(find.byType(CupertinoButton), findsOneWidget);
-    expect(find.text('Home 1'), findsOneWidget);
+    expect(find.text('PointerCancelEvents: 1'), findsOneWidget);
   });
 }
 
@@ -1601,8 +1597,9 @@ Widget buildNavigator({
 //
 // It contains 2 routes:
 //
-//  * The initial route, 'home', displays a button showing 'Home #', where # is
-//    the number of cancel events received. Tapping the button pushes route 'sub'.
+//  * The initial route, 'home', displays a button showing 'PointerCancelEvents: #',
+//    where # is the number of cancel events received. Tapping the button pushes
+//    route 'sub'.
 //  * The 'sub' route, displays a text showing 'Hold'. Holding the button (a down
 //    event) will pop this route after 1 second.
 //
@@ -1620,7 +1617,7 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
   Widget _buildHome(BuildContext context) {
     return Center(
       child: CupertinoButton(
-        child: Text('Home $counter'),
+        child: Text('PointerCancelEvents: $counter'),
         onPressed: () => Navigator.pushNamed<void>(context, 'sub'),
       ),
     );
