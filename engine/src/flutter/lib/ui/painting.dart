@@ -2656,7 +2656,7 @@ class ColorFilter {
   /// in unnormalized, 0...255, space. For example, the identity matrix is:
   ///
   /// ```
-  /// const ColorMatrix identity = ColorFilter.matrix(<double>[
+  /// const ColorFilter identity = ColorFilter.matrix(<double>[
   ///   1, 0, 0, 0, 0,
   ///   0, 1, 0, 0, 0,
   ///   0, 0, 1, 0, 0,
