@@ -114,6 +114,14 @@ tasks:
 
   # Android on-device tests
 
+  complex_layout_android__scroll_smoothness:
+    description: >
+      Measures the smoothness of scrolling of the Complex Layout sample app on
+      Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   complex_layout_scroll_perf__timeline_summary:
     description: >
       Measures the runtime performance of the Complex Layout sample app on
@@ -201,12 +209,28 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  cubic_bezier_perf__e2e_summary:
+    description: >
+      Measures the runtime performance of cubic bezier animations on Android
+      using e2e.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   cubic_bezier_perf_sksl_warmup__timeline_summary:
     description: >
       Measures the runtime performance of cubic bezier animations on Android
       with SkSL shader warm-up.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  cubic_bezier_perf_sksl_warmup__e2e_summary:
+    description: >
+      Measures the runtime performance of cubic bezier animations on Android
+      with SkSL shader warm-up using e2e.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery_sksl_warmup_ios32__transition_perf:
     description: >
