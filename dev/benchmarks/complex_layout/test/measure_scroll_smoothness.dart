@@ -15,20 +15,6 @@ import 'package:e2e/e2e.dart';
 
 import 'package:complex_layout/main.dart' as app;
 
-class PointerDataTestBinding extends E2EWidgetsFlutterBinding {
-  // PointerData injection would usually be considered device input and therefore
-  // blocked by [TestWidgetsFlutterBinding]. Override this behavior
-  // to help events go into widget tree.
-  @override
-  void dispatchEvent(
-    PointerEvent event,
-    HitTestResult hitTestResult, {
-    TestBindingEventSource source = TestBindingEventSource.device,
-  }) {
-    super.dispatchEvent(event, hitTestResult, source: TestBindingEventSource.test);
-  }
-}
-
 /// A union of [ui.PointerDataPacket] and the time it should be sent.
 class PointerDataRecord {
   PointerDataRecord(this.timeStamp, List<ui.PointerData> data)
@@ -164,7 +150,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
 }
 
 Future<void> main() async {
-  final PointerDataTestBinding binding = PointerDataTestBinding();
+  final E2ETestBinding binding = E2ETestBinding();
   assert(WidgetsBinding.instance == binding);
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
   binding.reportData ??= <String, dynamic>{};
