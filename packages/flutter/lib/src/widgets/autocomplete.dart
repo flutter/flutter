@@ -162,7 +162,11 @@ class AutocompleteController<T> {
        _ownsTextEditingController = textEditingController == null,
        textEditingController = textEditingController ?? TextEditingController(),
        getResults = ((TextEditingValue value) {
-         return _filterByString(options, value, filterStringForOption);
+         return _filterByString(
+           options,
+           value,
+           filterStringForOption ?? _defaultStringForOption,
+         );
        }) {
     this.textEditingController.addListener(_onChangedField);
   }
