@@ -2147,6 +2147,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       value = _whitespaceFormatter.formatEditUpdate(_value, value);
       _lastFormattedValue = value;
     }
+
     // Setting _value here ensures the selection and composing region info is passed.
     _value = value;
     // Use the last formatted value when an identical repeat pass is detected.
