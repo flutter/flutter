@@ -470,6 +470,7 @@ const CORE = [
   ${coreBundle.map((String file) => '"$file"').join(',\n')}];
 // During install, the TEMP cache is populated with the application shell files.
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
   return event.waitUntil(
     caches.open(TEMP).then((cache) => {
       return cache.addAll(
