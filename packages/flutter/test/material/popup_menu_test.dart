@@ -636,6 +636,93 @@ void main() {
     await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomCenter, TextDirection.rtl, const Rect.fromLTWH(450.0, 500.0, 0.0, 0.0));
   });
 
+  testWidgets('PopupMenu positioning inside nested Overlay', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Example')),
+          body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Overlay(
+              initialEntries: [
+                OverlayEntry(
+                  builder: (_) => Center(
+                    child: PopupMenuButton<int>(
+                      key: buttonKey,
+                      itemBuilder: (_) => <PopupMenuItem<int>>[
+                        const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+                        const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+                      ],
+                      child: const Text('Show Menu'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    final Finder popupFinder = find.byWidgetPredicate(
+      (Widget w) => '${w.runtimeType}' == '_PopupMenu<int>',
+    );
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    final Offset buttonTopLeft = tester.getTopLeft(buttonFinder);
+    expect(tester.getTopLeft(popupFinder), buttonTopLeft);
+  });
+
+  testWidgets('PopupMenu positioning inside nested Navigator', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Example')),
+          body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<dynamic>(
+                  builder: (BuildContext context) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: PopupMenuButton<int>(
+                          key: buttonKey,
+                          itemBuilder: (_) => <PopupMenuItem<int>>[
+                            const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+                            const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+                          ],
+                          child: const Text('Show Menu'),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    final Finder popupFinder = find.byWidgetPredicate(
+      (Widget w) => '${w.runtimeType}' == '_PopupMenu<int>',
+    );
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    final Offset buttonTopLeft = tester.getTopLeft(buttonFinder);
+    expect(tester.getTopLeft(popupFinder), buttonTopLeft);
+  });
+
   testWidgets('PopupMenu removes MediaQuery padding', (WidgetTester tester) async {
     BuildContext popupContext;
 
