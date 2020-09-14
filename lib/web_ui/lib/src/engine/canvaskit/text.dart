@@ -31,7 +31,6 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           fontStyle,
           ellipsis,
         ) {
-    assert(skParagraphStyle != null);
     _textDirection = textDirection ?? ui.TextDirection.ltr;
     _fontFamily = fontFamily;
   }

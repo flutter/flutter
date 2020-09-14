@@ -12,8 +12,6 @@ analyzer:
     missing_required_param: warning
     missing_return: warning
     native_function_body_in_non_sdk_code: ignore
-    unnecessary_non_null_assertion: ignore
-    unnecessary_null_comparison: ignore
     todo: ignore
 
 linter:
