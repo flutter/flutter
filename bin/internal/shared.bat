@@ -142,7 +142,7 @@ GOTO :after_subroutine
         GOTO :retry_pub_upgrade
       :upgrade_retries_exhausted
         SET exit_code=%ERRORLEVEL%
-        ECHO Error: 'pub upgrade' still failing after %total_tries% tries, giving up. 1>&2
+        ECHO Error: 'pub upgrade' still failing after %total_tries% tries. 1>&2
         GOTO final_exit
       :upgrade_succeeded
     ENDLOCAL
