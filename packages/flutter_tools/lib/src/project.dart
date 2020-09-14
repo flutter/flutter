@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
+import '../src/convert.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'artifacts.dart';
 import 'base/common.dart';
@@ -264,8 +264,9 @@ class FlutterProject {
     }
     await injectPlugins(this, checkProjects: checkProjects);
   }
-  String getVersionInfo()  {
 
+  /// Returns a json encoded string that is used to generate version.json
+  String getVersionInfo()  {
     final Map<String, String> versionFileJson = <String, String>{
       'app_name': manifest.appName,
       'version': manifest.buildName,

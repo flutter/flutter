@@ -267,6 +267,7 @@ class WebReleaseBundle extends Target {
         environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path
       );
     }
+
     final String versionInfo = FlutterProject.current().getVersionInfo();
     environment.outputDir
         .childFile('version.json')

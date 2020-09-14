@@ -435,6 +435,7 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode();
 
     writePidFile(stringArg('pid-file'));
+
     if (boolArg('machine')) {
       if (devices.length > 1) {
         throwToolExit('--machine does not support -d all.');

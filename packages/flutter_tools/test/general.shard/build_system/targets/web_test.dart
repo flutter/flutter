@@ -99,6 +99,7 @@ void main() {
         .createSync(recursive: true);
     environment.buildDir.childFile('main.dart.js').createSync();
     await const WebReleaseBundle().build(environment);
+
     expect(environment.outputDir.childFile('version.json'),exists);
   }));
 
