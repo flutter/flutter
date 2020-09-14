@@ -317,7 +317,18 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
 /// A default selection overlay for [CupertinoPicker]s.
 ///
-/// It draws a gray rounded rectangle to match the picker visuals introduced in iOS 14
+/// It draws a gray rounded rectangle to match the picker visuals introduced in iOS 14.
+///
+/// This widget is typically only used in [CupertinoPicker.selectionOverlay].
+/// In an iOS 14 multi-column picker, the selection overlay is a single rounded rectangle that spans the entire multi-column picker.
+/// To achieve the same effect using [CupertinoPickerDefaultSelectionOverlay],
+/// the additional margin and corner radii on the left or the right side can be
+/// disabled by turning off [capLeftEdge] and [capRightEdge], so this selection
+/// overlay visually connects with selection overlays of adjoining [CupertinoPicker]s (i.e., other "column"s).
+///
+/// See also:
+///
+///  * [CupertinoPicker], which uses this widget as its default [CupertinoPicker.selectionOverlay].
 class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
 
   /// Create a selection overlay.
