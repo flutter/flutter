@@ -351,10 +351,10 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
        assert(capRightEdge != null),
        super(key: key);
 
-  /// Whether to use the default radius and margin on the left side
+  /// Whether to use the default use rounded corners and margin on the left side.
   final bool capLeftEdge;
 
-  /// Whether to use the default radius and margin on the right side
+  /// Whether to use the default use rounded corners and margin on the right side.
   final bool capRightEdge;
 
   /// The color to fill in the background of the [CupertinoPickerDefaultSelectionOverlay].
