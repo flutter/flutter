@@ -82,6 +82,7 @@ void AndroidExternalTextureGL::UpdateTransform() {
 void AndroidExternalTextureGL::OnGrContextDestroyed() {
   if (state_ == AttachmentState::attached) {
     Detach();
+    glDeleteTextures(1, &texture_name_);
   }
   state_ = AttachmentState::detached;
 }
