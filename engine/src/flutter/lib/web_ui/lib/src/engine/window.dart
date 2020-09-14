@@ -656,7 +656,7 @@ class EngineWindow extends ui.Window {
             assert(_browserHistory is MultiEntriesBrowserHistory);
             _browserHistory.setRouteName(
               message!['location'],
-              state: message!['state'],
+              state: message['state'],
             );
             _replyToPlatformMessage(
               callback, codec.encodeSuccessEnvelope(true));

@@ -528,12 +528,9 @@ class Shadow {
     this.color = const Color(_kColorDefault),
     this.offset = Offset.zero,
     this.blurRadius = 0.0,
-  })  : assert(color != null,
-            'Text shadow color was null.'), // ignore: unnecessary_null_comparison
-        assert(offset != null,
-            'Text shadow offset was null.'), // ignore: unnecessary_null_comparison
-        assert(blurRadius >= 0.0,
-            'Text shadow blur radius should be non-negative.');
+  })  : assert(color != null, 'Text shadow color was null.'), // ignore: unnecessary_null_comparison
+        assert(offset != null, 'Text shadow offset was null.'), // ignore: unnecessary_null_comparison
+        assert(blurRadius >= 0.0, 'Text shadow blur radius should be non-negative.');
 
   static const int _kColorDefault = 0xFF000000;
   final Color color;
