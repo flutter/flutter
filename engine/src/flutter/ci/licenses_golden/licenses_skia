@@ -1,4 +1,4 @@
-Signature: de955a9c882992c0a555f37eda3262fd
+Signature: c076281ccaaafb010afa10f355ad0d72
 
 UNUSED LICENSES:
 
@@ -952,9 +952,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: skia
 ORIGIN: ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/.bazelignore
 FILE: ../../../third_party/skia/.clang-tidy
+FILE: ../../../third_party/skia/BUILD.bazel
 FILE: ../../../third_party/skia/CQ_COMMITTERS
 FILE: ../../../third_party/skia/DEPS
+FILE: ../../../third_party/skia/WORKSPACE.bazel
 FILE: ../../../third_party/skia/animations/checkbox.xml
 FILE: ../../../third_party/skia/animations/chest#1.jpg
 FILE: ../../../third_party/skia/animations/fire#1.jpg
@@ -965,6 +968,8 @@ FILE: ../../../third_party/skia/animations/movie#1.xml
 FILE: ../../../third_party/skia/animations/paths#1.xml
 FILE: ../../../third_party/skia/animations/redcross#1.jpg
 FILE: ../../../third_party/skia/animations/text#1.xml
+FILE: ../../../third_party/skia/bazel/BUILD.bazel
+FILE: ../../../third_party/skia/bazel/libpng.bazel
 FILE: ../../../third_party/skia/bench/microbench.json
 FILE: ../../../third_party/skia/bench/skpbench.json
 FILE: ../../../third_party/skia/build/fuchsia/skqp/skqp.cmx
