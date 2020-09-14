@@ -41,17 +41,34 @@ FLUTTER_ASSERT_ARC
   self.continueAfterFailure = NO;
 }
 
-// TODO(cbracken): re-enable this test by removing the skip_ prefix once the source of its flakiness
-// has been identified. https://github.com/flutter/flutter/issues/61620
-- (void)skip_testDismissedFlutterViewControllerNotRespondingToApplicationLifecycle {
-  XCTestExpectation* engineStartedExpectation = [self expectationWithDescription:@"Engine started"];
+- (NSArray*)initialPresentLifecycles {
+  NSMutableArray* expectations =
+      [NSMutableArray arrayWithObject:[[XCAppLifecycleTestExpectation alloc]
+                                          initForLifecycle:@"AppLifecycleState.inactive"
+                                                   forStep:@"showing a FlutterViewController"]];
 
+  // If the test is the very first test to run in the test target, the UIApplication may
+  // be in inactive state. Haven't found a good way to force it to go to active state.
+  // So just account for it in the initial lifecycle events with an extra resumed since
+  // the FlutterViewController tracks all view controller and application lifecycle events.
+  if ([UIApplication sharedApplication].applicationState != UIApplicationStateActive) {
+    [expectations addObject:[[XCAppLifecycleTestExpectation alloc]
+                                initForLifecycle:@"AppLifecycleState.resumed"
+                                         forStep:@"showing a FlutterViewController"]];
+  }
+  [expectations addObject:[[XCAppLifecycleTestExpectation alloc]
+                              initForLifecycle:@"AppLifecycleState.resumed"
+                                       forStep:@"showing a FlutterViewController"]];
+  return expectations;
+}
+
+- (void)testDismissedFlutterViewControllerNotRespondingToApplicationLifecycle {
+  XCTestExpectation* engineStartedExpectation = [self expectationWithDescription:@"Engine started"];
   // Let the engine finish booting (at the end of which the channels are properly set-up) before
   // moving onto the next step of showing the next view controller.
   ScreenBeforeFlutter* rootVC = [[ScreenBeforeFlutter alloc] initWithEngineRunCompletion:^void() {
     [engineStartedExpectation fulfill];
   }];
-
   [self waitForExpectationsWithTimeout:5 handler:nil];
 
   UIApplication* application = UIApplication.sharedApplication;
@@ -61,36 +78,34 @@ FLUTTER_ASSERT_ARC
   NSMutableArray* lifecycleExpectations = [NSMutableArray arrayWithCapacity:10];
 
   // Expected sequence from showing the FlutterViewController is inactive and resumed.
-  [lifecycleExpectations addObjectsFromArray:@[
-    [[XCAppLifecycleTestExpectation alloc] initForLifecycle:@"AppLifecycleState.inactive"
-                                                    forStep:@"showing a FlutterViewController"],
-    [[XCAppLifecycleTestExpectation alloc] initForLifecycle:@"AppLifecycleState.resumed"
-                                                    forStep:@"showing a FlutterViewController"]
-  ]];
+  [lifecycleExpectations addObjectsFromArray:[self initialPresentLifecycles]];
+
+  [engine.lifecycleChannel setMessageHandler:^(id message, FlutterReply callback) {
+    if (lifecycleExpectations.count == 0) {
+      XCTFail(@"Unexpected lifecycle transition: %@", message);
+      return;
+    }
+    XCAppLifecycleTestExpectation* nextExpectation = [lifecycleExpectations objectAtIndex:0];
+    if (![[nextExpectation expectedLifecycle] isEqualToString:message]) {
+      XCTFail(@"Expected lifecycle %@ but instead received %@", [nextExpectation expectedLifecycle],
+              message);
+      return;
+    }
+
+    [nextExpectation fulfill];
+    [lifecycleExpectations removeObjectAtIndex:0];
+  }];
 
   FlutterViewController* flutterVC;
   @autoreleasepool {
     // Holding onto this FlutterViewController is consequential here. Since a released
     // FlutterViewController wouldn't keep listening to the application lifecycle events and produce
     // false positives for the application lifecycle tests further below.
-    flutterVC = [rootVC showFlutter];
-    NSLog(@"FlutterViewController instance %@ created", flutterVC);
-    [engine.lifecycleChannel setMessageHandler:^(id message, FlutterReply callback) {
-      if (lifecycleExpectations.count == 0) {
-        XCTFail(@"Unexpected lifecycle transition: %@", message);
-        return;
-      }
-      XCAppLifecycleTestExpectation* nextExpectation = [lifecycleExpectations objectAtIndex:0];
-      if (![[nextExpectation expectedLifecycle] isEqualToString:message]) {
-        XCTFail(@"Expected lifecycle %@ but instead received %@",
-                [nextExpectation expectedLifecycle], message);
-        return;
-      }
-
-      [nextExpectation fulfill];
-      [lifecycleExpectations removeObjectAtIndex:0];
+    XCTestExpectation* vcShown = [self expectationWithDescription:@"present"];
+    flutterVC = [rootVC showFlutter:^{
+      [vcShown fulfill];
     }];
-
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
     // The expectations list isn't dequeued by the message handler yet.
     [self waitForExpectations:lifecycleExpectations timeout:5 enforceOrder:YES];
 
@@ -150,7 +165,11 @@ FLUTTER_ASSERT_ARC
   ]];
 
   @autoreleasepool {
-    flutterVC = [rootVC showFlutter];
+    XCTestExpectation* vcShown = [self expectationWithDescription:@"present"];
+    flutterVC = [rootVC showFlutter:^{
+      [vcShown fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
     NSLog(@"FlutterViewController instance %@ created", flutterVC);
     [self waitForExpectations:lifecycleExpectations timeout:5 enforceOrder:YES];
 
@@ -178,9 +197,7 @@ FLUTTER_ASSERT_ARC
   [engine destroyContext];
 }
 
-// TODO(cbracken): re-enable this test by removing the skip_ prefix once the source of its flakiness
-// has been identified. https://github.com/flutter/flutter/issues/61620
-- (void)skip_testVisibleFlutterViewControllerRespondsToApplicationLifecycle {
+- (void)testVisibleFlutterViewControllerRespondsToApplicationLifecycle {
   XCTestExpectation* engineStartedExpectation = [self expectationWithDescription:@"Engine started"];
 
   // Let the engine finish booting (at the end of which the channels are properly set-up) before
@@ -198,33 +215,31 @@ FLUTTER_ASSERT_ARC
   NSMutableArray* lifecycleExpectations = [NSMutableArray arrayWithCapacity:10];
 
   // Expected sequence from showing the FlutterViewController is inactive and resumed.
-  [lifecycleExpectations addObjectsFromArray:@[
-    [[XCAppLifecycleTestExpectation alloc] initForLifecycle:@"AppLifecycleState.inactive"
-                                                    forStep:@"showing a FlutterViewController"],
-    [[XCAppLifecycleTestExpectation alloc] initForLifecycle:@"AppLifecycleState.resumed"
-                                                    forStep:@"showing a FlutterViewController"]
-  ]];
+  [lifecycleExpectations addObjectsFromArray:[self initialPresentLifecycles]];
+
+  [engine.lifecycleChannel setMessageHandler:^(id message, FlutterReply callback) {
+    if (lifecycleExpectations.count == 0) {
+      XCTFail(@"Unexpected lifecycle transition: %@", message);
+      return;
+    }
+    XCAppLifecycleTestExpectation* nextExpectation = [lifecycleExpectations objectAtIndex:0];
+    if (![[nextExpectation expectedLifecycle] isEqualToString:message]) {
+      XCTFail(@"Expected lifecycle %@ but instead received %@", [nextExpectation expectedLifecycle],
+              message);
+      return;
+    }
+
+    [nextExpectation fulfill];
+    [lifecycleExpectations removeObjectAtIndex:0];
+  }];
 
   FlutterViewController* flutterVC;
   @autoreleasepool {
-    flutterVC = [rootVC showFlutter];
-    NSLog(@"FlutterViewController instance %@ created", flutterVC);
-    [engine.lifecycleChannel setMessageHandler:^(id message, FlutterReply callback) {
-      if (lifecycleExpectations.count == 0) {
-        XCTFail(@"Unexpected lifecycle transition: %@", message);
-        return;
-      }
-      XCAppLifecycleTestExpectation* nextExpectation = [lifecycleExpectations objectAtIndex:0];
-      if (![[nextExpectation expectedLifecycle] isEqualToString:message]) {
-        XCTFail(@"Expected lifecycle %@ but instead received %@",
-                [nextExpectation expectedLifecycle], message);
-        return;
-      }
-
-      [nextExpectation fulfill];
-      [lifecycleExpectations removeObjectAtIndex:0];
+    XCTestExpectation* vcShown = [self expectationWithDescription:@"present"];
+    flutterVC = [rootVC showFlutter:^{
+      [vcShown fulfill];
     }];
-
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
     [self waitForExpectations:lifecycleExpectations timeout:5];
 
     // Now put the FlutterViewController into background.
@@ -285,9 +300,7 @@ FLUTTER_ASSERT_ARC
   [engine destroyContext];
 }
 
-// TODO(cbracken): re-enable this test by removing the skip_ prefix once the source of its flakiness
-// has been identified. https://github.com/flutter/flutter/issues/61620
-- (void)skip_testFlutterViewControllerDetachingSendsApplicationLifecycle {
+- (void)testFlutterViewControllerDetachingSendsApplicationLifecycle {
   XCTestExpectation* engineStartedExpectation = [self expectationWithDescription:@"Engine started"];
 
   // Let the engine finish booting (at the end of which the channels are properly set-up) before
@@ -305,34 +318,33 @@ FLUTTER_ASSERT_ARC
   NSMutableArray* lifecycleExpectations = [NSMutableArray arrayWithCapacity:10];
 
   // Expected sequence from showing the FlutterViewController is inactive and resumed.
-  [lifecycleExpectations addObjectsFromArray:@[
-    [[XCAppLifecycleTestExpectation alloc] initForLifecycle:@"AppLifecycleState.inactive"
-                                                    forStep:@"showing a FlutterViewController"],
-    [[XCAppLifecycleTestExpectation alloc] initForLifecycle:@"AppLifecycleState.resumed"
-                                                    forStep:@"showing a FlutterViewController"]
-  ]];
+  [lifecycleExpectations addObjectsFromArray:[self initialPresentLifecycles]];
+
+  [engine.lifecycleChannel setMessageHandler:^(id message, FlutterReply callback) {
+    if (lifecycleExpectations.count == 0) {
+      XCTFail(@"Unexpected lifecycle transition: %@", message);
+      return;
+    }
+    XCAppLifecycleTestExpectation* nextExpectation = [lifecycleExpectations objectAtIndex:0];
+    if (![[nextExpectation expectedLifecycle] isEqualToString:message]) {
+      XCTFail(@"Expected lifecycle %@ but instead received %@", [nextExpectation expectedLifecycle],
+              message);
+      return;
+    }
+
+    [nextExpectation fulfill];
+    [lifecycleExpectations removeObjectAtIndex:0];
+  }];
+
   // At the end of Flutter VC, we want to make sure it deallocs and sends detached signal.
   // Using autoreleasepool will guarantee that.
   FlutterViewController* flutterVC;
   @autoreleasepool {
-    flutterVC = [rootVC showFlutter];
-    NSLog(@"FlutterViewController instance %@ created", flutterVC);
-    [engine.lifecycleChannel setMessageHandler:^(id message, FlutterReply callback) {
-      if (lifecycleExpectations.count == 0) {
-        XCTFail(@"Unexpected lifecycle transition: %@", message);
-        return;
-      }
-      XCAppLifecycleTestExpectation* nextExpectation = [lifecycleExpectations objectAtIndex:0];
-      if (![[nextExpectation expectedLifecycle] isEqualToString:message]) {
-        XCTFail(@"Expected lifecycle %@ but instead received %@",
-                [nextExpectation expectedLifecycle], message);
-        return;
-      }
-
-      [nextExpectation fulfill];
-      [lifecycleExpectations removeObjectAtIndex:0];
+    XCTestExpectation* vcShown = [self expectationWithDescription:@"present"];
+    flutterVC = [rootVC showFlutter:^{
+      [vcShown fulfill];
     }];
-
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
     [self waitForExpectations:lifecycleExpectations timeout:5];
 
     // Starts dealloc flutter VC.
