@@ -331,14 +331,15 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 ///  * [CupertinoPicker], which uses this widget as its default [CupertinoPicker.selectionOverlay].
 class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
 
-  /// Create a selection overlay.
+  /// Creates an iOS 14 style selection overlay that highlights the magnified area
+  /// (or the currently selected item, depending on how you described it elsewhere) of a [CupertinoPicker].
   ///
   /// The [background] argument default value is [CupertinoColors.tertiarySystemFill].
   /// It must be non-null.
   ///
-  /// The [capLeftEdge] and [capRightEdge] arguments decides whether there is a default margin and radius on the left and right sides.
-  /// They default value is true.
-  /// They must be non-null.
+  /// The [capLeftEdge] and [capRightEdge] arguments decide whether to add a default
+  /// margin and use rounded corners on the left and right side of the rectangular overlay.
+  /// Default to true and must not be null.
   const CupertinoPickerDefaultSelectionOverlay({
     Key key,
     this.background = CupertinoColors.tertiarySystemFill,
