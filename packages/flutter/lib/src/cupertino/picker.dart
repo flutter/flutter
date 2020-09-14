@@ -359,6 +359,9 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
 
   /// The color to fill in the background of the [CupertinoPickerDefaultSelectionOverlay].
   /// It Support for use [CupertinoDynamicColor].
+  ///
+  /// Typically this should not be set to a fully opaque color, as the currently
+  /// selected item of the underlying [CupertinoPicker] should remain visible.
   final Color background;
 
   /// Default margin of the 'SelectionOverlay'.
