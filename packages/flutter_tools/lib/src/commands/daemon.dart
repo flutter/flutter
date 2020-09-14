@@ -1111,8 +1111,6 @@ class AppInstance {
   }
 
   Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) async {
-    // _logger.domain = domain;
-    // _logger.app = this;
     return method();
   }
 }
