@@ -402,4 +402,3 @@ bool isWhitespace(_AnsiRun run) {
       rune == 0x3000 ||
       rune == 0xFEFF;
 }
-
