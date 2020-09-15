@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
 #include <gdk/gdkx.h>
+#include <cstring>
 
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_key_event_plugin.h"
