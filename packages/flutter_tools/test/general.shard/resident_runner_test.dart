@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/widget_cache.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -1103,6 +1102,137 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
+  testUsingContext('ResidentRunner will alternative the name of the dill file uploaded for a hot restart', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      FakeVmServiceRequest(
+        method: 'getVM',
+        jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+      ),
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        },
+      ),
+      FakeVmServiceRequest(
+        method: kRunInViewMethod,
+        args: <String, Object>{
+          'viewId': fakeFlutterView.id,
+          'mainScript': 'lib/main.dart.dill',
+          'assetDirectory': 'build/flutter_assets',
+        },
+      ),
+      FakeVmServiceStreamResponse(
+        streamId: 'Isolate',
+        event: vm_service.Event(
+          timestamp: 0,
+          kind: vm_service.EventKind.kIsolateRunnable,
+        ),
+      ),
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      FakeVmServiceRequest(
+        method: 'getVM',
+        jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+      ),
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        },
+      ),
+      FakeVmServiceRequest(
+        method: kRunInViewMethod,
+        args: <String, Object>{
+          'viewId': fakeFlutterView.id,
+          'mainScript': 'lib/main.dart.swap.dill',
+          'assetDirectory': 'build/flutter_assets',
+        },
+      ),
+      FakeVmServiceStreamResponse(
+        streamId: 'Isolate',
+        event: vm_service.Event(
+          timestamp: 0,
+          kind: vm_service.EventKind.kIsolateRunnable,
+        ),
+      ),
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      FakeVmServiceRequest(
+        method: 'getVM',
+        jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+      ),
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        },
+      ),
+      FakeVmServiceRequest(
+        method: kRunInViewMethod,
+        args: <String, Object>{
+          'viewId': fakeFlutterView.id,
+          'mainScript': 'lib/main.dart.dill',
+          'assetDirectory': 'build/flutter_assets',
+        },
+      ),
+      FakeVmServiceStreamResponse(
+        streamId: 'Isolate',
+        event: vm_service.Event(
+          timestamp: 0,
+          kind: vm_service.EventKind.kIsolateRunnable,
+        ),
+      )
+    ]);
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    when(mockDevice.supportsHotRestart).thenReturn(true);
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    ));
+
+    await residentRunner.restart(fullRestart: true);
+    await residentRunner.restart(fullRestart: true);
+    await residentRunner.restart(fullRestart: true);
+
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }));
+
   testUsingContext('ResidentRunner Can handle an RPC exception from hot restart', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
@@ -1180,64 +1310,41 @@ void main() {
   }));
 
   testUsingContext('ResidentRunner can run source generation', () => testbed.run(() async {
-    final FakeProcessManager processManager = globals.processManager as FakeProcessManager;
-    final Directory dependencies = globals.fs.directory(
-      globals.fs.path.join('build', '6ec2559087977927717927ede0a147f1'));
-    processManager.addCommand(FakeCommand(
-      command: <String>[
-        globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
-        '--disable-dart-dev',
-        globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
-        '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
-        '--project-dir=${globals.fs.currentDirectory.path}',
-      ],
-      onRun: () {
-        dependencies
-          .childFile('gen_l10n_inputs_and_outputs.json')
-          ..createSync()
-          ..writeAsStringSync('{"inputs":[],"outputs":[]}');
-      }
-    ));
-    globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
-      .createSync(recursive: true);
+    final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
     globals.fs.file('l10n.yaml').createSync();
     globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     await residentRunner.runSourceGenerators();
 
     expect(testLogger.errorText, isEmpty);
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
+    expect(testLogger.statusText, contains('use the --untranslated-messages-file'));
   }));
 
   testUsingContext('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
-    final FakeProcessManager processManager = globals.processManager as FakeProcessManager;
-    final Directory dependencies = globals.fs.directory(
-      globals.fs.path.join('build', '6ec2559087977927717927ede0a147f1'));
-    processManager.addCommand(FakeCommand(
-      command: <String>[
-        globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
-        '--disable-dart-dev',
-        globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
-        '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
-        '--project-dir=${globals.fs.currentDirectory.path}',
-      ],
-      exitCode: 1,
-      stderr: 'stderr'
-    ));
-    globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
-      .createSync(recursive: true);
+    // Intentionally define arb file with wrong name. generate_localizations defaults
+    // to app_en.arb.
+    final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
     globals.fs.file('l10n.yaml').createSync();
     globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     await residentRunner.runSourceGenerators();
 
-    expect(testLogger.errorText, allOf(
-      contains('stderr'), // Message from gen_l10n.dart
-      contains('Exception') // Message from build_system
-    ));
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
+    expect(testLogger.errorText, allOf(contains('Exception')));
+    expect(testLogger.statusText, isEmpty);
   }));
 
   testUsingContext('ResidentRunner printHelpDetails', () => testbed.run(() {

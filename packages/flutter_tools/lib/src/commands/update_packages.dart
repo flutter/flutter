@@ -26,7 +26,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Therefore, we control the version of flutter_gallery_assets so that
   // existing tests do not fail when the package has a new version.
   'flutter_gallery_assets': '^0.2.0',
-  'mockito': '^4.1.0',  // Prevent mockito from downgrading to 4.0.0
+  'mockito': '4.1.1',  // Prevent mockito from upgrading to the source gen version.
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
   'video_player': '0.10.6', // 0.10.7 fails a gallery smoke test for toString.
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
@@ -52,9 +52,9 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'stream_channel': '2.1.0-nullsafety',
   'string_scanner': '1.1.0-nullsafety',
   'term_glyph': '1.2.0-nullsafety',
-  'test': '1.16.0-nullsafety.1',
+  'test': '1.16.0-nullsafety.4',
   'test_api': '0.2.19-nullsafety',
-  'test_core': '0.3.12-nullsafety.1',
+  'test_core': '0.3.12-nullsafety.4',
   'typed_data': '1.3.0-nullsafety.2',
   'vector_math': '2.1.0-nullsafety.2',
   'platform': '3.0.0-nullsafety.1',

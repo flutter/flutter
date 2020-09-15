@@ -10,10 +10,12 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
+import '../src/mocks.dart';
 
 final Platform testPlatform = FakePlatform(environment: <String, String>{});
 
@@ -38,6 +40,34 @@ void main() {
       fileSystem.currentDirectory.childDirectory('out'),
     );
     expect(logger.statusText, contains('test message'));
+    expect(fileSystem.file('out/test'), exists);
+  });
+
+  testWithoutContext('ArtifactUpdater will restart the status ticker if it needs to retry the download', () async {
+    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final Logger logger = StdoutLogger(
+      terminal: Terminal.test(supportsColor: true),
+      stdio: MockStdio(),
+      outputPreferences: OutputPreferences.test(),
+      timeoutConfiguration: const TimeoutConfiguration(),
+    );
+    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: MockHttpClient()..exceptionOnFirstRun = true,
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
+        ..createSync(),
+    );
+
+    await artifactUpdater.downloadZipArchive(
+      'test message',
+      Uri.parse('http:///test.zip'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    );
+
     expect(fileSystem.file('out/test'), exists);
   });
 
@@ -249,10 +279,15 @@ class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
 class MockHttpClient extends Mock implements HttpClient {
   int attempts = 0;
   bool argumentError = false;
+  bool exceptionOnFirstRun = false;
   final MockHttpClientRequest testRequest = MockHttpClientRequest();
 
   @override
   Future<HttpClientRequest> getUrl(Uri url) async {
+    if (exceptionOnFirstRun && attempts == 0) {
+      attempts += 1;
+      throw Exception();
+    }
     attempts += 1;
     if (argumentError) {
       throw ArgumentError();

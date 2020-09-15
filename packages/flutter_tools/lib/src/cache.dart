@@ -1466,13 +1466,14 @@ class ArtifactUpdater {
   ) async {
     final String downloadPath = flattenNameSubdirs(url, _fileSystem);
     final File tempFile = _createDownloadFile(downloadPath);
-    final Status status = _logger.startProgress(
-      message,
-      timeout: null, // This will take a variable amount of time based on network connectivity.
-    );
+    Status status;
     int retries = _kRetryCount;
 
     while (retries > 0) {
+      status = _logger.startProgress(
+        message,
+        timeout: null, // This will take a variable amount of time based on network connectivity.
+      );
       try {
         _ensureExists(tempFile.parent);
         final IOSink ioSink = tempFile.openWrite();

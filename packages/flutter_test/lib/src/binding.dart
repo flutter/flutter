@@ -1504,7 +1504,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
             renderView._pointers[event.pointer].decay = _kPointerDecay;
           _handleViewNeedsPaint();
         } else if (event.down) {
-          assert(event is PointerDownEvent);
           renderView._pointers[event.pointer] = _LiveTestPointerRecord(
             event.pointer,
             event.position,

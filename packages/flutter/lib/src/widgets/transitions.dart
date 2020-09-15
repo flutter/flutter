@@ -315,6 +315,51 @@ class SlideTransition extends AnimatedWidget {
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/scale_transition.mp4}
 ///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// The following code implements the [ScaleTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// AnimationController _controller;
+/// Animation<double> _animation;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 2),
+///     vsync: this,
+///   )..repeat(reverse: true);
+///   _animation = CurvedAnimation(
+///     parent: _controller,
+///     curve: Curves.fastOutSlowIn,
+///   );
+/// }
+///
+/// @override
+/// void dispose() {
+///   super.dispose();
+///   _controller.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: ScaleTransition(
+///         scale: _animation,
+///         child: const Padding(
+///           padding: EdgeInsets.all(8.0),
+///           child: FlutterLogo(size: 150.0),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [PositionedTransition], a widget that animates its child from a start
@@ -372,6 +417,52 @@ class ScaleTransition extends AnimatedWidget {
 /// Here's an illustration of the [RotationTransition] widget, with it's [turns]
 /// animated by a [CurvedAnimation] set to [Curves.elasticOut]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/rotation_transition.mp4}
+///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// The following code implements the [RotationTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// AnimationController _controller;
+/// Animation<double> _animation;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 2),
+///     vsync: this,
+///   )..repeat(reverse: true);
+///   _animation = CurvedAnimation(
+///     parent: _controller,
+///     curve: Curves.elasticOut,
+///   );
+/// }
+///
+/// @override
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: RotationTransition(
+///         turns: _animation,
+///         child: const Padding(
+///           padding: EdgeInsets.all(8.0),
+///           child: FlutterLogo(size: 150.0),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ScaleTransition], a widget that animates the scale of a transformed
@@ -569,7 +660,49 @@ class SizeTransition extends AnimatedWidget {
 /// Here's an illustration of the [FadeTransition] widget, with it's [opacity]
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 ///
-/// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/fade_transition.mp4}
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// The following code implements the [FadeTransition] using
+/// the Flutter logo:
+///
+/// ```dart
+/// AnimationController _controller;
+/// Animation<double> _animation;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 2),
+///     vsync: this,
+///   )..repeat(reverse: true);
+///   _animation = CurvedAnimation(
+///     parent: _controller,
+///     curve: Curves.easeIn,
+///   );
+/// }
+///
+/// @override
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: Colors.white,
+///     child: FadeTransition(
+///       opacity: _animation,
+///       child: const Padding(
+///         padding: EdgeInsets.all(8),
+///         child: FlutterLogo()
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -878,6 +1011,61 @@ class PositionedTransition extends AnimatedWidget {
 /// Here's an illustration of the [RelativePositionedTransition] widget, with it's [rect]
 /// animated by a [CurvedAnimation] set to [Curves.elasticInOut]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/relative_positioned_transition.mp4}
+///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// The following code implements the [RelativePositionedTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// AnimationController _controller;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 2),
+///     vsync: this,
+///   )..repeat(reverse: true);
+/// }
+///
+/// @override
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   final double smallLogo = 100;
+///   final double bigLogo = 200;
+///
+///   return LayoutBuilder(
+///     builder: (context, constraints) {
+///       final Size biggest = constraints.biggest;
+///       return Stack(
+///         children: [
+///           RelativePositionedTransition(
+///             size: biggest,
+///             rect: RectTween(
+///               begin: Rect.fromLTWH(0, 0, bigLogo, bigLogo),
+///               end: Rect.fromLTWH(biggest.width - smallLogo, biggest.height - smallLogo, smallLogo, smallLogo),
+///             ).animate(CurvedAnimation(
+///               parent: _controller,
+///               curve: Curves.elasticInOut,
+///             )),
+///             child: Padding(
+///               padding: const EdgeInsets.all(8),
+///               child: FlutterLogo()
+///             ),
+///           ),
+///         ],
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

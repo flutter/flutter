@@ -5,18 +5,21 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:path/path.dart' as path;
 
-import '../../localization/gen_l10n.dart';
-import '../../localization/gen_l10n_types.dart';
-import '../../localization/localizations_utils.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/localizations/gen_l10n.dart';
+import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
+import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 
-import '../common.dart';
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
+// ignore: deprecated_member_use
+export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf, test; // Defines a 'package:test' shim.
 
-final String defaultL10nPathString = path.join('lib', 'l10n');
-final String syntheticPackagePath = path.join('.dart_tool', 'flutter_gen', 'gen_l10n');
+final String defaultL10nPathString = globals.fs.path.join('lib', 'l10n');
+final String syntheticPackagePath = globals.fs.path.join('.dart_tool', 'flutter_gen', 'gen_l10n');
 const String defaultTemplateArbFileName = 'app_en.arb';
 const String defaultOutputFileString = 'output-localization-file.dart';
 const String defaultClassNameString = 'AppLocalizations';
@@ -72,7 +75,7 @@ void main() {
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
         generator.setInputDirectory('lib');
-      } on FileSystemException catch (e) {
+      } on L10nException catch (e) {
         expect(e.message, contains('Make sure that the correct path was provided'));
         return;
       }
@@ -218,7 +221,7 @@ void main() {
 
       // Run localizations generator in specified absolute path.
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      final String flutterProjectPath = path.join('absolute', 'path', 'to', 'flutter_project');
+      final String flutterProjectPath = fs.path.join('absolute', 'path', 'to', 'flutter_project');
       try {
         generator.initialize(
           projectPathString: flutterProjectPath,
@@ -238,7 +241,7 @@ void main() {
 
       // Output files should be generated in the provided absolute path.
       expect(
-        fs.isFileSync(path.join(
+        fs.isFileSync(fs.path.join(
           flutterProjectPath,
           '.dart_tool',
           'flutter_gen',
@@ -248,7 +251,7 @@ void main() {
         true,
       );
       expect(
-        fs.isFileSync(path.join(
+        fs.isFileSync(fs.path.join(
           flutterProjectPath,
           '.dart_tool',
           'flutter_gen',
@@ -481,13 +484,16 @@ void main() {
         )
         ..loadResources()
         ..writeOutputFiles()
-        ..outputUnimplementedMessages(path.join('lib', 'l10n', 'unimplemented_message_translations.json'));
+        ..outputUnimplementedMessages(
+          fs.path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
+          BufferLogger.test(),
+        );
     } on L10nException catch (e) {
       fail('Generating output should not fail: \n${e.message}');
     }
 
     final File unimplementedOutputFile = fs.file(
-      path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
+      fs.path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
     );
     final String unimplementedOutputString = unimplementedOutputFile.readAsStringSync();
     try {
@@ -554,7 +560,7 @@ void main() {
         generator
           ..initialize(
             inputPathString: defaultL10nPathString,
-            outputPathString: path.join('lib', 'l10n', 'output'),
+            outputPathString: fs.path.join('lib', 'l10n', 'output'),
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -586,7 +592,7 @@ void main() {
         generator
           ..initialize(
             inputPathString: defaultL10nPathString,
-            outputPathString: path.join('lib', 'l10n', 'output'),
+            outputPathString: fs.path.join('lib', 'l10n', 'output'),
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -627,7 +633,7 @@ void main() {
     }
 
     final File inputsAndOutputsList = fs.file(
-      path.join(syntheticPackagePath, 'gen_l10n_inputs_and_outputs.json'),
+      fs.path.join(syntheticPackagePath, 'gen_l10n_inputs_and_outputs.json'),
     );
     expect(inputsAndOutputsList.existsSync(), isTrue);
 
@@ -787,7 +793,7 @@ void main() {
       l10nDirectory.childFile('app_zh.arb')
         .writeAsStringSync(singleZhMessageArbFileString);
 
-      const String preferredSupportedLocaleString = '["zh", "es"]';
+      const List<String> preferredSupportedLocale = <String>['zh', 'es'];
       LocalizationsGenerator generator;
       try {
         generator = LocalizationsGenerator(fs);
@@ -797,7 +803,7 @@ void main() {
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
-          preferredSupportedLocaleString: preferredSupportedLocaleString,
+          preferredSupportedLocale: preferredSupportedLocale,
         );
         generator.loadResources();
       } on L10nException catch (e) {
@@ -808,47 +814,6 @@ void main() {
       expect(generator.supportedLocales.elementAt(1), LocaleInfo.fromString('es'));
       expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('en'));
     });
-
-    test(
-      'throws an error attempting to add preferred locales '
-      'with incorrect runtime type',
-      () {
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile('app_en.arb')
-          .writeAsStringSync(singleMessageArbFileString);
-        l10nDirectory.childFile('app_es.arb')
-          .writeAsStringSync(singleEsMessageArbFileString);
-        l10nDirectory.childFile('app_zh.arb')
-          .writeAsStringSync(singleZhMessageArbFileString);
-
-        const String preferredSupportedLocaleString = '[44, "en"]';
-        LocalizationsGenerator generator;
-        try {
-          generator = LocalizationsGenerator(fs);
-          generator.initialize(
-            inputPathString: defaultL10nPathString,
-            outputPathString: defaultL10nPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-            preferredSupportedLocaleString: preferredSupportedLocaleString,
-          );
-          generator.loadResources();
-        } on L10nException catch (e) {
-          expect(
-            e.message,
-            contains('Incorrect runtime type'),
-          );
-          return;
-        }
-
-        fail(
-          'Should fail since an incorrect runtime type was used '
-          'in the preferredSupportedLocales list.'
-        );
-      },
-    );
 
     test(
       'throws an error attempting to add preferred locales '
@@ -864,7 +829,7 @@ void main() {
         l10nDirectory.childFile('app_zh.arb')
           .writeAsStringSync(singleZhMessageArbFileString);
 
-        const String preferredSupportedLocaleString = '["am", "es"]';
+        const List<String> preferredSupportedLocale = <String>['am', 'es'];
         LocalizationsGenerator generator;
         try {
           generator = LocalizationsGenerator(fs);
@@ -874,7 +839,7 @@ void main() {
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
-            preferredSupportedLocaleString: preferredSupportedLocaleString,
+            preferredSupportedLocale: preferredSupportedLocale,
           );
           generator.loadResources();
         } on L10nException catch (e) {
@@ -918,9 +883,9 @@ void main() {
         fail('Setting language and locales should not fail: \n${e.message}');
       }
 
-      expect(generator.arbPathStrings.first, path.join('lib', 'l10n', 'app_en.arb'));
-      expect(generator.arbPathStrings.elementAt(1), path.join('lib', 'l10n', 'app_es.arb'));
-      expect(generator.arbPathStrings.elementAt(2), path.join('lib', 'l10n', 'app_zh.arb'));
+      expect(generator.arbPathStrings.first, fs.path.join('lib', 'l10n', 'app_en.arb'));
+      expect(generator.arbPathStrings.elementAt(1), fs.path.join('lib', 'l10n', 'app_es.arb'));
+      expect(generator.arbPathStrings.elementAt(2), fs.path.join('lib', 'l10n', 'app_zh.arb'));
     });
 
     test('correctly parses @@locale property in arb file', () {
@@ -1130,11 +1095,11 @@ void main() {
         fail('Generating output files should not fail: $e');
       }
 
-      expect(fs.isFileSync(path.join(syntheticPackagePath, 'output-localization-file_en.dart')), true);
-      expect(fs.isFileSync(path.join(syntheticPackagePath, 'output-localization-file_en_US.dart')), false);
+      expect(fs.isFileSync(fs.path.join(syntheticPackagePath, 'output-localization-file_en.dart')), true);
+      expect(fs.isFileSync(fs.path.join(syntheticPackagePath, 'output-localization-file_en_US.dart')), false);
 
       final String englishLocalizationsFile = fs.file(
-        path.join(syntheticPackagePath, 'output-localization-file_en.dart')
+        fs.path.join(syntheticPackagePath, 'output-localization-file_en.dart')
       ).readAsStringSync();
       expect(englishLocalizationsFile, contains('class AppLocalizationsEnCa extends AppLocalizationsEn'));
       expect(englishLocalizationsFile, contains('class AppLocalizationsEn extends AppLocalizations'));
@@ -1146,7 +1111,7 @@ void main() {
         ..childFile('app_zh.arb').writeAsStringSync(singleZhMessageArbFileString)
         ..childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
 
-      const String preferredSupportedLocaleString = '["zh"]';
+      const List<String> preferredSupportedLocale = <String>['zh'];
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
         generator.initialize(
@@ -1155,7 +1120,7 @@ void main() {
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
-          preferredSupportedLocaleString: preferredSupportedLocaleString,
+          preferredSupportedLocale: preferredSupportedLocale,
         );
         generator.loadResources();
         generator.writeOutputFiles();
@@ -1164,7 +1129,7 @@ void main() {
       }
 
       final String localizationsFile = fs.file(
-        path.join(syntheticPackagePath, defaultOutputFileString),
+        fs.path.join(syntheticPackagePath, defaultOutputFileString),
       ).readAsStringSync();
       expect(localizationsFile, contains(
 '''
@@ -1194,7 +1159,7 @@ import 'output-localization-file_zh.dart';
       }
 
       final String localizationsFile = fs.file(
-        path.join(syntheticPackagePath, defaultOutputFileString),
+        fs.path.join(syntheticPackagePath, defaultOutputFileString),
       ).readAsStringSync();
       expect(localizationsFile, contains(
 '''
