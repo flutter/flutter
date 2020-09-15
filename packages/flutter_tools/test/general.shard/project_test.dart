@@ -242,18 +242,18 @@ void main() {
         expectExists(pluginRegistrantClasses.childFile('GeneratedPluginRegistrant.h'));
         expectExists(pluginRegistrantClasses.childFile('GeneratedPluginRegistrant.m'));
       });
-      testUsingContext('Version.json info is correct',(){
+
+      testUsingContext('Version.json info is correct', (){
         final MemoryFileSystem fileSystem = MemoryFileSystem.test();
         final FlutterManifest manifest = FlutterManifest.createFromString('''
     name: test
     version: 1.0.0+3
-    ''',logger: BufferLogger.test());
+    ''', logger: BufferLogger.test());
         final FlutterProject project = FlutterProject(fileSystem.systemTempDirectory,manifest,manifest);
         final dynamic versionInfo = jsonDecode(project.getVersionInfo());
         expect(versionInfo['app_name'],'test');
         expect(versionInfo['version'],'1.0.0');
         expect(versionInfo['build_number'],'3');
-
       });
     });
 

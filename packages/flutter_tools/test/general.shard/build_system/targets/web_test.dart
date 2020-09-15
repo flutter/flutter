@@ -100,7 +100,7 @@ void main() {
     environment.buildDir.childFile('main.dart.js').createSync();
     await const WebReleaseBundle().build(environment);
 
-    expect(environment.outputDir.childFile('version.json'),exists);
+    expect(environment.outputDir.childFile('version.json'), exists);
   }));
 
   test('WebReleaseBundle copies dart2js output and resource files to output directory', () => testbed.run(() async {
