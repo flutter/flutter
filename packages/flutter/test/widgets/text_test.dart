@@ -1004,7 +1004,7 @@ void main() {
         ),
       ],
     )));
-  }, semanticsEnabled: true);
+  }, semanticsEnabled: true, skip: isBrowser); // Browser semantics have different sizes.
 }
 
 Future<void> _pumpTextWidget({ WidgetTester tester, String text, TextOverflow overflow }) {
