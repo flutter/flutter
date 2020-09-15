@@ -975,6 +975,9 @@ abstract class WidgetController {
   /// that will build child specified by `finder` when there are multiple
   ///[Scrollable]s.
   ///
+  /// Scroll is performed until the start of the `finder` is visible. This is
+  /// due to the default parameter values of [Scrollable.ensureVisible] method.
+  ///
   /// See also [dragUntilVisible].
   Future<void> scrollUntilVisible(
     Finder finder,
