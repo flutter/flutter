@@ -1255,6 +1255,8 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
       return EngineParagraph(
         paragraphElement: _paragraphElement,
         geometricStyle: ParagraphGeometricStyle(
+          textDirection: _paragraphStyle._effectiveTextDirection,
+          textAlign: _paragraphStyle._effectiveTextAlign,
           fontFamily: fontFamily,
           fontWeight: fontWeight,
           fontStyle: fontStyle,
@@ -1310,6 +1312,8 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
     return EngineParagraph(
       paragraphElement: _paragraphElement,
       geometricStyle: ParagraphGeometricStyle(
+        textDirection: _paragraphStyle._effectiveTextDirection,
+        textAlign: _paragraphStyle._effectiveTextAlign,
         fontFamily: fontFamily,
         fontWeight: fontWeight,
         fontStyle: fontStyle,
@@ -1364,6 +1368,8 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
     return EngineParagraph(
       paragraphElement: _paragraphElement,
       geometricStyle: ParagraphGeometricStyle(
+        textDirection: _paragraphStyle._effectiveTextDirection,
+        textAlign: _paragraphStyle._effectiveTextAlign,
         fontFamily: _paragraphStyle._fontFamily,
         fontWeight: _paragraphStyle._fontWeight,
         fontStyle: _paragraphStyle._fontStyle,
