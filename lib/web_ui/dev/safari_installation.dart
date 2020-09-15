@@ -7,9 +7,11 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:args/args.dart';
+import 'package:simulators/simulator_manager.dart';
 import 'package:yaml/yaml.dart';
 
 import 'common.dart';
+import 'utils.dart';
 
 class SafariArgParser extends BrowserArgParser {
   static final SafariArgParser _singletonInstance = SafariArgParser._();
@@ -73,6 +75,48 @@ class IosSafariArgParser extends BrowserArgParser {
   String get iosDevice => _iosDevice ?? _pinnedIosDevice;
 
   IosSafariArgParser._();
+
+  /// Returns [IosSimulator] if the [Platform] is `macOS` and simulator
+  /// is started.
+  ///
+  /// Throws an [StateError] if these two conditions are not met.
+  IosSimulator get iosSimulator => io.Platform.isMacOS
+      ? (_iosSimulator != null
+          ? _iosSimulator
+          : throw StateError('iosSimulator not started. Please first call '
+              'initIOSSimulator method'))
+      : throw StateError('iOS Simulator is only avaliable on macOS machines.');
+
+  IosSimulator _iosSimulator;
+
+  /// Inializes and boots an [IosSimulator] using the [iosMajorVersion],
+  /// [iosMinorVersion] and [iosDevice] arguments.
+  Future<void> initIosSimulator() async {
+    if (_iosSimulator != null) {
+      throw StateError('_iosSimulator can only be initialized once');
+    }
+    final IosSimulatorManager iosSimulatorManager = IosSimulatorManager();
+    try {
+      _iosSimulator = await iosSimulatorManager.getSimulator(
+        iosMajorVersion,
+        iosMinorVersion,
+        iosDevice,
+      );
+    } catch (e) {
+      throw Exception('Error getting requested simulator. Try running '
+          '`felt create` command first before running the tests. Exception: '
+          '$e');
+    }
+
+    if (!_iosSimulator.booted) {
+      await _iosSimulator.boot();
+      print('INFO: Simulator ${_iosSimulator.id} booted.');
+      cleanupCallbacks.add(() async {
+        await _iosSimulator.shutdown();
+        print('INFO: Simulator ${_iosSimulator.id} shutdown.');
+      });
+    }
+  }
 
   @override
   void populateOptions(ArgParser argParser) {

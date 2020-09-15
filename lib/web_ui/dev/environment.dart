@@ -168,6 +168,13 @@ class Environment {
         'goldens',
       ));
 
+  /// Path to the screenshots taken by iOS simulator.
+  io.Directory get webUiSimulatorScreenshotsDirectory =>
+      io.Directory(pathlib.join(
+        webUiDartToolDir.path,
+        'ios_screenshots',
+      ));
+
   /// Path to the script that clones the Flutter repo.
   io.File get cloneFlutterScript => io.File(pathlib.join(
         engineToolsDir.path,
