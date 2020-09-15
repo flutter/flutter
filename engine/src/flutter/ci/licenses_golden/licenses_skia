@@ -1,4 +1,4 @@
-Signature: 4019a4af0e15575ff91dece5121e4daa
+Signature: e146062ebb1797457d48a65fda82496d
 
 UNUSED LICENSES:
 
@@ -3917,6 +3917,8 @@ FILE: ../../../third_party/skia/src/gpu/GrBackendSurfaceMutableStateImpl.h
 FILE: ../../../third_party/skia/src/gpu/GrBackendUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.h
+FILE: ../../../third_party/skia/src/gpu/GrClipStack.cpp
+FILE: ../../../third_party/skia/src/gpu/GrClipStack.h
 FILE: ../../../third_party/skia/src/gpu/GrManagedResource.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRingBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRingBuffer.h
