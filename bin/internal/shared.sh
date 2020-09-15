@@ -42,9 +42,9 @@ function _rmlock () {
 # Determines which lock method to use, based on what is available on the system.
 # Returns a non-zero value if the lock was not acquired, zero if acquired.
 #
-# There is macOS version of flock but it's not compatible: 1) it doesn't support 
+# There is macOS version of flock but it's not compatible: 1) it doesn't support
 # `exclusive` option and 2) it doesn't support `--` option format. We can't use
-# flock even if it's installed on macOS, otherwise this function will fail and 
+# flock even if it's installed on macOS, otherwise this function will fail and
 # flutter command will be blocked by it.
 # by this.
 function _lock () {
