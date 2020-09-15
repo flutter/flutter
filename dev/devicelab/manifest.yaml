@@ -120,7 +120,6 @@ tasks:
       Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   complex_layout_scroll_perf__timeline_summary:
     description: >
@@ -215,7 +214,6 @@ tasks:
       using e2e.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   cubic_bezier_perf_sksl_warmup__timeline_summary:
     description: >
@@ -230,7 +228,6 @@ tasks:
       with SkSL shader warm-up using e2e.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery_sksl_warmup_ios32__transition_perf:
     description: >
