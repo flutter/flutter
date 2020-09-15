@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:collection' show SplayTreeMap, HashMap;
 
 import 'package:flutter/foundation.dart';
@@ -33,7 +31,7 @@ export 'package:flutter/rendering.dart' show
 ///  * [CustomScrollView], for an explanation of scroll semantics.
 ///  * [SliverChildBuilderDelegate], for an explanation of how this is used to
 ///    generate indexes.
-typedef SemanticIndexCallback = int Function(Widget widget, int localIndex);
+typedef SemanticIndexCallback = int? Function(Widget widget, int localIndex);
 
 int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 
@@ -123,9 +121,10 @@ abstract class SliverChildDelegate {
 
   /// Returns the child with the given index.
   ///
-  /// Should return null if asked to build a widget with a greater index than
-  /// exists. If this returns null, [estimatedChildCount] must subsequently
-  /// return a precise non-null value.
+  /// Should return null if asked to build a widget with a greater
+  /// index than exists. If this returns null, [estimatedChildCount]
+  /// must subsequently return a precise non-null value (which is then
+  /// used to implement [RenderSliverBoxChildManager.childCount]).
   ///
   /// Subclasses typically override this function and wrap their children in
   /// [AutomaticKeepAlive], [IndexedSemantics], and [RepaintBoundary] widgets.
@@ -133,7 +132,7 @@ abstract class SliverChildDelegate {
   /// The values returned by this method are cached. To indicate that the
   /// widgets have changed, a new delegate must be provided, and the new
   /// delegate's [shouldRebuild] method must return true.
-  Widget build(BuildContext context, int index);
+  Widget? build(BuildContext context, int index);
 
   /// Returns an estimate of the number of children this delegate will build.
   ///
@@ -143,8 +142,9 @@ abstract class SliverChildDelegate {
   /// Return null if there are an unbounded number of children or if it would
   /// be too difficult to estimate the number of children.
   ///
-  /// This must return a precise number once [build] has returned null.
-  int get estimatedChildCount => null;
+  /// This must return a precise number once [build] has returned null, as it
+  /// used to implement [RenderSliverBoxChildManager.childCount].
+  int? get estimatedChildCount => null;
 
   /// Returns an estimate of the max scroll extent for all the children.
   ///
@@ -153,7 +153,7 @@ abstract class SliverChildDelegate {
   ///
   /// The default implementation returns null, which causes the caller to
   /// extrapolate the max scroll offset from the given parameters.
-  double estimateMaxScrollOffset(
+  double? estimateMaxScrollOffset(
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
@@ -186,7 +186,7 @@ abstract class SliverChildDelegate {
   /// This will be called during `performRebuild` in [SliverMultiBoxAdaptorElement]
   /// to check if a child has moved to a different position. It should return the
   /// index of the child element with associated key, null if not found.
-  int findIndexByKey(Key key) => null;
+  int? findIndexByKey(Key key) => null;
 
   @override
   String toString() {
@@ -200,7 +200,7 @@ abstract class SliverChildDelegate {
   @mustCallSuper
   void debugFillDescription(List<String> description) {
     try {
-      final int children = estimatedChildCount;
+      final int? children = estimatedChildCount;
       if (children != null)
         description.add('estimated child count: $children');
     } catch (e) {
@@ -219,7 +219,7 @@ typedef ChildIndexGetter = int Function(Key key);
 ///
 /// Many slivers lazily construct their box children to avoid creating more
 /// children than are visible through the [Viewport]. This delegate provides
-/// children using an [IndexedWidgetBuilder] callback, so that the children do
+/// children using a [NullableIndexedWidgetBuilder] callback, so that the children do
 /// not even have to be built until they are displayed.
 ///
 /// The widgets returned from the builder callback are automatically wrapped in
@@ -356,13 +356,13 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   ///
   /// The delegate wraps the children returned by this builder in
   /// [RepaintBoundary] widgets.
-  final IndexedWidgetBuilder builder;
+  final NullableIndexedWidgetBuilder builder;
 
   /// The total number of children this delegate can provide.
   ///
   /// If null, the number of children is determined by the least index for which
   /// [builder] returns null.
-  final int childCount;
+  final int? childCount;
 
   /// Whether to wrap each child in an [AutomaticKeepAlive].
   ///
@@ -422,10 +422,10 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   ///
   /// This callback should take an input [Key], and It should return the
   /// index of the child element with associated key, null if not found.
-  final ChildIndexGetter findChildIndexCallback;
+  final ChildIndexGetter? findChildIndexCallback;
 
   @override
-  int findIndexByKey(Key key) {
+  int? findIndexByKey(Key key) {
     if (findChildIndexCallback == null)
       return null;
     assert(key != null);
@@ -436,27 +436,28 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     } else {
       childKey = key;
     }
-    return findChildIndexCallback(childKey);
+    return findChildIndexCallback!(childKey);
   }
 
   @override
-  Widget build(BuildContext context, int index) {
+  Widget? build(BuildContext context, int index) {
     assert(builder != null);
-    if (index < 0 || (childCount != null && index >= childCount))
+    if (index < 0 || (childCount != null && index >= childCount!))
       return null;
-    Widget child;
+    Widget? child;
     try {
       child = builder(context, index);
     } catch (exception, stackTrace) {
       child = _createErrorWidget(exception, stackTrace);
     }
-    if (child == null)
+    if (child == null) {
       return null;
-    final Key key = child.key != null ? _SaltedValueKey(child.key) : null;
+    }
+    final Key? key = child.key != null ? _SaltedValueKey(child.key!) : null;
     if (addRepaintBoundaries)
       child = RepaintBoundary(child: child);
     if (addSemanticIndexes) {
-      final int semanticIndex = semanticIndexCallback(child, index);
+      final int? semanticIndex = semanticIndexCallback(child, index);
       if (semanticIndex != null)
         child = IndexedSemantics(index: semanticIndex + semanticIndexOffset, child: child);
     }
@@ -466,7 +467,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   }
 
   @override
-  int get estimatedChildCount => childCount;
+  int? get estimatedChildCount => childCount;
 
   @override
   bool shouldRebuild(covariant SliverChildBuilderDelegate oldDelegate) => true;
@@ -545,7 +546,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
        assert(addRepaintBoundaries != null),
        assert(addSemanticIndexes != null),
        assert(semanticIndexCallback != null),
-       _keyToIndex = <Key, int>{null: 0};
+       _keyToIndex = <Key?, int>{null: 0};
 
   /// Creates a constant version of the delegate that supplies children for
   /// slivers using the given list.
@@ -627,38 +628,38 @@ class SliverChildListDelegate extends SliverChildDelegate {
   ///
   /// _keyToIndex[null] is used as current index during the lazy loading process
   /// in [_findChildIndex]. _keyToIndex should never be used for looking up null key.
-  final Map<Key, int> _keyToIndex;
+  final Map<Key?, int>? _keyToIndex;
 
   bool get _isConstantInstance => _keyToIndex == null;
 
-  int _findChildIndex(Key key) {
+  int? _findChildIndex(Key key) {
     if (_isConstantInstance) {
       return null;
     }
     // Lazily fill the [_keyToIndex].
-    if (!_keyToIndex.containsKey(key)) {
-      int index = _keyToIndex[null];
+    if (!_keyToIndex!.containsKey(key)) {
+      int index = _keyToIndex![null]!;
       while (index < children.length) {
         final Widget child = children[index];
         if (child.key != null) {
-          _keyToIndex[child.key] = index;
+          _keyToIndex![child.key] = index;
         }
         if (child.key == key) {
           // Record current index for next function call.
-          _keyToIndex[null] = index + 1;
+          _keyToIndex![null] = index + 1;
           return index;
         }
         index += 1;
       }
-      _keyToIndex[null] = index;
+      _keyToIndex![null] = index;
     } else {
-      return _keyToIndex[key];
+      return _keyToIndex![key];
     }
     return null;
   }
 
   @override
-  int findIndexByKey(Key key) {
+  int? findIndexByKey(Key key) {
     assert(key != null);
     Key childKey;
     if (key is _SaltedValueKey) {
@@ -671,12 +672,12 @@ class SliverChildListDelegate extends SliverChildDelegate {
   }
 
   @override
-  Widget build(BuildContext context, int index) {
+  Widget? build(BuildContext context, int index) {
     assert(children != null);
     if (index < 0 || index >= children.length)
       return null;
     Widget child = children[index];
-    final Key key = child.key != null? _SaltedValueKey(child.key) : null;
+    final Key? key = child.key != null? _SaltedValueKey(child.key!) : null;
     assert(
       child != null,
       "The sliver's children must not contain null values, but a null value was found at index $index"
@@ -684,7 +685,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     if (addRepaintBoundaries)
       child = RepaintBoundary(child: child);
     if (addSemanticIndexes) {
-      final int semanticIndex = semanticIndexCallback(child, index);
+      final int? semanticIndex = semanticIndexCallback(child, index);
       if (semanticIndex != null)
         child = IndexedSemantics(index: semanticIndex + semanticIndexOffset, child: child);
     }
@@ -694,7 +695,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   }
 
   @override
-  int get estimatedChildCount => children.length;
+  int? get estimatedChildCount => children.length;
 
   @override
   bool shouldRebuild(covariant SliverChildListDelegate oldDelegate) {
@@ -706,7 +707,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
 abstract class SliverWithKeepAliveWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
   const SliverWithKeepAliveWidget({
-    Key key,
+    Key? key,
   }) : super(key : key);
 
   @override
@@ -723,8 +724,8 @@ abstract class SliverWithKeepAliveWidget extends RenderObjectWidget {
 abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   /// Initializes fields for subclasses.
   const SliverMultiBoxAdaptorWidget({
-    Key key,
-    @required this.delegate,
+    Key? key,
+    required this.delegate,
   }) : assert(delegate != null),
        super(key: key);
 
@@ -758,8 +759,8 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   ///
   /// The default implementation defers to [delegate] via its
   /// [SliverChildDelegate.estimateMaxScrollOffset] method.
-  double estimateMaxScrollOffset(
-    SliverConstraints constraints,
+  double? estimateMaxScrollOffset(
+    SliverConstraints? constraints,
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
@@ -814,8 +815,8 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 class SliverList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children in a linear array.
   const SliverList({
-    Key key,
-    @required SliverChildDelegate delegate,
+    Key? key,
+    required SliverChildDelegate delegate,
   }) : super(key: key, delegate: delegate);
 
   @override
@@ -873,9 +874,9 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children with the same main axis extent
   /// in a linear array.
   const SliverFixedExtentList({
-    Key key,
-    @required SliverChildDelegate delegate,
-    @required this.itemExtent,
+    Key? key,
+    required SliverChildDelegate delegate,
+    required this.itemExtent,
   }) : super(key: key, delegate: delegate);
 
   /// The extent the children are forced to have in the main axis.
@@ -945,9 +946,9 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement.
   const SliverGrid({
-    Key key,
-    @required SliverChildDelegate delegate,
-    @required this.gridDelegate,
+    Key? key,
+    required SliverChildDelegate delegate,
+    required this.gridDelegate,
   }) : super(key: key, delegate: delegate);
 
   /// Creates a sliver that places multiple box children in a two dimensional
@@ -960,8 +961,8 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   ///
   ///  * [new GridView.count], the equivalent constructor for [GridView] widgets.
   SliverGrid.count({
-    Key key,
-    @required int crossAxisCount,
+    Key? key,
+    required int crossAxisCount,
     double mainAxisSpacing = 0.0,
     double crossAxisSpacing = 0.0,
     double childAspectRatio = 1.0,
@@ -984,8 +985,8 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   ///
   ///  * [new GridView.extent], the equivalent constructor for [GridView] widgets.
   SliverGrid.extent({
-    Key key,
-    @required double maxCrossAxisExtent,
+    Key? key,
+    required double maxCrossAxisExtent,
     double mainAxisSpacing = 0.0,
     double crossAxisSpacing = 0.0,
     double childAspectRatio = 1.0,
@@ -1014,7 +1015,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 
   @override
   double estimateMaxScrollOffset(
-    SliverConstraints constraints,
+    SliverConstraints? constraints,
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
@@ -1026,7 +1027,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
       lastIndex,
       leadingScrollOffset,
       trailingScrollOffset,
-    ) ?? gridDelegate.getLayout(constraints).computeMaxScrollOffset(delegate.estimatedChildCount);
+    ) ?? gridDelegate.getLayout(constraints!).computeMaxScrollOffset(delegate.estimatedChildCount!);
   }
 }
 
@@ -1055,8 +1056,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       performRebuild();
   }
 
-  final SplayTreeMap<int, Element> _childElements = SplayTreeMap<int, Element>();
-  RenderBox _currentBeforeChild;
+  final SplayTreeMap<int, Element?> _childElements = SplayTreeMap<int, Element?>();
+  RenderBox? _currentBeforeChild;
 
   @override
   void performRebuild() {
@@ -1064,7 +1065,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     _currentBeforeChild = null;
     assert(_currentlyUpdatingChildIndex == null);
     try {
-      final SplayTreeMap<int, Element> newChildren = SplayTreeMap<int, Element>();
+      final SplayTreeMap<int, Element?> newChildren = SplayTreeMap<int, Element?>();
       final Map<int, double> indexToLayoutOffset = HashMap<int, double>();
 
       void processElement(int index) {
@@ -1073,10 +1074,10 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           // This index has an old child that isn't used anywhere and should be deactivated.
           _childElements[index] = updateChild(_childElements[index], null, index);
         }
-        final Element newChild = updateChild(newChildren[index], _build(index), index);
+        final Element? newChild = updateChild(newChildren[index], _build(index), index);
         if (newChild != null) {
           _childElements[index] = newChild;
-          final SliverMultiBoxAdaptorParentData parentData = newChild.renderObject.parentData as SliverMultiBoxAdaptorParentData;
+          final SliverMultiBoxAdaptorParentData parentData = newChild.renderObject!.parentData as SliverMultiBoxAdaptorParentData;
           if (index == 0) {
             parentData.layoutOffset = 0.0;
           } else if (indexToLayoutOffset.containsKey(index)) {
@@ -1089,20 +1090,20 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         }
       }
       for (final int index in _childElements.keys.toList()) {
-        final Key key = _childElements[index].widget.key;
-        final int newIndex = key == null ? null : widget.delegate.findIndexByKey(key);
-        final SliverMultiBoxAdaptorParentData childParentData =
-          _childElements[index].renderObject?.parentData as SliverMultiBoxAdaptorParentData;
+        final Key? key = _childElements[index]!.widget.key;
+        final int? newIndex = key == null ? null : widget.delegate.findIndexByKey(key);
+        final SliverMultiBoxAdaptorParentData? childParentData =
+          _childElements[index]!.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
 
         if (childParentData != null && childParentData.layoutOffset != null)
-          indexToLayoutOffset[index] = childParentData.layoutOffset;
+          indexToLayoutOffset[index] = childParentData.layoutOffset!;
 
         if (newIndex != null && newIndex != index) {
           // The layout offset of the child being moved is no longer accurate.
           if (childParentData != null)
             childParentData.layoutOffset = null;
 
-          newChildren[newIndex] = _childElements[index];
+          newChildren[newIndex] = _childElements[index]!;
           // We need to make sure the original index gets processed.
           newChildren.putIfAbsent(index, () => null);
           // We do not want the remapped child to get deactivated during processElement.
@@ -1126,18 +1127,18 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     }
   }
 
-  Widget _build(int index) {
+  Widget? _build(int index) {
     return widget.delegate.build(this, index);
   }
 
   @override
-  void createChild(int index, { @required RenderBox after }) {
+  void createChild(int index, { required RenderBox? after }) {
     assert(_currentlyUpdatingChildIndex == null);
-    owner.buildScope(this, () {
+    owner!.buildScope(this, () {
       final bool insertFirst = after == null;
       assert(insertFirst || _childElements[index-1] != null);
-      _currentBeforeChild = insertFirst ? null : (_childElements[index-1].renderObject as RenderBox);
-      Element newChild;
+      _currentBeforeChild = insertFirst ? null : (_childElements[index-1]!.renderObject as RenderBox?);
+      Element? newChild;
       try {
         _currentlyUpdatingChildIndex = index;
         newChild = updateChild(_childElements[index], _build(index), index);
@@ -1153,10 +1154,10 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
-    final SliverMultiBoxAdaptorParentData oldParentData = child?.renderObject?.parentData as SliverMultiBoxAdaptorParentData;
-    final Element newChild = super.updateChild(child, newWidget, newSlot);
-    final SliverMultiBoxAdaptorParentData newParentData = newChild?.renderObject?.parentData as SliverMultiBoxAdaptorParentData;
+  Element? updateChild(Element? child, Widget? newWidget, dynamic newSlot) {
+    final SliverMultiBoxAdaptorParentData? oldParentData = child?.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
+    final Element? newChild = super.updateChild(child, newWidget, newSlot);
+    final SliverMultiBoxAdaptorParentData? newParentData = newChild?.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
 
     // Preserve the old layoutOffset if the renderObject was swapped out.
     if (oldParentData != newParentData && oldParentData != null && newParentData != null) {
@@ -1179,11 +1180,11 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     final int index = renderObject.indexOf(child);
     assert(_currentlyUpdatingChildIndex == null);
     assert(index >= 0);
-    owner.buildScope(this, () {
+    owner!.buildScope(this, () {
       assert(_childElements.containsKey(index));
       try {
         _currentlyUpdatingChildIndex = index;
-        final Element result = updateChild(_childElements[index], null, index);
+        final Element? result = updateChild(_childElements[index], null, index);
         assert(result == null);
       } finally {
         _currentlyUpdatingChildIndex = null;
@@ -1210,21 +1211,21 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   double estimateMaxScrollOffset(
-    SliverConstraints constraints, {
-    int firstIndex,
-    int lastIndex,
-    double leadingScrollOffset,
-    double trailingScrollOffset,
+    SliverConstraints? constraints, {
+    int? firstIndex,
+    int? lastIndex,
+    double? leadingScrollOffset,
+    double? trailingScrollOffset,
   }) {
-    final int childCount = this.childCount;
+    final int? childCount = estimatedChildCount;
     if (childCount == null)
       return double.infinity;
     return widget.estimateMaxScrollOffset(
       constraints,
-      firstIndex,
-      lastIndex,
-      leadingScrollOffset,
-      trailingScrollOffset,
+      firstIndex!,
+      lastIndex!,
+      leadingScrollOffset!,
+      trailingScrollOffset!,
     ) ?? _extrapolateMaxScrollOffset(
       firstIndex,
       lastIndex,
@@ -1234,8 +1235,59 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     );
   }
 
+  /// The best available estimate of [childCount], or null if no estimate is available.
+  ///
+  /// This differs from [childCount] in that [childCount] never returns null (and must
+  /// not be accessed if the child count is not yet available, meaning the [createChild]
+  /// method has not been provided an index that does not create a child).
+  ///
+  /// See also:
+  ///
+  ///  * [SliverChildDelegate.estimatedChildCount], to which this getter defers.
+  int? get estimatedChildCount => widget.delegate.estimatedChildCount;
+
   @override
-  int get childCount => widget.delegate.estimatedChildCount;
+  int get childCount {
+    int? result = estimatedChildCount;
+    if (result == null) {
+      // Since childCount was called, we know that we reached the end of
+      // the list (as in, _build return null once), so we know that the
+      // list is finite.
+      // Let's do an open-ended binary search to find the end of the list
+      // manually.
+      int lo = 0;
+      int hi = 1;
+      const int max = kIsWeb
+        ? 9007199254740992 // max safe integer on JS (from 0 to this number x != x+1)
+        : ((1 << 63) - 1);
+      while (_build(hi - 1) != null) {
+        lo = hi - 1;
+        if (hi < max ~/ 2) {
+          hi *= 2;
+        } else if (hi < max) {
+          hi = max;
+        } else {
+          throw FlutterError(
+            'Could not find the number of children in ${widget.delegate}.\n'
+            'The childCount getter was called (implying that the delegate\'s builder returned null '
+            'for a positive index), but even building the child with index $hi (the maximum '
+            'possible integer) did not return null. Consider implementing childCount to avoid '
+            'the cost of searching for the final child.'
+          );
+        }
+      }
+      while (hi - lo > 1) {
+        final int mid = (hi - lo) ~/ 2 + lo;
+        if (_build(mid - 1) == null) {
+          hi = mid;
+        } else {
+          lo = mid;
+        }
+      }
+      result = lo;
+    }
+    return result;
+  }
 
   @override
   void didStartLayout() {
@@ -1250,7 +1302,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     widget.delegate.didFinishLayout(firstIndex, lastIndex);
   }
 
-  int _currentlyUpdatingChildIndex;
+  int? _currentlyUpdatingChildIndex;
 
   @override
   bool debugAssertChildListLocked() {
@@ -1302,27 +1354,27 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   void visitChildren(ElementVisitor visitor) {
     // The toList() is to make a copy so that the underlying list can be modified by
     // the visitor:
-    assert(!_childElements.values.any((Element child) => child == null));
-    _childElements.values.toList().forEach(visitor);
+    assert(!_childElements.values.any((Element? child) => child == null));
+    _childElements.values.cast<Element>().toList().forEach(visitor);
   }
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    _childElements.values.where((Element child) {
-      final SliverMultiBoxAdaptorParentData parentData = child.renderObject.parentData as SliverMultiBoxAdaptorParentData;
+    _childElements.values.cast<Element>().where((Element child) {
+      final SliverMultiBoxAdaptorParentData parentData = child.renderObject!.parentData as SliverMultiBoxAdaptorParentData;
       double itemExtent;
       switch (renderObject.constraints.axis) {
         case Axis.horizontal:
-          itemExtent = child.renderObject.paintBounds.width;
+          itemExtent = child.renderObject!.paintBounds.width;
           break;
         case Axis.vertical:
-          itemExtent = child.renderObject.paintBounds.height;
+          itemExtent = child.renderObject!.paintBounds.height;
           break;
       }
 
       return parentData.layoutOffset != null &&
-          parentData.layoutOffset < renderObject.constraints.scrollOffset + renderObject.constraints.remainingPaintExtent &&
-          parentData.layoutOffset + itemExtent > renderObject.constraints.scrollOffset;
+          parentData.layoutOffset! < renderObject.constraints.scrollOffset + renderObject.constraints.remainingPaintExtent &&
+          parentData.layoutOffset! + itemExtent > renderObject.constraints.scrollOffset;
     }).forEach(visitor);
   }
 }
@@ -1374,10 +1426,10 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
   /// The [opacity] argument must not be null and must be between 0.0 and 1.0
   /// (inclusive).
   const SliverOpacity({
-    Key key,
-    @required this.opacity,
+    Key? key,
+    required this.opacity,
     this.alwaysIncludeSemantics = false,
-    Widget sliver,
+    Widget? sliver,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
        assert(alwaysIncludeSemantics != null),
        super(key: key, child: sliver);
@@ -1443,10 +1495,10 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
   /// this render object will be ignored for semantics if [ignoring] is true.
   const SliverIgnorePointer({
-    Key key,
+    Key? key,
     this.ignoring = true,
     this.ignoringSemantics,
-    Widget sliver,
+    Widget? sliver,
   }) : assert(ignoring != null),
        super(key: key, child: sliver);
 
@@ -1462,7 +1514,7 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// If null, defaults to value of [ignoring].
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
-  final bool ignoringSemantics;
+  final bool? ignoringSemantics;
 
   @override
   RenderSliverIgnorePointer createRenderObject(BuildContext context) {
@@ -1501,9 +1553,9 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
 class SliverOffstage extends SingleChildRenderObjectWidget {
   /// Creates a sliver that visually hides its sliver child.
   const SliverOffstage({
-    Key key,
+    Key? key,
     this.offstage = true,
-    Widget sliver,
+    Widget? sliver,
   }) : assert(offstage != null),
        super(key: key, child: sliver);
 
@@ -1572,9 +1624,9 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   ///
   /// The [child] and [keepAlive] arguments must not be null.
   const KeepAlive({
-    Key key,
-    @required this.keepAlive,
-    @required Widget child,
+    Key? key,
+    required this.keepAlive,
+    required Widget child,
   }) : assert(child != null),
        assert(keepAlive != null),
        super(key: key, child: child);
@@ -1590,7 +1642,7 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
     final KeepAliveParentDataMixin parentData = renderObject.parentData as KeepAliveParentDataMixin;
     if (parentData.keepAlive != keepAlive) {
       parentData.keepAlive = keepAlive;
-      final AbstractNode targetParent = renderObject.parent;
+      final AbstractNode? targetParent = renderObject.parent;
       if (targetParent is RenderObject && !keepAlive)
         targetParent.markNeedsLayout(); // No need to redo layout if it became true.
     }
