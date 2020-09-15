@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/linux/fl_platform_plugin.h"
 
 #include <gtk/gtk.h>
+#include <cstring>
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_method_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_method_channel.h"
