@@ -43,12 +43,10 @@ function _rmlock () {
 # Returns a non-zero value if the lock was not acquired, zero if acquired.
 #
 # There is macOS version of flock but it's not compatible: 1) it doesn't support
-# `exclusive` option and 2) it doesn't support `--` option format. We can't use
-# flock even if it's installed on macOS, otherwise this function will fail and
-# flutter command will be blocked by it.
-# by this.
+# `exclusive` option and 2) it doesn't support `--` option format. Do not use
+# flock on macOS, otherwise this function will fail and the script will stall.
 function _lock () {
-  if ! [[ $OS =~ Darwin.* ]] && hash flock 2>/dev/null; then
+  if ! [[ $(uname -s) =~ Darwin.* ]] && hash flock 2>/dev/null; then
     flock --nonblock --exclusive 7 2>/dev/null
   elif hash shlock 2>/dev/null; then
     shlock -f "$1" -p $$
