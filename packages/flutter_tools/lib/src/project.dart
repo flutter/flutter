@@ -265,7 +265,7 @@ class FlutterProject {
     await injectPlugins(this, checkProjects: checkProjects);
   }
 
-  /// Returns a json encoded string that is used to generate version.json
+  /// Returns a json encoded string containing the [appName], [version], and [buildNumber] that is used to generate version.json
   String getVersionInfo()  {
     final Map<String, String> versionFileJson = <String, String>{
       'app_name': manifest.appName,
