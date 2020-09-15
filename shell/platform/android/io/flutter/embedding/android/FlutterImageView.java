@@ -195,7 +195,11 @@ public class FlutterImageView extends View implements RenderSurface {
     // While the engine will also stop producing frames, there is a race condition.
     //
     // To avoid exceptions, check if a new image can be acquired.
-    if (imageQueue.size() < imageReader.getMaxImages()) {
+    int imageOpenedCount = imageQueue.size();
+    if (currentImage != null) {
+      imageOpenedCount++;
+    }
+    if (imageOpenedCount < imageReader.getMaxImages()) {
       final Image image = imageReader.acquireLatestImage();
       if (image != null) {
         imageQueue.add(image);
