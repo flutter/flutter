@@ -1768,6 +1768,49 @@ void main() {
 
     debugOnPaintImage = null;
   });
+
+  testWidgets('Load good image after a bad image was loaded', (WidgetTester tester) async {
+    final UniqueKey errorKey = UniqueKey();
+    final ui.Image image = await tester.runAsync(() => createTestImage(kBlueRectPng));
+    final FailSuccessFailImageProvider imageProvider =
+        FailSuccessFailImageProvider(image: image, throws: 'threw');
+
+    int count = 0;
+    debugOnPaintImage = (ImageSizeInfo info) {
+      count += 1;
+    };
+
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          height: 50,
+          width: 50,
+          child: Image(
+            image: imageProvider,
+            errorBuilder:
+                (BuildContext context, Object error, StackTrace stackTrace) {
+              return Container(key: errorKey);
+            },
+          ),
+        ),
+      ),
+    );
+
+    // No error widget before loading a invalid image
+    expect(find.byKey(errorKey), findsNothing);
+
+    // Loading bad image fails
+    imageProvider.load(0, null);
+    await tester.pump();
+    expect(find.byKey(errorKey), findsOneWidget);
+
+    // Loading good image succeed
+    imageProvider.load(1, null);
+    await tester.pump();
+    expect(count, equals(1));
+    expect(find.byKey(errorKey), findsNothing);
+    debugOnPaintImage = null;
+  });
 }
 
 class ImagePainter extends CustomPainter {
@@ -1980,4 +2023,45 @@ class FailingImageProvider extends ImageProvider<int> {
       ),
     );
   }
+}
+
+class FailSuccessFailImageProvider extends ImageProvider<Object> {
+  FailSuccessFailImageProvider({this.image, this.throws});
+
+  final Object throws;
+  final ui.Image image;
+
+  @override
+  Future<Object> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<FailSuccessFailImageProvider>(this);
+  }
+
+  @override
+  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream,
+      Object key, ImageErrorListener handleError) {
+    super.resolveStreamForKey(configuration, stream, key, handleError);
+  }
+
+  int _loadCallCount = 0;
+
+  @override
+  ImageStreamCompleter load(Object key, DecoderCallback decode) {
+    _loadCallCount += 1;
+    // Fail on first load, succeed on second and fails again on third load.
+    if (_loadCallCount == 1 || _loadCallCount == 3) {
+      throw throws;
+    }
+
+    return OneFrameImageStreamCompleter(
+      Future<ImageInfo>.value(
+        ImageInfo(
+          image: image,
+          scale: 1.0,
+        ),
+      ),
+    );
+  }
+
+  @override
+  String toString() => '${describeIdentity(this)}()';
 }
