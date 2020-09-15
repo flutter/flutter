@@ -1330,11 +1330,9 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 ///
 /// When this widget is composited during the compositing phase (which comes
 /// after the paint phase, as described in [WidgetsBinding.drawFrame]), it
-/// applies a transformation that brings [targetAnchor] of the linked
-/// [CompositedTransformTarget] and [followerAnchor] of this widget together.
-/// The two anchor points will have the same global coordinates, unless [offset]
-/// is not [Offset.zero], in which case [followerAnchor] will be offset by
-/// [offset] in the linked [CompositedTransformTarget]'s coordinate space.
+/// applies a transformation that causes it to provide its child with a
+/// coordinate space that matches that of the linked [CompositedTransformTarget]
+/// widget, offset by [offset].
 ///
 /// The [LayerLink] object used as the [link] must be the same object as that
 /// provided to the matching [CompositedTransformTarget].
@@ -1366,14 +1364,10 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
     @required this.link,
     this.showWhenUnlinked = true,
     this.offset = Offset.zero,
-    this.targetAnchor = Alignment.topLeft,
-    this.followerAnchor = Alignment.topLeft,
     Widget child,
   }) : assert(link != null),
        assert(showWhenUnlinked != null),
        assert(offset != null),
-       assert(targetAnchor != null),
-       assert(followerAnchor != null),
        super(key: key, child: child);
 
   /// The link object that connects this [CompositedTransformFollower] with a
@@ -1393,33 +1387,8 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// hidden.
   final bool showWhenUnlinked;
 
-  /// The anchor point on the linked [CompositedTransformTarget] that
-  /// [followerAnchor] will line up with.
-  ///
-  /// {@template flutter.widgets.followerLayer.anchor}
-  /// For example, when [targetAnchor] and [followerAnchor] are both
-  /// [Alignment.topLeft], this widget will be top left aligned with the linked
-  /// [CompositedTransformTarget]. When [targetAnchor] is
-  /// [Alignment.bottomLeft] and [followerAnchor] is [Alignment.topLeft], this
-  /// widget will be left aligned with the linked [CompositedTransformTarget],
-  /// and its top edge will line up with the [CompositedTransformTarget]'s
-  /// bottom edge.
-  /// {@endtemplate}
-  ///
-  /// Defaults to [Alignment.topLeft].
-  final Alignment targetAnchor;
-
-  /// The anchor point on this widget that will line up with [followerAnchor] on
-  /// the linked [CompositedTransformTarget].
-  ///
-  /// {@macro flutter.widgets.followerLayer.anchor}
-  ///
-  /// Defaults to [Alignment.topLeft].
-  final Alignment followerAnchor;
-
-  /// The additional offset to apply to the [targetAnchor] of the linked
-  /// [CompositedTransformTarget] to obtain this widget's [followerAnchor]
-  /// position.
+  /// The offset to apply to the origin of the linked
+  /// [CompositedTransformTarget] to obtain this widget's origin.
   final Offset offset;
 
   @override
@@ -1428,8 +1397,6 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
       link: link,
       showWhenUnlinked: showWhenUnlinked,
       offset: offset,
-      leaderAnchor: targetAnchor,
-      followerAnchor: followerAnchor,
     );
   }
 
@@ -1438,9 +1405,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
     renderObject
       ..link = link
       ..showWhenUnlinked = showWhenUnlinked
-      ..offset = offset
-      ..leaderAnchor = targetAnchor
-      ..followerAnchor = followerAnchor;
+      ..offset = offset;
   }
 }
 

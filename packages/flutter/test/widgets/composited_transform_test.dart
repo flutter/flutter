@@ -9,12 +9,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  final LayerLink link = LayerLink();
-  group('Composited transforms - only offsets', () {
+  testWidgets('Composited transforms - only offsets', (WidgetTester tester) async {
+    final LayerLink link = LayerLink();
     final GlobalKey key = GlobalKey();
-
-    Widget build({ @required Alignment targetAlignment, @required Alignment followerAlignment }) {
-      return Directionality(
+    await tester.pumpWidget(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
           children: <Widget>[
@@ -31,41 +30,23 @@ void main() {
               top: 343.0,
               child: CompositedTransformFollower(
                 link: link,
-                targetAnchor: targetAlignment,
-                followerAnchor: followerAlignment,
-                child: Container(key: key, height: 20.0, width: 20.0),
+                child: Container(key: key, height: 10.0, width: 10.0),
               ),
             ),
           ],
         ),
-      );
-    }
-
-    testWidgets('topLeft', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
-      final RenderBox box = key.currentContext.findRenderObject() as RenderBox;
-      expect(box.localToGlobal(Offset.zero), const Offset(123.0, 456.0));
-    });
-
-    testWidgets('center', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
-      final RenderBox box = key.currentContext.findRenderObject() as RenderBox;
-      expect(box.localToGlobal(Offset.zero), const Offset(118.0, 451.0));
-    });
-
-    testWidgets('bottomRight - topRight', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
-      final RenderBox box = key.currentContext.findRenderObject() as RenderBox;
-      expect(box.localToGlobal(Offset.zero), const Offset(113.0, 466.0));
-    });
+      ),
+    );
+    final RenderBox box = key.currentContext.findRenderObject() as RenderBox;
+    expect(box.localToGlobal(Offset.zero), const Offset(123.0, 456.0));
   });
 
-  group('Composited transforms - with rotations', () {
+  testWidgets('Composited transforms - with rotations', (WidgetTester tester) async {
+    final LayerLink link = LayerLink();
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
-
-    Widget build({ @required Alignment targetAlignment, @required Alignment followerAlignment }) {
-      return Directionality(
+    await tester.pumpWidget(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
           children: <Widget>[
@@ -76,7 +57,7 @@ void main() {
                 angle: 1.0, // radians
                 child: CompositedTransformTarget(
                   link: link,
-                  child: Container(key: key1, width: 80.0, height: 10.0),
+                  child: Container(key: key1, height: 10.0, width: 10.0),
                 ),
               ),
             ),
@@ -87,50 +68,28 @@ void main() {
                 angle: -0.3, // radians
                 child: CompositedTransformFollower(
                   link: link,
-                  targetAnchor: targetAlignment,
-                  followerAnchor: followerAlignment,
-                  child: Container(key: key2, width: 40.0, height: 20.0),
+                  child: Container(key: key2, height: 10.0, width: 10.0),
                 ),
               ),
             ),
           ],
         ),
-      );
-    }
-    testWidgets('topLeft', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
-      final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
-      final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
-      final Offset position1 = box1.localToGlobal(Offset.zero);
-      final Offset position2 = box2.localToGlobal(Offset.zero);
-      expect(position1, offsetMoreOrLessEquals(position2));
-    });
-
-    testWidgets('center', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
-      final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
-      final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
-      final Offset position1 = box1.localToGlobal(const Offset(40, 5));
-      final Offset position2 = box2.localToGlobal(const Offset(20, 10));
-      expect(position1, offsetMoreOrLessEquals(position2));
-    });
-
-    testWidgets('bottomRight - topRight', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
-      final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
-      final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
-      final Offset position1 = box1.localToGlobal(const Offset(80, 10));
-      final Offset position2 = box2.localToGlobal(const Offset(40, 0));
-      expect(position1, offsetMoreOrLessEquals(position2));
-    });
+      ),
+    );
+    final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
+    final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
+    final Offset position1 = box1.localToGlobal(Offset.zero);
+    final Offset position2 = box2.localToGlobal(Offset.zero);
+    expect(position1.dx, moreOrLessEquals(position2.dx));
+    expect(position1.dy, moreOrLessEquals(position2.dy));
   });
 
-  group('Composited transforms - nested', () {
+  testWidgets('Composited transforms - nested', (WidgetTester tester) async {
+    final LayerLink link = LayerLink();
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
-
-    Widget build({ @required Alignment targetAlignment, @required Alignment followerAlignment }) {
-      return Directionality(
+    await tester.pumpWidget(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
           children: <Widget>[
@@ -141,7 +100,7 @@ void main() {
                 angle: 1.0, // radians
                 child: CompositedTransformTarget(
                   link: link,
-                  child: Container(key: key1, width: 80.0, height: 10.0),
+                  child: Container(key: key1, height: 10.0, width: 10.0),
                 ),
               ),
             ),
@@ -160,9 +119,7 @@ void main() {
                         padding: const EdgeInsets.all(20.0),
                         child: CompositedTransformFollower(
                           link: link,
-                          targetAnchor: targetAlignment,
-                          followerAnchor: followerAlignment,
-                          child: Container(key: key2, width: 40.0, height: 20.0),
+                          child: Container(key: key2, height: 10.0, width: 10.0),
                         ),
                       ),
                     ),
@@ -172,45 +129,24 @@ void main() {
             ),
           ],
         ),
-      );
-    }
-    testWidgets('topLeft', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
-      final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
-      final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
-      final Offset position1 = box1.localToGlobal(Offset.zero);
-      final Offset position2 = box2.localToGlobal(Offset.zero);
-      expect(position1, offsetMoreOrLessEquals(position2));
-    });
-
-    testWidgets('center', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
-      final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
-      final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
-      final Offset position1 = box1.localToGlobal(Alignment.center.alongSize(const Size(80, 10)));
-      final Offset position2 = box2.localToGlobal(Alignment.center.alongSize(const Size(40, 20)));
-      expect(position1, offsetMoreOrLessEquals(position2));
-    });
-
-    testWidgets('bottomRight - topRight', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
-      final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
-      final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
-      final Offset position1 = box1.localToGlobal(Alignment.bottomRight.alongSize(const Size(80, 10)));
-      final Offset position2 = box2.localToGlobal(Alignment.topRight.alongSize(const Size(40, 20)));
-      expect(position1, offsetMoreOrLessEquals(position2));
-    });
+      ),
+    );
+    final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
+    final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
+    final Offset position1 = box1.localToGlobal(Offset.zero);
+    final Offset position2 = box2.localToGlobal(Offset.zero);
+    expect(position1.dx, moreOrLessEquals(position2.dx));
+    expect(position1.dy, moreOrLessEquals(position2.dy));
   });
 
-  group('Composited transforms - hit testing', () {
+  testWidgets('Composited transforms - hit testing', (WidgetTester tester) async {
+    final LayerLink link = LayerLink();
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
     final GlobalKey key3 = GlobalKey();
-
-    bool tapped = false;
-
-    Widget build({ @required Alignment targetAlignment, @required Alignment followerAlignment }) {
-      return Directionality(
+    bool _tapped = false;
+    await tester.pumpWidget(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
           children: <Widget>[
@@ -227,34 +163,18 @@ void main() {
               child: GestureDetector(
                 key: key2,
                 behavior: HitTestBehavior.opaque,
-                onTap: () { tapped = true; },
-                child: Container(key: key3, height: 2.0, width: 2.0),
+                onTap: () { _tapped = true; },
+                child: Container(key: key3, height: 10.0, width: 10.0),
               ),
             ),
           ],
         ),
-      );
-    }
-
-    const List<Alignment> alignments = <Alignment>[
-      Alignment.topLeft, Alignment.topRight,
-      Alignment.center,
-      Alignment.bottomLeft, Alignment.bottomRight,
-    ];
-
-    setUp(() { tapped = false; });
-
-    for (final Alignment targetAlignment in alignments) {
-      for (final Alignment followerAlignment in alignments) {
-        testWidgets('$targetAlignment - $followerAlignment', (WidgetTester tester) async{
-          await tester.pumpWidget(build(targetAlignment: targetAlignment, followerAlignment: followerAlignment));
-          final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
-          expect(box2.size, const Size(2.0, 2.0));
-          expect(tapped, isFalse);
-          await tester.tap(find.byKey(key3));
-          expect(tapped, isTrue);
-        });
-      }
-    }
+      ),
+    );
+    final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
+    expect(box2.size, const Size(10.0, 10.0));
+    expect(_tapped, isFalse);
+    await tester.tap(find.byKey(key1));
+    expect(_tapped, isTrue);
   });
 }

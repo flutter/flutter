@@ -4826,36 +4826,27 @@ class RenderLeaderLayer extends RenderProxyBox {
     required LayerLink link,
     RenderBox? child,
   }) : assert(link != null),
-       _link = link,
-       super(child);
+       super(child) {
+    this.link = link;
+  }
 
   /// The link object that connects this [RenderLeaderLayer] with one or more
   /// [RenderFollowerLayer]s.
   ///
   /// This property must not be null. The object must not be associated with
   /// another [RenderLeaderLayer] that is also being painted.
-  LayerLink get link => _link;
-  LayerLink _link;
+  LayerLink get link => _link!;
+  LayerLink? _link;
   set link(LayerLink value) {
     assert(value != null);
     if (_link == value)
       return;
-    _link.leaderSize = null;
     _link = value;
-    if (hasSize) {
-      _link.leaderSize = size;
-    }
     markNeedsPaint();
   }
 
   @override
   bool get alwaysNeedsCompositing => true;
-
-  @override
-  void performLayout() {
-    super.performLayout();
-    link.leaderSize = size;
-  }
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -4899,8 +4890,6 @@ class RenderFollowerLayer extends RenderProxyBox {
     required LayerLink link,
     bool showWhenUnlinked = true,
     Offset offset = Offset.zero,
-    Alignment leaderAnchor = Alignment.topLeft,
-    Alignment followerAnchor = Alignment.topLeft,
     RenderBox? child,
   }) : assert(link != null),
        assert(showWhenUnlinked != null),
@@ -4908,8 +4897,6 @@ class RenderFollowerLayer extends RenderProxyBox {
        _link = link,
        _showWhenUnlinked = showWhenUnlinked,
        _offset = offset,
-       _leaderAnchor = leaderAnchor,
-       _followerAnchor = followerAnchor,
        super(child);
 
   /// The link object that connects this [RenderFollowerLayer] with a
@@ -4952,46 +4939,6 @@ class RenderFollowerLayer extends RenderProxyBox {
     if (_offset == value)
       return;
     _offset = value;
-    markNeedsPaint();
-  }
-
-  /// The anchor point on the linked [RenderLeaderLayer] that [followerAnchor]
-  /// will line up with.
-  ///
-  /// {@template flutter.rendering.followerLayer.anchor}
-  /// For example, when [leaderAnchor] and [followerAnchor] are both
-  /// [Alignment.topLeft], this [RenderFollowerLayer] will be top left aligned
-  /// with the linked [RenderLeaderLayer]. When [leaderAnchor] is
-  /// [Alignment.bottomLeft] and [followerAnchor] is [Alignment.topLeft], this
-  /// [RenderFollowerLayer] will be left aligned with the linked
-  /// [RenderLeaderLayer], and its top edge will line up with the
-  /// [RenderLeaderLayer]'s bottom edge.
-  /// {@endtemplate}
-  ///
-  /// Defaults to [Alignment.topLeft].
-  Alignment get leaderAnchor => _leaderAnchor;
-  Alignment _leaderAnchor;
-  set leaderAnchor(Alignment value) {
-    assert(value != null);
-    if (_leaderAnchor == value)
-      return;
-    _leaderAnchor = value;
-    markNeedsPaint();
-  }
-
-  /// The anchor point on this [RenderFollowerLayer] that will line up with
-  /// [followerAnchor] on the linked [RenderLeaderLayer].
-  ///
-  /// {@macro flutter.rendering.followerLayer.anchor}
-  ///
-  /// Defaults to [Alignment.topLeft].
-  Alignment get followerAnchor => _followerAnchor;
-  Alignment _followerAnchor;
-  set followerAnchor(Alignment value) {
-    assert(value != null);
-    if (_followerAnchor == value)
-      return;
-    _followerAnchor = value;
     markNeedsPaint();
   }
 
@@ -5043,29 +4990,19 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final Size? leaderSize = link.leaderSize;
-    assert(
-      link.leaderSize != null || (link.leader == null || leaderAnchor == Alignment.topLeft),
-      '$link: layer is linked to ${link.leader} but a valid leaderSize is not set. '
-      'leaderSize is required when leaderAnchor is not Alignment.topLeft'
-      '(current value is $leaderAnchor).',
-    );
-    final Offset effectiveLinkedOffset = leaderSize == null
-      ? this.offset
-      : leaderAnchor.alongSize(leaderSize) - followerAnchor.alongSize(size) + this.offset;
     assert(showWhenUnlinked != null);
     if (layer == null) {
       layer = FollowerLayer(
         link: link,
         showWhenUnlinked: showWhenUnlinked,
-        linkedOffset: effectiveLinkedOffset,
+        linkedOffset: this.offset,
         unlinkedOffset: offset,
       );
     } else {
-      layer
-        ?..link = link
+      layer!
+        ..link = link
         ..showWhenUnlinked = showWhenUnlinked
-        ..linkedOffset = effectiveLinkedOffset
+        ..linkedOffset = this.offset
         ..unlinkedOffset = offset;
     }
     context.pushLayer(
