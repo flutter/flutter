@@ -1364,7 +1364,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
     @required this.link,
     this.showWhenUnlinked = true,
     this.offset = Offset.zero,
-    Widget? child,
+    Widget child,
   }) : assert(link != null),
        assert(showWhenUnlinked != null),
        assert(offset != null),
