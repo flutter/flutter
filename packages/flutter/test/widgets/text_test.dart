@@ -958,6 +958,53 @@ void main() {
     paragraph.layout(const ui.ParagraphConstraints(width: 1000));
     expect(paragraph.getBoxesForRange(2, 2), isEmpty);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/65818
+  testWidgets('WidgetSpans with no semantic information are elided from semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    // Without the fix for this bug the pump widget will throw a RangeError.
+    await tester.pumpWidget(
+      RichText(
+        textDirection: TextDirection.ltr,
+        text: TextSpan(children: <InlineSpan>[
+          const WidgetSpan(child: SizedBox.shrink()),
+          TextSpan(
+            text: 'HELLO',
+            style: const TextStyle(color: Colors.black),
+            recognizer: TapGestureRecognizer()..onTap = () {},
+          )
+        ]),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          id: 1,
+          rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+          transform: Matrix4(
+            3.0,0.0,0.0,0.0,
+            0.0,3.0,0.0,0.0,
+            0.0,0.0,1.0,0.0,
+            0.0,0.0,0.0,1.0,
+          ),
+          children: <TestSemantics>[
+            TestSemantics(
+              rect: const Rect.fromLTRB(-4.0, -4.0, 74.0, 18.0),
+              id: 2,
+              label: 'HELLO',
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isLink,
+              ],
+            ),
+          ],
+        ),
+      ],
+    )));
+  }, semanticsEnabled: true);
 }
 
 Future<void> _pumpTextWidget({ WidgetTester tester, String text, TextOverflow overflow }) {
