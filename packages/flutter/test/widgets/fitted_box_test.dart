@@ -481,7 +481,7 @@ void main() {
   testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(FittedBox(fit: BoxFit.none, child: Container()));
     final RenderFittedBox renderObject = tester.allRenderObjects.whereType<RenderFittedBox>().first;
-    expect(renderObject.clipBehavior, equals(Clip.none));
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     await tester.pumpWidget(FittedBox(fit: BoxFit.none, child: Container(), clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
