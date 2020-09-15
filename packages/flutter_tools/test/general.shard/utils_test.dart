@@ -21,6 +21,7 @@ baz=qux
       expect(file.values, hasLength(2));
     });
   });
+
   group('Version', () {
     testWithoutContext('can parse and compare', () {
       expect(Version.unknown.toString(), equals('unknown'));
