@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
+import '../src/convert.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'artifacts.dart';
 import 'base/common.dart';
@@ -262,6 +263,16 @@ class FlutterProject {
       await web.ensureReadyForPlatformSpecificTooling();
     }
     await injectPlugins(this, checkProjects: checkProjects);
+  }
+
+  /// Returns a json encoded string containing the [appName], [version], and [buildNumber] that is used to generate version.json
+  String getVersionInfo()  {
+    final Map<String, String> versionFileJson = <String, String>{
+      'app_name': manifest.appName,
+      'version': manifest.buildName,
+      'build_number': manifest.buildNumber
+    };
+    return jsonEncode(versionFileJson);
   }
 }
 
