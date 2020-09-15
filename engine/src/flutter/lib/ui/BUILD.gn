@@ -129,8 +129,15 @@ source_set("ui") {
     "//third_party/skia",
   ]
 
+  if (!defined(defines)) {
+    defines = []
+  }
   if (flutter_enable_skshaper) {
-    defines = [ "FLUTTER_ENABLE_SKSHAPER" ]
+    defines += [ "FLUTTER_ENABLE_SKSHAPER" ]
+  }
+  if (is_win) {
+    # Required for M_PI and others.
+    defines += [ "_USE_MATH_DEFINES" ]
   }
 
   if (is_fuchsia && flutter_enable_legacy_fuchsia_embedder) {
