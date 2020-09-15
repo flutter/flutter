@@ -43,6 +43,7 @@ class DartDevelopmentService {
           observatoryUri,
           serviceUri: ddsUri,
           enableAuthCodes: !disableServiceAuthCodes,
+          ipv6: ipv6,
         );
       logger.printTrace('DDS is listening at ${_ddsInstance.uri}.');
     } on dds.DartDevelopmentServiceException catch (e) {
