@@ -1161,6 +1161,8 @@ Future<void> refreshPluginsList(FlutterProject project, {bool checkProjects = fa
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false}) async {
   final List<Plugin> plugins = await findPlugins(project);
+  // Sort the plugins by name to keep ordering stable in generated files.
+  plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
   if ((checkProjects && project.android.existsSync()) || !checkProjects) {
     await _writeAndroidPluginRegistrant(project, plugins);
   }
