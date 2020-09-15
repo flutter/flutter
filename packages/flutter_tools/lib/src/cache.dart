@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/dart/package_map.dart';
-import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
@@ -18,9 +16,11 @@ import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'dart/package_map.dart';
 import 'dart/pub.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
+import 'runner/flutter_command.dart';
 
 /// A tag for a set of development artifacts that need to be cached.
 class DevelopmentArtifact {
