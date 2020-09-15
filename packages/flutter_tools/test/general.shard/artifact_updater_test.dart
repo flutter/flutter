@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:file/src/interface/file.dart';
 import 'package:file_testing/file_testing.dart';
@@ -180,6 +181,30 @@ void main() {
     expect(fileSystem.file('out/test'), exists);
   });
 
+  testWithoutContext('ArtifactUpdater will de-download a file if unzipping fails on windows', () async {
+    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils(windows: true);
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
+    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: MockHttpClient(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
+        ..createSync(),
+    );
+    operatingSystemUtils.failures = 1;
+
+    await artifactUpdater.downloadZipArchive(
+      'test message',
+      Uri.parse('http:///test.zip'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    );
+    expect(logger.statusText, contains('test message'));
+    expect(fileSystem.file('out/test'), exists);
+  });
+
   testWithoutContext('ArtifactUpdater will bail if unzipping fails more than twice', () async {
     final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -200,6 +225,30 @@ void main() {
       Uri.parse('http:///test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsA(isA<ProcessException>()));
+    expect(fileSystem.file('te,[/test'), isNot(exists));
+    expect(fileSystem.file('out/test'), isNot(exists));
+  });
+
+  testWithoutContext('ArtifactUpdater will bail if unzipping fails more than twice on Windows', () async {
+    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils(windows: true);
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
+    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: MockHttpClient(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
+        ..createSync(),
+    );
+    operatingSystemUtils.failures = 2;
+
+    expect(artifactUpdater.downloadZipArchive(
+      'test message',
+      Uri.parse('http:///test.zip'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    ), throwsA(isA<ArchiveException>()));
     expect(fileSystem.file('te,[/test'), isNot(exists));
     expect(fileSystem.file('out/test'), isNot(exists));
   });
@@ -253,12 +302,18 @@ void main() {
 }
 
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
+  MockOperatingSystemUtils({this.windows = false});
+
   int failures = 0;
+  final bool windows;
 
   @override
   void unzip(File file, Directory targetDirectory) {
     if (failures > 0) {
       failures -= 1;
+      if (windows) {
+        throw ArchiveException('zip');
+      }
       throw const ProcessException('zip', <String>[], 'Failed to unzip');
     }
     targetDirectory.childFile(file.fileSystem.path.basenameWithoutExtension(file.path))
@@ -269,6 +324,9 @@ class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
   void unpack(File gzippedTarFile, Directory targetDirectory) {
     if (failures > 0) {
       failures -= 1;
+      if (windows) {
+        throw ArchiveException('zip');
+      }
       throw const ProcessException('zip', <String>[], 'Failed to unzip');
     }
     targetDirectory.childFile(gzippedTarFile.fileSystem.path.basenameWithoutExtension(gzippedTarFile.path))
