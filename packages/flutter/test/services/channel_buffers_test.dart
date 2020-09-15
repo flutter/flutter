@@ -15,8 +15,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestChannelBuffersFlutterBinding extends BindingBase with SchedulerBinding, ServicesBinding {
-}
+class TestChannelBuffersFlutterBinding extends BindingBase with SchedulerBinding, ServicesBinding { }
 
 void main() {
   ByteData _makeByteData(String str) {
