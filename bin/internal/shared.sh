@@ -42,7 +42,7 @@ function _rmlock () {
 # Determines which lock method to use, based on what is available on the system.
 # Returns a non-zero value if the lock was not acquired, zero if acquired.
 function _lock () {
-  if hash flock 2>/dev/null; then
+  if ! [[ $OS =~ Darwin.* ]] && hash flock 2>/dev/null; then
     flock --nonblock --exclusive 7 2>/dev/null
   elif hash shlock 2>/dev/null; then
     shlock -f "$1" -p $$
