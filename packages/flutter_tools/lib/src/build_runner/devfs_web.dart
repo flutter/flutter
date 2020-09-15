@@ -29,7 +29,6 @@ import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
-import '../dart/pub.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
@@ -230,7 +229,7 @@ class WebAssetServer implements AssetReader {
       }
       // Ensure dwds is present and provide middleware to avoid trying to
       // load the through the isolate APIs.
-      final Directory directory = await _ensureDwds(globals.fs, globals.logger, pub);
+      final Directory directory = await _loadDwdsDirectory(globals.fs, globals.logger);
       final shelf.Middleware middleware = (FutureOr<shelf.Response> Function(shelf.Request) innerHandler) {
         return (shelf.Request request) async {
           if (request.url.path.endsWith('dwds/src/injected/client.js')) {
@@ -963,37 +962,13 @@ class ReleaseAssetServer {
   }
 }
 
-Future<Directory> _ensureDwds(FileSystem fileSystem, Logger logger, Pub pub) async {
+Future<Directory> _loadDwdsDirectory(FileSystem fileSystem, Logger logger) async {
   final String toolPackagePath = fileSystem.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools');
   final String packageFilePath = fileSystem.path.join(toolPackagePath, kPackagesFileName);
-  // Ensure that .packgaes is present.
-  if (!fileSystem.file(packageFilePath).existsSync()) {
-    await _ensurePackageDependencies(toolPackagePath, pub);
-  }
-  PackageConfig packageConfig = await loadPackageConfigWithLogging(
+  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packageFilePath),
     logger: logger,
   );
-  Uri dwdsLibDir = packageConfig['dwds']?.packageUriRoot;
-  // Ensure that the dwds package is present.
-  if (dwdsLibDir == null || !fileSystem.directory(dwdsLibDir).existsSync()) {
-    await _ensurePackageDependencies(toolPackagePath, pub);
-    packageConfig = await loadPackageConfigWithLogging(
-      fileSystem.file(packageFilePath),
-      logger: logger,
-    );
-    dwdsLibDir = packageConfig['dwds']?.packageUriRoot;
-  }
-  return fileSystem.directory(dwdsLibDir);
-}
-
-// Runs 'pub get' for the given path to ensure that .packages is created and
-// all dependencies are present.
-Future<void> _ensurePackageDependencies(String packagePath, Pub pub) async {
-  await pub.get(
-    context: PubContext.pubGet,
-    directory: packagePath,
-    generateSyntheticPackage: false,
-  );
+  return fileSystem.directory(packageConfig['dwds'].packageUriRoot);
 }

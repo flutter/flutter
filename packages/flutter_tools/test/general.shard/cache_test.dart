@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
@@ -660,6 +661,69 @@ void main() {
 
     expect(cache.getStampFor('foo'), 'ABC');
   });
+
+  testWithoutContext('PubDependencies needs to be updated if the package config'
+    ' file or the source directories are missing', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final PubDependencies pubDependencies = PubDependencies(
+      flutterRoot: () => '',
+      fileSystem: fileSystem,
+      logger: logger,
+      pub: MockPub(),
+    );
+
+    expect(await pubDependencies.isUpToDate(), false); // no package config
+
+    fileSystem.file('packages/flutter_tools/.packages')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('\n');
+    fileSystem.file('packages/flutter_tools/.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "example",
+      "rootUri": "file:///.pub-cache/hosted/pub.dartlang.org/example-7.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.7"
+    }
+  ],
+  "generated": "2020-09-15T20:29:20.691147Z",
+  "generator": "pub",
+  "generatorVersion": "2.10.0-121.0.dev"
+}
+''');
+
+    expect(await pubDependencies.isUpToDate(), false); // dependencies are missing.
+
+    fileSystem.file('.pub-cache/hosted/pub.dartlang.org/example-7.0.0/lib/foo.dart')
+      .createSync(recursive: true);
+
+    expect(await pubDependencies.isUpToDate(), true);
+  });
+
+  testWithoutContext('PubDependencies updates via pub get', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final MockPub pub = MockPub();
+    final PubDependencies pubDependencies = PubDependencies(
+      flutterRoot: () => '',
+      fileSystem: fileSystem,
+      logger: logger,
+      pub: pub,
+    );
+
+    await pubDependencies.update(MockArtifactUpdater());
+
+    verify(pub.get(
+      context: PubContext.pubGet,
+      directory: 'packages/flutter_tools',
+      generateSyntheticPackage: false,
+    )).called(1);
+  });
 }
 
 class FakeCachedArtifact extends EngineCachedArtifact {
@@ -724,6 +788,7 @@ class MockInternetAddress extends Mock implements InternetAddress {}
 class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 class MockVersionedPackageResolver extends Mock implements VersionedPackageResolver {}
+class MockPub extends Mock implements Pub {}
 class FakeCache extends Cache {
   FakeCache({
     @required Logger logger,

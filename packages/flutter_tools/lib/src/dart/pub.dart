@@ -82,7 +82,7 @@ abstract class Pub {
     @required Platform platform,
     @required BotDetector botDetector,
     @required Usage usage,
-    File toolStampFile,
+    File Function() toolStampFile,
   }) = _DefaultPub;
 
   /// Runs `pub get`.
@@ -143,7 +143,7 @@ class _DefaultPub implements Pub {
     @required Platform platform,
     @required BotDetector botDetector,
     @required Usage usage,
-    File toolStampFile,
+   File Function() toolStampFile,
   }) : _toolStampFile = toolStampFile,
        _fileSystem = fileSystem,
        _logger = logger,
@@ -161,7 +161,7 @@ class _DefaultPub implements Pub {
   final Platform _platform;
   final BotDetector _botDetector;
   final Usage _usage;
-  final File _toolStampFile;
+  final File Function() _toolStampFile;
 
   @override
   Future<void> get({
@@ -401,10 +401,10 @@ class _DefaultPub implements Pub {
     if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified)) {
       return true;
     }
-
-    if (_toolStampFile != null &&
-        _toolStampFile.existsSync() &&
-        _toolStampFile.lastModifiedSync().isAfter(dotPackagesLastModified)) {
+    final File toolStampFile = _toolStampFile();
+    if (toolStampFile != null &&
+        toolStampFile.existsSync() &&
+        toolStampFile.lastModifiedSync().isAfter(dotPackagesLastModified)) {
       return true;
     }
     return false;
