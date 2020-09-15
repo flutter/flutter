@@ -28,8 +28,7 @@ class FilePath {
 
   @override
   bool operator ==(Object other) {
-    return other is FilePath
-        && other._absolutePath == _absolutePath;
+    return other is FilePath && other._absolutePath == _absolutePath;
   }
 
   @override
@@ -216,7 +215,9 @@ void cleanup() async {
   // Delete temporary directories.
   if (temporaryDirectories.length > 0) {
     for (io.Directory directory in temporaryDirectories) {
-      directory.deleteSync(recursive: true);
+      if (!directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
     }
   }
 

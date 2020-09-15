@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:math';
 
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
@@ -34,13 +35,12 @@ import 'package:test_core/src/runner/environment.dart'; // ignore: implementatio
 
 import 'package:test_core/src/util/io.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/configuration.dart'; // ignore: implementation_imports
-import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
-    as wip;
 
 import 'browser.dart';
 import 'common.dart';
 import 'environment.dart' as env;
 import 'goldens.dart';
+import 'screenshot_manager.dart';
 import 'supported_browsers.dart';
 
 class BrowserPlatform extends PlatformPlugin {
@@ -97,6 +97,11 @@ class BrowserPlatform extends PlatformPlugin {
   /// The HTTP client to use when caching JS files in `pub serve`.
   final HttpClient _http;
 
+  /// Handles taking screenshots during tests.
+  ///
+  /// Implementation will differ depending on the browser.
+  ScreenshotManager _screenshotManager;
+
   /// Whether [close] has been called.
   bool get _closed => _closeMemo.hasRun;
 
@@ -124,9 +129,10 @@ class BrowserPlatform extends PlatformPlugin {
               serveFilesOutsidePath:
                   config.suiteDefaults.precompiledPath != null))
           .add(_wrapperHandler);
-      // Screenshot tests are only enabled in chrome for now.
-      if (name == 'chrome') {
+      // Screenshot tests are only enabled in Chrome and Safari iOS for now.
+      if (browserName == 'chrome' || browserName == 'ios-safari') {
         cascade = cascade.add(_screeshotHandler);
+        _screenshotManager = ScreenshotManager.choose(browserName);
       }
     }
 
@@ -141,8 +147,9 @@ class BrowserPlatform extends PlatformPlugin {
   }
 
   Future<shelf.Response> _screeshotHandler(shelf.Request request) async {
-    if (browserName != 'chrome') {
-      throw Exception('Screenshots tests are only available in Chrome.');
+    if (browserName != 'chrome' && browserName != 'ios-safari') {
+      throw Exception('Screenshots tests are only available in Chrome '
+          'and in Safari-iOS.');
     }
 
     if (!request.requestedUri.path.endsWith('/screenshot')) {
@@ -178,6 +185,9 @@ class BrowserPlatform extends PlatformPlugin {
       write = true;
     }
 
+    filename =
+        filename.replaceAll('.png', '${_screenshotManager.filenameSuffix}.png');
+
     String goldensDirectory;
     if (filename.startsWith('__local__')) {
       filename = filename.substring('__local__/'.length);
@@ -208,42 +218,15 @@ To automatically create this file call matchGoldenFile('$filename', write: true)
 ''';
     }
 
-    final wip.ChromeConnection chromeConnection =
-        wip.ChromeConnection('localhost', kDevtoolsPort);
-    final wip.ChromeTab chromeTab = await chromeConnection.getTab(
-        (wip.ChromeTab chromeTab) => chromeTab.url.contains('localhost'));
-    final wip.WipConnection wipConnection = await chromeTab.connect();
+    final Rectangle regionAsRectange = Rectangle(
+      region['x'] as num,
+      region['y'] as num,
+      region['width'] as num,
+      region['height'] as num,
+    );
 
-    Map<String, dynamic> captureScreenshotParameters = null;
-    if (region != null) {
-      captureScreenshotParameters = <String, dynamic>{
-        'format': 'png',
-        'clip': <String, dynamic>{
-          'x': region['x'],
-          'y': region['y'],
-          'width': region['width'],
-          'height': region['height'],
-          'scale':
-              1, // This is NOT the DPI of the page, instead it's the "zoom level".
-        },
-      };
-    }
-
-    // Setting hardware-independent screen parameters:
-    // https://chromedevtools.github.io/devtools-protocol/tot/Emulation
-    await wipConnection
-        .sendCommand('Emulation.setDeviceMetricsOverride', <String, dynamic>{
-      'width': kMaxScreenshotWidth,
-      'height': kMaxScreenshotHeight,
-      'deviceScaleFactor': 1,
-      'mobile': false,
-    });
-    final wip.WipResponse response = await wipConnection.sendCommand(
-        'Page.captureScreenshot', captureScreenshotParameters);
-
-    // Compare screenshots
-    final Image screenshot =
-        decodePng(base64.decode(response.result['data'] as String));
+    // Take screenshot.
+    final Image screenshot = await _screenshotManager.capture(regionAsRectange);
 
     if (write) {
       // Don't even bother with the comparison, just write and return
@@ -257,6 +240,7 @@ To automatically create this file call matchGoldenFile('$filename', write: true)
       }
     }
 
+    // Compare screenshots.
     ImageDiff diff = ImageDiff(
       golden: decodeNamedImage(file.readAsBytesSync(), filename),
       other: screenshot,
