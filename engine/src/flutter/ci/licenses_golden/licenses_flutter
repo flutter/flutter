@@ -1035,6 +1035,7 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextI
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterView.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/fixtures/flutter_desktop_test.dart
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/module.modulemap

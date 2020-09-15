@@ -12,6 +12,11 @@
 @property(nonatomic, readonly, nullable) FlutterView* flutterView;
 
 /**
+ * This just returns the NSPasteboard so that it can be mocked in the tests.
+ */
+@property(nonatomic, readonly, nonnull) NSPasteboard* pasteboard;
+
+/**
  * Adds a responder for keyboard events. Key up and key down events are forwarded to all added
  * responders.
  */
