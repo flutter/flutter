@@ -8,6 +8,8 @@ part of engine;
 /// Contains the subset of [ui.ParagraphStyle] properties that affect layout.
 class ParagraphGeometricStyle {
   ParagraphGeometricStyle({
+    required this.textDirection,
+    required this.textAlign,
     this.fontWeight,
     this.fontStyle,
     this.fontFamily,
@@ -21,6 +23,8 @@ class ParagraphGeometricStyle {
     this.shadows,
   });
 
+  final ui.TextDirection textDirection;
+  final ui.TextAlign textAlign;
   final ui.FontWeight? fontWeight;
   final ui.FontStyle? fontStyle;
   final String? fontFamily;
@@ -102,6 +106,8 @@ class ParagraphGeometricStyle {
       return false;
     }
     return other is ParagraphGeometricStyle
+        && other.textDirection == textDirection
+        && other.textAlign == textAlign
         && other.fontWeight == fontWeight
         && other.fontStyle == fontStyle
         && other.fontFamily == fontFamily
@@ -116,6 +122,8 @@ class ParagraphGeometricStyle {
 
   @override
   int get hashCode => _cachedHashCode ??= ui.hashValues(
+        textDirection,
+        textAlign,
         fontWeight,
         fontStyle,
         fontFamily,
@@ -131,7 +139,9 @@ class ParagraphGeometricStyle {
   @override
   String toString() {
     if (assertionsEnabled) {
-      return '$runtimeType(fontWeight: $fontWeight, fontStyle: $fontStyle,'
+      return '$runtimeType(textDirection: $textDirection, textAlign: $textAlign,'
+          ' fontWeight: $fontWeight,'
+          ' fontStyle: $fontStyle,'
           ' fontFamily: $fontFamily, fontSize: $fontSize,'
           ' lineHeight: $lineHeight,'
           ' maxLines: $maxLines,'
@@ -245,6 +255,8 @@ class TextDimensions {
   void applyStyle(ParagraphGeometricStyle style) {
     final html.CssStyleDeclaration elementStyle = _element.style;
     elementStyle
+      ..direction = _textDirectionToCss(style.textDirection)
+      ..textAlign = textAlignToCssValue(style.textAlign, style.textDirection)
       ..fontSize = style.fontSize != null ? '${style.fontSize!.floor()}px' : null
       ..fontFamily = canonicalizeFontFamily(style.effectiveFontFamily)
       ..fontWeight =
