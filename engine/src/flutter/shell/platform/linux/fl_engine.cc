@@ -12,6 +12,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 
 #include <gmodule.h>
+#include <cstring>
 
 static constexpr int kMicrosecondsPerNanosecond = 1000;
 
