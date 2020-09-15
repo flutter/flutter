@@ -141,4 +141,9 @@ class TestImage implements ui.Image {
   Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
     throw UnsupportedError('Cannot encode test image');
   }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError();
+  }
 }

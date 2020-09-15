@@ -120,6 +120,11 @@ class TestImage implements ui.Image {
       {ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
     throw UnimplementedError();
   }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError();
+  }
 }
 
 class TestCanvas implements Canvas {

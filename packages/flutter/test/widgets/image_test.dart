@@ -1915,6 +1915,11 @@ class TestImage implements ui.Image {
 
   @override
   String toString() => '[$width\u00D7$height]';
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError();
+  }
 }
 
 class DebouncingImageProvider extends ImageProvider<Object> {

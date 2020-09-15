@@ -30,6 +30,11 @@ class SquareImage implements ui.Image {
 
   @override
   void dispose() { }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError();
+  }
 }
 
 class WideImage implements ui.Image {
@@ -49,6 +54,11 @@ class WideImage implements ui.Image {
 
   @override
   void dispose() { }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError();
+  }
 }
 
 class TallImage implements ui.Image {
@@ -68,6 +78,11 @@ class TallImage implements ui.Image {
 
   @override
   void dispose() { }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError();
+  }
 }
 
 void main() {

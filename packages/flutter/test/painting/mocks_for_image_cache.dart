@@ -88,6 +88,11 @@ class TestImage implements ui.Image {
   Future<ByteData> toByteData({ ImageByteFormat format = ImageByteFormat.rawRgba }) {
     throw UnimplementedError();
   }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError();
+  }
 }
 
 class ErrorImageProvider extends ImageProvider<ErrorImageProvider> {

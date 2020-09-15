@@ -130,4 +130,9 @@ class FakeImage implements ui.Image {
 
   @override
   int get width => 10;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError();
+  }
 }
