@@ -1651,7 +1651,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // the engine will notify twice for the same value. Perhaps this is an issue.
       _updateEditingValueInProgress = false;
       return;
-    } else if (_isSelectionOnlyChanged(value)) {
+    } else if (_isSelectionOnlyChange(value)) {
       _handleSelectionChanged(value.selection, renderEditable, SelectionChangedCause.keyboard);
     } else {
       _formatAndSetValue(value);
@@ -1666,7 +1666,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _updateEditingValueInProgress = false;
   }
 
-  bool _isSelectionOnlyChanged(TextEditingValue value) {
+  bool _isSelectionOnlyChange(TextEditingValue value) {
     return value.text == _value.text && value.composing == _value.composing && value.selection != _value.selection;
   }
 
