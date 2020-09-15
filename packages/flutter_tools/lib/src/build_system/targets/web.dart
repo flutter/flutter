@@ -14,6 +14,7 @@ import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
+import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
@@ -295,6 +296,11 @@ class WebReleaseBundle extends Target {
         environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path
       );
     }
+
+    final String versionInfo = FlutterProject.current().getVersionInfo();
+    environment.outputDir
+        .childFile('version.json')
+        .writeAsStringSync(versionInfo);
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(

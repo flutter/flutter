@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -240,6 +241,19 @@ void main() {
             .childDirectory('Classes');
         expectExists(pluginRegistrantClasses.childFile('GeneratedPluginRegistrant.h'));
         expectExists(pluginRegistrantClasses.childFile('GeneratedPluginRegistrant.m'));
+      });
+
+      testUsingContext('Version.json info is correct', (){
+        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final FlutterManifest manifest = FlutterManifest.createFromString('''
+    name: test
+    version: 1.0.0+3
+    ''', logger: BufferLogger.test());
+        final FlutterProject project = FlutterProject(fileSystem.systemTempDirectory,manifest,manifest);
+        final dynamic versionInfo = jsonDecode(project.getVersionInfo());
+        expect(versionInfo['app_name'],'test');
+        expect(versionInfo['version'],'1.0.0');
+        expect(versionInfo['build_number'],'3');
       });
     });
 
