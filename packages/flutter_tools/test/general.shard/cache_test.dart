@@ -138,25 +138,25 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('should not be up to date, if some cached artifact is not', () {
+    testUsingContext('should not be up to date, if some cached artifact is not', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
       when(artifact1.isUpToDate()).thenReturn(true);
       when(artifact2.isUpToDate()).thenReturn(false);
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
-      expect(cache.isUpToDate(), isFalse);
+      expect(await cache.isUpToDate(), isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
       FileSystem: () => MemoryFileSystem.test(),
     });
 
-    testUsingContext('should be up to date, if all cached artifacts are', () {
+    testUsingContext('should be up to date, if all cached artifacts are', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
       when(artifact1.isUpToDate()).thenReturn(true);
       when(artifact2.isUpToDate()).thenReturn(true);
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
-      expect(cache.isUpToDate(), isTrue);
+      expect(await cache.isUpToDate(), isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
       FileSystem: () => MemoryFileSystem.test(),
