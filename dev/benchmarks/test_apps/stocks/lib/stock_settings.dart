@@ -72,13 +72,13 @@ class StockSettingsState extends State<StockSettings> {
               title: const Text('Change mode?'),
               content: const Text('Optimistic mode means everything is awesome. Are you sure you can handle that?'),
               actions: <Widget>[
-                FlatButton(
+                TextButton(
                   child: const Text('NO THANKS'),
                   onPressed: () {
                     Navigator.pop(context, false);
                   },
                 ),
-                FlatButton(
+                TextButton(
                   child: const Text('AGREE'),
                   onPressed: () {
                     Navigator.pop(context, true);
