@@ -12,7 +12,6 @@ import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart' as shelf;
-import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf;
 
 import '../artifacts.dart';
@@ -232,12 +231,12 @@ class WebAssetServer implements AssetReader {
       // Ensure dwds is present and provide middleware to avoid trying to
       // load the through the isolate APIs.
       final Directory directory = await _ensureDwds(globals.fs, globals.logger, pub);
-      final Middleware middleware = (FutureOr<Response> Function(Request) innerHandler) {
-        return (Request request) async {
+      final shelf.Middleware middleware = (FutureOr<shelf.Response> Function(shelf.Request) innerHandler) {
+        return (shelf.Request request) async {
           if (request.url.path.endsWith('dwds/src/injected/client.js')) {
             final Uri uri = directory.uri.resolve('src/injected/client.js');
             final String result = await globals.fs.file(uri.toFilePath()).readAsString();
-            return Response.ok(result, headers: <String, String>{
+            return shelf.Response.ok(result, headers: <String, String>{
               HttpHeaders.contentTypeHeader: 'application/javascript'
             });
           }
