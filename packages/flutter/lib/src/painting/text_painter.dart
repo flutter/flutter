@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' show min, max;
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics, TextHeightBehavior, BoxHeightStyle, BoxWidthStyle;
 
@@ -44,6 +43,9 @@ class PlaceholderDimensions {
     this.baselineOffset,
   }) : assert(size != null),
        assert(alignment != null);
+
+  /// A constant representing an empty placeholder.
+  static const PlaceholderDimensions empty = PlaceholderDimensions(size: Size.zero, alignment: ui.PlaceholderAlignment.bottom);
 
   /// Width and height dimensions of the placeholder.
   final Size size;
@@ -580,7 +582,7 @@ class TextPainter {
           newWidth = maxIntrinsicWidth;
           break;
       }
-      newWidth = newWidth.clamp(minWidth, maxWidth) as double;
+      newWidth = newWidth.clamp(minWidth, maxWidth);
       if (newWidth != _applyFloatingPointHack(_paragraph!.width)) {
         _paragraph!.layout(ui.ParagraphConstraints(width: newWidth));
       }
@@ -782,7 +784,9 @@ class TextPainter {
     return _caretMetrics.offset;
   }
 
-  /// Returns the tight bounded height of the glyph at the given [position].
+  /// {@template flutter.painting.textPainter.getFullHeightForCaret}
+  /// Returns the strut bounded height of the glyph at the given `position`.
+  /// {@endtemplate}
   ///
   /// Valid only after [layout] has been called.
   double? getFullHeightForCaret(TextPosition position, Rect caretPrototype) {

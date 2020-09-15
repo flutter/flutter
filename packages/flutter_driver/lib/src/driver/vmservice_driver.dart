@@ -12,6 +12,7 @@ import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:vm_service_client/vm_service_client.dart';
+import 'package:webdriver/async_io.dart' as async_io;
 import 'package:web_socket_channel/io.dart';
 
 import '../../flutter_driver.dart';
@@ -303,6 +304,9 @@ class VMServiceFlutterDriver extends FlutterDriver {
   @override
   VMServiceClient get serviceClient => _serviceClient;
 
+  @override
+  async_io.WebDriver get webDriver => throw UnsupportedError('VMServiceFlutterDriver does not support webDriver');
+
   /// The main isolate hosting the Flutter application.
   ///
   /// If you used the [registerExtension] API to instrument your application,
@@ -315,6 +319,11 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
   /// Whether to log communication between host and app to `flutter_driver_commands.log`.
   final bool _logCommunicationToFile;
+
+  @override
+  Future<void> enableAccessibility() async {
+    throw UnsupportedError('VMServiceFlutterDriver does not support enableAccessibility');
+  }
 
   @override
   Future<Map<String, dynamic>> sendCommand(Command command) async {
@@ -651,13 +660,15 @@ Future<VMServiceClientConnection> _waitAndConnect(
 /// the VM service.
 const Duration _kPauseBetweenReconnectAttempts = Duration(seconds: 1);
 
-// See https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc#L32
+// See `timeline_streams` in
+// https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc
 String _timelineStreamsToString(List<TimelineStream> streams) {
   final String contents = streams.map<String>((TimelineStream stream) {
     switch (stream) {
       case TimelineStream.all: return 'all';
       case TimelineStream.api: return 'API';
       case TimelineStream.compiler: return 'Compiler';
+      case TimelineStream.compilerVerbose: return 'CompilerVerbose';
       case TimelineStream.dart: return 'Dart';
       case TimelineStream.debugger: return 'Debugger';
       case TimelineStream.embedder: return 'Embedder';

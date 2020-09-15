@@ -415,7 +415,7 @@ abstract class WidgetController {
   ///   return value should be exact zeros.
   /// - For [LiveTestWidgetsFlutterBinding], the values are typically small
   /// positives, meaning the event happens a little later than the set time,
-  /// but a very small portion may have a tiny negatvie value for about tens of
+  /// but a very small portion may have a tiny negative value for about tens of
   /// microseconds. This is due to the nature of [Future.delayed].
   ///
   /// The closer the return values are to zero the more faithful it is to the
@@ -759,6 +759,7 @@ abstract class WidgetController {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
+    assert(downLocation != null);
     final TestGesture result = await createGesture(
       pointer: pointer,
       kind: kind,
@@ -953,7 +954,7 @@ abstract class WidgetController {
   /// the screen correctly.
   ///
   /// This does not work when the `S` is long and `W` far away from the
-  /// dispalyed part does not have a cached element yet. See
+  /// displayed part does not have a cached element yet. See
   /// https://github.com/flutter/flutter/issues/61458
   ///
   /// Shorthand for `Scrollable.ensureVisible(element(finder))`
@@ -1110,7 +1111,7 @@ class LiveWidgetController extends WidgetController {
   }
 
   // This method is almost identical to [GestureBinding._handlePointerEvent]
-  // to replicate the bahavior of the real binding.
+  // to replicate the behavior of the real binding.
   void _handlePointerEvent(
     PointerEvent event,
     Map<int, HitTestResult> _hitTests

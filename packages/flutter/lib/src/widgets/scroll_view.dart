@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -314,6 +315,22 @@ abstract class ScrollView extends StatelessWidget {
     AxisDirection axisDirection,
     List<Widget> slivers,
   ) {
+    assert(() {
+      switch (axisDirection) {
+        case AxisDirection.up:
+        case AxisDirection.down:
+          return debugCheckHasDirectionality(
+            context,
+            why: 'to determine the cross-axis direction of the scroll view',
+            hint: 'Vertical scroll views create Viewport widgets that try to determine their cross axis direction '
+                  'from the ambient Directionality.',
+          );
+        case AxisDirection.left:
+        case AxisDirection.right:
+          return true;
+      }
+      return true;
+    }());
     if (shrinkWrap) {
       return ShrinkWrappingViewport(
         axisDirection: axisDirection,
@@ -1027,7 +1044,7 @@ class ListView extends BoxScrollView {
   /// those children that are actually visible.
   ///
   /// It is usually more efficient to create children on demand using
-  /// [ListView.builder].
+  /// [ListView.builder] because it will create the widget children lazily as necessary.
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The

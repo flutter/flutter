@@ -145,6 +145,24 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   double get maxScrollExtent => _maxScrollExtent;
   double _maxScrollExtent;
 
+  /// The additional velocity added for a [forcePixels] change in a single
+  /// frame.
+  ///
+  /// This value is used by [recommendDeferredLoading] in addition to the
+  /// [activity]'s [ScrollActivity.velocity] to ask the [physics] whether or
+  /// not to defer loading. It accounts for the fact that a [forcePixels] call
+  /// may involve a [ScrollActivity] with 0 velocity, but the scrollable is
+  /// still instantaneously moving from its current position to a potentially
+  /// very far position, and which is of interest to callers of
+  /// [recommendDeferredLoading].
+  ///
+  /// For example, if a scrollable is currently at 5000 pixels, and we [jumpTo]
+  /// 0 to get back to the top of the list, we would have an implied velocity of
+  /// -5000 and an `activity.velocity` of 0. The jump may be going past a
+  /// number of resource intensive widgets which should avoid doing work if the
+  /// position jumps past them.
+  double _impliedVelocity = 0;
+
   @override
   double get pixels => _pixels;
   double _pixels;
@@ -226,7 +244,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// If there is any overscroll, it is reported using [didOverscrollBy].
   double setPixels(double newPixels) {
     assert(_pixels != null);
-    assert(SchedulerBinding.instance.schedulerPhase.index <= SchedulerPhase.transientCallbacks.index);
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks, 'A scrollable\'s position should not change during the build, layout, and paint phases, otherwise the rendering will be confused.');
     if (newPixels != pixels) {
       final double overscroll = applyBoundaryConditions(newPixels);
       assert(() {
@@ -343,8 +361,13 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   void forcePixels(double value) {
     assert(pixels != null);
+    assert(value != null);
+    _impliedVelocity = value - _pixels;
     _pixels = value;
     notifyListeners();
+    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      _impliedVelocity = 0;
+    });
   }
 
   /// Called whenever scrolling ends, to store the current scroll offset in a
@@ -471,27 +494,37 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     return true;
   }
 
+  bool _pendingDimensions = false;
+  ScrollMetrics _lastMetrics;
+
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
     assert(minScrollExtent != null);
     assert(maxScrollExtent != null);
+    assert(haveDimensions == (_lastMetrics != null));
     if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
         !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
         _didChangeViewportDimensionOrReceiveCorrection) {
       assert(minScrollExtent != null);
       assert(maxScrollExtent != null);
       assert(minScrollExtent <= maxScrollExtent);
-      final ScrollMetrics oldPosition = haveDimensions ? copyWith() : null;
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
-      final ScrollMetrics newPosition = haveDimensions ? copyWith() : null;
+      final ScrollMetrics currentMetrics = haveDimensions ? copyWith() : null;
       _didChangeViewportDimensionOrReceiveCorrection = false;
-      if (haveDimensions && !correctForNewDimensions(oldPosition, newPosition))
+      _pendingDimensions = true;
+      if (haveDimensions && !correctForNewDimensions(_lastMetrics, currentMetrics)) {
         return false;
+      }
       _haveDimensions = true;
+    }
+    assert(haveDimensions);
+    if (_pendingDimensions) {
       applyNewDimensions();
+      _pendingDimensions = false;
     }
     assert(!_didChangeViewportDimensionOrReceiveCorrection, 'Use correctForNewDimensions() (and return true) to change the scroll offset during applyContentDimensions().');
+    _lastMetrics = copyWith();
     return true;
   }
 
@@ -546,6 +579,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @mustCallSuper
   void applyNewDimensions() {
     assert(pixels != null);
+    assert(_pendingDimensions);
     activity.applyNewDimensions();
     _updateSemanticActions(); // will potentially request a semantics update.
   }
@@ -834,7 +868,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(context != null);
     assert(activity != null);
     assert(activity.velocity != null);
-    return physics.recommendDeferredLoading(activity.velocity, copyWith(), context);
+    assert(_impliedVelocity != null);
+    return physics.recommendDeferredLoading(
+      activity.velocity + _impliedVelocity,
+      copyWith(),
+      context,
+    );
   }
 
   @override

@@ -56,7 +56,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   final int metaState;
 
   @override
-  String get keyLabel => key;
+  String get keyLabel => key == 'Unidentified' ? '' : key;
 
   @override
   PhysicalKeyboardKey get physicalKey {

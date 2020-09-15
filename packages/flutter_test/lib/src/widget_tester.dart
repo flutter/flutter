@@ -271,6 +271,61 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   }
 }
 
+/// A [TestVariant] that runs separate tests with each of the given values.
+///
+/// To use this variant, define it before the test, and then access
+/// [currentValue] inside the test.
+///
+/// The values are typically enums, but they don't have to be. The `toString`
+/// for the given value will be used to describe the variant. Values will have
+/// their type name stripped from their `toString` output, so that enum values
+/// will only print the value, not the type.
+///
+/// {@tool snippet}
+/// This example shows how to set up the test to access the [currentValue]. In
+/// this example, two tests will be run, one with `value1`, and one with
+/// `value2`. The test with `value2` will fail. The names of the tests will be:
+///
+///   - `Test handling of TestScenario (value1)`
+///   - `Test handling of TestScenario (value2)`
+///
+/// ```dart
+/// enum TestScenario {
+///   value1,
+///   value2,
+///   value3,
+/// }
+///
+/// final ValueVariant<TestScenario> variants = ValueVariant<TestScenario>(
+///   <TestScenario>{value1, value2},
+/// );
+///
+/// testWidgets('Test handling of TestScenario', (WidgetTester tester) {
+///   expect(variants.currentValue, equals(value1));
+/// }, variant: variants);
+/// ```
+/// {@end-tool}
+class ValueVariant<T> extends TestVariant<T> {
+  /// Creates a [ValueVariant] that tests the given [values].
+  ValueVariant(this.values);
+
+  /// Returns the value currently under test.
+  T get currentValue => _currentValue;
+  T _currentValue;
+
+  @override
+  final Set<T> values;
+
+  @override
+  String describeValue(T value) => value.toString().replaceFirst('$T.', '');
+
+  @override
+  Future<T> setUp(T value) async => _currentValue = value;
+
+  @override
+  Future<void> tearDown(T value, T memento) async {}
+}
+
 /// The warning message to show when a benchmark is performed with assert on.
 const String kDebugWarning = '''
 ┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓
@@ -763,6 +818,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   HitTestResult hitTestOnBinding(Offset location) {
+    assert(location != null);
     location = binding.localToGlobal(location);
     return super.hitTestOnBinding(location);
   }

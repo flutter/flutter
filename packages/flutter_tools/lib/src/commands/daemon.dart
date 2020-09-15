@@ -897,11 +897,11 @@ class DevToolsDomain extends Domain {
 
   Future<Map<String, dynamic>> serve([ Map<String, dynamic> args ]) async {
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    final HttpServer server = await _devtoolsLauncher.serve();
+    final DevToolsServerAddress server = await _devtoolsLauncher.serve();
 
     return<String, dynamic>{
-      'host': server.address.host,
-      'port': server.port,
+      'host': server?.host,
+      'port': server?.port,
     };
   }
 
@@ -1251,7 +1251,6 @@ class AppRunLogger extends Logger {
     bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
-    assert(timeout != null);
     final int id = _nextProgressId++;
 
     _sendProgressEvent(<String, dynamic>{

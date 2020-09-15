@@ -397,7 +397,7 @@ class AnimationController extends Animation<double>
   }
 
   void _internalSetValue(double newValue) {
-    _value = newValue.clamp(lowerBound, upperBound) as double;
+    _value = newValue.clamp(lowerBound, upperBound);
     if (_value == lowerBound) {
       _status = AnimationStatus.dismissed;
     } else if (_value == upperBound) {
@@ -581,7 +581,7 @@ class AnimationController extends Animation<double>
     stop();
     if (simulationDuration == Duration.zero) {
       if (value != target) {
-        _value = target.clamp(lowerBound, upperBound) as double;
+        _value = target.clamp(lowerBound, upperBound);
         notifyListeners();
       }
       _status = (_direction == _AnimationDirection.forward) ?
@@ -710,7 +710,7 @@ class AnimationController extends Animation<double>
     assert(!isAnimating);
     _simulation = simulation;
     _lastElapsedDuration = Duration.zero;
-    _value = simulation.x(0.0).clamp(lowerBound, upperBound) as double;
+    _value = simulation.x(0.0).clamp(lowerBound, upperBound);
     final TickerFuture result = _ticker!.start();
     _status = (_direction == _AnimationDirection.forward) ?
       AnimationStatus.forward :
@@ -787,7 +787,7 @@ class AnimationController extends Animation<double>
     _lastElapsedDuration = elapsed;
     final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
     assert(elapsedInSeconds >= 0.0);
-    _value = _simulation!.x(elapsedInSeconds).clamp(lowerBound, upperBound) as double;
+    _value = _simulation!.x(elapsedInSeconds).clamp(lowerBound, upperBound);
     if (_simulation!.isDone(elapsedInSeconds)) {
       _status = (_direction == _AnimationDirection.forward) ?
         AnimationStatus.completed :
@@ -822,7 +822,7 @@ class _InterpolationSimulation extends Simulation {
 
   @override
   double x(double timeInSeconds) {
-    final double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0) as double;
+    final double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
     if (t == 0.0)
       return _begin;
     else if (t == 1.0)
