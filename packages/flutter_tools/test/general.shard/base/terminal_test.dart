@@ -143,7 +143,6 @@ void main() {
           bufferLogger.statusText,
           'Please choose something [a|b|c]: d\n'
           'Please choose something [a|b|c]: \n'
-          '\n'
           'Please choose something [a|b|c]: b\n');
     });
 
@@ -166,9 +165,9 @@ void main() {
 
       expect(choice, 'b');
       expect(
-          bufferLogger.statusText,
-          'Please choose something: \n'
-          '\n');
+        bufferLogger.statusText,
+        'Please choose something: \n'
+      );
     });
 
     testWithoutContext('Does not set single char mode when a terminal is not attached', () {

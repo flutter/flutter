@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -56,13 +54,13 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
   ///
   /// The [curve] and [duration] arguments must not be null.
   const AnimatedSize({
-    Key key,
-    Widget child,
+    Key? key,
+    Widget? child,
     this.alignment = Alignment.center,
     this.curve = Curves.linear,
-    @required this.duration,
+    required this.duration,
     this.reverseDuration,
-    @required this.vsync,
+    required this.vsync,
   }) : super(key: key, child: child);
 
   /// The alignment of the child within the parent when the parent is not yet
@@ -98,7 +96,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
   /// size when going in reverse.
   ///
   /// If not specified, defaults to [duration].
-  final Duration reverseDuration;
+  final Duration? reverseDuration;
 
   /// The [TickerProvider] for this widget.
   final TickerProvider vsync;

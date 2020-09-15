@@ -469,6 +469,7 @@ class PerfTest {
     this.testTarget,
     this.timelineFileName, {
     this.measureCpuGpu = false,
+    this.measureMemory = false,
     this.saveTraceFile = false,
     this.testDriver,
     this.needsFullTimeline = true,
@@ -481,6 +482,7 @@ class PerfTest {
     this.testDirectory,
     this.testTarget, {
     this.measureCpuGpu = false,
+    this.measureMemory = false,
     this.testDriver =  'test_driver/e2e_test.dart',
     this.needsFullTimeline = false,
     this.benchmarkScoreKeys = _kCommonScoreKeys,
@@ -501,6 +503,8 @@ class PerfTest {
   final String testDriver;
   /// Whether to collect CPU and GPU metrics.
   final bool measureCpuGpu;
+  /// Whether to collect memory metrics.
+  final bool measureMemory;
   /// Whether to collect full timeline, meaning if `--trace-startup` flag is needed.
   final bool needsFullTimeline;
   /// Whether to save the trace timeline file `*.timeline.json`.
@@ -593,6 +597,7 @@ class PerfTest {
           '99th_percentile_vsync_transitions_missed',
           if (measureCpuGpu) 'average_cpu_usage',
           if (measureCpuGpu) 'average_gpu_usage',
+          if (measureMemory) ...<String>['average_memory_usage', '90th_percentile_memory_usage', '99th_percentile_memory_usage'],
         ],
       );
     });
