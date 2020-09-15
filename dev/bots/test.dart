@@ -1239,9 +1239,6 @@ Future<void> _runHostOnlyDeviceLabTests() async {
   final List<ShardRunner> tests = <ShardRunner>[
     // Keep this in alphabetical order.
     () => _runDevicelabTest('build_aar_module_test', environment: gradleEnvironment),
-    if (Platform.isMacOS) () => _runDevicelabTest('flutter_create_offline_test_mac'),
-    if (Platform.isLinux) () => _runDevicelabTest('flutter_create_offline_test_linux'),
-    if (Platform.isWindows) () => _runDevicelabTest('flutter_create_offline_test_windows'),
     () => _runDevicelabTest('gradle_fast_start_test', environment: gradleEnvironment),
     // TODO(ianh): Fails on macOS looking for "dexdump", https://github.com/flutter/flutter/issues/42494
     if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
@@ -1250,12 +1247,10 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     () => _runDevicelabTest('gradle_plugin_bundle_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_plugin_fat_apk_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment),
-
     () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: true),
     () => _runDevicelabTest('module_custom_host_app_name_test', environment: gradleEnvironment),
     () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
     () => _runDevicelabTest('plugin_dependencies_test', environment: gradleEnvironment),
-
     if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
     if (Platform.isMacOS) () => _runDevicelabTest('build_ios_framework_module_test'),
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
