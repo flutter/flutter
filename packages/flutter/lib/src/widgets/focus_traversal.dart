@@ -1278,9 +1278,8 @@ class _OrderedFocusInfo {
 ///   Widget build(BuildContext context) {
 ///     return FocusTraversalOrder(
 ///       order: NumericFocusOrder(order),
-///       child: FlatButton(
+///       child: TextButton(
 ///         autofocus: autofocus,
-///         focusColor: Colors.red,
 ///         onPressed: () => _handleOnPressed(),
 ///         child: Text(name),
 ///       ),
