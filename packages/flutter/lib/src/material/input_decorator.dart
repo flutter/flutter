@@ -1065,7 +1065,7 @@ class _RenderDecoration extends RenderBox {
       prefixHeight - boxToBaseline[prefix],
       suffixHeight - boxToBaseline[suffix],
     );
-    final double fixBelowInput = math.max(
+    final double fixBelowInput = fixBelowBaseline <= 0.0 ? 0.0 : math.max(
       0,
       fixBelowBaseline - (inputHeight - inputInternalBaseline),
     );
