@@ -384,8 +384,14 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// This effect is relatively expensive, especially if the filter is non-local,
 /// such as a blur.
 ///
+/// If all you want to do is apply an [ImageFilter] to a single widget
+/// (as opposed to applying the filter to everything _beneath_ a widget), use
+/// [ImageFiltered] instead. For that scenario, [ImageFiltered] is both
+/// easier to use and less expensive than [BackdropFilter].
+///
 /// See also:
 ///
+///  * [ImageFiltered], which applies an [ImageFilter] to its child.
 ///  * [DecoratedBox], which draws a background under (or over) a widget.
 ///  * [Opacity], which changes the opacity of the widget itself.
 class BackdropFilter extends SingleChildRenderObjectWidget {
