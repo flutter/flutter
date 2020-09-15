@@ -21,10 +21,7 @@ Future<void> processPodsIfNeeded(
   final FlutterProject project = xcodeProject.parent;
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
   await refreshPluginsList(project);
-
-  // Keep going if there are Flutter plugins, or the app developer added their own
-  // development pods.
-  if (!hasPlugins(project) && !xcodeProject.podfile.existsSync()) {
+  if (!(hasPlugins(project) || (project.isModule && xcodeProject.podfile.existsSync()))) {
     return;
   }
   // If the Xcode project, Podfile, or generated xcconfig have changed since
