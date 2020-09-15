@@ -590,11 +590,13 @@ public class FlutterViewTest {
   }
 
   @Test
+  @SuppressLint("WrongCall") /*View#onDraw*/
   public void flutterImageView_acquiresMaxImagesAtMost() {
     final ImageReader mockReader = mock(ImageReader.class);
-    when(mockReader.getMaxImages()).thenReturn(2);
+    when(mockReader.getMaxImages()).thenReturn(3);
 
     final Image mockImage = mock(Image.class);
+    when(mockImage.getPlanes()).thenReturn(new Plane[0]);
     when(mockReader.acquireLatestImage()).thenReturn(mockImage);
 
     final FlutterImageView imageView =
@@ -606,13 +608,31 @@ public class FlutterViewTest {
 
     final FlutterJNI jni = mock(FlutterJNI.class);
     imageView.attachToRenderer(new FlutterRenderer(jni));
-
     doNothing().when(imageView).invalidate();
-    assertTrue(imageView.acquireLatestImage());
-    assertTrue(imageView.acquireLatestImage());
-    assertTrue(imageView.acquireLatestImage());
 
-    verify(mockReader, times(2)).acquireLatestImage();
+    assertTrue(imageView.acquireLatestImage()); // 1 image
+    assertTrue(imageView.acquireLatestImage()); // 2 images
+    assertTrue(imageView.acquireLatestImage()); // 3 images
+    assertTrue(imageView.acquireLatestImage()); // 3 images
+    verify(mockReader, times(3)).acquireLatestImage();
+
+    imageView.onDraw(mock(Canvas.class)); // 3 images
+    assertTrue(imageView.acquireLatestImage()); // 3 images
+    verify(mockReader, times(3)).acquireLatestImage();
+
+    imageView.onDraw(mock(Canvas.class)); // 2 images
+    assertTrue(imageView.acquireLatestImage()); // 3 images
+    verify(mockReader, times(4)).acquireLatestImage();
+
+    imageView.onDraw(mock(Canvas.class)); // 2 images
+    imageView.onDraw(mock(Canvas.class)); // 1 image
+    imageView.onDraw(mock(Canvas.class)); // 1 image
+
+    assertTrue(imageView.acquireLatestImage()); // 2 images
+    assertTrue(imageView.acquireLatestImage()); // 3 images
+    assertTrue(imageView.acquireLatestImage()); // 3 images
+    assertTrue(imageView.acquireLatestImage()); // 3 images
+    verify(mockReader, times(6)).acquireLatestImage();
   }
 
   @Test
