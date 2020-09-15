@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:archive/archive.dart';
 import 'package:meta/meta.dart';
 
 import 'android/gradle_utils.dart';
@@ -1511,6 +1512,13 @@ class ArtifactUpdater {
       try {
         extractor(tempFile, location);
       } on ProcessException {
+        retries -= 1;
+        if (retries == 0) {
+          rethrow;
+        }
+        _deleteIgnoringErrors(tempFile);
+        continue;
+      } on ArchiveException {
         retries -= 1;
         if (retries == 0) {
           rethrow;
