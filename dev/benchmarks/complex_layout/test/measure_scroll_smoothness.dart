@@ -15,6 +15,9 @@ import 'package:e2e/e2e.dart';
 
 import 'package:complex_layout/main.dart' as app;
 
+class PointerDataTestBinding extends E2EWidgetsFlutterBinding {
+}
+
 /// A union of [ui.PointerDataPacket] and the time it should be sent.
 class PointerDataRecord {
   PointerDataRecord(this.timeStamp, List<ui.PointerData> data)
@@ -150,7 +153,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
 }
 
 Future<void> main() async {
-  final E2ETestBinding binding = E2ETestBinding();
+  final PointerDataTestBinding binding = PointerDataTestBinding();
   assert(WidgetsBinding.instance == binding);
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
   binding.reportData ??= <String, dynamic>{};
