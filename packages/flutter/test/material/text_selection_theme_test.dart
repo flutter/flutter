@@ -58,7 +58,9 @@ void main() {
   });
 
   testWidgets('Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
-    final Color primaryColor = Color(ThemeData.fallback().colorScheme.primary.value);
+    const Color defaultCursorColor = Color(0x002196f3);
+    const Color defaultSelectionColor = Color(0x662196f3);
+    const Color defaultSelectionHandleColor = Color(0xff2196f3);
 
     // Test TextField's cursor & selection color.
     await tester.pumpWidget(
@@ -71,8 +73,8 @@ void main() {
     await tester.pumpAndSettle();
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
-    expect(renderEditable.cursorColor, primaryColor.withAlpha(0));
-    expect(Color(renderEditable.selectionColor.value), primaryColor.withOpacity(0.40));
+    expect(renderEditable.cursorColor, defaultCursorColor);
+    expect(Color(renderEditable.selectionColor.value), defaultSelectionColor);
 
     // Test the selection handle color.
     await tester.pumpWidget(
@@ -90,7 +92,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
-    expect(handle, paints..path(color: primaryColor));
+    expect(handle, paints..path(color: defaultSelectionHandleColor));
   });
 
   testWidgets('ThemeDate.textSelectionTheme will be used if provided', (WidgetTester tester) async {
