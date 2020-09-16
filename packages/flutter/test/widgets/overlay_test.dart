@@ -1040,7 +1040,7 @@ void main() {
     );
 
     // By default, clipBehavior should be Clip.none
-    final dynamic renderObject = tester.renderObject(find.byType(Overlay));     
+    final dynamic renderObject = tester.renderObject(find.byType(Overlay));   
     expect(renderObject.clipBehavior, equals(Clip.none));
 
     for(final Clip clip in Clip.values) {

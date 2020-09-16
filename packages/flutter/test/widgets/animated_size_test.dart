@@ -297,7 +297,7 @@ void main() {
       );
 
       // By default, clipBehavior should be Clip.none
-      final RenderAnimatedSize renderObject = tester.renderObject(find.byType(AnimatedSize));       
+      final RenderAnimatedSize renderObject = tester.renderObject(find.byType(AnimatedSize));
       expect(renderObject.clipBehavior, equals(Clip.none));
 
       for(final Clip clip in Clip.values) {
