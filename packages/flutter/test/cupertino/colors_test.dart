@@ -167,7 +167,7 @@ void main() {
   });
 
   test('can resolve null color', () {
-    expect(CupertinoDynamicColor.resolve(null, null), isNull);
+    expect(CupertinoDynamicColor.resolve(null, _NullElement.instance), isNull);
   });
 
   test('withVibrancy constructor creates colors that may depend on vibrancy', () {
@@ -588,4 +588,21 @@ void main() {
       expect(color, isNot(dynamicColor.darkHighContrastElevatedColor));
     });
   });
+}
+
+class _NullElement extends Element {
+  _NullElement() : super(_NullWidget());
+
+  static _NullElement instance = _NullElement();
+
+  @override
+  bool get debugDoingBuild => throw UnimplementedError();
+
+  @override
+  void performRebuild() { }
+}
+
+class _NullWidget extends Widget {
+  @override
+  Element createElement() => throw UnimplementedError();
 }
