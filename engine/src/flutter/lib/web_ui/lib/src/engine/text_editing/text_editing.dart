@@ -532,7 +532,7 @@ class InputConfiguration {
   final bool readOnly;
 
   /// Whether to hide the text being edited.
-  final bool? obscureText;
+  final bool obscureText;
 
   /// Whether to enable autocorrection.
   ///
@@ -759,20 +759,8 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
   }) {
     assert(!isEnabled);
 
-    this._inputConfiguration = inputConfig;
-
     _domElement = inputConfig.inputType.createDomElement();
-    if (inputConfig.readOnly) {
-      domElement.setAttribute('readonly', 'readonly');
-    }
-    if (inputConfig.obscureText!) {
-      domElement.setAttribute('type', 'password');
-    }
-
-    inputConfig.autofill?.applyToDomElement(domElement, focusedElement: true);
-
-    final String autocorrectValue = inputConfig.autocorrect ? 'on' : 'off';
-    domElement.setAttribute('autocorrect', autocorrectValue);
+    _applyConfiguration(inputConfig);
 
     _setStaticStyleAttributes(domElement);
     _style?.applyToDomElement(domElement);
@@ -791,6 +779,25 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
     isEnabled = true;
     _onChange = onChange;
     _onAction = onAction;
+  }
+
+  void _applyConfiguration(InputConfiguration config) {
+    _inputConfiguration = config;
+
+    if (config.readOnly) {
+      domElement.setAttribute('readonly', 'readonly');
+    } else {
+      domElement.removeAttribute('readonly');
+    }
+
+    if (config.obscureText) {
+      domElement.setAttribute('type', 'password');
+    }
+
+    config.autofill?.applyToDomElement(domElement, focusedElement: true);
+
+    final String autocorrectValue = config.autocorrect ? 'on' : 'off';
+    domElement.setAttribute('autocorrect', autocorrectValue);
   }
 
   @override
@@ -1278,6 +1285,11 @@ class TextEditingChannel {
         );
         break;
 
+      case 'TextInput.updateConfig':
+        final config = InputConfiguration.fromFrameworkMessage(call.arguments);
+        implementation.updateConfig(config);
+        break;
+
       case 'TextInput.setEditingState':
         implementation
             .setEditingState(EditingState.fromFrameworkMessage(call.arguments));
@@ -1473,6 +1485,11 @@ class HybridTextEditing {
     }
     _clientId = clientId;
     _configuration = configuration;
+  }
+
+  void updateConfig(InputConfiguration configuration) {
+    _configuration = configuration;
+    editingElement?._applyConfiguration(_configuration);
   }
 
   /// Responds to the 'TextInput.setEditingState' message.
