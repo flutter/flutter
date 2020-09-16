@@ -358,7 +358,7 @@ class Container extends StatelessWidget {
   final Matrix4? transform;
 
   /// The transform alignment
-  final Alignment transformAlignment;
+  final Alignment? transformAlignment;
 
   /// The clip behavior when [Container.decoration] is not null.
   ///
@@ -431,7 +431,7 @@ class Container extends StatelessWidget {
       current = Padding(padding: margin!, child: current);
 
     if (transform != null)
-      current = transformAlignment == null ? Transform(transform: transform, child: current) : Transform(transform: transform, child: current, alignment: transformAlignment);
+      current = transformAlignment == null ? Transform(transform: transform!, child: current) : Transform(transform: transform!, child: current, alignment: transformAlignment!);
 
     return current!;
   }
