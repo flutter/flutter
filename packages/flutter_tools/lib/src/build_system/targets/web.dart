@@ -5,6 +5,7 @@
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
@@ -13,6 +14,7 @@ import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
+import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
@@ -32,6 +34,32 @@ const String kDart2jsOptimization = 'Dart2jsOptimization';
 
 /// Whether to disable dynamic generation code to satisfy csp policies.
 const String kCspMode = 'cspMode';
+
+/// The caching strategy to use for service worker generation.
+const String kServiceWorkerStrategy = 'ServiceWorkerStratgey';
+
+/// The caching strategy for the generated service worker.
+enum ServiceWorkerStrategy {
+  /// Download the app shell eagerly and all other assets lazily.
+  /// Prefer the offline cached version.
+  offlineFirst,
+  /// Do not generate a service worker,
+  none,
+}
+
+const String kOfflineFirst = 'offline-first';
+const String kNoneWorker = 'none';
+
+/// Convert a [value] into a [ServiceWorkerStrategy].
+ServiceWorkerStrategy _serviceWorkerStrategyfromString(String value) {
+  switch (value) {
+    case kNoneWorker:
+      return ServiceWorkerStrategy.none;
+    // offline-first is the default value for any invalid requests.
+    default:
+      return ServiceWorkerStrategy.offlineFirst;
+  }
+}
 
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
@@ -268,6 +296,11 @@ class WebReleaseBundle extends Target {
         environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path
       );
     }
+
+    final String versionInfo = FlutterProject.current().getVersionInfo();
+    environment.outputDir
+        .childFile('version.json')
+        .writeAsStringSync(versionInfo);
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(
@@ -384,16 +417,23 @@ class WebServiceWorker extends Target {
     final File serviceWorkerFile = environment.outputDir
       .childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
-    final String serviceWorker = generateServiceWorker(urlToHash, <String>[
-      '/',
-      'main.dart.js',
-      'index.html',
-      'assets/NOTICES',
-      if (urlToHash.containsKey('assets/AssetManifest.json'))
-        'assets/AssetManifest.json',
-      if (urlToHash.containsKey('assets/FontManifest.json'))
-        'assets/FontManifest.json',
-    ]);
+    final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyfromString(
+      environment.defines[kServiceWorkerStrategy],
+    );
+    final String serviceWorker = generateServiceWorker(
+      urlToHash,
+      <String>[
+        '/',
+        'main.dart.js',
+        'index.html',
+        'assets/NOTICES',
+        if (urlToHash.containsKey('assets/AssetManifest.json'))
+          'assets/AssetManifest.json',
+        if (urlToHash.containsKey('assets/FontManifest.json'))
+          'assets/FontManifest.json',
+      ],
+      serviceWorkerStrategy: serviceWorkerStrategy,
+    );
     serviceWorkerFile
       .writeAsStringSync(serviceWorker);
     final DepfileService depfileService = DepfileService(
@@ -413,7 +453,14 @@ class WebServiceWorker extends Target {
 /// The tool embeds file hashes directly into the worker so that the byte for byte
 /// invalidation will automatically reactivate workers whenever a new
 /// version is deployed.
-String generateServiceWorker(Map<String, String> resources, List<String> coreBundle) {
+String generateServiceWorker(
+  Map<String, String> resources,
+  List<String> coreBundle, {
+  @required ServiceWorkerStrategy serviceWorkerStrategy,
+}) {
+  if (serviceWorkerStrategy == ServiceWorkerStrategy.none) {
+    return '';
+  }
   return '''
 'use strict';
 const MANIFEST = 'flutter-app-manifest';
@@ -427,7 +474,6 @@ const RESOURCES = {
 // start.
 const CORE = [
   ${coreBundle.map((String file) => '"$file"').join(',\n')}];
-
 // During install, the TEMP cache is populated with the application shell files.
 self.addEventListener("install", (event) => {
   return event.waitUntil(
@@ -448,7 +494,6 @@ self.addEventListener("activate", function(event) {
       var tempCache = await caches.open(TEMP);
       var manifestCache = await caches.open(MANIFEST);
       var manifest = await manifestCache.match('manifest');
-
       // When there is no prior manifest, clear the entire cache.
       if (!manifest) {
         await caches.delete(CACHE_NAME);
@@ -462,7 +507,6 @@ self.addEventListener("activate", function(event) {
         await manifestCache.put('manifest', new Response(JSON.stringify(RESOURCES)));
         return;
       }
-
       var oldManifest = await manifest.json();
       var origin = self.location.origin;
       for (var request of await contentCache.keys()) {
@@ -537,7 +581,6 @@ self.addEventListener('message', (event) => {
   if (event.data === 'skipWaiting') {
     return self.skipWaiting();
   }
-
   if (event.message === 'downloadOffline') {
     downloadOffline();
   }

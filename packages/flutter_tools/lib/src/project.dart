@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
+import '../src/convert.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'artifacts.dart';
 import 'base/common.dart';
@@ -263,6 +264,16 @@ class FlutterProject {
     }
     await injectPlugins(this, checkProjects: checkProjects);
   }
+
+  /// Returns a json encoded string containing the [appName], [version], and [buildNumber] that is used to generate version.json
+  String getVersionInfo()  {
+    final Map<String, String> versionFileJson = <String, String>{
+      'app_name': manifest.appName,
+      'version': manifest.buildName,
+      'build_number': manifest.buildNumber
+    };
+    return jsonEncode(versionFileJson);
+  }
 }
 
 /// Base class for projects per platform.
@@ -336,6 +347,9 @@ abstract class CmakeBasedProject {
 
   /// Includable CMake with rules and variables for plugin builds.
   File get generatedPluginCmakeFile;
+
+  /// The directory to write plugin symlinks.
+  Directory get pluginSymlinkDirectory;
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -1043,6 +1057,9 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   @override
   File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
 
+  @override
+  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
+
   Directory get _editableDirectory => parent.directory.childDirectory('windows');
 
   /// The directory in the project that is managed by Flutter. As much as
@@ -1054,9 +1071,6 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   /// generated on the fly. All generated files that are not intended to be
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
-
-  /// The directory to write plugin symlinks.
-  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
@@ -1097,7 +1111,7 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   @override
   File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
 
-  /// The directory to write plugin symlinks.
+  @override
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}

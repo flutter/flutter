@@ -92,6 +92,17 @@ void main() {
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
   }));
 
+  test('version.json is created after release build', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    webResources.childFile('index.html')
+        .createSync(recursive: true);
+    environment.buildDir.childFile('main.dart.js').createSync();
+    await const WebReleaseBundle().build(environment);
+
+    expect(environment.outputDir.childFile('version.json'), exists);
+  }));
+
   test('WebReleaseBundle copies dart2js output and resource files to output directory', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     final Directory webResources = environment.projectDir.childDirectory('web');
@@ -475,14 +486,20 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
+  test('Generated service worker is empty with none-strategy', () {
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[], serviceWorkerStrategy: ServiceWorkerStrategy.none);
+
+    expect(result, '');
+  });
+
   test('Generated service worker correctly inlines file hashes', () {
-    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[]);
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[], serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst);
 
     expect(result, contains('{\n  "/foo": "abcd"\n};'));
   });
 
   test('Generated service worker includes core files', () {
-    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>['foo', 'bar']);
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>['foo', 'bar'], serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst);
 
     expect(result, contains('"foo",\n"bar"'));
   });
