@@ -280,6 +280,9 @@ public class PlatformPlugin {
   private CharSequence getClipboardData(PlatformChannel.ClipboardContentFormat format) {
     ClipboardManager clipboard =
         (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+
+    if (!clipboard.hasPrimaryClip()) return null;
+
     ClipData clip = clipboard.getPrimaryClip();
     if (clip == null) return null;
 
