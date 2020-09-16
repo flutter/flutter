@@ -274,7 +274,7 @@ void main() {
         kDeployCommand,
         kLaunchDebugCommand,
       ]);
-      BufferLogger logger = BufferLogger.test();
+     final  BufferLogger logger = BufferLogger.test();
       final IOSDevice device = setUpIOSDevice(
         sdkVersion: '13.0',
         processManager: processManager,
@@ -310,7 +310,7 @@ void main() {
 
       expect(launchResult.started, false);
       expect(launchResult.hasObservatory, false);
-      expect(logger.errorText, contains('Settings > Privacy > Local Network'));
+      expect(logger.errorText, isEmpty);
     }, overrides: <Type, Generator>{
       MDnsObservatoryDiscovery: () => MockMDnsObservatoryDiscovery(),
       Usage: () => MockUsage(),
@@ -323,7 +323,7 @@ void main() {
         kDeployCommand,
         kLaunchDebugCommand,
       ]);
-      BufferLogger logger = BufferLogger.test();
+      final BufferLogger logger = BufferLogger.test();
       final IOSDevice device = setUpIOSDevice(
         sdkVersion: '14.0',
         processManager: processManager,
@@ -359,7 +359,7 @@ void main() {
 
       expect(launchResult.started, false);
       expect(launchResult.hasObservatory, false);
-      expect(logger.errorText, isEmpty);
+      expect(logger.errorText, contains('Settings > Privacy > Local Network'));
     }, overrides: <Type, Generator>{
       MDnsObservatoryDiscovery: () => MockMDnsObservatoryDiscovery(),
       Usage: () => MockUsage(),
