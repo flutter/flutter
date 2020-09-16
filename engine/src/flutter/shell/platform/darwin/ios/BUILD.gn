@@ -305,17 +305,26 @@ copy("copy_license") {
   outputs = [ "$root_out_dir/LICENSE" ]
 }
 
-shared_library("copy_and_verify_framework_headers") {
+shared_library("copy_and_verify_framework_module") {
+  framework_search_path = rebase_path("$root_out_dir")
   visibility = [ ":*" ]
-  include_dirs = [ "$_flutter_framework_headers_copy_dir" ]
+  cflags_objc = [
+    "-F$framework_search_path",
+    "-fmodules",
+    "-Wnon-modular-include-in-framework-module",
+  ]
 
   sources = [ "framework/Source/FlutterUmbrellaImport.m" ]
-  deps = [ ":copy_framework_headers" ]
+  deps = [
+    ":copy_framework_headers",
+    ":copy_framework_info_plist",
+    ":copy_framework_module_map",
+  ]
 }
 
 group("flutter_framework") {
   deps = [
-    ":copy_and_verify_framework_headers",
+    ":copy_and_verify_framework_module",
     ":copy_dylib",
     ":copy_framework_icu",
     ":copy_framework_info_plist",
