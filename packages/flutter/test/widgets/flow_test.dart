@@ -170,7 +170,7 @@ void main() {
     );
 
     // By default, clipBehavior should be Clip.none
-    final RenderFlow renderObject = tester.renderObject(find.byType(Flow));    
+    final RenderFlow renderObject = tester.renderObject(find.byType(Flow));
     expect(renderObject.clipBehavior, equals(Clip.none));
 
     for(final Clip clip in Clip.values) {
@@ -199,7 +199,7 @@ void main() {
     );
 
     // By default, clipBehavior should be Clip.none
-    final RenderFlow renderObject = tester.renderObject(find.byType(Flow));    
+    final RenderFlow renderObject = tester.renderObject(find.byType(Flow));
     expect(renderObject.clipBehavior, equals(Clip.none));
 
     for(final Clip clip in Clip.values) {
