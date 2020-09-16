@@ -633,7 +633,7 @@ class HeroControllerScope extends InheritedWidget {
   /// Creates a widget to host the input [controller].
   const HeroControllerScope({
     Key? key,
-    this.controller,
+    required HeroController this.controller,
     required Widget child,
   }) : assert(controller != null),
        super(key: key, child: child);
