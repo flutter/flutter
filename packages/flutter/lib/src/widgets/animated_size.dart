@@ -61,7 +61,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
     required this.duration,
     this.reverseDuration,
     required this.vsync,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(clipBehavior != null),
        super(key: key, child: child);
 
@@ -105,7 +105,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
 
   @override

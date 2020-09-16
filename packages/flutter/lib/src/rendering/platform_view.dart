@@ -84,7 +84,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     required AndroidViewController viewController,
     required PlatformViewHitTestBehavior hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-    Clip clipBehavior = Clip.none,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(viewController != null),
        assert(hitTestBehavior != null),
        assert(gestureRecognizers != null),
@@ -121,9 +121,9 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.none;
+  Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
     assert(value != null);
     if (value != _clipBehavior) {

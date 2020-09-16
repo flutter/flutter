@@ -296,9 +296,9 @@ void main() {
         ),
       );
 
-      // By default, clipBehavior should be Clip.none
+      // By default, clipBehavior should be Clip.hardEdge
       final RenderAnimatedSize renderObject = tester.renderObject(find.byType(AnimatedSize));
-      expect(renderObject.clipBehavior, equals(Clip.none));
+      expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
       for(final Clip clip in Clip.values) {
         await tester.pumpWidget(

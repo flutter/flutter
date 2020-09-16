@@ -181,7 +181,7 @@ class RenderFlow extends RenderBox
   RenderFlow({
     List<RenderBox>? children,
     required FlowDelegate delegate,
-    Clip clipBehavior = Clip.none,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(delegate != null),
        assert(clipBehavior != null),
        _delegate = delegate,
@@ -226,9 +226,9 @@ class RenderFlow extends RenderBox
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.none;
+  Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
     assert(value != null);
     if (value != _clipBehavior) {

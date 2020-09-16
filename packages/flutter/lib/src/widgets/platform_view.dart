@@ -71,7 +71,7 @@ class AndroidView extends StatefulWidget {
     this.gestureRecognizers,
     this.creationParams,
     this.creationParamsCodec,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(viewType != null),
        assert(hitTestBehavior != null),
        assert(creationParams == null || creationParamsCodec != null),
@@ -185,7 +185,7 @@ class AndroidView extends StatefulWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
 
   @override
@@ -651,7 +651,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
     required this.controller,
     required this.hitTestBehavior,
     required this.gestureRecognizers,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(controller != null),
        assert(hitTestBehavior != null),
        assert(gestureRecognizers != null),

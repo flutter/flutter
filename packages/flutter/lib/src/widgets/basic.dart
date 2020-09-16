@@ -5091,7 +5091,7 @@ class Flow extends MultiChildRenderObjectWidget {
     Key? key,
     required this.delegate,
     List<Widget> children = const <Widget>[],
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(delegate != null),
        assert(clipBehavior != null),
        super(key: key, children: RepaintBoundary.wrapAll(children));
@@ -5108,7 +5108,7 @@ class Flow extends MultiChildRenderObjectWidget {
     Key? key,
     required this.delegate,
     List<Widget> children = const <Widget>[],
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(delegate != null),
        assert(clipBehavior != null),
        super(key: key, children: children);

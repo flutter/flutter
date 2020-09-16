@@ -214,7 +214,7 @@ class Overlay extends StatefulWidget {
   const Overlay({
     Key? key,
     this.initialEntries = const <OverlayEntry>[],
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(initialEntries != null),
        assert(clipBehavior != null),
        super(key: key);
@@ -236,7 +236,7 @@ class Overlay extends StatefulWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
 
   /// The state from the closest instance of this class that encloses the given context.
@@ -499,7 +499,7 @@ class _Theatre extends MultiChildRenderObjectWidget {
   _Theatre({
     Key? key,
     this.skipCount = 0,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
   }) : assert(skipCount != null),
        assert(skipCount >= 0),
@@ -560,7 +560,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     List<RenderBox>? children,
     required TextDirection textDirection,
     int skipCount = 0,
-    Clip clipBehavior = Clip.none,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(skipCount != null),
        assert(skipCount >= 0),
        assert(textDirection != null),
@@ -613,9 +613,9 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.none;
+  Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
     assert(value != null);
     if (value != _clipBehavior) {

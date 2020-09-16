@@ -81,7 +81,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     AlignmentGeometry alignment = Alignment.center,
     TextDirection? textDirection,
     RenderBox? child,
-    Clip clipBehavior = Clip.none,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(vsync != null),
        assert(duration != null),
        assert(curve != null),
@@ -144,9 +144,9 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.none;
+  Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
     assert(value != null);
     if (value != _clipBehavior) {
