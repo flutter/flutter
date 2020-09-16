@@ -8,7 +8,7 @@
 #include "flutter/flow/texture.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
-#include "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
 
 namespace flutter {
 

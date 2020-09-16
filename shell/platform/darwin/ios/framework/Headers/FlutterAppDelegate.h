@@ -7,8 +7,8 @@
 
 #import <UIKit/UIKit.h>
 
-#include "FlutterMacros.h"
-#include "FlutterPlugin.h"
+#import "FlutterMacros.h"
+#import "FlutterPlugin.h"
 
 /**
  * `UIApplicationDelegate` subclass for simple apps that want default behavior.

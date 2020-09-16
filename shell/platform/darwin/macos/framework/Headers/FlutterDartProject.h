@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 
-#include "FlutterMacros.h"
+#import "FlutterMacros.h"
 
 /**
  * A set of Flutter and Dart assets used by a `FlutterEngine` to initialize execution.

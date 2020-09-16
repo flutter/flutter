@@ -969,8 +969,8 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge_test.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.mm
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/connection_collection.cc
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/connection_collection.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/connection_collection.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/connection_collection_test.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.mm

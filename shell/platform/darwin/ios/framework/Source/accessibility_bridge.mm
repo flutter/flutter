@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
+
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h"
-
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 #pragma GCC diagnostic error "-Wundeclared-selector"

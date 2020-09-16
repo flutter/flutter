@@ -8,7 +8,7 @@
 #import <CoreMedia/CoreMedia.h>
 #import <Foundation/Foundation.h>
 
-#include "FlutterMacros.h"
+#import "FlutterMacros.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
