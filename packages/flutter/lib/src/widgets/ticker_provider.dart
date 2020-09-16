@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -22,9 +20,9 @@ class TickerMode extends StatelessWidget {
   ///
   /// The [enabled] argument must not be null.
   const TickerMode({
-    Key key,
-    @required this.enabled,
-    this.child,
+    Key? key,
+    required this.enabled,
+    required this.child,
   }) : assert(enabled != null),
        super(key: key);
 
@@ -60,7 +58,7 @@ class TickerMode extends StatelessWidget {
   /// bool tickingEnabled = TickerMode.of(context);
   /// ```
   static bool of(BuildContext context) {
-    final _EffectiveTickerMode widget = context.dependOnInheritedWidgetOfExactType<_EffectiveTickerMode>();
+    final _EffectiveTickerMode? widget = context.dependOnInheritedWidgetOfExactType<_EffectiveTickerMode>();
     return widget?.enabled ?? true;
   }
 
@@ -81,9 +79,9 @@ class TickerMode extends StatelessWidget {
 
 class _EffectiveTickerMode extends InheritedWidget {
   const _EffectiveTickerMode({
-    Key key,
-    @required this.enabled,
-    Widget child,
+    Key? key,
+    required this.enabled,
+    required Widget child,
   }) : assert(enabled != null),
         super(key: key, child: child);
 
@@ -111,7 +109,7 @@ class _EffectiveTickerMode extends InheritedWidget {
 /// [TickerProviderStateMixin] instead.
 @optionalTypeArgs
 mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> implements TickerProvider {
-  Ticker _ticker;
+  Ticker? _ticker;
 
   @override
   Ticker createTicker(TickerCallback onTick) {
@@ -133,13 +131,13 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
     // event handler, and that thus TickerMode.of(context) would return true. We
     // can't actually check that here because if we're in initState then we're
     // not allowed to do inheritance checks yet.
-    return _ticker;
+    return _ticker!;
   }
 
   @override
   void dispose() {
     assert(() {
-      if (_ticker == null || !_ticker.isActive)
+      if (_ticker == null || !_ticker!.isActive)
         return true;
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('$this was disposed with an active Ticker.'),
@@ -153,7 +151,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
           'should be disposed by calling dispose() on the AnimationController itself. '
           'Otherwise, the ticker will leak.'
         ),
-        _ticker.describeForError('The offending ticker was')
+        _ticker!.describeForError('The offending ticker was')
       ]);
     }());
     super.dispose();
@@ -162,20 +160,20 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
   @override
   void didChangeDependencies() {
     if (_ticker != null)
-      _ticker.muted = !TickerMode.of(context);
+      _ticker!.muted = !TickerMode.of(context);
     super.didChangeDependencies();
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    String tickerDescription;
+    String? tickerDescription;
     if (_ticker != null) {
-      if (_ticker.isActive && _ticker.muted)
+      if (_ticker!.isActive && _ticker!.muted)
         tickerDescription = 'active but muted';
-      else if (_ticker.isActive)
+      else if (_ticker!.isActive)
         tickerDescription = 'active';
-      else if (_ticker.muted)
+      else if (_ticker!.muted)
         tickerDescription = 'inactive and muted';
       else
         tickerDescription = 'inactive';
@@ -196,27 +194,27 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
 /// [SingleTickerProviderStateMixin] is more efficient. This is the common case.
 @optionalTypeArgs
 mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements TickerProvider {
-  Set<Ticker> _tickers;
+  Set<Ticker>? _tickers;
 
   @override
   Ticker createTicker(TickerCallback onTick) {
     _tickers ??= <_WidgetTicker>{};
     final _WidgetTicker result = _WidgetTicker(onTick, this, debugLabel: 'created by $this');
-    _tickers.add(result);
+    _tickers!.add(result);
     return result;
   }
 
   void _removeTicker(_WidgetTicker ticker) {
     assert(_tickers != null);
-    assert(_tickers.contains(ticker));
-    _tickers.remove(ticker);
+    assert(_tickers!.contains(ticker));
+    _tickers!.remove(ticker);
   }
 
   @override
   void dispose() {
     assert(() {
       if (_tickers != null) {
-        for (final Ticker ticker in _tickers) {
+        for (final Ticker ticker in _tickers!) {
           if (ticker.isActive) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('$this was disposed with an active Ticker.'),
@@ -244,7 +242,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
   void didChangeDependencies() {
     final bool muted = !TickerMode.of(context);
     if (_tickers != null) {
-      for (final Ticker ticker in _tickers) {
+      for (final Ticker ticker in _tickers!) {
         ticker.muted = muted;
       }
     }
@@ -258,7 +256,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
       'tickers',
       _tickers,
       description: _tickers != null ?
-        'tracking ${_tickers.length} ticker${_tickers.length == 1 ? "" : "s"}' :
+        'tracking ${_tickers!.length} ticker${_tickers!.length == 1 ? "" : "s"}' :
         null,
       defaultValue: null,
     ));
@@ -270,7 +268,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
 // confusing. Instead we use the less precise but more anodyne "_WidgetTicker",
 // which attracts less attention.
 class _WidgetTicker extends Ticker {
-  _WidgetTicker(TickerCallback onTick, this._creator, { String debugLabel }) : super(onTick, debugLabel: debugLabel);
+  _WidgetTicker(TickerCallback onTick, this._creator, { String? debugLabel }) : super(onTick, debugLabel: debugLabel);
 
   final TickerProviderStateMixin _creator;
 

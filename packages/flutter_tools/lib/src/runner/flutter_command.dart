@@ -459,7 +459,7 @@ abstract class FlutterCommand extends Command<void> {
         'the information needed to symbolize Dart stack traces. For an app built '
         "with this flag, the 'flutter symbolize' command with the right program "
         'symbol file is required to obtain a human readable stack trace.',
-      valueHelp: '/project-name/v1.2.3/',
+      valueHelp: 'v1.2.3/',
     );
   }
 
@@ -486,7 +486,7 @@ abstract class FlutterCommand extends Command<void> {
         'during "flutter run". These can be included in an application to '
         'improve the first frame render times.',
       hide: hide,
-      valueHelp: '/project-name/flutter_1.sksl'
+      valueHelp: 'flutter_1.sksl'
     );
   }
 

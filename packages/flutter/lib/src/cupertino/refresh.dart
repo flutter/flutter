@@ -384,7 +384,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     // dragged widget, hence the use of Overflow.visible.
     return Center(
       child: Stack(
-        overflow: Overflow.visible,
+        clipBehavior: Clip.none,
         children: <Widget>[
           Positioned(
             top: _kActivityIndicatorMargin,
