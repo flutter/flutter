@@ -345,7 +345,7 @@ void main() {
     ).validate();
     expect(
       validationResult.messages.any(
-        (ValidationMessage message) => message.message.contains("flutter config --android-sdk")
+        (ValidationMessage message) => message.message.contains('flutter config --android-sdk')
       ),
       true,
     );
