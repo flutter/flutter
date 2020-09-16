@@ -11,6 +11,7 @@ struct _FlRendererHeadless {
 G_DEFINE_TYPE(FlRendererHeadless, fl_renderer_headless, fl_renderer_get_type())
 
 static gboolean fl_renderer_headless_create_surfaces(FlRenderer* renderer,
+                                                     GtkWidget* widget,
                                                      EGLDisplay display,
                                                      EGLConfig config,
                                                      EGLSurface* visible,

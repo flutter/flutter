@@ -94,6 +94,7 @@ source_set("flutter_linux_sources") {
     "fl_plugin_registry.cc",
     "fl_renderer.cc",
     "fl_renderer_headless.cc",
+    "fl_renderer_wayland.cc",
     "fl_renderer_x11.cc",
     "fl_standard_message_codec.cc",
     "fl_standard_method_codec.cc",
@@ -117,6 +118,7 @@ source_set("flutter_linux") {
   configs += [
     "//flutter/shell/platform/linux/config:gtk",
     "//flutter/shell/platform/linux/config:egl",
+    "//flutter/shell/platform/linux/config:wayland-egl",
     "//third_party/khronos:khronos_headers",
   ]
 
@@ -157,7 +159,10 @@ executable("flutter_linux_unittests") {
 
   public_configs = [ "//flutter:config" ]
 
-  configs += [ "//flutter/shell/platform/linux/config:gtk" ]
+  configs += [
+    "//flutter/shell/platform/linux/config:gtk",
+    "//flutter/shell/platform/linux/config:wayland-egl",
+  ]
 
   # Set flag to allow public headers to be directly included (library users should not do this)
   defines = [ "FLUTTER_LINUX_COMPILATION" ]
