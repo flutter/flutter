@@ -333,7 +333,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Mentions `kAndroidSdkRoot if user has no AndroidSdk`', () async {
+  testWithoutContext('Mentions `flutter config --android-sdk if user has no AndroidSdk`', () async {
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: null,
       androidStudio: null,
