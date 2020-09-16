@@ -7,6 +7,8 @@
 //
 // See: https://github.com/flutter/flutter/wiki/Release-process
 
+// TODO(fujino): Remove once //flutter/dev/conductor is finished.
+
 import 'dart:io';
 
 import 'package:args/args.dart';
