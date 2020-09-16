@@ -9,6 +9,7 @@
 
 #include <gdk/gdkwayland.h>
 #include <wayland-egl-core.h>
+#include <cstring>
 
 struct _FlRendererWayland {
   FlRenderer parent_instance;
