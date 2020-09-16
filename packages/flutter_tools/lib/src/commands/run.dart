@@ -23,7 +23,6 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
 import '../web/web_runner.dart';
-import '../widget_cache.dart';
 import 'daemon.dart';
 
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
@@ -531,7 +530,6 @@ class RunCommand extends RunCommandBase {
           target: stringArg('target'),
           buildInfo: getBuildInfo(),
           userIdentifier: userIdentifier,
-          widgetCache: WidgetCache(featureFlags: featureFlags),
         ),
     ];
     // Only support "web mode" with a single web device due to resident runner

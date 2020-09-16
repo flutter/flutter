@@ -34,7 +34,6 @@ import 'project.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
 import 'vmservice.dart';
-import 'widget_cache.dart';
 
 class FlutterDevice {
   FlutterDevice(
@@ -46,7 +45,6 @@ class FlutterDevice {
     TargetPlatform targetPlatform,
     ResidentCompiler generator,
     this.userIdentifier,
-    this.widgetCache,
   }) : assert(buildInfo.trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          globals.artifacts.getArtifactPath(
@@ -79,7 +77,6 @@ class FlutterDevice {
     List<String> experimentalFlags,
     ResidentCompiler generator,
     String userIdentifier,
-    WidgetCache widgetCache,
   }) async {
     ResidentCompiler generator;
     final TargetPlatform targetPlatform = await device.targetPlatform;
@@ -134,6 +131,14 @@ class FlutterDevice {
         logger: globals.logger,
       );
     } else {
+      // The flutter-widget-cache feature only applies to run mode.
+      List<String> extraFrontEndOptions = buildInfo.extraFrontEndOptions;
+      if (featureFlags.isSingleWidgetReloadEnabled) {
+        extraFrontEndOptions = <String>[
+          '--flutter-widget-cache',
+          ...?extraFrontEndOptions,
+        ];
+      }
       generator = ResidentCompiler(
         globals.artifacts.getArtifactPath(
           Artifact.flutterPatchedSdkPath,
@@ -146,11 +151,11 @@ class FlutterDevice {
         fileSystemScheme: fileSystemScheme,
         targetModel: targetModel,
         dartDefines: buildInfo.dartDefines,
-        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+        extraFrontEndOptions: extraFrontEndOptions,
         initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
-          extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+          extraFrontEndOptions: extraFrontEndOptions,
         ),
         packagesPath: buildInfo.packagesPath,
         artifacts: globals.artifacts,
@@ -168,7 +173,6 @@ class FlutterDevice {
       generator: generator,
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
-      widgetCache: widgetCache,
     );
   }
 
@@ -176,7 +180,6 @@ class FlutterDevice {
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
   final String userIdentifier;
-  final WidgetCache widgetCache;
   Stream<Uri> observatoryUris;
   vm_service.VmService vmService;
   DevFS devFS;
@@ -684,7 +687,6 @@ class FlutterDevice {
         pathToReload: pathToReload,
         invalidatedFiles: invalidatedFiles,
         packageConfig: packageConfig,
-        widgetCache: widgetCache,
       );
     } on DevFSException {
       devFSStatus.cancel();
@@ -732,10 +734,6 @@ abstract class ResidentRunner {
        ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
-    }
-    for (final FlutterDevice flutterDevice in flutterDevices) {
-      flutterDevice.widgetCache.outFile = artifactDirectory
-        .childFile('app.dill.incremental.dill.debug-widgets');
     }
   }
 

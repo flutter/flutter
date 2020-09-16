@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/widget_cache.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -775,7 +774,6 @@ void main() {
     final FakeFlutterDevice flutterDevice =  FakeFlutterDevice(
       mockDevice,
       BuildInfo.debug,
-      FakeWidgetCache(),
       FakeResidentCompiler(),
       mockDevFS,
     )..vmService = fakeVmServiceHost.vmService;
@@ -902,7 +900,6 @@ void main() {
     final FakeFlutterDevice flutterDevice =  FakeFlutterDevice(
       mockDevice,
       BuildInfo.debug,
-      FakeWidgetCache(),
       FakeResidentCompiler(),
       mockDevFS,
     )..vmService = fakeVmServiceHost.vmService;
@@ -2324,24 +2321,13 @@ class ThrowingForwardingFileSystem extends ForwardingFileSystem {
   }
 }
 
-class FakeWidgetCache implements WidgetCache {
-  @override
-  String validateLibrary() {
-    return 'FakeWidget';
-  }
-
-  @override
-  set outFile(File file) {}
-}
-
 class FakeFlutterDevice extends FlutterDevice {
   FakeFlutterDevice(
     Device device,
     BuildInfo buildInfo,
-    WidgetCache widgetCache,
     ResidentCompiler residentCompiler,
     this.fakeDevFS,
-  ) : super(device, buildInfo: buildInfo, widgetCache:widgetCache, generator: residentCompiler);
+  ) : super(device, buildInfo: buildInfo, generator: residentCompiler);
 
   @override
   Future<void> connect({
