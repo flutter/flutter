@@ -119,8 +119,7 @@ class _DefaultHeroTag {
 /// See also:
 ///
 ///  * [Scaffold], in which floating action buttons typically live.
-///  * [RaisedButton], another kind of button that appears to float above the
-///    content.
+///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * <https://material.io/design/components/buttons-floating-action-button.html>
 class FloatingActionButton extends StatelessWidget {
   /// Creates a circular floating action button.
@@ -358,7 +357,7 @@ class FloatingActionButton extends StatelessWidget {
   /// This controls the size of the shadow below the floating action button.
   ///
   /// Defaults to the same value as [elevation]. Setting this to zero makes the
-  /// floating action button work similar to a [RaisedButton] but the titular
+  /// floating action button work similar to an [ElevatedButton] but the titular
   /// "floating" effect is lost. The value is always non-negative.
   ///
   /// See also:

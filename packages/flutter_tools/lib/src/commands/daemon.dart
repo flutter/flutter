@@ -545,6 +545,12 @@ class AppDomain extends Domain {
     final AppInstance app = AppInstance(_getNewAppId(),
         runner: runner, logToStdout: daemon.logToStdout, logger: logger);
     _apps.add(app);
+
+    // Set the domain and app for the given AppRunLogger. This allows the logger
+    // to log messages containing the app ID to the host.
+    logger.domain = this;
+    logger.app = app;
+
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
       'directory': projectDirectory,
@@ -1105,8 +1111,6 @@ class AppInstance {
   }
 
   Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) async {
-    _logger.domain = domain;
-    _logger.app = this;
     return method();
   }
 }
@@ -1253,22 +1257,22 @@ class AppRunLogger extends Logger {
   }) {
     final int id = _nextProgressId++;
 
-    _sendProgressEvent(<String, dynamic>{
-      'id': id.toString(),
-      'progressId': progressId,
-      'message': message,
-    });
+    _sendProgressEvent(
+      eventId: id.toString(),
+      eventType: progressId,
+      message: message,
+    );
 
     _status = SilentStatus(
       timeout: timeout,
       timeoutConfiguration: timeoutConfiguration,
       onFinish: () {
         _status = null;
-        _sendProgressEvent(<String, dynamic>{
-          'id': id.toString(),
-          'progressId': progressId,
-          'finished': true,
-        });
+        _sendProgressEvent(
+          eventId: id.toString(),
+          eventType: progressId,
+          finished: true,
+        );
       }, stopwatch: Stopwatch())..start();
     return _status;
   }
@@ -1285,10 +1289,26 @@ class AppRunLogger extends Logger {
     }
   }
 
-  void _sendProgressEvent(Map<String, dynamic> event) {
+  void _sendProgressEvent({
+    @required String eventId,
+    @required String eventType,
+    bool finished = false,
+    String message,
+  }) {
     if (domain == null) {
-      printStatus('event sent after app closed: $event');
+      // If we're sending progress events before an app has started, send the
+      // progress messages as plain status messages.
+      if (message != null) {
+        printStatus(message);
+      }
     } else {
+      final Map<String, dynamic> event = <String, dynamic>{
+        'id': eventId,
+        'progressId': eventType,
+        if (message != null) 'message': message,
+        if (finished != null) 'finished': finished,
+      };
+
       domain._sendAppEvent(app, 'progress', event);
     }
   }

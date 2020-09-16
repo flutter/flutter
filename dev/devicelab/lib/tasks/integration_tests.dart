@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
-import 'package:path/path.dart' as path;
 import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/utils.dart';
@@ -86,34 +84,6 @@ TaskFunction createImageLoadingIntegrationTest() {
     '${flutterDirectory.path}/dev/integration_tests/image_loading',
     'lib/main.dart',
   );
-}
-
-TaskFunction createFlutterCreateOfflineTest() {
-  return () async {
-    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_create_test.');
-    String output;
-    // The default create template has an actual online dependency against
-    // a pub package. Make sure it's available in pub cache first before
-    // trying to resolve it offline.
-    await inDirectory(tempDir, () async {
-      output = await eval(
-        path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['pub', 'cache', 'add', 'cupertino_icons', '--version', '1.0.0'],
-      );
-    });
-    await inDirectory(tempDir, () async {
-      output = await eval(
-        path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['create', '--offline', 'flutter_create_test'],
-      );
-    });
-    if (output.contains(RegExp('building flutter tool', caseSensitive: false))) {
-      return TaskResult.failure('`flutter create --offline` should not rebuild flutter tool');
-    } else if (!output.contains('All done!')) {
-      return TaskResult.failure('`flutter create` failed');
-    }
-    return TaskResult.success(null);
-  };
 }
 
 TaskFunction createAndroidSplashScreenKitchenSinkTest() {

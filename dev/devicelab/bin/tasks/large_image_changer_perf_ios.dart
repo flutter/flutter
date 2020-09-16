@@ -16,5 +16,6 @@ Future<void> main() async {
     'test_driver/large_image_changer.dart',
     'large_image_changer',
     measureCpuGpu: true,
+    measureMemory: true,
   ).run);
 }
