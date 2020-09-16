@@ -885,12 +885,12 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   /// value will be used ([Brightness.light] platform brightness, normal contrast,
   /// [CupertinoUserInterfaceLevelData.base] elevation level), unless [nullOk] is
   /// set to false, in which case an exception will be thrown.
-  static Color? resolve(Color? resolvable, BuildContext? context, { bool nullOk = true }) {
+  static Color? resolve(Color? resolvable, BuildContext context, { bool nullOk = true }) {
     if (resolvable == null)
       return null;
     assert(context != null);
     return (resolvable is CupertinoDynamicColor)
-      ? resolvable.resolveFrom(context!, nullOk: nullOk)
+      ? resolvable.resolveFrom(context, nullOk: nullOk)
       : resolvable;
   }
 
