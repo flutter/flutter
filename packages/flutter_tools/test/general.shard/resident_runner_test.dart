@@ -714,22 +714,6 @@ void main() {
       listViews,
       listViews,
       listViews,
-      FakeVmServiceRequest(
-        method: 'getIsolate',
-        args: <String, Object>{
-          'isolateId': '1',
-        },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
-      ),
-      const FakeVmServiceRequest(
-        method: 'evaluate',
-        args: <String, String>{
-          'isolateId': '1',
-          'targetId': '1',
-          'expression': '((){debugFastReassembleMethod=(Object _fastReassembleParam) => _fastReassembleParam is FakeWidget})()',
-        }
-      ),
-      listViews,
       const FakeVmServiceRequest(
         method: '_flutter.setAssetBundlePath',
         args: <String, Object>{
@@ -769,6 +753,7 @@ void main() {
         method: 'ext.flutter.fastReassemble',
         args: <String, Object>{
           'isolateId': fakeUnpausedIsolate.id,
+          'className': 'FOO',
         },
       ),
     ]);
@@ -810,7 +795,7 @@ void main() {
       invalidatedFiles: anyNamed('invalidatedFiles'),
       packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
-      return UpdateFSReport(success: true);
+      return UpdateFSReport(success: true, fastReassembleClassName: 'FOO');
     });
 
     final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
@@ -828,133 +813,6 @@ void main() {
     Platform: () => FakePlatform(operatingSystem: 'linux'),
     ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
   }));
-
-  testUsingContext('ResidentRunner bails out of fast reassemble if evaluation fails', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      listViews,
-      FakeVmServiceRequest(
-        method: 'getVM',
-        jsonResponse: fakeVM.toJson(),
-      ),
-      listViews,
-      listViews,
-      listViews,
-      FakeVmServiceRequest(
-        method: 'getIsolate',
-        args: <String, Object>{
-          'isolateId': '1',
-        },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
-      ),
-      const FakeVmServiceRequest(
-        method: 'evaluate',
-        args: <String, String>{
-          'isolateId': '1',
-          'targetId': '1',
-          'expression': '((){debugFastReassembleMethod=(Object _fastReassembleParam) => _fastReassembleParam is FakeWidget})()',
-        },
-        errorCode: 500,
-      ),
-      listViews,
-      const FakeVmServiceRequest(
-        method: '_flutter.setAssetBundlePath',
-        args: <String, Object>{
-          'viewId': 'a',
-          'assetDirectory': 'build/flutter_assets',
-          'isolateId': '1',
-        }
-      ),
-      FakeVmServiceRequest(
-        method: 'getVM',
-        jsonResponse: fakeVM.toJson(),
-      ),
-      const FakeVmServiceRequest(
-        method: 'reloadSources',
-        args: <String, Object>{
-          'isolateId': '1',
-          'pause': false,
-          'rootLibUri': 'lib/main.dart.incremental.dill',
-        },
-        jsonResponse: <String, Object>{
-          'type': 'ReloadReport',
-          'success': true,
-          'details': <String, Object>{
-            'loadedLibraryCount': 1,
-          },
-        },
-      ),
-      listViews,
-      FakeVmServiceRequest(
-        method: 'getIsolate',
-        args: <String, Object>{
-          'isolateId': '1',
-        },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
-      ),
-      FakeVmServiceRequest(
-        method: 'ext.flutter.reassemble',
-        args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
-        },
-      ),
-    ]);
-    final FakeFlutterDevice flutterDevice =  FakeFlutterDevice(
-      mockDevice,
-      BuildInfo.debug,
-      FakeResidentCompiler(),
-      mockDevFS,
-    )..vmService = fakeVmServiceHost.vmService;
-    residentRunner = HotRunner(
-      <FlutterDevice>[
-        flutterDevice,
-      ],
-      stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-    );
-    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
-      return 'Example';
-    });
-    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
-      return TargetPlatform.android_arm;
-    });
-    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
-      return false;
-    });
-    when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(NoOpDeviceLogReader('test'));
-    when(mockDevFS.update(
-      mainUri: anyNamed('mainUri'),
-      target: anyNamed('target'),
-      bundle: anyNamed('bundle'),
-      firstBuildTime: anyNamed('firstBuildTime'),
-      bundleFirstUpload: anyNamed('bundleFirstUpload'),
-      generator: anyNamed('generator'),
-      fullRestart: anyNamed('fullRestart'),
-      dillOutputPath: anyNamed('dillOutputPath'),
-      trackWidgetCreation: anyNamed('trackWidgetCreation'),
-      projectRootPath: anyNamed('projectRootPath'),
-      pathToReload: anyNamed('pathToReload'),
-      invalidatedFiles: anyNamed('invalidatedFiles'),
-      packageConfig: anyNamed('packageConfig'),
-    )).thenAnswer((Invocation invocation) async {
-      return UpdateFSReport(success: true);
-    });
-
-    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
-    final Completer<void> onAppStart = Completer<void>.sync();
-    unawaited(residentRunner.attach(
-      appStartedCompleter: onAppStart,
-      connectionInfoCompleter: onConnectionInfo,
-    ));
-
-    final OperationResult result = await residentRunner.restart(fullRestart: false);
-    expect(result.fatal, false);
-    expect(result.code, 0);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
-    Platform: () => FakePlatform(operatingSystem: 'linux'),
-    ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
-  }));
-
 
   testUsingContext('ResidentRunner can send target platform to analytics from full restart', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
