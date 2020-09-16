@@ -8,11 +8,11 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-#include "FlutterBinaryMessenger.h"
-#include "FlutterDartProject.h"
-#include "FlutterMacros.h"
-#include "FlutterPlugin.h"
-#include "FlutterTexture.h"
+#import "FlutterBinaryMessenger.h"
+#import "FlutterDartProject.h"
+#import "FlutterMacros.h"
+#import "FlutterPlugin.h"
+#import "FlutterTexture.h"
 
 @class FlutterViewController;
 

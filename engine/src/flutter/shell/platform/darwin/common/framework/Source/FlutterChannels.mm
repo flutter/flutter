@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 // FLUTTER_NOLINT
 
-#include "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 
 #pragma mark - Basic message channel
 

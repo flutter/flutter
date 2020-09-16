@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import <XCTest/XCTest.h>
+
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 
 FLUTTER_ASSERT_ARC

@@ -6,9 +6,10 @@
 #error ARC must be enabled!
 #endif
 
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
-#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 
 @interface MockBinaryMessenger : NSObject <FlutterBinaryMessenger>
 @property(nonatomic, copy) NSString* channel;

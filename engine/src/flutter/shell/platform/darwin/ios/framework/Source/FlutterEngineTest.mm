@@ -4,7 +4,8 @@
 
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
-#include "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 

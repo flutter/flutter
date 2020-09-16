@@ -4,8 +4,8 @@
 
 #import <UIKit/UIKit.h>
 
-#include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
-#include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h"
 
 static const UIAccessibilityTraits UIAccessibilityTraitUndocumentedEmptyLine = 0x800000000000;
 

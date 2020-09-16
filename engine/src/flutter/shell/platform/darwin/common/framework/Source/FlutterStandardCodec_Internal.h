@@ -5,7 +5,7 @@
 #ifndef SHELL_PLATFORM_DARWIN_COMMON_FRAMEWORK_SOURCE_FLUTTERSTANDARDCODECINTERNAL_H_
 #define SHELL_PLATFORM_DARWIN_COMMON_FRAMEWORK_SOURCE_FLUTTERSTANDARDCODECINTERNAL_H_
 
-#include "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 
 typedef NS_ENUM(NSInteger, FlutterStandardField) {
   FlutterStandardFieldNil,

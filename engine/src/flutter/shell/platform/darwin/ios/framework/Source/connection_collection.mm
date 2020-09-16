@@ -2,18 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/darwin/ios/framework/Source/connection_collection.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/connection_collection.h"
 
 namespace flutter {
-ConnectionCollection::Connection ConnectionCollection::AquireConnection(
-    const std::string& name) {
+ConnectionCollection::Connection ConnectionCollection::AquireConnection(const std::string& name) {
   Connection nextConnection = ++counter_;
   connections_[name] = nextConnection;
   return nextConnection;
 }
 
-std::string ConnectionCollection::CleanupConnection(
-    ConnectionCollection::Connection connection) {
+std::string ConnectionCollection::CleanupConnection(ConnectionCollection::Connection connection) {
   if (connection > 0) {
     std::string channel;
     for (auto& keyValue : connections_) {
@@ -30,13 +28,11 @@ std::string ConnectionCollection::CleanupConnection(
   return "";
 }
 
-bool ConnectionCollection::IsValidConnection(
-    ConnectionCollection::Connection connection) {
+bool ConnectionCollection::IsValidConnection(ConnectionCollection::Connection connection) {
   return connection > 0;
 }
 
-ConnectionCollection::Connection ConnectionCollection::MakeErrorConnection(
-    int errCode) {
+ConnectionCollection::Connection ConnectionCollection::MakeErrorConnection(int errCode) {
   if (errCode < 0) {
     return -1 * errCode;
   }

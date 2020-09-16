@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 // FLUTTER_NOLINT
 
-#include "FlutterStandardCodec_Internal.h"
+#import "flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodec_Internal.h"
 
 #pragma mark - Codec for basic message channel
 

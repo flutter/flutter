@@ -7,7 +7,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-#include "FlutterMacros.h"
+#import "FlutterMacros.h"
 
 /**
  * `NSApplicationDelegate` subclass for simple apps that want default behavior.
