@@ -169,7 +169,7 @@ class AndroidValidator extends DoctorValidator {
       } else {
         // Instruct user to set [kAndroidSdkRoot] and not deprecated [kAndroidHome]
         // See https://github.com/flutter/flutter/issues/39301
-        messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(kAndroidSdkRoot, _platform)));
+        messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(_platform)));
       }
       return ValidationResult(ValidationType.missing, messages);
     }
@@ -200,7 +200,7 @@ class AndroidValidator extends DoctorValidator {
         _androidSdk.latestVersion.platformName,
         _androidSdk.latestVersion.buildToolsVersionName)));
     } else {
-      messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(kAndroidHome, _platform)));
+      messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(_platform)));
     }
 
     if (_platform.environment.containsKey(kAndroidHome)) {
