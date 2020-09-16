@@ -885,19 +885,19 @@ class ThemeData with Diagnosticable {
   /// The color of text selections in text fields, such as [TextField].
   ///
   /// By default this property is no longer used. It has been replaced with
-  /// [TextSelectionTheme.selectionColor] and will soon be deprecated.
+  /// [TextSelectionThemeData.selectionColor] and will soon be deprecated.
   final Color textSelectionColor;
 
   /// The color of cursors in Material-style text fields, such as [TextField].
   ///
   /// By default this property is no longer used. It has been replaced with
-  /// [TextSelectionTheme.cursorColor] and will soon be deprecated.
+  /// [TextSelectionThemeData.cursorColor] and will soon be deprecated.
   final Color cursorColor;
 
   /// The color of the handles used to adjust what part of the text is currently selected.
   ///
   /// By default this property is no longer used. It has been replaced with
-  /// [TextSelectionTheme.selectionHandleColor] and will soon be deprecated.
+  /// [TextSelectionThemeData.selectionHandleColor] and will soon be deprecated.
   final Color textSelectionHandleColor;
 
   /// A color that contrasts with the [primaryColor], e.g. used as the
