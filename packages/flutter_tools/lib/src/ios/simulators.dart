@@ -425,10 +425,7 @@ class IOSSimulator extends Device {
         if (debuggingOptions.useTestFonts) '--use-test-fonts',
         if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
         if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
-        if (debuggingOptions.disableDds)
-          '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}'
-        else
-          '--observatory-port=0'
+        '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}'
       ],
     ];
 
@@ -437,7 +434,7 @@ class IOSSimulator extends Device {
       observatoryDiscovery = ProtocolDiscovery.observatory(
         getLogReader(app: package),
         ipv6: ipv6,
-        hostPort: debuggingOptions.disableDds ? debuggingOptions.hostVmServicePort : 0,
+        hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
       );
     }

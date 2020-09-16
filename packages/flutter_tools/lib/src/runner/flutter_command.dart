@@ -287,7 +287,9 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption(observatoryPortOption,
         help: '(deprecated use host-vmservice-port instead) '
               'Listen to the given port for an observatory debugger connection.\n'
-              'Specifying port 0 (the default) will find a random free port.',
+              'Specifying port 0 (the default) will find a random free port.\nNote: '
+              'if the Dart Development Service (DDS) is enabled, this will not be the port '
+              'of the Observatory instance advertised on the command line.',
     );
     argParser.addOption('device-vmservice-port',
       help: 'Look for vmservice connections only from the specified port.\n'
@@ -303,6 +305,10 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addDdsOptions({@required bool verboseHelp}) {
+    argParser.addOption('dds-port',
+      help: 'When this value is provided, the Dart Development Service (DDS) will be '
+            'bound to the provided port.\nSpecifying port 0 (the default) will find '
+            'a random free port.');
     argParser.addFlag(
       'disable-dds',
       hide: !verboseHelp,
@@ -316,6 +322,8 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   bool get disableDds => boolArg('disable-dds');
+
+  int get ddsPort => int.tryParse(stringArg('dds-port')) ?? 0;
 
   /// Gets the vmservice port provided to in the 'observatory-port' or
   /// 'host-vmservice-port option.

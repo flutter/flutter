@@ -206,6 +206,7 @@ class FlutterDevice {
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     int hostVmServicePort,
+    int ddsPort,
     bool disableServiceAuthCodes = false,
     bool disableDds = false,
     bool ipv6 = false,
@@ -222,7 +223,7 @@ class FlutterDevice {
       if (!disableDds) {
         await device.dds.startDartDevelopmentService(
           observatoryUri,
-          hostVmServicePort,
+          ddsPort,
           ipv6,
           disableServiceAuthCodes,
         );
@@ -1242,6 +1243,7 @@ abstract class ResidentRunner {
         restart: restart,
         compileExpression: compileExpression,
         disableDds: debuggingOptions.disableDds,
+        ddsPort: debuggingOptions.ddsPort,
         hostVmServicePort: debuggingOptions.hostVmServicePort,
         reloadMethod: reloadMethod,
         getSkSLMethod: getSkSLMethod,

@@ -243,7 +243,7 @@ class DriveCommand extends RunCommandBase {
           // We can ignore this and continue to use the remote DDS instance.
           await device.dds.startDartDevelopmentService(
             Uri.parse(observatoryUri),
-            hostVmservicePort,
+            ddsPort,
             ipv6,
             disableServiceAuthCodes,
           );
@@ -486,7 +486,8 @@ Future<LaunchResult> _startApp(
     debuggingOptions: DebuggingOptions.enabled(
       command.getBuildInfo(),
       startPaused: true,
-      hostVmServicePort: (webUri != null || command.disableDds) ? command.hostVmservicePort : 0,
+      hostVmServicePort: webUri != null ? command.hostVmservicePort : 0,
+      ddsPort: command.ddsPort,
       verboseSystemLogs: command.verboseSystemLogs,
       cacheSkSL: command.cacheSkSL,
       dumpSkpOnShaderCompilation: command.dumpSkpOnShaderCompilation,

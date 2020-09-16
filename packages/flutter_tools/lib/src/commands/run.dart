@@ -408,6 +408,7 @@ class RunCommand extends RunCommandBase {
         purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
+        ddsPort: ddsPort,
         verboseSystemLogs: boolArg('verbose-system-logs'),
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',

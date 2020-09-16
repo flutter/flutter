@@ -505,6 +505,7 @@ class FlutterPlatform extends PlatformPlugin {
             final DartDevelopmentService dds = await DartDevelopmentService.startDartDevelopmentService(
               detectedUri,
               enableAuthCodes: !disableServiceAuthCodes,
+              ipv6: host.type == InternetAddressType.IPv6,
             );
             processObservatoryUri = dds.uri;
             globals.printTrace('Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
