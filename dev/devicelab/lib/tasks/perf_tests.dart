@@ -174,6 +174,13 @@ TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = false}) {
   ).run;
 }
 
+TaskFunction createAnimatedPlaceholderPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/animated_placeholder_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createPictureCachePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
