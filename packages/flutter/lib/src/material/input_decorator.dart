@@ -1032,11 +1032,12 @@ class _RenderDecoration extends RenderBox {
       counterHeight,
       helperErrorHeight,
     );
+    final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
     boxToBaseline[input] = _layoutLineBox(
       input,
       boxConstraints.deflate(EdgeInsets.only(
-        top: contentPadding.top + topHeight,
-        bottom: contentPadding.bottom + bottomHeight,
+        top: contentPadding.top + topHeight + densityOffset.dy / 2,
+        bottom: contentPadding.bottom + bottomHeight + densityOffset.dy / 2,
       )).copyWith(
         minWidth: inputWidth,
         maxWidth: inputWidth,
@@ -1071,7 +1072,6 @@ class _RenderDecoration extends RenderBox {
     );
 
     // Calculate the height of the input text container.
-    final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
     final double prefixIconHeight = prefixIcon == null ? 0 : prefixIcon.size.height;
     final double suffixIconHeight = suffixIcon == null ? 0 : suffixIcon.size.height;
     final double fixIconHeight = math.max(prefixIconHeight, suffixIconHeight);
@@ -1087,8 +1087,8 @@ class _RenderDecoration extends RenderBox {
     );
     final double minContainerHeight = decoration.isDense || decoration.isCollapsed || expands
       ? 0.0
-      : kMinInteractiveDimension + densityOffset.dy;
-    final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight + densityOffset.dy;
+      : kMinInteractiveDimension;
+    final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight;
     final double containerHeight = expands
       ? maxContainerHeight
       : math.min(math.max(contentHeight, minContainerHeight), maxContainerHeight);

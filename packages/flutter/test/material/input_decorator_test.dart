@@ -4235,4 +4235,55 @@ void main() {
     expect(tester.getSize(find.text(labelText)).width, labelWidth);
     expect(getOpacity(tester, prefixText), 1.0);
   });
+
+  testWidgets('given enough space, constrained and unconstrained heights result in the same size widget', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/65572
+    final UniqueKey keyUnconstrained = UniqueKey();
+    final UniqueKey keyConstrained = UniqueKey();
+
+    Widget getInputDecorator(VisualDensity visualDensity) {
+      return MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Theme(
+                data: Theme.of(context).copyWith(visualDensity: visualDensity),
+                child: Center(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(
+                        width: 35.0,
+                        child: TextField(
+                          key: keyUnconstrained,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 35.0,
+                        // 48 is the height that this TextField would take when
+                        // laid out with no constraints.
+                        height: 48.0,
+                        child: TextField(
+                          key: keyConstrained,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(getInputDecorator(VisualDensity.standard));
+    final double constrainedHeight = tester.getSize(find.byKey(keyConstrained)).height;
+    final double unConstrainedHeight = tester.getSize(find.byKey(keyUnconstrained)).height;
+    expect(constrainedHeight, equals(unConstrainedHeight));
+
+    await tester.pumpWidget(getInputDecorator(VisualDensity.compact));
+    final double constrainedHeightCompact = tester.getSize(find.byKey(keyConstrained)).height;
+    final double unConstrainedHeightCompact = tester.getSize(find.byKey(keyUnconstrained)).height;
+    expect(constrainedHeightCompact, equals(unConstrainedHeightCompact));
+  });
 }
