@@ -5150,7 +5150,9 @@ class Flow extends MultiChildRenderObjectWidget {
     Key key,
     @required this.delegate,
     List<Widget> children = const <Widget>[],
+    this.clipBehavior = Clip.none,
   }) : assert(delegate != null),
+       assert(clipBehavior != null),
        super(key: key, children: RepaintBoundary.wrapAll(children));
        // https://github.com/dart-lang/sdk/issues/29277
 
@@ -5165,18 +5167,26 @@ class Flow extends MultiChildRenderObjectWidget {
     Key key,
     @required this.delegate,
     List<Widget> children = const <Widget>[],
+    this.clipBehavior = Clip.none,
   }) : assert(delegate != null),
+       assert(clipBehavior != null),
        super(key: key, children: children);
 
   /// The delegate that controls the transformation matrices of the children.
   final FlowDelegate delegate;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  final Clip clipBehavior;
+
   @override
-  RenderFlow createRenderObject(BuildContext context) => RenderFlow(delegate: delegate);
+  RenderFlow createRenderObject(BuildContext context) => RenderFlow(delegate: delegate, clipBehavior: clipBehavior);
 
   @override
   void updateRenderObject(BuildContext context, RenderFlow renderObject) {
     renderObject.delegate = delegate;
+    renderObject.clipBehavior = clipBehavior;
   }
 }
 

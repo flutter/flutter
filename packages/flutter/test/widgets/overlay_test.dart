@@ -1002,7 +1002,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Can used Positioned within OverlayEntry', (WidgetTester tester) async {
+  testWidgets('Can use Positioned within OverlayEntry', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1023,6 +1023,42 @@ void main() {
     );
 
     expect(tester.getTopLeft(find.text('positioned child')), const Offset(145, 123));
+  });
+
+  testWidgets('Overlay can set and update clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) => Container(),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // By default, clipBehavior should be Clip.none
+    final dynamic renderObject = tester.renderObject(find.byType(Overlay));     
+    expect(renderObject.clipBehavior, equals(Clip.none));
+
+    for(final Clip clip in Clip.values) {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) => Container(),
+              ),
+            ],
+            clipBehavior: clip,
+          ),
+        ),
+      );
+      expect(renderObject.clipBehavior, clip);
+    }
   });
 }
 

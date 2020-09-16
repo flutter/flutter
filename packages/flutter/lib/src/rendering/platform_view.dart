@@ -84,10 +84,13 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     required AndroidViewController viewController,
     required PlatformViewHitTestBehavior hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+    Clip clipBehavior = Clip.none,
   }) : assert(viewController != null),
        assert(hitTestBehavior != null),
        assert(gestureRecognizers != null),
-       _viewController = viewController {
+       assert(clipBehavior != null),
+       _viewController = viewController,
+       _clipBehavior = clipBehavior {
     _viewController.pointTransformer = (Offset offset) => globalToLocal(offset);
     updateGestureRecognizers(gestureRecognizers);
     _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
@@ -114,6 +117,20 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
       markNeedsSemanticsUpdate();
     }
     _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
+  }
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.none;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
   }
 
   void _onPlatformViewCreated(int id) {
@@ -189,8 +206,8 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
 
     // Clip the texture if it's going to paint out of the bounds of the renter box
     // (see comment in _paintTexture for an explanation of when this happens).
-    if (size.width < _currentAndroidViewSize.width || size.height < _currentAndroidViewSize.height) {
-      context.pushClipRect(true, offset, offset & size, _paintTexture);
+    if (size.width < _currentAndroidViewSize.width || size.height < _currentAndroidViewSize.height && clipBehavior != Clip.none) {
+      context.pushClipRect(true, offset, offset & size, _paintTexture, clipBehavior: clipBehavior);
       return;
     }
 

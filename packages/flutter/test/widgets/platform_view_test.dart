@@ -1103,6 +1103,52 @@ void main() {
 
       expect(viewsController.lastClearedFocusViewId, currentViewId + 1);
     });
+
+    testWidgets('can set and update clipBehavior', (WidgetTester tester) async {
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(
+              viewType: 'webview',
+              layoutDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      );
+
+      // By default, clipBehavior should be Clip.none
+      final RenderAndroidView renderObject = tester.renderObject(
+        find.descendant(
+          of: find.byType(AndroidView),
+          matching: find.byWidgetPredicate(
+            (Widget widget) => widget.runtimeType.toString() == '_AndroidPlatformView',
+          ),
+        ),
+      );
+      expect(renderObject.clipBehavior, equals(Clip.none));
+
+      for(final Clip clip in Clip.values) {
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: AndroidView(
+                viewType: 'webview',
+                layoutDirection: TextDirection.ltr,
+                clipBehavior: clip,
+              ),
+            ),
+          ),
+        );
+        expect(renderObject.clipBehavior, clip);
+      }
+    });
   });
 
   group('AndroidViewSurface', () {

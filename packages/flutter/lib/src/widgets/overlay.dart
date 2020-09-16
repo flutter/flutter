@@ -216,7 +216,9 @@ class Overlay extends StatefulWidget {
   const Overlay({
     Key key,
     this.initialEntries = const <OverlayEntry>[],
+    this.clipBehavior = Clip.none,
   }) : assert(initialEntries != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// The entries to include in the overlay initially.
@@ -233,6 +235,11 @@ class Overlay extends StatefulWidget {
   ///
   /// To remove an entry from an [Overlay], use [OverlayEntry.remove].
   final List<OverlayEntry> initialEntries;
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  final Clip clipBehavior;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -473,6 +480,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     return _Theatre(
       skipCount: children.length - onstageCount,
       children: children.reversed.toList(growable: false),
+      clipBehavior: widget.clipBehavior,
     );
   }
 
@@ -493,14 +501,18 @@ class _Theatre extends MultiChildRenderObjectWidget {
   _Theatre({
     Key key,
     this.skipCount = 0,
+    this.clipBehavior = Clip.none,
     List<Widget> children = const <Widget>[],
   }) : assert(skipCount != null),
        assert(skipCount >= 0),
        assert(children != null),
        assert(children.length >= skipCount),
+       assert(clipBehavior != null),
        super(key: key, children: children);
 
   final int skipCount;
+
+  final Clip clipBehavior;
 
   @override
   _TheatreElement createElement() => _TheatreElement(this);
@@ -510,6 +522,7 @@ class _Theatre extends MultiChildRenderObjectWidget {
     return _RenderTheatre(
       skipCount: skipCount,
       textDirection: Directionality.of(context),
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -517,7 +530,8 @@ class _Theatre extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderTheatre renderObject) {
     renderObject
       ..skipCount = skipCount
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.of(context)
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -548,11 +562,14 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     List<RenderBox> children,
     @required TextDirection textDirection,
     int skipCount = 0,
+    Clip clipBehavior = Clip.none,
   }) : assert(skipCount != null),
        assert(skipCount >= 0),
        assert(textDirection != null),
+       assert(clipBehavior != null),
        _textDirection = textDirection,
-       _skipCount = skipCount {
+       _skipCount = skipCount,
+       _clipBehavior = clipBehavior {
     addAll(children);
   }
 
@@ -593,6 +610,20 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     if (_skipCount != value) {
       _skipCount = value;
       markNeedsLayout();
+    }
+  }
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.none;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
     }
   }
 
@@ -727,8 +758,8 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_hasVisualOverflow) {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack);
+    if (_hasVisualOverflow && clipBehavior != Clip.none) {
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack, clipBehavior: clipBehavior);
     } else {
       paintStack(context, offset);
     }

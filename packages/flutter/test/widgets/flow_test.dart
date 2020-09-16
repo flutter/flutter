@@ -157,4 +157,62 @@ void main() {
     expect(opacityLayer.alpha, equals(opacity * 255));
     expect(layer.firstChild, isA<TransformLayer>());
   });
+
+  testWidgets('Flow can set and update clipBehavior', (WidgetTester tester) async {
+    const double opacity = 0.2;
+    await tester.pumpWidget(
+      Flow(
+        delegate: OpacityFlowDelegate(opacity),
+        children: const <Widget>[
+          SizedBox(width: 100.0, height: 100.0),
+        ],
+      ),
+    );
+
+    // By default, clipBehavior should be Clip.none
+    final RenderFlow renderObject = tester.renderObject(find.byType(Flow));       
+    expect(renderObject.clipBehavior, equals(Clip.none));
+
+    for(final Clip clip in Clip.values) {
+      await tester.pumpWidget(
+        Flow(
+          delegate: OpacityFlowDelegate(opacity),
+          children: const <Widget>[
+            SizedBox(width: 100.0, height: 100.0),
+          ],
+          clipBehavior: clip,
+        ),
+      );
+      expect(renderObject.clipBehavior, clip);
+    }
+  });
+
+  testWidgets('Flow.unwrapped can set and update clipBehavior', (WidgetTester tester) async {
+    const double opacity = 0.2;
+    await tester.pumpWidget(
+      Flow.unwrapped(
+        delegate: OpacityFlowDelegate(opacity),
+        children: const <Widget>[
+          SizedBox(width: 100.0, height: 100.0),
+        ],
+      ),
+    );
+
+    // By default, clipBehavior should be Clip.none
+    final RenderFlow renderObject = tester.renderObject(find.byType(Flow));       
+    expect(renderObject.clipBehavior, equals(Clip.none));
+
+    for(final Clip clip in Clip.values) {
+      await tester.pumpWidget(
+        Flow.unwrapped(
+          delegate: OpacityFlowDelegate(opacity),
+          children: const <Widget>[
+            SizedBox(width: 100.0, height: 100.0),
+          ],
+          clipBehavior: clip,
+        ),
+      );
+      expect(renderObject.clipBehavior, clip);
+    }
+  });
 }

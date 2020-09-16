@@ -81,10 +81,13 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     AlignmentGeometry alignment = Alignment.center,
     TextDirection? textDirection,
     RenderBox? child,
+    Clip clipBehavior = Clip.none,
   }) : assert(vsync != null),
        assert(duration != null),
        assert(curve != null),
+       assert(clipBehavior != null),
        _vsync = vsync,
+       _clipBehavior = clipBehavior,
        super(child: child, alignment: alignment, textDirection: textDirection) {
     _controller = AnimationController(
       vsync: vsync,
@@ -137,6 +140,20 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     if (value == _animation.curve)
       return;
     _animation.curve = value;
+  }
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.none;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
   }
 
   /// Whether the size is being currently animated towards the child's size.
@@ -275,9 +292,9 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null && _hasVisualOverflow) {
+    if (child != null && _hasVisualOverflow && clipBehavior != Clip.none) {
       final Rect rect = Offset.zero & size;
-      context.pushClipRect(needsCompositing, offset, rect, super.paint);
+      context.pushClipRect(needsCompositing, offset, rect, super.paint, clipBehavior: clipBehavior);
     } else {
       super.paint(context, offset);
     }
