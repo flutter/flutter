@@ -21,7 +21,7 @@ class ButtonMatrixAppState extends State<ButtonMatrixApp> {
         appBar: AppBar(
           title: Text('Count: $count'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               onPressed: () => setState(() { count += increment; }),
               child: Text('Add $increment'),
             ),
@@ -34,7 +34,7 @@ class ButtonMatrixAppState extends State<ButtonMatrixApp> {
             Column(
               children: List<Widget>.filled(
                 10,
-                FlatButton(
+                TextButton(
                   child: const Text('Faster'),
                   onPressed: () => setState(() { increment += 1; }),
                 ),
