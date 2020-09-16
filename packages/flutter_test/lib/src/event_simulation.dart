@@ -174,7 +174,6 @@ class KeyEventSimulator {
     final Map<String, dynamic> result = <String, dynamic>{
       'type': isDown ? 'keydown' : 'keyup',
       'keymap': platform,
-      'character': key.keyLabel,
     };
 
     switch (platform) {
@@ -182,6 +181,7 @@ class KeyEventSimulator {
         result['keyCode'] = keyCode;
         if (key.keyLabel.isNotEmpty) {
           result['codePoint'] = key.keyLabel.codeUnitAt(0);
+          result['character'] = key.keyLabel;
         }
         result['scanCode'] = scanCode;
         result['metaState'] = _getAndroidModifierFlags(key, isDown);
@@ -198,16 +198,19 @@ class KeyEventSimulator {
         result['keyCode'] = keyCode;
         result['scanCode'] = scanCode;
         result['modifiers'] = _getGlfwModifierFlags(key, isDown);
+        result['unicodeScalarValues'] = key.keyLabel.isNotEmpty ? key.keyLabel.codeUnitAt(0) : 0;
         break;
       case 'macos':
         result['keyCode'] = scanCode;
-        result['characters'] = key.keyLabel;
-        result['charactersIgnoringModifiers'] = key.keyLabel;
+        if (key.keyLabel.isNotEmpty) {
+          result['characters'] = key.keyLabel;
+          result['charactersIgnoringModifiers'] = key.keyLabel;
+        }
         result['modifiers'] = _getMacOsModifierFlags(key, isDown);
         break;
       case 'web':
         result['code'] = _getWebKeyCode(key);
-        result['key'] = '';
+        result['key'] = key.keyLabel;
         result['metaState'] = _getWebModifierFlags(key, isDown);
         break;
       case 'windows':
