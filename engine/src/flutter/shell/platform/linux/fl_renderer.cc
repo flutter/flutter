@@ -135,15 +135,13 @@ static gboolean setup_gdk_window(FlRenderer* self,
   gtk_widget_register_window(widget, window);
   gtk_widget_set_window(widget, window);
 
-  if (FL_RENDERER_GET_CLASS(self)->set_window) {
-    FL_RENDERER_GET_CLASS(self)->set_window(self, window);
-  }
-
   return TRUE;
 }
 
 // Creates the EGL surfaces that Flutter will render to.
-static gboolean setup_egl_surfaces(FlRenderer* self, GError** error) {
+static gboolean setup_egl_surfaces(FlRenderer* self,
+                                   GtkWidget* widget,
+                                   GError** error) {
   FlRendererPrivate* priv =
       static_cast<FlRendererPrivate*>(fl_renderer_get_instance_private(self));
 
@@ -155,7 +153,7 @@ static gboolean setup_egl_surfaces(FlRenderer* self, GError** error) {
   }
 
   if (!FL_RENDERER_GET_CLASS(self)->create_surfaces(
-          self, priv->egl_display, priv->egl_config, &priv->egl_surface,
+          self, widget, priv->egl_display, priv->egl_config, &priv->egl_surface,
           &priv->resource_surface, error)) {
     return FALSE;
   }
@@ -184,6 +182,8 @@ static gboolean setup_egl_surfaces(FlRenderer* self, GError** error) {
 gboolean fl_renderer_start(FlRenderer* self,
                            GtkWidget* widget,
                            GError** error) {
+  g_return_val_if_fail(FL_IS_RENDERER(self), FALSE);
+
   if (!setup_egl_display(self, error)) {
     return FALSE;
   }
@@ -192,7 +192,7 @@ gboolean fl_renderer_start(FlRenderer* self,
     return FALSE;
   }
 
-  if (!setup_egl_surfaces(self, error)) {
+  if (!setup_egl_surfaces(self, widget, error)) {
     return FALSE;
   }
 

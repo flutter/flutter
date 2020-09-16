@@ -9,6 +9,7 @@
 #include <gtk/gtk.h>
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
 G_BEGIN_DECLS
 
@@ -37,20 +38,24 @@ struct _FlRendererClass {
   /**
    * Virtual method called before creating a GdkWindow for the widget.
    * Does not need to be implemented.
+   * @renderer: an #FlRenderer.
+   * @widget: the widget being rendered on.
+   * @display: display to create surfaces on.
+   * @config: EGL configuration.
+   * @window_attributes: window attributes to modify.
+   * @mask: (out): the window mask to use.
+   * @error: (allow-none): #GError location to store the error occurring, or
+   * %NULL to ignore.
+   *
+   * Returns: %TRUE if the window is successfully set up.
    */
   gboolean (*setup_window_attr)(FlRenderer* renderer,
                                 GtkWidget* widget,
-                                EGLDisplay egl_display,
-                                EGLConfig egl_config,
+                                EGLDisplay display,
+                                EGLConfig config,
                                 GdkWindowAttr* window_attributes,
                                 gint* mask,
                                 GError** error);
-
-  /**
-   * Virtual method called after a GDK window has been created.
-   * This is called once. Does not need to be implemented.
-   */
-  void (*set_window)(FlRenderer* renderer, GdkWindow* window);
 
   /**
    * Virtual method to create a new EGL display.
@@ -60,7 +65,9 @@ struct _FlRendererClass {
   /**
    * Virtual method called when Flutter needs surfaces to render to.
    * @renderer: an #FlRenderer.
+   * @widget: the widget being rendered on.
    * @display: display to create surfaces on.
+   * @config: EGL configuration.
    * @visible: (out): the visible surface that is created.
    * @resource: (out): the resource surface that is created.
    * @error: (allow-none): #GError location to store the error occurring, or
@@ -69,6 +76,7 @@ struct _FlRendererClass {
    * Returns: %TRUE if both surfaces were created, %FALSE if there was an error.
    */
   gboolean (*create_surfaces)(FlRenderer* renderer,
+                              GtkWidget* widget,
                               EGLDisplay display,
                               EGLConfig config,
                               EGLSurface* visible,

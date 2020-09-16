@@ -17,6 +17,7 @@ static EGLDisplay fl_mock_renderer_create_display(FlRenderer* renderer) {
 
 // Implements FlRenderer::create_surfaces.
 static gboolean fl_mock_renderer_create_surfaces(FlRenderer* renderer,
+                                                 GtkWidget* widget,
                                                  EGLDisplay display,
                                                  EGLConfig config,
                                                  EGLSurface* visible,

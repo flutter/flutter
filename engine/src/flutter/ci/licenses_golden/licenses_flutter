@@ -1304,6 +1304,8 @@ FILE: ../../../flutter/shell/platform/linux/fl_renderer.cc
 FILE: ../../../flutter/shell/platform/linux/fl_renderer.h
 FILE: ../../../flutter/shell/platform/linux/fl_renderer_headless.cc
 FILE: ../../../flutter/shell/platform/linux/fl_renderer_headless.h
+FILE: ../../../flutter/shell/platform/linux/fl_renderer_wayland.cc
+FILE: ../../../flutter/shell/platform/linux/fl_renderer_wayland.h
 FILE: ../../../flutter/shell/platform/linux/fl_renderer_x11.cc
 FILE: ../../../flutter/shell/platform/linux/fl_renderer_x11.h
 FILE: ../../../flutter/shell/platform/linux/fl_standard_message_codec.cc
