@@ -9,11 +9,11 @@
 #include "flutter/flow/rtree.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/shell.h"
-#include "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
-#include "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
-#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
-#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
-#include "flutter/shell/platform/darwin/ios/ios_context.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
+#import "flutter/shell/platform/darwin/ios/ios_context.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
 @class FlutterTouchInterceptingView;

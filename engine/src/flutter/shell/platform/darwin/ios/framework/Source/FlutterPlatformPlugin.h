@@ -6,8 +6,8 @@
 #define SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMPLUGIN_H_
 
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
-#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 
 @interface FlutterPlatformPlugin : NSObject
 - (instancetype)init NS_UNAVAILABLE;

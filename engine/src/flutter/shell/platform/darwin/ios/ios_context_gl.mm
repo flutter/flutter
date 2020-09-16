@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/darwin/ios/ios_context_gl.h"
+#import "flutter/shell/platform/darwin/ios/ios_context_gl.h"
 
 #import <OpenGLES/EAGL.h>
 
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
-#include "flutter/shell/platform/darwin/ios/ios_external_texture_gl.h"
+#import "flutter/shell/platform/darwin/ios/ios_external_texture_gl.h"
 
 namespace flutter {
 

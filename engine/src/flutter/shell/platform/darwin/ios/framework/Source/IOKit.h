@@ -14,9 +14,9 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_IOKIT_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_IOKIT_H_
 
-#if __cplusplus
+#if defined(__cplusplus)
 extern "C" {
-#endif  // __cplusplus
+#endif  // defined(__cplusplus)
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <mach/mach.h>

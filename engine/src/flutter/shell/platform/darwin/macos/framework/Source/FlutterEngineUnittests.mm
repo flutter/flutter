@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 // FLUTTER_NOLINT
 
-#include "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
-#include "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
-#include "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #include "flutter/testing/testing.h"
 
 namespace flutter::testing {

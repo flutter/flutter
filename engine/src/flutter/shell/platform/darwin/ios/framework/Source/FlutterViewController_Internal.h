@@ -6,7 +6,8 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLER_INTERNAL_H_
 
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 
 namespace flutter {
 class FlutterPlatformViewsController;

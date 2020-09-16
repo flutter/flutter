@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/darwin/ios/ios_external_texture_metal.h"
+#import "flutter/shell/platform/darwin/ios/ios_external_texture_metal.h"
 
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkYUVAIndex.h"

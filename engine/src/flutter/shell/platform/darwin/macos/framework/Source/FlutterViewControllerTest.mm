@@ -4,11 +4,12 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 
-#include "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
-#include "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
-#include "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
+#import <OCMock/OCMock.h>
+
+#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #include "flutter/testing/testing.h"
-#import "third_party/ocmock/Source/OCMock/OCMock.h"
 
 namespace flutter::testing {
 

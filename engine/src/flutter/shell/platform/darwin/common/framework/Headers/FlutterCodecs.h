@@ -6,7 +6,8 @@
 #define FLUTTER_FLUTTERCODECS_H_
 
 #import <Foundation/Foundation.h>
-#include "FlutterMacros.h"
+
+#import "FlutterMacros.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

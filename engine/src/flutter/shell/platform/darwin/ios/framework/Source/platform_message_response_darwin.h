@@ -12,7 +12,7 @@
 #include "flutter/fml/platform/darwin/scoped_block.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/window/platform_message_response.h"
-#include "flutter/shell/platform/darwin/common/buffer_conversions.h"
+#import "flutter/shell/platform/darwin/common/buffer_conversions.h"
 
 typedef void (^PlatformMessageResponseCallback)(NSData*);
 

@@ -13,7 +13,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
-#include "flutter/shell/platform/darwin/ios/ios_switchable_gl_context.h"
+#import "flutter/shell/platform/darwin/ios/ios_switchable_gl_context.h"
 
 namespace flutter {
 

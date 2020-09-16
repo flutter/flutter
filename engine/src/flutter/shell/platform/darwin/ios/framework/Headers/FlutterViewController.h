@@ -8,12 +8,12 @@
 #import <UIKit/UIKit.h>
 #include <sys/cdefs.h>
 
-#include "FlutterBinaryMessenger.h"
-#include "FlutterDartProject.h"
-#include "FlutterEngine.h"
-#include "FlutterMacros.h"
-#include "FlutterPlugin.h"
-#include "FlutterTexture.h"
+#import "FlutterBinaryMessenger.h"
+#import "FlutterDartProject.h"
+#import "FlutterEngine.h"
+#import "FlutterMacros.h"
+#import "FlutterPlugin.h"
+#import "FlutterTexture.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

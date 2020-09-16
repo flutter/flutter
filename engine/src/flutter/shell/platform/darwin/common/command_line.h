@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_COMMON_COMMAND_LINE_H_
 
 #include "flutter/fml/command_line.h"
+
 #include "flutter/fml/macros.h"
 
 namespace flutter {

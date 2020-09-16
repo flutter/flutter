@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/darwin/ios/ios_switchable_gl_context.h"
+#import "flutter/shell/platform/darwin/ios/ios_switchable_gl_context.h"
+
 #import <OpenGLES/EAGL.h>
 
 namespace flutter {

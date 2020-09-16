@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 
-#include "FlutterMacros.h"
+#import "FlutterMacros.h"
 
 /**
  * An object containing the result of `FlutterCallbackCache`'s `lookupCallbackInformation`

@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
+
 #import <Foundation/Foundation.h>
-#import "IOKit.h"
+
+#import "flutter/shell/platform/darwin/ios/framework/Source/IOKit.h"
 
 namespace {
 

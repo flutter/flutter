@@ -5,7 +5,7 @@
 #ifndef FLUTTER_FLUTTERCALLBACKCACHE_INTERNAL_H_
 #define FLUTTER_FLUTTERCALLBACKCACHE_INTERNAL_H_
 
-#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterCallbackCache.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterCallbackCache.h"
 
 @interface FlutterCallbackCache ()
 

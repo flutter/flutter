@@ -13,7 +13,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
-#include "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
 #include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter {
