@@ -2352,6 +2352,7 @@ class FakeFlutterDevice extends FlutterDevice {
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     int hostVmServicePort,
+    int ddsPort,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   }) async { }
 

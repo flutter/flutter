@@ -142,6 +142,7 @@ class TestFlutterDevice extends FlutterDevice {
     bool disableDds = false,
     bool disableServiceAuthCodes = false,
     int hostVmServicePort,
+    int ddsPort,
     bool ipv6 = false,
   }) async {
     throw exception;
