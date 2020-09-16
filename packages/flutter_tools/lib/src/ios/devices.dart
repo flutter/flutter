@@ -310,6 +310,7 @@ class IOSDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     @visibleForTesting Duration fallbackPollingDelay,
+    @visibleForTesting Duration fallbackThrottleTimeout,
     String userIdentifier,
   }) async {
     String packageId;
@@ -402,6 +403,7 @@ class IOSDevice extends Device {
           hostPort: debuggingOptions.hostVmServicePort,
           devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
+          throttleTimeout: fallbackThrottleTimeout ?? const Duration(seconds: 1),
         );
       }
       final int installationResult = await _iosDeploy.runApp(
@@ -441,6 +443,12 @@ class IOSDevice extends Device {
         packageName: FlutterProject.current().manifest.appName,
       );
       if (localUri == null) {
+        if (majorSdkVersion >= 14) {
+          _logger.printError('Failed to attach to the observatory.');
+          _logger.printError(
+              'Try accepting the local permissions popup, or enable "Settings > Privacy > Local Network" for your app.');
+          _logger.printError('For more information, see https://flutter.dev/docs/development/ios-14#debugging-flutter');
+        }
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(observatoryUri: localUri);
