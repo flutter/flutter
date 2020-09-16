@@ -274,6 +274,7 @@ class Container extends StatelessWidget {
     BoxConstraints constraints,
     this.margin,
     this.transform,
+    this.transformAlignment,
     this.child,
     this.clipBehavior = Clip.none,
   }) : assert(margin == null || margin.isNonNegative),
@@ -362,6 +363,9 @@ class Container extends StatelessWidget {
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
 
+  /// The transform alignment
+  final Alignment transformAlignment;
+
   /// The clip behavior when [Container.decoration] is not null.
   ///
   /// Defaults to [Clip.none]. Must be [Clip.none] if [decoration] is null.
@@ -433,7 +437,7 @@ class Container extends StatelessWidget {
       current = Padding(padding: margin, child: current);
 
     if (transform != null)
-      current = Transform(transform: transform, child: current);
+      current = transformAlignment == null ? Transform(transform: transform, child: current) : Transform(transform: transform, child: current, alignment: transformAlignment);
 
     return current;
   }
