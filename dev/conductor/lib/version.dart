@@ -46,6 +46,7 @@ class Version {
     );
   }
 
+  // Returns a new version with the given [increment] part incremented.
   // NOTE new version must be of same type as previousVersion.
   factory Version.increment(Version previousVersion, String increment) {
     final int nextX = previousVersion.x;
