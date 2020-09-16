@@ -456,18 +456,15 @@ class AlertDialog extends StatelessWidget {
     final DialogTheme dialogTheme = DialogTheme.of(context);
 
     String label = semanticLabel;
-    if (title == null) {
-      switch (theme.platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          label = semanticLabel;
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          label = semanticLabel ?? MaterialLocalizations.of(context)?.alertDialogLabel;
-      }
+    switch (theme.platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        label ??= MaterialLocalizations.of(context)?.alertDialogLabel;
     }
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
@@ -492,7 +489,7 @@ class AlertDialog extends StatelessWidget {
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6,
           child: Semantics(
             child: title,
-            namesRoute: true,
+            namesRoute: label == null,
             container: true,
           ),
         ),
@@ -570,6 +567,8 @@ class AlertDialog extends StatelessWidget {
 
     if (label != null)
       dialogChild = Semantics(
+        scopesRoute: true,
+        explicitChildNodes: true,
         namesRoute: true,
         label: label,
         child: dialogChild,
