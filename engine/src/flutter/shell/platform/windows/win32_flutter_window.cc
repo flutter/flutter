@@ -171,8 +171,4 @@ void Win32FlutterWindow::OnScroll(double delta_x, double delta_y) {
                                       kScrollOffsetMultiplier);
 }
 
-void Win32FlutterWindow::OnFontChange() {
-  binding_handler_delegate_->OnFontChange();
-}
-
 }  // namespace flutter

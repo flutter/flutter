@@ -59,9 +59,6 @@ class Win32FlutterWindow : public Win32Window, public WindowBindingHandler {
   // |Win32Window|
   void OnScroll(double delta_x, double delta_y) override;
 
-  // |Win32Window|
-  void OnFontChange() override;
-
   // |FlutterWindowBindingHandler|
   void SetView(WindowBindingHandlerDelegate* view) override;
 

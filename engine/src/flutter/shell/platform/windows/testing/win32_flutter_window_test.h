@@ -19,11 +19,6 @@ class Win32FlutterWindowTest : public Win32FlutterWindow {
   Win32FlutterWindowTest(Win32FlutterWindowTest const&) = delete;
   Win32FlutterWindowTest& operator=(Win32FlutterWindowTest const&) = delete;
 
-  // |Win32Window|
-  void OnFontChange() override;
-
-  bool OnFontChangeWasCalled();
-
  private:
   bool on_font_change_called_ = false;
 };
