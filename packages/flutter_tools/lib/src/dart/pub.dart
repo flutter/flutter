@@ -401,7 +401,7 @@ class _DefaultPub implements Pub {
     if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified)) {
       return true;
     }
-    final File toolStampFile = _toolStampFile();
+    final File toolStampFile = _toolStampFile != null ? _toolStampFile() : null;
     if (toolStampFile != null &&
         toolStampFile.existsSync() &&
         toolStampFile.lastModifiedSync().isAfter(dotPackagesLastModified)) {
