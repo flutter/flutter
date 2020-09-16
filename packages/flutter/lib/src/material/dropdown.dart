@@ -1306,16 +1306,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
-    List<Widget> items;
-    if (_enabled) {
-      items = widget.selectedItemBuilder == null
-        ? List<Widget>.from(widget.items)
-        : widget.selectedItemBuilder(context);
-    } else {
-      items = widget.selectedItemBuilder == null
-        ? <Widget>[]
-        : widget.selectedItemBuilder(context);
-    }
+    final List<Widget> items = widget.selectedItemBuilder == null
+      ? (_enabled ? List<Widget>.from(widget.items) : <Widget>[])
+      : List<Widget>.from(widget.selectedItemBuilder(context));
 
     int hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
