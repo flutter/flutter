@@ -36,37 +36,52 @@ import 'theme.dart';
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/divider.png)
 ///
 /// ```dart
-/// Widget build(BuildContext context) {
-///   return Center(
-///     child: Column(
-///       children: <Widget>[
-///         Expanded(
-///           child: Container(
-///             color: Colors.amber,
-///             child: const Center(
-///               child: Text('Above'),
+///   Widget build(BuildContext context) {
+///     return Center(
+///       child: Column(
+///         children: <Widget>[
+///           Expanded(
+///             child: Container(
+///               color: Colors.amber,
+///               child: const Center(
+///                 child: Text('Above'),
+///               ),
 ///             ),
 ///           ),
-///         ),
-///         const Divider(
-///           color: Colors.black,
-///           height: 20,
-///           thickness: 5,
-///           indent: 20,
-///           endIndent: 0,
-///         ),
-///         Expanded(
-///           child: Container(
-///             color: Colors.blue,
-///             child: const Center(
-///               child: Text('Below'),
+///           const Divider(
+///             color: Colors.black,
+///             height: 20,
+///             thickness: 5,
+///             indent: 20,
+///             endIndent: 0,
+///           ),
+///           // Subheader example from Material spec.
+///           // https://material.io/components/dividers#types
+///           Container(
+///             padding: EdgeInsets.only(left: 20),
+///             child: Align(
+///               alignment: Alignment.centerLeft,
+///               child: Text(
+///                 'Subheader',
+///                 style: Theme.of(context).textTheme.bodyText2.copyWith(
+///                     fontSize: 12.0,
+///                     color: Theme.of(context).textTheme.caption.color),
+///                 textAlign: TextAlign.start,
+///               ),
 ///             ),
 ///           ),
-///         ),
-///       ],
-///     ),
-///   );
-/// }
+///           Expanded(
+///             child: Container(
+///               color: Colors.blue,
+///               child: const Center(
+///                 child: Text('Below'),
+///               ),
+///             ),
+///           ),
+///         ],
+///       ),
+///     );
+///   }
 /// ```
 /// {@end-tool}
 /// See also:
