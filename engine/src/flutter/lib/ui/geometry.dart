@@ -155,7 +155,7 @@ class Offset extends OffsetBase {
 
   /// The angle of this offset as radians clockwise from the positive x-axis, in
   /// the range -[pi] to [pi], assuming positive values of the x-axis go to the
-  /// left and positive values of the y-axis go down.
+  /// right and positive values of the y-axis go down.
   ///
   /// Zero means that [dy] is zero and [dx] is zero or positive.
   ///
