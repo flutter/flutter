@@ -17,6 +17,30 @@ class _ModifierCheck {
 
 void main() {
   group('RawKeyboard', () {
+    testWidgets('The correct character is produced', (WidgetTester tester) async {
+      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
+        String character = '';
+        void handleKey(RawKeyEvent event) {
+          expect(event.character, equals(character), reason: 'on $platform');
+        }
+        RawKeyboard.instance.addListener(handleKey);
+        character = 'a';
+        await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: platform);
+        character = '`';
+        await simulateKeyDownEvent(LogicalKeyboardKey.backquote, platform: platform);
+        RawKeyboard.instance.removeListener(handleKey);
+      }
+    });
+    testWidgets('No character is produced for non-printables', (WidgetTester tester) async {
+      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
+        void handleKey(RawKeyEvent event) {
+          expect(event.character, isNull, reason: 'on $platform');
+        }
+        RawKeyboard.instance.addListener(handleKey);
+        await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+        RawKeyboard.instance.removeListener(handleKey);
+      }
+    });
     testWidgets('keysPressed is maintained', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
         RawKeyboard.instance.clearKeysPressed();

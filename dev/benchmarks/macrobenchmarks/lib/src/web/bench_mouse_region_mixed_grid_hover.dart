@@ -166,13 +166,8 @@ class _Tester {
 
   TestGesture get gesture {
     return _gesture ??= TestGesture(
-      dispatcher: (PointerEvent event, HitTestResult result) async {
-        RendererBinding.instance.dispatchEvent(event, result);
-      },
-      hitTester: (Offset location) {
-        final HitTestResult result = HitTestResult();
-        RendererBinding.instance.hitTest(result, location);
-        return result;
+      dispatcher: (PointerEvent event) async {
+        RendererBinding.instance.handlePointerEvent(event);
       },
       kind: PointerDeviceKind.mouse,
     );

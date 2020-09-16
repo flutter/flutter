@@ -41,7 +41,6 @@ export 'package:flutter/rendering.dart' show
   LayerLink,
   MainAxisAlignment,
   MainAxisSize,
-  Overflow,
   MultiChildLayoutDelegate,
   PaintingContext,
   PointerCancelEvent,
@@ -1328,11 +1327,9 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 ///
 /// When this widget is composited during the compositing phase (which comes
 /// after the paint phase, as described in [WidgetsBinding.drawFrame]), it
-/// applies a transformation that brings [targetAnchor] of the linked
-/// [CompositedTransformTarget] and [followerAnchor] of this widget together.
-/// The two anchor points will have the same global coordinates, unless [offset]
-/// is not [Offset.zero], in which case [followerAnchor] will be offset by
-/// [offset] in the linked [CompositedTransformTarget]'s coordinate space.
+/// applies a transformation that causes it to provide its child with a
+/// coordinate space that matches that of the linked [CompositedTransformTarget]
+/// widget, offset by [offset].
 ///
 /// The [LayerLink] object used as the [link] must be the same object as that
 /// provided to the matching [CompositedTransformTarget].
@@ -1364,14 +1361,10 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
     required this.link,
     this.showWhenUnlinked = true,
     this.offset = Offset.zero,
-    this.targetAnchor = Alignment.topLeft,
-    this.followerAnchor = Alignment.topLeft,
     Widget? child,
   }) : assert(link != null),
        assert(showWhenUnlinked != null),
        assert(offset != null),
-       assert(targetAnchor != null),
-       assert(followerAnchor != null),
        super(key: key, child: child);
 
   /// The link object that connects this [CompositedTransformFollower] with a
@@ -1391,33 +1384,8 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// hidden.
   final bool showWhenUnlinked;
 
-  /// The anchor point on the linked [CompositedTransformTarget] that
-  /// [followerAnchor] will line up with.
-  ///
-  /// {@template flutter.widgets.followerLayer.anchor}
-  /// For example, when [targetAnchor] and [followerAnchor] are both
-  /// [Alignment.topLeft], this widget will be top left aligned with the linked
-  /// [CompositedTransformTarget]. When [targetAnchor] is
-  /// [Alignment.bottomLeft] and [followerAnchor] is [Alignment.topLeft], this
-  /// widget will be left aligned with the linked [CompositedTransformTarget],
-  /// and its top edge will line up with the [CompositedTransformTarget]'s
-  /// bottom edge.
-  /// {@endtemplate}
-  ///
-  /// Defaults to [Alignment.topLeft].
-  final Alignment targetAnchor;
-
-  /// The anchor point on this widget that will line up with [followerAnchor] on
-  /// the linked [CompositedTransformTarget].
-  ///
-  /// {@macro flutter.widgets.followerLayer.anchor}
-  ///
-  /// Defaults to [Alignment.topLeft].
-  final Alignment followerAnchor;
-
-  /// The additional offset to apply to the [targetAnchor] of the linked
-  /// [CompositedTransformTarget] to obtain this widget's [followerAnchor]
-  /// position.
+  /// The offset to apply to the origin of the linked
+  /// [CompositedTransformTarget] to obtain this widget's origin.
   final Offset offset;
 
   @override
@@ -1426,8 +1394,6 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
       link: link,
       showWhenUnlinked: showWhenUnlinked,
       offset: offset,
-      leaderAnchor: targetAnchor,
-      followerAnchor: followerAnchor,
     );
   }
 
@@ -1436,9 +1402,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
     renderObject
       ..link = link
       ..showWhenUnlinked = showWhenUnlinked
-      ..offset = offset
-      ..leaderAnchor = targetAnchor
-      ..followerAnchor = followerAnchor;
+      ..offset = offset;
   }
 }
 
@@ -1485,7 +1449,6 @@ class FittedBox extends SingleChildRenderObjectWidget {
   ///    relative to text direction.
   final AlignmentGeometry alignment;
 
-  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
   /// {@macro flutter.widgets.Clip}
   ///
   /// Defaults to [Clip.hardEdge].
@@ -2291,7 +2254,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
     this.textDirection,
     this.alignment = Alignment.center,
     this.constrainedAxis,
-    this.clipBehavior = Clip.hardEdge,
+    this.clipBehavior = Clip.none,
   }) : assert(alignment != null),
        assert(clipBehavior != null),
        super(key: key, child: child);
@@ -2319,10 +2282,9 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   /// will be retained.
   final Axis? constrainedAxis;
 
-  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.hardEdge].
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   @override
@@ -3313,7 +3275,6 @@ class Stack extends MultiChildRenderObjectWidget {
     this.alignment = AlignmentDirectional.topStart,
     this.textDirection,
     this.fit = StackFit.loose,
-    this.overflow = Overflow.clip,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
   }) : assert(clipBehavior != null),
@@ -3354,20 +3315,6 @@ class Stack extends MultiChildRenderObjectWidget {
   /// ([StackFit.expand]).
   final StackFit fit;
 
-  // TODO(liyuqian): Deprecate and remove [overflow] once its usages are removed from Google.
-
-  /// Whether overflowing children should be clipped. See [Overflow].
-  ///
-  /// Some children in a stack might overflow its box. When this flag is set to
-  /// [Overflow.clip], children cannot paint outside of the stack's box.
-  ///
-  /// When set to [Overflow.visible], the visible overflow area will not accept
-  /// hit testing.
-  ///
-  /// This overrides [clipBehavior] for now due to a staged roll out without
-  /// breaking Google. We will remove it and only use [clipBehavior] soon.
-  final Overflow overflow;
-
   /// {@macro flutter.widgets.Clip}
   ///
   /// Defaults to [Clip.hardEdge].
@@ -3392,7 +3339,7 @@ class Stack extends MultiChildRenderObjectWidget {
       alignment: alignment,
       textDirection: textDirection ?? Directionality.of(context),
       fit: fit,
-      clipBehavior: overflow == Overflow.visible ? Clip.none : clipBehavior,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -3403,7 +3350,7 @@ class Stack extends MultiChildRenderObjectWidget {
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.of(context)
       ..fit = fit
-      ..clipBehavior = overflow == Overflow.visible ? Clip.none : clipBehavior;
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -3940,7 +3887,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
     this.textBaseline = TextBaseline.alphabetic,
-    this.clipBehavior = Clip.hardEdge,
+    this.clipBehavior = Clip.none,
     List<Widget> children = const <Widget>[],
   }) : assert(direction != null),
        assert(mainAxisAlignment != null),
@@ -4040,10 +3987,9 @@ class Flex extends MultiChildRenderObjectWidget {
   /// Defaults to [TextBaseline.alphabetic].
   final TextBaseline? textBaseline;
 
-  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.hardEdge].
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   bool get _needTextDirection {
@@ -4795,7 +4741,7 @@ class Wrap extends MultiChildRenderObjectWidget {
     this.crossAxisAlignment = WrapCrossAlignment.start,
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
-    this.clipBehavior = Clip.hardEdge,
+    this.clipBehavior = Clip.none,
     List<Widget> children = const <Widget>[],
   }) : assert(clipBehavior != null), super(key: key, children: children);
 
@@ -4931,10 +4877,9 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// [verticalDirection] must not be null.
   final VerticalDirection verticalDirection;
 
-  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.hardEdge].
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   @override

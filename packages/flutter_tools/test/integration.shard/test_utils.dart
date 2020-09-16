@@ -63,3 +63,15 @@ Future<void> getPackages(String folder) async {
     throw Exception('flutter pub get failed: ${result.stderr}\n${result.stdout}');
   }
 }
+
+const String kLocalEngineEnvironment = 'FLUTTER_LOCAL_ENGINE';
+const String kLocalEngineLocation = 'FLUTTER_LOCAL_ENGINE_SRC_PATH';
+
+List<String> getLocalEngineArguments() {
+  return <String>[
+    if (platform.environment.containsKey(kLocalEngineEnvironment))
+      '--local-engine=${platform.environment[kLocalEngineEnvironment]}',
+    if (platform.environment.containsKey(kLocalEngineLocation))
+      '--local-engine-src-path=${platform.environment[kLocalEngineLocation]}',
+  ];
+}

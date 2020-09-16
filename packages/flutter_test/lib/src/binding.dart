@@ -196,6 +196,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// prepare the binding for the next test.
   void reset() {
     _restorationManager = createRestorationManager();
+    resetGestureBinding();
   }
 
   @override
@@ -488,19 +489,25 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// events from the device).
   Offset localToGlobal(Offset point) => point;
 
+  // The source of the current pointer event.
+  //
+  // The [pointerEventSource] is set as the `source` parameter of
+  // [handlePointerEvent] and can be used in the immediate enclosing
+  // [dispatchEvent].
+  TestBindingEventSource _pointerEventSource = TestBindingEventSource.device;
+
   @override
-  void dispatchEvent(
-    PointerEvent event,
-    HitTestResult hitTestResult, {
+  void handlePointerEvent(
+    PointerEvent event, {
     TestBindingEventSource source = TestBindingEventSource.device,
   }) {
-    // This override disables calling this method from base class
-    // [GestureBinding] when the runtime type is [TestWidgetsFlutterBinding],
-    // while enables sub class [LiveTestWidgetsFlutterBinding] to override
-    // this behavior and use this argument to determine the souce of the event
-    // especially when the test app is running on a device.
-    assert(source == TestBindingEventSource.test);
-    super.dispatchEvent(event, hitTestResult);
+    final TestBindingEventSource previousSource = source;
+    _pointerEventSource = source;
+    try {
+      super.handlePointerEvent(event);
+    } finally {
+      _pointerEventSource = previousSource;
+    }
   }
 
   /// A stub for the system's onscreen keyboard. Callers must set the
@@ -1486,14 +1493,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   HitTestDispatcher deviceEventDispatcher;
 
 
-  /// Dispatch an event to a hit test result's path.
+  /// Dispatch an event to the targets found by a hit test on its position.
   ///
   /// Apart from forwarding the event to [GestureBinding.dispatchEvent],
   /// This also paint all events that's down on the screen.
   @override
-  void dispatchEvent(
-    PointerEvent event,
-    HitTestResult hitTestResult, {
+  void handlePointerEvent(
+    PointerEvent event, {
     TestBindingEventSource source = TestBindingEventSource.device,
   }) {
     switch (source) {
@@ -1510,11 +1516,23 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           );
           _handleViewNeedsPaint();
         }
-        super.dispatchEvent(event, hitTestResult, source: source);
+        super.handlePointerEvent(event, source: TestBindingEventSource.test);
         break;
       case TestBindingEventSource.device:
         if (deviceEventDispatcher != null)
-          deviceEventDispatcher.dispatchEvent(event, hitTestResult);
+          super.handlePointerEvent(event, source: TestBindingEventSource.device);
+        break;
+    }
+  }
+
+  @override
+  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult) {
+    switch (_pointerEventSource) {
+      case TestBindingEventSource.test:
+        super.dispatchEvent(event, hitTestResult);
+        break;
+      case TestBindingEventSource.device:
+        deviceEventDispatcher.dispatchEvent(event, hitTestResult);
         break;
     }
   }
