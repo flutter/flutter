@@ -62,6 +62,9 @@ class StubFlutterWindowsApi {
   // Called for FlutterDesktopEngineProcessMessages.
   virtual uint64_t EngineProcessMessages() { return 0; }
 
+  // Called for FlutterDesktopEngineReloadSystemFonts.
+  virtual void EngineReloadSystemFonts() {}
+
   // Called for FlutterDesktopViewGetHWND.
   virtual HWND ViewGetHWND() { return reinterpret_cast<HWND>(1); }
 

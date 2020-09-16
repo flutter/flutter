@@ -136,6 +136,10 @@ uint64_t FlutterDesktopEngineProcessMessages(FlutterDesktopEngineRef engine) {
   return EngineFromHandle(engine)->task_runner()->ProcessTasks().count();
 }
 
+void FlutterDesktopEngineReloadSystemFonts(FlutterDesktopEngineRef engine) {
+  FlutterEngineReloadSystemFonts(EngineFromHandle(engine)->engine());
+}
+
 FlutterDesktopPluginRegistrarRef FlutterDesktopEngineGetPluginRegistrar(
     FlutterDesktopEngineRef engine,
     const char* plugin_name) {
