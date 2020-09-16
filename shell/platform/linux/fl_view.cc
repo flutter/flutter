@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
+#include <gdk/gdkwayland.h>
 #include <gdk/gdkx.h>
 #include <cstring>
 
@@ -12,6 +13,7 @@
 #include "flutter/shell/platform/linux/fl_mouse_cursor_plugin.h"
 #include "flutter/shell/platform/linux/fl_platform_plugin.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
+#include "flutter/shell/platform/linux/fl_renderer_wayland.h"
 #include "flutter/shell/platform/linux/fl_renderer_x11.h"
 #include "flutter/shell/platform/linux/fl_text_input_plugin.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
@@ -132,7 +134,14 @@ static void fl_view_plugin_registry_iface_init(
 static void fl_view_constructed(GObject* object) {
   FlView* self = FL_VIEW(object);
 
-  self->renderer = FL_RENDERER(fl_renderer_x11_new());
+  GdkDisplay* display = gtk_widget_get_display(GTK_WIDGET(self));
+  if (GDK_IS_X11_DISPLAY(display)) {
+    self->renderer = FL_RENDERER(fl_renderer_x11_new());
+  } else if (GDK_IS_WAYLAND_DISPLAY(display)) {
+    self->renderer = FL_RENDERER(fl_renderer_wayland_new());
+  } else {
+    g_error("Unsupported GDK backend");
+  }
   self->engine = fl_engine_new(self->project, self->renderer);
 
   // Create system channel handlers.
