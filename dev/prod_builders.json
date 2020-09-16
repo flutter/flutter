@@ -67,6 +67,12 @@
          "flaky":false
       },
       {
+         "name": "Mac build_tests",
+         "repo": "flutter",
+         "task_name": "mac_build_tests",
+         "flaky": false
+      },
+      {
          "name": "Mac framework_tests",
          "repo": "flutter",
          "task_name": "mac_framework_tests",
