@@ -134,9 +134,11 @@ class Cache {
       _artifacts.add(FontSubsetArtifacts(this));
       _artifacts.add(PubDependencies(
         fileSystem: _fileSystem,
-        flutterRoot: () => flutterRoot,
         logger: _logger,
-        pub: pub,
+        // flutter root and pub must be lazily to avoid initialization
+        // before the version is determined.
+        flutterRoot: () => flutterRoot,
+        pub: () => pub,
       ));
     } else {
       _artifacts.addAll(artifacts);
@@ -617,7 +619,7 @@ class PubDependencies extends ArtifactSet {
     @required String Function() flutterRoot,
     @required FileSystem fileSystem,
     @required Logger logger,
-    @required Pub pub,
+    @required Pub Function() pub,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _flutterRoot = flutterRoot,
@@ -627,7 +629,7 @@ class PubDependencies extends ArtifactSet {
   final String Function() _flutterRoot;
   final FileSystem _fileSystem;
   final Logger _logger;
-  final Pub _pub;
+  final Pub Function() _pub;
 
   @override
   Future<bool> isUpToDate() async {
@@ -658,7 +660,7 @@ class PubDependencies extends ArtifactSet {
 
   @override
   Future<void> update(ArtifactUpdater artifactUpdater) async {
-    await _pub.get(
+    await _pub().get(
       context: PubContext.pubGet,
       directory: _fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
       generateSyntheticPackage: false,

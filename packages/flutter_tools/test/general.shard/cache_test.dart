@@ -670,7 +670,7 @@ void main() {
       flutterRoot: () => '',
       fileSystem: fileSystem,
       logger: logger,
-      pub: MockPub(),
+      pub: () => MockPub(),
     );
 
     expect(await pubDependencies.isUpToDate(), false); // no package config
@@ -713,7 +713,7 @@ void main() {
       flutterRoot: () => '',
       fileSystem: fileSystem,
       logger: logger,
-      pub: pub,
+      pub: () => pub,
     );
 
     await pubDependencies.update(MockArtifactUpdater());
