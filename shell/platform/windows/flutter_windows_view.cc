@@ -105,13 +105,6 @@ void FlutterWindowsView::OnScroll(double x,
   SendScroll(x, y, delta_x, delta_y, scroll_offset_multiplier);
 }
 
-void FlutterWindowsView::OnFontChange() {
-  if (engine_->engine() == nullptr) {
-    return;
-  }
-  FlutterEngineReloadSystemFonts(engine_->engine());
-}
-
 // Sends new size  information to FlutterEngine.
 void FlutterWindowsView::SendWindowMetrics(size_t width,
                                            size_t height,

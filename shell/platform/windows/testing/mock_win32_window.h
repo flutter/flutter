@@ -38,7 +38,6 @@ class MockWin32Window : public Win32Window {
   MOCK_METHOD1(OnText, void(const std::u16string&));
   MOCK_METHOD4(OnKey, void(int, int, int, char32_t));
   MOCK_METHOD2(OnScroll, void(double, double));
-  MOCK_METHOD0(OnFontChange, void());
 };
 
 }  // namespace testing

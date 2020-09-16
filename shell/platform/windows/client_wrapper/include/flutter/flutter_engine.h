@@ -53,6 +53,11 @@ class FlutterEngine : public PluginRegistry {
   // last return value from this function.
   std::chrono::nanoseconds ProcessMessages();
 
+  // Tells the engine that the system font list has changed. Should be called
+  // by clients when OS-level font changes happen (e.g., WM_FONTCHANGE in a
+  // Win32 application).
+  void ReloadSystemFonts();
+
   // flutter::PluginRegistry:
   FlutterDesktopPluginRegistrarRef GetRegistrarForPlugin(
       const std::string& plugin_name) override;

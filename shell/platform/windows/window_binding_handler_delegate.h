@@ -50,10 +50,6 @@ class WindowBindingHandlerDelegate {
                         double delta_x,
                         double delta_y,
                         int scroll_offset_multiplier) = 0;
-
-  // Notifies delegate that backing window size has had system font change.
-  // Typically called by currently configured WindowBindingHandler
-  virtual void OnFontChange() = 0;
 };
 
 }  // namespace flutter

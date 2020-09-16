@@ -38,16 +38,22 @@ class TestFlutterWindowsApi : public testing::StubFlutterWindowsApi {
   // |flutter::testing::StubFlutterWindowsApi|
   uint64_t EngineProcessMessages() override { return 99; }
 
+  // |flutter::testing::StubFlutterWindowsApi|
+  void EngineReloadSystemFonts() override { reload_fonts_called_ = true; }
+
   bool create_called() { return create_called_; }
 
   bool run_called() { return run_called_; }
 
   bool destroy_called() { return destroy_called_; }
 
+  bool reload_fonts_called() { return reload_fonts_called_; }
+
  private:
   bool create_called_ = false;
   bool run_called_ = false;
   bool destroy_called_ = false;
+  bool reload_fonts_called_ = false;
 };
 
 }  // namespace
@@ -91,6 +97,18 @@ TEST(FlutterEngineTest, ProcessMessages) {
 
   std::chrono::nanoseconds next_event_time = engine.ProcessMessages();
   EXPECT_EQ(next_event_time.count(), 99);
+}
+
+TEST(FlutterEngineTest, ReloadFonts) {
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
+      std::make_unique<TestFlutterWindowsApi>());
+  auto test_api = static_cast<TestFlutterWindowsApi*>(scoped_api_stub.stub());
+
+  FlutterEngine engine(DartProject(L"fake/project/path"));
+  engine.Run();
+
+  engine.ReloadSystemFonts();
+  EXPECT_TRUE(test_api->reload_fonts_called());
 }
 
 TEST(FlutterEngineTest, GetMessenger) {

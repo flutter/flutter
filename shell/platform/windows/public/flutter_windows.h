@@ -143,6 +143,9 @@ FLUTTER_EXPORT bool FlutterDesktopEngineRun(FlutterDesktopEngineRef engine,
 FLUTTER_EXPORT uint64_t
 FlutterDesktopEngineProcessMessages(FlutterDesktopEngineRef engine);
 
+FLUTTER_EXPORT void FlutterDesktopEngineReloadSystemFonts(
+    FlutterDesktopEngineRef engine);
+
 // Returns the plugin registrar handle for the plugin with the given name.
 //
 // The name must be unique across the application.
