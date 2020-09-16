@@ -235,7 +235,7 @@ Future<void> main() async {
 
       for (final String mode in <String>['Debug', 'Profile', 'Release']) {
         checkFileContains(
-          <String>['#include "FlutterEngine.h"'],
+          <String>['#import "FlutterEngine.h"'],
           path.join(outputPath, mode, 'Flutter.framework', 'Headers', 'Flutter.h'),
         );
       }
