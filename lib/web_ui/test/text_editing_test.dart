@@ -287,7 +287,8 @@ void testMain() {
     });
 
     test('Triggers input action', () {
-      final InputConfiguration config = InputConfiguration(inputAction: 'TextInputAction.done');
+      final InputConfiguration config =
+          InputConfiguration(inputAction: 'TextInputAction.done');
       editingElement.enable(
         config,
         onChange: trackEditingState,
@@ -661,6 +662,45 @@ void testMain() {
       sendFrameworkMessage(codec.encodeMethodCall(clearClient));
 
       expect(document.activeElement, document.body);
+
+      // Confirm that [HybridTextEditing] didn't send any messages.
+      expect(spy.messages, isEmpty);
+    });
+
+    test('setClient, setEditingState, show, updateConfig, clearClient', () {
+      final MethodCall setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        createFlutterConfig('text', readOnly: true),
+      ]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const MethodCall setEditingState = MethodCall(
+        'TextInput.setEditingState',
+        <String, dynamic>{
+          'text': 'abcd',
+          'selectionBase': 2,
+          'selectionExtent': 3,
+        },
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+
+      const MethodCall show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      final HtmlElement element = textEditing.editingElement.domElement;
+      expect(element.getAttribute('readonly'), 'readonly');
+
+      // Update the read-only config.
+      final MethodCall updateConfig = MethodCall(
+        'TextInput.updateConfig',
+        createFlutterConfig('text', readOnly: false),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(updateConfig));
+
+      expect(element.hasAttribute('readonly'), isFalse);
+
+      const MethodCall clearClient = MethodCall('TextInput.clearClient');
+      sendFrameworkMessage(codec.encodeMethodCall(clearClient));
 
       // Confirm that [HybridTextEditing] didn't send any messages.
       expect(spy.messages, isEmpty);
@@ -2082,6 +2122,7 @@ void checkTextAreaEditingState(
 /// simplicity.
 Map<String, dynamic> createFlutterConfig(
   String inputType, {
+  bool readOnly = false,
   bool obscureText = false,
   bool autocorrect = true,
   String textCapitalization = 'TextCapitalization.none',
@@ -2095,6 +2136,7 @@ Map<String, dynamic> createFlutterConfig(
       'name': 'TextInputType.$inputType',
       if (decimal) 'decimal': true,
     },
+    'readOnly': readOnly,
     'obscureText': obscureText,
     'autocorrect': autocorrect,
     'inputAction': inputAction ?? 'TextInputAction.done',
