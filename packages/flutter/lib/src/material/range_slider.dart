@@ -731,7 +731,6 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
     renderObject
       // We should update the `divisions` ahead of `values`, because the `values`
       // setter dependent on the `divisions`.
-      // https://github.com/flutter/flutter/issues/65943
       ..divisions = divisions
       ..values = values
       ..labels = labels

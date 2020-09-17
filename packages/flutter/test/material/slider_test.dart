@@ -2435,7 +2435,7 @@ void main() {
 
   testWidgets('Update the divisions and value at the same time for Slider', (WidgetTester tester) async {
     // Regress test for https://github.com/flutter/flutter/issues/65943
-    Widget buildFrame(double  maxValue) {
+    Widget buildFrame(double maxValue) {
       return MaterialApp(
         home: Material(
           child: Center(
@@ -2471,60 +2471,5 @@ void main() {
     // The right of the active track shape is the position of the thumb.
     // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
     expect(nearEqual(activeTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
-  });
-
-  testWidgets('Update the divisions and values at the same time for RangeSlider', (WidgetTester tester) async {
-    // Regress test for https://github.com/flutter/flutter/issues/65943
-    Widget buildFrame(double  maxValue) {
-      return MaterialApp(
-        home: Material(
-          child: Center(
-            child: RangeSlider(
-              values: const RangeValues(5, 8),
-              max: maxValue,
-              divisions: maxValue.toInt(),
-              onChanged: (RangeValues newValue) {},
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(10));
-
-    // _RenderRangeSlider is the last render object in the tree.
-    final RenderObject renderObject = tester.allRenderObjects.last;
-
-    // Update the divisions from 10 to 15, the thumbs should be paint at the correct position.
-    await tester.pumpWidget(buildFrame(15));
-    await tester.pumpAndSettle(); // Finish the animation.
-
-    RRect leftInactiveTrackRRect;
-    RRect rightInactiveTrackRRect;
-    int index = 0;
-    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawRRect)
-        return false;
-      if (index == 0) {
-        leftInactiveTrackRRect = arguments[0] as RRect;
-        index++;
-      } else {
-        rightInactiveTrackRRect = arguments[0] as RRect;
-        index++;
-      }
-      if (index == 2) {
-        return true;
-      } else {
-        return false;
-      }
-    }));
-
-    // The 1st thumb should at one-third(5 / 15) of the Slider.
-    // The 2nd thumb should at (8 / 15) of the Slider.
-    // The right of the left active track shape is the position of the 1st thumb.
-    // The left of the right active track shape is the position of the 2nd thumb.
-    // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
-    expect(nearEqual(leftInactiveTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
-    expect(nearEqual(rightInactiveTrackRRect.left, (800.0 - 24.0 - 24.0) * (8 / 15) + 24.0, 0.01), true);
   });
 }
