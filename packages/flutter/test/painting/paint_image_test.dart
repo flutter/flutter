@@ -4,10 +4,6 @@
 
 // @dart = 2.8
 
-<<<<<<< HEAD
-=======
-import 'dart:typed_data';
->>>>>>> upstream/master
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';

@@ -12,14 +12,15 @@ import 'test_async_utils.dart';
 
 final Map<int, ui.Image> _cache = <int, ui.Image>{};
 
-/// Asynchronously creates an arbitrarily sized test image.
+/// Creates an arbitrarily sized image for testing.
 ///
 /// If the [cache] parameter is set to true, the image will be cached. This
-/// should be avoided for images that are used only once in a test suite.
+/// should be avoided for images that are used only once in a test suite,
+/// especially if they are large.
 ///
 /// This method requires real async work, and will not work properly in the
 /// [FakeAsync] zones set up by [testWidgets]. Typically, it should be invoked
-/// as a setup step before [testWidgets] are run, however it can also be invoked
+/// as a setup step before [testWidgets] are run. If needed, it can be invoked
 /// using [WidgetTester.runAsync].
 Future<ui.Image> createTestImage({
   int width = 1,
