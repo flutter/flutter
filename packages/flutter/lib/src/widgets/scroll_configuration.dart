@@ -78,7 +78,7 @@ class ScrollBehavior {
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return (PointerEvent event) => VelocityTracker(event.kind);
+        return (PointerEvent event) => VelocityTracker.withKind(event.kind);
     }
     assert(false);
     return (PointerEvent event) => VelocityTracker(event.kind);
