@@ -233,10 +233,7 @@ Future<void> main() async {
       section("Check all modes' engine header");
 
       for (final String mode in <String>['Debug', 'Profile', 'Release']) {
-        checkFileContains(
-          <String>['#import "FlutterEngine.h"'],
-          path.join(outputPath, mode, 'Flutter.framework', 'Headers', 'Flutter.h'),
-        );
+        checkFileExists(path.join(outputPath, mode, 'Flutter.framework', 'Headers', 'Flutter.h'));
       }
 
       section('Check all modes have plugins');
