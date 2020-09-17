@@ -109,7 +109,7 @@ class LongPressMoveUpdateDetails {
 /// See also:
 ///
 ///  * [LongPressGestureRecognizer.onLongPressEnd], which uses [GestureLongPressEndCallback].
-///  * [LongPressMoveUpdateDetails], the details for [GestureLongPressMoveUpdateCallback]
+///  * [LongPressMoveUpdateDetails], the details for [GestureLongPressMoveUpdateCallback].
 ///  * [LongPressStartDetails], the details for [GestureLongPressStartCallback].
 class LongPressEndDetails {
   /// Creates the details for a [GestureLongPressEndCallback].

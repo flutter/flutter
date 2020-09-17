@@ -19,6 +19,8 @@ import 'thumb_painter.dart';
 
 /// An iOS-style slider.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
+///
 /// Used to select from a range of values.
 ///
 /// A slider can be used to select from either a continuous or a discrete set of
