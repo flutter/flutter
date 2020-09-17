@@ -93,6 +93,30 @@ static void ValidateDestroyPlatformView(Shell* shell) {
   ASSERT_FALSE(RasterizerHasLayerTree(shell));
 }
 
+static std::string CreateFlagsString(std::vector<const char*>& flags) {
+  if (flags.size() == 0) {
+    return "";
+  }
+  std::string flags_string = flags[0];
+  for (size_t i = 1; i < flags.size(); ++i) {
+    flags_string += ",";
+    flags_string += flags[i];
+  }
+  return flags_string;
+}
+
+static void TestDartVmFlags(std::vector<const char*>& flags) {
+  std::string flags_string = CreateFlagsString(flags);
+  const std::vector<fml::CommandLine::Option> options = {
+      fml::CommandLine::Option("dart-flags", flags_string)};
+  fml::CommandLine command_line("", options, std::vector<std::string>());
+  flutter::Settings settings = flutter::SettingsFromCommandLine(command_line);
+  EXPECT_EQ(settings.dart_flags.size(), flags.size());
+  for (size_t i = 0; i < flags.size(); ++i) {
+    EXPECT_EQ(settings.dart_flags[i], flags[i]);
+  }
+}
+
 TEST_F(ShellTest, InitializeWithInvalidThreads) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
@@ -275,25 +299,6 @@ TEST_F(ShellTest, LastEntrypoint) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
-TEST(ShellTestNoFixture, EnableMirrorsIsAllowed) {
-  if (DartVM::IsRunningPrecompiledCode()) {
-    // This covers profile and release modes which use AOT (where this flag does
-    // not make sense anyway).
-    GTEST_SKIP();
-    return;
-  }
-#if FLUTTER_RELEASE
-  GTEST_SKIP();
-  return;
-#endif
-
-  const std::vector<fml::CommandLine::Option> options = {
-      fml::CommandLine::Option("dart-flags", "--enable_mirrors")};
-  fml::CommandLine command_line("", options, std::vector<std::string>());
-  flutter::Settings settings = flutter::SettingsFromCommandLine(command_line);
-  EXPECT_EQ(settings.dart_flags.size(), 1u);
-}
-
 TEST_F(ShellTest, DisallowedDartVMFlag) {
   // Run this test in a thread-safe manner, otherwise gtest will complain.
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
@@ -309,22 +314,18 @@ TEST_F(ShellTest, DisallowedDartVMFlag) {
 }
 
 TEST_F(ShellTest, AllowedDartVMFlag) {
-  const std::vector<fml::CommandLine::Option> options = {
-#if !FLUTTER_RELEASE
-    fml::CommandLine::Option("dart-flags",
-                             "--max_profile_depth 1,--random_seed 42")
-#endif
+  std::vector<const char*> flags = {
+      "--enable-isolate-groups",
+      "--no-enable-isolate-groups",
   };
-  fml::CommandLine command_line("", options, std::vector<std::string>());
-  flutter::Settings settings = flutter::SettingsFromCommandLine(command_line);
-
 #if !FLUTTER_RELEASE
-  EXPECT_EQ(settings.dart_flags.size(), 2u);
-  EXPECT_EQ(settings.dart_flags[0], "--max_profile_depth 1");
-  EXPECT_EQ(settings.dart_flags[1], "--random_seed 42");
-#else
-  EXPECT_EQ(settings.dart_flags.size(), 0u);
+  flags.push_back("--max_profile_depth 1");
+  flags.push_back("--random_seed 42");
+  if (!DartVM::IsRunningPrecompiledCode()) {
+    flags.push_back("--enable_mirrors");
+  }
 #endif
+  TestDartVmFlags(flags);
 }
 
 TEST_F(ShellTest, NoNeedToReportTimingsByDefault) {
