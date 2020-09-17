@@ -131,6 +131,13 @@ class Dialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final DialogTheme dialogTheme = DialogTheme.of(context);
     final EdgeInsets effectivePadding = MediaQuery.of(context).viewInsets + (insetPadding ?? const EdgeInsets.all(0.0));
+    double minWidthSize = 280.0;
+    double minHeightSize = 0.0;
+
+    if (insetPadding != null) {
+      minWidthSize = (insetPadding.right == 0.0 && insetPadding.left == 0.0) ? double.infinity : 280.0;
+      minHeightSize = (insetPadding.top == 0.0 && insetPadding.bottom == 0.0) ? double.infinity : 0.0;
+    }
     return AnimatedPadding(
       padding: effectivePadding,
       duration: insetAnimationDuration,
@@ -143,7 +150,7 @@ class Dialog extends StatelessWidget {
         context: context,
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 280.0),
+            constraints: BoxConstraints(minWidth: minWidthSize, minHeight: minHeightSize),
             child: Material(
               color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
               elevation: elevation ?? dialogTheme.elevation ?? _defaultElevation,
