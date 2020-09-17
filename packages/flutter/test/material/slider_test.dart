@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -2430,5 +2431,45 @@ void main() {
           // thumb
           ..circle(x: 5.0, y: 5.0, radius: 10.0, )
     );
+  });
+
+  testWidgets('divisions update test', (WidgetTester tester) async {
+    // Regress test for https://github.com/flutter/flutter/issues/65943
+    Widget buildFrame(double  maxValue) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Slider.adaptive(
+              value: 5,
+              max: maxValue,
+              divisions: maxValue.toInt(),
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(10));
+
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+
+    // Update the divisions from 10 to 15, the thumb should be paint at the correct position.
+    // one-third of the Slider(5 / 15).
+    await tester.pumpWidget(buildFrame(15));
+    await tester.pumpAndSettle(); // Finish the animation.
+
+    RRect activeTrackRRect;
+    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
+      if (method != #drawRRect)
+        return false;
+      activeTrackRRect = arguments[0] as RRect;
+      return true;
+    }));
+
+    // The right of the active track shape is the position of the thumb.
+    // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
+    expect(nearEqual(activeTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
   });
 }
