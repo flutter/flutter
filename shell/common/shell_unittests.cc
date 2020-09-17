@@ -997,13 +997,9 @@ TEST_F(ShellTest,
 }
 
 // TODO(https://github.com/flutter/flutter/issues/59816): Enable on fuchsia.
-TEST_F(ShellTest,
-#if defined(OS_FUCHSIA)
-       DISABLED_SkipAndSubmitFrame
-#else
-       SkipAndSubmitFrame
-#endif
-) {
+// TODO(https://github.com/flutter/flutter/issues/66056): Deflake on all other
+// platforms
+TEST_F(ShellTest, DISABLED_SkipAndSubmitFrame) {
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
   std::shared_ptr<ShellTestExternalViewEmbedder> external_view_embedder;
