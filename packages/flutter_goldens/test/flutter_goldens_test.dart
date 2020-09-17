@@ -398,7 +398,7 @@ void main() {
         MockHttpClientResponse mockHttpResponse;
 
         setUp(() {
-          url = Uri.parse('https://flutter-gold.skia.org/json/ignores');
+          url = Uri.parse('https://flutter-gold.skia.org/json/v1/ignores');
           mockHttpRequest = MockHttpClientRequest();
           mockHttpResponse = MockHttpClientResponse(utf8.encode(
             ignoreResponseTemplate(
