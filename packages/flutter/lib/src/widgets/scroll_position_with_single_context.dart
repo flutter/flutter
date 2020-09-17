@@ -207,6 +207,13 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     goBallistic(0.0);
   }
 
+  @override
+  void pointerScroll(double delta) {
+    final PointerScrollActivity pointerScrollActivity = PointerScrollActivity(this, delta);
+    beginActivity(pointerScrollActivity);
+  }
+
+
   @Deprecated('This will lead to bugs.') // ignore: flutter_deprecation_syntax, https://github.com/flutter/flutter/issues/44609
   @override
   void jumpToWithoutSettling(double value) {

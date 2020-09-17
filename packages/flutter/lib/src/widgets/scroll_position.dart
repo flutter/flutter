@@ -735,6 +735,22 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @override
   void jumpTo(double value);
 
+  /// Jumps the scrolling position from current value to delta without animation
+  /// and without checking if new value is in range.
+  ///
+  /// Any active animation is canceled. If the user is currently scrolling, that
+  /// action is canceled.
+  ///
+  /// If this method changes the scroll position, a sequence of start/update/end
+  /// scroll notifications will be dispatched.
+  ///
+  /// [pointerScroll] is very similar to [jumpTo], but [pointerScroll] will
+  /// update [ScrollDirection.forward] / [ScrollDirection.reverse].
+  ///
+  /// This is usually used in processing pointer signals, where delta is given
+  /// to [ScrollPosition] to calculate target value sliding.
+  void pointerScroll(double delta);
+
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
   /// [animateTo] is called.
   ///

@@ -671,3 +671,45 @@ class DrivenScrollActivity extends ScrollActivity {
     return '${describeIdentity(this)}($_controller)';
   }
 }
+
+//// An activity that a scroll view based on delta
+////
+//// For example, a [PointerScrollActivity] is used to implement
+//// [ScrollPositionWithSingleContext.pointerScroll].
+class PointerScrollActivity extends ScrollActivity {
+
+  /// Creates an activity that a scroll view based on delta.
+  ///
+  /// All of the parameters must be non-null.
+  PointerScrollActivity(
+      ScrollActivityDelegate delegate,
+      this.delta,
+      ) : super(delegate) {
+    scheduleMicrotask(() {
+      delegate?.applyUserOffset(delta);
+      _isScrolling = false;
+      delegate?.goBallistic(0);
+    });
+  }
+
+  /// The offset of the scroll.
+  /// It will also act as [velocity].
+  final double delta;
+
+  //
+  bool _isScrolling = true;
+
+  @override
+  void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
+    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, velocity: delta).dispatch(context);
+  }
+
+  @override
+  bool get isScrolling => _isScrolling;
+
+  @override
+  bool get shouldIgnorePointer => false;
+
+  @override
+  double get velocity => delta;
+}

@@ -1075,6 +1075,18 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     goBallistic(0.0);
   }
 
+  void pointerScroll(double delta) {
+    final PointerScrollActivity pointerScrollActivity = PointerScrollActivity(this, delta);
+    beginActivity(
+      pointerScrollActivity,
+        (_NestedScrollPosition position) => createInnerBallisticScrollActivity(
+          position,
+          delta,
+        ),
+    );
+  }
+
+
   @override
   double setPixels(double newPixels) {
     assert(false);
@@ -1476,6 +1488,13 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   void jumpTo(double value) {
     return coordinator.jumpTo(coordinator.unnestOffset(value, this));
   }
+
+  @override
+  void pointerScroll(double delta) {
+    print('delta $delta');
+    return coordinator.pointerScroll(delta);
+  }
+
 
   @override
   void jumpToWithoutSettling(double value) {
