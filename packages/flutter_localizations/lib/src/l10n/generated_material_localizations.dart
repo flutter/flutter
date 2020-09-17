@@ -114,7 +114,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Begindatum';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '-';
 
   @override
   String get deleteButtonTooltip => 'Vee uit';
@@ -1176,7 +1176,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
-  String get searchFieldLabel => 'সন্ধান কৰক';
+  String get searchFieldLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
@@ -2400,7 +2400,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
-  String get searchFieldLabel => 'সার্চ';
+  String get searchFieldLabel => 'খুঁজুন';
 
   @override
   String get selectAllButtonLabel => 'সব বেছে নিন';
@@ -2679,7 +2679,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
-  String get reorderItemDown => 'Pomjeri prema dolje';
+  String get reorderItemDown => 'Pomjeri nadolje';
 
   @override
   String get reorderItemLeft => 'Pomjeri lijevo';
@@ -2694,7 +2694,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get reorderItemToStart => 'Pomjerite na početak';
 
   @override
-  String get reorderItemUp => 'Pomjeri prema gore';
+  String get reorderItemUp => 'Pomjeri nagore';
 
   @override
   String get rowsPerPageTitle => 'Broj redova po stranici:';
@@ -3147,7 +3147,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Vyjmout';
 
   @override
-  String get dateHelpText => 'mm/dd/rrrr';
+  String get dateHelpText => 'mm.dd.rrrr';
 
   @override
   String get dateInputLabel => 'Zadejte datum';
@@ -3174,7 +3174,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Datum zahájení';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Smazat';
@@ -9696,7 +9696,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Couper';
 
   @override
-  String get dateHelpText => 'mm/jj/aaaa';
+  String get dateHelpText => 'jj/mm/aaaa';
 
   @override
   String get dateInputLabel => 'Saisir une date';
@@ -11940,7 +11940,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Kivágás';
 
   @override
-  String get dateHelpText => 'hh/nn/éééé';
+  String get dateHelpText => 'hh.nn.éééé';
 
   @override
   String get dateInputLabel => 'Adja meg a dátumot';
@@ -11967,7 +11967,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Kezdés dátuma';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Törlés';
@@ -12273,7 +12273,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Մեկնարկի ամսաթիվը';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Ջնջել';
@@ -17007,7 +17007,7 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
-  String get searchFieldLabel => 'തിരയുക';
+  String get searchFieldLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'എല്ലാം തിരഞ്ഞെടുക്കുക';
@@ -17619,7 +17619,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.dense;
 
   @override
-  String get searchFieldLabel => 'शोध';
+  String get searchFieldLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'सर्व निवडा';
@@ -19005,7 +19005,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Startdatum';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '-';
 
   @override
   String get deleteButtonTooltip => 'Verwijderen';
@@ -19761,7 +19761,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
-  String get searchFieldLabel => 'ଖୋଜନ୍ତୁ';
+  String get searchFieldLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'ସବୁ ଚୟନ କରନ୍ତୁ';
@@ -22164,7 +22164,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Vystrihnúť';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'mm.dd.yyyy';
 
   @override
   String get dateInputLabel => 'Zadajte dátum';
@@ -22191,7 +22191,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'Dátum začatia';
 
   @override
-  String get dateSeparator => '/';
+  String get dateSeparator => '.';
 
   @override
   String get deleteButtonTooltip => 'Odstrániť';
@@ -24471,7 +24471,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.dense;
 
   @override
-  String get searchFieldLabel => 'தேடல்';
+  String get searchFieldLabel => 'Search';
 
   @override
   String get selectAllButtonLabel => 'அனைத்தையும் தேர்ந்தெடு';
