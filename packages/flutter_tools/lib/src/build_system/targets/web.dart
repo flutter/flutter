@@ -472,7 +472,7 @@ const CORE = [
   ${coreBundle.map((String file) => '"$file"').join(',\n')}];
 // During install, the TEMP cache is populated with the application shell files.
 self.addEventListener("install", (event) => {
-  skipWaiting();
+  self.skipWaiting();
   return event.waitUntil(
     caches.open(TEMP).then((cache) => {
       return cache.addAll(
@@ -580,7 +580,7 @@ self.addEventListener('message', (event) => {
   // SkipWaiting can be used to immediately activate a waiting service worker.
   // This will also require a page refresh triggered by the main worker.
   if (event.data === 'skipWaiting') {
-    skipWaiting();
+    self.skipWaiting();
     return;
   }
   if (event.data === 'downloadOffline') {
@@ -630,12 +630,6 @@ function onlineFirst(event) {
       });
     })
   );
-}
-
-function skipWaiting() {
-  if (self.skipWaiting != undefined) {
-    self.skipWaiting();
-  }
 }
 ''';
 }
