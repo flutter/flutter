@@ -376,7 +376,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void handlePrimaryPointer(PointerEvent event) {
     if (!event.synthesized) {
       if (event is PointerDownEvent) {
-        _velocityTracker = VelocityTracker(event.kind);
+        _velocityTracker = VelocityTracker.withKind(event.kind);
         _velocityTracker!.addPosition(event.timeStamp, event.localPosition);
       }
       if (event is PointerMoveEvent) {
