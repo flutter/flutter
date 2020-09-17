@@ -64,6 +64,11 @@ class Version {
       case 'y':
         // Dev release following a beta release.
         nextY += 1;
+        nextZ = 0;
+        if (previousVersion.type != VersionType.stable) {
+          nextM = 0;
+          nextN = 0;
+        }
         break;
       case 'z':
         // Hotfix to stable release.
@@ -75,6 +80,7 @@ class Version {
         assert(previousVersion.type == VersionType.development);
         assert(nextM != null);
         nextM += 1;
+        nextN = 0;
         break;
       case 'n':
         // Hotfix to internal roll.
