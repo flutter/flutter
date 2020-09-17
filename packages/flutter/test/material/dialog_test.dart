@@ -1275,12 +1275,10 @@ void main() {
         ));
   });
 
-  testWidgets('AlertDialog widget contains route semantics from title for iOS', (WidgetTester tester) async {
+  testWidgets('Dialog widget contains route semantics from title', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
         home: Material(
           child: Builder(
             builder: (BuildContext context) {
@@ -1318,62 +1316,6 @@ void main() {
     expect(semantics, includesNodeWith(
       label: 'Title',
       flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-    ));
-
-    semantics.dispose();
-  });
-
-    testWidgets('AlertDialog widget always contains alert route semantics for android', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.android),
-        home: Material(
-          child: Builder(
-            builder: (BuildContext context) {
-              return Center(
-                child: ElevatedButton(
-                  child: const Text('X'),
-                  onPressed: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return const AlertDialog(
-                          title: Text('Title'),
-                          content: Text('Y'),
-                          actions: <Widget>[],
-                        );
-                      },
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-
-    expect(semantics, isNot(includesNodeWith(
-      label: 'Title',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-    )));
-    expect(semantics, isNot(includesNodeWith(
-      label: 'Alert',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
-    )));
-
-    await tester.tap(find.text('X'));
-    await tester.pumpAndSettle();
-    // It does not use 'Title' as route semantics
-    expect(semantics, isNot(includesNodeWith(
-      label: 'Title',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-    )));
-    expect(semantics, includesNodeWith(
-      label: 'Alert',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
     ));
 
     semantics.dispose();
