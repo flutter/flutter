@@ -2499,17 +2499,17 @@ void main() {
     await tester.pumpWidget(buildFrame(15));
     await tester.pumpAndSettle(); // Finish the animation.
 
-    RRect leftActiveTrackRRect;
-    RRect rightActiveTrackRRect;
+    RRect leftInactiveTrackRRect;
+    RRect rightInactiveTrackRRect;
     int index = 0;
     expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
       if (method != #drawRRect)
         return false;
       if (index == 0) {
-        leftActiveTrackRRect = arguments[0] as RRect;
+        leftInactiveTrackRRect = arguments[0] as RRect;
         index++;
       } else {
-        rightActiveTrackRRect = arguments[0] as RRect;
+        rightInactiveTrackRRect = arguments[0] as RRect;
         index++;
       }
       if (index == 2) {
@@ -2524,7 +2524,7 @@ void main() {
     // The right of the left active track shape is the position of the 1st thumb.
     // The left of the right active track shape is the position of the 2nd thumb.
     // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
-    expect(nearEqual(leftActiveTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
-    expect(nearEqual(rightActiveTrackRRect.left, (800.0 - 24.0 - 24.0) * (8 / 15) + 24.0, 0.01), true);
+    expect(nearEqual(leftInactiveTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
+    expect(nearEqual(rightInactiveTrackRRect.left, (800.0 - 24.0 - 24.0) * (8 / 15) + 24.0, 0.01), true);
   });
 }
