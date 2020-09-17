@@ -296,9 +296,9 @@ typedef RefreshCallback = Future<void> Function();
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return MaterialApp(
-///     home: Scaffold(
-///       body: CustomScrollView(
+///   return CupertinoApp(
+///     home: CupertinoPageScaffold(
+///       child: CustomScrollView(
 ///         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
 ///         slivers: <Widget>[
 ///           const CupertinoSliverNavigationBar(largeTitle: Text('Scroll down')),
