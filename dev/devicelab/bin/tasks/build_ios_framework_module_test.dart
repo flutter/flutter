@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
@@ -235,7 +234,7 @@ Future<void> main() async {
 
       for (final String mode in <String>['Debug', 'Profile', 'Release']) {
         checkFileContains(
-          <String>['#include "FlutterEngine.h"'],
+          <String>['#import "FlutterEngine.h"'],
           path.join(outputPath, mode, 'Flutter.framework', 'Headers', 'Flutter.h'),
         );
       }

@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/rendering.dart';

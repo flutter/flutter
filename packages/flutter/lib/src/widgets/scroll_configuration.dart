@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -50,7 +48,6 @@ class ScrollBehavior {
           color: _kDefaultGlowColor,
         );
     }
-    return null;
   }
 
   /// Specifies the type of velocity tracker to use in the descendant
@@ -80,8 +77,6 @@ class ScrollBehavior {
       case TargetPlatform.windows:
         return (PointerEvent event) => VelocityTracker(event.kind);
     }
-    assert(false);
-    return (PointerEvent event) => VelocityTracker(event.kind);
   }
 
   static const ScrollPhysics _bouncingPhysics = BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
@@ -103,7 +98,6 @@ class ScrollBehavior {
       case TargetPlatform.windows:
         return _clampingPhysics;
     }
-    return null;
   }
 
   /// Called whenever a [ScrollConfiguration] is rebuilt with a new
@@ -131,9 +125,9 @@ class ScrollConfiguration extends InheritedWidget {
   ///
   /// The [behavior] and [child] arguments must not be null.
   const ScrollConfiguration({
-    Key key,
-    @required this.behavior,
-    @required Widget child,
+    Key? key,
+    required this.behavior,
+    required Widget child,
   }) : super(key: key, child: child);
 
   /// How [Scrollable] widgets that are descendants of [child] should behave.
@@ -144,7 +138,7 @@ class ScrollConfiguration extends InheritedWidget {
   /// If no [ScrollConfiguration] widget is in scope of the given `context`,
   /// a default [ScrollBehavior] instance is returned.
   static ScrollBehavior of(BuildContext context) {
-    final ScrollConfiguration configuration = context.dependOnInheritedWidgetOfExactType<ScrollConfiguration>();
+    final ScrollConfiguration? configuration = context.dependOnInheritedWidgetOfExactType<ScrollConfiguration>();
     return configuration?.behavior ?? const ScrollBehavior();
   }
 

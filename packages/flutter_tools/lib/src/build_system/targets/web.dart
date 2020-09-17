@@ -14,6 +14,7 @@ import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
+import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
@@ -295,6 +296,11 @@ class WebReleaseBundle extends Target {
         environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path
       );
     }
+
+    final String versionInfo = FlutterProject.current().getVersionInfo();
+    environment.outputDir
+        .childFile('version.json')
+        .writeAsStringSync(versionInfo);
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(
@@ -470,6 +476,7 @@ const CORE = [
   ${coreBundle.map((String file) => '"$file"').join(',\n')}];
 // During install, the TEMP cache is populated with the application shell files.
 self.addEventListener("install", (event) => {
+  skipWaiting();
   return event.waitUntil(
     caches.open(TEMP).then((cache) => {
       return cache.addAll(
@@ -573,10 +580,12 @@ self.addEventListener('message', (event) => {
   // SkipWaiting can be used to immediately activate a waiting service worker.
   // This will also require a page refresh triggered by the main worker.
   if (event.data === 'skipWaiting') {
-    return self.skipWaiting();
+    skipWaiting();
+    return;
   }
-  if (event.message === 'downloadOffline') {
+  if (event.data === 'downloadOffline') {
     downloadOffline();
+    return;
   }
 });
 
@@ -621,6 +630,12 @@ function onlineFirst(event) {
       });
     })
   );
+}
+
+function skipWaiting() {
+  if (self.skipWaiting != undefined) {
+    self.skipWaiting();
+  }
 }
 ''';
 }
