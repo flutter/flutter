@@ -1436,6 +1436,44 @@ void main() {
     }
   });
 
+  testWidgets('Sends "updateConfig" when read-only flag is flipped', (WidgetTester tester) async {
+    bool readOnly = true;
+    StateSetter setState;
+    final TextEditingController controller = TextEditingController(text: 'Lorem ipsum dolor sit amet');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          return EditableText(
+            readOnly: readOnly,
+            controller: controller,
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          );
+        }),
+      ),
+    );
+
+    // Interact with the field to establish the input connection.
+    final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+    await tester.tapAt(topLeft + const Offset(0.0, 5.0));
+    await tester.pump();
+
+    expect(tester.testTextInput.hasAnyClients, kIsWeb ? isTrue : isFalse);
+    if (kIsWeb) {
+      expect(tester.testTextInput.setClientArgs['readOnly'], isTrue);
+    }
+
+    setState(() { readOnly = false; });
+    await tester.pump();
+
+    expect(tester.testTextInput.hasAnyClients, isTrue);
+    expect(tester.testTextInput.setClientArgs['readOnly'], isFalse);
+  });
+
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
     String changedValue;
     final Widget widget = MaterialApp(
@@ -4711,6 +4749,132 @@ void main() {
       index++;
     }
     expect(tester.testTextInput.editingState['text'], 'flutter is the best!...');
+  });
+
+  testWidgets('Synchronous test of local and remote editing values', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/65059
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+    final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
+      if (newValue.text == 'I will be modified by the formatter.') {
+        newValue = const TextEditingValue(text: 'Flutter is the best!');
+      }
+      return newValue;
+    });
+    final TextEditingController controller = TextEditingController();
+    StateSetter setState;
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
+    Widget builder() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          return MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(devicePixelRatio: 1.0),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Material(
+                    child: EditableText(
+                      controller: controller,
+                      focusNode: focusNode,
+                      style: textStyle,
+                      cursorColor: Colors.red,
+                      backgroundCursorColor: Colors.red,
+                      keyboardType: TextInputType.multiline,
+                      inputFormatters: <TextInputFormatter>[
+                        formatter,
+                      ],
+                      onChanged: (String value) { },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pump();
+
+    log.clear();
+
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+
+    // setEditingState is not called when only the remote changes
+    state.updateEditingValue(const TextEditingValue(
+      text: 'a',
+    ));
+    expect(log.length, 0);
+
+    // setEditingState is called when remote value modified by the formatter.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'I will be modified by the formatter.',
+    ));
+    expect(log.length, 1);
+    MethodCall methodCall = log[0];
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
+        'text': 'Flutter is the best!',
+        'selectionBase': -1,
+        'selectionExtent': -1,
+        'selectionAffinity': 'TextAffinity.downstream',
+        'selectionIsDirectional': false,
+        'composingBase': -1,
+        'composingExtent': -1,
+      }),
+    );
+
+    log.clear();
+
+    // setEditingState is called when the [controller.value] is modified by local.
+    setState(() {
+      controller.text = 'I love flutter!';
+    });
+    expect(log.length, 1);
+    methodCall = log[0];
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
+        'text': 'I love flutter!',
+        'selectionBase': -1,
+        'selectionExtent': -1,
+        'selectionAffinity': 'TextAffinity.downstream',
+        'selectionIsDirectional': false,
+        'composingBase': -1,
+        'composingExtent': -1,
+      }),
+    );
+
+    log.clear();
+
+    // Currently `_receivedRemoteTextEditingValue` equals 'I will be modified by the formatter.',
+    // setEditingState will be called when set the [controller.value] to `_receivedRemoteTextEditingValue` by local.
+    setState(() {
+      controller.text = 'I will be modified by the formatter.';
+    });
+    expect(log.length, 1);
+    methodCall = log[0];
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
+        'text': 'I will be modified by the formatter.',
+        'selectionBase': -1,
+        'selectionExtent': -1,
+        'selectionAffinity': 'TextAffinity.downstream',
+        'selectionIsDirectional': false,
+        'composingBase': -1,
+        'composingExtent': -1,
+      }),
+    );
   });
 
   testWidgets('autofocus:true on first frame does not throw', (WidgetTester tester) async {
