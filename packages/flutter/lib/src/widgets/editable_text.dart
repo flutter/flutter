@@ -1620,11 +1620,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   TextEditingValue get currentTextEditingValue => _value;
 
+  bool _updateEditingValueInProgress = false;
+
   @override
   void updateEditingValue(TextEditingValue value) {
+    _updateEditingValueInProgress = true;
     // Since we still have to support keyboard select, this is the best place
     // to disable text updating.
     if (!_shouldCreateInputConnection) {
+      _updateEditingValueInProgress = false;
       return;
     }
     if (widget.readOnly) {
@@ -1643,7 +1647,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
-    if (_isSelectionOnlyChange(value)) {
+    if (value == _value) {
+      // This is possible, for example, when the numeric keyboard is input,
+      // the engine will notify twice for the same value.
+      // Track at https://github.com/flutter/flutter/issues/65811
+      _updateEditingValueInProgress = false;
+      return;
+    } else if (value.text == _value.text && value.composing == _value.composing && value.selection != _value.selection) {
+      // `selection` is the only change.
       _handleSelectionChanged(value.selection, renderEditable!, SelectionChangedCause.keyboard);
     } else {
       _formatAndSetValue(value);
@@ -1655,10 +1666,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _stopCursorTimer(resetCharTicks: false);
       _startCursorTimer();
     }
-  }
-
-  bool _isSelectionOnlyChange(TextEditingValue value) {
-    return value.text == _value.text && value.composing == _value.composing;
+    _updateEditingValueInProgress = false;
   }
 
   @override
@@ -1815,8 +1823,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasInputConnection)
       return;
     final TextEditingValue localValue = _value;
-    if (localValue == _receivedRemoteTextEditingValue)
+    // We should not update back the value notified by the remote(engine) in reverse, this is redundant.
+    // Unless we modify this value for some reason during processing, such as `TextInputFormatter`.
+    if (_updateEditingValueInProgress && localValue == _receivedRemoteTextEditingValue)
       return;
+    // In other cases, as long as the value of the [widget.controller.value] is modified,
+    // `setEditingState` should be called as we do not want to skip sending real changes
+    // to the engine.
+    // Also see https://github.com/flutter/flutter/issues/65059#issuecomment-690254379
     _textInputConnection!.setEditingState(localValue);
   }
 
@@ -2139,10 +2153,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (isRepeat && textChanged && _lastFormattedValue != null) {
       _value = _lastFormattedValue!;
     }
-
-    // Always attempt to send the value. If the value has changed, then it will send,
-    // otherwise, it will short-circuit.
-    _updateRemoteEditingValueIfNeeded();
 
     if (textChanged && widget.onChanged != null)
       widget.onChanged!(value.text);
