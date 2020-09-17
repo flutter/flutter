@@ -20,7 +20,7 @@ void main() {
   assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   final List<TrackerBenchmark> benchmarks = <TrackerBenchmark>[
-    TrackerBenchmark(name: 'velocity_tracker_iteration', tracker: VelocityTracker(PointerDeviceKind.touch)),
+    TrackerBenchmark(name: 'velocity_tracker_iteration', tracker: VelocityTracker.withKind(PointerDeviceKind.touch)),
     TrackerBenchmark(name: 'velocity_tracker_iteration_ios_fling', tracker: IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch)),
   ];
   final Stopwatch watch = Stopwatch();
