@@ -2431,4 +2431,8 @@ void main() {
           ..circle(x: 5.0, y: 5.0, radius: 10.0, )
     );
   });
+
+  testWidgets('Do not review, just test if the CI green.', (WidgetTester tester) async {
+    expect(true, true);
+  });
 }
