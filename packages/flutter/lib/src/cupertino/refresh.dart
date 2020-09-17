@@ -280,11 +280,11 @@ typedef RefreshCallback = Future<void> Function();
 /// ```
 ///
 /// ```dart
-/// List<Color> colors = [Colors.amber[100], Colors.amber[300], Colors.amber[600]];
+/// List<Color> colors = [CupertinoColors.systemYellow, CupertinoColors.systemOrange, CupertinoColors.systemPink];
 /// List<Widget> items = [
-///   Container(color: Colors.amber[600], height: 100.0),
-///   Container(color: Colors.amber[300], height: 100.0),
-///   Container(color: Colors.amber[100], height: 100.0),
+///   Container(color: CupertinoColors.systemPink, height: 100.0),
+///   Container(color: CupertinoColors.systemOrange, height: 100.0),
+///   Container(color: CupertinoColors.systemYellow, height: 100.0),
 /// ];
 ///
 /// Future<void> _getItems() async {
