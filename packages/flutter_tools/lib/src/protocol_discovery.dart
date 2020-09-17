@@ -63,7 +63,9 @@ class ProtocolDiscovery {
   /// The time to wait before forwarding a new observatory URIs from [logReader].
   final Duration throttleDuration;
 
-  /// The time between URIs are discovered before timing out when scraping the [logReader]. Optional.
+  /// The time between URIs are discovered before timing out when scraping the [logReader].
+  ///
+  /// If null, log scanning will continue indefinitely.
   final Duration throttleTimeout;
 
   StreamSubscription<String> _deviceLogSubscription;
@@ -95,12 +97,13 @@ class ProtocolDiscovery {
     Stream<Uri> uriStream = _uriStreamController.stream
       .transform(_throttle<Uri>(
         waitDuration: throttleDuration,
-      ))
-      .asyncMap<Uri>(_forwardPort);
+      ));
     if (throttleTimeout != null) {
-      uriStream = uriStream .timeout(throttleTimeout);
+      // Don't throw a TimeoutException. The URL wasn't found in time, just close the stream.
+      uriStream = uriStream.timeout(throttleTimeout,
+          onTimeout: (EventSink<Uri> sink) => sink.close());
     }
-    return uriStream;
+    return uriStream.asyncMap<Uri>(_forwardPort);
   }
 
   Future<void> cancel() => _stopScrapingLogs();
