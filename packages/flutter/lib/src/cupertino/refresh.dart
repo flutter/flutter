@@ -287,13 +287,6 @@ typedef RefreshCallback = Future<void> Function();
 ///   Container(color: CupertinoColors.systemYellow, height: 100.0),
 /// ];
 ///
-/// Future<void> _getItems() async {
-///   await Future.delayed(Duration(milliseconds: 1000));
-///   setState(() {
-///     items.insert(0, Container(color: colors[items.length % 3], height: 100.0));
-///   });
-/// }
-///
 /// @override
 /// Widget build(BuildContext context) {
 ///   return CupertinoApp(
@@ -305,7 +298,12 @@ typedef RefreshCallback = Future<void> Function();
 ///           CupertinoSliverRefreshControl(
 ///             refreshTriggerPullDistance: 100.0,
 ///             refreshIndicatorExtent: 60.0,
-///             onRefresh: _getItems,
+///             onRefresh: () async {
+///               await Future.delayed(Duration(milliseconds: 1000));
+///               setState(() {
+///                 items.insert(0, Container(color: colors[items.length % 3], height: 100.0));
+///               });
+///             },
 ///           ),
 ///           SliverList(
 ///             delegate: SliverChildBuilderDelegate(
