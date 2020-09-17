@@ -130,7 +130,7 @@
         "templates/app/windows.tmpl/runner/resource.h",
         "templates/app/windows.tmpl/runner/resources/app_icon.ico.img.tmpl",
         "templates/app/windows.tmpl/runner/runner.exe.manifest",
-        "templates/app/windows.tmpl/runner/Runner.rc",
+        "templates/app/windows.tmpl/runner/Runner.rc.tmpl",
         "templates/app/windows.tmpl/runner/run_loop.cpp",
         "templates/app/windows.tmpl/runner/run_loop.h",
         "templates/app/windows.tmpl/runner/utils.cpp",
