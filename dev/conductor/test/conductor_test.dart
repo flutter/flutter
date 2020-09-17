@@ -148,10 +148,7 @@ void main() {
          'already tagged', () {
       when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
       when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
-      when(mockGit.getOutput(
-        'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
-        any,
-      )).thenReturn(lastVersion);
+      when(mockGit.getFullTag(origin)).thenReturn(lastVersion);
       when(mockGit.getOutput(
         'rev-parse $lastVersion',
         any,
@@ -186,10 +183,7 @@ void main() {
     test('throws exception if desired commit is already tip of dev branch', () {
       when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
       when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
-      when(mockGit.getOutput(
-        'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
-        any,
-      )).thenReturn(lastVersion);
+      when(mockGit.getFullTag(origin)).thenReturn(lastVersion);
       when(mockGit.getOutput(
         'rev-parse $lastVersion',
         any,
@@ -219,10 +213,7 @@ void main() {
         .thenReturn(kUpstreamRemote);
       when(mockGit.getOutput('status --porcelain', any))
         .thenReturn('');
-      when(mockGit.getOutput(
-        'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
-        any,
-      )).thenReturn(lastVersion);
+      when(mockGit.getFullTag(origin)).thenReturn(lastVersion);
       when(mockGit.getOutput(
         'rev-parse $lastVersion',
         any,
@@ -261,10 +252,7 @@ void main() {
         .thenReturn(kUpstreamRemote);
       when(mockGit.getOutput('status --porcelain', any))
         .thenReturn('');
-      when(mockGit.getOutput(
-        'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
-        any,
-      )).thenReturn(lastVersion);
+      when(mockGit.getFullTag(origin)).thenReturn(lastVersion);
       when(mockGit.getOutput(
         'rev-parse $lastVersion',
         any,
@@ -293,10 +281,7 @@ void main() {
         .thenReturn(kUpstreamRemote);
       when(mockGit.getOutput('status --porcelain', any))
         .thenReturn('');
-      when(mockGit.getOutput(
-        'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
-        any,
-      )).thenReturn('1.2.0-0.0.pre');
+      when(mockGit.getFullTag(origin)).thenReturn(lastVersion);
       when(mockGit.getOutput(
         'rev-parse $lastVersion',
         any,
