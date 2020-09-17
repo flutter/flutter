@@ -16,6 +16,7 @@ dartdoc:
     # Default errors of dartdoc:
     - duplicate-file
     - invalid-parameter
+    - no-defining-library-found
     - tool-error
     - unresolved-export
     # Warnings that are elevated to errors:
@@ -23,6 +24,7 @@ dartdoc:
     - ambiguous-reexport
     - broken-link
     - category-order-gives-missing-package-name
+    - deprecated
     - ignored-canonical-for
     - missing-from-search-index
     - no-canonical-found
@@ -30,6 +32,7 @@ dartdoc:
     - not-implemented
     - orphaned-file
     - reexported-private-api-across-packages
+    - unknown-directive
     - unknown-file
     - unknown-macro
     - unresolved-doc-reference
