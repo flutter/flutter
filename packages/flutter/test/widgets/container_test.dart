@@ -586,7 +586,7 @@ void main() {
     expect(tapped, false);
   });
 
-    testWidgets('Container transformAlignment', (WidgetTester tester) async {
+  testWidgets('Container transformAlignment', (WidgetTester tester) async {
     bool didReceiveTap = false;
     await tester.pumpWidget(
       Directionality(
