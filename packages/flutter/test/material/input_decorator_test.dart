@@ -4286,4 +4286,29 @@ void main() {
     final double unConstrainedHeightCompact = tester.getSize(find.byKey(keyUnconstrained)).height;
     expect(constrainedHeightCompact, equals(unConstrainedHeightCompact));
   });
+
+  testWidgets('A vertically constrained TextField still positions its text inside of itself', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: Container(
+            width: 200,
+            height: 28,
+            child: TextField(
+              controller: TextEditingController(text: 'A'),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final double textFieldTop = tester.getTopLeft(find.byType(TextField)).dy;
+    final double textFieldBottom = tester.getBottomLeft(find.byType(TextField)).dy;
+    final double textTop = tester.getTopLeft(find.text('A')).dy;
+
+    // The text is inside the field.
+    expect(tester.getSize(find.text('A')).height, lessThan(textFieldBottom - textFieldTop));
+    expect(textTop, greaterThan(textFieldTop));
+    expect(textTop, lessThan(textFieldBottom));
+  });
 }
