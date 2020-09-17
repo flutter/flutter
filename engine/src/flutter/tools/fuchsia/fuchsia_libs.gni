@@ -75,7 +75,7 @@ vulkan_validation_libs = [
 ]
 
 vulkan_data_dir =
-    "//fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d"
+    "//fuchsia/sdk/$host_os/pkg/vulkan_layers/data/vulkan/explicit_layer.d"
 
 vulkan_icds = [
   {
