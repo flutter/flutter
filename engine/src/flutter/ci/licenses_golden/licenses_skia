@@ -1,4 +1,4 @@
-Signature: b37e6a55e65c0c837682581fe32a33ff
+Signature: ab6bb712b55598c93bd4290fbef36706
 
 UNUSED LICENSES:
 
@@ -975,6 +975,9 @@ FILE: ../../../third_party/skia/bench/skpbench.json
 FILE: ../../../third_party/skia/build/fuchsia/skqp/skqp.cmx
 FILE: ../../../third_party/skia/build/fuchsia/skqp/test_manifest.json
 FILE: ../../../third_party/skia/demos.skia.org/demos/hello_world/index.html
+FILE: ../../../third_party/skia/demos.skia.org/demos/image_decode_web_worker/index.html
+FILE: ../../../third_party/skia/demos.skia.org/demos/image_decode_web_worker/main.js
+FILE: ../../../third_party/skia/demos.skia.org/demos/image_decode_web_worker/worker.js
 FILE: ../../../third_party/skia/demos.skia.org/demos/path_performance/garbage.svg
 FILE: ../../../third_party/skia/demos.skia.org/demos/path_performance/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/path_performance/main.js
