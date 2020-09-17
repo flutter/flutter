@@ -40,7 +40,7 @@ it like so:
 $FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart bin/gen_keycodes.dart
 ```
 
-This will rengerate the `keyboard_key.dart` and `keyboard_maps.dart` files in
+This will regenerate the `keyboard_key.dart` and `keyboard_maps.dart` files in
 place.
 
 If you wish to incorporate and parse changes from the Chromium and Android
