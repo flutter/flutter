@@ -75,7 +75,6 @@ class UserMessages {
       'On first launch it will assist you in installing the Android SDK components.\n'
       '(or visit ${_androidSdkInstallUrl(platform)} for detailed instructions).\n'
       'If the Android SDK has been installed to a custom location, please use\n'
-      '`flutter config --android-studio-dir` or\n'
       '`flutter config --android-sdk` to update to that location.\n';
   String androidSdkLocation(String directory) => 'Android SDK at $directory';
   String androidSdkPlatformToolsVersion(String platform, String tools) =>
