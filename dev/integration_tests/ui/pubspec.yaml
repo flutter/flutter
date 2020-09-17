@@ -6,7 +6,7 @@ environment:
   sdk: ">=2.8.0 <3.0.0"
 
 dependencies:
-  image: 2.1.14
+  image: 2.1.15
   flutter:
     sdk: flutter
   flutter_driver:
@@ -84,4 +84,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: 2dc6
+# PUBSPEC CHECKSUM: 6fc7

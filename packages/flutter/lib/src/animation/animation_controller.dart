@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 
-import 'dart:async';
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';

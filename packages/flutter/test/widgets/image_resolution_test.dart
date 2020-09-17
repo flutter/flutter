@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 @TestOn('!chrome') // asset bundle behaves differently.
-import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
