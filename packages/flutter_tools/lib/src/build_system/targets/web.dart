@@ -341,10 +341,6 @@ class WebReleaseBundle extends Target {
         final String randomHash = Random().nextInt(4294967296).toString();
         final String resultString = inputFile.readAsStringSync()
           .replaceFirst(
-            '<script src="main.dart.js" type="application/javascript"></script>',
-            '<script src="main.dart.js?v=$randomHash" type="application/javascript"></script>'
-          )
-          .replaceFirst(
             "navigator.serviceWorker.register('flutter_service_worker.js')",
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
           );
@@ -545,6 +541,9 @@ self.addEventListener("activate", function(event) {
 // The fetch handler redirects requests for RESOURCE files to the service
 // worker cache.
 self.addEventListener("fetch", (event) => {
+  if (event.request.method !== 'GET') {
+    return;
+  }
   var origin = self.location.origin;
   var key = event.request.url.substring(origin.length + 1);
   // Redirect URLs to the index.html
@@ -554,9 +553,10 @@ self.addEventListener("fetch", (event) => {
   if (event.request.url == origin || event.request.url.startsWith(origin + '/#') || key == '') {
     key = '/';
   }
-  // If the URL is not the RESOURCE list, skip the cache.
+  // If the URL is not the RESOURCE list then return to signal that the
+  // browser should take over.
   if (!RESOURCES[key]) {
-    return event.respondWith(fetch(event.request));
+    return;
   }
   // If the URL is the index.html, perform an online-first request.
   if (key == '/') {
