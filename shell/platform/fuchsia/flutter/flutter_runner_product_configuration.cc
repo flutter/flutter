@@ -20,6 +20,9 @@ FlutterRunnerProductConfiguration::FlutterRunnerProductConfiguration(
   if (auto& val = document["vsync_offset_in_us"]; val.IsInt()) {
     vsync_offset_ = fml::TimeDelta::FromMicroseconds(val.GetInt());
   }
+  if (auto& val = document["max_frames_in_flight"]; val.IsInt()) {
+    max_frames_in_flight_ = val.GetInt();
+  }
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
   if (auto& val = document["use_legacy_renderer"]; val.IsBool()) {
     use_legacy_renderer_ = val.GetBool();
