@@ -280,7 +280,11 @@ typedef RefreshCallback = Future<void> Function();
 /// ```
 ///
 /// ```dart
-/// List<Color> colors = [CupertinoColors.systemYellow, CupertinoColors.systemOrange, CupertinoColors.systemPink];
+/// List<Color> colors = [
+///   CupertinoColors.systemYellow,
+///   CupertinoColors.systemOrange,
+///   CupertinoColors.systemPink
+/// ];
 /// List<Widget> items = [
 ///   Container(color: CupertinoColors.systemPink, height: 100.0),
 ///   Container(color: CupertinoColors.systemOrange, height: 100.0),
@@ -307,7 +311,7 @@ typedef RefreshCallback = Future<void> Function();
 ///           ),
 ///           SliverList(
 ///             delegate: SliverChildBuilderDelegate(
-///                 (BuildContext context, int index) => items[index],
+///               (BuildContext context, int index) => items[index],
 ///               childCount: items.length,
 ///             ),
 ///           ),
