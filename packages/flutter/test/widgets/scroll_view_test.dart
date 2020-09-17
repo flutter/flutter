@@ -836,7 +836,7 @@ void main() {
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
     expect(textField.focusNode.hasFocus, isFalse);
-  });  
+  });
 
   testWidgets('Can jumpTo during drag', (WidgetTester tester) async {
     final List<Type> log = <Type>[];
