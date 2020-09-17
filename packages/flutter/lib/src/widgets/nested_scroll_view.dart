@@ -1491,7 +1491,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 
   @override
   void pointerScroll(double delta) {
-    print('delta $delta');
     return coordinator.pointerScroll(delta);
   }
 
