@@ -531,6 +531,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
               border: InputBorder.none,
               hintText: searchFieldLabel,
               hintStyle: searchFieldStyle,
+              fillColor: theme.inputDecorationTheme.fillColor,
+              focusedBorder: theme.inputDecorationTheme.focusedBorder,
             ),
           ),
           actions: widget.delegate.buildActions(context),
