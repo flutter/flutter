@@ -71,9 +71,11 @@ class AndroidView extends StatefulWidget {
     this.gestureRecognizers,
     this.creationParams,
     this.creationParamsCodec,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(viewType != null),
        assert(hitTestBehavior != null),
        assert(creationParams == null || creationParamsCodec != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// The unique identifier for Android view type to be embedded by this widget.
@@ -180,6 +182,11 @@ class AndroidView extends StatefulWidget {
   ///
   /// This must not be null if [creationParams] is not null.
   final MessageCodec<dynamic>? creationParamsCodec;
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  final Clip clipBehavior;
 
   @override
   State<AndroidView> createState() => _AndroidViewState();
@@ -434,6 +441,7 @@ class _AndroidViewState extends State<AndroidView> {
         controller: _controller,
         hitTestBehavior: widget.hitTestBehavior,
         gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
+        clipBehavior: widget.clipBehavior,
       ),
     );
   }
@@ -643,14 +651,17 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
     required this.controller,
     required this.hitTestBehavior,
     required this.gestureRecognizers,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(controller != null),
        assert(hitTestBehavior != null),
        assert(gestureRecognizers != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   final AndroidViewController controller;
   final PlatformViewHitTestBehavior hitTestBehavior;
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
+  final Clip clipBehavior;
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
@@ -658,6 +669,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
         viewController: controller,
         hitTestBehavior: hitTestBehavior,
         gestureRecognizers: gestureRecognizers,
+        clipBehavior: clipBehavior,
       );
 
   @override
@@ -665,6 +677,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
     renderObject.viewController = controller;
     renderObject.hitTestBehavior = hitTestBehavior;
     renderObject.updateGestureRecognizers(gestureRecognizers);
+    renderObject.clipBehavior = clipBehavior;
   }
 }
 
