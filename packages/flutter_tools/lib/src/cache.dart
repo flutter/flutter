@@ -135,7 +135,7 @@ class Cache {
       _artifacts.add(PubDependencies(
         fileSystem: _fileSystem,
         logger: _logger,
-        // flutter root and pub must be lazily to avoid initialization
+        // flutter root and pub must be lazily initialized to avoid accessing
         // before the version is determined.
         flutterRoot: () => flutterRoot,
         pub: () => pub,
@@ -446,9 +446,14 @@ class Cache {
     );
   }
 
-  FutureOr<bool> isUpToDate() async => (await Future.wait<bool>(<Future<bool>>[
-    ..._artifacts.map((ArtifactSet artifact) async => await artifact.isUpToDate()),
-  ])).every((bool isUpToDate) => isUpToDate);
+  Future<bool> isUpToDate() async {
+    for (final ArtifactSet artifact in _artifacts) {
+      if (!await artifact.isUpToDate()) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   /// Update the cache to contain all `requiredArtifacts`.
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
@@ -518,7 +523,7 @@ abstract class ArtifactSet {
   final DevelopmentArtifact developmentArtifact;
 
   /// [true] if the artifact is up to date.
-  FutureOr<bool> isUpToDate();
+  Future<bool> isUpToDate();
 
   /// The environment variables (if any) required to consume the artifacts.
   Map<String, String> get environment {
@@ -562,7 +567,7 @@ abstract class CachedArtifact extends ArtifactSet {
   }
 
   @override
-  bool isUpToDate() {
+  Future<bool> isUpToDate() async {
     if (!location.existsSync()) {
       return false;
     }
@@ -1055,7 +1060,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
   }
 
   @override
-  bool isUpToDate() {
+  Future<bool> isUpToDate() async {
     // The dependencies are downloaded and cached by Gradle.
     // The tool doesn't know if the dependencies are already cached at this point.
     // Therefore, call Gradle to figure this out.

@@ -141,8 +141,8 @@ void main() {
     testUsingContext('should not be up to date, if some cached artifact is not', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate()).thenReturn(true);
-      when(artifact2.isUpToDate()).thenReturn(false);
+      when(artifact1.isUpToDate()).thenReturn(Future<bool>.value(true));
+      when(artifact2.isUpToDate()).thenReturn(Future<bool>.value(false));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       expect(await cache.isUpToDate(), isFalse);
     }, overrides: <Type, Generator>{
@@ -153,8 +153,8 @@ void main() {
     testUsingContext('should be up to date, if all cached artifacts are', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate()).thenReturn(true);
-      when(artifact2.isUpToDate()).thenReturn(true);
+      when(artifact1.isUpToDate()).thenReturn(Future<bool>.value(true));
+      when(artifact2.isUpToDate()).thenReturn(Future<bool>.value(true));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       expect(await cache.isUpToDate(), isTrue);
     }, overrides: <Type, Generator>{
@@ -165,8 +165,8 @@ void main() {
     testUsingContext('should update cached artifacts which are not up to date', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate()).thenReturn(true);
-      when(artifact2.isUpToDate()).thenReturn(false);
+      when(artifact1.isUpToDate()).thenReturn(Future<bool>.value(true));
+      when(artifact2.isUpToDate()).thenReturn(Future<bool>.value(false));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       await cache.updateAll(<DevelopmentArtifact>{
         null,
@@ -207,8 +207,8 @@ void main() {
     testUsingContext('failed storage.googleapis.com download shows China warning', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate()).thenReturn(false);
-      when(artifact2.isUpToDate()).thenReturn(false);
+      when(artifact1.isUpToDate()).thenReturn(Future<bool>.value(false));
+      when(artifact2.isUpToDate()).thenReturn(Future<bool>.value(false));
       final MockInternetAddress address = MockInternetAddress();
       when(address.host).thenReturn('storage.googleapis.com');
       when(artifact1.update(any)).thenThrow(SocketException(
