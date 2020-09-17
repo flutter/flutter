@@ -4,6 +4,7 @@
 
 import 'package:archive/archive.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 
 import 'android/gradle_utils.dart';
 import 'base/common.dart';
@@ -14,8 +15,11 @@ import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'dart/package_map.dart';
+import 'dart/pub.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
+import 'runner/flutter_command.dart';
 
 /// A tag for a set of development artifacts that need to be cached.
 class DevelopmentArtifact {
@@ -126,6 +130,14 @@ class Cache {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
       _artifacts.add(FontSubsetArtifacts(this));
+      _artifacts.add(PubDependencies(
+        fileSystem: _fileSystem,
+        logger: _logger,
+        // flutter root and pub must be lazily initialized to avoid accessing
+        // before the version is determined.
+        flutterRoot: () => flutterRoot,
+        pub: () => pub,
+      ));
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -432,7 +444,14 @@ class Cache {
     );
   }
 
-  bool isUpToDate() => _artifacts.every((ArtifactSet artifact) => artifact.isUpToDate());
+  Future<bool> isUpToDate() async {
+    for (final ArtifactSet artifact in _artifacts) {
+      if (!await artifact.isUpToDate()) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   /// Update the cache to contain all `requiredArtifacts`.
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
@@ -444,7 +463,7 @@ class Cache {
         _logger.printTrace('Artifact $artifact is not required, skipping update.');
         continue;
       }
-      if (artifact.isUpToDate()) {
+      if (await artifact.isUpToDate()) {
         continue;
       }
       try {
@@ -502,7 +521,7 @@ abstract class ArtifactSet {
   final DevelopmentArtifact developmentArtifact;
 
   /// [true] if the artifact is up to date.
-  bool isUpToDate();
+  Future<bool> isUpToDate();
 
   /// The environment variables (if any) required to consume the artifacts.
   Map<String, String> get environment {
@@ -546,7 +565,7 @@ abstract class CachedArtifact extends ArtifactSet {
   }
 
   @override
-  bool isUpToDate() {
+  Future<bool> isUpToDate() async {
     if (!location.existsSync()) {
       return false;
     }
@@ -590,6 +609,66 @@ abstract class CachedArtifact extends ArtifactSet {
   Future<void> updateInner(ArtifactUpdater artifactUpdater);
 
   Uri _toStorageUri(String path) => Uri.parse('${cache.storageBaseUrl}/$path');
+}
+
+/// Ensures that the source files for all of the dependencies for the
+/// flutter_tool are present.
+///
+/// This does not handle cases wheere the source files are modified or the
+/// directory contents are incomplete.
+class PubDependencies extends ArtifactSet {
+  PubDependencies({
+    // Needs to be lazy to avoid reading from the cache before the root is initialized.
+    @required String Function() flutterRoot,
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Pub Function() pub,
+  }) : _logger = logger,
+       _fileSystem = fileSystem,
+       _flutterRoot = flutterRoot,
+       _pub = pub,
+       super(DevelopmentArtifact.universal);
+
+  final String Function() _flutterRoot;
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final Pub Function() _pub;
+
+  @override
+  Future<bool> isUpToDate() async {
+    final File toolPackageConfig = _fileSystem.file(
+      _fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools', kPackagesFileName),
+    );
+    if (!toolPackageConfig.existsSync()) {
+      return false;
+    }
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      toolPackageConfig,
+      logger: _logger,
+      throwOnError: false,
+    );
+    if (packageConfig == null || packageConfig == PackageConfig.empty ) {
+      return false;
+    }
+    for (final Package package in packageConfig.packages) {
+      if (!_fileSystem.directory(package.packageUriRoot).existsSync()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @override
+  String get name => 'pub_dependencies';
+
+  @override
+  Future<void> update(ArtifactUpdater artifactUpdater) async {
+    await _pub().get(
+      context: PubContext.pubGet,
+      directory: _fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
+      generateSyntheticPackage: false,
+    );
+  }
 }
 
 /// A cached artifact containing fonts used for Material Design.
@@ -979,7 +1058,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
   }
 
   @override
-  bool isUpToDate() {
+  Future<bool> isUpToDate() async {
     // The dependencies are downloaded and cached by Gradle.
     // The tool doesn't know if the dependencies are already cached at this point.
     // Therefore, call Gradle to figure this out.
