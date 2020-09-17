@@ -45,6 +45,11 @@ group("flutter") {
     "//flutter/sky",
   ]
 
+  # Flutter SDK artifacts should only be built when either doing host builds, or
+  # for cross-compiled desktop targets.
+  build_engine_artifacts =
+      current_toolchain == host_toolchain || (is_linux && !is_chromeos)
+
   # If enbaled, compile the SDK / snapshot.
   if (!is_fuchsia) {
     public_deps += [
@@ -52,7 +57,7 @@ group("flutter") {
       "//flutter/lib/snapshot:kernel_platform_files",
     ]
 
-    if (current_toolchain == host_toolchain) {
+    if (build_engine_artifacts) {
       public_deps += [
         "//flutter/flutter_frontend_server:frontend_server",
         "//third_party/dart:create_sdk",
@@ -64,8 +69,7 @@ group("flutter") {
     }
   }
 
-  # If on the host, compile tools.
-  if (current_toolchain == host_toolchain) {
+  if (build_engine_artifacts) {
     public_deps += [
       "//flutter/shell/testing",
       "//flutter/tools/const_finder",
