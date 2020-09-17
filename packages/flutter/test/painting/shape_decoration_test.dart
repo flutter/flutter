@@ -60,12 +60,13 @@ void main() {
     expect(b.hitTest(size, const Offset(20.0, 50.0)), isTrue);
   });
 
-  test('ShapeDecoration.image RTL test', () {
+  test('ShapeDecoration.image RTL test', () async {
+    final ui.Image image = await createTestImage(width: 100, height: 200);
     final List<int> log = <int>[];
     final ShapeDecoration decoration = ShapeDecoration(
       shape: const CircleBorder(),
       image: DecorationImage(
-        image: TestImageProvider(),
+        image: TestImageProvider(image),
         alignment: AlignmentDirectional.bottomEnd,
       ),
     );
@@ -114,6 +115,10 @@ void main() {
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
+  TestImageProvider(this.image);
+
+  final ui.Image image;
+
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<TestImageProvider>(this);
@@ -122,28 +127,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   @override
   ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(ImageInfo(image: TestImage(), scale: 1.0)),
+      SynchronousFuture<ImageInfo>(ImageInfo(image: image, scale: 1.0)),
     );
-  }
-}
-
-class TestImage implements ui.Image {
-  @override
-  int get width => 100;
-
-  @override
-  int get height => 200;
-
-  @override
-  void dispose() { }
-
-  @override
-  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
-    throw UnsupportedError('Cannot encode test image');
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw UnimplementedError();
   }
 }

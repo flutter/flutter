@@ -15,8 +15,8 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
-import 'image_data.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
@@ -149,7 +149,7 @@ void main() {
 
   test('File image sets tag', () async {
     final MemoryFileSystem fs = MemoryFileSystem();
-    final File file = fs.file('/blue.png')..createSync(recursive: true)..writeAsBytesSync(kBlueRectPng);
+    final File file = fs.file('/blue.png')..createSync(recursive: true)..writeAsBytesSync(kBlueSquarePng);
     final FileImage provider = FileImage(file);
 
     final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
@@ -158,7 +158,7 @@ void main() {
   });
 
   test('Memory image sets tag', () async {
-    final Uint8List bytes = Uint8List.fromList(kBlueRectPng);
+    final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
     final MemoryImage provider = MemoryImage(bytes);
 
     final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
@@ -176,7 +176,7 @@ void main() {
   });
 
   test('Resize image sets tag', () async {
-    final Uint8List bytes = Uint8List.fromList(kBlueRectPng);
+    final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
     final ResizeImage provider = ResizeImage(MemoryImage(bytes), width: 40, height: 40);
     final MultiFrameImageStreamCompleter completer = provider.load(
       await provider.obtainKey(ImageConfiguration.empty),
@@ -206,6 +206,6 @@ class FakeCodec implements Codec {
 class _TestAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
-    return Uint8List.fromList(kBlueRectPng).buffer.asByteData();
+    return Uint8List.fromList(kBlueSquarePng).buffer.asByteData();
   }
 }

@@ -46,7 +46,7 @@ void main() {
     final Completer<Event> completer = Completer<Event>();
     vmService.onExtensionEvent.first.then(completer.complete);
 
-    const TestImage image = TestImage(width: 300, height: 300);
+    final ui.Image image = await createTestImage(width: 300, height: 300);
     final TestCanvas canvas = TestCanvas();
     paintImage(
       canvas: canvas,
@@ -79,7 +79,7 @@ void main() {
     final Completer<Event> completer = Completer<Event>();
     vmService.onExtensionEvent.first.then(completer.complete);
 
-    const TestImage image = TestImage(width: 300, height: 300);
+    final ui.Image image = await createTestImage(width: 300, height: 300);
     final TestCanvas canvas = TestCanvas();
     paintImage(
       canvas: canvas,
@@ -103,28 +103,6 @@ void main() {
       '{"test.png":{"source":"test.png","displaySize":{"width":300.0,"height":300.0},"imageSize":{"width":300.0,"height":300.0},"displaySizeInBytes":480000,"decodedSizeInBytes":480000}}',
     );
   }, skip: isBrowser); // uses dart:isolate and io
-}
-
-class TestImage implements ui.Image {
-  const TestImage({this.height = 0, this.width = 0});
-  @override
-  final int height;
-  @override
-  final int width;
-
-  @override
-  void dispose() {}
-
-  @override
-  Future<ByteData> toByteData(
-      {ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
-    throw UnimplementedError();
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw UnimplementedError();
-  }
 }
 
 class TestCanvas implements Canvas {

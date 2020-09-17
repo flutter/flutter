@@ -5,9 +5,7 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -31,7 +29,7 @@ class TestImageInfo implements ImageInfo {
 }
 
 class TestImageProvider extends ImageProvider<int> {
-  const TestImageProvider(this.key, this.imageValue, { this.image = const TestImage() })
+  const TestImageProvider(this.key, this.imageValue, { @required this.image })
       : assert(image != null);
 
   final int key;
@@ -72,27 +70,6 @@ Future<ImageInfo> extractOneFrame(ImageStream stream) {
   });
   stream.addListener(listener);
   return completer.future;
-}
-
-class TestImage implements ui.Image {
-  const TestImage({this.height = 0, this.width = 0});
-  @override
-  final int height;
-  @override
-  final int width;
-
-  @override
-  void dispose() { }
-
-  @override
-  Future<ByteData> toByteData({ ImageByteFormat format = ImageByteFormat.rawRgba }) {
-    throw UnimplementedError();
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw UnimplementedError();
-  }
 }
 
 class ErrorImageProvider extends ImageProvider<ErrorImageProvider> {
@@ -146,7 +123,7 @@ class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterIm
 }
 
 class TestImageStreamCompleter extends ImageStreamCompleter {
-  void testSetImage(TestImage image) {
+  void testSetImage(ui.Image image) {
     setImage(ImageInfo(image: image, scale: 1.0));
   }
 }
