@@ -827,7 +827,7 @@ void main() {
         ],
       ),
     ));
-    
+
     final Finder finder = find.byType(TextField).first;
     final TextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
