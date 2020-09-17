@@ -70,7 +70,7 @@ TEST_F(SessionConnectionTest, SimplePresentTest) {
 
   flutter_runner::SessionConnection session_connection(
       "debug label", std::move(session_), on_session_error_callback,
-      on_frame_presented_callback, vsync_event_.get());
+      on_frame_presented_callback, vsync_event_.get(), 3);
 
   for (int i = 0; i < 200; ++i) {
     session_connection.Present();
@@ -92,7 +92,7 @@ TEST_F(SessionConnectionTest, BatchedPresentTest) {
 
   flutter_runner::SessionConnection session_connection(
       "debug label", std::move(session_), on_session_error_callback,
-      on_frame_presented_callback, vsync_event_.get());
+      on_frame_presented_callback, vsync_event_.get(), 3);
 
   for (int i = 0; i < 200; ++i) {
     session_connection.Present();
