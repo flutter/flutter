@@ -382,7 +382,7 @@ class RenderFlow extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if(clipBehavior == Clip.none) {
+    if (clipBehavior == Clip.none) {
       _paintWithDelegate(context, offset);
     } else {
       context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintWithDelegate, clipBehavior: clipBehavior);
