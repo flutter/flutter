@@ -133,11 +133,6 @@ class TestCommand extends Command<bool> with ArgUtils {
       /// Collect information on the bot.
       final MacOSInfo macOsInfo = new MacOSInfo();
       await macOsInfo.printInformation();
-
-      /// Tests may fail on the CI, therefore exit test_runner.
-      if (isLuci) {
-        return true;
-      }
     }
 
     switch (testTypesRequested) {

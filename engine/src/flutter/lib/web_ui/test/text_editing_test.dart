@@ -1016,7 +1016,7 @@ void testMain() {
 
     test(
         'singleTextField Autofill: setClient, setEditingState, show, '
-        'setEditingState, clearClient', () {
+        'setSizeAndTransform, setEditingState, clearClient', () {
       // Create a configuration with focused element has autofil hint.
       final Map<String, dynamic> flutterSingleAutofillElementConfig =
           createFlutterConfig('text', autofillHint: 'username');
@@ -1034,6 +1034,11 @@ void testMain() {
 
       const MethodCall show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
 
       // The second [setEditingState] should override the first one.
       checkInputEditingState(
@@ -1074,9 +1079,18 @@ void testMain() {
       const MethodCall show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
 
-      // The second [setEditingState] should override the first one.
-      checkInputEditingState(
-          textEditing.editingElement.domElement, 'abcd', 2, 3);
+      final InputElement inputElement =
+          textEditing.editingElement.domElement as InputElement;
+      expect(inputElement.value, 'abcd');
+      if (!(browserEngine == BrowserEngine.webkit &&
+          operatingSystem == OperatingSystem.macOs)) {
+        // In Safari Desktop Autofill menu appears as soon as an element is
+        // focused, therefore the input element is only focused after the
+        // location is received.
+        expect(document.activeElement, inputElement);
+        expect(inputElement.selectionStart, 2);
+        expect(inputElement.selectionEnd, 3);
+      }
 
       // The transform is changed. For example after a validation error, red
       // line appeared under the input field.
@@ -1104,7 +1118,7 @@ void testMain() {
 
     test(
         'multiTextField Autofill: setClient, setEditingState, show, '
-        'setEditingState, clearClient', () {
+        'setSizeAndTransform setEditingState, clearClient', () {
       // Create a configuration with an AutofillGroup of four text fields.
       final Map<String, dynamic> flutterMultiAutofillElementConfig =
           createFlutterConfig('text',
@@ -1129,6 +1143,11 @@ void testMain() {
 
       const MethodCall show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
 
       // The second [setEditingState] should override the first one.
       checkInputEditingState(
@@ -1501,6 +1520,11 @@ void testMain() {
 
       const MethodCall show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
 
       // The second [setEditingState] should override the first one.
       checkInputEditingState(
