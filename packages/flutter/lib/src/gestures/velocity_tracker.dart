@@ -150,8 +150,8 @@ class _PointAtTime {
 class VelocityTracker {
   /// Create a new velocity tracker for a pointer [kind].
   @Deprecated(
-    'Use VelocityTracker.withKind and provide the PointerDeviceKind associated with the gesture being tracked.'
-    'This feature was deprecated after 1.22.0.'
+    'Use VelocityTracker.withKind and provide the PointerDeviceKind associated with the gesture being tracked '
+    'This feature was deprecated after v1.22.0.'
   )
   VelocityTracker([this.kind = PointerDeviceKind.touch]);
 
