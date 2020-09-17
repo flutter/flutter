@@ -27,7 +27,8 @@ class SessionConnection final : public flutter::SessionWrapper {
                     fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
                     fml::closure session_error_callback,
                     on_frame_presented_event on_frame_presented_callback,
-                    zx_handle_t vsync_event_handle);
+                    zx_handle_t vsync_event_handle,
+                    uint64_t max_frames_in_flight);
 
   ~SessionConnection();
 
@@ -71,7 +72,7 @@ class SessionConnection final : public flutter::SessionWrapper {
   // The maximum number of frames Flutter sent to Scenic that it can have
   // outstanding at any time. This is equivalent to how many times it has
   // called Present2() before receiving an OnFramePresented() event.
-  static constexpr int kMaxFramesInFlight = 3;
+  const int kMaxFramesInFlight;
   int frames_in_flight_ = 0;
 
   int frames_in_flight_allowed_ = 0;

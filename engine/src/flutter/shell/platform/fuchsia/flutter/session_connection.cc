@@ -17,10 +17,12 @@ SessionConnection::SessionConnection(
     fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
     fml::closure session_error_callback,
     on_frame_presented_event on_frame_presented_callback,
-    zx_handle_t vsync_event_handle)
+    zx_handle_t vsync_event_handle,
+    uint64_t max_frames_in_flight)
     : session_wrapper_(session.Bind(), nullptr),
       on_frame_presented_callback_(std::move(on_frame_presented_callback)),
-      vsync_event_handle_(vsync_event_handle) {
+      vsync_event_handle_(vsync_event_handle),
+      kMaxFramesInFlight(max_frames_in_flight) {
   session_wrapper_.set_error_handler(
       [callback = session_error_callback](zx_status_t status) { callback(); });
 

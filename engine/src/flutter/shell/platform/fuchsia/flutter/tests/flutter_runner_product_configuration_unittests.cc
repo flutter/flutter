@@ -68,4 +68,24 @@ TEST_F(FlutterRunnerProductConfigurationTest, NonIntegerVsyncOffset) {
   EXPECT_EQ(product_config.get_vsync_offset(), expected_offset);
 }
 
+TEST_F(FlutterRunnerProductConfigurationTest, ValidMaxFramesInFlight) {
+  const std::string json_string = "{ \"max_frames_in_flight\" : 5 } ";
+  const uint64_t expected_max_frames_in_flight = 5;
+
+  FlutterRunnerProductConfiguration product_config =
+      FlutterRunnerProductConfiguration(json_string);
+  EXPECT_EQ(product_config.get_max_frames_in_flight(),
+            expected_max_frames_in_flight);
+}
+
+TEST_F(FlutterRunnerProductConfigurationTest, MissingMaxFramesInFlight) {
+  const std::string json_string = "{ \"max_frames_in_flight\" :  } ";
+  const uint64_t minimum_reasonable_max_frames_in_flight = 1;
+
+  FlutterRunnerProductConfiguration product_config =
+      FlutterRunnerProductConfiguration(json_string);
+  EXPECT_GE(product_config.get_max_frames_in_flight(),
+            minimum_reasonable_max_frames_in_flight);
+}
+
 }  // namespace flutter_runner_test
