@@ -137,6 +137,38 @@ void main() {
     expect(hintColor, delegate.hintTextColor);
   });
 
+  testWidgets('InputDecoration fillColor overridden',
+          (WidgetTester tester) async {
+        final _TestSearchDelegate delegate = _TestSearchDelegate();
+
+        await tester.pumpWidget(TestHomePage(
+          delegate: delegate,
+        ));
+        await tester.tap(find.byTooltip('Search'));
+        await tester.pumpAndSettle();
+
+        final TextField textField =
+        tester.widget<TextField>(find.byType(TextField));
+        final Color fillColor = textField.decoration.fillColor;
+        expect(fillColor, delegate.fillColor);
+      });
+
+  testWidgets('InputDecoration focusedBorder overridden',
+          (WidgetTester tester) async {
+        final _TestSearchDelegate delegate = _TestSearchDelegate();
+
+        await tester.pumpWidget(TestHomePage(
+          delegate: delegate,
+        ));
+        await tester.tap(find.byTooltip('Search'));
+        await tester.pumpAndSettle();
+
+        final TextField textField =
+        tester.widget<TextField>(find.byType(TextField));
+        final InputBorder focusedBorder = textField.decoration.focusedBorder;
+        expect(focusedBorder, delegate.focusedBorder);
+      });
+
   testWidgets('Requests suggestions', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
@@ -760,15 +792,20 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   final String result;
   final List<Widget> actions;
   final Color hintTextColor = Colors.green;
+  final Color fillColor = Colors.blue;
+  final InputBorder focusedBorder = InputBorder.none;
 
   @override
   ThemeData appBarTheme(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return theme.copyWith(
-      inputDecorationTheme: InputDecorationTheme(hintStyle: TextStyle(color: hintTextColor)),
+      inputDecorationTheme: InputDecorationTheme(
+        hintStyle: TextStyle(color: hintTextColor),
+        fillColor: fillColor,
+        focusedBorder: focusedBorder,
+      ),
     );
   }
-
   @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
