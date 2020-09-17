@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../bundle.dart';
 import '../cache.dart';
+import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
@@ -130,6 +131,7 @@ class TestCommand extends FlutterCommand {
               'This flag is ignored if --start-paused or coverage are requested. '
               'The vmservice will be enabled no matter what in those cases.'
       );
+      addDdsOptions(verboseHelp: verboseHelp);
   }
 
   /// The interface for starting and configuring the tester.
@@ -164,6 +166,25 @@ class TestCommand extends FlutterCommand {
     }
     final FlutterProject flutterProject = FlutterProject.current();
     if (shouldRunPub) {
+      if (flutterProject.manifest.generateSyntheticPackage) {
+        final Environment environment = Environment(
+          artifacts: globals.artifacts,
+          logger: globals.logger,
+          cacheDir: globals.cache.getRoot(),
+          engineVersion: globals.flutterVersion.engineRevision,
+          fileSystem: globals.fs,
+          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+          outputDir: globals.fs.directory(getBuildDirectory()),
+          processManager: globals.processManager,
+          projectDir: flutterProject.directory,
+        );
+
+        await generateLocalizationsSyntheticPackage(
+          environment: environment,
+          buildSystem: globals.buildSystem,
+        );
+      }
+
       await pub.get(
         context: PubContext.getVerifyContext(name),
         skipPubspecYamlCheck: true,
@@ -254,6 +275,7 @@ class TestCommand extends FlutterCommand {
       enableObservatory: collector != null || startPaused || boolArg('enable-vmservice'),
       startPaused: startPaused,
       disableServiceAuthCodes: disableServiceAuthCodes,
+      disableDds: disableDds,
       ipv6: boolArg('ipv6'),
       machine: machine,
       buildMode: BuildMode.debug,

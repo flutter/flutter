@@ -30,6 +30,7 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
+import '../project.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 
@@ -159,6 +160,9 @@ class WebAssetServer implements AssetReader {
         address = (await InternetAddress.lookup(hostname)).first;
       }
       final HttpServer httpServer = await HttpServer.bind(address, port);
+      // Allow rendering in a iframe.
+      httpServer.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
+
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         globals.fs.file(buildInfo.packagesPath),
         logger: globals.logger,
@@ -282,6 +286,9 @@ class WebAssetServer implements AssetReader {
   final InternetAddress internetAddress;
   /* late final */ Dwds dwds;
   Directory entrypointCacheDirectory;
+
+  @visibleForTesting
+  HttpHeaders get defaultResponseHeaders => _httpServer.defaultResponseHeaders;
 
   @visibleForTesting
   Uint8List getFile(String path) => _files[path];
@@ -782,6 +789,7 @@ class WebDevFS implements DevFS {
       webAssetServer.writeBytes('stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile('manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile('flutter_service_worker.js', '// Service worker not loaded in run mode.');
+      webAssetServer.writeFile('version.json', FlutterProject.current().getVersionInfo());
       webAssetServer.writeFile(
         'main.dart.js',
         generateBootstrapScript(

@@ -32,7 +32,7 @@ void main() {
       for (final TestAnnotationEntry entry in annotationFinder(position)) {
         result.addWithRawTransform(
           transform: entry.transform,
-          position: null,
+          position: position,
           hitTest: (BoxHitTestResult result, Offset position) {
             result.add(entry);
             return true;

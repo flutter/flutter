@@ -28,7 +28,7 @@ class Utf8Codec extends Encoding {
   String get name => cnv.utf8.name;
 }
 
-Encoding get utf8 => const Utf8Codec();
+const Encoding utf8 = Utf8Codec();
 
 class Utf8Decoder extends cnv.Utf8Decoder {
   const Utf8Decoder({this.reportErrors = true}) : super(allowMalformed: true);

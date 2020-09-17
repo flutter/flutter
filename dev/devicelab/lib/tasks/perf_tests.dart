@@ -77,7 +77,7 @@ TaskFunction createCullOpacityPerfTest() {
 }
 
 TaskFunction createCullOpacityPerfE2ETest() {
-  return E2EPerfTest(
+  return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/cull_opacity_perf_e2e.dart',
   ).run;
@@ -89,6 +89,20 @@ TaskFunction createCubicBezierPerfTest() {
     'test_driver/run_app.dart',
     'cubic_bezier_perf',
     testDriver: 'test_driver/cubic_bezier_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createCubicBezierPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/cubic_bezier_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createCubicBezierPerfSkSlWarmupE2ETest() {
+  return PerfTestWithSkSL.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/cubic_bezier_perf_e2e.dart',
   ).run;
 }
 
@@ -106,6 +120,14 @@ TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
     'test_driver/transitions_perf.dart',
     'transitions',
+  ).run;
+}
+
+TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupE2ETest() {
+  return PerfTestWithSkSL.e2e(
+    '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
+    'test_driver/transitions_perf_e2e.dart',
+    testDriver: 'test_driver/transitions_perf_e2e_test.dart',
   ).run;
 }
 
@@ -152,6 +174,13 @@ TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = false}) {
   ).run;
 }
 
+TaskFunction createAnimatedPlaceholderPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/animated_placeholder_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createPictureCachePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -162,7 +191,7 @@ TaskFunction createPictureCachePerfTest() {
 }
 
 TaskFunction createPictureCachePerfE2ETest() {
-  return E2EPerfTest(
+  return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/picture_cache_perf_e2e.dart',
   ).run;
@@ -284,10 +313,58 @@ TaskFunction createsMultiWidgetConstructPerfTest() {
 }
 
 TaskFunction createsMultiWidgetConstructPerfE2ETest() {
-  return E2EPerfTest(
+  return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/multi_widget_construction_perf_e2e.dart',
   ).run;
+}
+
+TaskFunction createsScrollSmoothnessPerfTest() {
+  final String testDirectory =
+      '${flutterDirectory.path}/dev/benchmarks/complex_layout';
+  const String testTarget = 'test/measure_scroll_smoothness.dart';
+  return () {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      final Device device = await devices.workingDevice;
+      await device.unlock();
+      final String deviceId = device.deviceId;
+      await flutter('packages', options: <String>['get']);
+
+      await flutter('drive', options: <String>[
+        '-v',
+        '--verbose-system-logs',
+        '--profile',
+        '-t', testTarget,
+        '-d',
+        deviceId,
+      ]);
+      final Map<String, dynamic> data = json.decode(
+        file('$testDirectory/build/scroll_smoothness_test.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+
+      final Map<String, dynamic> result = <String, dynamic>{};
+      void addResult(dynamic data, String suffix) {
+        assert(data is Map<String, dynamic>);
+        const List<String> metricKeys = <String>[
+          'janky_count',
+          'average_abs_jerk',
+          'dropped_frame_count',
+        ];
+        for (final String key in metricKeys) {
+          result[key+suffix] = data[key];
+        }
+      }
+      addResult(data['resample on with 90Hz input'], '_with_resampler_90Hz');
+      addResult(data['resample on with 59Hz input'], '_with_resampler_59Hz');
+      addResult(data['resample off with 90Hz input'], '_without_resampler_90Hz');
+      addResult(data['resample off with 59Hz input'], '_without_resampler_59Hz');
+
+      return TaskResult.success(
+        result,
+        benchmarkScoreKeys: result.keys.toList(),
+      );
+    });
+  };
 }
 
 TaskFunction createFramePolicyIntegrationTest() {
@@ -333,6 +410,23 @@ TaskFunction createFramePolicyIntegrationTest() {
   };
 }
 
+Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations) {
+  final Map<String, dynamic> tally = <String, dynamic>{};
+  for (final Map<String, dynamic> item in results) {
+    item.forEach((String key, dynamic value) {
+      if (tally.containsKey(key)) {
+        tally[key] = (tally[key] as int) + (value as int);
+      } else {
+        tally[key] = value;
+      }
+    });
+  }
+  tally.forEach((String key, dynamic value) {
+    tally[key] = (value as int) ~/ iterations;
+  });
+  return tally;
+}
+
 /// Measure application startup performance.
 class StartupTest {
   const StartupTest(this.testDirectory, { this.reportMetrics = true });
@@ -345,21 +439,28 @@ class StartupTest {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
-      await flutter('run', options: <String>[
-        '--verbose',
-        '--profile',
-        '--trace-startup',
-        '-d',
-        deviceId,
-      ]);
-      final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/start_up_info.json').readAsStringSync(),
-      ) as Map<String, dynamic>;
+      const int iterations = 3;
+      final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
+      for (int i = 0; i < iterations; ++i) {
+        await flutter('run', options: <String>[
+          '--verbose',
+          '--profile',
+          '--trace-startup',
+          '-d',
+          deviceId,
+        ]);
+        final Map<String, dynamic> data = json.decode(
+          file('$testDirectory/build/start_up_info.json').readAsStringSync(),
+        ) as Map<String, dynamic>;
+        results.add(data);
+      }
+
+      final Map<String, dynamic> averageResults = _average(results, iterations);
 
       if (!reportMetrics)
-        return TaskResult.success(data);
+        return TaskResult.success(averageResults);
 
-      return TaskResult.success(data, benchmarkScoreKeys: <String>[
+      return TaskResult.success(averageResults, benchmarkScoreKeys: <String>[
         'timeToFirstFrameMicros',
         'timeToFirstFrameRasterizedMicros',
       ]);
@@ -375,12 +476,26 @@ class PerfTest {
     this.testTarget,
     this.timelineFileName, {
     this.measureCpuGpu = false,
+    this.measureMemory = false,
     this.saveTraceFile = false,
     this.testDriver,
     this.needsFullTimeline = true,
     this.benchmarkScoreKeys,
     this.dartDefine = '',
-  });
+    String resultFilename,
+  }): _resultFilename = resultFilename;
+
+  const PerfTest.e2e(
+    this.testDirectory,
+    this.testTarget, {
+    this.measureCpuGpu = false,
+    this.measureMemory = false,
+    this.testDriver =  'test_driver/e2e_test.dart',
+    this.needsFullTimeline = false,
+    this.benchmarkScoreKeys = _kCommonScoreKeys,
+    this.dartDefine = '',
+    String resultFilename = 'e2e_perf_summary',
+  }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
   final String testDirectory;
@@ -388,12 +503,15 @@ class PerfTest {
   final String testTarget;
   // The prefix name of the filename such as `<timelineFileName>.timeline_summary.json`.
   final String timelineFileName;
-  String get resultFilename => '$timelineFileName.timeline_summary';
   String get traceFilename => '$timelineFileName.timeline';
+  String get resultFilename => _resultFilename ?? '$timelineFileName.timeline_summary';
+  final String _resultFilename;
   /// The test file to run on the host.
   final String testDriver;
   /// Whether to collect CPU and GPU metrics.
   final bool measureCpuGpu;
+  /// Whether to collect memory metrics.
+  final bool measureMemory;
   /// Whether to collect full timeline, meaning if `--trace-startup` flag is needed.
   final bool needsFullTimeline;
   /// Whether to save the trace timeline file `*.timeline.json`.
@@ -480,53 +598,29 @@ class PerfTest {
         data,
         detailFiles: detailFiles.isNotEmpty ? detailFiles : null,
         benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
-          'average_frame_build_time_millis',
-          'worst_frame_build_time_millis',
-          '90th_percentile_frame_build_time_millis',
-          '99th_percentile_frame_build_time_millis',
-          'average_frame_rasterizer_time_millis',
-          'worst_frame_rasterizer_time_millis',
-          '90th_percentile_frame_rasterizer_time_millis',
-          '99th_percentile_frame_rasterizer_time_millis',
+          ..._kCommonScoreKeys,
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
           if (measureCpuGpu) 'average_cpu_usage',
           if (measureCpuGpu) 'average_gpu_usage',
+          if (measureMemory) ...<String>['average_memory_usage', '90th_percentile_memory_usage', '99th_percentile_memory_usage'],
         ],
       );
     });
   }
 }
 
-class E2EPerfTest extends PerfTest {
-  const E2EPerfTest(
-    String testDirectory,
-    String testTarget, {
-    String summaryFilename,
-    List<String> benchmarkScoreKeys,
-    }
-  ) : super(
-    testDirectory,
-    testTarget,
-    summaryFilename,
-    testDriver: 'test_driver/e2e_test.dart',
-    needsFullTimeline: false,
-    benchmarkScoreKeys: benchmarkScoreKeys ?? const <String>[
-      'average_frame_build_time_millis',
-      'worst_frame_build_time_millis',
-      '90th_percentile_frame_build_time_millis',
-      '99th_percentile_frame_build_time_millis',
-      'average_frame_rasterizer_time_millis',
-      'worst_frame_rasterizer_time_millis',
-      '90th_percentile_frame_rasterizer_time_millis',
-      '99th_percentile_frame_rasterizer_time_millis',
-      ],
-  );
-
-  @override
-  String get resultFilename => timelineFileName ?? 'e2e_perf_summary';
-}
+const List<String> _kCommonScoreKeys = <String>[
+  'average_frame_build_time_millis',
+  'worst_frame_build_time_millis',
+  '90th_percentile_frame_build_time_millis',
+  '99th_percentile_frame_build_time_millis',
+  'average_frame_rasterizer_time_millis',
+  'worst_frame_rasterizer_time_millis',
+  '90th_percentile_frame_rasterizer_time_millis',
+  '99th_percentile_frame_rasterizer_time_millis',
+];
 
 class PerfTestWithSkSL extends PerfTest {
   PerfTestWithSkSL(
@@ -535,12 +629,30 @@ class PerfTestWithSkSL extends PerfTest {
     String timelineFileName, {
     bool measureCpuGpu = false,
     String testDriver,
+    bool needsFullTimeline = true,
+    List<String> benchmarkScoreKeys,
   }) : super(
     testDirectory,
     testTarget,
     timelineFileName,
     measureCpuGpu: measureCpuGpu,
     testDriver: testDriver,
+    needsFullTimeline: needsFullTimeline,
+    benchmarkScoreKeys: benchmarkScoreKeys,
+  );
+
+
+  PerfTestWithSkSL.e2e(
+    String testDirectory,
+    String testTarget, {
+    String testDriver =  'test_driver/e2e_test.dart',
+    String resultFilename = 'e2e_perf_summary',
+  }) : super.e2e(
+    testDirectory,
+    testTarget,
+    testDriver: testDriver,
+    needsFullTimeline: false,
+    resultFilename: resultFilename,
   );
 
   @override
@@ -1111,11 +1223,15 @@ class DevToolsMemoryTest {
         .listen((String line) {
           print('run stdout: $line');
           final RegExpMatch match = RegExp(r'An Observatory debugger and profiler on .+ is available at: ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)').firstMatch(line);
-          if (match != null) {
+          if (match != null && !observatoryUri.isCompleted) {
             observatoryUri.complete(match[1]);
             _observatoryUri = match[1];
           }
-        }, onDone: () { observatoryUri.complete(null); });
+        }, onDone: () {
+          if (!observatoryUri.isCompleted) {
+            observatoryUri.complete();
+          }
+        });
     _forwardStream(_runProcess.stderr, 'run stderr');
 
     _observatoryUri = await observatoryUri.future;

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -30,6 +29,7 @@ class WebFlutterDriver extends FlutterDriver {
 
   final FlutterWebConnection _connection;
   DateTime _startTime;
+  bool _accessibilityEnabled = false;
 
   /// Start time for tracing.
   @visibleForTesting
@@ -41,11 +41,15 @@ class WebFlutterDriver extends FlutterDriver {
   @override
   VMServiceClient get serviceClient => throw UnsupportedError('WebFlutterDriver does not support serviceClient');
 
+  @override
+  async_io.WebDriver get webDriver => _connection._driver;
+
   /// Creates a driver that uses a connection provided by the given
   /// [hostUrl] which would fallback to environment variable VM_SERVICE_URL.
   /// Driver also depends on environment variables DRIVER_SESSION_ID,
-  /// BROWSER_SUPPORTS_TIMELINE, DRIVER_SESSION_URI, DRIVER_SESSION_SPEC
-  /// and ANDROID_CHROME_ON_EMULATOR for configurations.
+  /// BROWSER_SUPPORTS_TIMELINE, DRIVER_SESSION_URI, DRIVER_SESSION_SPEC,
+  /// DRIVER_SESSION_CAPABILITIES and ANDROID_CHROME_ON_EMULATOR for
+  /// configurations.
   static Future<FlutterDriver> connectWeb(
       {String hostUrl, Duration timeout}) async {
     hostUrl ??= Platform.environment['VM_SERVICE_URL'];
@@ -55,10 +59,27 @@ class WebFlutterDriver extends FlutterDriver {
       'session-uri': Platform.environment['DRIVER_SESSION_URI'],
       'session-spec': Platform.environment['DRIVER_SESSION_SPEC'],
       'android-chrome-on-emulator': Platform.environment['ANDROID_CHROME_ON_EMULATOR'] == 'true',
+      'session-capabilities': Platform.environment['DRIVER_SESSION_CAPABILITIES'],
     };
     final FlutterWebConnection connection = await FlutterWebConnection.connect
       (hostUrl, settings, timeout: timeout);
     return WebFlutterDriver.connectedTo(connection);
+  }
+
+  @override
+  Future<void> enableAccessibility() async {
+    if (!_accessibilityEnabled) {
+      // Clicks the button to enable accessibility via Javascript for Desktop Web.
+      //
+      // The tag used in the script is based on
+      // https://github.com/flutter/engine/blob/master/lib/web_ui/lib/src/engine/semantics/semantics_helper.dart#L193
+      //
+      // TODO(angjieli): Support Mobile Web. (https://github.com/flutter/flutter/issues/65192)
+      await webDriver.execute(
+          'document.querySelector(\'flt-semantics-placeholder\').click();',
+          <String>[]);
+      _accessibilityEnabled = true;
+    }
   }
 
   @override
@@ -177,12 +198,14 @@ class FlutterWebConnection {
       String url,
       Map<String, dynamic> settings,
       {Duration timeout}) async {
-    // Use sync WebDriver because async version will create a 15 seconds
-    // overhead when quitting.
-    final async_io.WebDriver driver = await async_io.fromExistingSession(
-        settings['session-id'].toString(),
-        uri: Uri.parse(settings['session-uri'].toString()),
-        spec: _convertToSpec(settings['session-spec'].toString().toLowerCase()));
+    final String sessionId = settings['session-id'].toString();
+    final Uri sessionUri = Uri.parse(settings['session-uri'].toString());
+    final async_io.WebDriver driver = async_io.WebDriver(
+        sessionUri,
+        sessionId,
+        json.decode(settings['session-capabilities'] as String) as Map<String, dynamic>,
+        async_io.AsyncIoRequestClient(sessionUri.resolve('session/$sessionId/')),
+        _convertToSpec(settings['session-spec'].toString().toLowerCase()));
     if (settings['android-chrome-on-emulator'] == true) {
       final Uri localUri = Uri.parse(url);
       // Converts to Android Emulator Uri.

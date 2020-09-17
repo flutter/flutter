@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
@@ -357,6 +355,9 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.buildInfo.performanceMeasurementFile != null) {
     command.add('-Pperformance-measurement-file=${androidBuildInfo.buildInfo.performanceMeasurementFile}');
   }
+  if (buildInfo.codeSizeDirectory != null) {
+    command.add('-Pcode-size-directory=${buildInfo.codeSizeDirectory}');
+  }
   command.add(assembleTask);
 
   GradleHandledError detectedGradleError;
@@ -394,7 +395,7 @@ Future<void> buildGradleApp({
       environment: gradleEnvironment,
       mapFunction: consumeLog,
     );
-  } on ProcessException catch(exception) {
+  } on ProcessException catch (exception) {
     consumeLog(exception.toString());
     // Rethrow the exception if the error isn't handled by any of the
     // `localGradleErrors`.
@@ -467,6 +468,10 @@ Future<void> buildGradleApp({
       ? '' // Don't display the size when building a debug variant.
       : ' (${getSizeAsMB(bundleFile.lengthSync())})';
 
+    if (buildInfo.codeSizeDirectory != null) {
+      await _performCodeSizeAnalysis('aab', bundleFile, androidBuildInfo);
+    }
+
     globals.printStatus(
       '$successMark Built ${globals.fs.path.relative(bundleFile.path)}$appSize.',
       color: TerminalColor.green,
@@ -502,24 +507,40 @@ Future<void> buildGradleApp({
     color: TerminalColor.green,
   );
 
-  // Call size analyzer if --analyze-size flag was provided.
-  if (buildInfo.analyzeSize != null && !globals.platform.isWindows) {
-    final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processUtils: ProcessUtils.instance,
-    );
-    final Map<String, Object> output = await sizeAnalyzer.analyzeApkSizeAndAotSnapshot(
-      apk: apkFile,
-      aotSnapshot: globals.fs.file(buildInfo.analyzeSize),
-    );
-    final File outputFile = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'apk-analysis', 'json')
-      ..writeAsStringSync(jsonEncode(output));
-    // This message is used as a sentinel in analyze_apk_size_test.dart
-    globals.printStatus(
-      'A summary of your APK analysis can be found at: ${outputFile.path}',
-    );
+  if (buildInfo.codeSizeDirectory != null) {
+    await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
   }
+}
+
+Future<void> _performCodeSizeAnalysis(
+  String kind,
+  File zipFile,
+  AndroidBuildInfo androidBuildInfo,
+) async {
+  final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    flutterUsage: globals.flutterUsage,
+  );
+  final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
+  final BuildInfo buildInfo = androidBuildInfo.buildInfo;
+  final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
+    .childFile('snapshot.$archName.json');
+  final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
+    .childFile('trace.$archName.json');
+  final Map<String, Object> output = await sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
+    zipFile: zipFile,
+    aotSnapshot: aotSnapshot,
+    precompilerTrace: precompilerTrace,
+    kind: kind,
+  );
+  final File outputFile = globals.fsUtils.getUniqueFile(
+    globals.fs.directory(getBuildDirectory()),'$kind-code-size-analysis', 'json',
+  )..writeAsStringSync(jsonEncode(output));
+  // This message is used as a sentinel in analyze_apk_size_test.dart
+  globals.printStatus(
+    'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
+  );
 }
 
 /// Builds AAR and POM files.

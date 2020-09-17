@@ -231,7 +231,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///                 title: const Text('Thanks!'),
 ///                 content: Text ('You typed "$value".'),
 ///                 actions: <Widget>[
-///                   FlatButton(
+///                   TextButton(
 ///                     onPressed: () { Navigator.pop(context); },
 ///                     child: const Text('OK'),
 ///                   ),
@@ -702,7 +702,7 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-  /// {@macro flutter.rendering.editable.selectionEnabled}
+  /// {@macro flutter.widgets.editableText.selectionEnabled}
   bool get selectionEnabled => enableInteractiveSelection;
 
   /// {@template flutter.material.textfield.onTap}

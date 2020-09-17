@@ -399,7 +399,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.index, 5);
     // The center of the FFFFFF item is now at the TabBar's center
-    expect(tester.getCenter(find.text('FFFFFF')).dx, closeTo(400.0, 1.0));
+    expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(400.0, epsilon: 1.0));
   });
 
 
@@ -2671,11 +2671,106 @@ void main() {
     expect(pageView.physics.toString().contains('ClampingScrollPhysics'), isFalse);
   });
 
+  testWidgets('TabController changes offset attribute', (WidgetTester tester) async {
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: 2,
+    );
+
+    Color firstColor;
+    Color secondColor;
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          controller: controller,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.black,
+          tabs: <Widget>[
+            Builder(builder: (BuildContext context) {
+              firstColor = DefaultTextStyle.of(context).style.color;
+              return const Text('First');
+            }),
+            Builder(builder: (BuildContext context) {
+              secondColor = DefaultTextStyle.of(context).style.color;
+              return const Text('Second');
+            }),
+          ],
+        ),
+      ),
+    );
+
+    expect(firstColor, equals(Colors.white));
+    expect(secondColor, equals(Colors.black));
+
+    controller.offset = 0.6;
+    await tester.pump();
+
+    expect(firstColor, equals(Color.lerp(Colors.white, Colors.black, 0.6)));
+    expect(secondColor, equals(Color.lerp(Colors.black, Colors.white, 0.6)));
+
+    controller.index = 1;
+    await tester.pump();
+
+    expect(firstColor, equals(Colors.black));
+    expect(secondColor, equals(Colors.white));
+
+    controller.offset = 0.6;
+    await tester.pump();
+
+    expect(firstColor, equals(Colors.black));
+    expect(secondColor, equals(Colors.white));
+  });
+
   testWidgets('Crash on dispose', (WidgetTester tester) async {
     await tester.pumpWidget(Padding(padding: const EdgeInsets.only(right: 200.0), child: TabBarDemo()));
     await tester.tap(find.byIcon(Icons.directions_bike));
     // There was a time where this would throw an exception
     // because we tried to send a notification on dispose.
+  });
+
+  testWidgets('TabController\'s animation value should be in sync with TabBarView\'s scroll value when user interrupts ballistic scroll', (WidgetTester tester) async {
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: 3,
+    );
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SizedBox.expand(
+        child: Center(
+          child: SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    expect(tabController.index, 0);
+    expect(position.pixels, 0.0);
+
+    pageController.jumpTo(300.0);
+    await tester.pump();
+    expect(tabController.animation.value, pageController.page);
+
+    // Touch TabBarView while ballistic scrolling is happening and
+    // check if tabController's animation value properly follows page value.
+    await tester.startGesture(tester.getCenter(find.byType(PageView)));
+    await tester.pump();
+    expect(tabController.animation.value, pageController.page);
   });
 }
 

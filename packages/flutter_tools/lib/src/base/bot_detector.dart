@@ -119,6 +119,9 @@ class AzureDetector {
       // The HttpClient connected to a host, but it did not respond in a timely
       // fashion. Assume we are not on a bot.
       return _isRunningOnAzure = false;
+    } on OSError {
+      // The HttpClient might be running in a WSL1 environment.
+      return _isRunningOnAzure = false;
     }
     // We got a response. We're running on Azure.
     return _isRunningOnAzure = true;

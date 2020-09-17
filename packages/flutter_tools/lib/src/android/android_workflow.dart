@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -58,13 +56,18 @@ class AndroidWorkflow implements Workflow {
   bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled;
 
   @override
-  bool get canListDevices => getAdbPath(_androidSdk) != null;
+  bool get canListDevices => _androidSdk != null
+    && _androidSdk.adbPath != null;
 
   @override
-  bool get canLaunchDevices => _androidSdk != null && _androidSdk.validateSdkWellFormed().isEmpty;
+  bool get canLaunchDevices => _androidSdk != null
+    && _androidSdk.adbPath != null
+    && _androidSdk.validateSdkWellFormed().isEmpty;
 
   @override
-  bool get canListEmulators => _androidSdk.emulatorPath != null;
+  bool get canListEmulators => _androidSdk != null
+    && _androidSdk.adbPath != null
+    && _androidSdk.emulatorPath != null;
 }
 
 class AndroidValidator extends DoctorValidator {
