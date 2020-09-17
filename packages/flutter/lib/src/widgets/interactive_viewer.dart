@@ -924,6 +924,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       }
       if (widget.onInteractionUpdate != null) {
         widget.onInteractionUpdate!(ScaleUpdateDetails(
+          focalPoint: _transformationController!.toScene(event.localPosition),
           rotation: 0.0,
           scale: scaleChange,
           horizontalScale: 1.0,
