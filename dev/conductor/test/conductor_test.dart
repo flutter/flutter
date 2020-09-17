@@ -123,10 +123,7 @@ void main() {
     test('does not reset or tag if --just-print is specified', () {
       when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
       when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
-      when(mockGit.getOutput(
-        'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
-        any,
-      )).thenReturn(lastVersion);
+      when(mockGit.getFullTag(origin)).thenReturn(lastVersion);
       when(mockGit.getOutput(
         'rev-parse $lastVersion',
         any,
@@ -325,10 +322,7 @@ void main() {
     test('successfully publishes release with --force', () {
       when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
       when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
-      when(mockGit.getOutput(
-        'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
-        any,
-      )).thenReturn(lastVersion);
+      when(mockGit.getFullTag(origin)).thenReturn(lastVersion);
       when(mockGit.getOutput(
         'rev-parse $lastVersion',
         any,
