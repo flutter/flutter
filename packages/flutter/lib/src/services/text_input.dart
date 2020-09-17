@@ -9,6 +9,7 @@ import 'dart:ui' show
   FontWeight,
   Offset,
   Size,
+  Rect,
   TextAffinity,
   TextAlign,
   TextDirection,
@@ -839,6 +840,7 @@ class TextInputConnection {
 
   Size? _cachedSize;
   Matrix4? _cachedTransform;
+  Rect? _cachedRect;
 
   static int _nextId = 1;
   final int _id;
@@ -907,6 +909,29 @@ class TextInputConnection {
         },
       );
     }
+  }
+
+  /// Send the smallest rect that covers the text in the client that's currently
+  /// being composed.
+  ///
+  /// The given `rect` can not be null. If any of the 4 coordinates of the given
+  /// [Rect] is not finite, a [Rect] of size (-1, -1) will be sent instead.
+  ///
+  /// The information is currently only used on iOS, for positioning the IME bar.
+  void setComposingRect(Rect rect) {
+    assert(rect != null);
+    if (rect == _cachedRect)
+      return;
+    _cachedRect = rect;
+    final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
+    TextInput._instance._setComposingTextRect(
+      <String, dynamic>{
+        'width': validRect.width,
+        'height': validRect.height,
+        'x': validRect.left,
+        'y': validRect.top,
+      },
+    );
   }
 
   /// Send text styling information.
@@ -1230,6 +1255,13 @@ class TextInput {
   void _setEditableSizeAndTransform(Map<String, dynamic> args) {
     _channel.invokeMethod<void>(
       'TextInput.setEditableSizeAndTransform',
+      args,
+    );
+  }
+
+  void _setComposingTextRect(Map<String, dynamic> args) {
+    _channel.invokeMethod<void>(
+      'TextInput.setMarkedTextRect',
       args,
     );
   }

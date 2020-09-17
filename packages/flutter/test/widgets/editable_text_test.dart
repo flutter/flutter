@@ -18,6 +18,30 @@ import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
 
+Matcher matchesMethodCall(String method, { dynamic args }) => _MatchesMethodCall(method, arguments: args == null ? null : wrapMatcher(args));
+
+class _MatchesMethodCall extends Matcher {
+  const _MatchesMethodCall(this.name, {this.arguments});
+
+  final String name;
+  final Matcher arguments;
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is MethodCall && item.method == name)
+      return arguments?.matches(item.arguments, matchState) ?? true;
+    return false;
+  }
+
+  @override
+  Description describe(Description description) {
+    final Description newDescription = description.add('has method name: ').addDescriptionOf(name);
+    if (arguments != null)
+        newDescription.add(' with arguments: ').addDescriptionOf(arguments);
+    return newDescription;
+  }
+}
+
 TextEditingController controller;
 final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
 final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
@@ -3288,6 +3312,98 @@ void main() {
     );
   });
 
+  group('setMarkedTextRect', () {
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: EditableText(
+                  backgroundCursorColor: Colors.grey,
+                  controller: controller,
+                  focusNode: FocusNode(),
+                  style: textStyle,
+                  cursorColor: Colors.blue,
+                  selectionControls: materialTextSelectionControls,
+                  keyboardType: TextInputType.text,
+                  onChanged: (String value) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets(
+      'called when the composing range changes',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(text: 'a' * 100);
+        await tester.pumpWidget(builder());
+        await tester.showKeyboard(find.byType(EditableText));
+
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setMarkedTextRect',
+            args: allOf(
+              // No composing text so the width should not be too wide because
+              // it's empty.
+              containsPair('width', lessThanOrEqualTo(5)),
+              containsPair('x', lessThanOrEqualTo(1)),
+            ),
+          ),
+        ));
+
+        tester.testTextInput.log.clear();
+
+        controller.value = TextEditingValue(text: 'a' * 100, composing: const TextRange(start: 0, end: 10));
+        await tester.pump();
+
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setMarkedTextRect',
+            // Now the composing range is not empty.
+            args: containsPair('width', greaterThanOrEqualTo(10)),
+          ),
+        ));
+    });
+
+    testWidgets(
+      'only send updates when necessary',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(text: 'a' * 100, composing: const TextRange(start: 0, end: 10));
+        await tester.pumpWidget(builder());
+        await tester.showKeyboard(find.byType(EditableText));
+
+        expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.setMarkedTextRect')));
+
+        tester.testTextInput.log.clear();
+
+        // Should not send updates every frame.
+        await tester.pump();
+
+        expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.setMarkedTextRect'))));
+    });
+
+    testWidgets(
+      'does not throw when sending infinite Rect',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(text: 'a' * 100, composing: const TextRange(start: 0, end: 10));
+        await tester.pumpWidget(FittedBox(child: SizedBox.fromSize(size: Size.zero, child: builder())));
+        await tester.showKeyboard(find.byType(EditableText));
+        expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.setMarkedTextRect', args: <String, dynamic> {
+          'width': -1,
+          'height': -1,
+          'x': 0,
+          'y': 0,
+        })));
+    });
+  });
+
+
   testWidgets('custom keyboardAppearance is respected', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/22212.
 
@@ -4607,17 +4723,16 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
+      'TextInput.setMarkedTextRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
     ];
-    expect(tester.testTextInput.log.length, 7);
-    int index = 0;
-    for (final MethodCall m in tester.testTextInput.log) {
-      expect(m.method, logOrder[index]);
-      index++;
-    }
+    expect(
+      tester.testTextInput.log.map((MethodCall m) => m.method),
+      logOrder,
+    );
   });
 
   testWidgets('setEditingState is not called when text changes', (WidgetTester tester) async {
@@ -4651,6 +4766,7 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
+      'TextInput.setMarkedTextRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
@@ -4698,18 +4814,18 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
+      'TextInput.setMarkedTextRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setEditingState',
     ];
-    expect(tester.testTextInput.log.length, logOrder.length);
-    int index = 0;
-    for (final MethodCall m in tester.testTextInput.log) {
-      expect(m.method, logOrder[index]);
-      index++;
-    }
+
+    expect(
+      tester.testTextInput.log.map((MethodCall m) => m.method),
+      logOrder,
+    );
     expect(tester.testTextInput.editingState['text'], 'flutter is the best!...');
   });
 

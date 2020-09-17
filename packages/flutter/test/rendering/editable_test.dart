@@ -1003,6 +1003,56 @@ void main() {
     });
   });
 
+  group('getRectForComposingRange', () {
+    const TextSpan emptyTextSpan = TextSpan(text: '\u200e');
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      maxLines: null,
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+    );
+
+    test('returns null when no composing range', () {
+      editable.text = const TextSpan(text: '123');
+      editable.layout(const BoxConstraints.tightFor(width: 200));
+
+      // Invalid range.
+      expect(editable.getRectForComposingRange(const TextRange(start: -1, end: 2)), isNull);
+      // Collapsed range.
+      expect(editable.getRectForComposingRange(const TextRange.collapsed(2)), isNull);
+
+      // Empty Editable.
+      editable.text = emptyTextSpan;
+      editable.layout(const BoxConstraints.tightFor(width: 200));
+
+      expect(editable.getRectForComposingRange(const TextRange(start: 0, end: 1)), isNull);
+    });
+
+    test('more than 1 run on the same line', () {
+      const TextStyle tinyText = TextStyle(fontSize: 1, fontFamily: 'Ahem');
+      const TextStyle normalText = TextStyle(fontSize: 10, fontFamily: 'Ahem');
+      editable.text = TextSpan(
+        children: <TextSpan>[
+          const TextSpan(text: 'A', style: tinyText),
+          TextSpan(text: 'A' * 20, style: normalText),
+          const TextSpan(text: 'A', style: tinyText)
+        ],
+      );
+      // Give it a width that forces the editable to wrap.
+      editable.layout(const BoxConstraints.tightFor(width: 200));
+
+      final Rect composingRect = editable.getRectForComposingRange(const TextRange(start: 0, end: 20 + 2));
+
+      // Since the range covers an entire line, the Rect should also be almost
+      // as wide as the entire paragraph (give or take 1 character).
+      expect(composingRect?.width, greaterThan(200 - 10));
+    });
+  });
+
   group('previousCharacter', () {
     test('handles normal strings correctly', () {
       expect(RenderEditable.previousCharacter(8, '01234567'), 7);
