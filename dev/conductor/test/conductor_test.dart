@@ -14,7 +14,7 @@ import './common.dart';
 void main() {
   group('run()', () {
     const String usage = 'usage info...';
-    const String level = 'z';
+    const String level = 'm';
     const String commit = 'abcde012345';
     const String origin = 'upstream';
     const String lastVersion = '1.2.0-0.0.pre';
@@ -350,6 +350,8 @@ void main() {
       verify(mockGit.run('tag $nextVersion', any));
       verify(mockGit.run('push --force $origin HEAD:dev', any));
     });
+  }, onPlatform: <String, dynamic>{
+    'windows': const Skip('Flutter Conductor only supported on macos/linux'),
   });
 
   group('parseFullTag', () {
@@ -386,6 +388,8 @@ void main() {
         expect(match, null, reason: 'Expected $invalidTag to not be parsed');
       }
     });
+  }, onPlatform: <String, dynamic>{
+    'windows': const Skip('Flutter Conductor only supported on macos/linux'),
   });
 
   group('getVersionFromParts', () {
@@ -396,6 +400,8 @@ void main() {
       parts = <int>[11, 2, 33, 1, 0];
       expect(getVersionFromParts(parts), '11.2.33-1.0.pre');
     });
+  }, onPlatform: <String, dynamic>{
+    'windows': const Skip('Flutter Conductor only supported on macos/linux'),
   });
 
   group('incrementLevel()', () {
@@ -465,6 +471,8 @@ void main() {
       version = '1.18.0-3.0.pre';
       expect(incrementLevel(version, level), '1.18.0-4.0.pre');
     });
+  }, onPlatform: <String, dynamic>{
+    'windows': const Skip('Flutter Conductor only supported on macos/linux'),
   });
 }
 

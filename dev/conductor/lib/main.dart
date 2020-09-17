@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 
 import './git.dart';
 import './globals.dart';
+import './version.dart';
 
 /// Main script execution.
 ///
@@ -56,11 +57,11 @@ bool run({
 
   git.run('fetch $origin', 'fetch $origin');
 
-  final String lastVersion = getFullTag(git, origin);
+  final Version lastVersion = Version.fromString(git.getFullTag(origin));
 
-  final String version = skipTagging
+  final Version version = skipTagging
     ? lastVersion
-    : incrementLevel(lastVersion, level);
+    : Version.increment(lastVersion, level);
 
   if (git.getOutput(
     'rev-parse $lastVersion',

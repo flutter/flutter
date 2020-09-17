@@ -33,6 +33,7 @@ class Version {
   }
 
   factory Version.fromString(String versionString) {
+    assert(versionString != null);
     final Match match = versionPattern.firstMatch(versionString.trim());
     final List<int> parts = match.groups(<int>[1, 2, 3, 4, 5]).map(int.parse).toList();
     final VersionType type = parts[3] == null ? VersionType.stable : VersionType.development;

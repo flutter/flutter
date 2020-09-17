@@ -6,17 +6,6 @@ import 'dart:io';
 
 import './globals.dart';
 
-/// Obtain the version tag of the previous dev release.
-String getFullTag(Git git, String remote) {
-  const String glob = '*.*.*-*.*.pre';
-  // describe the latest dev release
-  final String ref = 'refs/remotes/$remote/dev';
-  return git.getOutput(
-    'describe --match $glob --exact-match --tags $ref',
-    'obtain last released version number',
-  );
-}
-
 Match parseFullTag(String version) {
   // of the form: x.y.z-m.n.pre
   final RegExp versionPattern = RegExp(
@@ -55,6 +44,17 @@ class Git {
     if (result.exitCode != 0) {
       _reportFailureAndExit(result, explanation);
     }
+  }
+
+  /// Obtain the version tag of the previous dev release.
+  String getFullTag(String remote) {
+    const String glob = '*.*.*-*.*.pre';
+    // describe the latest dev release
+    final String ref = 'refs/remotes/$remote/dev';
+    return getOutput(
+        'describe --match $glob --exact-match --tags $ref',
+        'obtain last released version number',
+    );
   }
 
   ProcessResult _run(String command) {
