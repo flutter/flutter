@@ -25,7 +25,6 @@ import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
-import 'compile.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -180,12 +179,6 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         xcode: globals.xcode,
         platform: globals.platform,
-      ),
-      KernelCompilerFactory: () => KernelCompilerFactory(
-        logger: globals.logger,
-        processManager: globals.processManager,
-        artifacts: globals.artifacts,
-        fileSystem: globals.fs,
       ),
       Logger: () => globals.platform.isWindows
         ? WindowsStdoutLogger(
