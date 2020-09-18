@@ -19,11 +19,11 @@ void main() {
     if (!kIsWeb) {
       return;
     }
-    final Future<void> didDispatchFirstFrame = onFlutterFirstFrameEvent();
+    final Future<bool> didDispatchFirstFrame = onFlutterFirstFrameEvent();
 
     TestRenderBinding().initInstances();
 
-    expect(await didDispatchFirstFrame, completesNormally);
+    expect(await didDispatchFirstFrame, true);
   });
 }
 
