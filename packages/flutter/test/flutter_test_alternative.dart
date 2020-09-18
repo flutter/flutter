@@ -12,7 +12,7 @@ import 'package:test_api/test_api.dart' as test_package show TypeMatcher; // ign
 
 export 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
 export 'package:test_api/fake.dart'; // ignore: deprecated_member_use
-export 'package:flutter_test/flutter_test.dart' show createTestImage, TestImageData;
+export 'package:flutter_test/flutter_test.dart' show createTestImage;
 
 /// A matcher that compares the type of the actual value to the type argument T.
 test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();
