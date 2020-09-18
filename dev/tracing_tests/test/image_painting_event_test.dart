@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert' show jsonEncode;
 import 'dart:developer' as developer;
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
