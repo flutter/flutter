@@ -378,8 +378,7 @@ class TestGesture {
   /// Send a move event moving the pointer by the given offset.
   ///
   /// If the pointer is down, then a move event is dispatched. If the pointer is
-  /// up, then a hover event is dispatched. Touch devices are not able to send
-  /// hover events.
+  /// up, then a hover event is dispatched.
   Future<void> moveBy(Offset offset, { Duration timeStamp = Duration.zero }) {
     return moveTo(_pointer.location + offset, timeStamp: timeStamp);
   }
@@ -387,15 +386,12 @@ class TestGesture {
   /// Send a move event moving the pointer to the given location.
   ///
   /// If the pointer is down, then a move event is dispatched. If the pointer is
-  /// up, then a hover event is dispatched. Touch devices are not able to send
-  /// hover events.
+  /// up, then a hover event is dispatched.
   Future<void> moveTo(Offset location, { Duration timeStamp = Duration.zero }) {
     return TestAsyncUtils.guard<void>(() {
       if (_pointer._isDown) {
         return _dispatcher(_pointer.move(location, timeStamp: timeStamp));
       } else {
-        assert(_pointer.kind != PointerDeviceKind.touch,
-            'Touch device move events can only be sent if the pointer is down.');
         return _dispatcher(_pointer.hover(location, timeStamp: timeStamp));
       }
     });
