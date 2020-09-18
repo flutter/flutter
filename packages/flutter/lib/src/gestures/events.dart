@@ -515,7 +515,7 @@ abstract class PointerEvent with Diagnosticable {
   /// The method may return the same object instance if for example the
   /// transformation has no effect on the event. Otherwise, the resulting event
   /// will be a subclass of, but not exactly, the original event class (e.g.
-  /// [PointerDownEvent.transformd] may return a subclass of [PointerDownEvent]).
+  /// [PointerDownEvent.transformed] may return a subclass of [PointerDownEvent]).
   ///
   /// Transforms are not commutative, and are based on [original] events.
   /// If this method is called on a transformed event, the provided `transform`
