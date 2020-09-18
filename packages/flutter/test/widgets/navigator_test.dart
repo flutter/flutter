@@ -343,6 +343,33 @@ void main() {
     expect(find.text('B'), findsOneWidget);
   });
 
+  testWidgets('popAndPushNamed with explicit void type parameter', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed<void>(context, '/A'); }),
+      '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.popAndPushNamed<void, void>(context, '/B'); }),
+      '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () { Navigator.pop<void>(context); }),
+    };
+
+    await tester.pumpWidget(MaterialApp(routes: routes));
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A', skipOffstage: false), findsNothing);
+    expect(find.text('B', skipOffstage: false), findsNothing);
+
+    await tester.tap(find.text('/'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+  });
+
   testWidgets('Push and pop should trigger the observers', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
