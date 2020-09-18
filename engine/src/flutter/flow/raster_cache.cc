@@ -6,6 +6,7 @@
 
 #include <vector>
 
+#include "flutter/common/constants.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/paint_utils.h"
 #include "flutter/fml/logging.h"
@@ -298,12 +299,11 @@ void RasterCache::SetCheckboardCacheImages(bool checkerboard) {
 
 void RasterCache::TraceStatsToTimeline() const {
 #if !FLUTTER_RELEASE
-  constexpr double kMegaBytes = (1 << 20);
   FML_TRACE_COUNTER("flutter", "RasterCache", reinterpret_cast<int64_t>(this),
                     "LayerCount", layer_cache_.size(), "LayerMBytes",
-                    EstimateLayerCacheByteSize() / kMegaBytes, "PictureCount",
-                    picture_cache_.size(), "PictureMBytes",
-                    EstimatePictureCacheByteSize() / kMegaBytes);
+                    EstimateLayerCacheByteSize() / kMegaByteSizeInBytes,
+                    "PictureCount", picture_cache_.size(), "PictureMBytes",
+                    EstimatePictureCacheByteSize() / kMegaByteSizeInBytes);
 
 #endif  // !FLUTTER_RELEASE
 }
