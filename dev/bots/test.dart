@@ -39,20 +39,15 @@ final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
 
 String get platformFolderName {
-  if (Platform.isWindows) {
+  if (Platform.isWindows)
     return 'windows-x64';
-  }
-  if (Platform.isMacOS) {
+  if (Platform.isMacOS)
     return 'darwin-x64';
-  }
-  if (Platform.isLinux) {
+  if (Platform.isLinux)
     return 'linux-x64';
-  }
   throw UnsupportedError('The platform ${Platform.operatingSystem} is not supported by this script.');
 }
-
-final String flutterTester =
-    path.join(flutterRoot, 'bin', 'cache', 'artifacts', 'engine', platformFolderName, 'flutter_tester$exe');
+final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts', 'engine', platformFolderName, 'flutter_tester$exe');
 
 /// The arguments to pass to `flutter test` (typically the local engine
 /// configuration) -- prefilled with the arguments passed to test.dart.
@@ -64,7 +59,7 @@ final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTE
 ///
 /// WARNING: if you change this number, also change .cirrus.yml
 /// and make sure it runs _all_ shards.
-const int kDeviceLabShardCount = 2;
+const int kDeviceLabShardCount = 4;
 
 /// The number of Cirrus jobs that run build tests in parallel.
 ///
@@ -81,8 +76,9 @@ const int kBuildTestShardCount = 2;
 /// and make sure it runs _all_ shards.
 ///
 /// The last shard also runs the Web plugin tests.
-int get webShardCount =>
-    Platform.environment.containsKey('WEB_SHARD_COUNT') ? int.parse(Platform.environment['WEB_SHARD_COUNT']) : 8;
+int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
+  ? int.parse(Platform.environment['WEB_SHARD_COUNT'])
+  : 8;
 
 /// Tests that we don't run on Web for various reasons.
 //
@@ -150,7 +146,7 @@ Future<void> _validateEngineHash() async {
     // Because the artifacts have been changed, this particular test will return
     // a false positive and should be skipped.
     print('${yellow}Skipping Flutter Engine Version Validation for swarming '
-        'bot $luciBotId.');
+          'bot $luciBotId.');
     return;
   }
   final String expectedVersion = File(engineVersionFile).readAsStringSync().trim();
@@ -161,7 +157,7 @@ Future<void> _validateEngineHash() async {
   });
   if (!actualVersion.contains(expectedVersion)) {
     print('${red}Expected "Flutter Engine Version: $expectedVersion", '
-        'but found "$actualVersion".');
+          'but found "$actualVersion".');
     exit(1);
   }
 }
@@ -177,75 +173,67 @@ Future<void> _runSmokeTests() async {
   // We run the "pass" and "fail" smoke tests first, and alone, because those
   // are particularly critical and sensitive. If one of these fails, there's no
   // point even trying the others.
-  await _runFlutterTest(
-    automatedTests,
+  await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'pass_test.dart'),
     printOutput: false,
   );
-  await _runFlutterTest(
-    automatedTests,
+  await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'fail_test.dart'),
     expectFailure: true,
     printOutput: false,
   );
   // We run the timeout tests individually because they are timing-sensitive.
-  await _runFlutterTest(
-    automatedTests,
+  await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'timeout_pass_test.dart'),
     expectFailure: false,
     printOutput: false,
   );
-  await _runFlutterTest(
-    automatedTests,
+  await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'timeout_fail_test.dart'),
     expectFailure: true,
     printOutput: false,
   );
   await _runFlutterTest(automatedTests,
-      script: path.join('test_smoke_test', 'pending_timer_fail_test.dart'),
-      expectFailure: true,
-      printOutput: false, outputChecker: (CapturedOutput output) {
-    return output.stdout.contains('failingPendingTimerTest')
+    script: path.join('test_smoke_test', 'pending_timer_fail_test.dart'),
+    expectFailure: true,
+    printOutput: false,
+    outputChecker: (CapturedOutput output) {
+      return output.stdout.contains('failingPendingTimerTest')
         ? null
         : 'Failed to find the stack trace for the pending Timer.';
-  });
+    }
+  );
   // We run the remaining smoketests in parallel, because they each take some
   // time to run (e.g. compiling), so we don't want to run them in series,
   // especially on 20-core machines...
   await Future.wait<void>(
     <Future<void>>[
-      _runFlutterTest(
-        automatedTests,
+      _runFlutterTest(automatedTests,
         script: path.join('test_smoke_test', 'crash1_test.dart'),
         expectFailure: true,
         printOutput: false,
       ),
-      _runFlutterTest(
-        automatedTests,
+      _runFlutterTest(automatedTests,
         script: path.join('test_smoke_test', 'crash2_test.dart'),
         expectFailure: true,
         printOutput: false,
       ),
-      _runFlutterTest(
-        automatedTests,
+      _runFlutterTest(automatedTests,
         script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
         expectFailure: true,
         printOutput: false,
       ),
-      _runFlutterTest(
-        automatedTests,
+      _runFlutterTest(automatedTests,
         script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
         expectFailure: true,
         printOutput: false,
       ),
-      _runFlutterTest(
-        automatedTests,
+      _runFlutterTest(automatedTests,
         script: path.join('test_smoke_test', 'disallow_error_reporter_modification_test.dart'),
         expectFailure: true,
         printOutput: false,
       ),
-      runCommand(
-        flutter,
+      runCommand(flutter,
         <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
         workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
         expectNonZeroExit: true,
@@ -256,9 +244,8 @@ Future<void> _runSmokeTests() async {
 
   // Verify that we correctly generated the version file.
   final String versionError = await verifyVersion(File(path.join(flutterRoot, 'version')));
-  if (versionError != null) {
+  if (versionError != null)
     exitWithError(<String>[versionError]);
-  }
 }
 
 Future<bq.BigqueryApi> _getBigqueryApi() async {
@@ -296,8 +283,7 @@ Future<void> _runToolCoverage() async {
     ],
     coverage: 'coverage',
   );
-  await runCommand(
-    pub,
+  await runCommand(pub,
     <String>[
       'run',
       'coverage:format_coverage',
@@ -319,15 +305,17 @@ Future<void> _runToolTests() async {
 
   final Map<String, ShardRunner> subshards = Map<String, ShardRunner>.fromIterable(
     Directory(path.join(toolsPath, kTest))
-        .listSync()
-        .map<String>((FileSystemEntity entry) => entry.path)
-        .where((String name) => name.endsWith(kDotShard))
-        .map<String>((String name) => path.basenameWithoutExtension(name)),
+      .listSync()
+      .map<String>((FileSystemEntity entry) => entry.path)
+      .where((String name) => name.endsWith(kDotShard))
+      .map<String>((String name) => path.basenameWithoutExtension(name)),
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
       // Due to https://github.com/flutter/flutter/issues/46180, skip the hermetic directory
       // on Windows.
-      final String suffix = Platform.isWindows && subshard == 'commands' ? 'permeable' : '';
+      final String suffix = Platform.isWindows && subshard == 'commands'
+        ? 'permeable'
+        : '';
       // Try out tester on unit test shard
       if (subshard == 'general') {
         await _pubRunTester(
@@ -365,19 +353,20 @@ Future<void> _runBuildTests() async {
   // distribution of costs, but the seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
     for (final FileSystemEntity exampleDirectory in exampleDirectories)
-      () => _runExampleProjectBuildTests(exampleDirectory),
-    if (branch != 'beta' && branch != 'stable') ...<ShardRunner>[
-      // Web compilation tests.
-      () => _flutterBuildDart2js(
-            path.join('dev', 'integration_tests', 'web'),
-            path.join('lib', 'main.dart'),
-          ),
-      // Should not fail to compile with dart:io.
-      () => _flutterBuildDart2js(
-            path.join('dev', 'integration_tests', 'web_compile_tests'),
-            path.join('lib', 'dart_io_import.dart'),
-          ),
-    ],
+        () => _runExampleProjectBuildTests(exampleDirectory),
+    if (branch != 'beta' && branch != 'stable')
+      ...<ShardRunner>[
+        // Web compilation tests.
+          () =>  _flutterBuildDart2js(
+          path.join('dev', 'integration_tests', 'web'),
+          path.join('lib', 'main.dart'),
+        ),
+        // Should not fail to compile with dart:io.
+          () =>  _flutterBuildDart2js(
+          path.join('dev', 'integration_tests', 'web_compile_tests'),
+          path.join('lib', 'dart_io_import.dart'),
+        ),
+      ],
   ]..shuffle(math.Random(0));
 
   await _selectIndexedSubshard(tests, kBuildTestShardCount);
@@ -391,8 +380,9 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
   }
   final String examplePath = exampleDirectory.path;
   final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
-  final List<String> additionalArgs =
-      hasNullSafety ? <String>['--enable-experiment', 'non-nullable', '--no-sound-null-safety'] : <String>[];
+  final List<String> additionalArgs = hasNullSafety
+    ? <String>['--enable-experiment', 'non-nullable', '--no-sound-null-safety']
+    : <String>[];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
     await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
     await _flutterBuildApk(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -409,20 +399,21 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
   }
 }
 
-Future<void> _flutterBuildApk(
-  String relativePathToApplication, {
+Future<void> _flutterBuildApk(String relativePathToApplication, {
   @required bool release,
   bool verifyCaching = false,
   List<String> additionalArgs = const <String>[],
 }) async {
   print('${green}Testing APK build$reset for $cyan$relativePathToApplication$reset...');
-  await runCommand(
-    flutter,
+  await runCommand(flutter,
     <String>[
       'build',
       'apk',
       ...additionalArgs,
-      if (release) '--release' else '--debug',
+      if (release)
+        '--release'
+      else
+        '--debug',
       '-v',
     ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
@@ -430,14 +421,16 @@ Future<void> _flutterBuildApk(
 
   if (verifyCaching) {
     print('${green}Testing APK cache$reset for $cyan$relativePathToApplication$reset...');
-    await runCommand(
-      flutter,
+    await runCommand(flutter,
       <String>[
         'build',
         'apk',
         '--performance-measurement-file=perf.json',
         ...additionalArgs,
-        if (release) '--release' else '--debug',
+        if (release)
+          '--release'
+        else
+          '--debug',
         '-v',
       ],
       workingDirectory: path.join(flutterRoot, relativePathToApplication),
@@ -451,8 +444,7 @@ Future<void> _flutterBuildApk(
   }
 }
 
-Future<void> _flutterBuildIpa(
-  String relativePathToApplication, {
+Future<void> _flutterBuildIpa(String relativePathToApplication, {
   @required bool release,
   List<String> additionalArgs = const <String>[],
   bool verifyCaching = false,
@@ -463,8 +455,7 @@ Future<void> _flutterBuildIpa(
   // and build ios doesn't take care of it automatically.
   final File podfile = File(path.join(flutterRoot, relativePathToApplication, 'ios', 'Podfile'));
   if (podfile.existsSync()) {
-    await runCommand(
-      'pod',
+    await runCommand('pod',
       <String>['install'],
       workingDirectory: podfile.parent.path,
       environment: <String, String>{
@@ -472,29 +463,33 @@ Future<void> _flutterBuildIpa(
       },
     );
   }
-  await runCommand(
-    flutter,
+  await runCommand(flutter,
     <String>[
       'build',
       'ios',
       ...additionalArgs,
       '--no-codesign',
-      if (release) '--release' else '--debug',
+      if (release)
+        '--release'
+      else
+        '--debug',
       '-v',
     ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
   if (verifyCaching) {
     print('${green}Testing IPA cache$reset for $cyan$relativePathToApplication$reset...');
-    await runCommand(
-      flutter,
+    await runCommand(flutter,
       <String>[
         'build',
         'ios',
         '--performance-measurement-file=perf.json',
         ...additionalArgs,
         '--no-codesign',
-        if (release) '--release' else '--debug',
+        if (release)
+          '--release'
+        else
+          '--debug',
         '-v',
       ],
       workingDirectory: path.join(flutterRoot, relativePathToApplication),
@@ -509,16 +504,16 @@ Future<void> _flutterBuildIpa(
 }
 
 bool _allTargetsCached(File performanceFile) {
-  final Map<String, Object> data = json.decode(performanceFile.readAsStringSync()) as Map<String, Object>;
-  final List<Map<String, Object>> targets = (data['targets'] as List<Object>).cast<Map<String, Object>>();
+  final Map<String, Object> data = json.decode(performanceFile.readAsStringSync())
+    as Map<String, Object>;
+  final List<Map<String, Object>> targets = (data['targets'] as List<Object>)
+    .cast<Map<String, Object>>();
   return targets.every((Map<String, Object> element) => element['skipped'] == true);
 }
 
-Future<void> _flutterBuildDart2js(String relativePathToApplication, String target,
-    {bool expectNonZeroExit = false}) async {
+Future<void> _flutterBuildDart2js(String relativePathToApplication, String target, { bool expectNonZeroExit = false }) async {
   print('${green}Testing Dart2JS build$reset for $cyan$relativePathToApplication$reset...');
-  await runCommand(
-    flutter,
+  await runCommand(flutter,
     <String>['build', 'web', '-v', '--target=$target'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
     expectNonZeroExit: expectNonZeroExit,
@@ -532,8 +527,7 @@ Future<void> _runAddToAppLifeCycleTests() async {
   if (Platform.isMacOS) {
     print('${green}Running add-to-app life cycle iOS integration tests$reset...');
     final String addToAppDir = path.join(flutterRoot, 'dev', 'integration_tests', 'ios_add2app_life_cycle');
-    await runCommand(
-      './build_and_test.sh',
+    await runCommand('./build_and_test.sh',
       <String>[],
       workingDirectory: addToAppDir,
     );
@@ -543,10 +537,7 @@ Future<void> _runAddToAppLifeCycleTests() async {
 Future<void> _runFrameworkTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
   final List<String> nullSafetyOptions = <String>['--null-assertions', '--no-sound-null-safety'];
-  final List<String> trackWidgetCreationAlternatives = <String>[
-    '--track-widget-creation',
-    '--no-track-widget-creation'
-  ];
+  final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
   Future<void> runWidgets() async {
     print('${green}Running packages/flutter tests for$reset: ${cyan}test/widgets/$reset');
@@ -555,7 +546,7 @@ Future<void> _runFrameworkTests() async {
         path.join(flutterRoot, 'packages', 'flutter'),
         options: <String>[trackWidgetCreationOption, ...nullSafetyOptions],
         tableData: bigqueryApi?.tabledata,
-        tests: <String>[path.join('test', 'widgets') + path.separator],
+        tests: <String>[ path.join('test', 'widgets') + path.separator ],
       );
     }
     // Try compiling code outside of the packages/flutter directory with and without --track-widget-creation
@@ -570,11 +561,11 @@ Future<void> _runFrameworkTests() async {
 
   Future<void> runLibraries() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
-        .listSync(followLinks: false, recursive: false)
-        .whereType<Directory>()
-        .where((Directory dir) => dir.path.endsWith('widgets') == false)
-        .map<String>((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
-        .toList();
+      .listSync(followLinks: false, recursive: false)
+      .whereType<Directory>()
+      .where((Directory dir) => dir.path.endsWith('widgets') == false)
+      .map<String>((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
+      .toList();
     print('${green}Running packages/flutter tests$reset for: $cyan${tests.join(", ")}$reset');
     for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
       await _runFlutterTest(
@@ -626,39 +617,34 @@ Future<void> _runFrameworkTests() async {
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'tools'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'),
-        tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'),
-        tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'),
-        tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'),
-        tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'),
-        tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'),
-        options: nullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: nullSafetyOptions);
     await _runFlutterTest(
       path.join(flutterRoot, 'dev', 'tracing_tests'),
       options: <String>['--enable-vmservice'],
       tableData: bigqueryApi?.tabledata,
     );
     await runPrivateTests();
-    const String httpClientWarning = 'Warning: At least one test in this suite creates an HttpClient. When\n'
-        'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
-        'requests will return status code 400, and no network request will\n'
-        'actually be made. Any test expecting a real network connection and\n'
-        'status code will fail.\n'
-        'To test code that needs an HttpClient, provide your own HttpClient\n'
-        'implementation to the code under test, so that your test can\n'
-        'consistently provide a testable response to the code under test.';
+    const String httpClientWarning =
+      'Warning: At least one test in this suite creates an HttpClient. When\n'
+      'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
+      'requests will return status code 400, and no network request will\n'
+      'actually be made. Any test expecting a real network connection and\n'
+      'status code will fail.\n'
+      'To test code that needs an HttpClient, provide your own HttpClient\n'
+      'implementation to the code under test, so that your test can\n'
+      'consistently provide a testable response to the code under test.';
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter_test'),
       script: path.join('test', 'bindings_test_failure.dart'),
@@ -668,7 +654,7 @@ Future<void> _runFrameworkTests() async {
         final Iterable<Match> matches = httpClientWarning.allMatches(output.stdout);
         if (matches == null || matches.isEmpty || matches.length > 1) {
           return 'Failed to print warning about HttpClientUsage, or printed it too many times.\n'
-              'stdout:\n${output.stdout}';
+                 'stdout:\n${output.stdout}';
         }
         return null;
       },
@@ -698,10 +684,9 @@ Future<void> _runFirebaseTestLabTests() async {
   final String firebaseScript = path.join(flutterRoot, 'dev', 'bots', 'firebase_testlab.sh');
   final String integrationTestDirectory = path.join(flutterRoot, 'dev', 'integration_tests');
 
-  final List<ShardRunner> tests = integrationTests
-      .map((String integrationTest) =>
-          () => runCommand(firebaseScript, <String>[path.join(integrationTestDirectory, integrationTest)]))
-      .toList();
+  final List<ShardRunner> tests = integrationTests.map((String integrationTest) =>
+    () => runCommand(firebaseScript, <String>[ path.join(integrationTestDirectory, integrationTest) ])
+  ).toList();
 
   await _selectIndexedSubshard(tests, integrationTests.length);
 }
@@ -715,8 +700,7 @@ Future<void> _runFrameworkCoverage() async {
     exit(1);
   }
   coverageFile.deleteSync();
-  await _runFlutterTest(
-    path.join(flutterRoot, 'packages', 'flutter'),
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
     options: const <String>['--coverage'],
   );
   if (!coverageFile.existsSync()) {
@@ -734,19 +718,21 @@ Future<void> _runWebUnitTests() async {
   final Directory flutterPackageTestDirectory = Directory(path.join(flutterPackageDirectory.path, 'test'));
 
   final List<String> allTests = flutterPackageTestDirectory
-      .listSync()
-      .whereType<Directory>()
-      .expand((Directory directory) =>
-          directory.listSync(recursive: true).where((FileSystemEntity entity) => entity.path.endsWith('_test.dart')))
-      .whereType<File>()
-      .map<String>((File file) => path.relative(file.path, from: flutterPackageDirectory.path))
-      .where((String filePath) => !kWebTestFileKnownFailures.contains(filePath))
-      .toList()
-        // Finally we shuffle the list because we want the average cost per file to be uniformly
-        // distributed. If the list is not sorted then different shards and batches may have
-        // very different characteristics.
-        // We use a constant seed for repeatability.
-        ..shuffle(math.Random(0));
+    .listSync()
+    .whereType<Directory>()
+    .expand((Directory directory) => directory
+      .listSync(recursive: true)
+      .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart'))
+    )
+    .whereType<File>()
+    .map<String>((File file) => path.relative(file.path, from: flutterPackageDirectory.path))
+    .where((String filePath) => !kWebTestFileKnownFailures.contains(filePath))
+    .toList()
+    // Finally we shuffle the list because we want the average cost per file to be uniformly
+    // distributed. If the list is not sorted then different shards and batches may have
+    // very different characteristics.
+    // We use a constant seed for repeatability.
+    ..shuffle(math.Random(0));
 
   assert(webShardCount >= 1);
   final int testsPerShard = (allTests.length / webShardCount).ceil();
@@ -755,12 +741,12 @@ Future<void> _runWebUnitTests() async {
   // This for loop computes all but the last shard.
   for (int index = 0; index < webShardCount - 1; index += 1) {
     subshards['$index'] = () => _runFlutterWebTest(
-          flutterPackageDirectory.path,
-          allTests.sublist(
-            index * testsPerShard,
-            (index + 1) * testsPerShard,
-          ),
-        );
+      flutterPackageDirectory.path,
+      allTests.sublist(
+        index * testsPerShard,
+        (index + 1) * testsPerShard,
+      ),
+    );
   }
 
   // The last shard also runs the flutter_web_plugins tests.
@@ -780,8 +766,8 @@ Future<void> _runWebUnitTests() async {
       <String>['test'],
     );
     await _runFlutterWebTest(
-      path.join(flutterRoot, 'packages', 'flutter_driver'),
-      <String>[path.join('test', 'src', 'web_tests', 'web_extension_test.dart')],
+        path.join(flutterRoot, 'packages', 'flutter_driver'),
+        <String>[path.join('test', 'src', 'web_tests', 'web_extension_test.dart')],
     );
   };
 
@@ -796,14 +782,18 @@ Future<void> _runWebIntegrationTests() async {
   await _runWebDebugTest('test/test.dart');
   await _runWebDebugTest('lib/null_assert_main.dart', enableNullSafety: true);
   await _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true);
-  await _runWebDebugTest('lib/web_define_loading.dart', additionalArguments: <String>[
-    '--dart-define=test.valueA=Example',
-    '--dart-define=test.valueB=Value',
-  ]);
-  await _runWebReleaseTest('lib/web_define_loading.dart', additionalArguments: <String>[
-    '--dart-define=test.valueA=Example',
-    '--dart-define=test.valueB=Value',
-  ]);
+  await _runWebDebugTest('lib/web_define_loading.dart',
+    additionalArguments: <String>[
+      '--dart-define=test.valueA=Example',
+      '--dart-define=test.valueB=Value',
+    ]
+  );
+  await _runWebReleaseTest('lib/web_define_loading.dart',
+    additionalArguments: <String>[
+      '--dart-define=test.valueA=Example',
+      '--dart-define=test.valueB=Value',
+    ]
+  );
 }
 
 Future<void> _runWebStackTraceTest(String buildMode) async {
@@ -813,7 +803,7 @@ Future<void> _runWebStackTraceTest(String buildMode) async {
   // Build the app.
   await runCommand(
     flutter,
-    <String>['clean'],
+    <String>[ 'clean' ],
     workingDirectory: testAppDirectory,
   );
   await runCommand(
@@ -847,9 +837,8 @@ Future<void> _runWebStackTraceTest(String buildMode) async {
 }
 
 /// Run a web integration test in release mode.
-Future<void> _runWebReleaseTest(
-  String target, {
-  List<String> additionalArguments = const <String>[],
+Future<void> _runWebReleaseTest(String target, {
+  List<String> additionalArguments = const<String>[],
 }) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
   final String appBuildDirectory = path.join(testAppDirectory, 'build', 'web');
@@ -857,7 +846,7 @@ Future<void> _runWebReleaseTest(
   // Build the app.
   await runCommand(
     flutter,
-    <String>['clean'],
+    <String>[ 'clean' ],
     workingDirectory: testAppDirectory,
   );
   await runCommand(
@@ -894,10 +883,9 @@ Future<void> _runWebReleaseTest(
 /// Debug mode is special because `flutter build web` doesn't build in debug mode.
 ///
 /// Instead, we use `flutter run --debug` and sniff out the standard output.
-Future<void> _runWebDebugTest(
-  String target, {
+Future<void> _runWebDebugTest(String target, {
   bool enableNullSafety = false,
-  List<String> additionalArguments = const <String>[],
+  List<String> additionalArguments = const<String>[],
 }) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
   final CapturedOutput output = CapturedOutput();
@@ -907,12 +895,13 @@ Future<void> _runWebDebugTest(
     <String>[
       'run',
       '--debug',
-      if (enableNullSafety) ...<String>[
-        '--enable-experiment',
-        'non-nullable',
-        '--no-sound-null-safety',
-        '--null-assertions',
-      ],
+      if (enableNullSafety)
+        ...<String>[
+          '--enable-experiment',
+          'non-nullable',
+          '--no-sound-null-safety',
+          '--null-assertions',
+        ],
       '-d',
       'chrome',
       '--web-run-headless',
@@ -950,7 +939,8 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
     flutter,
     <String>[
       'test',
-      if (ciProvider == CiProviders.cirrus) '--concurrency=1', // do not parallelize on Cirrus, to reduce flakiness
+      if (ciProvider == CiProviders.cirrus)
+        '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
       '-v',
       '--platform=chrome',
       ...?flutterTestArgs,
@@ -966,8 +956,7 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
 
 const String _supportedTesterVersion = '0.0.2-dev7';
 
-Future<void> _pubRunTester(
-  String workingDirectory, {
+Future<void> _pubRunTester(String workingDirectory, {
   List<String> testPaths,
   bool forceSingleCore = false,
   int perTestTimeout,
@@ -989,7 +978,12 @@ Future<void> _pubRunTester(
   if (forceSingleCore) {
     cpus = 1;
   }
-  final List<String> args = <String>['global', 'activate', 'tester', _supportedTesterVersion];
+  final List<String> args = <String>[
+    'global',
+    'activate',
+    'tester',
+    _supportedTesterVersion
+  ];
   final Map<String, String> pubEnvironment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
   };
@@ -1011,7 +1005,10 @@ Future<void> _pubRunTester(
       '-j$cpus',
       '-v',
       '--ci',
-      if (perTestTimeout != null) '--timeout=$perTestTimeout' else '--timeout=-1',
+      if (perTestTimeout != null)
+        '--timeout=$perTestTimeout'
+      else
+        '--timeout=-1',
       ...testPaths,
     ],
     workingDirectory: workingDirectory,
@@ -1019,8 +1016,7 @@ Future<void> _pubRunTester(
   );
 }
 
-Future<void> _pubRunTest(
-  String workingDirectory, {
+Future<void> _pubRunTest(String workingDirectory, {
   List<String> testPaths,
   bool enableFlutterToolAsserts = true,
   bool useBuildRunner = false,
@@ -1050,13 +1046,20 @@ Future<void> _pubRunTest(
   final List<String> args = <String>[
     'run',
     'test',
-    if (useFlutterTestFormatter) '-rjson' else '-rcompact',
+    if (useFlutterTestFormatter)
+      '-rjson'
+    else
+      '-rcompact',
     '-j$cpus',
-    if (!hasColor) '--no-color',
-    if (coverage != null) '--coverage=$coverage',
-    if (perTestTimeout != null) '--timeout=${perTestTimeout.inMilliseconds.toString()}ms',
+    if (!hasColor)
+      '--no-color',
+    if (coverage != null)
+      '--coverage=$coverage',
+    if (perTestTimeout != null)
+      '--timeout=${perTestTimeout.inMilliseconds.toString()}ms',
     if (testPaths != null)
-      for (final String testPath in testPaths) testPath,
+      for (final String testPath in testPaths)
+        testPath,
   ];
   final Map<String, String> pubEnvironment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
@@ -1068,9 +1071,8 @@ Future<void> _pubRunTest(
     // If an existing env variable exists append to it, but only if
     // it doesn't appear to already include enable-asserts.
     String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
-    if (!toolsArgs.contains('--enable-asserts')) {
+    if (!toolsArgs.contains('--enable-asserts'))
       toolsArgs += ' --enable-asserts';
-    }
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
     // The flutter_tool will originally have been snapshotted without asserts.
     // We need to force it to be regenerated with them enabled.
@@ -1102,8 +1104,7 @@ Future<void> _pubRunTest(
   }
 }
 
-Future<void> _runFlutterTest(
-  String workingDirectory, {
+Future<void> _runFlutterTest(String workingDirectory, {
   String script,
   bool expectFailure = false,
   bool printOutput = true,
@@ -1123,9 +1124,8 @@ Future<void> _runFlutterTest(
   ];
 
   final bool shouldProcessOutput = useFlutterTestFormatter && !expectFailure && !options.contains('--coverage');
-  if (shouldProcessOutput) {
+  if (shouldProcessOutput)
     args.add('--machine');
-  }
 
   if (script != null) {
     final String fullScriptPath = path.join(workingDirectory, script);
@@ -1133,12 +1133,10 @@ Future<void> _runFlutterTest(
       print('${red}Could not find test$reset: $green$fullScriptPath$reset');
       print('Working directory: $cyan$workingDirectory$reset');
       print('Script: $green$script$reset');
-      if (!printOutput) {
+      if (!printOutput)
         print('This is one of the tests that does not normally print output.');
-      }
-      if (skip) {
+      if (skip)
         print('This is one of the tests that is normally skipped in this configuration.');
-      }
       exit(1);
     }
     args.add(script);
@@ -1170,9 +1168,8 @@ Future<void> _runFlutterTest(
 
     if (outputChecker != null) {
       final String message = outputChecker(output);
-      if (message != null) {
+      if (message != null)
         exitWithError(<String>[message]);
-      }
     }
     return;
   }
@@ -1243,8 +1240,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
   await _selectIndexedSubshard(tests, kDeviceLabShardCount);
 }
 
-Future<void> _runDevicelabTest(
-  String testName, {
+Future<void> _runDevicelabTest(String testName, {
   Map<String, String> environment,
   // testEmbeddingV2 is only supported by certain specific devicelab tests.
   // Don't use it unless you're sure the test actually supports it.
@@ -1258,7 +1254,8 @@ Future<void> _runDevicelabTest(
     workingDirectory: path.join(flutterRoot, 'dev', 'devicelab'),
     environment: <String, String>{
       ...?environment,
-      if (testEmbeddingV2) 'ENABLE_ANDROID_EMBEDDING_V2': 'true',
+      if (testEmbeddingV2)
+        'ENABLE_ANDROID_EMBEDDING_V2': 'true',
     },
   );
 }
@@ -1268,9 +1265,8 @@ void deleteFile(String path) {
   // while this script runs, so we should be ok. (Sadly recursive:true does not
   // obviate the need for existsSync, at least on Windows.)
   final File file = File(path);
-  if (file.existsSync()) {
+  if (file.existsSync())
     file.deleteSync();
-  }
 }
 
 enum CiProviders {
@@ -1296,8 +1292,8 @@ Future<void> _processTestOutput(
   final bq.TableDataInsertAllRequest request = bq.TableDataInsertAllRequest();
   final String authors = await _getAuthors();
   request.rows = List<bq.TableDataInsertAllRequestRows>.from(
-    formatter.tests.map<bq.TableDataInsertAllRequestRows>(
-      (TestResult result) => bq.TableDataInsertAllRequestRows.fromJson(<String, dynamic>{
+    formatter.tests.map<bq.TableDataInsertAllRequestRows>((TestResult result) =>
+      bq.TableDataInsertAllRequestRows.fromJson(<String, dynamic> {
         'json': <String, dynamic>{
           'source': <String, dynamic>{
             'provider': ciProviderName,
@@ -1322,12 +1318,10 @@ Future<void> _processTestOutput(
             'organization': 'flutter',
             'repository': 'flutter',
           },
-          'error': result.status != TestStatus.failed
-              ? null
-              : <String, dynamic>{
-                  'message': result.errorMessage,
-                  'stack_trace': result.stackTrace,
-                },
+          'error': result.status != TestStatus.failed ? null : <String, dynamic>{
+            'message': result.errorMessage,
+            'stack_trace': result.stackTrace,
+          },
           'information': result.messages,
         },
       }),
@@ -1365,7 +1359,9 @@ String get ciProviderName {
 int get prNumber {
   switch (ciProvider) {
     case CiProviders.cirrus:
-      return Platform.environment['CIRRUS_PR'] == null ? -1 : int.tryParse(Platform.environment['CIRRUS_PR']);
+      return Platform.environment['CIRRUS_PR'] == null
+          ? -1
+          : int.tryParse(Platform.environment['CIRRUS_PR']);
     case CiProviders.luci:
       return -1; // LUCI doesn't know about this.
   }
@@ -1374,8 +1370,7 @@ int get prNumber {
 
 Future<String> _getAuthors() async {
   final String author = await runAndGetStdout(
-    'git$exe',
-    <String>['-c', 'log.showSignature=false', 'log', gitHash, '--pretty="%an <%ae>"'],
+    'git$exe', <String>['-c', 'log.showSignature=false', 'log', gitHash, '--pretty="%an <%ae>"'],
     workingDirectory: flutterRoot,
   ).first;
   return author;
@@ -1392,7 +1387,7 @@ String get ciUrl {
 }
 
 String get gitHash {
-  switch (ciProvider) {
+  switch(ciProvider) {
     case CiProviders.cirrus:
       return Platform.environment['CIRRUS_CHANGE_IN_REPO'];
     case CiProviders.luci:
@@ -1407,17 +1402,15 @@ String get gitHash {
 /// Returns null if the contents are good. Returns a string if they are bad.
 /// The string is an error message.
 Future<String> verifyVersion(File file) async {
-  final RegExp pattern = RegExp(r'^(\d+)\.(\d+)\.(\d+)((-\d+\.\d+)?\.pre(\.\d+)?)?$');
+  final RegExp pattern = RegExp(
+    r'^(\d+)\.(\d+)\.(\d+)((-\d+\.\d+)?\.pre(\.\d+)?)?$');
   final String version = await file.readAsString();
-  if (!file.existsSync()) {
+  if (!file.existsSync())
     return 'The version logic failed to create the Flutter version file.';
-  }
-  if (version == '0.0.0-unknown') {
+  if (version == '0.0.0-unknown')
     return 'The version logic failed to determine the Flutter version.';
-  }
-  if (!version.contains(pattern)) {
+  if (!version.contains(pattern))
     return 'The version logic generated an invalid version string: "$version".';
-  }
   return null;
 }
 
@@ -1444,9 +1437,8 @@ Future<void> _selectIndexedSubshard(List<ShardRunner> tests, int numberOfShards)
       last = '_last';
     }
     subshards['$subshard$last'] = () async {
-      for (final ShardRunner test in sublist) {
+      for (final ShardRunner test in sublist)
         await test();
-      }
     };
   }
 
