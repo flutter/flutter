@@ -5,10 +5,12 @@
 #ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_TEST_H_
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_TEST_H_
 
+#include <map>
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/platform/embedder/tests/embedder_test_context.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_context_gl.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_context_software.h"
 #include "flutter/testing/testing.h"
 #include "flutter/testing/thread_test.h"
 
@@ -17,14 +19,20 @@ namespace testing {
 
 class EmbedderTest : public ThreadTest {
  public:
+  enum class ContextType {
+    kSoftwareContext,
+    kOpenGLContext,
+  };
+
   EmbedderTest();
 
   std::string GetFixturesDirectory() const;
 
-  EmbedderTestContext& GetEmbedderContext();
+  EmbedderTestContext& GetEmbedderContext(ContextType type);
 
  private:
-  std::unique_ptr<EmbedderTestContext> embedder_context_;
+  std::map<ContextType, std::unique_ptr<EmbedderTestContext>>
+      embedder_contexts_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTest);
 };

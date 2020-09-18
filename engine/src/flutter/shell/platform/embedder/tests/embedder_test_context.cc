@@ -30,9 +30,7 @@ EmbedderTestContext::EmbedderTestContext(std::string assets_path)
       });
 }
 
-EmbedderTestContext::~EmbedderTestContext() {
-  SetGLGetFBOCallback(nullptr);
-}
+EmbedderTestContext::~EmbedderTestContext() = default;
 
 void EmbedderTestContext::SetupAOTMappingsIfNecessary() {
   if (!DartVM::IsRunningPrecompiledCode()) {
@@ -170,92 +168,8 @@ EmbedderTestContext::GetComputePlatformResolvedLocaleCallbackHook() {
   };
 }
 
-void EmbedderTestContext::SetupOpenGLSurface(SkISize surface_size) {
-  FML_CHECK(!gl_surface_);
-  gl_surface_ = std::make_unique<TestGLSurface>(surface_size);
-}
-
-bool EmbedderTestContext::GLMakeCurrent() {
-  FML_CHECK(gl_surface_) << "GL surface must be initialized.";
-  return gl_surface_->MakeCurrent();
-}
-
-bool EmbedderTestContext::GLClearCurrent() {
-  FML_CHECK(gl_surface_) << "GL surface must be initialized.";
-  return gl_surface_->ClearCurrent();
-}
-
-bool EmbedderTestContext::GLPresent(uint32_t fbo_id) {
-  FML_CHECK(gl_surface_) << "GL surface must be initialized.";
-  gl_surface_present_count_++;
-
-  GLPresentCallback callback;
-  {
-    std::scoped_lock lock(gl_callback_mutex_);
-    callback = gl_present_callback_;
-  }
-
-  if (callback) {
-    callback(fbo_id);
-  }
-
-  FireRootSurfacePresentCallbackIfPresent(
-      [&]() { return gl_surface_->GetRasterSurfaceSnapshot(); });
-
-  if (!gl_surface_->Present()) {
-    return false;
-  }
-
-  return true;
-}
-
-void EmbedderTestContext::SetGLGetFBOCallback(GLGetFBOCallback callback) {
-  std::scoped_lock lock(gl_callback_mutex_);
-  gl_get_fbo_callback_ = callback;
-}
-
-void EmbedderTestContext::SetGLPresentCallback(GLPresentCallback callback) {
-  std::scoped_lock lock(gl_callback_mutex_);
-  gl_present_callback_ = callback;
-}
-
-uint32_t EmbedderTestContext::GLGetFramebuffer(FlutterFrameInfo frame_info) {
-  FML_CHECK(gl_surface_) << "GL surface must be initialized.";
-
-  GLGetFBOCallback callback;
-  {
-    std::scoped_lock lock(gl_callback_mutex_);
-    callback = gl_get_fbo_callback_;
-  }
-
-  if (callback) {
-    callback(frame_info);
-  }
-
-  const auto size = frame_info.size;
-  return gl_surface_->GetFramebuffer(size.width, size.height);
-}
-
-bool EmbedderTestContext::GLMakeResourceCurrent() {
-  FML_CHECK(gl_surface_) << "GL surface must be initialized.";
-  return gl_surface_->MakeResourceCurrent();
-}
-
-void* EmbedderTestContext::GLGetProcAddress(const char* name) {
-  FML_CHECK(gl_surface_) << "GL surface must be initialized.";
-  return gl_surface_->GetProcAddress(name);
-}
-
 FlutterTransformation EmbedderTestContext::GetRootSurfaceTransformation() {
   return FlutterTransformationMake(root_surface_transformation_);
-}
-
-void EmbedderTestContext::SetupCompositor() {
-  FML_CHECK(!compositor_) << "Already ssetup a compositor in this context.";
-  FML_CHECK(gl_surface_)
-      << "Setup the GL surface before setting up a compositor.";
-  compositor_ = std::make_unique<EmbedderTestCompositor>(
-      gl_surface_->GetSurfaceSize(), gl_surface_->GetGrContext());
 }
 
 EmbedderTestCompositor& EmbedderTestContext::GetCompositor() {
@@ -284,22 +198,6 @@ std::future<sk_sp<SkImage>> EmbedderTestContext::GetNextSceneImage() {
   return future;
 }
 
-bool EmbedderTestContext::SofwarePresent(sk_sp<SkImage> image) {
-  software_surface_present_count_++;
-
-  FireRootSurfacePresentCallbackIfPresent([image] { return image; });
-
-  return true;
-}
-
-size_t EmbedderTestContext::GetGLSurfacePresentCount() const {
-  return gl_surface_present_count_;
-}
-
-size_t EmbedderTestContext::GetSoftwareSurfacePresentCount() const {
-  return software_surface_present_count_;
-}
-
 /// @note Procedure doesn't copy all closures.
 void EmbedderTestContext::FireRootSurfacePresentCallbackIfPresent(
     const std::function<sk_sp<SkImage>(void)>& image_callback) {
@@ -309,11 +207,6 @@ void EmbedderTestContext::FireRootSurfacePresentCallbackIfPresent(
   auto callback = next_scene_callback_;
   next_scene_callback_ = nullptr;
   callback(image_callback());
-}
-
-uint32_t EmbedderTestContext::GetWindowFBOId() const {
-  FML_CHECK(gl_surface_);
-  return gl_surface_->GetWindowFBOId();
 }
 
 }  // namespace testing

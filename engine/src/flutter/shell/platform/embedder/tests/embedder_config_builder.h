@@ -9,8 +9,9 @@
 #include "flutter/fml/unique_object.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
-#include "flutter/shell/platform/embedder/tests/embedder_test_compositor.h"
-#include "flutter/shell/platform/embedder/tests/embedder_test_context.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_compositor_gl.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_context_gl.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_context_software.h"
 
 namespace flutter {
 namespace testing {
@@ -87,6 +88,9 @@ class EmbedderConfigBuilder {
   void SetCompositor();
 
   FlutterCompositor& GetCompositor();
+
+  void SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType type);
 
   UniqueEngine LaunchEngine() const;
 
