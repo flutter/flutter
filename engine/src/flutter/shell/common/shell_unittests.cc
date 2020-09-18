@@ -2011,5 +2011,60 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
   DestroyShell(std::move(shell));
 }
 
+TEST_F(ShellTest, DiscardLayerTreeOnResize) {
+  auto settings = CreateSettingsForFixture();
+
+  SkISize wrong_size = SkISize::Make(400, 100);
+  SkISize expected_size = SkISize::Make(400, 200);
+
+  fml::AutoResetWaitableEvent end_frame_latch;
+
+  auto end_frame_callback = [&](bool, fml::RefPtr<fml::RasterThreadMerger>) {
+    end_frame_latch.Signal();
+  };
+
+  std::shared_ptr<ShellTestExternalViewEmbedder> external_view_embedder =
+      std::make_shared<ShellTestExternalViewEmbedder>(
+          std::move(end_frame_callback), PostPrerollResult::kSuccess, true);
+
+  std::unique_ptr<Shell> shell = CreateShell(
+      settings, GetTaskRunnersForFixture(), false, external_view_embedder);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(),
+      [&shell, &expected_size]() {
+        shell->GetPlatformView()->SetViewportMetrics(
+            {1.0, static_cast<double>(expected_size.width()),
+             static_cast<double>(expected_size.height())});
+      });
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  fml::WeakPtr<RuntimeDelegate> runtime_delegate = shell->GetEngine();
+
+  PumpOneFrame(shell.get(), static_cast<double>(wrong_size.width()),
+               static_cast<double>(wrong_size.height()));
+
+  end_frame_latch.Wait();
+
+  ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
+
+  PumpOneFrame(shell.get(), static_cast<double>(expected_size.width()),
+               static_cast<double>(expected_size.height()));
+
+  end_frame_latch.Wait();
+
+  ASSERT_EQ(1, external_view_embedder->GetSubmittedFrameCount());
+  ASSERT_EQ(expected_size, external_view_embedder->GetLastSubmittedFrameSize());
+
+  DestroyShell(std::move(shell));
+}
+
 }  // namespace testing
 }  // namespace flutter
