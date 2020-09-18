@@ -13,14 +13,27 @@ std::string EmbedderTest::GetFixturesDirectory() const {
   return GetFixturesPath();
 }
 
-EmbedderTestContext& EmbedderTest::GetEmbedderContext() {
+EmbedderTestContext& EmbedderTest::GetEmbedderContext(ContextType type) {
   // Setup the embedder context lazily instead of in the constructor because we
   // don't to do all the work if the test won't end up using context.
-  if (!embedder_context_) {
-    embedder_context_ =
-        std::make_unique<EmbedderTestContext>(GetFixturesDirectory());
+  if (!embedder_contexts_[type]) {
+    switch (type) {
+      case ContextType::kSoftwareContext:
+        embedder_contexts_[type] =
+            std::make_unique<EmbedderTestContextSoftware>(
+                GetFixturesDirectory());
+        break;
+      case ContextType::kOpenGLContext:
+        embedder_contexts_[type] =
+            std::make_unique<EmbedderTestContextGL>(GetFixturesDirectory());
+        break;
+      default:
+        FML_DCHECK(false) << "Invalid context type specified.";
+        break;
+    }
   }
-  return *embedder_context_;
+
+  return *embedder_contexts_[type];
 }
 
 }  // namespace testing

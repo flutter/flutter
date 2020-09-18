@@ -43,7 +43,7 @@ class EmbedderTestContext {
  public:
   EmbedderTestContext(std::string assets_path = "");
 
-  ~EmbedderTestContext();
+  virtual ~EmbedderTestContext();
 
   const std::string& GetAssetsPath() const;
 
@@ -72,47 +72,14 @@ class EmbedderTestContext {
   void SetPlatformMessageCallback(
       const std::function<void(const FlutterPlatformMessage*)>& callback);
 
-  EmbedderTestCompositor& GetCompositor();
-
   std::future<sk_sp<SkImage>> GetNextSceneImage();
 
-  size_t GetGLSurfacePresentCount() const;
+  EmbedderTestCompositor& GetCompositor();
 
-  size_t GetSoftwareSurfacePresentCount() const;
+  virtual size_t GetSurfacePresentCount() const = 0;
 
-  using GLGetFBOCallback = std::function<void(FlutterFrameInfo frame_info)>;
-
-  //----------------------------------------------------------------------------
-  /// @brief      Sets a callback that will be invoked (on the raster task
-  ///             runner) when the engine asks the embedder for a new FBO ID at
-  ///             the updated size.
-  ///
-  /// @attention  The callback will be invoked on the raster task runner. The
-  ///             callback can be set on the tests host thread.
-  ///
-  /// @param[in]  callback  The callback to set. The previous callback will be
-  ///                       un-registered.
-  ///
-  void SetGLGetFBOCallback(GLGetFBOCallback callback);
-
-  uint32_t GetWindowFBOId() const;
-
-  using GLPresentCallback = std::function<void(uint32_t fbo_id)>;
-
-  //----------------------------------------------------------------------------
-  /// @brief      Sets a callback that will be invoked (on the raster task
-  ///             runner) when the engine presents an fbo that was given by the
-  ///             embedder.
-  ///
-  /// @attention  The callback will be invoked on the raster task runner. The
-  ///             callback can be set on the tests host thread.
-  ///
-  /// @param[in]  callback  The callback to set. The previous callback will be
-  ///                       un-registered.
-  ///
-  void SetGLPresentCallback(GLPresentCallback callback);
-
- private:
+  // TODO(gw280): encapsulate these properly for subclasses to use
+ protected:
   // This allows the builder to access the hooks.
   friend class EmbedderConfigBuilder;
 
@@ -130,15 +97,9 @@ class EmbedderTestContext {
   SemanticsNodeCallback update_semantics_node_callback_;
   SemanticsActionCallback update_semantics_custom_action_callback_;
   std::function<void(const FlutterPlatformMessage*)> platform_message_callback_;
-  std::unique_ptr<TestGLSurface> gl_surface_;
   std::unique_ptr<EmbedderTestCompositor> compositor_;
   NextSceneCallback next_scene_callback_;
   SkMatrix root_surface_transformation_;
-  size_t gl_surface_present_count_ = 0;
-  size_t software_surface_present_count_ = 0;
-  std::mutex gl_callback_mutex_;
-  GLGetFBOCallback gl_get_fbo_callback_;
-  GLPresentCallback gl_present_callback_;
 
   static VoidCallback GetIsolateCreateCallbackHook();
 
@@ -155,36 +116,22 @@ class EmbedderTestContext {
 
   void SetupAOTDataIfNecessary();
 
-  void SetupCompositor();
+  virtual void SetupCompositor() = 0;
 
   void FireIsolateCreateCallbacks();
 
   void SetNativeResolver();
 
-  void SetupOpenGLSurface(SkISize surface_size);
-
-  bool GLMakeCurrent();
-
-  bool GLClearCurrent();
-
-  bool GLPresent(uint32_t fbo_id);
-
-  uint32_t GLGetFramebuffer(FlutterFrameInfo frame_info);
-
-  bool GLMakeResourceCurrent();
-
-  void* GLGetProcAddress(const char* name);
-
   FlutterTransformation GetRootSurfaceTransformation();
 
   void PlatformMessageCallback(const FlutterPlatformMessage* message);
-
-  bool SofwarePresent(sk_sp<SkImage> image);
 
   void FireRootSurfacePresentCallbackIfPresent(
       const std::function<sk_sp<SkImage>(void)>& image_callback);
 
   void SetNextSceneCallback(const NextSceneCallback& next_scene_callback);
+
+  virtual void SetupOpenGLSurface(SkISize surface_size) = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContext);
 };
