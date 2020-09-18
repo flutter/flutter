@@ -228,12 +228,10 @@ class IOSDeployDebugger {
     @required ProcessUtils processUtils,
     @required List<String> launchCommand,
     @required Map<String, String> iosDeployEnv,
-    StreamController<String> debuggerOutput,
   }) : _processUtils = processUtils,
         _logger = logger,
         _launchCommand = launchCommand,
         _iosDeployEnv = iosDeployEnv,
-        _debuggerOutput = debuggerOutput ?? StreamController<String>.broadcast(),
         _debuggerState = _IOSDeployDebuggerState.detached;
 
   /// Create a [IOSDeployDebugger] for testing.
@@ -261,7 +259,7 @@ class IOSDeployDebugger {
   Process _iosDeployProcess;
 
   Stream<String> get logLines => _debuggerOutput.stream;
-  final StreamController<String> _debuggerOutput;
+  final StreamController<String> _debuggerOutput = StreamController<String>.broadcast();
 
   bool get debuggerAttached => _debuggerState == _IOSDeployDebuggerState.attached;
   _IOSDeployDebuggerState _debuggerState;
