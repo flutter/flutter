@@ -314,29 +314,11 @@ task:
         CPU: 6
         MEMORY: 8G
 
-    - name: hostonly_devicelab_tests-1-windows
+    - name: hostonly_devicelab_tests-1_last-windows
       << : *WINDOWS_SHARD_TEMPLATE
       environment:
         # As of December 2019, the hostonly_devicelab_tests-1-windows shard requires 4 GB RAM to
         # succeed. The optimal configuration was 4 CPUs and 6 GB RAM, running in ~26 minutes.
-        # Less CPU or RAM ran slower, and more CPU or RAM yielded no extra gain.
-        CPU: 4
-        MEMORY: 6G
-
-    - name: hostonly_devicelab_tests-2-windows
-      << : *WINDOWS_SHARD_TEMPLATE
-      environment:
-        # As of December 2019, the hostonly_devicelab_tests-2-windows shard required 2 GB RAM to
-        # succeed. The optimal configuration was 4 CPUs and 8 GB RAM, running in ~33 minutes.
-        # Less CPU or RAM ran slower, and more CPU or RAM yielded no extra gain.
-        CPU: 4
-        MEMORY: 8G
-
-    - name: hostonly_devicelab_tests-3_last-windows
-      << : *WINDOWS_SHARD_TEMPLATE
-      environment:
-        # As of December 2019, the hostonly_devicelab_tests-3_last-windows shard required 6 GB RAM
-        # to succeed. The optimal configuration was 4 CPUs and 6 GB RAM, running in ~43 minutes.
         # Less CPU or RAM ran slower, and more CPU or RAM yielded no extra gain.
         CPU: 4
         MEMORY: 6G
