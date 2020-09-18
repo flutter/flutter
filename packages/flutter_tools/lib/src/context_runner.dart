@@ -232,7 +232,8 @@ Future<T> runInContext<T>(
         botDetector: globals.botDetector,
         platform: globals.platform,
         usage: globals.flutterUsage,
-        toolStampFile: globals.cache.getStampFileFor('flutter_tools'),
+        // Avoid a circular dependency by making this access lazy.
+        toolStampFile: () => globals.cache.getStampFileFor('flutter_tools'),
       ),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Stdio: () => Stdio(),

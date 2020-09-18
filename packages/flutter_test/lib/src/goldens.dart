@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 // @dart = 2.10
-import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:path/path.dart' as path;

@@ -7,7 +7,7 @@ import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
-import 'package:logging/logging.dart';
+import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:package_config/package_config.dart';
@@ -19,6 +19,7 @@ import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
@@ -30,6 +31,7 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
+import '../project.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 
@@ -44,7 +46,7 @@ typedef DwdsLauncher = Future<Dwds> Function({
   bool useSseForDebugProxy,
   bool useSseForDebugBackend,
   bool serveDevTools,
-  void Function(Level, String) logWriter,
+  void Function(logging.Level, String) logWriter,
   bool verbose,
   UrlEncoder urlEncoder,
   bool useFileProvider,
@@ -226,6 +228,21 @@ class WebAssetServer implements AssetReader {
         }
         return null;
       }
+      // Ensure dwds is present and provide middleware to avoid trying to
+      // load the through the isolate APIs.
+      final Directory directory = await _loadDwdsDirectory(globals.fs, globals.logger);
+      final shelf.Middleware middleware = (FutureOr<shelf.Response> Function(shelf.Request) innerHandler) {
+        return (shelf.Request request) async {
+          if (request.url.path.endsWith('dwds/src/injected/client.js')) {
+            final Uri uri = directory.uri.resolve('src/injected/client.js');
+            final String result = await globals.fs.file(uri.toFilePath()).readAsString();
+            return shelf.Response.ok(result, headers: <String, String>{
+              HttpHeaders.contentTypeHeader: 'application/javascript'
+            });
+          }
+          return innerHandler(request);
+        };
+      };
 
       // In debug builds, spin up DWDS and the full asset server.
       final Dwds dwds = await dwdsLauncher(
@@ -242,7 +259,7 @@ class WebAssetServer implements AssetReader {
         useSseForDebugProxy: useSseForDebugProxy,
         useSseForDebugBackend: useSseForDebugBackend,
         serveDevTools: false,
-        logWriter: (Level logLevel, String message) => globals.printTrace(message),
+        logWriter: (logging.Level logLevel, String message) => globals.printTrace(message),
         loadStrategy: RequireStrategy(
           ReloadConfiguration.none,
           '.lib.js',
@@ -257,6 +274,7 @@ class WebAssetServer implements AssetReader {
       );
       shelf.Pipeline pipeline = const shelf.Pipeline();
       if (enableDwds) {
+        pipeline = pipeline.addMiddleware(middleware);
         pipeline = pipeline.addMiddleware(dwds.middleware);
       }
       final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
@@ -788,6 +806,7 @@ class WebDevFS implements DevFS {
       webAssetServer.writeBytes('stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile('manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile('flutter_service_worker.js', '// Service worker not loaded in run mode.');
+      webAssetServer.writeFile('version.json', FlutterProject.current().getVersionInfo());
       webAssetServer.writeFile(
         'main.dart.js',
         generateBootstrapScript(
@@ -943,4 +962,15 @@ class ReleaseAssetServer {
     }
     return shelf.Response.notFound('');
   }
+}
+
+Future<Directory> _loadDwdsDirectory(FileSystem fileSystem, Logger logger) async {
+  final String toolPackagePath = fileSystem.path.join(
+      Cache.flutterRoot, 'packages', 'flutter_tools');
+  final String packageFilePath = fileSystem.path.join(toolPackagePath, kPackagesFileName);
+  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+    fileSystem.file(packageFilePath),
+    logger: logger,
+  );
+  return fileSystem.directory(packageConfig['dwds'].packageUriRoot);
 }

@@ -176,9 +176,9 @@ const Duration _defaultSamplingOffset = Duration(milliseconds: -38);
 ///
 /// A pointer that is [PointerEvent.down] may send further events, such as
 /// [PointerMoveEvent], [PointerUpEvent], or [PointerCancelEvent]. These are
-/// sent to the same [HitTestTarget] nodes as were found when the down event was
-/// received (even if they have since been disposed; it is the responsibility of
-/// those objects to be aware of that possibility).
+/// sent to the same [HitTestTarget] nodes as were found when the
+/// [PointerDownEvent] was received (even if they have since been disposed; it is
+/// the responsibility of those objects to be aware of that possibility).
 ///
 /// Then, the events are routed to any still-registered entrants in the
 /// [PointerRouter]'s table for that pointer.
@@ -237,7 +237,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     _resampler.stop();
 
     while (_pendingPointerEvents.isNotEmpty)
-      _handlePointerEvent(_pendingPointerEvents.removeFirst());
+      handlePointerEvent(_pendingPointerEvents.removeFirst());
   }
 
   /// A router that routes all pointer events received from the engine.
@@ -247,8 +247,8 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// pointer events.
   final GestureArenaManager gestureArena = GestureArenaManager();
 
-  /// The resolver used for determining which widget handles a pointer
-  /// signal event.
+  /// The resolver used for determining which widget handles a
+  /// [PointerSignalEvent].
   final PointerSignalResolver pointerSignalResolver = PointerSignalResolver();
 
   /// State for all pointers which are currently down.
@@ -257,7 +257,17 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// hit-testing on every frame.
   final Map<int, HitTestResult> _hitTests = <int, HitTestResult>{};
 
-  void _handlePointerEvent(PointerEvent event) {
+  /// Dispatch an event to the targets found by a hit test on its position.
+  ///
+  /// This method sends the given event to [dispatchEvent] based on event types:
+  ///
+  ///  * [PointerDownEvent]s and [PointerSignalEvent]s are dispatched to the
+  ///    result of a new [hitTest].
+  ///  * [PointerUpEvent]s and [PointerMoveEvent]s are dispatched to the result of hit test of the
+  ///    preceding [PointerDownEvent]s.
+  ///  * [PointerHoverEvent]s, [PointerAddedEvent]s, and [PointerRemovedEvent]s
+  ///    are dispatched without a hit test result.
+  void handlePointerEvent(PointerEvent event) {
     assert(!locked);
     HitTestResult? hitTestResult;
     if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent) {
@@ -276,7 +286,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       hitTestResult = _hitTests.remove(event.pointer);
     } else if (event.down) {
       // Because events that occur with the pointer down (like
-      // PointerMoveEvents) should be dispatched to the same place that their
+      // [PointerMoveEvent]s) should be dispatched to the same place that their
       // initial PointerDownEvent was, we want to re-use the path we found when
       // the pointer went down, rather than do hit detection each time we get
       // such an event.
@@ -301,18 +311,20 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     result.add(HitTestEntry(this));
   }
 
-  /// Dispatch an event to a hit test result's path.
+  /// Dispatch an event to [pointerRouter] and the path of a hit test result.
   ///
-  /// This sends the given event to every [HitTestTarget] in the entries of the
-  /// given [HitTestResult], and catches exceptions that any of the handlers
-  /// might throw. The [hitTestResult] argument may only be null for
-  /// [PointerAddedEvent] or [PointerRemovedEvent] events.
+  /// The `event` is routed to [pointerRouter]. If the `hitTestResult` is not
+  /// null, the event is also sent to every [HitTestTarget] in the entries of the
+  /// given [HitTestResult]. Any exceptions from the handlers are caught.
+  ///
+  /// The `hitTestResult` argument may only be null for [PointerAddedEvent]s or
+  /// [PointerRemovedEvent]s.
   @override // from HitTestDispatcher
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     assert(!locked);
-    // No hit test information implies that this is a pointer add/remove event.
-    // These events are specially routed here; other events will be routed
-    // through the `handleEvent` below.
+    // No hit test information implies that this is a [PointerHoverEvent],
+    // [PointerAddedEvent], or [PointerRemovedEvent]. These events are specially
+    // routed here; other events will be routed through the `handleEvent` below.
     if (hitTestResult == null) {
       assert(event is PointerAddedEvent || event is PointerRemovedEvent);
       try {
@@ -364,6 +376,16 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     }
   }
 
+  /// Reset states of [GestureBinding].
+  ///
+  /// This clears the hit test records.
+  ///
+  /// This is typically called between tests.
+  @protected
+  void resetGestureBinding() {
+    _hitTests.clear();
+  }
+
   void _handleSampleTimeChanged() {
     if (!locked) {
       _flushPointerEventQueue();
@@ -373,7 +395,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   // Resampler used to filter incoming pointer events when resampling
   // is enabled.
   late final _Resampler _resampler = _Resampler(
-    _handlePointerEvent,
+    handlePointerEvent,
     _handleSampleTimeChanged,
   );
 
@@ -428,7 +450,8 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
 
   /// The hit test result entry for the object whose handleEvent method threw
   /// the exception. May be null if no hit test entry is associated with the
-  /// event (e.g. hover and pointer add/remove events).
+  /// event (e.g. [PointerHoverEvent]s, [PointerAddedEvent]s, and
+  /// [PointerRemovedEvent]s).
   ///
   /// The target object itself is given by the [HitTestEntry.target] property of
   /// the hitTestEntry object.
