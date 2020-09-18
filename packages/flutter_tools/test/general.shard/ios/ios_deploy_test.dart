@@ -78,7 +78,7 @@ void main () {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
-            stdout: '(lldb)     run\r\nsuccess\r\nLog on attach1\r\n\r\nLog on attach2\r\n\r\n\r\n\r\nPROCESS_STOPPED\r\nLog after process exit',
+            stdout: '(lldb)     run\r\nsuccess\r\nsuccess\r\nLog on attach1\r\n\r\nLog on attach2\r\n\r\n\r\n\r\nPROCESS_STOPPED\r\nLog after process exit',
           ),
         ]);
         final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
@@ -89,14 +89,39 @@ void main () {
         final Stream<String> logLines = iosDeployDebugger.logLines
           ..listen(receivedLogLines.add);
 
-        await iosDeployDebugger.launchAndAttach();
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
+        await logLines.toList();
+        expect(receivedLogLines, <String>[
+          'success', // ignore first "success" from lldb, but log subsequent ones from real logging.
+          'Log on attach1',
+          'Log on attach2',
+          '', '']);
+      });
+
+      testWithoutContext('attach failed', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['ios-deploy'],
+            // A success after an error should never happen, but test that we're handling random "successes" anyway.
+            stdout: '(lldb)     run\r\nerror: process launch failed\r\nsuccess\r\nLog on attach1',
+          ),
+        ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        final List<String> receivedLogLines = <String>[];
+        final Stream<String> logLines = iosDeployDebugger.logLines
+          ..listen(receivedLogLines.add);
+
+        expect(await iosDeployDebugger.launchAndAttach(), isFalse);
         await logLines.toList();
         // Debugger lines are double spaced, separated by an extra \r\n. Skip the extra lines.
         // Still include empty lines other than the extra added newlines.
-        expect(receivedLogLines, <String>['Log on attach1', 'Log on attach2', '', '']);
+        expect(receivedLogLines, isEmpty);
       });
 
-      testWithoutContext('no provisioning profile 1', () async {
+      testWithoutContext('no provisioning profile 1, stdout', () async {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
@@ -112,11 +137,11 @@ void main () {
         expect(logger.errorText, contains('No Provisioning Profile was found'));
       });
 
-      testWithoutContext('no provisioning profile 2', () async {
+      testWithoutContext('no provisioning profile 2, stderr', () async {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
-            stdout: 'Error 0xe8000067',
+            stderr: 'Error 0xe8000067',
           ),
         ]);
         final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(

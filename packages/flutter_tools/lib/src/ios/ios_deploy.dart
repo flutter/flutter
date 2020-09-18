@@ -214,6 +214,13 @@ class IOSDeploy {
   String _monitorFailure(String stdout) => _monitorIOSDeployFailure(stdout, _logger);
 }
 
+/// lldb attach state flow.
+enum _IOSDeployDebuggerState {
+  detached,
+  launching,
+  attached,
+}
+
 /// Wrapper to launch app and attach the debugger with ios-deploy.
 class IOSDeployDebugger {
   IOSDeployDebugger({
@@ -226,10 +233,15 @@ class IOSDeployDebugger {
         _logger = logger,
         _launchCommand = launchCommand,
         _iosDeployEnv = iosDeployEnv,
-        _debuggerOutput = debuggerOutput ?? StreamController<String>.broadcast();
+        _debuggerOutput = debuggerOutput ?? StreamController<String>.broadcast(),
+        _debuggerState = _IOSDeployDebuggerState.detached;
 
+  /// Create a [IOSDeployDebugger] for testing.
+  ///
+  /// Sets the command to "ios-deploy" and environment to an empty map.
+  @visibleForTesting
   factory IOSDeployDebugger.test({
-    ProcessManager processManager,
+    @required ProcessManager processManager,
     Logger logger,
   }) {
     final Logger debugLogger = logger ?? BufferLogger.test();
@@ -251,8 +263,12 @@ class IOSDeployDebugger {
   Stream<String> get logLines => _debuggerOutput.stream;
   final StreamController<String> _debuggerOutput;
 
-  bool get debuggerAttached => _debuggerAttached;
-  bool _debuggerAttached = false;
+  bool get debuggerAttached => _debuggerState == _IOSDeployDebuggerState.attached;
+  _IOSDeployDebuggerState _debuggerState;
+
+  // (lldb)     run
+  // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
+  static final RegExp _lldbRun = RegExp(r'\(lldb\)\s*run');
 
   /// Launch the app on the device, and attach the debugger.
   ///
@@ -265,7 +281,6 @@ class IOSDeployDebugger {
         _launchCommand,
         environment: _iosDeployEnv,
       );
-      bool lldbRunCalled = false;
       String lastLineFromDebugger;
       final StreamSubscription<String> stdoutSubscription = _iosDeployProcess.stdout
           .transform<String>(utf8.decoder)
@@ -276,36 +291,31 @@ class IOSDeployDebugger {
         // (lldb)     run
         // success
         // 2020-09-15 13:42:25.185474-0700 Runner[477:181141] flutter: Observatory listening on http://127.0.0.1:57782/
-        if (line == '(lldb)     run') {
+        if (_lldbRun.hasMatch(line)) {
           _logger.printTrace(line);
-          lldbRunCalled = true;
+          _debuggerState = _IOSDeployDebuggerState.launching;
           return;
         }
-        // next line must be "success".
-        if (lldbRunCalled && line == 'success') {
+        // Next line after "run" must be "success", or the attach failed.
+        // Example: "error: process launch failed"
+        if (_debuggerState == _IOSDeployDebuggerState.launching) {
           _logger.printTrace(line);
-          _debuggerAttached = true;
-          debuggerCompleter.complete(true);
+          final bool attachSuccess = line == 'success';
+          _debuggerState = attachSuccess ? _IOSDeployDebuggerState.attached : _IOSDeployDebuggerState.detached;
+          if (!debuggerCompleter.isCompleted) {
+            debuggerCompleter.complete(attachSuccess);
+          }
           return;
         }
-        lldbRunCalled = false;
         if (line.contains('PROCESS_STOPPED') ||
             line.contains('PROCESS_EXITED')) {
           // The app exited or crashed, so stop echoing the output.
           // Don't pass any further ios-deploy debugging messages to the log reader after it exits.
-          _debuggerAttached = false;
+          _debuggerState = _IOSDeployDebuggerState.detached;
           _logger.printTrace(line);
           return;
         }
-
-        if (line.contains('error: process launch failed')) {
-          // Timed out waiting for the app to launch.
-          _debuggerAttached = false;
-          _logger.printTrace(line);
-          debuggerCompleter.complete(false);
-          return;
-        }
-        if (!debuggerAttached) {
+        if (_debuggerState != _IOSDeployDebuggerState.attached) {
           _logger.printTrace(line);
           return;
         }
@@ -323,11 +333,12 @@ class IOSDeployDebugger {
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
+        _monitorIOSDeployFailure(line, _logger);
         _logger.printTrace(line);
       });
       unawaited(_iosDeployProcess.exitCode.then((int status) {
         _logger.printTrace('ios-deploy exited with code $exitCode');
-        _debuggerAttached = false;
+        _debuggerState = _IOSDeployDebuggerState.detached;
         unawaited(stdoutSubscription.cancel());
         unawaited(stderrSubscription.cancel());
       }).whenComplete(() async {
@@ -342,11 +353,11 @@ class IOSDeployDebugger {
       }));
     } on ProcessException catch (exception, stackTrace) {
       _logger.printTrace('ios-deploy failed: $exception');
-      _debuggerAttached = false;
+      _debuggerState = _IOSDeployDebuggerState.detached;
       _debuggerOutput.addError(exception, stackTrace);
     } on ArgumentError catch (exception, stackTrace) {
       _logger.printTrace('ios-deploy failed: $exception');
-      _debuggerAttached = false;
+      _debuggerState = _IOSDeployDebuggerState.detached;
       _debuggerOutput.addError(exception, stackTrace);
     }
     // Wait until the debugger attaches, or the attempt fails.
@@ -367,7 +378,7 @@ class IOSDeployDebugger {
     try {
       // Detach lldb from the app process.
       _iosDeployProcess?.stdin?.writeln('process detach');
-      _debuggerAttached = false;
+      _debuggerState = _IOSDeployDebuggerState.detached;
     } on SocketException catch (error) {
       // Best effort, try to detach, but maybe the app already exited or already detached.
       _logger.printTrace('Could not detach from debugger: $error');
