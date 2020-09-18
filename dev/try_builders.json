@@ -94,12 +94,6 @@
          "enabled":true
       },
       {
-         "name":"Linux hostonly_devicelab_tests",
-         "repo":"flutter",
-         "task_name":"linux_hostonly_devicelab_tests",
-         "enabled":true
-      },
-      {
          "name":"Linux module_host_with_custom_build_test",
          "repo":"flutter",
          "task_name":"linux_module_host_with_custom_build_test",
