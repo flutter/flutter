@@ -39,9 +39,15 @@ final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
 
 String get platformFolderName {
-  if (Platform.isWindows) return 'windows-x64';
-  if (Platform.isMacOS) return 'darwin-x64';
-  if (Platform.isLinux) return 'linux-x64';
+  if (Platform.isWindows) {
+    return 'windows-x64';
+  }
+  if (Platform.isMacOS) {
+    return 'darwin-x64';
+  }
+  if (Platform.isLinux) {
+    return 'linux-x64';
+  }
   throw UnsupportedError('The platform ${Platform.operatingSystem} is not supported by this script.');
 }
 
@@ -250,7 +256,9 @@ Future<void> _runSmokeTests() async {
 
   // Verify that we correctly generated the version file.
   final String versionError = await verifyVersion(File(path.join(flutterRoot, 'version')));
-  if (versionError != null) exitWithError(<String>[versionError]);
+  if (versionError != null) {
+    exitWithError(<String>[versionError]);
+  }
 }
 
 Future<bq.BigqueryApi> _getBigqueryApi() async {
@@ -1060,7 +1068,9 @@ Future<void> _pubRunTest(
     // If an existing env variable exists append to it, but only if
     // it doesn't appear to already include enable-asserts.
     String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
-    if (!toolsArgs.contains('--enable-asserts')) toolsArgs += ' --enable-asserts';
+    if (!toolsArgs.contains('--enable-asserts')) {
+      toolsArgs += ' --enable-asserts';
+    }
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
     // The flutter_tool will originally have been snapshotted without asserts.
     // We need to force it to be regenerated with them enabled.
@@ -1113,7 +1123,9 @@ Future<void> _runFlutterTest(
   ];
 
   final bool shouldProcessOutput = useFlutterTestFormatter && !expectFailure && !options.contains('--coverage');
-  if (shouldProcessOutput) args.add('--machine');
+  if (shouldProcessOutput) {
+    args.add('--machine');
+  }
 
   if (script != null) {
     final String fullScriptPath = path.join(workingDirectory, script);
@@ -1121,8 +1133,12 @@ Future<void> _runFlutterTest(
       print('${red}Could not find test$reset: $green$fullScriptPath$reset');
       print('Working directory: $cyan$workingDirectory$reset');
       print('Script: $green$script$reset');
-      if (!printOutput) print('This is one of the tests that does not normally print output.');
-      if (skip) print('This is one of the tests that is normally skipped in this configuration.');
+      if (!printOutput) {
+        print('This is one of the tests that does not normally print output.');
+      }
+      if (skip) {
+        print('This is one of the tests that is normally skipped in this configuration.');
+      }
       exit(1);
     }
     args.add(script);
@@ -1154,7 +1170,9 @@ Future<void> _runFlutterTest(
 
     if (outputChecker != null) {
       final String message = outputChecker(output);
-      if (message != null) exitWithError(<String>[message]);
+      if (message != null) {
+        exitWithError(<String>[message]);
+      }
     }
     return;
   }
@@ -1250,7 +1268,9 @@ void deleteFile(String path) {
   // while this script runs, so we should be ok. (Sadly recursive:true does not
   // obviate the need for existsSync, at least on Windows.)
   final File file = File(path);
-  if (file.existsSync()) file.deleteSync();
+  if (file.existsSync()) {
+    file.deleteSync();
+  }
 }
 
 enum CiProviders {
@@ -1389,9 +1409,15 @@ String get gitHash {
 Future<String> verifyVersion(File file) async {
   final RegExp pattern = RegExp(r'^(\d+)\.(\d+)\.(\d+)((-\d+\.\d+)?\.pre(\.\d+)?)?$');
   final String version = await file.readAsString();
-  if (!file.existsSync()) return 'The version logic failed to create the Flutter version file.';
-  if (version == '0.0.0-unknown') return 'The version logic failed to determine the Flutter version.';
-  if (!version.contains(pattern)) return 'The version logic generated an invalid version string: "$version".';
+  if (!file.existsSync()) {
+    return 'The version logic failed to create the Flutter version file.';
+  }
+  if (version == '0.0.0-unknown') {
+    return 'The version logic failed to determine the Flutter version.';
+  }
+  if (!version.contains(pattern)) {
+    return 'The version logic generated an invalid version string: "$version".';
+  }
   return null;
 }
 
@@ -1418,7 +1444,9 @@ Future<void> _selectIndexedSubshard(List<ShardRunner> tests, int numberOfShards)
       last = '_last';
     }
     subshards['$subshard$last'] = () async {
-      for (final ShardRunner test in sublist) await test();
+      for (final ShardRunner test in sublist) {
+        await test();
+      }
     };
   }
 
