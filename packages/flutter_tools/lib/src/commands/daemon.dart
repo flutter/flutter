@@ -473,6 +473,7 @@ class AppDomain extends Domain {
       target: target,
       buildInfo: options.buildInfo,
       widgetCache: WidgetCache(featureFlags: featureFlags),
+      platform: globals.platform,
     );
 
     ResidentRunner runner;

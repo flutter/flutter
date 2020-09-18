@@ -418,6 +418,7 @@ abstract class ResidentCompiler {
     String platformDill,
     List<String> dartDefines,
     String librariesSpec,
+    @required Platform platform,
     // Deprecated
     List<String> experimentalFlags,
   }) = DefaultResidentCompiler;
@@ -518,7 +519,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.platformDill,
     List<String> dartDefines,
     this.librariesSpec,
-    Platform platform,
+    @required Platform platform,
     // Deprecated
     List<String> experimentalFlags, // ignore: avoid_unused_constructor_parameters
   }) : assert(sdkRoot != null),

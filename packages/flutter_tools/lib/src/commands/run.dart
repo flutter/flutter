@@ -533,6 +533,7 @@ class RunCommand extends RunCommandBase {
           buildInfo: getBuildInfo(),
           userIdentifier: userIdentifier,
           widgetCache: WidgetCache(featureFlags: featureFlags),
+          platform: globals.platform,
         ),
     ];
     // Only support "web mode" with a single web device due to resident runner

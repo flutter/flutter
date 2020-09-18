@@ -2200,6 +2200,7 @@ void main() {
       ),
       flutterProject: FlutterProject.current(),
       target: null,
+      platform: FakePlatform(operatingSystem: 'linux'),
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill,
@@ -2234,6 +2235,7 @@ void main() {
       ),
       flutterProject: FlutterProject.current(),
       target: null,
+      platform: FakePlatform(operatingSystem: 'linux'),
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill,
