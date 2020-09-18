@@ -10,6 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -1914,5 +1915,48 @@ void main() {
           ..circle(x: -12.0, y: 5.0, radius: 10.0,)
           ..circle(x: 0.0, y: 5.0, radius: 10.0,)
     );
+  });
+
+  testWidgets('Update the divisions and values at the same time for RangeSlider', (WidgetTester tester) async {
+    // Regress test for https://github.com/flutter/flutter/issues/65943
+    Widget buildFrame(double maxValue) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: RangeSlider(
+              values: const RangeValues(5, 8),
+              max: maxValue,
+              divisions: maxValue.toInt(),
+              onChanged: (RangeValues newValue) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(10));
+
+    // _RenderRangeSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+
+    // Update the divisions from 10 to 15, the thumbs should be paint at the correct position.
+    await tester.pumpWidget(buildFrame(15));
+    await tester.pumpAndSettle(); // Finish the animation.
+
+    Rect activeTrackRect;
+    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
+      if (method != #drawRect)
+        return false;
+      activeTrackRect = arguments[0] as Rect;
+      return true;
+    }));
+
+    // The 1st thumb should at one-third(5 / 15) of the Slider.
+    // The 2nd thumb should at (8 / 15) of the Slider.
+    // The left of the active track shape is the position of the 1st thumb.
+    // The right of the active track shape is the position of the 2nd thumb.
+    // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
+    expect(nearEqual(activeTrackRect.left, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
+    expect(nearEqual(activeTrackRect.right, (800.0 - 24.0 - 24.0) * (8 / 15) + 24.0, 0.01), true);
   });
 }
