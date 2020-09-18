@@ -12,6 +12,12 @@
 static const char _kTextAffinityDownstream[] = "TextAffinity.downstream";
 static const char _kTextAffinityUpstream[] = "TextAffinity.upstream";
 
+// The "canonical" invalid CGRect, similar to CGRectNull, used to
+// indicate a CGRect involved in firstRectForRange calculation is
+// invalid. The specific value is chosen so that if firstRectForRange
+// returns kInvalidFirstRect, iOS will not show the IME candidates view.
+const CGRect kInvalidFirstRect = {{-1, -1}, {9999, 9999}};
+
 #pragma mark - TextInputConfiguration Field Names
 static NSString* const kSecureTextEntry = @"obscureText";
 static NSString* const kKeyboardType = @"inputType";
@@ -32,6 +38,7 @@ static NSString* const kAutofillHints = @"hints";
 static NSString* const kAutocorrectionType = @"autocorrect";
 
 #pragma mark - Static Functions
+
 static UIKeyboardType ToUIKeyboardType(NSDictionary* type) {
   NSString* inputType = type[@"name"];
   if ([inputType isEqualToString:@"TextInputType.address"])
@@ -414,20 +421,24 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 
 @interface FlutterTextInputView ()
 @property(nonatomic, copy) NSString* autofillId;
+@property(nonatomic, readonly) CATransform3D editableTransform;
+@property(nonatomic, assign) CGRect markedRect;
 @property(nonatomic) BOOL isVisibleToAutofill;
+
+- (void)setEditableTransform:(NSArray*)matrix;
 @end
 
 @implementation FlutterTextInputView {
   int _textInputClient;
   const char* _selectionAffinity;
   FlutterTextRange* _selectedTextRange;
+  CGRect _cachedFirstRect;
 }
 
 @synthesize tokenizer = _tokenizer;
 
 - (instancetype)init {
   self = [super init];
-
   if (self) {
     _textInputClient = 0;
     _selectionAffinity = _kTextAffinityUpstream;
@@ -436,6 +447,11 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
     _text = [[NSMutableString alloc] init];
     _markedText = [[NSMutableString alloc] init];
     _selectedTextRange = [[FlutterTextRange alloc] initWithNSRange:NSMakeRange(0, 0)];
+    _markedRect = kInvalidFirstRect;
+    _cachedFirstRect = kInvalidFirstRect;
+    // Initialize with the zero matrix which is not
+    // an affine transform.
+    _editableTransform = CATransform3D();
 
     // UITextInputTraits
     _autocapitalizationType = UITextAutocapitalizationTypeSentences;
@@ -907,19 +923,76 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 
 #pragma mark - UITextInput cursor, selection rect handling
 
+- (void)setMarkedRect:(CGRect)markedRect {
+  _markedRect = markedRect;
+  // Invalidate the cache.
+  _cachedFirstRect = kInvalidFirstRect;
+}
+
+// This method expects a 4x4 perspective matrix
+// stored in a NSArray in column-major order.
+- (void)setEditableTransform:(NSArray*)matrix {
+  CATransform3D* transform = &_editableTransform;
+
+  transform->m11 = [matrix[0] doubleValue];
+  transform->m12 = [matrix[1] doubleValue];
+  transform->m13 = [matrix[2] doubleValue];
+  transform->m14 = [matrix[3] doubleValue];
+
+  transform->m21 = [matrix[4] doubleValue];
+  transform->m22 = [matrix[5] doubleValue];
+  transform->m23 = [matrix[6] doubleValue];
+  transform->m24 = [matrix[7] doubleValue];
+
+  transform->m31 = [matrix[8] doubleValue];
+  transform->m32 = [matrix[9] doubleValue];
+  transform->m33 = [matrix[10] doubleValue];
+  transform->m34 = [matrix[11] doubleValue];
+
+  transform->m41 = [matrix[12] doubleValue];
+  transform->m42 = [matrix[13] doubleValue];
+  transform->m43 = [matrix[14] doubleValue];
+  transform->m44 = [matrix[15] doubleValue];
+
+  // Invalidate the cache.
+  _cachedFirstRect = kInvalidFirstRect;
+}
+
 // The following methods are required to support force-touch cursor positioning
 // and to position the
 // candidates view for multi-stage input methods (e.g., Japanese) when using a
 // physical keyboard.
 
 - (CGRect)firstRectForRange:(UITextRange*)range {
-  // multi-stage text is handled in the framework.
-  if (_markedTextRange != nil) {
-    return CGRectZero;
-  }
+  NSAssert([range.start isKindOfClass:[FlutterTextPosition class]],
+           @"Expected a FlutterTextPosition for range.start (got %@).", [range.start class]);
+  NSAssert([range.end isKindOfClass:[FlutterTextPosition class]],
+           @"Expected a FlutterTextPosition for range.end (got %@).", [range.end class]);
 
   NSUInteger start = ((FlutterTextPosition*)range.start).index;
   NSUInteger end = ((FlutterTextPosition*)range.end).index;
+  if (_markedTextRange != nil) {
+    // The candidates view can't be shown if _editableTransform is not affine,
+    // or markedRect is invalid.
+    if (CGRectEqualToRect(kInvalidFirstRect, _markedRect) ||
+        !CATransform3DIsAffine(_editableTransform)) {
+      return kInvalidFirstRect;
+    }
+
+    if (CGRectEqualToRect(_cachedFirstRect, kInvalidFirstRect)) {
+      // If the width returned is too small, that means the framework sent us
+      // the caret rect instead of the marked text rect. Expand it to 0.1 so
+      // the IME candidates view show up.
+      double nonZeroWidth = MAX(_markedRect.size.width, 0.1);
+      CGRect rect = _markedRect;
+      rect.size = CGSizeMake(nonZeroWidth, rect.size.height);
+      _cachedFirstRect =
+          CGRectApplyAffineTransform(rect, CATransform3DGetAffineTransform(_editableTransform));
+    }
+
+    return _cachedFirstRect;
+  }
+
   [_textInputDelegate showAutocorrectionPromptRectForStart:start
                                                        end:end
                                                 withClient:_textInputClient];
@@ -1112,12 +1185,31 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   } else if ([method isEqualToString:@"TextInput.clearClient"]) {
     [self clearTextInputClient];
     result(nil);
+  } else if ([method isEqualToString:@"TextInput.setEditableSizeAndTransform"]) {
+    [self setEditableSizeAndTransform:args];
+    result(nil);
+  } else if ([method isEqualToString:@"TextInput.setMarkedTextRect"]) {
+    [self updateMarkedRect:args];
+    result(nil);
   } else if ([method isEqualToString:@"TextInput.finishAutofillContext"]) {
     [self triggerAutofillSave:[args boolValue]];
     result(nil);
   } else {
     result(FlutterMethodNotImplemented);
   }
+}
+
+- (void)setEditableSizeAndTransform:(NSDictionary*)dictionary {
+  [_activeView setEditableTransform:dictionary[@"transform"]];
+}
+
+- (void)updateMarkedRect:(NSDictionary*)dictionary {
+  NSAssert(dictionary[@"x"] != nil && dictionary[@"y"] != nil && dictionary[@"width"] != nil &&
+               dictionary[@"height"] != nil,
+           @"Expected a dictionary representing a CGRect, got %@", dictionary);
+  CGRect rect = CGRectMake([dictionary[@"x"] doubleValue], [dictionary[@"y"] doubleValue],
+                           [dictionary[@"width"] doubleValue], [dictionary[@"height"] doubleValue]);
+  _activeView.markedRect = rect.size.width < 0 && rect.size.height < 0 ? kInvalidFirstRect : rect;
 }
 
 - (void)showTextInput {

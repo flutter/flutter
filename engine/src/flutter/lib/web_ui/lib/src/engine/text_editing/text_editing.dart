@@ -1336,6 +1336,11 @@ class TextEditingChannel {
         cleanForms();
         break;
 
+      case 'TextInput.setMarkedTextRect':
+        // No-op: this message is currently only used on iOS to implement
+        // UITextInput.firstRecForRange.
+        break;
+
       default:
         throw StateError(
             'Unsupported method call on the flutter/textinput channel: ${call.method}');
