@@ -45,7 +45,9 @@ enum class RasterStatus {
   // only used when thread configuration change occurs.
   kEnqueuePipeline,
   // Failed to rasterize the frame.
-  kFailed
+  kFailed,
+  // Layer tree was discarded due to LayerTreeDiscardCallback
+  kDiscarded
 };
 
 class CompositorContext {

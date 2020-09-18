@@ -181,6 +181,13 @@ if (enable_unittests) {
     ]
   }
 
+  config("shell_test_fixture_sources_config") {
+    defines = [
+      # Required for MSVC STL
+      "_ENABLE_ATOMIC_ALIGNMENT_FIX",
+    ]
+  }
+
   source_set("shell_test_fixture_sources") {
     testonly = true
 
@@ -214,7 +221,7 @@ if (enable_unittests) {
       "//third_party/skia",
     ]
 
-    public_configs = []
+    public_configs = [ ":shell_test_fixture_sources_config" ]
 
     # SwiftShader only supports x86/x64_64
     if (target_cpu == "x86" || target_cpu == "x64") {

@@ -32,6 +32,9 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
   // the external view embedder.
   int GetSubmittedFrameCount();
 
+  // Returns the size of last submitted frame surface
+  SkISize GetLastSubmittedFrameSize();
+
  private:
   // |ExternalViewEmbedder|
   void CancelFrame() override;
@@ -80,6 +83,7 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
   bool support_thread_merging_;
 
   std::atomic<int> submitted_frame_count_;
+  std::atomic<SkISize> last_submitted_frame_size_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShellTestExternalViewEmbedder);
 };
