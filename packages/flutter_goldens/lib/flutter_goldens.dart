@@ -670,7 +670,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     if (result.passed)
       return true;
 
-    generateFailureOutput(result, golden, basedir);
+    await generateFailureOutput(result, golden, basedir);
     return false;
   }
 }
