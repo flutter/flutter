@@ -806,12 +806,19 @@ void main() {
     ));
 
     final OperationResult result = await residentRunner.restart(fullRestart: false);
+
     expect(result.fatal, false);
     expect(result.code, 0);
+    verify(globals.flutterUsage.sendEvent('hot', 'reload', parameters: argThat(
+      containsPair('cd48', 'true'),
+      named: 'parameters',
+    ))).called(1);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     Platform: () => FakePlatform(operatingSystem: 'linux'),
     ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
+    Usage: () => MockUsage(),
+    FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true),
   }));
 
   testUsingContext('ResidentRunner can send target platform to analytics from full restart', () => testbed.run(() async {

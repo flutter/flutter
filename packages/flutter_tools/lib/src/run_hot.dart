@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:flutter_tools/src/features.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:meta/meta.dart';
@@ -744,7 +745,9 @@ class HotRunner extends ResidentRunner {
         emulator: emulator,
         fullRestart: true,
         nullSafety: usageNullSafety,
-        reason: reason).send();
+        reason: reason,
+        fastReassemble: null,
+      ).send();
       status?.cancel();
     }
     return result;
@@ -787,6 +790,7 @@ class HotRunner extends ResidentRunner {
         fullRestart: false,
         nullSafety: usageNullSafety,
         reason: reason,
+        fastReassemble: null,
       ).send();
       return OperationResult(1, 'hot reload failed to complete', fatal: true);
     } finally {
@@ -866,6 +870,7 @@ class HotRunner extends ResidentRunner {
             fullRestart: false,
             reason: reason,
             nullSafety: usageNullSafety,
+            fastReassemble: null,
           ).send();
           return OperationResult(1, 'Reload rejected');
         }
@@ -894,6 +899,7 @@ class HotRunner extends ResidentRunner {
           fullRestart: false,
           reason: reason,
           nullSafety: usageNullSafety,
+          fastReassemble: null,
         ).send();
         return OperationResult(errorCode, errorMessage);
       }
@@ -1031,6 +1037,9 @@ class HotRunner extends ResidentRunner {
       invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
       transferTimeInMs: devFSTimer.elapsed.inMilliseconds,
       nullSafety: usageNullSafety,
+      fastReassemble: featureFlags.isSingleWidgetReloadEnabled
+        ? updatedDevFS.fastReassembleClassName != null
+        : null,
     ).send();
 
     if (shouldReportReloadTime) {
