@@ -15,6 +15,7 @@ import 'package:mockito/mockito.dart';
 import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/mocks.dart' as mocks;
 
 final Platform _kNoAnsiPlatform = FakePlatform(stdoutSupportsAnsi: false);
@@ -626,6 +627,15 @@ void main() {
       expect(lines[1], equals('0123456789' * 4));
       expect(lines[2], equals('0123456789' * 4));
       expect(lines[3], equals('0123456789' * 3));
+    });
+
+    testUsingContext('AppRunLogger writes plain text statuses when no app is active', () async {
+      final BufferLogger buffer = BufferLogger.test();
+      final AppRunLogger logger = AppRunLogger(parent: buffer);
+
+      logger.startProgress('Test status...', timeout: null).stop();
+
+      expect(buffer.statusText.trim(), equals('Test status...'));
     });
 
     testWithoutContext('Error logs are wrapped and can be indented.', () async {

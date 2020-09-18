@@ -16,22 +16,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class PointerDataAutomatedTestWidgetsFlutterBinding extends AutomatedTestWidgetsFlutterBinding {
-  // PointerData injection would usually considerred device input and therefore
-  // blocked by [AutomatedTestWidgetsFlutterBinding]. Override this behavior
-  // to help events go into widget tree.
-  @override
-  void dispatchEvent(
-    PointerEvent event,
-    HitTestResult hitTestResult, {
-    TestBindingEventSource source = TestBindingEventSource.device,
-  }) {
-    super.dispatchEvent(event, hitTestResult, source: TestBindingEventSource.test);
-  }
-}
-
 void main() {
-  final TestWidgetsFlutterBinding binding = PointerDataAutomatedTestWidgetsFlutterBinding();
+  final TestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
   testWidgets('PointerEvent resampling on a widget', (WidgetTester tester) async {
     assert(WidgetsBinding.instance == binding);
     Duration currentTestFrameTime() => Duration(milliseconds: binding.clock.now().millisecondsSinceEpoch);

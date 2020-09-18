@@ -195,7 +195,7 @@ class CupertinoTabController extends ChangeNotifier {
 /// See also:
 ///
 ///  * [CupertinoTabBar], the bottom tab bar inserted in the scaffold.
-///  * [CupertinoTabController], the selection state of this widget
+///  * [CupertinoTabController], the selection state of this widget.
 ///  * [CupertinoTabView], the typical root content of each tab that holds its own
 ///    [Navigator] stack.
 ///  * [CupertinoPageRoute], a route hosting modal pages with iOS style transitions.

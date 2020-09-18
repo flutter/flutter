@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/services.dart';
 import 'framework.dart';
 
@@ -152,8 +150,8 @@ class AutofillGroup extends StatefulWidget {
   ///
   /// The [child] argument must not be null.
   const AutofillGroup({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     this.onDisposeAction = AutofillContextAction.commit,
   }) : assert(child != null),
        super(key: key);
@@ -166,8 +164,8 @@ class AutofillGroup extends StatefulWidget {
   ///
   /// * [EditableTextState], where this method is used to retrieve the closest
   ///   [AutofillGroupState].
-  static AutofillGroupState of(BuildContext context) {
-    final _AutofillScope scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();
+  static AutofillGroupState? of(BuildContext context) {
+    final _AutofillScope? scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();
     return scope?._scope;
   }
 
@@ -214,12 +212,12 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   bool _isTopmostAutofillGroup = false;
 
   @override
-  AutofillClient getAutofillClient(String tag) => _clients[tag];
+  AutofillClient? getAutofillClient(String tag) => _clients[tag];
 
   @override
   Iterable<AutofillClient> get autofillClients {
     return _clients.values
-      .where((AutofillClient client) => client?.textInputConfiguration?.autofillConfiguration != null);
+      .where((AutofillClient client) => client.textInputConfiguration.autofillConfiguration != null);
   }
 
   /// Adds the [AutofillClient] to this [AutofillGroup].
@@ -289,15 +287,15 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
 
 class _AutofillScope extends InheritedWidget {
   const _AutofillScope({
-    Key key,
-    Widget child,
-    AutofillGroupState autofillScopeState,
+    Key? key,
+    required Widget child,
+    AutofillGroupState? autofillScopeState,
   }) : _scope = autofillScopeState,
        super(key: key, child: child);
 
-  final AutofillGroupState _scope;
+  final AutofillGroupState? _scope;
 
-  AutofillGroup get client => _scope.widget;
+  AutofillGroup get client => _scope!.widget;
 
   @override
   bool updateShouldNotify(_AutofillScope old) => _scope != old._scope;

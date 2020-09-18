@@ -199,6 +199,7 @@ class SelectableText extends StatefulWidget {
     this.scrollPhysics,
     this.textHeightBehavior,
     this.textWidthBasis,
+    this.onSelectionChanged,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
@@ -250,6 +251,7 @@ class SelectableText extends StatefulWidget {
     this.scrollPhysics,
     this.textHeightBehavior,
     this.textWidthBasis,
+    this.onSelectionChanged,
   }) :  assert(showCursor != null),
     assert(autofocus != null),
     assert(dragStartBehavior != null),
@@ -392,6 +394,9 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
+  /// {@macro flutter.widgets.editableText.onSelectionChanged}
+  final SelectionChangedCallback onSelectionChanged;
+
   @override
   _SelectableTextState createState() => _SelectableTextState();
 
@@ -492,6 +497,10 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       setState(() {
         _showSelectionHandles = willShowSelectionHandles;
       });
+    }
+
+    if (widget.onSelectionChanged != null) {
+      widget.onSelectionChanged(selection, cause);
     }
 
     switch (Theme.of(context).platform) {

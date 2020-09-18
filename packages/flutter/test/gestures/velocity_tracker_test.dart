@@ -38,7 +38,7 @@ void main() {
   ];
 
   test('Velocity tracker gives expected results', () {
-    final VelocityTracker tracker = VelocityTracker(PointerDeviceKind.touch);
+    final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     int i = 0;
     for (final PointerEvent event in velocityEventData) {
       if (event is PointerDownEvent || event is PointerMoveEvent)
@@ -64,7 +64,7 @@ void main() {
 
   test('Interrupted velocity estimation', () {
     // Regression test for https://github.com/flutter/flutter/pull/7510
-    final VelocityTracker tracker = VelocityTracker(PointerDeviceKind.touch);
+    final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     for (final PointerEvent event in interruptedVelocityEventData) {
       if (event is PointerDownEvent || event is PointerMoveEvent)
         tracker.addPosition(event.timeStamp, event.position);
@@ -75,7 +75,7 @@ void main() {
   });
 
   test('No data velocity estimation', () {
-    final VelocityTracker tracker = VelocityTracker(PointerDeviceKind.touch);
+    final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     expect(tracker.getVelocity(), Velocity.zero);
   });
 

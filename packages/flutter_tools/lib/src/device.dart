@@ -789,6 +789,7 @@ class DebuggingOptions {
     this.verboseSystemLogs = false,
     this.hostVmServicePort,
     this.deviceVmServicePort,
+    this.ddsPort,
     this.initializePlatform = true,
     this.hostname,
     this.port,
@@ -830,6 +831,7 @@ class DebuggingOptions {
       verboseSystemLogs = false,
       hostVmServicePort = null,
       deviceVmServicePort = null,
+      ddsPort = null,
       vmserviceOutFile = null,
       fastStart = false,
       webEnableExpressionEvaluation = false,
@@ -857,6 +859,7 @@ class DebuggingOptions {
   final bool initializePlatform;
   final int hostVmServicePort;
   final int deviceVmServicePort;
+  final int ddsPort;
   final String port;
   final String hostname;
   final bool webEnableExposeUrl;

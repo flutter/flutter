@@ -23,7 +23,7 @@ import 'package:flutter/rendering.dart';
 ///  * [MaterialStateColor], a [Color] that implements `MaterialStateProperty`
 ///    which is used in APIs that need to accept either a [Color] or a
 ///    `MaterialStateProperty<Color>`.
-///  * [MaterialStateMouseCursor], a [MouseCursor] that implements `MaterialStateProperty`.
+///  * [MaterialStateMouseCursor], a [MouseCursor] that implements `MaterialStateProperty`
 ///    which is used in APIs that need to accept either a [MouseCursor] or a
 ///    [MaterialStateProperty<MouseCursor>].
 
@@ -339,7 +339,7 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 ///  * [MaterialStateColor], a [Color] that implements `MaterialStateProperty`
 ///    which is used in APIs that need to accept either a [Color] or a
 ///    `MaterialStateProperty<Color>`.
-///  * [MaterialStateMouseCursor], a [MouseCursor] that implements `MaterialStateProperty`.
+///  * [MaterialStateMouseCursor], a [MouseCursor] that implements `MaterialStateProperty`
 ///    which is used in APIs that need to accept either a [MouseCursor] or a
 ///    [MaterialStateProperty<MouseCursor>].
 abstract class MaterialStateProperty<T> {

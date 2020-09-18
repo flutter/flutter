@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -29,8 +27,8 @@ import 'sliver.dart';
 class SliverFillViewport extends StatelessWidget {
   /// Creates a sliver whose box children that each fill the viewport.
   const SliverFillViewport({
-    Key key,
-    @required this.delegate,
+    Key? key,
+    required this.delegate,
     this.viewportFraction = 1.0,
     this.padEnds = true,
   }) : assert(viewportFraction != null),
@@ -75,8 +73,8 @@ class SliverFillViewport extends StatelessWidget {
 
 class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget {
   const _SliverFillViewportRenderObjectWidget({
-    Key key,
-    @required SliverChildDelegate delegate,
+    Key? key,
+    required SliverChildDelegate delegate,
     this.viewportFraction = 1.0,
   }) : assert(viewportFraction != null),
       assert(viewportFraction > 0.0),
@@ -99,7 +97,7 @@ class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget 
 class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
   const _SliverFractionalPadding({
     this.viewportFraction = 0,
-    Widget sliver,
+    Widget? sliver,
   }) : assert(viewportFraction != null),
       assert(viewportFraction >= 0),
       assert(viewportFraction <= 0.5),
@@ -124,7 +122,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
       assert(viewportFraction >= 0),
       _viewportFraction = viewportFraction;
 
-  SliverConstraints _lastResolvedConstraints;
+  SliverConstraints? _lastResolvedConstraints;
 
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
@@ -137,8 +135,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   }
 
   @override
-  EdgeInsets get resolvedPadding => _resolvedPadding;
-  EdgeInsets _resolvedPadding;
+  EdgeInsets? get resolvedPadding => _resolvedPadding;
+  EdgeInsets? _resolvedPadding;
 
   void _markNeedsResolution() {
     _resolvedPadding = null;
@@ -399,7 +397,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 class SliverFillRemaining extends StatelessWidget {
   /// Creates a sliver that fills the remaining space in the viewport.
   const SliverFillRemaining({
-    Key key,
+    Key? key,
     this.child,
     this.hasScrollBody = true,
     this.fillOverscroll = false,
@@ -410,7 +408,7 @@ class SliverFillRemaining extends StatelessWidget {
   /// Box child widget that fills the remaining space in the viewport.
   ///
   /// The main [SliverFillRemaining] documentation contains more details.
-  final Widget child;
+  final Widget? child;
 
   /// Indicates whether the child has a scrollable body, this value cannot be
   /// null.
@@ -464,8 +462,8 @@ class SliverFillRemaining extends StatelessWidget {
 
 class _SliverFillRemainingWithScrollable extends SingleChildRenderObjectWidget {
   const _SliverFillRemainingWithScrollable({
-    Key key,
-    Widget child,
+    Key? key,
+    Widget? child,
   }) : super(key: key, child: child);
 
   @override
@@ -474,8 +472,8 @@ class _SliverFillRemainingWithScrollable extends SingleChildRenderObjectWidget {
 
 class _SliverFillRemainingWithoutScrollable extends SingleChildRenderObjectWidget {
   const _SliverFillRemainingWithoutScrollable({
-    Key key,
-    Widget child,
+    Key? key,
+    Widget? child,
   }) : super(key: key, child: child);
 
   @override
@@ -484,8 +482,8 @@ class _SliverFillRemainingWithoutScrollable extends SingleChildRenderObjectWidge
 
 class _SliverFillRemainingAndOverscroll extends SingleChildRenderObjectWidget {
   const _SliverFillRemainingAndOverscroll({
-    Key key,
-    Widget child,
+    Key? key,
+    Widget? child,
   }) : super(key: key, child: child);
 
   @override

@@ -31,23 +31,9 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
 }) async {
   if (!windowsProject.cmakeFile.existsSync()) {
     throwToolExit(
-      'No Windows desktop project configured. '
-      'See https://github.com/flutter/flutter/wiki/Desktop-shells#create '
+      'No Windows desktop project configured. See '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-app '
       'to learn about adding Windows support to a project.');
-  }
-
-  // Check for incompatibility between the Flutter tool version and the project
-  // template version, since the tempalte isn't stable yet.
-  final int templateCompareResult = _compareTemplateVersions(windowsProject);
-  if (templateCompareResult < 0) {
-    throwToolExit('The Windows runner was created with an earlier version of '
-      'the template, which is not yet stable.\n\n'
-      'Delete the windows/ directory and re-run \'flutter create .\', '
-      're-applying any previous changes.');
-  } else if (templateCompareResult > 0) {
-    throwToolExit('The Windows runner was created with a newer version of the '
-      'template, which is not yet stable.\n\n'
-      'Upgrade Flutter and try again.');
   }
 
   // Ensure that necessary emphemeral files are generated and up to date.
@@ -188,26 +174,4 @@ void _writeGeneratedFlutterConfig(
     environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot, windowsProject, environment);
-}
-
-// Checks the template version of [project] against the current template
-// version. Returns < 0 if the project is older than the current template, > 0
-// if it's newer, and 0 if they match.
-int _compareTemplateVersions(WindowsProject project) {
-  const String projectVersionBasename = '.template_version';
-  final int expectedVersion = int.parse(globals.fs.file(globals.fs.path.join(
-    globals.fs.path.absolute(Cache.flutterRoot),
-    'packages',
-    'flutter_tools',
-    'templates',
-    'app',
-    'windows.tmpl',
-    'flutter',
-    projectVersionBasename,
-  )).readAsStringSync());
-  final File projectVersionFile = project.managedDirectory.childFile(projectVersionBasename);
-  final int version = projectVersionFile.existsSync()
-      ? int.tryParse(projectVersionFile.readAsStringSync())
-      : 0;
-  return version.compareTo(expectedVersion);
 }

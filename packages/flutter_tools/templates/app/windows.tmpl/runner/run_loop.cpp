@@ -1,9 +1,6 @@
 #include "run_loop.h"
 
-#include <Windows.h>
-// Don't stomp std::min/std::max
-#undef max
-#undef min
+#include <windows.h>
 
 #include <algorithm>
 

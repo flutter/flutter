@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show Brightness;
 import 'package:flutter/widgets.dart';
@@ -98,12 +96,12 @@ const TextStyle _kDefaultDateTimePickerTextStyle = TextStyle(
   color: CupertinoColors.label,
 );
 
-TextStyle _resolveTextStyle(TextStyle style, BuildContext context, bool nullOk) {
+TextStyle? _resolveTextStyle(TextStyle? style, BuildContext context, bool nullOk) {
   // This does not resolve the shadow color, foreground, background, etc.
   return style?.copyWith(
-    color: CupertinoDynamicColor.resolve(style?.color, context, nullOk: nullOk),
-    backgroundColor: CupertinoDynamicColor.resolve(style?.backgroundColor, context, nullOk: nullOk),
-    decorationColor: CupertinoDynamicColor.resolve(style?.decorationColor, context, nullOk: nullOk),
+    color: CupertinoDynamicColor.resolve(style.color, context, nullOk: nullOk),
+    backgroundColor: CupertinoDynamicColor.resolve(style.backgroundColor, context, nullOk: nullOk),
+    decorationColor: CupertinoDynamicColor.resolve(style.decorationColor, context, nullOk: nullOk),
   );
 }
 
@@ -126,15 +124,15 @@ class CupertinoTextThemeData with Diagnosticable {
       'This argument no longer does anything. You can remove it. '
       'This feature was deprecated after v1.10.14.'
     )
-    Brightness brightness,
-    TextStyle textStyle,
-    TextStyle actionTextStyle,
-    TextStyle tabLabelTextStyle,
-    TextStyle navTitleTextStyle,
-    TextStyle navLargeTitleTextStyle,
-    TextStyle navActionTextStyle,
-    TextStyle pickerTextStyle,
-    TextStyle dateTimePickerTextStyle,
+    Brightness? brightness,
+    TextStyle? textStyle,
+    TextStyle? actionTextStyle,
+    TextStyle? tabLabelTextStyle,
+    TextStyle? navTitleTextStyle,
+    TextStyle? navLargeTitleTextStyle,
+    TextStyle? navActionTextStyle,
+    TextStyle? pickerTextStyle,
+    TextStyle? dateTimePickerTextStyle,
   }) : this._raw(
          const _TextThemeDefaultsBuilder(CupertinoColors.label, CupertinoColors.inactiveGray),
          primaryColor,
@@ -162,41 +160,41 @@ class CupertinoTextThemeData with Diagnosticable {
   ) : assert((_navActionTextStyle != null && _actionTextStyle != null) || _primaryColor != null);
 
   final _TextThemeDefaultsBuilder _defaults;
-  final Color _primaryColor;
+  final Color? _primaryColor;
 
-  final TextStyle _textStyle;
+  final TextStyle? _textStyle;
   /// The [TextStyle] of general text content for Cupertino widgets.
   TextStyle get textStyle => _textStyle ?? _defaults.textStyle;
 
-  final TextStyle _actionTextStyle;
+  final TextStyle? _actionTextStyle;
   /// The [TextStyle] of interactive text content such as text in a button without background.
   TextStyle get actionTextStyle {
     return _actionTextStyle ?? _defaults.actionTextStyle(primaryColor: _primaryColor);
   }
 
-  final TextStyle _tabLabelTextStyle;
+  final TextStyle? _tabLabelTextStyle;
   /// The [TextStyle] of unselected tabs.
   TextStyle get tabLabelTextStyle => _tabLabelTextStyle ?? _defaults.tabLabelTextStyle;
 
-  final TextStyle _navTitleTextStyle;
+  final TextStyle? _navTitleTextStyle;
   /// The [TextStyle] of titles in standard navigation bars.
   TextStyle get navTitleTextStyle => _navTitleTextStyle ?? _defaults.navTitleTextStyle;
 
-  final TextStyle _navLargeTitleTextStyle;
+  final TextStyle? _navLargeTitleTextStyle;
   /// The [TextStyle] of large titles in sliver navigation bars.
   TextStyle get navLargeTitleTextStyle => _navLargeTitleTextStyle ?? _defaults.navLargeTitleTextStyle;
 
-  final TextStyle _navActionTextStyle;
+  final TextStyle? _navActionTextStyle;
   /// The [TextStyle] of interactive text content in navigation bars.
   TextStyle get navActionTextStyle {
     return _navActionTextStyle ?? _defaults.navActionTextStyle(primaryColor: _primaryColor);
   }
 
-  final TextStyle _pickerTextStyle;
+  final TextStyle? _pickerTextStyle;
   /// The [TextStyle] of pickers.
   TextStyle get pickerTextStyle => _pickerTextStyle ?? _defaults.pickerTextStyle;
 
-  final TextStyle _dateTimePickerTextStyle;
+  final TextStyle? _dateTimePickerTextStyle;
   /// The [TextStyle] of date time pickers.
   TextStyle get dateTimePickerTextStyle => _dateTimePickerTextStyle ?? _defaults.dateTimePickerTextStyle;
 
@@ -209,7 +207,7 @@ class CupertinoTextThemeData with Diagnosticable {
   /// be used as-is.
   CupertinoTextThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
     return CupertinoTextThemeData._raw(
-      _defaults?.resolveFrom(context, nullOk),
+      _defaults.resolveFrom(context, nullOk),
       CupertinoDynamicColor.resolve(_primaryColor, context, nullOk: nullOk),
       _resolveTextStyle(_textStyle, context, nullOk),
       _resolveTextStyle(_actionTextStyle, context, nullOk),
@@ -225,20 +223,20 @@ class CupertinoTextThemeData with Diagnosticable {
   /// Returns a copy of the current [CupertinoTextThemeData] instance with
   /// specified overrides.
   CupertinoTextThemeData copyWith({
-    Color primaryColor,
+    Color? primaryColor,
     @Deprecated(
       'This argument no longer does anything. You can remove it. '
       'This feature was deprecated after v1.10.14.'
     )
-    Brightness brightness,
-    TextStyle textStyle,
-    TextStyle actionTextStyle,
-    TextStyle tabLabelTextStyle,
-    TextStyle navTitleTextStyle,
-    TextStyle navLargeTitleTextStyle,
-    TextStyle navActionTextStyle,
-    TextStyle pickerTextStyle,
-    TextStyle dateTimePickerTextStyle,
+    Brightness? brightness,
+    TextStyle? textStyle,
+    TextStyle? actionTextStyle,
+    TextStyle? tabLabelTextStyle,
+    TextStyle? navTitleTextStyle,
+    TextStyle? navLargeTitleTextStyle,
+    TextStyle? navActionTextStyle,
+    TextStyle? pickerTextStyle,
+    TextStyle? dateTimePickerTextStyle,
   }) {
     return CupertinoTextThemeData._raw(
       _defaults,
@@ -282,9 +280,9 @@ class _TextThemeDefaultsBuilder {
   final Color inactiveGrayColor;
 
   static TextStyle _applyLabelColor(TextStyle original, Color color) {
-    return original?.color == color
+    return original.color == color
       ?  original
-      :  original?.copyWith(color: color);
+      :  original.copyWith(color: color);
   }
 
   TextStyle get textStyle => _applyLabelColor(_kDefaultTextStyle, labelColor);
@@ -294,12 +292,12 @@ class _TextThemeDefaultsBuilder {
   TextStyle get pickerTextStyle => _applyLabelColor(_kDefaultPickerTextStyle, labelColor);
   TextStyle get dateTimePickerTextStyle => _applyLabelColor(_kDefaultDateTimePickerTextStyle, labelColor);
 
-  TextStyle actionTextStyle({ Color primaryColor }) => _kDefaultActionTextStyle.copyWith(color: primaryColor);
-  TextStyle navActionTextStyle({ Color primaryColor }) => actionTextStyle(primaryColor: primaryColor);
+  TextStyle actionTextStyle({ Color? primaryColor }) => _kDefaultActionTextStyle.copyWith(color: primaryColor);
+  TextStyle navActionTextStyle({ Color? primaryColor }) => actionTextStyle(primaryColor: primaryColor);
 
   _TextThemeDefaultsBuilder resolveFrom(BuildContext context, bool nullOk) {
-    final Color resolvedLabelColor = CupertinoDynamicColor.resolve(labelColor, context, nullOk: nullOk);
-    final Color resolvedInactiveGray = CupertinoDynamicColor.resolve(inactiveGrayColor, context, nullOk: nullOk);
+    final Color resolvedLabelColor = CupertinoDynamicColor.resolve(labelColor, context, nullOk: nullOk)!;
+    final Color resolvedInactiveGray = CupertinoDynamicColor.resolve(inactiveGrayColor, context, nullOk: nullOk)!;
     return resolvedLabelColor == labelColor && resolvedInactiveGray == CupertinoColors.inactiveGray
       ? this
       : _TextThemeDefaultsBuilder(resolvedLabelColor, resolvedInactiveGray);

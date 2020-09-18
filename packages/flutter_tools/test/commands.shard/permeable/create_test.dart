@@ -811,6 +811,25 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
+  testUsingContext('Windows has correct VERSIONINFO', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
+
+    final File resourceFile = projectDir.childDirectory('windows').childDirectory('runner').childFile('Runner.rc');
+    expect(resourceFile.existsSync(), true);
+    final String contents = resourceFile.readAsStringSync();
+    expect(contents, contains('"CompanyName", "com.foo.bar"'));
+    expect(contents, contains('"ProductName", "flutter_project"'));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
   testUsingContext('app does not include Windows by default', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);

@@ -429,7 +429,7 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: hoverColor));
-    await hoverGesture.removePointer();
+    await hoverGesture.moveTo(const Offset(0, 0));
 
     // focusColor
     focusNode.requestFocus();
@@ -438,6 +438,8 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: focusColor));
+
+    await hoverGesture.removePointer();
   });
 
 

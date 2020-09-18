@@ -132,7 +132,7 @@
   "minus": ["OEM_MINUS"],
   "period": ["OEM_PERIOD"],
   "slash": ["OEM_2"],
-  "backQuote": ["OEM_3"],
+  "backquote": ["OEM_3"],
   "gamepadA": ["GAMEPAD_A"],
   "gamepadB": ["GAMEPAD_B"],
   "gamepadX": ["GAMEPAD_X"],

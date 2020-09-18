@@ -378,7 +378,7 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 /// See also:
 ///
 ///   * [FlutterError.onError], which is called whenever the Flutter framework
-///     catches an error
+///     catches an error.
 class FlutterErrorDetails with Diagnosticable {
   /// Creates a [FlutterErrorDetails] object with the given arguments setting
   /// the object's properties.
@@ -893,10 +893,10 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// ```dart
   /// FlutterError.demangleStackTrace = (StackTrace stackTrace) {
   ///   if (stack is stack_trace.Trace)
-  //      return stack.vmTrace;
-  //    if (stack is stack_trace.Chain)
-  //      return stack.toTrace().vmTrace;
-  //    return stack;
+  ///     return stack.vmTrace;
+  ///   if (stack is stack_trace.Chain)
+  ///     return stack.toTrace().vmTrace;
+  ///   return stack;
   /// };
   /// ```
   static StackTraceDemangler demangleStackTrace = (StackTrace stackTrace) => stackTrace;

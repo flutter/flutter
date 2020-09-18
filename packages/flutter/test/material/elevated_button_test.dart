@@ -14,11 +14,6 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('ElevatedButton defaults', (WidgetTester tester) async {
-    final Finder rawButtonMaterial = find.descendant(
-      of: find.byType(ElevatedButton),
-      matching: find.byType(Material),
-    );
-
     const ColorScheme colorScheme = ColorScheme.light();
 
     // Enabled ElevatedButton
@@ -33,6 +28,12 @@ void main() {
         ),
       ),
     );
+
+    final Finder rawButtonMaterial = find.descendant(
+      of: find.byType(ElevatedButton),
+      matching: find.byType(Material),
+    );
+
 
     Material material = tester.widget<Material>(rawButtonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
@@ -87,6 +88,9 @@ void main() {
         ),
       ),
     );
+
+    // Finish the elevation animation, final background color change.
+    await tester.pumpAndSettle();
 
     material = tester.widget<Material>(rawButtonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
@@ -925,6 +929,53 @@ void main() {
       ),
     );
     expect(paddingWidget.padding, const EdgeInsets.all(22));
+  });
+
+  testWidgets('Elevated buttons animate elevation before color on disable', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/387
+
+    const ColorScheme colorScheme = ColorScheme.light();
+    final Color backgroundColor = colorScheme.primary;
+    final Color disabledBackgroundColor = colorScheme.onSurface.withOpacity(0.12);
+
+    Widget buildFrame({ bool enabled }) {
+      return MaterialApp(
+        theme: ThemeData.from(colorScheme: colorScheme),
+        home: Center(
+          child: ElevatedButton(
+            onPressed: enabled ? () { } : null,
+            child: const Text('button'),
+          ),
+        ),
+      );
+    }
+
+    PhysicalShape physicalShape() {
+      return tester.widget<PhysicalShape>(
+        find.descendant(
+          of: find.byType(ElevatedButton),
+          matching: find.byType(PhysicalShape),
+        ),
+      );
+    }
+
+    // Default elevation is 2, background color is primary.
+    await tester.pumpWidget(buildFrame(enabled: true));
+    expect(physicalShape().elevation, 2);
+    expect(physicalShape().color, backgroundColor);
+
+    // Disabled elevation animates to 0 over 200ms, THEN the background
+    // color changes to onSurface.withOpacity(0.12)
+    await tester.pumpWidget(buildFrame(enabled: false));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(physicalShape().elevation, lessThan(2));
+    expect(physicalShape().color, backgroundColor);
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(physicalShape().elevation, 0);
+    expect(physicalShape().color, backgroundColor);
+    await tester.pumpAndSettle();
+    expect(physicalShape().elevation, 0);
+    expect(physicalShape().color, disabledBackgroundColor);
   });
 }
 

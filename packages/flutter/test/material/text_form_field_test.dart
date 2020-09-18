@@ -431,6 +431,33 @@ void main() {
     expect(find.text('changedValue'), findsOneWidget);
   });
 
+  testWidgets('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
+    bool _called = false;
+
+    FormFieldState<String> state;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              onChanged: (String value) {
+                _called = true;
+                expect(value, state.value);
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
+
+    await tester.enterText(find.byType(TextField), 'Soup');
+
+    expect(_called, true);
+  });
+
   testWidgets('autofillHints is passed to super', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

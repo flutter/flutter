@@ -52,7 +52,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    final FlutterDriverExtension extension = FlutterDriverExtension(_handler, _silenceErrors, finders);
+    final FlutterDriverExtension extension = FlutterDriverExtension(_handler, _silenceErrors, finders: finders);
     registerServiceExtension(
       name: _extensionMethodName,
       callback: extension.call,
@@ -171,7 +171,11 @@ abstract class FinderExtension {
 @visibleForTesting
 class FlutterDriverExtension with DeserializeFinderFactory {
   /// Creates an object to manage a Flutter Driver connection.
-  FlutterDriverExtension(this._requestDataHandler, this._silenceErrors, List<FinderExtension> finders) {
+  FlutterDriverExtension(
+    this._requestDataHandler,
+    this._silenceErrors, {
+    List<FinderExtension> finders = const <FinderExtension>[],
+  }) : assert(finders != null) {
     _testTextInput.register();
 
     _commandHandlers.addAll(<String, CommandHandlerCallback>{
@@ -596,17 +600,14 @@ class FlutterDriverExtension with DeserializeFinderFactory {
     final Offset startLocation = _prober.getCenter(target);
     Offset currentLocation = startLocation;
     final TestPointer pointer = TestPointer(1);
-    final HitTestResult hitTest = HitTestResult();
-
-    _prober.binding.hitTest(hitTest, startLocation);
-    _prober.binding.dispatchEvent(pointer.down(startLocation), hitTest);
+    _prober.binding.handlePointerEvent(pointer.down(startLocation));
     await Future<void>.value(); // so that down and move don't happen in the same microtask
     for (int moves = 0; moves < totalMoves; moves += 1) {
       currentLocation = currentLocation + delta;
-      _prober.binding.dispatchEvent(pointer.move(currentLocation), hitTest);
+      _prober.binding.handlePointerEvent(pointer.move(currentLocation));
       await Future<void>.delayed(pause);
     }
-    _prober.binding.dispatchEvent(pointer.up(), hitTest);
+    _prober.binding.handlePointerEvent(pointer.up());
 
     return const ScrollResult();
   }

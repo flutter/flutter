@@ -195,6 +195,8 @@ class Stepper extends StatefulWidget {
   ///
   /// This callback which takes in a context and two functions: [onStepContinue]
   /// and [onStepCancel]. These can be used to control the stepper.
+  /// For example, keeping track of the [currentStep] within the callback can
+  /// change the text of the continue or cancel button depending on which step users are at.
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
   /// Creates a stepper control with custom buttons.

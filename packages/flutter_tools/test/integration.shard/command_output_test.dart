@@ -16,6 +16,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       '-h',
       '-v',
     ]);
@@ -36,6 +37,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       'doctor',
       '-v',
     ]);
@@ -48,6 +50,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       'doctor',
       '-vv',
     ]);
@@ -60,6 +63,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       'config',
     ]);
 
@@ -89,6 +93,7 @@ void main() {
       final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
+        ...getLocalEngineArguments(),
         'run',
         '--show-test-device', // ensure command can fail to run and hit injection of correct logger.
         '--machine',
@@ -105,6 +110,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       'attach',
       '--machine',
       '-v',
@@ -117,6 +123,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       'build',
       '-h',
       '-v',
@@ -133,6 +140,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       '--version',
       '--machine',
     ]);

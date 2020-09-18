@@ -2258,7 +2258,8 @@ void main() {
     final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
     when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
     when(mockDevice.dds).thenReturn(mockDds);
-    when(mockDds.startDartDevelopmentService(any, any)).thenReturn(null);
+    when(mockDds.startDartDevelopmentService(any, any, any, any)).thenReturn(null);
+    when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
 
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,
@@ -2345,10 +2346,13 @@ class FakeFlutterDevice extends FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     bool disableDds = false,
+    bool disableServiceAuthCodes = false,
     bool ipv6 = false,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
+    int hostVmServicePort,
+    int ddsPort,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   }) async { }
 

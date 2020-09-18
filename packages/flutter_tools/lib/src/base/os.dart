@@ -253,10 +253,11 @@ class _PosixUtils extends OperatingSystemUtils {
           _processUtils.runSync(<String>['sw_vers', '-productName']),
           _processUtils.runSync(<String>['sw_vers', '-productVersion']),
           _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
+          _processUtils.runSync(<String>['uname', '-m']),
         ];
         if (results.every((RunResult result) => result.exitCode == 0)) {
           _name = '${results[0].stdout.trim()} ${results[1].stdout
-              .trim()} ${results[2].stdout.trim()}';
+              .trim()} ${results[2].stdout.trim()} ${results[3].stdout.trim()}';
         }
       }
       _name ??= super.name;

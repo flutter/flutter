@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
@@ -93,6 +91,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// This object notifies its listeners when this value changes (except when
   /// the value changes due to [correctBy]).
   double get pixels;
+
+  /// Whether the [pixels] property is available.
+  bool get hasPixels;
 
   /// Called when the viewport's extents are established.
   ///
@@ -245,7 +246,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// `super.debugFillDescription(description)`.
   @mustCallSuper
   void debugFillDescription(List<String> description) {
-    description.add('offset: ${pixels.toStringAsFixed(1)}');
+    if (hasPixels) {
+      description.add('offset: ${pixels.toStringAsFixed(1)}');
+    }
   }
 }
 
@@ -257,6 +260,9 @@ class _FixedViewportOffset extends ViewportOffset {
 
   @override
   double get pixels => _pixels;
+
+  @override
+  bool get hasPixels => true;
 
   @override
   bool applyViewportDimension(double viewportDimension) => true;

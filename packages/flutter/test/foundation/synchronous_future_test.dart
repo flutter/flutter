@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 

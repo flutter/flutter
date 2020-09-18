@@ -7,12 +7,14 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button_theme.dart';
+import 'button_style.dart';
 import 'color_scheme.dart';
-import 'flat_button.dart';
 import 'material.dart';
+import 'material_state.dart';
 import 'scaffold.dart';
 import 'snack_bar_theme.dart';
+import 'text_button.dart';
+import 'text_button_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -128,15 +130,19 @@ class _SnackBarActionState extends State<SnackBarAction> {
 
   @override
   Widget build(BuildContext context) {
-    final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
-    final Color textColor = widget.textColor ?? snackBarTheme.actionTextColor;
-    final Color disabledTextColor = widget.disabledTextColor ?? snackBarTheme.disabledActionTextColor;
+    Color resolveForegroundColor(Set<MaterialState> states) {
+      final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
+      if (states.contains(MaterialState.disabled))
+        return widget.disabledTextColor ?? snackBarTheme.disabledActionTextColor;
+      return widget.textColor ?? snackBarTheme.actionTextColor;
+    }
 
-    return FlatButton(
+    return TextButton(
+      style: ButtonStyle(
+        foregroundColor: MaterialStateProperty.resolveWith<Color>(resolveForegroundColor),
+      ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
-      textColor: textColor,
-      disabledTextColor: disabledTextColor,
     );
   }
 }
@@ -385,6 +391,7 @@ class _SnackBarState extends State<SnackBar> {
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
     final bool isThemeDark = theme.brightness == Brightness.dark;
+    final Color buttonColor = isThemeDark ? colorScheme.primaryVariant : colorScheme.secondary;
 
     // SnackBar uses a theme that is the opposite brightness from
     // the surrounding theme.
@@ -400,7 +407,7 @@ class _SnackBarState extends State<SnackBar> {
         primaryVariant: colorScheme.onPrimary,
         // For the button color, the spec says it should be primaryVariant, but for
         // backward compatibility on light themes we are leaving it as secondary.
-        secondary: isThemeDark ? colorScheme.primaryVariant : colorScheme.secondary,
+        secondary: buttonColor,
         secondaryVariant: colorScheme.onSecondary,
         surface: colorScheme.onSurface,
         background: themeBackgroundColor,
@@ -445,10 +452,13 @@ class _SnackBarState extends State<SnackBar> {
             ),
           ),
           if (widget.action != null)
-            ButtonTheme(
-              textTheme: ButtonTextTheme.accent,
-              minWidth: 64.0,
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            TextButtonTheme(
+              data: TextButtonThemeData(
+                style: TextButton.styleFrom(
+                  primary: buttonColor,
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                ),
+              ),
               child: widget.action,
             ),
         ],

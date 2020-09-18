@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';

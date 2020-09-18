@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -62,4 +60,16 @@ Future<void> getPackages(String folder) async {
   if (result.exitCode != 0) {
     throw Exception('flutter pub get failed: ${result.stderr}\n${result.stdout}');
   }
+}
+
+const String kLocalEngineEnvironment = 'FLUTTER_LOCAL_ENGINE';
+const String kLocalEngineLocation = 'FLUTTER_LOCAL_ENGINE_SRC_PATH';
+
+List<String> getLocalEngineArguments() {
+  return <String>[
+    if (platform.environment.containsKey(kLocalEngineEnvironment))
+      '--local-engine=${platform.environment[kLocalEngineEnvironment]}',
+    if (platform.environment.containsKey(kLocalEngineLocation))
+      '--local-engine-src-path=${platform.environment[kLocalEngineLocation]}',
+  ];
 }

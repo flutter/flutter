@@ -92,6 +92,20 @@ TaskFunction createCubicBezierPerfTest() {
   ).run;
 }
 
+TaskFunction createCubicBezierPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/cubic_bezier_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createCubicBezierPerfSkSlWarmupE2ETest() {
+  return PerfTestWithSkSL.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/cubic_bezier_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createCubicBezierPerfSkSLWarmupTest() {
   return PerfTestWithSkSL(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -157,6 +171,13 @@ TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = false}) {
     'animated_placeholder_perf',
     measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/animated_placeholder_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createAnimatedPlaceholderPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/animated_placeholder_perf_e2e.dart',
   ).run;
 }
 
@@ -298,6 +319,54 @@ TaskFunction createsMultiWidgetConstructPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createsScrollSmoothnessPerfTest() {
+  final String testDirectory =
+      '${flutterDirectory.path}/dev/benchmarks/complex_layout';
+  const String testTarget = 'test/measure_scroll_smoothness.dart';
+  return () {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      final Device device = await devices.workingDevice;
+      await device.unlock();
+      final String deviceId = device.deviceId;
+      await flutter('packages', options: <String>['get']);
+
+      await flutter('drive', options: <String>[
+        '-v',
+        '--verbose-system-logs',
+        '--profile',
+        '-t', testTarget,
+        '-d',
+        deviceId,
+      ]);
+      final Map<String, dynamic> data = json.decode(
+        file('$testDirectory/build/scroll_smoothness_test.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+
+      final Map<String, dynamic> result = <String, dynamic>{};
+      void addResult(dynamic data, String suffix) {
+        assert(data is Map<String, dynamic>);
+        const List<String> metricKeys = <String>[
+          'janky_count',
+          'average_abs_jerk',
+          'dropped_frame_count',
+        ];
+        for (final String key in metricKeys) {
+          result[key+suffix] = data[key];
+        }
+      }
+      addResult(data['resample on with 90Hz input'], '_with_resampler_90Hz');
+      addResult(data['resample on with 59Hz input'], '_with_resampler_59Hz');
+      addResult(data['resample off with 90Hz input'], '_without_resampler_90Hz');
+      addResult(data['resample off with 59Hz input'], '_without_resampler_59Hz');
+
+      return TaskResult.success(
+        result,
+        benchmarkScoreKeys: result.keys.toList(),
+      );
+    });
+  };
+}
+
 TaskFunction createFramePolicyIntegrationTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
@@ -407,6 +476,7 @@ class PerfTest {
     this.testTarget,
     this.timelineFileName, {
     this.measureCpuGpu = false,
+    this.measureMemory = false,
     this.saveTraceFile = false,
     this.testDriver,
     this.needsFullTimeline = true,
@@ -419,6 +489,7 @@ class PerfTest {
     this.testDirectory,
     this.testTarget, {
     this.measureCpuGpu = false,
+    this.measureMemory = false,
     this.testDriver =  'test_driver/e2e_test.dart',
     this.needsFullTimeline = false,
     this.benchmarkScoreKeys = _kCommonScoreKeys,
@@ -439,6 +510,8 @@ class PerfTest {
   final String testDriver;
   /// Whether to collect CPU and GPU metrics.
   final bool measureCpuGpu;
+  /// Whether to collect memory metrics.
+  final bool measureMemory;
   /// Whether to collect full timeline, meaning if `--trace-startup` flag is needed.
   final bool needsFullTimeline;
   /// Whether to save the trace timeline file `*.timeline.json`.
@@ -531,6 +604,7 @@ class PerfTest {
           '99th_percentile_vsync_transitions_missed',
           if (measureCpuGpu) 'average_cpu_usage',
           if (measureCpuGpu) 'average_gpu_usage',
+          if (measureMemory) ...<String>['average_memory_usage', '90th_percentile_memory_usage', '99th_percentile_memory_usage'],
         ],
       );
     });

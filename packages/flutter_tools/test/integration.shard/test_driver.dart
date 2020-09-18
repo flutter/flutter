@@ -452,6 +452,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           '--disable-service-auth-codes',
         if (machine) '--machine',
         if (!spawnDdsInstance) '--disable-dds',
+        ...getLocalEngineArguments(),
         '-d',
         if (chrome)
           ...<String>[
@@ -482,6 +483,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     await _setupProcess(
       <String>[
         'attach',
+         ...getLocalEngineArguments(),
         '--machine',
         if (!spawnDdsInstance)
           '--disable-dds',
@@ -705,6 +707,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   }) async {
     await _setupProcess(<String>[
       'test',
+       ...getLocalEngineArguments(),
       '--disable-service-auth-codes',
       '--machine',
       if (coverage)

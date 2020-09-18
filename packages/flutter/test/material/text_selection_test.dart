@@ -554,7 +554,9 @@ void main() {
       await tester.pumpWidget(RepaintBoundary(
         child: Theme(
           data: ThemeData(
-            textSelectionHandleColor: const Color(0x550000AA),
+            textSelectionTheme: const TextSelectionThemeData(
+              selectionHandleColor: Color(0x550000AA),
+            ),
           ),
           isMaterialAppTheme: true,
           child: Builder(

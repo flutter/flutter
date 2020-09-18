@@ -670,7 +670,7 @@ class _RailDestination extends StatelessWidget {
                       child: styledLabel,
                     ),
                   ),
-                  const SizedBox(width: _horizontalDestinationPadding),
+                  SizedBox(width: _horizontalDestinationPadding * extendedTransitionAnimation.value),
                 ],
               ),
             ),

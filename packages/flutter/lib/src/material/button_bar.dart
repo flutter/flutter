@@ -10,8 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'button_bar_theme.dart';
 import 'button_theme.dart';
 import 'dialog.dart';
-import 'flat_button.dart';
-import 'raised_button.dart';
 
 /// An end-aligned row of buttons, laying out into a column if there is not
 /// enough horizontal space.
@@ -46,8 +44,9 @@ import 'raised_button.dart';
 ///
 /// See also:
 ///
-///  * [RaisedButton], a kind of button.
-///  * [FlatButton], another kind of button.
+///  * [TextButton], a simple flat button without a shadow.
+///  * [ElevatedButton], a filled button whose material elevates when pressed.
+///  * [OutlinedButton], a [TextButton] with a border outline.
 ///  * [Card], at the bottom of which it is common to place a [ButtonBar].
 ///  * [Dialog], which uses a [ButtonBar] for its actions.
 ///  * [ButtonBarTheme], which configures the [ButtonBar].
@@ -166,7 +165,7 @@ class ButtonBar extends StatelessWidget {
 
   /// The buttons to arrange horizontally.
   ///
-  /// Typically [RaisedButton] or [FlatButton] widgets.
+  /// Typically [ElevatedButton] or [TextButton] widgets.
   final List<Widget> children;
 
   @override

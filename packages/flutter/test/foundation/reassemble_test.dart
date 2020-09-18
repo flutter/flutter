@@ -5,8 +5,6 @@
 // @dart = 2.8
 
 @TestOn('!chrome')
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 

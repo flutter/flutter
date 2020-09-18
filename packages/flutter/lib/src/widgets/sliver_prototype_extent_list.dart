@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -38,9 +36,9 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   /// constrains them to have the same extent as a prototype item along
   /// the main axis.
   const SliverPrototypeExtentList({
-    Key key,
-    @required SliverChildDelegate delegate,
-    @required this.prototypeItem,
+    Key? key,
+    required SliverChildDelegate delegate,
+    required this.prototypeItem,
   }) : assert(prototypeItem != null),
        super(key: key, delegate: delegate);
 
@@ -71,7 +69,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   @override
   _RenderSliverPrototypeExtentList get renderObject => super.renderObject as _RenderSliverPrototypeExtentList;
 
-  Element _prototype;
+  Element? _prototype;
   static final Object _prototypeSlot = Object();
 
   @override
@@ -109,12 +107,12 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   @override
   void visitChildren(ElementVisitor visitor) {
     if (_prototype != null)
-      visitor(_prototype);
+      visitor(_prototype!);
     super.visitChildren(visitor);
   }
 
   @override
-  void mount(Element parent, dynamic newSlot) {
+  void mount(Element? parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     _prototype = updateChild(_prototype, widget.prototypeItem, _prototypeSlot);
   }
@@ -129,23 +127,23 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
 
 class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor {
   _RenderSliverPrototypeExtentList({
-    @required _SliverPrototypeExtentListElement childManager,
+    required _SliverPrototypeExtentListElement childManager,
   }) : super(childManager: childManager);
 
-  RenderBox _child;
-  RenderBox get child => _child;
-  set child(RenderBox value) {
+  RenderBox? _child;
+  RenderBox? get child => _child;
+  set child(RenderBox? value) {
     if (_child != null)
-      dropChild(_child);
+      dropChild(_child!);
     _child = value;
     if (_child != null)
-      adoptChild(_child);
+      adoptChild(_child!);
     markNeedsLayout();
   }
 
   @override
   void performLayout() {
-    child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
+    child!.layout(constraints.asBoxConstraints(), parentUsesSize: true);
     super.performLayout();
   }
 
@@ -153,33 +151,33 @@ class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor
   void attach(PipelineOwner owner) {
     super.attach(owner);
     if (_child != null)
-      _child.attach(owner);
+      _child!.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
     if (_child != null)
-      _child.detach();
+      _child!.detach();
   }
 
   @override
   void redepthChildren() {
     if (_child != null)
-      redepthChild(_child);
+      redepthChild(_child!);
     super.redepthChildren();
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
     if (_child != null)
-      visitor(_child);
+      visitor(_child!);
     super.visitChildren(visitor);
   }
 
   @override
   double get itemExtent {
-    assert(child != null && child.hasSize);
-    return constraints.axis == Axis.vertical ? child.size.height : child.size.width;
+    assert(child != null && child!.hasSize);
+    return constraints.axis == Axis.vertical ? child!.size.height : child!.size.width;
   }
 }

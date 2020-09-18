@@ -37,20 +37,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
         bool logCommunicationToFile = true,
       }) : _printCommunication = printCommunication,
         _logCommunicationToFile = logCommunicationToFile,
-        _isolateSubscription = _initIsolateHandler(_serviceClient),
         _driverId = _nextDriverId++;
-
-  // The Dart VM may be running with --pause-isolates-on-start.
-  // Set a listener to unpause new isolates as they are ready to run,
-  // otherwise they'll hang indefinitely.
-  static StreamSubscription<VMIsolateRef> _initIsolateHandler(
-      VMServiceClient serviceClient) {
-    return serviceClient.onIsolateRunnable.listen(
-      (VMIsolateRef isolateRef) async {
-        await _resumeLeniently(isolateRef);
-      }
-    );
-  }
 
   /// Connects to a Flutter application.
   ///
@@ -113,12 +100,9 @@ class VMServiceFlutterDriver extends FlutterDriver {
         null ? vm.isolates.first :
     vm.isolates.firstWhere(
             (VMIsolateRef isolate) => isolate.number == isolateNumber);
-
     _log('Isolate found with number: ${isolateRef.number}');
-    // There is a race condition here, the isolate may have been destroyed before
-    // we get around to loading it.
+
     VMIsolate isolate = await isolateRef.loadRunnable();
-    _log('Loaded isolate: ${isolate.number}');
 
     // TODO(yjbanov): vm_service_client does not support "None" pause event yet.
     // It is currently reported as null, but we cannot rely on it because
@@ -133,21 +117,8 @@ class VMServiceFlutterDriver extends FlutterDriver {
         isolate.pauseEvent is! VMPauseExceptionEvent &&
         isolate.pauseEvent is! VMPauseInterruptedEvent &&
         isolate.pauseEvent is! VMResumeEvent) {
-      _log('Reloading first isolate.');
       isolate = await isolateRef.loadRunnable();
-      _log('Reloaded first isolate.');
     }
-
-    // Tells the Dart VM Service to notify us about "Isolate" events.
-    //
-    // This is a workaround for an issue in package:vm_service_client, which
-    // subscribes to the "Isolate" stream lazily upon subscription, which
-    // results in lost events.
-    //
-    // Details: https://github.com/dart-lang/vm_service_client/issues/17
-    await connection.peer.sendRequest('streamListen', <String, String>{
-      'streamId': 'Isolate',
-    });
 
     final VMServiceFlutterDriver driver = VMServiceFlutterDriver.connectedTo(
       client, connection.peer, isolate,
@@ -156,6 +127,27 @@ class VMServiceFlutterDriver extends FlutterDriver {
     );
 
     driver._dartVmReconnectUrl = dartVmServiceUrl;
+
+    // Attempts to resume the isolate, but does not crash if it fails because
+    // the isolate is already resumed. There could be a race with other tools,
+    // such as a debugger, any of which could have resumed the isolate.
+    Future<dynamic> resumeLeniently() {
+      _log('Attempting to resume isolate');
+      return isolate.resume().catchError((dynamic e) {
+        const int vmMustBePausedCode = 101;
+        if (e is rpc.RpcException && e.code == vmMustBePausedCode) {
+          // No biggie; something else must have resumed the isolate
+          _log(
+              'Attempted to resume an already resumed isolate. This may happen '
+                  'when we lose a race with another tool (usually a debugger) that '
+                  'is connected to the same isolate.'
+          );
+        } else {
+          // Failed to resume due to another reason. Fail hard.
+          throw e;
+        }
+      });
+    }
 
     /// Waits for a signal from the VM service that the extension is registered.
     ///
@@ -191,8 +183,42 @@ class VMServiceFlutterDriver extends FlutterDriver {
       ]);
     }
 
+    /// Tells the Dart VM Service to notify us about "Isolate" events.
+    ///
+    /// This is a workaround for an issue in package:vm_service_client, which
+    /// subscribes to the "Isolate" stream lazily upon subscription, which
+    /// results in lost events.
+    ///
+    /// Details: https://github.com/dart-lang/vm_service_client/issues/17
+    Future<void> enableIsolateStreams() async {
+      await connection.peer.sendRequest('streamListen', <String, String>{
+        'streamId': 'Isolate',
+      });
+    }
+
     // Attempt to resume isolate if it was paused
-    await _resumeLeniently(isolate);
+    if (isolate.pauseEvent is VMPauseStartEvent) {
+      _log('Isolate is paused at start.');
+
+      await resumeLeniently();
+    } else if (isolate.pauseEvent is VMPauseExitEvent ||
+        isolate.pauseEvent is VMPauseBreakpointEvent ||
+        isolate.pauseEvent is VMPauseExceptionEvent ||
+        isolate.pauseEvent is VMPauseInterruptedEvent) {
+      // If the isolate is paused for any other reason, assume the extension is
+      // already there.
+      _log('Isolate is paused mid-flight.');
+      await resumeLeniently();
+    } else if (isolate.pauseEvent is VMResumeEvent) {
+      _log('Isolate is not paused. Assuming application is ready.');
+    } else {
+      _log(
+          'Unknown pause event type ${isolate.pauseEvent.runtimeType}. '
+              'Assuming application is ready.'
+      );
+    }
+
+    await enableIsolateStreams();
 
     // We will never receive the extension event if the user does not register
     // it. If that happens, show a message but continue waiting.
@@ -213,58 +239,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
     _log('Connected to Flutter application.');
     return driver;
-  }
-
-  static bool _alreadyRunning(VMIsolate isolate) {
-    // Expected pause events.
-    if (isolate.pauseEvent is VMPauseStartEvent ||
-        isolate.pauseEvent is VMPauseExitEvent ||
-        isolate.pauseEvent is VMPauseBreakpointEvent ||
-        isolate.pauseEvent is VMPauseExceptionEvent ||
-        isolate.pauseEvent is VMPauseInterruptedEvent ||
-        isolate.pauseEvent is VMNoneEvent) {
-      return false;
-    }
-    // Already running.
-    if (isolate.pauseEvent is VMResumeEvent) {
-      _log('Isolate is not paused. Assuming application is ready.');
-      return true;
-    }
-    _log('Unknown pause event type ${isolate.pauseEvent.runtimeType}. '
-        'Assuming application is ready.');
-    return true;
-  }
-
-  /// Attempts to resume the isolate, but does not crash if it fails because
-  /// the isolate is already resumed. There could be a race with other tools,
-  /// such as a debugger, any of which could have resumed the isolate.
-  /// Returns the isolate if it is runnable, null otherwise.
-  static Future<void> _resumeLeniently(VMIsolateRef isolateRef) async {
-    try {
-      _log('New runnable isolate ${isolateRef.number}');
-      final VMIsolate isolate = await isolateRef.load();
-      if (_alreadyRunning(isolate)) {
-        return;
-      }
-      _log('Attempting to resume isolate ${isolate.number}');
-      await isolate.resume();
-      _log('Resumed isolate ${isolate.number}');
-    } on VMSentinelException {
-      // Probably OK, the isolate vanished before we got to it.
-      _log('Failed to load isolate, proceeding.');
-    } on rpc.RpcException catch (e) {
-      const int vmMustBePausedCode = 101;
-      if (e.code == vmMustBePausedCode) {
-        // No biggie; something else must have resumed the isolate
-        _log('Attempted to resume an already resumed isolate. This may happen '
-             'when we lose a race with another tool (usually a debugger) that '
-             'is connected to the same isolate.'
-        );
-      } else {
-        // Failed to resume due to another reason. Fail hard.
-        rethrow;
-      }
-    }
   }
 
   static int _nextDriverId = 0;
@@ -300,9 +274,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
   /// useful if your application spawns multiple isolates that you
   /// would like to instrument.
   final VMServiceClient _serviceClient;
-
-  /// Subscription to isolate events happening in the app.
-  final StreamSubscription<VMIsolateRef> _isolateSubscription;
 
   /// JSON-RPC client useful for sending raw JSON requests.
   rpc.Peer _peer;
@@ -581,7 +552,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
   @override
   Future<void> close() async {
     // Don't leak vm_service_client-specific objects, if any
-    await _isolateSubscription.cancel();
     await _serviceClient.close();
     await _peer.close();
   }

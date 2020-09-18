@@ -555,7 +555,7 @@ class _AppBarState extends State<AppBar> {
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
       } else {
-        if (canPop)
+        if (!hasEndDrawer && canPop)
           leading = useCloseButton ? const CloseButton() : const BackButton();
       }
     }

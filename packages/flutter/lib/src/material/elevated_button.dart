@@ -222,8 +222,9 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `shadowColor` - Theme.shadowColor
   /// * `elevation`
   ///   * disabled - 0
-  ///   * hovered or focused - 2
-  ///   * pressed - 6
+  ///   * default - 2
+  ///   * hovered or focused - 4
+  ///   * pressed - 8
   /// * `padding`
   ///   * textScaleFactor <= 1 - horizontal(16)
   ///   * `1 < textScaleFactor <= 2` - lerp(horizontal(16), horizontal(8))

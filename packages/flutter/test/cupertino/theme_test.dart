@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/cupertino.dart';
