@@ -626,6 +626,7 @@ void main() {
     testWidgets('Scale with mouse returns onInteraction properties', (WidgetTester tester) async{
       final TransformationController transformationController = TransformationController();
       Offset focalPoint;
+      Offset localFocalPoint;
       double scaleChange;
       Velocity currentVelocity;
       bool calledStart;
@@ -641,6 +642,7 @@ void main() {
                 onInteractionUpdate: (ScaleUpdateDetails details){
                   scaleChange = details.scale;
                   focalPoint = details.focalPoint;
+                  localFocalPoint = details.localFocalPoint;
                 },
                 onInteractionEnd: (ScaleEndDetails details){
                   currentVelocity = details.velocity;
@@ -663,7 +665,10 @@ void main() {
       expect(afterScaling, isNot(equals(1.0)));
       expect(currentVelocity, equals(noMovement));
       expect(calledStart, equals(true));
-      expect(focalPoint, const Offset(100, 100)); // Center of Container.
+      // Focal points are given in coordinates outside of InteractiveViewer,
+      // with local being in relation to the InteractiveViewer.
+      expect(focalPoint, center);
+      expect(localFocalPoint, const Offset(100, 100));
     });
 
     testWidgets('viewport changes size', (WidgetTester tester) async {
