@@ -33,6 +33,8 @@ typedef PaintRangeValueIndicator = void Function(PaintingContext context, Offset
 ///
 /// Used to select a range from a range of values.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
+///
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// ![A range slider widget, consisting of 5 divisions and showing the default

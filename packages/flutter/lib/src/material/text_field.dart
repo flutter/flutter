@@ -1098,11 +1098,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
   }
 
-  Color _defaultSelectionColor(BuildContext context, Color primary) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    return primary.withOpacity(isDark ? 0.40 : 0.12);
-  }
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1136,13 +1131,14 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
         forcePressEnabled = true;
         textSelectionControls = cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
         if (theme.useTextSelectionTheme) {
-          cursorColor ??= selectionTheme.cursorColor ?? CupertinoTheme.of(context).primaryColor;
-          selectionColor = selectionTheme.selectionColor ?? _defaultSelectionColor(context, CupertinoTheme.of(context).primaryColor);
+          cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+          selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         } else {
           cursorColor ??= CupertinoTheme.of(context).primaryColor;
           selectionColor = theme.textSelectionColor;
@@ -1162,7 +1158,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorOpacityAnimates = false;
         if (theme.useTextSelectionTheme) {
           cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
-          selectionColor = selectionTheme.selectionColor ?? _defaultSelectionColor(context, theme.colorScheme.primary);
+          selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         } else {
           cursorColor ??= theme.cursorColor;
           selectionColor = theme.textSelectionColor;

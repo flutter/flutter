@@ -53,5 +53,12 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
       return *result;
     }
   }
+
+  switch (message) {
+    case WM_FONTCHANGE:
+      flutter_controller_->engine()->ReloadSystemFonts();
+      break;
+  }
+
   return Win32Window::MessageHandler(hwnd, message, wparam, lparam);
 }

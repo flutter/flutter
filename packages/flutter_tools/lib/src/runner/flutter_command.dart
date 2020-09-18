@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
@@ -287,7 +285,9 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption(observatoryPortOption,
         help: '(deprecated use host-vmservice-port instead) '
               'Listen to the given port for an observatory debugger connection.\n'
-              'Specifying port 0 (the default) will find a random free port.',
+              'Specifying port 0 (the default) will find a random free port.\nNote: '
+              'if the Dart Development Service (DDS) is enabled, this will not be the port '
+              'of the Observatory instance advertised on the command line.',
     );
     argParser.addOption('device-vmservice-port',
       help: 'Look for vmservice connections only from the specified port.\n'
@@ -303,6 +303,10 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addDdsOptions({@required bool verboseHelp}) {
+    argParser.addOption('dds-port',
+      help: 'When this value is provided, the Dart Development Service (DDS) will be '
+            'bound to the provided port.\nSpecifying port 0 (the default) will find '
+            'a random free port.');
     argParser.addFlag(
       'disable-dds',
       hide: !verboseHelp,
@@ -313,6 +317,15 @@ abstract class FlutterCommand extends Command<void> {
             'Note: passing this flag may degrade IDE functionality if a DDS instance is not'
             ' already connected to the target application.'
     );
+  }
+
+  bool get disableDds => boolArg('disable-dds');
+
+  int get ddsPort {
+    if (argResults.wasParsed('dds-port')) {
+      return int.tryParse(stringArg('dds-port')) ?? 0;
+    }
+    return 0;
   }
 
   /// Gets the vmservice port provided to in the 'observatory-port' or

@@ -208,6 +208,9 @@ class FlutterDevice {
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+    int hostVmServicePort,
+    int ddsPort,
+    bool disableServiceAuthCodes = false,
     bool disableDds = false,
     bool ipv6 = false,
   }) {
@@ -223,12 +226,14 @@ class FlutterDevice {
       if (!disableDds) {
         await device.dds.startDartDevelopmentService(
           observatoryUri,
+          ddsPort,
           ipv6,
+          disableServiceAuthCodes,
         );
       }
       try {
         service = await connectToVmService(
-          observatoryUri,
+          disableDds ? observatoryUri : device.dds.uri,
           reloadSources: reloadSources,
           restart: restart,
           compileExpression: compileExpression,
@@ -1191,10 +1196,13 @@ abstract class ResidentRunner {
         restart: restart,
         compileExpression: compileExpression,
         disableDds: debuggingOptions.disableDds,
+        ddsPort: debuggingOptions.ddsPort,
+        hostVmServicePort: debuggingOptions.hostVmServicePort,
         reloadMethod: reloadMethod,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
         ipv6: ipv6,
+        disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
