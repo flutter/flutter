@@ -440,7 +440,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
             }
             element.visitChildElements(markElementsDirty);
           }
-          markElementsDirty(renderViewElement!);
+          if (renderViewElement != null) {
+            markElementsDirty(renderViewElement!);
+          }
           await endOfFrame;
           return <String, String>{'type': 'Success'};
         },
