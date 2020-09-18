@@ -327,10 +327,14 @@ class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
   final FixedExtentScrollController scrollController;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderCupertinoPickerSemantics(scrollController, Directionality.of(context)!);
+  RenderObject createRenderObject(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
+    return _RenderCupertinoPickerSemantics(scrollController, Directionality.of(context)!);
+  }
 
   @override
   void updateRenderObject(BuildContext context, covariant _RenderCupertinoPickerSemantics renderObject) {
+    assert(debugCheckHasDirectionality(context));
     renderObject
       ..textDirection = Directionality.of(context)!
       ..controller = scrollController;
@@ -339,19 +343,22 @@ class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
 
 class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   _RenderCupertinoPickerSemantics(FixedExtentScrollController controller, this._textDirection) {
-    this.controller = controller;
+    _updateController(null, controller);
   }
 
-  FixedExtentScrollController? get controller => _controller;
-  FixedExtentScrollController? _controller;
-  set controller(FixedExtentScrollController? value) {
-    if (value == _controller)
+  FixedExtentScrollController get controller => _controller;
+  late FixedExtentScrollController _controller;
+  set controller(FixedExtentScrollController value) =>_updateController(_controller, value);
+
+  // This method exists to allow controller to be non-null. It is only called with a null oldValue from construtor.
+  void _updateController(FixedExtentScrollController? oldValue, FixedExtentScrollController value) {
+    if (value == oldValue)
       return;
-    if (_controller != null)
-      _controller!.removeListener(_handleScrollUpdate);
+    if (oldValue != null)
+      oldValue.removeListener(_handleScrollUpdate);
     else
-      _currentIndex = value!.initialItem;
-    value!.addListener(_handleScrollUpdate);
+      _currentIndex = value.initialItem;
+    value.addListener(_handleScrollUpdate);
     _controller = value;
   }
 
@@ -367,19 +374,19 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   int _currentIndex = 0;
 
   void _handleIncrease() {
-    controller!.jumpToItem(_currentIndex + 1);
+    controller.jumpToItem(_currentIndex + 1);
   }
 
   void _handleDecrease() {
     if (_currentIndex == 0)
       return;
-    controller!.jumpToItem(_currentIndex - 1);
+    controller.jumpToItem(_currentIndex - 1);
   }
 
   void _handleScrollUpdate() {
-    if (controller!.selectedItem == _currentIndex)
+    if (controller.selectedItem == _currentIndex)
       return;
-    _currentIndex = controller!.selectedItem;
+    _currentIndex = controller.selectedItem;
     markNeedsSemanticsUpdate();
   }
   @override
