@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -64,6 +63,13 @@ void main() {
   });
 
   group('which on Windows', () {
+    testWithoutContext('throws tool exit if where throws an argument error', () async {
+      when(mockProcessManager.runSync(<String>['where', kExecutable]))
+          .thenThrow(ArgumentError('Cannot find executable for where'));
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
+
+      expect(() => utils.which(kExecutable), throwsA(isA<ToolExit>()));
+    });
     testWithoutContext('returns null when executable does not exist', () async {
       when(mockProcessManager.runSync(<String>['where', kExecutable]))
           .thenReturn(ProcessResult(0, 1, null, null));
@@ -89,6 +95,29 @@ void main() {
     });
   });
 
+  testWithoutContext('macos name', () async {
+    when(mockProcessManager.runSync(
+      <String>['sw_vers', '-productName'],
+    )).thenReturn(ProcessResult(0, 0, 'product', ''));
+    when(mockProcessManager.runSync(
+      <String>['sw_vers', '-productVersion'],
+    )).thenReturn(ProcessResult(0, 0, 'version', ''));
+    when(mockProcessManager.runSync(
+      <String>['sw_vers', '-buildVersion'],
+    )).thenReturn(ProcessResult(0, 0, 'build', ''));
+    when(mockProcessManager.runSync(
+      <String>['uname', '-m'],
+    )).thenReturn(ProcessResult(0, 0, 'arch', ''));
+    final MockFileSystem fileSystem = MockFileSystem();
+    final OperatingSystemUtils utils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'macos'),
+      processManager: mockProcessManager,
+    );
+    expect(utils.name, 'product version build arch');
+  });
+
   testWithoutContext('If unzip fails, include stderr in exception text', () {
     const String exceptionMessage = 'Something really bad happened.';
     when(mockProcessManager.runSync(
@@ -112,59 +141,6 @@ void main() {
       () => osUtils.unzip(mockFile, mockDirectory),
       throwsProcessException(message: exceptionMessage),
     );
-  });
-
-  group('gzip on Windows:', () {
-    testWithoutContext('verifyGzip returns false on a FileSystemException', () {
-      final MockFileSystem fileSystem = MockFileSystem();
-      final MockFile mockFile = MockFile();
-      when(fileSystem.file(any)).thenReturn(mockFile);
-      when(mockFile.readAsBytesSync()).thenThrow(
-        const FileSystemException('error'),
-      );
-      final OperatingSystemUtils osUtils = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'windows'),
-        processManager: mockProcessManager,
-      );
-
-      expect(osUtils.verifyGzip(mockFile), isFalse);
-    });
-
-    testWithoutContext('verifyGzip returns false on an ArchiveException', () {
-      final MockFileSystem fileSystem = MockFileSystem();
-      final MockFile mockFile = MockFile();
-      when(fileSystem.file(any)).thenReturn(mockFile);
-      when(mockFile.readAsBytesSync()).thenReturn(Uint8List.fromList(<int>[
-        // Anything other than the magic header: 0x1f, 0x8b.
-        0x01,
-        0x02,
-      ]));
-      final OperatingSystemUtils osUtils = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'windows'),
-        processManager: mockProcessManager,
-      );
-
-      expect(osUtils.verifyGzip(mockFile), isFalse);
-    });
-
-    testWithoutContext('verifyGzip returns false on an empty file', () {
-      final MockFileSystem fileSystem = MockFileSystem();
-      final MockFile mockFile = MockFile();
-      when(fileSystem.file(any)).thenReturn(mockFile);
-      when(mockFile.readAsBytesSync()).thenReturn(Uint8List(0));
-      final OperatingSystemUtils osUtils = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'windows'),
-        processManager: mockProcessManager,
-      );
-
-      expect(osUtils.verifyGzip(mockFile), isFalse);
-    });
   });
 
   testWithoutContext('stream compression level', () {

@@ -2,21 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
+import 'package:archive/archive.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 
 import 'android/gradle_utils.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'base/io.dart' show SocketException;
+import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpStatus, ProcessException, SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'dart/package_map.dart';
+import 'dart/pub.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
+import 'runner/flutter_command.dart';
 
 /// A tag for a set of development artifacts that need to be cached.
 class DevelopmentArtifact {
@@ -122,11 +125,19 @@ class Cache {
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
       _artifacts.add(FlutterRunnerSDKArtifacts(this));
-      _artifacts.add(FlutterRunnerDebugSymbols(this));
+      _artifacts.add(FlutterRunnerDebugSymbols(this, platform: _platform));
       for (final String artifactName in IosUsbArtifacts.artifactNames) {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
       _artifacts.add(FontSubsetArtifacts(this));
+      _artifacts.add(PubDependencies(
+        fileSystem: _fileSystem,
+        logger: _logger,
+        // flutter root and pub must be lazily initialized to avoid accessing
+        // before the version is determined.
+        flutterRoot: () => flutterRoot,
+        pub: () => pub,
+      ));
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -136,6 +147,21 @@ class Cache {
   final Platform _platform;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _osUtils;
+
+  ArtifactUpdater get _artifactUpdater => __artifactUpdater ??= _createUpdater();
+  ArtifactUpdater __artifactUpdater;
+
+  /// This has to be lazy because it requires FLUTTER_ROOT to be initialized.
+  ArtifactUpdater _createUpdater() {
+    return ArtifactUpdater(
+      operatingSystemUtils: _osUtils,
+      logger: _logger,
+      fileSystem: _fileSystem,
+      tempStorage: getDownloadDir(),
+      platform: _platform,
+      httpClient: HttpClient(),
+    );
+  }
 
   Net _net;
   FileSystemUtils _fsUtils;
@@ -385,9 +411,19 @@ class Cache {
     }
   }
 
+  /// Read the stamp for [artifactName].
+  ///
+  /// If the file is missing or cannot be parsed, returns `null`.
   String getStampFor(String artifactName) {
     final File stampFile = getStampFileFor(artifactName);
-    return stampFile.existsSync() ? stampFile.readAsStringSync().trim() : null;
+    if (!stampFile.existsSync()) {
+      return null;
+    }
+    try {
+      return stampFile.readAsStringSync().trim();
+    } on FileSystemException {
+      return null;
+    }
   }
 
   void setStampFor(String artifactName, String version) {
@@ -408,34 +444,13 @@ class Cache {
     );
   }
 
-  bool isUpToDate() => _artifacts.every((ArtifactSet artifact) => artifact.isUpToDate());
-
-  Future<String> getThirdPartyFile(String urlStr, String serviceName) async {
-    final Uri url = Uri.parse(urlStr);
-    final Directory thirdPartyDir = getArtifactDirectory('third_party');
-
-    final Directory serviceDir = _fileSystem.directory(_fileSystem.path.join(
-      thirdPartyDir.path,
-      serviceName,
-    ));
-    if (!serviceDir.existsSync()) {
-      serviceDir.createSync(recursive: true);
-      _osUtils.chmod(serviceDir, '755');
-    }
-
-    final File cachedFile = _fileSystem.file(_fileSystem.path.join(
-      serviceDir.path,
-      url.pathSegments.last,
-    ));
-    if (!cachedFile.existsSync()) {
-      try {
-        await downloadFile(url, cachedFile);
-      } on Exception catch (e) {
-        throwToolExit('Failed to fetch third-party artifact $url: $e');
+  Future<bool> isUpToDate() async {
+    for (final ArtifactSet artifact in _artifacts) {
+      if (!await artifact.isUpToDate()) {
+        return false;
       }
     }
-
-    return cachedFile.path;
+    return true;
   }
 
   /// Update the cache to contain all `requiredArtifacts`.
@@ -448,11 +463,11 @@ class Cache {
         _logger.printTrace('Artifact $artifact is not required, skipping update.');
         continue;
       }
-      if (artifact.isUpToDate()) {
+      if (await artifact.isUpToDate()) {
         continue;
       }
       try {
-        await artifact.update();
+        await artifact.update(_artifactUpdater);
       } on SocketException catch (e) {
         if (_hostsBlockedInChina.contains(e.address?.host)) {
           _logger.printError(
@@ -483,12 +498,6 @@ class Cache {
     return allAvailible;
   }
 
-  /// Download a file from the given [url] and write it to [location].
-  Future<void> downloadFile(Uri url, File location) async {
-    _ensureExists(location.parent);
-    await _net.fetchUrl(url, destFile: location);
-  }
-
   Future<bool> doesRemoteExist(String message, Uri url) async {
     final Status status = _logger.startProgress(
       message,
@@ -512,7 +521,7 @@ abstract class ArtifactSet {
   final DevelopmentArtifact developmentArtifact;
 
   /// [true] if the artifact is up to date.
-  bool isUpToDate();
+  Future<bool> isUpToDate();
 
   /// The environment variables (if any) required to consume the artifacts.
   Map<String, String> get environment {
@@ -520,7 +529,7 @@ abstract class ArtifactSet {
   }
 
   /// Updates the artifact.
-  Future<void> update();
+  Future<void> update(ArtifactUpdater artifactUpdater);
 
   /// The canonical name of the artifact.
   String get name;
@@ -549,13 +558,6 @@ abstract class CachedArtifact extends ArtifactSet {
   Directory get location => cache.getArtifactDirectory(name);
   String get version => cache.getVersionFor(name);
 
-  /// Keep track of the files we've downloaded for this execution so we
-  /// can delete them after completion. We don't delete them right after
-  /// extraction in case [update] is interrupted, so we can restart without
-  /// starting from scratch.
-  @visibleForTesting
-  final List<File> downloadedFiles = <File>[];
-
   // Whether or not to bypass normal platform filtering for this artifact.
   bool get ignorePlatformFiltering {
     return cache.includeAllPlatforms ||
@@ -563,7 +565,7 @@ abstract class CachedArtifact extends ArtifactSet {
   }
 
   @override
-  bool isUpToDate() {
+  Future<bool> isUpToDate() async {
     if (!location.existsSync()) {
       return false;
     }
@@ -574,7 +576,7 @@ abstract class CachedArtifact extends ArtifactSet {
   }
 
   @override
-  Future<void> update() async {
+  Future<void> update(ArtifactUpdater artifactUpdater) async {
     if (!location.existsSync()) {
       try {
         location.createSync(recursive: true);
@@ -586,7 +588,7 @@ abstract class CachedArtifact extends ArtifactSet {
         );
       }
     }
-    await updateInner();
+    await updateInner(artifactUpdater);
     try {
       cache.setStampFor(stampName, version);
     } on FileSystemException catch (err) {
@@ -597,74 +599,75 @@ abstract class CachedArtifact extends ArtifactSet {
         'subsequent invocations until the problem is resolved.',
       );
     }
-    _removeDownloadedFiles();
-  }
-
-  /// Clear any zip/gzip files downloaded.
-  void _removeDownloadedFiles() {
-    for (final File f in downloadedFiles) {
-      try {
-        f.deleteSync();
-      } on FileSystemException catch (e) {
-        globals.printError('Failed to delete "${f.path}". Please delete manually. $e');
-        continue;
-      }
-      for (Directory d = f.parent; d.absolute.path != cache.getDownloadDir().absolute.path; d = d.parent) {
-        if (d.listSync().isEmpty) {
-          d.deleteSync();
-        } else {
-          break;
-        }
-      }
-    }
+    artifactUpdater.removeDownloadedFiles();
   }
 
   /// Hook method for extra checks for being up-to-date.
   bool isUpToDateInner() => true;
 
-
   /// Template method to perform artifact update.
-  Future<void> updateInner();
+  Future<void> updateInner(ArtifactUpdater artifactUpdater);
 
   Uri _toStorageUri(String path) => Uri.parse('${cache.storageBaseUrl}/$path');
+}
 
-  /// Download an archive from the given [url] and unzip it to [location].
-  Future<void> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f), void extractor(File f, Directory d)) {
-    return _withDownloadFile(flattenNameSubdirs(url), (File tempFile) async {
-      if (!verifier(tempFile)) {
-        final Status status = globals.logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
-        try {
-          await cache.downloadFile(url, tempFile);
-          status.stop();
-        // The exception is rethrown, so don't catch only Exceptions.
-        } catch (exception) { // ignore: avoid_catches_without_on_clauses
-          status.cancel();
-          rethrow;
-        }
-      } else {
-        globals.logger.printTrace('$message (cached)');
+/// Ensures that the source files for all of the dependencies for the
+/// flutter_tool are present.
+///
+/// This does not handle cases wheere the source files are modified or the
+/// directory contents are incomplete.
+class PubDependencies extends ArtifactSet {
+  PubDependencies({
+    // Needs to be lazy to avoid reading from the cache before the root is initialized.
+    @required String Function() flutterRoot,
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Pub Function() pub,
+  }) : _logger = logger,
+       _fileSystem = fileSystem,
+       _flutterRoot = flutterRoot,
+       _pub = pub,
+       super(DevelopmentArtifact.universal);
+
+  final String Function() _flutterRoot;
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final Pub Function() _pub;
+
+  @override
+  Future<bool> isUpToDate() async {
+    final File toolPackageConfig = _fileSystem.file(
+      _fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools', kPackagesFileName),
+    );
+    if (!toolPackageConfig.existsSync()) {
+      return false;
+    }
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      toolPackageConfig,
+      logger: _logger,
+      throwOnError: false,
+    );
+    if (packageConfig == null || packageConfig == PackageConfig.empty ) {
+      return false;
+    }
+    for (final Package package in packageConfig.packages) {
+      if (!_fileSystem.directory(package.packageUriRoot).existsSync()) {
+        return false;
       }
-      _ensureExists(location);
-      extractor(tempFile, location);
-    });
+    }
+    return true;
   }
 
-  /// Download a zip archive from the given [url] and unzip it to [location].
-  Future<void> _downloadZipArchive(String message, Uri url, Directory location) {
-    return _downloadArchive(message, url, location, globals.os.verifyZip, globals.os.unzip);
-  }
+  @override
+  String get name => 'pub_dependencies';
 
-  /// Download a gzipped tarball from the given [url] and unpack it to [location].
-  Future<void> _downloadZippedTarball(String message, Uri url, Directory location) {
-    return _downloadArchive(message, url, location, globals.os.verifyGzip, globals.os.unpack);
-  }
-
-  /// Create a temporary file and invoke [onTemporaryFile] with the file as
-  /// argument, then add the temporary file to the [downloadedFiles].
-  Future<void> _withDownloadFile(String name, Future<void> onTemporaryFile(File file)) async {
-    final File tempFile = globals.fs.file(globals.fs.path.join(cache.getDownloadDir().path, name));
-    downloadedFiles.add(tempFile);
-    await onTemporaryFile(tempFile);
+  @override
+  Future<void> update(ArtifactUpdater artifactUpdater) async {
+    await _pub().get(
+      context: PubContext.pubGet,
+      directory: _fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
+      generateSyntheticPackage: false,
+    );
   }
 }
 
@@ -677,9 +680,9 @@ class MaterialFonts extends CachedArtifact {
   );
 
   @override
-  Future<void> updateInner() {
+  Future<void> updateInner(ArtifactUpdater artifactUpdater) {
     final Uri archiveUri = _toStorageUri(version);
-    return _downloadZipArchive('Downloading Material fonts...', archiveUri, location);
+    return artifactUpdater.downloadZipArchive('Downloading Material fonts...', archiveUri, location);
   }
 }
 
@@ -701,7 +704,7 @@ class FlutterWebSdk extends CachedArtifact {
   String get version => cache.getVersionFor('engine');
 
   @override
-  Future<void> updateInner() async {
+  Future<void> updateInner(ArtifactUpdater artifactUpdater) async {
     String platformName = 'flutter-web-sdk-';
     if (globals.platform.isMacOS) {
       platformName += 'darwin-x64';
@@ -711,7 +714,7 @@ class FlutterWebSdk extends CachedArtifact {
       platformName += 'windows-x64';
     }
     final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra/flutter/$version/$platformName.zip');
-    await _downloadZipArchive('Downloading Web SDK...', url, location);
+    await artifactUpdater.downloadZipArchive('Downloading Web SDK...', url, location);
     // This is a temporary work-around for not being able to safely download into a shared directory.
     for (final FileSystemEntity entity in location.listSync(recursive: true)) {
       if (entity is File) {
@@ -774,12 +777,12 @@ abstract class EngineCachedArtifact extends CachedArtifact {
   }
 
   @override
-  Future<void> updateInner() async {
+  Future<void> updateInner(ArtifactUpdater artifactUpdater) async {
     final String url = '${cache.storageBaseUrl}/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (final String pkgName in getPackageDirs()) {
-      await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
+      await artifactUpdater.downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
     }
 
     for (final List<String> toolsDir in getBinaryDirs()) {
@@ -789,7 +792,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
       // Avoid printing things like 'Downloading linux-x64 tools...' multiple times.
       final String friendlyName = urlPath.replaceAll('/artifacts.zip', '').replaceAll('.zip', '');
-      await _downloadZipArchive('Downloading $friendlyName tools...', Uri.parse(url + urlPath), dir);
+      await artifactUpdater.downloadZipArchive('Downloading $friendlyName tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir);
 
@@ -850,7 +853,6 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     }
   }
 }
-
 
 /// A cached artifact containing the dart:ui source code.
 class FlutterSdk extends EngineCachedArtifact {
@@ -1024,7 +1026,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
   final Cache cache;
 
   @override
-  Future<void> update() async {
+  Future<void> update(ArtifactUpdater artifactUpdater) async {
     final Directory tempDir = cache.getRoot().createTempSync(
       'flutter_gradle_wrapper.',
     );
@@ -1056,7 +1058,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
   }
 
   @override
-  bool isUpToDate() {
+  Future<bool> isUpToDate() async {
     // The dependencies are downloaded and cached by Gradle.
     // The tool doesn't know if the dependencies are already cached at this point.
     // Therefore, call Gradle to figure this out.
@@ -1112,9 +1114,9 @@ class GradleWrapper extends CachedArtifact {
   String get _gradleWrapper => globals.fs.path.join('gradle', 'wrapper', 'gradle-wrapper.jar');
 
   @override
-  Future<void> updateInner() {
+  Future<void> updateInner(ArtifactUpdater artifactUpdater) {
     final Uri archiveUri = _toStorageUri(version);
-    return _downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location).then<void>((_) {
+    return artifactUpdater.downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location).then<void>((_) {
       // Delete property file, allowing templates to provide it.
       globals.fs.file(globals.fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
       // Remove NOTICE file. Should not be part of the template.
@@ -1160,9 +1162,9 @@ abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
   @override
   Directory get location => cache.getArtifactDirectory('fuchsia');
 
-  Future<void> _doUpdate() {
+  Future<void> _doUpdate(ArtifactUpdater artifactUpdater) {
     final String url = '$_cipdBaseUrl/$_path/+/$version';
-    return _downloadZipArchive('Downloading package fuchsia SDK...',
+    return artifactUpdater.downloadZipArchive('Downloading package fuchsia SDK...',
                                Uri.parse(url), location);
   }
 }
@@ -1182,12 +1184,12 @@ class FlutterRunnerSDKArtifacts extends CachedArtifact {
   String get version => cache.getVersionFor('engine');
 
   @override
-  Future<void> updateInner() async {
+  Future<void> updateInner(ArtifactUpdater artifactUpdater) async {
     if (!globals.platform.isLinux && !globals.platform.isMacOS) {
       return Future<void>.value();
     }
     final String url = '$_cipdBaseUrl/flutter/fuchsia/+/git_revision:$version';
-    await _downloadZipArchive('Downloading package flutter runner...',
+    await artifactUpdater.downloadZipArchive('Downloading package flutter runner...',
         Uri.parse(url), location);
   }
 }
@@ -1214,12 +1216,14 @@ class CipdArchiveResolver extends VersionedPackageResolver {
 
 /// The debug symbols for flutter runner for Fuchsia development.
 class FlutterRunnerDebugSymbols extends CachedArtifact {
-  FlutterRunnerDebugSymbols(Cache cache, {this.packageResolver = const CipdArchiveResolver(), this.dryRun = false})
-      : super('flutter_runner_debug_symbols', cache, DevelopmentArtifact.flutterRunner);
+  FlutterRunnerDebugSymbols(Cache cache, {
+    @required Platform platform,
+    this.packageResolver = const CipdArchiveResolver(),
+  }) : _platform = platform,
+      super('flutter_runner_debug_symbols', cache, DevelopmentArtifact.flutterRunner);
 
   final VersionedPackageResolver packageResolver;
-
-  final bool dryRun;
+  final Platform _platform;
 
   @override
   Directory get location => cache.getArtifactDirectory(name);
@@ -1227,24 +1231,23 @@ class FlutterRunnerDebugSymbols extends CachedArtifact {
   @override
   String get version => cache.getVersionFor('engine');
 
-  Future<void> _downloadDebugSymbols(String targetArch) async {
+  Future<void> _downloadDebugSymbols(String targetArch, ArtifactUpdater artifactUpdater) async {
     final String packageName = 'fuchsia-debug-symbols-$targetArch';
     final String url = packageResolver.resolveUrl(packageName, version);
-    if (!dryRun) {
-      await _downloadZipArchive(
-          'Downloading debug symbols for flutter runner - arch:$targetArch...',
-          Uri.parse(url),
-          location);
-    }
+    await artifactUpdater.downloadZipArchive(
+      'Downloading debug symbols for flutter runner - arch:$targetArch...',
+      Uri.parse(url),
+      location,
+    );
   }
 
   @override
-  Future<void> updateInner() async {
-    if (!globals.platform.isLinux && !globals.platform.isMacOS) {
-      return Future<void>.value();
+  Future<void> updateInner(ArtifactUpdater artifactUpdater) async {
+    if (!_platform.isLinux && !_platform.isMacOS) {
+      return;
     }
-    await _downloadDebugSymbols('x64');
-    await _downloadDebugSymbols('arm64');
+    await _downloadDebugSymbols('x64', artifactUpdater);
+    await _downloadDebugSymbols('arm64', artifactUpdater);
   }
 }
 
@@ -1253,11 +1256,11 @@ class LinuxFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
   LinuxFuchsiaSDKArtifacts(Cache cache) : super(cache, 'linux');
 
   @override
-  Future<void> updateInner() {
+  Future<void> updateInner(ArtifactUpdater artifactUpdater) {
     if (!globals.platform.isLinux) {
       return Future<void>.value();
     }
-    return _doUpdate();
+    return _doUpdate(artifactUpdater);
   }
 }
 
@@ -1266,11 +1269,11 @@ class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
   MacOSFuchsiaSDKArtifacts(Cache cache) : super(cache, 'mac');
 
   @override
-  Future<void> updateInner() async {
+  Future<void> updateInner(ArtifactUpdater artifactUpdater) async {
     if (!globals.platform.isMacOS) {
       return Future<void>.value();
     }
-    return _doUpdate();
+    return _doUpdate(artifactUpdater);
   }
 }
 
@@ -1358,14 +1361,14 @@ class IosUsbArtifacts extends CachedArtifact {
   }
 
   @override
-  Future<void> updateInner() {
+  Future<void> updateInner(ArtifactUpdater artifactUpdater) {
     if (!globals.platform.isMacOS && !ignorePlatformFiltering) {
       return Future<void>.value();
     }
     if (location.existsSync()) {
       location.deleteSync(recursive: true);
     }
-    return _downloadZipArchive('Downloading $name...', archiveUri, location);
+    return artifactUpdater.downloadZipArchive('Downloading $name...', archiveUri, location);
   }
 
   @visibleForTesting
@@ -1395,20 +1398,6 @@ String _flattenNameNoSubdirs(String fileName) {
       ..._flattenNameSubstitutions[codeUnit] ?? <int>[codeUnit],
   ];
   return String.fromCharCodes(replacedCodeUnits);
-}
-
-@visibleForTesting
-String flattenNameSubdirs(Uri url) {
-  final List<String> pieces = <String>[url.host, ...url.pathSegments];
-  final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
-  return globals.fs.path.joinAll(convertedPieces);
-}
-
-/// Create the given [directory] and parents, as necessary.
-void _ensureExists(Directory directory) {
-  if (!directory.existsSync()) {
-    directory.createSync(recursive: true);
-  }
 }
 
 // TODO(jonahwilliams): upload debug desktop artifacts to host-debug and
@@ -1487,3 +1476,198 @@ const List<List<String>> _dartSdks = <List<String>> [
   <String>['linux-x64', 'dart-sdk-linux-x64.zip'],
   <String>['windows-x64', 'dart-sdk-windows-x64.zip'],
 ];
+
+/// An API for downloading and un-archiving artifacts, such as engine binaries or
+/// additional source code.
+class ArtifactUpdater {
+  ArtifactUpdater({
+    @required OperatingSystemUtils operatingSystemUtils,
+    @required Logger logger,
+    @required FileSystem fileSystem,
+    @required Directory tempStorage,
+    @required HttpClient httpClient,
+    @required Platform platform,
+  }) : _operatingSystemUtils = operatingSystemUtils,
+       _httpClient = httpClient,
+       _logger = logger,
+       _fileSystem = fileSystem,
+       _tempStorage = tempStorage,
+       _platform = platform;
+
+  /// The number of times the artifact updater will repeat the artifact download loop.
+  static const int _kRetryCount = 2;
+
+  final Logger _logger;
+  final OperatingSystemUtils _operatingSystemUtils;
+  final FileSystem _fileSystem;
+  final Directory _tempStorage;
+  final HttpClient _httpClient;
+  final Platform _platform;
+
+  /// Keep track of the files we've downloaded for this execution so we
+  /// can delete them after completion. We don't delete them right after
+  /// extraction in case [update] is interrupted, so we can restart without
+  /// starting from scratch.
+  @visibleForTesting
+  final List<File> downloadedFiles = <File>[];
+
+  /// Download a zip archive from the given [url] and unzip it to [location].
+  Future<void> downloadZipArchive(
+    String message,
+    Uri url,
+    Directory location,
+  ) {
+    return _downloadArchive(
+      message,
+      url,
+      location,
+      _operatingSystemUtils.unzip,
+    );
+  }
+
+  /// Download a gzipped tarball from the given [url] and unpack it to [location].
+  Future<void> downloadZippedTarball(String message, Uri url, Directory location) {
+    return _downloadArchive(
+      message,
+      url,
+      location,
+      _operatingSystemUtils.unpack,
+    );
+  }
+
+  /// Download an archive from the given [url] and unzip it to [location].
+  Future<void> _downloadArchive(
+    String message,
+    Uri url,
+    Directory location,
+    void Function(File, Directory) extractor,
+  ) async {
+    final String downloadPath = flattenNameSubdirs(url, _fileSystem);
+    final File tempFile = _createDownloadFile(downloadPath);
+    Status status;
+    int retries = _kRetryCount;
+
+    while (retries > 0) {
+      status = _logger.startProgress(
+        message,
+        timeout: null, // This will take a variable amount of time based on network connectivity.
+      );
+      try {
+        _ensureExists(tempFile.parent);
+        final IOSink ioSink = tempFile.openWrite();
+        await _download(url, ioSink);
+        await ioSink.close();
+      } on Exception catch (err) {
+        _logger.printTrace(err.toString());
+        retries -= 1;
+        if (retries == 0) {
+          throwToolExit(
+            'Failed to download $url. Ensure you have network connectivity and then try again.',
+          );
+        }
+        continue;
+      } on ArgumentError catch (error) {
+        final String overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+        if (overrideUrl != null && url.toString().contains(overrideUrl)) {
+          _logger.printError(error.toString());
+          throwToolExit(
+            'The value of FLUTTER_STORAGE_BASE_URL ($overrideUrl) could not be '
+            'parsed as a valid url. Please see https://flutter.dev/community/china '
+            'for an example of how to use it.\n'
+            'Full URL: $url',
+            exitCode: kNetworkProblemExitCode,
+          );
+        }
+        // This error should not be hit if there was not a storage URL override, allow the
+        // tool to crash.
+        rethrow;
+      } finally {
+        status.stop();
+      }
+      _ensureExists(location);
+
+      try {
+        extractor(tempFile, location);
+      } on ProcessException {
+        retries -= 1;
+        if (retries == 0) {
+          rethrow;
+        }
+        _deleteIgnoringErrors(tempFile);
+        continue;
+      } on ArchiveException {
+        retries -= 1;
+        if (retries == 0) {
+          rethrow;
+        }
+        _deleteIgnoringErrors(tempFile);
+        continue;
+      }
+      return;
+    }
+  }
+
+  /// Download bytes from [url], throwing non-200 responses as an exception.
+  Future<void> _download(Uri url, IOSink ioSink) async {
+    final HttpClientRequest request = await _httpClient.getUrl(url);
+    final HttpClientResponse response = await request.close();
+    if (response.statusCode != HttpStatus.ok) {
+      throw Exception(response.statusCode);
+    }
+    await response.forEach(ioSink.add);
+  }
+
+  /// Create a temporary file and invoke [onTemporaryFile] with the file as
+  /// argument, then add the temporary file to the [downloadedFiles].
+  File _createDownloadFile(String name) {
+    final File tempFile = _fileSystem.file(_fileSystem.path.join(_tempStorage.path, name));
+    downloadedFiles.add(tempFile);
+    return tempFile;
+  }
+
+  /// Create the given [directory] and parents, as necessary.
+  void _ensureExists(Directory directory) {
+    if (!directory.existsSync()) {
+      directory.createSync(recursive: true);
+    }
+  }
+
+    /// Clear any zip/gzip files downloaded.
+  void removeDownloadedFiles() {
+    for (final File file in downloadedFiles) {
+      if (!file.existsSync()) {
+        continue;
+      }
+      try {
+        file.deleteSync();
+      } on FileSystemException catch (e) {
+        globals.printError('Failed to delete "${file.path}". Please delete manually. $e');
+        continue;
+      }
+      for (Directory directory = file.parent; directory.absolute.path != _tempStorage.absolute.path; directory = directory.parent) {
+        if (directory.listSync().isNotEmpty) {
+          break;
+        }
+        _deleteIgnoringErrors(directory);
+      }
+    }
+  }
+
+  static void _deleteIgnoringErrors(FileSystemEntity entity) {
+    if (!entity.existsSync()) {
+      return;
+    }
+    try {
+      entity.deleteSync();
+    } on FileSystemException {
+      // Ignore errors.
+    }
+  }
+}
+
+@visibleForTesting
+String flattenNameSubdirs(Uri url, FileSystem fileSystem){
+  final List<String> pieces = <String>[url.host, ...url.pathSegments];
+  final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
+  return fileSystem.path.joinAll(convertedPieces);
+}

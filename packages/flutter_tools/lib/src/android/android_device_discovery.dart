@@ -55,14 +55,13 @@ class AndroidDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
-    final String adbPath = getAdbPath(_androidSdk);
-    if (adbPath == null) {
+    if (_androidSdk == null || _androidSdk.adbPath == null) {
       return <AndroidDevice>[];
     }
     String text;
     try {
       text = (await _processUtils.run(
-        <String>[adbPath, 'devices', '-l'],
+        <String>[_androidSdk.adbPath, 'devices', '-l'],
         throwOnError: true,
       )).stdout.trim();
     } on ArgumentError catch (exception) {
@@ -88,12 +87,11 @@ class AndroidDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<String>> getDiagnostics() async {
-    final String adbPath = getAdbPath(_androidSdk);
-    if (adbPath == null) {
+    if (_androidSdk == null || _androidSdk.adbPath == null) {
       return <String>[];
     }
 
-    final RunResult result = await _processUtils.run(<String>[adbPath, 'devices', '-l']);
+    final RunResult result = await _processUtils.run(<String>[_androidSdk.adbPath, 'devices', '-l']);
     if (result.exitCode != 0) {
       return <String>[];
     } else {

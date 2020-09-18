@@ -14,6 +14,7 @@ import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
+import 'base/common.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/dds.dart';
@@ -209,7 +210,12 @@ abstract class DeviceManager {
   /// * If the user did not specify a device id and there is more than one
   /// device connected, then filter out unsupported devices and prioritize
   /// ephemeral devices.
-  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject, { Duration timeout }) async {
+    if (timeout != null) {
+      // Reset the cache with the specified timeout.
+      await refreshAllConnectedDevices(timeout: timeout);
+    }
+
     List<Device> devices = await getDevices();
 
     // Always remove web and fuchsia devices from `--all`. This setting
@@ -278,6 +284,9 @@ abstract class DeviceManager {
   Future<Device> _chooseOneOfAvailableDevices(List<Device> devices) async {
     _displayDeviceOptions(devices);
     final String userInput =  await _readUserInput(devices.length);
+    if (userInput.toLowerCase() == 'q') {
+      throwToolExit('');
+    }
     return devices[int.parse(userInput)];
   }
 
@@ -292,7 +301,8 @@ abstract class DeviceManager {
   Future<String> _readUserInput(int deviceCount) async {
     globals.terminal.usesTerminalUi = true;
     final String result = await globals.terminal.promptForCharInput(
-        <String>[ for (int i = 0; i < deviceCount; i++) '$i' ],
+        <String>[ for (int i = 0; i < deviceCount; i++) '$i', 'q', 'Q'],
+        displayAcceptedCharacters: false,
         logger: globals.logger,
         prompt: userMessages.flutterChooseOne);
     return result;
@@ -779,6 +789,7 @@ class DebuggingOptions {
     this.verboseSystemLogs = false,
     this.hostVmServicePort,
     this.deviceVmServicePort,
+    this.ddsPort,
     this.initializePlatform = true,
     this.hostname,
     this.port,
@@ -820,6 +831,7 @@ class DebuggingOptions {
       verboseSystemLogs = false,
       hostVmServicePort = null,
       deviceVmServicePort = null,
+      ddsPort = null,
       vmserviceOutFile = null,
       fastStart = false,
       webEnableExpressionEvaluation = false,
@@ -847,6 +859,7 @@ class DebuggingOptions {
   final bool initializePlatform;
   final int hostVmServicePort;
   final int deviceVmServicePort;
+  final int ddsPort;
   final String port;
   final String hostname;
   final bool webEnableExposeUrl;

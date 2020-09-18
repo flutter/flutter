@@ -69,13 +69,13 @@ class UserMessages {
   String androidBadSdkDir(String envKey, String homeDir) =>
       '$envKey = $homeDir\n'
       'but Android SDK not found at this location.';
-  String androidMissingSdkInstructions(String envKey, Platform platform) =>
+  String androidMissingSdkInstructions(Platform platform) =>
       'Unable to locate Android SDK.\n'
       'Install Android Studio from: https://developer.android.com/studio/index.html\n'
       'On first launch it will assist you in installing the Android SDK components.\n'
       '(or visit ${_androidSdkInstallUrl(platform)} for detailed instructions).\n'
-      'If the Android SDK has been installed to a custom location, set $envKey to that location.\n'
-      'You may also want to add it to your PATH environment variable.\n';
+      'If the Android SDK has been installed to a custom location, please use\n'
+      '`flutter config --android-sdk` to update to that location.\n';
   String androidSdkLocation(String directory) => 'Android SDK at $directory';
   String androidSdkPlatformToolsVersion(String platform, String tools) =>
       'Platform $platform, build-tools $tools';
@@ -113,9 +113,7 @@ class UserMessages {
       'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
   String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion, Platform platform) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
-      'To update using sdkmanager, run:\n'
-      '  "$managerPath" "platforms;android-$sdkMinVersion" "build-tools;$buildToolsMinVersion"\n'
-      'or visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
+      'To update the Android SDK visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
 
   // Messages used in AndroidStudioValidator
   String androidStudioVersion(String version) => 'version $version';
@@ -256,7 +254,7 @@ class UserMessages {
       'Found $count devices with name or id matching $deviceId:';
   String get flutterMultipleDevicesFound => 'Multiple devices found:';
   String flutterChooseDevice(int option, String name, String deviceId) => '[$option]: $name ($deviceId)';
-  String get flutterChooseOne => 'Please choose one:';
+  String get flutterChooseOne => 'Please choose one (To quit, press "q/Q")';
   String get flutterSpecifyDeviceWithAllOption =>
       'More than one device connected; please specify a device with '
       "the '-d <deviceId>' flag, or use '-d all' to act on all devices.";

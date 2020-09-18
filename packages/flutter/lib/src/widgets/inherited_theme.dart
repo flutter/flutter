@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
@@ -91,8 +89,8 @@ abstract class InheritedTheme extends InheritedWidget {
   /// const constructors so that they can be used in const expressions.
 
   const InheritedTheme({
-    Key key,
-    @required Widget child,
+    Key? key,
+    required Widget child,
   }) : super(key: key, child: child);
 
   /// Return a copy of this inherited theme with the specified [child].
@@ -138,9 +136,9 @@ abstract class InheritedTheme extends InheritedWidget {
 
 class _CaptureAll extends StatelessWidget {
   const _CaptureAll({
-    Key key,
-    @required this.themes,
-    @required this.child,
+    Key? key,
+    required this.themes,
+    required this.child,
   }) : assert(themes != null), assert(child != null), super(key: key);
 
   final List<InheritedTheme> themes;

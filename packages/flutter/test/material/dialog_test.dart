@@ -684,11 +684,11 @@ void main() {
     }) {
       expect(
         tester.getTopLeft(dialogFinder).dx,
-        closeTo(tester.getTopLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
       expect(
         tester.getBottomLeft(dialogFinder).dx,
-        closeTo(tester.getBottomLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
     }
 
@@ -700,11 +700,11 @@ void main() {
     }) {
       expect(
         tester.getTopRight(dialogFinder).dx,
-        closeTo(tester.getTopRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
       expect(
         tester.getBottomRight(dialogFinder).dx,
-        closeTo(tester.getBottomRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
     }
 
@@ -716,11 +716,11 @@ void main() {
     }) {
       expect(
         tester.getTopLeft(dialogFinder).dy,
-        closeTo(tester.getTopLeft(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopLeft(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
       expect(
         tester.getTopRight(dialogFinder).dy,
-        closeTo(tester.getTopRight(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopRight(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
     }
 
@@ -732,11 +732,11 @@ void main() {
     }) {
       expect(
         tester.getBottomLeft(dialogFinder).dy,
-        closeTo(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
       expect(
         tester.getBottomRight(dialogFinder).dy,
-        closeTo(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
     }
 
@@ -1275,10 +1275,12 @@ void main() {
         ));
   });
 
-  testWidgets('Dialog widget contains route semantics from title', (WidgetTester tester) async {
+  testWidgets('AlertDialog widget contains route semantics from title for iOS', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
         home: Material(
           child: Builder(
             builder: (BuildContext context) {
@@ -1316,6 +1318,62 @@ void main() {
     expect(semantics, includesNodeWith(
       label: 'Title',
       flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+    ));
+
+    semantics.dispose();
+  });
+
+  testWidgets('AlertDialog widget always contains alert route semantics for android', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showDialog<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const AlertDialog(
+                          title: Text('Title'),
+                          content: Text('Y'),
+                          actions: <Widget>[],
+                        );
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, isNot(includesNodeWith(
+      label: 'Title',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+    )));
+    expect(semantics, isNot(includesNodeWith(
+      label: 'Alert',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+    )));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    // It does not use 'Title' as route semantics
+    expect(semantics, isNot(includesNodeWith(
+      label: 'Title',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+    )));
+    expect(semantics, includesNodeWith(
+      label: 'Alert',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
     ));
 
     semantics.dispose();

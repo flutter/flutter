@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -18,6 +16,81 @@ import 'restoration.dart';
 /// Whenever a new [value] is set, [didUpdateValue] is called. Subclasses should
 /// call [notifyListeners] from this method if the new value changes what
 /// [toPrimitives] returns.
+///
+/// ## Using a RestorableValue
+///
+/// {@tool dartpad --template=stateful_widget_restoration}
+/// A [StatefulWidget] that has a restorable [int] property.
+///
+/// ```dart
+///   // The current value of the answer is stored in a [RestorableProperty].
+///   // During state restoration it is automatically restored to its old value.
+///   // If no restoration data is available to restore the answer from, it is
+///   // initialized to the specified default value, in this case 42.
+///   RestorableInt _answer = RestorableInt(42);
+///
+///   @override
+///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///     // All restorable properties must be registered with the mixin. After
+///     // registration, the answer either has its old value restored or is
+///     // initialized to its default value.
+///     registerForRestoration(_answer, 'answer');
+///   }
+///
+///   void _incrementAnswer() {
+///     setState(() {
+///       // The current value of the property can be accessed and modified via
+///       // the value getter and setter.
+///       _answer.value += 1;
+///     });
+///   }
+///
+///   @override
+///   void dispose() {
+///     // Properties must be disposed when no longer used.
+///     _answer.dispose();
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return OutlinedButton(
+///       child: Text('${_answer.value}'),
+///       onPressed: _incrementAnswer,
+///     );
+///   }
+/// ```
+/// {@end-tool}
+///
+/// ## Creating a subclass
+///
+/// {@tool snippet}
+/// This example shows how to create a new `RestorableValue` subclass,
+/// in this case for the [Duration] class.
+///
+/// ```dart
+/// class RestorableDuration extends RestorableValue<Duration> {
+///   @override
+///   Duration createDefaultValue() => const Duration();
+///
+///   @override
+///   void didUpdateValue(Duration oldValue) {
+///     if (oldValue.inMicroseconds != value.inMicroseconds)
+///       notifyListeners();
+///   }
+///
+///   @override
+///   Duration fromPrimitives(Object data) {
+///     return Duration(microseconds: data as int);
+///   }
+///
+///   @override
+///   Object toPrimitives() {
+///     return value.inMicroseconds;
+///   }
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -38,13 +111,13 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
   /// [RestorationMixin.registerForRestoration].
   T get value {
     assert(isRegistered);
-    return _value;
+    return _value as T;
   }
-  T _value;
+  T? _value;
   set value(T newValue) {
     assert(isRegistered);
     if (newValue != _value) {
-      final T oldValue = _value;
+      final T? oldValue = _value;
       _value = newValue;
       didUpdateValue(oldValue);
     }
@@ -64,7 +137,7 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
   /// Subclasses should call [notifyListeners] from this method, if the new
   /// value changes what [toPrimitives] returns.
   @protected
-  void didUpdateValue(T oldValue);
+  void didUpdateValue(T? oldValue);
 }
 
 // _RestorablePrimitiveValue and its subclasses do not allow null values in
@@ -76,7 +149,7 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
 // these new subclasses could be to add 'N' (for nullable) to the end of a
 // class name (e.g. RestorableIntN, RestorableStringN, etc.) to distinguish them
 // from their non-nullable friends.
-class _RestorablePrimitiveValue<T> extends RestorableValue<T> {
+class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
   _RestorablePrimitiveValue(this._defaultValue)
     : assert(_defaultValue != null),
       assert(debugIsSerializableForRestoration(_defaultValue)),
@@ -94,7 +167,7 @@ class _RestorablePrimitiveValue<T> extends RestorableValue<T> {
   }
 
   @override
-  void didUpdateValue(T oldValue) {
+  void didUpdateValue(T? oldValue) {
     assert(debugIsSerializableForRestoration(value));
     notifyListeners();
   }
@@ -200,16 +273,16 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
   /// [RestorationMixin.registerForRestoration].
   T get value {
     assert(isRegistered);
-    return _value;
+    return _value as T;
   }
-  T _value;
+  T? _value;
 
   @override
   void initWithValue(T value) {
     assert(value != null);
     _value?.removeListener(notifyListeners);
     _value = value;
-    _value.addListener(notifyListeners);
+    _value!.addListener(notifyListeners);
   }
 
   @override
@@ -231,7 +304,7 @@ class RestorableTextEditingController extends RestorableListenable<TextEditingCo
   ///
   /// This constructor treats a null `text` argument as if it were the empty
   /// string.
-  factory RestorableTextEditingController({String text}) => RestorableTextEditingController.fromValue(
+  factory RestorableTextEditingController({String? text}) => RestorableTextEditingController.fromValue(
     text == null ? TextEditingValue.empty : TextEditingValue(text: text),
   );
 
@@ -259,7 +332,7 @@ class RestorableTextEditingController extends RestorableListenable<TextEditingCo
     return value.text;
   }
 
-  TextEditingController _controller;
+  TextEditingController? _controller;
 
   @override
   void initWithValue(TextEditingController value) {
@@ -278,7 +351,7 @@ class RestorableTextEditingController extends RestorableListenable<TextEditingCo
     if (_controller != null) {
       // Scheduling a microtask for dispose to give other entities a chance
       // to remove their listeners first.
-      scheduleMicrotask(_controller.dispose);
+      scheduleMicrotask(_controller!.dispose);
     }
   }
 }

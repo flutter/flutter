@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
@@ -33,13 +30,13 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('flutter run does not terminate when a debugger is attached', () async {
+  testWithoutContext('flutter run does not terminate when a debugger is attached', () async {
     await _flutter.run(withDebugger: true);
     await Future<void>.delayed(requiredLifespan);
     expect(_flutter.hasExited, equals(false));
   });
 
-  test('fluter run does not terminate when a debugger is attached and pause-on-exceptions', () async {
+  testWithoutContext('fluter run does not terminate when a debugger is attached and pause-on-exceptions', () async {
     await _flutter.run(withDebugger: true, pauseOnExceptions: true);
     await Future<void>.delayed(requiredLifespan);
     expect(_flutter.hasExited, equals(false));
