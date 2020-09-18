@@ -660,15 +660,73 @@ void main() {
       const Velocity noMovement = Velocity(pixelsPerSecond: Offset(0,0));
       final double afterScaling = transformationController.value.getMaxScaleOnAxis();
 
-      expect(scaleChange,greaterThan(1.0));
-      expect(afterScaling, isNot(equals(null)));
-      expect(afterScaling, isNot(equals(1.0)));
+      expect(scaleChange, greaterThan(1.0));
+      expect(afterScaling, scaleChange);
       expect(currentVelocity, equals(noMovement));
       expect(calledStart, equals(true));
       // Focal points are given in coordinates outside of InteractiveViewer,
-      // with local being in relation to the InteractiveViewer.
+      // with local being in relation to the viewport.
       expect(focalPoint, center);
       expect(localFocalPoint, const Offset(100, 100));
+
+      // The scene point is the same as localFocalPoint because the center of
+      // the scene is at the center of the viewport.
+      final Offset scenePoint = transformationController.toScene(localFocalPoint);
+      expect(scenePoint, const Offset(100, 100));
+    });
+
+    testWidgets('onInteraction can be used to get scene point', (WidgetTester tester) async{
+      final TransformationController transformationController = TransformationController();
+      Offset focalPoint;
+      Offset localFocalPoint;
+      double scaleChange;
+      Velocity currentVelocity;
+      bool calledStart;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                transformationController: transformationController,
+                onInteractionStart: (ScaleStartDetails details){
+                  calledStart = true;
+                },
+                onInteractionUpdate: (ScaleUpdateDetails details){
+                  scaleChange = details.scale;
+                  focalPoint = details.focalPoint;
+                  localFocalPoint = details.localFocalPoint;
+                },
+                onInteractionEnd: (ScaleEndDetails details){
+                  currentVelocity = details.velocity;
+                },
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      final Offset offCenter = Offset(center.dx - 20.0, center.dy - 20.0);
+      await scrollAt(offCenter, tester, const Offset(0.0, -20.0));
+      await tester.pumpAndSettle();
+      const Velocity noMovement = Velocity(pixelsPerSecond: Offset(0,0));
+      final double afterScaling = transformationController.value.getMaxScaleOnAxis();
+
+      expect(scaleChange, greaterThan(1.0));
+      expect(afterScaling, scaleChange);
+      expect(currentVelocity, equals(noMovement));
+      expect(calledStart, equals(true));
+      // Focal points are given in coordinates outside of InteractiveViewer,
+      // with local being in relation to the viewport.
+      expect(focalPoint, offCenter);
+      expect(localFocalPoint, const Offset(80, 80));
+
+      // The top left corner of the viewport is not at the top left corner of
+      // the scene.
+      final Offset scenePoint = transformationController.toScene(Offset.zero);
+      expect(scenePoint.dx, greaterThan(0.0));
+      expect(scenePoint.dy, greaterThan(0.0));
     });
 
     testWidgets('viewport changes size', (WidgetTester tester) async {
