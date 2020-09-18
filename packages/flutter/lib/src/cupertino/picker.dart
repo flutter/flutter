@@ -277,7 +277,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     final Color? resolvedBackgroundColor = CupertinoDynamicColor.resolve(widget.backgroundColor, context);
 
     final Widget result = DefaultTextStyle(
-      style: CupertinoTheme.of(context).textTheme!.pickerTextStyle,
+      style: CupertinoTheme.of(context).textTheme.pickerTextStyle,
       child: Stack(
         children: <Widget>[
           Positioned.fill(
