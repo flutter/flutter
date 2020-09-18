@@ -711,9 +711,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle the start of a gesture. All of pan, scale, and rotate are handled
   // with GestureDetector's scale gesture.
   void _onScaleStart(ScaleStartDetails details) {
-    if (widget.onInteractionStart != null) {
-      widget.onInteractionStart!(details);
-    }
+    widget.onInteractionStart?.call(details);
 
     if (_controller.isAnimating) {
       _controller.stop();
@@ -735,14 +733,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // handled with GestureDetector's scale gesture.
   void _onScaleUpdate(ScaleUpdateDetails details) {
     final double scale = _transformationController!.value.getMaxScaleOnAxis();
-    if (widget.onInteractionUpdate != null) {
-      widget.onInteractionUpdate!(ScaleUpdateDetails(
-        focalPoint: details.focalPoint,
-        localFocalPoint: details.localFocalPoint,
-        scale: details.scale,
-        rotation: details.rotation,
-      ));
-    }
+    widget.onInteractionUpdate?.call(ScaleUpdateDetails(
+      focalPoint: details.focalPoint,
+      localFocalPoint: details.localFocalPoint,
+      scale: details.scale,
+      rotation: details.rotation,
+    ));
 
     final Offset focalPointScene = _transformationController!.toScene(
       details.localFocalPoint,
@@ -838,9 +834,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle the end of a gesture of _GestureType. All of pan, scale, and rotate
   // are handled with GestureDetector's scale gesture.
   void _onScaleEnd(ScaleEndDetails details) {
-    if (widget.onInteractionEnd != null) {
-      widget.onInteractionEnd!(details);
-    }
+    widget.onInteractionEnd?.call(details);
     _scaleStart = null;
     _rotationStart = null;
     _referenceFocalPoint = null;
@@ -916,24 +910,18 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _transformationController!.value,
         focalPointSceneScaled - focalPointScene,
       );
-      if (widget.onInteractionStart != null) {
-        widget.onInteractionStart!(
-            ScaleStartDetails(focalPoint: focalPointSceneScaled)
-        );
-      }
-      if (widget.onInteractionUpdate != null) {
-        widget.onInteractionUpdate!(ScaleUpdateDetails(
-          focalPoint: event.position,
-          localFocalPoint: event.localPosition,
-          rotation: 0.0,
-          scale: scaleChange,
-          horizontalScale: 1.0,
-          verticalScale: 1.0,
-        ));
-      }
-      if (widget.onInteractionEnd != null) {
-        widget.onInteractionEnd!(ScaleEndDetails());
-      }
+      widget.onInteractionStart?.call(
+        ScaleStartDetails(focalPoint: focalPointSceneScaled)
+      );
+      widget.onInteractionUpdate?.call(ScaleUpdateDetails(
+        focalPoint: event.position,
+        localFocalPoint: event.localPosition,
+        rotation: 0.0,
+        scale: scaleChange,
+        horizontalScale: 1.0,
+        verticalScale: 1.0,
+      ));
+      widget.onInteractionEnd?.call(ScaleEndDetails());
     }
   }
 
