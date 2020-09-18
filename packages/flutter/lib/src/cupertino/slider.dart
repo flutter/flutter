@@ -275,6 +275,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   _RenderCupertinoSlider createRenderObject(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
     return _RenderCupertinoSlider(
       value: value,
       divisions: divisions,
@@ -291,6 +292,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoSlider renderObject) {
+    assert(debugCheckHasDirectionality(context));
     renderObject
       ..value = value
       ..divisions = divisions
