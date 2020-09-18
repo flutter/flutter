@@ -1029,7 +1029,10 @@ void main() {
       editable.text = emptyTextSpan;
       editable.layout(const BoxConstraints.tightFor(width: 200));
 
-      expect(editable.getRectForComposingRange(const TextRange(start: 0, end: 1)), isNull);
+      expect(
+        editable.getRectForComposingRange(const TextRange(start: 0, end: 1)),
+        // On web this evaluates to a zero-width Rect.
+        anyOf(isNull, (Rect rect) => rect.width == 0));
     });
 
     test('more than 1 run on the same line', () {
@@ -1050,7 +1053,7 @@ void main() {
       // Since the range covers an entire line, the Rect should also be almost
       // as wide as the entire paragraph (give or take 1 character).
       expect(composingRect?.width, greaterThan(200 - 10));
-    });
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/66089
   });
 
   group('previousCharacter', () {

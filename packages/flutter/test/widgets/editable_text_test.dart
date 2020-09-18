@@ -3369,7 +3369,7 @@ void main() {
             args: containsPair('width', greaterThanOrEqualTo(10)),
           ),
         ));
-    });
+    }, skip: isBrowser); // Related to https://github.com/flutter/flutter/issues/66089
 
     testWidgets(
       'only send updates when necessary',
