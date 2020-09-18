@@ -524,6 +524,9 @@ abstract class PointerEvent with Diagnosticable {
   PointerEvent transformed(Matrix4? transform);
 
   /// Creates a copy of event with the specified properties replaced.
+  ///
+  /// Calling this method on a transformed event will return a new transformed
+  /// event based on the current [transform] and the provided properties.
   PointerEvent copyWith({
     Duration? timeStamp,
     int? pointer,
@@ -737,26 +740,9 @@ abstract class _TransformedPointerEvent extends _AbstractPointerEvent with Diagn
   @override
   bool get synthesized => original.synthesized;
 
-  /// The [position] transformed into the event receiver's local coordinate
-  /// system according to [transform].
-  ///
-  /// If this event has not been transformed, [position] is returned as-is.
-  /// See also:
-  ///
-  ///  * [position], which is the position in the global coordinate system of
-  ///    the screen.
   @override
   late final Offset localPosition = PointerEvent.transformPosition(transform, position);
 
-  /// The [delta] transformed into the event receiver's local coordinate
-  /// system according to [transform].
-  ///
-  /// If this event has not been transformed, [delta] is returned as-is.
-  ///
-  /// See also:
-  ///
-  ///  * [delta], which is the distance the pointer moved in the global
-  ///    coordinate system of the screen.
   @override
   late final Offset localDelta = PointerEvent.transformDeltaViaPositions(
     transform: transform,

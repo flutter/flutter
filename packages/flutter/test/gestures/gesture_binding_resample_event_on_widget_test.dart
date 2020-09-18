@@ -83,7 +83,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 7));
     expect(events.length, 1);
-    expect(events[0].runtimeType, equals(PointerDownEvent));
+    expect(events[0], isA<PointerDownEvent>());
     expect(events[0].timeStamp, currentTestFrameTime() + kSamplingOffset);
     expect(events[0].position, Offset(5.0 / ui.window.devicePixelRatio, 0.0));
 
@@ -91,7 +91,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 2));
     expect(events.length, 2);
     expect(events[1].timeStamp, currentTestFrameTime() + kSamplingOffset);
-    expect(events[1].runtimeType, equals(PointerMoveEvent));
+    expect(events[1], isA<PointerMoveEvent>());
     expect(events[1].position, Offset(25.0 / ui.window.devicePixelRatio, 0.0));
     expect(events[1].delta, Offset(20.0 / ui.window.devicePixelRatio, 0.0));
 
@@ -99,7 +99,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 2));
     expect(events.length, 3);
     expect(events[2].timeStamp, currentTestFrameTime() + kSamplingOffset);
-    expect(events[2].runtimeType, equals(PointerUpEvent));
+    expect(events[2], isA<PointerUpEvent>());
     expect(events[2].position, Offset(40.0 / ui.window.devicePixelRatio, 0.0));
   });
 }
