@@ -111,10 +111,14 @@ class TestCommand extends FlutterCommand {
         help: 'Whether to build the assets bundle for testing.\n'
               'Consider using --no-test-assets if assets are not required.',
       )
+      // --platform is not supported to be used by Flutter developers. It only
+      // exists to test the Flutter framework itself and may be removed entirely
+      // in the future. Developers should either use plain `flutter test`, or
+      // `package:integration_test` instead.
       ..addOption('platform',
         allowed: const <String>['tester', 'chrome'],
+        hide: true,
         defaultsTo: 'tester',
-        help: 'The platform to run the unit tests on. Defaults to "tester".',
       )
       ..addOption('test-randomize-ordering-seed',
         help: 'The seed to randomize the execution order of test cases.\n'

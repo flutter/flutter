@@ -613,8 +613,8 @@ void main() {
                   isEnabled: true,
                   isFocusable: true,
                   actions: <AndroidSemanticsAction>[
-                    if (item == 'Body1') AndroidSemanticsAction.clearAccessibilityFocus,
-                    if (item != 'Body1') AndroidSemanticsAction.accessibilityFocus,
+                    if (item == 'Title') AndroidSemanticsAction.clearAccessibilityFocus,
+                    if (item != 'Title') AndroidSemanticsAction.accessibilityFocus,
                   ],
                 ),
                 reason: "Alert $item button doesn't have the right semantics");
