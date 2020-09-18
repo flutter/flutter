@@ -737,9 +737,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final double scale = _transformationController!.value.getMaxScaleOnAxis();
     if (widget.onInteractionUpdate != null) {
       widget.onInteractionUpdate!(ScaleUpdateDetails(
-        focalPoint: _transformationController!.toScene(
-          details.localFocalPoint,
-        ),
+        focalPoint: details.focalPoint,
+        localFocalPoint: details.localFocalPoint,
         scale: details.scale,
         rotation: details.rotation,
       ));
@@ -924,7 +923,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       }
       if (widget.onInteractionUpdate != null) {
         widget.onInteractionUpdate!(ScaleUpdateDetails(
-          focalPoint: _transformationController!.toScene(event.localPosition),
+          focalPoint: event.position,
+          localFocalPoint: event.localPosition,
           rotation: 0.0,
           scale: scaleChange,
           horizontalScale: 1.0,
