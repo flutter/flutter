@@ -56,7 +56,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
     _overridePhase = lastPhase;
   }
 
-  List<void Function(Duration)> postFrameCallbacks;
+  List<void Function(Duration)> postFrameCallbacks = <void Function(Duration)>[];
 
   // Proxy post-frame callbacks.
   @override
