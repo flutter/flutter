@@ -49,7 +49,6 @@ import 'theme.dart';
 ///            ),
 ///          ),
 ///          const Divider(
-///            color: Colors.black,
 ///            height: 20,
 ///            thickness: 5,
 ///            indent: 20,
@@ -63,17 +62,14 @@ import 'theme.dart';
 ///              alignment: AlignmentDirectional.centerStart,
 ///              child: Text(
 ///                'Subheader',
-///                style: Theme.of(context).textTheme.bodyText2.copyWith(
-///                  fontSize: 12.0,
-///                  color: Theme.of(context).textTheme.caption.color,
-///                ),
+///                style: Theme.of(context).textTheme.caption,
 ///                textAlign: TextAlign.start,
 ///              ),
 ///            ),
 ///          ),
 ///          Expanded(
 ///            child: Container(
-///              color: Colors.blue,
+///              color: Theme.of(context).colorScheme.primary,
 ///              child: const Center(
 ///                child: Text('Below'),
 ///              ),
