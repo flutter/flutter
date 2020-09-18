@@ -10,6 +10,12 @@ import 'package:flutter/rendering.dart';
 import 'framework.dart';
 
 /// Applies an [ImageFilter] to its child.
+///
+/// See also:
+///
+/// * [BackdropFilter], which applies an [ImageFilter] to everything
+///   beneath its child.
+/// * [ColorFiltered], which applies a [ColorFilter] to its child.
 @immutable
 class ImageFiltered extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies an [ImageFilter] to its child.

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -706,10 +705,10 @@ class _InheritedNestedScrollView extends InheritedWidget {
 
 class _NestedScrollMetrics extends FixedScrollMetrics {
   _NestedScrollMetrics({
-    required double minScrollExtent,
-    required double maxScrollExtent,
-    required double pixels,
-    required double viewportDimension,
+    required double? minScrollExtent,
+    required double? maxScrollExtent,
+    required double? pixels,
+    required double? viewportDimension,
     required AxisDirection axisDirection,
     required this.minRange,
     required this.maxRange,
@@ -734,10 +733,10 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
     double? correctionOffset,
   }) {
     return _NestedScrollMetrics(
-      minScrollExtent: minScrollExtent ?? this.minScrollExtent,
-      maxScrollExtent: maxScrollExtent ?? this.maxScrollExtent,
-      pixels: pixels ?? this.pixels,
-      viewportDimension: viewportDimension ?? this.viewportDimension,
+      minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
+      maxScrollExtent: maxScrollExtent ?? (hasContentDimensions ? this.maxScrollExtent : null),
+      pixels: pixels ?? (hasPixels ? this.pixels : null),
+      viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       minRange: minRange ?? this.minRange,
       maxRange: maxRange ?? this.maxRange,

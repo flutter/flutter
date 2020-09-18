@@ -6,6 +6,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1471,6 +1472,25 @@ void main() {
     expect(find.text('first', skipOffstage: false), findsOneWidget);
     expect(find.text('second'), findsOneWidget);
   });
+
+  testWidgets('Popping routes should cancel down events', (WidgetTester tester) async {
+    await tester.pumpWidget(_TestPostRouteCancel());
+
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.down(tester.getCenter(find.text('PointerCancelEvents: 0')));
+    await gesture.up();
+
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoButton), findsNothing);
+    expect(find.text('Hold'), findsOneWidget);
+
+    await gesture.down(tester.getCenter(find.text('Hold')));
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    expect(find.text('Hold'), findsNothing);
+    expect(find.byType(CupertinoButton), findsOneWidget);
+    expect(find.text('PointerCancelEvents: 1'), findsOneWidget);
+  });
 }
 
 class MockNavigatorObserver extends NavigatorObserver {
@@ -1570,4 +1590,76 @@ Widget buildNavigator({
       ),
     ),
   );
+}
+
+
+// A test target for post-route cancel events.
+//
+// It contains 2 routes:
+//
+//  * The initial route, 'home', displays a button showing 'PointerCancelEvents: #',
+//    where # is the number of cancel events received. Tapping the button pushes
+//    route 'sub'.
+//  * The 'sub' route, displays a text showing 'Hold'. Holding the button (a down
+//    event) will pop this route after 1 second.
+//
+// Holding the 'Hold' button at the moment of popping will force the navigator to
+// cancel the down event, increasing the Home counter by 1.
+class _TestPostRouteCancel extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _TestPostRouteCancelState();
+}
+
+class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
+
+  int counter = 0;
+
+  Widget _buildHome(BuildContext context) {
+    return Center(
+      child: CupertinoButton(
+        child: Text('PointerCancelEvents: $counter'),
+        onPressed: () => Navigator.pushNamed<void>(context, 'sub'),
+      ),
+    );
+  }
+
+  Widget _buildSub(BuildContext context) {
+    return Listener(
+      onPointerDown: (_) {
+        Future<void>.delayed(const Duration(seconds: 1)).then((_) {
+          Navigator.pop(context);
+        });
+      },
+      onPointerCancel: (_) {
+        setState(() {
+          counter += 1;
+        });
+      },
+      child: const Center(
+        child: Text('Hold', style: TextStyle(color: Colors.blue)),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoApp(
+      initialRoute: 'home',
+      onGenerateRoute: (RouteSettings settings) {
+        return CupertinoPageRoute<void>(
+          settings: settings,
+          builder: (BuildContext context) {
+            switch (settings.name) {
+              case 'home':
+                return _buildHome(context);
+              case 'sub':
+                return _buildSub(context);
+              default:
+                throw UnimplementedError();
+            }
+          },
+        );
+      },
+    );
+  }
 }

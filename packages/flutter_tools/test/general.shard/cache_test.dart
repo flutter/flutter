@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
@@ -137,25 +138,25 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('should not be up to date, if some cached artifact is not', () {
+    testUsingContext('should not be up to date, if some cached artifact is not', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate()).thenReturn(true);
-      when(artifact2.isUpToDate()).thenReturn(false);
+      when(artifact1.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(true));
+      when(artifact2.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(false));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
-      expect(cache.isUpToDate(), isFalse);
+      expect(await cache.isUpToDate(), isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
       FileSystem: () => MemoryFileSystem.test(),
     });
 
-    testUsingContext('should be up to date, if all cached artifacts are', () {
+    testUsingContext('should be up to date, if all cached artifacts are', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate()).thenReturn(true);
-      when(artifact2.isUpToDate()).thenReturn(true);
+      when(artifact1.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(true));
+      when(artifact2.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(true));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
-      expect(cache.isUpToDate(), isTrue);
+      expect(await cache.isUpToDate(), isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
       FileSystem: () => MemoryFileSystem.test(),
@@ -164,8 +165,8 @@ void main() {
     testUsingContext('should update cached artifacts which are not up to date', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate()).thenReturn(true);
-      when(artifact2.isUpToDate()).thenReturn(false);
+      when(artifact1.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(true));
+      when(artifact2.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(false));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       await cache.updateAll(<DevelopmentArtifact>{
         null,
@@ -206,8 +207,8 @@ void main() {
     testUsingContext('failed storage.googleapis.com download shows China warning', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate()).thenReturn(false);
-      when(artifact2.isUpToDate()).thenReturn(false);
+      when(artifact1.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(false));
+      when(artifact2.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(false));
       final MockInternetAddress address = MockInternetAddress();
       when(address.host).thenReturn('storage.googleapis.com');
       when(artifact1.update(any)).thenThrow(SocketException(
@@ -317,7 +318,7 @@ void main() {
         ..createSync(recursive: true);
       when(mockCache.getRoot()).thenReturn(cacheRoot);
       final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(mockCache);
-      expect(mavenArtifacts.isUpToDate(), isFalse);
+      expect(await mavenArtifacts.isUpToDate(), isFalse);
 
       final Directory gradleWrapperDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_gradle_wrapper.');
       when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
@@ -340,7 +341,7 @@ void main() {
 
       await mavenArtifacts.update(MockArtifactUpdater());
 
-      expect(mavenArtifacts.isUpToDate(), isFalse);
+      expect(await mavenArtifacts.isUpToDate(), isFalse);
     }, overrides: <Type, Generator>{
       Cache: () => mockCache,
       FileSystem: () => memoryFileSystem,
@@ -660,6 +661,69 @@ void main() {
 
     expect(cache.getStampFor('foo'), 'ABC');
   });
+
+  testWithoutContext('PubDependencies needs to be updated if the package config'
+    ' file or the source directories are missing', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final PubDependencies pubDependencies = PubDependencies(
+      flutterRoot: () => '',
+      fileSystem: fileSystem,
+      logger: logger,
+      pub: () => MockPub(),
+    );
+
+    expect(await pubDependencies.isUpToDate(), false); // no package config
+
+    fileSystem.file('packages/flutter_tools/.packages')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('\n');
+    fileSystem.file('packages/flutter_tools/.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "example",
+      "rootUri": "file:///.pub-cache/hosted/pub.dartlang.org/example-7.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.7"
+    }
+  ],
+  "generated": "2020-09-15T20:29:20.691147Z",
+  "generator": "pub",
+  "generatorVersion": "2.10.0-121.0.dev"
+}
+''');
+
+    expect(await pubDependencies.isUpToDate(), false); // dependencies are missing.
+
+    fileSystem.file('.pub-cache/hosted/pub.dartlang.org/example-7.0.0/lib/foo.dart')
+      .createSync(recursive: true);
+
+    expect(await pubDependencies.isUpToDate(), true);
+  });
+
+  testWithoutContext('PubDependencies updates via pub get', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final MockPub pub = MockPub();
+    final PubDependencies pubDependencies = PubDependencies(
+      flutterRoot: () => '',
+      fileSystem: fileSystem,
+      logger: logger,
+      pub: () => pub,
+    );
+
+    await pubDependencies.update(MockArtifactUpdater());
+
+    verify(pub.get(
+      context: PubContext.pubGet,
+      directory: 'packages/flutter_tools',
+      generateSyntheticPackage: false,
+    )).called(1);
+  });
 }
 
 class FakeCachedArtifact extends EngineCachedArtifact {
@@ -724,6 +788,7 @@ class MockInternetAddress extends Mock implements InternetAddress {}
 class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 class MockVersionedPackageResolver extends Mock implements VersionedPackageResolver {}
+class MockPub extends Mock implements Pub {}
 class FakeCache extends Cache {
   FakeCache({
     @required Logger logger,

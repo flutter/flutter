@@ -41,7 +41,6 @@ export 'package:flutter/rendering.dart' show
   LayerLink,
   MainAxisAlignment,
   MainAxisSize,
-  Overflow,
   MultiChildLayoutDelegate,
   PaintingContext,
   PointerCancelEvent,
@@ -382,8 +381,14 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// This effect is relatively expensive, especially if the filter is non-local,
 /// such as a blur.
 ///
+/// If all you want to do is apply an [ImageFilter] to a single widget
+/// (as opposed to applying the filter to everything _beneath_ a widget), use
+/// [ImageFiltered] instead. For that scenario, [ImageFiltered] is both
+/// easier to use and less expensive than [BackdropFilter].
+///
 /// See also:
 ///
+///  * [ImageFiltered], which applies an [ImageFilter] to its child.
 ///  * [DecoratedBox], which draws a background under (or over) a widget.
 ///  * [Opacity], which changes the opacity of the widget itself.
 class BackdropFilter extends SingleChildRenderObjectWidget {
@@ -1444,7 +1449,6 @@ class FittedBox extends SingleChildRenderObjectWidget {
   ///    relative to text direction.
   final AlignmentGeometry alignment;
 
-  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
   /// {@macro flutter.widgets.Clip}
   ///
   /// Defaults to [Clip.hardEdge].
@@ -2250,7 +2254,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
     this.textDirection,
     this.alignment = Alignment.center,
     this.constrainedAxis,
-    this.clipBehavior = Clip.hardEdge,
+    this.clipBehavior = Clip.none,
   }) : assert(alignment != null),
        assert(clipBehavior != null),
        super(key: key, child: child);
@@ -2278,10 +2282,9 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   /// will be retained.
   final Axis? constrainedAxis;
 
-  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.hardEdge].
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   @override
@@ -3272,7 +3275,6 @@ class Stack extends MultiChildRenderObjectWidget {
     this.alignment = AlignmentDirectional.topStart,
     this.textDirection,
     this.fit = StackFit.loose,
-    this.overflow = Overflow.clip,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
   }) : assert(clipBehavior != null),
@@ -3313,20 +3315,6 @@ class Stack extends MultiChildRenderObjectWidget {
   /// ([StackFit.expand]).
   final StackFit fit;
 
-  // TODO(liyuqian): Deprecate and remove [overflow] once its usages are removed from Google.
-
-  /// Whether overflowing children should be clipped. See [Overflow].
-  ///
-  /// Some children in a stack might overflow its box. When this flag is set to
-  /// [Overflow.clip], children cannot paint outside of the stack's box.
-  ///
-  /// When set to [Overflow.visible], the visible overflow area will not accept
-  /// hit testing.
-  ///
-  /// This overrides [clipBehavior] for now due to a staged roll out without
-  /// breaking Google. We will remove it and only use [clipBehavior] soon.
-  final Overflow overflow;
-
   /// {@macro flutter.widgets.Clip}
   ///
   /// Defaults to [Clip.hardEdge].
@@ -3351,7 +3339,7 @@ class Stack extends MultiChildRenderObjectWidget {
       alignment: alignment,
       textDirection: textDirection ?? Directionality.of(context),
       fit: fit,
-      clipBehavior: overflow == Overflow.visible ? Clip.none : clipBehavior,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -3362,7 +3350,7 @@ class Stack extends MultiChildRenderObjectWidget {
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.of(context)
       ..fit = fit
-      ..clipBehavior = overflow == Overflow.visible ? Clip.none : clipBehavior;
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -3899,7 +3887,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
     this.textBaseline = TextBaseline.alphabetic,
-    this.clipBehavior = Clip.hardEdge,
+    this.clipBehavior = Clip.none,
     List<Widget> children = const <Widget>[],
   }) : assert(direction != null),
        assert(mainAxisAlignment != null),
@@ -3999,10 +3987,9 @@ class Flex extends MultiChildRenderObjectWidget {
   /// Defaults to [TextBaseline.alphabetic].
   final TextBaseline? textBaseline;
 
-  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.hardEdge].
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   bool get _needTextDirection {
@@ -4754,7 +4741,7 @@ class Wrap extends MultiChildRenderObjectWidget {
     this.crossAxisAlignment = WrapCrossAlignment.start,
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
-    this.clipBehavior = Clip.hardEdge,
+    this.clipBehavior = Clip.none,
     List<Widget> children = const <Widget>[],
   }) : assert(clipBehavior != null), super(key: key, children: children);
 
@@ -4890,10 +4877,9 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// [verticalDirection] must not be null.
   final VerticalDirection verticalDirection;
 
-  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.hardEdge].
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   @override
@@ -5105,7 +5091,9 @@ class Flow extends MultiChildRenderObjectWidget {
     Key? key,
     required this.delegate,
     List<Widget> children = const <Widget>[],
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(delegate != null),
+       assert(clipBehavior != null),
        super(key: key, children: RepaintBoundary.wrapAll(children));
        // https://github.com/dart-lang/sdk/issues/29277
 
@@ -5120,18 +5108,26 @@ class Flow extends MultiChildRenderObjectWidget {
     Key? key,
     required this.delegate,
     List<Widget> children = const <Widget>[],
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(delegate != null),
+       assert(clipBehavior != null),
        super(key: key, children: children);
 
   /// The delegate that controls the transformation matrices of the children.
   final FlowDelegate delegate;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  final Clip clipBehavior;
+
   @override
-  RenderFlow createRenderObject(BuildContext context) => RenderFlow(delegate: delegate);
+  RenderFlow createRenderObject(BuildContext context) => RenderFlow(delegate: delegate, clipBehavior: clipBehavior);
 
   @override
   void updateRenderObject(BuildContext context, RenderFlow renderObject) {
     renderObject.delegate = delegate;
+    renderObject.clipBehavior = clipBehavior;
   }
 }
 

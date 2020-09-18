@@ -201,8 +201,10 @@ enum ConnectionState {
 ///    with a [Stream].
 ///  * [FutureBuilder], which builds itself based on a snapshot from interacting
 ///    with a [Future].
+// TODO(a14n): the type parameter should be <T extends Object> to enforce that retrieved data must not be null.
+// But it breaks a lot of code in google3. See https://github.com/flutter/flutter/pull/64672#pullrequestreview-485199027
 @immutable
-class AsyncSnapshot<T extends Object> {
+class AsyncSnapshot<T> {
   /// Creates an [AsyncSnapshot] with the specified [connectionState],
   /// and optionally either [data] or [error] (but not both).
   const AsyncSnapshot._(this.connectionState, this.data, this.error)
@@ -216,7 +218,7 @@ class AsyncSnapshot<T extends Object> {
   const AsyncSnapshot.waiting() : this._(ConnectionState.waiting, null, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [data].
-  const AsyncSnapshot.withData(ConnectionState state, T? data) : this._(state, data, null);
+  const AsyncSnapshot.withData(ConnectionState state, T data): this._(state, data, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [error].
   const AsyncSnapshot.withError(ConnectionState state, Object error) : this._(state, null, error);
@@ -300,7 +302,7 @@ class AsyncSnapshot<T extends Object> {
 ///    itself based on a snapshot from interacting with a [Stream].
 ///  * [FutureBuilder], which delegates to an [AsyncWidgetBuilder] to build
 ///    itself based on a snapshot from interacting with a [Future].
-typedef AsyncWidgetBuilder<T extends Object> = Widget Function(BuildContext context, AsyncSnapshot<T> snapshot);
+typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnapshot<T> snapshot);
 
 /// Widget that builds itself based on the latest snapshot of interaction with
 /// a [Stream].
@@ -498,7 +500,9 @@ class StreamBuilder<T extends Object> extends StreamBuilderBase<T, AsyncSnapshot
   final T? initialData;
 
   @override
-  AsyncSnapshot<T> initial() => AsyncSnapshot<T>.withData(ConnectionState.none, initialData);
+  AsyncSnapshot<T> initial() => initialData == null
+      ? AsyncSnapshot<T>.nothing()
+      : AsyncSnapshot<T>.withData(ConnectionState.none, initialData!);
 
   @override
   AsyncSnapshot<T> afterConnected(AsyncSnapshot<T> current) => current.inState(ConnectionState.waiting);
@@ -729,7 +733,9 @@ class _FutureBuilderState<T extends Object> extends State<FutureBuilder<T>> {
   @override
   void initState() {
     super.initState();
-    _snapshot = AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData);
+    _snapshot = widget.initialData == null
+        ? AsyncSnapshot<T>.nothing()
+        : AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData!);
     _subscribe();
   }
 

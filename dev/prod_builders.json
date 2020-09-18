@@ -67,9 +67,123 @@
          "flaky":false
       },
       {
-         "name": "Mac",
+         "name": "Mac build_aar_module_test",
          "repo": "flutter",
-         "task_name": "mac_bot",
+         "task_name": "mac_build_aar_module_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac build_ios_framework_module_test",
+         "repo": "flutter",
+         "task_name": "mac_build_ios_framework_module_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac build_tests",
+         "repo": "flutter",
+         "task_name": "mac_build_tests",
+         "flaky": false
+      },
+      {
+         "name": "Mac customer_testing",
+         "repo": "flutter",
+         "task_name": "mac_customer_testing",
+         "flaky": false
+      },
+      {
+         "name": "Mac framework_tests",
+         "repo": "flutter",
+         "task_name": "mac_framework_tests",
+         "flaky": false
+      },
+      {
+         "name": "Mac gradle_fast_start_test",
+         "repo": "flutter",
+         "task_name": "mac_gradle_fast_start_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac gradle_jetifier_test",
+         "repo": "flutter",
+         "task_name": "mac_gradle_jetifier_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac gradle_non_android_plugin_test",
+         "repo": "flutter",
+         "task_name": "mac_gradle_non_android_plugin_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac gradle_plugin_bundle_test",
+         "repo": "flutter",
+         "task_name": "mac_gradle_plugin_bundle_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac gradle_plugin_fat_apk_test",
+         "repo": "flutter",
+         "task_name": "mac_gradle_plugin_fat_apk_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac gradle_plugin_light_apk_test",
+         "repo": "flutter",
+         "task_name": "mac_gradle_plugin_light_apk_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac gradle_r8_test",
+         "repo": "flutter",
+         "task_name": "mac_gradle_r8_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac module_custom_host_app_name_test",
+         "repo": "flutter",
+         "task_name": "mac_module_custom_host_app_name_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac module_host_with_custom_build_test",
+         "repo": "flutter",
+         "task_name": "mac_module_host_with_custom_build_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac module_test",
+         "repo": "flutter",
+         "task_name": "mac_module_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac module_test_ios",
+         "repo": "flutter",
+         "task_name": "mac_module_test_ios",
+         "flaky": false
+      },
+      {
+         "name": "Mac plugin_dependencies_test",
+         "repo": "flutter",
+         "task_name": "mac_plugin_dependencies_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac plugin_lint_mac",
+         "repo": "flutter",
+         "task_name": "mac_plugin_lint_mac",
+         "flaky": false
+      },
+      {
+         "name": "Mac plugin_test",
+         "repo": "flutter",
+         "task_name": "mac_plugin_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac tool_tests",
+         "repo": "flutter",
+         "task_name": "mac_tool_tests",
          "flaky": false
       },
       {

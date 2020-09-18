@@ -1102,6 +1102,137 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
+  testUsingContext('ResidentRunner will alternative the name of the dill file uploaded for a hot restart', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      FakeVmServiceRequest(
+        method: 'getVM',
+        jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+      ),
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        },
+      ),
+      FakeVmServiceRequest(
+        method: kRunInViewMethod,
+        args: <String, Object>{
+          'viewId': fakeFlutterView.id,
+          'mainScript': 'lib/main.dart.dill',
+          'assetDirectory': 'build/flutter_assets',
+        },
+      ),
+      FakeVmServiceStreamResponse(
+        streamId: 'Isolate',
+        event: vm_service.Event(
+          timestamp: 0,
+          kind: vm_service.EventKind.kIsolateRunnable,
+        ),
+      ),
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      FakeVmServiceRequest(
+        method: 'getVM',
+        jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+      ),
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        },
+      ),
+      FakeVmServiceRequest(
+        method: kRunInViewMethod,
+        args: <String, Object>{
+          'viewId': fakeFlutterView.id,
+          'mainScript': 'lib/main.dart.swap.dill',
+          'assetDirectory': 'build/flutter_assets',
+        },
+      ),
+      FakeVmServiceStreamResponse(
+        streamId: 'Isolate',
+        event: vm_service.Event(
+          timestamp: 0,
+          kind: vm_service.EventKind.kIsolateRunnable,
+        ),
+      ),
+      listViews,
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      FakeVmServiceRequest(
+        method: 'getVM',
+        jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+      ),
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        },
+      ),
+      FakeVmServiceRequest(
+        method: kRunInViewMethod,
+        args: <String, Object>{
+          'viewId': fakeFlutterView.id,
+          'mainScript': 'lib/main.dart.dill',
+          'assetDirectory': 'build/flutter_assets',
+        },
+      ),
+      FakeVmServiceStreamResponse(
+        streamId: 'Isolate',
+        event: vm_service.Event(
+          timestamp: 0,
+          kind: vm_service.EventKind.kIsolateRunnable,
+        ),
+      )
+    ]);
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    when(mockDevice.supportsHotRestart).thenReturn(true);
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    ));
+
+    await residentRunner.restart(fullRestart: true);
+    await residentRunner.restart(fullRestart: true);
+    await residentRunner.restart(fullRestart: true);
+
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }));
+
   testUsingContext('ResidentRunner Can handle an RPC exception from hot restart', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
@@ -2127,7 +2258,8 @@ void main() {
     final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
     when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
     when(mockDevice.dds).thenReturn(mockDds);
-    when(mockDds.startDartDevelopmentService(any, any)).thenReturn(null);
+    when(mockDds.startDartDevelopmentService(any, any, any, any)).thenReturn(null);
+    when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
 
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,
@@ -2214,10 +2346,13 @@ class FakeFlutterDevice extends FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     bool disableDds = false,
+    bool disableServiceAuthCodes = false,
     bool ipv6 = false,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
+    int hostVmServicePort,
+    int ddsPort,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   }) async { }
 

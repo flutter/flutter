@@ -861,6 +861,40 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// The following code implements the [AnimatedAlign] widget, using a [curve] of
+/// [Curves.fastOutSlowIn].
+///
+/// ```dart
+/// bool selected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return GestureDetector(
+///     onTap: () {
+///       setState(() {
+///         selected = !selected;
+///       });
+///     },
+///     child: Center(
+///       child: Container(
+///         width: 250.0,
+///         height: 250.0,
+///         color: Colors.red,
+///         child: AnimatedAlign(
+///           alignment: selected ? Alignment.topRight : Alignment.bottomLeft,
+///           duration: const Duration(seconds: 1),
+///           curve: Curves.fastOutSlowIn,
+///           child: const FlutterLogo(size: 50.0),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AnimatedContainer], which can transition more values at once.

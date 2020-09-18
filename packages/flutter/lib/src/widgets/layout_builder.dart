@@ -360,6 +360,13 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   }
 
   @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    if (child != null)
+      return child!.getDistanceToActualBaseline(baseline);
+    return super.computeDistanceToActualBaseline(baseline);
+  }
+
+  @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     return child?.hitTest(result, position: position) ?? false;
   }

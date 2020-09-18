@@ -6,8 +6,6 @@
 
 @TestOn('!chrome') // web has different stack traces
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 

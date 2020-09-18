@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
@@ -121,23 +120,26 @@ class OverlayEntry {
   ///
   /// This should only be called once.
   ///
-  /// If this method is called while the [SchedulerBinding.schedulerPhase] is
-  /// [SchedulerPhase.persistentCallbacks], i.e. during the build, layout, or
-  /// paint phases (see [WidgetsBinding.drawFrame]), then the removal is
-  /// delayed until the post-frame callbacks phase. Otherwise the removal is
-  /// done synchronously. This means that it is safe to call during builds, but
-  /// also that if you do call this during a build, the UI will not update until
-  /// the next frame (i.e. many milliseconds later).
+  /// This method removes this overlay entry from the overlay immediately. The
+  /// UI will be updated in the same frame if this method is called before the
+  /// overlay rebuild in this frame; otherwise, the UI will be updated in the
+  /// next frame. This means that it is safe to call during builds, but	also
+  /// that if you do call this after the overlay rebuild, the UI will not update
+  /// until	the next frame (i.e. many milliseconds later).
   void remove() {
     assert(_overlay != null);
     final OverlayState overlay = _overlay!;
     _overlay = null;
+    if (!overlay.mounted)
+      return;
+
+    overlay._entries.remove(this);
     if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
-        overlay._remove(this);
+        overlay._markDirty();
       });
     } else {
-      overlay._remove(this);
+      overlay._markDirty();
     }
   }
 
@@ -211,7 +213,9 @@ class Overlay extends StatefulWidget {
   const Overlay({
     Key? key,
     this.initialEntries = const <OverlayEntry>[],
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(initialEntries != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// The entries to include in the overlay initially.
@@ -228,6 +232,11 @@ class Overlay extends StatefulWidget {
   ///
   /// To remove an entry from an [Overlay], use [OverlayEntry.remove].
   final List<OverlayEntry> initialEntries;
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  final Clip clipBehavior;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -403,11 +412,9 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     });
   }
 
-  void _remove(OverlayEntry entry) {
+  void _markDirty() {
     if (mounted) {
-      setState(() {
-        _entries.remove(entry);
-      });
+      setState(() {});
     }
   }
 
@@ -470,6 +477,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     return _Theatre(
       skipCount: children.length - onstageCount,
       children: children.reversed.toList(growable: false),
+      clipBehavior: widget.clipBehavior,
     );
   }
 
@@ -490,14 +498,18 @@ class _Theatre extends MultiChildRenderObjectWidget {
   _Theatre({
     Key? key,
     this.skipCount = 0,
+    this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
   }) : assert(skipCount != null),
        assert(skipCount >= 0),
        assert(children != null),
        assert(children.length >= skipCount),
+       assert(clipBehavior != null),
        super(key: key, children: children);
 
   final int skipCount;
+
+  final Clip clipBehavior;
 
   @override
   _TheatreElement createElement() => _TheatreElement(this);
@@ -507,6 +519,7 @@ class _Theatre extends MultiChildRenderObjectWidget {
     return _RenderTheatre(
       skipCount: skipCount,
       textDirection: Directionality.of(context)!,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -514,7 +527,8 @@ class _Theatre extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderTheatre renderObject) {
     renderObject
       ..skipCount = skipCount
-      ..textDirection = Directionality.of(context)!;
+      ..textDirection = Directionality.of(context)!
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -545,11 +559,14 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     List<RenderBox>? children,
     required TextDirection textDirection,
     int skipCount = 0,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(skipCount != null),
        assert(skipCount >= 0),
        assert(textDirection != null),
+       assert(clipBehavior != null),
        _textDirection = textDirection,
-       _skipCount = skipCount {
+       _skipCount = skipCount,
+       _clipBehavior = clipBehavior {
     addAll(children);
   }
 
@@ -590,6 +607,20 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     if (_skipCount != value) {
       _skipCount = value;
       markNeedsLayout();
+    }
+  }
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.hardEdge;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
     }
   }
 
@@ -724,8 +755,8 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_hasVisualOverflow) {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack);
+    if (_hasVisualOverflow && clipBehavior != Clip.none) {
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack, clipBehavior: clipBehavior);
     } else {
       paintStack(context, offset);
     }
