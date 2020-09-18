@@ -10,6 +10,7 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
@@ -17,17 +18,18 @@ namespace testing {
 
 class EmbedderTestCompositor {
  public:
-  enum class RenderTargetType {
-    kOpenGLFramebuffer,
-    kOpenGLTexture,
-    kSoftwareBuffer,
-  };
+  using PlatformViewRendererCallback =
+      std::function<sk_sp<SkImage>(const FlutterLayer& layer,
+                                   GrDirectContext* context)>;
+  using PresentCallback =
+      std::function<void(const FlutterLayer** layers, size_t layers_count)>;
 
   EmbedderTestCompositor(SkISize surface_size, sk_sp<GrDirectContext> context);
 
-  ~EmbedderTestCompositor();
+  virtual ~EmbedderTestCompositor();
 
-  void SetRenderTargetType(RenderTargetType type);
+  void SetBackingStoreProducer(
+      std::unique_ptr<EmbedderTestBackingStoreProducer> backingstore_producer);
 
   bool CreateBackingStore(const FlutterBackingStoreConfig* config,
                           FlutterBackingStore* backing_store_out);
@@ -36,14 +38,9 @@ class EmbedderTestCompositor {
 
   bool Present(const FlutterLayer** layers, size_t layers_count);
 
-  using PlatformViewRendererCallback =
-      std::function<sk_sp<SkImage>(const FlutterLayer& layer,
-                                   GrDirectContext* context)>;
   void SetPlatformViewRendererCallback(
       const PlatformViewRendererCallback& callback);
 
-  using PresentCallback =
-      std::function<void(const FlutterLayer** layers, size_t layers_count)>;
   //----------------------------------------------------------------------------
   /// @brief      Allows tests to install a callback to notify them when the
   ///             entire render tree has been finalized so they can run their
@@ -73,10 +70,17 @@ class EmbedderTestCompositor {
 
   void AddOnPresentCallback(fml::closure callback);
 
- private:
+  sk_sp<GrDirectContext> GetGrContext();
+
+ protected:
+  virtual bool UpdateOffscrenComposition(const FlutterLayer** layers,
+                                         size_t layers_count) = 0;
+
+  // TODO(gw280): encapsulate these properly for subclasses to use
+  std::unique_ptr<EmbedderTestBackingStoreProducer> backingstore_producer_;
   const SkISize surface_size_;
   sk_sp<GrDirectContext> context_;
-  RenderTargetType type_ = RenderTargetType::kOpenGLFramebuffer;
+
   PlatformViewRendererCallback platform_view_renderer_callback_;
   bool present_callback_is_one_shot_ = false;
   PresentCallback present_callback_;
@@ -88,22 +92,10 @@ class EmbedderTestCompositor {
   std::vector<fml::closure> on_collect_render_target_callbacks_;
   std::vector<fml::closure> on_present_callbacks_;
 
-  bool UpdateOffscrenComposition(const FlutterLayer** layers,
-                                 size_t layers_count);
-
-  bool CreateFramebufferRenderSurface(const FlutterBackingStoreConfig* config,
-                                      FlutterBackingStore* renderer_out);
-
-  bool CreateTextureRenderSurface(const FlutterBackingStoreConfig* config,
-                                  FlutterBackingStore* renderer_out);
-
-  bool CreateSoftwareRenderSurface(const FlutterBackingStoreConfig* config,
-                                   FlutterBackingStore* renderer_out);
-
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestCompositor);
 };
 
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_TEST_COMPOSITOR_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_TEST_COMPOSITOR_GL_H_
