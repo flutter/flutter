@@ -11,6 +11,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import '_first_frame_io.dart' if (dart.library.html)
+  '_first_frame_web.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'mouse_tracking.dart';
@@ -44,6 +46,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     assert(renderView != null);
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
+    addPostFrameCallback(dispatchFirstFrame);
   }
 
   /// The current [RendererBinding], if one has been created.
