@@ -21,10 +21,17 @@ void main() {
     }
     final Future<bool> didDispatchFirstFrame = onFlutterFirstFrameEvent();
 
-    TestRenderBinding().initInstances();
+    final TestRenderBinding binding = TestRenderBinding();
+    binding.handleBeginFrame(Duration.zero);
+    binding.handleDrawFrame();
 
     expect(await didDispatchFirstFrame, true);
   });
 }
 
-class TestRenderBinding extends BindingBase with SchedulerBinding, ServicesBinding, GestureBinding, SemanticsBinding, RendererBinding {}
+class TestRenderBinding extends BindingBase with SchedulerBinding, ServicesBinding, GestureBinding, SemanticsBinding, RendererBinding {
+  @override
+  void initInstances() {
+    super.initInstances();
+  }
+}
