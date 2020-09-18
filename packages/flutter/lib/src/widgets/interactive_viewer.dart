@@ -733,13 +733,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // handled with GestureDetector's scale gesture.
   void _onScaleUpdate(ScaleUpdateDetails details) {
     final double scale = _transformationController!.value.getMaxScaleOnAxis();
-    widget.onInteractionUpdate?.call(ScaleUpdateDetails(
-      focalPoint: details.focalPoint,
-      localFocalPoint: details.localFocalPoint,
-      scale: details.scale,
-      rotation: details.rotation,
-    ));
-
     final Offset focalPointScene = _transformationController!.toScene(
       details.localFocalPoint,
     );
@@ -793,7 +786,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         if (_round(_referenceFocalPoint!) != _round(focalPointSceneCheck)) {
           _referenceFocalPoint = focalPointSceneCheck;
         }
-        return;
+        break;
 
       case _GestureType.rotate:
         if (details.rotation == 0.0) {
@@ -806,7 +799,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           details.localFocalPoint,
         );
         _currentRotation = desiredRotation;
-        return;
+        break;
 
       case _GestureType.pan:
         assert(_referenceFocalPoint != null);
@@ -827,8 +820,14 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _referenceFocalPoint = _transformationController!.toScene(
           details.localFocalPoint,
         );
-        return;
+        break;
     }
+    widget.onInteractionUpdate?.call(ScaleUpdateDetails(
+      focalPoint: details.focalPoint,
+      localFocalPoint: details.localFocalPoint,
+      scale: details.scale,
+      rotation: details.rotation,
+    ));
   }
 
   // Handle the end of a gesture of _GestureType. All of pan, scale, and rotate
@@ -911,7 +910,10 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         focalPointSceneScaled - focalPointScene,
       );
       widget.onInteractionStart?.call(
-        ScaleStartDetails(focalPoint: focalPointSceneScaled)
+        ScaleStartDetails(
+          focalPoint: event.position,
+          localFocalPoint: event.localPosition,
+        ),
       );
       widget.onInteractionUpdate?.call(ScaleUpdateDetails(
         focalPoint: event.position,
