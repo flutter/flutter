@@ -425,6 +425,13 @@ class Shell final : public PlatformView::Delegate,
   // and read from the raster thread.
   std::atomic<float> display_refresh_rate_ = 0.0f;
 
+  // protects expected_frame_size_ which is set on platform thread and read on
+  // raster thread
+  std::mutex resize_mutex_;
+
+  // used to discard wrong size layer tree produced during interactive resizing
+  SkISize expected_frame_size_ = SkISize::MakeEmpty();
+
   // How many frames have been timed since last report.
   size_t UnreportedFramesCount() const;
 

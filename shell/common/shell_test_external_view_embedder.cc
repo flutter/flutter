@@ -24,6 +24,10 @@ int ShellTestExternalViewEmbedder::GetSubmittedFrameCount() {
   return submitted_frame_count_;
 }
 
+SkISize ShellTestExternalViewEmbedder::GetLastSubmittedFrameSize() {
+  return last_submitted_frame_size_;
+}
+
 // |ExternalViewEmbedder|
 void ShellTestExternalViewEmbedder::CancelFrame() {}
 
@@ -61,6 +65,12 @@ void ShellTestExternalViewEmbedder::SubmitFrame(
     GrDirectContext* context,
     std::unique_ptr<SurfaceFrame> frame) {
   frame->Submit();
+  if (frame && frame->SkiaSurface()) {
+    last_submitted_frame_size_ = SkISize::Make(frame->SkiaSurface()->width(),
+                                               frame->SkiaSurface()->height());
+  } else {
+    last_submitted_frame_size_ = SkISize::MakeEmpty();
+  }
   submitted_frame_count_++;
 }
 
