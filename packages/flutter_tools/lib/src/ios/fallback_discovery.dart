@@ -156,10 +156,9 @@ class FallbackDiscovery {
     // Attempt to connect to the VM service 5 times.
     int attempts = 0;
     Exception firstException;
-    VmService vmService;
     while (attempts < 5) {
       try {
-        vmService = await _vmServiceConnectUri(
+        final VmService vmService = await _vmServiceConnectUri(
           assumedWsUri.toString(),
         );
         final VM vm = await vmService.getVM();
@@ -168,17 +167,15 @@ class FallbackDiscovery {
             isolateRefs.id,
           );
           final LibraryRef library = isolateResponse.rootLib;
-          if (library != null &&
-             (library.uri.startsWith('package:$packageName') ||
-              library.uri.startsWith(RegExp(r'file:\/\/\/.*\/' + packageName)))) {
+          if (library != null && library.uri.startsWith('package:$packageName')) {
             UsageEvent(
               _kEventName,
               'success',
               flutterUsage: _flutterUsage,
             ).send();
 
-            // This vmService instance must be disposed of, otherwise DDS will
-            // fail to start.
+            // We absolutely must dispose this vmService instance, otherwise
+            // DDS will fail to start.
             vmService.dispose();
             return Uri.parse('http://localhost:$hostPort');
           }
@@ -187,10 +184,6 @@ class FallbackDiscovery {
         // No action, we might have failed to connect.
         firstException ??= err;
         _logger.printTrace(err.toString());
-      } finally {
-        // This vmService instance must be disposed of, otherwise DDS will
-        // fail to start.
-        vmService?.dispose();
       }
 
       // No exponential backoff is used here to keep the amount of time the

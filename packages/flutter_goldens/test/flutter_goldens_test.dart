@@ -903,6 +903,8 @@ void main() {
 
         when(mockSkiaClient.getExpectationForTest('flutter.golden_test.1'))
           .thenAnswer((_) => Future<String>.value('55109a4bed52acc780530f7a9aeff6c0'));
+        when(mockSkiaClient.getExpectationForTest('flutter.new_golden_test.2'))
+          .thenAnswer((_) => Future<String>.value(''));
         when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
           .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
         when(mockSkiaClient.cleanTestName('library.flutter.golden_test.1.png'))
@@ -919,7 +921,7 @@ void main() {
         );
       });
 
-      testWithOutput('passes non-existent baseline for new test', () async {
+      testWithOutput('passes non-existent baseline for new test, null expectation', () async {
         expect(
           await comparator.compare(
             Uint8List.fromList(_kFailPngBytes),
@@ -930,6 +932,19 @@ void main() {
       }, 'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.1. '
          'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
          'Validate image output found at flutter/test/library/'
+      );
+
+      testWithOutput('passes non-existent baseline for new test, empty expectation', () async {
+        expect(
+          await comparator.compare(
+            Uint8List.fromList(_kFailPngBytes),
+            Uri.parse('flutter.new_golden_test.2'),
+          ),
+          isTrue,
+        );
+      }, 'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.2. '
+        'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
+        'Validate image output found at flutter/test/library/'
       );
 
       test('compare properly awaits validation & output before failing.', () async {
