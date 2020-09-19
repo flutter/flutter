@@ -2650,8 +2650,6 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   }
 }
 
-// Examples can assume:
-// bool _offstage;
 
 /// A widget that lays the child out as if it was in the tree, but without
 /// painting anything, without making the child available for hit testing, and
@@ -2668,16 +2666,74 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// needed, prefer removing the widget from the tree entirely rather than
 /// keeping it alive in an [Offstage] subtree.
 ///
-/// {@tool snippet}
+/// {@tool dartpad --template=stateful_widget_material_ticker}
 ///
 /// This example shows a [FlutterLogo] widget when the `_offstage` member field
-/// is false, and hides it without any room in the parent when it is true:
+/// is false, and hides it without any room in the parent when it is true. The
+/// [Size] of the logo without bringing it on screen will be measured.
 ///
 /// ```dart
-/// Offstage(
-///   offstage: _offstage,
-///   child: const FlutterLogo(),
-/// )
+/// class OffstageLogo extends StatefulWidget {
+///   @override
+///   _OffstageLogoState createState() => _OffstageLogoState();
+/// }
+///
+/// class _OffstageLogoState extends State<OffstageLogo> {
+///   GlobalKey _key = GlobalKey();
+///   bool _offstage = true;
+///   Size _invisibleLogoSize;
+///
+///   void _changeOffstageValue() {
+///     setState(() {
+///       _offstage = !_offstage;
+///       _invisibleLogoSize = null;
+///     });
+///   }
+///
+///   void _getInvisibleLogoSize() {
+///     setState(() {
+///       final RenderBox renderLogo = _key.currentContext.findRenderObject();
+///       final sizeLogo = renderLogo.size;
+///       _invisibleLogoSize = sizeLogo;
+///     });
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new Scaffold(
+///       body: Center(
+///         child: Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
+///           children: <Widget>[
+///             Offstage(
+///               offstage: _offstage,
+///               child: FlutterLogo(
+///                 key: _key,
+///                 size: 150.0,
+///               ),
+///             ),
+///             RaisedButton(
+///               child: Text('Change Offstage Value'),
+///               onPressed: () { _changeOffstageValue(); },
+///             ),
+///             Offstage(
+///               offstage: !_offstage,
+///               child: Column(
+///                 children: <Widget>[
+///                   RaisedButton(
+///                     child: const Text('Get Size Of The Invisible Logo'),
+///                     onPressed: () { _getInvisibleLogoSize(); },
+///                   ),
+///                   Text('${_invisibleLogoSize ?? ''}'),
+///                 ],
+///               ),
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
 /// ```
 /// {@end-tool}
 ///
