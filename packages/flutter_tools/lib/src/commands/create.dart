@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
@@ -507,15 +505,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         globals.printStatus("When complete, type 'flutter run' from the '$relativeAppPath' "
             'directory in order to launch your app.');
         globals.printStatus('Your $application code is in $relativeAppMain');
-      }
-
-      // Warn about unstable templates. This shuold be last so that it's not
-      // lost among the other output.
-      if (featureFlags.isWindowsEnabled && platforms.contains('windows')) {
-        globals.printStatus('');
-        globals.printStatus('WARNING: The Windows tooling and APIs are not yet stable. '
-            'You will likely need to re-create the "windows" directory after future '
-            'Flutter updates.');
       }
     }
     return FlutterCommandResult.success();

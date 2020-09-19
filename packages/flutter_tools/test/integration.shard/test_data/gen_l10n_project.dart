@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 
 import '../test_utils.dart';
@@ -19,16 +15,16 @@ class GenL10nProject extends Project {
     bool useSyntheticPackage = false,
   }) {
     this.dir = dir;
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_GB.arb'), appEnGb);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_es.arb'), appEs);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_es_419.arb'), appEs419);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh.arb'), appZh);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'), appZhHant);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
-    writeFile(globals.fs.path.join(dir.path, 'l10n.yaml'), l10nYaml(
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en_GB.arb'), appEnGb);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_es.arb'), appEs);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_es_419.arb'), appEs419);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh.arb'), appZh);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'), appZhHant);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
+    writeFile(fileSystem.path.join(dir.path, 'l10n.yaml'), l10nYaml(
       useDeferredLoading: useDeferredLoading,
       useSyntheticPackage: useSyntheticPackage,
     ));

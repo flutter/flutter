@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 
@@ -239,7 +237,9 @@ Future<Uri> buildObservatoryUri(
   if (!path.endsWith('/')) {
     path += '/';
   }
-  final int actualHostPort = hostVmservicePort ?? await device
-    .portForwarder.forward(devicePort);
+  hostVmservicePort ??= 0;
+  final int actualHostPort = hostVmservicePort == 0 ?
+    await device.portForwarder.forward(devicePort) :
+    hostVmservicePort;
   return Uri(scheme: 'http', host: host, port: actualHostPort, path: path);
 }

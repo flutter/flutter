@@ -12,6 +12,7 @@ import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:vm_service_client/vm_service_client.dart';
+import 'package:webdriver/async_io.dart' as async_io;
 import 'package:web_socket_channel/io.dart';
 
 import '../../flutter_driver.dart';
@@ -130,8 +131,22 @@ class VMServiceFlutterDriver extends FlutterDriver {
     // Attempts to resume the isolate, but does not crash if it fails because
     // the isolate is already resumed. There could be a race with other tools,
     // such as a debugger, any of which could have resumed the isolate.
-    Future<dynamic> resumeLeniently() {
+    Future<dynamic> resumeLeniently() async {
       _log('Attempting to resume isolate');
+      // Let subsequent isolates start automatically.
+      try {
+        final Map<String, dynamic> result =
+            await connection.peer.sendRequest('setFlag', <String, String>{
+          'name': 'pause_isolates_on_start',
+          'value': 'false',
+        }) as Map<String, dynamic>;
+        if (result == null || result['type'] != 'Success') {
+          _log('setFlag failure: $result');
+        }
+      } catch (e) {
+        _log('Failed to set pause_isolates_on_start=false, proceeding. Error: $e');
+      }
+
       return isolate.resume().catchError((dynamic e) {
         const int vmMustBePausedCode = 101;
         if (e is rpc.RpcException && e.code == vmMustBePausedCode) {
@@ -303,6 +318,9 @@ class VMServiceFlutterDriver extends FlutterDriver {
   @override
   VMServiceClient get serviceClient => _serviceClient;
 
+  @override
+  async_io.WebDriver get webDriver => throw UnsupportedError('VMServiceFlutterDriver does not support webDriver');
+
   /// The main isolate hosting the Flutter application.
   ///
   /// If you used the [registerExtension] API to instrument your application,
@@ -315,6 +333,11 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
   /// Whether to log communication between host and app to `flutter_driver_commands.log`.
   final bool _logCommunicationToFile;
+
+  @override
+  Future<void> enableAccessibility() async {
+    throw UnsupportedError('VMServiceFlutterDriver does not support enableAccessibility');
+  }
 
   @override
   Future<Map<String, dynamic>> sendCommand(Command command) async {
