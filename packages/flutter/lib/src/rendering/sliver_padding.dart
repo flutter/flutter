@@ -134,11 +134,15 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
       from: 0.0,
       to: beforePadding,
     );
+	 double overlap = constraints.overlap;
+    if (overlap > 0) {
+      overlap = math.max(0.0, constraints.overlap - beforePaddingPaintExtent);
+    }
     child!.layout(
       constraints.copyWith(
         scrollOffset: math.max(0.0, constraints.scrollOffset - beforePadding),
         cacheOrigin: math.min(0.0, constraints.cacheOrigin + beforePadding),
-        overlap: math.max(0.0, constraints.overlap - beforePaddingPaintExtent),
+        overlap: overlap,
         remainingPaintExtent: constraints.remainingPaintExtent - calculatePaintOffset(constraints, from: 0.0, to: beforePadding),
         remainingCacheExtent: constraints.remainingCacheExtent - calculateCacheOffset(constraints, from: 0.0, to: beforePadding),
         crossAxisExtent: math.max(0.0, constraints.crossAxisExtent - crossAxisPadding),
