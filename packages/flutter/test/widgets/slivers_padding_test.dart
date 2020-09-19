@@ -12,7 +12,11 @@ import 'package:flutter/widgets.dart';
 class _MockRenderSliver extends RenderSliver {
   @override
   void performLayout() {
-    geometry = SliverGeometry.zero;
+    geometry = const SliverGeometry(
+      paintOrigin: 10,
+      paintExtent: 10,
+      maxPaintExtent: 10,
+    );
   }
 
 }
@@ -491,6 +495,55 @@ void main() {
       parentUsesSize: true,
     );
     expect(mock.constraints.overlap, 80.0);
+  });
 
+  testWidgets('SliverPadding passes the overlap to the child if it\'s negative', (WidgetTester tester) async {
+    final _MockRenderSliver mock = _MockRenderSliver();
+    final RenderSliverPadding renderObject = RenderSliverPadding(
+      padding: const EdgeInsets.only(top: 20),
+    );
+    renderObject.child = mock;
+    renderObject.layout(const SliverConstraints(
+         viewportMainAxisExtent: 100.0,
+         overlap: -100.0,
+         cacheOrigin: 0.0,
+         scrollOffset: 0.0,
+         axisDirection: AxisDirection.down,
+         growthDirection: GrowthDirection.forward,
+         crossAxisExtent: 100.0,
+         crossAxisDirection: AxisDirection.right,
+         userScrollDirection: ScrollDirection.idle,
+         remainingPaintExtent: 100.0,
+         remainingCacheExtent: 100.0,
+         precedingScrollExtent: 0.0,
+      ),
+      parentUsesSize: true,
+    );
+    expect(mock.constraints.overlap, -100.0);
+  });
+
+  testWidgets('SliverPadding passes the paintOrigin of the child on', (WidgetTester tester) async {
+    final _MockRenderSliver mock = _MockRenderSliver();
+    final RenderSliverPadding renderObject = RenderSliverPadding(
+      padding: const EdgeInsets.only(top: 20),
+    );
+    renderObject.child = mock;
+    renderObject.layout(const SliverConstraints(
+         viewportMainAxisExtent: 100.0,
+         overlap: 100.0,
+         cacheOrigin: 0.0,
+         scrollOffset: 0.0,
+         axisDirection: AxisDirection.down,
+         growthDirection: GrowthDirection.forward,
+         crossAxisExtent: 100.0,
+         crossAxisDirection: AxisDirection.right,
+         userScrollDirection: ScrollDirection.idle,
+         remainingPaintExtent: 100.0,
+         remainingCacheExtent: 100.0,
+         precedingScrollExtent: 0.0,
+      ),
+      parentUsesSize: true,
+    );
+    expect(renderObject.geometry.paintOrigin, 10.0);
   });
 }
