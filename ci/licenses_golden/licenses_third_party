@@ -1,4 +1,4 @@
-Signature: df8509c58cbdd5662d110e2b80d6c766
+Signature: b8be332a74c91a09d01b943416fac686
 
 UNUSED LICENSES:
 
@@ -8105,6 +8105,7 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_type.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_type.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/recognized_method.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/recognized_method.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/write_barrier_elimination.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/write_barrier_elimination.h
