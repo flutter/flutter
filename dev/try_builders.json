@@ -73,6 +73,145 @@
          "run_if":["examples/hello_world/**" ,"dev/**", "packages/flutter/**", "packages/flutter_test/**", "packages/flutter_tools/lib/src/test/**", "packages/flutter_web_plugins/**", "bin/**"]
       },
       {
+         "name":"Mac build_aar_module_test",
+         "repo":"flutter",
+         "task_name":"mac_build_aar_module_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac build_ios_framework_module_test",
+         "repo":"flutter",
+         "task_name":"mac_build_ios_framework_module_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac build_tests",
+         "repo":"flutter",
+         "task_name":"mac_build_tests",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac customer_testing",
+         "repo":"flutter",
+         "task_name":"mac_customer_testing",
+         "enabled":true
+      },
+      {
+         "name":"Mac framework_tests",
+         "repo":"flutter",
+         "task_name":"mac_framework_tests",
+         "enabled":true,
+         "run_if":["dev/**", "packages/flutter/**", "packages/flutter_goldens/**", "packages/flutter_goldens_client/**", "packages/flutter_test/**", "packages/flutter_tools/lib/src/test/**", "bin/**"]
+      },
+      {
+         "name":"Mac gradle_fast_start_test",
+         "repo":"flutter",
+         "task_name":"mac_gradle_fast_start_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac gradle_jetifier_test",
+         "repo":"flutter",
+         "task_name":"mac_gradle_jetifier_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac gradle_non_android_plugin_test",
+         "repo":"flutter",
+         "task_name":"mac_gradle_non_android_plugin_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac gradle_plugin_bundle_test",
+         "repo":"flutter",
+         "task_name":"mac_gradle_plugin_bundle_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac gradle_plugin_fat_apk_test",
+         "repo":"flutter",
+         "task_name":"mac_gradle_plugin_fat_apk_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac gradle_plugin_light_apk_test",
+         "repo":"flutter",
+         "task_name":"mac_gradle_plugin_light_apk_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac gradle_r8_test",
+         "repo":"flutter",
+         "task_name":"mac_gradle_r8_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac module_custom_host_app_name_test",
+         "repo":"flutter",
+         "task_name":"mac_module_custom_host_app_name_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac module_host_with_custom_build_test",
+         "repo":"flutter",
+         "task_name":"mac_module_host_with_custom_build_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac module_test",
+         "repo":"flutter",
+         "task_name":"mac_module_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac module_test_ios",
+         "repo":"flutter",
+         "task_name":"mac_module_test_ios",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac plugin_dependencies_test",
+         "repo":"flutter",
+         "task_name":"mac_plugin_dependencies_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac plugin_lint_mac",
+         "repo":"flutter",
+         "task_name":"mac_plugin_lint_mac",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac plugin_test",
+         "repo":"flutter",
+         "task_name":"mac_plugin_lint_mac",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name":"Mac tool_tests",
+         "repo":"flutter",
+         "task_name":"mac_tool_tests",
+         "enabled":true,
+         "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
+      },
+      {
          "name": "Windows build_tests",
          "repo": "flutter",
          "task_name": "win_build_tests",

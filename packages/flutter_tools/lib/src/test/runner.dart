@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
@@ -36,6 +34,7 @@ abstract class FlutterTestRunner {
     bool enableObservatory = false,
     bool startPaused = false,
     bool disableServiceAuthCodes = false,
+    bool disableDds = false,
     bool ipv6 = false,
     bool machine = false,
     String precompiledDillPath,
@@ -71,6 +70,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     bool enableObservatory = false,
     bool startPaused = false,
     bool disableServiceAuthCodes = false,
+    bool disableDds = false,
     bool ipv6 = false,
     bool machine = false,
     String precompiledDillPath,
@@ -169,6 +169,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       machine: machine,
       startPaused: startPaused,
       disableServiceAuthCodes: disableServiceAuthCodes,
+      disableDds: disableDds,
       serverType: serverType,
       precompiledDillPath: precompiledDillPath,
       precompiledDillFiles: precompiledDillFiles,

@@ -7,12 +7,14 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button_theme.dart';
+import 'button_style.dart';
 import 'color_scheme.dart';
-import 'flat_button.dart';
 import 'material.dart';
+import 'material_state.dart';
 import 'scaffold.dart';
 import 'snack_bar_theme.dart';
+import 'text_button.dart';
+import 'text_button_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -32,7 +34,7 @@ const Curve _snackBarFadeOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlo
 
 /// Specify how a [SnackBar] was closed.
 ///
-/// The [ScaffoldMessengerState.showSnackBar] function returns a
+/// The [ScaffoldState.showSnackBar] function returns a
 /// [ScaffoldFeatureController]. The value of the controller's closed property
 /// is a Future that resolves to a SnackBarClosedReason. Applications that need
 /// to know how a snackbar was closed can use this value.
@@ -40,7 +42,7 @@ const Curve _snackBarFadeOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlo
 /// Example:
 ///
 /// ```dart
-/// ScaffoldMessenger.of(context).showSnackBar(
+/// Scaffold.of(context).showSnackBar(
 ///   SnackBar( ... )
 /// ).closed.then((SnackBarClosedReason reason) {
 ///    ...
@@ -57,10 +59,10 @@ enum SnackBarClosedReason {
   swipe,
 
   /// The snack bar was closed by the [ScaffoldFeatureController] close callback
-  /// or by calling [ScaffoldMessengerState.hideCurrentSnackBar] directly.
+  /// or by calling [ScaffoldState.hideCurrentSnackBar] directly.
   hide,
 
-  /// The snack bar was closed by an call to [ScaffoldMessengerState.removeCurrentSnackBar].
+  /// The snack bar was closed by an call to [ScaffoldState.removeCurrentSnackBar].
   remove,
 
   /// The snack bar was closed because its timer expired.
@@ -123,20 +125,24 @@ class _SnackBarActionState extends State<SnackBarAction> {
       _haveTriggeredAction = true;
     });
     widget.onPressed();
-    ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
+    Scaffold.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
   }
 
   @override
   Widget build(BuildContext context) {
-    final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
-    final Color textColor = widget.textColor ?? snackBarTheme.actionTextColor;
-    final Color disabledTextColor = widget.disabledTextColor ?? snackBarTheme.disabledActionTextColor;
+    Color resolveForegroundColor(Set<MaterialState> states) {
+      final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
+      if (states.contains(MaterialState.disabled))
+        return widget.disabledTextColor ?? snackBarTheme.disabledActionTextColor;
+      return widget.textColor ?? snackBarTheme.actionTextColor;
+    }
 
-    return FlatButton(
+    return TextButton(
+      style: ButtonStyle(
+        foregroundColor: MaterialStateProperty.resolveWith<Color>(resolveForegroundColor),
+      ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
-      textColor: textColor,
-      disabledTextColor: disabledTextColor,
     );
   }
 }
@@ -146,8 +152,8 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=zpO6n_oZWw0}
 ///
-/// To display a snack bar, call `ScaffoldMessenger.of(context).showSnackBar()`,
-/// passing an instance of [SnackBar] that describes the message.
+/// To display a snack bar, call `Scaffold.of(context).showSnackBar()`, passing
+/// an instance of [SnackBar] that describes the message.
 ///
 /// To control how long the [SnackBar] remains visible, specify a [duration].
 ///
@@ -156,11 +162,11 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///
 /// See also:
 ///
-///  * [ScaffoldMessenger.of], to obtain the current [ScaffoldMessengerState],
-///    which manages the display and animation of snack bars.
-///  * [ScaffoldMessengerState.showSnackBar], which displays a [SnackBar].
-///  * [ScaffoldMessengerState.removeCurrentSnackBar], which abruptly hides the
-///    currently displayed snack bar, if any, and allows the next to be displayed.
+///  * [Scaffold.of], to obtain the current [ScaffoldState], which manages the
+///    display and animation of snack bars.
+///  * [ScaffoldState.showSnackBar], which displays a [SnackBar].
+///  * [ScaffoldState.removeCurrentSnackBar], which abruptly hides the currently
+///    displayed snack bar, if any, and allows the next to be displayed.
 ///  * [SnackBarAction], which is used to specify an [action] button to show
 ///    on the snack bar.
 ///  * [SnackBarThemeData], to configure the default property values for
@@ -289,7 +295,7 @@ class SnackBar extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [ScaffoldMessengerState.removeCurrentSnackBar], which abruptly hides the
+  ///  * [ScaffoldState.removeCurrentSnackBar], which abruptly hides the
   ///    currently displayed snack bar, if any, and allows the next to be
   ///    displayed.
   ///  * <https://material.io/design/components/snackbars.html>
@@ -301,7 +307,7 @@ class SnackBar extends StatefulWidget {
   /// Called the first time that the snackbar is visible within a [Scaffold].
   final VoidCallback onVisible;
 
-  // API for ScaffoldMessengerState.showSnackBar():
+  // API for Scaffold.showSnackBar():
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
   static AnimationController createAnimationController({ @required TickerProvider vsync }) {
@@ -385,6 +391,7 @@ class _SnackBarState extends State<SnackBar> {
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
     final bool isThemeDark = theme.brightness == Brightness.dark;
+    final Color buttonColor = isThemeDark ? colorScheme.primaryVariant : colorScheme.secondary;
 
     // SnackBar uses a theme that is the opposite brightness from
     // the surrounding theme.
@@ -400,7 +407,7 @@ class _SnackBarState extends State<SnackBar> {
         primaryVariant: colorScheme.onPrimary,
         // For the button color, the spec says it should be primaryVariant, but for
         // backward compatibility on light themes we are leaving it as secondary.
-        secondary: isThemeDark ? colorScheme.primaryVariant : colorScheme.secondary,
+        secondary: buttonColor,
         secondaryVariant: colorScheme.onSecondary,
         surface: colorScheme.onSurface,
         background: themeBackgroundColor,
@@ -445,10 +452,13 @@ class _SnackBarState extends State<SnackBar> {
             ),
           ),
           if (widget.action != null)
-            ButtonTheme(
-              textTheme: ButtonTextTheme.accent,
-              minWidth: 64.0,
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            TextButtonTheme(
+              data: TextButtonThemeData(
+                style: TextButton.styleFrom(
+                  primary: buttonColor,
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                ),
+              ),
               child: widget.action,
             ),
         ],
@@ -516,14 +526,14 @@ class _SnackBarState extends State<SnackBar> {
       container: true,
       liveRegion: true,
       onDismiss: () {
-        ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
+        Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
       },
       child: Dismissible(
         key: const Key('dismissible'),
         direction: DismissDirection.down,
         resizeDuration: null,
         onDismissed: (DismissDirection direction) {
-          ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
+          Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },
         child: snackBar,
       ),
@@ -550,9 +560,7 @@ class _SnackBarState extends State<SnackBar> {
         child: snackBar,
       );
     }
-    return Hero(
-      child: ClipRect(child: snackBarTransition),
-      tag: '<SnackBar Hero tag - ${widget.content}>',
-    );
+
+    return ClipRect(child: snackBarTransition);
   }
 }
