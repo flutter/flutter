@@ -85,6 +85,18 @@ void setupDirectoryMocks({
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
   when(mockDirectory.createSync(recursive: anyNamed('recursive')))
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.create())
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.createSync())
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.delete())
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.deleteSync())
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.list())
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.listSync())
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
 void main() {
@@ -198,6 +210,7 @@ void main() {
   });
 
   group('throws ToolExit on Linux', () {
+    const int eperm = 1;
     const int enospc = 28;
     const int eacces = 13;
     MockFileSystem mockFileSystem;
@@ -221,7 +234,7 @@ void main() {
 
       final File file = fs.file('file');
 
-      const String expectedMessage = 'The flutter tool cannot access the file';
+      const String expectedMessage = 'The flutter tool cannot access the file or directory';
       expect(() async => await file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
       expect(() async => await file.writeAsString(''),
@@ -231,6 +244,26 @@ void main() {
       expect(() => file.writeAsStringSync(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when access is denied for directories', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eperm,
+      );
+
+      final Directory directory = fs.directory('file');
+
+      const String expectedMessage = 'The flutter tool cannot access the file or directory';
+      expect(() async => await directory.create(),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await directory.delete(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => directory.createSync(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => directory.deleteSync(),
              throwsToolExit(message: expectedMessage));
     });
 
@@ -273,6 +306,7 @@ void main() {
 
 
   group('throws ToolExit on macOS', () {
+    const int eperm = 1;
     const int enospc = 28;
     const int eacces = 13;
     MockFileSystem mockFileSystem;
@@ -306,6 +340,26 @@ void main() {
       expect(() => file.writeAsStringSync(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when access is denied for directories', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eperm,
+      );
+
+      final Directory directory = fs.directory('file');
+
+      const String expectedMessage = 'The flutter tool cannot access the file or directory';
+      expect(() async => await directory.create(),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await directory.delete(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => directory.createSync(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => directory.deleteSync(),
              throwsToolExit(message: expectedMessage));
     });
 
