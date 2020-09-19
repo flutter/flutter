@@ -93,10 +93,6 @@ void setupDirectoryMocks({
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
   when(mockDirectory.deleteSync())
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
-  when(mockDirectory.list())
-    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
-  when(mockDirectory.listSync())
-    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
 void main() {
