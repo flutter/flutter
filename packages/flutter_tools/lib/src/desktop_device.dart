@@ -9,10 +9,12 @@ import 'package:process/process.dart';
 
 import 'application_package.dart';
 import 'base/common.dart';
+import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'convert.dart';
+import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
 import 'protocol_discovery.dart';
@@ -25,8 +27,10 @@ abstract class DesktopDevice extends Device {
       @required bool ephemeral,
       Logger logger,
       ProcessManager processManager,
+      FileSystem fileSystem,
     }) : _logger = logger ?? globals.logger, // TODO(jonahwilliams): remove after updating google3
          _processManager = processManager ?? globals.processManager,
+         _fileSystem = fileSystem ?? globals.fs,
          super(
           identifier,
           category: Category.desktop,
@@ -36,8 +40,13 @@ abstract class DesktopDevice extends Device {
 
   final Logger _logger;
   final ProcessManager _processManager;
+  final FileSystem _fileSystem;
   final Set<Process> _runningProcesses = <Process>{};
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
+
+  @override
+  DevFSWriter get devFSWriter => _desktopDevFSWriter ??= DesktopDevFSWriter(fileSystem: _fileSystem);
+  DesktopDevFSWriter _desktopDevFSWriter;
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
@@ -212,5 +221,32 @@ class DesktopLogReader extends DeviceLogReader {
   @override
   void dispose() {
     // Nothing to dispose.
+  }
+}
+
+/// An implementation of a devFS writer which copies physical files for devices
+/// running on the same host.
+class DesktopDevFSWriter implements DevFSWriter {
+  DesktopDevFSWriter({
+    @required FileSystem fileSystem,
+  }) : _fileSystem = fileSystem;
+
+  final FileSystem _fileSystem;
+
+  @override
+  Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri) async {
+    for (final Uri uri in entries.keys) {
+      final DevFSContent devFSContent = entries[uri];
+      final File destination = _fileSystem.file(baseUri.resolveUri(uri));
+      if (!destination.parent.existsSync()) {
+        destination.parent.createSync(recursive: true);
+      }
+      if (devFSContent is DevFSFileContent) {
+        final File content = devFSContent.file as File;
+        content.copySync(destination.path);
+        continue;
+      }
+      destination.writeAsBytesSync(await devFSContent.contentsAsBytes());
+    }
   }
 }

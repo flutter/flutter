@@ -172,6 +172,8 @@ class FlutterDevice {
     );
   }
 
+  DevFSWriter get devFSWriter => device.devFSWriter;
+
   final Device device;
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
@@ -729,6 +731,7 @@ class FlutterDevice {
           pathToReload: pathToReload,
           invalidatedFiles: invalidatedFiles,
           packageConfig: packageConfig,
+          devFSWriter: device.devFSWriter,
         ).then((UpdateFSReport newReport) => report = newReport),
         if (!fullRestart)
           _attemptFastReassembleCheck(

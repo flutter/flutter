@@ -695,6 +695,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       invalidatedFiles: invalidationResult.uris,
       packageConfig: invalidationResult.packageConfig,
       trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
+      devFSWriter: device.devFSWriter,
     );
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');

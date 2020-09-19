@@ -776,20 +776,21 @@ class WebDevFS implements DevFS {
 
   @override
   Future<UpdateFSReport> update({
-    Uri mainUri,
+    @required Uri mainUri,
+    @required ResidentCompiler generator,
+    @required bool trackWidgetCreation,
+    @required String pathToReload,
+    @required List<Uri> invalidatedFiles,
+    @required PackageConfig packageConfig,
+    @required DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
-    @required ResidentCompiler generator,
     String dillOutputPath,
-    @required bool trackWidgetCreation,
     bool fullRestart = false,
     String projectRootPath,
-    String pathToReload,
-    List<Uri> invalidatedFiles,
     bool skipAssets = false,
-    @required PackageConfig packageConfig,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
