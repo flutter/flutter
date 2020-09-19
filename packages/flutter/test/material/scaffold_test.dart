@@ -1125,11 +1125,11 @@ void main() {
                     items: const <BottomNavigationBarItem>[
                       BottomNavigationBarItem(
                         icon: Icon(Icons.add),
-                        title: Text('test'),
+                        label: 'test',
                       ),
                       BottomNavigationBarItem(
                         icon: Icon(Icons.add),
-                        title: Text('test'),
+                        label: 'test',
                       ),
                     ],
                   );

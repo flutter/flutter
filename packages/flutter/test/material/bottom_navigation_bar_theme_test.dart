@@ -127,11 +127,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -220,11 +220,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),

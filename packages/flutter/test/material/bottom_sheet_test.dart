@@ -649,11 +649,11 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              title: Text('Item 1'),
+              label: 'Item 1',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.style),
-              title: Text('Item 2'),
+              label: 'Item 2',
             ),
           ],
         ),
@@ -678,11 +678,11 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              title: Text('Item 1'),
+              label: 'Item 1',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.style),
-              title: Text('Item 2'),
+              label: 'Item 2',
             ),
           ],
         ),
