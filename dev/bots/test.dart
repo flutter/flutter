@@ -59,7 +59,7 @@ final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTE
 ///
 /// WARNING: if you change this number, also change .cirrus.yml
 /// and make sure it runs _all_ shards.
-const int kDeviceLabShardCount = 4;
+const int kDeviceLabShardCount = 2;
 
 /// The number of Cirrus jobs that run build tests in parallel.
 ///
