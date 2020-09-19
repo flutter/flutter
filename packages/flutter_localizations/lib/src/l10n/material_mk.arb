@@ -77,7 +77,7 @@
   "invalidTimeLabel": "Внесете важечко време",
   "dialModeButtonLabel": "Префрлете се на режим на избирач",
   "inputTimeModeButtonLabel": "Префрлете се на режим за внесување текст",
-  "licensesPackageDetailTextZero": "No licenses",
+  "licensesPackageDetailTextZero": "Нема лиценци",
   "licensesPackageDetailTextOne": "1 лиценца",
   "licensesPackageDetailTextOther": "$licenseCount лиценци"
 }
