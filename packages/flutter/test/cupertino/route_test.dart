@@ -1491,6 +1491,72 @@ void main() {
     expect(find.byType(CupertinoButton), findsOneWidget);
     expect(find.text('PointerCancelEvents: 1'), findsOneWidget);
   });
+
+  testWidgets('Popping routes during back swipe should not crash', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/63984#issuecomment-675679939
+
+    CupertinoPageRoute r = CupertinoPageRoute<void>(builder: (BuildContext context) {
+      return Scaffold(
+        body: Center(
+          child: Text('gg'),
+        ),
+      );
+    });
+
+    NavigatorState navigator;
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: Builder(builder: (BuildContext context) {
+          return RaisedButton(
+            color: const Color.fromARGB(255, 255, 0, 0),
+            child: Text('press me'),
+            onPressed: () {
+              navigator = Navigator.of(context);
+              assert(navigator != null);
+              navigator.push<void>(r);
+            },
+          );
+        }),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.down(tester.getCenter(find.byType(RaisedButton)));
+    await gesture.up();
+
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('route-test-test-pre.png'),
+    );
+
+    await gesture.down(const Offset(3, 300), timeStamp: Duration.zero);
+
+    Duration time = Duration.zero;
+    double x = 5;
+
+    for (int i = 0; i < 10; i += 1) {
+      time += const Duration(milliseconds: 10);
+      x += 30;
+      await tester.pump(const Duration(milliseconds: 10));
+      await gesture.moveTo(Offset(x, 300), timeStamp: time);
+    }
+
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('route-test-test.png'),
+    );
+
+    navigator.removeRoute(r);
+    await tester.pump();
+
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('route-test-test-post.png'),
+    );
+  });
 }
 
 class MockNavigatorObserver extends NavigatorObserver {
