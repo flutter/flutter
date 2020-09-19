@@ -40,6 +40,5 @@ void main() {
     expect(toMultiRootPath(Uri.parse('file:///d/b/c'), 'scheme:///', <String>['/a/b/'], false), 'file:///d/b/c');
     expect(toMultiRootPath(Uri.parse('file:///a/b/c'), 'scheme:///', <String>['/d/b/', '/a/b/'], false), 'scheme:///c');
     expect(toMultiRootPath(Uri.parse('file:///a/b/c'), null, <String>[], false), 'file:///a/b/c');
-    expect(() => toMultiRootPath(Uri.parse('scheme:///a/b/c'), null, <String>[], false), throwsAssertionError);
   });
 }
