@@ -7,6 +7,8 @@ import 'dart:io';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 import 'package:test/test.dart' as test_package show TypeMatcher;
 
+import 'package:flutter_conductor/stdio.dart';
+
 export 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 // Defines a 'package:test' shim.
@@ -34,4 +36,51 @@ Matcher throwsExceptionWith(String messageSubString) {
           contains(messageSubString),
       ),
   );
+}
+
+class TestStdio implements Stdio {
+  TestStdio({
+    this.verbose = false,
+    List<String> stdin,
+  }) {
+    _stdin = stdin ?? <String>[];
+  }
+
+  final StringBuffer _error = StringBuffer();
+  String get error => _error.toString();
+
+  final StringBuffer _stdout = StringBuffer();
+  String get stdout => _stdout.toString();
+  final bool verbose;
+  List<String> _stdin;
+
+  @override
+  void printError(String message) {
+    _error.writeln(message);
+  }
+
+  @override
+  void printStatus(String message) {
+    _stdout.writeln(message);
+  }
+
+  @override
+  void printTrace(String message) {
+    if (verbose) {
+      _stdout.writeln(message);
+    }
+  }
+
+  @override
+  void write(String message) {
+    _stdout.write(message);
+  }
+
+  @override
+  String readLineSync() {
+    if (_stdin.isEmpty) {
+      throw Exception('Unexpected call to readLineSync!');
+    }
+    return _stdin.removeAt(0);
+  }
 }

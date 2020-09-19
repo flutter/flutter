@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 
 import './git.dart';
 import './globals.dart';
+import './stdio.dart';
 import './version.dart';
 
 /// Main script execution.
@@ -18,6 +17,7 @@ bool run({
   @required String usage,
   @required ArgResults argResults,
   @required Git git,
+  @required Stdio stdio,
 }) {
   final String level = argResults[kIncrement] as String;
   final String commit = argResults[kCommit] as String;
@@ -29,7 +29,7 @@ bool run({
   final bool skipTagging = argResults[kSkipTagging] as bool;
 
   if (help || level == null || commit == null) {
-    print(
+    stdio.printStatus(
         'roll_dev.dart --increment=level --commit=hash • update the version tags '
         'and roll a new dev build.\n$usage');
     return false;
@@ -46,9 +46,7 @@ bool run({
         'https://github.com/flutter/flutter/wiki/Release-process');
   }
 
-  if (git.getOutput(
-          'status --porcelain', 'check status of your local checkout') !=
-      '') {
+  if (git.getOutput('status --porcelain', 'check status of your local checkout') != '') {
     throw Exception(
         'Your git repository is not clean. Try running "git clean -fd". Warning, '
         'this will delete files! Run with -n to find out which ones.');
@@ -56,25 +54,20 @@ bool run({
 
   git.run('fetch $origin', 'fetch $origin');
 
-  final Version lastVersion = Version.fromString(
-    git.getFullTag(origin),
-  );
+  final Version lastVersion = Version.fromString(git.getFullTag(origin));
 
-  final Version version =
-      skipTagging ? lastVersion : Version.increment(lastVersion, level);
+  final Version version = skipTagging ? lastVersion : Version.increment(lastVersion, level);
 
-  if (git
-      .getOutput(
+  if (git.getOutput(
         'rev-parse $lastVersion',
         'check if commit is already on dev',
-      )
-      .contains(commit.trim())) {
+      ).contains(commit.trim())) {
     throw Exception(
         'Commit $commit is already on the dev branch as $lastVersion.');
   }
 
   if (justPrint) {
-    print(version);
+    stdio.printStatus(version.toString());
     return false;
   }
 
@@ -87,9 +80,9 @@ bool run({
 
   if (!force) {
     git.run(
-      'merge-base --is-ancestor $lastVersion $commit',
-      'verify $lastVersion is a direct ancestor of $commit. The flag `$kForce`'
-          'is required to force push a new release past a cherry-pick',
+        'merge-base --is-ancestor $lastVersion $commit',
+        'verify $lastVersion is a direct ancestor of $commit. The flag `$kForce`'
+        'is required to force push a new release past a cherry-pick',
     );
   }
 
@@ -101,15 +94,13 @@ bool run({
   // PROMPT
 
   if (autoApprove) {
-    print(
-        'Publishing Flutter $version (${hash.substring(0, 10)}) to the "dev" channel.');
+    stdio.printStatus('Publishing Flutter $version (${hash.substring(0, 10)}) to the "dev" channel.');
   } else {
-    print(
-        'Your tree is ready to publish Flutter $version (${hash.substring(0, 10)}) '
-        'to the "dev" channel.');
-    stdout.write('Are you? [yes/no] ');
-    if (stdin.readLineSync() != 'yes') {
-      print('The dev roll has been aborted.');
+    stdio.printStatus('Your tree is ready to publish Flutter $version '
+        '(${hash.substring(0, 10)}) to the "dev" channel.');
+    stdio.write('Are you? [yes/no] ');
+    if (stdio.readLineSync() != 'yes') {
+      stdio.printError('The dev roll has been aborted.');
       return false;
     }
   }
@@ -122,6 +113,8 @@ bool run({
     'push ${force ? "--force " : ""}$origin HEAD:dev',
     'land the new version on the "dev" branch',
   );
-  print('Flutter version $version has been rolled to the "dev" channel!');
+  stdio.printStatus(
+    'Flutter version $version has been rolled to the "dev" channel!',
+  );
   return true;
 }

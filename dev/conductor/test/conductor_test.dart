@@ -21,9 +21,11 @@ void main() {
     const String nextVersion = '1.2.0-1.0.pre';
     FakeArgResults fakeArgResults;
     MockGit mockGit;
+    TestStdio stdio;
 
     setUp(() {
       mockGit = MockGit();
+      stdio = TestStdio();
     });
 
     test('returns false if help requested', () {
@@ -35,9 +37,10 @@ void main() {
       );
       expect(
         run(
-          usage: usage,
           argResults: fakeArgResults,
           git: mockGit,
+          stdio: stdio,
+          usage: usage,
         ),
         false,
       );
@@ -54,6 +57,7 @@ void main() {
           usage: usage,
           argResults: fakeArgResults,
           git: mockGit,
+          stdio: stdio,
         ),
         false,
       );
@@ -70,6 +74,7 @@ void main() {
           usage: usage,
           argResults: fakeArgResults,
           git: mockGit,
+          stdio: stdio,
         ),
         false,
       );
@@ -89,6 +94,7 @@ void main() {
           usage: usage,
           argResults: fakeArgResults,
           git: mockGit,
+          stdio: stdio,
         ),
         throwsExceptionWith(errorMessage),
       );
@@ -110,6 +116,7 @@ void main() {
           usage: usage,
           argResults: fakeArgResults,
           git: mockGit,
+          stdio: stdio,
         );
       } on Exception catch (e) {
         exception = e;
@@ -138,7 +145,9 @@ void main() {
         usage: usage,
         argResults: fakeArgResults,
         git: mockGit,
+        stdio: stdio,
       ), false);
+      expect(stdio.stdout.trim(), nextVersion);
       verify(mockGit.run('fetch $origin', any));
       verifyNever(mockGit.run('reset $commit --hard', any));
       verifyNever(mockGit.getOutput('rev-parse HEAD', any));
@@ -172,6 +181,7 @@ void main() {
           usage: usage,
           argResults: fakeArgResults,
           git: mockGit,
+          stdio: stdio,
         ),
         throwsExceptionWith(exceptionMessage),
       );
@@ -199,6 +209,7 @@ void main() {
           usage: usage,
           argResults: fakeArgResults,
           git: mockGit,
+          stdio: stdio,
         ),
         throwsExceptionWith('is already on the dev branch as'),
       );
@@ -236,6 +247,7 @@ void main() {
         () => run(
           argResults: fakeArgResults,
           git: mockGit,
+          stdio: stdio,
           usage: usage,
         ),
         throwsExceptionWith(errorMessage),
@@ -268,6 +280,7 @@ void main() {
         usage: usage,
         argResults: fakeArgResults,
         git: mockGit,
+        stdio: stdio,
       ), true);
       verify(mockGit.run('fetch $origin', any));
       verify(mockGit.run('reset $commit --hard', any));
@@ -296,6 +309,7 @@ void main() {
         usage: usage,
         argResults: fakeArgResults,
         git: mockGit,
+        stdio: stdio,
       ), true);
       verify(mockGit.run('fetch $origin', any));
       verify(mockGit.run('reset $commit --hard', any));
@@ -320,9 +334,10 @@ void main() {
         force: true,
       );
       expect(run(
-        usage: usage,
         argResults: fakeArgResults,
         git: mockGit,
+        stdio: stdio,
+        usage: usage,
       ), true);
       verify(mockGit.run('fetch $origin', any));
       verify(mockGit.run('reset $commit --hard', any));
