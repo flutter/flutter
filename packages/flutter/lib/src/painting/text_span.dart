@@ -69,7 +69,7 @@ class TextSpan extends InlineSpan {
   const TextSpan({
     this.text,
     this.children,
-    TextStyle? style,
+    TextStyle? style = const TextStyle(),
     this.recognizer,
     this.semanticsLabel,
   }) : super(style: style);
