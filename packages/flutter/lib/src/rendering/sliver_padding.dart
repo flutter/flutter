@@ -179,6 +179,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
       constraints.remainingPaintExtent,
     );
     geometry = SliverGeometry(
+      paintOrigin: childLayoutGeometry.paintOrigin,
       scrollExtent: mainAxisPadding + childLayoutGeometry.scrollExtent,
       paintExtent: paintExtent,
       layoutExtent: math.min(mainAxisPaddingPaintExtent + childLayoutGeometry.layoutExtent, paintExtent),
