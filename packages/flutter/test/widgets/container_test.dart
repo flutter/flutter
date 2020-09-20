@@ -470,6 +470,47 @@ void main() {
     );
   });
 
+  testWidgets('Container transformAlignment', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                color: const Color(0xFF0000FF),
+              ),
+            ),
+            Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                key: key,
+                transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
+                transformAlignment: const Alignment(1.0, 0.0),
+                child: Container(
+                  color: const Color(0xFF00FFFF),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byKey(key));
+    expect(box.size, equals(const Size(100, 100)));
+    expect(box.localToGlobal(Offset.zero), equals(const Offset(100, 100)));
+  });
+
   testWidgets('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
     await tester.pumpWidget(Container(
       clipBehavior: Clip.none,
