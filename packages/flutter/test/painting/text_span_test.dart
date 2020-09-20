@@ -245,4 +245,37 @@ void main() {
     expect(() => text.computeToPlainText(StringBuffer()), anyOf(throwsFlutterError, throwsAssertionError));
   });
 
+  test('TextSpan with a null child should throw FlutterError', () {
+    const TextSpan text = TextSpan(
+      text: 'foo bar',
+      children: <InlineSpan>[
+        null,
+      ],
+    );
+    expect(() => text.computeToPlainText(StringBuffer()), anyOf(throwsFlutterError, throwsAssertionError));
+  });
+
+  test('TextSpan should have non-null default TextStyle()', () {
+    const TextSpan textSpan = TextSpan();
+    expect(textSpan.style, const TextStyle());
+  });
+
+  test('TextSpan in TextPainter should scale according to textScaleFactor', () {
+    const TextSpan textSpan = TextSpan(text: ' ');
+    final TextPainter painterScaleOne = TextPainter(
+      text: textSpan,
+      textScaleFactor: 1,
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    );
+    final TextPainter painterScaleDouble = TextPainter(
+      text: textSpan,
+      textScaleFactor: 2,
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    );
+    painterScaleOne.layout();
+    painterScaleDouble.layout();
+    expect(painterScaleOne.size.width < painterScaleDouble.size.width, true);
+  });
 }
