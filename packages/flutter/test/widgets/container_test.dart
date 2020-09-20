@@ -586,8 +586,9 @@ void main() {
     expect(tapped, false);
   });
 
-    testWidgets('Container transformAlignment', (WidgetTester tester) async {
-    bool didReceiveTap = false;
+  testWidgets('Container transformAlignment', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -608,15 +609,11 @@ void main() {
               child: Container(
                 width: 100.0,
                 height: 100.0,
+                key: key,
                 transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                 transformAlignment: const Alignment(1.0, 0.0),
-                child: GestureDetector(
-                  onTap: () {
-                    didReceiveTap = true;
-                  },
-                  child: Container(
-                    color: const Color(0xFF00FFFF),
-                  ),
+                child: Container(
+                  color: const Color(0xFF00FFFF),
                 ),
               ),
             ),
@@ -625,11 +622,9 @@ void main() {
       ),
     );
 
-    expect(didReceiveTap, isFalse);
-    await tester.tapAt(const Offset(110.0, 110.0));
-    expect(didReceiveTap, isFalse);
-    await tester.tapAt(const Offset(190.0, 150.0));
-    expect(didReceiveTap, isTrue);
+    final RenderBox box = tester.renderObject(find.byKey(key));
+    expect(box.size, equals(const Size(100, 100)));
+    expect(box.localToGlobal(Offset.zero), equals(const Offset(100, 100)));
   });
 
   testWidgets('using clipBehaviour and shadow, should not clip the shadow', (WidgetTester tester) async {
