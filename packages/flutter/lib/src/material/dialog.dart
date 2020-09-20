@@ -939,7 +939,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// (see [SafeArea] for more details). It is `true` by default, which means
 /// the dialog will not overlap operating system areas. If it is set to `false`
 /// the dialog will only be constrained by the screen size. It can not be `null`.
-//
+///
 /// The `useRootNavigator` argument is used to determine whether to push the
 /// dialog to the [Navigator] furthest from or nearest to the given `context`.
 /// By default, `useRootNavigator` is `true` and the dialog route created by
