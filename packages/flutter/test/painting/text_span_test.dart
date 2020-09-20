@@ -245,16 +245,6 @@ void main() {
     expect(() => text.computeToPlainText(StringBuffer()), anyOf(throwsFlutterError, throwsAssertionError));
   });
 
-  test('TextSpan with a null child should throw FlutterError', () {
-    const TextSpan text = TextSpan(
-      text: 'foo bar',
-      children: <InlineSpan>[
-        null,
-      ],
-    );
-    expect(() => text.computeToPlainText(StringBuffer()), anyOf(throwsFlutterError, throwsAssertionError));
-  });
-
   test('TextSpan should have non-null default TextStyle()', () {
     const TextSpan textSpan = TextSpan();
     expect(textSpan.style, const TextStyle());
