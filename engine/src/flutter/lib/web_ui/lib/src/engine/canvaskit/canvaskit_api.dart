@@ -1306,6 +1306,7 @@ class SkPictureRecorder {
 /// "borrowed", i.e. their memory is managed by other objects. In the case of
 /// [SkCanvas] it is managed by [SkPictureRecorder].
 @JS()
+@anonymous
 class SkCanvas {
   external void clear(Float32List color);
   external void clipPath(
@@ -1444,11 +1445,13 @@ class SkCanvas {
 }
 
 @JS()
+@anonymous
 class SkCanvasSaveLayerWithoutBoundsOverload {
   external void saveLayer(SkPaint paint);
 }
 
 @JS()
+@anonymous
 class SkCanvasSaveLayerWithFilterOverload {
   external void saveLayer(
     SkPaint? paint,
@@ -1465,6 +1468,7 @@ class SkPicture {
 }
 
 @JS()
+@anonymous
 class SkParagraphBuilderNamespace {
   external SkParagraphBuilder Make(
     SkParagraphStyle paragraphStyle,
@@ -1490,6 +1494,7 @@ class SkParagraphBuilder {
 }
 
 @JS()
+@anonymous
 class SkParagraphStyle {}
 
 @JS()
