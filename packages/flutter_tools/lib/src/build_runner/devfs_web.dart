@@ -782,7 +782,7 @@ class WebDevFS implements DevFS {
     @required String pathToReload,
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
-    @required DevFSWriter devFSWriter,
+    DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,

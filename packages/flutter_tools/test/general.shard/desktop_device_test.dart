@@ -5,12 +5,15 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/desktop_device.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
@@ -191,5 +194,33 @@ void main() {
     final int result = await portForwarder.forward(2);
     expect(result, 2);
     expect(portForwarder.forwardedPorts.isEmpty, true);
+  });
+
+  testWithoutContext('Local DevFSwriter can copy and write files', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('foo_bar')
+      ..writeAsStringSync('goodbye');
+    final DesktopDevFSWriter writer = DesktopDevFSWriter(fileSystem: fileSystem);
+
+    await writer.write(<Uri, DevFSContent>{
+      Uri.parse('hello'): DevFSStringContent('hello'),
+      Uri.parse('goodbye'): DevFSFileContent(file),
+    }, Uri.parse('/foo/bar/devfs/'));
+
+    expect(fileSystem.file('/foo/bar/devfs/hello'), exists);
+    expect(fileSystem.file('/foo/bar/devfs/hello').readAsStringSync(), 'hello');
+    expect(fileSystem.file('/foo/bar/devfs/goodbye'), exists);
+    expect(fileSystem.file('/foo/bar/devfs/goodbye').readAsStringSync(), 'goodbye');
+  });
+
+  testWithoutContext('Local DevFSwriter turns FileSystemException into DevFSException', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final DesktopDevFSWriter writer = DesktopDevFSWriter(fileSystem: fileSystem);
+    final File file = MockFile();
+    when(file.copySync(any)).thenThrow(const FileSystemException('foo'));
+
+    await expectLater(() async => await writer.write(<Uri, DevFSContent>{
+      Uri.parse('goodbye'): DevFSFileContent(file),
+    }, Uri.parse('/foo/bar/devfs/')), throwsA(isA<DevFSException>()));
   });
 }

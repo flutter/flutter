@@ -513,6 +513,7 @@ void main() {
       bundleFirstUpload: true,
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
+      pathToReload: '',
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -627,6 +628,7 @@ void main() {
       bundleFirstUpload: true,
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
+      pathToReload: '',
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);

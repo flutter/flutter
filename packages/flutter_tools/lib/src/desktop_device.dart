@@ -234,19 +234,23 @@ class DesktopDevFSWriter implements DevFSWriter {
   final FileSystem _fileSystem;
 
   @override
-  Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri) async {
-    for (final Uri uri in entries.keys) {
-      final DevFSContent devFSContent = entries[uri];
-      final File destination = _fileSystem.file(baseUri.resolveUri(uri));
-      if (!destination.parent.existsSync()) {
-        destination.parent.createSync(recursive: true);
+  Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, [DevFSWriter parent]) async {
+    try {
+      for (final Uri uri in entries.keys) {
+        final DevFSContent devFSContent = entries[uri];
+        final File destination = _fileSystem.file(baseUri.resolveUri(uri));
+        if (!destination.parent.existsSync()) {
+          destination.parent.createSync(recursive: true);
+        }
+        if (devFSContent is DevFSFileContent) {
+          final File content = devFSContent.file as File;
+          content.copySync(destination.path);
+          continue;
+        }
+        destination.writeAsBytesSync(await devFSContent.contentsAsBytes());
       }
-      if (devFSContent is DevFSFileContent) {
-        final File content = devFSContent.file as File;
-        content.copySync(destination.path);
-        continue;
-      }
-      destination.writeAsBytesSync(await devFSContent.contentsAsBytes());
+    } on FileSystemException catch (err) {
+      throw DevFSException(err.toString());
     }
   }
 }

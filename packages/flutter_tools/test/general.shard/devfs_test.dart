@@ -256,6 +256,53 @@ void main() {
     expect(report.success, true);
     expect(devFS.lastCompiled, isNot(previousCompile));
   });
+
+   testWithoutContext('DevFS uses provided DevFSWriter instead of default HTTP writer', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeDevFSWriter writer = FakeDevFSWriter();
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[createDevFSRequest],
+    );
+
+    final DevFS devFS = DevFS(
+      fakeVmServiceHost.vmService,
+      'test',
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+      httpClient: MockHttpClient(),
+    );
+
+    await devFS.create();
+
+    final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+    )).thenAnswer((Invocation invocation) async {
+      fileSystem.file('example').createSync();
+      return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
+    });
+
+    expect(writer.written, false);
+
+    final UpdateFSReport report = await devFS.update(
+      mainUri: Uri.parse('lib/main.dart'),
+      generator: residentCompiler,
+      dillOutputPath: 'lib/foo.dill',
+      pathToReload: 'lib/foo.txt.dill',
+      trackWidgetCreation: false,
+      invalidatedFiles: <Uri>[],
+      packageConfig: PackageConfig.empty,
+      devFSWriter: writer,
+    );
+
+    expect(report.success, true);
+    expect(writer.written, true);
+  });
 }
 
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}
@@ -263,3 +310,11 @@ class MockHttpHeaders extends Mock implements HttpHeaders {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
+class FakeDevFSWriter implements DevFSWriter {
+  bool written = false;
+
+  @override
+  Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, DevFSWriter parent) async {
+    written = true;
+  }
+}

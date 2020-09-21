@@ -209,11 +209,14 @@ class DevFSException implements Exception {
   final StackTrace stackTrace;
 }
 
+/// Interface responsible for syncing asset files to a development device.
 abstract class DevFSWriter {
   /// Write the assets in [entries] to the target device.
   ///
+  /// The keys of the map are relative from the [baseUri].
+  ///
   /// Throws a [DevFSException] if the process fails to complete.
-  Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri);
+  Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, DevFSWriter parent);
 }
 
 class _DevFSHttpWriter implements DevFSWriter {
@@ -243,7 +246,7 @@ class _DevFSHttpWriter implements DevFSWriter {
   Completer<void> _completer;
 
   @override
-  Future<void> write(Map<Uri, DevFSContent> entries, Uri devFSBase) async {
+  Future<void> write(Map<Uri, DevFSContent> entries, Uri devFSBase, [DevFSWriter parent]) async {
     try {
       _client.maxConnectionsPerHost = kMaxInFlight;
       _completer = Completer<void>();
@@ -441,7 +444,7 @@ class DevFS {
     @required String pathToReload,
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
-    @required DevFSWriter devFSWriter,
+    DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
@@ -519,7 +522,7 @@ class DevFS {
     }
     _logger.printTrace('Updating files');
     if (dirtyEntries.isNotEmpty) {
-      await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri);
+      await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri, _httpWriter);
     }
     _logger.printTrace('DevFS: Sync finished');
     return UpdateFSReport(

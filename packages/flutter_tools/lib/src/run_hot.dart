@@ -969,8 +969,11 @@ class HotRunner extends ResidentRunner {
       }
     }
     assert(reassembleViews.isNotEmpty);
-
-    globals.printTrace('Reassembling application');
+    final bool wasFastReassemble = updatedDevFS.fastReassembleClassName != null;
+    globals.printTrace(wasFastReassemble
+      ? 'Fast-Reassembling application'
+      : 'Reassembling application',
+    );
 
     final Future<void> reassembleFuture = Future.wait<void>(reassembleFutures);
     await reassembleFuture.timeout(
