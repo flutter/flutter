@@ -6,6 +6,7 @@
 
 import 'dart:ui' as ui show Image;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -17,7 +18,6 @@ Future<void> main() async {
   final ui.Image tallImage =   await createTestImage(width: 10, height: 20);
   test('Image sizing', () {
     RenderImage image;
-    final String imageString = squareImage.toString();
 
     image = RenderImage(image: squareImage);
     layout(image,
@@ -37,11 +37,12 @@ Future<void> main() async {
         '   parentData: <none> (can use size)\n'
         '   constraints: BoxConstraints(25.0<=w<=100.0, 25.0<=h<=100.0)\n'
         '   size: Size(25.0, 25.0)\n'
-        '   image: $imageString\n'
+        '   image: $squareImage\n'
         '   alignment: center\n'
         '   invertColors: false\n'
         '   filterQuality: low\n'
       ),
+      skip: kIsWeb, // TODO(dnfield): https://github.com/flutter/flutter/issues/66289
     );
 
     image = RenderImage(image: wideImage);
