@@ -233,7 +233,6 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     );
   }
 
-  @protected
   @override
   CupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
     Color? convertColor(Color? color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
@@ -384,6 +383,7 @@ class NoDefaultCupertinoThemeData {
   ///
   /// Called by [CupertinoTheme.of] to resolve colors defined in the retrieved
   /// [CupertinoThemeData].
+  @protected
   NoDefaultCupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
     Color? convertColor(Color? color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
