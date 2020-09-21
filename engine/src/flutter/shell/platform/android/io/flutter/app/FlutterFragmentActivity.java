@@ -18,9 +18,6 @@ import io.flutter.view.FlutterView;
  * Deprecated class for activities that use Flutter who also require the use of the Android v4
  * Support library's {@link FragmentActivity}.
  *
- * <p>Deprecation: this class is replaced by {@link
- * io.flutter.embedding.android.FlutterFragmentActivity}.
- *
  * <p>Applications that don't have this need will likely want to use {@link FlutterActivity}
  * instead.
  *
@@ -31,7 +28,10 @@ import io.flutter.view.FlutterView;
  *
  * @see <a target="_new"
  *     href="https://developer.android.com/training/testing/set-up-project">https://developer.android.com/training/testing/set-up-project</a>
+ * @deprecated this class is replaced by {@link
+ *     io.flutter.embedding.android.FlutterFragmentActivity}.
  */
+@Deprecated
 public class FlutterFragmentActivity extends FragmentActivity
     implements FlutterView.Provider, PluginRegistry, ViewFactory {
   private final FlutterActivityDelegate delegate = new FlutterActivityDelegate(this, this);
