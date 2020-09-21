@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'recorder.dart';
+import 'package:web_benchmarks/recorder.dart';
 import 'test_data.dart';
 
 /// The height of each row.

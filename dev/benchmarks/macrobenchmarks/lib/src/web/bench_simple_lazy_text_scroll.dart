@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-import 'recorder.dart';
+import 'package:web_benchmarks/recorder.dart';
 import 'test_data.dart';
 
 /// Creates several list views containing text items, then continuously scrolls

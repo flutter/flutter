@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'recorder.dart';
+import 'package:web_benchmarks/recorder.dart';
 
 /// Repeatedly paints a grid of rectangles where each rectangle is drawn in its
 /// own [Picture].

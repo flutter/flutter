@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'recorder.dart';
+import 'package:web_benchmarks/recorder.dart';
 
 /// Measures how expensive it is to construct material checkboxes.
 ///

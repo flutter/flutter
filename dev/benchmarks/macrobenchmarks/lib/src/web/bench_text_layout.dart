@@ -10,7 +10,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
-import 'recorder.dart';
+import 'package:web_benchmarks/recorder.dart';
 
 const String chars = '1234567890'
     'abcdefghijklmnopqrstuvwxyz'
