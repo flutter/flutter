@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';

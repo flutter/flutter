@@ -58,6 +58,7 @@ enum CustomDimensions {
   commandRunAndroidEmbeddingVersion, // cd45
   commandPackagesAndroidEmbeddingVersion, // cd46
   nullSafety, // cd47
+  fastReassemble, // cd48
 }
 
 String cdKey(CustomDimensions cd) => 'cd${cd.index + 1}';

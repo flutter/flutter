@@ -5,7 +5,6 @@
 /// Convenience methods for Flutter application driving on Fuchsia. Can
 /// be run on either a host machine (making a remote connection to a Fuchsia
 /// device), or on the target Fuchsia machine.
-import 'dart:async';
 import 'dart:core';
 import 'dart:io';
 
@@ -24,9 +23,6 @@ class _DummyPortForwarder implements PortForwarder {
 
   @override
   int get remotePort => _remotePort;
-
-  @override
-  String get openPortAddress => InternetAddress.loopbackIPv4.address;
 
   @override
   Future<void> stop() async { }

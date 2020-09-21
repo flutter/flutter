@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
@@ -26,7 +25,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Therefore, we control the version of flutter_gallery_assets so that
   // existing tests do not fail when the package has a new version.
   'flutter_gallery_assets': '^0.2.0',
-  'mockito': '^4.1.0',  // Prevent mockito from downgrading to 4.0.0
+  'mockito': '4.1.1',  // Prevent mockito from upgrading to the source gen version.
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
   'video_player': '0.10.6', // 0.10.7 fails a gallery smoke test for toString.
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
@@ -47,7 +46,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'pool': '1.5.0-nullsafety',
   'source_maps': '0.10.10-nullsafety',
   'source_map_stack_trace': '2.1.0-nullsafety.1',
-  'source_span': '1.8.0-nullsafety',
+  'source_span': '1.8.0-nullsafety.1',
   'stack_trace': '1.10.0-nullsafety',
   'stream_channel': '2.1.0-nullsafety',
   'string_scanner': '1.1.0-nullsafety',
@@ -62,6 +61,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'process': '4.0.0-nullsafety.1',
   // https://github.com/dart-lang/build/issues/2772
   'build_runner_core': '5.2.0',
+  'path_provider': '1.6.14'
 };
 
 class UpdatePackagesCommand extends FlutterCommand {

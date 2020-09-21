@@ -18,6 +18,7 @@ class ProtocolDiscovery {
     this.serviceName, {
     this.portForwarder,
     this.throttleDuration,
+    this.throttleTimeout,
     this.hostPort,
     this.devicePort,
     this.ipv6,
@@ -33,7 +34,8 @@ class ProtocolDiscovery {
   factory ProtocolDiscovery.observatory(
     DeviceLogReader logReader, {
     DevicePortForwarder portForwarder,
-    Duration throttleDuration = const Duration(milliseconds: 200),
+    Duration throttleDuration,
+    Duration throttleTimeout,
     @required int hostPort,
     @required int devicePort,
     @required bool ipv6,
@@ -43,7 +45,8 @@ class ProtocolDiscovery {
       logReader,
       kObservatoryService,
       portForwarder: portForwarder,
-      throttleDuration: throttleDuration,
+      throttleDuration: throttleDuration ?? const Duration(milliseconds: 200),
+      throttleTimeout: throttleTimeout,
       hostPort: hostPort,
       devicePort: devicePort,
       ipv6: ipv6,
@@ -59,6 +62,11 @@ class ProtocolDiscovery {
 
   /// The time to wait before forwarding a new observatory URIs from [logReader].
   final Duration throttleDuration;
+
+  /// The time between URIs are discovered before timing out when scraping the [logReader].
+  ///
+  /// If null, log scanning will continue indefinitely.
+  final Duration throttleTimeout;
 
   StreamSubscription<String> _deviceLogSubscription;
   _BufferedStreamController<Uri> _uriStreamController;
@@ -81,15 +89,21 @@ class ProtocolDiscovery {
   ///
   /// When a new observatory URL: is available in [logReader],
   /// the URLs are forwarded at most once every [throttleDuration].
+  /// Returns when no event has been observed for [throttleTimeout].
   ///
   /// Port forwarding is only attempted when this is invoked,
   /// for each observatory URL in the stream.
   Stream<Uri> get uris {
-    return _uriStreamController.stream
+    Stream<Uri> uriStream = _uriStreamController.stream
       .transform(_throttle<Uri>(
         waitDuration: throttleDuration,
-      ))
-      .asyncMap<Uri>(_forwardPort);
+      ));
+    if (throttleTimeout != null) {
+      // Don't throw a TimeoutException. The URL wasn't found in time, just close the stream.
+      uriStream = uriStream.timeout(throttleTimeout,
+          onTimeout: (EventSink<Uri> sink) => sink.close());
+    }
+    return uriStream.asyncMap<Uri>(_forwardPort);
   }
 
   Future<void> cancel() => _stopScrapingLogs();
@@ -211,7 +225,7 @@ class _BufferedStreamController<T> {
 ///
 /// For example, consider a `waitDuration` of `10ms`, and list of event names
 /// and arrival times: `a (0ms), b (5ms), c (11ms), d (21ms)`.
-/// The events `c` and `d` will be produced as a result.
+/// The events `a`, `c`, and `d` will be produced as a result.
 StreamTransformer<S, S> _throttle<S>({
   @required Duration waitDuration,
 }) {
@@ -226,10 +240,13 @@ StreamTransformer<S, S> _throttle<S>({
       handleData: (S value, EventSink<S> sink) {
         latestLine = value;
 
+        final bool isFirstMessage = lastExecution == null;
         final int currentTime = DateTime.now().millisecondsSinceEpoch;
         lastExecution ??= currentTime;
         final int remainingTime = currentTime - lastExecution;
-        final int nextExecutionTime = remainingTime > waitDuration.inMilliseconds
+
+        // Always send the first event immediately.
+        final int nextExecutionTime = isFirstMessage || remainingTime > waitDuration.inMilliseconds
           ? 0
           : waitDuration.inMilliseconds - remainingTime;
 

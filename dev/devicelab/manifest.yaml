@@ -120,7 +120,6 @@ tasks:
       Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   complex_layout_scroll_perf__timeline_summary:
     description: >
@@ -215,7 +214,6 @@ tasks:
       using e2e.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   cubic_bezier_perf_sksl_warmup__timeline_summary:
     description: >
@@ -230,7 +228,6 @@ tasks:
       with SkSL shader warm-up using e2e.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery_sksl_warmup_ios32__transition_perf:
     description: >
@@ -778,12 +775,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  flutter_gallery__transition_perf_e2e_ios32:
-    description: >
-      Measures the performance of screen transitions in Flutter Gallery on
-      Android with e2e.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios32"]
+#  TODO(jmagman): https://github.com/flutter/flutter/issues/66166
+#  flutter_gallery__transition_perf_e2e_ios32:
+#    description: >
+#      Measures the performance of screen transitions in Flutter Gallery on
+#      Android with e2e.
+#    stage: devicelab_ios
+#    required_agent_capabilities: ["mac/ios32"]
 
   flutter_gallery__transition_perf_e2e_ios:
     description: >
@@ -890,6 +888,15 @@ tasks:
       placeholder.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+
+  animated_placeholder_perf__e2e_summary:
+    description: >
+      Measures frame build and rasterizer times, as well as frame build counts
+      for a grid of images that uses FadeInImage with an animated gif as the
+      placeholder.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   analyzer_benchmark:
     description: >
