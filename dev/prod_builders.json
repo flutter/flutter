@@ -73,12 +73,6 @@
          "flaky": false
       },
       {
-         "name": "Linux gradle_plugin_light_apk_test",
-         "repo": "flutter",
-         "task_name": "linux_gradle_plugin_light_apk_test",
-         "flaky": false
-      },
-      {
          "name": "Linux gradle_r8_test",
          "repo": "flutter",
          "task_name": "linux_gradle_r8_test",
