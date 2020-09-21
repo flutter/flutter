@@ -12,8 +12,7 @@ namespace testing {
 
 class EmbedderTestCompositorSoftware : public EmbedderTestCompositor {
  public:
-  EmbedderTestCompositorSoftware(SkISize surface_size,
-                                 sk_sp<GrDirectContext> context);
+  EmbedderTestCompositorSoftware(SkISize surface_size);
 
   ~EmbedderTestCompositorSoftware() override;
 

@@ -34,17 +34,13 @@ size_t EmbedderTestContextSoftware::GetSurfacePresentCount() const {
   return software_surface_present_count_;
 }
 
-void EmbedderTestContextSoftware::SetupOpenGLSurface(SkISize surface_size) {
-  FML_CHECK(!gl_surface_);
-  gl_surface_ = std::make_unique<TestGLSurface>(surface_size);
+void EmbedderTestContextSoftware::SetupSurface(SkISize surface_size) {
+  surface_size_ = surface_size;
 }
 
 void EmbedderTestContextSoftware::SetupCompositor() {
-  FML_CHECK(!compositor_) << "Already ssetup a compositor in this context.";
-  FML_CHECK(gl_surface_)
-      << "Setup the GL surface before setting up a compositor.";
-  compositor_ = std::make_unique<EmbedderTestCompositorSoftware>(
-      gl_surface_->GetSurfaceSize(), gl_surface_->GetGrContext());
+  FML_CHECK(!compositor_) << "Already setup a compositor in this context.";
+  compositor_ = std::make_unique<EmbedderTestCompositorSoftware>(surface_size_);
 }
 
 }  // namespace testing

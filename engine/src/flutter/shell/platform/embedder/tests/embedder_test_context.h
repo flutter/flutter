@@ -131,7 +131,7 @@ class EmbedderTestContext {
 
   void SetNextSceneCallback(const NextSceneCallback& next_scene_callback);
 
-  virtual void SetupOpenGLSurface(SkISize surface_size) = 0;
+  virtual void SetupSurface(SkISize surface_size) = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContext);
 };

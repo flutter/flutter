@@ -107,11 +107,7 @@ FlutterProjectArgs& EmbedderConfigBuilder::GetProjectArgs() {
 void EmbedderConfigBuilder::SetSoftwareRendererConfig(SkISize surface_size) {
   renderer_config_.type = FlutterRendererType::kSoftware;
   renderer_config_.software = software_renderer_config_;
-
-  // TODO(chinmaygarde): The compositor still uses a GL surface for operation.
-  // Once this is no longer the case, don't setup the GL surface when using the
-  // software renderer config.
-  context_.SetupOpenGLSurface(surface_size);
+  context_.SetupSurface(surface_size);
 }
 
 void EmbedderConfigBuilder::SetOpenGLFBOCallBack() {
@@ -141,7 +137,7 @@ void EmbedderConfigBuilder::SetOpenGLPresentCallBack() {
 void EmbedderConfigBuilder::SetOpenGLRendererConfig(SkISize surface_size) {
   renderer_config_.type = FlutterRendererType::kOpenGL;
   renderer_config_.open_gl = opengl_renderer_config_;
-  context_.SetupOpenGLSurface(surface_size);
+  context_.SetupSurface(surface_size);
 }
 
 void EmbedderConfigBuilder::SetAssetsPath() {
