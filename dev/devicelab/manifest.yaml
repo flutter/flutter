@@ -681,7 +681,7 @@ tasks:
     description: >
       Checks the functionality and performance of hot reload on a macOS target platform
     stage: devicelab
-    required_agent_capabilities: ["mac"]
+    required_agent_capabilities: ["mac/ios"]
 
 #  TODO(jonahwilliams): investigate build failures on devicelab infra to re-enable.
 #  mac_enable_twc:
