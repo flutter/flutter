@@ -807,6 +807,7 @@ class PointerAddedEvent extends PointerEvent with _PointerEventDescription, _Cop
   /// All of the arguments must be non-null.
   const PointerAddedEvent({
     Duration timeStamp = Duration.zero,
+    int pointer = 0,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
@@ -822,6 +823,7 @@ class PointerAddedEvent extends PointerEvent with _PointerEventDescription, _Cop
     int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
+         pointer: pointer,
          kind: kind,
          device: device,
          position: position,
@@ -835,6 +837,7 @@ class PointerAddedEvent extends PointerEvent with _PointerEventDescription, _Cop
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
+         synthesized: false,
          embedderId: embedderId,
        );
 
@@ -913,6 +916,7 @@ class PointerRemovedEvent extends PointerEvent with _PointerEventDescription, _C
   /// All of the arguments must be non-null.
   const PointerRemovedEvent({
     Duration timeStamp = Duration.zero,
+    int pointer = 0,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
@@ -926,6 +930,7 @@ class PointerRemovedEvent extends PointerEvent with _PointerEventDescription, _C
     int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
+         pointer: pointer,
          kind: kind,
          device: device,
          position: position,
@@ -937,6 +942,7 @@ class PointerRemovedEvent extends PointerEvent with _PointerEventDescription, _C
          radiusMin: radiusMin,
          radiusMax: radiusMax,
          original: original,
+         synthesized: false,
          embedderId: embedderId,
        );
 
@@ -1033,6 +1039,7 @@ class PointerHoverEvent extends PointerEvent with _PointerEventDescription, _Cop
   const PointerHoverEvent({
     Duration timeStamp = Duration.zero,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    int pointer = 0,
     int device = 0,
     Offset position = Offset.zero,
     Offset delta = Offset.zero,
@@ -1050,10 +1057,10 @@ class PointerHoverEvent extends PointerEvent with _PointerEventDescription, _Cop
     double orientation = 0.0,
     double tilt = 0.0,
     bool synthesized = false,
-    PointerHoverEvent? original,
     int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
+         pointer: pointer,
          kind: kind,
          device: device,
          position: position,
@@ -1074,7 +1081,6 @@ class PointerHoverEvent extends PointerEvent with _PointerEventDescription, _Cop
          orientation: orientation,
          tilt: tilt,
          synthesized: synthesized,
-         original: original,
          embedderId: embedderId,
        );
 
@@ -1170,6 +1176,7 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
   /// All of the arguments must be non-null.
   const PointerEnterEvent({
     Duration timeStamp = Duration.zero,
+    int pointer = 0,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
@@ -1192,6 +1199,7 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
     int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
+         pointer: pointer,
          kind: kind,
          device: device,
          position: position,
@@ -1229,6 +1237,7 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
   /// This is used by the [MouseTracker] to synthesize enter events.
   factory PointerEnterEvent.fromMouseEvent(PointerEvent event) => PointerEnterEvent(
     timeStamp: event.timeStamp,
+    pointer: event.pointer,
     kind: event.kind,
     device: event.device,
     position: event.position,
@@ -1343,6 +1352,7 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription, _Copy
   const PointerExitEvent({
     Duration timeStamp = Duration.zero,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    int pointer = 0,
     int device = 0,
     Offset position = Offset.zero,
     Offset delta = Offset.zero,
@@ -1364,6 +1374,7 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription, _Copy
     int embedderId = 0,
   }) : super(
          timeStamp: timeStamp,
+         pointer: pointer,
          kind: kind,
          device: device,
          position: position,
@@ -1401,6 +1412,7 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription, _Copy
   /// This is used by the [MouseTracker] to synthesize exit events.
   factory PointerExitEvent.fromMouseEvent(PointerEvent event) => PointerExitEvent(
     timeStamp: event.timeStamp,
+    pointer: event.pointer,
     kind: event.kind,
     device: event.device,
     position: event.position,
@@ -1547,6 +1559,7 @@ class PointerDownEvent extends PointerEvent with _PointerEventDescription, _Copy
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
+         synthesized: false,
          embedderId: embedderId,
        );
 
@@ -1818,6 +1831,7 @@ class PointerUpEvent extends PointerEvent with _PointerEventDescription, _CopyPo
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
+         synthesized: false,
          embedderId: embedderId,
        );
 
@@ -2089,6 +2103,7 @@ class PointerCancelEvent extends PointerEvent with _PointerEventDescription, _Co
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
+         synthesized: false,
          embedderId: embedderId,
        );
 
