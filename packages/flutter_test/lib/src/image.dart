@@ -16,13 +16,17 @@ final Map<int, ui.Image> _cache = <int, ui.Image>{};
 /// Creates an arbitrarily sized image for testing.
 ///
 /// If the [cache] parameter is set to true, the image will be cached for the
-/// rest of this suite. This should be avoided for images that are used only
-/// once in a test suite, especially if they are large.
+/// rest of this suite. This is normally desirable, assuming a test suite uses
+/// images with the same dimensions in most tests, as it will save on memory
+/// usage and CPU time over the course of the suite. However, it should be
+/// avoided for images that are used only once in a test suite, especially if
+/// the image is large, as it will require holding on to the memory for that
+/// image for the duration of the suite.
 ///
 /// This method requires real async work, and will not work properly in the
 /// [FakeAsync] zones set up by [testWidgets]. Typically, it should be invoked
-/// as a setup step before [testWidgets] are run. If needed, it can be invoked
-/// using [WidgetTester.runAsync].
+/// as a setup step before [testWidgets] are run, such as [setUp] or [setUpAll].
+/// If needed, it can be invoked using [WidgetTester.runAsync].
 Future<ui.Image> createTestImage({
   int width = 1,
   int height = 1,
@@ -31,15 +35,23 @@ Future<ui.Image> createTestImage({
   assert(width != null && width > 0);
   assert(height != null && height > 0);
 
-  if (cache && _cache.containsKey(hashValues(width, height))) {
+  final int cacheKey = hashValues(width, height);
+  if (cache && _cache.containsKey(cacheKey)) {
     return _cache[hashValues(width,height)];
   }
 
+  final ui.Image image = await _createImage(width, height);
+  if (cache) {
+    _cache[cacheKey] = image;
+  }
+  return image;
+});
+
+Future<ui.Image> _createImage(int width, int height) async {
   if (kIsWeb) {
     return await _webCreateTestImage(
       width: width,
       height: height,
-      cache: cache,
     );
   }
 
@@ -50,14 +62,11 @@ Future<ui.Image> createTestImage({
     height,
     ui.PixelFormat.rgba8888,
     (ui.Image image) {
-      if (cache) {
-        _cache[hashValues(width, height)] = image;
-      }
       completer.complete(image);
     },
   );
-  return completer.future;
-});
+  return await completer.future;
+}
 
 /// Web doesn't support [decodeImageFromPixels]. Instead, generate a 1bpp BMP
 /// and just use [instantiateImageCodec].
@@ -66,7 +75,6 @@ Future<ui.Image> createTestImage({
 Future<ui.Image> _webCreateTestImage({
   int width,
   int height,
-  bool cache = true,
 }) async {
   // See https://en.wikipedia.org/wiki/BMP_file_format for format examples.
   final int bufferSize = 0x36 + (width * height);
@@ -106,8 +114,5 @@ Future<ui.Image> _webCreateTestImage({
     bmpData.buffer.asUint8List(),
   );
   final ui.FrameInfo frameInfo = await codec.getNextFrame();
-  if (cache) {
-    _cache[hashValues(width, height)] = frameInfo.image;
-  }
   return frameInfo.image;
 }

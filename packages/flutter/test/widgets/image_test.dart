@@ -461,15 +461,18 @@ void main() {
 
   testWidgets('Verify Image stops listening to ImageStream', (WidgetTester tester) async {
     final ui.Image image100x100 = await tester.runAsync(() async => createTestImage(width: 100, height: 100));
+    // Web does not override the toString, whereas VM does
+    final String imageString = image100x100.toString();
+
     final TestImageProvider imageProvider = TestImageProvider();
     await tester.pumpWidget(Image(image: imageProvider, excludeFromSemantics: true));
     final State<Image> image = tester.state/*State<Image>*/(find.byType(Image));
     expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, unresolved, 2 listeners), pixels: null, loadingProgress: null, frameNumber: null, wasSynchronouslyLoaded: false)'));
     imageProvider.complete(image100x100);
     await tester.pump();
-    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, [100×100] @ 1.0x, 1 listener), pixels: [100×100] @ 1.0x, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
+    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, $imageString @ 1.0x, 1 listener), pixels: $imageString @ 1.0x, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
     await tester.pumpWidget(Container());
-    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(lifecycle state: defunct, not mounted, stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, [100×100] @ 1.0x, 0 listeners), pixels: [100×100] @ 1.0x, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
+    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(lifecycle state: defunct, not mounted, stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, $imageString @ 1.0x, 0 listeners), pixels: $imageString @ 1.0x, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
   });
 
   testWidgets('Stream completer errors can be listened to by attaching before resolving', (WidgetTester tester) async {
@@ -1635,7 +1638,7 @@ void main() {
     Object caughtException;
     await tester.pumpWidget(
       Image(
-        image: const FailingImageProvider(failOnObtainKey: true, throws: 'threw'),
+        image: FailingImageProvider(failOnObtainKey: true, throws: 'threw', image: image10x10),
         errorBuilder: (BuildContext context, Object error, StackTrace stackTrace) {
           caughtException = error;
           return SizedBox.expand(key: errorKey);
@@ -1655,7 +1658,7 @@ void main() {
     Object caughtException;
     await tester.pumpWidget(
       Image(
-        image: const FailingImageProvider(failOnLoad: true, throws: 'threw'),
+        image: FailingImageProvider(failOnLoad: true, throws: 'threw', image: image10x10),
         errorBuilder: (BuildContext context, Object error, StackTrace stackTrace) {
           caughtException = error;
           return SizedBox.expand(key: errorKey);
@@ -1672,8 +1675,8 @@ void main() {
 
   testWidgets('no errorBuilder - failure reported to FlutterError', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Image(
-        image: FailingImageProvider(failOnLoad: true, throws: 'threw'),
+      Image(
+        image: FailingImageProvider(failOnLoad: true, throws: 'threw', image: image10x10),
       ),
     );
 
@@ -1888,30 +1891,6 @@ class TestImageStreamCompleter extends ImageStreamCompleter {
   }
 }
 
-class TestImage implements ui.Image {
-  @override
-  int get width => 100;
-
-  @override
-  int get height => 100;
-
-  @override
-  void dispose() { }
-
-  @override
-  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
-    throw UnsupportedError('Cannot encode test image');
-  }
-
-  @override
-  String toString() => '[$width\u00D7$height]';
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw UnimplementedError();
-  }
-}
-
 class DebouncingImageProvider extends ImageProvider<Object> {
   DebouncingImageProvider(this.imageProvider, this.seenKeys);
 
@@ -1944,14 +1923,17 @@ class FailingImageProvider extends ImageProvider<int> {
     this.failOnObtainKey = false,
     this.failOnLoad = false,
     @required this.throws,
+    @required this.image,
   }) : assert(failOnLoad != null),
        assert(failOnObtainKey != null),
        assert(failOnLoad == true || failOnObtainKey == true),
-       assert(throws != null);
+       assert(throws != null),
+       assert(image != null);
 
   final bool failOnObtainKey;
   final bool failOnLoad;
   final Object throws;
+  final ui.Image image;
 
   @override
   Future<int> obtainKey(ImageConfiguration configuration) {
@@ -1969,7 +1951,7 @@ class FailingImageProvider extends ImageProvider<int> {
     return OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(
         ImageInfo(
-          image: TestImage(),
+          image: image,
           scale: 0,
         ),
       ),

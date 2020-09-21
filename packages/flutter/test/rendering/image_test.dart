@@ -12,83 +12,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-class SquareImage implements ui.Image {
-  @override
-  int get width => 10;
-
-  @override
-  int get height => 10;
-
-  @override
-  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
-    throw UnsupportedError('Cannot encode test image');
-  }
-
-  @override
-  String toString() => '[$width\u00D7$height]';
-
-  @override
-  void dispose() { }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw UnimplementedError();
-  }
-}
-
-class WideImage implements ui.Image {
-  @override
-  int get width => 20;
-
-  @override
-  int get height => 10;
-
-  @override
-  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
-    throw UnsupportedError('Cannot encode test image');
-  }
-
-  @override
-  String toString() => '[$width\u00D7$height]';
-
-  @override
-  void dispose() { }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw UnimplementedError();
-  }
-}
-
-class TallImage implements ui.Image {
-  @override
-  int get width => 10;
-
-  @override
-  int get height => 20;
-
-  @override
-  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
-    throw UnsupportedError('Cannot encode test image');
-  }
-
-  @override
-  String toString() => '[$width\u00D7$height]';
-
-  @override
-  void dispose() { }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw UnimplementedError();
-  }
-}
-
-void main() {
+Future<void> main() async {
+  final ui.Image squareImage = await createTestImage(width: 10, height: 10);
+  final ui.Image wideImage =   await createTestImage(width: 20, height: 10);
+  final ui.Image tallImage =   await createTestImage(width: 10, height: 20);
   test('Image sizing', () {
     RenderImage image;
 
-    image = RenderImage(image: SquareImage());
+    image = RenderImage(image: squareImage);
     layout(image,
           constraints: const BoxConstraints(
               minWidth: 25.0,
@@ -113,7 +44,7 @@ void main() {
       ),
     );
 
-    image = RenderImage(image: WideImage());
+    image = RenderImage(image: wideImage);
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 5.0,
@@ -123,7 +54,7 @@ void main() {
     expect(image.size.width, equals(60.0));
     expect(image.size.height, equals(30.0));
 
-    image = RenderImage(image: TallImage());
+    image = RenderImage(image: tallImage);
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 50.0,
@@ -133,7 +64,7 @@ void main() {
     expect(image.size.width, equals(50.0));
     expect(image.size.height, equals(75.0));
 
-    image = RenderImage(image: WideImage());
+    image = RenderImage(image: wideImage);
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 5.0,
@@ -143,7 +74,7 @@ void main() {
     expect(image.size.width, equals(20.0));
     expect(image.size.height, equals(10.0));
 
-    image = RenderImage(image: WideImage());
+    image = RenderImage(image: wideImage);
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 5.0,
@@ -153,7 +84,7 @@ void main() {
     expect(image.size.width, equals(16.0));
     expect(image.size.height, equals(8.0));
 
-    image = RenderImage(image: TallImage());
+    image = RenderImage(image: tallImage);
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 5.0,
@@ -163,7 +94,7 @@ void main() {
     expect(image.size.width, equals(8.0));
     expect(image.size.height, equals(16.0));
 
-    image = RenderImage(image: SquareImage());
+    image = RenderImage(image: squareImage);
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 4.0,
@@ -173,7 +104,7 @@ void main() {
     expect(image.size.width, equals(8.0));
     expect(image.size.height, equals(8.0));
 
-    image = RenderImage(image: WideImage());
+    image = RenderImage(image: wideImage);
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 20.0,
@@ -183,7 +114,7 @@ void main() {
     expect(image.size.width, equals(30.0));
     expect(image.size.height, equals(20.0));
 
-    image = RenderImage(image: TallImage());
+    image = RenderImage(image: tallImage);
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 20.0,

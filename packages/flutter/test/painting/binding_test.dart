@@ -9,16 +9,18 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/painting.dart';
 
+import 'package:flutter_test/flutter_test.dart';
 
-void main() {
+Future<void> main() async {
+  final ui.Image image = await createTestImage();
+
   testWidgets('didHaveMemoryPressure clears imageCache', (WidgetTester tester) async {
     imageCache.putIfAbsent(1, () => OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(ImageInfo(
-        image: FakeImage(),
+        image: image,
         scale: 1.0,
       ),
     )));
@@ -113,26 +115,5 @@ class FakeImageCache extends ImageCache {
   void clearLiveImages() {
     liveClearCount += 1;
     super.clearLiveImages();
-  }
-}
-
-class FakeImage implements ui.Image {
-  @override
-  void dispose() {}
-
-  @override
-  int get height => 10;
-
-  @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
-    throw UnimplementedError();
-  }
-
-  @override
-  int get width => 10;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw UnimplementedError();
   }
 }
