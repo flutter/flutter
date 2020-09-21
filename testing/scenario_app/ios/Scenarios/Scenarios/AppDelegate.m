@@ -23,7 +23,9 @@
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-
+  if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--maskview-blocking"]) {
+    self.window.tintColor = UIColor.systemPinkColor;
+  }
   NSDictionary<NSString*, NSString*>* launchArgsMap = @{
     // The Platform view golden test args should match `PlatformViewGoldenTestManager`.
     @"--locale-initialization" : @"locale_initialization",
@@ -58,7 +60,6 @@
           *stop = YES;
         }
       }];
-
   if (flutterViewControllerTestName) {
     [self setupFlutterViewControllerTest:flutterViewControllerTestName];
   } else if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--screen-before-flutter"]) {
