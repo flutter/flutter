@@ -7,6 +7,7 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:file/memory.dart';
+import 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticsNode, DiagnosticPropertiesBuilder, FlutterError;
 import 'package:flutter_test/flutter_test.dart' hide test;
 import 'package:flutter_test/flutter_test.dart' as test_package;
 
@@ -100,6 +101,36 @@ void main() {
       expect(comparator.basedir, Uri.parse('./'));
     });
 
+    test('throws if local output is not awaited', () {
+      try {
+        comparator.generateFailureOutput(
+          ComparisonResult(passed: false),
+          Uri.parse('foo_test.dart'),
+          Uri.parse('/foo/bar/'),
+        );
+        TestAsyncUtils.verifyAllScopesClosed();
+        throw 'unexpectedly did not throw';
+      } on FlutterError catch (e) {
+        final List<String> lines = e.message.split('\n');
+        expectSync(lines[0], 'Asynchronous call to guarded function leaked.');
+        expectSync(lines[1], 'You must use "await" with all Future-returning test APIs.');
+        expectSync(
+          lines[2],
+          matches(r'^The guarded method "generateFailureOutput" from class '
+            r'LocalComparisonOutput was called from .*goldens_test.dart on line '
+            r'[0-9]+, but never completed before its parent scope closed\.$'),
+        );
+        expectSync(lines.length, 3);
+        final DiagnosticPropertiesBuilder propertiesBuilder = DiagnosticPropertiesBuilder();
+        e.debugFillProperties(propertiesBuilder);
+        final List<DiagnosticsNode> information = propertiesBuilder.properties;
+        expectSync(information.length, 3);
+        expectSync(information[0].level, DiagnosticLevel.summary);
+        expectSync(information[1].level, DiagnosticLevel.hint);
+        expectSync(information[2].level, DiagnosticLevel.info);
+      }
+    });
+
     group('compare', () {
       Future<bool> doComparison([ String golden = 'golden.png' ]) {
         final Uri uri = fs.file(fix(golden)).uri;
@@ -155,7 +186,7 @@ void main() {
           try {
             await doComparison();
             fail('TestFailure expected but not thrown.');
-          } on TestFailure catch (error) {
+          } on FlutterError catch (error) {
             expect(error.message, contains('% diff detected'));
             final io.File master = fs.file(
               fix('/failures/golden_masterImage.png')
@@ -184,7 +215,7 @@ void main() {
           try {
             await doComparison('subdir/golden.png');
             fail('TestFailure expected but not thrown.');
-          } on TestFailure catch (error) {
+          } on FlutterError catch (error) {
             expect(error.message, contains('% diff detected'));
             final io.File master = fs.file(
               fix('/failures/golden_masterImage.png')
@@ -219,7 +250,7 @@ void main() {
           try {
             await doComparison();
             fail('TestFailure expected but not thrown.');
-          } on TestFailure catch (error) {
+          } on FlutterError catch (error) {
             expect(error.message, contains('image sizes do not match'));
           }
         });
@@ -229,7 +260,7 @@ void main() {
           try {
             await doComparison();
             fail('TestFailure expected but not thrown.');
-          } on TestFailure catch (error) {
+          } on FlutterError catch (error) {
             expect(error.message, contains('% diff detected'));
           }
         });
@@ -239,7 +270,7 @@ void main() {
           try {
             await doComparison();
             fail('TestFailure expected but not thrown.');
-          } on TestFailure catch (error) {
+          } on FlutterError catch (error) {
             expect(error.message, contains('null image provided'));
           }
         });

@@ -9,11 +9,13 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package show TestFailure;
 
 import 'goldens.dart';
+import 'test_async_utils.dart';
 
 /// The default [GoldenFileComparator] implementation for `flutter test`.
 ///
@@ -103,7 +105,8 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
     );
 
     if (!result.passed) {
-      await generateFailureOutput(result, golden, basedir);
+      final String error = await generateFailureOutput(result, golden, basedir);
+      throw FlutterError(error);
     }
     return result.passed;
   }
@@ -126,32 +129,31 @@ class LocalComparisonOutput {
   /// Writes out diffs from the [ComparisonResult] of a golden file test.
   ///
   /// Will throw an error if a null result is provided.
-  Future<void> generateFailureOutput(
+  Future<String> generateFailureOutput(
     ComparisonResult result,
     Uri golden,
     Uri basedir, {
     String key = '',
   }) async {
-    String additionalFeedback = '';
-    if (result.diffs != null) {
-      additionalFeedback = '\nFailure feedback can be found at '
-        '${path.join(basedir.path, 'failures')}';
-      final Map<String, Image> diffs = result.diffs!.cast<String, Image>();
-      for (final MapEntry<String, Image> entry in diffs.entries) {
-        final File output = getFailureFile(
-          key.isEmpty ? entry.key : entry.key + '_' + key,
-          golden,
-          basedir,
-        );
-        output.parent.createSync(recursive: true);
-        final ByteData? pngBytes =
-            await entry.value.toByteData(format: ImageByteFormat.png);
-        output.writeAsBytesSync(pngBytes!.buffer.asUint8List());
+    return TestAsyncUtils.guard<String>(() async {
+      String additionalFeedback = '';
+      if (result.diffs != null) {
+        additionalFeedback = '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
+        final Map<String, Image> diffs = result.diffs!.cast<String, Image>();
+        for (final MapEntry<String, Image> entry in diffs.entries) {
+          final File output = getFailureFile(
+            key.isEmpty ? entry.key : entry.key + '_' + key,
+            golden,
+            basedir,
+          );
+          output.parent.createSync(recursive: true);
+          final ByteData? pngBytes = await entry.value.toByteData(format: ImageByteFormat.png);
+          output.writeAsBytesSync(pngBytes!.buffer.asUint8List());
+        }
       }
-    }
-    throw test_package.TestFailure(
-      'Golden "$golden": ${result.error}$additionalFeedback'
-    );
+
+      return 'Golden "$golden": ${result.error}$additionalFeedback';
+    });
   }
 
   /// Returns the appropriate file for a given diff from a [ComparisonResult].
