@@ -23,7 +23,7 @@ EmbedderTestContextGL::~EmbedderTestContextGL() {
   SetGLGetFBOCallback(nullptr);
 }
 
-void EmbedderTestContextGL::SetupOpenGLSurface(SkISize surface_size) {
+void EmbedderTestContextGL::SetupSurface(SkISize surface_size) {
   FML_CHECK(!gl_surface_);
   gl_surface_ = std::make_unique<TestGLSurface>(surface_size);
 }

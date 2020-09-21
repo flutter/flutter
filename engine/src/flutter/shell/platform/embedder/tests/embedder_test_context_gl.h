@@ -62,7 +62,7 @@ class EmbedderTestContextGL : public EmbedderTestContext {
   GLGetFBOCallback gl_get_fbo_callback_;
   GLPresentCallback gl_present_callback_;
 
-  void SetupOpenGLSurface(SkISize surface_size) override;
+  void SetupSurface(SkISize surface_size) override;
 
   bool GLMakeCurrent();
 
