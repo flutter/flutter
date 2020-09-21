@@ -67,19 +67,25 @@ const FakeCommand kLaunchReleaseCommand = FakeCommand(
 
 // The command used to actually launch the app with args in debug.
 const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
+  'script',
+  '-t',
+  '0',
+  '/dev/null',
   'ios-deploy',
   '--id',
   '123',
   '--bundle',
   '/',
+  '--debug',
   '--no-wifi',
-  '--justlaunch',
   '--args',
   '--enable-dart-profiling --enable-service-port-fallback --disable-service-auth-codes --observatory-port=60700 --enable-checked-mode --verify-entry-points'
 ], environment: <String, String>{
   'PATH': '/usr/bin:null',
   'DYLD_LIBRARY_PATH': '/path/to/libraries',
-});
+},
+stdout: '(lldb)     run\nsuccess',
+);
 
 void main() {
   // TODO(jonahwilliams): This test doesn't really belong here but
@@ -102,7 +108,7 @@ void main() {
   });
 
   // Still uses context for analytics and mDNS.
-  testUsingContext('IOSDevice.startApp succeeds in debug mode via mDNS discovery', () async {
+  testUsingContext('IOSDevice.startApp succeeds in debug mode via mDNS discovery when log reading fails', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kDeployCommand,
@@ -145,6 +151,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       platformArgs: <String, dynamic>{},
       fallbackPollingDelay: Duration.zero,
+      fallbackThrottleTimeout: const Duration(milliseconds: 10),
     );
 
     verify(globals.flutterUsage.sendEvent('ios-handshake', 'mdns-success')).called(1);
@@ -157,7 +164,7 @@ void main() {
   });
 
   // Still uses context for analytics and mDNS.
-  testUsingContext('IOSDevice.startApp succeeds in debug mode when mDNS fails', () async {
+  testUsingContext('IOSDevice.startApp succeeds in debug mode via log reading', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kDeployCommand,
@@ -183,34 +190,32 @@ void main() {
     device.portForwarder = const NoOpDevicePortForwarder();
     device.setLogReader(iosApp, deviceLogReader);
 
-    // Now that the reader is used, start writing messages to it.
+    // Start writing messages to the log reader.
     Timer.run(() {
       deviceLogReader.addLine('Foo');
       deviceLogReader.addLine('Observatory listening on http://127.0.0.1:456');
     });
-    when(MDnsObservatoryDiscovery.instance.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
-      .thenAnswer((Invocation invocation) async => null);
 
     final LaunchResult launchResult = await device.startApp(iosApp,
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       platformArgs: <String, dynamic>{},
       fallbackPollingDelay: Duration.zero,
+      fallbackThrottleTimeout: const Duration(milliseconds: 10),
     );
 
     expect(launchResult.started, true);
     expect(launchResult.hasObservatory, true);
-    verify(globals.flutterUsage.sendEvent('ios-handshake', 'mdns-failure')).called(1);
-    verify(globals.flutterUsage.sendEvent('ios-handshake', 'fallback-success')).called(1);
+    verify(globals.flutterUsage.sendEvent('ios-handshake', 'log-success')).called(1);
+    verifyNever(globals.flutterUsage.sendEvent('ios-handshake', 'mdns-failure'));
     expect(await device.stopApp(iosApp), false);
   }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
     MDnsObservatoryDiscovery: () => MockMDnsObservatoryDiscovery(),
+    Usage: () => MockUsage(),
   });
 
   // Still uses context for analytics and mDNS.
-  testUsingContext('IOSDevice.startApp fails in debug mode when mDNS fails and '
-    'when Observatory URI is malformed', () async {
+  testUsingContext('IOSDevice.startApp fails in debug mode when Observatory URI is malformed', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kDeployCommand,
@@ -239,16 +244,15 @@ void main() {
     // Now that the reader is used, start writing messages to it.
     Timer.run(() {
       deviceLogReader.addLine('Foo');
-      deviceLogReader.addLine('Observatory listening on http:/:/127.0.0.1:456');
+      deviceLogReader.addLine('Observatory listening on http://127.0.0.1:456abc');
     });
-    when(MDnsObservatoryDiscovery.instance.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
-      .thenAnswer((Invocation invocation) async => null);
 
     final LaunchResult launchResult = await device.startApp(iosApp,
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       platformArgs: <String, dynamic>{},
       fallbackPollingDelay: Duration.zero,
+      // fallbackThrottleTimeout: const Duration(milliseconds: 10),
     );
 
     expect(launchResult.started, false);
@@ -259,8 +263,8 @@ void main() {
       label: anyNamed('label'),
       value: anyNamed('value'),
     )).called(1);
+    verify(globals.flutterUsage.sendEvent('ios-handshake', 'log-failure')).called(1);
     verify(globals.flutterUsage.sendEvent('ios-handshake', 'mdns-failure')).called(1);
-    verify(globals.flutterUsage.sendEvent('ios-handshake', 'fallback-failure')).called(1);
     }, overrides: <Type, Generator>{
       MDnsObservatoryDiscovery: () => MockMDnsObservatoryDiscovery(),
       Usage: () => MockUsage(),
@@ -388,6 +392,7 @@ void main() {
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       platformArgs: <String, dynamic>{},
       fallbackPollingDelay: Duration.zero,
+      fallbackThrottleTimeout: const Duration(milliseconds: 10),
     );
 
     expect(launchResult.started, true);
@@ -405,13 +410,17 @@ void main() {
       kDeployCommand,
       FakeCommand(
         command: <String>[
+          'script',
+          '-t',
+          '0',
+          '/dev/null',
           'ios-deploy',
           '--id',
           '123',
           '--bundle',
           '/',
+          '--debug',
           '--no-wifi',
-          '--justlaunch',
           // The arguments below are determined by what is passed into
           // the debugging options argument to startApp.
           '--args',
@@ -436,7 +445,8 @@ void main() {
         ], environment: const <String, String>{
           'PATH': '/usr/bin:null',
           'DYLD_LIBRARY_PATH': '/path/to/libraries',
-        }
+        },
+        stdout: '(lldb)     run\nsuccess',
       )
     ]);
     final IOSDevice device = setUpIOSDevice(
@@ -455,22 +465,15 @@ void main() {
       bundleName: 'Runner',
       bundleDir: fileSystem.currentDirectory,
     );
-    final Uri uri = Uri(
-      scheme: 'http',
-      host: '127.0.0.1',
-      port: 1234,
-      path: 'observatory',
-    );
+    final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
 
-    device.setLogReader(iosApp, FakeDeviceLogReader());
     device.portForwarder = const NoOpDevicePortForwarder();
+    device.setLogReader(iosApp, deviceLogReader);
 
-    when(MDnsObservatoryDiscovery.instance.getObservatoryUri(
-      any,
-      any,
-      usesIpv6: anyNamed('usesIpv6'),
-      hostVmservicePort: anyNamed('hostVmservicePort')
-    )).thenAnswer((Invocation invocation) async => uri);
+    // Start writing messages to the log reader.
+    Timer.run(() {
+      deviceLogReader.addLine('Observatory listening on http://127.0.0.1:1234');
+    });
 
     final LaunchResult launchResult = await device.startApp(iosApp,
       prebuiltApplication: true,
@@ -492,6 +495,7 @@ void main() {
       ),
       platformArgs: <String, dynamic>{},
       fallbackPollingDelay: Duration.zero,
+      fallbackThrottleTimeout: const Duration(milliseconds: 10),
     );
 
     expect(launchResult.started, true);
