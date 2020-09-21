@@ -86,7 +86,7 @@ class ChannelBuffers {
       // TODO(aaclarke): Update this message to include instructions on how to resize
       // the buffer once that is available to users and print in all engine builds
       // after we verify that dropping messages isn't part of normal execution.
-      _printDebug('Overflow on channel: $channel.  '
+      _debugPrintWarning('Overflow on channel: $channel.  '
                   'Messages on this channel are being discarded in FIFO fashion.  '
                   'The engine may not be running or you need to adjust '
                   'the buffer size if of the channel.');
@@ -113,7 +113,7 @@ class ChannelBuffers {
     } else {
       final int numberOfDroppedMessages = queue.resize(newSize);
       if (numberOfDroppedMessages > 0) {
-        _Logger._printString('Dropping messages on channel "$channel" as a result of shrinking the buffer size.');
+        _debugPrintWarning('Dropping messages on channel "$channel" as a result of shrinking the buffer size.');
       }
     }
   }
