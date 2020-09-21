@@ -577,7 +577,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// a bottom sheet that will utilize [DraggableScrollableSheet]. If you wish
 /// to have a bottom sheet that has a scrollable child such as a [ListView] or
 /// a [GridView] and have the bottom sheet be draggable, you should set this
-/// parameter to true.
+/// parameter to true. When this parameter is set to true the top of [BottomSheet] will be padded
+/// such that it avoids any system top padding given by the [MediaQuery]
 ///
 /// The `useRootNavigator` parameter ensures that the root navigator is used to
 /// display the [BottomSheet] when set to `true`. This is useful in the case
