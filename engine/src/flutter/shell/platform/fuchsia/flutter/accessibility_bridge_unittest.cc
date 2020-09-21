@@ -467,7 +467,7 @@ TEST_F(AccessibilityBridgeTest, BatchesLargeMessages) {
   RunLoopUntilIdle();
 
   EXPECT_EQ(0, semantics_manager_.DeleteCount());
-  EXPECT_EQ(5, semantics_manager_.UpdateCount());
+  EXPECT_EQ(6, semantics_manager_.UpdateCount());
   EXPECT_EQ(1, semantics_manager_.CommitCount());
   EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
@@ -481,7 +481,7 @@ TEST_F(AccessibilityBridgeTest, BatchesLargeMessages) {
   RunLoopUntilIdle();
 
   EXPECT_EQ(1, semantics_manager_.DeleteCount());
-  EXPECT_EQ(6, semantics_manager_.UpdateCount());
+  EXPECT_EQ(7, semantics_manager_.UpdateCount());
   EXPECT_EQ(2, semantics_manager_.CommitCount());
   EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
