@@ -143,7 +143,7 @@ class _InheritedCupertinoTheme extends InheritedWidget {
 ///  * [ThemeData], a Material equivalent that also configures Cupertino
 ///    styling via a [CupertinoThemeData] subclass [MaterialBasedCupertinoThemeData].
 @immutable
-class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable  {
+class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable {
   /// Creates a [CupertinoTheme] styling specification.
   ///
   /// Unspecified parameters default to a reasonable iOS default style.
@@ -297,7 +297,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
 class NoDefaultCupertinoThemeData {
   /// Creates a [NoDefaultCupertinoThemeData] styling specification.
   ///
-  /// Unspecified parameters default to null.
+  /// Unspecified properties default to null.
   const NoDefaultCupertinoThemeData({
     this.brightness,
     this.primaryColor,
