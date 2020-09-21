@@ -9,6 +9,7 @@ import 'dart:math' as math;
 
 import 'package:macrobenchmarks/src/web/bench_text_layout.dart';
 import 'package:macrobenchmarks/src/web/bench_text_out_of_picture_bounds.dart';
+import 'package:web_benchmarks/recorder.dart';
 
 import 'package:gallery/benchmarks/gallery_automator.dart' show DemoType, typeOfDemo;
 
@@ -26,7 +27,6 @@ import 'src/web/bench_picture_recording.dart';
 import 'src/web/bench_simple_lazy_text_scroll.dart';
 import 'src/web/bench_text_out_of_picture_bounds.dart';
 import 'src/web/gallery/gallery_recorder.dart';
-import 'package:web_benchmarks/recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
 
