@@ -110,7 +110,6 @@ void main() {
     });
 
     testUsingContext('k - toggles CanvasKit rendering and prints results', () async {
-      when(mockResidentRunner.supportsCanvasKit).thenReturn(true);
       when(mockResidentRunner.toggleCanvaskit())
         .thenAnswer((Invocation invocation) async {
           return true;
