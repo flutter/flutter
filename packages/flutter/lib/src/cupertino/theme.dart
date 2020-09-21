@@ -204,66 +204,23 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
 
   final _CupertinoThemeDefaults _defaults;
 
-
-  /// A color used on interactive elements of the theme.
-  ///
-  /// This color is generally used on text and icons in buttons and tappable
-  /// elements. Defaults to [CupertinoColors.activeBlue].
-  ///
-  /// If coming from a Material [Theme] and unspecified, [primaryColor] will be
-  /// derived from the Material [ThemeData]'s `colorScheme.primary`. However, in
-  /// iOS styling, the [primaryColor] is more sparsely used than in Material
-  /// Design where the [primaryColor] can appear on non-interactive surfaces like
-  /// the [AppBar] background, [TextField] borders etc.
-  ///
-  /// See also:
-  ///
-  ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
-  ///    [primaryColor] to its Material [Theme] parent if it's unspecified.
   @override
   Color get primaryColor => super.primaryColor ?? _defaults.primaryColor;
 
-  /// A color that must be easy to see when rendered on a [primaryColor] background.
-  ///
-  /// For example, this color is used for a [CupertinoButton]'s text and icons
-  /// when the button's background is [primaryColor].
-  ///
-  /// If coming from a Material [Theme] and unspecified, [primaryContrastingColor]
-  /// will be derived from the Material [ThemeData]'s `colorScheme.onPrimary`.
-  ///
-  /// See also:
-  ///
-  ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
-  ///    [primaryContrastingColor] to its Material [Theme] parent if it's unspecified.
   @override
   Color get primaryContrastingColor => super.primaryContrastingColor ?? _defaults.primaryContrastingColor;
 
-  /// Text styles used by Cupertino widgets.
-  ///
-  /// Derived from [primaryColor] if unspecified.
   @override
   CupertinoTextThemeData get textTheme {
     return super.textTheme ?? _defaults.textThemeDefaults.createDefaults(primaryColor: primaryColor);
   }
 
-  /// Background color of the top nav bar and bottom tab bar.
-  ///
-  /// Defaults to a light gray in light mode, or a dark translucent gray color in
-  /// dark mode.
   @override
   Color get barBackgroundColor => super.barBackgroundColor ?? _defaults.barBackgroundColor;
 
-  /// Background color of the scaffold.
-  ///
-  /// Defaults to [CupertinoColors.systemBackground].
   @override
   Color get scaffoldBackgroundColor => super.scaffoldBackgroundColor ?? _defaults.scaffoldBackgroundColor;
 
-  /// Returns an instance of the [CupertinoThemeData] whose property getters
-  /// only return the construction time specifications with no derived values.
-  ///
-  /// Used in Material themes to let unspecified properties fallback to Material
-  /// theme properties instead of iOS defaults.
   @override
   NoDefaultCupertinoThemeData noDefault() {
     return NoDefaultCupertinoThemeData(
@@ -276,11 +233,6 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     );
   }
 
-  /// Returns a new `CupertinoThemeData` with all its colors resolved against the
-  /// given [BuildContext].
-  ///
-  /// Called by [CupertinoTheme.of] to resolve colors defined in the retrieved
-  /// [CupertinoThemeData].
   @protected
   @override
   CupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
@@ -297,13 +249,6 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     );
   }
 
-  /// Creates a copy of [CupertinoThemeData] with specified attributes overridden.
-  ///
-  /// Only the current instance's specified attributes are copied instead of
-  /// derived values. For instance, if the current [CupertinoThemeData.textTheme]
-  /// is implied from the current [primaryColor] because it was not specified,
-  /// copying with a different [primaryColor] will also change the copy's implied
-  /// [textTheme].
   @override
   CupertinoThemeData copyWith({
     Brightness? brightness,
@@ -337,7 +282,22 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   }
 }
 
+/// Styling specifications for a cupertino theme without default values for
+/// unspecified properties.
+///
+/// Unlike [CupetinoThemeData] instances of this class do not return default
+/// values for properties that have been left unspecified in the constructor.
+/// Instead, unspecified properties will return null. This is used by
+/// Material's [ThemeData.cupertinoOverrideTheme].
+///
+/// See also:
+///
+///  * [CupetinoThemeData], which uses reasonable default values for unspecified
+///    theme properties.
 class NoDefaultCupertinoThemeData {
+  /// Creates a [NoDefaultCupertinoThemeData] styling specification.
+  ///
+  /// Unspecified parameters default to null.
   const NoDefaultCupertinoThemeData({
     this.brightness,
     this.primaryColor,
@@ -347,13 +307,83 @@ class NoDefaultCupertinoThemeData {
     this.scaffoldBackgroundColor,
   });
 
+  /// The brightness override for Cupertino descendants.
+  ///
+  /// Defaults to null. If a non-null [Brightness] is specified, the value will
+  /// take precedence over the ambient [MediaQueryData.platformBrightness], when
+  /// determining the brightness of descendant Cupertino widgets.
+  ///
+  /// If coming from a Material [Theme] and unspecified, [brightness] will be
+  /// derived from the Material [ThemeData]'s `brightness`.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
+  ///    [brightness] to its Material [Theme] parent if it's unspecified.
+  ///
+  ///  * [CupertinoTheme.brightnessOf], a method used to retrieve the overall
+  ///    [Brightness] from a [BuildContext], for Cupertino widgets.
   final Brightness? brightness;
+
+  /// A color used on interactive elements of the theme.
+  ///
+  /// This color is generally used on text and icons in buttons and tappable
+  /// elements. Defaults to [CupertinoColors.activeBlue].
+  ///
+  /// If coming from a Material [Theme] and unspecified, [primaryColor] will be
+  /// derived from the Material [ThemeData]'s `colorScheme.primary`. However, in
+  /// iOS styling, the [primaryColor] is more sparsely used than in Material
+  /// Design where the [primaryColor] can appear on non-interactive surfaces like
+  /// the [AppBar] background, [TextField] borders etc.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
+  ///    [primaryColor] to its Material [Theme] parent if it's unspecified.
   final Color? primaryColor;
+
+  /// A color that must be easy to see when rendered on a [primaryColor] background.
+  ///
+  /// For example, this color is used for a [CupertinoButton]'s text and icons
+  /// when the button's background is [primaryColor].
+  ///
+  /// If coming from a Material [Theme] and unspecified, [primaryContrastingColor]
+  /// will be derived from the Material [ThemeData]'s `colorScheme.onPrimary`.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
+  ///    [primaryContrastingColor] to its Material [Theme] parent if it's unspecified.
   final Color? primaryContrastingColor;
+
+  /// Text styles used by Cupertino widgets.
+  ///
+  /// Derived from [primaryColor] if unspecified.
   final CupertinoTextThemeData? textTheme;
+
+  /// Background color of the top nav bar and bottom tab bar.
+  ///
+  /// Defaults to a light gray in light mode, or a dark translucent gray color in
+  /// dark mode.
   final Color? barBackgroundColor;
+
+  /// Background color of the scaffold.
+  ///
+  /// Defaults to [CupertinoColors.systemBackground].
   final Color? scaffoldBackgroundColor;
 
+  /// Returns an instance of the theme data whose property getters only return
+  /// the construction time specifications with no derived values.
+  ///
+  /// Used in Material themes to let unspecified properties fallback to Material
+  /// theme properties instead of iOS defaults.
+  NoDefaultCupertinoThemeData noDefault() => this;
+
+  /// Returns a new theme data with all its colors resolved against the
+  /// given [BuildContext].
+  ///
+  /// Called by [CupertinoTheme.of] to resolve colors defined in the retrieved
+  /// [CupertinoThemeData].
   NoDefaultCupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
     Color? convertColor(Color? color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
@@ -367,6 +397,12 @@ class NoDefaultCupertinoThemeData {
     );
   }
 
+  /// Creates a copy of the theme data with specified attributes overridden.
+  ///
+  /// Only the current instance's specified attributes are copied instead of
+  /// derived values. For instance, if the current [textTheme] is implied from
+  /// the current [primaryColor] because it was not specified, copying with a
+  /// different [primaryColor] will also change the copy's implied [textTheme].
   NoDefaultCupertinoThemeData copyWith({
     Brightness? brightness,
     Color? primaryColor,
@@ -384,8 +420,6 @@ class NoDefaultCupertinoThemeData {
       scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
     );
   }
-
-  NoDefaultCupertinoThemeData noDefault() => this;
 }
 
 @immutable
