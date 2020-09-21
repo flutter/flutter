@@ -326,7 +326,11 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   auto placeholder = [[[UIView alloc] init] autorelease];
 
   placeholder.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-  placeholder.backgroundColor = UIColor.whiteColor;
+  if (@available(iOS 13.0, *)) {
+    placeholder.backgroundColor = UIColor.systemBackgroundColor;
+  } else {
+    placeholder.backgroundColor = UIColor.whiteColor;
+  }
   placeholder.autoresizesSubviews = YES;
 
   // Only add the label when we know we have failed to enable tracing (and it was necessary).
