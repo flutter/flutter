@@ -34,10 +34,11 @@ Future<ui.Image> createTestImage({
 }) => TestAsyncUtils.guard(() async {
   assert(width != null && width > 0);
   assert(height != null && height > 0);
+  assert(cache != null);
 
   final int cacheKey = hashValues(width, height);
   if (cache && _cache.containsKey(cacheKey)) {
-    return _cache[hashValues(width,height)];
+    return _cache[cacheKey];
   }
 
   final ui.Image image = await _createImage(width, height);
