@@ -81,7 +81,7 @@ class Form extends StatefulWidget {
       'behaviour related to auto validation. '
       'This feature was deprecated after v1.19.0.'
     )
-    bool autovalidate = false,
+    this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
@@ -140,6 +140,15 @@ class Form extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.form.autovalidateMode}
   final AutovalidateMode autovalidateMode;
+
+  /// Used to enable/disable form fields auto validation and update their error
+  /// text.
+  @Deprecated(
+    'Use autoValidateMode parameter which provide more specific '
+    'behaviour related to auto validation. '
+    'This feature was deprecated after v1.19.0.'
+  )
+  final bool autovalidate;
 
   @override
   FormState createState() => FormState();
