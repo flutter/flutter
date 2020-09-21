@@ -291,14 +291,19 @@ class _DevFSHttpWriter implements DevFSWriter {
         await request.addStream(contents);
         // The contents has already been streamed, closing the request should
         // not take long but we are experiencing hangs with it, see #63869.
-        final HttpClientResponse response =
-            await request.close().timeout(const Duration(milliseconds: 500));
-        response.listen((_) {},
-          onError: (dynamic error) {
-            _logger.printTrace('error: $error');
-          },
-          cancelOnError: true,
-        );
+        try {
+          final HttpClientResponse response =
+              await request.close().timeout(const Duration(milliseconds: 500));
+          response.listen((_) {},
+            onError: (dynamic error) {
+              _logger.printTrace('error: $error');
+            },
+            cancelOnError: true,
+          );
+        } on TimeoutException {
+          request.abort();
+          rethrow;
+        }
         break;
       } on Exception catch (error, trace) {
         if (!_completer.isCompleted) {
