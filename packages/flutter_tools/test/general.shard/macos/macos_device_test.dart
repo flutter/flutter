@@ -36,6 +36,7 @@ void main() {
     final MacOSDevice device = MacOSDevice(
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
+      fileSystem: MemoryFileSystem.test(),
     );
     final MockMacOSApp mockMacOSApp = MockMacOSApp();
 
@@ -56,6 +57,7 @@ void main() {
   testUsingContext('Attaches to log reader when running in release mode', () async {
     final Completer<void> completer = Completer<void>();
     final MacOSDevice device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['Example.app'],
@@ -88,6 +90,7 @@ void main() {
 
   testWithoutContext('No devices listed if platform is unsupported', () async {
     expect(await MacOSDevices(
+      fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       platform: linux,
@@ -100,6 +103,7 @@ void main() {
 
   testWithoutContext('No devices listed if platform is supported and feature is disabled', () async {
     final MacOSDevices macOSDevices = MacOSDevices(
+      fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       platform: macOS,
@@ -114,6 +118,7 @@ void main() {
 
   testWithoutContext('devices listed if platform is supported and feature is enabled', () async {
     final MacOSDevices macOSDevices = MacOSDevices(
+      fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       platform: macOS,
@@ -128,6 +133,7 @@ void main() {
 
   testWithoutContext('can discover devices with a provided timeout', () async {
     final MacOSDevices macOSDevices = MacOSDevices(
+      fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       platform: macOS,
@@ -145,6 +151,7 @@ void main() {
 
   testUsingContext('isSupportedForProject is true with editable host app', () async {
     final MacOSDevice device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
     );
@@ -162,6 +169,7 @@ void main() {
 
   testUsingContext('isSupportedForProject is false with no host app', () async {
     final MacOSDevice device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
     );
@@ -178,6 +186,7 @@ void main() {
   testUsingContext('executablePathForDevice uses the correct package executable', () async {
     final MockMacOSApp mockApp = MockMacOSApp();
     final MacOSDevice device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
     );

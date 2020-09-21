@@ -369,12 +369,14 @@ class FlutterDeviceManager extends DeviceManager {
       macOSWorkflow: macOSWorkflow,
       logger: logger,
       platform: platform,
+      fileSystem: fileSystem,
     ),
     LinuxDevices(
       platform: platform,
       featureFlags: featureFlags,
       processManager: processManager,
       logger: logger,
+      fileSystem: fileSystem,
     ),
     WindowsDevices(),
     WebDevices(

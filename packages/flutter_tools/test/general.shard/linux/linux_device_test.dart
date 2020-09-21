@@ -31,6 +31,7 @@ void main() {
     final LinuxDevice device = LinuxDevice(
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
+      fileSystem: MemoryFileSystem.test(),
     );
 
     final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
@@ -51,6 +52,7 @@ void main() {
 
   testWithoutContext('LinuxDevice: no devices listed if platform unsupported', () async {
     expect(await LinuxDevices(
+      fileSystem: MemoryFileSystem.test(),
       platform: windows,
       featureFlags: TestFeatureFlags(isLinuxEnabled: true),
       logger: BufferLogger.test(),
@@ -60,6 +62,7 @@ void main() {
 
   testWithoutContext('LinuxDevice: no devices listed if Linux feature flag disabled', () async {
     expect(await LinuxDevices(
+      fileSystem: MemoryFileSystem.test(),
       platform: linux,
       featureFlags: TestFeatureFlags(isLinuxEnabled: false),
       logger: BufferLogger.test(),
@@ -69,6 +72,7 @@ void main() {
 
   testWithoutContext('LinuxDevice: devices', () async {
     expect(await LinuxDevices(
+      fileSystem: MemoryFileSystem.test(),
       platform: linux,
       featureFlags: TestFeatureFlags(isLinuxEnabled: true),
       logger: BufferLogger.test(),
@@ -79,6 +83,7 @@ void main() {
   testWithoutContext('LinuxDevice: discoverDevices', () async {
     // Timeout ignored.
     final List<Device> devices = await LinuxDevices(
+      fileSystem: MemoryFileSystem.test(),
       platform: linux,
       featureFlags: TestFeatureFlags(isLinuxEnabled: true),
       logger: BufferLogger.test(),
@@ -96,6 +101,7 @@ void main() {
     expect(LinuxDevice(
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
+      fileSystem: MemoryFileSystem.test(),
     ).isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
@@ -110,6 +116,7 @@ void main() {
     expect(LinuxDevice(
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
+      fileSystem: MemoryFileSystem.test(),
     ).isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
@@ -121,6 +128,7 @@ void main() {
     final LinuxDevice device = LinuxDevice(
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
+      fileSystem: MemoryFileSystem.test(),
     );
     const String debugPath = 'debug/executable';
     const String profilePath = 'profile/executable';

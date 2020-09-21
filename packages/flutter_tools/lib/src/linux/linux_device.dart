@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
@@ -22,12 +23,14 @@ class LinuxDevice extends DesktopDevice {
   LinuxDevice({
     @required ProcessManager processManager,
     @required Logger logger,
+    @required FileSystem fileSystem,
   }) : super(
       'linux',
       platformType: PlatformType.linux,
       ephemeral: false,
       logger: logger,
       processManager: processManager,
+      fileSystem: fileSystem,
   );
 
   @override
@@ -67,6 +70,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
     @required Platform platform,
     @required FeatureFlags featureFlags,
+    @required FileSystem fileSystem,
     ProcessManager processManager,
     Logger logger,
   }) : _platform = platform ?? globals.platform, // TODO(jonahwilliams): remove after google3 roll
@@ -74,6 +78,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
           platform: platform,
           featureFlags: featureFlags,
        ),
+       _fileSystem = fileSystem,
        _logger = logger,
        _processManager = processManager ?? globals.processManager,
        super('linux devices');
@@ -82,6 +87,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
   final LinuxWorkflow _linuxWorkflow;
   final ProcessManager _processManager;
   final Logger _logger;
+  final FileSystem _fileSystem;
 
   @override
   bool get supportsPlatform => _platform.isLinux;
@@ -98,6 +104,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
       LinuxDevice(
         logger: _logger,
         processManager: _processManager,
+        fileSystem: _fileSystem,
       ),
     ];
   }
