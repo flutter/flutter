@@ -209,6 +209,50 @@ void main() {
     ProcessManager: () => processManager,
   });
 
+  testUsingContext('AndroidAot provide code size information.', () async {
+    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      outputDir: fileSystem.directory('out')..createSync(),
+      defines: <String, String>{
+        kBuildMode: 'release',
+        kCodeSizeDirectory: 'code_size_1',
+      },
+      artifacts: artifacts,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    processManager.addCommand(FakeCommand(command: <String>[
+      artifacts.getArtifactPath(
+        Artifact.genSnapshot,
+        platform: TargetPlatform.android_arm64,
+        mode: BuildMode.release,
+      ),
+      '--deterministic',
+      '--write-v8-snapshot-profile-to=code_size_1/snapshot.arm64-v8a.json',
+      '--trace-precompiler-to=code_size_1/trace.arm64-v8a.json',
+      '--snapshot_kind=app-aot-elf',
+      '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
+      '--strip',
+      '--no-causal-async-stacks',
+      '--lazy-async-stacks',
+      environment.buildDir.childFile('app.dill').path,
+      ],
+    ));
+    environment.buildDir.createSync(recursive: true);
+    environment.buildDir.childFile('app.dill').createSync();
+    environment.projectDir.childFile('.packages').writeAsStringSync('\n');
+    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+
+    await androidAot.build(environment);
+
+    expect(processManager.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
   testUsingContext('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
     processManager = FakeProcessManager.list(<FakeCommand>[]);
     final Environment environment = Environment.test(

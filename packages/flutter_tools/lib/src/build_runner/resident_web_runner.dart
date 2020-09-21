@@ -21,9 +21,8 @@ import '../base/net.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
+import '../build_system/targets/web.dart';
 import '../dart/language_version.dart';
-import '../dart/pub.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../features.dart';
@@ -443,15 +442,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
 
     try {
       return await asyncGuard(() async {
-        // Ensure dwds resources are cached. If the .packages file is missing then
-        // the client.js script cannot be located by the injected handler in dwds.
-        // This will result in a NoSuchMethodError thrown by injected_handler.darts
-        await pub.get(
-          context: PubContext.pubGet,
-          directory: globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
-          generateSyntheticPackage: false,
-        );
-
         final ExpressionCompiler expressionCompiler =
           debuggingOptions.webEnableExpressionEvaluation
               ? WebExpressionCompiler(device.generator)
@@ -488,6 +478,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             debuggingOptions.buildInfo,
             debuggingOptions.initializePlatform,
             false,
+            kNoneWorker,
           );
         }
         await device.device.startApp(
@@ -557,6 +548,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions.buildInfo,
           debuggingOptions.initializePlatform,
           false,
+          kNoneWorker,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -596,6 +588,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
         nullSafety: usageNullSafety,
+        fastReassemble: null,
       ).send();
     }
     return OperationResult.ok;
@@ -699,7 +692,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       fullRestart: fullRestart,
       dillOutputPath: dillOutputPath,
       projectRootPath: projectRootPath,
-      pathToReload: getReloadPath(fullRestart: fullRestart),
+      pathToReload: getReloadPath(fullRestart: fullRestart, swap: false),
       invalidatedFiles: invalidationResult.uris,
       packageConfig: invalidationResult.packageConfig,
       trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:meta/meta.dart' show required, visibleForTesting;
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -630,11 +628,14 @@ extension FlutterVmService on vm_service.VmService {
 
   Future<Map<String, dynamic>> flutterFastReassemble({
    @required String isolateId,
+   @required String className,
   }) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.fastReassemble',
       isolateId: isolateId,
-      args: <String, Object>{},
+      args: <String, Object>{
+        'className': className,
+      },
     );
   }
 

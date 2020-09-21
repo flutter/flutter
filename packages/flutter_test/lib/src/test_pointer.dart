@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
@@ -295,7 +293,7 @@ class TestPointer {
 
 /// Signature for a callback that can dispatch events and returns a future that
 /// completes when the event dispatch is complete.
-typedef EventDispatcher = Future<void> Function(PointerEvent event, HitTestResult result);
+typedef EventDispatcher = Future<void> Function(PointerEvent event);
 
 /// Signature for callbacks that perform hit-testing at a given location.
 typedef HitTester = HitTestResult Function(Offset location);
@@ -324,27 +322,22 @@ class TestGesture {
   /// arguments are required.
   TestGesture({
     @required EventDispatcher dispatcher,
-    @required HitTester hitTester,
     int pointer = 1,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device,
     int buttons = kPrimaryButton,
   }) : assert(dispatcher != null),
-       assert(hitTester != null),
        assert(pointer != null),
        assert(kind != null),
        assert(buttons != null),
        _dispatcher = dispatcher,
-       _hitTester = hitTester,
-       _pointer = TestPointer(pointer, kind, device, buttons),
-       _result = null;
+       _pointer = TestPointer(pointer, kind, device, buttons);
 
   /// Dispatch a pointer down event at the given `downLocation`, caching the
   /// hit test result.
   Future<void> down(Offset downLocation, { Duration timeStamp = Duration.zero }) async {
     return TestAsyncUtils.guard<void>(() async {
-      _result = _hitTester(downLocation);
-      return _dispatcher(_pointer.down(downLocation, timeStamp: timeStamp), _result);
+      return _dispatcher(_pointer.down(downLocation, timeStamp: timeStamp));
     });
   }
 
@@ -353,36 +346,33 @@ class TestGesture {
   Future<void> downWithCustomEvent(Offset downLocation, PointerDownEvent event) async {
     _pointer.setDownInfo(event, downLocation);
     return TestAsyncUtils.guard<void>(() async {
-      _result = _hitTester(downLocation);
-      return _dispatcher(event, _result);
+      return _dispatcher(event);
     });
   }
 
   final EventDispatcher _dispatcher;
-  final HitTester _hitTester;
   final TestPointer _pointer;
-  HitTestResult _result;
 
   /// In a test, send a move event that moves the pointer by the given offset.
   @visibleForTesting
   Future<void> updateWithCustomEvent(PointerEvent event, { Duration timeStamp = Duration.zero }) {
     _pointer.setDownInfo(event, event.position);
     return TestAsyncUtils.guard<void>(() {
-      return _dispatcher(event, _result);
+      return _dispatcher(event);
     });
   }
 
   /// In a test, send a pointer add event for this pointer.
   Future<void> addPointer({ Duration timeStamp = Duration.zero, Offset location }) {
     return TestAsyncUtils.guard<void>(() {
-      return _dispatcher(_pointer.addPointer(timeStamp: timeStamp, location: location ?? _pointer.location), null);
+      return _dispatcher(_pointer.addPointer(timeStamp: timeStamp, location: location ?? _pointer.location));
     });
   }
 
   /// In a test, send a pointer remove event for this pointer.
   Future<void> removePointer({ Duration timeStamp = Duration.zero, Offset location }) {
     return TestAsyncUtils.guard<void>(() {
-      return _dispatcher(_pointer.removePointer(timeStamp: timeStamp, location: location ?? _pointer.location), null);
+      return _dispatcher(_pointer.removePointer(timeStamp: timeStamp, location: location ?? _pointer.location));
     });
   }
 
@@ -403,14 +393,11 @@ class TestGesture {
   Future<void> moveTo(Offset location, { Duration timeStamp = Duration.zero }) {
     return TestAsyncUtils.guard<void>(() {
       if (_pointer._isDown) {
-        assert(_result != null,
-            'Move events with the pointer down must be preceded by a down '
-            'event that captures a hit test result.');
-        return _dispatcher(_pointer.move(location, timeStamp: timeStamp), _result);
+        return _dispatcher(_pointer.move(location, timeStamp: timeStamp));
       } else {
         assert(_pointer.kind != PointerDeviceKind.touch,
             'Touch device move events can only be sent if the pointer is down.');
-        return _dispatcher(_pointer.hover(location, timeStamp: timeStamp), null);
+        return _dispatcher(_pointer.hover(location, timeStamp: timeStamp));
       }
     });
   }
@@ -419,9 +406,8 @@ class TestGesture {
   Future<void> up({ Duration timeStamp = Duration.zero }) {
     return TestAsyncUtils.guard<void>(() async {
       assert(_pointer._isDown);
-      await _dispatcher(_pointer.up(timeStamp: timeStamp), _result);
+      await _dispatcher(_pointer.up(timeStamp: timeStamp));
       assert(!_pointer._isDown);
-      _result = null;
     });
   }
 
@@ -431,9 +417,8 @@ class TestGesture {
   Future<void> cancel({ Duration timeStamp = Duration.zero }) {
     return TestAsyncUtils.guard<void>(() async {
       assert(_pointer._isDown);
-      await _dispatcher(_pointer.cancel(timeStamp: timeStamp), _result);
+      await _dispatcher(_pointer.cancel(timeStamp: timeStamp));
       assert(!_pointer._isDown);
-      _result = null;
     });
   }
 }

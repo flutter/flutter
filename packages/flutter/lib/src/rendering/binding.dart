@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
 
@@ -50,8 +47,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   /// The current [RendererBinding], if one has been created.
-  static RendererBinding get instance => _instance;
-  static RendererBinding _instance;
+  static RendererBinding? get instance => _instance;
+  static RendererBinding? _instance;
 
   @override
   void initServiceExtensions() {
@@ -145,20 +142,25 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   /// Called automatically when the binding is created.
   void initRenderView() {
-    assert(renderView == null);
+    assert(!_debugIsRenderViewInitialized);
+    assert(() {
+      _debugIsRenderViewInitialized = true;
+      return true;
+    }());
     renderView = RenderView(configuration: createViewConfiguration(), window: window);
     renderView.prepareInitialFrame();
   }
+  bool _debugIsRenderViewInitialized = false;
 
   /// The object that manages state about currently connected mice, for hover
   /// notification.
-  MouseTracker get mouseTracker => _mouseTracker;
-  MouseTracker _mouseTracker;
+  MouseTracker get mouseTracker => _mouseTracker!;
+  MouseTracker? _mouseTracker;
 
   /// The render tree's owner, which maintains dirty state for layout,
   /// composite, paint, and accessibility semantics.
   PipelineOwner get pipelineOwner => _pipelineOwner;
-  PipelineOwner _pipelineOwner;
+  late PipelineOwner _pipelineOwner;
 
   /// The render tree that's attached to the output surface.
   RenderView get renderView => _pipelineOwner.rootNode as RenderView;
@@ -239,25 +241,26 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     );
   }
 
-  SemanticsHandle _semanticsHandle;
+  SemanticsHandle? _semanticsHandle;
 
   /// Creates a [MouseTracker] which manages state about currently connected
   /// mice, for hover notification.
   ///
   /// Used by testing framework to reinitialize the mouse tracker between tests.
   @visibleForTesting
-  void initMouseTracker([MouseTracker tracker]) {
+  void initMouseTracker([MouseTracker? tracker]) {
     _mouseTracker?.dispose();
     _mouseTracker = tracker ?? MouseTracker();
   }
 
   @override // from GestureBinding
-  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult) {
+  void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     if (hitTestResult != null ||
         event is PointerHoverEvent ||
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
-      _mouseTracker.updateWithEvent(event,
+      assert(event.position != null);
+      _mouseTracker!.updateWithEvent(event,
           () => hitTestResult ?? renderView.hitTestMouseTrackers(event.position));
     }
     super.dispatchEvent(event, hitTestResult);
@@ -278,7 +281,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     }
   }
 
-  void _handleSemanticsAction(int id, SemanticsAction action, ByteData args) {
+  void _handleSemanticsAction(int id, SemanticsAction action, ByteData? args) {
     _pipelineOwner.semanticsOwner?.performAction(
       id,
       action,
@@ -306,13 +309,13 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       _debugMouseTrackerUpdateScheduled = true;
       return true;
     }());
-    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
       assert(_debugMouseTrackerUpdateScheduled);
       assert(() {
         _debugMouseTrackerUpdateScheduled = false;
         return true;
       }());
-      _mouseTracker.updateAllDevices(renderView.hitTestMouseTrackers);
+      _mouseTracker!.updateAllDevices(renderView.hitTestMouseTrackers);
     });
   }
 
@@ -455,29 +458,31 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @override
   void hitTest(HitTestResult result, Offset position) {
     assert(renderView != null);
+    assert(result != null);
+    assert(position != null);
     renderView.hitTest(result, position: position);
     super.hitTest(result, position);
   }
 
   Future<void> _forceRepaint() {
-    RenderObjectVisitor visitor;
+    late RenderObjectVisitor visitor;
     visitor = (RenderObject child) {
       child.markNeedsPaint();
       child.visitChildren(visitor);
     };
-    instance?.renderView?.visitChildren(visitor);
+    instance?.renderView.visitChildren(visitor);
     return endOfFrame;
   }
 }
 
 /// Prints a textual representation of the entire render tree.
 void debugDumpRenderTree() {
-  debugPrint(RendererBinding.instance?.renderView?.toStringDeep() ?? 'Render tree unavailable.');
+  debugPrint(RendererBinding.instance?.renderView.toStringDeep() ?? 'Render tree unavailable.');
 }
 
 /// Prints a textual representation of the entire layer tree.
 void debugDumpLayerTree() {
-  debugPrint(RendererBinding.instance?.renderView?.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.');
+  debugPrint(RendererBinding.instance?.renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.');
 }
 
 /// Prints a textual representation of the entire semantics tree.
@@ -487,7 +492,7 @@ void debugDumpLayerTree() {
 /// The order in which the children of a [SemanticsNode] will be printed is
 /// controlled by the [childOrder] parameter.
 void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
-  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: childOrder) ?? 'Semantics not collected.');
+  debugPrint(RendererBinding.instance?.renderView.debugSemantics?.toStringDeep(childOrder: childOrder) ?? 'Semantics not collected.');
 }
 
 /// A concrete binding for applications that use the Rendering framework
@@ -502,7 +507,7 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
   ///
   /// The `root` render box is attached directly to the [renderView] and is
   /// given constraints that require it to fill the window.
-  RenderingFlutterBinding({ RenderBox root }) {
+  RenderingFlutterBinding({ RenderBox? root }) {
     assert(renderView != null);
     renderView.child = root;
   }

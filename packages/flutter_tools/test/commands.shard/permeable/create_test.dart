@@ -811,6 +811,25 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
+  testUsingContext('Windows has correct VERSIONINFO', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
+
+    final File resourceFile = projectDir.childDirectory('windows').childDirectory('runner').childFile('Runner.rc');
+    expect(resourceFile.existsSync(), true);
+    final String contents = resourceFile.readAsStringSync();
+    expect(contents, contains('"CompanyName", "com.foo.bar"'));
+    expect(contents, contains('"ProductName", "flutter_project"'));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
   testUsingContext('app does not include Windows by default', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
@@ -2005,6 +2024,24 @@ void main() {
     final Map<String, VersionConstraint> env = pubspec.environment;
     expect(env['flutter'].allows(Version(1, 20, 0)), true);
     expect(env['flutter'].allows(Version(1, 19, 0)), false);
+  });
+
+  testUsingContext('default app uses Android sdk 29', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(globals.fs.isFileSync('${projectDir.path}/android/app/build.gradle'), true);
+
+    final String buildContent = await globals.fs.file(projectDir.path + '/android/app/build.gradle').readAsString();
+
+    expect(buildContent.contains('compileSdkVersion 29'), true);
+    expect(buildContent.contains('targetSdkVersion 29'), true);
   });
 
 }

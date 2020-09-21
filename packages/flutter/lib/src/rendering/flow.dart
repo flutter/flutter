@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui show Color;
 
 import 'package:flutter/foundation.dart';
@@ -32,7 +30,7 @@ abstract class FlowPaintingContext {
   /// The size of the [i]th child.
   ///
   /// If [i] is negative or exceeds [childCount], returns null.
-  Size getChildSize(int i);
+  Size? getChildSize(int i);
 
   /// Paint the [i]th child using the given transform.
   ///
@@ -59,9 +57,9 @@ abstract class FlowPaintingContext {
 ///  * [RenderFlow]
 abstract class FlowDelegate {
   /// The flow will repaint whenever [repaint] notifies its listeners.
-  const FlowDelegate({ Listenable repaint }) : _repaint = repaint;
+  const FlowDelegate({ Listenable? repaint }) : _repaint = repaint;
 
-  final Listenable _repaint;
+  final Listenable? _repaint;
 
   /// Override to control the size of the container for the children.
   ///
@@ -145,7 +143,7 @@ abstract class FlowDelegate {
 /// matrix, use the [FlowPaintingContext.paintChild] function from an override
 /// of the [FlowDelegate.paintChildren] function.
 class FlowParentData extends ContainerBoxParentData<RenderBox> {
-  Matrix4 _transform;
+  Matrix4? _transform;
 }
 
 /// Implements the flow layout algorithm.
@@ -181,16 +179,19 @@ class RenderFlow extends RenderBox
   /// For optimal performance, consider using children that return true from
   /// [isRepaintBoundary].
   RenderFlow({
-    List<RenderBox> children,
-    @required FlowDelegate delegate,
+    List<RenderBox>? children,
+    required FlowDelegate delegate,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(delegate != null),
-       _delegate = delegate {
+       assert(clipBehavior != null),
+       _delegate = delegate,
+       _clipBehavior = clipBehavior {
     addAll(children);
   }
 
   @override
   void setupParentData(RenderBox child) {
-    final ParentData childParentData = child.parentData;
+    final ParentData? childParentData = child.parentData;
     if (childParentData is FlowParentData)
       childParentData._transform = null;
     else
@@ -220,6 +221,20 @@ class RenderFlow extends RenderBox
     if (attached) {
       oldDelegate._repaint?.removeListener(markNeedsPaint);
       newDelegate._repaint?.addListener(markNeedsPaint);
+    }
+  }
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.hardEdge;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
     }
   }
 
@@ -285,7 +300,7 @@ class RenderFlow extends RenderBox
     size = _getSize(constraints);
     int i = 0;
     _randomAccessChildren.clear();
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     while (child != null) {
       _randomAccessChildren.add(child);
       final BoxConstraints innerConstraints = _delegate.getConstraintsForChild(i, constraints);
@@ -304,18 +319,18 @@ class RenderFlow extends RenderBox
   final List<int> _lastPaintOrder = <int>[];
 
   // Only valid during paint.
-  PaintingContext _paintingContext;
-  Offset _paintingOffset;
+  PaintingContext? _paintingContext;
+  Offset? _paintingOffset;
 
   @override
-  Size getChildSize(int i) {
+  Size? getChildSize(int i) {
     if (i < 0 || i >= _randomAccessChildren.length)
       return null;
     return _randomAccessChildren[i].size;
   }
 
   @override
-  void paintChild(int i, { Matrix4 transform, double opacity = 1.0 }) {
+  void paintChild(int i, { Matrix4? transform, double opacity = 1.0 }) {
     transform ??= Matrix4.identity();
     final RenderBox child = _randomAccessChildren[i];
     final FlowParentData childParentData = child.parentData as FlowParentData;
@@ -341,10 +356,10 @@ class RenderFlow extends RenderBox
       context.paintChild(child, offset);
     }
     if (opacity == 1.0) {
-      _paintingContext.pushTransform(needsCompositing, _paintingOffset, transform, painter);
+      _paintingContext!.pushTransform(needsCompositing, _paintingOffset!, transform, painter);
     } else {
-      _paintingContext.pushOpacity(_paintingOffset, ui.Color.getAlphaFromOpacity(opacity), (PaintingContext context, Offset offset) {
-        context.pushTransform(needsCompositing, offset, transform, painter);
+      _paintingContext!.pushOpacity(_paintingOffset!, ui.Color.getAlphaFromOpacity(opacity), (PaintingContext context, Offset offset) {
+        context.pushTransform(needsCompositing, offset, transform!, painter);
       });
     }
   }
@@ -367,11 +382,15 @@ class RenderFlow extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintWithDelegate);
+    if (clipBehavior == Clip.none) {
+      _paintWithDelegate(context, offset);
+    } else {
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintWithDelegate, clipBehavior: clipBehavior);
+    }
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     final List<RenderBox> children = getChildrenAsList();
     for (int i = _lastPaintOrder.length - 1; i >= 0; --i) {
       final int childIndex = _lastPaintOrder[i];
@@ -379,14 +398,14 @@ class RenderFlow extends RenderBox
         continue;
       final RenderBox child = children[childIndex];
       final FlowParentData childParentData = child.parentData as FlowParentData;
-      final Matrix4 transform = childParentData._transform;
+      final Matrix4? transform = childParentData._transform;
       if (transform == null)
         continue;
       final bool absorbed = result.addWithPaintTransform(
         transform: transform,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset position) {
-          return child.hitTest(result, position: position);
+        hitTest: (BoxHitTestResult result, Offset? position) {
+          return child.hitTest(result, position: position!);
         },
       );
       if (absorbed)
@@ -399,7 +418,7 @@ class RenderFlow extends RenderBox
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     final FlowParentData childParentData = child.parentData as FlowParentData;
     if (childParentData._transform != null)
-      transform.multiply(childParentData._transform);
+      transform.multiply(childParentData._transform!);
     super.applyPaintTransform(child, transform);
   }
 }

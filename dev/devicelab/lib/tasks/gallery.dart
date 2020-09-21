@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -23,6 +22,7 @@ TaskFunction createGalleryTransitionE2ETest({bool semanticsEnabled = false}) {
     needFullTimeline: false,
     timelineSummaryFile: 'e2e_perf_summary',
     transitionDurationFile: null,
+    timelineTraceFile: null,
     driverFile: 'transitions_perf_e2e_test',
   );
 }
@@ -43,6 +43,7 @@ class GalleryTransitionTest {
     this.testFile = 'transitions_perf',
     this.needFullTimeline = true,
     this.timelineSummaryFile = 'transitions.timeline_summary',
+    this.timelineTraceFile = 'transitions.timeline',
     this.transitionDurationFile = 'transition_durations.timeline',
     this.driverFile,
   });
@@ -51,6 +52,7 @@ class GalleryTransitionTest {
   final bool needFullTimeline;
   final String testFile;
   final String timelineSummaryFile;
+  final String timelineTraceFile;
   final String transitionDurationFile;
   final String driverFile;
 
@@ -95,19 +97,28 @@ class GalleryTransitionTest {
       summary['transitions'] = transitions;
       summary['missed_transition_count'] = _countMissedTransitions(transitions);
     }
-
-    return TaskResult.success(summary, benchmarkScoreKeys: <String>[
+    final List<String> detailFiles = <String>[
       if (transitionDurationFile != null)
-        'missed_transition_count',
-      'average_frame_build_time_millis',
-      'worst_frame_build_time_millis',
-      '90th_percentile_frame_build_time_millis',
-      '99th_percentile_frame_build_time_millis',
-      'average_frame_rasterizer_time_millis',
-      'worst_frame_rasterizer_time_millis',
-      '90th_percentile_frame_rasterizer_time_millis',
-      '99th_percentile_frame_rasterizer_time_millis',
-    ]);
+        '${galleryDirectory.path}/build/$transitionDurationFile.json',
+      if (timelineTraceFile != null)
+        '${galleryDirectory.path}/build/$timelineTraceFile.json'
+    ];
+
+    return TaskResult.success(summary,
+      detailFiles: detailFiles.isNotEmpty ? detailFiles : null,
+      benchmarkScoreKeys: <String>[
+        if (transitionDurationFile != null)
+          'missed_transition_count',
+        'average_frame_build_time_millis',
+        'worst_frame_build_time_millis',
+        '90th_percentile_frame_build_time_millis',
+        '99th_percentile_frame_build_time_millis',
+        'average_frame_rasterizer_time_millis',
+        'worst_frame_rasterizer_time_millis',
+        '90th_percentile_frame_rasterizer_time_millis',
+        '99th_percentile_frame_rasterizer_time_millis',
+      ],
+    );
   }
 }
 

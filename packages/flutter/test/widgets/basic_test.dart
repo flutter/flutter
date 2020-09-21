@@ -263,11 +263,11 @@ void main() {
       final double belowBaseline = math.max(belowBaseline1, belowBaseline2);
       expect(rowBox.size.height, greaterThan(textBox1.size.height));
       expect(rowBox.size.height, greaterThan(textBox2.size.height));
-      expect(rowBox.size.height, closeTo(aboveBaseline + belowBaseline, .001));
+      expect(rowBox.size.height, moreOrLessEquals(aboveBaseline + belowBaseline, epsilon: .001));
       expect(tester.getTopLeft(find.byKey(key1)).dy, 0);
       expect(
         tester.getTopLeft(find.byKey(key2)).dy,
-        closeTo(aboveBaseline1 - aboveBaseline2, .001),
+        moreOrLessEquals(aboveBaseline1 - aboveBaseline2, epsilon: .001),
       );
     });
 
@@ -321,7 +321,7 @@ void main() {
       expect(tester.getTopLeft(find.byKey(key1)).dy, 0);
       expect(
         tester.getTopLeft(find.byKey(key2)).dy,
-        closeTo(aboveBaseline1 - aboveBaseline2, .001),
+        moreOrLessEquals(aboveBaseline1 - aboveBaseline2, epsilon: .001),
       );
     });
   });
@@ -340,7 +340,7 @@ void main() {
   testWidgets('UnconstrainedBox can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(const UnconstrainedBox());
     final RenderUnconstrainedBox renderObject = tester.allRenderObjects.whereType<RenderUnconstrainedBox>().first;
-    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+    expect(renderObject.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(const UnconstrainedBox(clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));

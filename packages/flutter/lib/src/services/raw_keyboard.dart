@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 
-import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
@@ -267,6 +266,7 @@ abstract class RawKeyEvent with Diagnosticable {
   /// on the [SystemChannels.keyEvent] channel.
   factory RawKeyEvent.fromMessage(Map<String, dynamic> message) {
     RawKeyEventData data;
+    String? character;
 
     final String keymap = message['keymap'] as String;
     switch (keymap) {
@@ -284,13 +284,20 @@ abstract class RawKeyEvent with Diagnosticable {
           deviceId: message['deviceId'] as int? ?? 0,
           repeatCount: message['repeatCount'] as int? ?? 0,
         );
+        if (message.containsKey('character')) {
+          character = message['character'] as String?;
+        }
         break;
       case 'fuchsia':
+        final int codePoint = message['codePoint'] as int? ?? 0;
         data = RawKeyEventDataFuchsia(
           hidUsage: message['hidUsage'] as int? ?? 0,
-          codePoint: message['codePoint'] as int? ?? 0,
+          codePoint: codePoint,
           modifiers: message['modifiers'] as int? ?? 0,
         );
+        if (codePoint != 0) {
+          character = String.fromCharCode(codePoint);
+        }
         break;
       case 'macos':
         data = RawKeyEventDataMacOs(
@@ -298,15 +305,20 @@ abstract class RawKeyEvent with Diagnosticable {
             charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
             keyCode: message['keyCode'] as int? ?? 0,
             modifiers: message['modifiers'] as int? ?? 0);
+        character = message['characters'] as String?;
         break;
       case 'linux':
+        final int unicodeScalarValues = message['unicodeScalarValues'] as int? ?? 0;
         data = RawKeyEventDataLinux(
             keyHelper: KeyHelper(message['toolkit'] as String? ?? ''),
-            unicodeScalarValues: message['unicodeScalarValues'] as int? ?? 0,
+            unicodeScalarValues: unicodeScalarValues,
             keyCode: message['keyCode'] as int? ?? 0,
             scanCode: message['scanCode'] as int? ?? 0,
             modifiers: message['modifiers'] as int? ?? 0,
             isDown: message['type'] == 'keydown');
+        if (unicodeScalarValues != 0) {
+          character = String.fromCharCode(unicodeScalarValues);
+        }
         break;
       case 'web':
         data = RawKeyEventDataWeb(
@@ -314,14 +326,19 @@ abstract class RawKeyEvent with Diagnosticable {
           key: message['key'] as String? ?? '',
           metaState: message['metaState'] as int? ?? 0,
         );
+        character = message['key'] as String?;
         break;
       case 'windows':
+        final int characterCodePoint = message['characterCodePoint'] as int? ?? 0;
         data = RawKeyEventDataWindows(
           keyCode: message['keyCode'] as int? ?? 0,
           scanCode: message['scanCode'] as int? ?? 0,
-          characterCodePoint: message['characterCodePoint'] as int? ?? 0,
+          characterCodePoint: characterCodePoint,
           modifiers: message['modifiers'] as int? ?? 0,
         );
+        if (characterCodePoint != 0) {
+          character = String.fromCharCode(characterCodePoint);
+        }
         break;
       default:
         // Raw key events are not yet implemented  on iOS or other platforms,
@@ -333,7 +350,7 @@ abstract class RawKeyEvent with Diagnosticable {
     final String type = message['type'] as String;
     switch (type) {
       case 'keydown':
-        return RawKeyDownEvent(data: data, character: message['character'] as String);
+        return RawKeyDownEvent(data: data, character: character);
       case 'keyup':
         return RawKeyUpEvent(data: data);
       default:

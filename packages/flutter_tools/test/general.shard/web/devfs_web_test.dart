@@ -520,6 +520,7 @@ void main() {
     expect(webDevFS.webAssetServer.getFile('main.dart'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('manifest.json'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('flutter_service_worker.js'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('version.json'),isNotNull);
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'HELLO');
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
 
@@ -633,6 +634,7 @@ void main() {
     expect(webDevFS.webAssetServer.getFile('main.dart'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('manifest.json'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('flutter_service_worker.js'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('version.json'), isNotNull);
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'HELLO');
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
 
@@ -752,6 +754,28 @@ void main() {
 
     await webDevFS.destroy();
   }));
+
+  test('allows frame embedding', () async {
+    final WebAssetServer webAssetServer = await WebAssetServer.start(
+      null,
+      'localhost',
+      0,
+      null,
+      true,
+      true,
+      const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+      ),
+      false,
+      Uri.base,
+      null,
+      testMode: true);
+
+    expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
+    await webAssetServer.dispose();
+  });
 }
 
 class MockHttpServer extends Mock implements HttpServer {}
