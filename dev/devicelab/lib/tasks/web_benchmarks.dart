@@ -29,6 +29,8 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
     entryPoint: 'lib/web_benchmarks.dart',
   );
 
+  print(originalBenchmarkResult.toJson());
+
   // Gallery benchmarks.
   section('Get New Flutter Gallery!');
 
@@ -45,7 +47,17 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
     await exec('git', <String>['checkout', '6dc1c16bf67600bb907820a6407c1118cc297632']);
   });
 
-  
+  final TaskResult galleryBenchmarkResult = await runWebBenchmarkIn(
+    useCanvasKit: useCanvasKit,
+    macrobenchmarksDirectory: 'temp/gallery',
+    entryPoint: 'lib/benchmarks/runner.dart',
+  );
+
+  print(galleryBenchmarkResult.toJson());
+
+  return TaskResult.success(
+    <String, int>{'ans': 0},
+  );
 }
 
 Future<TaskResult> runWebBenchmarkIn({
