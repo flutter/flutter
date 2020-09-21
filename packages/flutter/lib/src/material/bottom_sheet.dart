@@ -472,7 +472,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
-    final Widget bottomSheet = MediaQuery.removePadding(
+    Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
       child: Builder(
@@ -490,6 +490,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
         },
       ),
     );
+    if (isScrollControlled)
+      bottomSheet = Padding(
+        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+        child: bottomSheet
+      );
     return capturedThemes.wrap(bottomSheet);
   }
 }
