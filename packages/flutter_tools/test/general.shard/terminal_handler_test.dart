@@ -109,17 +109,6 @@ void main() {
       verify(mockResidentRunner.printHelp(details: true)).called(3);
     });
 
-    testUsingContext('k - toggles CanvasKit rendering and prints results', () async {
-      when(mockResidentRunner.toggleCanvaskit())
-        .thenAnswer((Invocation invocation) async {
-          return true;
-        });
-
-      await terminalHandler.processTerminalInput('k');
-
-      verify(mockResidentRunner.toggleCanvaskit()).called(1);
-    });
-
     testUsingContext('i - debugToggleWidgetInspector with service protocol', () async {
       await terminalHandler.processTerminalInput('i');
 
