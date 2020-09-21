@@ -22,11 +22,15 @@ const int benchmarkServerPort = 9999;
 const int chromeDebugPort = 10000;
 
 Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
+  // Original (non-gallery) benchmarks.
   return await runWebBenchmarkIn(
     useCanvasKit: useCanvasKit,
     macrobenchmarksDirectory: path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks'),
     entryPoint: 'lib/web_benchmarks.dart',
   );
+
+  // Gallery benchmarks.
+  
 }
 
 Future<TaskResult> runWebBenchmarkIn({
