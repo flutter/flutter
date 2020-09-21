@@ -50,10 +50,11 @@ import java.util.ArrayList;
  * your activity implement {@link PluginRegistry} and/or {@link
  * io.flutter.view.FlutterView.Provider} and forward those methods to this class as well.
  *
- * <p>Deprecation: {@link io.flutter.embedding.android.FlutterActivity} is the new API that now
- * replaces this class and {@link io.flutter.app.FlutterActivity}. See
- * https://flutter.dev/go/android-project-migration for more migration details.
+ * @deprecated {@link io.flutter.embedding.android.FlutterActivity} is the new API that now replaces
+ *     this class and {@link io.flutter.app.FlutterActivity}. See
+ *     https://flutter.dev/go/android-project-migration for more migration details.
  */
+@Deprecated
 public final class FlutterActivityDelegate
     implements FlutterActivityEvents, FlutterView.Provider, PluginRegistry {
   private static final String SPLASH_SCREEN_META_DATA_KEY =
