@@ -101,14 +101,22 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     // offset.
     if (childScrollOffset(firstChild!) == null) {
       int leadingChildrenWithoutLayoutOffset = 0;
-      while (childScrollOffset(earliestUsefulChild!) == null) {
+      while (earliestUsefulChild != null && childScrollOffset(earliestUsefulChild) == null) {
         earliestUsefulChild = childAfter(firstChild!);
         leadingChildrenWithoutLayoutOffset += 1;
       }
       // We should be able to destroy children with null layout offset safely,
       // because they are likely outside of viewport
       collectGarbage(leadingChildrenWithoutLayoutOffset, 0);
-      assert(firstChild != null);
+      // If can not find a valid layout offset, start from the initial child.
+      if (firstChild == null) {
+        if (!addInitialChild()) {
+          // There are no children.
+          geometry = SliverGeometry.zero;
+          childManager.didFinishLayout();
+          return;
+        }
+      }
     }
 
     // Find the last child that is at or before the scrollOffset.
