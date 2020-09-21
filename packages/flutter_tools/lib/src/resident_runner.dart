@@ -795,7 +795,6 @@ abstract class ResidentRunner {
   bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
-  bool get supportsCanvasKit => false;
   bool get supportsWriteSkSL => supportsServiceProtocol;
   bool get trackWidgetCreation => debuggingOptions.buildInfo.trackWidgetCreation;
 
@@ -1319,9 +1318,6 @@ abstract class ResidentRunner {
         commandHelp.S.print();
         commandHelp.U.print();
       }
-      if (supportsCanvasKit){
-        commandHelp.k.print();
-      }
       if (supportsWriteSkSL) {
         commandHelp.M.print();
       }
@@ -1473,13 +1469,6 @@ class TerminalHandler {
       case 'I':
         if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
           await residentRunner.debugToggleInvertOversizedImages();
-          return true;
-        }
-        return false;
-      case 'k':
-        if (residentRunner.supportsCanvasKit) {
-          final bool result = await residentRunner.toggleCanvaskit();
-          globals.printStatus('${result ? 'Enabled' : 'Disabled'} CanvasKit');
           return true;
         }
         return false;

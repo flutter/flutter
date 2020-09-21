@@ -1223,8 +1223,6 @@ void main() {
     expect(residentRunner.supportsServiceProtocol, true);
     // isRunningDebug
     expect(residentRunner.isRunningDebug, true);
-    // does not support CanvasKit
-    expect(residentRunner.supportsCanvasKit, false);
     // does support SkSL
     expect(residentRunner.supportsWriteSkSL, true);
     // commands
@@ -1278,8 +1276,6 @@ void main() {
     expect(residentRunner.supportsServiceProtocol, false);
     // isRunningDebug
     expect(residentRunner.isRunningDebug, false);
-    // does not support CanvasKit
-    expect(residentRunner.supportsCanvasKit, false);
     // does support SkSL
     expect(residentRunner.supportsWriteSkSL, false);
     // commands
