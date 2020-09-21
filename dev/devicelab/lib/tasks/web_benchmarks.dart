@@ -30,6 +30,21 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
   );
 
   // Gallery benchmarks.
+  section('Get New Flutter Gallery!');
+
+  if (exists(io.Directory('temp/gallery'))) {
+    io.Directory('temp/gallery').deleteSync(recursive: true);
+  }
+
+  await inDirectory<void>(io.Directory('temp'), () async {
+    await exec('git', <String>['clone', 'https://github.com/pennzht/newfluttergallery.git']);
+  });
+
+  await inDirectory<void>(io.Directory('temp/gallery'), () async {
+    // TODO: Use fixed version.
+    await exec('git', <String>['checkout', '6dc1c16bf67600bb907820a6407c1118cc297632']);
+  });
+
   
 }
 
