@@ -536,3 +536,40 @@ class DevFS {
   /// Converts a platform-specific file path to a platform-independent URL path.
   String _asUriPath(String filePath) => _fileSystem.path.toUri(filePath).path + '/';
 }
+
+/// An implementation of a devFS writer which copies physical files for devices
+/// running on the same host.
+///
+/// DevFS entries which correspond to physical files are copied using [File.copySync],
+/// while entries that correspond to arbitrary string/byte values are written from
+/// memory.
+///
+/// Requires that the file system is the same for both the tool and application.
+class LocalDevFSWriter implements DevFSWriter {
+  LocalDevFSWriter({
+    @required FileSystem fileSystem,
+  }) : _fileSystem = fileSystem;
+
+  final FileSystem _fileSystem;
+
+  @override
+  Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, [DevFSWriter parent]) async {
+    try {
+      for (final Uri uri in entries.keys) {
+        final DevFSContent devFSContent = entries[uri];
+        final File destination = _fileSystem.file(baseUri.resolveUri(uri));
+        if (!destination.parent.existsSync()) {
+          destination.parent.createSync(recursive: true);
+        }
+        if (devFSContent is DevFSFileContent) {
+          final File content = devFSContent.file as File;
+          content.copySync(destination.path);
+          continue;
+        }
+        destination.writeAsBytesSync(await devFSContent.contentsAsBytes());
+      }
+    } on FileSystemException catch (err) {
+      throw DevFSException(err.toString());
+    }
+  }
+}
