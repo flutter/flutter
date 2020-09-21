@@ -285,15 +285,15 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
 /// Styling specifications for a cupertino theme without default values for
 /// unspecified properties.
 ///
-/// Unlike [CupetinoThemeData] instances of this class do not return default
+/// Unlike [CupertinoThemeData] instances of this class do not return default
 /// values for properties that have been left unspecified in the constructor.
 /// Instead, unspecified properties will return null. This is used by
 /// Material's [ThemeData.cupertinoOverrideTheme].
 ///
 /// See also:
 ///
-///  * [CupetinoThemeData], which uses reasonable default values for unspecified
-///    theme properties.
+///  * [CupertinoThemeData], which uses reasonable default values for
+///    unspecified theme properties.
 class NoDefaultCupertinoThemeData {
   /// Creates a [NoDefaultCupertinoThemeData] styling specification.
   ///
