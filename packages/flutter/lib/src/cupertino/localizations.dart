@@ -196,8 +196,8 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String timerPickerHourLabel(int hour);
 
-  /// All possible labels that appears next to the hour picker in [CupertinoTimerPicker]
-  /// when selected hour value is `hour`.
+  /// All possible hour labels that appears next to the hour picker in
+  /// [CupertinoTimerPicker]
   List<String> get timerPickerHourLabels;
 
   /// Label that appears next to the minute picker in
@@ -206,8 +206,8 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String timerPickerMinuteLabel(int minute);
 
-  /// All possible labels that appears next to the minute picker in [CupertinoTimerPicker]
-  /// when selected minute value is `minute`.
+  /// All possible minute labels that appears next to the minute picker in
+  /// [CupertinoTimerPicker]
   List<String> get timerPickerMinuteLabels;
 
   /// Label that appears next to the minute picker in
@@ -216,8 +216,8 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String timerPickerSecondLabel(int second);
 
-  /// All possible labels that appears next to the second picker in [CupertinoTimerPicker]
-  /// when selected second value is `second`.
+  /// All possible second labels that appears next to the second picker in
+  /// [CupertinoTimerPicker]
   List<String> get timerPickerSecondLabels;
 
   /// The term used for cutting.
