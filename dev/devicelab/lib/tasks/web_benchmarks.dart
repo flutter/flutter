@@ -38,13 +38,17 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
 
   final io.Directory temp = io.Directory.systemTemp.createTempSync('new_gallery_web_benchmarks');
 
+  print('Created temporary directory $temp for Gallery.');
+
   await inDirectory<void>(temp, () async {
     await exec('git', <String>['clone', 'https://github.com/pennzht/newfluttergallery.git']);
   });
 
-  print('Cloned.');
+  print('Cloned into $temp.');
 
   final galleryDirectory = temp.listSync().single;
+
+  print('Gallery directory is $galleryDirectory');
 
   await inDirectory<void>(galleryDirectory, () async {
     // TODO: Use fixed version.
@@ -60,6 +64,8 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
     macrobenchmarksDirectory: galleryDirectory.absolute.path,
     entryPoint: 'lib/benchmarks/runner.dart',
   );
+
+  rmTree(temp);
 
   if (galleryBenchmarkResult.failed) {
     return galleryBenchmarkResult;
