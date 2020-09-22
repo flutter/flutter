@@ -402,16 +402,21 @@ class IOSDevice extends Device {
       int installationResult = 1;
       if (debuggingOptions.debuggingEnabled) {
         _logger.printTrace('Debugging is enabled, connecting to observatory');
-        iosDeployDebugger = _iosDeploy.prepareDebuggerForLaunch(
-          deviceId: id,
-          bundlePath: bundle.path,
-          launchArguments: launchArguments,
-          interfaceType: interfaceType,
-        );
-
         final DeviceLogReader deviceLogReader = getLogReader(app: package);
-        if (deviceLogReader is IOSDeviceLogReader) {
-          deviceLogReader.debuggerStream = iosDeployDebugger;
+
+        // If the device supports syslog reading, prefer launching the app without
+        // attaching the debugger to avoid the overhead of the unnecessary extra running process.
+        if (majorSdkVersion >= IOSDeviceLogReader.minimumUniversalLoggingSdkVersion) {
+          iosDeployDebugger = _iosDeploy.prepareDebuggerForLaunch(
+            deviceId: id,
+            bundlePath: bundle.path,
+            launchArguments: launchArguments,
+            interfaceType: interfaceType,
+          );
+
+          if (deviceLogReader is IOSDeviceLogReader) {
+            deviceLogReader.debuggerStream = iosDeployDebugger;
+          }
         }
         observatoryDiscovery = ProtocolDiscovery.observatory(
           deviceLogReader,
@@ -422,14 +427,16 @@ class IOSDevice extends Device {
           devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
         );
-        installationResult = await iosDeployDebugger.launchAndAttach() ? 0 : 1;
-      } else {
+      }
+      if (iosDeployDebugger == null) {
         installationResult = await _iosDeploy.launchApp(
           deviceId: id,
           bundlePath: bundle.path,
           launchArguments: launchArguments,
           interfaceType: interfaceType,
         );
+      } else {
+        installationResult = await iosDeployDebugger.launchAndAttach() ? 0 : 1;
       }
       if (installationResult != 0) {
         _logger.printError('Could not run ${bundle.path} on $id.');
@@ -701,10 +708,10 @@ class IOSDeviceLogReader extends DeviceLogReader {
     _connectedVMService = connectedVmService;
   }
 
-  static const int _minimumUniversalLoggingSdkVersion = 13;
+  static const int minimumUniversalLoggingSdkVersion = 13;
 
   Future<void> _listenToUnifiedLoggingEvents(vm_service.VmService connectedVmService) async {
-    if (_majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
+    if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
       return;
     }
     try {
@@ -740,7 +747,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   /// Log reader will listen to [debugger.logLines] and will detach debugger on dispose.
   set debuggerStream(IOSDeployDebugger debugger) {
     // Logging is gathered from syslog on iOS 13 and earlier.
-    if (_majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
+    if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
       return;
     }
     _iosDeployDebugger = debugger;
@@ -759,7 +766,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
   void _listenToSysLog() {
     // syslog is not written on iOS 13+.
-    if (_majorSdkVersion >= _minimumUniversalLoggingSdkVersion) {
+    if (_majorSdkVersion >= minimumUniversalLoggingSdkVersion) {
       return;
     }
     _iMobileDevice.startLogger(_deviceId).then<void>((Process process) {
