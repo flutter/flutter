@@ -37,7 +37,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
   section('Get New Flutter Gallery!');
 
   final tempDirectory = path.join(flutterDirectory.path, 'dev', 'devicelab', 'temp');
-
+/*
   await inDirectory<void>(io.Directory(tempDirectory), () async {
     await exec('git', <String>['clone', 'https://github.com/pennzht/newfluttergallery.git']);
   });
@@ -52,7 +52,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
     await evalFlutter('pub', options: <String>['get']);
     print('Pub get finished.');
   });
-
+*/
   final TaskResult galleryBenchmarkResult = await runWebBenchmarkIn(
     useCanvasKit: useCanvasKit,
     macrobenchmarksDirectory: '$tempDirectory/newfluttergallery',
@@ -80,19 +80,31 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       ..addAll(originalData)
       ..addAll(galleryData);
 
-  final List<String> benchmarkScoreKeys =
-      originalBenchmarkResult.benchmarkScoreKeys +
-      galleryBenchmarkResult.benchmarkScoreKeys;
+  final List<String> benchmarkScoreKeys = _nullAwareConcatenation(
+    originalBenchmarkResult.benchmarkScoreKeys,
+    galleryBenchmarkResult.benchmarkScoreKeys,
+  );
 
-  final List<String> detailFiles =
-      originalBenchmarkResult.detailFiles +
-      galleryBenchmarkResult.detailFiles;
+  final List<String> detailFiles = _nullAwareConcatenation(
+    originalBenchmarkResult.detailFiles,
+    galleryBenchmarkResult.detailFiles,
+  );
 
   return TaskResult.success(
     combinedData,
     benchmarkScoreKeys: benchmarkScoreKeys,
     detailFiles: detailFiles,
   );
+}
+
+List<String> _nullAwareConcatenation(List<String> list1, List<String> list2) {
+  if (list1 == null) {
+    return list2;
+  } else if (list2 == null) {
+    return list1;
+  } else {
+    return list1 + list2;
+  }
 }
 
 Future<TaskResult> runWebBenchmarkIn({
