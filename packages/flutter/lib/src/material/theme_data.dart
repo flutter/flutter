@@ -271,7 +271,7 @@ class ThemeData with Diagnosticable {
     FloatingActionButtonThemeData floatingActionButtonTheme,
     NavigationRailThemeData navigationRailTheme,
     Typography typography,
-    CupertinoThemeData cupertinoOverrideTheme,
+    NoDefaultCupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
     PopupMenuThemeData popupMenuTheme,
@@ -405,7 +405,7 @@ class ThemeData with Diagnosticable {
     dataTableTheme ??= const DataTableThemeData();
 
     fixTextFieldOutlineLabel ??= false;
-    useTextSelectionTheme ??= false;
+    useTextSelectionTheme ??= true;
 
     return ThemeData.raw(
       visualDensity: visualDensity,
@@ -883,12 +883,21 @@ class ThemeData with Diagnosticable {
   final Color secondaryHeaderColor;
 
   /// The color of text selections in text fields, such as [TextField].
+  ///
+  /// By default this property is no longer used. It has been replaced with
+  /// [TextSelectionThemeData.selectionColor] and will soon be deprecated.
   final Color textSelectionColor;
 
   /// The color of cursors in Material-style text fields, such as [TextField].
+  ///
+  /// By default this property is no longer used. It has been replaced with
+  /// [TextSelectionThemeData.cursorColor] and will soon be deprecated.
   final Color cursorColor;
 
   /// The color of the handles used to adjust what part of the text is currently selected.
+  ///
+  /// By default this property is no longer used. It has been replaced with
+  /// [TextSelectionThemeData.selectionHandleColor] and will soon be deprecated.
   final Color textSelectionHandleColor;
 
   /// A color that contrasts with the [primaryColor], e.g. used as the
@@ -1071,7 +1080,7 @@ class ThemeData with Diagnosticable {
   ///
   /// This cascading effect for individual attributes of the [CupertinoThemeData]
   /// can be overridden using attributes of this [cupertinoOverrideTheme].
-  final CupertinoThemeData cupertinoOverrideTheme;
+  final NoDefaultCupertinoThemeData cupertinoOverrideTheme;
 
   /// A theme for customizing the color, elevation, and shape of a bottom sheet.
   final BottomSheetThemeData bottomSheetTheme;
@@ -1202,7 +1211,7 @@ class ThemeData with Diagnosticable {
     FloatingActionButtonThemeData floatingActionButtonTheme,
     NavigationRailThemeData navigationRailTheme,
     Typography typography,
-    CupertinoThemeData cupertinoOverrideTheme,
+    NoDefaultCupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
     PopupMenuThemeData popupMenuTheme,
@@ -1673,7 +1682,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationRailThemeData>('navigationRailThemeData', navigationRailTheme, defaultValue: defaultData.navigationRailTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<NoDefaultCupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme, level: DiagnosticLevel.debug));
@@ -1750,7 +1759,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
       );
 
   final ThemeData _materialTheme;
-  final CupertinoThemeData _cupertinoOverrideTheme;
+  final NoDefaultCupertinoThemeData _cupertinoOverrideTheme;
 
   @override
   Brightness get brightness => _cupertinoOverrideTheme.brightness ?? _materialTheme.brightness;

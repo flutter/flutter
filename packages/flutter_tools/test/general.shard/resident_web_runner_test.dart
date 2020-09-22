@@ -294,12 +294,6 @@ void main() {
 
     verify(mockAppConnection.runMain()).called(1);
     verify(status.stop()).called(1);
-    verify(pub.get(
-      context: PubContext.pubGet,
-      directory: anyNamed('directory'),
-      generateSyntheticPackage: false,
-    )).called(1);
-
     expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
   }, overrides: <Type, Generator>{
@@ -765,7 +759,6 @@ void main() {
     final WebAssetServer webAssetServer = WebAssetServer(null, null, null, null, null, null);
     when(mockWebDevFS.webAssetServer).thenReturn(webAssetServer);
 
-    expect(residentWebRunner.supportsCanvasKit, true);
     expect(webAssetServer.canvasKitRendering, false);
 
     final bool toggleResult = await residentWebRunner.toggleCanvaskit();

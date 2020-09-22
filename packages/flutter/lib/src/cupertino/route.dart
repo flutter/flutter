@@ -91,7 +91,7 @@ final DecorationTween _kGradientShadowTween = DecorationTween(
 /// See also:
 ///
 ///  * [MaterialRouteTransitionMixin], which is a mixin that provides
-///    platform-appropriate transitions for a [PageRoute]
+///    platform-appropriate transitions for a [PageRoute].
 ///  * [CupertinoPageRoute], which is a [PageRoute] that leverages this mixin.
 mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   /// Builds the primary contents of the route.

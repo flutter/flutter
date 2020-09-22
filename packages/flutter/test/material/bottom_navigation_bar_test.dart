@@ -52,11 +52,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -86,11 +86,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -149,11 +149,11 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
-                  title: Text('AC'),
+                  label: 'AC',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_alarm),
-                  title: Text('Alarm'),
+                  label: 'Alarm',
                 ),
               ],
             ),
@@ -190,11 +190,11 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
-                  title: Text('AC'),
+                  label: 'AC',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_alarm),
-                  title: Text('Alarm'),
+                  label: 'Alarm',
                 ),
               ],
             ),
@@ -224,11 +224,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -262,11 +262,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -306,11 +306,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -349,11 +349,11 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
-                  title: Text('AC'),
+                  label: 'AC',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_alarm),
-                  title: Text('Alarm'),
+                  label: 'Alarm',
                 ),
               ],
             ),
@@ -391,11 +391,11 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
-                  title: Text('AC'),
+                  label: 'AC',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_alarm),
-                  title: Text('Alarm'),
+                  label: 'Alarm',
                 ),
               ],
             ),
@@ -420,11 +420,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -463,11 +463,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -523,11 +523,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -550,11 +550,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -578,11 +578,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -606,12 +606,12 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
                 backgroundColor: itemColor,
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -631,11 +631,11 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              title: Text('AC'),
+              label: 'AC',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.access_alarm),
-              title: Text('Alarm'),
+              label: 'Alarm',
             ),
           ],
         );
@@ -656,11 +656,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -683,11 +683,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -708,11 +708,11 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
-                  title: Text('AC'),
+                  label: 'AC',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_alarm),
-                  title: Text('Alarm'),
+                  label: 'Alarm',
                 ),
               ],
             ),
@@ -736,11 +736,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -762,11 +762,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
           ),
@@ -791,19 +791,19 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_time),
-                title: Text('Time'),
+                label: 'Time',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.add),
-                title: Text('Add'),
+                label: 'Add',
               ),
             ],
           ),
@@ -852,19 +852,19 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
-                  title: Text('AC'),
+                  label: 'AC',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_alarm),
-                  title: Text('Alarm'),
+                  label: 'Alarm',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_time),
-                  title: Text('Time'),
+                  label: 'Time',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.add),
-                  title: Text('Add'),
+                  label: 'Add',
                 ),
               ],
             ),
@@ -890,19 +890,19 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
-                  title: Text('AC'),
+                  label: 'AC',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_alarm),
-                  title: Text('Alarm'),
+                  label: 'Alarm',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_time),
-                  title: Text('Time'),
+                  label: 'Time',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.add),
-                  title: Text('Add'),
+                  label: 'Add',
                 ),
               ],
             ),
@@ -925,11 +925,11 @@ void main() {
             iconSize: 12.0,
             items: <BottomNavigationBarItem>[
               const BottomNavigationBarItem(
-                title: Text('A'),
+                label: 'A',
                 icon: Icon(Icons.ac_unit),
               ),
               BottomNavigationBarItem(
-                title: const Text('B'),
+                label: 'B',
                 icon: Builder(
                   builder: (BuildContext context) {
                     builderIconSize = IconTheme.of(context).size;
@@ -960,11 +960,11 @@ void main() {
             type: BottomNavigationBarType.fixed,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                title: Text('A'),
+                label: 'A',
                 icon: Icon(Icons.ac_unit),
               ),
               BottomNavigationBarItem(
-                title: Text('B'),
+                label: 'B',
                 icon: Icon(Icons.battery_alert),
               ),
             ],
@@ -983,11 +983,11 @@ void main() {
             type: BottomNavigationBarType.shifting,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                title: Text('A'),
+                label: 'A',
                 icon: Icon(Icons.ac_unit),
               ),
               BottomNavigationBarItem(
-                title: Text('B'),
+                label: 'B',
                 icon: Icon(Icons.battery_alert),
               ),
             ],
@@ -1191,11 +1191,11 @@ void main() {
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              title: Text('A'),
+              label: 'A',
               icon: Icon(Icons.ac_unit),
             ),
             BottomNavigationBarItem(
-              title: Text('B'),
+              label: 'B',
               icon: Icon(Icons.battery_alert),
             ),
           ],
@@ -1223,11 +1223,11 @@ void main() {
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              title: Text('A'),
+              label: 'A',
               icon: Icon(Icons.ac_unit),
             ),
             BottomNavigationBarItem(
-              title: Text('B'),
+              label: 'B',
               icon: Icon(Icons.battery_alert),
             ),
           ],
@@ -1268,11 +1268,11 @@ void main() {
             BottomNavigationBarItem(
               activeIcon: Icon(Icons.favorite, key: filled),
               icon: Icon(Icons.favorite_border, key: stroked),
-              title: Text('Favorite'),
+              label: 'Favorite',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.access_alarm),
-              title: Text('Alarm'),
+              label: 'Alarm',
             ),
           ],
         ),
@@ -1292,11 +1292,11 @@ void main() {
             BottomNavigationBarItem(
               activeIcon: Icon(Icons.favorite, key: filled),
               icon: Icon(Icons.favorite_border, key: stroked),
-              title: Text('Favorite'),
+              label: 'Favorite',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.access_alarm),
-              title: Text('Alarm'),
+              label: 'Alarm',
             ),
           ],
         ),
@@ -1426,7 +1426,7 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(itemCount, (int itemIndex) {
               return BottomNavigationBarItem(
                 icon: const Icon(Icons.android),
-                title: Text('item $itemIndex'),
+                label: 'item $itemIndex',
               );
             }),
           ),
@@ -1477,12 +1477,12 @@ void main() {
                 type: BottomNavigationBarType.shifting,
                 items: <BottomNavigationBarItem>[
                   BottomNavigationBarItem(
-                    title: const Text('Page 1'),
+                    label: 'Page 1',
                     backgroundColor: _backgroundColor,
                     icon: const Icon(Icons.dashboard),
                   ),
                   BottomNavigationBarItem(
-                    title: const Text('Page 2'),
+                    label: 'Page 2',
                     backgroundColor: _backgroundColor,
                     icon: const Icon(Icons.menu),
                   ),
@@ -1530,12 +1530,12 @@ void main() {
                   },
                   items: const <BottomNavigationBarItem>[
                     BottomNavigationBarItem(
-                      title: Text('Red'),
+                      label: 'Red',
                       backgroundColor: Colors.red,
                       icon: Icon(Icons.dashboard),
                     ),
                     BottomNavigationBarItem(
-                      title: Text('Green'),
+                      label: 'Green',
                       backgroundColor: Colors.green,
                       icon: Icon(Icons.menu),
                     ),
@@ -1572,7 +1572,7 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
@@ -1598,12 +1598,12 @@ void main() {
                 type: BottomNavigationBarType.shifting,
                 items: const <BottomNavigationBarItem>[
                   BottomNavigationBarItem(
-                    title: Text('Red'),
+                    label: 'Red',
                     backgroundColor: Colors.red,
                     icon: Icon(Icons.dashboard),
                   ),
                   BottomNavigationBarItem(
-                    title: Text('Green'),
+                    label: 'Green',
                     backgroundColor: Colors.green,
                     icon: Icon(Icons.menu),
                   ),
@@ -1635,12 +1635,12 @@ void main() {
                   type: BottomNavigationBarType.fixed,
                   items: const <BottomNavigationBarItem>[
                     BottomNavigationBarItem(
-                      title: Text('Red'),
+                      label: 'Red',
                       backgroundColor: Colors.red,
                       icon: Icon(Icons.dashboard),
                     ),
                     BottomNavigationBarItem(
-                      title: Text('Green'),
+                      label: 'Green',
                       backgroundColor: Colors.green,
                       icon: Icon(Icons.menu),
                     ),

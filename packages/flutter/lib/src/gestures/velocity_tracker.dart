@@ -149,7 +149,14 @@ class _PointAtTime {
 /// have been received.
 class VelocityTracker {
   /// Create a new velocity tracker for a pointer [kind].
-  VelocityTracker(this.kind);
+  @Deprecated(
+    'Use VelocityTracker.withKind and provide the PointerDeviceKind associated with the gesture being tracked. '
+    'This feature was deprecated after v1.22.0-12.1.pre.'
+  )
+  VelocityTracker([this.kind = PointerDeviceKind.touch]);
+
+  /// Create a new velocity tracker for a pointer [kind].
+  VelocityTracker.withKind(this.kind);
 
   static const int _assumePointerMoveStoppedMilliseconds = 40;
   static const int _historySize = 20;
@@ -281,7 +288,7 @@ class VelocityTracker {
 ///   the iOS method that reports the fling velocity when the touch is released.
 class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
   /// Create a new IOSScrollViewFlingVelocityTracker.
-  IOSScrollViewFlingVelocityTracker(PointerDeviceKind kind) : super(kind);
+  IOSScrollViewFlingVelocityTracker(PointerDeviceKind kind) : super.withKind(kind);
 
   /// The velocity estimation uses at most 4 `_PointAtTime` samples. The extra
   /// samples are there to make the `VelocityEstimate.offset` sufficiently large

@@ -356,7 +356,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///
   /// See also:
   ///  * [Dart's characters package](https://pub.dev/packages/characters).
-  ///  * [Dart's documenetation on runes and grapheme clusters](https://dart.dev/guides/language/language-tour#runes-and-grapheme-clusters).
+  ///  * [Dart's documentation on runes and grapheme clusters](https://dart.dev/guides/language/language-tour#runes-and-grapheme-clusters).
   @visibleForTesting
   static TextEditingValue truncate(TextEditingValue value, int maxLength) {
     final CharacterRange iterator = CharacterRange(value.text);

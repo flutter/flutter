@@ -138,7 +138,7 @@ void main() {
 
     expect(
       logger.errorText,
-      'Font subetting is not supported in debug mode. The --tree-shake-icons'
+      'Font subsetting is not supported in debug mode. The --tree-shake-icons'
       ' flag will be ignored.\n',
     );
     expect(iconTreeShaker.enabled, false);

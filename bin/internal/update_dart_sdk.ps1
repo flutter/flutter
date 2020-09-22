@@ -57,7 +57,7 @@ $dartSdkZip = "$cachePath\$dartZipName"
 
 Try {
     Import-Module BitsTransfer
-    Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
+    Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip -ErrorAction Stop
 }
 Catch {
     Write-Host "Downloading the Dart SDK using the BITS service failed, retrying with WebRequest..."

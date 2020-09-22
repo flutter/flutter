@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
@@ -135,7 +136,8 @@ void main() {
     when(MDnsObservatoryDiscovery.instance.getObservatoryUri(
       any,
       any,
-      usesIpv6: anyNamed('usesIpv6')
+      usesIpv6: anyNamed('usesIpv6'),
+      hostVmservicePort: anyNamed('hostVmservicePort')
     )).thenAnswer((Invocation invocation) async => uri);
 
     final LaunchResult launchResult = await device.startApp(iosApp,
@@ -264,6 +266,106 @@ void main() {
       Usage: () => MockUsage(),
     });
 
+  group('IOSDevice.startApp on discovery failure local network permissions', () {
+    // Still uses context for analytics and mDNS.
+    testUsingContext('is not prompted on < iOS 14', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        kDeployCommand,
+        kLaunchDebugCommand,
+      ]);
+     final  BufferLogger logger = BufferLogger.test();
+      final IOSDevice device = setUpIOSDevice(
+        sdkVersion: '13.0',
+        processManager: processManager,
+        fileSystem: fileSystem,
+        logger: logger,
+        vmServiceConnector: (String string, {Log log}) async {
+          throw const io.SocketException(
+            'OS Error: Connection refused, errno = 61, address = localhost, port '
+                '= 58943',
+          );
+        },
+      );
+      final IOSApp iosApp = PrebuiltIOSApp(
+        projectBundleId: 'app',
+        bundleName: 'Runner',
+        bundleDir: fileSystem.currentDirectory,
+      );
+      final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+
+      device.portForwarder = const NoOpDevicePortForwarder();
+      device.setLogReader(iosApp, deviceLogReader);
+
+      when(MDnsObservatoryDiscovery.instance.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
+          .thenAnswer((Invocation invocation) async => null);
+
+      final LaunchResult launchResult = await device.startApp(iosApp,
+        prebuiltApplication: true,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        platformArgs: <String, dynamic>{},
+        fallbackPollingDelay: Duration.zero,
+        fallbackThrottleTimeout: const Duration(milliseconds: 10),
+      );
+
+      expect(launchResult.started, false);
+      expect(launchResult.hasObservatory, false);
+      expect(logger.errorText, isEmpty);
+    }, overrides: <Type, Generator>{
+      MDnsObservatoryDiscovery: () => MockMDnsObservatoryDiscovery(),
+      Usage: () => MockUsage(),
+    });
+
+    // Still uses context for analytics and mDNS.
+    testUsingContext('is prompted on >= iOS 14', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        kDeployCommand,
+        kLaunchDebugCommand,
+      ]);
+      final BufferLogger logger = BufferLogger.test();
+      final IOSDevice device = setUpIOSDevice(
+        sdkVersion: '14.0',
+        processManager: processManager,
+        fileSystem: fileSystem,
+        logger: logger,
+        vmServiceConnector: (String string, {Log log}) async {
+          throw const io.SocketException(
+            'OS Error: Connection refused, errno = 61, address = localhost, port '
+                '= 58943',
+          );
+        },
+      );
+      final IOSApp iosApp = PrebuiltIOSApp(
+        projectBundleId: 'app',
+        bundleName: 'Runner',
+        bundleDir: fileSystem.currentDirectory,
+      );
+      final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+
+      device.portForwarder = const NoOpDevicePortForwarder();
+      device.setLogReader(iosApp, deviceLogReader);
+
+      when(MDnsObservatoryDiscovery.instance.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
+          .thenAnswer((Invocation invocation) async => null);
+
+      final LaunchResult launchResult = await device.startApp(iosApp,
+        prebuiltApplication: true,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        platformArgs: <String, dynamic>{},
+        fallbackPollingDelay: Duration.zero,
+        fallbackThrottleTimeout: const Duration(milliseconds: 10),
+      );
+
+      expect(launchResult.started, false);
+      expect(launchResult.hasObservatory, false);
+      expect(logger.errorText, contains('Settings > Privacy > Local Network'));
+    }, overrides: <Type, Generator>{
+      MDnsObservatoryDiscovery: () => MockMDnsObservatoryDiscovery(),
+      Usage: () => MockUsage(),
+    });
+  });
+
   // Still uses context for TimeoutConfiguration and usage
   testUsingContext('IOSDevice.startApp succeeds in release mode', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -367,6 +469,7 @@ void main() {
       any,
       any,
       usesIpv6: anyNamed('usesIpv6'),
+      hostVmservicePort: anyNamed('hostVmservicePort')
     )).thenAnswer((Invocation invocation) async => uri);
 
     final LaunchResult launchResult = await device.startApp(iosApp,
@@ -427,7 +530,7 @@ IOSDevice setUpIOSDevice({
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     platform: macPlatform,
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
-    logger: BufferLogger.test(),
+    logger: logger ?? BufferLogger.test(),
     iosDeploy: IOSDeploy(
       logger: logger ?? BufferLogger.test(),
       platform: macPlatform,
@@ -454,3 +557,4 @@ class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscov
 class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
 class MockVmService extends Mock implements VmService {}
+class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}

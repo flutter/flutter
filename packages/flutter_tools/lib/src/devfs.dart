@@ -302,7 +302,7 @@ class UpdateFSReport {
     bool success = false,
     int invalidatedSourcesCount = 0,
     int syncedBytes = 0,
-    this.fastReassemble,
+    this.fastReassembleClassName,
   }) : _success = success,
        _invalidatedSourcesCount = invalidatedSourcesCount,
        _syncedBytes = syncedBytes;
@@ -312,7 +312,7 @@ class UpdateFSReport {
   int get syncedBytes => _syncedBytes;
 
   bool _success;
-  bool fastReassemble;
+  String fastReassembleClassName;
   int _invalidatedSourcesCount;
   int _syncedBytes;
 
@@ -320,11 +320,7 @@ class UpdateFSReport {
     if (!report._success) {
       _success = false;
     }
-    if (report.fastReassemble != null && fastReassemble != null) {
-      fastReassemble &= report.fastReassemble;
-    } else if (report.fastReassemble != null) {
-      fastReassemble = report.fastReassemble;
-    }
+    fastReassembleClassName ??= report.fastReassembleClassName;
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
   }
@@ -365,6 +361,7 @@ class DevFS {
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;
   PackageConfig lastPackageConfig;
+  File _widgetCacheOutputFile;
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
@@ -404,6 +401,20 @@ class DevFS {
     _logger.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
   }
 
+  /// If the build method of a single widget was modified, return the widget name.
+  ///
+  /// If any other changes were made, or there is an error scanning the file,
+  /// return `null`.
+  String _checkIfSingleWidgetReloadApplied() {
+    if (_widgetCacheOutputFile != null && _widgetCacheOutputFile.existsSync()) {
+      final String widget = _widgetCacheOutputFile.readAsStringSync().trim();
+      if (widget.isNotEmpty) {
+        return widget;
+      }
+    }
+    return null;
+  }
+
   /// Updates files on the device.
   ///
   /// Returns the number of bytes synced.
@@ -427,6 +438,7 @@ class DevFS {
     assert(generator != null);
     final DateTime candidateCompileTime = DateTime.now();
     lastPackageConfig = packageConfig;
+    _widgetCacheOutputFile = _fileSystem.file('$dillOutputPath.incremental.dill.widget_cache');
 
     // Update modified files
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
@@ -502,8 +514,12 @@ class DevFS {
       }
     }
     _logger.printTrace('DevFS: Sync finished');
-    return UpdateFSReport(success: true, syncedBytes: syncedBytes,
-         invalidatedSourcesCount: invalidatedFiles.length);
+    return UpdateFSReport(
+      success: true,
+      syncedBytes: syncedBytes,
+      invalidatedSourcesCount: invalidatedFiles.length,
+      fastReassembleClassName: _checkIfSingleWidgetReloadApplied(),
+    );
   }
 
   /// Converts a platform-specific file path to a platform-independent URL path.
