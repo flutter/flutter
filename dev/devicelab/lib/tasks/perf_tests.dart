@@ -15,7 +15,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
-TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = false}) {
+TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
@@ -131,7 +131,7 @@ TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupE2ETest() {
   ).run;
 }
 
-TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = false}) {
+TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -142,7 +142,7 @@ TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = false}) {
   ).run;
 }
 
-TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = false}) {
+TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -153,7 +153,7 @@ TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = false}) {
   ).run;
 }
 
-TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = false}) {
+TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -164,7 +164,7 @@ TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = false}) {
   ).run;
 }
 
-TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = false}) {
+TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -475,7 +475,7 @@ class PerfTest {
     this.testDirectory,
     this.testTarget,
     this.timelineFileName, {
-    this.measureCpuGpu = false,
+    this.measureCpuGpu = true,
     this.measureMemory = false,
     this.saveTraceFile = false,
     this.testDriver,
@@ -488,7 +488,7 @@ class PerfTest {
   const PerfTest.e2e(
     this.testDirectory,
     this.testTarget, {
-    this.measureCpuGpu = false,
+    this.measureCpuGpu = true,
     this.measureMemory = false,
     this.testDriver =  'test_driver/e2e_test.dart',
     this.needsFullTimeline = false,
