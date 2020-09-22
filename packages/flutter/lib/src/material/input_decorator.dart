@@ -1261,10 +1261,11 @@ class _RenderDecoration extends RenderBox {
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
       + _lineHeight(width, <RenderBox>[prefix, input, suffix])
       + subtextHeight
-      + contentPadding.bottom;
+      + contentPadding.bottom
+      + densityOffset.dy;
     final double minContainerHeight = decoration.isDense || expands
       ? 0.0
-      : kMinInteractiveDimension + densityOffset.dy;
+      : kMinInteractiveDimension;
     return math.max(containerHeight, minContainerHeight);
   }
 
