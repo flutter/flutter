@@ -47,9 +47,11 @@ class Repository {
   }
 
   Directory get checkouts {
+    print(platform.script.scheme);
+    final String filePath = platform.script.toFilePath();
     final String checkoutsDirname = fileSystem.path.normalize(
       fileSystem.path.join(
-        fileSystem.path.dirname(platform.script.toFilePath()),
+        fileSystem.path.dirname(filePath),
         '..',
         'checkouts',
       ),

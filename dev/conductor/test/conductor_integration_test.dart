@@ -29,7 +29,7 @@ void main() {
       fileSystem = const LocalFileSystem();
     });
 
-    test('does things', () {
+    test('integration test', () {
       final Repository frameworkFakeUpstream = Repository(
         name: 'framework-fake-upstream',
         upstream: kUpstreamRemote,
@@ -41,16 +41,16 @@ void main() {
 
       frameworkFakeUpstream.ensureCloned();
 
-      final Repository framework = Repository(
-        name: 'framework',
-        upstream: kUpstreamRemote,
-        git: git,
-        stdio: stdio,
-        platform: platform,
-        fileSystem: fileSystem,
-      );
+      //final Repository framework = Repository(
+      //  name: 'framework',
+      //  upstream: kUpstreamRemote,
+      //  git: git,
+      //  stdio: stdio,
+      //  platform: platform,
+      //  fileSystem: fileSystem,
+      //);
 
-      framework.ensureCloned();
+      //framework.ensureCloned();
     });
   });
 }
