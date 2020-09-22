@@ -52,6 +52,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
 
   final TaskResult galleryBenchmarkResult = await runWebBenchmarkIn(
     useCanvasKit: useCanvasKit,
+    // TODO: use absolute path!
     macrobenchmarksDirectory: ''/* absolute path! */,
     entryPoint: 'lib/benchmarks/runner.dart',
   );
