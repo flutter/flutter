@@ -1,3 +1,5 @@
+# Don't commit these checkouts
 *
 
+# But do commit this file
 !.gitignore
