@@ -21,7 +21,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 
 // The default font size if none is specified. This should be kept in
 // sync with the default values in text_painter.dart, as well as the
-// defaults set in the engine.
+// defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
 const double _kDefaultFontSize = 14.0;
 
 // Examples can assume:

@@ -426,7 +426,8 @@ class TextPainter {
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
       // Use the default font size to multiply by as RichText does not
-      // perform inheriting [TextStyle]s
+      // perform inheriting [TextStyle]s and would otherwise
+      // fail to apply textScaleFactor.
       fontSize: _kDefaultFontSize * textScaleFactor,
       maxLines: maxLines,
       textHeightBehavior: _textHeightBehavior,
