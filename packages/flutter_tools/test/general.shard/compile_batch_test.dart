@@ -252,9 +252,9 @@ void main() {
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       fileSystemRoots: <String>[
-        '/foo/bar/fizz/',
+        '/foo/bar/fizz',
       ],
-      fileSystemScheme: 'scheme:///',
+      fileSystemScheme: 'scheme',
       logger: BufferLogger.test(),
       processManager: mockProcessManager
     );
