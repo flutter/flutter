@@ -181,14 +181,12 @@ class KernelCompiler {
     @required Artifacts artifacts,
     @required List<String> fileSystemRoots,
     @required String fileSystemScheme,
-    @required Platform platform,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _processManager = processManager,
        _fileSystemScheme = fileSystemScheme,
-       _fileSystemRoots = fileSystemRoots,
-       _platform = platform;
+       _fileSystemRoots = fileSystemRoots;
 
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
@@ -196,7 +194,6 @@ class KernelCompiler {
   final Logger _logger;
   final String _fileSystemScheme;
   final List<String> _fileSystemRoots;
-  final Platform _platform;
 
   Future<CompilerOutput> compile({
     String sdkRoot,
@@ -233,7 +230,7 @@ class KernelCompiler {
     if (packagesPath != null) {
       mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
     }
-    mainUri ??= toMultiRootPath(mainFileUri, _fileSystemScheme, _fileSystemRoots, _platform.isWindows);
+    mainUri ??= toMultiRootPath(mainFileUri, _fileSystemScheme, _fileSystemRoots, _fileSystem.path.separator == r'\');
     if (outputFilePath != null && !_fileSystem.isFileSync(outputFilePath)) {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
@@ -505,6 +502,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   DefaultResidentCompiler(
     String sdkRoot, {
     @required this.buildMode,
+    @required Platform platform,
     Logger logger, // TODO(jonahwilliams): migrate to @required after google3
     ProcessManager processManager, // TODO(jonahwilliams): migrate to @required after google3
     Artifacts artifacts, // TODO(jonahwilliams): migrate to @required after google3
@@ -519,7 +517,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.platformDill,
     List<String> dartDefines,
     this.librariesSpec,
-    @required Platform platform,
     // Deprecated
     List<String> experimentalFlags, // ignore: avoid_unused_constructor_parameters
   }) : assert(sdkRoot != null),
