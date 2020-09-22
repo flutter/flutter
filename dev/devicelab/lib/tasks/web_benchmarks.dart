@@ -48,7 +48,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
 
   final galleryDirectory = temp.listSync().single;
 
-  print('Gallery directory is $galleryDirectory');
+  print('Gallery directory is $galleryDirectory.');
 
   await inDirectory<void>(galleryDirectory, () async {
     // TODO: Use fixed version.
