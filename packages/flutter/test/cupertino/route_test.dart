@@ -1495,10 +1495,10 @@ void main() {
   testWidgets('Popping routes during back swipe should not crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/63984#issuecomment-675679939
 
-    CupertinoPageRoute r = CupertinoPageRoute<void>(builder: (BuildContext context) {
-      return Scaffold(
+    final CupertinoPageRoute<void> r = CupertinoPageRoute<void>(builder: (BuildContext context) {
+      return const Scaffold(
         body: Center(
-          child: Text('gg'),
+          child: Text('child'),
         ),
       );
     });
@@ -1509,8 +1509,7 @@ void main() {
       home: Center(
         child: Builder(builder: (BuildContext context) {
           return RaisedButton(
-            color: const Color.fromARGB(255, 255, 0, 0),
-            child: Text('press me'),
+            child: const Text('Home'),
             onPressed: () {
               navigator = Navigator.of(context);
               assert(navigator != null);
@@ -1529,20 +1528,17 @@ void main() {
 
     await gesture.down(const Offset(3, 300), timeStamp: Duration.zero);
 
-    Duration time = Duration.zero;
-    double x = 5;
+    // Need 2 events to form a valid drag
+    await tester.pump(const Duration(milliseconds: 100));
+    await gesture.moveTo(const Offset(30, 300), timeStamp: const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 200));
+    await gesture.moveTo(const Offset(50, 300), timeStamp: const Duration(milliseconds: 200));
 
-    for (int i = 0; i < 3; i += 1) {
-      time += const Duration(milliseconds: 10);
-      x += 10;
-      await tester.pump(const Duration(milliseconds: 10));
-      await gesture.moveTo(Offset(x, 300), timeStamp: time);
-    }
-    await tester.pump(const Duration(seconds: 1));
-    x += 1;
-    time += const Duration(seconds: 1);
-    await gesture.moveTo(Offset(x, 300), timeStamp: time);
+    // Pause a while so that the route is popped when the drag is canceled
+    await tester.pump(const Duration(milliseconds: 1000));
+    await gesture.moveTo(const Offset(51, 300), timeStamp: const Duration(milliseconds: 1200));
 
+    // Remove the drag
     navigator.removeRoute(r);
     await tester.pump();
   });
