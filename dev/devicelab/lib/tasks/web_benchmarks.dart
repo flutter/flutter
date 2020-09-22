@@ -55,9 +55,6 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
     // TODO: When gallery PR merges, use `galleryVersion`.
     await exec('git', <String>['checkout', '6dc1c16bf67600bb907820a6407c1118cc297632']);
     print('Git checkout finished.');
-
-    await evalFlutter('pub', options: <String>['get']);
-    print('Pub get finished.');
   });
 
   final TaskResult galleryBenchmarkResult = await runWebBenchmarkIn(
