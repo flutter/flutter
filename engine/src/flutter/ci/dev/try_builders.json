@@ -31,6 +31,12 @@
          "enabled": true
       },
       {
+        "name":"Linux Web Framework tests",
+        "repo":"engine",
+        "enabled": true,
+        "run_if": ["DEPS", "lib/web_ui/**", "web_sdk/**"]
+      },
+      {
          "name":"Mac Android AOT Engine",
          "repo":"engine",
          "enabled": true
