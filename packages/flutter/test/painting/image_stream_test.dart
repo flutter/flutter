@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 
 class FakeFrameInfo implements FrameInfo {
-  FakeFrameInfo(int width, int height, this._duration, this._image);
+  FakeFrameInfo(this._duration, this._image);
 
 
   final Duration _duration;
@@ -70,9 +70,11 @@ class FakeEventReportingImageStreamCompleter extends ImageStreamCompleter {
 }
 
 void main() {
-  Image image;
+  Image image20x10;
+  Image image200x100;
   setUpAll(() async {
-    image = await createTestImage();
+    image20x10 = await createTestImage(width: 20, height: 10);
+    image200x100 = await createTestImage(width: 200, height: 100);
   });
 
   testWidgets('Codec future fails', (WidgetTester tester) async {
@@ -293,7 +295,7 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame = FakeFrameInfo(20, 10, const Duration(milliseconds: 200), image);
+    final FrameInfo frame = FakeFrameInfo(const Duration(milliseconds: 200), image20x10);
     mockCodec.completeNextFrame(frame);
     await tester.idle();
 
@@ -319,7 +321,7 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200), image);
+    final FrameInfo frame1 = FakeFrameInfo(const Duration(milliseconds: 200), image20x10);
     mockCodec.completeNextFrame(frame1);
     await tester.idle();
     // We are waiting for the next animation tick, so at this point no frames
@@ -329,7 +331,7 @@ void main() {
     await tester.pump();
     expect(emittedImages, equals(<ImageInfo>[ImageInfo(image: frame1.image)]));
 
-    final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400), image);
+    final FrameInfo frame2 = FakeFrameInfo(const Duration(milliseconds: 400), image200x100);
     mockCodec.completeNextFrame(frame2);
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -367,8 +369,8 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200), image);
-    final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400), image);
+    final FrameInfo frame1 = FakeFrameInfo(const Duration(milliseconds: 200), image20x10);
+    final FrameInfo frame2 = FakeFrameInfo(const Duration(milliseconds: 400), image200x100);
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle(); // let nextFrameFuture complete
@@ -410,8 +412,8 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200), image);
-    final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400), image);
+    final FrameInfo frame1 = FakeFrameInfo(const Duration(milliseconds: 200), image20x10);
+    final FrameInfo frame2 = FakeFrameInfo(const Duration(milliseconds: 400), image200x100);
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle(); // let nextFrameFuture complete
@@ -448,8 +450,8 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200), image);
-    final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400), image);
+    final FrameInfo frame1 = FakeFrameInfo(const Duration(milliseconds: 200), image20x10);
+    final FrameInfo frame2 = FakeFrameInfo(const Duration(milliseconds: 400), image200x100);
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle(); // let nextFrameFuture complete
@@ -493,8 +495,8 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200), image);
-    final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400), image);
+    final FrameInfo frame1 = FakeFrameInfo(const Duration(milliseconds: 200), image20x10);
+    final FrameInfo frame2 = FakeFrameInfo(const Duration(milliseconds: 400), image200x100);
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle(); // let nextFrameFuture complete
@@ -532,8 +534,8 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200), image);
-    final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400), image);
+    final FrameInfo frame1 = FakeFrameInfo(const Duration(milliseconds: 200), image20x10);
+    final FrameInfo frame2 = FakeFrameInfo(const Duration(milliseconds: 400), image200x100);
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle(); // let nextFrameFuture complete
@@ -565,8 +567,8 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200), image);
-    final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400), image);
+    final FrameInfo frame1 = FakeFrameInfo(const Duration(milliseconds: 200), image20x10);
+    final FrameInfo frame2 = FakeFrameInfo(const Duration(milliseconds: 400), image200x100);
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle(); // let nextFrameFuture complete
@@ -641,7 +643,7 @@ void main() {
     imageStream.addListener(ImageStreamListener(listener));
 
 
-    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200), image);
+    final FrameInfo frame1 = FakeFrameInfo(const Duration(milliseconds: 200), image20x10);
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle(); // let nextFrameFuture complete
