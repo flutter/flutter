@@ -2715,8 +2715,8 @@ class _RouteEntry extends RouteTransitionRecord {
   Route<dynamic> lastAnnouncedPoppedNextRoute = notAnnounced; // last argument to Route.didPopNext
   Route<dynamic>? lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
 
-  /// Restoration ID used for the encapsulated route if restoration is enabled
-  /// for it or null if restoration cannot be enabled for this route.
+  /// Restoration ID to be used for the encapsulating route when restoration is
+  /// enabled for it or null if restoration cannot be enabled for it.
   String? get restorationId {
     // User-provided restoration ids of Pages are prefixed with 'p+'. Generated
     // ids for pageless routes are prefixed with 'r+' to avoid clashes.
@@ -2724,7 +2724,7 @@ class _RouteEntry extends RouteTransitionRecord {
       final Page<Object> page = route.settings as Page<Object>;
       return page.restorationId != null ? 'p+${page.restorationId}' : null;
     }
-    if (restorationInformation != null && restorationInformation!.isRestorable) {
+    if (restorationInformation != null) {
       return 'r+${restorationInformation!.restorationScopeId}';
     }
     return null;
@@ -5009,7 +5009,7 @@ class _HistoryProperty extends RestorableProperty<Map<String?, List<Object>>?> {
       }
 
       assert(!entry.hasPage);
-      restorationEnabled = restorationEnabled && entry.restorationId != null;
+      restorationEnabled = restorationEnabled && entry.restorationInformation?.isRestorable == true;
       entry.restorationEnabled = restorationEnabled;
       if (restorationEnabled) {
         assert(entry.restorationId != null);
