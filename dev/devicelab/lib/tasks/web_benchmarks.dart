@@ -47,7 +47,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
 
   print('Cloned into $temp.');
 
-  final galleryDirectory = temp.listSync().single;
+  final io.FileSystemEntity galleryDirectory = temp.listSync().single;
 
   print('Gallery directory is $galleryDirectory.');
 
