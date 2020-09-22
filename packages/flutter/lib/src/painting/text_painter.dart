@@ -420,6 +420,7 @@ class TextPainter {
     ) ?? ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
+      textHeightBehavior: _textHeightBehavior,
       maxLines: maxLines,
       textHeightBehavior: _textHeightBehavior,
       ellipsis: ellipsis,
