@@ -44,7 +44,6 @@ abstract class DesktopDevice extends Device {
   final Set<Process> _runningProcesses = <Process>{};
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
-  @override
   DevFSWriter get devFSWriter => _desktopDevFSWriter ??= LocalDevFSWriter(fileSystem: _fileSystem);
   LocalDevFSWriter _desktopDevFSWriter;
 

@@ -25,7 +25,6 @@ import 'base/platform.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'devfs.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_device.dart';
 import 'fuchsia/fuchsia_sdk.dart';
@@ -659,9 +658,6 @@ abstract class Device {
   }
 
   Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
-
-  /// An optional platform-specific interface for writing files to the devFS.
-  DevFSWriter get devFSWriter => null;
 
   @nonVirtual
   @override

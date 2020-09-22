@@ -176,8 +176,6 @@ class FlutterDevice {
     );
   }
 
-  DevFSWriter get devFSWriter => device.devFSWriter;
-
   final Device device;
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
@@ -694,7 +692,7 @@ class FlutterDevice {
         pathToReload: pathToReload,
         invalidatedFiles: invalidatedFiles,
         packageConfig: packageConfig,
-        devFSWriter: device.devFSWriter,
+        devFSWriter: null,
       );
     } on DevFSException {
       devFSStatus.cancel();

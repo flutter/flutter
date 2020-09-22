@@ -296,7 +296,6 @@ class IOSSimulator extends Device {
   final SimControl _simControl;
   final Xcode _xcode;
 
-  @override
   DevFSWriter get devFSWriter => _desktopDevFSWriter ??= LocalDevFSWriter(fileSystem: globals.fs);
   LocalDevFSWriter _desktopDevFSWriter;
 
