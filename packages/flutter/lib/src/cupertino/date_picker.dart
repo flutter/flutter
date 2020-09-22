@@ -1681,7 +1681,12 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   double _measureLabelsMaxWidth(List<String> labels, TextStyle style) {
     double maxWidth = double.negativeInfinity;
     for (int i = 0; i < labels.length; i++) {
-      textPainter.text = TextSpan(text: labels[i], style: style);
+      final String label = labels[i];
+      if(label == null) {
+        continue;
+      }
+
+      textPainter.text = TextSpan(text: label, style: style);
       textPainter.layout();
       textPainter.maxIntrinsicWidth;
       if (textPainter.maxIntrinsicWidth > maxWidth)
