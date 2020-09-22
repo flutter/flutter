@@ -588,6 +588,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
         nullSafety: usageNullSafety,
+        fastReassemble: null,
       ).send();
     }
     return OperationResult.ok;
@@ -797,9 +798,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
     await cleanupAtFinish();
     return 0;
   }
-
-  @override
-  bool get supportsCanvasKit => supportsServiceProtocol;
 
   @override
   Future<bool> toggleCanvaskit() async {

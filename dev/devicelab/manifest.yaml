@@ -681,7 +681,7 @@ tasks:
     description: >
       Checks the functionality and performance of hot reload on a macOS target platform
     stage: devicelab
-    required_agent_capabilities: ["mac"]
+    required_agent_capabilities: ["mac/ios"]
 
 #  TODO(jonahwilliams): investigate build failures on devicelab infra to re-enable.
 #  mac_enable_twc:
@@ -775,12 +775,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  flutter_gallery__transition_perf_e2e_ios32:
-    description: >
-      Measures the performance of screen transitions in Flutter Gallery on
-      Android with e2e.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios32"]
+#  TODO(jmagman): https://github.com/flutter/flutter/issues/66166
+#  flutter_gallery__transition_perf_e2e_ios32:
+#    description: >
+#      Measures the performance of screen transitions in Flutter Gallery on
+#      Android with e2e.
+#    stage: devicelab_ios
+#    required_agent_capabilities: ["mac/ios32"]
 
   flutter_gallery__transition_perf_e2e_ios:
     description: >
@@ -895,7 +896,6 @@ tasks:
       placeholder.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   analyzer_benchmark:
     description: >
