@@ -10,13 +10,22 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
 
-const ImageProvider _kImage = TestImageProvider(21, 42);
 
 void main() {
+  ImageProvider _image;
+
+  setUpAll(() async {
+    _image = TestImageProvider(
+      21,
+      42,
+      image: await createTestImage(width: 10, height: 10),
+    );
+  });
+
   testWidgets('ImageIcon sizing - no theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(
-        child: ImageIcon(_kImage),
+      Center(
+        child: ImageIcon(_image),
       ),
     );
 
@@ -27,10 +36,10 @@ void main() {
 
   testWidgets('Icon opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(
+      Center(
         child: IconTheme(
-          data: IconThemeData(opacity: 0.5),
-          child: ImageIcon(_kImage),
+          data: const IconThemeData(opacity: 0.5),
+          child: ImageIcon(_image),
         ),
       ),
     );

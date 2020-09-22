@@ -10,7 +10,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/painting.dart';
 
 import '../flutter_test_alternative.dart';
-import 'image_data.dart';
+import '../image_data.dart';
 import 'painting_utils.dart';
 
 void main() {
