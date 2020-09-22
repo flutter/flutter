@@ -95,6 +95,9 @@ class CkAnimatedImage implements ui.Image {
     final ByteData data = bytes.buffer.asByteData(0, bytes.length);
     return Future<ByteData>.value(data);
   }
+
+  @override
+  String toString() => '[$width\u00D7$height]';
 }
 
 /// A [ui.Image] backed by an `SkImage` from Skia.
@@ -143,6 +146,9 @@ class CkImage implements ui.Image {
     final ByteData data = bytes.buffer.asByteData(0, bytes.length);
     return Future<ByteData>.value(data);
   }
+
+  @override
+  String toString() => '[$width\u00D7$height]';
 }
 
 /// A [Codec] that wraps an `SkAnimatedImage`.

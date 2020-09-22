@@ -21,6 +21,13 @@ void testMain() {
       await ui.webOnlyInitializePlatform();
     });
 
+    test('CkAnimatedImage toString', () {
+      final SkAnimatedImage skAnimatedImage = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
+      final CkAnimatedImage image = CkAnimatedImage(skAnimatedImage);
+      expect(image.toString(), '[1×1]');
+      image.dispose();
+    });
+
     test('CkAnimatedImage can be explicitly disposed of', () {
       final SkAnimatedImage skAnimatedImage = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
       final CkAnimatedImage image = CkAnimatedImage(skAnimatedImage);
@@ -29,6 +36,13 @@ void testMain() {
       expect(image.box.isDeleted, true);
       image.dispose();
       expect(image.box.isDeleted, true);
+    });
+
+    test('CkImage toString', () {
+      final SkImage skImage = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage).getCurrentFrame();
+      final CkImage image = CkImage(skImage);
+      expect(image.toString(), '[1×1]');
+      image.dispose();
     });
 
     test('CkImage can be explicitly disposed of', () {

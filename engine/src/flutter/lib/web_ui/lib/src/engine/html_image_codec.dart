@@ -149,4 +149,7 @@ class HtmlImage implements ui.Image {
       return imgElement;
     }
   }
+
+  @override
+  String toString() => '[$width\u00D7$height]';
 }
