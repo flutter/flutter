@@ -141,7 +141,7 @@ class DatePickerHeader extends StatelessWidget {
                  crossAxisAlignment: CrossAxisAlignment.start,
                  children: <Widget>[
                    const SizedBox(height: 16),
-                   Flexible(child: help),
+                   help,
                    const Flexible(child: SizedBox(height: 38)),
                    Row(
                      children: <Widget>[
