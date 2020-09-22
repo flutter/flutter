@@ -232,25 +232,6 @@ enum ListTileControlAffinity {
 ///
 /// {@tool snippet}
 ///
-/// This example uses an [Expanded] within a [Row] to demonstrate how to
-/// overcome the issue with a [ListTile] attempting to expand horizontally
-/// without proper constraints.
-///
-/// ```dart
-/// Row(
-///   children: const <Widget>[
-///     Expanded(
-///       child: ListTile(
-///         leading: FlutterLogo(),
-///         title: Text('The ListTile is expanded to fill the available space'),
-///       ),
-///     ),
-///   ],
-/// )
-/// ```
-/// {@end-tool}
-/// {@tool snippet}
-///
 /// This example uses a [ListView] to demonstrate different configurations of
 /// [ListTile]s in [Card]s.
 ///
@@ -302,6 +283,31 @@ enum ListTileControlAffinity {
 ///         ),
 ///         trailing: Icon(Icons.more_vert),
 ///         isThreeLine: true,
+///       ),
+///     ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+/// {@tool snippet}
+///
+/// To use a [ListTile] within a [Row], it needs to be wrapped in an
+/// [Expanded] widget. [ListTile] requires fixed width constraints,
+/// whereas a [Row] does not constrain its children.
+///
+/// ```dart
+/// Row(
+///   children: const <Widget>[
+///     Expanded(
+///       child: ListTile(
+///         leading: FlutterLogo(),
+///         title: Text('These ListTiles are expanded '),
+///       ),
+///     ),
+///     Expanded(
+///       child: ListTile(
+///         trailing: FlutterLogo(),
+///         title: Text('to fill the available space.'),
 ///       ),
 ///     ),
 ///   ],
