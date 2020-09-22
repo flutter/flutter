@@ -58,6 +58,7 @@ abstract class FlutterTestDriver {
   VmService _vmService;
   String get lastErrorInfo => _errorBuffer.toString();
   Stream<String> get stdout => _stdout.stream;
+  Stream<String> get stderr => _stderr.stream;
   int get vmServicePort => _vmServiceWsUri.port;
   bool get hasExited => _hasExited;
 
@@ -451,6 +452,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool singleWidgetReloads = false,
     File pidFile,
     String script,
+    List<String> dartDefines,
   }) async {
     await _setupProcess(
       <String>[
@@ -464,13 +466,15 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         if (chrome)
           ...<String>[
             'chrome',
-            '--web-run-headless',
             if (!expressionEvaluation) '--no-web-enable-expression-evaluation'
           ]
         else
           'flutter-tester',
         if (structuredErrors)
           '--dart-define=flutter.inspector.structuredErrors=true',
+        if (dartDefines != null)
+          for (String define in dartDefines)
+            '--dart-define=$define',
       ],
       withDebugger: withDebugger,
       startPaused: startPaused,
@@ -586,19 +590,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       'app.callServiceExtension',
       <String, dynamic>{'appId': _currentRunningAppId, 'methodName': 'ext.ui.window.scheduleFrame'},
     );
-  }
-
-  Future<void> reloadMethod({ String libraryId, String classId }) async {
-    if (_currentRunningAppId == null) {
-      throw Exception('App has not started yet');
-    }
-    final dynamic reloadMethodResponse = await _sendRequest(
-      'app.reloadMethod',
-      <String, dynamic>{'appId': _currentRunningAppId, 'class': classId, 'library': libraryId},
-    );
-    if (reloadMethodResponse == null || reloadMethodResponse['code'] != 0) {
-      _throwErrorResponse('reloadMethodResponse request failed');
-    }
   }
 
   Future<void> _restart({ bool fullRestart = false, bool pause = false, bool debounce = false, int debounceDurationOverrideMs }) async {
