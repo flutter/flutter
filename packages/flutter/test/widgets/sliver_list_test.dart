@@ -278,7 +278,7 @@ void main() {
     expect(find.text('Tile 3'), findsOneWidget);
   });
 
-  testWidgets('SliverList should start to perform layout from the initial child when none valid offset', (WidgetTester tester) async {
+  testWidgets('SliverList should start to perform layout from the initial child when there is no valid offset', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66198.
     bool isShow = true;
     final ScrollController controller = ScrollController();
@@ -297,7 +297,7 @@ void main() {
                       height: 50,
                       child: Text('Tile $i'),
                     ),
-                const SizedBox(), // Use this widget to occupy the position where the offset is 0 after rebuild
+                const SizedBox(), // Use this widget to occupy the position where the offset is 0 when rebuild
                 const SizedBox(key: Key('key0'), height: 50.0),
                 const SizedBox(key: Key('key1'), height: 50.0),
               ],
@@ -310,6 +310,7 @@ void main() {
     await tester.pumpWidget(buildSliverList(controller));
     await tester.pumpAndSettle();
 
+    // Scrolling to the bottom.
     await tester.drag(find.text('Tile 2'), const Offset(0.0, -1000.0));
     await tester.pumpAndSettle();
 
