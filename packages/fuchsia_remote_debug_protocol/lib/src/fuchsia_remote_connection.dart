@@ -409,7 +409,9 @@ class FuchsiaRemoteConnection {
     if (pf.openPortAddress == null) {
       addr = _useIpV6 ? '[$_ipv6Loopback]' : _ipv4Loopback;
     } else {
-      addr = _useIpV6 ? '[${pf.openPortAddress}]' : pf.openPortAddress;
+      addr = isIpV6Address(pf.openPortAddress)
+        ? '[${pf.openPortAddress}]'
+        : pf.openPortAddress;
     }
     final Uri uri = Uri.http('$addr:${pf.port}', '/');
     return uri;
