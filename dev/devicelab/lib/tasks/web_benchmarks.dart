@@ -35,13 +35,15 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
   // Gallery benchmarks.
   section('Get New Flutter Gallery!');
 
-  await inDirectory<void>(io.Directory('temp'), () async {
+  final tempDirectory = path.join(flutterDirectory.path, 'dev', 'temp');
+
+  await inDirectory<void>(io.Directory(tempDirectory), () async {
     await exec('git', <String>['clone', 'https://github.com/pennzht/newfluttergallery.git']);
   });
 
   print('Cloned.');
 
-  await inDirectory<void>(io.Directory('temp/newfluttergallery'), () async {
+  await inDirectory<void>(io.Directory('$tempDirectory/newfluttergallery'), () async {
     // TODO: Use fixed version.
     await exec('git', <String>['checkout', '6dc1c16bf67600bb907820a6407c1118cc297632']);
     print('Git checkout finished.');
@@ -52,8 +54,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
 
   final TaskResult galleryBenchmarkResult = await runWebBenchmarkIn(
     useCanvasKit: useCanvasKit,
-    // TODO: use absolute path!
-    macrobenchmarksDirectory: ''/* absolute path! */,
+    macrobenchmarksDirectory: '$tempDirectory/newfluttergallery',
     entryPoint: 'lib/benchmarks/runner.dart',
   );
 
