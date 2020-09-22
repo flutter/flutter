@@ -4072,6 +4072,16 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return route.popped;
   }
 
+  bool _debugIsStaticCallback(Function callback) {
+    bool result = false;
+    assert(() {
+      // TODO(goderbauer): remove the kIsWeb check when https://github.com/flutter/flutter/issues/33615 is resolved.
+      result = kIsWeb || ui.PluginUtilities.getCallbackHandle(callback) != null;
+      return true;
+    }());
+    return result;
+  }
+
   /// Push a new route onto the navigator.
   ///
   /// {@macro flutter.widgets.navigator.restorablePush}
@@ -4084,7 +4094,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @optionalTypeArgs
   String restorablePush<T extends Object?>(RestorableRouteBuilder<T> routeBuilder, {Object? arguments}) {
     assert(routeBuilder != null);
-    assert(ui.PluginUtilities.getCallbackHandle(routeBuilder) != null, 'The provided routeBuilder must be a static function.');
+    assert(_debugIsStaticCallback(routeBuilder), 'The provided routeBuilder must be a static function.');
     assert(debugIsSerializableForRestoration(arguments), 'The arguments object must be serializable via the StandardMessageCodec.');
     final _RouteEntry entry = _RestorationInformation.anonymous(
       routeBuilder: routeBuilder,
@@ -4196,7 +4206,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @optionalTypeArgs
   String restorablePushReplacement<T extends Object?, TO extends Object?>(RestorableRouteBuilder<T> routeBuilder, { TO? result, Object? arguments }) {
     assert(routeBuilder != null);
-    assert(ui.PluginUtilities.getCallbackHandle(routeBuilder) != null, 'The provided routeBuilder must be a static function.');
+    assert(_debugIsStaticCallback(routeBuilder), 'The provided routeBuilder must be a static function.');
     assert(debugIsSerializableForRestoration(arguments), 'The arguments object must be serializable via the StandardMessageCodec.');
     final _RouteEntry entry = _RestorationInformation.anonymous(
       routeBuilder: routeBuilder,
@@ -4274,7 +4284,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @optionalTypeArgs
   String restorablePushAndRemoveUntil<T extends Object?>(RestorableRouteBuilder<T> newRouteBuilder, RoutePredicate predicate, {Object? arguments}) {
     assert(newRouteBuilder != null);
-    assert(ui.PluginUtilities.getCallbackHandle(newRouteBuilder) != null, 'The provided routeBuilder must be a static function.');
+    assert(_debugIsStaticCallback(newRouteBuilder), 'The provided routeBuilder must be a static function.');
     assert(debugIsSerializableForRestoration(arguments), 'The arguments object must be serializable via the StandardMessageCodec.');
     final _RouteEntry entry = _RestorationInformation.anonymous(
       routeBuilder: newRouteBuilder,
@@ -4345,7 +4355,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(oldRoute != null);
     assert(oldRoute._navigator == this);
     assert(newRouteBuilder != null);
-    assert(ui.PluginUtilities.getCallbackHandle(newRouteBuilder) != null, 'The provided routeBuilder must be a static function.');
+    assert(_debugIsStaticCallback(newRouteBuilder), 'The provided routeBuilder must be a static function.');
     assert(debugIsSerializableForRestoration(arguments), 'The arguments object must be serializable via the StandardMessageCodec.');
     assert(oldRoute != null);
     final _RouteEntry entry = _RestorationInformation.anonymous(
@@ -4417,7 +4427,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(anchorRoute != null);
     assert(anchorRoute._navigator == this);
     assert(newRouteBuilder != null);
-    assert(ui.PluginUtilities.getCallbackHandle(newRouteBuilder) != null, 'The provided routeBuilder must be a static function.');
+    assert(_debugIsStaticCallback(newRouteBuilder), 'The provided routeBuilder must be a static function.');
     assert(debugIsSerializableForRestoration(arguments), 'The arguments object must be serializable via the StandardMessageCodec.');
     assert(anchorRoute != null);
     final _RouteEntry entry = _RestorationInformation.anonymous(
