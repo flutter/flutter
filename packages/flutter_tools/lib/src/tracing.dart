@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
-import 'build_info.dart';
-import 'globals.dart' as globals;
+
 import 'vmservice.dart';
 
 // Names of some of the Timeline events we care about.
@@ -19,10 +20,15 @@ const String kFirstFrameBuiltEventName = 'Widgets built first useful frame';
 const String kFirstFrameRasterizedEventName = 'Rasterized first useful frame';
 
 class Tracing {
-  Tracing(this.vmService);
+  Tracing({
+    @required this.vmService,
+    @required Logger logger,
+  }) : _logger = logger;
 
   static const String firstUsefulFrameEventName = kFirstFrameRasterizedEventName;
+
   final vm_service.VmService vmService;
+  final Logger _logger;
 
   Future<void> startTracing() async {
     await vmService.setVMTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
@@ -34,9 +40,9 @@ class Tracing {
     bool awaitFirstFrame = false,
   }) async {
     if (awaitFirstFrame) {
-      final Status status = globals.logger.startProgress(
+      final Status status = _logger.startProgress(
         'Waiting for application to render first frame...',
-        timeout: timeoutConfiguration.fastOperation,
+        timeout: null,
       );
       try {
         final Completer<void> whenFirstFrameRendered = Completer<void>();
@@ -80,9 +86,12 @@ class Tracing {
 
 /// Download the startup trace information from the given observatory client and
 /// store it to build/start_up_info.json.
-Future<void> downloadStartupTrace(vm_service.VmService vmService, { bool awaitFirstFrame = true }) async {
-  final String traceInfoFilePath = globals.fs.path.join(getBuildDirectory(), 'start_up_info.json');
-  final File traceInfoFile = globals.fs.file(traceInfoFilePath);
+Future<void> downloadStartupTrace(vm_service.VmService vmService, {
+  bool awaitFirstFrame = true,
+  @required Logger logger,
+  @required Directory output,
+}) async {
+  final File traceInfoFile = output.childFile('start_up_info.json');
 
   // Delete old startup data, if any.
   if (traceInfoFile.existsSync()) {
@@ -94,11 +103,14 @@ Future<void> downloadStartupTrace(vm_service.VmService vmService, { bool awaitFi
     traceInfoFile.parent.createSync();
   }
 
-  final Tracing tracing = Tracing(vmService);
+  final Tracing tracing = Tracing(vmService: vmService, logger: logger);
 
   final Map<String, dynamic> timeline = await tracing.stopTracingAndDownloadTimeline(
     awaitFirstFrame: awaitFirstFrame,
   );
+
+  final File traceTimelineFile = output.childFile('start_up_timeline.json');
+  traceTimelineFile.writeAsStringSync(toPrettyJson(timeline));
 
   int extractInstantEventTimestamp(String eventName) {
     final List<Map<String, dynamic>> events =
@@ -115,8 +127,8 @@ Future<void> downloadStartupTrace(vm_service.VmService vmService, { bool awaitFi
   final int frameworkInitTimestampMicros = extractInstantEventTimestamp(kFrameworkInitEventName);
 
   if (engineEnterTimestampMicros == null) {
-    globals.printTrace('Engine start event is missing in the timeline: $timeline');
-    throw 'Engine start event is missing in the timeline. Cannot compute startup time.';
+    logger.printTrace('Engine start event is missing in the timeline: $timeline');
+    throwToolExit('Engine start event is missing in the timeline. Cannot compute startup time.');
   }
 
   final Map<String, dynamic> traceInfo = <String, dynamic>{
@@ -133,8 +145,8 @@ Future<void> downloadStartupTrace(vm_service.VmService vmService, { bool awaitFi
     final int firstFrameBuiltTimestampMicros = extractInstantEventTimestamp(kFirstFrameBuiltEventName);
     final int firstFrameRasterizedTimestampMicros = extractInstantEventTimestamp(kFirstFrameRasterizedEventName);
     if (firstFrameBuiltTimestampMicros == null || firstFrameRasterizedTimestampMicros == null) {
-      globals.printTrace('First frame events are missing in the timeline: $timeline');
-      throw 'First frame events are missing in the timeline. Cannot compute startup time.';
+      logger.printTrace('First frame events are missing in the timeline: $timeline');
+      throwToolExit('First frame events are missing in the timeline. Cannot compute startup time.');
     }
 
     // To keep our old benchmarks valid, we'll preserve the
@@ -152,6 +164,6 @@ Future<void> downloadStartupTrace(vm_service.VmService vmService, { bool awaitFi
 
   traceInfoFile.writeAsStringSync(toPrettyJson(traceInfo));
 
-  globals.printStatus(message);
-  globals.printStatus('Saved startup trace info in ${traceInfoFile.path}.');
+  logger.printStatus(message);
+  logger.printStatus('Saved startup trace info in ${traceInfoFile.path}.');
 }

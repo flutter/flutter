@@ -270,6 +270,12 @@ void main() {
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
     expect(revealed.offset, 5 * (100 + 22 + 23) + 22 - 100);
+
+    // With rect specified.
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22 + 2);
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22 - (200 - 4));
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - right', (WidgetTester tester) async {
@@ -311,6 +317,12 @@ void main() {
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
     expect(revealed.offset, 5 * (100 + 22 + 23) + 22 - 100);
+
+    // With rect specified.
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22 + 1);
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22 - (200 - 3));
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - up', (WidgetTester tester) async {
@@ -353,6 +365,12 @@ void main() {
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
     expect(revealed.offset, 5 * (100 + 22 + 23) + 23 - 100);
+
+    // With rect specified.
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 23 + (100 - 4));
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, - 200 + 6 * (100 + 22 + 23) - 22 - 2);
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - up - reverse growth', (WidgetTester tester) async {
@@ -404,6 +422,12 @@ void main() {
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
     expect(revealed.offset, - 100 - 22 - 100);
+
+    // With rect specified.
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, - 22 - 4);
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, -200 - 22 - 2);
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - left - reverse growth', (WidgetTester tester) async {
@@ -456,6 +480,12 @@ void main() {
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
     expect(revealed.offset, - 100 - 22 - 200);
+
+    // With rect specified.
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, - 22 - 3);
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, - 300 - 22 - 1);
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - left', (WidgetTester tester) async {
@@ -498,6 +528,12 @@ void main() {
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
     expect(revealed.offset, 5 * (100 + 22 + 23) + 23 - 100);
+
+    // With rect specified.
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 6 * (100 + 22 + 23) - 22 - 3);
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, -200  + 6 * (100 + 22 + 23) - 22 - 1);
   });
 
   testWidgets('Nested Viewports showOnScreen', (WidgetTester tester) async {

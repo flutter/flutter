@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:collection';
 
 // COMMON SIGNATURES
@@ -237,4 +236,11 @@ class Factory<T> {
   String toString() {
     return 'Factory(type: $type)';
   }
+}
+
+/// Linearly interpolate between two `Duration`s.
+Duration lerpDuration(Duration a, Duration b, double t) {
+  return Duration(
+    microseconds: (a.inMicroseconds + (b.inMicroseconds - a.inMicroseconds) * t).round(),
+  );
 }

@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 
 import 'package:flutter/cupertino.dart';
@@ -3462,8 +3461,8 @@ void main() {
         expect(focusNode.hasFocus, true);
 
         // The EditableText is at the top.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(206.0, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(206.0, epsilon: .0001));
       });
 
       testWidgets('align center', (WidgetTester tester) async {
@@ -3510,8 +3509,8 @@ void main() {
         expect(focusNode.hasFocus, true);
 
         // The EditableText is at the center.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(291.5, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(291.5, epsilon: .0001));
       });
 
       testWidgets('align bottom', (WidgetTester tester) async {
@@ -3558,8 +3557,8 @@ void main() {
         expect(focusNode.hasFocus, true);
 
         // The EditableText is at the bottom.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(377.0, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(377.0, epsilon: .0001));
       });
 
       testWidgets('align as a double', (WidgetTester tester) async {
@@ -3606,8 +3605,8 @@ void main() {
         expect(focusNode.hasFocus, true);
 
         // The EditableText is near the bottom.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(355.625, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(355.625, epsilon: .0001));
       });
     });
 
@@ -3660,8 +3659,8 @@ void main() {
         expect(focusNode.hasFocus, true);
 
         // The EditableText is at the center. Same as without prefix.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(291.5, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(291.5, epsilon: .0001));
       });
 
       testWidgets('align top', (WidgetTester tester) async {
@@ -3714,8 +3713,8 @@ void main() {
 
         // The prefix is at the top, and the EditableText is centered within its
         // height.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(241.5, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(241.5, epsilon: .0001));
       });
 
       testWidgets('align bottom', (WidgetTester tester) async {
@@ -3768,8 +3767,8 @@ void main() {
 
         // The prefix is at the bottom, and the EditableText is centered within
         // its height.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(341.5, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(341.5, epsilon: .0001));
       });
 
       testWidgets('align as a double', (WidgetTester tester) async {
@@ -3821,8 +3820,8 @@ void main() {
         expect(focusNode.hasFocus, true);
 
         // The EditableText is near the bottom.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(329.0, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(329.0, epsilon: .0001));
       });
     });
 

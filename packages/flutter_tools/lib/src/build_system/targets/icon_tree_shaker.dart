@@ -61,7 +61,7 @@ class IconTreeShaker {
        _fontManifest = fontManifest?.string {
     if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
-      logger.printError('Font subetting is not supported in debug mode. The '
+      logger.printError('Font subsetting is not supported in debug mode. The '
                          '--tree-shake-icons flag will be ignored.');
     }
   }

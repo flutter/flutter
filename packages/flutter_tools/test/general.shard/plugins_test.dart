@@ -8,6 +8,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -32,49 +33,55 @@ void main() {
     MockWebProject webProject;
     MockWindowsProject windowsProject;
     MockLinuxProject linuxProject;
-    File packagesFile;
-    Directory dummyPackageDirectory;
     SystemClock mockClock;
     FlutterVersion mockVersion;
+    // A Windows-style filesystem. This is not populated by default, so tests
+    // using it instead of fs must re-run any necessary setup (e.g.,
+    // setUpProject).
+    FileSystem fsWindows;
 
-    setUp(() async {
-      fs = MemoryFileSystem();
-      mockClock = MockClock();
-      mockVersion = MockFlutterVersion();
-
-      // Add basic properties to the Flutter project and subprojects
+    // Adds basic properties to the flutterProject and its subprojects.
+    void setUpProject(FileSystem fileSystem) {
       flutterProject = MockFlutterProject();
-      when(flutterProject.directory).thenReturn(fs.directory('/'));
-      // TODO(franciscojma): Remove logic for .flutter-plugins it's deprecated.
+      when(flutterProject.directory).thenReturn(fileSystem.systemTempDirectory.childDirectory('app'));
+      // TODO(franciscojma): Remove logic for .flutter-plugins once it's deprecated.
       when(flutterProject.flutterPluginsFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins'));
       when(flutterProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins-dependencies'));
+
       iosProject = MockIosProject();
       when(flutterProject.ios).thenReturn(iosProject);
+      final Directory iosDirectory = flutterProject.directory.childDirectory('ios');
       when(iosProject.pluginRegistrantHost).thenReturn(flutterProject.directory.childDirectory('Runner'));
-      when(iosProject.podfile).thenReturn(flutterProject.directory.childDirectory('ios').childFile('Podfile'));
-      when(iosProject.podManifestLock).thenReturn(flutterProject.directory.childDirectory('ios').childFile('Podfile.lock'));
+      when(iosProject.podfile).thenReturn(iosDirectory.childFile('Podfile'));
+      when(iosProject.podManifestLock).thenReturn(iosDirectory.childFile('Podfile.lock'));
       when(iosProject.pluginConfigKey).thenReturn('ios');
       when(iosProject.existsSync()).thenReturn(false);
+
       macosProject = MockMacOSProject();
       when(flutterProject.macos).thenReturn(macosProject);
-      when(macosProject.podfile).thenReturn(flutterProject.directory.childDirectory('macos').childFile('Podfile'));
-      when(macosProject.podManifestLock).thenReturn(flutterProject.directory.childDirectory('macos').childFile('Podfile.lock'));
-      final Directory macosManagedDirectory = flutterProject.directory.childDirectory('macos').childDirectory('Flutter');
+      final Directory macosDirectory = flutterProject.directory.childDirectory('macos');
+      when(macosProject.podfile).thenReturn(macosDirectory.childFile('Podfile'));
+      when(macosProject.podManifestLock).thenReturn(macosDirectory.childFile('Podfile.lock'));
+      final Directory macosManagedDirectory = macosDirectory.childDirectory('Flutter');
       when(macosProject.managedDirectory).thenReturn(macosManagedDirectory);
       when(macosProject.pluginConfigKey).thenReturn('macos');
       when(macosProject.existsSync()).thenReturn(false);
+
       androidProject = MockAndroidProject();
       when(flutterProject.android).thenReturn(androidProject);
-      when(androidProject.pluginRegistrantHost).thenReturn(flutterProject.directory.childDirectory('android').childDirectory('app'));
-      when(androidProject.hostAppGradleRoot).thenReturn(flutterProject.directory.childDirectory('android'));
+      final Directory androidDirectory = flutterProject.directory.childDirectory('android');
+      when(androidProject.pluginRegistrantHost).thenReturn(androidDirectory.childDirectory('app'));
+      when(androidProject.hostAppGradleRoot).thenReturn(androidDirectory);
       when(androidProject.pluginConfigKey).thenReturn('android');
       when(androidProject.existsSync()).thenReturn(false);
+
       webProject = MockWebProject();
       when(flutterProject.web).thenReturn(webProject);
       when(webProject.libDirectory).thenReturn(flutterProject.directory.childDirectory('lib'));
       when(webProject.existsSync()).thenReturn(true);
       when(webProject.pluginConfigKey).thenReturn('web');
       when(webProject.existsSync()).thenReturn(false);
+
       windowsProject = MockWindowsProject();
       when(flutterProject.windows).thenReturn(windowsProject);
       when(windowsProject.pluginConfigKey).thenReturn('windows');
@@ -84,6 +91,7 @@ void main() {
       when(windowsProject.generatedPluginCmakeFile).thenReturn(windowsManagedDirectory.childFile('generated_plugins.mk'));
       when(windowsProject.pluginSymlinkDirectory).thenReturn(windowsManagedDirectory.childDirectory('ephemeral').childDirectory('.plugin_symlinks'));
       when(windowsProject.existsSync()).thenReturn(false);
+
       linuxProject = MockLinuxProject();
       when(flutterProject.linux).thenReturn(linuxProject);
       when(linuxProject.pluginConfigKey).thenReturn('linux');
@@ -95,6 +103,17 @@ void main() {
       when(linuxProject.cmakeFile).thenReturn(linuxManagedDirectory.parent.childFile('CMakeLists.txt'));
       when(linuxProject.generatedPluginCmakeFile).thenReturn(linuxManagedDirectory.childFile('generated_plugins.mk'));
       when(linuxProject.existsSync()).thenReturn(false);
+    }
+
+    setUp(() async {
+      fs = MemoryFileSystem();
+      fsWindows = MemoryFileSystem(style: FileSystemStyle.windows);
+      mockClock = MockClock();
+      mockVersion = MockFlutterVersion();
+
+      // Add basic properties to the Flutter project and subprojects
+      setUpProject(fs);
+      flutterProject.directory.childFile('.packages').createSync(recursive: true);
 
       when(mockClock.now()).thenAnswer(
         (Invocation _) => DateTime(1970, 1, 1)
@@ -102,36 +121,59 @@ void main() {
       when(mockVersion.frameworkVersion).thenAnswer(
         (Invocation _) => '1.0.0'
       );
-
-      // Set up a simple .packages file for all the tests to use, pointing to one package.
-      dummyPackageDirectory = fs.directory('/pubcache/apackage/lib/');
-      packagesFile = fs.file(fs.path.join(flutterProject.directory.path, '.packages'));
-      packagesFile..createSync(recursive: true)
-          ..writeAsStringSync('apackage:file://${dummyPackageDirectory.path}\n');
     });
 
-    const String _pluginYaml = '''
+    // Makes fake plugin packages for each plugin, adds them to flutterProject,
+    // and returns their directories.
+    //
+    // If an entry contains a path separator, it will be treated as a path for
+    // the location of the package, with the name being the last component.
+    // Otherwise it will be treated as a name, and put in a default location
+    // (a fake pub cache).
+    List<Directory> createFakePlugins(FileSystem fileSystem, List<String> pluginNamesOrPaths) {
+      const String pluginYamlTemplate = '''
   flutter:
     plugin:
       platforms:
         ios:
-          pluginClass: SomePlugin
+          pluginClass: PLUGIN_CLASS
         macos:
-          pluginClass: SomePlugin
+          pluginClass: PLUGIN_CLASS
         windows:
-          pluginClass: SomePlugin
+          pluginClass: PLUGIN_CLASS
         linux:
-          pluginClass: SomePlugin
+          pluginClass: PLUGIN_CLASS
         web:
-          pluginClass: SomePlugin
-          fileName: lib/SomeFile.dart
+          pluginClass: PLUGIN_CLASS
+          fileName: lib/PLUGIN_CLASS.dart
         android:
-          pluginClass: SomePlugin
+          pluginClass: PLUGIN_CLASS
           package: AndroidPackage
   ''';
-    // Makes the dummy package pointed to by packagesFile look like a plugin.
-    void configureDummyPackageAsPlugin() {
-      dummyPackageDirectory.parent.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync(_pluginYaml);
+
+      final List<Directory> directories = <Directory>[];
+      final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
+      final File packagesFile = flutterProject.directory.childFile('.packages')
+            ..createSync(recursive: true);
+      for (final String nameOrPath in pluginNamesOrPaths) {
+        final String name = fileSystem.path.basename(nameOrPath);
+        final Directory pluginDirectory = (nameOrPath == name)
+            ? fakePubCache.childDirectory(name)
+            : fileSystem.directory(nameOrPath);
+        packagesFile.writeAsStringSync(
+            '$name:file://${pluginDirectory.childFile('lib').uri}\n',
+            mode: FileMode.writeOnlyAppend);
+        pluginDirectory.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', toTitleCase(camelCase(name))));
+        directories.add(pluginDirectory);
+      }
+      return directories;
+    }
+
+    // Makes a fake plugin package, adds it to flutterProject, and returns its directory.
+    Directory createFakePlugin(FileSystem fileSystem) {
+      return createFakePlugins(fileSystem, <String>['some_plugin'])[0];
     }
 
     void createNewJavaPlugin1() {
@@ -347,7 +389,7 @@ dependencies:
       });
 
       testUsingContext('Refreshing the plugin list creates a plugin directory when there are plugins', () async {
-        configureDummyPackageAsPlugin();
+        createFakePlugin(fs);
         when(iosProject.existsSync()).thenReturn(true);
 
         await refreshPluginsList(flutterProject);
@@ -466,7 +508,7 @@ dependencies:
       testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () async {
         simulatePodInstallRun(iosProject);
         simulatePodInstallRun(macosProject);
-        configureDummyPackageAsPlugin();
+        createFakePlugin(fs);
         when(iosProject.existsSync()).thenReturn(true);
         when(macosProject.existsSync()).thenReturn(true);
 
@@ -481,7 +523,7 @@ dependencies:
       });
 
       testUsingContext('No changes to the plugin list does not invalidate the Cocoapod lockfiles', () async {
-        configureDummyPackageAsPlugin();
+        createFakePlugin(fs);
         when(iosProject.existsSync()).thenReturn(true);
         when(macosProject.existsSync()).thenReturn(true);
 
@@ -638,7 +680,7 @@ dependencies:
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
-      testUsingContext('old embedding app uses a plugin that supports v1 and v2 embedding works but shows a deprecation warning', () async {
+      testUsingContext('old embedding app uses a plugin that supports v1 and v2 embedding works', () async {
         when(flutterProject.isModule).thenReturn(false);
         when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
 
@@ -655,7 +697,6 @@ dependencies:
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
         expect(registrant.readAsStringSync(),
           contains('UseBothEmbedding.registerWith(registry.registrarFor("plugin4.UseBothEmbedding"));'));
-        expect(testLogger.statusText, contains('Follow the steps on https://flutter.dev/go/android-project-migration'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -857,9 +898,8 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         when(featureFlags.isMacOSEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(true);
         // Create a plugin without a pluginClass.
-        dummyPackageDirectory.parent.childFile('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+        final Directory pluginDirectory = createFakePlugin(fs);
+        pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 flutter:
   plugin:
     platforms:
@@ -884,9 +924,8 @@ flutter:
         when(featureFlags.isMacOSEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(true);
         // Create a plugin without a pluginClass.
-        dummyPackageDirectory.parent.childFile('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+        final Directory pluginDirectory = createFakePlugin(fs);
+        pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 flutter:
   plugin:
     platforms:
@@ -913,9 +952,8 @@ flutter:
         when(featureFlags.isMacOSEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(true);
         // Create a plugin without a pluginClass.
-        dummyPackageDirectory.parent.childFile('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'''
+        final Directory pluginDirectory = createFakePlugin(fs);
+        pluginDirectory.childFile('pubspec.yaml').writeAsStringSync(r'''
 "aws ... \"Branch\": $BITBUCKET_BRANCH, \"Date\": $(date +"%m-%d-%y"), \"Time\": $(date +"%T")}\"
     ''');
 
@@ -934,7 +972,7 @@ flutter:
         when(linuxProject.existsSync()).thenReturn(true);
         when(featureFlags.isLinuxEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
-        configureDummyPackageAsPlugin();
+        createFakePlugin(fs);
 
         await injectPlugins(flutterProject, checkProjects: true);
 
@@ -955,9 +993,8 @@ flutter:
         when(featureFlags.isLinuxEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         // Create a plugin without a pluginClass.
-        dummyPackageDirectory.parent.childFile('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+        final Directory pluginDirectory = createFakePlugin(fs);
+        pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 flutter:
   plugin:
     platforms:
@@ -983,9 +1020,8 @@ flutter:
         when(featureFlags.isLinuxEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         // Create a plugin without a pluginClass.
-        dummyPackageDirectory.parent.childFile('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+        final Directory pluginDirectory = createFakePlugin(fs);
+        pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 flutter:
   plugin:
     platforms:
@@ -1011,7 +1047,7 @@ flutter:
         when(linuxProject.existsSync()).thenReturn(true);
         when(featureFlags.isLinuxEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
-        configureDummyPackageAsPlugin();
+        createFakePlugin(fs);
 
         await injectPlugins(flutterProject, checkProjects: true);
 
@@ -1019,7 +1055,7 @@ flutter:
 
         expect(pluginMakefile.existsSync(), isTrue);
         final String contents = pluginMakefile.readAsStringSync();
-        expect(contents, contains('apackage'));
+        expect(contents, contains('some_plugin'));
         expect(contents, contains('target_link_libraries(\${BINARY_NAME} PRIVATE \${plugin}_plugin)'));
         expect(contents, contains('list(APPEND PLUGIN_BUNDLED_LIBRARIES \$<TARGET_FILE:\${plugin}_plugin>)'));
         expect(contents, contains('list(APPEND PLUGIN_BUNDLED_LIBRARIES \${\${plugin}_bundled_libraries})'));
@@ -1029,12 +1065,38 @@ flutter:
         FeatureFlags: () => featureFlags,
       });
 
+      testUsingContext('Generated Linux plugin files sorts by plugin name', () async {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(featureFlags.isLinuxEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        createFakePlugins(fs, <String>[
+          'plugin_d',
+          'plugin_a',
+          '/local_plugins/plugin_c',
+          '/local_plugins/plugin_b'
+        ]);
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File pluginCmakeFile = linuxProject.generatedPluginCmakeFile;
+        final File pluginRegistrant = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+        for (final File file in <File>[pluginCmakeFile, pluginRegistrant]) {
+          final String contents = file.readAsStringSync();
+          expect(contents.indexOf('plugin_a'), lessThan(contents.indexOf('plugin_b')));
+          expect(contents.indexOf('plugin_b'), lessThan(contents.indexOf('plugin_c')));
+          expect(contents.indexOf('plugin_c'), lessThan(contents.indexOf('plugin_d')));
+        }
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
 
       testUsingContext('Injecting creates generated Windows registrant', () async {
         when(windowsProject.existsSync()).thenReturn(true);
         when(featureFlags.isWindowsEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
-        configureDummyPackageAsPlugin();
+        createFakePlugin(fs);
 
         await injectPlugins(flutterProject, checkProjects: true);
 
@@ -1055,9 +1117,8 @@ flutter:
         when(featureFlags.isWindowsEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         // Create a plugin without a pluginClass.
-        dummyPackageDirectory.parent.childFile('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+        final Directory pluginDirectory = createFakePlugin(fs);
+        pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 flutter:
   plugin:
     platforms:
@@ -1082,9 +1143,8 @@ flutter:
         when(featureFlags.isWindowsEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         // Create a plugin without a pluginClass.
-        dummyPackageDirectory.parent.childFile('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+        final Directory pluginDirectory = createFakePlugin(fs);
+        pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 flutter:
   plugin:
     platforms:
@@ -1106,24 +1166,55 @@ flutter:
         FeatureFlags: () => featureFlags,
       });
 
-      testUsingContext('Injecting creates generated Windows plugin CMake file', () async {
+      testUsingContext('Generated Windows plugin files sorts by plugin name', () async {
         when(windowsProject.existsSync()).thenReturn(true);
         when(featureFlags.isWindowsEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
-        configureDummyPackageAsPlugin();
+        createFakePlugins(fs, <String>[
+          'plugin_d',
+          'plugin_a',
+          '/local_plugins/plugin_c',
+          '/local_plugins/plugin_b'
+        ]);
 
         await injectPlugins(flutterProject, checkProjects: true);
 
-        final File pluginMakefile = windowsProject.generatedPluginCmakeFile;
-
-        expect(pluginMakefile.existsSync(), isTrue);
-        final String contents = pluginMakefile.readAsStringSync();
-        expect(contents, contains('apackage'));
-        expect(contents, contains('target_link_libraries(\${BINARY_NAME} PRIVATE \${plugin}_plugin)'));
-        expect(contents, contains('list(APPEND PLUGIN_BUNDLED_LIBRARIES \$<TARGET_FILE:\${plugin}_plugin>)'));
-        expect(contents, contains('list(APPEND PLUGIN_BUNDLED_LIBRARIES \${\${plugin}_bundled_libraries})'));
+        final File pluginCmakeFile = windowsProject.generatedPluginCmakeFile;
+        final File pluginRegistrant = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+        for (final File file in <File>[pluginCmakeFile, pluginRegistrant]) {
+          final String contents = file.readAsStringSync();
+          expect(contents.indexOf('plugin_a'), lessThan(contents.indexOf('plugin_b')));
+          expect(contents.indexOf('plugin_b'), lessThan(contents.indexOf('plugin_c')));
+          expect(contents.indexOf('plugin_c'), lessThan(contents.indexOf('plugin_d')));
+        }
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Generated plugin CMake files always use posix-style paths', () async {
+        // Re-run the setup using the Windows filesystem.
+        setUpProject(fsWindows);
+        createFakePlugin(fsWindows);
+
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(windowsProject.existsSync()).thenReturn(true);
+        when(featureFlags.isLinuxEnabled).thenReturn(true);
+        when(featureFlags.isWindowsEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        for (final CmakeBasedProject project in <CmakeBasedProject>[linuxProject, windowsProject]) {
+          final File pluginCmakefile = project.generatedPluginCmakeFile;
+
+          expect(pluginCmakefile.existsSync(), isTrue);
+          final String contents = pluginCmakefile.readAsStringSync();
+          expect(contents, contains('add_subdirectory(flutter/ephemeral/.plugin_symlinks'));
+        }
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fsWindows,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -1140,11 +1231,11 @@ flutter:
 
       testUsingContext('Symlinks are created for Linux plugins', () async {
         when(linuxProject.existsSync()).thenReturn(true);
-        configureDummyPackageAsPlugin();
+        createFakePlugin(fs);
         // refreshPluginsList should call createPluginSymlinks.
         await refreshPluginsList(flutterProject);
 
-        expect(linuxProject.pluginSymlinkDirectory.childLink('apackage').existsSync(), true);
+        expect(linuxProject.pluginSymlinkDirectory.childLink('some_plugin').existsSync(), true);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1153,11 +1244,11 @@ flutter:
 
       testUsingContext('Symlinks are created for Windows plugins', () async {
         when(windowsProject.existsSync()).thenReturn(true);
-        configureDummyPackageAsPlugin();
+        createFakePlugin(fs);
         // refreshPluginsList should call createPluginSymlinks.
         await refreshPluginsList(flutterProject);
 
-        expect(windowsProject.pluginSymlinkDirectory.childLink('apackage').existsSync(), true);
+        expect(windowsProject.pluginSymlinkDirectory.childLink('some_plugin').existsSync(), true);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1200,7 +1291,7 @@ flutter:
         }
 
         // refreshPluginsList should remove existing links and recreate on changes.
-        configureDummyPackageAsPlugin();
+        createFakePlugin(fs);
         await refreshPluginsList(flutterProject);
 
         for (final File file in dummyFiles) {
@@ -1239,12 +1330,12 @@ flutter:
       testUsingContext('createPluginSymlinks repairs missing links', () async {
         when(linuxProject.existsSync()).thenReturn(true);
         when(windowsProject.existsSync()).thenReturn(true);
-        configureDummyPackageAsPlugin();
+        createFakePlugin(fs);
         await refreshPluginsList(flutterProject);
 
         final List<Link> links = <Link>[
-          linuxProject.pluginSymlinkDirectory.childLink('apackage'),
-          windowsProject.pluginSymlinkDirectory.childLink('apackage'),
+          linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
+          windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
         ];
         for (final Link link in links) {
           link.deleteSync();
@@ -1279,7 +1370,26 @@ flutter:
       }
 
       test('validatePubspecForPlugin works', () async {
-        _createPubspecFile(_pluginYaml);
+        const String pluginYaml = '''
+  flutter:
+    plugin:
+      platforms:
+        ios:
+          pluginClass: SomePlugin
+        macos:
+          pluginClass: SomePlugin
+        windows:
+          pluginClass: SomePlugin
+        linux:
+          pluginClass: SomePlugin
+        web:
+          pluginClass: SomePlugin
+          fileName: lib/SomeFile.dart
+        android:
+          pluginClass: SomePlugin
+          package: AndroidPackage
+  ''';
+        _createPubspecFile(pluginYaml);
         validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
           'ios', 'macos', 'windows', 'linux', 'android', 'web'
         ], androidIdentifier: 'AndroidPackage', webFileName: 'lib/SomeFile.dart');

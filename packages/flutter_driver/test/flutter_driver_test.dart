@@ -72,6 +72,10 @@ void main() {
         connectionLog.add('streamListen');
         return null;
       });
+      when(mockPeer.sendRequest('setFlag', any)).thenAnswer((Invocation invocation) {
+        connectionLog.add('setFlag');
+        return null;
+      });
       when(mockIsolate.pauseEvent).thenReturn(MockVMPauseStartEvent());
       when(mockIsolate.resume()).thenAnswer((Invocation invocation) {
         connectionLog.add('resume');
@@ -85,8 +89,25 @@ void main() {
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
       expectLogContains('Isolate is paused at start');
-      expect(connectionLog, <String>['resume', 'streamListen', 'onExtensionAdded']);
+      expect(connectionLog, <String>['setFlag', 'resume', 'streamListen', 'onExtensionAdded']);
     });
+
+    test('ignores setFlag failure', () async {
+      when(mockPeer.sendRequest('setFlag', any)).thenThrow(Exception('setFlag failed'));
+      when(mockIsolate.pauseEvent).thenReturn(MockVMPauseStartEvent());
+      when(mockIsolate.resume()).thenAnswer((Invocation invocation) {
+        return Future<dynamic>.value(null);
+      });
+      when(mockIsolate.onExtensionAdded).thenAnswer((Invocation invocation) {
+        return Stream<String>.fromIterable(<String>['ext.flutter.driver']);
+      });
+
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
+      expectLogContains('Failed to set pause_isolates_on_start=false, proceeding. '
+                        'Error: Exception: setFlag failed');
+      expect(driver, isNotNull);
+    });
+
 
     test('connects to isolate paused mid-flight', () async {
       when(mockIsolate.pauseEvent).thenReturn(MockVMPauseBreakpointEvent());
@@ -768,6 +789,16 @@ void main() {
         expect(driver.waitFor(find.byTooltip('foo')), throwsDriverError);
       });
     });
+
+    group('VMServiceFlutterDriver Unsupported error', () {
+      test('enableAccessibility', () async {
+        expect(driver.enableAccessibility(), throwsA(isA<UnsupportedError>()));
+      });
+
+      test('webDriver', () async {
+        expect(() => driver.webDriver, throwsA(isA<UnsupportedError>()));
+      });
+    });
   });
 
   group('VMServiceFlutterDriver with custom timeout', () {
@@ -1117,7 +1148,7 @@ void main() {
       await driver.checkHealth();
     });
 
-    group('WebFlutterDriver Unimplemented error', () {
+    group('WebFlutterDriver Unimplemented/Unsupported error', () {
       test('forceGC', () async {
         expect(driver.forceGC(),
             throwsA(isA<UnimplementedError>()));

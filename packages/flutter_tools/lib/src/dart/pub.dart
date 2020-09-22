@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
@@ -82,7 +80,7 @@ abstract class Pub {
     @required Platform platform,
     @required BotDetector botDetector,
     @required Usage usage,
-    File toolStampFile,
+    File Function() toolStampFile,
   }) = _DefaultPub;
 
   /// Runs `pub get`.
@@ -143,7 +141,7 @@ class _DefaultPub implements Pub {
     @required Platform platform,
     @required BotDetector botDetector,
     @required Usage usage,
-    File toolStampFile,
+   File Function() toolStampFile,
   }) : _toolStampFile = toolStampFile,
        _fileSystem = fileSystem,
        _logger = logger,
@@ -161,7 +159,7 @@ class _DefaultPub implements Pub {
   final Platform _platform;
   final BotDetector _botDetector;
   final Usage _usage;
-  final File _toolStampFile;
+  final File Function() _toolStampFile;
 
   @override
   Future<void> get({
@@ -181,7 +179,8 @@ class _DefaultPub implements Pub {
       _fileSystem.path.join(directory, 'pubspec.yaml'));
     final File packageConfigFile = _fileSystem.file(
       _fileSystem.path.join(directory, '.dart_tool', 'package_config.json'));
-    final Directory generatedDirectory = _fileSystem.directory(_fileSystem.path.join(directory, '.dart_tool', 'flutter_gen'));
+    final Directory generatedDirectory = _fileSystem.directory(
+      _fileSystem.path.join(directory, '.dart_tool', 'flutter_gen'));
 
     if (!skipPubspecYamlCheck && !pubSpecYaml.existsSync()) {
       if (!skipIfAbsent) {
@@ -400,10 +399,10 @@ class _DefaultPub implements Pub {
     if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified)) {
       return true;
     }
-
-    if (_toolStampFile != null &&
-        _toolStampFile.existsSync() &&
-        _toolStampFile.lastModifiedSync().isAfter(dotPackagesLastModified)) {
+    final File toolStampFile = _toolStampFile != null ? _toolStampFile() : null;
+    if (toolStampFile != null &&
+        toolStampFile.existsSync() &&
+        toolStampFile.lastModifiedSync().isAfter(dotPackagesLastModified)) {
       return true;
     }
     return false;

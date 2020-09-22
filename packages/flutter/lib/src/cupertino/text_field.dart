@@ -212,7 +212,8 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [minLines]
+  ///  * [minLines], which is the minimum number of lines to occupy when the
+  ///    content spans fewer lines.
   ///  * [expands], to allow the widget to size itself to its parent's height.
   ///  * [maxLength], which discusses the precise meaning of "number of
   ///    characters" and how it may differ from the intuitive meaning.
@@ -591,7 +592,7 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scrollPhysics}
   final ScrollPhysics scrollPhysics;
 
-  /// {@macro flutter.rendering.editable.selectionEnabled}
+  /// {@macro flutter.widgets.editableText.selectionEnabled}
   bool get selectionEnabled => enableInteractiveSelection;
 
   /// {@macro flutter.material.textfield.onTap}
@@ -645,7 +646,7 @@ class CupertinoTextField extends StatefulWidget {
   }
 }
 
-class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin implements TextSelectionGestureDetectorBuilderDelegate {
+class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField> implements TextSelectionGestureDetectorBuilderDelegate {
   final GlobalKey _clearGlobalKey = GlobalKey();
 
   RestorableTextEditingController _controller;

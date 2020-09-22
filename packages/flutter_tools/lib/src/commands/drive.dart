@@ -18,6 +18,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -146,7 +147,7 @@ class DriveCommand extends RunCommandBase {
   @override
   Future<void> validateCommand() async {
     if (userIdentifier != null) {
-      final Device device = await findTargetDevice();
+      final Device device = await findTargetDevice(timeout: deviceDiscoveryTimeout);
       if (device is! AndroidDevice) {
         throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
       }
@@ -161,7 +162,7 @@ class DriveCommand extends RunCommandBase {
       throwToolExit(null);
     }
 
-    _device = await findTargetDevice();
+    _device = await findTargetDevice(timeout: deviceDiscoveryTimeout);
     if (device == null) {
       throwToolExit(null);
     }
@@ -235,12 +236,18 @@ class DriveCommand extends RunCommandBase {
       }
       observatoryUri = result.observatoryUri.toString();
       // TODO(bkonyi): add web support (https://github.com/flutter/flutter/issues/61259)
-      if (!isWebPlatform) {
+      if (!isWebPlatform && !disableDds) {
         try {
           // If there's another flutter_tools instance still connected to the target
           // application, DDS will already be running remotely and this call will fail.
           // We can ignore this and continue to use the remote DDS instance.
-          await device.dds.startDartDevelopmentService(Uri.parse(observatoryUri), ipv6);
+          await device.dds.startDartDevelopmentService(
+            Uri.parse(observatoryUri),
+            ddsPort,
+            ipv6,
+            disableServiceAuthCodes,
+          );
+          observatoryUri = device.dds.uri.toString();
         } on dds.DartDevelopmentServiceException catch(_) {
           globals.printTrace('Note: DDS is already connected to $observatoryUri.');
         }
@@ -306,6 +313,7 @@ $ex
         'DRIVER_SESSION_ID': driver.id,
         'DRIVER_SESSION_URI': driver.uri.toString(),
         'DRIVER_SESSION_SPEC': driver.spec.toString(),
+        'DRIVER_SESSION_CAPABILITIES': json.encode(driver.capabilities),
         'SUPPORT_TIMELINE_ACTION': (browser == Browser.chrome).toString(),
         'FLUTTER_WEB_TEST': 'true',
         'ANDROID_CHROME_ON_EMULATOR': (isAndroidChrome && useEmulator).toString(),
@@ -388,9 +396,9 @@ $ex
   }
 }
 
-Future<Device> findTargetDevice() async {
+Future<Device> findTargetDevice({ @required Duration timeout }) async {
   final DeviceManager deviceManager = globals.deviceManager;
-  final List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
+  final List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current(), timeout: timeout);
 
   if (deviceManager.hasSpecifiedDeviceId) {
     if (devices.isEmpty) {
@@ -478,7 +486,8 @@ Future<LaunchResult> _startApp(
     debuggingOptions: DebuggingOptions.enabled(
       command.getBuildInfo(),
       startPaused: true,
-      hostVmServicePort: command.hostVmservicePort,
+      hostVmServicePort: webUri != null ? command.hostVmservicePort : 0,
+      ddsPort: command.ddsPort,
       verboseSystemLogs: command.verboseSystemLogs,
       cacheSkSL: command.cacheSkSL,
       dumpSkpOnShaderCompilation: command.dumpSkpOnShaderCompilation,

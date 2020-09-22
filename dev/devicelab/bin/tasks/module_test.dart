@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/apk_utils.dart';
@@ -42,7 +41,8 @@ Future<void> main() async {
 
       final File readonlyTxtAssetFile = await File(path.join(
         projectDir.path,
-        'assets/read-only.txt'
+        'assets',
+        'read-only.txt'
       ))
       .create(recursive: true);
 
@@ -253,7 +253,7 @@ Future<void> main() async {
 
       section('Check file access modes for read-only asset from Flutter module');
 
-      final String readonlyDebugAssetFilePath = path.join(
+      final String readonlyDebugAssetFilePath = path.joinAll(<String>[
         hostApp.path,
         'app',
         'build',
@@ -261,8 +261,10 @@ Future<void> main() async {
         'merged_assets',
         'debug',
         'out',
-        'flutter_assets/assets/read-only.txt',
-      );
+        'flutter_assets',
+        'assets',
+        'read-only.txt',
+      ]);
       final File readonlyDebugAssetFile = File(readonlyDebugAssetFilePath);
       if (!exists(readonlyDebugAssetFile)) {
         return TaskResult.failure('Failed to copy read-only asset file');
@@ -323,7 +325,7 @@ Future<void> main() async {
 
       section('Check file access modes for read-only asset from Flutter module');
 
-      final String readonlyReleaseAssetFilePath = path.join(
+      final String readonlyReleaseAssetFilePath = path.joinAll(<String>[
         hostApp.path,
         'app',
         'build',
@@ -331,8 +333,10 @@ Future<void> main() async {
         'merged_assets',
         'release',
         'out',
-        'flutter_assets/assets/read-only.txt',
-      );
+        'flutter_assets',
+        'assets',
+        'read-only.txt',
+      ]);
       final File readonlyReleaseAssetFile = File(readonlyReleaseAssetFilePath);
       if (!exists(readonlyReleaseAssetFile)) {
         return TaskResult.failure('Failed to copy read-only asset file');

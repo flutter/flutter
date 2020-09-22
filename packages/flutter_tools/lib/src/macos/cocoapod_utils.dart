@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import '../base/fingerprint.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
@@ -13,7 +11,11 @@ import '../project.dart';
 
 /// For a given build, determines whether dependencies have changed since the
 /// last call to processPods, then calls processPods with that information.
-Future<void> processPodsIfNeeded(XcodeBasedProject xcodeProject, String buildDirectory, BuildMode buildMode) async {
+Future<void> processPodsIfNeeded(
+  XcodeBasedProject xcodeProject,
+  String buildDirectory,
+  BuildMode buildMode,
+) async {
   final FlutterProject project = xcodeProject.parent;
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
   await refreshPluginsList(project);
@@ -29,7 +31,8 @@ Future<void> processPodsIfNeeded(XcodeBasedProject xcodeProject, String buildDir
       xcodeProject.podfile.path,
       xcodeProject.generatedXcodePropertiesFile.path,
     ],
-    properties: <String, String>{},
+    fileSystem: globals.fs,
+    logger: globals.logger,
   );
 
   final bool didPodInstall = await globals.cocoaPods.processPods(

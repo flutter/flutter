@@ -695,18 +695,15 @@ class _RenderDecoration extends RenderBox {
        _expands = expands;
 
   static const double subtextGap = 8.0;
-  final Map<_DecorationSlot, RenderBox> slotToChild = <_DecorationSlot, RenderBox>{};
-  final Map<RenderBox, _DecorationSlot> childToSlot = <RenderBox, _DecorationSlot>{};
+  final Map<_DecorationSlot, RenderBox> children = <_DecorationSlot, RenderBox>{};
 
   RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _DecorationSlot slot) {
     if (oldChild != null) {
       dropChild(oldChild);
-      childToSlot.remove(oldChild);
-      slotToChild.remove(slot);
+      children.remove(slot);
     }
     if (newChild != null) {
-      childToSlot[newChild] = slot;
-      slotToChild[slot] = newChild;
+      children[slot] = newChild;
       adoptChild(newChild);
     }
     return newChild;
@@ -1085,11 +1082,12 @@ class _RenderDecoration extends RenderBox {
       counterHeight,
       helperErrorHeight,
     );
+    final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
     boxToBaseline[input] = _layoutLineBox(
       input,
       boxConstraints.deflate(EdgeInsets.only(
-        top: contentPadding.top + topHeight,
-        bottom: contentPadding.bottom + bottomHeight,
+        top: contentPadding.top + topHeight + densityOffset.dy / 2,
+        bottom: contentPadding.bottom + bottomHeight + densityOffset.dy / 2,
       )).copyWith(
         minWidth: inputWidth,
         maxWidth: inputWidth,
@@ -1118,13 +1116,15 @@ class _RenderDecoration extends RenderBox {
       prefixHeight - boxToBaseline[prefix],
       suffixHeight - boxToBaseline[suffix],
     );
+    // TODO(justinmc): fixBelowInput should have no effect when there is no
+    // prefix/suffix below the input.
+    // https://github.com/flutter/flutter/issues/66050
     final double fixBelowInput = math.max(
       0,
       fixBelowBaseline - (inputHeight - inputInternalBaseline),
     );
 
     // Calculate the height of the input text container.
-    final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
     final double prefixIconHeight = prefixIcon == null ? 0 : prefixIcon.size.height;
     final double suffixIconHeight = suffixIcon == null ? 0 : suffixIcon.size.height;
     final double fixIconHeight = math.max(prefixIconHeight, suffixIconHeight);
@@ -1140,8 +1140,8 @@ class _RenderDecoration extends RenderBox {
     );
     final double minContainerHeight = decoration.isDense || decoration.isCollapsed || expands
       ? 0.0
-      : kMinInteractiveDimension + densityOffset.dy;
-    final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight + densityOffset.dy;
+      : kMinInteractiveDimension;
+    final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight;
     final double containerHeight = expands
       ? maxContainerHeight
       : math.min(math.max(contentHeight, minContainerHeight), maxContainerHeight);
@@ -1311,10 +1311,11 @@ class _RenderDecoration extends RenderBox {
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
       + _lineHeight(width, <RenderBox>[prefix, input, suffix])
       + subtextHeight
-      + contentPadding.bottom;
+      + contentPadding.bottom
+      + densityOffset.dy;
     final double minContainerHeight = decoration.isDense || expands
       ? 0.0
-      : kMinInteractiveDimension + densityOffset.dy;
+      : kMinInteractiveDimension;
     return math.max(containerHeight, minContainerHeight);
   }
 
@@ -1579,11 +1580,10 @@ class _RenderDecoration extends RenderBox {
   }
 }
 
-class _RenderDecorationElement extends RenderObjectElement {
-  _RenderDecorationElement(_Decorator widget) : super(widget);
+class _DecorationElement extends RenderObjectElement {
+  _DecorationElement(_Decorator widget) : super(widget);
 
   final Map<_DecorationSlot, Element> slotToChild = <_DecorationSlot, Element>{};
-  final Map<Element, _DecorationSlot> childToSlot = <Element, _DecorationSlot>{};
 
   @override
   _Decorator get widget => super.widget as _Decorator;
@@ -1598,11 +1598,10 @@ class _RenderDecorationElement extends RenderObjectElement {
 
   @override
   void forgetChild(Element child) {
-    assert(slotToChild.values.contains(child));
-    assert(childToSlot.keys.contains(child));
-    final _DecorationSlot slot = childToSlot[child];
-    childToSlot.remove(child);
-    slotToChild.remove(slot);
+    assert(slotToChild.containsValue(child));
+    assert(child.slot is _DecorationSlot);
+    assert(slotToChild.containsKey(child.slot));
+    slotToChild.remove(child.slot);
     super.forgetChild(child);
   }
 
@@ -1611,11 +1610,9 @@ class _RenderDecorationElement extends RenderObjectElement {
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
       slotToChild.remove(slot);
-      childToSlot.remove(oldChild);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -1639,12 +1636,10 @@ class _RenderDecorationElement extends RenderObjectElement {
     final Element oldChild = slotToChild[slot];
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
-      childToSlot.remove(oldChild);
       slotToChild.remove(slot);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -1704,26 +1699,22 @@ class _RenderDecorationElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, dynamic slotValue) {
+  void insertRenderObjectChild(RenderObject child, _DecorationSlot slot) {
     assert(child is RenderBox);
-    assert(slotValue is _DecorationSlot);
-    final _DecorationSlot slot = slotValue as _DecorationSlot;
     _updateRenderObject(child as RenderBox, slot);
-    assert(renderObject.childToSlot.keys.contains(child));
-    assert(renderObject.slotToChild.keys.contains(slot));
+    assert(renderObject.children.keys.contains(slot));
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, _DecorationSlot slot) {
     assert(child is RenderBox);
-    assert(renderObject.childToSlot.keys.contains(child));
-    _updateRenderObject(null, renderObject.childToSlot[child]);
-    assert(!renderObject.childToSlot.keys.contains(child));
-    assert(!renderObject.slotToChild.keys.contains(slot));
+    assert(renderObject.children[slot] == child);
+    _updateRenderObject(null, slot);
+    assert(!renderObject.children.keys.contains(slot));
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, dynamic slotValue) {
+  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
     assert(false, 'not reachable');
   }
 }
@@ -1751,7 +1742,7 @@ class _Decorator extends RenderObjectWidget {
   final bool expands;
 
   @override
-  _RenderDecorationElement createElement() => _RenderDecorationElement(this);
+  _DecorationElement createElement() => _DecorationElement(this);
 
   @override
   _RenderDecoration createRenderObject(BuildContext context) {
@@ -1886,9 +1877,7 @@ class InputDecorator extends StatefulWidget {
   /// Whether the input field has focus.
   ///
   /// Determines the position of the label text and the color and weight of the
-  /// border, as well as the container fill color, which is a blend of
-  /// [InputDecoration.focusColor] with [InputDecoration.fillColor] when
-  /// focused, and [InputDecoration.fillColor] when not.
+  /// border.
   ///
   /// Defaults to false.
   ///
@@ -1906,12 +1895,6 @@ class InputDecorator extends StatefulWidget {
   /// true, and [InputDecoration.fillColor] when not.
   ///
   /// Defaults to false.
-  ///
-  /// See also:
-  ///
-  ///  * [InputDecoration.focusColor], which is also blended into the hover
-  ///    color and fill color when [isFocused] is true to produce the final
-  ///    color.
   final bool isHovering;
 
   /// If true, the height of the input field will be as large as possible.
@@ -2853,10 +2836,10 @@ class InputDecoration {
   ///
   /// If `isOutline` property of [border] is false and if [filled] is true then
   /// `contentPadding` is `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense]
-  /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false`.
+  /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false.
   /// If `isOutline` property of [border] is false and if [filled] is false then
   /// `contentPadding` is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
-  /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false`.
+  /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false.
   ///
   /// If `isOutline` property of [border] is true then `contentPadding` is
   /// `EdgeInsets.fromLTRB(12, 20, 12, 12)` when [isDense] is true
@@ -3147,8 +3130,7 @@ class InputDecoration {
 
   /// If true the decoration's container is filled with [fillColor].
   ///
-  /// When [InputDecorator.isFocused] is true, the [focusColor] is also blended into the final
-  /// fill color.  When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
+  /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
   /// into the final fill color.
   ///
   /// Typically this field set to true if [border] is an
@@ -3164,8 +3146,7 @@ class InputDecoration {
 
   /// The base fill color of the decoration's container color.
   ///
-  /// When [InputDecorator.isFocused] is true, the [focusColor] is also blended
-  /// into the final fill color.  When [InputDecorator.isHovering] is true, the
+  /// When [InputDecorator.isHovering] is true, the
   /// [hoverColor] is also blended into the final fill color.
   ///
   /// By default the fillColor is based on the current [Theme].
@@ -3173,16 +3154,8 @@ class InputDecoration {
   /// The decoration's container is the area which is filled if [filled] is true
   /// and bordered per the [border]. It's the area adjacent to [icon] and above
   /// the widgets that contain [helperText], [errorText], and [counterText].
-  ///
-  /// This color is blended with [focusColor] if the decoration is focused.
   final Color fillColor;
 
-  /// The color to blend with [fillColor] and fill the decoration's container
-  /// with, if [filled] is true and the container has input focus.
-  ///
-  /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended into the final
-  /// fill color.
-  ///
   /// By default the [focusColor] is based on the current [Theme].
   ///
   /// The decoration's container is the area which is filled if [filled] is
@@ -3195,8 +3168,7 @@ class InputDecoration {
   /// is being hovered over by a mouse.
   ///
   /// If [filled] is true, the color is blended with [fillColor] and fills the
-  /// decoration's container. When [InputDecorator.isFocused] is true, the
-  /// [focusColor] is also blended into the final fill color.
+  /// decoration's container.
   ///
   /// If [filled] is false, and [InputDecorator.isFocused] is false, the color
   /// is blended over the [enabledBorder]'s color.

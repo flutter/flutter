@@ -7,8 +7,10 @@ import 'dart:async';
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:path/path.dart' as path; // ignore: package_path_import
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -48,8 +50,9 @@ void tryToDelete(Directory directory) {
 /// environment variable is set, it will be returned. Otherwise, this will
 /// deduce the path from `platform.script`.
 String getFlutterRoot() {
-  if (globals.platform.environment.containsKey('FLUTTER_ROOT')) {
-    return globals.platform.environment['FLUTTER_ROOT'];
+  const Platform platform = LocalPlatform();
+  if (platform.environment.containsKey('FLUTTER_ROOT')) {
+    return platform.environment['FLUTTER_ROOT'];
   }
 
   Error invalidScript() => StateError('Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.');
@@ -71,13 +74,13 @@ String getFlutterRoot() {
       throw invalidScript();
   }
 
-  final List<String> parts = globals.fs.path.split(globals.fs.path.fromUri(scriptUri));
+  final List<String> parts = path.split(globals.fs.path.fromUri(scriptUri));
   final int toolsIndex = parts.indexOf('flutter_tools');
   if (toolsIndex == -1) {
     throw invalidScript();
   }
-  final String toolsPath = globals.fs.path.joinAll(parts.sublist(0, toolsIndex + 1));
-  return globals.fs.path.normalize(globals.fs.path.join(toolsPath, '..', '..'));
+  final String toolsPath = path.joinAll(parts.sublist(0, toolsIndex + 1));
+  return path.normalize(path.join(toolsPath, '..', '..'));
 }
 
 CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
@@ -387,5 +390,26 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
       }),
       body: () => super.runCommand(topLevelResults),
     );
+  }
+}
+
+/// A file system that allows preconfiguring certain entities.
+///
+/// This is useful for inserting mocks/entities which throw errors or
+/// have other behavior that is not easily configured through the
+/// filesystem interface.
+class ConfiguredFileSystem extends ForwardingFileSystem {
+  ConfiguredFileSystem(FileSystem delegate, {@required this.entities}) : super(delegate);
+
+  final Map<String, FileSystemEntity> entities;
+
+  @override
+  File file(dynamic path) {
+    return (entities[path] as File) ?? super.file(path);
+  }
+
+  @override
+  Directory directory(dynamic path) {
+    return (entities[path] as Directory) ?? super.directory(path);
   }
 }

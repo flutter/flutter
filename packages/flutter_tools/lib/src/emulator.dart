@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -140,7 +139,7 @@ class EmulatorManager {
           .trim();
     }
     final RunResult runResult = await _processUtils.run(<String>[
-      getAvdManagerPath(_androidSdk),
+      _androidSdk?.avdManagerPath,
         'create',
         'avd',
         '-n', name,
@@ -163,7 +162,7 @@ class EmulatorManager {
 
   Future<String> _getPreferredAvailableDevice() async {
     final List<String> args = <String>[
-      getAvdManagerPath(_androidSdk),
+      _androidSdk?.avdManagerPath,
       'list',
       'device',
       '-c',
@@ -191,7 +190,7 @@ class EmulatorManager {
     // It seems that to get the available list of images, we need to send a
     // request to create without the image and it'll provide us a list :-(
     final List<String> args = <String>[
-      getAvdManagerPath(_androidSdk),
+      _androidSdk?.avdManagerPath,
       'create',
       'avd',
       '-n', 'temp',

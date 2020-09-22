@@ -7,6 +7,7 @@ import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
 
+import 'events.dart';
 import 'lsq_solver.dart';
 
 export 'dart:ui' show Offset;
@@ -147,10 +148,23 @@ class _PointAtTime {
 /// The quality of the velocity estimation will be better if more data points
 /// have been received.
 class VelocityTracker {
+  /// Create a new velocity tracker for a pointer [kind].
+  @Deprecated(
+    'Use VelocityTracker.withKind and provide the PointerDeviceKind associated with the gesture being tracked. '
+    'This feature was deprecated after v1.22.0-12.1.pre.'
+  )
+  VelocityTracker([this.kind = PointerDeviceKind.touch]);
+
+  /// Create a new velocity tracker for a pointer [kind].
+  VelocityTracker.withKind(this.kind);
+
   static const int _assumePointerMoveStoppedMilliseconds = 40;
   static const int _historySize = 20;
   static const int _horizonMilliseconds = 100;
   static const int _minSampleSize = 3;
+
+  /// The kind of pointer this tracker is for.
+  final PointerDeviceKind kind;
 
   // Circular buffer; current sample at _index.
   final List<_PointAtTime?> _samples = List<_PointAtTime?>.filled(_historySize, null, growable: false);
@@ -273,6 +287,9 @@ class VelocityTracker {
 /// * [scrollViewWillEndDragging(_:withVelocity:targetContentOffset:)](https://developer.apple.com/documentation/uikit/uiscrollviewdelegate/1619385-scrollviewwillenddragging),
 ///   the iOS method that reports the fling velocity when the touch is released.
 class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
+  /// Create a new IOSScrollViewFlingVelocityTracker.
+  IOSScrollViewFlingVelocityTracker(PointerDeviceKind kind) : super.withKind(kind);
+
   /// The velocity estimation uses at most 4 `_PointAtTime` samples. The extra
   /// samples are there to make the `VelocityEstimate.offset` sufficiently large
   /// to be recognized as a fling. See
