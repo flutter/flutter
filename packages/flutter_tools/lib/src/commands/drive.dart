@@ -316,17 +316,15 @@ $ex
       });
     }
 
-    List<String> experimentalFlags = <String>[];
-    if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
-        stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
-      experimentalFlags = stringsArg(FlutterOptions.kEnableExperiment);
-    }
-
     try {
       await testRunner(
         <String>[
-          if (experimentalFlags.isNotEmpty)
-            '--enable-experiment=${experimentalFlags.join(',')}',
+          if (buildInfo.dartExperiments.isNotEmpty)
+            '--enable-experiment=${buildInfo.dartExperiments.join(',')}',
+          if (buildInfo.nullSafetyMode == NullSafetyMode.sound)
+            '--sound-null-safety',
+          if (buildInfo.nullSafetyMode == NullSafetyMode.unsound)
+            '--no-sound-null-safety',
           testFile,
         ],
         environment,

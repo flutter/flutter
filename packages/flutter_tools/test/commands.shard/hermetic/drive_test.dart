@@ -204,7 +204,7 @@ void main() {
         return LaunchResult.succeeded();
       });
       testRunner = expectAsync2((List<String> testArgs, Map<String, String> environment) async {
-        expect(testArgs, <String>[testFile]);
+        expect(testArgs, <String>['--no-sound-null-safety', testFile]);
         // VM_SERVICE_URL is not set by drive command arguments
         expect(environment, <String, String>{
           'VM_SERVICE_URL': 'null',
@@ -287,6 +287,7 @@ void main() {
           testArgs,
           <String>[
             '--enable-experiment=experiment1,experiment2',
+            '--no-sound-null-safety',
             testFile,
           ]
         );
@@ -305,6 +306,47 @@ void main() {
         '--no-pub',
         '--enable-experiment=experiment1',
         '--enable-experiment=experiment2',
+      ];
+      await createTestCommandRunner(command).run(args);
+      expect(testLogger.errorText, isEmpty);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('sound null safety', () async {
+      final MockAndroidDevice mockDevice = MockAndroidDevice();
+      applyDdsMocks(mockDevice);
+      testDeviceManager.addDevice(mockDevice);
+
+      final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
+      final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
+
+      appStarter = expectAsync2((DriveCommand command, Uri webUri) async {
+        return LaunchResult.succeeded();
+      });
+      testRunner = expectAsync2((List<String> testArgs, Map<String, String> environment) async {
+        expect(
+          testArgs,
+          <String>[
+            '--sound-null-safety',
+            testFile,
+          ]
+        );
+      });
+      appStopper = expectAsync1((DriveCommand command) async {
+        return true;
+      });
+
+      final MemoryFileSystem memFs = fs;
+      await memFs.file(testApp).writeAsString('main() {}');
+      await memFs.file(testFile).writeAsString('main() {}');
+
+      final List<String> args = <String>[
+        'drive',
+        '--target=$testApp',
+        '--no-pub',
+        '--sound-null-safety',
       ];
       await createTestCommandRunner(command).run(args);
       expect(testLogger.errorText, isEmpty);
