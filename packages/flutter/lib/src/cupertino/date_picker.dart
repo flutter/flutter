@@ -31,6 +31,8 @@ const TextStyle _kDefaultPickerTextStyle = TextStyle(
   letterSpacing: -0.83,
 );
 
+// The item height is 32 and the magnifier height is 34, as derived from
+// iOS simulators with "Debug View Hierarchy".
 const double _kTimerPickerMagnification = 34 / 32;
 // Minimum horizontal padding between [CupertinoTimerPicker]
 const double _kTimerPickerMinHorizontalPadding = 20;
