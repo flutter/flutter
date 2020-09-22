@@ -3,15 +3,19 @@ package io.flutter.embedding.android;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,15 +28,18 @@ import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
 import io.flutter.plugin.platform.PlatformPlugin;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
@@ -54,7 +61,8 @@ public class FlutterAndroidComponentTest {
     cachedEngine.getPlugins().add(mockPlugin);
 
     // Create a fake Host, which is required by the delegate.
-    FlutterActivityAndFragmentDelegate.Host fakeHost = new FakeHost(cachedEngine);
+    FakeHost fakeHost = new FakeHost(cachedEngine);
+    fakeHost.shouldDestroyEngineWithHost = true;
 
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(fakeHost);
@@ -165,9 +173,87 @@ public class FlutterAndroidComponentTest {
     verify(activityAwarePlugin, times(1)).onDetachedFromActivity();
   }
 
+  @Test
+  public void normalLifecycleStepsDoNotTriggerADetachFromFlutterEngine() {
+    // ---- Test setup ----
+    // Place a FlutterEngine in the static cache.
+    FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
+    FlutterJNI mockFlutterJni = mock(FlutterJNI.class);
+    when(mockFlutterJni.isAttached()).thenReturn(true);
+    FlutterEngine cachedEngine =
+        spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
+    FlutterEngineCache.getInstance().put("my_flutter_engine", cachedEngine);
+
+    // Create a fake Host, which is required by the delegate.
+    FakeHost fakeHost = new FakeHost(cachedEngine);
+
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate =
+        spy(new FlutterActivityAndFragmentDelegate(fakeHost));
+
+    // --- Execute the behavior under test ---
+    // Push the delegate through all lifecycle methods all the way to destruction.
+    delegate.onAttach(RuntimeEnvironment.application);
+    delegate.onActivityCreated(null);
+    delegate.onCreateView(null, null, null);
+    delegate.onStart();
+    delegate.onResume();
+    delegate.onPause();
+    delegate.onStop();
+    delegate.onDestroyView();
+    delegate.onDetach();
+
+    verify(delegate, never()).detachFromFlutterEngine();
+  }
+
+  @Test
+  public void twoOverlappingFlutterActivitiesDoNotCrosstalk() {
+    // ---- Test setup ----
+    // Place a FlutterEngine in the static cache.
+    FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
+    FlutterJNI mockFlutterJni = mock(FlutterJNI.class);
+    when(mockFlutterJni.isAttached()).thenReturn(true);
+    FlutterEngine cachedEngine =
+        spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
+    FlutterEngineCache.getInstance().put("my_flutter_engine", cachedEngine);
+    LifecycleChannel mockLifecycleChannel = mock(LifecycleChannel.class);
+    when(cachedEngine.getLifecycleChannel()).thenReturn(mockLifecycleChannel);
+
+    Intent intent =
+        FlutterActivity.withCachedEngine("my_flutter_engine").build(RuntimeEnvironment.application);
+    ActivityController<FlutterActivity> activityController1 =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    activityController1.create().start().resume();
+
+    InOrder inOrder = inOrder(mockLifecycleChannel);
+    inOrder.verify(mockLifecycleChannel, times(1)).appIsResumed();
+    verifyNoMoreInteractions(mockLifecycleChannel);
+
+    activityController1.pause();
+    // Create a second instance on the same engine and start running it as well.
+    ActivityController<FlutterActivity> activityController2 =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    activityController2.create().start().resume();
+
+    // From the onPause of the first activity.
+    inOrder.verify(mockLifecycleChannel, times(1)).appIsInactive();
+    // By creating the second activity, we should automatically detach the first activity.
+    inOrder.verify(mockLifecycleChannel, times(1)).appIsDetached();
+    // In order, the second activity then is resumed.
+    inOrder.verify(mockLifecycleChannel, times(1)).appIsResumed();
+    verifyNoMoreInteractions(mockLifecycleChannel);
+
+    // The first activity goes through the normal lifecycles of destruction, but since we
+    // detached the first activity during the second activity's creation, we should ignore the
+    // first activity's destruction events to avoid crosstalk.
+    activityController1.stop().destroy();
+    verifyNoMoreInteractions(mockLifecycleChannel);
+  }
+
   private static class FakeHost implements FlutterActivityAndFragmentDelegate.Host {
     final FlutterEngine cachedEngine;
     Activity activity;
+    boolean shouldDestroyEngineWithHost = false;
     Lifecycle lifecycle = mock(Lifecycle.class);
 
     private FakeHost(@NonNull FlutterEngine flutterEngine) {
@@ -209,7 +295,7 @@ public class FlutterAndroidComponentTest {
 
     @Override
     public boolean shouldDestroyEngineWithHost() {
-      return true;
+      return shouldDestroyEngineWithHost;
     }
 
     @NonNull
@@ -288,5 +374,8 @@ public class FlutterAndroidComponentTest {
 
     @Override
     public void onFlutterUiNoLongerDisplayed() {}
+
+    @Override
+    public void detachFromFlutterEngine() {}
   }
 }

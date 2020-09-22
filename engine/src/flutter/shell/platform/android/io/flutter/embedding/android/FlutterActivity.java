@@ -560,56 +560,102 @@ public class FlutterActivity extends Activity
   @Override
   protected void onStop() {
     super.onStop();
-    delegate.onStop();
+    if (stillAttachedForEvent("onStop")) {
+      delegate.onStop();
+    }
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_STOP);
   }
 
   @Override
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
-    delegate.onSaveInstanceState(outState);
+    if (stillAttachedForEvent("onSaveInstanceState")) {
+      delegate.onSaveInstanceState(outState);
+    }
+  }
+
+  /**
+   * Irreversibly release this activity's control of the {@link FlutterEngine} and its
+   * subcomponents.
+   *
+   * <p>Calling will disconnect this activity's view from the Flutter renderer, disconnect this
+   * activity from plugins' {@link ActivityControlSurface}, and stop system channel messages from
+   * this activity.
+   *
+   * <p>After calling, this activity should be disposed immediately and not be re-used.
+   */
+  private void release() {
+    delegate.onDestroyView();
+    delegate.onDetach();
+    delegate.release();
+    delegate = null;
+  }
+
+  @Override
+  public void detachFromFlutterEngine() {
+    Log.v(
+        TAG,
+        "FlutterActivity "
+            + this
+            + " connection to the engine "
+            + getFlutterEngine()
+            + " evicted by another attaching activity");
+    release();
   }
 
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    delegate.onDestroyView();
-    delegate.onDetach();
+    if (stillAttachedForEvent("onDestroy")) {
+      release();
+    }
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY);
   }
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    delegate.onActivityResult(requestCode, resultCode, data);
+    if (stillAttachedForEvent("onActivityResult")) {
+      delegate.onActivityResult(requestCode, resultCode, data);
+    }
   }
 
   @Override
   protected void onNewIntent(@NonNull Intent intent) {
     // TODO(mattcarroll): change G3 lint rule that forces us to call super
     super.onNewIntent(intent);
-    delegate.onNewIntent(intent);
+    if (stillAttachedForEvent("onNewIntent")) {
+      delegate.onNewIntent(intent);
+    }
   }
 
   @Override
   public void onBackPressed() {
-    delegate.onBackPressed();
+    if (stillAttachedForEvent("onBackPressed")) {
+      delegate.onBackPressed();
+    }
   }
 
   @Override
   public void onRequestPermissionsResult(
       int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    delegate.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    if (stillAttachedForEvent("onRequestPermissionsResult")) {
+      delegate.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
   }
 
   @Override
   public void onUserLeaveHint() {
-    delegate.onUserLeaveHint();
+    if (stillAttachedForEvent("onUserLeaveHint")) {
+      delegate.onUserLeaveHint();
+    }
   }
 
   @Override
   public void onTrimMemory(int level) {
     super.onTrimMemory(level);
-    delegate.onTrimMemory(level);
+    if (stillAttachedForEvent("onTrimMemory")) {
+      delegate.onTrimMemory(level);
+    }
   }
 
   /**
@@ -908,7 +954,7 @@ public class FlutterActivity extends Activity
    * <p>Returning false from this method does not preclude a {@link FlutterEngine} from being
    * attaching to a {@code FlutterActivity} - it just prevents the attachment from happening
    * automatically. A developer can choose to subclass {@code FlutterActivity} and then invoke
-   * {@link ActivityControlSurface#attachToActivity(Activity, Lifecycle)} and {@link
+   * {@link ActivityControlSurface#attachToActivity(ExclusiveAppComponent, Lifecycle)} and {@link
    * ActivityControlSurface#detachFromActivity()} at the desired times.
    *
    * <p>One reason that a developer might choose to manually manage the relationship between the
@@ -957,6 +1003,14 @@ public class FlutterActivity extends Activity
     }
     if (getCachedEngineId() != null) {
       // Prevent overwriting the existing state in a cached engine with restoration state.
+      return false;
+    }
+    return true;
+  }
+
+  private boolean stillAttachedForEvent(String event) {
+    if (delegate == null) {
+      Log.v(TAG, "FlutterActivity " + hashCode() + " " + event + " called after release.");
       return false;
     }
     return true;
