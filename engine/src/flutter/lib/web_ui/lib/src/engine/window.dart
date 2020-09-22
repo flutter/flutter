@@ -603,6 +603,11 @@ class EngineWindow extends ui.Window {
         }
         break;
 
+      // Dispatched by the bindings to delay service worker initialization.
+      case 'flutter/service_worker':
+        html.window.dispatchEvent(html.Event('flutter-first-frame'));
+        return;
+
       case 'flutter/textinput':
         textEditing.channel.handleTextInput(data, callback);
         return;

@@ -255,4 +255,20 @@ void testMain() {
     expect(window.locales, isNotEmpty);
     expect(localeChangedCount, 1);
   });
+
+  test('dispatches browser event on flutter/service_worker channel', () async {
+    final Completer<void> completer = Completer<void>();
+    html.window.addEventListener('flutter-first-frame', completer.complete);
+    final Zone innerZone = Zone.current.fork();
+
+    innerZone.runGuarded(() {
+      window.sendPlatformMessage(
+        'flutter/service_worker',
+        ByteData(0),
+        (outputData) { },
+      );
+    });
+
+    await expectLater(completer.future, completes);
+  });
 }
