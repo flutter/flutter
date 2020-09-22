@@ -708,6 +708,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterPluginRegist
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/AndroidKeyProcessor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/AndroidTouchProcessor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/DrawableSplashScreen.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/ExclusiveAppComponent.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivity.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivityAndFragmentDelegate.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivityLaunchConfigs.java
@@ -727,7 +728,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/Splas
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/TransparencyMode.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngine.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngineCache.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEnginePluginRegistry.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngineConnectionRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterJNI.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterOverlaySurface.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterShellArgs.java

@@ -357,7 +357,7 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Verify that the ActivityControlSurface was told to attach to an Activity.
     verify(mockFlutterEngine.getActivityControlSurface(), times(1))
-        .attachToActivity(any(Activity.class), any(Lifecycle.class));
+        .attachToActivity(any(ExclusiveAppComponent.class), any(Lifecycle.class));
 
     // Flutter is detached from the surrounding Activity in onDetach.
     delegate.onDetach();

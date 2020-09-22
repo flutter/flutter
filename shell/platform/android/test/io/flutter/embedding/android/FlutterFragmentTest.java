@@ -5,6 +5,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,5 +74,35 @@ public class FlutterFragmentTest {
     assertTrue(fragment.shouldAttachEngineToActivity());
     assertEquals("my_cached_engine", fragment.getCachedEngineId());
     assertTrue(fragment.shouldDestroyEngineWithHost());
+  }
+
+  @Test
+  public void itCanBeDetachedFromTheEngineAndStopSendingFurtherEvents() {
+    FlutterActivityAndFragmentDelegate mockDelegate =
+        mock(FlutterActivityAndFragmentDelegate.class);
+    FlutterFragment fragment =
+        FlutterFragment.withCachedEngine("my_cached_engine")
+            .destroyEngineWithFragment(true)
+            .build();
+    fragment.setDelegate(mockDelegate);
+    fragment.onStart();
+    fragment.onResume();
+
+    verify(mockDelegate, times(1)).onStart();
+    verify(mockDelegate, times(1)).onResume();
+
+    fragment.onPause();
+    fragment.detachFromFlutterEngine();
+    verify(mockDelegate, times(1)).onPause();
+    verify(mockDelegate, times(1)).onDestroyView();
+    verify(mockDelegate, times(1)).onDetach();
+
+    fragment.onStop();
+    fragment.onDestroy();
+
+    verify(mockDelegate, never()).onStop();
+    // 1 time same as before.
+    verify(mockDelegate, times(1)).onDestroyView();
+    verify(mockDelegate, times(1)).onDetach();
   }
 }
