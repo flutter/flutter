@@ -3276,6 +3276,10 @@ class Stack extends MultiChildRenderObjectWidget {
     this.alignment = AlignmentDirectional.topStart,
     this.textDirection,
     this.fit = StackFit.loose,
+    @Deprecated(
+      'Use clipBehavior instead. See the migration guide in '
+      'flutter.dev/go/clip-behavior. This feature was deprecated after v1.22.'
+    )
     this.overflow = Overflow.clip,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
@@ -3317,10 +3321,6 @@ class Stack extends MultiChildRenderObjectWidget {
   /// ([StackFit.expand]).
   final StackFit fit;
 
-  @Deprecated(
-    'Use clipBehavior instead. See the migration guide in '
-    'flutter.dev/go/clip-behavior. This feature was deprecated after v1.22.'
-  )
   /// Whether overflowing children should be clipped. See [Overflow].
   ///
   /// Some children in a stack might overflow its box. When this flag is set to
@@ -3329,10 +3329,14 @@ class Stack extends MultiChildRenderObjectWidget {
   /// When set to [Overflow.visible], the visible overflow area will not accept
   /// hit testing.
   ///
-  /// This overrides [clipBehavior] for now due to a staged roll out without
-  /// breaking Google. We will remove it and only use [clipBehavior] soon.
+  /// This overrides [clipBehavior] for now due to a staged roll out.
+  /// We will remove it and only use [clipBehavior] soon.
   ///
   /// Deprecated. Use [clipBehavior] instead.
+  @Deprecated(
+      'Use clipBehavior instead. See the migration guide in '
+          'flutter.dev/go/clip-behavior. This feature was deprecated after v1.22.'
+  )
   final Overflow overflow;
 
   /// {@macro flutter.widgets.Clip}

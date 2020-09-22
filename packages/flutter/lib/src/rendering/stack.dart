@@ -275,7 +275,7 @@ enum StackFit {
 /// Whether overflowing children should be clipped, or their overflow be
 /// visible.
 ///
-/// Deprecated. Use clipBehavior instead.
+/// Deprecated. Use [Stack.clipBehavior] instead.
 enum Overflow {
   /// Overflowing children will be visible.
   ///
