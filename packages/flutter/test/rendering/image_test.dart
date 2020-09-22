@@ -29,7 +29,8 @@ Future<void> main() async {
     expect(image.size.width, equals(25.0));
     expect(image.size.height, equals(25.0));
 
-    expect(image, hasAGoodToStringDeep);
+    // TODO(dnfield): https://github.com/flutter/flutter/issues/66289
+    expect(image, hasAGoodToStringDeep, skip: kIsWeb);
     expect(
       image.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
@@ -42,7 +43,6 @@ Future<void> main() async {
         '   invertColors: false\n'
         '   filterQuality: low\n'
       ),
-      skip: kIsWeb, // TODO(dnfield): https://github.com/flutter/flutter/issues/66289
     );
 
     image = RenderImage(image: wideImage);
