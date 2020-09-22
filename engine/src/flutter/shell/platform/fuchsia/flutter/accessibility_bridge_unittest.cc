@@ -137,6 +137,70 @@ TEST_F(AccessibilityBridgeTest, DeletesChildrenTransitively) {
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
 }
 
+TEST_F(AccessibilityBridgeTest, PopulatesRoleButton) {
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+  node0.flags = static_cast<int>(flutter::SemanticsFlags::kIsButton);
+
+  accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}});
+  RunLoopUntilIdle();
+
+  EXPECT_EQ(1U, semantics_manager_.LastUpdatedNodes().size());
+  const auto& fuchsia_node = semantics_manager_.LastUpdatedNodes().at(0u);
+  EXPECT_EQ(fuchsia_node.node_id(), static_cast<unsigned int>(node0.id));
+  EXPECT_TRUE(fuchsia_node.has_role());
+  EXPECT_EQ(fuchsia_node.role(),
+            fuchsia::accessibility::semantics::Role::BUTTON);
+}
+
+TEST_F(AccessibilityBridgeTest, PopulatesRoleImage) {
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+  node0.flags = static_cast<int>(flutter::SemanticsFlags::kIsImage);
+
+  accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}});
+  RunLoopUntilIdle();
+
+  EXPECT_EQ(1U, semantics_manager_.LastUpdatedNodes().size());
+  const auto& fuchsia_node = semantics_manager_.LastUpdatedNodes().at(0u);
+  EXPECT_EQ(fuchsia_node.node_id(), static_cast<unsigned int>(node0.id));
+  EXPECT_TRUE(fuchsia_node.has_role());
+  EXPECT_EQ(fuchsia_node.role(),
+            fuchsia::accessibility::semantics::Role::IMAGE);
+}
+
+TEST_F(AccessibilityBridgeTest, PopulatesRoleSlider) {
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+  node0.actions |= static_cast<int>(flutter::SemanticsAction::kIncrease);
+
+  accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}});
+  RunLoopUntilIdle();
+
+  EXPECT_EQ(1U, semantics_manager_.LastUpdatedNodes().size());
+  const auto& fuchsia_node = semantics_manager_.LastUpdatedNodes().at(0u);
+  EXPECT_EQ(fuchsia_node.node_id(), static_cast<unsigned int>(node0.id));
+  EXPECT_TRUE(fuchsia_node.has_role());
+  EXPECT_EQ(fuchsia_node.role(),
+            fuchsia::accessibility::semantics::Role::SLIDER);
+}
+
+TEST_F(AccessibilityBridgeTest, PopulatesRoleHeader) {
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+  node0.flags = static_cast<int>(flutter::SemanticsFlags::kIsHeader);
+
+  accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}});
+  RunLoopUntilIdle();
+
+  EXPECT_EQ(1U, semantics_manager_.LastUpdatedNodes().size());
+  const auto& fuchsia_node = semantics_manager_.LastUpdatedNodes().at(0u);
+  EXPECT_EQ(fuchsia_node.node_id(), static_cast<unsigned int>(node0.id));
+  EXPECT_TRUE(fuchsia_node.has_role());
+  EXPECT_EQ(fuchsia_node.role(),
+            fuchsia::accessibility::semantics::Role::HEADER);
+}
+
 TEST_F(AccessibilityBridgeTest, PopulatesCheckedState) {
   flutter::SemanticsNode node0;
   node0.id = 0;
