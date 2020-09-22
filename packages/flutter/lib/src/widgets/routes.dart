@@ -756,7 +756,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 
   bool get _shouldIgnoreFocusRequest {
     return widget.route.animation?.status == AnimationStatus.reverse ||
-        (widget.route.navigator?.userGestureInProgress ?? false);
+      (widget.route.navigator?.userGestureInProgress ?? false);
   }
 
   // This should be called to wrap any changes to route.isCurrent, route.canPop,
