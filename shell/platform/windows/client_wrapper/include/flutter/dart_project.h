@@ -29,17 +29,6 @@ class DartProject {
 
   ~DartProject() = default;
 
-  // Switches to pass to the Flutter engine. See
-  // https://github.com/flutter/engine/blob/master/shell/common/switches.h
-  // for details. Not all switches will apply to embedding mode. Switches have
-  // not stability guarantee, and are subject to change without notice.
-  //
-  // Note: This WILL BE REMOVED in the future. If you call this, please see
-  // https://github.com/flutter/flutter/issues/38569.
-  void SetEngineSwitches(const std::vector<std::string>& switches) {
-    engine_switches_ = switches;
-  }
-
  private:
   // Accessors for internals are private, so that they can be changed if more
   // flexible options for project structures are needed later without it
@@ -52,9 +41,6 @@ class DartProject {
   const std::wstring& assets_path() const { return assets_path_; }
   const std::wstring& icu_data_path() const { return icu_data_path_; }
   const std::wstring& aot_library_path() const { return aot_library_path_; }
-  const std::vector<std::string>& engine_switches() const {
-    return engine_switches_;
-  }
 
   // The path to the assets directory.
   std::wstring assets_path_;
@@ -63,8 +49,6 @@ class DartProject {
   // The path to the AOT library. This will always return a path, but non-AOT
   // builds will not be expected to actually have a library at that path.
   std::wstring aot_library_path_;
-  // Switches to pass to the engine.
-  std::vector<std::string> engine_switches_;
 };
 
 }  // namespace flutter

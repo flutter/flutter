@@ -137,10 +137,10 @@ bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
   // FlutterProjectArgs is expecting a full argv, so when processing it for
   // flags the first item is treated as the executable and ignored. Add a dummy
   // value so that all provided arguments are used.
+  std::vector<std::string> switches = project_->GetSwitches();
   std::vector<const char*> argv = {"placeholder"};
   std::transform(
-      project_->switches().begin(), project_->switches().end(),
-      std::back_inserter(argv),
+      switches.begin(), switches.end(), std::back_inserter(argv),
       [](const std::string& arg) -> const char* { return arg.c_str(); });
 
   // Configure task runners.
