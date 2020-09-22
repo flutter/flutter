@@ -134,27 +134,24 @@ class LocalComparisonOutput {
     Uri golden,
     Uri basedir, {
     String key = '',
-  }) async {
-    return TestAsyncUtils.guard<String>(() async {
-      String additionalFeedback = '';
-      if (result.diffs != null) {
-        additionalFeedback = '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
-        final Map<String, Image> diffs = result.diffs!.cast<String, Image>();
-        for (final MapEntry<String, Image> entry in diffs.entries) {
-          final File output = getFailureFile(
-            key.isEmpty ? entry.key : entry.key + '_' + key,
-            golden,
-            basedir,
-          );
-          output.parent.createSync(recursive: true);
-          final ByteData? pngBytes = await entry.value.toByteData(format: ImageByteFormat.png);
-          output.writeAsBytesSync(pngBytes!.buffer.asUint8List());
-        }
+  }) async => TestAsyncUtils.guard<String>(() async {
+    String additionalFeedback = '';
+    if (result.diffs != null) {
+      additionalFeedback = '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
+      final Map<String, Image> diffs = result.diffs!.cast<String, Image>();
+      for (final MapEntry<String, Image> entry in diffs.entries) {
+        final File output = getFailureFile(
+          key.isEmpty ? entry.key : entry.key + '_' + key,
+          golden,
+          basedir,
+        );
+        output.parent.createSync(recursive: true);
+        final ByteData? pngBytes = await entry.value.toByteData(format: ImageByteFormat.png);
+        output.writeAsBytesSync(pngBytes!.buffer.asUint8List());
       }
-
-      return 'Golden "$golden": ${result.error}$additionalFeedback';
-    });
-  }
+    }
+    return 'Golden "$golden": ${result.error}$additionalFeedback';
+  });
 
   /// Returns the appropriate file for a given diff from a [ComparisonResult].
   File getFailureFile(String failure, Uri golden, Uri basedir) {
