@@ -45,7 +45,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'pedantic': '1.10.0-nullsafety.1',
   'pool': '1.5.0-nullsafety.1',
   'source_maps': '0.10.10-nullsafety.1',
-  'source_map_stack_trace': '2.1.0-nullsafety.12',
+  'source_map_stack_trace': '2.1.0-nullsafety.2',
   'source_span': '1.8.0-nullsafety.2',
   'stack_trace': '1.10.0-nullsafety.1',
   'stream_channel': '2.1.0-nullsafety.1',
