@@ -40,6 +40,7 @@ void main() {
       }
       stdout.write(line);
     });
+    flutter.stderr.listen(print);
     await flutter.run(chrome: true);
     await onStart.future;
     await Future<void>.delayed(const Duration(seconds: 2));
@@ -52,7 +53,6 @@ void main() {
 
   testWithoutContext('newly added code executes during hot restart - canvaskit', () async {
     final StringBuffer stdout = StringBuffer();
-    final StringBuffer stderr = StringBuffer();
     final Completer<void> onDone = Completer<void>();
     final Completer<void> onStart = Completer<void>();
     flutter.stdout.listen((String line) {
