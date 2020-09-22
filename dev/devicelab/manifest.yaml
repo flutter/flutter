@@ -775,13 +775,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-#  TODO(jmagman): https://github.com/flutter/flutter/issues/66166
-#  flutter_gallery__transition_perf_e2e_ios32:
-#    description: >
-#      Measures the performance of screen transitions in Flutter Gallery on
-#      Android with e2e.
-#    stage: devicelab_ios
-#    required_agent_capabilities: ["mac/ios32"]
+  flutter_gallery__transition_perf_e2e_ios32:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      Android with e2e.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios32"]
 
   flutter_gallery__transition_perf_e2e_ios:
     description: >

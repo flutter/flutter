@@ -10,8 +10,8 @@ import 'dart:typed_data';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
-import 'image_data.dart';
 
 void main() {
   TestRenderingFlutterBinding();
@@ -36,7 +36,7 @@ void main() {
 
 
   test('ResizeImage resizes to the correct dimensions (down)', () async {
-    final Uint8List bytes = Uint8List.fromList(kBlueSquare);
+    final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
     final MemoryImage imageProvider = MemoryImage(bytes);
     final Size rawImageSize = await _resolveAndGetSize(imageProvider);
     expect(rawImageSize, const Size(50, 50));
