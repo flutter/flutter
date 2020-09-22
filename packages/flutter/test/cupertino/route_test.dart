@@ -1527,35 +1527,24 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    await expectLater(
-      find.byType(CupertinoApp),
-      matchesGoldenFile('route-test-test-pre.png'),
-    );
-
     await gesture.down(const Offset(3, 300), timeStamp: Duration.zero);
 
     Duration time = Duration.zero;
     double x = 5;
 
-    for (int i = 0; i < 10; i += 1) {
+    for (int i = 0; i < 3; i += 1) {
       time += const Duration(milliseconds: 10);
-      x += 30;
+      x += 10;
       await tester.pump(const Duration(milliseconds: 10));
       await gesture.moveTo(Offset(x, 300), timeStamp: time);
     }
-
-    await expectLater(
-      find.byType(CupertinoApp),
-      matchesGoldenFile('route-test-test.png'),
-    );
+    await tester.pump(const Duration(seconds: 1));
+    x += 1;
+    time += const Duration(seconds: 1);
+    await gesture.moveTo(Offset(x, 300), timeStamp: time);
 
     navigator.removeRoute(r);
     await tester.pump();
-
-    await expectLater(
-      find.byType(CupertinoApp),
-      matchesGoldenFile('route-test-test-post.png'),
-    );
   });
 }
 
