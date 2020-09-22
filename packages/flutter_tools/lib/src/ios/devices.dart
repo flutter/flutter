@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -678,6 +679,10 @@ class IOSDeviceLogReader extends DeviceLogReader {
       return;
     }
     try {
+      // The VM service will not publish logging events unless the debug stream is being listened to.
+      // Listen to this stream as a side effect.
+      unawaited(connectedVmService.streamListen('Debug'));
+
       await Future.wait(<Future<void>>[
         connectedVmService.streamListen(vm_service.EventStreams.kStdout),
         connectedVmService.streamListen(vm_service.EventStreams.kStderr),
