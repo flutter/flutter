@@ -70,7 +70,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
     @required Platform platform,
     @required FeatureFlags featureFlags,
-    @required FileSystem fileSystem,
+    FileSystem fileSystem,
     ProcessManager processManager,
     Logger logger,
   }) : _platform = platform ?? globals.platform, // TODO(jonahwilliams): remove after google3 roll
@@ -78,7 +78,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
           platform: platform,
           featureFlags: featureFlags,
        ),
-       _fileSystem = fileSystem,
+       _fileSystem = fileSystem ?? globals.fs,
        _logger = logger,
        _processManager = processManager ?? globals.processManager,
        super('linux devices');

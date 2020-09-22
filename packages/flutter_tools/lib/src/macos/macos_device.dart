@@ -12,6 +12,7 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../macos/application_package.dart';
 import '../project.dart';
 import 'build_macos.dart';
@@ -22,7 +23,7 @@ class MacOSDevice extends DesktopDevice {
   MacOSDevice({
     @required ProcessManager processManager,
     @required Logger logger,
-    @required FileSystem fileSystem,
+    FileSystem fileSystem,
   }) : _processManager = processManager,
        _logger = logger,
        super(
@@ -31,7 +32,7 @@ class MacOSDevice extends DesktopDevice {
         ephemeral: false,
         processManager: processManager,
         logger: logger,
-        fileSystem: fileSystem,
+        fileSystem: fileSystem ?? globals.fs,
       );
 
   final ProcessManager _processManager;
