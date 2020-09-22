@@ -50,9 +50,11 @@ import 'run.dart';
 /// successful the exit code will be `0`. Otherwise, you will see a non-zero
 /// exit code.
 class DriveCommand extends RunCommandBase {
-  DriveCommand() {
+  DriveCommand({
+    bool verboseHelp = false,
+  }) {
     requiresPubspecYaml();
-
+    addEnableExperimentation(hide: !verboseHelp);
     argParser
       ..addFlag('keep-app-running',
         defaultsTo: null,
@@ -314,8 +316,21 @@ $ex
       });
     }
 
+    List<String> experimentalFlags = <String>[];
+    if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
+        stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
+      experimentalFlags = stringsArg(FlutterOptions.kEnableExperiment);
+    }
+
     try {
-      await testRunner(<String>[testFile], environment);
+      await testRunner(
+        <String>[
+          if (experimentalFlags.isNotEmpty)
+            '--enable-experiment=${experimentalFlags.join(',')}',
+          testFile,
+        ],
+        environment,
+      );
     } on Exception catch (error, stackTrace) {
       if (error is ToolExit) {
         rethrow;
