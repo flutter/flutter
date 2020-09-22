@@ -396,6 +396,12 @@ class _IndicatorPainter extends CustomPainter {
     final EdgeInsets insets = indicatorPadding.resolve(_currentTextDirection);
     final Rect rect = Rect.fromLTWH(tabLeft, 0.0, tabRight - tabLeft, tabBarSize.height);
 
+    if (!(rect.size >= insets.collapsedSize)) {
+      throw FlutterError(
+          'indicatorPadding insets should be less than Tab Size\n'
+          'Rect Size : ${rect.size}, Insets: ${insets.toString()}'
+      );
+    }
     return insets.deflateRect(rect);
   }
 
@@ -819,7 +825,6 @@ class _TabBarState extends State<TabBar> {
       color = Colors.white;
 
     return UnderlineTabIndicator(
-//      insets: widget.indicatorPadding,
       borderSide: BorderSide(
         width: widget.indicatorWeight,
         color: color,
