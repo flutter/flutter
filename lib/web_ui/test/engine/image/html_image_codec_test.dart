@@ -20,6 +20,7 @@ void testMain() async {
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
       expect(frameInfo.image, isNotNull);
       expect(frameInfo.image.width, 100);
+      expect(frameInfo.image.toString(), '[100×100]');
     });
     test('provides image loading progress', () async {
       StringBuffer buffer = new StringBuffer();
