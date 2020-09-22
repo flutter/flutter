@@ -2049,7 +2049,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         break;
     }
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
-    final textStyle = _textStyleFrom(context);
+    final TextStyle textStyle = _textStyleFrom(context);
     return MediaQuery(
       // The native iOS picker's text scaling is fixed, so we will also fix it
       // as well in our picker.

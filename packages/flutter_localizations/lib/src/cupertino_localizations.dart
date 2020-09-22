@@ -308,7 +308,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   @override
-  List<String> get timerPickerHourLabels => [
+  List<String> get timerPickerHourLabels => <String>[
     timerPickerHourLabelZero,
     timerPickerHourLabelOne,
     timerPickerHourLabelTwo,
@@ -345,7 +345,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   @override
-  List<String> get timerPickerMinuteLabels => [
+  List<String> get timerPickerMinuteLabels => <String>[
     timerPickerMinuteLabelZero,
     timerPickerMinuteLabelOne,
     timerPickerMinuteLabelTwo,
@@ -382,7 +382,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   @override
-  List<String> get timerPickerSecondLabels => [
+  List<String> get timerPickerSecondLabels => <String>[
     timerPickerSecondLabelZero,
     timerPickerSecondLabelOne,
     timerPickerSecondLabelTwo,
