@@ -887,5 +887,5 @@ String toMultiRootPath(Uri fileUri, String scheme, List<String> fileSystemRoots,
       return scheme + '://' + filePath.substring(fileSystemRoot.length);
     }
   }
-  return fileUri.toString();
+  return fileUri.toFilePath(windows: windows);
 }
