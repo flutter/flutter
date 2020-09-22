@@ -23,18 +23,18 @@ const int chromeDebugPort = 10000;
 
 Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
   // Original (non-gallery) benchmarks.
-  /*
   final TaskResult originalBenchmarkResult = await runWebBenchmarkIn(
     useCanvasKit: useCanvasKit,
     macrobenchmarksDirectory: path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks'),
     entryPoint: 'lib/web_benchmarks.dart',
   );
 
-  print(originalBenchmarkResult.toJson()); */
+  if (originalBenchmarkResult.failed) {
+    return originalBenchmarkResult;
+  }
 
   // Gallery benchmarks.
   section('Get New Flutter Gallery!');
-  print(flutterDirectory.path);
 
   final tempDirectory = path.join(flutterDirectory.path, 'dev', 'devicelab', 'temp');
 
@@ -59,10 +59,39 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
     entryPoint: 'lib/benchmarks/runner.dart',
   );
 
-  print(galleryBenchmarkResult.toJson());
+  if (galleryBenchmarkResult.failed) {
+    return galleryBenchmarkResult;
+  }
+
+  // Both succeeded. Combine data.
+
+  final Map<String, dynamic> originalData = originalBenchmarkResult.data;
+  final Map<String, dynamic> galleryData = galleryBenchmarkResult.data;
+
+  final Set<String> keyIntersection = originalData.keys.toSet()
+      .intersection(galleryData.keys.toSet());
+
+  if (keyIntersection.isNotEmpty) {
+    throw Exception('Original and Gallery benchmarks are not disjoint; '
+        '$keyIntersection are found in both of them.');
+  }
+
+  final Map<String, dynamic> combinedData = <String, dynamic>{}
+      ..addAll(originalData)
+      ..addAll(galleryData);
+
+  final List<String> benchmarkScoreKeys =
+      originalBenchmarkResult.benchmarkScoreKeys +
+      galleryBenchmarkResult.benchmarkScoreKeys;
+
+  final List<String> detailFiles =
+      originalBenchmarkResult.detailFiles +
+      galleryBenchmarkResult.detailFiles;
 
   return TaskResult.success(
-    <String, int>{'ans': 0},
+    combinedData,
+    benchmarkScoreKeys: benchmarkScoreKeys,
+    detailFiles: detailFiles,
   );
 }
 
