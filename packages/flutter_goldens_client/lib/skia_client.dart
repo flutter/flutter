@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
@@ -419,7 +418,7 @@ class SkiaGoldClient {
     final String traceID = getTraceID(testName);
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForExpectations = Uri.parse(
-        'https://flutter-gold.skia.org/json/latestpositivedigest/$traceID'
+        'https://flutter-gold.skia.org/json/v1/latestpositivedigest/$traceID'
       );
       late String rawResponse;
       try {
@@ -485,7 +484,7 @@ class SkiaGoldClient {
     late String rawResponse;
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForIgnores = Uri.parse(
-        'https://flutter-gold.skia.org/json/ignores'
+        'https://flutter-gold.skia.org/json/v1/ignores'
       );
 
       try {

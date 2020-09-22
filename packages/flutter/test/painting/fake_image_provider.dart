@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
 import 'dart:ui' as ui show Codec;
 
 import 'package:flutter/foundation.dart';

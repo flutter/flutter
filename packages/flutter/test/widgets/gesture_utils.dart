@@ -11,6 +11,5 @@ Future<void> scrollAt(Offset position, WidgetTester tester, [Offset offset = con
   final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
   // Create a hover event so that |testPointer| has a location when generating the scroll.
   testPointer.hover(position);
-  final HitTestResult result = tester.hitTestOnBinding(position);
-  return tester.sendEventToBinding(testPointer.scroll(offset), result);
+  return tester.sendEventToBinding(testPointer.scroll(offset));
 }

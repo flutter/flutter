@@ -18,6 +18,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       'build',
       'apk',
       '--analyze-size',
@@ -42,6 +43,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+       ...getLocalEngineArguments(),
       'build',
       'ios',
       '--analyze-size',
@@ -65,6 +67,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+       ...getLocalEngineArguments(),
       'build',
       'apk',
       '--analyze-size',
