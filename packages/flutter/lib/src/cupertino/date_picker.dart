@@ -1679,7 +1679,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           _measureLabelsMaxWidth(localizations.timerPickerSecondLabels, textStyle);
   }
 
-  // Measure the maximum label width for the picker column.
+  // Measures all possible time text labels and return maximum width.
   double _measureLabelsMaxWidth(List<String> labels, TextStyle style) {
     double maxWidth = double.negativeInfinity;
     for (int i = 0; i < labels.length; i++) {
