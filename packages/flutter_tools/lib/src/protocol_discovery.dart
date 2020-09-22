@@ -34,7 +34,7 @@ class ProtocolDiscovery {
   factory ProtocolDiscovery.observatory(
     DeviceLogReader logReader, {
     DevicePortForwarder portForwarder,
-    Duration throttleDuration,
+    Duration throttleDuration = const Duration(milliseconds: 200),
     Duration throttleTimeout,
     @required int hostPort,
     @required int devicePort,
@@ -45,7 +45,7 @@ class ProtocolDiscovery {
       logReader,
       kObservatoryService,
       portForwarder: portForwarder,
-      throttleDuration: throttleDuration ?? const Duration(milliseconds: 200),
+      throttleDuration: throttleDuration,
       throttleTimeout: throttleTimeout,
       hostPort: hostPort,
       devicePort: devicePort,
@@ -225,7 +225,7 @@ class _BufferedStreamController<T> {
 ///
 /// For example, consider a `waitDuration` of `10ms`, and list of event names
 /// and arrival times: `a (0ms), b (5ms), c (11ms), d (21ms)`.
-/// The events `a`, `c`, and `d` will be produced as a result.
+/// The events `c` and `d` will be produced as a result.
 StreamTransformer<S, S> _throttle<S>({
   @required Duration waitDuration,
 }) {
@@ -240,13 +240,10 @@ StreamTransformer<S, S> _throttle<S>({
       handleData: (S value, EventSink<S> sink) {
         latestLine = value;
 
-        final bool isFirstMessage = lastExecution == null;
         final int currentTime = DateTime.now().millisecondsSinceEpoch;
         lastExecution ??= currentTime;
         final int remainingTime = currentTime - lastExecution;
-
-        // Always send the first event immediately.
-        final int nextExecutionTime = isFirstMessage || remainingTime > waitDuration.inMilliseconds
+        final int nextExecutionTime = remainingTime > waitDuration.inMilliseconds
           ? 0
           : waitDuration.inMilliseconds - remainingTime;
 
