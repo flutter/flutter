@@ -467,11 +467,13 @@ TEST_F(AccessibilityBridgeTest, BatchesLargeMessages) {
   RunLoopUntilIdle();
 
   EXPECT_EQ(0, semantics_manager_.DeleteCount());
-  EXPECT_EQ(6, semantics_manager_.UpdateCount());
+  EXPECT_TRUE(6 <= semantics_manager_.UpdateCount() &&
+              semantics_manager_.UpdateCount() <= 10);
   EXPECT_EQ(1, semantics_manager_.CommitCount());
   EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
 
+  int next_update_count = semantics_manager_.UpdateCount() + 1;
   // Remove the children
   node0.childrenInTraversalOrder.clear();
   node0.childrenInHitTestOrder.clear();
@@ -481,7 +483,7 @@ TEST_F(AccessibilityBridgeTest, BatchesLargeMessages) {
   RunLoopUntilIdle();
 
   EXPECT_EQ(1, semantics_manager_.DeleteCount());
-  EXPECT_EQ(7, semantics_manager_.UpdateCount());
+  EXPECT_EQ(next_update_count, semantics_manager_.UpdateCount());
   EXPECT_EQ(2, semantics_manager_.CommitCount());
   EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
