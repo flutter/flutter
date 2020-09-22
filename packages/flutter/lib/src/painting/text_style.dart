@@ -19,6 +19,11 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor and a background\n'
     'The backgroundColor argument is just a shorthand for "background: new Paint()..color = color".';
 
+// The default font size if none is specified. This should be kept in
+// sync with the default values in text_painter.dart, as well as the
+// defaults set in the engine.
+const double _kDefaultFontSize = 14.0;
+
 // Examples can assume:
 // BuildContext context;
 
@@ -511,9 +516,6 @@ class TextStyle with Diagnosticable {
   /// [getParagraphStyle] will default to 14 logical pixels if the font size
   /// isn't specified here.
   final double? fontSize;
-
-  // The default font size if none is specified.
-  static const double _defaultFontSize = 14.0;
 
   /// The typeface thickness to use when painting the text (e.g., bold).
   final FontWeight? fontWeight;
@@ -1092,7 +1094,7 @@ class TextStyle with Diagnosticable {
       fontWeight: fontWeight ?? this.fontWeight,
       fontStyle: fontStyle ?? this.fontStyle,
       fontFamily: fontFamily ?? this.fontFamily,
-      fontSize: (fontSize ?? this.fontSize ?? _defaultFontSize) * textScaleFactor,
+      fontSize: (fontSize ?? this.fontSize ?? _kDefaultFontSize) * textScaleFactor,
       height: height ?? this.height,
       textHeightBehavior: textHeightBehavior,
       strutStyle: strutStyle == null ? null : ui.StrutStyle(

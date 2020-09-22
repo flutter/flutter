@@ -201,7 +201,7 @@ void main() {
       textScaleFactor: 2.0,
     );
     painter.layout();
-    expect(painter.size, const Size(20.0, 20.0));
+    expect(painter.size, const Size(28.0, 28.0));
   });
 
   test('TextPainter default text height is 14 pixels', () {
