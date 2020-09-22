@@ -26,7 +26,7 @@ import org.robolectric.annotation.Config;
 // Run with Robolectric so that Log calls don't crash.
 @Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
-public class FlutterEnginePluginRegistryTest {
+public class FlutterEngineConnectionRegistryTest {
   @Test
   public void itDoesNotRegisterTheSamePluginTwice() {
     Context context = mock(Context.class);
@@ -40,8 +40,8 @@ public class FlutterEnginePluginRegistryTest {
     FakeFlutterPlugin fakePlugin1 = new FakeFlutterPlugin();
     FakeFlutterPlugin fakePlugin2 = new FakeFlutterPlugin();
 
-    FlutterEnginePluginRegistry registry =
-        new FlutterEnginePluginRegistry(context, flutterEngine, flutterLoader);
+    FlutterEngineConnectionRegistry registry =
+        new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader);
 
     // Verify that the registry doesn't think it contains our plugin yet.
     assertFalse(registry.has(fakePlugin1.getClass()));
@@ -80,8 +80,8 @@ public class FlutterEnginePluginRegistryTest {
     AtomicBoolean isFirstCall = new AtomicBoolean(true);
 
     // setup the environment to get the required internal data
-    FlutterEnginePluginRegistry registry =
-        new FlutterEnginePluginRegistry(context, flutterEngine, flutterLoader);
+    FlutterEngineConnectionRegistry registry =
+        new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader);
     FakeActivityAwareFlutterPlugin fakePlugin = new FakeActivityAwareFlutterPlugin();
     registry.add(fakePlugin);
     registry.attachToActivity(activity, lifecycle);

@@ -967,7 +967,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   public void detachFromFlutterEngine() {
     Log.v(TAG, "Detaching from a FlutterEngine: " + flutterEngine);
     if (!isAttachedToFlutterEngine()) {
-      Log.v(TAG, "Not attached to an engine. Doing nothing.");
+      Log.v(TAG, "FlutterView not attached to an engine. Not detaching.");
       return;
     }
 

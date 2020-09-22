@@ -62,7 +62,7 @@ import java.util.Arrays;
  * the same form. <strong>Do not use this class as a convenient shortcut for any other
  * behavior.</strong>
  */
-/* package */ final class FlutterActivityAndFragmentDelegate {
+/* package */ class FlutterActivityAndFragmentDelegate implements ExclusiveAppComponent<Activity> {
   private static final String TAG = "FlutterActivityAndFragmentDelegate";
   private static final String FRAMEWORK_RESTORATION_BUNDLE_KEY = "framework";
   private static final String PLUGINS_RESTORATION_BUNDLE_KEY = "plugins";
@@ -154,14 +154,6 @@ import java.util.Arrays;
       setupFlutterEngine();
     }
 
-    // Regardless of whether or not a FlutterEngine already existed, the PlatformPlugin
-    // is bound to a specific Activity. Therefore, it needs to be created and configured
-    // every time this Fragment attaches to a new Activity.
-    // TODO(mattcarroll): the PlatformPlugin needs to be reimagined because it implicitly takes
-    //                    control of the entire window. This is unacceptable for non-fullscreen
-    //                    use-cases.
-    platformPlugin = host.providePlatformPlugin(host.getActivity(), flutterEngine);
-
     if (host.shouldAttachEngineToActivity()) {
       // Notify any plugins that are currently attached to our FlutterEngine that they
       // are now attached to an Activity.
@@ -172,13 +164,30 @@ import java.util.Arrays;
       // which means there shouldn't be any possibility for the Fragment Lifecycle to get out of
       // sync with the Activity. We use the Fragment's Lifecycle because it is possible that the
       // attached Activity is not a LifecycleOwner.
-      Log.v(TAG, "Attaching FlutterEngine to the Activity that owns this Fragment.");
-      flutterEngine
-          .getActivityControlSurface()
-          .attachToActivity(host.getActivity(), host.getLifecycle());
+      Log.v(TAG, "Attaching FlutterEngine to the Activity that owns this delegate.");
+      flutterEngine.getActivityControlSurface().attachToActivity(this, host.getLifecycle());
     }
 
+    // Regardless of whether or not a FlutterEngine already existed, the PlatformPlugin
+    // is bound to a specific Activity. Therefore, it needs to be created and configured
+    // every time this Fragment attaches to a new Activity.
+    // TODO(mattcarroll): the PlatformPlugin needs to be reimagined because it implicitly takes
+    //                    control of the entire window. This is unacceptable for non-fullscreen
+    //                    use-cases.
+    platformPlugin = host.providePlatformPlugin(host.getActivity(), flutterEngine);
+
     host.configureFlutterEngine(flutterEngine);
+  }
+
+  @Override
+  public @NonNull Activity getAppComponent() {
+    final Activity activity = host.getActivity();
+    if (activity == null) {
+      throw new AssertionError(
+          "FlutterActivityAndFragmentDelegate's getAppComponent should only "
+              + "be queried after onAttach, when the host's activity should always be non-null");
+    }
+    return activity;
   }
 
   /**
@@ -480,6 +489,24 @@ import java.util.Arrays;
     }
   }
 
+  @Override
+  public void detachFromFlutterEngine() {
+    if (host.shouldDestroyEngineWithHost()) {
+      // The host owns the engine and should never have its engine taken by another exclusive
+      // activity.
+      throw new AssertionError(
+          "The internal FlutterEngine created by "
+              + host
+              + " has been attached to by another activity. To persist a FlutterEngine beyond the "
+              + "ownership of this activity, explicitly create a FlutterEngine");
+    }
+
+    // Default, but customizable, behavior is for the host to call {@link #onDetach}
+    // deterministically as to not mix more events during the lifecycle of the next exclusive
+    // activity.
+    host.detachFromFlutterEngine();
+  }
+
   /**
    * Invoke this from {@code Activity#onDestroy()} or {@code Fragment#onDetach()}.
    *
@@ -740,6 +767,15 @@ import java.util.Arrays;
      * provided.
      */
     boolean shouldDestroyEngineWithHost();
+
+    /**
+     * Callback called when the {@link FlutterEngine} has been attached to by another activity
+     * before this activity was destroyed.
+     *
+     * <p>The expected behavior is for this activity to synchronously stop using the {@link
+     * FlutterEngine} to avoid lifecycle crosstalk with the new activity.
+     */
+    void detachFromFlutterEngine();
 
     /** Returns the Dart entrypoint that should run when a new {@link FlutterEngine} is created. */
     @NonNull

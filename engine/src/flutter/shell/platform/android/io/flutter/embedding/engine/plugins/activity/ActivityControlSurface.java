@@ -10,6 +10,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
+import io.flutter.embedding.android.ExclusiveAppComponent;
 
 /**
  * Control surface through which an {@link Activity} attaches to a {@link FlutterEngine}.
@@ -19,9 +20,10 @@ import androidx.lifecycle.Lifecycle;
  *
  * <ol>
  *   <li>Once an {@link Activity} is created, and its associated {@link FlutterEngine} is executing
- *       Dart code, the {@link Activity} should invoke {@link #attachToActivity(Activity,
- *       Lifecycle)}. At this point the {@link FlutterEngine} is considered "attached" to the {@link
- *       Activity} and all {@link ActivityAware} plugins are given access to the {@link Activity}.
+ *       Dart code, the {@link Activity} should invoke {@link #attachToActivity(
+ *       ExclusiveAppComponent, Lifecycle)}. At this point the {@link FlutterEngine} is considered
+ *       "attached" to the {@link Activity} and all {@link ActivityAware} plugins are given access
+ *       to the {@link Activity}.
  *   <li>Just before an attached {@link Activity} is destroyed for configuration change purposes,
  *       that {@link Activity} should invoke {@link #detachFromActivityForConfigChanges()}, giving
  *       each {@link ActivityAware} plugin an opportunity to clean up its references before the
@@ -32,6 +34,10 @@ import androidx.lifecycle.Lifecycle;
  *   <li>When an {@link Activity} is destroyed for non-configuration-change purposes, or when the
  *       {@link Activity} is no longer interested in displaying a {@link FlutterEngine}'s content,
  *       the {@link Activity} should invoke {@link #detachFromActivity()}.
+ *   <li>When a {@link Activity} is being attached while an existing {@link ExclusiveAppComponent}
+ *       is already attached, the existing {@link ExclusiveAppComponent} is given a chance to detach
+ *       first via {@link ExclusiveAppComponent#detachFromFlutterEngine()} before the new activity
+ *       attaches.
  * </ol>
  *
  * The attached {@link Activity} should also forward all {@link Activity} calls that this {@code
@@ -48,8 +54,30 @@ public interface ActivityControlSurface {
    * Dart code, the {@link Activity} should invoke this method. At that point the {@link
    * FlutterEngine} is considered "attached" to the {@link Activity} and all {@link ActivityAware}
    * plugins are given access to the {@link Activity}.
+   *
+   * @deprecated Prefer using the {@link #attachToActivity(ExclusiveAppComponent, Lifecycle)} API to
+   *     avoid situations where multiple activities are driving the FlutterEngine simultaneously.
+   *     See https://github.com/flutter/flutter/issues/66192.
    */
+  @Deprecated
   void attachToActivity(@NonNull Activity activity, @NonNull Lifecycle lifecycle);
+
+  /**
+   * Call this method from the {@link ExclusiveAppComponent} that is displaying the visual content
+   * of the {@link FlutterEngine} that is associated with this {@code ActivityControlSurface}.
+   *
+   * <p>Once an {@link ExclusiveAppComponent} is created, and its associated {@link FlutterEngine}
+   * is executing Dart code, the {@link ExclusiveAppComponent} should invoke this method. At that
+   * point the {@link FlutterEngine} is considered "attached" to the {@link ExclusiveAppComponent}
+   * and all {@link ActivityAware} plugins are given access to the {@link ExclusiveAppComponent}'s
+   * {@link Activity}.
+   *
+   * <p>This method differs from {@link #attachToActivity(Activity, Lifecycle)} in that it calls
+   * back the existing {@link ExclusiveAppComponent} to give it a chance to cleanly detach before a
+   * new {@link ExclusiveAppComponent} is attached.
+   */
+  void attachToActivity(
+      @NonNull ExclusiveAppComponent<Activity> exclusiveActivity, @NonNull Lifecycle lifecycle);
 
   /**
    * Call this method from the {@link Activity} that is attached to this {@code

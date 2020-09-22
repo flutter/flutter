@@ -74,7 +74,7 @@ public class FlutterEngine {
   @NonNull private final FlutterJNI flutterJNI;
   @NonNull private final FlutterRenderer renderer;
   @NonNull private final DartExecutor dartExecutor;
-  @NonNull private final FlutterEnginePluginRegistry pluginRegistry;
+  @NonNull private final FlutterEngineConnectionRegistry pluginRegistry;
   @NonNull private final LocalizationPlugin localizationPlugin;
 
   // System channels.
@@ -301,7 +301,7 @@ public class FlutterEngine {
     this.platformViewsController.onAttachedToJNI();
 
     this.pluginRegistry =
-        new FlutterEnginePluginRegistry(context.getApplicationContext(), this, flutterLoader);
+        new FlutterEngineConnectionRegistry(context.getApplicationContext(), this, flutterLoader);
 
     if (automaticallyRegisterPlugins) {
       registerPlugins();

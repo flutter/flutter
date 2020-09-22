@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
 import io.flutter.Log;
+import io.flutter.embedding.android.ExclusiveAppComponent;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.PluginRegistry;
@@ -36,13 +37,20 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-class FlutterEnginePluginRegistry
+/**
+ * This class is owned by the {@link FlutterEngine} and its role is to managed its connections with
+ * Android App Components and Flutter plugins.
+ *
+ * <p>It enforces the {0|1}:1 relationship between activity and engine, and propagates the app
+ * component connection to the plugins.
+ */
+/* package */ class FlutterEngineConnectionRegistry
     implements PluginRegistry,
         ActivityControlSurface,
         ServiceControlSurface,
         BroadcastReceiverControlSurface,
         ContentProviderControlSurface {
-  private static final String TAG = "FlutterEnginePluginRegistry";
+  private static final String TAG = "FlutterEngineConnectionRegistry";
 
   // PluginRegistry
   @NonNull
@@ -57,7 +65,9 @@ class FlutterEnginePluginRegistry
   private final Map<Class<? extends FlutterPlugin>, ActivityAware> activityAwarePlugins =
       new HashMap<>();
 
-  @Nullable private Activity activity;
+  // TODO(xster): remove activity after 2021/03/01 since exclusiveActivity should be the API to use.
+  @Deprecated @Nullable private Activity activity;
+  @Nullable private ExclusiveAppComponent<Activity> exclusiveActivity;
   @Nullable private FlutterEngineActivityPluginBinding activityPluginBinding;
   private boolean isWaitingForActivityReattachment = false;
 
@@ -85,7 +95,7 @@ class FlutterEnginePluginRegistry
   @Nullable private ContentProvider contentProvider;
   @Nullable private FlutterEngineContentProviderPluginBinding contentProviderPluginBinding;
 
-  FlutterEnginePluginRegistry(
+  FlutterEngineConnectionRegistry(
       @NonNull Context appContext,
       @NonNull FlutterEngine flutterEngine,
       @NonNull FlutterLoader flutterLoader) {
@@ -103,10 +113,10 @@ class FlutterEnginePluginRegistry
   public void destroy() {
     Log.v(TAG, "Destroying.");
     // Detach from any Android component that we may currently be attached to, e.g., Activity,
-    // Service,
-    // BroadcastReceiver, ContentProvider. This must happen before removing all plugins so that the
-    // plugins have an opportunity to clean up references as a result of component detachment.
-    detachFromAndroidComponent();
+    // Service, BroadcastReceiver, ContentProvider. This must happen before removing all plugins so
+    // that the plugins have an opportunity to clean up references as a result of component
+    // detachment.
+    detachFromAppComponent();
 
     // Remove all registered plugins.
     removeAll();
@@ -269,7 +279,7 @@ class FlutterEnginePluginRegistry
     plugins.clear();
   }
 
-  private void detachFromAndroidComponent() {
+  private void detachFromAppComponent() {
     if (isAttachedToActivity()) {
       detachFromActivity();
     } else if (isAttachedToService()) {
@@ -283,7 +293,11 @@ class FlutterEnginePluginRegistry
 
   // -------- Start ActivityControlSurface -------
   private boolean isAttachedToActivity() {
-    return activity != null;
+    return activity != null || exclusiveActivity != null;
+  }
+
+  private Activity attachedActivity() {
+    return exclusiveActivity != null ? exclusiveActivity.getAppComponent() : activity;
   }
 
   @Override
@@ -294,10 +308,43 @@ class FlutterEnginePluginRegistry
             + activity
             + "."
             + (isWaitingForActivityReattachment ? " This is after a config change." : ""));
-    // If we were already attached to an Android component, detach from it.
-    detachFromAndroidComponent();
+    if (this.exclusiveActivity != null) {
+      this.exclusiveActivity.detachFromFlutterEngine();
+    }
+    // If we were already attached to an app component, detach from it.
+    detachFromAppComponent();
 
+    if (this.exclusiveActivity != null) {
+      throw new AssertionError("Only activity or exclusiveActivity should be set");
+    }
     this.activity = activity;
+    attachToActivityInternal(activity, lifecycle);
+  }
+
+  @Override
+  public void attachToActivity(
+      @NonNull ExclusiveAppComponent<Activity> exclusiveActivity, @NonNull Lifecycle lifecycle) {
+    Log.v(
+        TAG,
+        "Attaching to an exclusive Activity: "
+            + exclusiveActivity.getAppComponent()
+            + (isAttachedToActivity() ? " evicting previous activity " + attachedActivity() : "")
+            + "."
+            + (isWaitingForActivityReattachment ? " This is after a config change." : ""));
+    if (this.exclusiveActivity != null) {
+      this.exclusiveActivity.detachFromFlutterEngine();
+    }
+    // If we were already attached to an app component, detach from it.
+    detachFromAppComponent();
+
+    if (this.activity != null) {
+      throw new AssertionError("Only activity or exclusiveActivity should be set");
+    }
+    this.exclusiveActivity = exclusiveActivity;
+    attachToActivityInternal(exclusiveActivity.getAppComponent(), lifecycle);
+  }
+
+  private void attachToActivityInternal(@NonNull Activity activity, @NonNull Lifecycle lifecycle) {
     this.activityPluginBinding = new FlutterEngineActivityPluginBinding(activity, lifecycle);
 
     // Activate the PlatformViewsController. This must happen before any plugins attempt
@@ -321,18 +368,14 @@ class FlutterEnginePluginRegistry
   @Override
   public void detachFromActivityForConfigChanges() {
     if (isAttachedToActivity()) {
-      Log.v(TAG, "Detaching from an Activity for config changes: " + activity);
+      Log.v(TAG, "Detaching from an Activity for config changes: " + attachedActivity());
       isWaitingForActivityReattachment = true;
 
       for (ActivityAware activityAware : activityAwarePlugins.values()) {
         activityAware.onDetachedFromActivityForConfigChanges();
       }
 
-      // Deactivate PlatformViewsController.
-      flutterEngine.getPlatformViewsController().detach();
-
-      activity = null;
-      activityPluginBinding = null;
+      detachFromActivityInternal();
     } else {
       Log.e(TAG, "Attempted to detach plugins from an Activity when no Activity was attached.");
     }
@@ -341,19 +384,24 @@ class FlutterEnginePluginRegistry
   @Override
   public void detachFromActivity() {
     if (isAttachedToActivity()) {
-      Log.v(TAG, "Detaching from an Activity: " + activity);
+      Log.v(TAG, "Detaching from an Activity: " + attachedActivity());
       for (ActivityAware activityAware : activityAwarePlugins.values()) {
         activityAware.onDetachedFromActivity();
       }
 
-      // Deactivate PlatformViewsController.
-      flutterEngine.getPlatformViewsController().detach();
-
-      activity = null;
-      activityPluginBinding = null;
+      detachFromActivityInternal();
     } else {
       Log.e(TAG, "Attempted to detach plugins from an Activity when no Activity was attached.");
     }
+  }
+
+  private void detachFromActivityInternal() {
+    // Deactivate PlatformViewsController.
+    flutterEngine.getPlatformViewsController().detach();
+
+    exclusiveActivity = null;
+    activity = null;
+    activityPluginBinding = null;
   }
 
   @Override
@@ -443,7 +491,7 @@ class FlutterEnginePluginRegistry
       @NonNull Service service, @Nullable Lifecycle lifecycle, boolean isForeground) {
     Log.v(TAG, "Attaching to a Service: " + service);
     // If we were already attached to an Android component, detach from it.
-    detachFromAndroidComponent();
+    detachFromAppComponent();
 
     this.service = service;
     this.servicePluginBinding = new FlutterEngineServicePluginBinding(service, lifecycle);
@@ -497,7 +545,7 @@ class FlutterEnginePluginRegistry
       @NonNull BroadcastReceiver broadcastReceiver, @NonNull Lifecycle lifecycle) {
     Log.v(TAG, "Attaching to BroadcastReceiver: " + broadcastReceiver);
     // If we were already attached to an Android component, detach from it.
-    detachFromAndroidComponent();
+    detachFromAppComponent();
 
     this.broadcastReceiver = broadcastReceiver;
     this.broadcastReceiverPluginBinding =
@@ -539,7 +587,7 @@ class FlutterEnginePluginRegistry
       @NonNull ContentProvider contentProvider, @NonNull Lifecycle lifecycle) {
     Log.v(TAG, "Attaching to ContentProvider: " + contentProvider);
     // If we were already attached to an Android component, detach from it.
-    detachFromAndroidComponent();
+    detachFromAppComponent();
 
     this.contentProvider = contentProvider;
     this.contentProviderPluginBinding =

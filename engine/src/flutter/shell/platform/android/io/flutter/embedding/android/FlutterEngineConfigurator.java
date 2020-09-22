@@ -4,7 +4,6 @@
 
 package io.flutter.embedding.android;
 
-import android.app.Activity;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -21,8 +20,8 @@ public interface FlutterEngineConfigurator {
    *
    * <p>This method is called after the given {@link FlutterEngine} has been attached to the owning
    * {@code FragmentActivity}. See {@link
-   * io.flutter.embedding.engine.plugins.activity.ActivityControlSurface#attachToActivity(Activity,
-   * Lifecycle)}.
+   * io.flutter.embedding.engine.plugins.activity.ActivityControlSurface#attachToActivity(
+   * ExclusiveAppComponent, Lifecycle)}.
    *
    * <p>It is possible that the owning {@code FragmentActivity} opted not to connect itself as an
    * {@link io.flutter.embedding.engine.plugins.activity.ActivityControlSurface}. In that case, any
