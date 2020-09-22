@@ -71,6 +71,15 @@ public class AndroidKeyProcessor {
   }
 
   /**
+   * Detaches the key processor from the Flutter engine.
+   *
+   * <p>The AndroidKeyProcessor instance should not be used after calling this.
+   */
+  public void destroy() {
+    keyEventChannel.setEventResponseHandler(null);
+  }
+
+  /**
    * Called when a key up event is received by the {@link FlutterView}.
    *
    * @param keyEvent the Android key event to respond to.
