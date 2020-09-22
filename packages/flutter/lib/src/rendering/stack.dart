@@ -268,14 +268,14 @@ enum StackFit {
   passthrough,
 }
 
-@Deprecated(
-  'Use clipBehavior instead. See the migration guide in '
-  'flutter.dev/go/clip-behavior. This feature was deprecated after v1.22.'
-)
 /// Whether overflowing children should be clipped, or their overflow be
 /// visible.
 ///
 /// Deprecated. Use [Stack.clipBehavior] instead.
+@Deprecated(
+    'Use clipBehavior instead. See the migration guide in '
+    'flutter.dev/go/clip-behavior. This feature was deprecated after v1.22.'
+)
 enum Overflow {
   /// Overflowing children will be visible.
   ///

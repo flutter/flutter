@@ -3335,7 +3335,7 @@ class Stack extends MultiChildRenderObjectWidget {
   /// Deprecated. Use [clipBehavior] instead.
   @Deprecated(
       'Use clipBehavior instead. See the migration guide in '
-          'flutter.dev/go/clip-behavior. This feature was deprecated after v1.22.'
+      'flutter.dev/go/clip-behavior. This feature was deprecated after v1.22.'
   )
   final Overflow overflow;
 
