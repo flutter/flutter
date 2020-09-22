@@ -2,7 +2,9 @@ package io.flutter.embedding.android;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.notNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -54,6 +56,22 @@ public class AndroidKeyProcessorTest {
     verify(fakeKeyEventChannel, times(1)).keyDown(any(KeyEventChannel.FlutterKeyEvent.class));
     verify(fakeKeyEventChannel, times(0)).keyUp(any(KeyEventChannel.FlutterKeyEvent.class));
     verify(fakeView, times(0)).dispatchKeyEvent(any(KeyEvent.class));
+  }
+
+  @Test
+  public void destroyTest() {
+    FlutterEngine flutterEngine = mockFlutterEngine();
+    KeyEventChannel fakeKeyEventChannel = flutterEngine.getKeyEventChannel();
+    View fakeView = mock(View.class);
+
+    AndroidKeyProcessor processor =
+        new AndroidKeyProcessor(fakeView, fakeKeyEventChannel, mock(TextInputPlugin.class));
+
+    verify(fakeKeyEventChannel, times(1))
+        .setEventResponseHandler(notNull(KeyEventChannel.EventResponseHandler.class));
+    processor.destroy();
+    verify(fakeKeyEventChannel, times(1))
+        .setEventResponseHandler(isNull(KeyEventChannel.EventResponseHandler.class));
   }
 
   public void synthesizesEventsWhenKeyDownNotHandled() {
