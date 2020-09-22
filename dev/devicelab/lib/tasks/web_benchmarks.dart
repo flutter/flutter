@@ -53,7 +53,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
 
   await inDirectory<void>(galleryDirectory, () async {
     // TODO: When gallery PR merges, use `galleryVersion`.
-    await exec('git', <String>['checkout', '6dc1c16bf67600bb907820a6407c1118cc297632']);
+    await exec('git', <String>['checkout', '1d285dfe37cc3bd68f2965f8c4186932118d8ee8']);
     print('Git checkout finished.');
   });
 
