@@ -40,6 +40,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
 
   print('Created temporary directory $temp for Gallery.');
 
+  // TODO: When gallery PR merges, move to flutter/gallery.
   await inDirectory<void>(temp, () async {
     await exec('git', <String>['clone', 'https://github.com/pennzht/newfluttergallery.git']);
   });
@@ -51,7 +52,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
   print('Gallery directory is $galleryDirectory.');
 
   await inDirectory<void>(galleryDirectory, () async {
-    // TODO: Use fixed version.
+    // TODO: When gallery PR merges, use `galleryVersion`.
     await exec('git', <String>['checkout', '6dc1c16bf67600bb907820a6407c1118cc297632']);
     print('Git checkout finished.');
 
