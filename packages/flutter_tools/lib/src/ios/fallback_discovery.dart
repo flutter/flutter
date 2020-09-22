@@ -82,29 +82,6 @@ class FallbackDiscovery {
     }
 
     try {
-      final Uri result = await _protocolDiscovery.uri;
-      if (result != null) {
-        UsageEvent(
-          _kEventName,
-          'log-success',
-          flutterUsage: _flutterUsage,
-        ).send();
-        return result;
-      }
-    } on ArgumentError {
-      // In the event of an invalid InternetAddress, this code attempts to catch
-      // an ArgumentError from protocol_discovery.dart
-    } on Exception catch (err) {
-      _logger.printTrace(err.toString());
-    }
-    _logger.printTrace('Failed to connect with log scanning, falling back to mDNS');
-    UsageEvent(
-      _kEventName,
-      'log-failure',
-      flutterUsage: _flutterUsage,
-    ).send();
-
-    try {
       final Uri result = await _mDnsObservatoryDiscovery.getObservatoryUri(
         packageId,
         device,
@@ -122,10 +99,33 @@ class FallbackDiscovery {
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
     }
-    _logger.printTrace('Failed to connect with mDNS');
+    _logger.printTrace('Failed to connect with mDNS, falling back to log scanning');
     UsageEvent(
       _kEventName,
       'mdns-failure',
+      flutterUsage: _flutterUsage,
+    ).send();
+
+    try {
+      final Uri result = await _protocolDiscovery.uri;
+      if (result != null) {
+        UsageEvent(
+          _kEventName,
+          'fallback-success',
+          flutterUsage: _flutterUsage,
+        ).send();
+        return result;
+      }
+    } on ArgumentError {
+    // In the event of an invalid InternetAddress, this code attempts to catch
+    // an ArgumentError from protocol_discovery.dart
+    } on Exception catch (err) {
+      _logger.printTrace(err.toString());
+    }
+    _logger.printTrace('Failed to connect with log scanning');
+    UsageEvent(
+      _kEventName,
+      'fallback-failure',
       flutterUsage: _flutterUsage,
     ).send();
     return null;
@@ -148,7 +148,7 @@ class FallbackDiscovery {
       assumedWsUri = Uri.parse('ws://localhost:$hostPort/ws');
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
-      _logger.printTrace('Failed to connect directly, falling back to log scanning');
+      _logger.printTrace('Failed to connect directly, falling back to mDNS');
       _sendFailureEvent(err, assumedDevicePort);
       return null;
     }

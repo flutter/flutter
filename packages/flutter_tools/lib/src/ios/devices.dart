@@ -212,9 +212,6 @@ class IOSDevice extends Device {
 
   DevicePortForwarder _portForwarder;
 
-  @visibleForTesting
-  IOSDeployDebugger iosDeployDebugger;
-
   @override
   Future<bool> get isLocalEmulator async => false;
 
@@ -398,38 +395,23 @@ class IOSDevice extends Device {
         timeout: timeoutConfiguration.slowOperation);
     try {
       ProtocolDiscovery observatoryDiscovery;
-      int installationResult = 1;
       if (debuggingOptions.debuggingEnabled) {
         _logger.printTrace('Debugging is enabled, connecting to observatory');
-        iosDeployDebugger = _iosDeploy.prepareDebuggerForLaunch(
-          deviceId: id,
-          bundlePath: bundle.path,
-          launchArguments: launchArguments,
-          interfaceType: interfaceType,
-        );
-
-        final DeviceLogReader deviceLogReader = getLogReader(app: package);
-        if (deviceLogReader is IOSDeviceLogReader) {
-          deviceLogReader.debuggerStream = iosDeployDebugger;
-        }
         observatoryDiscovery = ProtocolDiscovery.observatory(
-          deviceLogReader,
+          getLogReader(app: package),
           portForwarder: portForwarder,
-          throttleDuration: fallbackPollingDelay,
-          throttleTimeout: fallbackThrottleTimeout ?? const Duration(seconds: 5),
           hostPort: debuggingOptions.hostVmServicePort,
           devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
-        );
-        installationResult = await iosDeployDebugger.launchAndAttach() ? 0 : 1;
-      } else {
-        installationResult = await _iosDeploy.launchApp(
-          deviceId: id,
-          bundlePath: bundle.path,
-          launchArguments: launchArguments,
-          interfaceType: interfaceType,
+          throttleTimeout: fallbackThrottleTimeout ?? const Duration(seconds: 1),
         );
       }
+      final int installationResult = await _iosDeploy.runApp(
+        deviceId: id,
+        bundlePath: bundle.path,
+        launchArguments: launchArguments,
+        interfaceType: interfaceType,
+      );
       if (installationResult != 0) {
         _logger.printError('Could not run ${bundle.path} on $id.');
         _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
@@ -483,11 +465,7 @@ class IOSDevice extends Device {
     IOSApp app, {
     String userIdentifier,
   }) async {
-    // If the debugger is not attached, killing the ios-deploy process won't stop the app.
-    if (iosDeployDebugger!= null && iosDeployDebugger.debuggerAttached) {
-      // Avoid null.
-      return iosDeployDebugger?.exit() == true;
-    }
+    // Currently we don't have a way to stop an app running on iOS.
     return false;
   }
 
@@ -677,13 +655,6 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // Matches a syslog line from any app.
   RegExp _anyLineRegex;
 
-  // Logging from native code/Flutter engine is prefixed by timestamp and process metadata:
-  // 2020-09-15 19:15:10.931434-0700 Runner[541:226276] Did finish launching.
-  // 2020-09-15 19:15:10.931434-0700 Runner[541:226276] [Category] Did finish launching.
-  //
-  // Logging from the dart code has no prefixing metadata.
-  final RegExp _debuggerLoggingRegex = RegExp(r'^\S* \S* \S*\[[0-9:]*] (.*)');
-
   StreamController<String> _linesController;
   List<StreamSubscription<void>> _loggingSubscriptions;
 
@@ -716,10 +687,6 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
 
     void logMessage(vm_service.Event event) {
-      if (_iosDeployDebugger != null && _iosDeployDebugger.debuggerAttached) {
-        // Prefer the more complete logs from the  attached debugger.
-        return;
-      }
       final String message = processVmServiceMessage(event);
       if (message.isNotEmpty) {
         _linesController.add(message);
@@ -731,26 +698,6 @@ class IOSDeviceLogReader extends DeviceLogReader {
       connectedVmService.onStderrEvent.listen(logMessage),
     ]);
   }
-
-  /// Log reader will listen to [debugger.logLines] and will detach debugger on dispose.
-  set debuggerStream(IOSDeployDebugger debugger) {
-    // Logging is gathered from syslog on iOS 13 and earlier.
-    if (_majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
-      return;
-    }
-    _iosDeployDebugger = debugger;
-    // Add the debugger logs to the controller created on initialization.
-    _loggingSubscriptions.add(debugger.logLines.listen(
-      (String line) => _linesController.add(_debuggerLineHandler(line)),
-      onError: _linesController.addError,
-      onDone: _linesController.close,
-      cancelOnError: true,
-    ));
-  }
-  IOSDeployDebugger _iosDeployDebugger;
-
-  // Strip off the logging metadata (leave the category), or just echo the line.
-  String _debuggerLineHandler(String line) => _debuggerLoggingRegex?.firstMatch(line)?.group(1) ?? line;
 
   void _listenToSysLog() {
     // syslog is not written on iOS 13+.
@@ -811,7 +758,6 @@ class IOSDeviceLogReader extends DeviceLogReader {
       loggingSubscription.cancel();
     }
     _idevicesyslogProcess?.kill();
-    _iosDeployDebugger?.detach();
   }
 }
 
