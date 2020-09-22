@@ -204,6 +204,16 @@ void main() {
     expect(findRoute('home', count: 1, skipOffstage: false), findsOneWidget);
     expect(findRoute('Foo', count: 1), findsOneWidget);
     expect(findRoute('Bar'), findsNothing);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+
+  testWidgets('restorablePush adds route on all platforms', (WidgetTester tester) async {
+    await tester.pumpWidget(const TestWidget());
+    await tapRouteCounter('home', tester);
+    expect(findRoute('home', count: 1), findsOneWidget);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).restorablePush(_routeBuilder, arguments: 'Foo');
+    await tester.pumpAndSettle();
+    expect(findRoute('Foo'), findsOneWidget);
   });
 
   testWidgets('restorablePushReplacement', (WidgetTester tester) async {
@@ -237,6 +247,16 @@ void main() {
     expect(findRoute('home', skipOffstage: false), findsNothing);
     expect(findRoute('Foo', count: 1), findsOneWidget);
     expect(findRoute('Bar'), findsNothing);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+
+  testWidgets('restorablePushReplacement adds route on all platforms', (WidgetTester tester) async {
+    await tester.pumpWidget(const TestWidget());
+    await tapRouteCounter('home', tester);
+    expect(findRoute('home', count: 1), findsOneWidget);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushReplacement(_routeBuilder, arguments: 'Foo');
+    await tester.pumpAndSettle();
+    expect(findRoute('Foo'), findsOneWidget);
   });
 
   testWidgets('restorablePushAndRemoveUntil', (WidgetTester tester) async {
@@ -270,6 +290,16 @@ void main() {
     expect(findRoute('home', skipOffstage: false), findsNothing);
     expect(findRoute('Foo', count: 1), findsOneWidget);
     expect(findRoute('Bar'), findsNothing);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+
+  testWidgets('restorablePushAndRemoveUntil adds route on all platforms', (WidgetTester tester) async {
+    await tester.pumpWidget(const TestWidget());
+    await tapRouteCounter('home', tester);
+    expect(findRoute('home', count: 1), findsOneWidget);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushAndRemoveUntil(_routeBuilder, (Route<dynamic> _) => false, arguments: 'Foo');
+    await tester.pumpAndSettle();
+    expect(findRoute('Foo'), findsOneWidget);
   });
 
   testWidgets('restorableReplace', (WidgetTester tester) async {
@@ -306,6 +336,18 @@ void main() {
     expect(findRoute('home', skipOffstage: false), findsNothing);
     expect(findRoute('Foo', count: 1), findsOneWidget);
     expect(findRoute('Bar'), findsNothing);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+
+  testWidgets('restorableReplace adds route on all platforms', (WidgetTester tester) async {
+    await tester.pumpWidget(const TestWidget());
+    expect(findRoute('home', count: 0), findsOneWidget);
+
+    final Route<Object> oldRoute = ModalRoute.of(tester.element(find.text('Route: home')));
+    expect(oldRoute.settings.name, 'home');
+
+    tester.state<NavigatorState>(find.byType(Navigator)).restorableReplace(newRouteBuilder: _routeBuilder, arguments: 'Foo', oldRoute: oldRoute);
+    await tester.pumpAndSettle();
+    expect(findRoute('Foo'), findsOneWidget);
   });
 
   testWidgets('restorableReplaceRouteBelow', (WidgetTester tester) async {
@@ -352,6 +394,26 @@ void main() {
     expect(findRoute('home', skipOffstage: false), findsNothing);
     expect(findRoute('Foo', count: 0, skipOffstage: false), findsOneWidget);
     expect(findRoute('Anchor', count: 2), findsOneWidget);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+
+  testWidgets('restorableReplaceRouteBelow adds route on all platforms', (WidgetTester tester) async {
+    await tester.pumpWidget(const TestWidget());
+    expect(findRoute('home', count: 0), findsOneWidget);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('Anchor');
+    await tester.pumpAndSettle();
+
+    await tapRouteCounter('Anchor', tester);
+    expect(findRoute('home'), findsNothing);
+    expect(findRoute('home', count: 0, skipOffstage: false), findsOneWidget);
+    expect(findRoute('Anchor', count: 1), findsOneWidget);
+
+    final Route<Object> anchor = ModalRoute.of(tester.element(find.text('Route: Anchor')));
+    expect(anchor.settings.name, 'Anchor');
+
+    tester.state<NavigatorState>(find.byType(Navigator)).restorableReplaceRouteBelow(newRouteBuilder: _routeBuilder, arguments: 'Foo', anchorRoute: anchor);
+    await tester.pumpAndSettle();
+    expect(findRoute('Foo', skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('restoring a popped route', (WidgetTester tester) async {
@@ -482,7 +544,7 @@ void main() {
     tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route2');
     await tester.pumpAndSettle();
     expect(findRoute('route2'), findsOneWidget);
-    tester.state<NavigatorState>(find.byType(Navigator)).restorablePush(_routeBuilder, arguments: 'route3');
+    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route3');
     await tester.pumpAndSettle();
     expect(findRoute('route3'), findsOneWidget);
     tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route4');
@@ -517,7 +579,7 @@ void main() {
     tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route1');
     await tester.pumpAndSettle();
     expect(findRoute('route1'), findsOneWidget);
-    tester.state<NavigatorState>(find.byType(Navigator)).restorablePush(_routeBuilder, arguments: 'route2');
+    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route2');
     await tester.pumpAndSettle();
     expect(findRoute('route2'), findsOneWidget);
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('route3');
@@ -547,7 +609,7 @@ void main() {
     tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route1');
     await tester.pumpAndSettle();
     expect(findRoute('route1'), findsOneWidget);
-    tester.state<NavigatorState>(find.byType(Navigator)).restorablePush(_routeBuilder, arguments: 'route2');
+    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route2');
     await tester.pumpAndSettle();
     expect(findRoute('route2'), findsOneWidget);
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('route3');
@@ -556,7 +618,7 @@ void main() {
     tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route4');
     await tester.pumpAndSettle();
     expect(findRoute('route4'), findsOneWidget);
-    tester.state<NavigatorState>(find.byType(Navigator)).restorablePush(_routeBuilder, arguments: 'route5');
+    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route5');
     await tester.pumpAndSettle();
     expect(findRoute('route5'), findsOneWidget);
 
@@ -705,22 +767,27 @@ void main() {
     expect(
       () => tester.state<NavigatorState>(find.byType(Navigator)).restorablePush((BuildContext _, Object __) => null),
       throwsBuilderAssertionError,
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/33615
     );
     expect(
       () => tester.state<NavigatorState>(find.byType(Navigator)).restorablePushReplacement((BuildContext _, Object __) => null),
       throwsBuilderAssertionError,
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/33615
     );
     expect(
       () => tester.state<NavigatorState>(find.byType(Navigator)).restorablePushAndRemoveUntil((BuildContext _, Object __) => null, (Route<Object> _) => false),
       throwsBuilderAssertionError,
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/33615
     );
     expect(
       () => tester.state<NavigatorState>(find.byType(Navigator)).restorableReplace(newRouteBuilder: (BuildContext _, Object __) => null, oldRoute: oldRoute),
       throwsBuilderAssertionError,
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/33615
     );
     expect(
       () => tester.state<NavigatorState>(find.byType(Navigator)).restorableReplaceRouteBelow(newRouteBuilder: (BuildContext _, Object __) => null, anchorRoute: oldRoute),
       throwsBuilderAssertionError,
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/33615
     );
   });
 

@@ -2724,7 +2724,7 @@ class _RouteEntry extends RouteTransitionRecord {
       final Page<Object> page = route.settings as Page<Object>;
       return page.restorationId != null ? 'p+${page.restorationId}' : null;
     }
-    if (restorationInformation != null) {
+    if (restorationInformation != null && restorationInformation!.isRestorable) {
       return 'r+${restorationInformation!.restorationScopeId}';
     }
     return null;
@@ -4850,6 +4850,8 @@ abstract class _RestorationInformation {
   int get restorationScopeId;
   Object? _serializableData;
 
+  bool get isRestorable => true;
+
   Object getSerializableData() {
     _serializableData ??= computeSerializableData();
     return _serializableData!;
@@ -4934,7 +4936,12 @@ class _AnonymousRestorationInformation extends _RestorationInformation {
   }
 
   @override
+  // TODO(goderbauer): remove the kIsWeb check when https://github.com/flutter/flutter/issues/33615 is resolved.
+  bool get isRestorable => !kIsWeb;
+
+  @override
   List<Object> computeSerializableData() {
+    assert(isRestorable);
     final ui.CallbackHandle? handle = ui.PluginUtilities.getCallbackHandle(routeBuilder);
     assert(handle != null);
     return super.computeSerializableData()..addAll(<Object>[
