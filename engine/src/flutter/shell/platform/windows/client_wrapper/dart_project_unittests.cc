@@ -26,12 +26,6 @@ class DartProjectTest : public ::testing::Test {
   std::wstring GetProjectAotLibraryPath(const DartProject& project) {
     return project.aot_library_path();
   }
-
-  // Wrapper for accessing private engine_switches.
-  std::vector<std::string> GetProjectEngineSwitches(
-      const DartProject& project) {
-    return project.engine_switches();
-  }
 };
 
 TEST_F(DartProjectTest, StandardProjectFormat) {
@@ -39,14 +33,6 @@ TEST_F(DartProjectTest, StandardProjectFormat) {
   EXPECT_EQ(GetProjectIcuDataPath(project), L"test\\icudtl.dat");
   EXPECT_EQ(GetProjectAssetsPath(project), L"test\\flutter_assets");
   EXPECT_EQ(GetProjectAotLibraryPath(project), L"test\\app.so");
-}
-
-TEST_F(DartProjectTest, Switches) {
-  DartProject project(L"test");
-  std::vector<std::string> switches = {"--foo", "--bar"};
-  project.SetEngineSwitches(switches);
-  EXPECT_EQ(GetProjectEngineSwitches(project).size(), 2);
-  EXPECT_EQ(GetProjectEngineSwitches(project)[0], "--foo");
 }
 
 }  // namespace flutter
