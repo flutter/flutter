@@ -73,12 +73,6 @@
          "flaky": false
       },
       {
-         "name": "Linux gradle_plugin_light_apk_test",
-         "repo": "flutter",
-         "task_name": "linux_gradle_plugin_light_apk_test",
-         "flaky": false
-      },
-      {
          "name": "Linux gradle_r8_test",
          "repo": "flutter",
          "task_name": "linux_gradle_r8_test",
@@ -265,6 +259,12 @@
          "flaky": false
       },
       {
+         "name": "Windows build_aar_module_test",
+         "repo": "flutter",
+         "task_name": "win_build_aar_module_test",
+         "flaky": false
+      },
+      {
          "name": "Windows build_tests",
          "repo": "flutter",
          "task_name": "win_build_tests",
@@ -286,6 +286,18 @@
          "name": "Windows gradle_fast_start_test",
          "repo": "flutter",
          "task_name": "win_gradle_fast_start_test",
+         "flaky": false
+      },
+      {
+         "name": "Windows gradle_jetifier_test",
+         "repo": "flutter",
+         "task_name": "win_gradle_jetifier_test",
+         "flaky": false
+      },
+      {
+         "name": "Windows gradle_plugin_light_apk_test",
+         "repo": "flutter",
+         "task_name": "win_gradle_plugin_light_apk_test",
          "flaky": false
       },
       {
@@ -313,9 +325,27 @@
          "flaky": false
       },
       {
+         "name": "Windows module_custom_host_app_name_test",
+         "repo": "flutter",
+         "task_name": "win_module_custom_host_app_name_test",
+         "flaky": false
+      },
+      {
          "name": "Windows module_host_with_custom_build_test",
          "repo": "flutter",
          "task_name": "win_module_host_with_custom_build_test",
+         "flaky": false
+      },
+      {
+         "name": "Windows module_test",
+         "repo": "flutter",
+         "task_name": "win_module_test",
+         "flaky": false
+      },
+      {
+         "name": "Windows plugin_dependencies_test",
+         "repo": "flutter",
+         "task_name": "win_plugin_dependencies_test",
          "flaky": false
       },
       {

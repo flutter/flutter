@@ -9,6 +9,8 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
+final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
+
 /// Tests that a plugin A can depend on platform code from a plugin B
 /// as long as plugin B is defined as a pub dependency of plugin A.
 ///
@@ -150,14 +152,14 @@ public class DummyPluginBClass {
       final File pluginApubspec = File(path.join(pluginADirectory.path, 'pubspec.yaml'));
       String pluginApubspecContent = await pluginApubspec.readAsString();
       pluginApubspecContent = pluginApubspecContent.replaceFirst(
-        '\ndependencies:\n',
-        '\ndependencies:\n'
-        '  plugin_b:\n'
-        '    path: ${pluginBDirectory.path}\n'
-        '  plugin_c:\n'
-        '    path: ${pluginCDirectory.path}\n'
-        '  plugin_d:\n'
-        '    path: ${pluginDDirectory.path}\n',
+        '${platformLineSep}dependencies:$platformLineSep',
+        '${platformLineSep}dependencies:$platformLineSep'
+        '  plugin_b:$platformLineSep'
+        '    path: ${pluginBDirectory.path}$platformLineSep'
+        '  plugin_c:$platformLineSep'
+        '    path: ${pluginCDirectory.path}$platformLineSep'
+        '  plugin_d:$platformLineSep'
+        '    path: ${pluginDDirectory.path}$platformLineSep',
       );
       await pluginApubspec.writeAsString(pluginApubspecContent, flush: true);
 
