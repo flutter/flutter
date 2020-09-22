@@ -222,7 +222,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         ? primaryColor
         : CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context);
 
-    final TextStyle textStyle = themeData.textTheme!.textStyle.copyWith(color: foregroundColor);
+    final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,

@@ -277,7 +277,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     final Color? resolvedBackgroundColor = CupertinoDynamicColor.resolve(widget.backgroundColor, context);
 
     final Widget result = DefaultTextStyle(
-      style: CupertinoTheme.of(context).textTheme!.pickerTextStyle,
+      style: CupertinoTheme.of(context).textTheme.pickerTextStyle,
       child: Stack(
         children: <Widget>[
           Positioned.fill(
@@ -348,7 +348,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
 
   FixedExtentScrollController get controller => _controller;
   late FixedExtentScrollController _controller;
-  set controller(FixedExtentScrollController value) =>_updateController(_controller, value);
+  set controller(FixedExtentScrollController value) => _updateController(_controller, value);
 
   // This method exists to allow controller to be non-null. It is only called with a null oldValue from construtor.
   void _updateController(FixedExtentScrollController? oldValue, FixedExtentScrollController value) {
