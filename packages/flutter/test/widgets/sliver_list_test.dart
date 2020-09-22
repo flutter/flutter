@@ -277,6 +277,64 @@ void main() {
     expect(find.text('Tile 18'), findsOneWidget);
     expect(find.text('Tile 3'), findsOneWidget);
   });
+
+  testWidgets('SliverList should start to perform layout from the initial child when none valid offset', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66198.
+    bool isShow = true;
+    final ScrollController controller = ScrollController();
+    Widget buildSliverList(ScrollController controller) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200,
+            child: ListView(
+              controller: controller,
+              children: <Widget>[
+                if (isShow)
+                  for (int i = 0; i < 20; i++)
+                    Container(
+                      height: 50,
+                      child: Text('Tile $i'),
+                    ),
+                const SizedBox(), // Use this widget to occupy the position where the offset is 0 after rebuild
+                const SizedBox(key: Key('key0'), height: 50.0),
+                const SizedBox(key: Key('key1'), height: 50.0),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSliverList(controller));
+    await tester.pumpAndSettle();
+
+    await tester.drag(find.text('Tile 2'), const Offset(0.0, -1000.0));
+    await tester.pumpAndSettle();
+
+    // Viewport should be scrolled to the end of list.
+    expect(controller.offset, 900.0);
+    expect(find.text('Tile 17'), findsNothing);
+    expect(find.text('Tile 18'), findsOneWidget);
+    expect(find.text('Tile 19'), findsOneWidget);
+    expect(find.byKey(const Key('key0')), findsOneWidget);
+    expect(find.byKey(const Key('key1')), findsOneWidget);
+
+    // Trigger rebuild.
+    isShow = false;
+    await tester.pumpWidget(buildSliverList(controller));
+
+    // After rebuild, [ContainerRenderObjectMixin] has two children, and
+    // neither of them has a valid layout offset.
+    // SliverList can layout normally without any assert or dead loop.
+    // Only the 'SizeBox' show in the viewport.
+    expect(controller.offset, 0.0);
+    expect(find.text('Tile 0'), findsNothing);
+    expect(find.text('Tile 19'), findsNothing);
+    expect(find.byKey(const Key('key0')), findsOneWidget);
+    expect(find.byKey(const Key('key1')), findsOneWidget);
+  });
 }
 
 Widget _buildSliverListRenderWidgetChild(List<String> items) {

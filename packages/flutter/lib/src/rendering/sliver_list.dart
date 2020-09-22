@@ -102,7 +102,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     if (childScrollOffset(firstChild!) == null) {
       int leadingChildrenWithoutLayoutOffset = 0;
       while (earliestUsefulChild != null && childScrollOffset(earliestUsefulChild) == null) {
-        earliestUsefulChild = childAfter(firstChild!);
+        earliestUsefulChild = childAfter(earliestUsefulChild);
         leadingChildrenWithoutLayoutOffset += 1;
       }
       // We should be able to destroy children with null layout offset safely,
