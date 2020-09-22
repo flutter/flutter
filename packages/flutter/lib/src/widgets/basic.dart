@@ -3277,8 +3277,8 @@ class Stack extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.fit = StackFit.loose,
     @Deprecated(
-      'Use clipBehavior instead. See the migration guide in '
-      'flutter.dev/go/clip-behavior. This feature was deprecated after v1.22.'
+      'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
+      'This feature was deprecated after v1.22.0-12.0.pre.'
     )
     this.overflow = Overflow.clip,
     this.clipBehavior = Clip.hardEdge,
@@ -3334,8 +3334,8 @@ class Stack extends MultiChildRenderObjectWidget {
   ///
   /// Deprecated. Use [clipBehavior] instead.
   @Deprecated(
-      'Use clipBehavior instead. See the migration guide in '
-      'flutter.dev/go/clip-behavior. This feature was deprecated after v1.22.'
+    'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
+    'This feature was deprecated after v1.22.0-12.0.pre.'
   )
   final Overflow overflow;
 
