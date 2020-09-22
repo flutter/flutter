@@ -121,6 +121,7 @@ executable("flutter_windows_unittests") {
   testonly = true
 
   sources = [
+    "flutter_project_bundle_unittests.cc",
     "string_conversion_unittests.cc",
     "system_utils_unittests.cc",
     "testing/mock_win32_window.cc",
