@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -31,7 +29,7 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
   /// mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.
   const PerformanceOverlay({
-    Key key,
+    Key? key,
     this.optionsMask = 0,
     this.rasterizerThreshold = 0,
     this.checkerboardRasterCacheImages = false,
@@ -40,7 +38,7 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
 
   /// Create a performance overlay that displays all available statistics.
   PerformanceOverlay.allEnabled({
-    Key key,
+    Key? key,
     this.rasterizerThreshold = 0,
     this.checkerboardRasterCacheImages = false,
     this.checkerboardOffscreenLayers = false,

@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
+import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
@@ -932,8 +931,7 @@ plugin1=${plugin1.path}
   });
 
   group('gradle build', () {
-    final Usage mockUsage = MockUsage();
-
+    Usage mockUsage;
     MockAndroidSdk mockAndroidSdk;
     MockAndroidStudio mockAndroidStudio;
     MockLocalEngineArtifacts mockArtifacts;
@@ -944,6 +942,7 @@ plugin1=${plugin1.path}
     Cache cache;
 
     setUp(() {
+      mockUsage = MockUsage();
       fileSystem = MemoryFileSystem();
       fileSystemUtils = MockFileSystemUtils();
       mockAndroidSdk = MockAndroidSdk();
@@ -1336,6 +1335,89 @@ plugin1=${plugin1.path}
         any,
         label: 'gradle-random-event-label-success',
         parameters: anyNamed('parameters'),
+      )).called(1);
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      Cache: () => cache,
+      FileSystem: () => fileSystem,
+      Platform: () => android,
+      ProcessManager: () => mockProcessManager,
+      Usage: () => mockUsage,
+    });
+
+    testUsingContext('performs code size analyis and sends analytics', () async {
+      when(mockProcessManager.start(any,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment')))
+      .thenAnswer((_) {
+        return Future<Process>.value(createMockProcess(
+          exitCode: 0,
+          stdout: 'irrelevant',
+        ));
+      });
+
+      fileSystem.directory('android')
+        .childFile('build.gradle')
+        .createSync(recursive: true);
+
+      fileSystem.directory('android')
+        .childFile('gradle.properties')
+        .createSync(recursive: true);
+
+      fileSystem.directory('android')
+        .childDirectory('app')
+        .childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+      final Archive archive = Archive()
+        ..addFile(ArchiveFile('AndroidManifest.xml', 100,  List<int>.filled(100, 0)))
+        ..addFile(ArchiveFile('META-INF/CERT.RSA', 10,  List<int>.filled(10, 0)))
+        ..addFile(ArchiveFile('META-INF/CERT.SF', 10,  List<int>.filled(10, 0)))
+        ..addFile(ArchiveFile('lib/arm64-v8a/libapp.so', 50,  List<int>.filled(50, 0)))
+        ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
+
+      fileSystem.directory('build')
+        .childDirectory('app')
+        .childDirectory('outputs')
+        .childDirectory('flutter-apk')
+        .childFile('app-release.apk')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(ZipEncoder().encode(archive));
+
+      fileSystem.file('foo/snapshot.arm64-v8a.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'''[
+{
+  "l": "dart:_internal",
+  "c": "SubListIterable",
+  "n": "[Optimized] skip",
+  "s": 2400
+}
+]''');
+      fileSystem.file('foo/trace.arm64-v8a.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{}');
+
+      await buildGradleApp(
+        project: FlutterProject.current(),
+        androidBuildInfo: const AndroidBuildInfo(
+          BuildInfo(
+            BuildMode.release,
+            null,
+            treeShakeIcons: false,
+            codeSizeDirectory: 'foo',
+          ),
+          targetArchs: <AndroidArch>[AndroidArch.arm64_v8a],
+        ),
+        target: 'lib/main.dart',
+        isBuildingBundle: false,
+        localGradleErrors: <GradleHandledError>[],
+      );
+
+      verify(mockUsage.sendEvent(
+        'code-size-analysis',
+        'apk',
       )).called(1);
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,

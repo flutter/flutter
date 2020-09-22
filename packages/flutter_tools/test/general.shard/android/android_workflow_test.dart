@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
@@ -67,6 +65,20 @@ void main() {
     expect(androidWorkflow.canListDevices, false);
     expect(androidWorkflow.canListEmulators, false);
   });
+
+  testWithoutContext('AndroidWorkflow handles a null adb', () {
+    final MockAndroidSdk androidSdk = MockAndroidSdk();
+    when(androidSdk.adbPath).thenReturn(null);
+    final AndroidWorkflow androidWorkflow = AndroidWorkflow(
+      featureFlags: TestFeatureFlags(),
+      androidSdk: androidSdk,
+    );
+
+    expect(androidWorkflow.canLaunchDevices, false);
+    expect(androidWorkflow.canListDevices, false);
+    expect(androidWorkflow.canListEmulators, false);
+  });
+
 
   testUsingContext('licensesAccepted returns LicensesAccepted.unknown if cannot find sdkmanager', () async {
     processManager.canRunSucceeds = false;
@@ -317,9 +329,15 @@ void main() {
       validationResult.messages.last.message,
       errorMessage,
     );
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains('Unable to locate Android SDK')
+      ),
+      false,
+    );
   });
 
-  testWithoutContext('Mentions `kAndroidSdkRoot if user has no AndroidSdk`', () async {
+  testWithoutContext('Mentions `flutter config --android-sdk if user has no AndroidSdk`', () async {
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: null,
       androidStudio: null,
@@ -331,7 +349,7 @@ void main() {
     ).validate();
     expect(
       validationResult.messages.any(
-        (ValidationMessage message) => message.message.contains(kAndroidSdkRoot)
+        (ValidationMessage message) => message.message.contains('flutter config --android-sdk')
       ),
       true,
     );

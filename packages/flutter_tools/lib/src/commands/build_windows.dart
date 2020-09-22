@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
@@ -21,20 +19,7 @@ import 'build.dart';
 /// A command to build a windows desktop target through a build shell script.
 class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand({ bool verboseHelp = false }) {
-    addTreeShakeIconsFlag();
-    usesTargetOption();
-    addBuildModeFlags(verboseHelp: verboseHelp);
-    usesPubOption();
-    addSplitDebugInfoOption();
-    addDartObfuscationOption();
-    usesDartDefineOption();
-    usesExtraFrontendOptions();
-    addEnableExperimentation(hide: !verboseHelp);
-    usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    addBuildPerformanceFile(hide: !verboseHelp);
-    addBundleSkSLPathOption(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
-    usesAnalyzeSizeFlag();
+    addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
   }
 
   @override
@@ -73,6 +58,7 @@ class BuildWindowsCommand extends BuildSubCommand {
         fileSystem: globals.fs,
         logger: globals.logger,
         appFilenamePattern: 'app.so',
+        flutterUsage: globals.flutterUsage,
       ),
     );
     return FlutterCommandResult.success();

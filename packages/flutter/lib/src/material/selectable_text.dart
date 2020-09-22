@@ -72,25 +72,11 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   @override
   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectWordsInRange(
-            from: details.globalPosition - details.offsetFromOrigin,
-            to: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-      }
+      renderEditable.selectWordsInRange(
+        from: details.globalPosition - details.offsetFromOrigin,
+        to: details.globalPosition,
+        cause: SelectionChangedCause.longPress,
+      );
     }
   }
 
@@ -118,22 +104,8 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   @override
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-          Feedback.forLongPress(_state.context);
-          break;
-      }
+      renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+      Feedback.forLongPress(_state.context);
     }
   }
 }
@@ -227,6 +199,7 @@ class SelectableText extends StatefulWidget {
     this.scrollPhysics,
     this.textHeightBehavior,
     this.textWidthBasis,
+    this.onSelectionChanged,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
@@ -278,6 +251,7 @@ class SelectableText extends StatefulWidget {
     this.scrollPhysics,
     this.textHeightBehavior,
     this.textWidthBasis,
+    this.onSelectionChanged,
   }) :  assert(showCursor != null),
     assert(autofocus != null),
     assert(dragStartBehavior != null),
@@ -420,6 +394,9 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
+  /// {@macro flutter.widgets.editableText.onSelectionChanged}
+  final SelectionChangedCallback onSelectionChanged;
+
   @override
   _SelectableTextState createState() => _SelectableTextState();
 
@@ -520,6 +497,10 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       setState(() {
         _showSelectionHandles = willShowSelectionHandles;
       });
+    }
+
+    if (widget.onSelectionChanged != null) {
+      widget.onSelectionChanged(selection, cause);
     }
 
     switch (Theme.of(context).platform) {

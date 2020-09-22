@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -40,6 +38,11 @@ class BuildIOSCommand extends BuildSubCommand {
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     argParser
+      ..addFlag('config-only',
+        help: 'Update the project configuration without performing a build. '
+          'This can be used in CI/CD process that create an archive to avoid '
+          'performing duplicate work.'
+      )
       ..addFlag('simulator',
         help: 'Build for the iOS simulator instead of the device. This changes '
           'the default build mode to debug if otherwise unspecified.',
@@ -64,13 +67,27 @@ class BuildIOSCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final bool forSimulator = boolArg('simulator');
+    final bool configOnly = boolArg('config-only');
+    final bool shouldCodesign = boolArg('codesign');
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
+    final BuildInfo buildInfo = getBuildInfo();
 
     if (!globals.platform.isMacOS) {
-      throwToolExit('Building for iOS is only supported on the Mac.');
+      throwToolExit('Building for iOS is only supported on macOS.');
+    }
+    if (forSimulator && !buildInfo.supportsSimulator) {
+      throwToolExit('${toTitleCase(buildInfo.friendlyModeName)} mode is not supported for simulators.');
+    }
+    if (configOnly && buildInfo.codeSizeDirectory != null) {
+      throwToolExit('Cannot analyze code size without performing a full build.');
+    }
+    if (!forSimulator && !shouldCodesign) {
+      globals.printStatus(
+        'Warning: Building for device with codesigning disabled. You will '
+        'have to manually codesign before deploying to device.',
+      );
     }
 
-    final BuildInfo buildInfo = getBuildInfo();
     final BuildableIOSApp app = await applicationPackages.getPackageForPlatform(
       TargetPlatform.ios,
       buildInfo,
@@ -80,18 +97,7 @@ class BuildIOSCommand extends BuildSubCommand {
       throwToolExit('Application not configured for iOS');
     }
 
-    final bool shouldCodesign = boolArg('codesign');
-
-    if (!forSimulator && !shouldCodesign) {
-      globals.printStatus('Warning: Building for device with codesigning disabled. You will '
-        'have to manually codesign before deploying to device.');
-    }
-    if (forSimulator && !buildInfo.supportsSimulator) {
-      throwToolExit('${toTitleCase(buildInfo.friendlyModeName)} mode is not supported for simulators.');
-    }
-
     final String logTarget = forSimulator ? 'simulator' : 'device';
-
     final String typeName = globals.artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
     globals.printStatus('Building $app for $logTarget ($typeName)...');
     final XcodeBuildResult result = await buildXcodeProject(
@@ -100,6 +106,7 @@ class BuildIOSCommand extends BuildSubCommand {
       targetOverride: targetFile,
       buildForDevice: !forSimulator,
       codesign: shouldCodesign,
+      configOnly: configOnly,
     );
 
     if (!result.success) {
@@ -111,6 +118,7 @@ class BuildIOSCommand extends BuildSubCommand {
       final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
         fileSystem: globals.fs,
         logger: globals.logger,
+        flutterUsage: globals.flutterUsage,
         appFilenamePattern: 'App'
       );
       // Only support 64bit iOS code size analysis.

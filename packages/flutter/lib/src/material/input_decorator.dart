@@ -1032,11 +1032,12 @@ class _RenderDecoration extends RenderBox {
       counterHeight,
       helperErrorHeight,
     );
+    final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
     boxToBaseline[input] = _layoutLineBox(
       input,
       boxConstraints.deflate(EdgeInsets.only(
-        top: contentPadding.top + topHeight,
-        bottom: contentPadding.bottom + bottomHeight,
+        top: contentPadding.top + topHeight + densityOffset.dy / 2,
+        bottom: contentPadding.bottom + bottomHeight + densityOffset.dy / 2,
       )).copyWith(
         minWidth: inputWidth,
         maxWidth: inputWidth,
@@ -1065,13 +1066,15 @@ class _RenderDecoration extends RenderBox {
       prefixHeight - boxToBaseline[prefix],
       suffixHeight - boxToBaseline[suffix],
     );
+    // TODO(justinmc): fixBelowInput should have no effect when there is no
+    // prefix/suffix below the input.
+    // https://github.com/flutter/flutter/issues/66050
     final double fixBelowInput = math.max(
       0,
       fixBelowBaseline - (inputHeight - inputInternalBaseline),
     );
 
     // Calculate the height of the input text container.
-    final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
     final double prefixIconHeight = prefixIcon == null ? 0 : prefixIcon.size.height;
     final double suffixIconHeight = suffixIcon == null ? 0 : suffixIcon.size.height;
     final double fixIconHeight = math.max(prefixIconHeight, suffixIconHeight);
@@ -1087,8 +1090,8 @@ class _RenderDecoration extends RenderBox {
     );
     final double minContainerHeight = decoration.isDense || decoration.isCollapsed || expands
       ? 0.0
-      : kMinInteractiveDimension + densityOffset.dy;
-    final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight + densityOffset.dy;
+      : kMinInteractiveDimension;
+    final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight;
     final double containerHeight = expands
       ? maxContainerHeight
       : math.min(math.max(contentHeight, minContainerHeight), maxContainerHeight);
@@ -1258,10 +1261,11 @@ class _RenderDecoration extends RenderBox {
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
       + _lineHeight(width, <RenderBox>[prefix, input, suffix])
       + subtextHeight
-      + contentPadding.bottom;
+      + contentPadding.bottom
+      + densityOffset.dy;
     final double minContainerHeight = decoration.isDense || expands
       ? 0.0
-      : kMinInteractiveDimension + densityOffset.dy;
+      : kMinInteractiveDimension;
     return math.max(containerHeight, minContainerHeight);
   }
 
@@ -1823,9 +1827,7 @@ class InputDecorator extends StatefulWidget {
   /// Whether the input field has focus.
   ///
   /// Determines the position of the label text and the color and weight of the
-  /// border, as well as the container fill color, which is a blend of
-  /// [InputDecoration.focusColor] with [InputDecoration.fillColor] when
-  /// focused, and [InputDecoration.fillColor] when not.
+  /// border.
   ///
   /// Defaults to false.
   ///
@@ -1843,12 +1845,6 @@ class InputDecorator extends StatefulWidget {
   /// true, and [InputDecoration.fillColor] when not.
   ///
   /// Defaults to false.
-  ///
-  /// See also:
-  ///
-  ///  * [InputDecoration.focusColor], which is also blended into the hover
-  ///    color and fill color when [isFocused] is true to produce the final
-  ///    color.
   final bool isHovering;
 
   /// If true, the height of the input field will be as large as possible.
@@ -2773,10 +2769,10 @@ class InputDecoration {
   ///
   /// If `isOutline` property of [border] is false and if [filled] is true then
   /// `contentPadding` is `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense]
-  /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false`.
+  /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false.
   /// If `isOutline` property of [border] is false and if [filled] is false then
   /// `contentPadding` is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
-  /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false`.
+  /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false.
   ///
   /// If `isOutline` property of [border] is true then `contentPadding` is
   /// `EdgeInsets.fromLTRB(12, 20, 12, 12)` when [isDense] is true
@@ -3067,8 +3063,7 @@ class InputDecoration {
 
   /// If true the decoration's container is filled with [fillColor].
   ///
-  /// When [InputDecorator.isFocused] is true, the [focusColor] is also blended into the final
-  /// fill color.  When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
+  /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
   /// into the final fill color.
   ///
   /// Typically this field set to true if [border] is an
@@ -3084,8 +3079,7 @@ class InputDecoration {
 
   /// The base fill color of the decoration's container color.
   ///
-  /// When [InputDecorator.isFocused] is true, the [focusColor] is also blended
-  /// into the final fill color.  When [InputDecorator.isHovering] is true, the
+  /// When [InputDecorator.isHovering] is true, the
   /// [hoverColor] is also blended into the final fill color.
   ///
   /// By default the fillColor is based on the current [Theme].
@@ -3093,16 +3087,8 @@ class InputDecoration {
   /// The decoration's container is the area which is filled if [filled] is true
   /// and bordered per the [border]. It's the area adjacent to [icon] and above
   /// the widgets that contain [helperText], [errorText], and [counterText].
-  ///
-  /// This color is blended with [focusColor] if the decoration is focused.
   final Color fillColor;
 
-  /// The color to blend with [fillColor] and fill the decoration's container
-  /// with, if [filled] is true and the container has input focus.
-  ///
-  /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended into the final
-  /// fill color.
-  ///
   /// By default the [focusColor] is based on the current [Theme].
   ///
   /// The decoration's container is the area which is filled if [filled] is
@@ -3115,8 +3101,7 @@ class InputDecoration {
   /// is being hovered over by a mouse.
   ///
   /// If [filled] is true, the color is blended with [fillColor] and fills the
-  /// decoration's container. When [InputDecorator.isFocused] is true, the
-  /// [focusColor] is also blended into the final fill color.
+  /// decoration's container.
   ///
   /// If [filled] is false, and [InputDecorator.isFocused] is false, the color
   /// is blended over the [enabledBorder]'s color.

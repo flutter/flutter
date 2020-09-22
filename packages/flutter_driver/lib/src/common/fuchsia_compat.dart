@@ -5,7 +5,6 @@
 /// Convenience methods for Flutter application driving on Fuchsia. Can
 /// be run on either a host machine (making a remote connection to a Fuchsia
 /// device), or on the target Fuchsia machine.
-import 'dart:async';
 import 'dart:core';
 import 'dart:io';
 
