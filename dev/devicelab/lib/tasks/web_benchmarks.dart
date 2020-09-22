@@ -34,8 +34,9 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
 
   // Gallery benchmarks.
   section('Get New Flutter Gallery!');
+  print(flutterDirectory.path);
 
-  final tempDirectory = path.join(flutterDirectory.path, 'dev', 'temp');
+  final tempDirectory = path.join(flutterDirectory.path, 'dev', 'devicelab', 'temp');
 
   await inDirectory<void>(io.Directory(tempDirectory), () async {
     await exec('git', <String>['clone', 'https://github.com/pennzht/newfluttergallery.git']);
