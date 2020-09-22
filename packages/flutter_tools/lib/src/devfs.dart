@@ -302,6 +302,9 @@ class _DevFSHttpWriter implements DevFSWriter {
           );
         } on TimeoutException {
           request.abort();
+          // This should throw "HttpException: Request has been aborted".
+          await request.done;
+          // Just to be safe we rethrow the TimeoutException.
           rethrow;
         }
         break;
