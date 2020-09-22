@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -20,7 +18,7 @@ import 'overlay.dart';
 typedef AutocompleteResultsGetter<T> = List<T> Function(TextEditingValue textEditingValue);
 
 /// A type for indicating the selection of an autocomplete result.
-typedef AutocompleteOnSelected<T> = void Function(T result);
+typedef AutocompleteOnSelected<T> = void Function(T? result);
 
 /// A builder for the selectable results given the current autocomplete field
 /// text.
@@ -152,10 +150,10 @@ class AutocompleteController<T> {
     /// See also:
     ///   * [AutocompleteController.generated], which can be used with
     ///     [getResults] to generate results programmatically.
-    @required List<T> options,
-    AutocompleteOptionToString<T> displayStringForOption,
-    AutocompleteOptionToString<T> filterStringForOption,
-    TextEditingController textEditingController,
+    required List<T> options,
+    AutocompleteOptionToString<T>? displayStringForOption,
+    AutocompleteOptionToString<T>? filterStringForOption,
+    TextEditingController? textEditingController,
   }) : assert(options != null && options.isNotEmpty),
        displayStringForOption = displayStringForOption ?? _defaultStringForOption,
        filterStringForOption = filterStringForOption ?? _defaultStringForOption,
@@ -178,9 +176,9 @@ class AutocompleteController<T> {
   ///   * [AutocompleteController], which receives a list of all possible
   ///     options up front instead of generating them in [getResults].
   AutocompleteController.generated({
-    @required this.getResults,
-    AutocompleteOptionToString<T> displayStringForOption,
-    TextEditingController textEditingController,
+    required this.getResults,
+    AutocompleteOptionToString<T>? displayStringForOption,
+    TextEditingController? textEditingController,
   }) : assert(getResults != null),
        displayStringForOption = displayStringForOption ?? _defaultStringForOption,
        filterStringForOption = null,
@@ -227,7 +225,7 @@ class AutocompleteController<T> {
   /// See also:
   ///   * [displayStringForOption], which can be used to specify a custom String
   ///     to be shown in the field.
-  final AutocompleteOptionToString<T> filterStringForOption;
+  final AutocompleteOptionToString<T>? filterStringForOption;
 
   /// The current results being returned by [getResults].
   ///
@@ -426,8 +424,8 @@ class AutocompleteCore<T> extends StatefulWidget {
   /// null.
   const AutocompleteCore({
     this.autocompleteController,
-    @required this.buildField,
-    @required this.buildResults,
+    required this.buildField,
+    required this.buildResults,
     this.options,
     this.onSelected,
   }) : assert(
@@ -446,7 +444,7 @@ class AutocompleteCore<T> extends StatefulWidget {
   ///
   /// The owner of autocompleteController must call
   /// [AutocompleteController.dispose] on this when it's no longer needed.
-  final AutocompleteController<T> autocompleteController;
+  final AutocompleteController<T>? autocompleteController;
 
   /// Builds the field whose input is used to find the results.
   final AutocompleteFieldBuilder buildField;
@@ -455,13 +453,13 @@ class AutocompleteCore<T> extends StatefulWidget {
   final AutocompleteResultsBuilder<T> buildResults;
 
   /// Called when a result is selected by the user.
-  final AutocompleteOnSelected<T> onSelected;
+  final AutocompleteOnSelected<T>? onSelected;
 
   /// All possible options that can be selected.
   ///
   /// If passing an AutocompleteController, use
   /// [AutocompleteController.options] instead.
-  final List<T> options;
+  final List<T>? options;
 
   @override
   _AutocompleteCoreState<T> createState() =>
@@ -471,11 +469,11 @@ class AutocompleteCore<T> extends StatefulWidget {
 class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _resultsLayerLink = LayerLink();
-  AutocompleteController<T> _autocompleteController;
-  T _selection;
+  late AutocompleteController<T> _autocompleteController;
+  T? _selection;
 
   // The OverlayEntry containing the results.
-  OverlayEntry _floatingResults;
+  OverlayEntry? _floatingResults;
 
   // True iff the state indicates that the results should be visible.
   bool get _shouldShowResults {
@@ -497,7 +495,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   void _onChangedField() {
     if (_selection != null) {
       final String selectionString =
-          _autocompleteController.displayStringForOption(_selection);
+          _autocompleteController.displayStringForOption(_selection!);
       if (_autocompleteController.textEditingController.text == selectionString) {
         return;
       }
@@ -518,21 +516,20 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   }
 
   // Select the given option and update the widget.
-  void _select(T nextSelection) {
+  void _select(T? nextSelection) {
     if (nextSelection == _selection) {
       return;
     }
     setState(() {
       _selection = nextSelection;
-      final String selectionString =
-          _autocompleteController.displayStringForOption(nextSelection);
+      final String selectionString = nextSelection == null
+          ? ''
+          : _autocompleteController.displayStringForOption(nextSelection);
       _autocompleteController.textEditingController.value = TextEditingValue(
         selection: TextSelection.collapsed(offset: selectionString.length),
         text: selectionString,
       );
-      if (widget.onSelected != null) {
-        widget.onSelected(_selection);
-      }
+      widget.onSelected?.call(_selection);
     });
   }
 
@@ -552,9 +549,9 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
           );
         },
       );
-      Overlay.of(context, rootOverlay: true).insert(_floatingResults);
+      Overlay.of(context, rootOverlay: true)!.insert(_floatingResults!);
     } else if (_floatingResults != null) {
-      _floatingResults.remove();
+      _floatingResults!.remove();
       _floatingResults = null;
     }
   }
@@ -573,10 +570,10 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   void initState() {
     super.initState();
     _autocompleteController = widget.autocompleteController
-        ?? AutocompleteController<T>(options: widget.options);
+        ?? AutocompleteController<T>(options: widget.options!);
     _listenToController(_autocompleteController);
 
-    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+    SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       _updateOverlay();
     });
   }
@@ -587,23 +584,25 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
 
     // Handle changes in the AutocompleteController.
     if (widget.autocompleteController == null && oldWidget.autocompleteController != null) {
-      _unlistenToController(oldWidget.autocompleteController);
+      _unlistenToController(oldWidget.autocompleteController!);
       _autocompleteController = AutocompleteController<T>(
-        options: widget.options,
+        options: widget.options!,
       );
       _listenToController(_autocompleteController);
     } else if (widget.autocompleteController != null && oldWidget.autocompleteController == null) {
       _unlistenToController(_autocompleteController);
       _autocompleteController.dispose();
-      _autocompleteController = widget.autocompleteController;
+      _autocompleteController = widget.autocompleteController!;
       _listenToController(_autocompleteController);
-    } else if (widget.autocompleteController != oldWidget.autocompleteController) {
-      _unlistenToController(oldWidget.autocompleteController);
-      _autocompleteController = widget.autocompleteController;
+    } else if (widget.autocompleteController != oldWidget.autocompleteController
+        && widget.autocompleteController != null
+        && oldWidget.autocompleteController != null) {
+      _unlistenToController(oldWidget.autocompleteController!);
+      _autocompleteController = widget.autocompleteController!;
       _listenToController(_autocompleteController);
     }
 
-    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+    SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       _updateOverlay();
     });
   }
@@ -637,12 +636,12 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
 
 class _FloatingResults<T> extends StatelessWidget {
   const _FloatingResults({
-    Key key,
-    @required this.buildResults,
-    @required this.fieldSize,
-    @required this.layerLink,
-    @required this.onSelected,
-    @required this.results,
+    Key? key,
+    required this.buildResults,
+    required this.fieldSize,
+    required this.layerLink,
+    required this.onSelected,
+    required this.results,
   }) : assert(buildResults != null),
        assert(fieldSize != null),
        assert(layerLink != null),
