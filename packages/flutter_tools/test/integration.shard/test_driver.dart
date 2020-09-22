@@ -466,6 +466,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         if (chrome)
           ...<String>[
             'chrome',
+            '--web-run-headless',
             if (!expressionEvaluation) '--no-web-enable-expression-evaluation'
           ]
         else
