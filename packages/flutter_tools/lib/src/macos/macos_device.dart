@@ -93,12 +93,12 @@ class MacOSDevices extends PollingDeviceDiscovery {
     @required MacOSWorkflow macOSWorkflow,
     @required ProcessManager processManager,
     @required Logger logger,
-    @required FileSystem fileSystem,
+    FileSystem fileSystem,
   }) : _logger = logger,
        _platform = platform,
        _macOSWorkflow = macOSWorkflow,
        _processManager = processManager,
-       _fileSystem = fileSystem,
+       _fileSystem = fileSystem ?? globals.fs,
        super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
