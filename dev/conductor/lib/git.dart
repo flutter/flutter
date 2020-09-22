@@ -23,6 +23,7 @@ class Git {
     }
   }
 
+  // TODO: this should not be a [Git] method.
   /// Obtain the version tag of the previous dev release.
   String getFullTag(String remote) {
     const String glob = '*.*.*-*.*.pre';

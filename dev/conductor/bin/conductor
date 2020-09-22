@@ -35,4 +35,4 @@ function follow_links() (
 PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 
-dart --enable-asserts "$BIN_DIR/conductor.dart"
+dart --enable-asserts "$BIN_DIR/conductor.dart" "$@"

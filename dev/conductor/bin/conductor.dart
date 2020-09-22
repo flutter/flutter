@@ -10,6 +10,8 @@
 import 'dart:io' as io;
 
 import 'package:args/args.dart';
+import 'package:file/local.dart';
+import 'package:platform/platform.dart';
 
 import 'package:flutter_conductor/arguments.dart';
 import 'package:flutter_conductor/git.dart';
@@ -53,6 +55,8 @@ void main(List<String> args) {
       argResults: argResults,
       git: const Git(),
       stdio: stdio,
+      platform: const LocalPlatform(),
+      fileSystem: const LocalFileSystem(),
     );
   } on Exception catch (e) {
     stdio.printError(e.toString());

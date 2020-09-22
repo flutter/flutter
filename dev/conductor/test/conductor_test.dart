@@ -147,7 +147,7 @@ void main() {
         git: mockGit,
         stdio: stdio,
       ), false);
-      expect(stdio.stdout.trim(), nextVersion);
+      expect(stdio.stdout.contains(nextVersion), true);
       verify(mockGit.run('fetch $origin', any));
       verifyNever(mockGit.run('reset $commit --hard', any));
       verifyNever(mockGit.getOutput('rev-parse HEAD', any));

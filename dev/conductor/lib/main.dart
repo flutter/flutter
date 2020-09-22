@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:args/args.dart';
+import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
 
 import './git.dart';
 import './globals.dart';
@@ -18,6 +22,8 @@ bool run({
   @required ArgResults argResults,
   @required Git git,
   @required Stdio stdio,
+  @required Platform platform,
+  @required FileSystem fileSystem,
 }) {
   final String level = argResults[kIncrement] as String;
   final String commit = argResults[kCommit] as String;
