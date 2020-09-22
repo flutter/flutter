@@ -14,9 +14,8 @@ import io.flutter.embedding.engine.loader.FlutterLoader;
 /**
  * A legacy class to initialize the Flutter engine.
  *
- * @deprecated Replaced by {@link io.flutter.embedding.engine.loader.FlutterLoader}.
+ * <p>Replaced by {@link io.flutter.embedding.engine.loader.FlutterLoader}.
  */
-@Deprecated
 public class FlutterMain {
 
   public static class Settings {
