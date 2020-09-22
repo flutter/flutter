@@ -31,8 +31,10 @@ const TextStyle _kDefaultPickerTextStyle = TextStyle(
   letterSpacing: -0.83,
 );
 
-// The item height is 32 and the magnifier height is 34, as derived from
+// The item height is 32 and the magnifier height is 34, from
 // iOS simulators with "Debug View Hierarchy".
+// And the magnified fontSize by [_kTimerPickerMagnification] conforms to the
+// iOS 14 native style by eyeball test.
 const double _kTimerPickerMagnification = 34 / 32;
 // Minimum horizontal padding between [CupertinoTimerPicker]
 const double _kTimerPickerMinHorizontalPadding = 20;
@@ -45,10 +47,6 @@ const double _kTimerPickerLabelFontSize = 17.0;
 
 // The width of each column of the countdown time picker.
 const double _kTimerPickerColumnIntrinsicWidth = 106;
-// Unfortunately turning on magnification for the timer picker messes up the label
-// alignment. So we'll have to hard code the font size and turn magnification off
-// for now.
-const double _kTimerPickerNumberLabelFontSize = 23;
 
 TextStyle _themeTextStyle(BuildContext context, { bool isValid = true }) {
   final TextStyle style = CupertinoTheme.of(context).textTheme.dateTimePickerTextStyle;
@@ -1632,7 +1630,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   void _measureLabelMetrics() {
     textPainter.textDirection = textDirection;
-    final TextStyle textStyle = _textStyleFrom(context);
+    final TextStyle textStyle = _textStyleFrom(context, _kTimerPickerMagnification);
 
     double maxWidth = double.negativeInfinity;
     String widestNumber;
@@ -1923,13 +1921,14 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     );
   }
 
-  TextStyle _textStyleFrom(BuildContext context) {
-    return CupertinoTheme.of(context).textTheme
-      .pickerTextStyle.merge(
-        const TextStyle(
-          fontSize: _kTimerPickerNumberLabelFontSize,
-        ),
-      );
+  // Returns [CupertinoTextThemeData.pickerTextStyle] and magnifies the fontSize
+  // by [magnification].
+  TextStyle _textStyleFrom(BuildContext context, [double magnification = 1.0]) {
+    final TextStyle textStyle = CupertinoTheme.of(context).textTheme
+        .pickerTextStyle;
+    return textStyle.copyWith(
+      fontSize: textStyle.fontSize * magnification
+    );
   }
 
   // Calculate the number label center point by padding start to get a
@@ -2051,7 +2050,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         break;
     }
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
-    final TextStyle textStyle = _textStyleFrom(context);
     return MediaQuery(
       // The native iOS picker's text scaling is fixed, so we will also fix it
       // as well in our picker.
@@ -2059,7 +2057,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       child: CupertinoTheme(
         data: themeData.copyWith(
           textTheme: themeData.textTheme.copyWith(
-            pickerTextStyle: textStyle,
+            pickerTextStyle: _textStyleFrom(context, _kTimerPickerMagnification),
           ),
         ),
         child: Align(
@@ -2069,7 +2067,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             width: totalWidth,
             height: _kPickerHeight,
             child: DefaultTextStyle(
-              style: textStyle.copyWith(fontSize: textStyle.fontSize / _kTimerPickerMagnification),
+              style: _textStyleFrom(context),
               child: Row(children: columns.map((Widget child) => Expanded(child: child)).toList(growable: false)),
             ),
           ),
