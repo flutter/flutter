@@ -799,6 +799,45 @@ void main() {
     log.clear();
   });
 
+  testWidgets('CustomScrollView dismiss keyboard onDrag test', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: CustomScrollView(
+        dragStartBehavior: DragStartBehavior.down,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        slivers: <Widget>[
+          SliverList(
+            delegate: SliverChildListDelegate(
+              focusNodes.map((FocusNode focusNode) {
+                return Container(
+                  height: 50,
+                  color: Colors.green,
+                  child: TextField(
+                    focusNode: focusNode,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    )
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    final Finder finder = find.byType(TextField).first;
+    final TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode.hasFocus, isFalse);
+  });
+
   testWidgets('Can jumpTo during drag', (WidgetTester tester) async {
     final List<Type> log = <Type>[];
     final ScrollController controller = ScrollController();
