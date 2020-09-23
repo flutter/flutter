@@ -1567,7 +1567,7 @@ class ArtifactUpdater {
         await ioSink.flush();
         await ioSink.close();
         if (!tempFile.existsSync()) {
-          throw Exception();
+          throw Exception('Did not find downloaded file ${tempFile.path}');
         }
       } on Exception catch (err) {
         _logger.printTrace(err.toString());
