@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:devtools_server/devtools_server.dart' as devtools_server;
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -21,6 +20,7 @@ import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/signals.dart';
+import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
