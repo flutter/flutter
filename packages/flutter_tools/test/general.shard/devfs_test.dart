@@ -350,9 +350,9 @@ void main() {
     when(httpRequest.close()).thenAnswer((Invocation invocation) async {
       if (!didAbort) {
         while (!didAbort) {
-          await new Future.delayed(const Duration(milliseconds : 10));
+          await Future<dynamic>.delayed(const Duration(milliseconds : 10));
         }
-        throw HttpException('aborted');
+        throw const HttpException('aborted');
       }
       didRetry = true;
       return httpClientResponse;
