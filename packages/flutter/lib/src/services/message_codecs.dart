@@ -453,13 +453,13 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         return buffer.getFloat64List(length);
       case _valueList:
         final int length = readSize(buffer);
-        final dynamic result = List<dynamic>.filled(length, null, growable: false);
+        final List<dynamic> result = List<dynamic>.filled(length, null, growable: false);
         for (int i = 0; i < length; i++)
           result[i] = readValue(buffer);
         return result;
       case _valueMap:
         final int length = readSize(buffer);
-        final dynamic result = <dynamic, dynamic>{};
+        final Map<dynamic, dynamic> result = <dynamic, dynamic>{};
         for (int i = 0; i < length; i++)
           result[readValue(buffer)] = readValue(buffer);
         return result;

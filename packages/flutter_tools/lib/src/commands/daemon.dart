@@ -470,7 +470,6 @@ class AppDomain extends Domain {
       flutterProject: flutterProject,
       target: target,
       buildInfo: options.buildInfo,
-      platform: globals.platform,
     );
 
     ResidentRunner runner;

@@ -18,7 +18,6 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
-import 'base/platform.dart';
 import 'base/signals.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -64,7 +63,6 @@ class FlutterDevice {
          artifacts: globals.artifacts,
          processManager: globals.processManager,
          logger: globals.logger,
-         platform: globals.platform,
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
@@ -73,7 +71,6 @@ class FlutterDevice {
     @required FlutterProject flutterProject,
     @required String target,
     @required BuildInfo buildInfo,
-    @required Platform platform,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     TargetModel targetModel = TargetModel.flutter,
@@ -132,7 +129,6 @@ class FlutterDevice {
         artifacts: globals.artifacts,
         processManager: globals.processManager,
         logger: globals.logger,
-        platform: platform,
       );
     } else {
       // The flutter-widget-cache feature only applies to run mode.
@@ -165,7 +161,6 @@ class FlutterDevice {
         artifacts: globals.artifacts,
         processManager: globals.processManager,
         logger: globals.logger,
-        platform: platform,
       );
     }
 

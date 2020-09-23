@@ -199,7 +199,6 @@ class DriveCommand extends RunCommandBase {
           flutterProject: flutterProject,
           target: targetFile,
           buildInfo: buildInfo,
-          platform: globals.platform,
         );
         residentRunner = webRunnerFactory.createWebRunner(
           flutterDevice,

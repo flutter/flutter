@@ -198,8 +198,6 @@ class KernelSnapshot extends Target {
       logger: environment.logger,
       processManager: environment.processManager,
       artifacts: environment.artifacts,
-      fileSystemRoots: <String>[],
-      fileSystemScheme: null,
     );
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'kernel_snapshot');

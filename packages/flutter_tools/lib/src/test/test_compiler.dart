@@ -108,7 +108,6 @@ class TestCompiler {
       dartDefines: const <String>[],
       packagesPath: globalPackagesPath,
       extraFrontEndOptions: extraFrontEndOptions,
-      platform: globals.platform,
     );
     return residentCompiler;
   }

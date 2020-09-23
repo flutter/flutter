@@ -1587,6 +1587,30 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
+  /// Returns the smallest [Rect], in the local coordinate system, that covers
+  /// the text within the [TextRange] specified.
+  ///
+  /// This method is used to calculate the approximate position of the IME bar
+  /// on iOS.
+  ///
+  /// Returns null if [TextRange.isValid] is false for the given `range`, or the
+  /// given `range` is collapsed.
+  Rect? getRectForComposingRange(TextRange range) {
+    assert(constraints != null);
+    if (!range.isValid || range.isCollapsed)
+      return null;
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+
+    final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(
+      TextSelection(baseOffset: range.start, extentOffset: range.end),
+    );
+
+    return boxes.fold(
+      null,
+      (Rect? accum, TextBox incoming) => accum?.expandToInclude(incoming.toRect()) ?? incoming.toRect(),
+    )?.shift(_paintOffset);
+  }
+
   /// Returns the position in the text for the given global coordinate.
   ///
   /// See also:

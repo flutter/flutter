@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -28,7 +26,7 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
 class CupertinoActivityIndicator extends StatefulWidget {
   /// Creates an iOS-style activity indicator that spins clockwise.
   const CupertinoActivityIndicator({
-    Key key,
+    Key? key,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
   })  : assert(animating != null),
@@ -44,7 +42,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// will be shown) and 1.0 (all ticks will be shown) inclusive. Defaults
   /// to 1.0.
   const CupertinoActivityIndicator.partiallyRevealed({
-    Key key,
+    Key? key,
     this.radius = _kDefaultIndicatorRadius,
     this.progress = 1.0,
   })  : assert(radius != null),
@@ -80,7 +78,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
 
 class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
     with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+  late AnimationController _controller;
 
   @override
   void initState() {
@@ -121,7 +119,7 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
         painter: _CupertinoActivityIndicatorPainter(
           position: _controller,
           activeColor:
-              CupertinoDynamicColor.resolve(_kActiveTickColor, context),
+              CupertinoDynamicColor.resolve(_kActiveTickColor, context)!,
           radius: widget.radius,
           progress: widget.progress,
         ),
@@ -150,10 +148,10 @@ const int _partiallyRevealedAlpha = 147;
 
 class _CupertinoActivityIndicatorPainter extends CustomPainter {
   _CupertinoActivityIndicatorPainter({
-    @required this.position,
-    @required this.activeColor,
-    @required this.radius,
-    @required this.progress,
+    required this.position,
+    required this.activeColor,
+    required this.radius,
+    required this.progress,
   })  : tickFundamentalRRect = RRect.fromLTRBXY(
           -radius / _kDefaultIndicatorRadius,
           -radius / 3.0,
