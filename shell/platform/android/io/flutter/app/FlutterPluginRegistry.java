@@ -21,8 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/// This class is now deprecated. See https://flutter.dev/go/android-project-migration for
-/// migration instructions.
+/** @deprecated See https://flutter.dev/go/android-project-migration for migration instructions. */
+@Deprecated
 public class FlutterPluginRegistry
     implements PluginRegistry,
         PluginRegistry.RequestPermissionsResultListener,
