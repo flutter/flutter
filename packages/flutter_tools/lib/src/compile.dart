@@ -879,7 +879,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
 @visibleForTesting
 String toMultiRootPath(Uri fileUri, String scheme, List<String> fileSystemRoots, bool windows) {
   if (scheme == null || fileSystemRoots.isEmpty) {
-    return fileUri.toFilePath(windows: windows);
+    return fileUri.toString();
   }
   final String filePath = fileUri.toFilePath(windows: windows);
   for (final String fileSystemRoot in fileSystemRoots) {
@@ -887,5 +887,5 @@ String toMultiRootPath(Uri fileUri, String scheme, List<String> fileSystemRoots,
       return scheme + '://' + filePath.substring(fileSystemRoot.length);
     }
   }
-  return fileUri.toFilePath(windows: windows);
+  return fileUri.toString();
 }
