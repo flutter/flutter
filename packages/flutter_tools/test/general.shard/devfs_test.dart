@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -344,21 +345,31 @@ void main() {
     when(httpClient.putUrl(any)).thenAnswer((Invocation invocation) {
       return Future<HttpClientRequest>.value(httpRequest);
     });
-    final MockHttpClientResponse httpClientResponse = MockHttpClientResponse();
-    bool didAbort = false;
-    bool didRetry = false;
+    int closeCount = 0;
+    final Completer<MockHttpClientResponse> hanger = Completer<MockHttpClientResponse>();
+    final Completer<MockHttpClientResponse> succeeder = Completer<MockHttpClientResponse>();
+    final List<Completer<MockHttpClientResponse>> closeCompleters =
+      <Completer<MockHttpClientResponse>>[hanger, succeeder];
+    succeeder.complete(MockHttpClientResponse());
+
     when(httpRequest.close()).thenAnswer((Invocation invocation) async {
-      if (!didAbort) {
-        while (!didAbort) {
-          await Future<dynamic>.delayed(const Duration(milliseconds : 10));
-        }
-        throw const HttpException('aborted');
-      }
-      didRetry = true;
-      return httpClientResponse;
+      final Completer<MockHttpClientResponse> completer = closeCompleters[closeCount];
+      closeCount += 1;
+      return await completer.future;
     });
     when(httpRequest.abort()).thenAnswer((_) {
-      didAbort = true;
+      hanger.completeError(const HttpException('aborted'));
+    });
+    when(httpRequest.done).thenAnswer((_) {
+      if (closeCount == 1) {
+        return hanger.future;
+      } else if (closeCount == 2) {
+        return succeeder.future;
+      } else {
+        // This branch shouldn't happen.
+        assert(false);
+        return null;
+      }
     });
 
     final DevFS devFS = DevFS(
@@ -397,8 +408,7 @@ void main() {
 
     expect(report.success, true);
     expect(devFS.lastCompiled, isNot(previousCompile));
-    expect(didAbort, true);
-    expect(didRetry, true);
+    expect(closeCount, 2);
   });
 }
 
