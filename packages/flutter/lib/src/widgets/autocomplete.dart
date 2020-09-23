@@ -142,14 +142,6 @@ class AutocompleteController<T> {
   ///     [getResults] method instead of specifying all possible options up
   ///     front.
   AutocompleteController({
-    /// All possible options that can be selected.
-    ///
-    /// This list will be filtered by the user's input with a simple case-
-    /// insensitive string matching filter.
-    ///
-    /// See also:
-    ///   * [AutocompleteController.generated], which can be used with
-    ///     [getResults] to generate results programmatically.
     required List<T> options,
     AutocompleteOptionToString<T>? displayStringForOption,
     AutocompleteOptionToString<T>? filterStringForOption,
@@ -197,9 +189,9 @@ class AutocompleteController<T> {
   /// A function that returns the results given the text in the field.
   ///
   /// See also:
-  ///   * [options], which can be used with the default constructor to simply
-  ///     pass a list of all possible options and filter them with simple string
-  ///     matching.
+  ///   * [AutocompleteController()]'s options parameter, which can be used
+  ///     instead to simply pass a list of all possible options and filter them
+  ///     with string matching.
   final AutocompleteResultsGetter<T> getResults;
 
   /// Returns the string to display in the field when the option is selected.
@@ -457,8 +449,8 @@ class AutocompleteCore<T> extends StatefulWidget {
 
   /// All possible options that can be selected.
   ///
-  /// If passing an AutocompleteController, use
-  /// [AutocompleteController.options] instead.
+  /// If passing an AutocompleteController, use [AutocompleteController()]'s
+  /// options parameter instead.
   final List<T>? options;
 
   @override
