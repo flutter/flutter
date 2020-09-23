@@ -675,7 +675,7 @@ void main() {
     expect(restoredRouteFuture.route, isNull);
     expect(restoredRouteFuture.isPresent, isFalse);
     expect(restoredRouteFuture.enabled, isFalse);
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
   testWidgets('RestorableRouteFuture in unrestorable context', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
