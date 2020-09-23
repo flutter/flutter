@@ -740,8 +740,4 @@ void main() {
 
     expect(brightnessValue, 'Brightness.light');
   });
-
-  test('Service extensions - fastReassemble', () async {
-    expect(binding.testExtension('fastReassemble', <String, String>{}), throwsA(isA<FlutterError>()));
-  });
 }

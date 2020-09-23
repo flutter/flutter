@@ -475,6 +475,26 @@ void main() {
       '6666cd76f96956469e7be39d750cc7d9');
   });
 
+  testWithoutContext('trackSharedBuildDirectory handles a missing output dir', () {
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      outputDir: fileSystem.directory('a/b/c/d'),
+      artifacts: MockArtifacts(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    FlutterBuildSystem(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
+
+    expect(environment.outputDir.childFile('.last_build_id'), exists);
+    expect(environment.outputDir.childFile('.last_build_id').readAsStringSync(),
+      '5954e2278dd01e1c4e747578776eeb94');
+  });
+
   testWithoutContext('trackSharedBuildDirectory does not modify .last_build_id when config is identical', () {
     environment.outputDir.childFile('.last_build_id')
       ..writeAsStringSync('6666cd76f96956469e7be39d750cc7d9')

@@ -759,7 +759,6 @@ void main() {
     final WebAssetServer webAssetServer = WebAssetServer(null, null, null, null, null, null);
     when(mockWebDevFS.webAssetServer).thenReturn(webAssetServer);
 
-    expect(residentWebRunner.supportsCanvasKit, true);
     expect(webAssetServer.canvasKitRendering, false);
 
     final bool toggleResult = await residentWebRunner.toggleCanvaskit();

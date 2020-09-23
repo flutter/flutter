@@ -59,7 +59,7 @@ final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTE
 ///
 /// WARNING: if you change this number, also change .cirrus.yml
 /// and make sure it runs _all_ shards.
-const int kDeviceLabShardCount = 4;
+const int kDeviceLabShardCount = 2;
 
 /// The number of Cirrus jobs that run build tests in parallel.
 ///
@@ -1223,15 +1223,6 @@ Future<void> _runHostOnlyDeviceLabTests() async {
   // TODO(ianh): Move the tests that are not running on devicelab any more out
   // of the device lab directory.
 
-  const Map<String, String> kChromeVariables = <String, String>{
-    // This is required to be able to run Chrome on Cirrus and LUCI.
-    'CHROME_NO_SANDBOX': 'true',
-    // Causes Chrome to run in headless mode in environments without displays,
-    // such as Cirrus and LUCI. Do not use this variable when recording actual
-    // benchmark numbers.
-    'UNCALIBRATED_SMOKE_TEST': 'true',
-  };
-
   // List the tests to run.
   // We split these into subshards. The tests are randomly distributed into
   // those subshards so as to get a uniform distribution of costs, but the
@@ -1239,23 +1230,11 @@ Future<void> _runHostOnlyDeviceLabTests() async {
   final List<ShardRunner> tests = <ShardRunner>[
     // Keep this in alphabetical order.
     () => _runDevicelabTest('build_aar_module_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('gradle_fast_start_test', environment: gradleEnvironment),
-    // TODO(ianh): Fails on macOS looking for "dexdump", https://github.com/flutter/flutter/issues/42494
-    if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('gradle_plugin_bundle_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('gradle_plugin_fat_apk_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('gradle_r8_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: true),
     () => _runDevicelabTest('module_custom_host_app_name_test', environment: gradleEnvironment),
     () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
     () => _runDevicelabTest('plugin_dependencies_test', environment: gradleEnvironment),
-    if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
-    if (Platform.isMacOS) () => _runDevicelabTest('build_ios_framework_module_test'),
-    if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
-    () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),
-    if (Platform.isLinux) () => _runDevicelabTest('web_benchmarks_html', environment: kChromeVariables),
   ]..shuffle(math.Random(0));
 
   await _selectIndexedSubshard(tests, kDeviceLabShardCount);

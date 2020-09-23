@@ -220,6 +220,9 @@ class InteractiveViewer extends StatefulWidget {
 
   /// Called when the user ends a pan or scale gesture on the widget.
   ///
+  /// At the time this is called, the [TransformationController] will have
+  /// already been updated to reflect the change caused by the interaction.
+  ///
   /// {@template flutter.widgets.interactiveViewer.onInteraction}
   /// Will be called even if the interaction is disabled with
   /// [panEnabled] or [scaleEnabled].
@@ -229,10 +232,6 @@ class InteractiveViewer extends StatefulWidget {
   /// [GestureDetector.onScaleEnd]. Use [onInteractionStart],
   /// [onInteractionUpdate], and [onInteractionEnd] to respond to those
   /// gestures.
-  ///
-  /// The coordinates returned in the details are viewport coordinates relative
-  /// to the parent. See [TransformationController.toScene] for how to
-  /// convert the coordinates to scene coordinates relative to the child.
   /// {@endtemplate}
   ///
   /// See also:
@@ -243,7 +242,16 @@ class InteractiveViewer extends StatefulWidget {
 
   /// Called when the user begins a pan or scale gesture on the widget.
   ///
+  /// At the time this is called, the [TransformationController] will not have
+  /// changed due to this interaction.
+  ///
   /// {@macro flutter.widgets.interactiveViewer.onInteraction}
+  ///
+  /// The coordinates provided in the details' `focalPoint` and
+  /// `localFocalPoint` are normal Flutter event coordinates, not
+  /// InteractiveViewer scene coordinates. See
+  /// [TransformationController.toScene] for how to convert these coordinates to
+  /// scene coordinates relative to the child.
   ///
   /// See also:
   ///
@@ -253,7 +261,16 @@ class InteractiveViewer extends StatefulWidget {
 
   /// Called when the user updates a pan or scale gesture on the widget.
   ///
+  /// At the time this is called, the [TransformationController] will have
+  /// already been updated to reflect the change caused by the interaction.
+  ///
   /// {@macro flutter.widgets.interactiveViewer.onInteraction}
+  ///
+  /// The coordinates provided in the details' `focalPoint` and
+  /// `localFocalPoint` are normal Flutter event coordinates, not
+  /// InteractiveViewer scene coordinates. See
+  /// [TransformationController.toScene] for how to convert these coordinates to
+  /// scene coordinates relative to the child.
   ///
   /// See also:
   ///
@@ -711,9 +728,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle the start of a gesture. All of pan, scale, and rotate are handled
   // with GestureDetector's scale gesture.
   void _onScaleStart(ScaleStartDetails details) {
-    if (widget.onInteractionStart != null) {
-      widget.onInteractionStart!(details);
-    }
+    widget.onInteractionStart?.call(details);
 
     if (_controller.isAnimating) {
       _controller.stop();
@@ -735,16 +750,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // handled with GestureDetector's scale gesture.
   void _onScaleUpdate(ScaleUpdateDetails details) {
     final double scale = _transformationController!.value.getMaxScaleOnAxis();
-    if (widget.onInteractionUpdate != null) {
-      widget.onInteractionUpdate!(ScaleUpdateDetails(
-        focalPoint: _transformationController!.toScene(
-          details.localFocalPoint,
-        ),
-        scale: details.scale,
-        rotation: details.rotation,
-      ));
-    }
-
     final Offset focalPointScene = _transformationController!.toScene(
       details.localFocalPoint,
     );
@@ -798,7 +803,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         if (_round(_referenceFocalPoint!) != _round(focalPointSceneCheck)) {
           _referenceFocalPoint = focalPointSceneCheck;
         }
-        return;
+        break;
 
       case _GestureType.rotate:
         if (details.rotation == 0.0) {
@@ -811,7 +816,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           details.localFocalPoint,
         );
         _currentRotation = desiredRotation;
-        return;
+        break;
 
       case _GestureType.pan:
         assert(_referenceFocalPoint != null);
@@ -832,16 +837,20 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _referenceFocalPoint = _transformationController!.toScene(
           details.localFocalPoint,
         );
-        return;
+        break;
     }
+    widget.onInteractionUpdate?.call(ScaleUpdateDetails(
+      focalPoint: details.focalPoint,
+      localFocalPoint: details.localFocalPoint,
+      scale: details.scale,
+      rotation: details.rotation,
+    ));
   }
 
   // Handle the end of a gesture of _GestureType. All of pan, scale, and rotate
   // are handled with GestureDetector's scale gesture.
   void _onScaleEnd(ScaleEndDetails details) {
-    if (widget.onInteractionEnd != null) {
-      widget.onInteractionEnd!(details);
-    }
+    widget.onInteractionEnd?.call(details);
     _scaleStart = null;
     _rotationStart = null;
     _referenceFocalPoint = null;
@@ -890,10 +899,17 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Handle mousewheel scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
-    if (!_gestureIsSupported(_GestureType.scale)) {
-      return;
-    }
     if (event is PointerScrollEvent) {
+      widget.onInteractionStart?.call(
+        ScaleStartDetails(
+          focalPoint: event.position,
+          localFocalPoint: event.localPosition,
+        ),
+      );
+      if (!_gestureIsSupported(_GestureType.scale)) {
+        widget.onInteractionEnd?.call(ScaleEndDetails());
+        return;
+      }
       final RenderBox childRenderBox = _childKey.currentContext!.findRenderObject() as RenderBox;
       final Size childSize = childRenderBox.size;
       final double scaleChange = 1.0 - event.scrollDelta.dy / childSize.height;
@@ -903,6 +919,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       final Offset focalPointScene = _transformationController!.toScene(
         event.localPosition,
       );
+
       _transformationController!.value = _matrixScale(
         _transformationController!.value,
         scaleChange,
@@ -917,22 +934,16 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _transformationController!.value,
         focalPointSceneScaled - focalPointScene,
       );
-      if (widget.onInteractionStart != null) {
-        widget.onInteractionStart!(
-            ScaleStartDetails(focalPoint: focalPointSceneScaled)
-        );
-      }
-      if (widget.onInteractionUpdate != null) {
-        widget.onInteractionUpdate!(ScaleUpdateDetails(
-          rotation: 0.0,
-          scale: scaleChange,
-          horizontalScale: 1.0,
-          verticalScale: 1.0,
-        ));
-      }
-      if (widget.onInteractionEnd != null) {
-        widget.onInteractionEnd!(ScaleEndDetails());
-      }
+
+      widget.onInteractionUpdate?.call(ScaleUpdateDetails(
+        focalPoint: event.position,
+        localFocalPoint: event.localPosition,
+        rotation: 0.0,
+        scale: scaleChange,
+        horizontalScale: 1.0,
+        verticalScale: 1.0,
+      ));
+      widget.onInteractionEnd?.call(ScaleEndDetails());
     }
   }
 

@@ -5,12 +5,14 @@
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../macos/application_package.dart';
 import '../project.dart';
 import 'build_macos.dart';
@@ -21,6 +23,7 @@ class MacOSDevice extends DesktopDevice {
   MacOSDevice({
     @required ProcessManager processManager,
     @required Logger logger,
+    FileSystem fileSystem,
   }) : _processManager = processManager,
        _logger = logger,
        super(
@@ -29,6 +32,7 @@ class MacOSDevice extends DesktopDevice {
         ephemeral: false,
         processManager: processManager,
         logger: logger,
+        fileSystem: fileSystem ?? globals.fs,
       );
 
   final ProcessManager _processManager;
@@ -89,16 +93,19 @@ class MacOSDevices extends PollingDeviceDiscovery {
     @required MacOSWorkflow macOSWorkflow,
     @required ProcessManager processManager,
     @required Logger logger,
+    FileSystem fileSystem,
   }) : _logger = logger,
        _platform = platform,
        _macOSWorkflow = macOSWorkflow,
        _processManager = processManager,
+       _fileSystem = fileSystem ?? globals.fs,
        super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
   final Platform _platform;
   final ProcessManager _processManager;
   final Logger _logger;
+  final FileSystem _fileSystem;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
@@ -112,7 +119,11 @@ class MacOSDevices extends PollingDeviceDiscovery {
       return const <Device>[];
     }
     return <Device>[
-      MacOSDevice(processManager: _processManager, logger: _logger),
+      MacOSDevice(
+        processManager: _processManager,
+        logger: _logger,
+        fileSystem: _fileSystem,
+      ),
     ];
   }
 

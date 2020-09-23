@@ -268,6 +268,60 @@ typedef RefreshCallback = Future<void> Function();
 /// sliver such as [CupertinoSliverNavigationBar] and your main scrollable
 /// content's sliver.
 ///
+/// {@tool dartpad --template=stateful_widget_material}
+///
+/// When the user scrolls past [refreshTriggerPullDistance],
+/// this sample shows the default ios pull to refresh indicator for 1 second and
+/// adds a new item to the top of the list view.
+///
+/// ```dart imports
+/// import 'package:flutter/cupertino.dart';
+/// ```
+///
+/// ```dart
+/// List<Color> colors = [
+///   CupertinoColors.systemYellow,
+///   CupertinoColors.systemOrange,
+///   CupertinoColors.systemPink
+/// ];
+/// List<Widget> items = [
+///   Container(color: CupertinoColors.systemPink, height: 100.0),
+///   Container(color: CupertinoColors.systemOrange, height: 100.0),
+///   Container(color: CupertinoColors.systemYellow, height: 100.0),
+/// ];
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return CupertinoApp(
+///     home: CupertinoPageScaffold(
+///       child: CustomScrollView(
+///         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+///         slivers: <Widget>[
+///           const CupertinoSliverNavigationBar(largeTitle: Text('Scroll down')),
+///           CupertinoSliverRefreshControl(
+///             refreshTriggerPullDistance: 100.0,
+///             refreshIndicatorExtent: 60.0,
+///             onRefresh: () async {
+///               await Future.delayed(Duration(milliseconds: 1000));
+///               setState(() {
+///                 items.insert(0, Container(color: colors[items.length % 3], height: 100.0));
+///               });
+///             },
+///           ),
+///           SliverList(
+///             delegate: SliverChildBuilderDelegate(
+///               (BuildContext context, int index) => items[index],
+///               childCount: items.length,
+///             ),
+///           ),
+///         ],
+///       )
+///     )
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CustomScrollView], a typical sliver holding scroll view this control

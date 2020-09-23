@@ -839,8 +839,10 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderSlider renderObject) {
     renderObject
-      ..value = value
+      // We should update the `divisions` ahead of `value`, because the `value`
+      // setter dependent on the `divisions`.
       ..divisions = divisions
+      ..value = value
       ..label = label
       ..sliderTheme = sliderTheme
       ..theme = Theme.of(context)

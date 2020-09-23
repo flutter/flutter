@@ -21,6 +21,7 @@ import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'features.dart';
 import 'globals.dart' as globals;
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -744,7 +745,9 @@ class HotRunner extends ResidentRunner {
         emulator: emulator,
         fullRestart: true,
         nullSafety: usageNullSafety,
-        reason: reason).send();
+        reason: reason,
+        fastReassemble: null,
+      ).send();
       status?.cancel();
     }
     return result;
@@ -787,6 +790,7 @@ class HotRunner extends ResidentRunner {
         fullRestart: false,
         nullSafety: usageNullSafety,
         reason: reason,
+        fastReassemble: null,
       ).send();
       return OperationResult(1, 'hot reload failed to complete', fatal: true);
     } finally {
@@ -866,6 +870,7 @@ class HotRunner extends ResidentRunner {
             fullRestart: false,
             reason: reason,
             nullSafety: usageNullSafety,
+            fastReassemble: null,
           ).send();
           return OperationResult(1, 'Reload rejected');
         }
@@ -894,6 +899,7 @@ class HotRunner extends ResidentRunner {
           fullRestart: false,
           reason: reason,
           nullSafety: usageNullSafety,
+          fastReassemble: null,
         ).send();
         return OperationResult(errorCode, errorMessage);
       }
@@ -936,9 +942,10 @@ class HotRunner extends ResidentRunner {
           // If the tool identified a change in a single widget, do a fast instead
           // of a full reassemble.
           Future<void> reassembleWork;
-          if (updatedDevFS.fastReassemble == true) {
+          if (updatedDevFS.fastReassembleClassName != null) {
             reassembleWork = device.vmService.flutterFastReassemble(
               isolateId: view.uiIsolate.id,
+              className: updatedDevFS.fastReassembleClassName,
             );
           } else {
             reassembleWork = device.vmService.flutterReassemble(
@@ -1030,6 +1037,9 @@ class HotRunner extends ResidentRunner {
       invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
       transferTimeInMs: devFSTimer.elapsed.inMilliseconds,
       nullSafety: usageNullSafety,
+      fastReassemble: featureFlags.isSingleWidgetReloadEnabled
+        ? updatedDevFS.fastReassembleClassName != null
+        : null,
     ).send();
 
     if (shouldReportReloadTime) {

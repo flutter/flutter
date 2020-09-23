@@ -648,7 +648,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     late String? testExpectation;
     testExpectation = await skiaClient.getExpectationForTest(testName);
 
-    if (testExpectation == null) {
+    if (testExpectation == null || testExpectation.isEmpty) {
       // There is no baseline for this test
       print('No expectations provided by Skia Gold for test: $golden. '
         'This may be a new test. If this is an unexpected result, check '

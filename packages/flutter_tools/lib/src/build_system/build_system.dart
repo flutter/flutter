@@ -668,6 +668,7 @@ class FlutterBuildSystem extends BuildSystem {
     final String currentBuildId = fileSystem.path.basename(environment.buildDir.path);
     final File lastBuildIdFile = environment.outputDir.childFile('.last_build_id');
     if (!lastBuildIdFile.existsSync()) {
+      lastBuildIdFile.parent.createSync(recursive: true);
       lastBuildIdFile.writeAsStringSync(currentBuildId);
       // No config file, either output was cleaned or this is the first build.
       return;
@@ -703,7 +704,6 @@ class FlutterBuildSystem extends BuildSystem {
     }
   }
 }
-
 
 /// An active instance of a build.
 class _BuildInstance {

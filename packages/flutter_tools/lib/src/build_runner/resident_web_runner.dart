@@ -588,6 +588,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
         nullSafety: usageNullSafety,
+        fastReassemble: null,
       ).send();
     }
     return OperationResult.ok;
@@ -695,6 +696,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       invalidatedFiles: invalidationResult.uris,
       packageConfig: invalidationResult.packageConfig,
       trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
+      devFSWriter: null,
     );
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
@@ -797,9 +799,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
     await cleanupAtFinish();
     return 0;
   }
-
-  @override
-  bool get supportsCanvasKit => supportsServiceProtocol;
 
   @override
   Future<bool> toggleCanvaskit() async {

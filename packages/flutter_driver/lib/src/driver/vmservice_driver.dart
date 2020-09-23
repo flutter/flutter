@@ -131,8 +131,22 @@ class VMServiceFlutterDriver extends FlutterDriver {
     // Attempts to resume the isolate, but does not crash if it fails because
     // the isolate is already resumed. There could be a race with other tools,
     // such as a debugger, any of which could have resumed the isolate.
-    Future<dynamic> resumeLeniently() {
+    Future<dynamic> resumeLeniently() async {
       _log('Attempting to resume isolate');
+      // Let subsequent isolates start automatically.
+      try {
+        final Map<String, dynamic> result =
+            await connection.peer.sendRequest('setFlag', <String, String>{
+          'name': 'pause_isolates_on_start',
+          'value': 'false',
+        }) as Map<String, dynamic>;
+        if (result == null || result['type'] != 'Success') {
+          _log('setFlag failure: $result');
+        }
+      } catch (e) {
+        _log('Failed to set pause_isolates_on_start=false, proceeding. Error: $e');
+      }
+
       return isolate.resume().catchError((dynamic e) {
         const int vmMustBePausedCode = 101;
         if (e is rpc.RpcException && e.code == vmMustBePausedCode) {

@@ -5,13 +5,13 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
-import 'image_data.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   TestImageProvider(this.testImage);
@@ -47,12 +47,6 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   @override
   String toString() => '${describeIdentity(this)}()';
-}
-
-Future<ui.Image> createTestImage() {
-  final Completer<ui.Image> uiImage = Completer<ui.Image>();
-  ui.decodeImageFromList(Uint8List.fromList(kTransparentImage), uiImage.complete);
-  return uiImage.future;
 }
 
 class FakeImageConfiguration implements ImageConfiguration {

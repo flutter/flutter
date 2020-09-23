@@ -58,13 +58,13 @@ String getFlutterRoot() {
   Error invalidScript() => StateError('Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.');
 
   Uri scriptUri;
-  switch (globals.platform.script.scheme) {
+  switch (platform.script.scheme) {
     case 'file':
-      scriptUri = globals.platform.script;
+      scriptUri = platform.script;
       break;
     case 'data':
       final RegExp flutterTools = RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
-      final Match match = flutterTools.firstMatch(Uri.decodeFull(globals.platform.script.path));
+      final Match match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
       if (match == null) {
         throw invalidScript();
       }
