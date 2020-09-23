@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1298,8 +1299,8 @@ void main() {
                 },
                 child: const Text('X'),
               );
-            }
-          )
+            },
+          ),
         ),
       ),
     ));
@@ -2043,5 +2044,38 @@ void main() {
     expect(find.text(snackBarText), findsOneWidget);
     expect(find.text(firstHeader), findsNothing);
     expect(find.text(secondHeader), findsOneWidget);
+  });
+
+  testWidgets('SnackBars cannot be used by the Scaffold and ScaffoldMessenger at the same time', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(),
+    ));
+
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
+    scaffoldMessengerState.showSnackBar(SnackBar(
+      content: const Text('ScaffoldMessenger'),
+      duration: const Duration(seconds: 2),
+      action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+      behavior: SnackBarBehavior.floating,
+    ));
+    final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+    scaffoldState.showSnackBar(SnackBar(
+      content: const Text('Scaffold'),
+      duration: const Duration(seconds: 2),
+      action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+      behavior: SnackBarBehavior.floating,
+    ));
+
+    final List<dynamic> exceptions = <dynamic>[];
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exceptions.add(details.exception);
+    };
+    await tester.pump();
+    FlutterError.onError = oldHandler;
+
+    expect(exceptions.length, 1);
+    final AssertionError error = exceptions.first as AssertionError;
+    expect(error.message, contains('Only one API should be used to manage SnackBars.'));
   });
 }

@@ -4,12 +4,12 @@
 
 // @dart = 2.8
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
 import 'color_scheme.dart';
+import 'debug.dart';
 import 'material.dart';
 import 'material_state.dart';
 import 'scaffold.dart';
@@ -92,7 +92,7 @@ class SnackBarAction extends StatefulWidget {
     @required this.label,
     @required this.onPressed,
     @Deprecated(
-      'This is meant to serve the migration from the Scaffold SnackBar to the '
+      'This is meant to serve the migration from the Scaffold SnackBar API to the '
         'ScaffoldMessenger API.'
         'This feature was deprecated after v1.22.0-2.0.pre.'
     )
@@ -126,9 +126,6 @@ class SnackBarAction extends StatefulWidget {
   final bool useScaffoldMessenger;
 
   /// Creates a copy of this snack bar but with useScaffoldMessenger set to true.
-  ///
-  /// If the original snack bar lacks a key, the newly created snack bar will
-  /// use the given fallback key.
   SnackBarAction withScaffoldMessenger() {
     return SnackBarAction(
       key: key ,
@@ -226,7 +223,7 @@ class SnackBar extends StatefulWidget {
     this.animation,
     this.onVisible,
     @Deprecated(
-      'This is meant to serve the migration from the Scaffold SnackBar to the '
+      'This is meant to serve the migration from the Scaffold SnackBar API to the '
       'ScaffoldMessenger API.'
       'This feature was deprecated after v1.22.0-2.0.pre.'
     )

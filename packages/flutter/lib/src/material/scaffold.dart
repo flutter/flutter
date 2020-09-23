@@ -2214,7 +2214,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _snackBarTimer = null;
   }
 
-  // The _messengerSnackBar represents the current SnackBAr being managed by
+  // The _messengerSnackBar represents the current SnackBar being managed by
   // the ScaffoldMessenger, instead of the Scaffold.
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> _messengerSnackBar;
 
@@ -2866,7 +2866,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     double snackBarWidth;
     // We should only be using one API for SnackBars. Currently, we can use the
     // Scaffold, which creates a SnackBar queue (_snackBars), or the
-    // ScaffoldMessenger
+    // ScaffoldMessenger (_messengerSnackBar).
     assert(
       _snackBars.isEmpty || _messengerSnackBar == null,
       'Only one API should be used to manage SnackBars. The ScaffoldMessenger is '
