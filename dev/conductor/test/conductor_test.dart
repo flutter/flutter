@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/args.dart';
 import 'package:mockito/mockito.dart';
 
 import 'package:flutter_conductor/main.dart';
@@ -347,57 +346,6 @@ void main() {
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),
   });
-}
-
-class FakeArgResults implements ArgResults {
-  FakeArgResults({
-    String level,
-    String commit,
-    String origin,
-    bool justPrint = false,
-    bool autoApprove = true, // so we don't have to mock stdin
-    bool help = false,
-    bool force = false,
-    bool skipTagging = false,
-  }) : _parsedArgs = <String, dynamic>{
-    'increment': level,
-    'commit': commit,
-    'origin': origin,
-    'just-print': justPrint,
-    'yes': autoApprove,
-    'help': help,
-    'force': force,
-    'skip-tagging': skipTagging,
-  };
-
-  @override
-  String name;
-
-  @override
-  ArgResults command;
-
-  @override
-  final List<String> rest = <String>[];
-
-  @override
-  List<String> arguments;
-
-  final Map<String, dynamic> _parsedArgs;
-
-  @override
-  Iterable<String> get options {
-    return null;
-  }
-
-  @override
-  dynamic operator [](String name) {
-    return _parsedArgs[name];
-  }
-
-  @override
-  bool wasParsed(String name) {
-    return null;
-  }
 }
 
 class MockGit extends Mock implements Git {}

@@ -11,6 +11,8 @@ import 'package:flutter_conductor/stdio.dart';
 
 export 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
+import 'package:args/args.dart';
+
 // Defines a 'package:test' shim.
 // TODO(ianh): Remove this file once https://github.com/dart-lang/matcher/issues/98 is fixed
 
@@ -82,5 +84,56 @@ class TestStdio implements Stdio {
       throw Exception('Unexpected call to readLineSync!');
     }
     return _stdin.removeAt(0);
+  }
+}
+
+class FakeArgResults implements ArgResults {
+  FakeArgResults({
+    String level,
+    String commit,
+    String origin,
+    bool justPrint = false,
+    bool autoApprove = true, // so we don't have to mock stdin
+    bool help = false,
+    bool force = false,
+    bool skipTagging = false,
+  }) : _parsedArgs = <String, dynamic>{
+    'increment': level,
+    'commit': commit,
+    'origin': origin,
+    'just-print': justPrint,
+    'yes': autoApprove,
+    'help': help,
+    'force': force,
+    'skip-tagging': skipTagging,
+  };
+
+  @override
+  String name;
+
+  @override
+  ArgResults command;
+
+  @override
+  final List<String> rest = <String>[];
+
+  @override
+  List<String> arguments;
+
+  final Map<String, dynamic> _parsedArgs;
+
+  @override
+  Iterable<String> get options {
+    return null;
+  }
+
+  @override
+  dynamic operator [](String name) {
+    return _parsedArgs[name];
+  }
+
+  @override
+  bool wasParsed(String name) {
+    return null;
   }
 }

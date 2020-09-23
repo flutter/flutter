@@ -8,16 +8,24 @@ import 'dart:io';
 class Git {
   const Git();
 
-  String getOutput(String command, String explanation) {
-    final ProcessResult result = _run(command);
+  String getOutput(
+    String command,
+    String explanation, {
+    String workingDirectory,
+  }) {
+    final ProcessResult result = _run(command, workingDirectory);
     if ((result.stderr as String).isEmpty && result.exitCode == 0)
       return (result.stdout as String).trim();
     _reportFailureAndExit(result, explanation);
     return null; // for the analyzer's sake
   }
 
-  void run(String command, String explanation) {
-    final ProcessResult result = _run(command);
+  void run(
+    String command,
+    String explanation, {
+    String workingDirectory,
+  }) {
+    final ProcessResult result = _run(command, workingDirectory);
     if (result.exitCode != 0) {
       _reportFailureAndExit(result, explanation);
     }
@@ -30,19 +38,24 @@ class Git {
     // describe the latest dev release
     final String ref = 'refs/remotes/$remote/dev';
     return getOutput(
-        'describe --match $glob --exact-match --tags $ref',
-        'obtain last released version number',
+      'describe --match $glob --exact-match --tags $ref',
+      'obtain last released version number',
     );
   }
 
-  ProcessResult _run(String command) {
-    return Process.runSync('git', command.split(' '));
+  ProcessResult _run(String command, String workingDirectory) {
+    return Process.runSync(
+      'git',
+      command.split(' '),
+      workingDirectory: workingDirectory,
+    );
   }
 
   void _reportFailureAndExit(ProcessResult result, String explanation) {
     final StringBuffer message = StringBuffer();
     if (result.exitCode != 0) {
-      message.writeln('Failed to $explanation. Git exited with error code ${result.exitCode}.');
+      message.writeln(
+          'Failed to $explanation. Git exited with error code ${result.exitCode}.');
     } else {
       message.writeln('Failed to $explanation.');
     }

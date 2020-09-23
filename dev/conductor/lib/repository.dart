@@ -19,7 +19,10 @@ class Repository {
     @required this.stdio,
     @required this.platform,
     @required this.fileSystem,
-  });
+    this.localUpstream = false,
+  }) {
+    ensureCloned();
+  }
 
   final String name;
   final String upstream;
@@ -28,26 +31,34 @@ class Repository {
   final Platform platform;
   final FileSystem fileSystem;
 
+  /// If the repository's upstream is a local directory.
+  final bool localUpstream;
+
   void ensureCloned() {
     stdio.printTrace('About to check if $name exists...');
-    final Directory repoDir = checkouts.childDirectory(name);
+    final Directory repoDir = directory;
     if (!repoDir.existsSync()) {
-      stdio.printTrace('About to clone');
+      stdio.printTrace('About to clone repo $name');
       git.run(
         'clone -- $upstream ${repoDir.path}',
         'Cloning $name repo',
+        workingDirectory: checkouts.path,
       );
+    } else {
+      stdio.printTrace('Repo $name already exists');
     }
     //git.run();
   }
 
-  /// Fetch latest from all upstreams
   void fetch() {
-    // TODO(fujino): implement.
+    // TODO: implement.
   }
 
+  Directory get directory => checkouts.childDirectory(name);
+
   Directory get checkouts {
-    print(platform.script.scheme);
+    // Ensure not a test
+    assert(platform.script.scheme != 'data');
     final String filePath = platform.script.toFilePath();
     final String checkoutsDirname = fileSystem.path.normalize(
       fileSystem.path.join(

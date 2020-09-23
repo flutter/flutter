@@ -6,6 +6,7 @@ import 'package:platform/platform.dart';
 
 import 'package:flutter_conductor/git.dart';
 import 'package:flutter_conductor/globals.dart';
+import 'package:flutter_conductor/main.dart' show run;
 import 'package:flutter_conductor/repository.dart';
 import 'package:flutter_conductor/stdio.dart';
 
@@ -39,18 +40,31 @@ void main() {
         fileSystem: fileSystem,
       );
 
-      frameworkFakeUpstream.ensureCloned();
+      final Repository framework = Repository(
+        name: 'framework',
+        upstream: frameworkFakeUpstream.directory.path,
+        git: git,
+        stdio: stdio,
+        platform: platform,
+        fileSystem: fileSystem,
+      );
 
-      //final Repository framework = Repository(
-      //  name: 'framework',
-      //  upstream: kUpstreamRemote,
-      //  git: git,
-      //  stdio: stdio,
-      //  platform: platform,
-      //  fileSystem: fileSystem,
-      //);
+      final FakeArgResults fakeArgResults = FakeArgResults(
+        level: 'm',
+        commit: 'abc123',
+        origin: 'origin',
+        justPrint: true,
+      );
 
-      //framework.ensureCloned();
+      run(
+        usage: 'usage string',
+        argResults: fakeArgResults,
+        git: git,
+        stdio: stdio,
+        fileSystem: fileSystem,
+        platform: platform,
+        repository: framework,
+      );
     });
   });
 }
