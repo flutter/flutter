@@ -92,9 +92,8 @@ class SnackBarAction extends StatefulWidget {
     @required this.label,
     @required this.onPressed,
     @Deprecated(
-      'This is meant to serve the migration from the Scaffold SnackBar API to the '
-        'ScaffoldMessenger API.'
-        'This feature was deprecated after v1.22.0-2.0.pre.'
+      'Do not use, intended for migration interim. '
+      'This feature was deprecated after v1.22.0-2.0.pre.'
     )
     this.useScaffoldMessenger = false,
   }) : assert(label != null),
@@ -223,8 +222,7 @@ class SnackBar extends StatefulWidget {
     this.animation,
     this.onVisible,
     @Deprecated(
-      'This is meant to serve the migration from the Scaffold SnackBar API to the '
-      'ScaffoldMessenger API.'
+      'Do not use, intended for migration interim. '
       'This feature was deprecated after v1.22.0-2.0.pre.'
     )
     this.useScaffoldMessenger = false,
