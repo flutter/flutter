@@ -11,8 +11,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
-import '_first_frame_io.dart' if (dart.library.html)
-  '_first_frame_web.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'mouse_tracking.dart';
@@ -46,7 +44,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     assert(renderView != null);
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
-    addPostFrameCallback(dispatchFirstFrame);
+    if (kIsWeb) {
+      addPostFrameCallback(_handleWebFirstFrame);
+    }
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -282,6 +282,12 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       _semanticsHandle?.dispose();
       _semanticsHandle = null;
     }
+  }
+
+  void _handleWebFirstFrame(Duration _) {
+    assert(kIsWeb);
+    const MethodChannel methodChannel = MethodChannel('flutter/service_worker');
+    methodChannel.invokeMethod<void>('first-frame');
   }
 
   void _handleSemanticsAction(int id, SemanticsAction action, ByteData? args) {
