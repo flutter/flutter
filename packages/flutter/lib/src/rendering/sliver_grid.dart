@@ -107,10 +107,10 @@ abstract class SliverGridLayout {
   /// const constructors so that they can be used in const expressions.
   const SliverGridLayout();
 
-  /// The minimum child index that is visible at (or after) this scroll offset.
+  /// The minimum child index that intersects with (or is after) this scroll offset.
   int getMinChildIndexForScrollOffset(double scrollOffset);
 
-  /// The maximum child index that is visible at (or before) this scroll offset.
+  /// The maximum child index that intersects with (or is before) this scroll offset.
   int getMaxChildIndexForScrollOffset(double scrollOffset);
 
   /// The size and position of the child with the given index.
@@ -606,7 +606,6 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
     final int lastIndex = indexOf(lastChild!);
 
-    assert(childScrollOffset(firstChild!)! <= scrollOffset);
     assert(debugAssertChildListIsNonEmptyAndContiguous());
     assert(indexOf(firstChild!) == firstIndex);
     assert(targetLastIndex == null || lastIndex <= targetLastIndex);
@@ -621,7 +620,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
     final double paintExtent = calculatePaintOffset(
       constraints,
-      from: leadingScrollOffset,
+      from: math.min(constraints.scrollOffset, leadingScrollOffset),
       to: trailingScrollOffset,
     );
     final double cacheExtent = calculateCacheOffset(

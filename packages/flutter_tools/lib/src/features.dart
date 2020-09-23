@@ -173,6 +173,10 @@ const Feature flutterWindowsDesktopFeature = Feature(
     available: true,
     enabledByDefault: false,
   ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
 );
 
 /// The [Feature] for Android devices.
@@ -235,6 +239,7 @@ const Feature flutterFuchsiaFeature = Feature(
 const Feature singleWidgetReload = Feature(
   name: 'Hot reload optimization for changes to class body of a single widget',
   configSetting: 'single-widget-reload-optimization',
+  environmentOverride: 'FLUTTER_SINGLE_WIDGET_RELOAD',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,

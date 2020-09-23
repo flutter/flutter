@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:vm_service_client/vm_service_client.dart';
+import 'package:webdriver/async_io.dart' as async_io;
 
 import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
@@ -168,6 +168,14 @@ abstract class FlutterDriver {
 
   /// Getter of serviceClient.
   VMServiceClient get serviceClient => throw UnimplementedError();
+
+  /// Getter of webDriver.
+  async_io.WebDriver get webDriver => throw UnimplementedError();
+
+  /// Enables accessibility feature.
+  Future<void> enableAccessibility() async {
+    throw UnimplementedError();
+  }
 
   /// Sends [command] to the Flutter Driver extensions.
   /// This must be implemented by subclass.

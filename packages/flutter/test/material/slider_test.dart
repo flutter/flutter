@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -2360,13 +2361,13 @@ void main() {
     ]);
   });
 
-  testWidgets('Slider paint correctly when the track shape is rectangular', (WidgetTester tester) async {
+  testWidgets('Slider track paints correctly when the shape is rectangular', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
             sliderTheme: const SliderThemeData(
               trackShape: RectangularSliderTrackShape(),
-            )
+            ),
         ),
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -2395,5 +2396,80 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(24.0, 298.0, 400.0, 302.0)) // active track Rect.
           ..rect(rect: const Rect.fromLTRB(400.0, 298.0, 776.0, 302.0)) // inactive track Rect.
     );
+  });
+
+  testWidgets('Slider can be painted in a narrower constraint', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: SizedBox(
+                height: 10.0,
+                width: 10.0,
+                child: Slider(
+                  value: 0.5,
+                  onChanged: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+
+    expect(renderObject,
+        paints
+          // active track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(-14.0, 2.0, 5.0, 8.0, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0)))
+          // inactive track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(5.0, 3.0, 24.0, 7.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
+          // thumb
+          ..circle(x: 5.0, y: 5.0, radius: 10.0, )
+    );
+  });
+
+  testWidgets('Update the divisions and value at the same time for Slider', (WidgetTester tester) async {
+    // Regress test for https://github.com/flutter/flutter/issues/65943
+    Widget buildFrame(double maxValue) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Slider.adaptive(
+              value: 5,
+              max: maxValue,
+              divisions: maxValue.toInt(),
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(10));
+
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+
+    // Update the divisions from 10 to 15, the thumb should be paint at the correct position.
+    await tester.pumpWidget(buildFrame(15));
+    await tester.pumpAndSettle(); // Finish the animation.
+
+    RRect activeTrackRRect;
+    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
+      if (method != #drawRRect)
+        return false;
+      activeTrackRRect = arguments[0] as RRect;
+      return true;
+    }));
+
+    // The thumb should at one-third(5 / 15) of the Slider.
+    // The right of the active track shape is the position of the thumb.
+    // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
+    expect(nearEqual(activeTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
   });
 }

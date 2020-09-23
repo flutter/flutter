@@ -27,7 +27,8 @@ void main() {
     expect(() => context.context, throwsAssertionError);
 
     context.dispose();
-    expect(context.context, state.context);
+    expect(context.context, null);
+    expect(() => state.context, throwsFlutterError);
 
     expect(() => DisposableBuildContext(state), throwsAssertionError);
   });

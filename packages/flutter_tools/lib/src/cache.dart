@@ -2,21 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
+import 'package:archive/archive.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 
 import 'android/gradle_utils.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'base/io.dart' show ProcessException, SocketException;
+import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpStatus, ProcessException, SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'dart/package_map.dart';
+import 'dart/pub.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
+import 'runner/flutter_command.dart';
 
 /// A tag for a set of development artifacts that need to be cached.
 class DevelopmentArtifact {
@@ -127,6 +130,14 @@ class Cache {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
       _artifacts.add(FontSubsetArtifacts(this));
+      _artifacts.add(PubDependencies(
+        fileSystem: _fileSystem,
+        logger: _logger,
+        // flutter root and pub must be lazily initialized to avoid accessing
+        // before the version is determined.
+        flutterRoot: () => flutterRoot,
+        pub: () => pub,
+      ));
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -144,10 +155,11 @@ class Cache {
   ArtifactUpdater _createUpdater() {
     return ArtifactUpdater(
       operatingSystemUtils: _osUtils,
-      net: _net,
       logger: _logger,
       fileSystem: _fileSystem,
       tempStorage: getDownloadDir(),
+      platform: _platform,
+      httpClient: HttpClient(),
     );
   }
 
@@ -432,7 +444,14 @@ class Cache {
     );
   }
 
-  bool isUpToDate() => _artifacts.every((ArtifactSet artifact) => artifact.isUpToDate());
+  Future<bool> isUpToDate() async {
+    for (final ArtifactSet artifact in _artifacts) {
+      if (!await artifact.isUpToDate()) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   /// Update the cache to contain all `requiredArtifacts`.
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
@@ -444,7 +463,7 @@ class Cache {
         _logger.printTrace('Artifact $artifact is not required, skipping update.');
         continue;
       }
-      if (artifact.isUpToDate()) {
+      if (await artifact.isUpToDate()) {
         continue;
       }
       try {
@@ -502,7 +521,7 @@ abstract class ArtifactSet {
   final DevelopmentArtifact developmentArtifact;
 
   /// [true] if the artifact is up to date.
-  bool isUpToDate();
+  Future<bool> isUpToDate();
 
   /// The environment variables (if any) required to consume the artifacts.
   Map<String, String> get environment {
@@ -546,7 +565,7 @@ abstract class CachedArtifact extends ArtifactSet {
   }
 
   @override
-  bool isUpToDate() {
+  Future<bool> isUpToDate() async {
     if (!location.existsSync()) {
       return false;
     }
@@ -590,6 +609,66 @@ abstract class CachedArtifact extends ArtifactSet {
   Future<void> updateInner(ArtifactUpdater artifactUpdater);
 
   Uri _toStorageUri(String path) => Uri.parse('${cache.storageBaseUrl}/$path');
+}
+
+/// Ensures that the source files for all of the dependencies for the
+/// flutter_tool are present.
+///
+/// This does not handle cases wheere the source files are modified or the
+/// directory contents are incomplete.
+class PubDependencies extends ArtifactSet {
+  PubDependencies({
+    // Needs to be lazy to avoid reading from the cache before the root is initialized.
+    @required String Function() flutterRoot,
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Pub Function() pub,
+  }) : _logger = logger,
+       _fileSystem = fileSystem,
+       _flutterRoot = flutterRoot,
+       _pub = pub,
+       super(DevelopmentArtifact.universal);
+
+  final String Function() _flutterRoot;
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final Pub Function() _pub;
+
+  @override
+  Future<bool> isUpToDate() async {
+    final File toolPackageConfig = _fileSystem.file(
+      _fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools', kPackagesFileName),
+    );
+    if (!toolPackageConfig.existsSync()) {
+      return false;
+    }
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      toolPackageConfig,
+      logger: _logger,
+      throwOnError: false,
+    );
+    if (packageConfig == null || packageConfig == PackageConfig.empty ) {
+      return false;
+    }
+    for (final Package package in packageConfig.packages) {
+      if (!_fileSystem.directory(package.packageUriRoot).existsSync()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @override
+  String get name => 'pub_dependencies';
+
+  @override
+  Future<void> update(ArtifactUpdater artifactUpdater) async {
+    await _pub().get(
+      context: PubContext.pubGet,
+      directory: _fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
+      generateSyntheticPackage: false,
+    );
+  }
 }
 
 /// A cached artifact containing fonts used for Material Design.
@@ -979,7 +1058,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
   }
 
   @override
-  bool isUpToDate() {
+  Future<bool> isUpToDate() async {
     // The dependencies are downloaded and cached by Gradle.
     // The tool doesn't know if the dependencies are already cached at this point.
     // Therefore, call Gradle to figure this out.
@@ -1403,21 +1482,27 @@ const List<List<String>> _dartSdks = <List<String>> [
 class ArtifactUpdater {
   ArtifactUpdater({
     @required OperatingSystemUtils operatingSystemUtils,
-    @required Net net,
     @required Logger logger,
     @required FileSystem fileSystem,
-    @required Directory tempStorage
+    @required Directory tempStorage,
+    @required HttpClient httpClient,
+    @required Platform platform,
   }) : _operatingSystemUtils = operatingSystemUtils,
-       _net = net,
+       _httpClient = httpClient,
        _logger = logger,
        _fileSystem = fileSystem,
-       _tempStorage = tempStorage;
+       _tempStorage = tempStorage,
+       _platform = platform;
+
+  /// The number of times the artifact updater will repeat the artifact download loop.
+  static const int _kRetryCount = 2;
 
   final Logger _logger;
-  final Net _net;
   final OperatingSystemUtils _operatingSystemUtils;
   final FileSystem _fileSystem;
   final Directory _tempStorage;
+  final HttpClient _httpClient;
+  final Platform _platform;
 
   /// Keep track of the files we've downloaded for this execution so we
   /// can delete them after completion. We don't delete them right after
@@ -1459,16 +1544,43 @@ class ArtifactUpdater {
   ) async {
     final String downloadPath = flattenNameSubdirs(url, _fileSystem);
     final File tempFile = _createDownloadFile(downloadPath);
-    final Status status = _logger.startProgress(
-      message,
-      timeout: null, // This will take a variable amount of time based on network connectivity.
-    );
-    int retries = 2;
+    Status status;
+    int retries = _kRetryCount;
 
     while (retries > 0) {
+      status = _logger.startProgress(
+        message,
+        timeout: null, // This will take a variable amount of time based on network connectivity.
+      );
       try {
         _ensureExists(tempFile.parent);
-        await _net.fetchUrl(url, destFile: tempFile, maxAttempts: 2);
+        final IOSink ioSink = tempFile.openWrite();
+        await _download(url, ioSink);
+        await ioSink.close();
+      } on Exception catch (err) {
+        _logger.printTrace(err.toString());
+        retries -= 1;
+        if (retries == 0) {
+          throwToolExit(
+            'Failed to download $url. Ensure you have network connectivity and then try again.',
+          );
+        }
+        continue;
+      } on ArgumentError catch (error) {
+        final String overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+        if (overrideUrl != null && url.toString().contains(overrideUrl)) {
+          _logger.printError(error.toString());
+          throwToolExit(
+            'The value of FLUTTER_STORAGE_BASE_URL ($overrideUrl) could not be '
+            'parsed as a valid url. Please see https://flutter.dev/community/china '
+            'for an example of how to use it.\n'
+            'Full URL: $url',
+            exitCode: kNetworkProblemExitCode,
+          );
+        }
+        // This error should not be hit if there was not a storage URL override, allow the
+        // tool to crash.
+        rethrow;
       } finally {
         status.stop();
       }
@@ -1483,9 +1595,26 @@ class ArtifactUpdater {
         }
         _deleteIgnoringErrors(tempFile);
         continue;
+      } on ArchiveException {
+        retries -= 1;
+        if (retries == 0) {
+          rethrow;
+        }
+        _deleteIgnoringErrors(tempFile);
+        continue;
       }
       return;
     }
+  }
+
+  /// Download bytes from [url], throwing non-200 responses as an exception.
+  Future<void> _download(Uri url, IOSink ioSink) async {
+    final HttpClientRequest request = await _httpClient.getUrl(url);
+    final HttpClientResponse response = await request.close();
+    if (response.statusCode != HttpStatus.ok) {
+      throw Exception(response.statusCode);
+    }
+    await response.forEach(ioSink.add);
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as

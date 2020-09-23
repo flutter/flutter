@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:mockito/mockito.dart';
 
-import '../../../packages/flutter/test/painting/image_data.dart';
+import '../../../packages/flutter/test/image_data.dart';
 
 // Returns a mock HTTP client that responds with an image to all requests.
 MockHttpClient createMockImageHttpClient(SecurityContext _) {

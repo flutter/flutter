@@ -23,7 +23,7 @@ Future<void> main() async {
           });
         }
         break;
-      case 'TargetPlatorm.android':
+      case 'TargetPlatform.android':
         {
           // Just run for 20 seconds to collect memory usage. The widget itself
           // animates during this time.
