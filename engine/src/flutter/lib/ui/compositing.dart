@@ -715,8 +715,6 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
 
   /// Adds a platform view (e.g an iOS UIView) to the scene.
   ///
-  /// Only supported on iOS, this is currently a no-op on other platforms.
-  ///
   /// On iOS this layer splits the current output surface into two surfaces, one for the scene nodes
   /// preceding the platform view, and one for the scene nodes following the platform view.
   ///
@@ -729,6 +727,8 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// With a platform view in the scene, Quartz has to composite the two Flutter surfaces and the
   /// embedded UIView. In addition to that, on iOS versions greater than 9, the Flutter frames are
   /// synchronized with the UIView frames adding additional performance overhead.
+  ///
+  /// The `offset` argument is not used for iOS and Android.
   void addPlatformView(
     int viewId, {
     Offset offset = Offset.zero,
