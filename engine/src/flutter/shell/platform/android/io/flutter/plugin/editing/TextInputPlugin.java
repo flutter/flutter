@@ -28,6 +28,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -192,6 +193,7 @@ public class TextInputPlugin {
   @TargetApi(30)
   @RequiresApi(30)
   @SuppressLint({"NewApi", "Override"})
+  @Keep
   class ImeSyncDeferringInsetsCallback extends WindowInsetsAnimation.Callback
       implements View.OnApplyWindowInsetsListener {
     private int overlayInsetTypes;
