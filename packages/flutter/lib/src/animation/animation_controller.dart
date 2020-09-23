@@ -646,14 +646,14 @@ class AnimationController extends Animation<double>
     _checkStatusChanged();
   }
 
-  /// Drives the animation with a critically damped spring (within [lowerBound]
-  /// and [upperBound]) and initial velocity.
+  /// Drives the animation with a spring (within [lowerBound] and [upperBound])
+  /// and initial velocity.
   ///
   /// If velocity is positive, the animation will complete, otherwise it will
   /// dismiss.
   ///
-  /// The [springDescription] can be used to apply custom spring to the [SpringSimulation]
-  /// that is driven by this method.
+  /// The default spring that is driven by this method is critically damped,
+  /// but the [springDescription] can be used to drive by a custom spring.
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
