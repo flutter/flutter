@@ -258,7 +258,7 @@ void main() {
     expect(devFS.lastCompiled, isNot(previousCompile));
   });
 
-   testWithoutContext('DevFS uses provided DevFSWriter instead of default HTTP writer', () async {
+  testWithoutContext('DevFS uses provided DevFSWriter instead of default HTTP writer', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeDevFSWriter writer = FakeDevFSWriter();
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
@@ -331,6 +331,74 @@ void main() {
     await expectLater(() async => await writer.write(<Uri, DevFSContent>{
       Uri.parse('goodbye'): DevFSFileContent(file),
     }, Uri.parse('/foo/bar/devfs/')), throwsA(isA<DevFSException>()));
+  });
+
+  testWithoutContext('test handles request closure hangs', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[createDevFSRequest],
+    );
+    final HttpClient httpClient = MockHttpClient();
+    final MockHttpClientRequest httpRequest = MockHttpClientRequest();
+    when(httpRequest.headers).thenReturn(MockHttpHeaders());
+    when(httpClient.putUrl(any)).thenAnswer((Invocation invocation) {
+      return Future<HttpClientRequest>.value(httpRequest);
+    });
+    final MockHttpClientResponse httpClientResponse = MockHttpClientResponse();
+    bool didAbort = false;
+    bool didRetry = false;
+    when(httpRequest.close()).thenAnswer((Invocation invocation) async {
+      if (!didAbort) {
+        while (!didAbort) {
+          await new Future.delayed(const Duration(milliseconds : 10));
+        }
+        throw HttpException('aborted');
+      }
+      didRetry = true;
+      return httpClientResponse;
+    });
+    when(httpRequest.abort()).thenAnswer((_) {
+      didAbort = true;
+    });
+
+    final DevFS devFS = DevFS(
+      fakeVmServiceHost.vmService,
+      'test',
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+      httpClient: httpClient,
+    );
+
+    await devFS.create();
+    final DateTime previousCompile = devFS.lastCompiled;
+
+    final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+    )).thenAnswer((Invocation invocation) async {
+      fileSystem.file('example').createSync();
+      return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
+    });
+
+    final UpdateFSReport report = await devFS.update(
+      mainUri: Uri.parse('lib/main.dart'),
+      generator: residentCompiler,
+      dillOutputPath: 'lib/foo.dill',
+      pathToReload: 'lib/foo.txt.dill',
+      trackWidgetCreation: false,
+      invalidatedFiles: <Uri>[],
+      packageConfig: PackageConfig.empty,
+    );
+
+    expect(report.success, true);
+    expect(devFS.lastCompiled, isNot(previousCompile));
+    expect(didAbort, true);
+    expect(didRetry, true);
   });
 }
 
