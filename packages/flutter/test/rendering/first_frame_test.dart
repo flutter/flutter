@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -11,22 +13,21 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../flutter_test_alternative.dart';
-import '_first_frame_helper_io.dart' if (dart.library.html)
-  '_first_frame_helper_web.dart';
 
 void main() {
   test('Flutter dispatches first frame event on the web only', () async {
-    if (!kIsWeb) {
-      return;
-    }
-    final Future<bool> didDispatchFirstFrame = onFlutterFirstFrameEvent();
-
+    final Completer<void> completer = Completer<void>();
     final TestRenderBinding binding = TestRenderBinding();
+    const MethodChannel firstFrameChannel = MethodChannel('flutter/service_worker');
+    firstFrameChannel.setMockMethodCallHandler((MethodCall methodCall) async {
+      completer.complete();
+    });
+
     binding.handleBeginFrame(Duration.zero);
     binding.handleDrawFrame();
 
-    expect(await didDispatchFirstFrame, true);
-  });
+    await expectLater(completer.future, completes);
+  }, skip: !kIsWeb);
 }
 
 class TestRenderBinding extends BindingBase with SchedulerBinding, ServicesBinding, GestureBinding, SemanticsBinding, RendererBinding {
