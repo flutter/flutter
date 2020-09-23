@@ -309,13 +309,14 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 
   @override
   void setMessageHandler(String channel, MessageHandler? handler) {
-    if (handler == null)
+    if (handler == null) {
       _handlers.remove(channel);
-    else
+    } else {
       _handlers[channel] = handler;
-    ui.channelBuffers.drain(channel, (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
-      await handlePlatformMessage(channel, data, callback);
-    });
+      ui.channelBuffers.drain(channel, (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
+        await handlePlatformMessage(channel, data, callback);
+      });
+    }
   }
 
   @override

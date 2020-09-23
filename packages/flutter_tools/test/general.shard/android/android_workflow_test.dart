@@ -329,9 +329,15 @@ void main() {
       validationResult.messages.last.message,
       errorMessage,
     );
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains('Unable to locate Android SDK')
+      ),
+      false,
+    );
   });
 
-  testWithoutContext('Mentions `kAndroidSdkRoot if user has no AndroidSdk`', () async {
+  testWithoutContext('Mentions `flutter config --android-sdk if user has no AndroidSdk`', () async {
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: null,
       androidStudio: null,
@@ -343,7 +349,7 @@ void main() {
     ).validate();
     expect(
       validationResult.messages.any(
-        (ValidationMessage message) => message.message.contains(kAndroidSdkRoot)
+        (ValidationMessage message) => message.message.contains('flutter config --android-sdk')
       ),
       true,
     );

@@ -1616,7 +1616,7 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  static Future<T> pushNamed<T extends Object>(
+  static Future<T> pushNamed<T extends Object?>(
     BuildContext context,
     String routeName, {
     Object? arguments,
@@ -1673,7 +1673,7 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  static Future<T> pushReplacementNamed<T extends Object, TO extends Object>(
+  static Future<T> pushReplacementNamed<T extends Object?, TO extends Object?>(
     BuildContext context,
     String routeName, {
     TO? result,
@@ -1726,7 +1726,7 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  static Future<T> popAndPushNamed<T extends Object, TO extends Object>(
+  static Future<T> popAndPushNamed<T extends Object?, TO extends Object?>(
     BuildContext context,
     String routeName, {
     TO? result,
@@ -1790,7 +1790,7 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  static Future<T> pushNamedAndRemoveUntil<T extends Object>(
+  static Future<T> pushNamedAndRemoveUntil<T extends Object?>(
     BuildContext context,
     String newRouteName,
     RoutePredicate predicate, {
@@ -1828,7 +1828,7 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  static Future<T> push<T extends Object>(BuildContext context, Route<T> route) {
+  static Future<T> push<T extends Object?>(BuildContext context, Route<T> route) {
     return Navigator.of(context)!.push(route);
   }
 
@@ -1872,7 +1872,7 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  static Future<T> pushReplacement<T extends Object, TO extends Object>(BuildContext context, Route<T> newRoute, { TO? result }) {
+  static Future<T> pushReplacement<T extends Object?, TO extends Object?>(BuildContext context, Route<T> newRoute, { TO? result }) {
     return Navigator.of(context)!.pushReplacement<T, TO>(newRoute, result: result);
   }
 
@@ -1926,7 +1926,7 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  static Future<T> pushAndRemoveUntil<T extends Object>(BuildContext context, Route<T> newRoute, RoutePredicate predicate) {
+  static Future<T> pushAndRemoveUntil<T extends Object?>(BuildContext context, Route<T> newRoute, RoutePredicate predicate) {
     return Navigator.of(context)!.pushAndRemoveUntil<T>(newRoute, predicate);
   }
 
@@ -1962,7 +1962,7 @@ class Navigator extends StatefulWidget {
   ///  * [replaceRouteBelow], which is the same but identifies the route to be
   ///    removed by reference to the route above it, rather than directly.
   @optionalTypeArgs
-  static void replace<T extends Object>(BuildContext context, { required Route<dynamic> oldRoute, required Route<T> newRoute }) {
+  static void replace<T extends Object?>(BuildContext context, { required Route<dynamic> oldRoute, required Route<T> newRoute }) {
     return Navigator.of(context)!.replace<T>(oldRoute: oldRoute, newRoute: newRoute);
   }
 
@@ -1996,7 +1996,7 @@ class Navigator extends StatefulWidget {
   ///  * [replace], which is the same but identifies the route to be removed
   ///    directly.
   @optionalTypeArgs
-  static void replaceRouteBelow<T extends Object>(BuildContext context, { required Route<dynamic> anchorRoute, required Route<T> newRoute }) {
+  static void replaceRouteBelow<T extends Object?>(BuildContext context, { required Route<dynamic> anchorRoute, required Route<T> newRoute }) {
     return Navigator.of(context)!.replaceRouteBelow<T>(anchorRoute: anchorRoute, newRoute: newRoute);
   }
 
@@ -2051,7 +2051,7 @@ class Navigator extends StatefulWidget {
   ///  * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
-  static Future<bool> maybePop<T extends Object>(BuildContext context, [ T? result ]) {
+  static Future<bool> maybePop<T extends Object?>(BuildContext context, [ T? result ]) {
     return Navigator.of(context)!.maybePop<T>(result);
   }
 
@@ -2101,7 +2101,7 @@ class Navigator extends StatefulWidget {
   /// }
   /// ```
   @optionalTypeArgs
-  static void pop<T extends Object>(BuildContext context, [ T? result ]) {
+  static void pop<T extends Object?>(BuildContext context, [ T? result ]) {
     Navigator.of(context)!.pop<T>(result);
   }
 
@@ -3456,7 +3456,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  Future<T> pushNamed<T extends Object>(
+  Future<T> pushNamed<T extends Object?>(
     String routeName, {
     Object? arguments,
   }) {
@@ -3482,7 +3482,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  Future<T> pushReplacementNamed<T extends Object, TO extends Object>(
+  Future<T> pushReplacementNamed<T extends Object?, TO extends Object?>(
     String routeName, {
     TO? result,
     Object? arguments,
@@ -3508,7 +3508,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  Future<T> popAndPushNamed<T extends Object, TO extends Object>(
+  Future<T> popAndPushNamed<T extends Object?, TO extends Object?>(
     String routeName, {
     TO? result,
     Object? arguments,
@@ -3535,7 +3535,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  Future<T> pushNamedAndRemoveUntil<T extends Object>(
+  Future<T> pushNamedAndRemoveUntil<T extends Object?>(
     String newRouteName,
     RoutePredicate predicate, {
     Object? arguments,
@@ -3633,7 +3633,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  Future<T> pushReplacement<T extends Object, TO extends Object>(Route<T> newRoute, { TO? result }) {
+  Future<T> pushReplacement<T extends Object?, TO extends Object?>(Route<T> newRoute, { TO? result }) {
     assert(!_debugLocked);
     assert(() {
       _debugLocked = true;
@@ -3673,7 +3673,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  Future<T> pushAndRemoveUntil<T extends Object>(Route<T> newRoute, RoutePredicate predicate) {
+  Future<T> pushAndRemoveUntil<T extends Object?>(Route<T> newRoute, RoutePredicate predicate) {
     assert(!_debugLocked);
     assert(() {
       _debugLocked = true;
@@ -3709,7 +3709,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///  * [replaceRouteBelow], which is the same but identifies the route to be
   ///    removed by reference to the route above it, rather than directly.
   @optionalTypeArgs
-  void replace<T extends Object>({ required Route<dynamic> oldRoute, required Route<T> newRoute }) {
+  void replace<T extends Object?>({ required Route<dynamic> oldRoute, required Route<T> newRoute }) {
     assert(!_debugLocked);
     assert(oldRoute != null);
     assert(newRoute != null);
@@ -3746,7 +3746,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///  * [replace], which is the same but identifies the route to be removed
   ///    directly.
   @optionalTypeArgs
-  void replaceRouteBelow<T extends Object>({ required Route<dynamic> anchorRoute, required Route<T> newRoute }) {
+  void replaceRouteBelow<T extends Object?>({ required Route<dynamic> anchorRoute, required Route<T> newRoute }) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; }());
     assert(anchorRoute != null);
@@ -3800,7 +3800,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///    to veto a [pop] initiated by the app's back button.
   ///  * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
   ///    to define the route's `willPop` method.
-  Future<bool> maybePop<T extends Object>([ T? result ]) async {
+  @optionalTypeArgs
+  Future<bool> maybePop<T extends Object?>([ T? result ]) async {
     final _RouteEntry? lastEntry = _history.cast<_RouteEntry?>().lastWhere(
       (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
       orElse: () => null,
@@ -3854,7 +3855,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  void pop<T extends Object>([ T? result ]) {
+  void pop<T extends Object?>([ T? result ]) {
     assert(!_debugLocked);
     assert(() {
       _debugLocked = true;
