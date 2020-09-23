@@ -1702,6 +1702,24 @@ class Navigator extends StatefulWidget {
   /// [Navigator.onUnknownRoute] to construct the route.
   /// {@endtemplate}
   ///
+  /// {@tool snippet}
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// void _showBerlinWeather() {
+  ///   Navigator.restorablePushNamed(
+  ///     context,
+  ///     '/weather',
+  ///     arguments: <String, String>{
+  ///       'city': 'Berlin',
+  ///       'country': 'Germany',
+  ///     },
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
   /// {@template flutter.widgets.navigator.restorablePushNamed.returnValue}
   /// The method returns an opaque ID for the pushed route that can be used by
   /// the [RestorableRouteFuture] to gain access to the actual [Route] object
@@ -1793,6 +1811,17 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
   ///
+  /// {@tool snippet}
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// void _switchToBrightness() {
+  ///   Navigator.restorablePushReplacementNamed(context, '/settings/brightness');
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   static String restorablePushReplacementNamed<T extends Object?, TO extends Object?>(
@@ -1874,6 +1903,17 @@ class Navigator extends StatefulWidget {
   /// {@macro flutter.widgets.navigator.popAndPushNamed}
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  ///
+  /// {@tool snippet}
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// void _selectAccessibility() {
+  ///   Navigator.restorablePopAndPushNamed(context, '/settings/accessibility');
+  /// }
+  /// ```
+  /// {@end-tool}
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
@@ -1969,6 +2009,17 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
   ///
+  /// {@tool snippet}
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// void _resetToCalendar() {
+  ///   Navigator.restorablePushNamedAndRemoveUntil(context, '/calendar', ModalRoute.withName('/'));
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   static String restorablePushNamedAndRemoveUntil<T extends Object?>(
@@ -2040,6 +2091,32 @@ class Navigator extends StatefulWidget {
   /// passed as `arguments`. Often, a Map is used to pass key-value pairs.
   /// {@endtemplate}
   ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  ///   return MaterialPageRoute(
+  ///     builder: (BuildContext context) => MyStatefulWidget(),
+  ///   );
+  /// }
+  ///
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     appBar: AppBar(
+  ///       title: const Text('Sample Code'),
+  ///     ),
+  ///     floatingActionButton: FloatingActionButton(
+  ///       onPressed: () => Navigator.restorablePush(context, _myRouteBuilder),
+  ///       tooltip: 'Increment Counter',
+  ///       child: const Icon(Icons.add),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   static String restorablePush<T extends Object?>(BuildContext context, RestorableRouteBuilder<T> routeBuilder, {Object? arguments}) {
@@ -2108,6 +2185,32 @@ class Navigator extends StatefulWidget {
   /// {@macro flutter.widgets.navigator.pushReplacement}
   ///
   /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  ///   return MaterialPageRoute(
+  ///     builder: (BuildContext context) => MyStatefulWidget(),
+  ///   );
+  /// }
+  ///
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     appBar: AppBar(
+  ///       title: const Text('Sample Code'),
+  ///     ),
+  ///     floatingActionButton: FloatingActionButton(
+  ///       onPressed: () => Navigator.restorablePushReplacement(context, _myRouteBuilder),
+  ///       tooltip: 'Increment Counter',
+  ///       child: const Icon(Icons.add),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
@@ -2187,6 +2290,36 @@ class Navigator extends StatefulWidget {
   /// {@macro flutter.widgets.navigator.pushAndRemoveUntil}
   ///
   /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  ///   return MaterialPageRoute(
+  ///     builder: (BuildContext context) => MyStatefulWidget(),
+  ///   );
+  /// }
+  ///
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     appBar: AppBar(
+  ///       title: const Text('Sample Code'),
+  ///     ),
+  ///     floatingActionButton: FloatingActionButton(
+  ///       onPressed: () => Navigator.restorablePushAndRemoveUntil(
+  ///         context,
+  ///         _myRouteBuilder,
+  ///         ModalRoute.withName('/'),
+  ///       ),
+  ///       tooltip: 'Increment Counter',
+  ///       child: const Icon(Icons.add),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
@@ -3860,6 +3993,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
   ///
+  /// {@tool snippet}
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// void _aaronBurrSir() {
+  ///   navigator.restorablePushNamed('/nyc/1776');
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   String restorablePushNamed<T extends Object?>(
@@ -3918,6 +4062,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// {@macro flutter.widgets.navigator.pushReplacementNamed}
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  ///
+  /// {@tool snippet}
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// void _startBike() {
+  ///   navigator.restorablePushReplacementNamed('/jouett/1781');
+  /// }
+  /// ```
+  /// {@end-tool}
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
@@ -3978,6 +4133,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
   ///
+  /// {@tool snippet}
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// void _begin() {
+  ///   navigator.restorablePopAndPushNamed('/nyc/1776');
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   String restorablePopAndPushNamed<T extends Object?, TO extends Object?>(
@@ -4028,6 +4194,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// {@macro flutter.widgets.navigator.pushNamedAndRemoveUntil}
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  ///
+  /// {@tool snippet}
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// void _handleOpenCalendar() {
+  ///   navigator.restorablePushNamedAndRemoveUntil('/calendar', ModalRoute.withName('/'));
+  /// }
+  /// ```
+  /// {@end-tool}
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
@@ -4089,6 +4266,32 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// {@macro flutter.widgets.navigator.push}
   ///
   /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  ///   return MaterialPageRoute(
+  ///     builder: (BuildContext context) => MyStatefulWidget(),
+  ///   );
+  /// }
+  ///
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     appBar: AppBar(
+  ///       title: const Text('Sample Code'),
+  ///     ),
+  ///     floatingActionButton: FloatingActionButton(
+  ///       onPressed: () => Navigator.of(context).restorablePush(context, _myRouteBuilder),
+  ///       tooltip: 'Increment Counter',
+  ///       child: const Icon(Icons.add),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
@@ -4202,6 +4405,35 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.restorablePush.arguments}
   ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  ///   return MaterialPageRoute(
+  ///     builder: (BuildContext context) => MyStatefulWidget(),
+  ///   );
+  /// }
+  ///
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     appBar: AppBar(
+  ///       title: const Text('Sample Code'),
+  ///     ),
+  ///     floatingActionButton: FloatingActionButton(
+  ///       onPressed: () => Navigator.of(context).restorablePushReplacement(
+  ///         context,
+  ///         _myRouteBuilder,
+  ///       ),
+  ///       tooltip: 'Increment Counter',
+  ///       child: const Icon(Icons.add),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   String restorablePushReplacement<T extends Object?, TO extends Object?>(RestorableRouteBuilder<T> routeBuilder, { TO? result, Object? arguments }) {
@@ -4279,6 +4511,36 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// {@macro flutter.widgets.navigator.pushAndRemoveUntil}
   ///
   /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  ///   return MaterialPageRoute(
+  ///     builder: (BuildContext context) => MyStatefulWidget(),
+  ///   );
+  /// }
+  ///
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     appBar: AppBar(
+  ///       title: const Text('Sample Code'),
+  ///     ),
+  ///     floatingActionButton: FloatingActionButton(
+  ///       onPressed: () => Navigator.of(context).restorablePushAndRemoveUntil(
+  ///         context,
+  ///         _myRouteBuilder,
+  ///         ModalRoute.withName('/'),
+  ///       ),
+  ///       tooltip: 'Increment Counter',
+  ///       child: const Icon(Icons.add),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
