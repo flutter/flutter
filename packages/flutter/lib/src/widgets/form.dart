@@ -92,9 +92,8 @@ class Form extends StatefulWidget {
          autovalidate == true && autovalidateMode == null,
          'autovalidate and autovalidateMode should not be used together.'
        ),
-       autovalidateMode = autovalidate
-           ? AutovalidateMode.always
-           : (autovalidateMode ?? AutovalidateMode.disabled),
+       autovalidateMode = autovalidateMode ??
+         (autovalidate ? AutovalidateMode.always : AutovalidateMode.disabled),
        super(key: key);
 
   /// Returns the closest [FormState] which encloses the given context.
@@ -331,7 +330,7 @@ class FormField<T> extends StatefulWidget {
       'behaviour related to auto validation. '
       'This feature was deprecated after v1.19.0.'
     )
-    bool autovalidate = false,
+    this.autovalidate = false,
     this.enabled = true,
     AutovalidateMode? autovalidateMode,
   }) : assert(builder != null),
@@ -340,9 +339,8 @@ class FormField<T> extends StatefulWidget {
          autovalidate == true && autovalidateMode == null,
          'autovalidate and autovalidateMode should not be used together.'
        ),
-       autovalidateMode = autovalidate
-           ? AutovalidateMode.always
-           : (autovalidateMode ?? AutovalidateMode.disabled),
+        autovalidateMode = autovalidateMode ??
+          (autovalidate ? AutovalidateMode.always : AutovalidateMode.disabled),
        super(key: key);
 
   /// An optional method to call with the final value when the form is saved via
@@ -393,6 +391,15 @@ class FormField<T> extends StatefulWidget {
   /// is set to [AutovalidateMode.always] for backward compatibility.
   /// {@endtemplate}
   final AutovalidateMode autovalidateMode;
+
+  /// Used to enable/disable auto validation and update their error
+  /// text.
+  @Deprecated(
+    'Use autoValidateMode parameter which provide more specific '
+    'behaviour related to auto validation. '
+    'This feature was deprecated after v1.19.0.'
+  )
+  final bool autovalidate;
 
   @override
   FormFieldState<T> createState() => FormFieldState<T>();

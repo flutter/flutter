@@ -886,4 +886,40 @@ void main() {
     expect(fieldValue, '123456');
     expect(formKey.currentState.validate(), isFalse);
   });
+
+  testWidgets('autovalidate parameter is passed into class property', (WidgetTester tester) async {
+    String errorText(String value) => '$value/error';
+    const ObjectKey widgetKey = ObjectKey('key');
+
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: FormField<String>(
+                  key: widgetKey,
+                  initialValue: 'foo',
+                  autovalidate: true,
+                  builder: (FormFieldState<String> state) {
+                    return Container();
+                  },
+                  validator: errorText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    final Finder formFieldFinder = find.byKey(widgetKey);
+    final FormField<String> formField = tester.widget(formFieldFinder);
+    expect(formField.autovalidate, isTrue);
+    expect(formField.autovalidateMode, equals(AutovalidateMode.always));
+  });
 }
