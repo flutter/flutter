@@ -9,8 +9,6 @@ import 'package:macrobenchmarks/src/web/bench_text_out_of_picture_bounds.dart';
 import 'package:web_benchmarks/recorder.dart';
 import 'package:web_benchmarks/driver.dart' as web_benchmarks_driver;
 
-import 'package:gallery/benchmarks/gallery_automator.dart' show DemoType, typeOfDemo;
-
 import 'src/web/bench_build_material_checkbox.dart';
 import 'src/web/bench_card_infinite_scroll.dart';
 import 'src/web/bench_child_layers.dart';
@@ -24,13 +22,10 @@ import 'src/web/bench_paths.dart';
 import 'src/web/bench_picture_recording.dart';
 import 'src/web/bench_simple_lazy_text_scroll.dart';
 import 'src/web/bench_text_out_of_picture_bounds.dart';
-import 'src/web/gallery/gallery_recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
 
 const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
-
-const String _galleryBenchmarkPrefix = 'gallery_v2';
 
 /// List of all benchmarks that run in the devicelab.
 ///
