@@ -7,7 +7,7 @@ part of engine;
 
 /// An implementation of [ui.Canvas] that is backed by a CanvasKit canvas.
 class CanvasKitCanvas implements ui.Canvas {
-  final CkCanvas? _canvas;
+  final CkCanvas _canvas;
 
   factory CanvasKitCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
     assert(recorder != null); // ignore: unnecessary_null_comparison
@@ -24,7 +24,7 @@ class CanvasKitCanvas implements ui.Canvas {
 
   @override
   void save() {
-    _canvas!.save();
+    _canvas.save();
   }
 
   @override
@@ -39,43 +39,43 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _saveLayerWithoutBounds(ui.Paint paint) {
-    _canvas!.saveLayerWithoutBounds(paint as CkPaint);
+    _canvas.saveLayerWithoutBounds(paint as CkPaint);
   }
 
   void _saveLayer(ui.Rect bounds, ui.Paint paint) {
-    _canvas!.saveLayer(bounds, paint as CkPaint);
+    _canvas.saveLayer(bounds, paint as CkPaint);
   }
 
   @override
   void restore() {
-    _canvas!.restore();
+    _canvas.restore();
   }
 
   @override
   int getSaveCount() {
-    return _canvas!.saveCount!;
+    return _canvas.saveCount!;
   }
 
   @override
   void translate(double dx, double dy) {
-    _canvas!.translate(dx, dy);
+    _canvas.translate(dx, dy);
   }
 
   @override
   void scale(double sx, [double? sy]) => _scale(sx, sy ?? sx);
 
   void _scale(double sx, double sy) {
-    _canvas!.scale(sx, sy);
+    _canvas.scale(sx, sy);
   }
 
   @override
   void rotate(double radians) {
-    _canvas!.rotate(radians);
+    _canvas.rotate(radians);
   }
 
   @override
   void skew(double sx, double sy) {
-    _canvas!.skew(sx, sy);
+    _canvas.skew(sx, sy);
   }
 
   @override
@@ -88,7 +88,7 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _transform(Float32List matrix4) {
-    _canvas!.transform(matrix4);
+    _canvas.transform(matrix4);
   }
 
   @override
@@ -101,7 +101,7 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _clipRect(ui.Rect rect, ui.ClipOp clipOp, bool doAntiAlias) {
-    _canvas!.clipRect(rect, clipOp, doAntiAlias);
+    _canvas.clipRect(rect, clipOp, doAntiAlias);
   }
 
   @override
@@ -112,7 +112,7 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _clipRRect(ui.RRect rrect, bool doAntiAlias) {
-    _canvas!.clipRRect(rrect, doAntiAlias);
+    _canvas.clipRRect(rrect, doAntiAlias);
   }
 
   @override
@@ -124,7 +124,7 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _clipPath(ui.Path path, bool doAntiAlias) {
-    _canvas!.clipPath(path, doAntiAlias);
+    _canvas.clipPath(path, doAntiAlias);
   }
 
   @override
@@ -135,7 +135,7 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _drawColor(ui.Color color, ui.BlendMode blendMode) {
-    _canvas!.drawColor(color, blendMode);
+    _canvas.drawColor(color, blendMode);
   }
 
   @override
@@ -147,7 +147,7 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _drawLine(ui.Offset p1, ui.Offset p2, ui.Paint paint) {
-    _canvas!.drawLine(p1, p2, paint as CkPaint);
+    _canvas.drawLine(p1, p2, paint as CkPaint);
   }
 
   @override
@@ -157,7 +157,7 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _drawPaint(ui.Paint paint) {
-    _canvas!.drawPaint(paint as CkPaint);
+    _canvas.drawPaint(paint as CkPaint);
   }
 
   @override
@@ -168,7 +168,7 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _drawRect(ui.Rect rect, ui.Paint paint) {
-    _canvas!.drawRect(rect, paint as CkPaint);
+    _canvas.drawRect(rect, paint as CkPaint);
   }
 
   @override
@@ -179,7 +179,7 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _drawRRect(ui.RRect rrect, ui.Paint paint) {
-    _canvas!.drawRRect(rrect, paint as CkPaint);
+    _canvas.drawRRect(rrect, paint as CkPaint);
   }
 
   @override
@@ -191,7 +191,7 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint paint) {
-    _canvas!.drawDRRect(outer, inner, paint as CkPaint);
+    _canvas.drawDRRect(outer, inner, paint as CkPaint);
   }
 
   @override
@@ -202,7 +202,7 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _drawOval(ui.Rect rect, ui.Paint paint) {
-    _canvas!.drawOval(rect, paint as CkPaint);
+    _canvas.drawOval(rect, paint as CkPaint);
   }
 
   @override
@@ -213,7 +213,7 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _drawCircle(ui.Offset c, double radius, ui.Paint paint) {
-    _canvas!.drawCircle(c, radius, paint as CkPaint);
+    _canvas.drawCircle(c, radius, paint as CkPaint);
   }
 
   @override
@@ -226,7 +226,7 @@ class CanvasKitCanvas implements ui.Canvas {
 
   void _drawArc(ui.Rect rect, double startAngle, double sweepAngle,
       bool useCenter, ui.Paint paint) {
-    _canvas!.drawArc(rect, startAngle, sweepAngle, useCenter, paint as CkPaint);
+    _canvas.drawArc(rect, startAngle, sweepAngle, useCenter, paint as CkPaint);
   }
 
   @override
@@ -234,7 +234,7 @@ class CanvasKitCanvas implements ui.Canvas {
     // ignore: unnecessary_null_comparison
     assert(path != null); // path is checked on the engine side
     assert(paint != null); // ignore: unnecessary_null_comparison
-    _canvas!.drawPath(path as CkPath, paint as CkPaint);
+    _canvas.drawPath(path as CkPath, paint as CkPaint);
   }
 
   @override
@@ -247,7 +247,7 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _drawImage(ui.Image image, ui.Offset p, ui.Paint paint) {
-    _canvas!.drawImage(image, p, paint as CkPaint);
+    _canvas.drawImage(image, p, paint as CkPaint);
   }
 
   @override
@@ -262,7 +262,7 @@ class CanvasKitCanvas implements ui.Canvas {
 
   void _drawImageRect(
       ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
-    _canvas!.drawImageRect(image, src, dst, paint as CkPaint);
+    _canvas.drawImageRect(image, src, dst, paint as CkPaint);
   }
 
   @override
@@ -278,14 +278,14 @@ class CanvasKitCanvas implements ui.Canvas {
 
   void _drawImageNine(
       ui.Image image, ui.Rect center, ui.Rect dst, ui.Paint paint) {
-    _canvas!.drawImageNine(image, center, dst, paint as CkPaint);
+    _canvas.drawImageNine(image, center, dst, paint as CkPaint);
   }
 
   @override
   void drawPicture(ui.Picture picture) {
     // ignore: unnecessary_null_comparison
     assert(picture != null); // picture is checked on the engine side
-    _canvas!.drawPicture(picture as CkPicture);
+    _canvas.drawPicture(picture as CkPicture);
   }
 
   @override
@@ -296,7 +296,7 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
-    _canvas!.drawParagraph(paragraph as CkParagraph, offset);
+    _canvas.drawParagraph(paragraph as CkParagraph, offset);
   }
 
   @override
@@ -306,7 +306,7 @@ class CanvasKitCanvas implements ui.Canvas {
     assert(points != null); // ignore: unnecessary_null_comparison
     assert(paint != null); // ignore: unnecessary_null_comparison
     final SkFloat32List skPoints = toMallocedSkPoints(points);
-    _canvas!.drawPoints(
+    _canvas.drawPoints(
       paint as CkPaint,
       pointMode,
       skPoints.toTypedArray(),
@@ -323,7 +323,7 @@ class CanvasKitCanvas implements ui.Canvas {
     if (points.length % 2 != 0) {
       throw ArgumentError('"points" must have an even number of values.');
     }
-    _canvas!.drawPoints(
+    _canvas.drawPoints(
       paint as CkPaint,
       pointMode,
       points,
@@ -342,7 +342,7 @@ class CanvasKitCanvas implements ui.Canvas {
 
   void _drawVertices(
       ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
-    _canvas!.drawVertices(vertices, blendMode, paint as CkPaint);
+    _canvas.drawVertices(vertices, blendMode, paint as CkPaint);
   }
 
   @override
@@ -438,7 +438,7 @@ class CanvasKitCanvas implements ui.Canvas {
     List<Float32List>? colors,
     ui.BlendMode blendMode,
   ) {
-    _canvas!.drawAtlasRaw(paint as CkPaint, atlas, rstTransforms, rects, colors, blendMode);
+    _canvas.drawAtlasRaw(paint as CkPaint, atlas, rstTransforms, rects, colors, blendMode);
   }
 
   @override
@@ -453,6 +453,6 @@ class CanvasKitCanvas implements ui.Canvas {
 
   void _drawShadow(ui.Path path, ui.Color color, double elevation,
       bool transparentOccluder) {
-    _canvas!.drawShadow(path, color, elevation, transparentOccluder);
+    _canvas.drawShadow(path, color, elevation, transparentOccluder);
   }
 }
