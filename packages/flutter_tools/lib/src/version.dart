@@ -398,7 +398,7 @@ class FlutterVersion {
         lenient: false
       ));
     } on VersionCheckError {
-      // Don't perform the update check if the verison check failed.
+      // Don't perform the update check if the version check failed.
       return;
     }
 
