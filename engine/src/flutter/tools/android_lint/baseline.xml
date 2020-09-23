@@ -166,4 +166,26 @@
             column="20"/>
     </issue>
 
+    <issue
+        id="UseValueOf"
+        message="Use `Boolean.valueOf(true)` instead"
+        errorLine1="    messageContent.add(new Boolean(true));"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/test/io/flutter/plugin/common/StandardMessageCodecTest.java"
+            line="87"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="UseValueOf"
+        message="Use `Boolean.valueOf(false)` instead"
+        errorLine1="    messageContent.add(new Boolean(false));"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/test/io/flutter/plugin/common/StandardMessageCodecTest.java"
+            line="88"
+            column="24"/>
+    </issue>
+
 </issues>

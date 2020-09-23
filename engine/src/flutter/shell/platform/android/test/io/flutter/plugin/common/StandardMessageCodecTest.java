@@ -75,4 +75,22 @@ public class StandardMessageCodecTest {
     expected.flip();
     assertEquals(expected, message);
   }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  public void itEncodesBooleans() {
+    // Setup message codec
+    StandardMessageCodec codec = new StandardMessageCodec();
+
+    ArrayList<Object> messageContent = new ArrayList();
+    // Test handling of Boolean objects other than the static TRUE and FALSE constants.
+    messageContent.add(new Boolean(true));
+    messageContent.add(new Boolean(false));
+    ByteBuffer message = codec.encodeMessage(messageContent);
+    message.flip();
+    ByteBuffer expected = ByteBuffer.allocateDirect(4);
+    expected.put(new byte[] {LIST, 2, TRUE, FALSE});
+    expected.flip();
+    assertEquals(expected, message);
+  }
 }
