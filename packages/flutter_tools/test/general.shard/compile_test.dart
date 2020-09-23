@@ -41,5 +41,6 @@ void main() {
     expect(toMultiRootPath(Uri.parse('file:///a/b/c'), 'scheme', <String>['/d/b', '/a/b'], false), 'scheme:///c');
     expect(toMultiRootPath(Uri.parse('file:///a/b/c'), null, <String>[], false), 'file:///a/b/c');
     expect(toMultiRootPath(Uri.parse('org-dartlang-app:///a/b/c'), null, <String>[], false), 'org-dartlang-app:///a/b/c');
+    expect(toMultiRootPath(Uri.parse('org-dartlang-app:///a/b/c'), 'scheme', <String>['/d/b'], false), 'org-dartlang-app:///a/b/c');
   });
 }
