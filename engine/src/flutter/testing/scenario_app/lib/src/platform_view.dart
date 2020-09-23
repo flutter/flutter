@@ -707,21 +707,15 @@ mixin _BasePlatformViewScenarioMixin on Scenario {
     SceneBuilder sceneBuilder,
     int viewId,
     double width,
-    double height, {
-    Offset overlayOffset,
-  }) {
-    overlayOffset ??= const Offset(50, 50);
+    double height,
+  ) {
     if (Platform.isIOS) {
-      sceneBuilder.addPlatformView(viewId, offset: overlayOffset, width: width, height: height);
+      sceneBuilder.addPlatformView(viewId, width: width, height: height);
     } else if (Platform.isAndroid) {
       if (usesAndroidHybridComposition) {
-        // Hybrid composition does not support `offset`.
-        // https://github.com/flutter/flutter/issues/60630
-        sceneBuilder.pushOffset(overlayOffset.dx, overlayOffset.dy);
         sceneBuilder.addPlatformView(viewId, width: width, height: height);
-        sceneBuilder.pop();
       } else if (_textureId != null) {
-        sceneBuilder.addTexture(_textureId, offset: overlayOffset, width: width, height: height);
+        sceneBuilder.addTexture(_textureId, width: width, height: height);
       }
     } else {
       throw UnsupportedError('Platform ${Platform.operatingSystem} is not supported');
@@ -740,7 +734,6 @@ mixin _BasePlatformViewScenarioMixin on Scenario {
       viewId,
       500,
       500,
-      overlayOffset: overlayOffset,
     );
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
