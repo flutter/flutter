@@ -208,6 +208,8 @@ class CupertinoActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMediaQuery(context));
+
     final List<Widget> children = <Widget>[
       Flexible(child: ClipRRect(
           borderRadius: BorderRadius.circular(12.0),
@@ -396,6 +398,7 @@ class _CupertinoAlertRenderWidget extends RenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
+    assert(debugCheckHasMediaQuery(context));
     return _RenderCupertinoAlert(
       dividerThickness: _kDividerThickness / MediaQuery.of(context)!.devicePixelRatio,
       dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context)!,
