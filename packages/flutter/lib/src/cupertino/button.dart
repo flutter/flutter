@@ -211,7 +211,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   Widget build(BuildContext context) {
     final bool enabled = widget.enabled;
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
-    final Color? primaryColor = themeData.primaryColor;
+    final Color primaryColor = themeData.primaryColor;
     final Color? backgroundColor = widget.color == null
       ? (widget._filled ? primaryColor : null)
       : CupertinoDynamicColor.resolve(widget.color, context);
