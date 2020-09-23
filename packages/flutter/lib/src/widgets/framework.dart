@@ -321,7 +321,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
     final Element? element = _currentElement;
     if (element is StatefulElement) {
       final StatefulElement statefulElement = element;
-      final State? state = statefulElement.state;
+      final State state = statefulElement.state;
       if (state is T)
         return state;
     }
