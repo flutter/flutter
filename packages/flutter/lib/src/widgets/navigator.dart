@@ -1707,13 +1707,13 @@ class Navigator extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// void _showBerlinWeather() {
+  /// void _showParisWeather() {
   ///   Navigator.restorablePushNamed(
   ///     context,
   ///     '/weather',
   ///     arguments: <String, String>{
-  ///       'city': 'Berlin',
-  ///       'country': 'Germany',
+  ///       'city': 'Paris',
+  ///       'country': 'France',
   ///     },
   ///   );
   /// }
@@ -1816,8 +1816,8 @@ class Navigator extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// void _switchToBrightness() {
-  ///   Navigator.restorablePushReplacementNamed(context, '/settings/brightness');
+  /// void _switchToAudioVolume() {
+  ///   Navigator.restorablePushReplacementNamed(context, '/settings/volume');
   /// }
   /// ```
   /// {@end-tool}
@@ -1909,8 +1909,8 @@ class Navigator extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// void _selectAccessibility() {
-  ///   Navigator.restorablePopAndPushNamed(context, '/settings/accessibility');
+  /// void _selectNetwork() {
+  ///   Navigator.restorablePopAndPushNamed(context, '/settings/network');
   /// }
   /// ```
   /// {@end-tool}
@@ -2014,8 +2014,8 @@ class Navigator extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// void _resetToCalendar() {
-  ///   Navigator.restorablePushNamedAndRemoveUntil(context, '/calendar', ModalRoute.withName('/'));
+  /// void _resetToOverview() {
+  ///   Navigator.restorablePushNamedAndRemoveUntil(context, '/overview', ModalRoute.withName('/'));
   /// }
   /// ```
   /// {@end-tool}
@@ -3998,7 +3998,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// void _aaronBurrSir() {
+  /// void _openDetails() {
   ///   navigator.restorablePushNamed('/nyc/1776');
   /// }
   /// ```
@@ -4068,7 +4068,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// void _startBike() {
+  /// void _startCar() {
   ///   navigator.restorablePushReplacementNamed('/jouett/1781');
   /// }
   /// ```
@@ -4138,7 +4138,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// void _begin() {
+  /// void _end() {
   ///   navigator.restorablePopAndPushNamed('/nyc/1776');
   /// }
   /// ```
@@ -4200,7 +4200,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// void _handleOpenCalendar() {
+  /// void _openCalendar() {
   ///   navigator.restorablePushNamedAndRemoveUntil('/calendar', ModalRoute.withName('/'));
   /// }
   /// ```
@@ -4284,7 +4284,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///       title: const Text('Sample Code'),
   ///     ),
   ///     floatingActionButton: FloatingActionButton(
-  ///       onPressed: () => Navigator.of(context).restorablePush(context, _myRouteBuilder),
+  ///       onPressed: () => Navigator.of(context).restorablePush(_myRouteBuilder),
   ///       tooltip: 'Increment Counter',
   ///       child: const Icon(Icons.add),
   ///     ),
@@ -4423,7 +4423,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///     ),
   ///     floatingActionButton: FloatingActionButton(
   ///       onPressed: () => Navigator.of(context).restorablePushReplacement(
-  ///         context,
   ///         _myRouteBuilder,
   ///       ),
   ///       tooltip: 'Increment Counter',
@@ -4530,7 +4529,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///     ),
   ///     floatingActionButton: FloatingActionButton(
   ///       onPressed: () => Navigator.of(context).restorablePushAndRemoveUntil(
-  ///         context,
   ///         _myRouteBuilder,
   ///         ModalRoute.withName('/'),
   ///       ),
@@ -5436,7 +5434,9 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 /// When [present] has been called to add a route, it may only be called again
 /// after the previously added route has completed.
 ///
-// TODO(goderbauer): Add a code sample that showcases how to use this.
+///
+///
+///
 class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   /// Creates a [RestorableRouteFuture].
   ///
@@ -5540,10 +5540,7 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   void _hookOntoRouteFuture(String id) {
     assert(id != null);
     _route = _navigator._getRouteById<T>(id);
-    if (_route == null) {
-      notifyListeners();
-      return;
-    }
+    assert(_route != null);
     route!.restorationScopeId.addListener(notifyListeners);
     route!.popped.then((dynamic result) {
       if (_disposed) {
