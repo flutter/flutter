@@ -592,7 +592,12 @@ class RunCommand extends RunCommandBase {
       (_) {
         appStartedTime = globals.systemClock.now();
         if (stayResident) {
-          TerminalHandler(runner)
+          TerminalHandler(
+            runner,
+            logger: globals.logger,
+            terminal: globals.terminal,
+            signals: globals.signals,
+          )
             ..setupTerminal()
             ..registerSignalHandlers();
         }

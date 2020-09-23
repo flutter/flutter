@@ -340,7 +340,12 @@ class AttachCommand extends FlutterCommand {
         final Completer<void> onAppStart = Completer<void>.sync();
         TerminalHandler terminalHandler;
         unawaited(onAppStart.future.whenComplete(() {
-          terminalHandler = TerminalHandler(runner)
+          terminalHandler = TerminalHandler(
+            runner,
+            logger: globals.logger,
+            terminal: globals.terminal,
+            signals: globals.signals,
+          )
             ..setupTerminal()
             ..registerSignalHandlers();
         }));

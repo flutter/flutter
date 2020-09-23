@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_server/devtools_server.dart' as devtools_server;
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -1390,7 +1391,17 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
 
 /// Redirects terminal commands to the correct resident runner methods.
 class TerminalHandler {
-  TerminalHandler(this.residentRunner);
+  TerminalHandler(this.residentRunner, {
+    @required Logger logger,
+    @required Terminal terminal,
+    @required Signals signals,
+  }) : _logger = logger,
+       _terminal = terminal,
+       _signals = signals;
+
+  final Logger _logger;
+  final Terminal _terminal;
+  final Signals _signals;
 
   final ResidentRunner residentRunner;
   bool _processingUserRequest = false;
@@ -1400,19 +1411,19 @@ class TerminalHandler {
   String lastReceivedCommand;
 
   void setupTerminal() {
-    if (!globals.logger.quiet) {
-      globals.printStatus('');
+    if (!_logger.quiet) {
+      _logger.printStatus('');
       residentRunner.printHelp(details: false);
     }
-    globals.terminal.singleCharMode = true;
-    subscription = globals.terminal.keystrokes.listen(processTerminalInput);
+    _terminal.singleCharMode = true;
+    subscription = _terminal.keystrokes.listen(processTerminalInput);
   }
 
 
   final Map<io.ProcessSignal, Object> _signalTokens = <io.ProcessSignal, Object>{};
 
   void _addSignalHandler(io.ProcessSignal signal, SignalHandler handler) {
-    _signalTokens[signal] = globals.signals.addHandler(signal, handler);
+    _signalTokens[signal] = _signals.addHandler(signal, handler);
   }
 
   void registerSignalHandlers() {
@@ -1431,7 +1442,7 @@ class TerminalHandler {
   void stop() {
     assert(residentRunner.stayResident);
     for (final MapEntry<io.ProcessSignal, Object> entry in _signalTokens.entries) {
-      globals.signals.removeHandler(entry.key, entry.value);
+      _signals.removeHandler(entry.key, entry.value);
     }
     _signalTokens.clear();
     subscription.cancel();
@@ -1439,8 +1450,8 @@ class TerminalHandler {
 
   /// Returns [true] if the input has been handled by this function.
   Future<bool> _commonTerminalInputHandler(String character) async {
-    globals.printStatus(''); // the key the user tapped might be on this line
-    switch(character) {
+    _logger.printStatus(''); // the key the user tapped might be on this line
+    switch (character) {
       case 'a':
         if (residentRunner.supportsServiceProtocol) {
           await residentRunner.debugToggleProfileWidgetBuilds();
@@ -1448,8 +1459,11 @@ class TerminalHandler {
         }
         return false;
       case 'b':
-        await residentRunner.debugToggleBrightness();
-        return true;
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugToggleBrightness();
+          return true;
+        }
+        return false;
       case 'c':
         residentRunner.clearScreen();
         return true;
@@ -1523,7 +1537,7 @@ class TerminalHandler {
           throwToolExit(result.message);
         }
         if (!result.isOk) {
-          globals.printStatus('Try again after fixing the above error(s).', emphasis: true);
+          _logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
         }
         return true;
       case 'R':
@@ -1536,7 +1550,7 @@ class TerminalHandler {
           throwToolExit(result.message);
         }
         if (!result.isOk) {
-          globals.printStatus('Try again after fixing the above error(s).', emphasis: true);
+          _logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
         }
         return true;
       case 's':
@@ -1590,7 +1604,7 @@ class TerminalHandler {
     // When terminal doesn't support line mode, '\n' can sneak into the input.
     command = command.trim();
     if (_processingUserRequest) {
-      globals.printTrace('Ignoring terminal input: "$command" because we are busy.');
+      _logger.printTrace('Ignoring terminal input: "$command" because we are busy.');
       return;
     }
     _processingUserRequest = true;
@@ -1601,7 +1615,7 @@ class TerminalHandler {
     } catch (error, st) { // ignore: avoid_catches_without_on_clauses
       // Don't print stack traces for known error types.
       if (error is! ToolExit) {
-        globals.printError('$error\n$st');
+        _logger.printError('$error\n$st');
       }
       await _cleanUp(null);
       rethrow;
@@ -1612,7 +1626,7 @@ class TerminalHandler {
 
   Future<void> _handleSignal(io.ProcessSignal signal) async {
     if (_processingUserRequest) {
-      globals.printTrace('Ignoring signal: "$signal" because we are busy.');
+      _logger.printTrace('Ignoring signal: "$signal" because we are busy.');
       return;
     }
     _processingUserRequest = true;
@@ -1627,7 +1641,7 @@ class TerminalHandler {
   }
 
   Future<void> _cleanUp(io.ProcessSignal signal) async {
-    globals.terminal.singleCharMode = false;
+    _terminal.singleCharMode = false;
     await subscription?.cancel();
     await residentRunner.cleanupAfterSignal();
   }
