@@ -192,7 +192,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
   _SliverPersistentHeaderRenderObjectWidget get widget => super.widget as _SliverPersistentHeaderRenderObjectWidget;
 
   @override
-  _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject as _RenderSliverPersistentHeaderForWidgetsMixin;
+  _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject! as _RenderSliverPersistentHeaderForWidgetsMixin;
 
   @override
   void mount(Element? parent, dynamic newSlot) {

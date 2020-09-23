@@ -730,7 +730,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
     super.initState();
     scrollController = widget.controller ?? FixedExtentScrollController();
     if (widget.controller is FixedExtentScrollController) {
-      final FixedExtentScrollController controller = widget.controller as FixedExtentScrollController;
+      final FixedExtentScrollController controller = widget.controller! as FixedExtentScrollController;
       _lastReportedItemIndex = controller.initialItem;
     }
   }
@@ -800,7 +800,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   ListWheelViewport get widget => super.widget as ListWheelViewport;
 
   @override
-  RenderListWheelViewport get renderObject => super.renderObject as RenderListWheelViewport;
+  RenderListWheelViewport get renderObject => super.renderObject! as RenderListWheelViewport;
 
   // We inflate widgets at two different times:
   //  1. When we ourselves are told to rebuild (see performRebuild).
@@ -907,7 +907,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   void insertRenderObjectChild(RenderObject child, int slot) {
     final RenderListWheelViewport renderObject = this.renderObject;
     assert(renderObject.debugValidateChild(child));
-    renderObject.insert(child as RenderBox, after: _childElements[slot - 1]?.renderObject as RenderBox);
+    renderObject.insert(child as RenderBox, after: _childElements[slot - 1]?.renderObject as RenderBox?);
     assert(renderObject == this.renderObject);
   }
 
