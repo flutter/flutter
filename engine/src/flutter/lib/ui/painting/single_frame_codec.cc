@@ -4,7 +4,6 @@
 
 #include "flutter/lib/ui/painting/single_frame_codec.h"
 
-#include "flutter/lib/ui/painting/frame_info.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 
@@ -34,7 +33,8 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
   }
 
   if (status_ == Status::kComplete) {
-    tonic::DartInvoke(callback_handle, {tonic::ToDart(cached_frame_)});
+    tonic::DartInvoke(callback_handle,
+                      {tonic::ToDart(cached_image_), tonic::ToDart(0)});
     return Dart_Null();
   }
 
@@ -82,8 +82,7 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
           auto canvas_image = fml::MakeRefCounted<CanvasImage>();
           canvas_image->set_image(std::move(image));
 
-          codec->cached_frame_ = fml::MakeRefCounted<FrameInfo>(
-              std::move(canvas_image), 0 /* duration */);
+          codec->cached_image_ = std::move(canvas_image);
         }
 
         // The cached frame is now available and should be returned to any
@@ -91,9 +90,10 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
         codec->status_ = Status::kComplete;
 
         // Invoke any callbacks that were provided before the frame was decoded.
-        Dart_Handle frame = tonic::ToDart(codec->cached_frame_);
         for (const DartPersistentValue& callback : codec->pending_callbacks_) {
-          tonic::DartInvoke(callback.value(), {frame});
+          tonic::DartInvoke(
+              callback.value(),
+              {tonic::ToDart(codec->cached_image_), tonic::ToDart(0)});
         }
         codec->pending_callbacks_.clear();
       });
@@ -109,9 +109,8 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
 
 size_t SingleFrameCodec::GetAllocationSize() const {
   const auto& data_size = descriptor_->GetAllocationSize();
-  const auto frame_byte_size = (cached_frame_ && cached_frame_->image())
-                                   ? cached_frame_->image()->GetAllocationSize()
-                                   : 0;
+  const auto frame_byte_size =
+      cached_image_ ? cached_image_->GetAllocationSize() : 0;
   return data_size + frame_byte_size + sizeof(this);
 }
 

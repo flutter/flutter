@@ -330,6 +330,10 @@ abstract class Image {
   Future<ByteData?> toByteData({ImageByteFormat format = ImageByteFormat.rawRgba});
   void dispose();
 
+  Image clone() => this;
+
+  List<StackTrace>? debugGetOpenHandleStackTraces() => null;
+
   @override
   String toString() => '[$width\u00D7$height]';
 }
