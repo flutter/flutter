@@ -3002,11 +3002,7 @@ class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
 /// is a basic sliver that insets another sliver by applying padding on each
 /// side.
 ///
-/// Applying padding to anything but the most mundane sliver is likely to have
-/// undesired effects. For example, wrapping a [SliverPersistentHeader] with
-/// `pinned:true` will cause the app bar to overlap earlier slivers (contrary to
-/// the normal behavior of pinned app bars), and while the app bar is pinned,
-/// the padding will scroll away.
+/// {@macro flutter.rendering.sliverPadding.limitation}
 ///
 /// See also:
 ///
