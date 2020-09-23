@@ -505,14 +505,14 @@ void main() {
         ),
       ),
     );
-    
+
     final Finder finder = find.byKey(key);
 
     expect(tester.getSize(finder), equals(const Size(100, 100)));
 
     expect(tester.getTopLeft(finder), equals(const Offset(100, 100)));
     expect(tester.getTopRight(finder), equals(const Offset(200, 100)));
-    
+
     expect(tester.getBottomLeft(finder), equals(const Offset(100, 200)));
     expect(tester.getBottomRight(finder), equals(const Offset(200, 200)));
   });
