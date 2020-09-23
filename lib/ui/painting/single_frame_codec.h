@@ -7,7 +7,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/lib/ui/painting/codec.h"
-#include "flutter/lib/ui/painting/frame_info.h"
+#include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
 #include "flutter/lib/ui/painting/image_descriptor.h"
 
@@ -39,7 +39,7 @@ class SingleFrameCodec : public Codec {
   fml::RefPtr<ImageDescriptor> descriptor_;
   uint32_t target_width_;
   uint32_t target_height_;
-  fml::RefPtr<FrameInfo> cached_frame_;
+  fml::RefPtr<CanvasImage> cached_image_;
   std::vector<DartPersistentValue> pending_callbacks_;
 
   FML_FRIEND_MAKE_REF_COUNTED(SingleFrameCodec);

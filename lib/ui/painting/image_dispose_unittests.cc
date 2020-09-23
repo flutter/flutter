@@ -19,11 +19,11 @@ namespace testing {
 class ImageDisposeTest : public ShellTest {
  public:
   template <class T>
-  T* GetNativePeer(Dart_NativeArguments args, int index) {
-    auto handle = Dart_GetNativeArgument(args, index);
+  T* GetNativePeer(Dart_Handle handle) {
     intptr_t peer = 0;
-    EXPECT_FALSE(Dart_IsError(Dart_GetNativeInstanceField(
-        handle, tonic::DartWrappable::kPeerIndex, &peer)));
+    auto native_handle = Dart_GetNativeInstanceField(
+        handle, tonic::DartWrappable::kPeerIndex, &peer);
+    EXPECT_FALSE(Dart_IsError(native_handle)) << Dart_GetError(native_handle);
     return reinterpret_cast<T*>(peer);
   }
 
@@ -42,8 +42,14 @@ class ImageDisposeTest : public ShellTest {
 
 TEST_F(ImageDisposeTest, ImageReleasedAfterFrame) {
   auto native_capture_image_and_picture = [&](Dart_NativeArguments args) {
-    CanvasImage* image = GetNativePeer<CanvasImage>(args, 0);
-    Picture* picture = GetNativePeer<Picture>(args, 1);
+    auto image_handle = Dart_GetNativeArgument(args, 0);
+    auto native_image_handle =
+        Dart_GetField(image_handle, Dart_NewStringFromCString("_image"));
+    ASSERT_FALSE(Dart_IsError(native_image_handle))
+        << Dart_GetError(native_image_handle);
+    ASSERT_FALSE(Dart_IsNull(native_image_handle));
+    CanvasImage* image = GetNativePeer<CanvasImage>(native_image_handle);
+    Picture* picture = GetNativePeer<Picture>(Dart_GetNativeArgument(args, 1));
     ASSERT_FALSE(image->image()->unique());
     ASSERT_FALSE(picture->picture()->unique());
     current_image_ = image->image();
