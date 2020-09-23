@@ -17,7 +17,7 @@ import 'floating_action_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
 import 'page.dart';
-import 'scaffold.dart';
+import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
 import 'theme.dart';
 
 /// [MaterialApp] uses this [TextStyle] as its [DefaultTextStyle] to encourage
