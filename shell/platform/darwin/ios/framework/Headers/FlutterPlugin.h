@@ -439,6 +439,6 @@ typedef enum {
 - (void)addApplicationLifeCycleDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate;
 @end
 
-NS_ASSUME_NONNULL_END;
+NS_ASSUME_NONNULL_END
 
 #endif  // FLUTTER_FLUTTERPLUGIN_H_
