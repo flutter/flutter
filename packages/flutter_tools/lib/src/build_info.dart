@@ -33,6 +33,7 @@ class BuildInfo {
     this.performanceMeasurementFile,
     this.packagesPath = '.packages',
     this.nullSafetyMode = NullSafetyMode.autodetect,
+    this.codeSizeDirectory,
   });
 
   final BuildMode mode;
@@ -81,7 +82,7 @@ class BuildInfo {
   /// A "x.y.z" string used as the version number shown to users.
   /// For each new version of your app, you will provide a version number to differentiate it from previous versions.
   /// On Android it is used as versionName.
-  /// On Xcode builds it is used as CFBundleShortVersionString,
+  /// On Xcode builds it is used as CFBundleShortVersionString.
   final String buildName;
 
   /// An optional directory path to save debugging information from dwarf stack
@@ -92,7 +93,7 @@ class BuildInfo {
   /// Whether to apply dart source code obfuscation.
   final bool dartObfuscation;
 
-  /// An optional path to a JSON containing object SkSL shaders
+  /// An optional path to a JSON containing object SkSL shaders.
   ///
   /// Currently this is only supported for Android builds.
   final String bundleSkSLPath;
@@ -112,6 +113,10 @@ class BuildInfo {
   /// This is not considered a build input and will not force assemble to
   /// rerun tasks.
   final String performanceMeasurementFile;
+
+  /// If provided, an output directory where one or more v8-style heapsnapshots
+  /// will be written for code size profiling.
+  final String codeSizeDirectory;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -173,6 +178,8 @@ class BuildInfo {
         'BUNDLE_SKSL_PATH': bundleSkSLPath,
       if (packagesPath != null)
         'PACKAGE_CONFIG': packagesPath,
+      if (codeSizeDirectory != null)
+        'CODE_SIZE_DIRECTORY': codeSizeDirectory,
     };
   }
 }
@@ -693,7 +700,7 @@ String encodeDartDefines(List<String> defines) {
 /// Dart defines are encoded inside [environmentDefines] as a comma-separated list.
 List<String> decodeDartDefines(Map<String, String> environmentDefines, String key) {
   if (!environmentDefines.containsKey(key) || environmentDefines[key].isEmpty) {
-    return const <String>[];
+    return <String>[];
   }
   return environmentDefines[key]
     .split(',')

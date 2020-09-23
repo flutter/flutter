@@ -18,12 +18,9 @@ import 'tooltip_theme.dart';
 
 /// A material design tooltip.
 ///
-/// Tooltips provide text labels that help explain the function of a button or
-/// other user interface action. Wrap the button in a [Tooltip] widget to
-/// show a label when the widget long pressed (or when the user takes some
-/// other appropriate action).
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=EeEfD5fI-5Q}
+/// Tooltips provide text labels which help explain the function of a button or
+/// other user interface action. Wrap the button in a [Tooltip] widget and provide
+/// a message which will be shown when the widget is long pressed.
 ///
 /// Many widgets, such as [IconButton], [FloatingActionButton], and
 /// [PopupMenuButton] have a `tooltip` property that, when non-null, causes the
@@ -32,6 +29,9 @@ import 'tooltip_theme.dart';
 /// Tooltips improve the accessibility of visual widgets by proving a textual
 /// representation of the widget, which, for example, can be vocalized by a
 /// screen reader.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=EeEfD5fI-5Q}
+///
 ///
 /// See also:
 ///
@@ -284,8 +284,16 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _createNewEntry() {
+    final OverlayState overlayState = Overlay.of(
+      context,
+      debugRequiredFor: widget,
+    );
+
     final RenderBox box = context.findRenderObject() as RenderBox;
-    final Offset target = box.localToGlobal(box.size.center(Offset.zero));
+    final Offset target = box.localToGlobal(
+      box.size.center(Offset.zero),
+      ancestor: overlayState.context.findRenderObject(),
+    );
 
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
@@ -309,7 +317,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       ),
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
-    Overlay.of(context, debugRequiredFor: widget).insert(_entry);
+    overlayState.insert(_entry);
     SemanticsService.tooltip(widget.message);
   }
 

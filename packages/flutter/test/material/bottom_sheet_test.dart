@@ -24,7 +24,7 @@ void main() {
     final double dyDelta2 = thirdPosition.dy - secondPosition.dy;
 
     // If the animation were linear, these two values would be the same.
-    expect(dyDelta1, isNot(closeTo(dyDelta2, 0.1)));
+    expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
 
   testWidgets('Tapping on a modal BottomSheet should not dismiss it', (WidgetTester tester) async {

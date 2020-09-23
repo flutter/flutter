@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
@@ -262,7 +261,7 @@ class AndroidApk extends ApplicationPackage {
   String get name => file.basename;
 }
 
-/// Tests whether a [Directory] is an iOS bundle directory
+/// Tests whether a [Directory] is an iOS bundle directory.
 bool _isBundleDirectory(Directory dir) => dir.path.endsWith('.app');
 
 abstract class IOSApp extends ApplicationPackage {

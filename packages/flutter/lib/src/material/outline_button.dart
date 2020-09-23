@@ -26,6 +26,17 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 
 /// Similar to a [FlatButton] with a thin grey rounded rectangle border.
 ///
+/// ### This class is obsolete, please use [OutlinedButton] instead.
+///
+/// FlatButton, RaisedButton, and OutlineButton have been replaced by
+/// TextButton, ElevatedButton, and OutlinedButton respectively.
+/// ButtonTheme has been replaced by TextButtonTheme,
+/// ElevatedButtonTheme, and OutlinedButtonTheme. The original classes
+/// will be deprecated soon, please migrate code that uses them.
+/// There's a detailed migration guide for the new button and button
+/// theme classes in
+/// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
+///
 /// The outline button's border shape is defined by [shape]
 /// and its appearance is defined by [borderSide], [disabledBorderColor],
 /// and [highlightedBorderColor]. By default the border is a one pixel

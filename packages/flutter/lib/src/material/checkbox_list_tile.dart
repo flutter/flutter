@@ -382,6 +382,21 @@ class CheckboxListTile extends StatelessWidget {
   /// If tristate is false (the default), [value] must not be null.
   final bool tristate;
 
+  void _handleValueChange() {
+    assert(onChanged != null);
+    switch (value) {
+      case false:
+        onChanged(true);
+        break;
+      case true:
+        onChanged(tristate ? null : false);
+        break;
+      default: // case null:
+        onChanged(false);
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final Widget control = Checkbox(
@@ -416,7 +431,7 @@ class CheckboxListTile extends StatelessWidget {
           isThreeLine: isThreeLine,
           dense: dense,
           enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged(!value); } : null,
+          onTap: onChanged != null ? _handleValueChange : null,
           selected: selected,
           autofocus: autofocus,
           contentPadding: contentPadding,

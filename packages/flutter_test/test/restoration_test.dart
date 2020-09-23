@@ -88,7 +88,7 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   double doubleValue = 1.0; // Not restorable.
 
   @override
-  void restoreState(RestorationBucket oldBucket) {
+  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
     registerForRestoration(stringValue, 'string');
     registerForRestoration(intValue, 'int');
   }

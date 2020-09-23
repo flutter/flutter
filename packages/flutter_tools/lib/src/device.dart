@@ -14,6 +14,7 @@ import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
+import 'base/common.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/dds.dart';
@@ -209,7 +210,12 @@ abstract class DeviceManager {
   /// * If the user did not specify a device id and there is more than one
   /// device connected, then filter out unsupported devices and prioritize
   /// ephemeral devices.
-  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject, { Duration timeout }) async {
+    if (timeout != null) {
+      // Reset the cache with the specified timeout.
+      await refreshAllConnectedDevices(timeout: timeout);
+    }
+
     List<Device> devices = await getDevices();
 
     // Always remove web and fuchsia devices from `--all`. This setting
@@ -278,6 +284,9 @@ abstract class DeviceManager {
   Future<Device> _chooseOneOfAvailableDevices(List<Device> devices) async {
     _displayDeviceOptions(devices);
     final String userInput =  await _readUserInput(devices.length);
+    if (userInput.toLowerCase() == 'q') {
+      throwToolExit('');
+    }
     return devices[int.parse(userInput)];
   }
 
@@ -292,7 +301,8 @@ abstract class DeviceManager {
   Future<String> _readUserInput(int deviceCount) async {
     globals.terminal.usesTerminalUi = true;
     final String result = await globals.terminal.promptForCharInput(
-        <String>[ for (int i = 0; i < deviceCount; i++) '$i' ],
+        <String>[ for (int i = 0; i < deviceCount; i++) '$i', 'q', 'Q'],
+        displayAcceptedCharacters: false,
         logger: globals.logger,
         prompt: userMessages.flutterChooseOne);
     return result;
@@ -358,12 +368,14 @@ class FlutterDeviceManager extends DeviceManager {
       macOSWorkflow: macOSWorkflow,
       logger: logger,
       platform: platform,
+      fileSystem: fileSystem,
     ),
     LinuxDevices(
       platform: platform,
       featureFlags: featureFlags,
       processManager: processManager,
       logger: logger,
+      fileSystem: fileSystem,
     ),
     WindowsDevices(),
     WebDevices(
@@ -557,7 +569,7 @@ abstract class Device {
     String userIdentifier,
   });
 
-  /// Check if the device is supported by Flutter
+  /// Check if the device is supported by Flutter.
   bool isSupported();
 
   // String meant to be displayed to the user indicating if the device is
@@ -734,7 +746,7 @@ abstract class Device {
     };
   }
 
-  /// Clean up resources allocated by device
+  /// Clean up resources allocated by device.
   ///
   /// For example log readers or port forwarders.
   Future<void> dispose();
@@ -779,6 +791,7 @@ class DebuggingOptions {
     this.verboseSystemLogs = false,
     this.hostVmServicePort,
     this.deviceVmServicePort,
+    this.ddsPort,
     this.initializePlatform = true,
     this.hostname,
     this.port,
@@ -790,6 +803,7 @@ class DebuggingOptions {
     this.webEnableExpressionEvaluation = false,
     this.vmserviceOutFile,
     this.fastStart = false,
+    this.nullAssertions = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -819,9 +833,11 @@ class DebuggingOptions {
       verboseSystemLogs = false,
       hostVmServicePort = null,
       deviceVmServicePort = null,
+      ddsPort = null,
       vmserviceOutFile = null,
       fastStart = false,
-      webEnableExpressionEvaluation = false;
+      webEnableExpressionEvaluation = false,
+      nullAssertions = false;
 
   final bool debuggingEnabled;
 
@@ -845,6 +861,7 @@ class DebuggingOptions {
   final bool initializePlatform;
   final int hostVmServicePort;
   final int deviceVmServicePort;
+  final int ddsPort;
   final String port;
   final String hostname;
   final bool webEnableExposeUrl;
@@ -861,12 +878,14 @@ class DebuggingOptions {
   /// The port the browser should use for its debugging protocol.
   final int webBrowserDebugPort;
 
-  /// Enable expression evaluation for web target
+  /// Enable expression evaluation for web target.
   final bool webEnableExpressionEvaluation;
 
   /// A file where the vmservice URL should be written after the application is started.
   final String vmserviceOutFile;
   final bool fastStart;
+
+  final bool nullAssertions;
 
   bool get hasObservatoryPort => hostVmServicePort != null;
 }
@@ -925,7 +944,7 @@ abstract class DevicePortForwarder {
   /// Stops forwarding [forwardedPort].
   Future<void> unforward(ForwardedPort forwardedPort);
 
-  /// Cleanup allocated resources, like forwardedPorts
+  /// Cleanup allocated resources, like [forwardedPorts].
   Future<void> dispose();
 }
 
@@ -992,4 +1011,15 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
 
   @override
   Future<void> dispose() async { }
+}
+
+/// Append --null_assertions to any existing Dart VM flags if
+/// [debuggingOptions.nullAssertions] is true.
+String computeDartVmFlags(DebuggingOptions debuggingOptions) {
+  return <String>[
+    if (debuggingOptions.dartFlags?.isNotEmpty ?? false)
+      debuggingOptions.dartFlags,
+    if (debuggingOptions.nullAssertions)
+      '--null_assertions',
+  ].join(',');
 }

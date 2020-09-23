@@ -109,6 +109,8 @@ class SystemUiOverlayStyle {
   /// The brightness of the system navigation bar icons.
   ///
   /// Only honored in Android versions O and greater.
+  /// When set to [Brightness.light], the system navigation bar icons are light.
+  /// When set to [Brightness.dark], the system navigation bar icons are dark.
   final Brightness? systemNavigationBarIconBrightness;
 
   /// The color of top status bar.

@@ -1649,12 +1649,94 @@ void main() {
                           TestSemantics(
                             children: <TestSemantics>[
                               TestSemantics(
-                                label: 'Leading',
-                                textDirection: TextDirection.ltr,
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    label: 'Leading',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    label: 'Action 1',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
+                              ),
+                              TestSemantics(),
+                            ],
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+      ignoreId: true,
+    ));
+
+    semantics.dispose();
+  });
+
+  testWidgets('SliverAppBar with flexable space has correct semantics order', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/64922.
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              leading: Text('Leading'),
+              flexibleSpace: Text('Flexible space'),
+              actions: <Widget>[Text('Action 1')],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                children: <TestSemantics>[
+                  TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    label: 'Leading',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    label: 'Action 1',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
                               ),
                               TestSemantics(
-                                label: 'Action 1',
-                                textDirection: TextDirection.ltr,
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    flags: <SemanticsFlag>[SemanticsFlag.isHeader],
+                                    label: 'Flexible space',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -1975,6 +2057,41 @@ void main() {
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
   });
 
+  testWidgets('SliverAppBar configures the delegate properly', (WidgetTester tester) async {
+    Future<void> buildAndVerifyDelegate({ bool pinned, bool floating, bool snap }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                title: const Text('Jumbo'),
+                pinned: pinned,
+                floating: floating,
+                snap: snap,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final SliverPersistentHeaderDelegate delegate = tester
+        .widget<SliverPersistentHeader>(find.byType(SliverPersistentHeader))
+        .delegate;
+
+      // Ensure we have a non-null vsync when it's needed.
+      if (!floating || (delegate.snapConfiguration == null && delegate.showOnScreenConfiguration == null))
+        expect(delegate.vsync, isNotNull);
+
+      expect(delegate.showOnScreenConfiguration != null, snap && floating);
+    }
+
+    await buildAndVerifyDelegate(pinned: false, floating: true, snap: false);
+    await buildAndVerifyDelegate(pinned: false, floating: true, snap: true);
+
+    await buildAndVerifyDelegate(pinned: true, floating: true, snap: false);
+    await buildAndVerifyDelegate(pinned: true, floating: true, snap: true);
+  });
+
   testWidgets('AppBar respects toolbarHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -2076,5 +2193,22 @@ void main() {
 
     // By default toolbarHeight is 56.0.
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
+  });
+
+  testWidgets("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(),
+        endDrawer: const Drawer(),
+      ),
+    ));
+
+    final Finder endDrawerFinder = find.byTooltip('Open navigation menu');
+    await tester.tap(endDrawerFinder);
+    await tester.pump();
+
+    final Finder appBarFinder = find.byType(NavigationToolbar);
+    NavigationToolbar getAppBarWidget(Finder finder) => tester.widget<NavigationToolbar>(finder);
+    expect(getAppBarWidget(appBarFinder).leading, null);
   });
 }

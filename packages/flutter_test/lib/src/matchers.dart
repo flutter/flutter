@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -584,7 +583,7 @@ Matcher matchesSemantics({
 ///
 /// ```dart
 /// final SemanticsHandle handle = tester.ensureSemantics();
-/// await meetsGuideline(tester, meetsGuideline(textContrastGuideline));
+/// await expectLater(tester, meetsGuideline(textContrastGuideline));
 /// handle.dispose();
 /// ```
 ///

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
@@ -178,7 +177,7 @@ void main() {
         when(mockDeviceManager.getDevices()).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(noDevices)
         );
-        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+        when(mockDeviceManager.findTargetDevices(any, timeout: anyNamed('timeout'))).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(noDevices)
         );
 
@@ -214,7 +213,7 @@ void main() {
         when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) async {
           return <Device>[device];
         });
-        when(mockDeviceManager.findTargetDevices(any)).thenAnswer((Invocation invocation) async {
+        when(mockDeviceManager.findTargetDevices(any, timeout: anyNamed('timeout'))).thenAnswer((Invocation invocation) async {
           return <Device>[device];
         });
         when(mockDeviceManager.hasSpecifiedAllDevices).thenReturn(false);
@@ -254,7 +253,7 @@ void main() {
           ]);
         });
 
-        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+        when(mockDeviceManager.findTargetDevices(any, timeout: anyNamed('timeout'))).thenAnswer(
             (Invocation invocation) => Future<List<Device>>.value(<Device>[]),
         );
 
@@ -301,7 +300,8 @@ void main() {
         );
         // No devices are attached, we just want to verify update the cache
         // BEFORE checking for devices
-        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+        const Duration timeout = Duration(seconds: 10);
+        when(mockDeviceManager.findTargetDevices(any, timeout: timeout)).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[])
         );
 
@@ -309,6 +309,8 @@ void main() {
           await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
+            '--device-timeout',
+            '10',
           ]);
           fail('Exception expected');
         } on ToolExit catch (e) {
@@ -324,7 +326,7 @@ void main() {
           // as part of gathering `requiredArtifacts`
           mockDeviceManager.getDevices(),
           // in validateCommand()
-          mockDeviceManager.findTargetDevices(any),
+          mockDeviceManager.findTargetDevices(any, timeout: anyNamed('timeout')),
         ]);
       }, overrides: <Type, Generator>{
         ApplicationPackageFactory: () => mockApplicationPackageFactory,
@@ -365,7 +367,7 @@ void main() {
           (Invocation invocation) => Future<List<Device>>.value(<Device>[mockDevice])
         );
 
-        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+        when(mockDeviceManager.findTargetDevices(any, timeout: anyNamed('timeout'))).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[mockDevice])
         );
 
@@ -434,7 +436,7 @@ void main() {
         when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
           return Future<List<Device>>.value(<Device>[fakeDevice]);
         });
-        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+        when(mockDeviceManager.findTargetDevices(any, timeout: anyNamed('timeout'))).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[fakeDevice])
         );
       });

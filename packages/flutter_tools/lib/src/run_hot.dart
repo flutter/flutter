@@ -21,6 +21,7 @@ import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'features.dart';
 import 'globals.dart' as globals;
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -90,6 +91,20 @@ class HotRunner extends ResidentRunner {
   final bool benchmarkMode;
   final File applicationBinary;
   final bool hostIsIde;
+
+  /// When performing a hot restart, the tool needs to upload a new main.dart.dill to
+  /// each attached device's devfs. Replacing the existing file is not safe and does
+  /// not work at all on the windows embedder, because the old dill file will still be
+  /// memory-mapped by the embedder. To work around this issue, the tool will alternate
+  /// names for the uploaded dill, sometimes inserting `.swap`. Since the active dill will
+  /// never be replaced, there is no risk of writing the file while the embedder is attempting
+  /// to read from it. This also avoids filling up the devfs, if a incrementing counter was
+  /// used instead.
+  ///
+  /// This is only used for hot restart, incremental dills uploaded as part of the hot
+  /// reload process do not have this issue.
+  bool _swap = false;
+
   bool _didAttach = false;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
@@ -376,10 +391,19 @@ class HotRunner extends ResidentRunner {
       asyncScanning: hotRunnerConfig.asyncScanning,
       packageConfig: flutterDevices[0].devFS.lastPackageConfig,
     );
+    final File entrypointFile = globals.fs.file(mainPath);
+    if (!entrypointFile.existsSync()) {
+      globals.printError(
+        'The entrypoint file (i.e. the file with main()) ${entrypointFile.path} '
+        'cannot be found. Moving or renaming this file will prevent changes to '
+        'its contents from being discovered during hot reload/restart until '
+        'flutter is restarted or the file is restored.'
+      );
+    }
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (final FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
-        mainUri: globals.fs.file(mainPath).absolute.uri,
+        mainUri: entrypointFile.absolute.uri,
         target: target,
         bundle: assetBundle,
         firstBuildTime: firstBuildTime,
@@ -387,7 +411,7 @@ class HotRunner extends ResidentRunner {
         bundleDirty: !isFirstUpload && rebuildBundle,
         fullRestart: fullRestart,
         projectRootPath: projectRootPath,
-        pathToReload: getReloadPath(fullRestart: fullRestart),
+        pathToReload: getReloadPath(fullRestart: fullRestart, swap: _swap),
         invalidatedFiles: invalidationResult.uris,
         packageConfig: invalidationResult.packageConfig,
         dillOutputPath: dillOutputPath,
@@ -535,7 +559,7 @@ class HotRunner extends ResidentRunner {
     }
     await Future.wait(operations);
 
-    await _launchFromDevFS(mainPath + '.dill');
+    await _launchFromDevFS('$mainPath${_swap ? '.swap' : ''}.dill');
     restartTimer.stop();
     globals.printTrace('Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
     _addBenchmarkData('hotRestartMillisecondsToFrame',
@@ -561,6 +585,9 @@ class HotRunner extends ResidentRunner {
       }
       await Future.wait(isolateNotifications);
     }
+    // Toggle the main dill name after successfully uploading.
+    _swap =! _swap;
+
     return OperationResult.ok;
   }
 
@@ -718,7 +745,9 @@ class HotRunner extends ResidentRunner {
         emulator: emulator,
         fullRestart: true,
         nullSafety: usageNullSafety,
-        reason: reason).send();
+        reason: reason,
+        fastReassemble: null,
+      ).send();
       status?.cancel();
     }
     return result;
@@ -761,6 +790,7 @@ class HotRunner extends ResidentRunner {
         fullRestart: false,
         nullSafety: usageNullSafety,
         reason: reason,
+        fastReassemble: null,
       ).send();
       return OperationResult(1, 'hot reload failed to complete', fatal: true);
     } finally {
@@ -800,7 +830,7 @@ class HotRunner extends ResidentRunner {
     Map<String, dynamic> firstReloadDetails;
     try {
       final String entryPath = globals.fs.path.relative(
-        getReloadPath(fullRestart: false),
+        getReloadPath(fullRestart: false, swap: _swap),
         from: projectRootPath,
       );
       final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
@@ -840,6 +870,7 @@ class HotRunner extends ResidentRunner {
             fullRestart: false,
             reason: reason,
             nullSafety: usageNullSafety,
+            fastReassemble: null,
           ).send();
           return OperationResult(1, 'Reload rejected');
         }
@@ -868,6 +899,7 @@ class HotRunner extends ResidentRunner {
           fullRestart: false,
           reason: reason,
           nullSafety: usageNullSafety,
+          fastReassemble: null,
         ).send();
         return OperationResult(errorCode, errorMessage);
       }
@@ -910,9 +942,10 @@ class HotRunner extends ResidentRunner {
           // If the tool identified a change in a single widget, do a fast instead
           // of a full reassemble.
           Future<void> reassembleWork;
-          if (updatedDevFS.fastReassemble == true) {
+          if (updatedDevFS.fastReassembleClassName != null) {
             reassembleWork = device.vmService.flutterFastReassemble(
               isolateId: view.uiIsolate.id,
+              className: updatedDevFS.fastReassembleClassName,
             );
           } else {
             reassembleWork = device.vmService.flutterReassemble(
@@ -1004,6 +1037,9 @@ class HotRunner extends ResidentRunner {
       invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
       transferTimeInMs: devFSTimer.elapsed.inMilliseconds,
       nullSafety: usageNullSafety,
+      fastReassemble: featureFlags.isSingleWidgetReloadEnabled
+        ? updatedDevFS.fastReassembleClassName != null
+        : null,
     ).send();
 
     if (shouldReportReloadTime) {

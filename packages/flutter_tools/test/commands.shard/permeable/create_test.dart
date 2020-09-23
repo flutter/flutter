@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
 import '../../src/common.dart';
@@ -653,6 +654,31 @@ void main() {
     expect(actualContents.contains('useAndroidX'), true);
   });
 
+  testUsingContext('creating a new project should create v2 embedding and never show an Android v1 deprecation warning', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--platforms', 'android', projectDir.path]);
+
+    final String androidManifest = await globals.fs.file(
+      projectDir.path + '/android/app/src/main/AndroidManifest.xml'
+    ).readAsString();
+    expect(androidManifest.contains('android:name="flutterEmbedding"'), true);
+    expect(androidManifest.contains('android:value="2"'), true);
+
+    final String mainActivity = await globals.fs.file(
+      projectDir.path +  '/android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt'
+    ).readAsString();
+    // Import for the new embedding class.
+    expect(mainActivity.contains('import io.flutter.embedding.android.FlutterActivity'), true);
+
+    expect(testLogger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
+  });
+
   testUsingContext('app supports Linux if requested', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
@@ -781,6 +807,25 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     expect(projectDir.childDirectory('windows').childFile('CMakeLists.txt').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('Windows has correct VERSIONINFO', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
+
+    final File resourceFile = projectDir.childDirectory('windows').childDirectory('runner').childFile('Runner.rc');
+    expect(resourceFile.existsSync(), true);
+    final String contents = resourceFile.readAsStringSync();
+    expect(contents, contains('"CompanyName", "com.foo.bar"'));
+    expect(contents, contains('"ProductName", "flutter_project"'));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -1120,7 +1165,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: app\n'));
+    expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
 
   testUsingContext('can re-gen default template over existing app project with no metadta and detect the type', () async {
@@ -1137,7 +1182,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: app\n'));
+    expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
 
   testUsingContext('can re-gen app template over existing app project and detect the type', () async {
@@ -1151,7 +1196,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: app\n'));
+    expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
 
   testUsingContext('can re-gen template over existing module project and detect the type', () async {
@@ -1165,7 +1210,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: module\n'));
+    expect(LineSplitter.split(metadata), contains('project_type: module'));
   });
 
   testUsingContext('can re-gen default template over existing plugin project and detect the type', () async {
@@ -1179,7 +1224,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: plugin'));
+    expect(LineSplitter.split(metadata), contains('project_type: plugin'));
   });
 
   testUsingContext('can re-gen default template over existing package project and detect the type', () async {
@@ -1193,7 +1238,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
-    expect(metadata, contains('project_type: package'));
+    expect(LineSplitter.split(metadata), contains('project_type: package'));
   });
 
   testUsingContext('can re-gen module .android/ folder, reusing custom org', () async {
@@ -1964,6 +2009,39 @@ void main() {
     expect(logger.statusText, contains('The `pubspec.yaml` under the project directory must be updated to support'));
   }, overrides: <Type, Generator> {
     Logger: () => logger,
+  });
+
+  testUsingContext('newly created plugin has min flutter sdk version as 1.20.0', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final Pubspec pubspec = Pubspec.parse(rawPubspec);
+    final Map<String, VersionConstraint> env = pubspec.environment;
+    expect(env['flutter'].allows(Version(1, 20, 0)), true);
+    expect(env['flutter'].allows(Version(1, 19, 0)), false);
+  });
+
+  testUsingContext('default app uses Android sdk 29', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(globals.fs.isFileSync('${projectDir.path}/android/app/build.gradle'), true);
+
+    final String buildContent = await globals.fs.file(projectDir.path + '/android/app/build.gradle').readAsString();
+
+    expect(buildContent.contains('compileSdkVersion 29'), true);
+    expect(buildContent.contains('targetSdkVersion 29'), true);
   });
 
 }

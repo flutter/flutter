@@ -99,7 +99,7 @@ abstract class StackFilter {
   /// Filters the list of [StackFrame]s by updating corresponding indices in
   /// `reasons`.
   ///
-  /// To elide a frame or number of frames, set the string
+  /// To elide a frame or number of frames, set the string.
   void filter(List<StackFrame> stackFrames, List<String?> reasons);
 }
 
@@ -378,7 +378,7 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 /// See also:
 ///
 ///   * [FlutterError.onError], which is called whenever the Flutter framework
-///     catches an error
+///     catches an error.
 class FlutterErrorDetails with Diagnosticable {
   /// Creates a [FlutterErrorDetails] object with the given arguments setting
   /// the object's properties.
@@ -679,7 +679,7 @@ class FlutterErrorDetails with Diagnosticable {
         }
       }
       properties.add(ErrorSpacer());
-      properties.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', stack!, stackFilter: stackFilter));
+      properties.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', stack, stackFilter: stackFilter));
     }
     if (informationCollector != null) {
       properties.add(ErrorSpacer());
@@ -871,6 +871,9 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// Set this to null to silently catch and ignore errors. This is not
   /// recommended.
+  ///
+  /// Do not call [onError] directly, instead, call [reportError], which
+  /// forwards to [onError] if it is not null.
   static FlutterExceptionHandler? onError = (FlutterErrorDetails details) => presentError(details);
 
   /// Called by the Flutter framework before attempting to parse a [StackTrace].
@@ -890,10 +893,10 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// ```dart
   /// FlutterError.demangleStackTrace = (StackTrace stackTrace) {
   ///   if (stack is stack_trace.Trace)
-  //      return stack.vmTrace;
-  //    if (stack is stack_trace.Chain)
-  //      return stack.toTrace().vmTrace;
-  //    return stack;
+  ///     return stack.vmTrace;
+  ///   if (stack is stack_trace.Chain)
+  ///     return stack.toTrace().vmTrace;
+  ///   return stack;
   /// };
   /// ```
   static StackTraceDemangler demangleStackTrace = (StackTrace stackTrace) => stackTrace;

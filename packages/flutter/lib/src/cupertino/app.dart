@@ -104,6 +104,50 @@ class CupertinoApp extends StatefulWidget {
        assert(checkerboardOffscreenLayers != null),
        assert(showSemanticsDebugger != null),
        assert(debugShowCheckedModeBanner != null),
+       routeInformationProvider = null,
+       routeInformationParser = null,
+       routerDelegate = null,
+       backButtonDispatcher = null,
+       super(key: key);
+
+  /// Creates a [CupertinoApp] that uses the [Router] instead of a [Navigator].
+  const CupertinoApp.router({
+    Key key,
+    this.routeInformationProvider,
+    @required this.routeInformationParser,
+    @required this.routerDelegate,
+    this.backButtonDispatcher,
+    this.theme,
+    this.builder,
+    this.title = '',
+    this.onGenerateTitle,
+    this.color,
+    this.locale,
+    this.localizationsDelegates,
+    this.localeListResolutionCallback,
+    this.localeResolutionCallback,
+    this.supportedLocales = const <Locale>[Locale('en', 'US')],
+    this.showPerformanceOverlay = false,
+    this.checkerboardRasterCacheImages = false,
+    this.checkerboardOffscreenLayers = false,
+    this.showSemanticsDebugger = false,
+    this.debugShowCheckedModeBanner = true,
+    this.shortcuts,
+    this.actions,
+  }) : assert(title != null),
+       assert(showPerformanceOverlay != null),
+       assert(checkerboardRasterCacheImages != null),
+       assert(checkerboardOffscreenLayers != null),
+       assert(showSemanticsDebugger != null),
+       assert(debugShowCheckedModeBanner != null),
+       navigatorObservers = null,
+       navigatorKey = null,
+       onGenerateRoute = null,
+       home = null,
+       onGenerateInitialRoutes = null,
+       onUnknownRoute = null,
+       routes = null,
+       initialRoute = null,
        super(key: key);
 
   /// {@macro flutter.widgets.widgetsApp.navigatorKey}
@@ -142,6 +186,18 @@ class CupertinoApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
   final List<NavigatorObserver> navigatorObservers;
+
+  /// {@macro flutter.widgets.widgetsApp.routeInformationProvider}
+  final RouteInformationProvider routeInformationProvider;
+
+  /// {@macro flutter.widgets.widgetsApp.routeInformationParser}
+  final RouteInformationParser<Object> routeInformationParser;
+
+  /// {@macro flutter.widgets.widgetsApp.routerDelegate}
+  final RouterDelegate<Object> routerDelegate;
+
+  /// {@macro flutter.widgets.widgetsApp.backButtonDispatcher}
+  final BackButtonDispatcher backButtonDispatcher;
 
   /// {@macro flutter.widgets.widgetsApp.builder}
   final TransitionBuilder builder;
@@ -286,6 +342,7 @@ class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
 
 class _CupertinoAppState extends State<CupertinoApp> {
   HeroController _heroController;
+  bool get _usesRouter => widget.routerDelegate != null;
 
   @override
   void initState() {
@@ -304,6 +361,83 @@ class _CupertinoAppState extends State<CupertinoApp> {
     yield DefaultCupertinoLocalizations.delegate;
   }
 
+  Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
+    return CupertinoButton.filled(
+      child: const Icon(
+        CupertinoIcons.search,
+        size: 28.0,
+        color: CupertinoColors.white,
+      ),
+      padding: EdgeInsets.zero,
+      onPressed: onPressed,
+    );
+  }
+
+  WidgetsApp _buildWidgetApp(BuildContext context) {
+    final CupertinoThemeData effectiveThemeData = CupertinoTheme.of(context);
+    final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context);
+
+    if (_usesRouter) {
+      return WidgetsApp.router(
+        key: GlobalObjectKey(this),
+        routeInformationProvider: widget.routeInformationProvider,
+        routeInformationParser: widget.routeInformationParser,
+        routerDelegate: widget.routerDelegate,
+        backButtonDispatcher: widget.backButtonDispatcher,
+        builder: widget.builder,
+        title: widget.title,
+        onGenerateTitle: widget.onGenerateTitle,
+        textStyle: effectiveThemeData.textTheme.textStyle,
+        color: color,
+        locale: widget.locale,
+        localizationsDelegates: _localizationsDelegates,
+        localeResolutionCallback: widget.localeResolutionCallback,
+        localeListResolutionCallback: widget.localeListResolutionCallback,
+        supportedLocales: widget.supportedLocales,
+        showPerformanceOverlay: widget.showPerformanceOverlay,
+        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+        showSemanticsDebugger: widget.showSemanticsDebugger,
+        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+        inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+        shortcuts: widget.shortcuts,
+        actions: widget.actions,
+      );
+    }
+    return WidgetsApp(
+      key: GlobalObjectKey(this),
+      navigatorKey: widget.navigatorKey,
+      navigatorObservers: widget.navigatorObservers,
+      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+        return CupertinoPageRoute<T>(settings: settings, builder: builder);
+      },
+      home: widget.home,
+      routes: widget.routes,
+      initialRoute: widget.initialRoute,
+      onGenerateRoute: widget.onGenerateRoute,
+      onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
+      onUnknownRoute: widget.onUnknownRoute,
+      builder: widget.builder,
+      title: widget.title,
+      onGenerateTitle: widget.onGenerateTitle,
+      textStyle: effectiveThemeData.textTheme.textStyle,
+      color: color,
+      locale: widget.locale,
+      localizationsDelegates: _localizationsDelegates,
+      localeResolutionCallback: widget.localeResolutionCallback,
+      localeListResolutionCallback: widget.localeListResolutionCallback,
+      supportedLocales: widget.supportedLocales,
+      showPerformanceOverlay: widget.showPerformanceOverlay,
+      checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+      checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+      showSemanticsDebugger: widget.showSemanticsDebugger,
+      debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+      inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+      shortcuts: widget.shortcuts,
+      actions: widget.actions,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final CupertinoThemeData effectiveThemeData = widget.theme ?? const CupertinoThemeData();
@@ -314,53 +448,11 @@ class _CupertinoAppState extends State<CupertinoApp> {
         data: CupertinoUserInterfaceLevelData.base,
         child: CupertinoTheme(
           data: effectiveThemeData,
-          child: Builder(
-            builder: (BuildContext context) {
-              return HeroControllerScope(
-                controller: _heroController,
-                child: WidgetsApp(
-                  key: GlobalObjectKey(this),
-                  navigatorKey: widget.navigatorKey,
-                  navigatorObservers: widget.navigatorObservers,
-                  pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
-                    CupertinoPageRoute<T>(settings: settings, builder: builder),
-                  home: widget.home,
-                  routes: widget.routes,
-                  initialRoute: widget.initialRoute,
-                  onGenerateRoute: widget.onGenerateRoute,
-                  onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
-                  onUnknownRoute: widget.onUnknownRoute,
-                  builder: widget.builder,
-                  title: widget.title,
-                  onGenerateTitle: widget.onGenerateTitle,
-                  textStyle: CupertinoTheme.of(context).textTheme.textStyle,
-                  color: CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context),
-                  locale: widget.locale,
-                  localizationsDelegates: _localizationsDelegates,
-                  localeResolutionCallback: widget.localeResolutionCallback,
-                  localeListResolutionCallback: widget.localeListResolutionCallback,
-                  supportedLocales: widget.supportedLocales,
-                  showPerformanceOverlay: widget.showPerformanceOverlay,
-                  checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-                  checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-                  showSemanticsDebugger: widget.showSemanticsDebugger,
-                  debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-                  inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-                    return CupertinoButton.filled(
-                      child: const Icon(
-                        CupertinoIcons.search,
-                        size: 28.0,
-                        color: CupertinoColors.white,
-                      ),
-                      padding: EdgeInsets.zero,
-                      onPressed: onPressed,
-                    );
-                  },
-                  shortcuts: widget.shortcuts,
-                  actions: widget.actions,
-                ),
-              );
-            },
+          child: HeroControllerScope(
+            controller: _heroController,
+            child: Builder(
+              builder: _buildWidgetApp,
+            ),
           ),
         ),
       ),

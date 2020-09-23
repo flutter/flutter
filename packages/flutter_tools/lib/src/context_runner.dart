@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:process/process.dart';
+
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
@@ -13,6 +15,7 @@ import 'artifacts.dart';
 import 'asset.dart';
 import 'base/config.dart';
 import 'base/context.dart';
+import 'base/error_handling_io.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
@@ -214,6 +217,10 @@ Future<T> runInContext<T>(
         platform: globals.platform,
       ),
       ProcessInfo: () => ProcessInfo(),
+      ProcessManager: () => ErrorHandlingProcessManager(
+        delegate: const LocalProcessManager(),
+        platform: globals.platform,
+      ),
       ProcessUtils: () => ProcessUtils(
         processManager: globals.processManager,
         logger: globals.logger,
@@ -225,7 +232,8 @@ Future<T> runInContext<T>(
         botDetector: globals.botDetector,
         platform: globals.platform,
         usage: globals.flutterUsage,
-        toolStampFile: globals.cache.getStampFileFor('flutter_tools'),
+        // Avoid a circular dependency by making this access lazy.
+        toolStampFile: () => globals.cache.getStampFileFor('flutter_tools'),
       ),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Stdio: () => Stdio(),

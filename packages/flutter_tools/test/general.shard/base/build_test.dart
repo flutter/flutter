@@ -27,7 +27,7 @@ const FakeCommand kSdkPathCommand = FakeCommand(
 );
 
 const List<String> kDefaultClang = <String>[
-  '-miphoneos-version-min=8.0',
+  '-miphoneos-version-min=9.0',
   '-dynamiclib',
   '-Xlinker',
   '-rpath',
@@ -47,7 +47,7 @@ const List<String> kDefaultClang = <String>[
 ];
 
 const List<String> kBitcodeClang = <String>[
-  '-miphoneos-version-min=8.0',
+  '-miphoneos-version-min=9.0',
   '-dynamiclib',
   '-Xlinker',
   '-rpath',

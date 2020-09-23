@@ -22,7 +22,7 @@ class FakePlatformViewController extends PlatformViewController {
   bool disposed = false;
   bool focusCleared = false;
 
-  /// Events that are dispatched;
+  /// Events that are dispatched.
   List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
 
   int _id;
@@ -59,7 +59,7 @@ class FakeAndroidViewController implements AndroidViewController {
   bool focusCleared = false;
   bool created = false;
 
-  /// Events that are dispatched;
+  /// Events that are dispatched.
   List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
 
   @override

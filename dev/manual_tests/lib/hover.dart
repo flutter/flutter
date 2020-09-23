@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -24,7 +23,7 @@ class DemoButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
+    return TextButton(
       onPressed: () => _handleOnPressed(),
       child: Text(name),
     );
@@ -42,6 +41,11 @@ class _HoverDemoState extends State<HoverDemo> {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
+    final ButtonStyle overrideFocusColor = ButtonStyle(
+      overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+        return states.contains(MaterialState.focused) ? Colors.deepOrangeAccent : null;
+      })
+    );
 
     return DefaultTextStyle(
       style: textTheme.headline4,
@@ -60,15 +64,15 @@ class _HoverDemoState extends State<HoverDemo> {
               children: <Widget>[
                 Row(
                   children: <Widget>[
-                    RaisedButton(
+                    ElevatedButton(
                       onPressed: () => print('Button pressed.'),
                       child: const Text('Button'),
-                      focusColor: Colors.deepOrangeAccent,
+                      style: overrideFocusColor,
                     ),
-                    FlatButton(
+                    TextButton(
                       onPressed: () => print('Button pressed.'),
                       child: const Text('Button'),
-                      focusColor: Colors.deepOrangeAccent,
+                      style: overrideFocusColor,
                     ),
                     IconButton(
                       onPressed: () => print('Button pressed'),

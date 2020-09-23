@@ -61,12 +61,12 @@ class IconTreeShaker {
        _fontManifest = fontManifest?.string {
     if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
-      logger.printError('Font subetting is not supported in debug mode. The '
+      logger.printError('Font subsetting is not supported in debug mode. The '
                          '--tree-shake-icons flag will be ignored.');
     }
   }
 
-  /// The MIME type for ttf fonts.
+  /// The MIME types for supported font sets.
   static const Set<String> kTtfMimeTypes = <String>{
     'font/ttf', // based on internet search
     'font/opentype',
@@ -383,5 +383,7 @@ class IconTreeShakerException implements Exception {
   final String message;
 
   @override
-  String toString() => 'FontSubset error: $message';
+  String toString() => 'IconTreeShakerException: $message\n\n'
+    'To disable icon tree shaking, pass --no-tree-shake-icons to the requested '
+    'flutter build command';
 }

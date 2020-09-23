@@ -196,6 +196,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// prepare the binding for the next test.
   void reset() {
     _restorationManager = createRestorationManager();
+    resetGestureBinding();
   }
 
   @override
@@ -488,19 +489,25 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// events from the device).
   Offset localToGlobal(Offset point) => point;
 
+  // The source of the current pointer event.
+  //
+  // The [pointerEventSource] is set as the `source` parameter of
+  // [handlePointerEvent] and can be used in the immediate enclosing
+  // [dispatchEvent].
+  TestBindingEventSource _pointerEventSource = TestBindingEventSource.device;
+
   @override
-  void dispatchEvent(
-    PointerEvent event,
-    HitTestResult hitTestResult, {
+  void handlePointerEvent(
+    PointerEvent event, {
     TestBindingEventSource source = TestBindingEventSource.device,
   }) {
-    // This override disables calling this method from base class
-    // [GestureBinding] when the runtime type is [TestWidgetsFlutterBinding],
-    // while enables sub class [LiveTestWidgetsFlutterBinding] to override
-    // this behavior and use this argument to determine the souce of the event
-    // especially when the test app is running on a device.
-    assert(source == TestBindingEventSource.test);
-    super.dispatchEvent(event, hitTestResult);
+    final TestBindingEventSource previousSource = source;
+    _pointerEventSource = source;
+    try {
+      super.handlePointerEvent(event);
+    } finally {
+      _pointerEventSource = previousSource;
+    }
   }
 
   /// A stub for the system's onscreen keyboard. Callers must set the
@@ -1245,11 +1252,15 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// [LiveTestWidgetsFlutterBinding.framePolicy] property.
 ///
 /// {@template flutter.flutter_test.frame_policy}
-/// The default is [fadePointers]. Setting this to anything other than
-/// [onlyPumps] results in pumping extra frames, which might involve calling
-/// builders more, or calling paint callbacks more, etc, and might interfere
-/// with the test. If you know that your test won't be affected by this, you can
-/// set the policy to [fullyLive] or [benchmarkLive] in that particular file.
+/// The default is [LiveTestWidgetsFlutterBindingFramePolicy.fadePointers].
+/// Setting this to anything other than
+/// [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps] results in pumping
+/// extra frames, which might involve calling builders more, or calling paint
+/// callbacks more, etc, and might interfere with the test. If you know that
+/// your test won't be affected by this, you can set the policy to
+/// [LiveTestWidgetsFlutterBindingFramePolicy.fullyLive] or
+/// [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] in that particular
+/// file.
 ///
 /// To set a value while still allowing the test file to work as a normal test,
 /// add the following code to your test file at the top of your
@@ -1284,7 +1295,7 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// explicitly pumped.
   ///
   /// The major difference between [fullyLive] and [benchmarkLive] is the latter
-  /// ignores frame requests by [pump].
+  /// ignores frame requests by [WidgetTester.pump].
   ///
   /// This can help with orienting the developer when looking at
   /// heavily-animated situations, and will almost certainly result in
@@ -1302,7 +1313,7 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   ///
   /// This allows all frame requests from the engine to be serviced, and allows
   /// all frame requests that are artificially triggered to be serviced, but
-  /// ignores [scheduleFrame] requests from the framework.
+  /// ignores [SchedulerBinding.scheduleFrame] requests from the framework.
   /// Therefore animation won't run for this mode because the framework
   /// generates an animation by requesting new frames.
   ///
@@ -1319,11 +1330,11 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// This is used for running the test on a device, where scheduling of new
   /// frames respects what the engine and the device needed.
   ///
-  /// Compared to [fullyLive] this policy ignores the frame requests from [pump]
-  /// so that frame scheduling mimics that of the real environment, and avoids
-  /// waiting for an artificially [pump]ed frame. (For example, when driving the
-  /// test in methods like [WidgetTester.handlePointerEventRecord] or
-  /// [WidgetTester.fling].)
+  /// Compared to [fullyLive] this policy ignores the frame requests from
+  /// [WidgetTester.pump] so that frame scheduling mimics that of the real
+  /// environment, and avoids waiting for an artificially pumped frame. (For
+  /// example, when driving the test in methods like
+  /// [WidgetTester.handlePointerEventRecord] or [WidgetTester.fling].)
   ///
   /// This policy differs from [benchmark] in that it can be used for capturing
   /// animation frames requested by the framework.
@@ -1482,14 +1493,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   HitTestDispatcher deviceEventDispatcher;
 
 
-  /// Dispatch an event to a hit test result's path.
+  /// Dispatch an event to the targets found by a hit test on its position.
   ///
   /// Apart from forwarding the event to [GestureBinding.dispatchEvent],
   /// This also paint all events that's down on the screen.
   @override
-  void dispatchEvent(
-    PointerEvent event,
-    HitTestResult hitTestResult, {
+  void handlePointerEvent(
+    PointerEvent event, {
     TestBindingEventSource source = TestBindingEventSource.device,
   }) {
     switch (source) {
@@ -1500,18 +1510,29 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
             renderView._pointers[event.pointer].decay = _kPointerDecay;
           _handleViewNeedsPaint();
         } else if (event.down) {
-          assert(event is PointerDownEvent);
           renderView._pointers[event.pointer] = _LiveTestPointerRecord(
             event.pointer,
             event.position,
           );
           _handleViewNeedsPaint();
         }
-        super.dispatchEvent(event, hitTestResult, source: source);
+        super.handlePointerEvent(event, source: TestBindingEventSource.test);
         break;
       case TestBindingEventSource.device:
         if (deviceEventDispatcher != null)
-          deviceEventDispatcher.dispatchEvent(event, hitTestResult);
+          super.handlePointerEvent(event, source: TestBindingEventSource.device);
+        break;
+    }
+  }
+
+  @override
+  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult) {
+    switch (_pointerEventSource) {
+      case TestBindingEventSource.test:
+        super.dispatchEvent(event, hitTestResult);
+        break;
+      case TestBindingEventSource.device:
+        deviceEventDispatcher.dispatchEvent(event, hitTestResult);
         break;
     }
   }

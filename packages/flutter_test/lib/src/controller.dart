@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:clock/clock.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -304,13 +302,26 @@ abstract class WidgetController {
   /// If the middle of the widget is not exposed, this might send
   /// events to another object.
   ///
-  /// This can pump frames. See [flingFrom] for a discussion of how the
-  /// `offset`, `velocity` and `frameInterval` arguments affect this.
+  /// {@template flutter.flutter_test.fling}
+  /// This can pump frames.
+  ///
+  /// Exactly 50 pointer events are synthesized.
   ///
   /// The `speed` is in pixels per second in the direction given by `offset`.
   ///
-  /// A fling is essentially a drag that ends at a particular speed. If you
-  /// just want to drag and end without a fling, use [drag].
+  /// The `offset` and `speed` control the interval between each pointer event.
+  /// For example, if the `offset` is 200 pixels down, and the `speed` is 800
+  /// pixels per second, the pointer events will be sent for each increment
+  /// of 4 pixels (200/50), over 250ms (200/800), meaning events will be sent
+  /// every 1.25ms (250/200).
+  ///
+  /// To make tests more realistic, frames may be pumped during this time (using
+  /// calls to [pump]). If the total duration is longer than `frameInterval`,
+  /// then one frame is pumped each time that amount of time elapses while
+  /// sending events, or each time an event is synthesized, whichever is rarer.
+  ///
+  /// See [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] if the method
+  /// is used in a live environment and accurate time control is important.
   ///
   /// The `initialOffset` argument, if non-zero, causes the pointer to first
   /// apply that offset, then pump a delay of `initialOffsetDelay`. This can be
@@ -318,6 +329,10 @@ abstract class WidgetController {
   /// opposite direction of the fling (e.g. dragging 200 pixels to the right,
   /// then fling to the left over 200 pixels, ending at the exact point that the
   /// drag started).
+  /// {@endtemplate}
+  ///
+  /// A fling is essentially a drag that ends at a particular speed. If you
+  /// just want to drag and end without a fling, use [drag].
   Future<void> fling(
     Finder finder,
     Offset offset,
@@ -343,28 +358,10 @@ abstract class WidgetController {
   /// Attempts a fling gesture starting from the given location, moving the
   /// given distance, reaching the given speed.
   ///
-  /// Exactly 50 pointer events are synthesized.
-  ///
-  /// The offset and speed control the interval between each pointer event. For
-  /// example, if the offset is 200 pixels down, and the speed is 800 pixels per
-  /// second, the pointer events will be sent for each increment of 4 pixels
-  /// (200/50), over 250ms (200/800), meaning events will be sent every 1.25ms
-  /// (250/200).
-  ///
-  /// To make tests more realistic, frames may be pumped during this time (using
-  /// calls to [pump]). If the total duration is longer than `frameInterval`,
-  /// then one frame is pumped each time that amount of time elapses while
-  /// sending events, or each time an event is synthesized, whichever is rarer.
+  /// {@macro flutter.flutter_test.fling}
   ///
   /// A fling is essentially a drag that ends at a particular speed. If you
   /// just want to drag and end without a fling, use [dragFrom].
-  ///
-  /// The `initialOffset` argument, if non-zero, causes the pointer to first
-  /// apply that offset, then pump a delay of `initialOffsetDelay`. This can be
-  /// used to simulate a drag followed by a fling, including dragging in the
-  /// opposite direction of the fling (e.g. dragging 200 pixels to the right,
-  /// then fling to the left over 200 pixels, ending at the exact point that the
-  /// drag started).
   Future<void> flingFrom(
     Offset startLocation,
     Offset offset,
@@ -379,27 +376,26 @@ abstract class WidgetController {
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard<void>(() async {
       final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), PointerDeviceKind.touch, null, buttons);
-      final HitTestResult result = hitTestOnBinding(startLocation);
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
-      final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * speed);
+      final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);
       double timeStamp = 0.0;
       double lastTimeStamp = timeStamp;
-      await sendEventToBinding(testPointer.down(startLocation, timeStamp: Duration(milliseconds: timeStamp.round())), result);
+      await sendEventToBinding(testPointer.down(startLocation, timeStamp: Duration(microseconds: timeStamp.round())));
       if (initialOffset.distance > 0.0) {
-        await sendEventToBinding(testPointer.move(startLocation + initialOffset, timeStamp: Duration(milliseconds: timeStamp.round())), result);
-        timeStamp += initialOffsetDelay.inMilliseconds;
+        await sendEventToBinding(testPointer.move(startLocation + initialOffset, timeStamp: Duration(microseconds: timeStamp.round())));
+        timeStamp += initialOffsetDelay.inMicroseconds;
         await pump(initialOffsetDelay);
       }
       for (int i = 0; i <= kMoveCount; i += 1) {
         final Offset location = startLocation + initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount);
-        await sendEventToBinding(testPointer.move(location, timeStamp: Duration(milliseconds: timeStamp.round())), result);
+        await sendEventToBinding(testPointer.move(location, timeStamp: Duration(microseconds: timeStamp.round())));
         timeStamp += timeStampDelta;
-        if (timeStamp - lastTimeStamp > frameInterval.inMilliseconds) {
-          await pump(Duration(milliseconds: (timeStamp - lastTimeStamp).truncate()));
+        if (timeStamp - lastTimeStamp > frameInterval.inMicroseconds) {
+          await pump(Duration(microseconds: (timeStamp - lastTimeStamp).truncate()));
           lastTimeStamp = timeStamp;
         }
       }
-      await sendEventToBinding(testPointer.up(timeStamp: Duration(milliseconds: timeStamp.round())), result);
+      await sendEventToBinding(testPointer.up(timeStamp: Duration(microseconds: timeStamp.round())));
     });
   }
 
@@ -416,7 +412,7 @@ abstract class WidgetController {
   ///   return value should be exact zeros.
   /// - For [LiveTestWidgetsFlutterBinding], the values are typically small
   /// positives, meaning the event happens a little later than the set time,
-  /// but a very small portion may have a tiny negatvie value for about tens of
+  /// but a very small portion may have a tiny negative value for about tens of
   /// microseconds. This is due to the nature of [Future.delayed].
   ///
   /// The closer the return values are to zero the more faithful it is to the
@@ -440,6 +436,34 @@ abstract class WidgetController {
   /// be appropriate to return in the implementation of this method.
   Future<void> pump([Duration duration]);
 
+  /// Repeatedly calls [pump] with the given `duration` until there are no
+  /// longer any frames scheduled. This will call [pump] at least once, even if
+  /// no frames are scheduled when the function is called, to flush any pending
+  /// microtasks which may themselves schedule a frame.
+  ///
+  /// This essentially waits for all animations to have completed.
+  ///
+  /// If it takes longer that the given `timeout` to settle, then the test will
+  /// fail (this method will throw an exception). In particular, this means that
+  /// if there is an infinite animation in progress (for example, if there is an
+  /// indeterminate progress indicator spinning), this method will throw.
+  ///
+  /// The default timeout is ten minutes, which is longer than most reasonable
+  /// finite animations would last.
+  ///
+  /// If the function returns, it returns the number of pumps that it performed.
+  ///
+  /// In general, it is better practice to figure out exactly why each frame is
+  /// needed, and then to [pump] exactly as many frames as necessary. This will
+  /// help catch regressions where, for instance, an animation is being started
+  /// one frame later than it should.
+  ///
+  /// Alternatively, one can check that the return value from this function
+  /// matches the expected number of pumps.
+  Future<int> pumpAndSettle([
+    Duration duration = const Duration(milliseconds: 100),
+  ]);
+
   /// Attempts to drag the given widget by the given offset, by
   /// starting a drag in the middle of the widget.
   ///
@@ -449,21 +473,24 @@ abstract class WidgetController {
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [fling] instead.
   ///
+  /// The operation happens at once. If you want the drag to last for a period
+  /// of time, consider using [timedDrag].
+  ///
   /// {@template flutter.flutter_test.drag}
-  /// By default, if the x or y component of offset is greater than [kTouchSlop], the
-  /// gesture is broken up into two separate moves calls. Changing 'touchSlopX' or
-  /// `touchSlopY` will change the minimum amount of movement in the respective axis
-  /// before the drag will be broken into multiple calls. To always send the
-  /// drag with just a single call to [TestGesture.moveBy], `touchSlopX` and `touchSlopY`
-  /// should be set to 0.
+  /// By default, if the x or y component of offset is greater than
+  /// [kDragSlopDefault], the gesture is broken up into two separate moves
+  /// calls. Changing `touchSlopX` or `touchSlopY` will change the minimum
+  /// amount of movement in the respective axis before the drag will be broken
+  /// into multiple calls. To always send the drag with just a single call to
+  /// [TestGesture.moveBy], `touchSlopX` and `touchSlopY` should be set to 0.
   ///
   /// Breaking the drag into multiple moves is necessary for accurate execution
   /// of drag update calls with a [DragStartBehavior] variable set to
   /// [DragStartBehavior.start]. Without such a change, the dragUpdate callback
   /// from a drag recognizer will never be invoked.
   ///
-  /// To force this function to a send a single move event, the 'touchSlopX' and
-  /// 'touchSlopY' variables should be set to 0. However, generally, these values
+  /// To force this function to a send a single move event, the `touchSlopX` and
+  /// `touchSlopY` variables should be set to 0. However, generally, these values
   /// should be left to their default values.
   /// {@endtemplate}
   Future<void> drag(
@@ -474,7 +501,6 @@ abstract class WidgetController {
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
   }) {
-    assert(kDragSlopDefault > kTouchSlop);
     return dragFrom(
       getCenter(finder),
       offset,
@@ -491,6 +517,9 @@ abstract class WidgetController {
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [flingFrom]
   /// instead.
+  ///
+  /// The operation happens at once. If you want the drag to last for a period
+  /// of time, consider using [timedDragFrom].
   ///
   /// {@macro flutter.flutter_test.drag}
   Future<void> dragFrom(
@@ -574,15 +603,125 @@ abstract class WidgetController {
     });
   }
 
+  /// Attempts to drag the given widget by the given offset in the `duration`
+  /// time, starting in the middle of the widget.
+  ///
+  /// If the middle of the widget is not exposed, this might send
+  /// events to another object.
+  ///
+  /// This is the timed version of [drag]. This may or may not result in a
+  /// [fling] or ballistic animation, depending on the speed from
+  /// `offset/duration`.
+  ///
+  /// {@template flutter.flutter_test.timeddrag}
+  /// The move events are sent at a given `frequency` in Hz (or events per
+  /// second). It defaults to 60Hz.
+  ///
+  /// The movement is linear in time.
+  ///
+  /// See also [LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive] for
+  /// more accurate time control.
+  /// {@endtemplate}
+  Future<void> timedDrag(
+    Finder finder,
+    Offset offset,
+    Duration duration, {
+    int pointer,
+    int buttons = kPrimaryButton,
+    double frequency = 60.0,
+  }) {
+    return timedDragFrom(
+      getCenter(finder),
+      offset,
+      duration,
+      pointer: pointer,
+      buttons: buttons,
+      frequency: frequency,
+    );
+  }
+
+  /// Attempts a series of [PointerEvent]s to simulate a drag operation in the
+  /// `duration` time.
+  ///
+  /// This is the timed version of [dragFrom]. This may or may not result in a
+  /// [flingFrom] or ballistic animation, depending on the speed from
+  /// `offset/duration`.
+  ///
+  /// {@macro flutter.flutter_test.timeddrag}
+  Future<void> timedDragFrom(
+    Offset startLocation,
+    Offset offset,
+    Duration duration, {
+    int pointer,
+    int buttons = kPrimaryButton,
+    double frequency = 60.0,
+  }) {
+    assert(frequency > 0);
+    final int intervals = duration.inMicroseconds * frequency ~/ 1E6;
+    assert(intervals > 1);
+    pointer ??= _getNextPointer();
+    final List<Duration> timeStamps = <Duration>[
+      for (int t = 0; t <= intervals; t += 1)
+        duration * t ~/ intervals,
+    ];
+    final List<Offset> offsets = <Offset>[
+      startLocation,
+      for (int t = 0; t <= intervals; t += 1)
+        startLocation + offset * (t / intervals),
+    ];
+    final List<PointerEventRecord> records = <PointerEventRecord>[
+      PointerEventRecord(Duration.zero, <PointerEvent>[
+          PointerAddedEvent(
+            timeStamp: Duration.zero,
+            position: startLocation,
+          ),
+          PointerDownEvent(
+            timeStamp: Duration.zero,
+            position: startLocation,
+            pointer: pointer,
+            buttons: buttons,
+          ),
+        ]),
+      ...<PointerEventRecord>[
+        for(int t = 0; t <= intervals; t += 1)
+          PointerEventRecord(timeStamps[t], <PointerEvent>[
+            PointerMoveEvent(
+              timeStamp: timeStamps[t],
+              position: offsets[t+1],
+              delta: offsets[t+1] - offsets[t],
+              pointer: pointer,
+              buttons: buttons,
+            )
+          ]),
+      ],
+      PointerEventRecord(duration, <PointerEvent>[
+        PointerUpEvent(
+          timeStamp: duration,
+          position: offsets.last,
+          pointer: pointer,
+          // The PointerData received from the engine with
+          // change = PointerChange.up, which translates to PointerUpEvent,
+          // doesn't provide the button field.
+          // buttons: buttons,
+        )
+      ]),
+    ];
+    return TestAsyncUtils.guard<void>(() async {
+      return handlePointerEventRecord(records);
+    });
+  }
+
   /// The next available pointer identifier.
   ///
   /// This is the default pointer identifier that will be used the next time the
   /// [startGesture] method is called without an explicit pointer identifier.
-  int nextPointer = 1;
+  int get nextPointer => _nextPointer;
 
-  int _getNextPointer() {
-    final int result = nextPointer;
-    nextPointer += 1;
+  static int _nextPointer = 1;
+
+  static int _getNextPointer() {
+    final int result = _nextPointer;
+    _nextPointer += 1;
     return result;
   }
 
@@ -597,7 +736,6 @@ abstract class WidgetController {
     int buttons = kPrimaryButton,
   }) async {
     return TestGesture(
-      hitTester: hitTestOnBinding,
       dispatcher: sendEventToBinding,
       kind: kind,
       pointer: pointer ?? _getNextPointer(),
@@ -617,6 +755,7 @@ abstract class WidgetController {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
+    assert(downLocation != null);
     final TestGesture result = await createGesture(
       pointer: pointer,
       kind: kind,
@@ -634,9 +773,9 @@ abstract class WidgetController {
   }
 
   /// Forwards the given pointer event to the binding.
-  Future<void> sendEventToBinding(PointerEvent event, HitTestResult result) {
+  Future<void> sendEventToBinding(PointerEvent event) {
     return TestAsyncUtils.guard<void>(() async {
-      binding.dispatchEvent(event, result);
+      binding.handlePointerEvent(event);
     });
   }
 
@@ -811,32 +950,38 @@ abstract class WidgetController {
   /// the screen correctly.
   ///
   /// This does not work when the `S` is long and `W` far away from the
-  /// dispalyed part does not have a cached element yet. See
+  /// displayed part does not have a cached element yet. See
   /// https://github.com/flutter/flutter/issues/61458
   ///
   /// Shorthand for `Scrollable.ensureVisible(element(finder))`
   Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 
-  /// Repeatedly scrolls the `scrollable` by `delta` in the
+  /// Repeatedly scrolls a [Scrollable] by `delta` in the
   /// [Scrollable.axisDirection] until `finder` is visible.
   ///
   /// Between each scroll, wait for `duration` time for settling.
+  ///
+  /// If `scrollable` is `null`, this will find a [Scrollable].
   ///
   /// Throws a [StateError] if `finder` is not found for maximum `maxScrolls`
   /// times.
   ///
   /// This is different from [ensureVisible] in that this allows looking for
   /// `finder` that is not built yet, but the caller must specify the scrollable
-  /// that will build child specified by `finder`.
+  /// that will build child specified by `finder` when there are multiple
+  ///[Scrollable]s.
+  ///
+  /// See also [dragUntilVisible].
   Future<void> scrollUntilVisible(
     Finder finder,
-    Finder scrollable,
     double delta, {
+      Finder scrollable,
       int maxScrolls = 50,
       Duration duration = const Duration(milliseconds: 50),
     }
   ) {
     assert(maxScrolls > 0);
+    scrollable ??= find.byType(Scrollable);
     return TestAsyncUtils.guard<void>(() async {
       Offset moveStep;
       switch(widget<Scrollable>(scrollable).axisDirection) {
@@ -853,10 +998,33 @@ abstract class WidgetController {
           moveStep = Offset(-delta, 0);
           break;
       }
-      while(maxScrolls > 0 && finder.evaluate().isEmpty) {
-        await drag(scrollable, moveStep);
+      await dragUntilVisible(
+        finder,
+        scrollable,
+        moveStep,
+        maxIteration: maxScrolls,
+        duration: duration);
+    });
+  }
+
+  /// Repeatedly drags the `view` by `moveStep` until `finder` is visible.
+  ///
+  /// Between each operation, wait for `duration` time for settling.
+  ///
+  /// Throws a [StateError] if `finder` is not found for maximum `maxIteration`
+  /// times.
+  Future<void> dragUntilVisible(
+    Finder finder,
+    Finder view,
+    Offset moveStep, {
+      int maxIteration = 50,
+      Duration duration = const Duration(milliseconds: 50),
+  }) {
+    return TestAsyncUtils.guard<void>(() async {
+      while(maxIteration > 0 && finder.evaluate().isEmpty) {
+        await drag(view, moveStep);
         await pump(duration);
-        maxScrolls -= 1;
+        maxIteration-= 1;
       }
       await Scrollable.ensureVisible(element(finder));
     });
@@ -880,6 +1048,22 @@ class LiveWidgetController extends WidgetController {
   }
 
   @override
+  Future<int> pumpAndSettle([
+    Duration duration = const Duration(milliseconds: 100),
+  ]) {
+    assert(duration != null);
+    assert(duration > Duration.zero);
+    return TestAsyncUtils.guard<int>(() async {
+      int count = 0;
+      do {
+        await pump(duration);
+        count += 1;
+      } while (binding.hasScheduledFrame);
+      return count;
+    });
+  }
+
+  @override
   Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records) {
     assert(records != null);
     assert(records.isNotEmpty);
@@ -899,9 +1083,7 @@ class LiveWidgetController extends WidgetController {
           // processing of the events.
           // Flush all past events
           handleTimeStampDiff.add(-timeDiff);
-          for (final PointerEvent event in record.events) {
-            _handlePointerEvent(event, hitTestHistory);
-          }
+          record.events.forEach(binding.handlePointerEvent);
         } else {
           await Future<void>.delayed(timeDiff);
           handleTimeStampDiff.add(
@@ -910,9 +1092,7 @@ class LiveWidgetController extends WidgetController {
             // fake async this new diff should be zero.
             clock.now().difference(startTime) - record.timeDelay,
           );
-          for (final PointerEvent event in record.events) {
-            _handlePointerEvent(event, hitTestHistory);
-          }
+          record.events.forEach(binding.handlePointerEvent);
         }
       }
       // This makes sure that a gesture is completed, with no more pointers
@@ -920,47 +1100,5 @@ class LiveWidgetController extends WidgetController {
       assert(hitTestHistory.isEmpty);
       return handleTimeStampDiff;
     });
-  }
-
-  // This method is almost identical to [GestureBinding._handlePointerEvent]
-  // to replicate the bahavior of the real binding.
-  void _handlePointerEvent(
-    PointerEvent event,
-    Map<int, HitTestResult> _hitTests
-  ) {
-    HitTestResult hitTestResult;
-    if (event is PointerDownEvent || event is PointerSignalEvent) {
-      assert(!_hitTests.containsKey(event.pointer));
-      hitTestResult = HitTestResult();
-      binding.hitTest(hitTestResult, event.position);
-      if (event is PointerDownEvent) {
-        _hitTests[event.pointer] = hitTestResult;
-      }
-      assert(() {
-        if (debugPrintHitTestResults)
-          debugPrint('$event: $hitTestResult');
-        return true;
-      }());
-    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
-      hitTestResult = _hitTests.remove(event.pointer);
-    } else if (event.down) {
-      // Because events that occur with the pointer down (like
-      // PointerMoveEvents) should be dispatched to the same place that their
-      // initial PointerDownEvent was, we want to re-use the path we found when
-      // the pointer went down, rather than do hit detection each time we get
-      // such an event.
-      hitTestResult = _hitTests[event.pointer];
-    }
-    assert(() {
-      if (debugPrintMouseHoverEvents && event is PointerHoverEvent)
-        debugPrint('$event');
-      return true;
-    }());
-    if (hitTestResult != null ||
-        event is PointerHoverEvent ||
-        event is PointerAddedEvent ||
-        event is PointerRemovedEvent) {
-      binding.dispatchEvent(event, hitTestResult);
-    }
   }
 }

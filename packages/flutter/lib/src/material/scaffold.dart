@@ -578,7 +578,15 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating) {
         snackBarYOffsetBase = floatingActionButtonRect.top;
       } else {
-        snackBarYOffsetBase = contentBottom;
+        // SnackBarBehavior.fixed applies a SafeArea automatically.
+        // SnackBarBehavior.floating does not since the positioning is affected
+        // if there is a FloatingActionButton (see condition above). If there is
+        // no FAB, make sure we account for safe space when the SnackBar is
+        // floating.
+        final double safeYOffsetBase = size.height - minViewPadding.bottom;
+        snackBarYOffsetBase = isSnackBarFloating
+          ? math.min(contentBottom, safeYOffsetBase)
+          : contentBottom;
       }
 
       final double xOffset = hasCustomWidth ? (size.width - snackBarWidth) / 2 : 0.0;
@@ -1006,6 +1014,10 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///    it is shown using the [showModalBottomSheet] function.
 ///  * [ScaffoldState], which is the state associated with this widget.
 ///  * <https://material.io/design/layout/responsive-layout-grid.html>
+///  * Cookbook: [Add a Drawer to a screen](https://flutter.dev/docs/cookbook/design/drawer)
+///  * Cookbook: [Display a snackbar](https://flutter.dev/docs/cookbook/design/snackbars)
+///  * See our
+///    [Scaffold Sample Apps](https://flutter.dev/docs/catalog/samples/Scaffold).
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for material design widgets.
   const Scaffold({
