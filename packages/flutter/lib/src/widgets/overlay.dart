@@ -545,7 +545,7 @@ class _TheatreElement extends MultiChildRenderObjectElement {
   _Theatre get widget => super.widget as _Theatre;
 
   @override
-  _RenderTheatre get renderObject => super.renderObject! as _RenderTheatre;
+  _RenderTheatre get renderObject => super.renderObject as _RenderTheatre;
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {

@@ -4099,7 +4099,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     Element? ancestor = _parent;
     while (ancestor != null) {
       if (ancestor is RenderObjectElement && ancestor.renderObject is T)
-        return ancestor.renderObject! as T;
+        return ancestor.renderObject as T;
       ancestor = ancestor._parent;
     }
     return null;
@@ -5433,8 +5433,8 @@ abstract class RenderObjectElement extends Element {
 
   /// The underlying [RenderObject] for this element.
   @override
-  RenderObject? get renderObject => _renderObject;
-  RenderObject? _renderObject;
+  RenderObject get renderObject => _renderObject;
+  late RenderObject _renderObject;
 
   bool _debugDoingBuild = false;
   @override
@@ -5526,7 +5526,7 @@ abstract class RenderObjectElement extends Element {
       _debugDoingBuild = true;
       return true;
     }());
-    widget.updateRenderObject(this, renderObject!);
+    widget.updateRenderObject(this, renderObject);
     assert(() {
       _debugDoingBuild = false;
       return true;
@@ -5536,7 +5536,7 @@ abstract class RenderObjectElement extends Element {
 
   void _debugUpdateRenderObjectOwner() {
     assert(() {
-      _renderObject!.debugCreator = DebugCreator(this);
+      _renderObject.debugCreator = DebugCreator(this);
       return true;
     }());
   }
@@ -5547,7 +5547,7 @@ abstract class RenderObjectElement extends Element {
       _debugDoingBuild = true;
       return true;
     }());
-    widget.updateRenderObject(this, renderObject!);
+    widget.updateRenderObject(this, renderObject);
     assert(() {
       _debugDoingBuild = false;
       return true;
@@ -5759,7 +5759,7 @@ abstract class RenderObjectElement extends Element {
   @override
   void deactivate() {
     super.deactivate();
-    assert(!renderObject!.attached,
+    assert(!renderObject.attached,
       'A RenderObject was still attached when attempting to deactivate its '
       'RenderObjectElement: $renderObject');
   }
@@ -5767,22 +5767,22 @@ abstract class RenderObjectElement extends Element {
   @override
   void unmount() {
     super.unmount();
-    assert(!renderObject!.attached,
+    assert(!renderObject.attached,
       'A RenderObject was still attached when attempting to unmount its '
       'RenderObjectElement: $renderObject');
-    widget.didUnmountRenderObject(renderObject!);
+    widget.didUnmountRenderObject(renderObject);
   }
 
   void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
     bool applyParentData = true;
     assert(() {
       try {
-        if (!parentDataWidget.debugIsValidRenderObject(renderObject!)) {
+        if (!parentDataWidget.debugIsValidRenderObject(renderObject)) {
           applyParentData = false;
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Incorrect use of ParentDataWidget.'),
             ...parentDataWidget._debugDescribeIncorrectParentDataType(
-              parentData: renderObject!.parentData,
+              parentData: renderObject.parentData,
               parentDataCreator: _ancestorRenderObjectElement!.widget,
               ownershipChain: ErrorDescription(debugGetCreatorChain(10)),
             ),
@@ -5797,7 +5797,7 @@ abstract class RenderObjectElement extends Element {
       return true;
     }());
     if (applyParentData)
-      parentDataWidget.applyParentData(renderObject!);
+      parentDataWidget.applyParentData(renderObject);
   }
 
   @override
@@ -5806,7 +5806,7 @@ abstract class RenderObjectElement extends Element {
     assert(oldSlot != newSlot);
     super._updateSlot(newSlot);
     assert(slot == newSlot);
-    _ancestorRenderObjectElement!.moveRenderObjectChild(renderObject!, oldSlot, slot);
+    _ancestorRenderObjectElement!.moveRenderObjectChild(renderObject, oldSlot, slot);
   }
 
   @override
@@ -5814,7 +5814,7 @@ abstract class RenderObjectElement extends Element {
     assert(_ancestorRenderObjectElement == null);
     _slot = newSlot;
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
-    _ancestorRenderObjectElement?.insertRenderObjectChild(renderObject!, newSlot);
+    _ancestorRenderObjectElement?.insertRenderObjectChild(renderObject, newSlot);
     final ParentDataElement<ParentData>? parentDataElement = _findAncestorParentDataElement();
     if (parentDataElement != null)
       _updateParentData(parentDataElement.widget);
@@ -5823,7 +5823,7 @@ abstract class RenderObjectElement extends Element {
   @override
   void detachRenderObject() {
     if (_ancestorRenderObjectElement != null) {
-      _ancestorRenderObjectElement!.removeRenderObjectChild(renderObject!, slot);
+      _ancestorRenderObjectElement!.removeRenderObjectChild(renderObject, slot);
       _ancestorRenderObjectElement = null;
     }
     _slot = null;
@@ -6139,7 +6139,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 
   @override
   void insertRenderObjectChild(RenderObject child, dynamic slot) {
-    final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject! as RenderObjectWithChildMixin<RenderObject>;
+    final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject as RenderObjectWithChildMixin<RenderObject>;
     assert(slot == null);
     assert(renderObject.debugValidateChild(child));
     renderObject.child = child;
@@ -6153,7 +6153,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 
   @override
   void removeRenderObjectChild(RenderObject child, dynamic slot) {
-    final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject! as RenderObjectWithChildMixin<RenderObject>;
+    final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject as RenderObjectWithChildMixin<RenderObject>;
     assert(slot == null);
     assert(renderObject.child == child);
     renderObject.child = null;
@@ -6199,7 +6199,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   void insertRenderObjectChild(RenderObject child, IndexedSlot<Element?> slot) {
     final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
-      this.renderObject! as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
+      this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
     assert(renderObject.debugValidateChild(child));
     renderObject.insert(child, after: slot.value?.renderObject);
     assert(renderObject == this.renderObject);
@@ -6208,7 +6208,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   void moveRenderObjectChild(RenderObject child, IndexedSlot<Element?> oldSlot, IndexedSlot<Element?> newSlot) {
     final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
-      this.renderObject! as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
+      this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
     assert(child.parent == renderObject);
     renderObject.move(child, after: newSlot.value?.renderObject);
     assert(renderObject == this.renderObject);
@@ -6217,7 +6217,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   void removeRenderObjectChild(RenderObject child, dynamic slot) {
     final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
-      this.renderObject! as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
+      this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
     assert(child.parent == renderObject);
     renderObject.remove(child);
     assert(renderObject == this.renderObject);

@@ -1043,7 +1043,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   SliverMultiBoxAdaptorWidget get widget => super.widget as SliverMultiBoxAdaptorWidget;
 
   @override
-  RenderSliverMultiBoxAdaptor get renderObject => super.renderObject! as RenderSliverMultiBoxAdaptor;
+  RenderSliverMultiBoxAdaptor get renderObject => super.renderObject as RenderSliverMultiBoxAdaptor;
 
   @override
   void update(covariant SliverMultiBoxAdaptorWidget newWidget) {

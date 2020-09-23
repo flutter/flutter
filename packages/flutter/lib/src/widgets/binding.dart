@@ -1228,7 +1228,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   }
 
   @override
-  RenderObjectWithChildMixin<T> get renderObject => super.renderObject! as RenderObjectWithChildMixin<T>;
+  RenderObjectWithChildMixin<T> get renderObject => super.renderObject as RenderObjectWithChildMixin<T>;
 
   @override
   void insertRenderObjectChild(RenderObject child, dynamic slot) {

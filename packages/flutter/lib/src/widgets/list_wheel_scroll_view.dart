@@ -800,7 +800,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   ListWheelViewport get widget => super.widget as ListWheelViewport;
 
   @override
-  RenderListWheelViewport get renderObject => super.renderObject! as RenderListWheelViewport;
+  RenderListWheelViewport get renderObject => super.renderObject as RenderListWheelViewport;
 
   // We inflate widgets at two different times:
   //  1. When we ourselves are told to rebuild (see performRebuild).

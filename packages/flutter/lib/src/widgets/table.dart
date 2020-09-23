@@ -280,7 +280,7 @@ class _TableElement extends RenderObjectElement {
   Table get widget => super.widget as Table;
 
   @override
-  RenderTable get renderObject => super.renderObject! as RenderTable;
+  RenderTable get renderObject => super.renderObject as RenderTable;
 
   // This class ignores the child's slot entirely.
   // Instead of doing incremental updates to the child list, it replaces the entire list each frame.
