@@ -1223,8 +1223,6 @@ void main() {
     expect(residentRunner.supportsServiceProtocol, true);
     // isRunningDebug
     expect(residentRunner.isRunningDebug, true);
-    // does not support CanvasKit
-    expect(residentRunner.supportsCanvasKit, false);
     // does support SkSL
     expect(residentRunner.supportsWriteSkSL, true);
     // commands
@@ -1278,8 +1276,6 @@ void main() {
     expect(residentRunner.supportsServiceProtocol, false);
     // isRunningDebug
     expect(residentRunner.isRunningDebug, false);
-    // does not support CanvasKit
-    expect(residentRunner.supportsCanvasKit, false);
     // does support SkSL
     expect(residentRunner.supportsWriteSkSL, false);
     // commands
@@ -2063,6 +2059,7 @@ void main() {
       ),
       flutterProject: FlutterProject.current(),
       target: null,
+      platform: FakePlatform(operatingSystem: 'linux'),
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill,
@@ -2097,6 +2094,7 @@ void main() {
       ),
       flutterProject: FlutterProject.current(),
       target: null,
+      platform: FakePlatform(operatingSystem: 'linux'),
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill,
@@ -2130,7 +2128,7 @@ void main() {
         extraFrontEndOptions: <String>[],
       ),
       flutterProject: FlutterProject.current(),
-      target: null,
+      target: null, platform: null,
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.extraFrontEndOptions,

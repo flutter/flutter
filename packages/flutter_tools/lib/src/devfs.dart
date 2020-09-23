@@ -209,7 +209,17 @@ class DevFSException implements Exception {
   final StackTrace stackTrace;
 }
 
-class _DevFSHttpWriter {
+/// Interface responsible for syncing asset files to a development device.
+abstract class DevFSWriter {
+  /// Write the assets in [entries] to the target device.
+  ///
+  /// The keys of the map are relative from the [baseUri].
+  ///
+  /// Throws a [DevFSException] if the process fails to complete.
+  Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, DevFSWriter parent);
+}
+
+class _DevFSHttpWriter implements DevFSWriter {
   _DevFSHttpWriter(
     this.fsName,
     vm_service.VmService serviceProtocol, {
@@ -235,12 +245,21 @@ class _DevFSHttpWriter {
   Map<Uri, DevFSContent> _outstanding;
   Completer<void> _completer;
 
-  Future<void> write(Map<Uri, DevFSContent> entries) async {
-    _client.maxConnectionsPerHost = kMaxInFlight;
-    _completer = Completer<void>();
-    _outstanding = Map<Uri, DevFSContent>.of(entries);
-    _scheduleWrites();
-    await _completer.future;
+  @override
+  Future<void> write(Map<Uri, DevFSContent> entries, Uri devFSBase, [DevFSWriter parent]) async {
+    try {
+      _client.maxConnectionsPerHost = kMaxInFlight;
+      _completer = Completer<void>();
+      _outstanding = Map<Uri, DevFSContent>.of(entries);
+      _scheduleWrites();
+      await _completer.future;
+    } on SocketException catch (socketException, stackTrace) {
+      _logger.printTrace('DevFS sync failed. Lost connection to device: $socketException');
+      throw DevFSException('Lost connection to device.', socketException, stackTrace);
+    } on Exception catch (exception, stackTrace) {
+      _logger.printError('Could not update files on device: $exception');
+      throw DevFSException('Sync failed', exception, stackTrace);
+    }
   }
 
   void _scheduleWrites() {
@@ -425,6 +444,7 @@ class DevFS {
     @required String pathToReload,
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
+    DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
@@ -445,7 +465,6 @@ class DevFS {
 
     int syncedBytes = 0;
     if (bundle != null && !skipAssets) {
-      _logger.printTrace('Scanning asset files');
       final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
       // We write the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
@@ -503,15 +522,7 @@ class DevFS {
     }
     _logger.printTrace('Updating files');
     if (dirtyEntries.isNotEmpty) {
-      try {
-        await _httpWriter.write(dirtyEntries);
-      } on SocketException catch (socketException, stackTrace) {
-        _logger.printTrace('DevFS sync failed. Lost connection to device: $socketException');
-        throw DevFSException('Lost connection to device.', socketException, stackTrace);
-      } on Exception catch (exception, stackTrace) {
-        _logger.printError('Could not update files on device: $exception');
-        throw DevFSException('Sync failed', exception, stackTrace);
-      }
+      await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri, _httpWriter);
     }
     _logger.printTrace('DevFS: Sync finished');
     return UpdateFSReport(
@@ -524,4 +535,41 @@ class DevFS {
 
   /// Converts a platform-specific file path to a platform-independent URL path.
   String _asUriPath(String filePath) => _fileSystem.path.toUri(filePath).path + '/';
+}
+
+/// An implementation of a devFS writer which copies physical files for devices
+/// running on the same host.
+///
+/// DevFS entries which correspond to physical files are copied using [File.copySync],
+/// while entries that correspond to arbitrary string/byte values are written from
+/// memory.
+///
+/// Requires that the file system is the same for both the tool and application.
+class LocalDevFSWriter implements DevFSWriter {
+  LocalDevFSWriter({
+    @required FileSystem fileSystem,
+  }) : _fileSystem = fileSystem;
+
+  final FileSystem _fileSystem;
+
+  @override
+  Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, [DevFSWriter parent]) async {
+    try {
+      for (final Uri uri in entries.keys) {
+        final DevFSContent devFSContent = entries[uri];
+        final File destination = _fileSystem.file(baseUri.resolveUri(uri));
+        if (!destination.parent.existsSync()) {
+          destination.parent.createSync(recursive: true);
+        }
+        if (devFSContent is DevFSFileContent) {
+          final File content = devFSContent.file as File;
+          content.copySync(destination.path);
+          continue;
+        }
+        destination.writeAsBytesSync(await devFSContent.contentsAsBytes());
+      }
+    } on FileSystemException catch (err) {
+      throw DevFSException(err.toString());
+    }
+  }
 }

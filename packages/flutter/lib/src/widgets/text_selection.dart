@@ -903,7 +903,7 @@ class TextSelectionGestureDetectorBuilder {
   /// The [RenderObject] of the [EditableText] for which the builder will
   /// provide a [TextSelectionGestureDetector].
   @protected
-  RenderEditable get renderEditable => editableText!.renderEditable!;
+  RenderEditable get renderEditable => editableText!.renderEditable;
 
   /// Handler for [TextSelectionGestureDetector.onTapDown].
   ///
