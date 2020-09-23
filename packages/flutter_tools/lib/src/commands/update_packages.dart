@@ -46,7 +46,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'pool': '1.5.0-nullsafety',
   'source_maps': '0.10.10-nullsafety',
   'source_map_stack_trace': '2.1.0-nullsafety.1',
-  'source_span': '1.8.0-nullsafety',
+  'source_span': '1.8.0-nullsafety.2',
   'stack_trace': '1.10.0-nullsafety',
   'stream_channel': '2.1.0-nullsafety',
   'string_scanner': '1.1.0-nullsafety',
@@ -61,6 +61,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'process': '4.0.0-nullsafety.1',
   // https://github.com/dart-lang/build/issues/2772
   'build_runner_core': '5.2.0',
+  'path_provider': '1.6.14'
 };
 
 class UpdatePackagesCommand extends FlutterCommand {

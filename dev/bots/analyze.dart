@@ -1141,6 +1141,8 @@ Iterable<File> _allFiles(String workingDirectory, String extension, { @required 
         continue;
       if (path.basename(entity.path) == 'gradlew.bat')
         continue;
+      if (path.basename(entity.path) == '.DS_Store')
+        continue;
       if (extension == null || path.extension(entity.path) == '.$extension') {
         matches += 1;
         yield entity;

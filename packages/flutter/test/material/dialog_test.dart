@@ -1323,7 +1323,7 @@ void main() {
     semantics.dispose();
   });
 
-    testWidgets('AlertDialog widget always contains alert route semantics for android', (WidgetTester tester) async {
+  testWidgets('AlertDialog widget always contains alert route semantics for android', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(

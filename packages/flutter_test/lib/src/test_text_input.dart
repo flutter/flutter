@@ -98,6 +98,9 @@ class TestTextInput {
         _client = methodCall.arguments[0] as int;
         setClientArgs = methodCall.arguments[1] as Map<String, dynamic>;
         break;
+      case 'TextInput.updateConfig':
+        setClientArgs = methodCall.arguments as Map<String, dynamic>;
+        break;
       case 'TextInput.clearClient':
         _client = 0;
         _isVisible = false;

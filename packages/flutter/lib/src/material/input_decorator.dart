@@ -1066,7 +1066,10 @@ class _RenderDecoration extends RenderBox {
       prefixHeight - boxToBaseline[prefix],
       suffixHeight - boxToBaseline[suffix],
     );
-    final double fixBelowInput = fixBelowBaseline <= 0.0 ? 0.0 : math.max(
+    // TODO(justinmc): fixBelowInput should have no effect when there is no
+    // prefix/suffix below the input.
+    // https://github.com/flutter/flutter/issues/66050
+    final double fixBelowInput = math.max(
       0,
       fixBelowBaseline - (inputHeight - inputInternalBaseline),
     );
@@ -1258,10 +1261,11 @@ class _RenderDecoration extends RenderBox {
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
       + _lineHeight(width, <RenderBox>[prefix, input, suffix])
       + subtextHeight
-      + contentPadding.bottom;
+      + contentPadding.bottom
+      + densityOffset.dy;
     final double minContainerHeight = decoration.isDense || expands
       ? 0.0
-      : kMinInteractiveDimension + densityOffset.dy;
+      : kMinInteractiveDimension;
     return math.max(containerHeight, minContainerHeight);
   }
 
