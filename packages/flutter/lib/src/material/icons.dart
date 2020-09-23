@@ -7582,16 +7582,16 @@ class Icons {
   /// <i class="material-icons md-36">insert_chart</i> &#x2014; material icon named "insert chart".
   static const IconData insert_chart = IconData(0xe7dc, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">insert_chart</i> &#x2014; material icon named "insert chart outlined".
+  /// <i class="material-icons md-36">insert_chart_outlined</i> &#x2014; material icon named "insert chart outlined".
   static const IconData insert_chart_outlined = IconData(0xe248, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">insert_chart</i> &#x2014; material icon named "insert chart outlined outlined".
   static const IconData insert_chart_outlined_outlined = IconData(0xe249, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">insert_chart</i> &#x2014; material icon named "insert chart outlined rounded".
+  /// <i class="material-icons-round md-36">insert_chart_outlined</i> &#x2014; material icon named "insert chart outlined rounded".
   static const IconData insert_chart_outlined_rounded = IconData(0xf278, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">insert_chart</i> &#x2014; material icon named "insert chart outlined sharp".
+  /// <i class="material-icons-sharp md-36">insert_chart_outlined</i> &#x2014; material icon named "insert chart outlined sharp".
   static const IconData insert_chart_outlined_sharp = IconData(0xed4a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">insert_chart</i> &#x2014; material icon named "insert chart rounded".

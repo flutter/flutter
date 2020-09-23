@@ -267,15 +267,24 @@ String _generateDeclaration(MapEntry<String, String> tokenPair) {
 
   String styleSuffix = '';
   String webFontKey = tokenPair.key;
-  if (webFontKey.contains('_outlined')) {
+
+  // The first line of each generated declaration includes a comment of html.
+  // DartDocs reads that to make the listings in our api docs that shows the
+  // icon rendered next to its key name. Unfortunately, unlike Flutter, this
+  // html needs to use a different web font for each style. We read the style's
+  // suffix from the key for Flutter's icons font, add the corresponding style's
+  // suffix to the class we pass into html, and then remove the suffix from the
+  // icon key. The keys needed for the individual web fonts do not use a suffix
+  // to denote style.
+  if (webFontKey.endsWith('_outlined') && webFontKey!='insert_chart_outlined') {
     styleSuffix = '-outlined';
     webFontKey = webFontKey.replaceAll('_outlined', '');
   }
-  if (webFontKey.contains('_rounded')) {
+  if (webFontKey.endsWith('_rounded')) {
     styleSuffix = '-round';
     webFontKey = webFontKey.replaceAll('_rounded', '');
   }
-  if (webFontKey.contains('_sharp')) {
+  if (webFontKey.endsWith('_sharp')) {
     styleSuffix = '-sharp';
     webFontKey = webFontKey.replaceAll('_sharp', '');
   }
