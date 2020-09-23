@@ -372,12 +372,13 @@ void main() {
       }
     });
 
+    final BufferLogger logger = BufferLogger.test();
     final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
+      logger: logger,
       osUtils: FakeOperatingSystemUtils(),
       httpClient: httpClient,
     );
@@ -409,6 +410,7 @@ void main() {
     expect(report.success, true);
     expect(devFS.lastCompiled, isNot(previousCompile));
     expect(closeCount, 2);
+    expect(logger.errorText, '');
   });
 }
 
