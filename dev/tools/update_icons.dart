@@ -263,14 +263,31 @@ void _testIsMapSuperset(Map<String, String> newCodepoints, Map<String, String> o
 }
 
 String _generateDeclaration(MapEntry<String, String> tokenPair) {
-  final String identifier = _generateIdentifier(tokenPair.key);
   final String description = tokenPair.key.replaceAll('_', ' ');
+
+  String styleSuffix = '';
+  String webFontKey = tokenPair.key;
+  if (webFontKey.contains('_outlined')) {
+    styleSuffix = '-outlined';
+    webFontKey = webFontKey.replaceAll('_outlined', '');
+  }
+  if (webFontKey.contains('_rounded')) {
+    styleSuffix = '-round';
+    webFontKey = webFontKey.replaceAll('_rounded', '');
+  }
+  if (webFontKey.contains('_sharp')) {
+    styleSuffix = '-sharp';
+    webFontKey = webFontKey.replaceAll('_sharp', '');
+  }
+
+  final String identifier = _generateIdentifier(tokenPair.key);
   final String rtl = _mirroredIcons.contains(tokenPair.key)
       ? ', matchTextDirection: true'
       : '';
+
   return '''
 
-  /// <i class="material-icons md-36">${tokenPair.key}</i> &#x2014; material icon named "$description".
+  /// <i class="material-icons$styleSuffix md-36">$webFontKey</i> &#x2014; material icon named "$description".
   static const IconData $identifier = IconData(0x${tokenPair.value}, fontFamily: 'MaterialIcons'$rtl);
 ''';
 }

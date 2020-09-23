@@ -121,8 +121,8 @@ dl.dl-horizontal dt {
 }
 
 /* Line the material icons up with their labels */
-i.material-icons.md-36,
-i.material-icons.md-48 {
+i.md-36,
+i.md-48 {
   vertical-align: bottom;
 }
 
