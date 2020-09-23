@@ -505,10 +505,16 @@ void main() {
         ),
       ),
     );
+    
+    final Finder finder = find.byKey(key);
 
-    final RenderBox box = tester.renderObject(find.byKey(key));
-    expect(box.size, equals(const Size(100, 100)));
-    expect(box.localToGlobal(Offset.zero), equals(const Offset(100, 100)));
+    expect(tester.getSize(finder), equals(const Size(100, 100)));
+
+    expect(tester.getTopLeft(finder), equals(const Offset(100, 100)));
+    expect(tester.getTopRight(finder), equals(const Offset(200, 100)));
+    
+    expect(tester.getBottomLeft(finder), equals(const Offset(100, 200)));
+    expect(tester.getBottomRight(finder), equals(const Offset(200, 200)));
   });
 
   testWidgets('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
