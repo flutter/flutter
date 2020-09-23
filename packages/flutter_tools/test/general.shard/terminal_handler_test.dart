@@ -86,14 +86,6 @@ void main() {
       verify(mockResidentRunner.debugToggleProfileWidgetBuilds()).called(1);
     });
 
-    testWithoutContext('a - debugToggleProfileWidgetBuilds without service protocol', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
-      await terminalHandler.processTerminalInput('a');
-
-      verifyNever(mockResidentRunner.debugToggleProfileWidgetBuilds());
-    });
-
-
     testWithoutContext('a - debugToggleProfileWidgetBuilds', () async {
       when(mockResidentRunner.supportsServiceProtocol).thenReturn(true);
       await terminalHandler.processTerminalInput('a');
@@ -107,14 +99,6 @@ void main() {
 
       verify(mockResidentRunner.debugToggleBrightness()).called(1);
     });
-
-    testWithoutContext('b - debugToggleBrightness not called if service protocol is unsupported', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
-      await terminalHandler.processTerminalInput('b');
-
-      verifyNever(mockResidentRunner.debugToggleBrightness());
-    });
-
 
     testWithoutContext('d,D - detach', () async {
       await terminalHandler.processTerminalInput('d');
@@ -137,13 +121,6 @@ void main() {
       verify(mockResidentRunner.debugToggleWidgetInspector()).called(1);
     });
 
-    testWithoutContext('i - debugToggleWidgetInspector without service protocol', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
-      await terminalHandler.processTerminalInput('i');
-
-      verifyNever(mockResidentRunner.debugToggleWidgetInspector());
-    });
-
     testWithoutContext('I - debugToggleInvertOversizedImages with service protocol/debug', () async {
       when(mockResidentRunner.isRunningDebug).thenReturn(true);
       await terminalHandler.processTerminalInput('I');
@@ -151,30 +128,10 @@ void main() {
       verify(mockResidentRunner.debugToggleInvertOversizedImages()).called(1);
     });
 
-    testWithoutContext('I - debugToggleInvertOversizedImages with service protocol/ndebug', () async {
-      when(mockResidentRunner.isRunningDebug).thenReturn(false);
-      await terminalHandler.processTerminalInput('I');
-
-      verifyNever(mockResidentRunner.debugToggleInvertOversizedImages());
-    });
-
-    testWithoutContext('I - debugToggleInvertOversizedImages without service protocol', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
-      await terminalHandler.processTerminalInput('I');
-
-    });
-
     testWithoutContext('L - debugDumpLayerTree with service protocol', () async {
       await terminalHandler.processTerminalInput('L');
 
       verify(mockResidentRunner.debugDumpLayerTree()).called(1);
-    });
-
-    testWithoutContext('L - debugDumpLayerTree without service protocol', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
-      await terminalHandler.processTerminalInput('L');
-
-      verifyNever(mockResidentRunner.debugDumpLayerTree());
     });
 
     testWithoutContext('o,O - debugTogglePlatform with service protocol and debug mode', () async {
@@ -185,15 +142,6 @@ void main() {
       verify(mockResidentRunner.debugTogglePlatform()).called(2);
     });
 
-    testWithoutContext('o,O - debugTogglePlatform without service protocol', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
-      when(mockResidentRunner.isRunningDebug).thenReturn(true);
-      await terminalHandler.processTerminalInput('o');
-      await terminalHandler.processTerminalInput('O');
-
-      verifyNever(mockResidentRunner.debugTogglePlatform());
-    });
-
     testWithoutContext('p - debugToggleDebugPaintSizeEnabled with service protocol and debug mode', () async {
       when(mockResidentRunner.isRunningDebug).thenReturn(true);
       await terminalHandler.processTerminalInput('p');
@@ -201,40 +149,17 @@ void main() {
       verify(mockResidentRunner.debugToggleDebugPaintSizeEnabled()).called(1);
     });
 
-    testWithoutContext('p - debugTogglePlatform without service protocol', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
-      when(mockResidentRunner.isRunningDebug).thenReturn(true);
-      await terminalHandler.processTerminalInput('p');
-
-      verifyNever(mockResidentRunner.debugToggleDebugPaintSizeEnabled());
-    });
-
     testWithoutContext('p - debugToggleDebugPaintSizeEnabled with service protocol and debug mode', () async {
       when(mockResidentRunner.isRunningDebug).thenReturn(true);
       await terminalHandler.processTerminalInput('p');
 
       verify(mockResidentRunner.debugToggleDebugPaintSizeEnabled()).called(1);
-    });
-
-    testWithoutContext('p - debugTogglePlatform without service protocol', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
-      when(mockResidentRunner.isRunningDebug).thenReturn(true);
-      await terminalHandler.processTerminalInput('p');
-
-      verifyNever(mockResidentRunner.debugToggleDebugPaintSizeEnabled());
     });
 
     testWithoutContext('P - debugTogglePerformanceOverlayOverride with service protocol', () async {
       await terminalHandler.processTerminalInput('P');
 
       verify(mockResidentRunner.debugTogglePerformanceOverlayOverride()).called(1);
-    });
-
-    testWithoutContext('P - debugTogglePerformanceOverlayOverride without service protocol', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
-      await terminalHandler.processTerminalInput('P');
-
-      verifyNever(mockResidentRunner.debugTogglePerformanceOverlayOverride());
     });
 
     testWithoutContext('q,Q - exit', () async {
@@ -347,13 +272,6 @@ void main() {
       verify(mockResidentRunner.debugDumpSemanticsTreeInTraversalOrder()).called(1);
     });
 
-    testWithoutContext('S - debugDumpSemanticsTreeInTraversalOrder without service protocol', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
-      await terminalHandler.processTerminalInput('S');
-
-      verifyNever(mockResidentRunner.debugDumpSemanticsTreeInTraversalOrder());
-    });
-
     testWithoutContext('t,T - debugDumpRenderTree with service protocol', () async {
       await terminalHandler.processTerminalInput('t');
       await terminalHandler.processTerminalInput('T');
@@ -361,25 +279,10 @@ void main() {
       verify(mockResidentRunner.debugDumpRenderTree()).called(2);
     });
 
-    testWithoutContext('t,T - debugDumpSemanticsTreeInTraversalOrder without service protocol', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
-      await terminalHandler.processTerminalInput('t');
-      await terminalHandler.processTerminalInput('T');
-
-      verifyNever(mockResidentRunner.debugDumpRenderTree());
-    });
-
     testWithoutContext('U - debugDumpRenderTree with service protocol', () async {
       await terminalHandler.processTerminalInput('U');
 
       verify(mockResidentRunner.debugDumpSemanticsTreeInInverseHitTestOrder()).called(1);
-    });
-
-    testWithoutContext('U - debugDumpSemanticsTreeInTraversalOrder without service protocol', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
-      await terminalHandler.processTerminalInput('U');
-
-      verifyNever(mockResidentRunner.debugDumpSemanticsTreeInInverseHitTestOrder());
     });
 
     testWithoutContext('v - launchDevTools', () async {
@@ -394,14 +297,6 @@ void main() {
       await terminalHandler.processTerminalInput('W');
 
       verify(mockResidentRunner.debugDumpApp()).called(2);
-    });
-
-    testWithoutContext('w,W - debugDumpApp without service protocol', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
-      await terminalHandler.processTerminalInput('w');
-      await terminalHandler.processTerminalInput('W');
-
-      verifyNever(mockResidentRunner.debugDumpApp());
     });
 
     testWithoutContext('z,Z - debugToggleDebugCheckElevationsEnabled with service protocol', () async {

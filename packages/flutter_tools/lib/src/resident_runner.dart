@@ -979,73 +979,120 @@ abstract class ResidentRunner {
     appFinished();
   }
 
-  Future<void> debugDumpApp() async {
+  Future<bool> debugDumpApp() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpApp();
     }
+    return true;
   }
 
-  Future<void> debugDumpRenderTree() async {
+  Future<bool> debugDumpRenderTree() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpRenderTree();
     }
+    return true;
   }
 
-  Future<void> debugDumpLayerTree() async {
+  Future<bool> debugDumpLayerTree() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpLayerTree();
     }
+    return true;
   }
 
-  Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
+  Future<bool> debugDumpSemanticsTreeInTraversalOrder() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpSemanticsTreeInTraversalOrder();
     }
+    return true;
   }
 
-  Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
+  Future<bool> debugDumpSemanticsTreeInInverseHitTestOrder() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpSemanticsTreeInInverseHitTestOrder();
     }
+    return true;
   }
 
-  Future<void> debugToggleDebugPaintSizeEnabled() async {
+  Future<bool> debugToggleDebugPaintSizeEnabled() async {
+    if (!supportsServiceProtocol || !isRunningDebug) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleDebugPaintSizeEnabled();
     }
+    return true;
   }
 
-  Future<void> debugToggleDebugCheckElevationsEnabled() async {
+  Future<bool> debugToggleDebugCheckElevationsEnabled() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleDebugCheckElevationsEnabled();
     }
+    return true;
   }
 
-  Future<void> debugTogglePerformanceOverlayOverride() async {
+  Future<bool> debugTogglePerformanceOverlayOverride() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.debugTogglePerformanceOverlayOverride();
     }
+    return true;
   }
 
-  Future<void> debugToggleWidgetInspector() async {
+  Future<bool> debugToggleWidgetInspector() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleWidgetInspector();
     }
+    return true;
   }
 
-  Future<void> debugToggleInvertOversizedImages() async {
+  Future<bool> debugToggleInvertOversizedImages() async {
+    if (!supportsServiceProtocol || !isRunningDebug) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleInvertOversizedImages();
     }
+    return true;
   }
 
-  Future<void> debugToggleProfileWidgetBuilds() async {
+  Future<bool> debugToggleProfileWidgetBuilds() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleProfileWidgetBuilds();
     }
+    return true;
   }
 
-  Future<void> debugToggleBrightness() async {
+  Future<bool> debugToggleBrightness() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     final Brightness brightness = await flutterDevices.first.toggleBrightness();
     Brightness next;
     for (final FlutterDevice device in flutterDevices) {
@@ -1054,6 +1101,7 @@ abstract class ResidentRunner {
       );
       globals.logger.printStatus('Changed brightness to $next.');
     }
+    return true;
   }
 
   /// Take a screenshot on the provided [device].
@@ -1118,7 +1166,10 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<void> debugTogglePlatform() async {
+  Future<bool> debugTogglePlatform() async {
+    if (!supportsServiceProtocol || !isRunningDebug) {
+      return false;
+    }
     final List<FlutterView> views = await flutterDevices
       .first
       .vmService.getFlutterViews();
@@ -1132,6 +1183,7 @@ abstract class ResidentRunner {
       to = await device.togglePlatform(from: from);
     }
     globals.printStatus('Switched operating system to $to');
+    return true;
   }
 
   Future<void> stopEchoingDeviceLog() async {
@@ -1230,10 +1282,14 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<void> launchDevTools() async {
+  Future<bool> launchDevTools() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     assert(supportsServiceProtocol);
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    return _devtoolsLauncher.launch(flutterDevices.first.vmService.httpAddress);
+    await _devtoolsLauncher.launch(flutterDevices.first.vmService.httpAddress);
+    return true;
   }
 
   Future<void> shutdownDevtools() async {
@@ -1453,17 +1509,9 @@ class TerminalHandler {
     _logger.printStatus(''); // the key the user tapped might be on this line
     switch (character) {
       case 'a':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugToggleProfileWidgetBuilds();
-          return true;
-        }
-        return false;
+        return residentRunner.debugToggleProfileWidgetBuilds();
       case 'b':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugToggleBrightness();
-          return true;
-        }
-        return false;
+        return residentRunner.debugToggleBrightness();
       case 'c':
         residentRunner.clearScreen();
         return true;
@@ -1481,30 +1529,14 @@ class TerminalHandler {
         residentRunner.printHelp(details: true);
         return true;
       case 'i':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugToggleWidgetInspector();
-          return true;
-        }
-        return false;
+        return residentRunner.debugToggleWidgetInspector();
       case 'I':
-        if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
-          await residentRunner.debugToggleInvertOversizedImages();
-          return true;
-        }
-        return false;
+        return residentRunner.debugToggleInvertOversizedImages();
       case 'L':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugDumpLayerTree();
-          return true;
-        }
-        return false;
+        return residentRunner.debugDumpLayerTree();
       case 'o':
       case 'O':
-        if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
-          await residentRunner.debugTogglePlatform();
-          return true;
-        }
-        return false;
+        return residentRunner.debugTogglePlatform();
       case 'M':
         if (residentRunner.supportsWriteSkSL) {
           await residentRunner.writeSkSL();
@@ -1512,17 +1544,9 @@ class TerminalHandler {
         }
         return false;
       case 'p':
-        if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
-          await residentRunner.debugToggleDebugPaintSizeEnabled();
-          return true;
-        }
-        return false;
+        return residentRunner.debugToggleDebugPaintSizeEnabled();
       case 'P':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugTogglePerformanceOverlayOverride();
-          return true;
-        }
-        return false;
+        return residentRunner.debugTogglePerformanceOverlayOverride();
       case 'q':
       case 'Q':
         // exit
@@ -1561,41 +1585,20 @@ class TerminalHandler {
         }
         return true;
       case 'S':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugDumpSemanticsTreeInTraversalOrder();
-          return true;
-        }
-        return false;
+        return residentRunner.debugDumpSemanticsTreeInTraversalOrder();
       case 't':
       case 'T':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugDumpRenderTree();
-          return true;
-        }
-        return false;
+        return residentRunner.debugDumpRenderTree();
       case 'U':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
-          return true;
-        }
-        return false;
+        return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
       case 'v':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.launchDevTools();
-          return true;
-        }
-        return false;
+        return residentRunner.launchDevTools();
       case 'w':
       case 'W':
-        if (residentRunner.supportsServiceProtocol) {
-          await residentRunner.debugDumpApp();
-          return true;
-        }
-        return false;
+        return residentRunner.debugDumpApp();
       case 'z':
       case 'Z':
-        await residentRunner.debugToggleDebugCheckElevationsEnabled();
-        return true;
+        return residentRunner.debugToggleDebugCheckElevationsEnabled();
     }
     return false;
   }
