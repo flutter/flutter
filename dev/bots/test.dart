@@ -59,7 +59,7 @@ final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTE
 ///
 /// WARNING: if you change this number, also change .cirrus.yml
 /// and make sure it runs _all_ shards.
-const int kDeviceLabShardCount = 4;
+const int kDeviceLabShardCount = 2;
 
 /// The number of Cirrus jobs that run build tests in parallel.
 ///
@@ -92,8 +92,6 @@ const List<String> kWebTestFileKnownFailures = <String>[
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
   'test/widgets/editable_text_cursor_test.dart',
-  'test/widgets/editable_text_test.dart',
-  'test/material/animated_icons_private_test.dart',
   'test/material/data_table_test.dart',
   'test/cupertino/nav_bar_transition_test.dart',
   'test/cupertino/refresh_test.dart',
@@ -538,7 +536,7 @@ Future<void> _runAddToAppLifeCycleTests() async {
 
 Future<void> _runFrameworkTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
-  final List<String> nullSafetyOptions = <String>['--enable-experiment=non-nullable'];
+  final List<String> nullSafetyOptions = <String>['--null-assertions', '--no-sound-null-safety'];
   final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
   Future<void> runWidgets() async {
@@ -579,6 +577,40 @@ Future<void> _runFrameworkTests() async {
     }
   }
 
+  Future<void> runPrivateTests() async {
+    final List<String> args = <String>[
+      'run',
+      '--enable-experiment=non-nullable',
+      '--sound-null-safety',
+      'test_private.dart',
+    ];
+    final Map<String, String> pubEnvironment = <String, String>{
+      'FLUTTER_ROOT': flutterRoot,
+    };
+    if (Directory(pubCache).existsSync()) {
+      pubEnvironment['PUB_CACHE'] = pubCache;
+    }
+
+    // If an existing env variable exists append to it, but only if
+    // it doesn't appear to already include enable-asserts.
+    String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
+    if (!toolsArgs.contains('--enable-asserts')) {
+      toolsArgs += ' --enable-asserts';
+    }
+    pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
+    // The flutter_tool will originally have been snapshotted without asserts.
+    // We need to force it to be regenerated with them enabled.
+    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'));
+    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp'));
+
+    await runCommand(
+      pub,
+      args,
+      workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_private'),
+      environment: pubEnvironment,
+    );
+  }
+
   Future<void> runMisc() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata);
@@ -603,6 +635,7 @@ Future<void> _runFrameworkTests() async {
       options: <String>['--enable-vmservice'],
       tableData: bigqueryApi?.tabledata,
     );
+    await runPrivateTests();
     const String httpClientWarning =
       'Warning: At least one test in this suite creates an HttpClient. When\n'
       'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
@@ -866,7 +899,8 @@ Future<void> _runWebDebugTest(String target, {
         ...<String>[
           '--enable-experiment',
           'non-nullable',
-          '--no-sound-null-safety'
+          '--no-sound-null-safety',
+          '--null-assertions',
         ],
       '-d',
       'chrome',
@@ -1189,15 +1223,6 @@ Future<void> _runHostOnlyDeviceLabTests() async {
   // TODO(ianh): Move the tests that are not running on devicelab any more out
   // of the device lab directory.
 
-  const Map<String, String> kChromeVariables = <String, String>{
-    // This is required to be able to run Chrome on Cirrus and LUCI.
-    'CHROME_NO_SANDBOX': 'true',
-    // Causes Chrome to run in headless mode in environments without displays,
-    // such as Cirrus and LUCI. Do not use this variable when recording actual
-    // benchmark numbers.
-    'UNCALIBRATED_SMOKE_TEST': 'true',
-  };
-
   // List the tests to run.
   // We split these into subshards. The tests are randomly distributed into
   // those subshards so as to get a uniform distribution of costs, but the
@@ -1205,29 +1230,11 @@ Future<void> _runHostOnlyDeviceLabTests() async {
   final List<ShardRunner> tests = <ShardRunner>[
     // Keep this in alphabetical order.
     () => _runDevicelabTest('build_aar_module_test', environment: gradleEnvironment),
-    if (Platform.isMacOS) () => _runDevicelabTest('flutter_create_offline_test_mac'),
-    if (Platform.isLinux) () => _runDevicelabTest('flutter_create_offline_test_linux'),
-    if (Platform.isWindows) () => _runDevicelabTest('flutter_create_offline_test_windows'),
-    () => _runDevicelabTest('gradle_fast_start_test', environment: gradleEnvironment),
-    // TODO(ianh): Fails on macOS looking for "dexdump", https://github.com/flutter/flutter/issues/42494
-    if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('gradle_deprecated_settings_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('gradle_plugin_bundle_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('gradle_plugin_fat_apk_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment),
-    () => _runDevicelabTest('gradle_r8_test', environment: gradleEnvironment),
-
-    () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: true),
     () => _runDevicelabTest('module_custom_host_app_name_test', environment: gradleEnvironment),
     () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
     () => _runDevicelabTest('plugin_dependencies_test', environment: gradleEnvironment),
-
-    if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
-    if (Platform.isMacOS) () => _runDevicelabTest('build_ios_framework_module_test'),
-    if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
-    () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),
-    if (Platform.isLinux) () => _runDevicelabTest('web_benchmarks_html', environment: kChromeVariables),
   ]..shuffle(math.Random(0));
 
   await _selectIndexedSubshard(tests, kDeviceLabShardCount);

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -18,15 +16,6 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
   darkColor: Color(0xFFEBEBF5),
 );
 
-/// Define the iOS version style of [CupertinoActivityIndicator].
-enum CupertinoActivityIndicatorIOSVersionStyle {
-  /// The style that is used in iOS13 and earlier (12 points).
-  iOS13,
-
-  /// The style that was introduced in iOS14 (8 points).
-  iOS14,
-}
-
 /// An iOS-style activity indicator that spins clockwise.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=AENVH-ZqKDQ}
@@ -37,10 +26,9 @@ enum CupertinoActivityIndicatorIOSVersionStyle {
 class CupertinoActivityIndicator extends StatefulWidget {
   /// Creates an iOS-style activity indicator that spins clockwise.
   const CupertinoActivityIndicator({
-    Key key,
+    Key? key,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
-    this.iOSVersionStyle = CupertinoActivityIndicatorIOSVersionStyle.iOS13,
   })  : assert(animating != null),
         assert(radius != null),
         assert(radius > 0.0),
@@ -54,10 +42,9 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// will be shown) and 1.0 (all ticks will be shown) inclusive. Defaults
   /// to 1.0.
   const CupertinoActivityIndicator.partiallyRevealed({
-    Key key,
+    Key? key,
     this.radius = _kDefaultIndicatorRadius,
     this.progress = 1.0,
-    this.iOSVersionStyle = CupertinoActivityIndicatorIOSVersionStyle.iOS13,
   })  : assert(radius != null),
         assert(radius > 0.0),
         assert(progress != null),
@@ -84,12 +71,6 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// Defaults to 1.0. Must be between 0.0 and 1.0 inclusive, and cannot be null.
   final double progress;
 
-  /// The iOS version style of activity indicator.
-  ///
-  /// Defaults to [CupertinoActivityIndicatorIOSVersionStyle.iOS13].
-  // TODO(ctrysbita): Change default style to iOS14 after official release, https://github.com/flutter/flutter/issues/60047
-  final CupertinoActivityIndicatorIOSVersionStyle iOSVersionStyle;
-
   @override
   _CupertinoActivityIndicatorState createState() =>
       _CupertinoActivityIndicatorState();
@@ -97,7 +78,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
 
 class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
     with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+  late AnimationController _controller;
 
   @override
   void initState() {
@@ -138,10 +119,9 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
         painter: _CupertinoActivityIndicatorPainter(
           position: _controller,
           activeColor:
-              CupertinoDynamicColor.resolve(_kActiveTickColor, context),
+              CupertinoDynamicColor.resolve(_kActiveTickColor, context)!,
           radius: widget.radius,
           progress: widget.progress,
-          iOSVersionStyle: widget.iOSVersionStyle,
         ),
       ),
     );
@@ -152,57 +132,29 @@ const double _kTwoPI = math.pi * 2.0;
 
 /// Alpha values extracted from the native component (for both dark and light mode) to
 /// draw the spinning ticks.
-const Map<CupertinoActivityIndicatorIOSVersionStyle, List<int>>
-    _kAlphaValuesMap = <CupertinoActivityIndicatorIOSVersionStyle, List<int>>{
-  /// The order of these values is designed to match the first frame of the iOS activity indicator which
-  /// has the most prominent tick at 9 o'clock.
-  CupertinoActivityIndicatorIOSVersionStyle.iOS13: <int>[
-    47,
-    47,
-    47,
-    47,
-    64,
-    81,
-    97,
-    114,
-    131,
-    147,
-    47,
-    47
-  ],
-
-  /// Alpha values for new style that introduced in iOS14.
-  CupertinoActivityIndicatorIOSVersionStyle.iOS14: <int>[
-    47,
-    47,
-    47,
-    47,
-    72,
-    97,
-    122,
-    147,
-  ],
-};
+const List<int> _kAlphaValues = <int>[
+  47,
+  47,
+  47,
+  47,
+  72,
+  97,
+  122,
+  147,
+];
 
 /// The alpha value that is used to draw the partially revealed ticks.
 const int _partiallyRevealedAlpha = 147;
 
 class _CupertinoActivityIndicatorPainter extends CustomPainter {
   _CupertinoActivityIndicatorPainter({
-    @required this.position,
-    @required this.activeColor,
-    @required this.radius,
-    @required this.progress,
-    CupertinoActivityIndicatorIOSVersionStyle iOSVersionStyle =
-        CupertinoActivityIndicatorIOSVersionStyle.iOS13,
-  })  : alphaValues = _kAlphaValuesMap[iOSVersionStyle],
-        tickFundamentalRRect = RRect.fromLTRBXY(
+    required this.position,
+    required this.activeColor,
+    required this.radius,
+    required this.progress,
+  })  : tickFundamentalRRect = RRect.fromLTRBXY(
           -radius / _kDefaultIndicatorRadius,
-          -radius /
-              (iOSVersionStyle ==
-                      CupertinoActivityIndicatorIOSVersionStyle.iOS14
-                  ? 3.0
-                  : 2.0),
+          -radius / 3.0,
           radius / _kDefaultIndicatorRadius,
           -radius,
           radius / _kDefaultIndicatorRadius,
@@ -215,13 +167,12 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
   final double radius;
   final double progress;
 
-  final List<int> alphaValues;
   final RRect tickFundamentalRRect;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint();
-    final int tickCount = alphaValues.length;
+    final int tickCount = _kAlphaValues.length;
 
     canvas.save();
     canvas.translate(size.width / 2.0, size.height / 2.0);
@@ -231,7 +182,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     for (int i = 0; i < tickCount * progress; ++i) {
       final int t = (i - activeTick) % tickCount;
       paint.color = activeColor
-          .withAlpha(progress < 1 ? _partiallyRevealedAlpha : alphaValues[t]);
+          .withAlpha(progress < 1 ? _partiallyRevealedAlpha : _kAlphaValues[t]);
       canvas.drawRRect(tickFundamentalRRect, paint);
       canvas.rotate(_kTwoPI / tickCount);
     }

@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -241,6 +242,47 @@ void main() {
       });
       final FuchsiaDevice device = FuchsiaDevice('123');
       expect(await device.targetPlatform, TargetPlatform.fuchsia_x64);
+    }, overrides: <Type, Generator>{
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => MockFuchsiaSdk(),
+      ProcessManager: () => MockProcessManager(),
+    });
+
+    testUsingContext('hostAddress parsing works', () async {
+      when(globals.processManager.run(any)).thenAnswer((Invocation _) async {
+        return ProcessResult(
+          1,
+          0,
+          'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
+          '',
+        );
+      });
+      final FuchsiaDevice device = FuchsiaDevice('id');
+      expect(await device.hostAddress, 'fe80::8c6c:2fff:fe3d:c5e1%25ethp0003');
+    }, overrides: <Type, Generator>{
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => MockFuchsiaSdk(),
+      ProcessManager: () => MockProcessManager(),
+    });
+
+    testUsingContext('hostAddress parsing throws tool error on failure', () async {
+      when(globals.processManager.run(any)).thenAnswer((Invocation _) async {
+        return ProcessResult(1, 1, '', '');
+      });
+      final FuchsiaDevice device = FuchsiaDevice('id');
+      expect(() async => await device.hostAddress, throwsToolExit());
+    }, overrides: <Type, Generator>{
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => MockFuchsiaSdk(),
+      ProcessManager: () => MockProcessManager(),
+    });
+
+    testUsingContext('hostAddress parsing throws tool error on empty response', () async {
+      when(globals.processManager.run(any)).thenAnswer((Invocation _) async {
+        return ProcessResult(1, 0, '', '');
+      });
+      final FuchsiaDevice device = FuchsiaDevice('id');
+      expect(() async => await device.hostAddress, throwsToolExit());
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       FuchsiaSdk: () => MockFuchsiaSdk(),
@@ -728,10 +770,13 @@ void main() {
         fuchsiaDevice,
         expectedIsolateName,
         (Uri uri) async => fakeVmServiceHost.vmService,
-        (Device device, Uri uri) => null,
+        (Device device, Uri uri, bool enableServiceAuthCodes) => null,
         true, // only poll once.
       );
-
+      final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
+      when(fuchsiaDevice.dds).thenReturn(mockDds);
+      when(mockDds.startDartDevelopmentService(any, any, any, any)).thenReturn(null);
+      when(mockDds.uri).thenReturn(Uri.parse('example'));
       when(fuchsiaDevice.servicePorts())
           .thenAnswer((Invocation invocation) async => <int>[1]);
       when(portForwarder.forward(1))
@@ -1559,5 +1604,6 @@ class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
   final FuchsiaDevFinder fuchsiaDevFinder;
 }
 
+class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
 class MockFuchsiaWorkflow extends Mock implements FuchsiaWorkflow {}
 class MockCache extends Mock implements Cache {}

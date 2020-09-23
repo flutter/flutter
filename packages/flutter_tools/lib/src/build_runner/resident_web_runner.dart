@@ -21,10 +21,8 @@ import '../base/net.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
-import '../convert.dart';
+import '../build_system/targets/web.dart';
 import '../dart/language_version.dart';
-import '../dart/pub.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../features.dart';
@@ -196,11 +194,6 @@ abstract class ResidentWebRunner extends ResidentRunner {
     if (device.device is! WebServerDevice) {
       globals.printStatus('For a more detailed help message, press "h". $quitMessage');
     }
-  }
-
-  @override
-  Future<List<FlutterView>> listFlutterViews() async {
-    return <FlutterView>[];
   }
 
   @override
@@ -449,15 +442,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
 
     try {
       return await asyncGuard(() async {
-        // Ensure dwds resources are cached. If the .packages file is missing then
-        // the client.js script cannot be located by the injected handler in dwds.
-        // This will result in a NoSuchMethodError thrown by injected_handler.darts
-        await pub.get(
-          context: PubContext.pubGet,
-          directory: globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
-          generateSyntheticPackage: false,
-        );
-
         final ExpressionCompiler expressionCompiler =
           debuggingOptions.webEnableExpressionEvaluation
               ? WebExpressionCompiler(device.generator)
@@ -475,6 +459,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           entrypoint: globals.fs.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
+          nullAssertions: debuggingOptions.nullAssertions,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {
@@ -493,6 +478,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             debuggingOptions.buildInfo,
             debuggingOptions.initializePlatform,
             false,
+            kNoneWorker,
           );
         }
         await device.device.startApp(
@@ -562,6 +548,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions.buildInfo,
           debuggingOptions.initializePlatform,
           false,
+          kNoneWorker,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -601,6 +588,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
         nullSafety: usageNullSafety,
+        fastReassemble: null,
       ).send();
     }
     return OperationResult.ok;
@@ -704,10 +692,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
       fullRestart: fullRestart,
       dillOutputPath: dillOutputPath,
       projectRootPath: projectRootPath,
-      pathToReload: getReloadPath(fullRestart: fullRestart),
+      pathToReload: getReloadPath(fullRestart: fullRestart, swap: false),
       invalidatedFiles: invalidationResult.uris,
       packageConfig: invalidationResult.packageConfig,
       trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
+      devFSWriter: null,
     );
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
@@ -736,14 +725,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
       _connectionResult = await webDevFS.connect(useDebugExtension);
       unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
 
-      _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
-        final String message = utf8.decode(base64.decode(log.bytes));
-        globals.printStatus(message, newline: false);
-      });
-      _stdErrSub = _vmService.onStderrEvent.listen((vmservice.Event log) {
-        final String message = utf8.decode(base64.decode(log.bytes));
-        globals.printStatus(message, newline: false);
-      });
+      void onLogEvent(vmservice.Event event)  {
+        final String message = processVmServiceMessage(event);
+        globals.printStatus(message);
+      }
+
+      _stdOutSub = _vmService.onStdoutEvent.listen(onLogEvent);
+      _stdErrSub = _vmService.onStderrEvent.listen(onLogEvent);
       _extensionEventSub =
           _vmService.onExtensionEvent.listen(printStructuredErrorLog);
       try {
@@ -811,9 +799,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
     await cleanupAtFinish();
     return 0;
   }
-
-  @override
-  bool get supportsCanvasKit => supportsServiceProtocol;
 
   @override
   Future<bool> toggleCanvaskit() async {

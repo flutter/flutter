@@ -1,8 +1,7 @@
-#ifndef WIN32_WINDOW_H_
-#define WIN32_WINDOW_H_
+#ifndef RUNNER_WIN32_WINDOW_H_
+#define RUNNER_WIN32_WINDOW_H_
 
-#include <Windows.h>
-#include <Windowsx.h>
+#include <windows.h>
 
 #include <functional>
 #include <memory>
@@ -52,6 +51,9 @@ class Win32Window {
   // If true, closing this window will quit the application.
   void SetQuitOnClose(bool quit_on_close);
 
+  // Return a RECT representing the bounds of the current client area.
+  RECT GetClientArea();
+
  protected:
   // Processes and route salient window messages for mouse handling,
   // size change and DPI. Delegates handling of these to member overloads that
@@ -62,8 +64,8 @@ class Win32Window {
                                  LPARAM const lparam) noexcept;
 
   // Called when CreateAndShow is called, allowing subclass window-related
-  // setup.
-  virtual void OnCreate();
+  // setup. Subclasses should return false if setup fails.
+  virtual bool OnCreate();
 
   // Called when Destroy is called.
   virtual void OnDestroy();
@@ -93,4 +95,4 @@ class Win32Window {
   HWND child_content_ = nullptr;
 };
 
-#endif  // WIN32_WINDOW_H_
+#endif  // RUNNER_WIN32_WINDOW_H_

@@ -71,7 +71,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 /// This example shows how to move the focus to the next field when the user
-/// presses the ENTER key.
+/// presses the SPACE key.
 ///
 /// ```dart imports
 /// import 'package:flutter/services.dart';
@@ -88,7 +88,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///         },
 ///         child: FocusTraversalGroup(
 ///           child: Form(
-///             autovalidate: true,
+///             autovalidateMode: AutovalidateMode.always,
 ///             onChanged: () {
 ///               Form.of(primaryFocus.context).save();
 ///             },
@@ -158,6 +158,11 @@ class TextFormField extends FormField<String> {
     SmartDashesType smartDashesType,
     SmartQuotesType smartQuotesType,
     bool enableSuggestions = true,
+    @Deprecated(
+      'Use autoValidateMode parameter which provide more specific '
+      'behaviour related to auto validation. '
+      'This feature was deprecated after v1.19.0.'
+    )
     bool autovalidate = false,
     bool maxLengthEnforced = true,
     int maxLines = 1,
@@ -227,10 +232,10 @@ class TextFormField extends FormField<String> {
          final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
              .applyDefaults(Theme.of(field.context).inputDecorationTheme);
          void onChangedHandler(String value) {
+           field.didChange(value);
            if (onChanged != null) {
              onChanged(value);
            }
-           field.didChange(value);
          }
          return TextField(
            controller: state._effectiveController,

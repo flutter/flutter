@@ -18,22 +18,28 @@ import 'scrollbar.dart';
 
 // TODO(abarth): These constants probably belong somewhere more general.
 
+// Used XD to flutter plugin(https://github.com/AdobeXD/xd-to-flutter-plugin/)
+// to derive values of TextStyle(height and letterSpacing) from
+// Adobe XD template for iOS 13, which can be found in
+// Apple Design Resources(https://developer.apple.com/design/resources/).
+// However the values are not exactly the same as native, so eyeballing is needed.
 const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
   fontFamily: '.SF UI Display',
   inherit: false,
-  fontSize: 18.0,
+  fontSize: 17.0,
   fontWeight: FontWeight.w600,
-  letterSpacing: 0.48,
+  height: 1.3,
+  letterSpacing: -0.5,
   textBaseline: TextBaseline.alphabetic,
 );
 
 const TextStyle _kCupertinoDialogContentStyle = TextStyle(
   fontFamily: '.SF UI Text',
   inherit: false,
-  fontSize: 13.4,
+  fontSize: 13.0,
   fontWeight: FontWeight.w400,
-  height: 1.036,
-  letterSpacing: -0.25,
+  height: 1.35,
+  letterSpacing: -0.2,
   textBaseline: TextBaseline.alphabetic,
 );
 
@@ -433,7 +439,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, _AlertDialogSections slot) {
+  void insertRenderObjectChild(RenderObject child, _AlertDialogSections slot) {
     assert(slot != null);
     switch (slot) {
       case _AlertDialogSections.contentSection:
@@ -446,7 +452,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, _AlertDialogSections slot) {
+  void moveRenderObjectChild(RenderObject child, _AlertDialogSections oldSlot, _AlertDialogSections newSlot) {
     assert(false);
   }
 
@@ -470,7 +476,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, _AlertDialogSections slot) {
     assert(child == renderObject.contentSection || child == renderObject.actionsSection);
     if (renderObject.contentSection == child) {
       renderObject.contentSection = null;

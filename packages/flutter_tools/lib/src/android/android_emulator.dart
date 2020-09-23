@@ -56,7 +56,7 @@ class AndroidEmulators extends EmulatorDiscovery {
 
   /// Return the list of available emulator AVDs.
   Future<List<AndroidEmulator>> _getEmulatorAvds() async {
-    final String emulatorPath = getEmulatorPath(_androidSdk);
+    final String emulatorPath = _androidSdk.emulatorPath;
     if (emulatorPath == null) {
       return <AndroidEmulator>[];
     }
@@ -81,7 +81,7 @@ class AndroidEmulators extends EmulatorDiscovery {
 
   AndroidEmulator _loadEmulatorInfo(String id) {
     id = id.trim();
-    final String avdPath = getAvdPath();
+    final String avdPath = _androidSdk.getAvdPath();
     final AndroidEmulator androidEmulatorWithoutProperties = AndroidEmulator(
       id,
       processManager: _processManager,
@@ -150,7 +150,7 @@ class AndroidEmulator extends Emulator {
   @override
   Future<void> launch() async {
     final Process process = await _processUtils.start(
-      <String>[getEmulatorPath(_androidSdk), '-avd', id],
+      <String>[_androidSdk.emulatorPath, '-avd', id],
     );
 
     // Record output from the emulator process.

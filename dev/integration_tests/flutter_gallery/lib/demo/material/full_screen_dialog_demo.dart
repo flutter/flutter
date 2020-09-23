@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -126,13 +124,13 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
             style: dialogTextStyle,
           ),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('CANCEL'),
               onPressed: () {
                 Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
               },
             ),
-            FlatButton(
+            TextButton(
               child: const Text('DISCARD'),
               onPressed: () {
                 Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
@@ -152,7 +150,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
       appBar: AppBar(
         title: Text(_hasName ? _eventName : 'Event Name TBD'),
         actions: <Widget> [
-          FlatButton(
+          TextButton(
             child: Text('SAVE', style: theme.textTheme.bodyText2.copyWith(color: Colors.white)),
             onPressed: () {
               Navigator.pop(context, DismissDialogAction.save);

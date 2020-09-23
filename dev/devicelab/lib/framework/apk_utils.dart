@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -160,7 +159,6 @@ class ApkExtractor {
         'packages',
         apkFile.path,
       ],
-      printStdout: false,
     );
     _classes = Set<String>.from(
       packages

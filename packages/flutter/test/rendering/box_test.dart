@@ -394,31 +394,6 @@ void main() {
     {
       FlutterError result;
       try {
-        unconstrained.getMinIntrinsicWidth(null);
-      } on FlutterError catch (e) {
-        result = e;
-      }
-      expect(result, isNotNull);
-      expect(
-        result.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   The height argument to getMinIntrinsicWidth was null.\n'
-          '   The argument to getMinIntrinsicWidth must not be negative or\n'
-          '   null.\n'
-          '   If you do not have a specific height in mind, then pass\n'
-          '   double.infinity instead.\n'
-        ),
-      );
-      expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific height in mind, then pass double.infinity instead.',
-      );
-    }
-
-    {
-      FlutterError result;
-      try {
         unconstrained.getMinIntrinsicWidth(-1);
       } on FlutterError catch (e) {
         result = e;
@@ -441,31 +416,6 @@ void main() {
         'If you perform computations on another height before passing it to '
         'getMinIntrinsicWidth, consider using math.max() or double.clamp() '
         'to force the value into the valid range.',
-      );
-    }
-
-    {
-      FlutterError result;
-      try {
-        unconstrained.getMinIntrinsicHeight(null);
-      } on FlutterError catch (e) {
-        result = e;
-      }
-      expect(result, isNotNull);
-      expect(
-        result.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   The width argument to getMinIntrinsicHeight was null.\n'
-          '   The argument to getMinIntrinsicHeight must not be negative or\n'
-          '   null.\n'
-          '   If you do not have a specific width in mind, then pass\n'
-          '   double.infinity instead.\n'
-        ),
-      );
-      expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific width in mind, then pass double.infinity instead.',
       );
     }
 
@@ -500,31 +450,6 @@ void main() {
     {
       FlutterError result;
       try {
-        unconstrained.getMaxIntrinsicWidth(null);
-      } on FlutterError catch (e) {
-        result = e;
-      }
-      expect(result, isNotNull);
-      expect(
-        result.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   The height argument to getMaxIntrinsicWidth was null.\n'
-          '   The argument to getMaxIntrinsicWidth must not be negative or\n'
-          '   null.\n'
-          '   If you do not have a specific height in mind, then pass\n'
-          '   double.infinity instead.\n'
-        ),
-      );
-      expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific height in mind, then pass double.infinity instead.',
-      );
-    }
-
-    {
-      FlutterError result;
-      try {
         unconstrained.getMaxIntrinsicWidth(-1);
       } on FlutterError catch (e) {
         result = e;
@@ -547,31 +472,6 @@ void main() {
         'If you perform computations on another height before passing it to '
         'getMaxIntrinsicWidth, consider using math.max() or double.clamp() '
         'to force the value into the valid range.',
-      );
-    }
-
-    {
-      FlutterError result;
-      try {
-        unconstrained.getMaxIntrinsicHeight(null);
-      } on FlutterError catch (e) {
-        result = e;
-      }
-      expect(result, isNotNull);
-      expect(
-        result.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   The width argument to getMaxIntrinsicHeight was null.\n'
-          '   The argument to getMaxIntrinsicHeight must not be negative or\n'
-          '   null.\n'
-          '   If you do not have a specific width in mind, then pass\n'
-          '   double.infinity instead.\n'
-        ),
-      );
-      expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific width in mind, then pass double.infinity instead.',
       );
     }
 
@@ -733,7 +633,7 @@ void main() {
 
       bool isHit = result.addWithPaintTransform(
         transform: null,
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -741,12 +641,12 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, Offset.zero);
       positions.clear();
 
       isHit = result.addWithPaintTransform(
         transform: Matrix4.translationValues(20, 30, 0),
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -754,7 +654,7 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, const Offset(-20.0, -30.0));
       positions.clear();
 
       const Offset position = Offset(3, 4);
@@ -817,7 +717,7 @@ void main() {
 
       bool isHit = result.addWithPaintOffset(
         offset: null,
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -825,12 +725,12 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, Offset.zero);
       positions.clear();
 
       isHit = result.addWithPaintOffset(
         offset: const Offset(55, 32),
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -838,7 +738,7 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, const Offset(-55.0, -32.0));
       positions.clear();
 
       const Offset position = Offset(3, 4);
@@ -888,7 +788,7 @@ void main() {
 
       bool isHit = result.addWithRawTransform(
         transform: null,
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -896,12 +796,12 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, Offset.zero);
       positions.clear();
 
       isHit = result.addWithRawTransform(
         transform: Matrix4.translationValues(20, 30, 0),
-        position: null,
+        position: Offset.zero,
         hitTest: (BoxHitTestResult result, Offset position) {
           expect(result, isNotNull);
           positions.add(position);
@@ -909,7 +809,7 @@ void main() {
         },
       );
       expect(isHit, isTrue);
-      expect(positions.single, isNull);
+      expect(positions.single, const Offset(20.0, 30.0));
       positions.clear();
 
       const Offset position = Offset(3, 4);
@@ -951,6 +851,82 @@ void main() {
       expect(isHit, isTrue);
       expect(positions.single, position + const Offset(20, 30));
       positions.clear();
+    });
+
+    test('addWithOutOfBandPosition', () {
+      final BoxHitTestResult result = BoxHitTestResult();
+      bool ran = false;
+
+      bool isHit = result.addWithOutOfBandPosition(
+        paintOffset: const Offset(20, 30),
+        hitTest: (BoxHitTestResult result) {
+          expect(result, isNotNull);
+          ran = true;
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(ran, isTrue);
+      ran = false;
+
+      isHit = result.addWithOutOfBandPosition(
+        paintTransform: Matrix4.translationValues(20, 30, 0),
+        hitTest: (BoxHitTestResult result) {
+          expect(result, isNotNull);
+          ran = true;
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(ran, isTrue);
+      ran = false;
+
+      isHit = result.addWithOutOfBandPosition(
+        rawTransform: Matrix4.translationValues(20, 30, 0),
+        hitTest: (BoxHitTestResult result) {
+          expect(result, isNotNull);
+          ran = true;
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(ran, isTrue);
+      ran = false;
+
+      isHit = result.addWithOutOfBandPosition(
+        rawTransform: MatrixUtils.forceToPoint(Offset.zero), // cannot be inverted
+        hitTest: (BoxHitTestResult result) {
+          expect(result, isNotNull);
+          ran = true;
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(ran, isTrue);
+      ran = false;
+
+      try {
+        isHit = result.addWithOutOfBandPosition(
+          paintTransform: MatrixUtils.forceToPoint(Offset.zero), // cannot be inverted
+          hitTest: (BoxHitTestResult result) {
+            fail('non-invertible transform should be caught');
+          },
+        );
+        fail('no exception thrown');
+      } on AssertionError catch (e) {
+        expect(e.message, 'paintTransform must be invertible.');
+      }
+
+      try {
+        isHit = result.addWithOutOfBandPosition(
+          hitTest: (BoxHitTestResult result) {
+            fail('addWithOutOfBandPosition should need some transformation of some sort');
+          },
+        );
+        fail('no exception thrown');
+      } on AssertionError catch (e) {
+        expect(e.message, 'Exactly one transform or offset argument must be provided.');
+      }
     });
 
     test('error message', () {

@@ -15,7 +15,6 @@ import '../base/io.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../device.dart';
-import '../features.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
@@ -27,7 +26,6 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
-import '../widget_cache.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -57,7 +55,6 @@ import '../widget_cache.dart';
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
     addBuildModeFlags(defaultToRelease: false);
-    usesIsolateFilterOption(hide: !verboseHelp);
     usesTargetOption();
     usesPortOptions();
     usesIpv6Flag();
@@ -103,6 +100,7 @@ class AttachCommand extends FlutterCommand {
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
+    usesDeviceTimeoutOption();
     hotRunnerFactory ??= HotRunnerFactory();
   }
 
@@ -143,7 +141,10 @@ class AttachCommand extends FlutterCommand {
     if (argResults['debug-uri'] == null) {
       return null;
     }
-    final Uri uri = Uri.parse(stringArg('debug-uri'));
+    final Uri uri = Uri.tryParse(stringArg('debug-uri'));
+    if (uri == null) {
+      throwToolExit('Invalid `--debug-uri`: ${stringArg('debug-uri')}');
+    }
     if (!uri.hasPort) {
       throwToolExit('Port not specified for `--debug-uri`: $uri');
     }
@@ -380,12 +381,10 @@ class AttachCommand extends FlutterCommand {
       flutterProject: flutterProject,
       fileSystemRoots: stringsArg('filesystem-root'),
       fileSystemScheme: stringArg('filesystem-scheme'),
-      viewFilter: stringArg('isolate-filter'),
       target: stringArg('target'),
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: getBuildInfo(),
       userIdentifier: userIdentifier,
-      widgetCache: WidgetCache(featureFlags: featureFlags),
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];

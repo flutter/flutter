@@ -124,7 +124,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     Widget body;
     if (leaveBehindItems.isEmpty) {
       body = Center(
-        child: RaisedButton(
+        child: ElevatedButton(
           onPressed: () => handleDemoAction(LeaveBehindDemoAction.reset),
           child: const Text('Reset the list'),
         ),
@@ -282,13 +282,13 @@ class _LeaveBehindListItem extends StatelessWidget {
         return AlertDialog(
           title: Text('Do you want to $action this item?'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text('Yes'),
               onPressed: () {
                 Navigator.pop(context, true); // showDialog() returns true
               },
             ),
-            FlatButton(
+            TextButton(
               child: const Text('No'),
               onPressed: () {
                 Navigator.pop(context, false); // showDialog() returns false

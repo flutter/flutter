@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -27,19 +26,6 @@ void main() {
       await expectLater(() async {
         await GlobalMaterialLocalizations.delegate.load(const Locale('xx', 'XX'));
       }, throwsAssertionError);
-    });
-
-    // Regression test for https://github.com/flutter/flutter/issues/53036.
-    test('`nb` uses `no` as a synonym when `nb` arb file is not present', () async {
-      final File nbMaterialArbFile = File('lib/src/l10n/material_nb.arb');
-      final File noMaterialArbFile = File('lib/src/l10n/material_no.arb');
-
-      // No need to run test if `nb` arb file exists or if `no` arb file does not exist.
-      if (noMaterialArbFile.existsSync() && !nbMaterialArbFile.existsSync()) {
-        final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate
-          .load(const Locale('nb')) as GlobalMaterialLocalizations;
-        expect(localizations.formatMediumDate(DateTime(2020, 4, 3)), 'fre. 3. apr.');
-      }
     });
 
     group('formatHour', () {

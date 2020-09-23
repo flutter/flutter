@@ -10,10 +10,20 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class MockRestorationManager extends TestRestorationManager {
+  MockRestorationManager({ this.enableChannels = false });
+
   bool get updateScheduled => _updateScheduled;
   bool _updateScheduled = false;
 
   final List<RestorationBucket> _buckets = <RestorationBucket>[];
+
+  final bool enableChannels;
+
+  @override
+  void initChannels() {
+    if (enableChannels)
+      super.initChannels();
+  }
 
   @override
   void scheduleSerializationFor(RestorationBucket bucket) {
@@ -50,9 +60,16 @@ class MockRestorationManager extends TestRestorationManager {
   Future<RestorationBucket> _rootBucket;
   set rootBucket(Future<RestorationBucket> value) {
     _rootBucket = value;
+    _isRestoring = true;
+    ServicesBinding.instance.addPostFrameCallback((Duration _) {
+      _isRestoring = false;
+    });
     notifyListeners();
   }
 
+  @override
+  bool get isReplacing => _isRestoring;
+  bool _isRestoring;
 
   @override
   Future<void> sendToEngine(Uint8List encodedData) {

@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'common.dart';
+import 'context.dart';
 
 export 'package:process/process.dart' show ProcessManager;
 
@@ -198,6 +199,11 @@ abstract class FakeProcessManager implements ProcessManager {
   ///
   /// This is a no-op on [FakeProcessManager.any].
   void addCommand(FakeCommand command);
+
+  /// Add multiple [FakeCommand] to the current process manager.
+  void addCommands(Iterable<FakeCommand> commands) {
+    commands.forEach(addCommand);
+  }
 
   /// Whether this fake has more [FakeCommand]s that are expected to run.
   ///

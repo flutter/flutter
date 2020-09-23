@@ -18,7 +18,7 @@ class _CountButtonState extends State<CountButton> {
   int counter = 0;
   @override
   Widget build(BuildContext context) {
-    return RaisedButton(
+    return ElevatedButton(
       child: Text('Counter $counter'),
       onPressed: () {
         setState(() {

@@ -179,7 +179,10 @@ abstract class ButtonStyleButton extends StatefulWidget {
 ///  * [TextButton], a simple button without a shadow.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * [OutlinedButton], similar to [TextButton], but with an outline.
-class _ButtonStyleState extends State<ButtonStyleButton> {
+class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStateMixin {
+  AnimationController _controller;
+  double _elevation;
+  Color _backgroundColor;
   final Set<MaterialState> _states = <MaterialState>{};
 
   bool get _hovered => _states.contains(MaterialState.hovered);
@@ -222,6 +225,12 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
   }
 
   @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(ButtonStyleButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateState(MaterialState.disabled, !widget.enabled);
@@ -254,11 +263,11 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
       );
     }
 
+    final double resolvedElevation = resolve<double>((ButtonStyle style) => style?.elevation);
     final TextStyle resolvedTextStyle = resolve<TextStyle>((ButtonStyle style) => style?.textStyle);
-    final Color resolvedBackgroundColor = resolve<Color>((ButtonStyle style) => style?.backgroundColor);
+    Color resolvedBackgroundColor = resolve<Color>((ButtonStyle style) => style?.backgroundColor);
     final Color resolvedForegroundColor = resolve<Color>((ButtonStyle style) => style?.foregroundColor);
     final Color resolvedShadowColor = resolve<Color>((ButtonStyle style) => style?.shadowColor);
-    final double resolvedElevation = resolve<double>((ButtonStyle style) => style?.elevation);
     final EdgeInsetsGeometry resolvedPadding = resolve<EdgeInsetsGeometry>((ButtonStyle style) => style?.padding);
     final Size resolvedMinimumSize = resolve<Size>((ButtonStyle style) => style?.minimumSize);
     final BorderSide resolvedSide = resolve<BorderSide>((ButtonStyle style) => style?.side);
@@ -291,6 +300,37 @@ class _ButtonStyleState extends State<ButtonStyleButton> {
         bottom: densityAdjustment.dy,
       ),
     ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+
+    // If an opaque button's background is becoming translucent while its
+    // elevation is changing, change the elevation first. Material implicitly
+    // animates its elevation but not its color. SKIA renders non-zero
+    // elevations as a shadow colored fill behind the Material's background.
+    if (resolvedAnimationDuration > Duration.zero
+        && _elevation != null
+        && _backgroundColor != null
+        && _elevation != resolvedElevation
+        && _backgroundColor.value != resolvedBackgroundColor.value
+        && _backgroundColor.opacity == 1
+        && resolvedBackgroundColor.opacity < 1
+        && resolvedElevation == 0) {
+      if (_controller?.duration != resolvedAnimationDuration) {
+        _controller?.dispose();
+        _controller = AnimationController(
+          duration: resolvedAnimationDuration,
+          vsync: this,
+        )
+        ..addStatusListener((AnimationStatus status) {
+          if (status == AnimationStatus.completed) {
+            setState(() { }); // Rebuild with the final background color.
+          }
+        });
+      }
+      resolvedBackgroundColor = _backgroundColor; // Defer changing the background color.
+      _controller.value = 0;
+      _controller.forward();
+    }
+    _elevation = resolvedElevation;
+    _backgroundColor = resolvedBackgroundColor;
 
     final Widget result = ConstrainedBox(
       constraints: effectiveConstraints,

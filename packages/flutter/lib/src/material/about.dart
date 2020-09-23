@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
 import 'dart:developer' show Timeline, Flow;
 import 'dart:io' show Platform;
 
@@ -612,41 +611,40 @@ class _PackagesViewState extends State<_PackagesView> {
     return FutureBuilder<_LicenseData>(
       future: licenses,
       builder: (BuildContext context, AsyncSnapshot<_LicenseData> snapshot) {
-        return AnimatedSwitcher(
-          transitionBuilder: (Widget child, Animation<double> animation) => FadeTransition(opacity: animation, child: child),
-          duration: kThemeAnimationDuration,
-          child: LayoutBuilder(
-            key: ValueKey<ConnectionState>(snapshot.connectionState),
-            builder: (BuildContext context, BoxConstraints constraints) {
-              switch (snapshot.connectionState) {
-                case ConnectionState.done:
-                  _initDefaultDetailPage(snapshot.data, context);
-                  return ValueListenableBuilder<int>(
-                    valueListenable: widget.selectedId,
-                    builder: (BuildContext context, int selectedId, Widget _) {
-                      return Center(
-                        child: Material(
-                          color: Theme.of(context).cardColor,
-                          elevation: 4.0,
-                          child: Container(
-                            constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
-                            child: _packagesList(context, selectedId, snapshot.data, widget.isLateral),
-                          ),
+        return LayoutBuilder(
+          key: ValueKey<ConnectionState>(snapshot.connectionState),
+          builder: (BuildContext context, BoxConstraints constraints) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.done:
+                _initDefaultDetailPage(snapshot.data, context);
+                return ValueListenableBuilder<int>(
+                  valueListenable: widget.selectedId,
+                  builder: (BuildContext context, int selectedId, Widget _) {
+                    return Center(
+                      child: Material(
+                        color: Theme.of(context).cardColor,
+                        elevation: 4.0,
+                        child: Container(
+                          constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
+                          child: _packagesList(context, selectedId, snapshot.data, widget.isLateral),
                         ),
-                      );
-                    },
-                  );
-                default:
-                  return Column(
+                      ),
+                    );
+                  },
+                );
+              default:
+                return Material(
+                    color: Theme.of(context).cardColor,
+                    child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       widget.about,
                       const Center(child: CircularProgressIndicator()),
                     ],
-                  );
-              }
-            },
-          ),
+                  ),
+                );
+            }
+          },
         );
       },
     );
@@ -917,7 +915,11 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     if (widget.scrollController == null) {
       page = Scaffold(
         appBar: AppBar(
-          title: _PackageLicensePageTitle(title, subtitle, theme.primaryTextTheme),
+          title: _PackageLicensePageTitle(
+            title,
+            subtitle,
+            theme.appBarTheme.textTheme ?? theme.primaryTextTheme,
+          ),
         ),
         body: Center(
           child: Material(

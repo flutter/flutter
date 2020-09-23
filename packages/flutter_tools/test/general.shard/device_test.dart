@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -13,7 +12,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
-import 'package:quiver/testing/async.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
@@ -58,8 +57,10 @@ void main() {
       // 3. A device discoverer that succeeds.
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
-        testLongPollingDeviceDiscovery: true,
-        testThrowingDeviceDiscovery: true,
+        deviceDiscoveryOverrides: <DeviceDiscovery>[
+          ThrowingPollingDeviceDiscovery(),
+          LongPollingDeviceDiscovery(),
+        ],
       );
 
       Future<void> expectDevice(String id, List<Device> expected) async {
@@ -89,7 +90,9 @@ void main() {
       // 2. A device discoverer that succeeds.
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
-        testThrowingDeviceDiscovery: true
+        deviceDiscoveryOverrides: <DeviceDiscovery>[
+          ThrowingPollingDeviceDiscovery(),
+        ],
       );
 
       Future<void> expectDevice(String id, List<Device> expected) async {
@@ -136,7 +139,7 @@ void main() {
 
   group('PollingDeviceDiscovery', () {
     testUsingContext('startPolling', () async {
-      FakeAsync().run((FakeAsync time) async {
+      await FakeAsync().run((FakeAsync time) async {
         final FakePollingDeviceDiscovery pollingDeviceDiscovery = FakePollingDeviceDiscovery();
         await pollingDeviceDiscovery.startPolling();
         time.elapse(const Duration(milliseconds: 4001));
@@ -154,7 +157,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Artifacts: () => Artifacts.test(),
       Cache: () => cache,
-    });
+    }, skip: true); // TODO(jonahwilliams): clean up with https://github.com/flutter/flutter/issues/60675
   });
 
   group('Filter devices', () {
@@ -204,7 +207,8 @@ void main() {
       ];
 
       when(mockStdio.stdinHasTerminal).thenReturn(true);
-      when(globals.terminal.promptForCharInput(<String>['0', '1'],
+      when(globals.terminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+      displayAcceptedCharacters: false,
       logger: globals.logger,
       prompt: globals.userMessages.flutterChooseOne)
       ).thenAnswer((Invocation invocation) async => '0');
@@ -228,8 +232,9 @@ void main() {
       ];
 
       when(mockStdio.stdinHasTerminal).thenReturn(true);
-      when(globals.terminal.promptForCharInput(<String>['0', '1'],
-      logger: globals.logger,
+      when(globals.terminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+          displayAcceptedCharacters: false,
+          logger: globals.logger,
       prompt: globals.userMessages.flutterChooseOne)
       ).thenAnswer((Invocation invocation) async => '1');
 
@@ -252,8 +257,9 @@ void main() {
       ];
 
       when(mockStdio.stdinHasTerminal).thenReturn(true);
-      when(globals.terminal.promptForCharInput(<String>['0', '1'],
-        logger: globals.logger,
+      when(globals.terminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+          displayAcceptedCharacters: false,
+          logger: globals.logger,
         prompt: globals.userMessages.flutterChooseOne)
       ).thenAnswer((Invocation invocation) async => '0');
 
@@ -276,8 +282,9 @@ void main() {
       ];
 
       when(mockStdio.stdinHasTerminal).thenReturn(true);
-      when(globals.terminal.promptForCharInput(<String>['0', '1'],
-        logger: globals.logger,
+      when(globals.terminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+          displayAcceptedCharacters: false,
+          logger: globals.logger,
         prompt: globals.userMessages.flutterChooseOne)
       ).thenAnswer((Invocation invocation) async => '1');
 
@@ -303,7 +310,8 @@ void main() {
       ];
 
       when(mockStdio.stdinHasTerminal).thenReturn(true);
-      when(globals.terminal.promptForCharInput(<String>['0', '1', '2', '3'],
+      when(globals.terminal.promptForCharInput(<String>['0', '1', '2', '3', 'q', 'Q'],
+        displayAcceptedCharacters: false,
         logger: globals.logger,
         prompt: globals.userMessages.flutterChooseOne)
       ).thenAnswer((Invocation invocation) async => '2');
@@ -314,6 +322,33 @@ void main() {
       expect(filtered, <Device>[
         nonEphemeralOne
       ]);
+    }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
+      AnsiTerminal: () => MockTerminal(),
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
+    });
+
+    testUsingContext('exit from choose one of available devices', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+        ephemeralTwo,
+      ];
+
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
+      when(globals.terminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+          displayAcceptedCharacters: false,
+          logger: globals.logger,
+          prompt: globals.userMessages.flutterChooseOne)
+      ).thenAnswer((Invocation invocation) async => 'q');
+
+      try {
+        final DeviceManager deviceManager = TestDeviceManager(devices);
+        await deviceManager.findTargetDevices(FlutterProject.current());
+      } on ToolExit catch (e) {
+        expect(e.exitCode, null);
+        expect(e.message, '');
+      }
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       AnsiTerminal: () => MockTerminal(),
@@ -387,7 +422,62 @@ void main() {
       Artifacts: () => Artifacts.test(),
       Cache: () => cache,
     });
+
+    testUsingContext('does not refresh device cache without a timeout', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+      ];
+      final MockDeviceDiscovery mockDeviceDiscovery = MockDeviceDiscovery();
+      when(mockDeviceDiscovery.supportsPlatform).thenReturn(true);
+      // when(mockDeviceDiscovery.discoverDevices(timeout: timeout)).thenAnswer((_) async => devices);
+      when(mockDeviceDiscovery.devices).thenAnswer((_) async => devices);
+      // when(mockDeviceDiscovery.discoverDevices(timeout: timeout)).thenAnswer((_) async => devices);
+
+      final DeviceManager deviceManager = TestDeviceManager(<Device>[], deviceDiscoveryOverrides: <DeviceDiscovery>[
+        mockDeviceDiscovery
+      ]);
+      deviceManager.specifiedDeviceId = ephemeralOne.id;
+      final List<Device> filtered = await deviceManager.findTargetDevices(
+        FlutterProject.current(),
+      );
+
+      expect(filtered.single, ephemeralOne);
+      verify(mockDeviceDiscovery.devices).called(1);
+      verifyNever(mockDeviceDiscovery.discoverDevices(timeout: anyNamed('timeout')));
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
+    });
+
+    testUsingContext('refreshes device cache with a timeout', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+      ];
+      const Duration timeout = Duration(seconds: 2);
+      final MockDeviceDiscovery mockDeviceDiscovery = MockDeviceDiscovery();
+      when(mockDeviceDiscovery.supportsPlatform).thenReturn(true);
+      when(mockDeviceDiscovery.discoverDevices(timeout: timeout)).thenAnswer((_) async => devices);
+      when(mockDeviceDiscovery.devices).thenAnswer((_) async => devices);
+      // when(mockDeviceDiscovery.discoverDevices(timeout: timeout)).thenAnswer((_) async => devices);
+
+      final DeviceManager deviceManager = TestDeviceManager(<Device>[], deviceDiscoveryOverrides: <DeviceDiscovery>[
+        mockDeviceDiscovery
+      ]);
+      deviceManager.specifiedDeviceId = ephemeralOne.id;
+      final List<Device> filtered = await deviceManager.findTargetDevices(
+        FlutterProject.current(),
+        timeout: timeout,
+      );
+
+      expect(filtered.single, ephemeralOne);
+      verify(mockDeviceDiscovery.devices).called(1);
+      verify(mockDeviceDiscovery.discoverDevices(timeout: anyNamed('timeout'))).called(1);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(),
+      Cache: () => cache,
+    });
   });
+
   group('ForwardedPort', () {
     group('dispose()', () {
       testUsingContext('does not throw exception if no process is present', () {
@@ -416,20 +506,24 @@ void main() {
       );
     });
   });
+
+  testWithoutContext('computeDartVmFlags handles various combinations of Dart VM flags and null_assertions', () {
+    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: null)), '');
+    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo')), '--foo');
+    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '', nullAssertions: true)), '--null_assertions');
+    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo', nullAssertions: true)), '--foo,--null_assertions');
+  });
 }
 
 class TestDeviceManager extends DeviceManager {
     TestDeviceManager(List<Device> allDevices, {
-    bool testLongPollingDeviceDiscovery = false,
-    bool testThrowingDeviceDiscovery = false,
+    List<DeviceDiscovery> deviceDiscoveryOverrides,
   }) {
     _fakeDeviceDiscoverer = FakePollingDeviceDiscovery();
     _deviceDiscoverers = <DeviceDiscovery>[
-      if (testLongPollingDeviceDiscovery)
-        LongPollingDeviceDiscovery(),
-      if (testThrowingDeviceDiscovery)
-        ThrowingPollingDeviceDiscovery(),
       _fakeDeviceDiscoverer,
+      if (deviceDiscoveryOverrides != null)
+        ...deviceDiscoveryOverrides
     ];
     resetDevices(allDevices);
   }
@@ -457,3 +551,4 @@ class MockProcess extends Mock implements Process {}
 class MockTerminal extends Mock implements AnsiTerminal {}
 class MockStdio extends Mock implements Stdio {}
 class MockCache extends Mock implements Cache {}
+class MockDeviceDiscovery extends Mock implements DeviceDiscovery {}

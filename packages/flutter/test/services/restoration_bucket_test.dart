@@ -541,60 +541,12 @@ void main() {
     expect(rawData[childrenMapKey]['child1'][childrenMapKey]['child2'][valuesMapKey]['hello'], 'world');
   });
 
-  test('decommission drops itself from parent and notifies all listeners', () {
-    final MockRestorationManager manager = MockRestorationManager();
-    final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
-
-    final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
-    final RestorationBucket child2 = root.claimChild('child2', debugOwner: 'owner1');
-    final RestorationBucket childOfChild1 = child1.claimChild('child1.1', debugOwner: 'owner1');
-    final RestorationBucket childOfChildOfChild1 = childOfChild1.claimChild('child1.1.1', debugOwner: 'owner1');
-
-    expect(manager.updateScheduled, isTrue);
-    manager.doSerialization();
-    expect(manager.updateScheduled, isFalse);
-
-    bool rootDecommissioned = false;
-    root.addListener(() {
-      rootDecommissioned = true;
-    });
-    bool child1Decommissioned = false;
-    child1.addListener(() {
-      child1Decommissioned = true;
-    });
-    bool child2Decommissioned = false;
-    child2.addListener(() {
-      child2Decommissioned = true;
-    });
-    bool childOfChild1Decommissioned = false;
-    childOfChild1.addListener(() {
-      childOfChild1Decommissioned = true;
-    });
-    bool childOfChildOfChild1Decommissioned = false;
-    childOfChildOfChild1.addListener(() {
-      childOfChildOfChild1Decommissioned = true;
-    });
-
-    expect(rawData[childrenMapKey].containsKey('child1'), isTrue);
-
-    child1.decommission();
-    expect(rootDecommissioned, isFalse);
-    expect(child2Decommissioned, isFalse);
-    expect(child1Decommissioned, isTrue);
-    expect(childOfChild1Decommissioned, isTrue);
-    expect(childOfChildOfChild1Decommissioned, isTrue);
-
-    expect(rawData[childrenMapKey].containsKey('child1'), isFalse);
-  });
-
   test('throws when used after dispose', () {
     final RestorationBucket bucket = RestorationBucket.empty(restorationId: 'foo', debugOwner: null);
     bucket.dispose();
 
     expect(() => bucket.debugOwner, throwsFlutterError);
     expect(() => bucket.restorationId, throwsFlutterError);
-    expect(() => bucket.decommission(), throwsFlutterError);
     expect(() => bucket.read<int>('foo'), throwsFlutterError);
     expect(() => bucket.write('foo', 10), throwsFlutterError);
     expect(() => bucket.remove<int>('foo'), throwsFlutterError);
@@ -604,11 +556,6 @@ void main() {
     expect(() => bucket.adoptChild(child), throwsFlutterError);
     expect(() => bucket.rename('bar'), throwsFlutterError);
     expect(() => bucket.dispose(), throwsFlutterError);
-  });
-
-  test('cannot serialize without manager', () {
-    final RestorationBucket bucket = RestorationBucket.empty(restorationId: 'foo', debugOwner: null);
-    expect(() => bucket.write('foo', 10), throwsAssertionError);
   });
 }
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -271,6 +269,61 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   }
 }
 
+/// A [TestVariant] that runs separate tests with each of the given values.
+///
+/// To use this variant, define it before the test, and then access
+/// [currentValue] inside the test.
+///
+/// The values are typically enums, but they don't have to be. The `toString`
+/// for the given value will be used to describe the variant. Values will have
+/// their type name stripped from their `toString` output, so that enum values
+/// will only print the value, not the type.
+///
+/// {@tool snippet}
+/// This example shows how to set up the test to access the [currentValue]. In
+/// this example, two tests will be run, one with `value1`, and one with
+/// `value2`. The test with `value2` will fail. The names of the tests will be:
+///
+///   - `Test handling of TestScenario (value1)`
+///   - `Test handling of TestScenario (value2)`
+///
+/// ```dart
+/// enum TestScenario {
+///   value1,
+///   value2,
+///   value3,
+/// }
+///
+/// final ValueVariant<TestScenario> variants = ValueVariant<TestScenario>(
+///   <TestScenario>{value1, value2},
+/// );
+///
+/// testWidgets('Test handling of TestScenario', (WidgetTester tester) {
+///   expect(variants.currentValue, equals(value1));
+/// }, variant: variants);
+/// ```
+/// {@end-tool}
+class ValueVariant<T> extends TestVariant<T> {
+  /// Creates a [ValueVariant] that tests the given [values].
+  ValueVariant(this.values);
+
+  /// Returns the value currently under test.
+  T get currentValue => _currentValue;
+  T _currentValue;
+
+  @override
+  final Set<T> values;
+
+  @override
+  String describeValue(T value) => value.toString().replaceFirst('$T.', '');
+
+  @override
+  Future<T> setUp(T value) async => _currentValue = value;
+
+  @override
+  Future<void> tearDown(T value, T memento) async {}
+}
+
 /// The warning message to show when a benchmark is performed with assert on.
 const String kDebugWarning = '''
 ┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓
@@ -488,7 +541,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           // Flush all past events
           handleTimeStampDiff.add(-timeDiff);
           for (final PointerEvent event in record.events) {
-            _handlePointerEvent(event, hitTestHistory);
+            binding.handlePointerEvent(event, source: TestBindingEventSource.test);
           }
         } else {
           // TODO(CareF): reconsider the pumping strategy after
@@ -499,7 +552,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
             binding.clock.now().difference(startTime) - record.timeDelay,
           );
           for (final PointerEvent event in record.events) {
-            _handlePointerEvent(event, hitTestHistory);
+            binding.handlePointerEvent(event, source: TestBindingEventSource.test);
           }
         }
       }
@@ -509,48 +562,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       assert(hitTestHistory.isEmpty);
       return handleTimeStampDiff;
     });
-  }
-
-  // This is a parallel implementation of [GestureBinding._handlePointerEvent]
-  // to make compatible with test bindings.
-  void _handlePointerEvent(
-    PointerEvent event,
-    Map<int, HitTestResult> _hitTests
-  ) {
-    HitTestResult hitTestResult;
-    if (event is PointerDownEvent || event is PointerSignalEvent) {
-      assert(!_hitTests.containsKey(event.pointer));
-      hitTestResult = HitTestResult();
-      binding.hitTest(hitTestResult, event.position);
-      if (event is PointerDownEvent) {
-        _hitTests[event.pointer] = hitTestResult;
-      }
-      assert(() {
-        if (debugPrintHitTestResults)
-          debugPrint('$event: $hitTestResult');
-        return true;
-      }());
-    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
-      hitTestResult = _hitTests.remove(event.pointer);
-    } else if (event.down) {
-      // Because events that occur with the pointer down (like
-      // PointerMoveEvents) should be dispatched to the same place that their
-      // initial PointerDownEvent was, we want to re-use the path we found when
-      // the pointer went down, rather than do hit detection each time we get
-      // such an event.
-      hitTestResult = _hitTests[event.pointer];
-    }
-    assert(() {
-      if (debugPrintMouseHoverEvents && event is PointerHoverEvent)
-        debugPrint('$event');
-      return true;
-    }());
-    if (hitTestResult != null ||
-        event is PointerHoverEvent ||
-        event is PointerAddedEvent ||
-        event is PointerRemovedEvent) {
-      binding.dispatchEvent(event, hitTestResult, source: TestBindingEventSource.test);
-    }
   }
 
   /// Triggers a frame after `duration` amount of time.
@@ -763,14 +774,15 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   HitTestResult hitTestOnBinding(Offset location) {
+    assert(location != null);
     location = binding.localToGlobal(location);
     return super.hitTestOnBinding(location);
   }
 
   @override
-  Future<void> sendEventToBinding(PointerEvent event, HitTestResult result) {
+  Future<void> sendEventToBinding(PointerEvent event) {
     return TestAsyncUtils.guard<void>(() async {
-      binding.dispatchEvent(event, result, source: TestBindingEventSource.test);
+      binding.handlePointerEvent(event, source: TestBindingEventSource.test);
     });
   }
 

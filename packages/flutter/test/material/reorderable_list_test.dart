@@ -177,11 +177,9 @@ void main() {
           return contentElement;
         }
 
-        const double kNonDraggingListHeight = 292.0;
-        // The list view pads the drop area by 8dp.
-        const double kDraggingListHeight = 300.0;
+        const double kDraggingListHeight = 292.0;
         // Drag a normal text item
-        expect(getContentElement().size.height, kNonDraggingListHeight);
+        expect(getContentElement().size.height, kDraggingListHeight);
         TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Normal item')));
         await tester.pump(kLongPressTimeout + kPressTimeout);
         await tester.pumpAndSettle();
@@ -195,7 +193,7 @@ void main() {
         // Drop it
         await drag.up();
         await tester.pumpAndSettle();
-        expect(getContentElement().size.height, kNonDraggingListHeight);
+        expect(getContentElement().size.height, kDraggingListHeight);
 
         // Drag a tall item
         drag = await tester.startGesture(tester.getCenter(find.text('Tall item')));
@@ -210,7 +208,48 @@ void main() {
         // Drop it
         await drag.up();
         await tester.pumpAndSettle();
-        expect(getContentElement().size.height, kNonDraggingListHeight);
+        expect(getContentElement().size.height, kDraggingListHeight);
+      });
+
+      testWidgets('Vertical drop area golden', (WidgetTester tester) async {
+        final Widget reorderableListView = ReorderableListView(
+          children: <Widget>[
+            Container(
+              key: const Key('pink'),
+              width: double.infinity,
+              height: itemHeight,
+              color: Colors.pink,
+            ),
+            Container(
+              key: const Key('blue'),
+              width: double.infinity,
+              height: itemHeight,
+              color: Colors.blue,
+            ),
+            Container(
+              key: const Key('green'),
+              width: double.infinity,
+              height: itemHeight,
+              color: Colors.green,
+            ),
+          ],
+          scrollDirection: Axis.vertical,
+          onReorder: (int oldIndex, int newIndex) { },
+        );
+        await tester.pumpWidget(MaterialApp(
+          home: SizedBox(
+            height: itemHeight * 3,
+            child: reorderableListView,
+          ),
+        ));
+
+        await tester.startGesture(tester.getCenter(find.byKey(const Key('blue'))));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byKey(const Key('blue')),
+          matchesGoldenFile('reorderable_list_test.vertical.drop_area.png'),
+        );
       });
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
@@ -251,6 +290,35 @@ void main() {
         expect(findState(const Key('B')).checked, false);
         expect(findState(const Key('C')).checked, false);
         expect(findState(const Key('A')).checked, true);
+      });
+
+      testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
+        const Key firstBox = Key('key');
+        Widget build() {
+          return MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: ReorderableListView(
+                  scrollDirection: Axis.vertical,
+                  children: const <Widget>[
+                    SizedBox(key: firstBox, width: 10, height: 10),
+                  ],
+                  onReorder: (_, __) {},
+                ),
+              ),
+            ),
+          );
+        }
+
+        // When the widget is rebuilt, the state of child should be consistent.
+        await tester.pumpWidget(build());
+        final Element e0 = tester.element(find.byKey(firstBox));
+        await tester.pumpWidget(build());
+        final Element e1 = tester.element(find.byKey(firstBox));
+        expect(e0, equals(e1));
       });
 
       testWidgets('Uses the PrimaryScrollController when available', (WidgetTester tester) async {
@@ -692,11 +760,9 @@ void main() {
           return contentElement;
         }
 
-        const double kNonDraggingListWidth = 292.0;
-        // The list view pads the drop area by 8dp.
-        const double kDraggingListWidth = 300.0;
+        const double kDraggingListWidth = 292.0;
         // Drag a normal text item
-        expect(getContentElement().size.width, kNonDraggingListWidth);
+        expect(getContentElement().size.width, kDraggingListWidth);
         TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Normal item')));
         await tester.pump(kLongPressTimeout + kPressTimeout);
         await tester.pumpAndSettle();
@@ -710,7 +776,7 @@ void main() {
         // Drop it
         await drag.up();
         await tester.pumpAndSettle();
-        expect(getContentElement().size.width, kNonDraggingListWidth);
+        expect(getContentElement().size.width, kDraggingListWidth);
 
         // Drag a tall item
         drag = await tester.startGesture(tester.getCenter(find.text('Tall item')));
@@ -725,9 +791,49 @@ void main() {
         // Drop it
         await drag.up();
         await tester.pumpAndSettle();
-        expect(getContentElement().size.width, kNonDraggingListWidth);
+        expect(getContentElement().size.width, kDraggingListWidth);
       });
 
+      testWidgets('Horizontal drop area golden', (WidgetTester tester) async {
+        final Widget reorderableListView = ReorderableListView(
+          children: <Widget>[
+            Container(
+              key: const Key('pink'),
+              height: double.infinity,
+              width: itemHeight,
+              color: Colors.pink,
+            ),
+            Container(
+              key: const Key('blue'),
+              height: double.infinity,
+              width: itemHeight,
+              color: Colors.blue,
+            ),
+            Container(
+              key: const Key('green'),
+              height: double.infinity,
+              width: itemHeight,
+              color: Colors.green,
+            ),
+          ],
+          scrollDirection: Axis.horizontal,
+          onReorder: (int oldIndex, int newIndex) { },
+        );
+        await tester.pumpWidget(MaterialApp(
+          home: SizedBox(
+            width: itemHeight * 3,
+            child: reorderableListView,
+          ),
+        ));
+
+        await tester.startGesture(tester.getCenter(find.byKey(const Key('blue'))));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byKey(const Key('blue')),
+          matchesGoldenFile('reorderable_list_test.horizontal.drop_area.png'),
+        );
+      });
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
@@ -769,6 +875,35 @@ void main() {
         expect(findState(const Key('B')).checked, false);
         expect(findState(const Key('C')).checked, false);
         expect(findState(const Key('A')).checked, true);
+      });
+
+      testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
+        const Key firstBox = Key('key');
+        Widget build() {
+          return MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: ReorderableListView(
+                  scrollDirection: Axis.horizontal,
+                  children: const <Widget>[
+                    SizedBox(key: firstBox, width: 10, height: 10),
+                  ],
+                  onReorder: (_, __) {},
+                ),
+              ),
+            ),
+          );
+        }
+
+        // When the widget is rebuilt, the state of child should be consistent.
+        await tester.pumpWidget(build());
+        final Element e0 = tester.element(find.byKey(firstBox));
+        await tester.pumpWidget(build());
+        final Element e1 = tester.element(find.byKey(firstBox));
+        expect(e0, equals(e1));
       });
 
       group('Accessibility (a11y/Semantics)', () {

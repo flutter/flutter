@@ -79,6 +79,9 @@ class ViewportOffsetSpy extends ViewportOffset {
   @override
   double get pixels => _pixels;
 
+  @override
+  bool get hasPixels => true;
+
   bool corrected = false;
 
   @override
@@ -342,8 +345,6 @@ void main() {
     final SliverMultiBoxAdaptorParentData candidate = SliverMultiBoxAdaptorParentData();
     expect(candidate.keepAlive, isFalse);
     expect(candidate.index, isNull);
-    expect(candidate.toString(), 'index=null; layoutOffset=None');
-    candidate.keepAlive = null;
     expect(candidate.toString(), 'index=null; layoutOffset=None');
     candidate.keepAlive = true;
     expect(candidate.toString(), 'index=null; keepAlive; layoutOffset=None');

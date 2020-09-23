@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 
@@ -130,7 +129,7 @@ abstract class BorderRadiusGeometry {
   /// into a concrete [BorderRadius] using [resolve].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BorderRadiusGeometry lerp(BorderRadiusGeometry a, BorderRadiusGeometry b, double t) {
+  static BorderRadiusGeometry? lerp(BorderRadiusGeometry? a, BorderRadiusGeometry? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
@@ -148,11 +147,11 @@ abstract class BorderRadiusGeometry {
   ///  * [BorderRadius], for which this is a no-op (returns itself).
   ///  * [BorderRadiusDirectional], which flips the horizontal direction
   ///    based on the `direction` argument.
-  BorderRadius resolve(TextDirection direction);
+  BorderRadius resolve(TextDirection? direction);
 
   @override
   String toString() {
-    String visual, logical;
+    String? visual, logical;
     if (_topLeft == _topRight &&
         _topRight == _bottomLeft &&
         _bottomLeft == _bottomRight) {
@@ -474,24 +473,24 @@ class BorderRadius extends BorderRadiusGeometry {
   /// If either is null, this function interpolates from [BorderRadius.zero].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BorderRadius lerp(BorderRadius a, BorderRadius b, double t) {
+  static BorderRadius? lerp(BorderRadius? a, BorderRadius? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return b * t;
+      return b! * t;
     if (b == null)
       return a * (1.0 - t);
     return BorderRadius.only(
-      topLeft: Radius.lerp(a.topLeft, b.topLeft, t),
-      topRight: Radius.lerp(a.topRight, b.topRight, t),
-      bottomLeft: Radius.lerp(a.bottomLeft, b.bottomLeft, t),
-      bottomRight: Radius.lerp(a.bottomRight, b.bottomRight, t),
+      topLeft: Radius.lerp(a.topLeft, b.topLeft, t)!,
+      topRight: Radius.lerp(a.topRight, b.topRight, t)!,
+      bottomLeft: Radius.lerp(a.bottomLeft, b.bottomLeft, t)!,
+      bottomRight: Radius.lerp(a.bottomRight, b.bottomRight, t)!,
     );
   }
 
   @override
-  BorderRadius resolve(TextDirection direction) => this;
+  BorderRadius resolve(TextDirection? direction) => this;
 }
 
 /// An immutable set of radii for each corner of a rectangle, but with the
@@ -691,26 +690,26 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   /// If either is null, this function interpolates from [BorderRadiusDirectional.zero].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BorderRadiusDirectional lerp(BorderRadiusDirectional a, BorderRadiusDirectional b, double t) {
+  static BorderRadiusDirectional? lerp(BorderRadiusDirectional? a, BorderRadiusDirectional? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
-      return b * t;
+      return b! * t;
     if (b == null)
       return a * (1.0 - t);
     return BorderRadiusDirectional.only(
-      topStart: Radius.lerp(a.topStart, b.topStart, t),
-      topEnd: Radius.lerp(a.topEnd, b.topEnd, t),
-      bottomStart: Radius.lerp(a.bottomStart, b.bottomStart, t),
-      bottomEnd: Radius.lerp(a.bottomEnd, b.bottomEnd, t),
+      topStart: Radius.lerp(a.topStart, b.topStart, t)!,
+      topEnd: Radius.lerp(a.topEnd, b.topEnd, t)!,
+      bottomStart: Radius.lerp(a.bottomStart, b.bottomStart, t)!,
+      bottomEnd: Radius.lerp(a.bottomEnd, b.bottomEnd, t)!,
     );
   }
 
   @override
-  BorderRadius resolve(TextDirection direction) {
+  BorderRadius resolve(TextDirection? direction) {
     assert(direction != null);
-    switch (direction) {
+    switch (direction!) {
       case TextDirection.rtl:
         return BorderRadius.only(
           topLeft: topEnd,
@@ -726,7 +725,6 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
           bottomRight: bottomEnd,
         );
     }
-    return null;
   }
 }
 
@@ -838,9 +836,9 @@ class _MixedBorderRadius extends BorderRadiusGeometry {
   }
 
   @override
-  BorderRadius resolve(TextDirection direction) {
+  BorderRadius resolve(TextDirection? direction) {
     assert(direction != null);
-    switch (direction) {
+    switch (direction!) {
       case TextDirection.rtl:
         return BorderRadius.only(
           topLeft: _topLeft + _topEnd,
@@ -856,6 +854,5 @@ class _MixedBorderRadius extends BorderRadiusGeometry {
           bottomRight: _bottomRight + _bottomEnd,
         );
     }
-    return null;
   }
 }

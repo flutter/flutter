@@ -323,7 +323,7 @@ void main() {
         fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>[
-              'git', 'tag', '--contains', 'HEAD',
+              'git', 'tag', '--points-at', 'HEAD',
             ],
             stdout: '',
           ),

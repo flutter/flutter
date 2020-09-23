@@ -55,8 +55,14 @@ Future<vm_service.VmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) 
 Future<void> _kDefaultDartDevelopmentServiceStarter(
   Device device,
   Uri observatoryUri,
+  bool disableServiceAuthCodes,
 ) async {
-  await device.dds.startDartDevelopmentService(observatoryUri, true);
+  await device.dds.startDartDevelopmentService(
+    observatoryUri,
+    0,
+    true,
+    disableServiceAuthCodes,
+  );
 }
 
 /// Read the log for a particular device.
@@ -580,6 +586,32 @@ class FuchsiaDevice extends Device {
   /// [true] if the current host address is IPv6.
   bool get ipv6 => _ipv6 ??= isIPv6Address(id);
 
+  /// Return the address that the device should use to communicate with the
+  /// host.
+  Future<String> get hostAddress async {
+    if (_cachedHostAddress != null) {
+      return _cachedHostAddress;
+    }
+    final RunResult result = await shell('echo \$SSH_CONNECTION');
+    void fail() {
+      throwToolExit('Failed to get local address, aborting.\n$result');
+    }
+    if (result.exitCode != 0) {
+      fail();
+    }
+    final List<String> splitResult = result.stdout.split(' ');
+    if (splitResult.isEmpty) {
+      fail();
+    }
+    final String addr = splitResult[0].replaceAll('%', '%25');
+    if (addr.isEmpty) {
+      fail();
+    }
+    return _cachedHostAddress = addr;
+  }
+
+  String _cachedHostAddress;
+
   /// List the ports currently running a dart observatory.
   Future<List<int>> servicePorts() async {
     const String findCommand = 'find /hub -name vmservice-port';
@@ -712,7 +744,7 @@ class FuchsiaIsolateDiscoveryProtocol {
   final String _isolateName;
   final Completer<Uri> _foundUri = Completer<Uri>();
   final Future<vm_service.VmService> Function(Uri) _vmServiceConnector;
-  final Future<void> Function(Device, Uri) _ddsStarter;
+  final Future<void> Function(Device, Uri, bool) _ddsStarter;
   // whether to only poll once.
   final bool _pollOnce;
   Timer _pollingTimer;
@@ -755,8 +787,8 @@ class FuchsiaIsolateDiscoveryProtocol {
         final int localPort = await _device.portForwarder.forward(port);
         try {
           final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$localPort');
-          await _ddsStarter(_device, uri);
-          service = await _vmServiceConnector(uri);
+          await _ddsStarter(_device, uri, true);
+          service = await _vmServiceConnector(_device.dds.uri);
           _ports[port] = service;
         } on SocketException catch (err) {
           globals.printTrace('Failed to connect to $localPort: $err');

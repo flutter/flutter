@@ -6,10 +6,9 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:mockito/mockito.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -440,68 +439,68 @@ void main() {
     // entire screen.
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(443.7, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(443.7, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(291.9, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(291.9, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(168.2, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(168.2, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(89.5, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(89.5, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(48.1, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(48.1, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(26.1, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(26.1, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(14.3, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(14.3, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(7.41, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(7.41, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(3.0, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(3.0, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(0.0, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(0.0, epsilon: 0.1));
 
     // Exit animation
     await tester.tap(find.text('Close'));
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(156.3, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(156.3, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(308.1, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(308.1, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(431.7, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(431.7, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(510.4, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(510.4, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(551.8, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(551.8, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(573.8, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(573.8, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(585.6, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(585.6, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(592.6, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(592.6, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(596.9, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(596.9, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, closeTo(600.0, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(600.0, epsilon: 0.1));
   });
 
   Future<void> testParallax(WidgetTester tester, {@required bool fromFullscreenDialog}) async {
@@ -538,51 +537,51 @@ void main() {
 
     // Enter animation.
     await tester.tap(find.text('Button'));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(0.0, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(0.0, epsilon: 0.1));
     await tester.pump();
 
     // We use a higher number of intervals since the animation has to scale the
     // entire screen.
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-70.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-70.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-137.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-137.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-192.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-192.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-227.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-227.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-246.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-246.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-255.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-255.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-260.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-260.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-264.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-264.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-266.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-266.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-267.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-267.0, epsilon: 1.0));
 
     // Exit animation
     await tester.tap(find.text('Button'));
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-198.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-198.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 360));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-0.0, 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-0.0, epsilon: 1.0));
   }
 
   testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
@@ -627,7 +626,7 @@ void main() {
 
     // Enter animation.
     await tester.tap(find.text('Button'));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(0.0, 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(0.0, epsilon: 0.1));
     await tester.pump();
 
     // We use a higher number of intervals since the animation has to scale the
@@ -847,10 +846,10 @@ void main() {
 
     navigatorKey.currentState.push(route2);
     await tester.pumpAndSettle();
-    verify(navigatorObserver.didPush(any, any)).called(greaterThanOrEqualTo(1));
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didPush);
 
     await tester.dragFrom(const Offset(5, 100), const Offset(100, 0));
-    verify(navigatorObserver.didStartUserGesture(any, any)).called(1);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStartUserGesture);
     await tester.pump();
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(100));
     expect(navigatorKey.currentState.userGestureInProgress, true);
@@ -861,14 +860,15 @@ void main() {
     // Back to the page covering the whole screen.
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(0));
     expect(navigatorKey.currentState.userGestureInProgress, false);
-    verify(navigatorObserver.didStopUserGesture()).called(1);
-    verifyNever(navigatorObserver.didPop(any, any));
+
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStopUserGesture);
+    expect(navigatorObserver.invocations.removeLast(), isNot(NavigatorInvocation.didPop));
 
     await tester.dragFrom(const Offset(5, 100), const Offset(500, 0));
     await tester.pump();
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(500));
     expect(navigatorKey.currentState.userGestureInProgress, true);
-    verify(navigatorObserver.didPop(any, any)).called(1);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didPop);
 
     // Did go far enough to snap out of this route.
     await tester.pump(const Duration(milliseconds: 301));
@@ -907,14 +907,14 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(5, 200));
     // The width of the page.
     await gesture.moveBy(const Offset(800, 0));
-    verify(navigatorObserver.didStartUserGesture(any, any)).called(1);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStartUserGesture);
     await gesture.up();
     await tester.pump();
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
-    verify(navigatorObserver.didPop(any, any)).called(1);
-    verify(navigatorObserver.didStopUserGesture()).called(1);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStopUserGesture);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didPop);
   });
 
   testWidgets('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
@@ -944,7 +944,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(5, 200));
     // Move right a bit
     await gesture.moveBy(const Offset(300, 0));
-    verify(navigatorObserver.didStartUserGesture(any, any)).called(1);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStartUserGesture);
     expect(
       tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
       true,
@@ -958,8 +958,8 @@ void main() {
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
-    verifyNever(navigatorObserver.didPop(any, any));
-    verify(navigatorObserver.didStopUserGesture()).called(1);
+    expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didStopUserGesture);
+    expect(navigatorObserver.invocations.removeLast(), isNot(NavigatorInvocation.didPop));
     expect(
       tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
       false,
@@ -1472,9 +1472,57 @@ void main() {
     expect(find.text('first', skipOffstage: false), findsOneWidget);
     expect(find.text('second'), findsOneWidget);
   });
+
+  testWidgets('Popping routes should cancel down events', (WidgetTester tester) async {
+    await tester.pumpWidget(_TestPostRouteCancel());
+
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.down(tester.getCenter(find.text('PointerCancelEvents: 0')));
+    await gesture.up();
+
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoButton), findsNothing);
+    expect(find.text('Hold'), findsOneWidget);
+
+    await gesture.down(tester.getCenter(find.text('Hold')));
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    expect(find.text('Hold'), findsNothing);
+    expect(find.byType(CupertinoButton), findsOneWidget);
+    expect(find.text('PointerCancelEvents: 1'), findsOneWidget);
+  });
 }
 
-class MockNavigatorObserver extends Mock implements NavigatorObserver {}
+class MockNavigatorObserver extends NavigatorObserver {
+  final List<NavigatorInvocation> invocations = <NavigatorInvocation>[];
+
+  @override
+  void didStartUserGesture(Route<Object> route, Route<Object> previousRoute) {
+    invocations.add(NavigatorInvocation.didStartUserGesture);
+  }
+
+  @override
+  void didPop(Route<Object> route, Route<Object> previousRoute) {
+    invocations.add(NavigatorInvocation.didPop);
+  }
+
+  @override
+  void didPush(Route<Object> route, Route<Object> previousRoute) {
+    invocations.add(NavigatorInvocation.didPush);
+  }
+
+  @override
+  void didStopUserGesture() {
+    invocations.add(NavigatorInvocation.didStopUserGesture);
+  }
+}
+
+enum NavigatorInvocation {
+  didStartUserGesture,
+  didPop,
+  didPush,
+  didStopUserGesture,
+}
 
 class PopupObserver extends NavigatorObserver {
   int popupCount = 0;
@@ -1542,4 +1590,76 @@ Widget buildNavigator({
       ),
     ),
   );
+}
+
+
+// A test target for post-route cancel events.
+//
+// It contains 2 routes:
+//
+//  * The initial route, 'home', displays a button showing 'PointerCancelEvents: #',
+//    where # is the number of cancel events received. Tapping the button pushes
+//    route 'sub'.
+//  * The 'sub' route, displays a text showing 'Hold'. Holding the button (a down
+//    event) will pop this route after 1 second.
+//
+// Holding the 'Hold' button at the moment of popping will force the navigator to
+// cancel the down event, increasing the Home counter by 1.
+class _TestPostRouteCancel extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _TestPostRouteCancelState();
+}
+
+class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
+
+  int counter = 0;
+
+  Widget _buildHome(BuildContext context) {
+    return Center(
+      child: CupertinoButton(
+        child: Text('PointerCancelEvents: $counter'),
+        onPressed: () => Navigator.pushNamed<void>(context, 'sub'),
+      ),
+    );
+  }
+
+  Widget _buildSub(BuildContext context) {
+    return Listener(
+      onPointerDown: (_) {
+        Future<void>.delayed(const Duration(seconds: 1)).then((_) {
+          Navigator.pop(context);
+        });
+      },
+      onPointerCancel: (_) {
+        setState(() {
+          counter += 1;
+        });
+      },
+      child: const Center(
+        child: Text('Hold', style: TextStyle(color: Colors.blue)),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoApp(
+      initialRoute: 'home',
+      onGenerateRoute: (RouteSettings settings) {
+        return CupertinoPageRoute<void>(
+          settings: settings,
+          builder: (BuildContext context) {
+            switch (settings.name) {
+              case 'home':
+                return _buildHome(context);
+              case 'sub':
+                return _buildSub(context);
+              default:
+                throw UnimplementedError();
+            }
+          },
+        );
+      },
+    );
+  }
 }

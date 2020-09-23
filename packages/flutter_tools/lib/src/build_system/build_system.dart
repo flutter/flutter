@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:async/async.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
@@ -159,7 +157,7 @@ abstract class Target {
     );
   }
 
-  /// Invoke to remove the stamp file if the [buildAction] threw an exception;
+  /// Invoke to remove the stamp file if the [buildAction] threw an exception.
   void clearStamp(Environment environment) {
     final File stamp = _findStampFile(environment);
     if (stamp.existsSync()) {
@@ -260,18 +258,22 @@ abstract class Target {
 ///
 /// Use the environment to determine where to write an output file.
 ///
+/// ```dart
 ///    environment.buildDir.childFile('output')
 ///      ..createSync()
 ///      ..writeAsStringSync('output data');
+/// ```
 ///
 /// Example (Bad):
 ///
 /// Use a hard-coded path or directory relative to the current working
 /// directory to write an output file.
 ///
+/// ```dart
 ///   globals.fs.file('build/linux/out')
 ///     ..createSync()
 ///     ..writeAsStringSync('output data');
+/// ```
 ///
 /// Example (Good):
 ///
@@ -279,6 +281,7 @@ abstract class Target {
 /// is still responsible for outputting a different file, as defined by the
 /// corresponding output [Source].
 ///
+/// ```dart
 ///    final BuildMode buildMode = getBuildModeFromDefines(environment.defines);
 ///    if (buildMode == BuildMode.debug) {
 ///      environment.buildDir.childFile('debug.output')
@@ -289,6 +292,7 @@ abstract class Target {
 ///        ..createSync()
 ///        ..writeAsStringSync('non_debug');
 ///    }
+/// ```
 class Environment {
   /// Create a new [Environment] object.
   ///
@@ -664,6 +668,7 @@ class FlutterBuildSystem extends BuildSystem {
     final String currentBuildId = fileSystem.path.basename(environment.buildDir.path);
     final File lastBuildIdFile = environment.outputDir.childFile('.last_build_id');
     if (!lastBuildIdFile.existsSync()) {
+      lastBuildIdFile.parent.createSync(recursive: true);
       lastBuildIdFile.writeAsStringSync(currentBuildId);
       // No config file, either output was cleaned or this is the first build.
       return;
@@ -699,7 +704,6 @@ class FlutterBuildSystem extends BuildSystem {
     }
   }
 }
-
 
 /// An active instance of a build.
 class _BuildInstance {

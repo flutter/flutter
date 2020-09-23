@@ -1414,58 +1414,69 @@ class _TimePickerInputState extends State<_TimePickerInput> {
                 ),
                 const SizedBox(width: 12.0),
               ],
-              Expanded(child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const SizedBox(height: 8.0),
-                  _HourMinuteTextField(
-                    selectedTime: _selectedTime,
-                    isHour: true,
-                    style: hourMinuteStyle,
-                    validator: _validateHour,
-                    onSavedSubmitted: _handleHourSavedSubmitted,
-                    onChanged: _handleHourChanged,
-                  ),
-                  const SizedBox(height: 8.0),
-                  if (!hourHasError && !minuteHasError)
-                    ExcludeSemantics(
-                      child: Text(
-                        MaterialLocalizations.of(context).timePickerHourLabel,
-                        style: theme.textTheme.caption,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  // Hour/minutes should not change positions in RTL locales.
+                  textDirection: TextDirection.ltr,
+                  children: <Widget>[
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          const SizedBox(height: 8.0),
+                          _HourTextField(
+                            selectedTime: _selectedTime,
+                            style: hourMinuteStyle,
+                            validator: _validateHour,
+                            onSavedSubmitted: _handleHourSavedSubmitted,
+                            onChanged: _handleHourChanged,
+                          ),
+                          const SizedBox(height: 8.0),
+                          if (!hourHasError && !minuteHasError)
+                            ExcludeSemantics(
+                              child: Text(
+                                MaterialLocalizations.of(context).timePickerHourLabel,
+                                style: theme.textTheme.caption,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                ],
-              )),
-              Container(
-                margin: const EdgeInsets.only(top: 8.0),
-                height: _kTimePickerHeaderControlHeight,
-                child: _StringFragment(timeOfDayFormat: timeOfDayFormat),
+                    Container(
+                      margin: const EdgeInsets.only(top: 8.0),
+                      height: _kTimePickerHeaderControlHeight,
+                      child: _StringFragment(timeOfDayFormat: timeOfDayFormat),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          const SizedBox(height: 8.0),
+                          _MinuteTextField(
+                            selectedTime: _selectedTime,
+                            style: hourMinuteStyle,
+                            validator: _validateMinute,
+                            onSavedSubmitted: _handleMinuteSavedSubmitted,
+                          ),
+                          const SizedBox(height: 8.0),
+                          if (!hourHasError && !minuteHasError)
+                            ExcludeSemantics(
+                              child: Text(
+                                MaterialLocalizations.of(context).timePickerMinuteLabel,
+                                style: theme.textTheme.caption,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              Expanded(child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const SizedBox(height: 8.0),
-                  _HourMinuteTextField(
-                    selectedTime: _selectedTime,
-                    isHour: false,
-                    style: hourMinuteStyle,
-                    validator: _validateMinute,
-                    onSavedSubmitted: _handleMinuteSavedSubmitted,
-                  ),
-                  const SizedBox(height: 8.0),
-                  if (!hourHasError && !minuteHasError)
-                    ExcludeSemantics(
-                      child: Text(
-                        MaterialLocalizations.of(context).timePickerMinuteLabel,
-                        style: theme.textTheme.caption,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                ],
-              )),
               if (!use24HourDials && timeOfDayFormat != TimeOfDayFormat.a_space_h_colon_mm) ...<Widget>[
                 const SizedBox(width: 12.0),
                 _DayPeriodControl(
@@ -1485,6 +1496,61 @@ class _TimePickerInputState extends State<_TimePickerInput> {
             const SizedBox(height: 2.0),
         ],
       ),
+    );
+  }
+}
+
+class _HourTextField extends StatelessWidget {
+  const _HourTextField({
+    Key key,
+    @required this.selectedTime,
+    @required this.style,
+    @required this.validator,
+    @required this.onSavedSubmitted,
+    @required this.onChanged,
+  }) : super(key: key);
+
+  final TimeOfDay selectedTime;
+  final TextStyle style;
+  final FormFieldValidator<String> validator;
+  final ValueChanged<String> onSavedSubmitted;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return _HourMinuteTextField(
+      selectedTime: selectedTime,
+      isHour: true,
+      style: style,
+      validator: validator,
+      onSavedSubmitted: onSavedSubmitted,
+      onChanged: onChanged,
+    );
+  }
+}
+
+class _MinuteTextField extends StatelessWidget {
+  const _MinuteTextField({
+    Key key,
+    @required this.selectedTime,
+    @required this.style,
+    @required this.validator,
+    @required this.onSavedSubmitted,
+  }) : super(key: key);
+
+  final TimeOfDay selectedTime;
+  final TextStyle style;
+  final FormFieldValidator<String> validator;
+  final ValueChanged<String> onSavedSubmitted;
+
+  @override
+  Widget build(BuildContext context) {
+    return _HourMinuteTextField(
+      selectedTime: selectedTime,
+      isHour: false,
+      style: style,
+      validator: validator,
+      onSavedSubmitted: onSavedSubmitted,
     );
   }
 }
@@ -2004,6 +2070,10 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// Optional strings for the [helpText], [cancelText], and [confirmText] can be
 /// provided to override the default values.
 ///
+/// By default, the time picker gets its colors from the overall theme's
+/// [ColorScheme]. The time picker can be further customized by providing a
+/// [TimePickerThemeData] to the overall theme.
+///
 /// {@tool snippet}
 /// Show a dialog with the text direction overridden to be [TextDirection.rtl].
 ///
@@ -2042,6 +2112,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 ///
 ///  * [showDatePicker], which shows a dialog that contains a material design
 ///    date picker.
+///  * [TimePickerThemeData], which allows you to customize the colors,
+///    typography, and shape of the time picker.
 Future<TimeOfDay> showTimePicker({
   @required BuildContext context,
   @required TimeOfDay initialTime,

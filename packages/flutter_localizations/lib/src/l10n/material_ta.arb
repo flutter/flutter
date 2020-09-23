@@ -72,14 +72,14 @@
   "dateRangePickerHelpText": "வரம்பைத் தேர்ந்தெடுக்கவும்",
   "calendarModeButtonLabel": "கேலெண்டருக்கு மாற்று",
   "inputDateModeButtonLabel": "உள்ளீட்டுக்கு மாற்று",
-  "timePickerDialHelpText": "SELECT TIME",
-  "timePickerInputHelpText": "ENTER TIME",
-  "timePickerHourLabel": "Hour",
-  "timePickerMinuteLabel": "Minute",
-  "invalidTimeLabel": "Enter a valid time",
-  "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "timePickerDialHelpText": "நேரத்தைத் தேர்வுசெய்க",
+  "timePickerInputHelpText": "நேரத்தை உள்ளிடுக",
+  "timePickerHourLabel": "மணிநேரம்",
+  "timePickerMinuteLabel": "நிமிடம்",
+  "invalidTimeLabel": "சரியான நேரத்தை உள்ளிடவும்",
+  "dialModeButtonLabel": "டயல் தேர்வுக் கருவி பயன்முறைக்கு மாற்றும்",
+  "inputTimeModeButtonLabel": "உரை உள்ளீட்டு முறைக்கு மாற்றும்",
   "licensesPackageDetailTextZero": "No licenses",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses"
+  "licensesPackageDetailTextOne": "1 உரிமம்",
+  "licensesPackageDetailTextOther": "$licenseCount உரிமங்கள்"
 }

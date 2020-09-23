@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -58,15 +57,15 @@ class CupertinoNavigationDemo extends StatelessWidget {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(CupertinoIcons.home),
-                title: Text('Home'),
+                label: 'Home',
               ),
               BottomNavigationBarItem(
                 icon: Icon(CupertinoIcons.conversation_bubble),
-                title: Text('Support'),
+                label: 'Support',
               ),
               BottomNavigationBarItem(
                 icon: Icon(CupertinoIcons.profile_circled),
-                title: Text('Profile'),
+                label: 'Profile',
               ),
             ],
           ),

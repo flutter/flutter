@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:ui' as ui show lerpDouble;
 
@@ -54,12 +53,12 @@ class RoundedRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     assert(t != null);
     if (a is RoundedRectangleBorder) {
       return RoundedRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
+        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t)!,
       );
     }
     if (a is CircleBorder) {
@@ -73,12 +72,12 @@ class RoundedRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     assert(t != null);
     if (b is RoundedRectangleBorder) {
       return RoundedRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t)!,
       );
     }
     if (b is CircleBorder) {
@@ -94,7 +93,7 @@ class RoundedRectangleBorder extends OutlinedBorder {
   /// Returns a copy of this RoundedRectangleBorder with the given fields
   /// replaced with the new values.
   @override
-  RoundedRectangleBorder copyWith({ BorderSide side, BorderRadius borderRadius }) {
+  RoundedRectangleBorder copyWith({ BorderSide? side, BorderRadius? borderRadius }) {
     return RoundedRectangleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,
@@ -102,19 +101,19 @@ class RoundedRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..addRRect(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     switch (side.style) {
       case BorderStyle.none:
         break;
@@ -154,7 +153,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
   const _RoundedRectangleToCircleBorder({
     BorderSide side = BorderSide.none,
     this.borderRadius = BorderRadius.zero,
-    @required this.circleness,
+    required this.circleness,
   }) : assert(side != null),
        assert(borderRadius != null),
        assert(circleness != null),
@@ -179,12 +178,12 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
   }
 
   @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     assert(t != null);
     if (a is RoundedRectangleBorder) {
       return _RoundedRectangleToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
+        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t)!,
         circleness: circleness * t,
       );
     }
@@ -198,19 +197,19 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
     if (a is _RoundedRectangleToCircleBorder) {
       return _RoundedRectangleToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
-        circleness: ui.lerpDouble(a.circleness, circleness, t),
+        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t)!,
+        circleness: ui.lerpDouble(a.circleness, circleness, t)!,
       );
     }
     return super.lerpFrom(a, t);
   }
 
   @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     if (b is RoundedRectangleBorder) {
       return _RoundedRectangleToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t)!,
         circleness: circleness * (1.0 - t),
       );
     }
@@ -224,8 +223,8 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
     if (b is _RoundedRectangleToCircleBorder) {
       return _RoundedRectangleToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
-        circleness: ui.lerpDouble(circleness, b.circleness, t),
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t)!,
+        circleness: ui.lerpDouble(circleness, b.circleness, t)!,
       );
     }
     return super.lerpTo(b, t);
@@ -253,7 +252,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
     }
   }
 
-  BorderRadius _adjustBorderRadius(Rect rect, TextDirection textDirection) {
+  BorderRadius? _adjustBorderRadius(Rect rect, TextDirection? textDirection) {
     final BorderRadius resolvedRadius = borderRadius.resolve(textDirection);
     if (circleness == 0.0)
       return resolvedRadius;
@@ -261,19 +260,19 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
-      ..addRRect(_adjustBorderRadius(rect, textDirection).toRRect(_adjustRect(rect)).deflate(side.width));
+      ..addRRect(_adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect)).deflate(side.width));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
-      ..addRRect(_adjustBorderRadius(rect, textDirection).toRRect(_adjustRect(rect)));
+      ..addRRect(_adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect)));
   }
 
   @override
-  _RoundedRectangleToCircleBorder copyWith({ BorderSide side, BorderRadius borderRadius, double circleness }) {
+  _RoundedRectangleToCircleBorder copyWith({ BorderSide? side, BorderRadius? borderRadius, double? circleness }) {
     return _RoundedRectangleToCircleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,
@@ -282,16 +281,16 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     switch (side.style) {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
         final double width = side.width;
         if (width == 0.0) {
-          canvas.drawRRect(_adjustBorderRadius(rect, textDirection).toRRect(_adjustRect(rect)), side.toPaint());
+          canvas.drawRRect(_adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect)), side.toPaint());
         } else {
-          final RRect outer = _adjustBorderRadius(rect, textDirection).toRRect(_adjustRect(rect));
+          final RRect outer = _adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect));
           final RRect inner = outer.deflate(width);
           final Paint paint = Paint()
             ..color = side.color;
