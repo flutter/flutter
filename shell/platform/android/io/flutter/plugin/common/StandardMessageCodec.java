@@ -208,10 +208,8 @@ public class StandardMessageCodec implements MessageCodec<Object> {
   protected void writeValue(ByteArrayOutputStream stream, Object value) {
     if (value == null || value.equals(null)) {
       stream.write(NULL);
-    } else if (value == Boolean.TRUE) {
-      stream.write(TRUE);
-    } else if (value == Boolean.FALSE) {
-      stream.write(FALSE);
+    } else if (value instanceof Boolean) {
+      stream.write(((Boolean) value).booleanValue() ? TRUE : FALSE);
     } else if (value instanceof Number) {
       if (value instanceof Integer || value instanceof Short || value instanceof Byte) {
         stream.write(INT);
