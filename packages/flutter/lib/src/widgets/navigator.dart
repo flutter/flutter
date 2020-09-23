@@ -5434,9 +5434,155 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 /// When [present] has been called to add a route, it may only be called again
 /// after the previously added route has completed.
 ///
+/// {@tool dartpad --template=freeform}
+/// This example uses a [RestorableRouteFuture] in the `_MyHomeState` to push a
+/// new `MyCounter` route and to retrieve its return value.
 ///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
 ///
+/// ```dart main
+/// void main() => runApp(MyApp());
+/// ```
 ///
+/// ```dart preamble
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       restorationScopeId: 'app',
+///       home: Scaffold(
+///         appBar: AppBar(title: Text('RestorableRouteFuture Example')),
+///         body: MyHome(),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// class MyHome extends StatefulWidget {
+///   const MyHome({Key key}) : super(key: key);
+///
+///   @override
+///   State<MyHome> createState() => _MyHomeState();
+/// }
+///
+/// class _MyHomeState extends State<MyHome> with RestorationMixin {
+///   final RestorableInt _lastCount = RestorableInt(0);
+///   RestorableRouteFuture<int> _counterRoute;
+///
+///   @override
+///   String get restorationId => 'home';
+///
+///   void initState() {
+///     super.initState();
+///     _counterRoute = RestorableRouteFuture<int>(
+///       onPresent: (NavigatorState navigator, Object arguments) {
+///         // Defines what route should be shown (and how it should be added
+///         // to the navigator) when `RestorableRouteFuture.present` is called.
+///         return navigator.restorablePush(
+///           _counterRouteBuilder,
+///           arguments: arguments,
+///         );
+///       },
+///       onComplete: (int count) {
+///         // Defines what should happen with the return value when the route
+///         // completes.
+///         setState(() {
+///           _lastCount.value = count;
+///         });
+///       }
+///     );
+///   }
+///
+///   @override
+///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///     // Register the `RestorableRouteFuture` with the state restoration framework.
+///     registerForRestoration(_counterRoute, 'route');
+///     registerForRestoration(_lastCount, 'count');
+///   }
+///
+///   // A static `RestorableRouteBuilder` that can re-create the route during
+///   // state restoration.
+///   static Route<int> _counterRouteBuilder(BuildContext context, Object arguments) {
+///     return MaterialPageRoute(
+///       builder: (BuildContext context) => MyCounter(
+///         title: arguments as String,
+///       ),
+///     );
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Center(
+///       child: Column(
+///         mainAxisSize: MainAxisSize.min,
+///         children: <Widget>[
+///           Text('Last count: ${_lastCount.value}'),
+///           RaisedButton(
+///             onPressed: () {
+///               // Show the route defined by the `RestorableRouteFuture`.
+///               _counterRoute.present('Awesome Counter');
+///             },
+///             child: Text('Open Counter'),
+///           ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+///
+/// // Widget for the route pushed by the `RestorableRouteFuture`.
+/// class MyCounter extends StatefulWidget {
+///   const MyCounter({Key key, this.title}) : super(key: key);
+///
+///   final String title;
+///
+///   @override
+///   State<MyCounter> createState() => _MyCounterState();
+/// }
+///
+/// class _MyCounterState extends State<MyCounter> with RestorationMixin {
+///   final RestorableInt _count = RestorableInt(0);
+///
+///   @override
+///   String get restorationId => 'counter';
+///
+///   @override
+///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///     registerForRestoration(_count, 'count');
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       appBar: AppBar(
+///         title: Text(widget.title),
+///         leading: BackButton(
+///           onPressed: () {
+///             // Return the current count of the counter from this route.
+///             Navigator.of(context).pop(_count.value);
+///           },
+///         ),
+///       ),
+///       body: Center(
+///         child: Text('Count: ${_count.value}'),
+///       ),
+///       floatingActionButton: FloatingActionButton(
+///         child: Icon(Icons.add),
+///         onPressed: () {
+///           setState(() {
+///             _count.value++;
+///           });
+///         },
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
 class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   /// Creates a [RestorableRouteFuture].
   ///
