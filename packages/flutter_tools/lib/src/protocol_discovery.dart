@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import 'base/io.dart';
 import 'device.dart';
@@ -95,9 +96,7 @@ class ProtocolDiscovery {
   /// for each observatory URL in the stream.
   Stream<Uri> get uris {
     Stream<Uri> uriStream = _uriStreamController.stream
-      .transform(_throttle<Uri>(
-        waitDuration: throttleDuration,
-      ));
+      .throttle(throttleDuration);
     if (throttleTimeout != null) {
       // Don't throw a TimeoutException. The URL wasn't found in time, just close the stream.
       uriStream = uriStream.timeout(throttleTimeout,
@@ -219,44 +218,4 @@ class _BufferedStreamController<T> {
   Future<void> close() {
     return _streamController.close();
   }
-}
-
-/// This transformer will produce an event at most once every [waitDuration].
-///
-/// For example, consider a `waitDuration` of `10ms`, and list of event names
-/// and arrival times: `a (0ms), b (5ms), c (11ms), d (21ms)`.
-/// The events `a`, `c`, and `d` will be produced as a result.
-StreamTransformer<S, S> _throttle<S>({
-  @required Duration waitDuration,
-}) {
-  assert(waitDuration != null);
-
-  S latestLine;
-  int lastExecution;
-  Future<void> throttleFuture;
-
-  return StreamTransformer<S, S>
-    .fromHandlers(
-      handleData: (S value, EventSink<S> sink) {
-        latestLine = value;
-
-        final bool isFirstMessage = lastExecution == null;
-        final int currentTime = DateTime.now().millisecondsSinceEpoch;
-        lastExecution ??= currentTime;
-        final int remainingTime = currentTime - lastExecution;
-
-        // Always send the first event immediately.
-        final int nextExecutionTime = isFirstMessage || remainingTime > waitDuration.inMilliseconds
-          ? 0
-          : waitDuration.inMilliseconds - remainingTime;
-
-        throttleFuture ??= Future<void>
-          .delayed(Duration(milliseconds: nextExecutionTime))
-          .whenComplete(() {
-            sink.add(latestLine);
-            throttleFuture = null;
-            lastExecution = DateTime.now().millisecondsSinceEpoch;
-          });
-      }
-    );
 }
