@@ -531,6 +531,7 @@ class RunCommand extends RunCommandBase {
           target: stringArg('target'),
           buildInfo: getBuildInfo(),
           userIdentifier: userIdentifier,
+          platform: globals.platform,
         ),
     ];
     // Only support "web mode" with a single web device due to resident runner

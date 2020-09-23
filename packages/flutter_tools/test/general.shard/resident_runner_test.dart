@@ -2059,6 +2059,7 @@ void main() {
       ),
       flutterProject: FlutterProject.current(),
       target: null,
+      platform: FakePlatform(operatingSystem: 'linux'),
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill,
@@ -2093,6 +2094,7 @@ void main() {
       ),
       flutterProject: FlutterProject.current(),
       target: null,
+      platform: FakePlatform(operatingSystem: 'linux'),
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill,
@@ -2126,7 +2128,7 @@ void main() {
         extraFrontEndOptions: <String>[],
       ),
       flutterProject: FlutterProject.current(),
-      target: null,
+      target: null, platform: null,
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.extraFrontEndOptions,
