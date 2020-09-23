@@ -14,7 +14,14 @@ namespace flutter {
 
 typedef CanvasImage Image;
 
-IMPLEMENT_WRAPPERTYPEINFO(ui, Image);
+// Since _Image is a private class, we can't use IMPLEMENT_WRAPPERTYPEINFO
+static const tonic::DartWrapperInfo kDartWrapperInfo_ui_Image = {
+    "ui",
+    "_Image",
+    sizeof(Image),
+};
+const tonic::DartWrapperInfo& Image::dart_wrapper_info_ =
+    kDartWrapperInfo_ui_Image;
 
 #define FOR_EACH_BINDING(V) \
   V(Image, width)           \

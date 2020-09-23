@@ -5,6 +5,7 @@
 #include "flutter/lib/ui/painting/multi_frame_codec.h"
 
 #include "flutter/fml/make_copyable.h"
+#include "flutter/lib/ui/painting/image.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/core/SkPixelRef.h"
 #include "third_party/tonic/logging/dart_invoke.h"
@@ -24,7 +25,8 @@ MultiFrameCodec::State::State(std::shared_ptr<SkCodecImageGenerator> generator)
       nextFrameIndex_(0) {}
 
 static void InvokeNextFrameCallback(
-    fml::RefPtr<FrameInfo> frameInfo,
+    fml::RefPtr<CanvasImage> image,
+    int duration,
     std::unique_ptr<DartPersistentValue> callback,
     size_t trace_id) {
   std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
@@ -34,11 +36,8 @@ static void InvokeNextFrameCallback(
     return;
   }
   tonic::DartState::Scope scope(dart_state);
-  if (!frameInfo) {
-    tonic::DartInvoke(callback->value(), {Dart_Null()});
-  } else {
-    tonic::DartInvoke(callback->value(), {ToDart(frameInfo)});
-  }
+  tonic::DartInvoke(callback->value(),
+                    {tonic::ToDart(image), tonic::ToDart(duration)});
 }
 
 // Copied the source bitmap to the destination. If this cannot occur due to
@@ -139,22 +138,24 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
     fml::WeakPtr<GrDirectContext> resourceContext,
     fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
     size_t trace_id) {
-  fml::RefPtr<FrameInfo> frameInfo = NULL;
+  fml::RefPtr<CanvasImage> image = nullptr;
+  int duration = 0;
   sk_sp<SkImage> skImage = GetNextFrameImage(resourceContext);
   if (skImage) {
-    fml::RefPtr<CanvasImage> image = CanvasImage::Create();
+    image = CanvasImage::Create();
     image->set_image({skImage, std::move(unref_queue)});
     SkCodec::FrameInfo skFrameInfo{0};
     generator_->getFrameInfo(nextFrameIndex_, &skFrameInfo);
-    frameInfo =
-        fml::MakeRefCounted<FrameInfo>(std::move(image), skFrameInfo.fDuration);
+    duration = skFrameInfo.fDuration;
   }
   nextFrameIndex_ = (nextFrameIndex_ + 1) % frameCount_;
 
-  ui_task_runner->PostTask(fml::MakeCopyable(
-      [callback = std::move(callback), frameInfo, trace_id]() mutable {
-        InvokeNextFrameCallback(frameInfo, std::move(callback), trace_id);
-      }));
+  ui_task_runner->PostTask(fml::MakeCopyable([callback = std::move(callback),
+                                              image = std::move(image),
+                                              duration, trace_id]() mutable {
+    InvokeNextFrameCallback(std::move(image), duration, std::move(callback),
+                            trace_id);
+  }));
 }
 
 Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
