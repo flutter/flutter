@@ -692,6 +692,7 @@ class FlutterDevice {
         pathToReload: pathToReload,
         invalidatedFiles: invalidatedFiles,
         packageConfig: packageConfig,
+        devFSWriter: null,
       );
     } on DevFSException {
       devFSStatus.cancel();

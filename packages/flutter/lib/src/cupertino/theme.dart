@@ -143,7 +143,7 @@ class _InheritedCupertinoTheme extends InheritedWidget {
 ///  * [ThemeData], a Material equivalent that also configures Cupertino
 ///    styling via a [CupertinoThemeData] subclass [MaterialBasedCupertinoThemeData].
 @immutable
-class CupertinoThemeData with Diagnosticable {
+class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable {
   /// Creates a [CupertinoTheme] styling specification.
   ///
   /// Unspecified parameters default to a reasonable iOS default style.
@@ -186,16 +186,125 @@ class CupertinoThemeData with Diagnosticable {
   );
 
   const CupertinoThemeData._rawWithDefaults(
-    this.brightness,
-    this._primaryColor,
-    this._primaryContrastingColor,
-    this._textTheme,
-    this._barBackgroundColor,
-    this._scaffoldBackgroundColor,
+    Brightness? brightness,
+    Color? primaryColor,
+    Color? primaryContrastingColor,
+    CupertinoTextThemeData? textTheme,
+    Color? barBackgroundColor,
+    Color? scaffoldBackgroundColor,
     this._defaults,
+  ) : super(
+    brightness: brightness,
+    primaryColor: primaryColor,
+    primaryContrastingColor: primaryContrastingColor,
+    textTheme: textTheme,
+    barBackgroundColor: barBackgroundColor,
+    scaffoldBackgroundColor: scaffoldBackgroundColor,
   );
 
-  final _CupertinoThemeDefaults? _defaults;
+  final _CupertinoThemeDefaults _defaults;
+
+  @override
+  Color get primaryColor => super.primaryColor ?? _defaults.primaryColor;
+
+  @override
+  Color get primaryContrastingColor => super.primaryContrastingColor ?? _defaults.primaryContrastingColor;
+
+  @override
+  CupertinoTextThemeData get textTheme {
+    return super.textTheme ?? _defaults.textThemeDefaults.createDefaults(primaryColor: primaryColor);
+  }
+
+  @override
+  Color get barBackgroundColor => super.barBackgroundColor ?? _defaults.barBackgroundColor;
+
+  @override
+  Color get scaffoldBackgroundColor => super.scaffoldBackgroundColor ?? _defaults.scaffoldBackgroundColor;
+
+  @override
+  NoDefaultCupertinoThemeData noDefault() {
+    return NoDefaultCupertinoThemeData(
+      brightness: super.brightness,
+      primaryColor: super.primaryColor,
+      primaryContrastingColor: super.primaryContrastingColor,
+      textTheme: super.textTheme,
+      barBackgroundColor: super.barBackgroundColor,
+      scaffoldBackgroundColor: super.scaffoldBackgroundColor,
+    );
+  }
+
+  @override
+  CupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
+    Color? convertColor(Color? color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+
+    return CupertinoThemeData._rawWithDefaults(
+      brightness,
+      convertColor(super.primaryColor),
+      convertColor(super.primaryContrastingColor),
+      super.textTheme?.resolveFrom(context, nullOk: nullOk),
+      convertColor(super.barBackgroundColor),
+      convertColor(super.scaffoldBackgroundColor),
+      _defaults.resolveFrom(context, super.textTheme == null, nullOk: nullOk),
+    );
+  }
+
+  @override
+  CupertinoThemeData copyWith({
+    Brightness? brightness,
+    Color? primaryColor,
+    Color? primaryContrastingColor,
+    CupertinoTextThemeData? textTheme,
+    Color? barBackgroundColor,
+    Color? scaffoldBackgroundColor,
+  }) {
+    return CupertinoThemeData._rawWithDefaults(
+      brightness ?? super.brightness,
+      primaryColor ?? super.primaryColor,
+      primaryContrastingColor ?? super.primaryContrastingColor,
+      textTheme ?? super.textTheme,
+      barBackgroundColor ?? super.barBackgroundColor,
+      scaffoldBackgroundColor ?? super.scaffoldBackgroundColor,
+      _defaults,
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    const CupertinoThemeData defaultData = CupertinoThemeData();
+    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: null));
+    properties.add(createCupertinoColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
+    properties.add(createCupertinoColorProperty('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
+    properties.add(createCupertinoColorProperty('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
+    properties.add(createCupertinoColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
+    textTheme.debugFillProperties(properties);
+  }
+}
+
+/// Styling specifications for a cupertino theme without default values for
+/// unspecified properties.
+///
+/// Unlike [CupertinoThemeData] instances of this class do not return default
+/// values for properties that have been left unspecified in the constructor.
+/// Instead, unspecified properties will return null. This is used by
+/// Material's [ThemeData.cupertinoOverrideTheme].
+///
+/// See also:
+///
+///  * [CupertinoThemeData], which uses reasonable default values for
+///    unspecified theme properties.
+class NoDefaultCupertinoThemeData {
+  /// Creates a [NoDefaultCupertinoThemeData] styling specification.
+  ///
+  /// Unspecified properties default to null.
+  const NoDefaultCupertinoThemeData({
+    this.brightness,
+    this.primaryColor,
+    this.primaryContrastingColor,
+    this.textTheme,
+    this.barBackgroundColor,
+    this.scaffoldBackgroundColor,
+  });
 
   /// The brightness override for Cupertino descendants.
   ///
@@ -230,8 +339,7 @@ class CupertinoThemeData with Diagnosticable {
   ///
   ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
   ///    [primaryColor] to its Material [Theme] parent if it's unspecified.
-  Color? get primaryColor => _primaryColor ?? _defaults!.primaryColor;
-  final Color? _primaryColor;
+  final Color? primaryColor;
 
   /// A color that must be easy to see when rendered on a [primaryColor] background.
   ///
@@ -245,150 +353,57 @@ class CupertinoThemeData with Diagnosticable {
   ///
   ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
   ///    [primaryContrastingColor] to its Material [Theme] parent if it's unspecified.
-  Color? get primaryContrastingColor => _primaryContrastingColor ?? _defaults!.primaryContrastingColor;
-  final Color? _primaryContrastingColor;
+  final Color? primaryContrastingColor;
 
   /// Text styles used by Cupertino widgets.
   ///
   /// Derived from [primaryColor] if unspecified.
-  CupertinoTextThemeData? get textTheme {
-    return _textTheme ?? _defaults!.textThemeDefaults.createDefaults(primaryColor: primaryColor!);
-  }
-  final CupertinoTextThemeData? _textTheme;
+  final CupertinoTextThemeData? textTheme;
 
   /// Background color of the top nav bar and bottom tab bar.
   ///
   /// Defaults to a light gray in light mode, or a dark translucent gray color in
   /// dark mode.
-  Color? get barBackgroundColor => _barBackgroundColor ?? _defaults!.barBackgroundColor;
-  final Color? _barBackgroundColor;
+  final Color? barBackgroundColor;
 
   /// Background color of the scaffold.
   ///
   /// Defaults to [CupertinoColors.systemBackground].
-  Color? get scaffoldBackgroundColor => _scaffoldBackgroundColor ?? _defaults!.scaffoldBackgroundColor;
-  final Color? _scaffoldBackgroundColor;
+  final Color? scaffoldBackgroundColor;
 
-  /// Returns an instance of the [CupertinoThemeData] whose property getters
-  /// only return the construction time specifications with no derived values.
+  /// Returns an instance of the theme data whose property getters only return
+  /// the construction time specifications with no derived values.
   ///
   /// Used in Material themes to let unspecified properties fallback to Material
   /// theme properties instead of iOS defaults.
-  CupertinoThemeData noDefault() {
-    return _NoDefaultCupertinoThemeData(
-      brightness,
-      _primaryColor,
-      _primaryContrastingColor,
-      _textTheme,
-      _barBackgroundColor,
-      _scaffoldBackgroundColor,
-    );
-  }
+  NoDefaultCupertinoThemeData noDefault() => this;
 
-  /// Returns a new `CupertinoThemeData` with all its colors resolved against the
+  /// Returns a new theme data with all its colors resolved against the
   /// given [BuildContext].
   ///
   /// Called by [CupertinoTheme.of] to resolve colors defined in the retrieved
   /// [CupertinoThemeData].
   @protected
-  CupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
+  NoDefaultCupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
     Color? convertColor(Color? color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
-    return CupertinoThemeData._rawWithDefaults(
-      brightness,
-      convertColor(_primaryColor),
-      convertColor(_primaryContrastingColor),
-      _textTheme?.resolveFrom(context, nullOk: nullOk),
-      convertColor(_barBackgroundColor),
-      convertColor(_scaffoldBackgroundColor),
-      _defaults!.resolveFrom(context, _textTheme == null, nullOk: nullOk),
+    return NoDefaultCupertinoThemeData(
+      brightness: brightness,
+      primaryColor: convertColor(primaryColor),
+      primaryContrastingColor: convertColor(primaryContrastingColor),
+      textTheme: textTheme?.resolveFrom(context, nullOk: nullOk),
+      barBackgroundColor: convertColor(barBackgroundColor),
+      scaffoldBackgroundColor: convertColor(scaffoldBackgroundColor),
     );
   }
 
-  /// Creates a copy of [CupertinoThemeData] with specified attributes overridden.
+  /// Creates a copy of the theme data with specified attributes overridden.
   ///
   /// Only the current instance's specified attributes are copied instead of
-  /// derived values. For instance, if the current [CupertinoThemeData.textTheme]
-  /// is implied from the current [primaryColor] because it was not specified,
-  /// copying with a different [primaryColor] will also change the copy's implied
-  /// [textTheme].
-  CupertinoThemeData copyWith({
-    Brightness? brightness,
-    Color? primaryColor,
-    Color? primaryContrastingColor,
-    CupertinoTextThemeData? textTheme,
-    Color? barBackgroundColor,
-    Color? scaffoldBackgroundColor,
-  }) {
-    return CupertinoThemeData._rawWithDefaults(
-      brightness ?? this.brightness,
-      primaryColor ?? _primaryColor,
-      primaryContrastingColor ?? _primaryContrastingColor,
-      textTheme ?? _textTheme,
-      barBackgroundColor ?? _barBackgroundColor,
-      scaffoldBackgroundColor ?? _scaffoldBackgroundColor,
-      _defaults,
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    const CupertinoThemeData defaultData = CupertinoThemeData();
-    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: null));
-    properties.add(createCupertinoColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
-    properties.add(createCupertinoColorProperty('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
-    properties.add(createCupertinoColorProperty('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
-    properties.add(createCupertinoColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
-    textTheme!.debugFillProperties(properties);
-  }
-}
-
-class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
-  const _NoDefaultCupertinoThemeData(
-    Brightness? brightness,
-    this.primaryColor,
-    this.primaryContrastingColor,
-    this.textTheme,
-    this.barBackgroundColor,
-    this.scaffoldBackgroundColor,
-  ) : super._rawWithDefaults(
-        brightness,
-        primaryColor,
-        primaryContrastingColor,
-        textTheme,
-        barBackgroundColor,
-        scaffoldBackgroundColor,
-        null,
-      );
-
-  @override
-  final Color? primaryColor;
-  @override
-  final Color? primaryContrastingColor;
-  @override
-  final CupertinoTextThemeData? textTheme;
-  @override
-  final Color? barBackgroundColor;
-  @override
-  final Color? scaffoldBackgroundColor;
-
-  @override
-  _NoDefaultCupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
-    Color? convertColor(Color? color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
-
-    return _NoDefaultCupertinoThemeData(
-      brightness,
-      convertColor(primaryColor),
-      convertColor(primaryContrastingColor),
-      textTheme?.resolveFrom(context, nullOk: nullOk),
-      convertColor(barBackgroundColor),
-      convertColor(scaffoldBackgroundColor),
-    );
-  }
-
-  @override
-  CupertinoThemeData copyWith({
+  /// derived values. For instance, if the current [textTheme] is implied from
+  /// the current [primaryColor] because it was not specified, copying with a
+  /// different [primaryColor] will also change the copy's implied [textTheme].
+  NoDefaultCupertinoThemeData copyWith({
     Brightness? brightness,
     Color? primaryColor,
     Color? primaryContrastingColor,
@@ -396,13 +411,13 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
     Color? barBackgroundColor ,
     Color? scaffoldBackgroundColor,
   }) {
-    return _NoDefaultCupertinoThemeData(
-      brightness ?? this.brightness,
-      primaryColor ?? this.primaryColor,
-      primaryContrastingColor ?? this.primaryContrastingColor,
-      textTheme ?? this.textTheme,
-      barBackgroundColor ?? this.barBackgroundColor,
-      scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
+    return NoDefaultCupertinoThemeData(
+      brightness: brightness ?? this.brightness,
+      primaryColor: primaryColor ?? this.primaryColor,
+      primaryContrastingColor: primaryContrastingColor ?? this.primaryContrastingColor,
+      textTheme: textTheme ?? this.textTheme,
+      barBackgroundColor: barBackgroundColor ?? this.barBackgroundColor,
+      scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
     );
   }
 }
