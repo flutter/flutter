@@ -328,10 +328,10 @@ class _SearchPageRoute<T> extends PageRoute<T> {
     @required this.delegate,
   }) : assert(delegate != null) {
     assert(
-      delegate._route == null,
-      'The ${delegate.runtimeType} instance is currently used by another active '
-      'search. Please close that search by calling close() on the SearchDelegate '
-      'before opening another search with the same delegate instance.',
+    delegate._route == null,
+    'The ${delegate.runtimeType} instance is currently used by another active '
+        'search. Please close that search by calling close() on the SearchDelegate '
+        'before opening another search with the same delegate instance.',
     );
     delegate._route = this;
   }
@@ -352,11 +352,11 @@ class _SearchPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child,
+      ) {
     return FadeTransition(
       opacity: animation,
       child: child,
@@ -372,10 +372,10 @@ class _SearchPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      ) {
     return _SearchPage<T>(
       delegate: delegate,
       animation: animation,
@@ -475,9 +475,9 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = widget.delegate.searchFieldLabel
-      ?? MaterialLocalizations.of(context).searchFieldLabel;
+        ?? MaterialLocalizations.of(context).searchFieldLabel;
     final TextStyle searchFieldStyle = widget.delegate.searchFieldStyle
-      ?? theme.inputDecorationTheme.hintStyle;
+        ?? theme.inputDecorationTheme.hintStyle;
     Widget body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
@@ -531,6 +531,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
               border: InputBorder.none,
               hintText: searchFieldLabel,
               hintStyle: searchFieldStyle,
+              fillColor: theme.inputDecorationTheme.fillColor,
+              focusedBorder: theme.inputDecorationTheme.focusedBorder,
             ),
           ),
           actions: widget.delegate.buildActions(context),
