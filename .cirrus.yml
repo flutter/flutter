@@ -4,11 +4,6 @@
 # YAML anchors used to share fields between tasks.
 # See https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html
 
-windows_shard_template: &WINDOWS_SHARD_TEMPLATE
-  only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-  script:
-    - dart --enable-asserts ./dev/bots/test.dart
-
 firebase_shard_template: &FIREBASE_SHARD_TEMPLATE
   environment:
     # Empirically, this shard runs in 20-25 minutes with just one CPU and 4G of RAM, as of
@@ -269,59 +264,6 @@ task:
         ANDROID_GALLERY_UPLOAD_KEY: ENCRYPTED[0f2aca35f05b26add5d9edea2a7449341269a2b7e22d5c667f876996e2e8bc44ff1369431ebf73b7c5581fd95d0e5902]
       script:
         - ./dev/bots/deploy_gallery.sh
-
-# WINDOWS SHARDS
-task:
-  windows_container:
-    image: cirrusci/android-sdk:30-windowsservercore-2019
-    os_version: 2019
-    cpu: $CPU
-    memory: $MEMORY
-  environment:
-    CPU: 1 # 1-8 without compute credits, 1-30 with
-    MEMORY: 2G # 256M-24G without compute credits, 256M-90G with
-    CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\$FLUTTER_SDK_PATH_WITH_SPACE"
-    PATH: "$CIRRUS_WORKING_DIR/bin;$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin;$PATH"
-    SHOULD_UPDATE_PACKAGES: "TRUE"
-  pub_cache:
-    folder: $APPDATA\Pub\Cache
-    fingerprint_script:
-      - ps: $Environment:OS; Get-ChildItem -Path "$Environment:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
-    reupload_on_changes: false
-  flutter_pkg_cache:
-    folder: bin\cache\pkg
-    fingerprint_script: echo %OS% & type bin\internal\*.version
-    reupload_on_changes: false
-  artifacts_cache:
-    folder: bin\cache\artifacts
-    fingerprint_script: echo %OS% & type bin\internal\*.version
-    reupload_on_changes: false
-  setup_script:
-    - git clean -xffd --exclude=bin/cache/ # git wants forward slash path separators, even on Windows.
-    - git fetch origin
-    - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
-    - flutter config --no-analytics
-    - flutter doctor -v
-    - CMD /C IF "%SHOULD_UPDATE_PACKAGES%" EQU "TRUE" flutter update-packages
-    - git fetch origin master
-  matrix:
-    - name: hostonly_devicelab_tests-0-windows
-      << : *WINDOWS_SHARD_TEMPLATE
-      environment:
-        # As of December 2019, the hostonly_devicelab_tests-0-windows shard needs at least 6G RAM to
-        # succeed. The shard got faster with more CPUs up to 6 CPUs and more RAM up to 8 GB
-        # (running in about 30 minutes).
-        CPU: 6
-        MEMORY: 8G
-
-    - name: hostonly_devicelab_tests-1_last-windows
-      << : *WINDOWS_SHARD_TEMPLATE
-      environment:
-        # As of December 2019, the hostonly_devicelab_tests-1-windows shard requires 4 GB RAM to
-        # succeed. The optimal configuration was 4 CPUs and 6 GB RAM, running in ~26 minutes.
-        # Less CPU or RAM ran slower, and more CPU or RAM yielded no extra gain.
-        CPU: 4
-        MEMORY: 6G
 
 # MACOS SHARDS
 # Mac doesn't use caches because they apparently take longer to populate and save
