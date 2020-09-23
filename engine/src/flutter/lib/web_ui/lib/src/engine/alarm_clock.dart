@@ -88,10 +88,8 @@ class AlarmClock {
   }
 
   void _cancelTimer() {
-    if (_timer != null) {
-      _timer!.cancel();
-      _timer = null;
-    }
+    _timer?.cancel();
+    _timer = null;
   }
 
   void _timerDidFire() {
