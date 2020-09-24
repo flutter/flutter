@@ -129,6 +129,10 @@ void printUsage() {
             << std::endl;
 }
 
+void GLFW_ErrorCallback(int error, const char* description) {
+  std::cout << "GLFW Error: (" << error << ") " << description << std::endl;
+}
+
 int main(int argc, const char* argv[]) {
   if (argc != 3) {
     printUsage();
@@ -137,6 +141,8 @@ int main(int argc, const char* argv[]) {
 
   std::string project_path = argv[1];
   std::string icudtl_path = argv[2];
+
+  glfwSetErrorCallback(GLFW_ErrorCallback);
 
   int result = glfwInit();
   assert(result == GLFW_TRUE);
