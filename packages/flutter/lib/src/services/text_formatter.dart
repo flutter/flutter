@@ -322,6 +322,9 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// The value must be null or greater than zero. If it is null, then no limit
   /// is enforced.
   ///
+  /// {@template flutter.services.lengthLimitingTextInputFormatter.maxLength}
+  /// ## Characters
+  ///
   /// For a specific definition of what is considered a character, see the
   /// [characters](https://pub.dev/packages/characters) package on Pub, which is
   /// what Flutter uses to delineate characters. In general, even complex
@@ -339,6 +342,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// Unicode "THUMBS UP SIGN + MEDIUM SKIN TONE MODIFIER", "👍🏽"is counted as
   /// a single character, even though it is a combination of two Unicode scalar
   /// values, '\u{1F44D}\u{1F3FD}'.
+  /// {@endtemplate}
   ///
   /// ### Composing text behaviors
   ///
