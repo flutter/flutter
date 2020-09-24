@@ -5756,6 +5756,8 @@ void main() {
     controller.text = '12345' ;
     assert(state.currentTextEditingValue == const TextEditingValue(text: '12345'));
 
+    // Should be able to change the editing value if the new value is still shorter
+    // than maxLength.
     state.updateEditingValue(const TextEditingValue(text: '12345', composing: TextRange(start: 2, end: 4)));
     expect(state.currentTextEditingValue.composing, const TextRange(start: 2, end: 4));
 
@@ -5765,7 +5767,7 @@ void main() {
 
     // The text should not change when trying to insert when the text is already
     // at maxLength.
-    state.updateEditingValue(const TextEditingValue(text: '123456', composing: TextRange(start: 5, end: 6)));
+    state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 5, end: 6)));
     expect(state.currentTextEditingValue.text, '12345');
     expect(state.currentTextEditingValue.composing, TextRange.empty);
   });
