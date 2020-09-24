@@ -394,7 +394,7 @@ class SnackBar extends StatefulWidget {
   /// use the given fallback key.
   @Deprecated(
     'Do not use, intended for migration interim. '
-      'This feature was deprecated after v1.22.0-2.0.pre.'
+    'This feature was deprecated after v1.22.0-2.0.pre.'
   )
   SnackBar withScaffoldMessenger({ Key fallbackKey }) {
     return SnackBar(
