@@ -181,11 +181,7 @@ class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
   @override
   Widget? build(BuildContext context, int index) {
     if (childCount == null) {
-      final Widget child = builder(context, index);
-      // `child` has a non-nullable return type, but might be null when
-      // running with weak checking, so we need to null check it anyway (and
-      // ignore the warning that the null-handling logic is dead code).
-      // ignore: dead_code
+      final Widget? child = builder(context, index);
       return child == null ? null : IndexedSemantics(child: child, index: index);
     }
     if (index < 0 || index >= childCount!)

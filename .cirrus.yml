@@ -154,39 +154,6 @@ task:
         - (cd dev/bots; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
-    - name: tool_tests-integration-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') && $CIRRUS_PR != ''"
-      environment:
-        # As of October 2019, the tool_tests-integration-linux shard got faster with more CPUs up to
-        # 6 CPUs, and needed at least 8G of RAM to not run out of memory.
-        CPU: 6
-        MEMORY: 8G
-        CHROME_NO_SANDBOX: true
-        SHOULD_UPDATE_PACKAGES: "FALSE"
-      script:
-        - (cd packages/flutter_tools; pub get)
-        - (cd dev/bots; pub get)
-        - (cd dev/tools; pub get)
-        - dart --enable-asserts ./dev/bots/test.dart
-
-    - name: tool_coverage-linux # linux-only
-      skip: true # Skip while moving between Cirrus and LUCI
-      only_if: "$CIRRUS_BRANCH == 'master'"
-      environment:
-        # As of February 2020, the tool_coverage-linux shard needed at least 24G of RAM to run without
-        # getting OOM-killed, and even 8 CPUs took 25 minutes.
-        CPU: 8
-        MEMORY: 24G
-        CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
-        SHOULD_UPDATE_PACKAGES: "FALSE"
-      script:
-        - (cd packages/flutter_tools; pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/main; pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/font; pub get)
-        - (cd dev/bots; pub get)
-        - dart --enable-asserts ./dev/bots/test.dart
-        - bash <(curl -s https://codecov.io/bash) -c -f packages/flutter_tools/coverage/lcov.info -F flutter_tool
-
     - name: web_integration_tests
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/**', 'packages/flutter_web_plugins/**', 'bin/**') && $CIRRUS_PR != ''"
       environment:

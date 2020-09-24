@@ -58,7 +58,7 @@
   "remainingTextFieldCharacterCountOther": "Մնացել է $remainingCount նիշ",
   "refreshIndicatorSemanticLabel": "Թարմացնել",
   "moreButtonTooltip": "Այլ",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "օօ.աա.տտտտ",
   "selectYearSemanticsLabel": "Ընտրել տարին",
   "unspecifiedDate": "Ամսաթիվ",
