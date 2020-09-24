@@ -117,7 +117,7 @@ class Cache {
       _artifacts.add(AndroidInternalBuildArtifacts(this));
 
       _artifacts.add(IOSEngineArtifacts(this));
-      _artifacts.add(FlutterWebSdk(this));
+      _artifacts.add(FlutterWebSdk(this, platform: _platform));
       _artifacts.add(FlutterSdk(this));
       _artifacts.add(WindowsEngineArtifacts(this, platform: _platform));
       _artifacts.add(MacOSEngineArtifacts(this));
@@ -691,11 +691,15 @@ class MaterialFonts extends CachedArtifact {
 ///
 /// This SDK references code within the regular Dart sdk to reduce download size.
 class FlutterWebSdk extends CachedArtifact {
-  FlutterWebSdk(Cache cache) : super(
-    'flutter_web_sdk',
-    cache,
-    DevelopmentArtifact.web,
-  );
+  FlutterWebSdk(Cache cache, {Platform platform})
+   : _platform = platform ?? globals.platform,
+     super(
+      'flutter_web_sdk',
+      cache,
+      DevelopmentArtifact.web,
+    );
+
+  final Platform _platform;
 
   @override
   Directory get location => cache.getWebSdkDirectory();
@@ -706,22 +710,26 @@ class FlutterWebSdk extends CachedArtifact {
   @override
   Future<void> updateInner(ArtifactUpdater artifactUpdater) async {
     String platformName = 'flutter-web-sdk-';
-    if (globals.platform.isMacOS) {
+    if (_platform.isMacOS) {
       platformName += 'darwin-x64';
-    } else if (globals.platform.isLinux) {
+    } else if (_platform.isLinux) {
       platformName += 'linux-x64';
-    } else if (globals.platform.isWindows) {
+    } else if (_platform.isWindows) {
       platformName += 'windows-x64';
     }
     final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra/flutter/$version/$platformName.zip');
+    if (location.existsSync()) {
+      location.deleteSync(recursive: true);
+    }
     await artifactUpdater.downloadZipArchive('Downloading Web SDK...', url, location);
     // This is a temporary work-around for not being able to safely download into a shared directory.
+    final FileSystem fileSystem = location.fileSystem;
     for (final FileSystemEntity entity in location.listSync(recursive: true)) {
       if (entity is File) {
-        final List<String> segments = globals.fs.path.split(entity.path);
+        final List<String> segments = fileSystem.path.split(entity.path);
         segments.remove('flutter_web_sdk');
-        final String newPath = globals.fs.path.joinAll(segments);
-        final File newFile = globals.fs.file(newPath);
+        final String newPath = fileSystem.path.joinAll(segments);
+        final File newFile = fileSystem.file(newPath);
         if (!newFile.existsSync()) {
           newFile.createSync(recursive: true);
         }
@@ -1556,7 +1564,11 @@ class ArtifactUpdater {
         _ensureExists(tempFile.parent);
         final IOSink ioSink = tempFile.openWrite();
         await _download(url, ioSink);
+        await ioSink.flush();
         await ioSink.close();
+        if (!tempFile.existsSync()) {
+          throw Exception('Did not find downloaded file ${tempFile.path}');
+        }
       } on Exception catch (err) {
         _logger.printTrace(err.toString());
         retries -= 1;
