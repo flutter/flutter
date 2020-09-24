@@ -319,8 +319,8 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// The limit on the number of characters (i.e. Unicode scalar values) this formatter
   /// will allow.
   ///
-  /// The value must be null or greater than zero. If it is null, then no limit
-  /// is enforced.
+  /// The value must be null or greater than zero. If it is null or -1, then no
+  /// limit is enforced.
   ///
   /// This formatter does not currently count Unicode grapheme clusters (i.e.
   /// characters visible to the user), it counts Unicode scalar values, which leaves
