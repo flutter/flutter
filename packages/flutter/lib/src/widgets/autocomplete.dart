@@ -84,7 +84,10 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///   void initState() {
 ///     super.initState();
 ///     _autocompleteController = AutocompleteController<String>(
-///       options: <String>['aardvark', 'bobcat', 'chameleon'],
+///       buildOptions: (TextEditingValue textEditingValue) {
+///         return <String>['aardvark', 'bobcat', 'chameleon']
+///            .contains(value.text.toLowerCase());
+///       }
 ///     );
 ///     _autocompleteController.textEditingController.addListener(_onChangedField);
 ///     _autocompleteController.results.addListener(_onChangeResults);
@@ -130,6 +133,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 /// }
 /// ```
 /// {@end-tool}
+/*
 @immutable
 class AutocompleteController<T> {
   /// Create an instance of AutocompleteController with a known list of options.
@@ -260,6 +264,7 @@ class AutocompleteController<T> {
     results.value = resultsValue;
   }
 }
+*/
 
 // TODO(justinmc): Link to Autocomplete and AutocompleteCupertino when they are
 // implemented.
@@ -287,7 +292,10 @@ class AutocompleteController<T> {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return AutocompleteCore<String>(
-///       options: <String>['aardvark', 'bobcat', 'chameleon'],
+///       buildOptions: (TextEditingValue textEditingValue) {
+///         return <String>['aardvark', 'bobcat', 'chameleon']
+///            .contains(value.text.toLowerCase());
+///       }
 ///       buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
 ///         return TextFormField(
 ///           controller: textEditingController,
@@ -415,34 +423,39 @@ class AutocompleteCore<T> extends StatefulWidget {
   /// [autocompleteController], [buildField], and [buildResults] must not be
   /// null.
   const AutocompleteCore({
-    this.autocompleteController,
     required this.buildField,
     required this.buildResults,
-    this.options,
+    required this.buildOptions,
+    AutocompleteOptionToString<T>? displayStringForOption,
     this.onSelected,
-  }) : assert(
-         autocompleteController != null || options != null,
-         'If not providing autocompleteController, options must be passed.',
-       ),
-       assert(
-         autocompleteController == null || options == null,
-         'No need to pass options if providing an AutocompleteController',
-       ),
-       assert(buildField != null),
-       assert(buildResults != null);
+  }) : assert(buildField != null),
+       assert(buildResults != null),
+       displayStringForOption = displayStringForOption ?? _defaultStringForOption;
 
   /// The controller that provides access to the main autocomplete state and
   /// logic.
   ///
   /// The owner of autocompleteController must call
   /// [AutocompleteController.dispose] on this when it's no longer needed.
-  final AutocompleteController<T>? autocompleteController;
+  //final AutocompleteController<T>? autocompleteController;
 
   /// Builds the field whose input is used to find the results.
   final AutocompleteFieldBuilder buildField;
 
   /// Builds the selectable results of filtering.
   final AutocompleteResultsBuilder<T> buildResults;
+
+  /// Returns the string to display in the field when the option is selected.
+  ///
+  /// This is useful when using a custom T type for AutocompleteController and
+  /// the string to display is different than the string to search by.
+  ///
+  /// If not provided, will use `option.toString()`.
+  ///
+  /// See also:
+  ///   * [filterStringForOption], which can be used to specify a custom string
+  ///     to filter by.
+  final AutocompleteOptionToString<T> displayStringForOption;
 
   /// Called when a result is selected by the user.
   final AutocompleteOnSelected<T>? onSelected;
@@ -451,7 +464,13 @@ class AutocompleteCore<T> extends StatefulWidget {
   ///
   /// If passing an AutocompleteController, use [AutocompleteController()]'s
   /// options parameter instead.
-  final List<T>? options;
+  /// TODO(justinmc): update docs.
+  final AutocompleteResultsGetter<T> buildOptions;
+
+  // The default way to convert an option to a string.
+  static String _defaultStringForOption<T>(T option) {
+    return option.toString();
+  }
 
   @override
   _AutocompleteCoreState<T> createState() =>
@@ -461,38 +480,48 @@ class AutocompleteCore<T> extends StatefulWidget {
 class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _resultsLayerLink = LayerLink();
-  late AutocompleteController<T> _autocompleteController;
+  final TextEditingController _textEditingController = TextEditingController();
+  // TODO(justinmc): Listen to changes on _textEditingController and update this.
+  List<T> _results = <T>[];
   T? _selection;
+
+
+  /// The current results being returned by [getResults].
+  ///
+  /// This is a [ValueNotifier], so it can be listened to for changes.
+  final ValueNotifier<List<T>> results = ValueNotifier<List<T>>(<T>[]);
 
   // The OverlayEntry containing the results.
   OverlayEntry? _floatingResults;
 
   // True iff the state indicates that the results should be visible.
   bool get _shouldShowResults {
-    final List<T> results = _autocompleteController.results.value;
-    final TextSelection selection =
-        _autocompleteController.textEditingController.selection;
+    final TextSelection selection = _textEditingController.selection;
     final bool fieldIsFocused = selection.baseOffset >= 0
         && selection.extentOffset >= 0;
-    final bool hasResults = results != null && results.isNotEmpty;
+    final bool hasResults = _results != null && _results.isNotEmpty;
     return fieldIsFocused && _selection == null && hasResults;
   }
 
-  // Called when _autocompleteController.results changes.
+  // Called when _results changes.
   void _onChangedResults() {
     _updateOverlay();
   }
 
-  // Called when _autocompleteController.textEditingController changes.
+  // Called when _textEditingController changes.
   void _onChangedField() {
-    if (_selection != null) {
-      final String selectionString =
-          _autocompleteController.displayStringForOption(_selection!);
-      if (_autocompleteController.textEditingController.text == selectionString) {
-        return;
-      }
-    }
+    final List<T> results = widget.buildOptions(
+      _textEditingController.value,
+    );
+    assert(results != null);
     setState(() {
+      _results = results;
+      if (_selection != null) {
+        final String selectionString = widget.displayStringForOption(_selection!);
+        if (_textEditingController.text == selectionString) {
+          return;
+        }
+      }
       _selection = null;
     });
     _updateOverlay();
@@ -500,11 +529,10 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
 
   // Called from buildField when the user submits the field.
   void _onFieldSubmitted() {
-    final List<T> results = _autocompleteController.results.value;
-    if (results.isEmpty) {
+    if (_results.isEmpty) {
       return;
     }
-    _select(results[0]);
+    _select(_results[0]);
   }
 
   // Select the given option and update the widget.
@@ -516,8 +544,8 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
       _selection = nextSelection;
       final String selectionString = nextSelection == null
           ? ''
-          : _autocompleteController.displayStringForOption(nextSelection);
-      _autocompleteController.textEditingController.value = TextEditingValue(
+          : widget.displayStringForOption(nextSelection);
+      _textEditingController.value = TextEditingValue(
         selection: TextSelection.collapsed(offset: selectionString.length),
         text: selectionString,
       );
@@ -537,7 +565,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
             fieldSize: renderBox.size,
             layerLink: _resultsLayerLink,
             onSelected: _select,
-            results: _autocompleteController.results.value,
+            results: _results,
           );
         },
       );
@@ -548,23 +576,10 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     }
   }
 
-  void _listenToController(AutocompleteController<T> autocompleteController) {
-    autocompleteController.results.addListener(_onChangedResults);
-    autocompleteController.textEditingController.addListener(_onChangedField);
-  }
-
-  void _unlistenToController(AutocompleteController<T> autocompleteController) {
-    autocompleteController.results.removeListener(_onChangedResults);
-    autocompleteController.textEditingController.removeListener(_onChangedField);
-  }
-
   @override
   void initState() {
     super.initState();
-    _autocompleteController = widget.autocompleteController
-        ?? AutocompleteController<T>(options: widget.options!);
-    _listenToController(_autocompleteController);
-
+    _textEditingController.addListener(_onChangedField);
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       _updateOverlay();
     });
@@ -573,27 +588,6 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   @override
   void didUpdateWidget(AutocompleteCore<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    // Handle changes in the AutocompleteController.
-    if (widget.autocompleteController == null && oldWidget.autocompleteController != null) {
-      _unlistenToController(oldWidget.autocompleteController!);
-      _autocompleteController = AutocompleteController<T>(
-        options: widget.options!,
-      );
-      _listenToController(_autocompleteController);
-    } else if (widget.autocompleteController != null && oldWidget.autocompleteController == null) {
-      _unlistenToController(_autocompleteController);
-      _autocompleteController.dispose();
-      _autocompleteController = widget.autocompleteController!;
-      _listenToController(_autocompleteController);
-    } else if (widget.autocompleteController != oldWidget.autocompleteController
-        && widget.autocompleteController != null
-        && oldWidget.autocompleteController != null) {
-      _unlistenToController(oldWidget.autocompleteController!);
-      _autocompleteController = widget.autocompleteController!;
-      _listenToController(_autocompleteController);
-    }
-
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       _updateOverlay();
     });
@@ -601,10 +595,6 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
 
   @override
   void dispose() {
-    _unlistenToController(_autocompleteController);
-    if (widget.autocompleteController == null) {
-      _autocompleteController.dispose();
-    }
     _floatingResults?.remove();
     _floatingResults = null;
     super.dispose();
@@ -618,7 +608,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
         link: _resultsLayerLink,
         child: widget.buildField(
           context,
-          _autocompleteController.textEditingController,
+          _textEditingController,
           _onFieldSubmitted,
         ),
       ),
