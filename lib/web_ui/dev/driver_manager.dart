@@ -5,7 +5,6 @@
 // @dart = 2.6
 import 'dart:io' as io;
 
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as pathlib;
 import 'package:web_driver_installer/chrome_driver_installer.dart';
 import 'package:web_driver_installer/firefox_driver_installer.dart';
@@ -184,14 +183,12 @@ class SafariDriverManager extends DriverManager {
 /// tests.
 abstract class DriverManager {
   /// Installation directory for browser's driver.
-  @protected
   final io.Directory _browserDriverDir;
 
   /// This is the parent directory for all drivers.
   ///
   /// This directory is saved to [temporaryDirectories] and deleted before
   /// tests shutdown.
-  @protected
   final io.Directory _drivers;
 
   DriverManager(String browser)
@@ -223,7 +220,6 @@ abstract class DriverManager {
 
   Future<void> _verifyDriverForLUCI();
 
-  @protected
   Future<void> _startDriver();
 
   static DriverManager chooseDriver(String browser) {

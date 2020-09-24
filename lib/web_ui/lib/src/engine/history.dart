@@ -88,16 +88,13 @@ abstract class BrowserHistory {
   ///
   /// Subclasses should send appropriate system messages to update the flutter
   /// applications accordingly.
-  @protected
   void onPopState(covariant html.PopStateEvent event);
 
   /// Sets up any prerequisites to use this browser history class.
-  @protected
   Future<void> setup() => Future<void>.value();
 
   /// Restore any modifications to the html browser history during the lifetime
   /// of this class.
-  @protected
   Future<void> tearDown() => Future<void>.value();
 }
 
