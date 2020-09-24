@@ -357,8 +357,13 @@ class Container extends StatelessWidget {
   /// The transformation matrix to apply before painting the container.
   final Matrix4? transform;
 
-  /// The transform alignment of the origin, relative to the size of the container.
-  /// Only applied when [transform] is **not** null.
+ /// The alignment of the origin, relative to the size of the container, if [transform] is specified.
+ ///
+ /// When [transform] is null, the value of this property is ignored.
+ ///
+ /// See also:
+ ///
+ ///  * [Transform.align], which is set by this property.
   final Alignment? transformAlignment;
 
   /// The clip behavior when [Container.decoration] is not null.
