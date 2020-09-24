@@ -464,7 +464,7 @@ class FlutterPlatform extends PlatformPlugin {
         enableObservatory: enableObservatory,
         startPaused: startPaused,
         disableServiceAuthCodes: disableServiceAuthCodes,
-        observatoryPort: explicitObservatoryPort,
+        observatoryPort: disableDds ? explicitObservatoryPort : 0,
         serverPort: server.port,
       );
       subprocessActive = true;
@@ -502,8 +502,17 @@ class FlutterPlatform extends PlatformPlugin {
           assert(explicitObservatoryPort == null ||
               explicitObservatoryPort == detectedUri.port);
           if (!disableDds) {
+            final Uri serviceUri = Uri(
+              scheme: 'http',
+              host: (host.type == InternetAddressType.IPv6 ?
+              InternetAddress.loopbackIPv6 :
+              InternetAddress.loopbackIPv4
+              ).host,
+              port: explicitObservatoryPort ?? 0,
+            );
             final DartDevelopmentService dds = await DartDevelopmentService.startDartDevelopmentService(
               detectedUri,
+              serviceUri: serviceUri,
               enableAuthCodes: !disableServiceAuthCodes,
               ipv6: host.type == InternetAddressType.IPv6,
             );
