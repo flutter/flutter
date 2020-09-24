@@ -450,22 +450,9 @@ Future<Codec> instantiateImageCodec(
       _instantiateImageCodec(list, callback));
 }
 
-String? _instantiateImageCodec(
-  Uint8List list,
-  engine.Callback<Codec> callback, {
-  int? width,
-  int? height,
-  int? rowBytes,
-  PixelFormat? format,
-}) {
+String? _instantiateImageCodec(Uint8List list, engine.Callback<Codec> callback) {
   if (engine.experimentalUseSkia) {
-    if (width == null) {
-      engine.skiaInstantiateImageCodec(list, callback);
-    } else {
-      assert(height != null);
-      assert(format != null);
-      engine.skiaInstantiateImageCodec(list, callback, width, height, format!.index, rowBytes);
-    }
+    engine.skiaInstantiateImageCodec(list, callback);
     return null;
   }
   final html.Blob blob = html.Blob(<dynamic>[list.buffer]);
@@ -502,6 +489,81 @@ Future<void> _decodeImageFromListAsync(Uint8List list, ImageDecoderCallback call
   final FrameInfo frameInfo = await codec.getNextFrame();
   callback(frameInfo.image);
 }
+Future<Codec> _createBmp(
+  Uint8List pixels,
+  int width,
+  int height,
+  int rowBytes,
+  PixelFormat format,
+) {
+  // See https://en.wikipedia.org/wiki/BMP_file_format for format examples.
+  final int bufferSize = 0x36 + (width * height * 4);
+  final ByteData bmpData = ByteData(bufferSize);
+  // 'BM' header
+  bmpData.setUint8(0x00, 0x42);
+  bmpData.setUint8(0x01, 0x4D);
+  // Size of data
+  bmpData.setUint32(0x02, bufferSize, Endian.little);
+  // Offset where pixel array begins
+  bmpData.setUint32(0x0A, 0x36, Endian.little);
+  // Bytes in DIB header
+  bmpData.setUint32(0x0E, 0x28, Endian.little);
+  // width
+  bmpData.setUint32(0x12, width, Endian.little);
+  // height
+  bmpData.setUint32(0x16, height, Endian.little);
+  // Color panes
+  bmpData.setUint16(0x1A, 0x01, Endian.little);
+  // 32 bpp
+  bmpData.setUint16(0x1C, 0x20, Endian.little);
+  // no compression
+  bmpData.setUint32(0x1E, 0x00, Endian.little);
+  // raw bitmap data size
+  bmpData.setUint32(0x22, width * height, Endian.little);
+  // print DPI width
+  bmpData.setUint32(0x26, width, Endian.little);
+  // print DPI height
+  bmpData.setUint32(0x2A, height, Endian.little);
+  // colors in the palette
+  bmpData.setUint32(0x2E, 0x00, Endian.little);
+  // important colors
+  bmpData.setUint32(0x32, 0x00, Endian.little);
+
+
+  int pixelDestinationIndex = 0;
+  late bool swapRedBlue;
+  switch (format) {
+    case PixelFormat.bgra8888:
+      swapRedBlue = true;
+      break;
+    case PixelFormat.rgba8888:
+      swapRedBlue = false;
+      break;
+  }
+  for (int pixelSourceIndex = 0; pixelSourceIndex < pixels.length; pixelSourceIndex += 4) {
+    final int r = swapRedBlue ? pixels[pixelSourceIndex + 2] : pixels[pixelSourceIndex];
+    final int b = swapRedBlue ? pixels[pixelSourceIndex]     : pixels[pixelSourceIndex + 2];
+    final int g = pixels[pixelSourceIndex + 1];
+    final int a = pixels[pixelSourceIndex + 3];
+
+    // Set the pixel past the header data.
+    bmpData.setUint8(pixelDestinationIndex + 0x36, r);
+    bmpData.setUint8(pixelDestinationIndex + 0x37, g);
+    bmpData.setUint8(pixelDestinationIndex + 0x38, b);
+    bmpData.setUint8(pixelDestinationIndex + 0x39, a);
+    pixelDestinationIndex += 4;
+    if (rowBytes != width && pixelSourceIndex % width == 0) {
+      pixelSourceIndex += rowBytes - width;
+    }
+  }
+
+  final Completer<Codec> codecCompleter = Completer<Codec>();
+  _instantiateImageCodec(
+    bmpData.buffer.asUint8List(),
+    (Codec codec) => codecCompleter.complete(codec),
+  );
+  return codecCompleter.future;
+}
 
 void decodeImageFromPixels(
   Uint8List pixels,
@@ -514,19 +576,29 @@ void decodeImageFromPixels(
   int? targetHeight,
   bool allowUpscaling = true,
 }) {
-  final Future<Codec> codecFuture = _futurize((engine.Callback<Codec> callback) {
-    return _instantiateImageCodec(
+  if (engine.experimentalUseSkia) {
+    engine.skiaInstantiateImageCodec(
       pixels,
-      callback,
-      width: width,
-      height: height,
-      format: format,
-      rowBytes: rowBytes,
+      (Codec codec) {
+        codec.getNextFrame().then((FrameInfo info) {
+          callback(info.image);
+        });
+      },
+      width,
+      height,
+      format.index,
+      rowBytes,
     );
-  });
-  codecFuture
-      .then((Codec codec) => codec.getNextFrame())
-      .then((FrameInfo frameInfo) => callback(frameInfo.image));
+    return;
+  }
+
+  void Function(Codec) callbacker = (Codec codec) {
+    codec.getNextFrame().then((FrameInfo frameInfo) {
+      callback(frameInfo.image);
+    });
+  };
+  _createBmp(pixels, width, height, rowBytes ?? width, format).then(callbacker);
+
 }
 
 class Shadow {
@@ -684,27 +756,19 @@ class ImageDescriptor {
   int get bytesPerPixel =>
       throw UnsupportedError('ImageDescriptor.bytesPerPixel is not supported on web.');
   void dispose() => _data = null;
-  Future<Codec> instantiateCodec({int? targetWidth, int? targetHeight}) {
+  Future<Codec> instantiateCodec({int? targetWidth, int? targetHeight}) async {
     if (_data == null) {
       throw StateError('Object is disposed');
     }
     if (_width == null) {
-      return instantiateImageCodec(
+      return await instantiateImageCodec(
         _data!,
         targetWidth: targetWidth,
         targetHeight: targetHeight,
         allowUpscaling: false,
       );
     }
-    return _futurize((engine.Callback<Codec> callback) {
-      return _instantiateImageCodec(
-        _data!,
-        callback,
-        width: _width,
-        height: _height,
-        format: _format,
-        rowBytes: _rowBytes,
-      );
-    });
+
+    return await _createBmp(_data!, width, height, _rowBytes ?? width, _format!);
   }
 }
