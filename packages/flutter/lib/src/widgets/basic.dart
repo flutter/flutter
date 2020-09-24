@@ -4688,7 +4688,7 @@ class Expanded extends Flexible {
   const Expanded({
     Key? key,
     int flex = 1,
-    required Widget child,
+    @required Widget child,
   }) : super(key: key, flex: flex, fit: FlexFit.tight, child: child);
 }
 
