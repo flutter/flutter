@@ -352,10 +352,10 @@ void main() {
       <Completer<MockHttpClientResponse>>[hanger, succeeder];
     succeeder.complete(MockHttpClientResponse());
 
-    when(httpRequest.close()).thenAnswer((Invocation invocation) async {
+    when(httpRequest.close()).thenAnswer((Invocation invocation) {
       final Completer<MockHttpClientResponse> completer = closeCompleters[closeCount];
       closeCount += 1;
-      return await completer.future;
+      return completer.future;
     });
     when(httpRequest.abort()).thenAnswer((_) {
       hanger.completeError(const HttpException('aborted'));
@@ -367,7 +367,7 @@ void main() {
         return succeeder.future;
       } else {
         // This branch shouldn't happen.
-        assert(false);
+        fail('This branch should not happen');
         return null;
       }
     });
