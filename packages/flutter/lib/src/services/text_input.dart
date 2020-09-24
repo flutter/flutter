@@ -756,7 +756,17 @@ abstract class TextSelectionDelegate {
   /// Gets the current text input.
   TextEditingValue get textEditingValue;
 
-  /// Sets the current text input (replaces the whole line).
+  /// Indicates that the user has requested the delegate to replace its current
+  /// text editing state with [value].
+  ///
+  /// The new [value] should be treated as user input and thus may subject to
+  /// user-input-specific pre-processing such as input formatters.
+  ///
+  /// See also:
+  ///
+  /// * [EditableTextState.textEditingValue]: an concrete implementation that
+  ///   appleis additional pre-processing to the specified [value], before
+  ///   updating the text editing state.
   set textEditingValue(TextEditingValue value);
 
   /// Hides the text selection toolbar.
@@ -805,6 +815,9 @@ abstract class TextInputClient {
   AutofillScope? get currentAutofillScope;
 
   /// Requests that this client update its editing state to the given value.
+  ///
+  /// The new [value] should be treated as user input and thus may subject to
+  /// user-input-specific pre-processing such as input formatters.
   void updateEditingValue(TextEditingValue value);
 
   /// Requests that this client perform the given action.

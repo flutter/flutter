@@ -352,6 +352,34 @@ class ToolbarOptions {
 /// methods such as [RenderEditable.selectPosition],
 /// [RenderEditable.selectWord], etc. programmatically.
 ///
+/// ## Communication with the Platform Text Input Plugin
+///
+/// [EditableText] communicates asynchronously with the platform text input
+/// plugin to keep the [TextEditingValue] in sync. Currently the communication
+/// flow is:
+///
+/// * [EditableText] sends its latest [TextEditingValue] to the platform text
+///   input plugin using [TextInputConnection.setEditingState], and it
+///   unconditionally overwrites the platform text input plugin's current
+///   [TextEditingValue].
+///
+/// * With the exception of autofill, the text input plugin can only send
+///   [TextEditingValue] to the currently connected [EditableText]. Once
+///   received by the [EditableText], the [TextEditingValue] will be treated as
+///   user input and processed by the supplied [inputFormatters] and then the
+///   [onChanged] callback.
+///
+/// These rules need to be followed:
+///
+/// * To prevent feedback loops, it is vital that the receiving end not sending
+///   the value back to the sending end.
+///
+/// * The message handler for the "TextInput.setEditingState" message in the
+///   platform text input plugin must set the [TextEditingValue] as is.
+///   Attempting to change the editing value and reporting the change back to
+///   the framework may cause the [EditableText] and the text input plugin to
+///   stuck in an infinite loop.
+///
 /// See also:
 ///
 ///  * [TextField], which is a full-featured, material-design text input field
@@ -1616,54 +1644,62 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // _lastFormattedUnmodifiedTextEditingValue tracks the last value
   // that the formatter ran on and is used to prevent double-formatting.
   TextEditingValue? _lastFormattedUnmodifiedTextEditingValue;
-  // _lastFormattedValue tracks the last post-format value, so that it can be
-  // reused without rerunning the formatter when the input value is repeated.
-  TextEditingValue? _lastFormattedValue;
-  // _receivedRemoteTextEditingValue is the direct value last passed in
-  // updateEditingValue. This value does not get updated with the formatted
-  // version.
-  TextEditingValue? _receivedRemoteTextEditingValue;
+  /// The last reported [TextEditingValue] the platform text input plugin holds.
+  ///
+  /// This value is updated when the platform text input plugin sends a new
+  /// update via [updateEditingValue], or when [EditableText] calls
+  /// [TextInputConnection.setEditingState] to overwrite the platform text input
+  /// plugin's [TextEditingValue].
+  ///
+  /// Used in [_updateRemoteEditingValueIfNeeded] to determine whether the
+  /// remote value is outdated and needs updating.
+  TextEditingValue? _lastKnownRemoteTextEditingValue;
 
   @override
   TextEditingValue get currentTextEditingValue => _value;
 
-  bool _updateEditingValueInProgress = false;
-
   @override
   void updateEditingValue(TextEditingValue value) {
-    _updateEditingValueInProgress = true;
+    // This method handles text editing state updates from the platform text
+    // input plugin. The [EditableText] may not have the focus or an open input
+    // connection, as autofill can updated an [EditableText] without an active
+    // connection.
+
     // Since we still have to support keyboard select, this is the best place
     // to disable text updating.
     if (!_shouldCreateInputConnection) {
-      _updateEditingValueInProgress = false;
       return;
     }
+
     if (widget.readOnly) {
       // In the read-only case, we only care about selection changes, and reject
       // everything else.
       value = _value.copyWith(selection: value.selection);
     }
-    _receivedRemoteTextEditingValue = value;
-    if (value.text != _value.text) {
-      hideToolbar();
-      _showCaretOnScreen();
-      _currentPromptRectRange = null;
-      if (widget.obscureText && value.text.length == _value.text.length + 1) {
-        _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
-        _obscureLatestCharIndex = _value.selection.baseOffset;
-      }
-    }
+    _lastKnownRemoteTextEditingValue = value;
 
     if (value == _value) {
       // This is possible, for example, when the numeric keyboard is input,
       // the engine will notify twice for the same value.
       // Track at https://github.com/flutter/flutter/issues/65811
-      _updateEditingValueInProgress = false;
       return;
-    } else if (value.text == _value.text && value.composing == _value.composing && value.selection != _value.selection) {
+    }
+
+    if (value.text == _value.text && value.composing == _value.composing) {
       // `selection` is the only change.
       _handleSelectionChanged(value.selection, renderEditable, SelectionChangedCause.keyboard);
     } else {
+      hideToolbar();
+      _currentPromptRectRange = null;
+
+      if (_hasInputConnection) {
+        _showCaretOnScreen();
+        if (widget.obscureText && value.text.length == _value.text.length + 1) {
+          _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
+          _obscureLatestCharIndex = _value.selection.baseOffset;
+        }
+      }
+
       _formatAndSetValue(value);
     }
 
@@ -1673,7 +1709,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _stopCursorTimer(resetCharTicks: false);
       _startCursorTimer();
     }
-    _updateEditingValueInProgress = false;
   }
 
   @override
@@ -1822,23 +1857,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     // Invoke optional callback with the user's submitted content.
-    if (widget.onSubmitted != null)
-      widget.onSubmitted!(_value.text);
+    widget.onSubmitted?.call(_value.text);
   }
 
+  // When this flag is true, calling [_updateRemoteEditingValueIfNeeded] does
+  // nothing. This can be used to mute [_updateRemoteEditingValueIfNeeded] calls
+  // triggered by the [_value] setter.
+  bool _muteRemoteUpdate = false;
   void _updateRemoteEditingValueIfNeeded() {
-    if (!_hasInputConnection)
+    if (_muteRemoteUpdate || !_hasInputConnection)
       return;
     final TextEditingValue localValue = _value;
-    // We should not update back the value notified by the remote(engine) in reverse, this is redundant.
-    // Unless we modify this value for some reason during processing, such as `TextInputFormatter`.
-    if (_updateEditingValueInProgress && localValue == _receivedRemoteTextEditingValue)
+    if (localValue == _lastKnownRemoteTextEditingValue)
       return;
-    // In other cases, as long as the value of the [widget.controller.value] is modified,
-    // `setEditingState` should be called as we do not want to skip sending real changes
-    // to the engine.
-    // Also see https://github.com/flutter/flutter/issues/65059#issuecomment-690254379
     _textInputConnection!.setEditingState(localValue);
+    // Update _lastKnownremoteTextEditingValue immediately as setEditingValue is
+    // "fire and forget".
+    _lastKnownRemoteTextEditingValue = localValue;
   }
 
   TextEditingValue get _value => widget.controller.value;
@@ -1902,7 +1937,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return RevealedOffset(rect: rect.shift(unitOffset * offsetDelta), offset: targetOffset);
   }
 
-  bool get _hasInputConnection => _textInputConnection != null && _textInputConnection!.attached;
+  bool get _hasInputConnection => _textInputConnection?.attached ?? false;
   bool get _needsAutofill => widget.autofillHints?.isNotEmpty ?? false;
   bool get _shouldBeInAutofillContext => _needsAutofill && currentAutofillScope != null;
 
@@ -1954,7 +1989,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection!.close();
       _textInputConnection = null;
       _lastFormattedUnmodifiedTextEditingValue = null;
-      _receivedRemoteTextEditingValue = null;
+      _lastKnownRemoteTextEditingValue = null;
     }
   }
 
@@ -1973,7 +2008,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection!.connectionClosedReceived();
       _textInputConnection = null;
       _lastFormattedUnmodifiedTextEditingValue = null;
-      _receivedRemoteTextEditingValue = null;
+      _lastKnownRemoteTextEditingValue = null;
       _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
     }
   }
@@ -2037,8 +2072,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
       _selectionOverlay!.handlesVisible = widget.showSelectionHandles;
       _selectionOverlay!.showHandles();
-      if (widget.onSelectionChanged != null)
-        widget.onSelectionChanged!(selection, cause);
+      widget.onSelectionChanged?.call(selection, cause);
     }
   }
 
@@ -2125,14 +2159,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
   }
 
-  _WhitespaceDirectionalityFormatter? _whitespaceFormatter;
+  late final _WhitespaceDirectionalityFormatter _whitespaceFormatter = _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
 
+  /// Preprocesses the **user input** and updates the current editing state.
   void _formatAndSetValue(TextEditingValue value) {
-    _whitespaceFormatter ??= _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
-
     // Check if the new value is the same as the current local value, or is the same
     // as the pre-formatting value of the previous pass (repeat call).
-    final bool textChanged = _value.text != value.text;
+    final bool textChanged = _value.text != value.text || _value.composing != _value.composing;
     final bool isRepeat = value == _lastFormattedUnmodifiedTextEditingValue;
 
     // There's no need to format when starting to compose or when continuing
@@ -2151,20 +2184,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       // Always pass the text through the whitespace directionality formatter to
       // maintain expected behavior with carets on trailing whitespace.
-      value = _whitespaceFormatter!.formatEditUpdate(_value, value);
-      _lastFormattedValue = value;
+      value = _whitespaceFormatter.formatEditUpdate(_value, value);
     }
 
+    // Before triggering the [_value] change notifier, we want to make sure
+    // [_updateRemoteEditingValueIfNeeded] is muted, so we can consolidate the
+    // changes and send them to the engine in one batch.
+    _muteRemoteUpdate = true;
     // Setting _value here ensures the selection and composing region info is passed.
     _value = value;
-    // Use the last formatted value when an identical repeat pass is detected.
-    if (isRepeat && textChanged && _lastFormattedValue != null) {
-      _value = _lastFormattedValue!;
-    }
 
-    if (textChanged && widget.onChanged != null)
-      widget.onChanged!(value.text);
-    _lastFormattedUnmodifiedTextEditingValue = _receivedRemoteTextEditingValue;
+    if (textChanged)
+      widget.onChanged?.call(value.text);
+    _muteRemoteUpdate = false;
+    _lastFormattedUnmodifiedTextEditingValue = _lastKnownRemoteTextEditingValue;
+    _updateRemoteEditingValueIfNeeded();
+    assert(!_muteRemoteUpdate);
   }
 
   void _onCursorColorTick() {
@@ -2335,6 +2370,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   double get _devicePixelRatio => MediaQuery.of(context)?.devicePixelRatio ?? 1.0;
 
+  /// Update the current
   @override
   set textEditingValue(TextEditingValue value) {
     _selectionOverlay?.update(value);
