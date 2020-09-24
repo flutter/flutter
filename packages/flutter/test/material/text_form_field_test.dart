@@ -122,6 +122,7 @@ void main() {
 
   testWidgets('Passes cursor attributes to underlying TextField', (WidgetTester tester) async {
     const double cursorWidth = 3.14;
+    const double cursorHeight = 6.28;
     const Radius cursorRadius = Radius.circular(4);
     const Color cursorColor = Colors.purple;
 
@@ -131,6 +132,7 @@ void main() {
           child: Center(
             child: TextFormField(
               cursorWidth: cursorWidth,
+              cursorHeight: cursorHeight,
               cursorRadius: cursorRadius,
               cursorColor: cursorColor,
             ),
@@ -144,6 +146,7 @@ void main() {
 
     final TextField textFieldWidget = tester.widget(textFieldFinder);
     expect(textFieldWidget.cursorWidth, cursorWidth);
+    expect(textFieldWidget.cursorHeight, cursorHeight);
     expect(textFieldWidget.cursorRadius, cursorRadius);
     expect(textFieldWidget.cursorColor, cursorColor);
   });
@@ -426,6 +429,33 @@ void main() {
 
     expect(find.text('initialValue'), findsNothing);
     expect(find.text('changedValue'), findsOneWidget);
+  });
+
+  testWidgets('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
+    bool _called = false;
+
+    FormFieldState<String> state;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              onChanged: (String value) {
+                _called = true;
+                expect(value, state.value);
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
+
+    await tester.enterText(find.byType(TextField), 'Soup');
+
+    expect(_called, true);
   });
 
   testWidgets('autofillHints is passed to super', (WidgetTester tester) async {

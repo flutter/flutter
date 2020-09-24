@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:dds/dds.dart' as dds;
 import 'package:vm_service/vm_service_io.dart' as vm_service;
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:meta/meta.dart';
@@ -17,6 +18,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -48,9 +50,11 @@ import 'run.dart';
 /// successful the exit code will be `0`. Otherwise, you will see a non-zero
 /// exit code.
 class DriveCommand extends RunCommandBase {
-  DriveCommand() {
+  DriveCommand({
+    bool verboseHelp = false,
+  }) {
     requiresPubspecYaml();
-
+    addEnableExperimentation(hide: !verboseHelp);
     argParser
       ..addFlag('keep-app-running',
         defaultsTo: null,
@@ -145,7 +149,7 @@ class DriveCommand extends RunCommandBase {
   @override
   Future<void> validateCommand() async {
     if (userIdentifier != null) {
-      final Device device = await findTargetDevice();
+      final Device device = await findTargetDevice(timeout: deviceDiscoveryTimeout);
       if (device is! AndroidDevice) {
         throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
       }
@@ -160,7 +164,7 @@ class DriveCommand extends RunCommandBase {
       throwToolExit(null);
     }
 
-    _device = await findTargetDevice();
+    _device = await findTargetDevice(timeout: deviceDiscoveryTimeout);
     if (device == null) {
       throwToolExit(null);
     }
@@ -187,17 +191,6 @@ class DriveCommand extends RunCommandBase {
         );
       }
 
-      if (isWebPlatform && buildInfo.isDebug) {
-        // TODO(angjieli): remove this once running against
-        // target under test_driver in debug mode is supported
-        throwToolExit(
-          'Flutter Driver web does not support running in debug mode.\n'
-          '\n'
-          'Use --profile mode for testing application performance.\n'
-          'Use --release mode for testing correctness (with assertions).'
-        );
-      }
-
       Uri webUri;
 
       if (isWebPlatform) {
@@ -208,6 +201,7 @@ class DriveCommand extends RunCommandBase {
           flutterProject: flutterProject,
           target: targetFile,
           buildInfo: buildInfo,
+          platform: globals.platform,
         );
         residentRunner = webRunnerFactory.createWebRunner(
           flutterDevice,
@@ -244,6 +238,23 @@ class DriveCommand extends RunCommandBase {
         throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
       }
       observatoryUri = result.observatoryUri.toString();
+      // TODO(bkonyi): add web support (https://github.com/flutter/flutter/issues/61259)
+      if (!isWebPlatform && !disableDds) {
+        try {
+          // If there's another flutter_tools instance still connected to the target
+          // application, DDS will already be running remotely and this call will fail.
+          // We can ignore this and continue to use the remote DDS instance.
+          await device.dds.startDartDevelopmentService(
+            Uri.parse(observatoryUri),
+            ddsPort,
+            ipv6,
+            disableServiceAuthCodes,
+          );
+          observatoryUri = device.dds.uri.toString();
+        } on dds.DartDevelopmentServiceException catch(_) {
+          globals.printTrace('Note: DDS is already connected to $observatoryUri.');
+        }
+      }
     } else {
       globals.printStatus('Will connect to already running application instance.');
       observatoryUri = stringArg('use-existing-app');
@@ -305,6 +316,7 @@ $ex
         'DRIVER_SESSION_ID': driver.id,
         'DRIVER_SESSION_URI': driver.uri.toString(),
         'DRIVER_SESSION_SPEC': driver.spec.toString(),
+        'DRIVER_SESSION_CAPABILITIES': json.encode(driver.capabilities),
         'SUPPORT_TIMELINE_ACTION': (browser == Browser.chrome).toString(),
         'FLUTTER_WEB_TEST': 'true',
         'ANDROID_CHROME_ON_EMULATOR': (isAndroidChrome && useEmulator).toString(),
@@ -312,7 +324,18 @@ $ex
     }
 
     try {
-      await testRunner(<String>[testFile], environment);
+      await testRunner(
+        <String>[
+          if (buildInfo.dartExperiments.isNotEmpty)
+            '--enable-experiment=${buildInfo.dartExperiments.join(',')}',
+          if (buildInfo.nullSafetyMode == NullSafetyMode.sound)
+            '--sound-null-safety',
+          if (buildInfo.nullSafetyMode == NullSafetyMode.unsound)
+            '--no-sound-null-safety',
+          testFile,
+        ],
+        environment,
+      );
     } on Exception catch (error, stackTrace) {
       if (error is ToolExit) {
         rethrow;
@@ -387,9 +410,9 @@ $ex
   }
 }
 
-Future<Device> findTargetDevice() async {
+Future<Device> findTargetDevice({ @required Duration timeout }) async {
   final DeviceManager deviceManager = globals.deviceManager;
-  final List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
+  final List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current(), timeout: timeout);
 
   if (deviceManager.hasSpecifiedDeviceId) {
     if (devices.isEmpty) {
@@ -477,10 +500,12 @@ Future<LaunchResult> _startApp(
     debuggingOptions: DebuggingOptions.enabled(
       command.getBuildInfo(),
       startPaused: true,
-      hostVmServicePort: command.hostVmservicePort,
+      hostVmServicePort: webUri != null ? command.hostVmservicePort : 0,
+      ddsPort: command.ddsPort,
       verboseSystemLogs: command.verboseSystemLogs,
       cacheSkSL: command.cacheSkSL,
       dumpSkpOnShaderCompilation: command.dumpSkpOnShaderCompilation,
+      purgePersistentCache: command.purgePersistentCache,
     ),
     platformArgs: platformArgs,
     prebuiltApplication: !command.shouldBuild,
@@ -539,7 +564,7 @@ Future<bool> _stopApp(DriveCommand command) async {
   return stopped;
 }
 
-/// A list of supported browsers
+/// A list of supported browsers.
 @visibleForTesting
 enum Browser {
   /// Chrome on Android: https://developer.chrome.com/multidevice/android/overview

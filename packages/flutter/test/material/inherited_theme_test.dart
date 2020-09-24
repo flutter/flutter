@@ -40,7 +40,7 @@ void main() {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
-                          RaisedButton(
+                          ElevatedButton(
                             child: const Text('push unwrapped'),
                             onPressed: () {
                               Navigator.of(context).push<void>(
@@ -51,7 +51,7 @@ void main() {
                               );
                             },
                           ),
-                          RaisedButton(
+                          ElevatedButton(
                             child: const Text('push wrapped'),
                             onPressed: () {
                               Navigator.of(context).push<void>(
@@ -169,7 +169,7 @@ void main() {
     final Widget banner = MaterialBanner(
       content: const Text('hello'),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
           child: const Text('action'),
           onPressed: () { },
         ),
@@ -193,7 +193,7 @@ void main() {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -204,7 +204,7 @@ void main() {
                           );
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -283,7 +283,7 @@ void main() {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -294,7 +294,7 @@ void main() {
                           );
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -387,7 +387,7 @@ void main() {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -398,7 +398,7 @@ void main() {
                           );
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -487,7 +487,7 @@ void main() {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -498,7 +498,7 @@ void main() {
                           );
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -572,7 +572,7 @@ void main() {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -583,7 +583,7 @@ void main() {
                           );
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(

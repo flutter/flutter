@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -20,9 +18,9 @@ import 'package:test_api/test_api.dart' as test_package;
 import 'all_elements.dart';
 import 'binding.dart';
 import 'controller.dart';
-import 'event_simulation.dart';
 import 'finders.dart';
 import 'matchers.dart';
+import 'restoration.dart';
 import 'test_async_utils.dart';
 import 'test_compat.dart';
 import 'test_pointer.dart';
@@ -137,6 +135,7 @@ void testWidgets(
         test_package.addTearDown(binding.postTest);
         return binding.runTest(
           () async {
+            binding.reset();
             debugResetSemanticsIdCounter();
             tester.resetTestTextInput();
             Object memento;
@@ -270,6 +269,77 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   }
 }
 
+/// A [TestVariant] that runs separate tests with each of the given values.
+///
+/// To use this variant, define it before the test, and then access
+/// [currentValue] inside the test.
+///
+/// The values are typically enums, but they don't have to be. The `toString`
+/// for the given value will be used to describe the variant. Values will have
+/// their type name stripped from their `toString` output, so that enum values
+/// will only print the value, not the type.
+///
+/// {@tool snippet}
+/// This example shows how to set up the test to access the [currentValue]. In
+/// this example, two tests will be run, one with `value1`, and one with
+/// `value2`. The test with `value2` will fail. The names of the tests will be:
+///
+///   - `Test handling of TestScenario (value1)`
+///   - `Test handling of TestScenario (value2)`
+///
+/// ```dart
+/// enum TestScenario {
+///   value1,
+///   value2,
+///   value3,
+/// }
+///
+/// final ValueVariant<TestScenario> variants = ValueVariant<TestScenario>(
+///   <TestScenario>{value1, value2},
+/// );
+///
+/// testWidgets('Test handling of TestScenario', (WidgetTester tester) {
+///   expect(variants.currentValue, equals(value1));
+/// }, variant: variants);
+/// ```
+/// {@end-tool}
+class ValueVariant<T> extends TestVariant<T> {
+  /// Creates a [ValueVariant] that tests the given [values].
+  ValueVariant(this.values);
+
+  /// Returns the value currently under test.
+  T get currentValue => _currentValue;
+  T _currentValue;
+
+  @override
+  final Set<T> values;
+
+  @override
+  String describeValue(T value) => value.toString().replaceFirst('$T.', '');
+
+  @override
+  Future<T> setUp(T value) async => _currentValue = value;
+
+  @override
+  Future<void> tearDown(T value, T memento) async {}
+}
+
+/// The warning message to show when a benchmark is performed with assert on.
+const String kDebugWarning = '''
+┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓
+┇ ⚠    THIS BENCHMARK IS BEING RUN IN DEBUG MODE     ⚠  ┇
+┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦
+│                                                       │
+│  Numbers obtained from a benchmark while asserts are  │
+│  enabled will not accurately reflect the performance  │
+│  that will be experienced by end users using release  ╎
+│  builds. Benchmarks should be run using this command  ╎
+│  line:  "flutter run --profile test.dart" or          ┊
+│  or "flutter drive --profile -t test.dart".           ┊
+│                                                       ┊
+└─────────────────────────────────────────────────╌┄┈  🐢
+''';
+
 /// Runs the [callback] inside the Flutter benchmark environment.
 ///
 /// Use this function for benchmarking custom [StatelessWidget]s and
@@ -320,18 +390,7 @@ Future<void> benchmarkWidgets(
   assert(() {
     if (mayRunWithAsserts)
       return true;
-
-    print('┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓');
-    print('┇ ⚠ THIS BENCHMARK IS BEING RUN WITH ASSERTS ENABLED ⚠  ┇');
-    print('┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦');
-    print('│                                                       │');
-    print('│  Numbers obtained from a benchmark while asserts are  │');
-    print('│  enabled will not accurately reflect the performance  │');
-    print('│  that will be experienced by end users using release  ╎');
-    print('│  builds. Benchmarks should be run using this command  ┆');
-    print('│  line:  flutter run --release benchmark.dart          ┊');
-    print('│                                                        ');
-    print('└─────────────────────────────────────────────────╌┄┈  🐢');
+    print(kDebugWarning);
     return true;
   }());
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
@@ -482,7 +541,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           // Flush all past events
           handleTimeStampDiff.add(-timeDiff);
           for (final PointerEvent event in record.events) {
-            _handlePointerEvent(event, hitTestHistory);
+            binding.handlePointerEvent(event, source: TestBindingEventSource.test);
           }
         } else {
           // TODO(CareF): reconsider the pumping strategy after
@@ -493,7 +552,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
             binding.clock.now().difference(startTime) - record.timeDelay,
           );
           for (final PointerEvent event in record.events) {
-            _handlePointerEvent(event, hitTestHistory);
+            binding.handlePointerEvent(event, source: TestBindingEventSource.test);
           }
         }
       }
@@ -505,53 +564,15 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     });
   }
 
-  // This is a parallel implementation of [GestureBinding._handlePointerEvent]
-  // to make compatible with test bindings.
-  void _handlePointerEvent(
-    PointerEvent event,
-    Map<int, HitTestResult> _hitTests
-  ) {
-    HitTestResult hitTestResult;
-    if (event is PointerDownEvent || event is PointerSignalEvent) {
-      assert(!_hitTests.containsKey(event.pointer));
-      hitTestResult = HitTestResult();
-      binding.hitTest(hitTestResult, event.position);
-      if (event is PointerDownEvent) {
-        _hitTests[event.pointer] = hitTestResult;
-      }
-      assert(() {
-        if (debugPrintHitTestResults)
-          debugPrint('$event: $hitTestResult');
-        return true;
-      }());
-    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
-      hitTestResult = _hitTests.remove(event.pointer);
-    } else if (event.down) {
-      // Because events that occur with the pointer down (like
-      // PointerMoveEvents) should be dispatched to the same place that their
-      // initial PointerDownEvent was, we want to re-use the path we found when
-      // the pointer went down, rather than do hit detection each time we get
-      // such an event.
-      hitTestResult = _hitTests[event.pointer];
-    }
-    assert(() {
-      if (debugPrintMouseHoverEvents && event is PointerHoverEvent)
-        debugPrint('$event');
-      return true;
-    }());
-    if (hitTestResult != null ||
-        event is PointerHoverEvent ||
-        event is PointerAddedEvent ||
-        event is PointerRemovedEvent) {
-      binding.dispatchEvent(event, hitTestResult, source: TestBindingEventSource.test);
-    }
-  }
-
   /// Triggers a frame after `duration` amount of time.
   ///
   /// This makes the framework act as if the application had janked (missed
   /// frames) for `duration` amount of time, and then received a "Vsync" signal
   /// to paint the application.
+  ///
+  /// For a [FakeAsync] environment (typically in `flutter test`), this advances
+  /// time and timeout counting; for a live environment this delays `duration`
+  /// time.
   ///
   /// This is a convenience function that just calls
   /// [TestWidgetsFlutterBinding.pump].
@@ -594,30 +615,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }
   }
 
-  /// Repeatedly calls [pump] with the given `duration` until there are no
-  /// longer any frames scheduled. This will call [pump] at least once, even if
-  /// no frames are scheduled when the function is called, to flush any pending
-  /// microtasks which may themselves schedule a frame.
-  ///
-  /// This essentially waits for all animations to have completed.
-  ///
-  /// If it takes longer that the given `timeout` to settle, then the test will
-  /// fail (this method will throw an exception). In particular, this means that
-  /// if there is an infinite animation in progress (for example, if there is an
-  /// indeterminate progress indicator spinning), this method will throw.
-  ///
-  /// The default timeout is ten minutes, which is longer than most reasonable
-  /// finite animations would last.
-  ///
-  /// If the function returns, it returns the number of pumps that it performed.
-  ///
-  /// In general, it is better practice to figure out exactly why each frame is
-  /// needed, and then to [pump] exactly as many frames as necessary. This will
-  /// help catch regressions where, for instance, an animation is being started
-  /// one frame later than it should.
-  ///
-  /// Alternatively, one can check that the return value from this function
-  /// matches the expected number of pumps.
+  @override
   Future<int> pumpAndSettle([
     Duration duration = const Duration(milliseconds: 100),
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
@@ -638,16 +636,17 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       }
       return true;
     }());
-    int count = 0;
-    return TestAsyncUtils.guard<void>(() async {
+    return TestAsyncUtils.guard<int>(() async {
       final DateTime endTime = binding.clock.fromNowBy(timeout);
+      int count = 0;
       do {
         if (binding.clock.now().isAfter(endTime))
           throw FlutterError('pumpAndSettle timed out');
         await binding.pump(duration, phase);
         count += 1;
       } while (binding.hasScheduledFrame);
-    }).then<int>((_) => count);
+      return count;
+    });
   }
 
   /// Repeatedly pump frames that render the `target` widget with a fixed time
@@ -671,6 +670,53 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         elapsed += interval;
       }
     });
+  }
+
+  /// Simulates restoring the state of the widget tree after the application
+  /// is restarted.
+  ///
+  /// The method grabs the current serialized restoration data from the
+  /// [RestorationManager], takes down the widget tree to destroy all in-memory
+  /// state, and then restores the widget tree from the serialized restoration
+  /// data.
+  Future<void> restartAndRestore() async {
+    assert(
+      binding.restorationManager.debugRootBucketAccessed,
+      'The current widget tree did not inject the root bucket of the RestorationManager and '
+      'therefore no restoration data has been collected to restore from. Did you forget to wrap '
+      'your widget tree in a RootRestorationScope?',
+    );
+    final Widget widget = (binding.renderViewElement as RenderObjectToWidgetElement<RenderObject>).widget.child;
+    final TestRestorationData restorationData = binding.restorationManager.restorationData;
+    runApp(Container(key: UniqueKey()));
+    await pump();
+    binding.restorationManager.restoreFrom(restorationData);
+    return pumpWidget(widget);
+  }
+
+  /// Retrieves the current restoration data from the [RestorationManager].
+  ///
+  /// The returned [TestRestorationData] describes the current state of the
+  /// widget tree under test and can be provided to [restoreFrom] to restore
+  /// the widget tree to the state described by this data.
+  Future<TestRestorationData> getRestorationData() async {
+    assert(
+      binding.restorationManager.debugRootBucketAccessed,
+      'The current widget tree did not inject the root bucket of the RestorationManager and '
+      'therefore no restoration data has been collected. Did you forget to wrap your widget tree '
+      'in a RootRestorationScope?',
+    );
+    return binding.restorationManager.restorationData;
+  }
+
+  /// Restores the widget tree under test to the state described by the
+  /// provided [TestRestorationData].
+  ///
+  /// The data provided to this method is usually obtained from
+  /// [getRestorationData].
+  Future<void> restoreFrom(TestRestorationData data) {
+    binding.restorationManager.restoreFrom(data);
+    return pump();
   }
 
   /// Runs a [callback] that performs real asynchronous work.
@@ -728,14 +774,15 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   HitTestResult hitTestOnBinding(Offset location) {
+    assert(location != null);
     location = binding.localToGlobal(location);
     return super.hitTestOnBinding(location);
   }
 
   @override
-  Future<void> sendEventToBinding(PointerEvent event, HitTestResult result) {
+  Future<void> sendEventToBinding(PointerEvent event) {
     return TestAsyncUtils.guard<void>(() async {
-      binding.dispatchEvent(event, result, source: TestBindingEventSource.test);
+      binding.handlePointerEvent(event, source: TestBindingEventSource.test);
     });
   }
 
@@ -1001,74 +1048,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     });
   }
 
-  /// Simulates sending physical key down and up events through the system channel.
-  ///
-  /// This only simulates key events coming from a physical keyboard, not from a
-  /// soft keyboard.
-  ///
-  /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "android". Must not be null. Some platforms (e.g.
-  /// Windows, iOS) are not yet supported.
-  ///
-  /// Keys that are down when the test completes are cleared after each test.
-  ///
-  /// This method sends both the key down and the key up events, to simulate a
-  /// key press. To simulate individual down and/or up events, see
-  /// [sendKeyDownEvent] and [sendKeyUpEvent].
-  ///
-  /// See also:
-  ///
-  ///  - [sendKeyDownEvent] to simulate only a key down event.
-  ///  - [sendKeyUpEvent] to simulate only a key up event.
-  Future<void> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
-    assert(platform != null);
-    await simulateKeyDownEvent(key, platform: platform);
-    // Internally wrapped in async guard.
-    return simulateKeyUpEvent(key, platform: platform);
-  }
-
-  /// Simulates sending a physical key down event through the system channel.
-  ///
-  /// This only simulates key down events coming from a physical keyboard, not
-  /// from a soft keyboard.
-  ///
-  /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "android". Must not be null. Some platforms (e.g.
-  /// Windows, iOS) are not yet supported.
-  ///
-  /// Keys that are down when the test completes are cleared after each test.
-  ///
-  /// See also:
-  ///
-  ///  - [sendKeyUpEvent] to simulate the corresponding key up event.
-  ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<void> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
-    assert(platform != null);
-    // Internally wrapped in async guard.
-    return simulateKeyDownEvent(key, platform: platform);
-  }
-
-  /// Simulates sending a physical key up event through the system channel.
-  ///
-  /// This only simulates key up events coming from a physical keyboard,
-  /// not from a soft keyboard.
-  ///
-  /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "android". May not be null.
-  ///
-  /// See also:
-  ///
-  ///  - [sendKeyDownEvent] to simulate the corresponding key down event.
-  ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<void> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
-    assert(platform != null);
-    // Internally wrapped in async guard.
-    return simulateKeyUpEvent(key, platform: platform);
-  }
-
   /// Makes an effort to dismiss the current page with a Material [Scaffold] or
   /// a [CupertinoPageScaffold].
   ///
@@ -1084,49 +1063,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
       await tap(backButton);
     });
-  }
-
-  /// Attempts to find the [SemanticsNode] of first result from `finder`.
-  ///
-  /// If the object identified by the finder doesn't own it's semantic node,
-  /// this will return the semantics data of the first ancestor with semantics.
-  /// The ancestor's semantic data will include the child's as well as
-  /// other nodes that have been merged together.
-  ///
-  /// If the [SemanticsNode] of the object identified by the finder is
-  /// force-merged into an ancestor (e.g. via the [MergeSemantics] widget)
-  /// the node into which it is merged is returned. That node will include
-  /// all the semantics information of the nodes merged into it.
-  ///
-  /// Will throw a [StateError] if the finder returns more than one element or
-  /// if no semantics are found or are not enabled.
-  SemanticsNode getSemantics(Finder finder) {
-    if (binding.pipelineOwner.semanticsOwner == null)
-      throw StateError('Semantics are not enabled.');
-    final Iterable<Element> candidates = finder.evaluate();
-    if (candidates.isEmpty) {
-      throw StateError('Finder returned no matching elements.');
-    }
-    if (candidates.length > 1) {
-      throw StateError('Finder returned more than one element.');
-    }
-    final Element element = candidates.single;
-    RenderObject renderObject = element.findRenderObject();
-    SemanticsNode result = renderObject.debugSemantics;
-    while (renderObject != null && (result == null || result.isMergedIntoParent)) {
-      renderObject = renderObject?.parent as RenderObject;
-      result = renderObject?.debugSemantics;
-    }
-    if (result == null)
-      throw StateError('No Semantics data found.');
-    return result;
-  }
-
-  /// Enable semantics in a test by creating a [SemanticsHandle].
-  ///
-  /// The handle must be disposed at the end of the test.
-  SemanticsHandle ensureSemantics() {
-    return binding.pipelineOwner.ensureSemantics();
   }
 }
 

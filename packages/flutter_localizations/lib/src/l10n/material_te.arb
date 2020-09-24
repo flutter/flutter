@@ -70,14 +70,14 @@
   "dateRangePickerHelpText": "పరిధిని ఎంచుకోండి",
   "calendarModeButtonLabel": "క్యాలెండర్‌కు మారండి",
   "inputDateModeButtonLabel": "ఇన్‌పుట్‌కు మారండి",
-  "timePickerDialHelpText": "SELECT TIME",
-  "timePickerInputHelpText": "ENTER TIME",
-  "timePickerHourLabel": "Hour",
-  "timePickerMinuteLabel": "Minute",
-  "invalidTimeLabel": "Enter a valid time",
-  "dialModeButtonLabel": "Switch to dial picker mode",
-  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "timePickerDialHelpText": "సమయాన్ని ఎంచుకోండి",
+  "timePickerInputHelpText": "సమయాన్ని ఎంటర్ చేయండి",
+  "timePickerHourLabel": "గంట",
+  "timePickerMinuteLabel": "నిమిషం",
+  "invalidTimeLabel": "చెల్లుబాటు అయ్యే సమయాన్ని ఎంటర్ చేయండి",
+  "dialModeButtonLabel": "డయల్ పికర్ మోడ్‌కు మారుస్తుంది",
+  "inputTimeModeButtonLabel": "టెక్స్ట్ ఇన్‌పుట్ మోడ్‌కు మారుస్తుంది",
   "licensesPackageDetailTextZero": "No licenses",
-  "licensesPackageDetailTextOne": "1 license",
-  "licensesPackageDetailTextOther": "$licenseCount licenses"
+  "licensesPackageDetailTextOne": "1 లైసెన్స్",
+  "licensesPackageDetailTextOther": "$licenseCount లైసెన్స్‌లు"
 }

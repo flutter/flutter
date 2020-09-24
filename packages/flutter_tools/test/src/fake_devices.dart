@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -54,7 +53,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
   ),
 ];
 
-/// Fake device to test `devices` command
+/// Fake device to test `devices` command.
 class FakeDevice extends Device {
   FakeDevice(this.name, String id, [bool ephemeral = true, this._isSupported = true, PlatformType type = PlatformType.web]) : super(
       id,
@@ -87,7 +86,7 @@ class FakeDevice extends Device {
   Future<String> sdkNameAndVersion = Future<String>.value('Test SDK (1.2.3)');
 }
 
-/// Combines fake device with its canonical JSON representation
+/// Combines fake device with its canonical JSON representation.
 class FakeDeviceJsonData {
   FakeDeviceJsonData(this.dev, this.json);
 

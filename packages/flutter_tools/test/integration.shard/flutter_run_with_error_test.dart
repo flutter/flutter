@@ -3,12 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:process/process.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
@@ -30,12 +27,11 @@ void main() {
   });
 
   tearDown(() async {
-    await _flutter.stop();
     tryToDelete(tempDir);
   });
 
-  test('flutter run in non-machine mode reports an early error in an application', () async {
-    final String flutterBin = globals.fs.path.join(
+  testWithoutContext('flutter run in non-machine mode reports an early error in an application', () async {
+    final String flutterBin = fileSystem.path.join(
       getFlutterRoot(),
       'bin',
       'flutter',
@@ -43,7 +39,7 @@ void main() {
 
     final StringBuffer stdout = StringBuffer();
 
-    final Process process = await const LocalProcessManager().start(<String>[
+    final Process process = await processManager.start(<String>[
       flutterBin,
       'run',
       '--disable-service-auth-codes',
@@ -80,7 +76,7 @@ void main() {
     expect(stdout.toString(), contains(_exceptionStart));
   });
 
-  test('flutter run in machine mode does not print an error', () async {
+  testWithoutContext('flutter run in machine mode does not print an error', () async {
     final StringBuffer stdout = StringBuffer();
 
     await _flutter.run(
@@ -101,13 +97,12 @@ void main() {
       // We don't expect to see any output but want to write to stdout anyway.
       completer.complete();
     });
-
     await _flutter.stop();
 
     expect(stdout.toString(), isNot(contains(_exceptionStart)));
   });
 
-  test('flutter run for web reports an early error in an application', () async {
+  testWithoutContext('flutter run for web reports an early error in an application', () async {
     final StringBuffer stdout = StringBuffer();
 
     await _flutter.run(
@@ -118,7 +113,6 @@ void main() {
       machine: false,
     );
     await _flutter.resume();
-
     final Completer<void> completer = Completer<void>();
     bool lineFound = false;
 

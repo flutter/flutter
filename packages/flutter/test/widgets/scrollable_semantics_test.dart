@@ -593,7 +593,52 @@ void main() {
 
   });
 
+  testWidgets('transform of inner node from useTwoPaneSemantics scrolls correctly with nested scrollables', (WidgetTester tester) async {
+    semantics = SemanticsTester(tester); // enables semantics tree generation
 
+    // Context: https://github.com/flutter/flutter/issues/61631
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          child: ListView(
+            shrinkWrap: true,
+            children: <Widget>[
+              for (int i = 0; i < 50; ++i)
+                Text('$i'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode rootScrollNode = semantics.nodesWith(actions: <SemanticsAction>[SemanticsAction.scrollUp]).single;
+    final SemanticsNode innerListPane = semantics.nodesWith(ancestor: rootScrollNode, scrollExtentMax: 0).single;
+    final SemanticsNode outerListPane = innerListPane.parent;
+    final List<SemanticsNode> hiddenNodes = semantics.nodesWith(flags: <SemanticsFlag>[SemanticsFlag.isHidden]).toList();
+
+    // This test is only valid if some children are offscreen.
+    // Increase the number of Text children if this assert fails.
+    assert(hiddenNodes.length >= 3);
+
+    // Scroll to end -> beginning -> middle to test both directions.
+    final List<SemanticsNode> targetNodes = <SemanticsNode>[
+      hiddenNodes.last,
+      hiddenNodes.first,
+      hiddenNodes[hiddenNodes.length ~/ 2],
+    ];
+
+    expect(nodeGlobalRect(innerListPane), nodeGlobalRect(outerListPane));
+
+    for (final SemanticsNode node in targetNodes) {
+      tester.binding.pipelineOwner.semanticsOwner.performAction(node.id, SemanticsAction.showOnScreen);
+      await tester.pumpAndSettle();
+
+      expect(nodeGlobalRect(innerListPane), nodeGlobalRect(outerListPane));
+    }
+
+    semantics.dispose();
+  });
 }
 
 Future<void> flingUp(WidgetTester tester, { int repetitions = 1 }) => fling(tester, const Offset(0.0, -200.0), repetitions);
@@ -610,4 +655,14 @@ Future<void> fling(WidgetTester tester, Offset offset, int repetitions) async {
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
   }
+}
+
+Rect nodeGlobalRect(SemanticsNode node) {
+  Matrix4 globalTransform = node.transform ?? Matrix4.identity();
+  for (SemanticsNode parent = node.parent; parent != null; parent = parent.parent) {
+    if (parent.transform != null) {
+      globalTransform = parent.transform.multiplied(globalTransform);
+    }
+  }
+  return MatrixUtils.transformRect(globalTransform, node.rect);
 }

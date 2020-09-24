@@ -119,8 +119,7 @@ class _DefaultHeroTag {
 /// See also:
 ///
 ///  * [Scaffold], in which floating action buttons typically live.
-///  * [RaisedButton], another kind of button that appears to float above the
-///    content.
+///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * <https://material.io/design/components/buttons-floating-action-button.html>
 class FloatingActionButton extends StatelessWidget {
   /// Creates a circular floating action button.
@@ -237,10 +236,11 @@ class FloatingActionButton extends StatelessWidget {
 
   /// The default foreground color for icons and text within the button.
   ///
-  /// If this property is null, then the [Theme]'s
-  /// [ThemeData.floatingActionButtonTheme.foregroundColor] is used. If that
-  /// property is also null, then the [Theme]'s
-  /// [ThemeData.colorScheme.onSecondary] color is used.
+  /// If this property is null, then the
+  /// [FloatingActionButtonThemeData.foregroundColor] of
+  /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// null, then the [ColorScheme.onSecondary] color of [ThemeData.colorScheme]
+  /// is used.
   ///
   /// Although the color of theme's `accentIconTheme` currently provides a
   /// default that supercedes the `onSecondary` color, this dependency
@@ -250,10 +250,10 @@ class FloatingActionButton extends StatelessWidget {
 
   /// The button's background color.
   ///
-  /// If this property is null, then the [Theme]'s
-  /// [ThemeData.floatingActionButtonTheme.backgroundColor] is used. If that
-  /// property is also null, then the [Theme]'s
-  /// [ThemeData.colorScheme.secondary] color is used.
+  /// If this property is null, then the
+  /// [FloatingActionButtonThemeData.backgroundColor] of
+  /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// null, then the [Theme]'s [ColorScheme.secondary] color is used.
   final Color backgroundColor;
 
   /// The color to use for filling the button when the button has input focus.
@@ -357,7 +357,7 @@ class FloatingActionButton extends StatelessWidget {
   /// This controls the size of the shadow below the floating action button.
   ///
   /// Defaults to the same value as [elevation]. Setting this to zero makes the
-  /// floating action button work similar to a [RaisedButton] but the titular
+  /// floating action button work similar to an [ElevatedButton] but the titular
   /// "floating" effect is lost. The value is always non-negative.
   ///
   /// See also:

@@ -27,11 +27,11 @@ IF NOT EXIST "%flutter_root%\.git" (
   ECHO        The flutter tool requires Git in order to operate properly;
   ECHO        to set up Flutter, run the following command:
   ECHO        git clone -b stable https://github.com/flutter/flutter.git
-  EXIT /B 1
+  EXIT 1
 )
 
 REM Include shared scripts in shared.bat
-SET shared_bin=%FLUTTER_ROOT%/bin/internal/shared.bat
+SET shared_bin=%FLUTTER_ROOT%\bin\internal\shared.bat
 CALL "%shared_bin%"
 
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
@@ -52,6 +52,3 @@ REM Do not use the CALL command in the next line to execute Dart. CALL causes
 REM Windows to re-read the line from disk after the CALL command has finished
 REM regardless of the ampersand chain.
 "%dart%" --disable-dart-dev --packages="%flutter_tools_dir%\.packages" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & exit /B !ERRORLEVEL!
-
-:final_exit
-EXIT /B %exit_code%

@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -1061,6 +1062,52 @@ void main() {
     element.createChild(0, after: null);
   });
 
+  testWidgets('GlobalKey - re-attach child to new parents, and the old parent is deactivated(unmounted)', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/62055
+    const Key key1 = GlobalObjectKey('key1');
+    const Key key2 = GlobalObjectKey('key2');
+    StateSetter setState;
+    int tabBarViewCnt = 2;
+    TabController tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync(),);
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          return TabBarView(
+            controller: tabController,
+            children: <Widget>[
+              if (tabBarViewCnt > 0) const Text('key1', key: key1,),
+              if (tabBarViewCnt > 1) const Text('key2', key: key2,),
+            ],
+          );
+        },
+      ),
+    ));
+
+    expect(tabController.index, 0);
+
+    // switch tabs 0 -> 1
+    setState((){
+      tabController.index = 1;
+    });
+
+    await tester.pump(const Duration(seconds: 1)); // finish the animation
+
+    expect(tabController.index, 1);
+
+    // rebuild TabBarView that only have the 1st page with GlobalKey 'key1'
+    setState((){
+      tabBarViewCnt = 1;
+      tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync(),);
+    });
+
+    await tester.pump(const Duration(seconds: 1)); // finish the animation
+
+    expect(tabController.index, 0);
+  });
+
   testWidgets('Defunct setState throws exception', (WidgetTester tester) async {
     StateSetter setState;
 
@@ -1163,21 +1210,6 @@ void main() {
         '  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n',
       ),
     );
-  });
-
-  testWidgets('Element diagnostics with null child', (WidgetTester tester) async {
-    await tester.pumpWidget(const NullChildTest());
-    final NullChildElement test = tester.element<NullChildElement>(find.byType(NullChildTest));
-    test.includeChild = true;
-    expect(
-      tester.binding.renderViewElement.toStringDeep(),
-      equalsIgnoringHashCodes(
-        '[root](renderObject: RenderView#4a0f0)\n'
-        '└NullChildTest(dirty)\n'
-        ' └<null child>\n',
-      ),
-    );
-    test.includeChild = false;
   });
 
   testWidgets('scheduleBuild while debugBuildingDirtyElements is true', (WidgetTester tester) async {
@@ -1547,30 +1579,6 @@ class _DecorateState extends State<Decorate> {
     widget.build.call(context.isDecorated);
     return Container();
   }
-}
-
-class NullChildTest extends Widget {
-  const NullChildTest({ Key key }) : super(key: key);
-  @override
-  Element createElement() => NullChildElement(this);
-}
-
-class NullChildElement extends Element {
-  NullChildElement(Widget widget) : super(widget);
-
-  bool includeChild = false;
-
-  @override
-  void visitChildren(ElementVisitor visitor) {
-    if (includeChild)
-      visitor(null);
-  }
-
-  @override
-  void performRebuild() { }
-
-  @override
-  bool get debugDoingBuild => throw UnimplementedError();
 }
 
 class DirtyElementWithCustomBuildOwner extends Element {

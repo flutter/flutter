@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+import 'package:process/process.dart';
+
+import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
@@ -14,11 +20,23 @@ import 'macos_workflow.dart';
 
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
-  MacOSDevice() : super(
-      'macos',
-      platformType: PlatformType.macos,
-      ephemeral: false,
-  );
+  MacOSDevice({
+    @required ProcessManager processManager,
+    @required Logger logger,
+    FileSystem fileSystem,
+  }) : _processManager = processManager,
+       _logger = logger,
+       super(
+        'macos',
+        platformType: PlatformType.macos,
+        ephemeral: false,
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem ?? globals.fs,
+      );
+
+  final ProcessManager _processManager;
+  final Logger _logger;
 
   @override
   bool isSupported() => true;
@@ -44,7 +62,7 @@ class MacOSDevice extends DesktopDevice {
       flutterProject: FlutterProject.current(),
       buildInfo: buildInfo,
       targetOverride: mainPath,
-      verboseLogging: globals.logger.isVerbose,
+      verboseLogging: _logger.isVerbose,
     );
   }
 
@@ -59,7 +77,7 @@ class MacOSDevice extends DesktopDevice {
     // than post-attach, since this won't run for release builds, but there's
     // no general-purpose way of knowing when a process is far enoug along in
     // the launch process for 'open' to foreground it.
-    globals.processManager.run(<String>[
+    _processManager.run(<String>[
       'open', package.applicationBundle(buildMode),
     ]).then((ProcessResult result) {
       if (result.exitCode != 0) {
@@ -70,13 +88,30 @@ class MacOSDevice extends DesktopDevice {
 }
 
 class MacOSDevices extends PollingDeviceDiscovery {
-  MacOSDevices() : super('macOS devices');
+  MacOSDevices({
+    @required Platform platform,
+    @required MacOSWorkflow macOSWorkflow,
+    @required ProcessManager processManager,
+    @required Logger logger,
+    FileSystem fileSystem,
+  }) : _logger = logger,
+       _platform = platform,
+       _macOSWorkflow = macOSWorkflow,
+       _processManager = processManager,
+       _fileSystem = fileSystem ?? globals.fs,
+       super('macOS devices');
+
+  final MacOSWorkflow _macOSWorkflow;
+  final Platform _platform;
+  final ProcessManager _processManager;
+  final Logger _logger;
+  final FileSystem _fileSystem;
 
   @override
-  bool get supportsPlatform => globals.platform.isMacOS;
+  bool get supportsPlatform => _platform.isMacOS;
 
   @override
-  bool get canListAnything => macOSWorkflow.canListDevices;
+  bool get canListAnything => _macOSWorkflow.canListDevices;
 
   @override
   Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
@@ -84,7 +119,11 @@ class MacOSDevices extends PollingDeviceDiscovery {
       return const <Device>[];
     }
     return <Device>[
-      MacOSDevice(),
+      MacOSDevice(
+        processManager: _processManager,
+        logger: _logger,
+        fileSystem: _fileSystem,
+      ),
     ];
   }
 

@@ -195,6 +195,21 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
+  testWidgets('VisualDensity in ThemeData defaults to "compact" on desktop and "standard" on mobile', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    switch (debugDefaultTargetPlatformOverride) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        expect(themeData.visualDensity, equals(const VisualDensity()));
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(themeData.visualDensity, equals(VisualDensity.compact));
+    }
+  }, variant: TargetPlatformVariant.all());
+
   testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
 
     final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
@@ -287,7 +302,10 @@ void main() {
       textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colors.red)),
       elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colors.green)),
       outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(primary: Colors.blue)),
+      textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
+      dataTableTheme: const DataTableThemeData(),
       fixTextFieldOutlineLabel: false,
+      useTextSelectionTheme: false,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -373,7 +391,10 @@ void main() {
       textButtonTheme: const TextButtonThemeData(),
       elevatedButtonTheme: const ElevatedButtonThemeData(),
       outlinedButtonTheme: const OutlinedButtonThemeData(),
+      textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.white),
+      dataTableTheme: const DataTableThemeData(),
       fixTextFieldOutlineLabel: true,
+      useTextSelectionTheme: true,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -445,7 +466,9 @@ void main() {
       textButtonTheme: otherTheme.textButtonTheme,
       elevatedButtonTheme: otherTheme.elevatedButtonTheme,
       outlinedButtonTheme: otherTheme.outlinedButtonTheme,
+      textSelectionTheme: otherTheme.textSelectionTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
+      useTextSelectionTheme: otherTheme.useTextSelectionTheme,
     );
 
     expect(themeDataCopy.brightness, equals(otherTheme.brightness));
@@ -516,7 +539,9 @@ void main() {
     expect(themeDataCopy.textButtonTheme, equals(otherTheme.textButtonTheme));
     expect(themeDataCopy.elevatedButtonTheme, equals(otherTheme.elevatedButtonTheme));
     expect(themeDataCopy.outlinedButtonTheme, equals(otherTheme.outlinedButtonTheme));
+    expect(themeDataCopy.textSelectionTheme, equals(otherTheme.textSelectionTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
+    expect(themeDataCopy.useTextSelectionTheme, equals(otherTheme.useTextSelectionTheme));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {

@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../src/common.dart';
 import 'test_data/gen_l10n_project.dart';
@@ -151,15 +150,10 @@ void main() {
     );
   }
 
-  test('generated l10n classes produce expected localized strings', () async {
+  // TODO(jsimmons): need a localization test that uses deferred loading
+  // (see https://github.com/flutter/flutter/issues/61911)
+  testWithoutContext('generated l10n classes produce expected localized strings', () async {
     await project.setUpIn(tempDir);
-    flutter = FlutterRunTestDriver(tempDir);
-    final StringBuffer stdout = await runApp();
-    expectOutput(stdout);
-  });
-
-  test('generated l10n classes produce expected localized strings with deferred loading', () async {
-    await project.setUpIn(tempDir, useDeferredLoading: true);
     flutter = FlutterRunTestDriver(tempDir);
     final StringBuffer stdout = await runApp();
     expectOutput(stdout);

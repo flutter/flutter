@@ -23,9 +23,12 @@ import '_platform_io.dart'
 /// adaptations for iOS later). Tests can check iOS behavior by using the
 /// platform override APIs (such as [ThemeData.platform] in the material
 /// library) or by setting [debugDefaultTargetPlatformOverride].
+///
+/// Tests can also create specific platform tests by and adding a `variant:`
+/// argument to the test and using a [TargetPlatformVariant].
 //
-// When adding support for a new platform (e.g. Windows Phone, macOS), first
-// create a new value on the [TargetPlatform] enum, then add a rule for
+// When adding support for a new platform (e.g. Windows Phone, Rasberry Pi),
+// first create a new value on the [TargetPlatform] enum, then add a rule for
 // selecting that platform here.
 //
 // It would be incorrect to make a platform that isn't supported by
@@ -42,7 +45,7 @@ enum TargetPlatform {
   /// Android: <https://www.android.com/>
   android,
 
-  /// Fuchsia: <https://fuchsia.googlesource.com/>
+  /// Fuchsia: <https://fuchsia.dev/fuchsia-src/concepts>
   fuchsia,
 
   /// iOS: <https://www.apple.com/ios/>

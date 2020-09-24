@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import 'android/android_studio_validator.dart';
@@ -61,6 +59,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   );
 
   final WebWorkflow webWorkflow = WebWorkflow(
+    platform: globals.platform,
+    featureFlags: featureFlags,
+  );
+
+  final MacOSWorkflow macOSWorkflow = MacOSWorkflow(
     platform: globals.platform,
     featureFlags: featureFlags,
   );

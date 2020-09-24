@@ -20,7 +20,7 @@ MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData theme, double textSca
       child: Builder(
         builder: (BuildContext context) {
           return Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               child: const Text('X'),
               onPressed: () {
                 showDialog<void>(
@@ -61,7 +61,7 @@ void main() {
         color: Colors.green[500],
       ),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
             onPressed: () {
               didPressOk = true;
             },
@@ -224,7 +224,7 @@ void main() {
       const MaterialApp(
         home: Material(
           child: Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               onPressed: null,
               child: Text('Go'),
             ),
@@ -333,7 +333,7 @@ void main() {
       const MaterialApp(
         home: Material(
           child: Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               onPressed: null,
               child: Text('Go'),
             ),
@@ -427,7 +427,7 @@ void main() {
       const MaterialApp(
         home: Material(
           child: Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               onPressed: null,
               child: Text(buttonText),
             ),
@@ -461,7 +461,7 @@ void main() {
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
-        RaisedButton(
+        ElevatedButton(
           onPressed: () {},
           child: const Text('button'),
         ),
@@ -494,7 +494,7 @@ void main() {
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
-        RaisedButton(
+        ElevatedButton(
           onPressed: () {},
           child: const Text('button'),
         ),
@@ -531,12 +531,12 @@ void main() {
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
-        RaisedButton(
+        ElevatedButton(
           key: key1,
           onPressed: () {},
           child: const Text('button 1'),
         ),
-        RaisedButton(
+        ElevatedButton(
           key: key2,
           onPressed: () {},
           child: const Text('button 2'),
@@ -591,12 +591,12 @@ void main() {
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
-        RaisedButton(
+        ElevatedButton(
           key: key1,
           onPressed: () {},
           child: const Text('button 1'),
         ),
-        RaisedButton(
+        ElevatedButton(
           key: key2,
           onPressed: () {},
           child: const Text('button 2'),
@@ -684,11 +684,11 @@ void main() {
     }) {
       expect(
         tester.getTopLeft(dialogFinder).dx,
-        closeTo(tester.getTopLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
       expect(
         tester.getBottomLeft(dialogFinder).dx,
-        closeTo(tester.getBottomLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomLeft(finder).dx - unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
     }
 
@@ -700,11 +700,11 @@ void main() {
     }) {
       expect(
         tester.getTopRight(dialogFinder).dx,
-        closeTo(tester.getTopRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
       expect(
         tester.getBottomRight(dialogFinder).dx,
-        closeTo(tester.getBottomRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomRight(finder).dx + unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
     }
 
@@ -716,11 +716,11 @@ void main() {
     }) {
       expect(
         tester.getTopLeft(dialogFinder).dy,
-        closeTo(tester.getTopLeft(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopLeft(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
       expect(
         tester.getTopRight(dialogFinder).dy,
-        closeTo(tester.getTopRight(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getTopRight(finder).dy - unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
     }
 
@@ -732,11 +732,11 @@ void main() {
     }) {
       expect(
         tester.getBottomLeft(dialogFinder).dy,
-        closeTo(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
       expect(
         tester.getBottomRight(dialogFinder).dy,
-        closeTo(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor], 1e-6),
+        moreOrLessEquals(tester.getBottomRight(finder).dy + unscaledValue * paddingScaleFactors[textScaleFactor]),
       );
     }
 
@@ -765,7 +765,7 @@ void main() {
       key: contentKey,
     );
     final List<Widget> actions = <Widget>[
-      RaisedButton(
+      ElevatedButton(
         onPressed: () {},
         child: const Text('button'),
       ),
@@ -1049,12 +1049,12 @@ void main() {
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
-        RaisedButton(
+        ElevatedButton(
           key: key1,
           onPressed: () {},
           child: const Text('Looooooooooooooong button 1'),
         ),
-        RaisedButton(
+        ElevatedButton(
           key: key2,
           onPressed: () {},
           child: const Text('Looooooooooooooong button 2'),
@@ -1072,7 +1072,7 @@ void main() {
 
     final Rect buttonOneRect = tester.getRect(find.byKey(key1));
     final Rect buttonTwoRect = tester.getRect(find.byKey(key2));
-    // Second [RaisedButton] should appear above the first.
+    // Second [ElevatedButton] should appear above the first.
     expect(buttonTwoRect.bottom, lessThanOrEqualTo(buttonOneRect.top));
   });
 
@@ -1084,12 +1084,12 @@ void main() {
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
-        RaisedButton(
+        ElevatedButton(
           key: key1,
           onPressed: () {},
           child: const Text('Looooooooooooooong button 1'),
         ),
-        RaisedButton(
+        ElevatedButton(
           key: key2,
           onPressed: () {},
           child: const Text('Looooooooooooooong button 2'),
@@ -1117,12 +1117,12 @@ void main() {
       title: const Text('title'),
       content: const Text('content'),
       actions: <Widget>[
-        RaisedButton(
+        ElevatedButton(
           key: key1,
           onPressed: () {},
           child: const Text('Looooooooooooooong button 1'),
         ),
-        RaisedButton(
+        ElevatedButton(
           key: key2,
           onPressed: () {},
           child: const Text('Looooooooooooooong button 2'),
@@ -1275,15 +1275,17 @@ void main() {
         ));
   });
 
-  testWidgets('Dialog widget contains route semantics from title', (WidgetTester tester) async {
+  testWidgets('AlertDialog widget contains route semantics from title for iOS', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
         home: Material(
           child: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: RaisedButton(
+                child: ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(
@@ -1321,6 +1323,62 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('AlertDialog widget always contains alert route semantics for android', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showDialog<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const AlertDialog(
+                          title: Text('Title'),
+                          content: Text('Y'),
+                          actions: <Widget>[],
+                        );
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, isNot(includesNodeWith(
+      label: 'Title',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+    )));
+    expect(semantics, isNot(includesNodeWith(
+      label: 'Alert',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+    )));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    // It does not use 'Title' as route semantics
+    expect(semantics, isNot(includesNodeWith(
+      label: 'Title',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+    )));
+    expect(semantics, includesNodeWith(
+      label: 'Alert',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+    ));
+
+    semantics.dispose();
+  });
+
   testWidgets('Dismissible.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     final List<int> dismissedItems = <int>[];
@@ -1333,13 +1391,13 @@ void main() {
         builder: (BuildContext context) {
           return AlertDialog(
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: const Text('TRUE'),
                 onPressed: () {
                   Navigator.pop(context, true); // showDialog() returns true
                 },
               ),
-              FlatButton(
+              TextButton(
                 child: const Text('FALSE'),
                 onPressed: () {
                   Navigator.pop(context, false); // showDialog() returns false
@@ -1460,7 +1518,7 @@ void main() {
           child: Builder(
             key: builderKey,
             builder: (BuildContext outerContext) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showDialog<void>(
                     context: outerContext,
@@ -1480,7 +1538,7 @@ void main() {
     await tester.pumpWidget(buildFrame(UniqueKey()));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
     await tester.pumpAndSettle();
 
     // Force the Builder to be recreated (new key) which causes outerContext to
@@ -1542,7 +1600,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showDialog<void>(
                     context: context,
@@ -1560,7 +1618,7 @@ void main() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.dialogCount, 1);
     expect(nestedObserver.dialogCount, 0);
@@ -1577,7 +1635,7 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
                   showDialog<void>(
                     context: context,
@@ -1596,7 +1654,7 @@ void main() {
     ));
 
     // Open the dialog.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
 
     expect(rootObserver.dialogCount, 0);
     expect(nestedObserver.dialogCount, 1);
@@ -1694,7 +1752,7 @@ void main() {
         ],
         home: const Material(
           child: Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               onPressed: null,
               child: Text('Go'),
             ),

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:meta/meta.dart' show required, visibleForTesting;
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -628,14 +626,15 @@ extension FlutterVmService on vm_service.VmService {
     );
   }
 
-  Future<Map<String, dynamic>> flutterFastReassemble(String classId, {
+  Future<Map<String, dynamic>> flutterFastReassemble({
    @required String isolateId,
+   @required String className,
   }) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.fastReassemble',
       isolateId: isolateId,
       args: <String, Object>{
-        'class': classId,
+        'className': className,
       },
     );
   }
@@ -813,7 +812,7 @@ extension FlutterVmService on vm_service.VmService {
     return callServiceExtension(kScreenshotSkpMethod);
   }
 
-  /// Set the VM timeline flags
+  /// Set the VM timeline flags.
   Future<vm_service.Response> setVMTimelineFlags(List<String> recordedStreams) {
     assert(recordedStreams != null);
     return callServiceExtension(
@@ -901,4 +900,14 @@ enum Brightness {
   ///
   /// For example, the color might be bright white, requiring black text.
   light,
+}
+
+/// Process a VM service log event into a string message.
+String processVmServiceMessage(vm_service.Event event) {
+  final String message = utf8.decode(base64.decode(event.bytes));
+  // Remove extra trailing newlines appended by the vm service.
+  if (message.endsWith('\n')) {
+    return message.substring(0, message.length - 1);
+  }
+  return message;
 }

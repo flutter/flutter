@@ -849,4 +849,41 @@ void main() {
     }
     expect(() => builder(), throwsAssertionError);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/65374.
+  testWidgets('Validate form should return correct validation if the value is composing', (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String fieldValue;
+
+    final Widget widget = MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Material(
+              child: Form(
+                key: formKey,
+                child: TextFormField(
+                  maxLength: 5,
+                  onSaved: (String value) { fieldValue = value; },
+                  validator: (String value) => value.length > 5 ? 'Exceeded' : null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    final EditableTextState editableText = tester.state<EditableTextState>(find.byType(EditableText));
+    editableText.updateEditingValue(const TextEditingValue(text: '123456', composing: TextRange(start: 2, end: 5)));
+    expect(editableText.currentTextEditingValue.composing, const TextRange(start: 2, end: 5));
+
+    formKey.currentState.save();
+    expect(fieldValue, '123456');
+    expect(formKey.currentState.validate(), isFalse);
+  });
 }

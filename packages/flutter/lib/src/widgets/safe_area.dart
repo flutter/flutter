@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -41,14 +39,14 @@ class SafeArea extends StatelessWidget {
   /// The [left], [top], [right], [bottom], and [minimum] arguments must not be
   /// null.
   const SafeArea({
-    Key key,
+    Key? key,
     this.left = true,
     this.top = true,
     this.right = true,
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
     this.maintainBottomViewPadding = false,
-    @required this.child,
+    required this.child,
   }) : assert(left != null),
        assert(top != null),
        assert(right != null),
@@ -73,9 +71,10 @@ class SafeArea extends StatelessWidget {
   /// The greater of the minimum insets and the media padding will be applied.
   final EdgeInsets minimum;
 
-  /// Specifies whether the [SafeArea] should maintain the [viewPadding] instead
-  /// of the [padding] when consumed by the [viewInsets] of the current
-  /// context's [MediaQuery], defaults to false.
+  /// Specifies whether the [SafeArea] should maintain the
+  /// [MediaQueryData.viewPadding] instead of the [MediaQueryData.padding] when
+  /// consumed by the [MediaQueryData.viewInsets] of the current context's
+  /// [MediaQuery], defaults to false.
   ///
   /// For example, if there is an onscreen keyboard displayed above the
   /// SafeArea, the padding can be maintained below the obstruction rather than
@@ -96,7 +95,7 @@ class SafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData data = MediaQuery.of(context);
+    final MediaQueryData data = MediaQuery.of(context)!;
     EdgeInsets padding = data.padding;
     // Bottom padding has been consumed - i.e. by the keyboard
     if (data.padding.bottom == 0.0 && data.viewInsets.bottom != 0.0 && maintainBottomViewPadding)
@@ -124,9 +123,9 @@ class SafeArea extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
-    properties.add(FlagProperty('top', value: left, ifTrue: 'avoid top padding'));
-    properties.add(FlagProperty('right', value: left, ifTrue: 'avoid right padding'));
-    properties.add(FlagProperty('bottom', value: left, ifTrue: 'avoid bottom padding'));
+    properties.add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
+    properties.add(FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
+    properties.add(FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
   }
 }
 
@@ -155,13 +154,13 @@ class SliverSafeArea extends StatelessWidget {
   ///
   /// The [left], [top], [right], [bottom], and [minimum] arguments must not be null.
   const SliverSafeArea({
-    Key key,
+    Key? key,
     this.left = true,
     this.top = true,
     this.right = true,
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
-    @required this.sliver,
+    required this.sliver,
   }) : assert(left != null),
        assert(top != null),
        assert(right != null),
@@ -195,7 +194,7 @@ class SliverSafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final EdgeInsets padding = MediaQuery.of(context).padding;
+    final EdgeInsets padding = MediaQuery.of(context)!.padding;
     return SliverPadding(
       padding: EdgeInsets.only(
         left: math.max(left ? padding.left : 0.0, minimum.left),
@@ -218,8 +217,8 @@ class SliverSafeArea extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
-    properties.add(FlagProperty('top', value: left, ifTrue: 'avoid top padding'));
-    properties.add(FlagProperty('right', value: left, ifTrue: 'avoid right padding'));
-    properties.add(FlagProperty('bottom', value: left, ifTrue: 'avoid bottom padding'));
+    properties.add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
+    properties.add(FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
+    properties.add(FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
   }
 }

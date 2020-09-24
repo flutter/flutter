@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 import 'text_input.dart';
@@ -614,7 +613,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * Android: [AUTOFILL_HINT_NEW_USERNAME](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_NEW_USERNAME).
+  /// * Android: [AUTOFILL_HINT_USERNAME](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_USERNAME).
   /// * iOS: [username](https://developer.apple.com/documentation/uikit/uitextcontenttype).
   /// * web: ["username"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
@@ -629,9 +628,9 @@ class AutofillConfiguration {
   /// Creates autofill related configuration information that can be sent to the
   /// platform.
   const AutofillConfiguration({
-    @required this.uniqueIdentifier,
-    @required this.autofillHints,
-    this.currentEditingValue,
+    required this.uniqueIdentifier,
+    required this.autofillHints,
+    required this.currentEditingValue,
   }) : assert(uniqueIdentifier != null),
        assert(autofillHints != null);
 
@@ -713,7 +712,7 @@ class AutofillConfiguration {
 abstract class AutofillClient {
   /// The unique identifier of this [AutofillClient].
   ///
-  /// Must not be null;
+  /// Must not be null.
   String get autofillId;
 
   /// The [TextInputConfiguration] that describes this [AutofillClient].
@@ -722,8 +721,8 @@ abstract class AutofillClient {
   /// [TextInputConfiguration.autofillConfiguration] must not be null.
   TextInputConfiguration get textInputConfiguration;
 
-  /// Requests this [AutofillClient] update its [TextEditingState] to the given
-  /// state.
+  /// Requests this [AutofillClient] update its [TextEditingValue] to the given
+  /// value.
   void updateEditingValue(TextEditingValue newEditingValue);
 }
 
@@ -734,11 +733,11 @@ abstract class AutofillClient {
 /// input fields during autofill. That is, when an autofillable [TextInputClient]
 /// gains focus, only the [AutofillClient]s within the same [AutofillScope] will
 /// be visible to the autofill service, in the same order as they appear in
-/// [autofillClients].
+/// [AutofillScope.autofillClients].
 ///
 /// [AutofillScope] also allows [TextInput] to redirect autofill values from the
 /// platform to the [AutofillClient] with the given identifier, by calling
-/// [getAutofillClient].
+/// [AutofillScope.getAutofillClient].
 ///
 /// An [AutofillClient] that's not tied to any [AutofillScope] will only
 /// participate in autofill if the autofill is directly triggered by its own
@@ -749,7 +748,7 @@ abstract class AutofillScope {
   /// this [AutofillScope].
   ///
   /// Returns null if there's no matching [AutofillClient].
-  AutofillClient getAutofillClient(String autofillId);
+  AutofillClient? getAutofillClient(String autofillId);
 
   /// The collection of [AutofillClient]s currently tied to this [AutofillScope].
   ///
@@ -767,8 +766,8 @@ abstract class AutofillScope {
 @immutable
 class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   _AutofillScopeTextInputConfiguration({
-    @required this.allConfigurations,
-    @required TextInputConfiguration currentClientConfiguration,
+    required this.allConfigurations,
+    required TextInputConfiguration currentClientConfiguration,
   }) : assert(allConfigurations != null),
        assert(currentClientConfiguration != null),
        super(inputType: currentClientConfiguration.inputType,
@@ -807,13 +806,11 @@ mixin AutofillScopeMixin implements AutofillScope {
       !autofillClients.any((AutofillClient client) => client.textInputConfiguration.autofillConfiguration == null),
       'Every client in AutofillScope.autofillClients must enable autofill',
     );
-    return TextInput.attach(
-      trigger,
-      _AutofillScopeTextInputConfiguration(
-        allConfigurations: autofillClients
-          .map((AutofillClient client) => client.textInputConfiguration),
-        currentClientConfiguration: configuration,
-      ),
+
+    final TextInputConfiguration inputConfiguration = _AutofillScopeTextInputConfiguration(
+      allConfigurations: autofillClients.map((AutofillClient client) => client.textInputConfiguration),
+      currentClientConfiguration: configuration,
     );
+    return TextInput.attach(trigger, inputConfiguration);
   }
 }

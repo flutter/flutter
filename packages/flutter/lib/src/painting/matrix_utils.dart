@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:typed_data';
 
@@ -22,7 +21,7 @@ class MatrixUtils {
   /// nothing but a 2D translation.
   ///
   /// Otherwise, returns null.
-  static Offset getAsTranslation(Matrix4 transform) {
+  static Offset? getAsTranslation(Matrix4 transform) {
     assert(transform != null);
     final Float64List values = transform.storage;
     // Values are stored in column-major order.
@@ -49,7 +48,7 @@ class MatrixUtils {
   /// scale, if the matrix is nothing but a symmetric 2D scale transform.
   ///
   /// Otherwise, returns null.
-  static double getAsScale(Matrix4 transform) {
+  static double? getAsScale(Matrix4 transform) {
     assert(transform != null);
     final Float64List values = transform.storage;
     // Values are stored in column-major order.
@@ -75,12 +74,12 @@ class MatrixUtils {
 
   /// Returns true if the given matrices are exactly equal, and false
   /// otherwise. Null values are assumed to be the identity matrix.
-  static bool matrixEquals(Matrix4 a, Matrix4 b) {
+  static bool matrixEquals(Matrix4? a, Matrix4? b) {
     if (identical(a, b))
       return true;
     assert(a != null || b != null);
     if (a == null)
-      return isIdentity(b);
+      return isIdentity(b!);
     if (b == null)
       return isIdentity(a);
     assert(a != null && b != null);
@@ -127,6 +126,13 @@ class MatrixUtils {
   ///
   /// This function assumes the given point has a z-coordinate of 0.0. The
   /// z-coordinate of the result is ignored.
+  ///
+  /// While not common, this method may return (NaN, NaN), iff the given `point`
+  /// results in a "point at infinity" in homogeneous coordinates after applying
+  /// the `transform`. For example, a [RenderObject] may set its transform to
+  /// the zero matrix to indicate its content is currently not visible. Trying
+  /// to convert an `Offset` to its coordinate space always results in
+  /// (NaN, NaN).
   static Offset transformPoint(Matrix4 transform, Offset point) {
     final Float64List storage = transform.storage;
     final double x = point.dx;
@@ -158,8 +164,6 @@ class MatrixUtils {
         storage[7] == 0.0 &&
         storage[15] == 1.0;
 
-    _minMax ??= Float64List(4);
-
     _accumulate(storage, rect.left,  rect.top,    true,  isAffine);
     _accumulate(storage, rect.right, rect.top,    false, isAffine);
     _accumulate(storage, rect.left,  rect.bottom, false, isAffine);
@@ -168,7 +172,7 @@ class MatrixUtils {
     return Rect.fromLTRB(_minMax[0], _minMax[1], _minMax[2], _minMax[3]);
   }
 
-  static Float64List _minMax;
+  static late final Float64List _minMax = Float64List(4);
   static void _accumulate(Float64List m, double x, double y, bool first, bool isAffine) {
     final double w = isAffine ? 1.0 : 1.0 / (m[3] * x + m[7] * y + m[15]);
     final double tx = (m[0] * x + m[4] * y + m[12]) * w;
@@ -478,8 +482,8 @@ class MatrixUtils {
   /// almost always possible to end up seeing the inner side of the cylinder
   /// or the back side of the transformed plane before π / 2 when perspective > 0.
   static Matrix4 createCylindricalProjectionTransform({
-    @required double radius,
-    @required double angle,
+    required double radius,
+    required double angle,
     double perspective = 0.001,
     Axis orientation = Axis.vertical,
   }) {
@@ -534,7 +538,7 @@ class MatrixUtils {
 /// useful for [TransformProperty].
 ///
 /// If the argument is null, returns a list with the single string "null".
-List<String> debugDescribeTransform(Matrix4 transform) {
+List<String> debugDescribeTransform(Matrix4? transform) {
   if (transform == null)
     return const <String>['null'];
   return <String>[
@@ -552,9 +556,9 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
   /// The [showName] and [level] arguments must not be null.
   TransformProperty(
     String name,
-    Matrix4 value, {
+    Matrix4? value, {
     bool showName = true,
-    Object defaultValue = kNoDefaultValue,
+    Object? defaultValue = kNoDefaultValue,
     DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(level != null),
@@ -567,15 +571,15 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
        );
 
   @override
-  String valueToString({ TextTreeConfiguration parentConfiguration }) {
+  String valueToString({ TextTreeConfiguration? parentConfiguration }) {
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Format the value on a single line to be compatible with the parent's
       // style.
       final List<String> values = <String>[
-        '${debugFormatDouble(value.entry(0, 0))},${debugFormatDouble(value.entry(0, 1))},${debugFormatDouble(value.entry(0, 2))},${debugFormatDouble(value.entry(0, 3))}',
-        '${debugFormatDouble(value.entry(1, 0))},${debugFormatDouble(value.entry(1, 1))},${debugFormatDouble(value.entry(1, 2))},${debugFormatDouble(value.entry(1, 3))}',
-        '${debugFormatDouble(value.entry(2, 0))},${debugFormatDouble(value.entry(2, 1))},${debugFormatDouble(value.entry(2, 2))},${debugFormatDouble(value.entry(2, 3))}',
-        '${debugFormatDouble(value.entry(3, 0))},${debugFormatDouble(value.entry(3, 1))},${debugFormatDouble(value.entry(3, 2))},${debugFormatDouble(value.entry(3, 3))}',
+        '${debugFormatDouble(value!.entry(0, 0))},${debugFormatDouble(value!.entry(0, 1))},${debugFormatDouble(value!.entry(0, 2))},${debugFormatDouble(value!.entry(0, 3))}',
+        '${debugFormatDouble(value!.entry(1, 0))},${debugFormatDouble(value!.entry(1, 1))},${debugFormatDouble(value!.entry(1, 2))},${debugFormatDouble(value!.entry(1, 3))}',
+        '${debugFormatDouble(value!.entry(2, 0))},${debugFormatDouble(value!.entry(2, 1))},${debugFormatDouble(value!.entry(2, 2))},${debugFormatDouble(value!.entry(2, 3))}',
+        '${debugFormatDouble(value!.entry(3, 0))},${debugFormatDouble(value!.entry(3, 1))},${debugFormatDouble(value!.entry(3, 2))},${debugFormatDouble(value!.entry(3, 3))}',
       ];
       return '[${values.join('; ')}]';
     }

@@ -77,60 +77,6 @@ void main() {
     );
   });
 
-  testWidgets('Activity indicator with iOS14 style',
-      (WidgetTester tester) async {
-    final Key key = UniqueKey();
-    await tester.pumpWidget(
-      Center(
-        child: MediaQuery(
-          data: const MediaQueryData(platformBrightness: Brightness.light),
-          child: RepaintBoundary(
-            key: key,
-            child: Container(
-              color: CupertinoColors.white,
-              child: const CupertinoActivityIndicator(
-                animating: false,
-                radius: 35,
-                iOSVersionStyle:
-                    CupertinoActivityIndicatorIOSVersionStyle.iOS14,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await expectLater(
-      find.byKey(key),
-      matchesGoldenFile('activityIndicator.iOS14.paused.light.png'),
-    );
-
-    await tester.pumpWidget(
-      Center(
-        child: MediaQuery(
-          data: const MediaQueryData(platformBrightness: Brightness.dark),
-          child: RepaintBoundary(
-            key: key,
-            child: Container(
-              color: CupertinoColors.black,
-              child: const CupertinoActivityIndicator(
-                animating: false,
-                radius: 35,
-                iOSVersionStyle:
-                    CupertinoActivityIndicatorIOSVersionStyle.iOS14,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await expectLater(
-      find.byKey(key),
-      matchesGoldenFile('activityIndicator.iOS14.paused.dark.png'),
-    );
-  });
-
   testWidgets('Activity indicator 0% in progress', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
@@ -209,7 +155,8 @@ void main() {
     // first tick was changed to be at 12 o'clock.
     expect(
       find.byType(CupertinoActivityIndicator),
-      paints..rrect(rrect: const RRect.fromLTRBXY(-10, -50, 10, -100, 10, 10)),
+      paints
+        ..rrect(rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10)),
     );
   });
 }

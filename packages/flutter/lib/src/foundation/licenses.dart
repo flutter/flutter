@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart' show visibleForTesting;
 
 /// Signature for callbacks passed to [LicenseRegistry.addLicense].
@@ -47,7 +45,7 @@ abstract class LicenseEntry {
   const LicenseEntry();
 
   /// The names of the packages that this license entry applies to.
-  Iterable<String>? get packages;
+  Iterable<String> get packages;
 
   /// The paragraphs of the license, each as a [LicenseParagraph] consisting of
   /// a string and some formatting information. Paragraphs can include newline
@@ -123,7 +121,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
   const LicenseEntryWithLineBreaks(this.packages, this.text);
 
   @override
-  final List<String>? packages;
+  final List<String> packages;
 
   /// The text of the license.
   ///

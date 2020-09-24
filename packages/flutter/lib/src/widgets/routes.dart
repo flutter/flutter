@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -24,6 +22,7 @@ import 'transitions.dart';
 
 // Examples can assume:
 // dynamic routeObserver;
+// NavigatorState navigator;
 
 const Color _kTransparent = Color(0x00000000);
 
@@ -31,7 +30,7 @@ const Color _kTransparent = Color(0x00000000);
 abstract class OverlayRoute<T> extends Route<T> {
   /// Creates a route that knows how to interact with an [Overlay].
   OverlayRoute({
-    RouteSettings settings,
+    RouteSettings? settings,
   }) : super(settings: settings);
 
   /// Subclasses should override this getter to return the builders for the overlay.
@@ -66,7 +65,7 @@ abstract class OverlayRoute<T> extends Route<T> {
     final bool returnValue = super.didPop(result);
     assert(returnValue);
     if (finishedWhenPopped)
-      navigator.finalizeRoute(this);
+      navigator!.finalizeRoute(this);
     return returnValue;
   }
 
@@ -81,7 +80,7 @@ abstract class OverlayRoute<T> extends Route<T> {
 abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// Creates a route that animates itself when it is pushed or popped.
   TransitionRoute({
-    RouteSettings settings,
+    RouteSettings? settings,
   }) : super(settings: settings);
 
   /// This future completes only once the transition itself has finished, after
@@ -103,10 +102,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// {@endtemplate}
   Duration get transitionDuration;
 
+  /// {@template flutter.widgets.transitionRoute.reverseTransitionDuration}
   /// The duration the transition going in reverse.
   ///
   /// By default, the reverse transition duration is set to the value of
   /// the forwards [transitionDuration].
+  /// {@endtemplate}
   Duration get reverseTransitionDuration => transitionDuration;
 
   /// {@template flutter.widgets.transitionRoute.opaque}
@@ -122,24 +123,24 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   //
   // This situation arises when dealing with the Cupertino dismiss gesture.
   @override
-  bool get finishedWhenPopped => _controller.status == AnimationStatus.dismissed;
+  bool get finishedWhenPopped => _controller!.status == AnimationStatus.dismissed;
 
   /// The animation that drives the route's transition and the previous route's
   /// forward transition.
-  Animation<double> get animation => _animation;
-  Animation<double> _animation;
+  Animation<double>? get animation => _animation;
+  Animation<double>? _animation;
 
   /// The animation controller that the route uses to drive the transitions.
   ///
   /// The animation itself is exposed by the [animation] property.
   @protected
-  AnimationController get controller => _controller;
-  AnimationController _controller;
+  AnimationController? get controller => _controller;
+  AnimationController? _controller;
 
   /// The animation for the route being pushed on top of this route. This
   /// animation lets this route coordinate with the entrance and exit transition
   /// of route pushed on top of this route.
-  Animation<double> get secondaryAnimation => _secondaryAnimation;
+  Animation<double>? get secondaryAnimation => _secondaryAnimation;
   final ProxyAnimation _secondaryAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
 
   /// Called to create the animation controller that will drive the transitions to
@@ -154,7 +155,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
       duration: duration,
       reverseDuration: reverseDuration,
       debugLabel: debugLabel,
-      vsync: navigator,
+      vsync: navigator!,
     );
   }
 
@@ -164,10 +165,10 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   Animation<double> createAnimation() {
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     assert(_controller != null);
-    return _controller.view;
+    return _controller!.view;
   }
 
-  T _result;
+  T? _result;
 
   void _handleStatusChanged(AnimationStatus status) {
     switch (status) {
@@ -186,12 +187,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         // back gesture drives this animation to the dismissed status before
         // removing the route and disposing it.
         if (!isActive) {
-          navigator.finalizeRoute(this);
+          navigator!.finalizeRoute(this);
           assert(overlayEntries.isEmpty);
         }
         break;
     }
-    changedInternalState();
   }
 
   @override
@@ -199,46 +199,38 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     assert(!_transitionCompleter.isCompleted, 'Cannot install a $runtimeType after disposing it.');
     _controller = createAnimationController();
     assert(_controller != null, '$runtimeType.createAnimationController() returned null.');
-    _animation = createAnimation();
+    _animation = createAnimation()
+      ..addStatusListener(_handleStatusChanged);
     assert(_animation != null, '$runtimeType.createAnimation() returned null.');
     super.install();
+    if (_animation!.isCompleted && overlayEntries.isNotEmpty) {
+      overlayEntries.first.opaque = opaque;
+    }
   }
 
   @override
   TickerFuture didPush() {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
-    _didPushOrReplace();
     super.didPush();
-    return _controller.forward();
+    return _controller!.forward();
   }
 
   @override
   void didAdd() {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
-    _didPushOrReplace();
     super.didAdd();
-    _controller.value = _controller.upperBound;
+    _controller!.value = _controller!.upperBound;
   }
 
   @override
-  void didReplace(Route<dynamic> oldRoute) {
+  void didReplace(Route<dynamic>? oldRoute) {
     assert(_controller != null, '$runtimeType.didReplace called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     if (oldRoute is TransitionRoute)
-      _controller.value = oldRoute._controller.value;
-    _didPushOrReplace();
+      _controller!.value = oldRoute._controller!.value;
     super.didReplace(oldRoute);
-  }
-
-  void _didPushOrReplace() {
-    _animation.addStatusListener(_handleStatusChanged);
-    // If the animation is already completed, _handleStatusChanged will not get
-    // a chance to set opaqueness of OverlayEntry.
-    if (_animation.isCompleted && overlayEntries.isNotEmpty) {
-      overlayEntries.first.opaque = opaque;
-    }
   }
 
   @override
@@ -246,7 +238,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     assert(_controller != null, '$runtimeType.didPop called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     _result = result;
-    _controller.reverse();
+    _controller!.reverse();
     return super.didPop(result);
   }
 
@@ -259,7 +251,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   @override
-  void didChangeNext(Route<dynamic> nextRoute) {
+  void didChangeNext(Route<dynamic>? nextRoute) {
     assert(_controller != null, '$runtimeType.didChangeNext called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     _updateSecondaryAnimation(nextRoute);
@@ -271,20 +263,20 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   //
   // This property is non-null if there is a train hopping in progress, and the
   // caller must reset this property to null after it is called.
-  VoidCallback _trainHoppingListenerRemover;
+  VoidCallback? _trainHoppingListenerRemover;
 
-  void _updateSecondaryAnimation(Route<dynamic> nextRoute) {
+  void _updateSecondaryAnimation(Route<dynamic>? nextRoute) {
     // There is an existing train hopping in progress. Unfortunately, we cannot
     // dispose current train hopping animation until we replace it with a new
     // animation.
-    final VoidCallback previousTrainHoppingListenerRemover = _trainHoppingListenerRemover;
+    final VoidCallback? previousTrainHoppingListenerRemover = _trainHoppingListenerRemover;
     _trainHoppingListenerRemover = null;
 
     if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
-      final Animation<double> current = _secondaryAnimation.parent;
+      final Animation<double>? current = _secondaryAnimation.parent;
       if (current != null) {
-        final Animation<double> currentTrain = current is TrainHoppingAnimation ? current.currentTrain : current;
-        final Animation<double> nextTrain = nextRoute._animation;
+        final Animation<double> currentTrain = (current is TrainHoppingAnimation ? current.currentTrain : current)!;
+        final Animation<double> nextTrain = nextRoute._animation!;
         if (
           currentTrain.value == nextTrain.value ||
           nextTrain.status == AnimationStatus.completed ||
@@ -302,7 +294,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           //  3. A new _updateSecondaryAnimation is called before train hopping
           //     finishes. We leave a listener remover for the next call to
           //     properly clean up the existing train hopping.
-          TrainHoppingAnimation newAnimation;
+          TrainHoppingAnimation? newAnimation;
           void _jumpOnAnimationEnd(AnimationStatus status) {
             switch (status) {
               case AnimationStatus.completed:
@@ -312,7 +304,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
                 // TrainHoppingAnimation.
                 _setSecondaryAnimation(nextTrain, nextRoute.completed);
                 if (_trainHoppingListenerRemover != null) {
-                  _trainHoppingListenerRemover();
+                  _trainHoppingListenerRemover!();
                   _trainHoppingListenerRemover = null;
                 }
                 break;
@@ -331,12 +323,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
             nextTrain,
             onSwitchedTrain: () {
               assert(_secondaryAnimation.parent == newAnimation);
-              assert(newAnimation.currentTrain == nextRoute._animation);
+              assert(newAnimation!.currentTrain == nextRoute._animation);
               // We can hop on the nextTrain, so we don't need to listen to
               // whether the nextTrain has stopped.
-              _setSecondaryAnimation(newAnimation.currentTrain, nextRoute.completed);
+              _setSecondaryAnimation(newAnimation!.currentTrain, nextRoute.completed);
               if (_trainHoppingListenerRemover != null) {
-                _trainHoppingListenerRemover();
+                _trainHoppingListenerRemover!();
                 _trainHoppingListenerRemover = null;
               }
             },
@@ -356,7 +348,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     }
   }
 
-  void _setSecondaryAnimation(Animation<double> animation, [Future<dynamic> disposed]) {
+  void _setSecondaryAnimation(Animation<double>? animation, [Future<dynamic>? disposed]) {
     _secondaryAnimation.parent = animation;
     // Releases the reference to the next route's animation when that route
     // is disposed.
@@ -378,12 +370,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// need to coordinate transitions with.
   ///
   /// If true, and `nextRoute.canTransitionFrom()` is true, then the
-  /// [buildTransitions] `secondaryAnimation` will run from 0.0 - 1.0
+  /// [ModalRoute.buildTransitions] `secondaryAnimation` will run from 0.0 - 1.0
   /// when [nextRoute] is pushed on top of this one.  Similarly, if
   /// the [nextRoute] is popped off of this route, the
   /// `secondaryAnimation` will run from 1.0 - 0.0.
   ///
-  /// If false, this route's [buildTransitions] `secondaryAnimation` parameter
+  /// If false, this route's [ModalRoute.buildTransitions] `secondaryAnimation` parameter
   /// value will be [kAlwaysDismissedAnimation]. In other words, this route
   /// will not animate when when [nextRoute] is pushed on top of it or when
   /// [nextRoute] is popped off of it.
@@ -393,7 +385,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// See also:
   ///
   ///  * [canTransitionFrom], which must be true for [nextRoute] for the
-  ///    [buildTransitions] `secondaryAnimation` to run.
+  ///    [ModalRoute.buildTransitions] `secondaryAnimation` to run.
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => true;
 
   /// Returns true if [previousRoute] should animate when this route
@@ -403,12 +395,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// need to coordinate transitions with.
   ///
   /// If true, and `previousRoute.canTransitionTo()` is true, then the
-  /// previous route's [buildTransitions] `secondaryAnimation` will
+  /// previous route's [ModalRoute.buildTransitions] `secondaryAnimation` will
   /// run from 0.0 - 1.0 when this route is pushed on top of
   /// it. Similarly, if this route is popped off of [previousRoute]
   /// the previous route's `secondaryAnimation` will run from 1.0 - 0.0.
   ///
-  /// If false, then the previous route's [buildTransitions]
+  /// If false, then the previous route's [ModalRoute.buildTransitions]
   /// `secondaryAnimation` value will be kAlwaysDismissedAnimation. In
   /// other words [previousRoute] will not animate when this route is
   /// pushed on top of it or when then this route is popped off of it.
@@ -418,7 +410,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// See also:
   ///
   ///  * [canTransitionTo], which must be true for [previousRoute] for its
-  ///    [buildTransitions] `secondaryAnimation` to run.
+  ///    [ModalRoute.buildTransitions] `secondaryAnimation` to run.
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => true;
 
   @override
@@ -442,19 +434,19 @@ class LocalHistoryEntry {
   LocalHistoryEntry({ this.onRemove });
 
   /// Called when this entry is removed from the history of its associated [LocalHistoryRoute].
-  final VoidCallback onRemove;
+  final VoidCallback? onRemove;
 
-  LocalHistoryRoute<dynamic> _owner;
+  LocalHistoryRoute<dynamic>? _owner;
 
   /// Remove this entry from the history of its associated [LocalHistoryRoute].
   void remove() {
-    _owner.removeLocalHistoryEntry(this);
+    _owner!.removeLocalHistoryEntry(this);
     assert(_owner == null);
   }
 
   void _notifyRemoved() {
     if (onRemove != null)
-      onRemove();
+      onRemove!();
   }
 }
 
@@ -466,7 +458,7 @@ class LocalHistoryEntry {
 /// than being removed as the current route, the most recent [LocalHistoryEntry]
 /// is removed from the list and its [LocalHistoryEntry.onRemove] is called.
 mixin LocalHistoryRoute<T> on Route<T> {
-  List<LocalHistoryEntry> _localHistory;
+  List<LocalHistoryEntry>? _localHistory;
 
   /// Adds a local history entry to this route.
   ///
@@ -521,7 +513,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///           children: <Widget>[
   ///             Text('HomePage'),
   ///             // Press this button to open the SecondPage.
-  ///             RaisedButton(
+  ///             ElevatedButton(
   ///               child: Text('Second Page >'),
   ///               onPressed: () {
   ///                 Navigator.pushNamed(context, '/second_page');
@@ -566,7 +558,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///           height: 100.0,
   ///           color: Colors.red,
   ///         )
-  ///       : RaisedButton(
+  ///       : ElevatedButton(
   ///           child: Text('Show Rectangle'),
   ///           onPressed: _navigateLocallyToShowRectangle,
   ///         );
@@ -577,7 +569,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///           mainAxisAlignment: MainAxisAlignment.center,
   ///           children: <Widget>[
   ///             localNavContent,
-  ///             RaisedButton(
+  ///             ElevatedButton(
   ///               child: Text('< Back'),
   ///               onPressed: () {
   ///                 // Pop a route. If this is pressed while the red rectangle is
@@ -599,8 +591,8 @@ mixin LocalHistoryRoute<T> on Route<T> {
     assert(entry._owner == null);
     entry._owner = this;
     _localHistory ??= <LocalHistoryEntry>[];
-    final bool wasEmpty = _localHistory.isEmpty;
-    _localHistory.add(entry);
+    final bool wasEmpty = _localHistory!.isEmpty;
+    _localHistory!.add(entry);
     if (wasEmpty)
       changedInternalState();
   }
@@ -612,16 +604,16 @@ mixin LocalHistoryRoute<T> on Route<T> {
   void removeLocalHistoryEntry(LocalHistoryEntry entry) {
     assert(entry != null);
     assert(entry._owner == this);
-    assert(_localHistory.contains(entry));
-    _localHistory.remove(entry);
+    assert(_localHistory!.contains(entry));
+    _localHistory!.remove(entry);
     entry._owner = null;
     entry._notifyRemoved();
-    if (_localHistory.isEmpty) {
-      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+    if (_localHistory!.isEmpty) {
+      if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.persistentCallbacks) {
         // The local history might be removed as a result of disposing inactive
         // elements during finalizeTree. The state is locked at this moment, and
         // we can only notify state has changed in the next frame.
-        SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
           changedInternalState();
         });
       } else {
@@ -639,12 +631,12 @@ mixin LocalHistoryRoute<T> on Route<T> {
 
   @override
   bool didPop(T result) {
-    if (_localHistory != null && _localHistory.isNotEmpty) {
-      final LocalHistoryEntry entry = _localHistory.removeLast();
+    if (_localHistory != null && _localHistory!.isNotEmpty) {
+      final LocalHistoryEntry entry = _localHistory!.removeLast();
       assert(entry._owner == this);
       entry._owner = null;
       entry._notifyRemoved();
-      if (_localHistory.isEmpty)
+      if (_localHistory!.isEmpty)
         changedInternalState();
       return false;
     }
@@ -653,24 +645,24 @@ mixin LocalHistoryRoute<T> on Route<T> {
 
   @override
   bool get willHandlePopInternally {
-    return _localHistory != null && _localHistory.isNotEmpty;
+    return _localHistory != null && _localHistory!.isNotEmpty;
   }
 }
 
 class _DismissModalAction extends DismissAction {
   @override
   Object invoke(DismissIntent intent) {
-    return Navigator.of(primaryFocus.context).maybePop();
+    return Navigator.of(primaryFocus!.context!)!.maybePop();
   }
 }
 
 class _ModalScopeStatus extends InheritedWidget {
   const _ModalScopeStatus({
-    Key key,
-    @required this.isCurrent,
-    @required this.canPop,
-    @required this.route,
-    @required Widget child,
+    Key? key,
+    required this.isCurrent,
+    required this.canPop,
+    required this.route,
+    required Widget child,
   }) : assert(isCurrent != null),
        assert(canPop != null),
        assert(route != null),
@@ -698,8 +690,8 @@ class _ModalScopeStatus extends InheritedWidget {
 
 class _ModalScope<T> extends StatefulWidget {
   const _ModalScope({
-    Key key,
-    this.route,
+    Key? key,
+    required this.route,
   }) : super(key: key);
 
   final ModalRoute<T> route;
@@ -713,10 +705,10 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   // whenever the dependencies change. This implements the contract described in
   // the documentation for buildPage, namely that it gets called once, unless
   // something like a ModalRoute.of() dependency triggers an update.
-  Widget _page;
+  Widget? _page;
 
   // This is the combination of the two animations for the route.
-  Listenable _listenable;
+  late Listenable _listenable;
 
   /// The node this scope will use for its root [FocusScope] widget.
   final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: '$_ModalScopeState Focus Scope');
@@ -725,12 +717,12 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   void initState() {
     super.initState();
     final List<Listenable> animations = <Listenable>[
-      if (widget.route.animation != null) widget.route.animation,
-      if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation,
+      if (widget.route.animation != null) widget.route.animation!,
+      if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation!,
     ];
     _listenable = Listenable.merge(animations);
     if (widget.route.isCurrent) {
-      widget.route.navigator.focusScopeNode.setFirstFocus(focusScopeNode);
+      widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
   }
 
@@ -739,7 +731,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     super.didUpdateWidget(oldWidget);
     assert(widget.route == oldWidget.route);
     if (widget.route.isCurrent) {
-      widget.route.navigator.focusScopeNode.setFirstFocus(focusScopeNode);
+      widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
   }
 
@@ -770,7 +762,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   // and route.offstage.
   void _routeSetState(VoidCallback fn) {
     if (widget.route.isCurrent && !_shouldIgnoreFocusRequest) {
-      widget.route.navigator.focusScopeNode.setFirstFocus(focusScopeNode);
+      widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
     setState(fn);
   }
@@ -796,18 +788,18 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
               child: RepaintBoundary(
                 child: AnimatedBuilder(
                   animation: _listenable, // immutable
-                  builder: (BuildContext context, Widget child) {
+                  builder: (BuildContext context, Widget? child) {
                     return widget.route.buildTransitions(
                       context,
-                      widget.route.animation,
-                      widget.route.secondaryAnimation,
+                      widget.route.animation!,
+                      widget.route.secondaryAnimation!,
                       // This additional AnimatedBuilder is include because if the
                       // value of the userGestureInProgressNotifier changes, it's
                       // only necessary to rebuild the IgnorePointer widget and set
                       // the focus node's ability to focus.
                       AnimatedBuilder(
                         animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
-                        builder: (BuildContext context, Widget child) {
+                        builder: (BuildContext context, Widget? child) {
                           final bool ignoreEvents = _shouldIgnoreFocusRequest;
                           focusScopeNode.canRequestFocus = !ignoreEvents;
                           return IgnorePointer(
@@ -825,8 +817,8 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                       builder: (BuildContext context) {
                         return widget.route.buildPage(
                           context,
-                          widget.route.animation,
-                          widget.route.secondaryAnimation,
+                          widget.route.animation!,
+                          widget.route.secondaryAnimation!,
                         );
                       },
                     ),
@@ -852,8 +844,8 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T> {
   /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
-    RouteSettings settings,
-    ui.ImageFilter filter,
+    RouteSettings? settings,
+    ui.ImageFilter? filter,
   }) : _filter = filter,
        super(settings: settings);
 
@@ -861,7 +853,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// If given, this filter will be applied to the modal barrier using
   /// [BackdropFilter]. This allows blur effects, for example.
-  final ui.ImageFilter _filter;
+  final ui.ImageFilter? _filter;
 
   // The API for general users of this class
 
@@ -876,11 +868,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// ```
   ///
   /// The given [BuildContext] will be rebuilt if the state of the route changes
-  /// (specifically, if [isCurrent] or [canPop] change value).
+  /// while it is visible (specifically, if [isCurrent] or [canPop] change value).
   @optionalTypeArgs
-  static ModalRoute<T> of<T extends Object>(BuildContext context) {
-    final _ModalScopeStatus widget = context.dependOnInheritedWidgetOfExactType<_ModalScopeStatus>();
-    return widget?.route as ModalRoute<T>;
+  static ModalRoute<T>? of<T extends Object>(BuildContext context) {
+    final _ModalScopeStatus? widget = context.dependOnInheritedWidgetOfExactType<_ModalScopeStatus>();
+    return widget?.route as ModalRoute<T>?;
   }
 
   /// Schedule a call to [buildTransitions].
@@ -898,7 +890,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @protected
   void setState(VoidCallback fn) {
     if (_scopeKey.currentState != null) {
-      _scopeKey.currentState._routeSetState(fn);
+      _scopeKey.currentState!._routeSetState(fn);
     } else {
       // The route isn't currently visible, so we don't have to call its setState
       // method, but we do still need to call the fn callback, otherwise the state
@@ -956,7 +948,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// is not wrapped in any transition widgets.
   ///
   /// The [buildTransitions] method, in contrast to [buildPage], is called each
-  /// time the [Route]'s state changes (e.g. the value of [canPop]).
+  /// time the [Route]'s state changes while it is visible (e.g. if the value of
+  /// [canPop] changes on the active route).
   ///
   /// The [buildTransitions] method is typically used to define transitions
   /// that animate the new topmost route's comings and goings. When the
@@ -1081,7 +1074,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   TickerFuture didPush() {
     if (_scopeKey.currentState != null) {
-      navigator.focusScopeNode.setFirstFocus(_scopeKey.currentState.focusScopeNode);
+      navigator!.focusScopeNode.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
     }
     return super.didPush();
   }
@@ -1089,7 +1082,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void didAdd() {
     if (_scopeKey.currentState != null) {
-      navigator.focusScopeNode.setFirstFocus(_scopeKey.currentState.focusScopeNode);
+      navigator!.focusScopeNode.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
     }
     super.didAdd();
   }
@@ -1112,7 +1105,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// If [barrierDismissible] is false, then tapping the barrier has no effect.
   ///
   /// If this getter would ever start returning a different value, the
-  /// [changedInternalState] should be invoked so that the change can take
+  /// [Route.changedInternalState] should be invoked so that the change can take
   /// effect.
   ///
   /// See also:
@@ -1148,23 +1141,37 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// For example, when a dialog is on the screen, the page below the dialog is
   /// usually darkened by the modal barrier.
   ///
-  /// The color is ignored, and the barrier made invisible, when [offstage] is
-  /// true.
+  /// The color is ignored, and the barrier made invisible, when
+  /// [ModalRoute.offstage] is true.
   ///
   /// While the route is animating into position, the color is animated from
   /// transparent to the specified color.
+  /// {@endtemplate}
   ///
   /// If this getter would ever start returning a different color, the
-  /// [changedInternalState] should be invoked so that the change can take
+  /// [Route.changedInternalState] should be invoked so that the change can take
   /// effect.
+  ///
+  /// {@tool snippet}
+  ///
+  /// It is safe to use `navigator.context` here. For example, to make
+  /// the barrier color use the theme's background color, one could say:
+  ///
+  /// ```dart
+  /// Color get barrierColor => Theme.of(navigator.context).backgroundColor;
+  /// ```
+  ///
+  /// The [Navigator] causes the [ModalRoute]'s modal barrier overlay entry
+  /// to rebuild any time its dependencies change.
+  ///
+  /// {@end-tool}
   ///
   /// See also:
   ///
   ///  * [barrierDismissible], which controls the behavior of the barrier when
   ///    tapped.
   ///  * [ModalBarrier], the widget that implements this feature.
-  /// {@endtemplate}
-  Color get barrierColor;
+  Color? get barrierColor;
 
   /// {@template flutter.widgets.modalRoute.barrierLabel}
   /// The semantic label used for a dismissible barrier.
@@ -1178,9 +1185,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// For example, when a dialog is on the screen, the page below the dialog is
   /// usually darkened by the modal barrier.
+  /// {@endtemplate}
   ///
   /// If this getter would ever start returning a different label, the
-  /// [changedInternalState] should be invoked so that the change can take
+  /// [Route.changedInternalState] should be invoked so that the change can take
   /// effect.
   ///
   /// See also:
@@ -1188,8 +1196,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [barrierDismissible], which controls the behavior of the barrier when
   ///    tapped.
   ///  * [ModalBarrier], the widget that implements this feature.
-  /// {@endtemplate}
-  String get barrierLabel;
+  String? get barrierLabel;
 
   /// The curve that is used for animating the modal barrier in and out.
   ///
@@ -1225,11 +1232,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// pops. If this is not necessary, this can be set to false to allow the
   /// framework to entirely discard the route's widget hierarchy when it is not
   /// visible.
+  /// {@endtemplate}
   ///
   /// If this getter would ever start returning a different value, the
   /// [changedInternalState] should be invoked so that the change can take
   /// effect.
-  /// {@endtemplate}
   bool get maintainState;
 
 
@@ -1245,6 +1252,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// The modal barrier, if any, is not rendered if [offstage] is true (see
   /// [barrierColor]).
+  ///
+  /// Whenever this changes value, [changedInternalState] is called.
   bool get offstage => _offstage;
   bool _offstage = false;
   set offstage(bool value) {
@@ -1253,20 +1262,21 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     setState(() {
       _offstage = value;
     });
-    _animationProxy.parent = _offstage ? kAlwaysCompleteAnimation : super.animation;
-    _secondaryAnimationProxy.parent = _offstage ? kAlwaysDismissedAnimation : super.secondaryAnimation;
+    _animationProxy!.parent = _offstage ? kAlwaysCompleteAnimation : super.animation;
+    _secondaryAnimationProxy!.parent = _offstage ? kAlwaysDismissedAnimation : super.secondaryAnimation;
+    changedInternalState();
   }
 
   /// The build context for the subtree containing the primary content of this route.
-  BuildContext get subtreeContext => _subtreeKey.currentContext;
+  BuildContext? get subtreeContext => _subtreeKey.currentContext;
 
   @override
-  Animation<double> get animation => _animationProxy;
-  ProxyAnimation _animationProxy;
+  Animation<double>? get animation => _animationProxy;
+  ProxyAnimation? _animationProxy;
 
   @override
-  Animation<double> get secondaryAnimation => _secondaryAnimationProxy;
-  ProxyAnimation _secondaryAnimationProxy;
+  Animation<double>? get secondaryAnimation => _secondaryAnimationProxy;
+  ProxyAnimation? _secondaryAnimationProxy;
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
@@ -1290,7 +1300,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    this method checks.
   @override
   Future<RoutePopDisposition> willPop() async {
-    final _ModalScopeState<T> scope = _scopeKey.currentState;
+    final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
     for (final WillPopCallback callback in List<WillPopCallback>.from(_willPopCallbacks)) {
       if (await callback() != true)
@@ -1399,7 +1409,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  void didChangePrevious(Route<dynamic> previousRoute) {
+  void didChangePrevious(Route<dynamic>? previousRoute) {
     super.didChangePrevious(previousRoute);
     changedInternalState();
   }
@@ -1416,13 +1426,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void changedExternalState() {
     super.changedExternalState();
     if (_scopeKey.currentState != null)
-      _scopeKey.currentState._forceRebuildPage();
+      _scopeKey.currentState!._forceRebuildPage();
   }
 
   /// Whether this route can be popped.
   ///
-  /// When this changes, the route will rebuild, and any widgets that used
-  /// [ModalRoute.of] will be notified.
+  /// When this changes, if the route is visible, the route will
+  /// rebuild, and any widgets that used [ModalRoute.of] will be
+  /// notified.
   bool get canPop => !isFirst || willHandlePopInternally;
 
   // Internals
@@ -1432,12 +1443,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   final PageStorageBucket _storageBucket = PageStorageBucket();
 
   // one of the builders
-  OverlayEntry _modalBarrier;
+  late OverlayEntry _modalBarrier;
   Widget _buildModalBarrier(BuildContext context) {
     Widget barrier;
-    if (barrierColor != null && barrierColor.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
+    if (barrierColor != null && barrierColor!.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
       assert(barrierColor != _kTransparent);
-      final Animation<Color> color = animation.drive(
+      final Animation<Color?> color = animation!.drive(
         ColorTween(
           begin: _kTransparent,
           end: barrierColor, // changedInternalState is called if barrierColor updates
@@ -1458,13 +1469,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     }
     if (_filter != null) {
       barrier = BackdropFilter(
-        filter: _filter,
+        filter: _filter!,
         child: barrier,
       );
     }
     barrier = IgnorePointer(
-      ignoring: animation.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
-                animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
+      ignoring: animation!.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
+                animation!.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
       child: barrier,
     );
     if (semanticsDismissible && barrierDismissible) {
@@ -1479,7 +1490,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // We cache the part of the modal scope that doesn't change from frame to
   // frame so that we minimize the amount of building that happens.
-  Widget _modalScopeCache;
+  Widget? _modalScopeCache;
 
   // one of the builders
   Widget _buildModalScope(BuildContext context) {
@@ -1494,7 +1505,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     );
   }
 
-  OverlayEntry _modalScope;
+  late OverlayEntry _modalScope;
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
@@ -1510,8 +1521,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 abstract class PopupRoute<T> extends ModalRoute<T> {
   /// Initializes the [PopupRoute].
   PopupRoute({
-    RouteSettings settings,
-    ui.ImageFilter filter,
+    RouteSettings? settings,
+    ui.ImageFilter? filter,
   }) : super(
          filter: filter,
          settings: settings,
@@ -1621,15 +1632,15 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   void unsubscribe(RouteAware routeAware) {
     assert(routeAware != null);
     for (final R route in _listeners.keys) {
-      final Set<RouteAware> subscribers = _listeners[route];
+      final Set<RouteAware>? subscribers = _listeners[route];
       subscribers?.remove(routeAware);
     }
   }
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is R && previousRoute is R) {
-      final List<RouteAware> previousSubscribers = _listeners[previousRoute]?.toList();
+      final List<RouteAware>? previousSubscribers = _listeners[previousRoute]?.toList();
 
       if (previousSubscribers != null) {
         for (final RouteAware routeAware in previousSubscribers) {
@@ -1637,7 +1648,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
         }
       }
 
-      final List<RouteAware> subscribers = _listeners[route]?.toList();
+      final List<RouteAware>? subscribers = _listeners[route]?.toList();
 
       if (subscribers != null) {
         for (final RouteAware routeAware in subscribers) {
@@ -1648,9 +1659,9 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   }
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is R && previousRoute is R) {
-      final Set<RouteAware> previousSubscribers = _listeners[previousRoute];
+      final Set<RouteAware>? previousSubscribers = _listeners[previousRoute];
 
       if (previousSubscribers != null) {
         for (final RouteAware routeAware in previousSubscribers) {
@@ -1683,13 +1694,13 @@ abstract class RouteAware {
 
 class _DialogRoute<T> extends PopupRoute<T> {
   _DialogRoute({
-    @required RoutePageBuilder pageBuilder,
+    required RoutePageBuilder pageBuilder,
     bool barrierDismissible = true,
-    String barrierLabel,
-    Color barrierColor = const Color(0x80000000),
+    String? barrierLabel,
+    Color? barrierColor = const Color(0x80000000),
     Duration transitionDuration = const Duration(milliseconds: 200),
-    RouteTransitionsBuilder transitionBuilder,
-    RouteSettings settings,
+    RouteTransitionsBuilder? transitionBuilder,
+    RouteSettings? settings,
   }) : assert(barrierDismissible != null),
        _pageBuilder = pageBuilder,
        _barrierDismissible = barrierDismissible,
@@ -1706,18 +1717,18 @@ class _DialogRoute<T> extends PopupRoute<T> {
   final bool _barrierDismissible;
 
   @override
-  String get barrierLabel => _barrierLabel;
-  final String _barrierLabel;
+  String? get barrierLabel => _barrierLabel;
+  final String? _barrierLabel;
 
   @override
-  Color get barrierColor => _barrierColor;
-  final Color _barrierColor;
+  Color? get barrierColor => _barrierColor;
+  final Color? _barrierColor;
 
   @override
   Duration get transitionDuration => _transitionDuration;
   final Duration _transitionDuration;
 
-  final RouteTransitionsBuilder _transitionBuilder;
+  final RouteTransitionsBuilder? _transitionBuilder;
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
@@ -1738,7 +1749,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
           ),
           child: child);
     } // Some default transition
-    return _transitionBuilder(context, animation, secondaryAnimation, child);
+    return _transitionBuilder!(context, animation, secondaryAnimation, child);
   }
 }
 
@@ -1796,21 +1807,21 @@ class _DialogRoute<T> extends PopupRoute<T> {
 ///
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
-Future<T> showGeneralDialog<T>({
-  @required BuildContext context,
-  @required RoutePageBuilder pageBuilder,
+Future<T> showGeneralDialog<T extends Object>({
+  required BuildContext context,
+  required RoutePageBuilder pageBuilder,
   bool barrierDismissible = false,
-  String barrierLabel,
+  String? barrierLabel,
   Color barrierColor = const Color(0x80000000),
   Duration transitionDuration = const Duration(milliseconds: 200),
-  RouteTransitionsBuilder transitionBuilder,
+  RouteTransitionsBuilder? transitionBuilder,
   bool useRootNavigator = true,
-  RouteSettings routeSettings,
+  RouteSettings? routeSettings,
 }) {
   assert(pageBuilder != null);
   assert(useRootNavigator != null);
   assert(!barrierDismissible || barrierLabel != null);
-  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(_DialogRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator)!.push<T>(_DialogRoute<T>(
     pageBuilder: pageBuilder,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,

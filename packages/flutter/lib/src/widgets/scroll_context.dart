@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 
@@ -27,7 +25,7 @@ abstract class ScrollContext {
   /// widget itself. For example, [Scrollable] uses a context outside the
   /// [Viewport] but inside the widgets created by
   /// [ScrollBehavior.buildViewportChrome].
-  BuildContext get notificationContext;
+  BuildContext? get notificationContext;
 
   /// The [BuildContext] that should be used when searching for a [PageStorage].
   ///
@@ -35,6 +33,7 @@ abstract class ScrollContext {
   /// particular, it should involve any [GlobalKey]s that are dynamically
   /// created as part of creating the scrolling widget, since those would be
   /// different each time the widget is created.
+  // TODO(goderbauer): Deprecate this when state restoration supports all features of PageStorage.
   BuildContext get storageContext;
 
   /// A [TickerProvider] to use when animating the scroll position.
@@ -61,4 +60,12 @@ abstract class ScrollContext {
 
   /// Set the [SemanticsAction]s that should be expose to the semantics tree.
   void setSemanticsActions(Set<SemanticsAction> actions);
+
+  /// Called by the [ScrollPosition] whenever scrolling ends to persist the
+  /// provided scroll `offset` for state restoration purposes.
+  ///
+  /// The [ScrollContext] may pass the value back to a [ScrollPosition] by
+  /// calling [ScrollPosition.restoreOffset] at a later point in time or after
+  /// the application has restarted to restore the scroll offset.
+  void saveOffset(double offset);
 }

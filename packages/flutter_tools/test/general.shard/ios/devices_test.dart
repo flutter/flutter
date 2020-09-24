@@ -356,8 +356,8 @@ void main() {
       );
 
       device2 = IOSDevice(
-        '43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7',
-        name: 'iPhone 6s',
+        '00008027-00192736010F802E',
+        name: 'iPad Pro',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),

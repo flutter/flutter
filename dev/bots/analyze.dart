@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:core' hide print;
 import 'dart:io' hide exit;
@@ -1142,6 +1141,8 @@ Iterable<File> _allFiles(String workingDirectory, String extension, { @required 
         continue;
       if (path.basename(entity.path) == 'gradlew.bat')
         continue;
+      if (path.basename(entity.path) == '.DS_Store')
+        continue;
       if (extension == null || path.extension(entity.path) == '.$extension') {
         matches += 1;
         yield entity;
@@ -1151,9 +1152,13 @@ Iterable<File> _allFiles(String workingDirectory, String extension, { @required 
         continue;
       if (path.basename(entity.path) == '.git')
         continue;
+      if (path.basename(entity.path) == '.idea')
+        continue;
       if (path.basename(entity.path) == '.gradle')
         continue;
       if (path.basename(entity.path) == '.dart_tool')
+        continue;
+      if (path.basename(entity.path) == '.idea')
         continue;
       if (path.basename(entity.path) == 'build')
         continue;

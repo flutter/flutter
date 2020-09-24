@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -208,7 +207,7 @@ class Dialog extends StatelessWidget {
 ///           ),
 ///         ),
 ///         actions: <Widget>[
-///           FlatButton(
+///           TextButton(
 ///             child: Text('Approve'),
 ///             onPressed: () {
 ///               Navigator.of(context).pop();
@@ -281,8 +280,8 @@ class AlertDialog extends StatelessWidget {
 
   /// Style for the text in the [title] of this [AlertDialog].
   ///
-  /// If null, [DialogTheme.titleTextStyle] is used, if that's null, defaults to
-  /// [ThemeData.textTheme.headline6].
+  /// If null, [DialogTheme.titleTextStyle] is used. If that's null, defaults to
+  /// [TextTheme.headline6] of [ThemeData.textTheme].
   final TextStyle titleTextStyle;
 
   /// The (optional) content of the dialog is displayed in the center of the
@@ -304,16 +303,16 @@ class AlertDialog extends StatelessWidget {
 
   /// Style for the text in the [content] of this [AlertDialog].
   ///
-  /// If null, [DialogTheme.contentTextStyle] is used, if that's null, defaults
-  /// to [ThemeData.textTheme.subtitle1].
+  /// If null, [DialogTheme.contentTextStyle] is used. If that's null, defaults
+  /// to [TextTheme.subtitle1] of [ThemeData.textTheme].
   final TextStyle contentTextStyle;
 
   /// The (optional) set of actions that are displayed at the bottom of the
   /// dialog.
   ///
-  /// Typically this is a list of [FlatButton] widgets. It is recommended to
-  /// set the [textAlign] to [TextAlign.end] for the [Text] within the
-  /// [FlatButton], so that buttons whose labels wrap to an extra line align
+  /// Typically this is a list of [TextButton] widgets. It is recommended to
+  /// set the [Text.textAlign] to [TextAlign.end] for the [Text] within the
+  /// [TextButton], so that buttons whose labels wrap to an extra line align
   /// with the overall [ButtonBar]'s alignment within the dialog.
   ///
   /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
@@ -341,8 +340,8 @@ class AlertDialog extends StatelessWidget {
   ///   title: Text('Title'),
   ///   content: Container(width: 200, height: 200, color: Colors.green),
   ///   actions: <Widget>[
-  ///     RaisedButton(onPressed: () {}, child: Text('Button 1')),
-  ///     RaisedButton(onPressed: () {}, child: Text('Button 2')),
+  ///     ElevatedButton(onPressed: () {}, child: Text('Button 1')),
+  ///     ElevatedButton(onPressed: () {}, child: Text('Button 2')),
   ///   ],
   ///   actionsPadding: EdgeInsets.symmetric(horizontal: 8.0),
   /// )
@@ -366,7 +365,7 @@ class AlertDialog extends StatelessWidget {
   /// bottom and "ends" at the top.
   ///
   /// If null then it will use the surrounding
-  /// [ButtonBarTheme.overflowDirection]. If that is null, it will
+  /// [ButtonBarThemeData.overflowDirection]. If that is null, it will
   /// default to [VerticalDirection.down].
   ///
   /// See also:
@@ -396,7 +395,7 @@ class AlertDialog extends StatelessWidget {
   /// between the entire button bar and the edges of the dialog.
   ///
   /// If this property is null, then it will use the surrounding
-  /// [ButtonBarTheme.buttonPadding]. If that is null, it will default to
+  /// [ButtonBarThemeData.buttonPadding]. If that is null, it will default to
   /// 8.0 logical pixels on the left and right.
   ///
   /// See also:
@@ -414,13 +413,15 @@ class AlertDialog extends StatelessWidget {
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
   ///
-  /// If this label is not provided, a semantic label will be inferred from the
-  /// [title] if it is not null.  If there is no title, the label will be taken
-  /// from [MaterialLocalizations.alertDialogLabel].
+  /// In iOS, if this label is not provided, a semantic label will be inferred
+  /// from the [title] if it is not null.
+  ///
+  /// In Android, if this label is not provided, the dialog will use the
+  /// [MaterialLocalizations.alertDialogLabel] as its label.
   ///
   /// See also:
   ///
-  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///  * [SemanticsConfiguration.namesRoute], for a description of how this
   ///    value is used.
   final String semanticLabel;
 
@@ -456,18 +457,15 @@ class AlertDialog extends StatelessWidget {
     final DialogTheme dialogTheme = DialogTheme.of(context);
 
     String label = semanticLabel;
-    if (title == null) {
-      switch (theme.platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          label = semanticLabel;
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          label = semanticLabel ?? MaterialLocalizations.of(context)?.alertDialogLabel;
-      }
+    switch (theme.platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        label ??= MaterialLocalizations.of(context)?.alertDialogLabel;
     }
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
@@ -492,7 +490,7 @@ class AlertDialog extends StatelessWidget {
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6,
           child: Semantics(
             child: title,
-            namesRoute: true,
+            namesRoute: label == null,
             container: true,
           ),
         ),
@@ -570,6 +568,8 @@ class AlertDialog extends StatelessWidget {
 
     if (label != null)
       dialogChild = Semantics(
+        scopesRoute: true,
+        explicitChildNodes: true,
         namesRoute: true,
         label: label,
         child: dialogChild,
@@ -613,7 +613,7 @@ class AlertDialog extends StatelessWidget {
 ///
 ///  * [SimpleDialog], for a dialog in which to use this widget.
 ///  * [showDialog], which actually displays the dialog and returns its result.
-///  * [FlatButton], which are commonly used as actions in other kinds of
+///  * [TextButton], which are commonly used as actions in other kinds of
 ///    dialogs, such as [AlertDialog]s.
 ///  * <https://material.io/design/components/dialogs.html#simple-dialog>
 class SimpleDialogOption extends StatelessWidget {
@@ -764,8 +764,8 @@ class SimpleDialog extends StatelessWidget {
 
   /// Style for the text in the [title] of this [SimpleDialog].
   ///
-  /// If null, [DialogTheme.titleTextStyle] is used, if that's null, defaults to
-  /// [ThemeData.textTheme.headline6].
+  /// If null, [DialogTheme.titleTextStyle] is used. If that's null, defaults to
+  /// [TextTheme.headline6] of [ThemeData.textTheme].
   final TextStyle titleTextStyle;
 
   /// The (optional) content of the dialog is displayed in a
@@ -804,7 +804,7 @@ class SimpleDialog extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///  * [SemanticsConfiguration.namesRoute], for a description of how this
   ///    value is used.
   final String semanticLabel;
 
@@ -931,15 +931,15 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// barrier will dismiss the dialog. It is `true` by default and can not be `null`.
 ///
 /// The `barrierColor` argument is used to specify the color of the modal
-/// barrier that darkens everything the dialog. If `null` the default color
+/// barrier that darkens everything below the dialog. If `null` the default color
 /// `Colors.black54` is used.
 ///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
 /// display in 'safe' areas of the screen not used by the operating system
-/// (see [SafeArea] for more details). It is `true` by default which will mean
+/// (see [SafeArea] for more details). It is `true` by default, which means
 /// the dialog will not overlap operating system areas. If it is set to `false`
-/// the dialog will only be constrained by the screen size. It can not be 'null`.
-//
+/// the dialog will only be constrained by the screen size. It can not be `null`.
+///
 /// The `useRootNavigator` argument is used to determine whether to push the
 /// dialog to the [Navigator] furthest from or nearest to the given `context`.
 /// By default, `useRootNavigator` is `true` and the dialog route created by

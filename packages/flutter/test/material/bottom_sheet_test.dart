@@ -24,7 +24,7 @@ void main() {
     final double dyDelta2 = thirdPosition.dy - secondPosition.dy;
 
     // If the animation were linear, these two values would be the same.
-    expect(dyDelta1, isNot(closeTo(dyDelta2, 0.1)));
+    expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
 
   testWidgets('Tapping on a modal BottomSheet should not dismiss it', (WidgetTester tester) async {
@@ -649,11 +649,11 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              title: Text('Item 1'),
+              label: 'Item 1',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.style),
-              title: Text('Item 2'),
+              label: 'Item 2',
             ),
           ],
         ),
@@ -678,11 +678,11 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              title: Text('Item 1'),
+              label: 'Item 1',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.style),
-              title: Text('Item 2'),
+              label: 'Item 2',
             ),
           ],
         ),
@@ -738,7 +738,7 @@ class _TestPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: FlatButton(
+      child: TextButton(
         child: const Text('Show bottom sheet'),
         onPressed: () {
           if (useRootNavigator != null) {

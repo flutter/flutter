@@ -64,7 +64,7 @@ class TestTextInput {
   /// Log for method calls.
   ///
   /// For all registered channels, handled calls are added to the list. Can
-  /// be cleaned using [clearLog].
+  /// be cleaned using `log.clear()`.
   final List<MethodCall> log = <MethodCall>[];
 
   /// Whether this [TestTextInput] is registered with [SystemChannels.textInput].
@@ -97,6 +97,9 @@ class TestTextInput {
       case 'TextInput.setClient':
         _client = methodCall.arguments[0] as int;
         setClientArgs = methodCall.arguments[1] as Map<String, dynamic>;
+        break;
+      case 'TextInput.updateConfig':
+        setClientArgs = methodCall.arguments as Map<String, dynamic>;
         break;
       case 'TextInput.clearClient':
         _client = 0;

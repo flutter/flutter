@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -51,6 +50,8 @@ Future<void> main() async {
           'lib/armeabi-v7a/libapp.so',
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
+          'lib/x86_64/libflutter.so',
+          'lib/x86_64/libapp.so',
         ], apkFiles);
 
         checkCollectionDoesNotContain<String>(debugAssets, apkFiles);

@@ -4,22 +4,19 @@
 
 // @dart = 2.8
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
 
 void main() {
   // Here and below, see: https://github.com/dart-lang/sdk/issues/26980
   const FlutterLogoDecoration start = FlutterLogoDecoration(
-    lightColor: Color(0xFF000000),
-    darkColor: Color(0xFFFFFFFF),
     textColor: Color(0xFFD4F144),
     style: FlutterLogoStyle.stacked,
     margin: EdgeInsets.all(10.0),
   );
 
   const FlutterLogoDecoration end = FlutterLogoDecoration(
-    lightColor: Color(0xFFFFFFFF),
-    darkColor: Color(0xFF000000),
     textColor: Color(0xFF81D4FA),
     style: FlutterLogoStyle.stacked,
     margin: EdgeInsets.all(10.0),
@@ -32,8 +29,6 @@ void main() {
 
   test('FlutterLogoDecoration lerp from non-null to null lerps margin', () {
     final FlutterLogoDecoration logo = FlutterLogoDecoration.lerp(start, null, 0.4);
-    expect(logo.lightColor, start.lightColor);
-    expect(logo.darkColor, start.darkColor);
     expect(logo.textColor, start.textColor);
     expect(logo.style, start.style);
     expect(logo.margin, start.margin * 0.4);
@@ -41,8 +36,6 @@ void main() {
 
   test('FlutterLogoDecoration lerp from null to non-null lerps margin', () {
     final FlutterLogoDecoration logo = FlutterLogoDecoration.lerp(null, end, 0.6);
-    expect(logo.lightColor, end.lightColor);
-    expect(logo.darkColor, end.darkColor);
     expect(logo.textColor, end.textColor);
     expect(logo.style, end.style);
     expect(logo.margin, end.margin * 0.6);
@@ -50,8 +43,6 @@ void main() {
 
   test('FlutterLogoDecoration lerps colors and margins', () {
     final FlutterLogoDecoration logo = FlutterLogoDecoration.lerp(start, end, 0.5);
-    expect(logo.lightColor, Color.lerp(start.lightColor, end.lightColor, 0.5));
-    expect(logo.darkColor, Color.lerp(start.darkColor, end.darkColor, 0.5));
     expect(logo.textColor, Color.lerp(start.textColor, end.textColor, 0.5));
     expect(logo.margin, EdgeInsets.lerp(start.margin, end.margin, 0.5));
   });
@@ -75,14 +66,27 @@ void main() {
     expect(
       start.toString(),
       equals(
-        'FlutterLogoDecoration(Color(0xff000000)/Color(0xffffffff) on Color(0xffd4f144), style: stacked)'
+        'FlutterLogoDecoration(textColor: Color(0xffd4f144), style: stacked)'
       ),
     );
     expect(
       FlutterLogoDecoration.lerp(null, end, 0.5).toString(),
       equals(
-        'FlutterLogoDecoration(Color(0xffffffff)/Color(0xff000000) on Color(0xff81d4fa), style: stacked, transition -1.0:0.5)',
+        'FlutterLogoDecoration(textColor: Color(0xff81d4fa), style: stacked, transition -1.0:0.5)',
       ),
+    );
+  });
+
+  testWidgets('Flutter Logo golden test', (WidgetTester tester) async {
+    final Key logo = UniqueKey();
+    await tester.pumpWidget(Container(
+      key: logo,
+      decoration: const FlutterLogoDecoration(),
+    ));
+
+    await expectLater(
+      find.byKey(logo),
+      matchesGoldenFile('flutter_logo.png'),
     );
   });
 }

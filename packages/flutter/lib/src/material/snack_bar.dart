@@ -7,12 +7,14 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button_theme.dart';
+import 'button_style.dart';
 import 'color_scheme.dart';
-import 'flat_button.dart';
 import 'material.dart';
+import 'material_state.dart';
 import 'scaffold.dart';
 import 'snack_bar_theme.dart';
+import 'text_button.dart';
+import 'text_button_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -50,7 +52,7 @@ enum SnackBarClosedReason {
   /// The snack bar was closed after the user tapped a [SnackBarAction].
   action,
 
-  /// The snack bar was closed through a [SemanticAction.dismiss].
+  /// The snack bar was closed through a [SemanticsAction.dismiss].
   dismiss,
 
   /// The snack bar was closed by a user's swipe.
@@ -92,11 +94,12 @@ class SnackBarAction extends StatefulWidget {
        assert(onPressed != null),
        super(key: key);
 
-  /// The button label color. If not provided, defaults to [accentColor].
+  /// The button label color. If not provided, defaults to
+  /// [SnackBarThemeData.actionTextColor].
   final Color textColor;
 
   /// The button disabled label color. This color is shown after the
-  /// [snackBarAction] is dismissed.
+  /// [SnackBarAction] is dismissed.
   final Color disabledTextColor;
 
   /// The button label.
@@ -127,15 +130,19 @@ class _SnackBarActionState extends State<SnackBarAction> {
 
   @override
   Widget build(BuildContext context) {
-    final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
-    final Color textColor = widget.textColor ?? snackBarTheme.actionTextColor;
-    final Color disabledTextColor = widget.disabledTextColor ?? snackBarTheme.disabledActionTextColor;
+    Color resolveForegroundColor(Set<MaterialState> states) {
+      final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
+      if (states.contains(MaterialState.disabled))
+        return widget.disabledTextColor ?? snackBarTheme.disabledActionTextColor;
+      return widget.textColor ?? snackBarTheme.actionTextColor;
+    }
 
-    return FlatButton(
+    return TextButton(
+      style: ButtonStyle(
+        foregroundColor: MaterialStateProperty.resolveWith<Color>(resolveForegroundColor),
+      ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
-      textColor: textColor,
-      disabledTextColor: disabledTextColor,
     );
   }
 }
@@ -207,9 +214,10 @@ class SnackBar extends StatefulWidget {
   final Widget content;
 
   /// The snack bar's background color. If not specified it will use
-  /// [ThemeData.snackBarTheme.backgroundColor]. If that is not specified
-  /// it will default to a dark variation of [ColorScheme.surface] for light
-  /// themes, or [ColorScheme.onSurface] for dark themes.
+  /// [SnackBarThemeData.backgroundColor] of [ThemeData.snackBarTheme]. If that
+  /// is not specified it will default to a dark variation of
+  /// [ColorScheme.surface] for light themes, or [ColorScheme.onSurface] for
+  /// dark themes.
   final Color backgroundColor;
 
   /// The z-coordinate at which to place the snack bar. This controls the size
@@ -217,8 +225,9 @@ class SnackBar extends StatefulWidget {
   ///
   /// Defines the card's [Material.elevation].
   ///
-  /// If this property is null, then [ThemeData.snackBarTheme.elevation] is
-  /// used, if that is also null, the default value is 6.0.
+  /// If this property is null, then [SnackBarThemeData.elevation] of
+  /// [ThemeData.snackBarTheme] is used, if that is also null, the default value
+  /// is 6.0.
   final double elevation;
 
   /// Empty space to surround the snack bar.
@@ -253,11 +262,12 @@ class SnackBar extends StatefulWidget {
   ///
   /// Defines the snack bar's [Material.shape].
   ///
-  /// If this property is null then [ThemeData.snackBarTheme.shape] is used.
-  /// If that's null then the shape will depend on the [SnackBarBehavior]. For
-  /// [SnackBarBehavior.fixed], no overriding shape is specified, so the
-  /// [SnackBar] is rectangular. For [SnackBarBehavior.floating], it uses a
-  /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
+  /// If this property is null then [SnackBarThemeData.shape] of
+  /// [ThemeData.snackBarTheme] is used. If that's null then the shape will
+  /// depend on the [SnackBarBehavior]. For [SnackBarBehavior.fixed], no
+  /// overriding shape is specified, so the [SnackBar] is rectangular. For
+  /// [SnackBarBehavior.floating], it uses a [RoundedRectangleBorder] with a
+  /// circular corner radius of 4.0.
   final ShapeBorder shape;
 
   /// This defines the behavior and location of the snack bar.
@@ -266,8 +276,9 @@ class SnackBar extends StatefulWidget {
   /// location should be adjusted when the scaffold also includes a
   /// [FloatingActionButton] or a [BottomNavigationBar]
   ///
-  /// If this property is null, then [ThemeData.snackBarTheme.behavior]
-  /// is used. If that is null, then the default is [SnackBarBehavior.fixed].
+  /// If this property is null, then [SnackBarThemeData.behavior] of
+  /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
+  /// [SnackBarBehavior.fixed].
   final SnackBarBehavior behavior;
 
   /// (optional) An action that the user can take based on the snack bar.
@@ -380,6 +391,7 @@ class _SnackBarState extends State<SnackBar> {
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
     final bool isThemeDark = theme.brightness == Brightness.dark;
+    final Color buttonColor = isThemeDark ? colorScheme.primaryVariant : colorScheme.secondary;
 
     // SnackBar uses a theme that is the opposite brightness from
     // the surrounding theme.
@@ -395,7 +407,7 @@ class _SnackBarState extends State<SnackBar> {
         primaryVariant: colorScheme.onPrimary,
         // For the button color, the spec says it should be primaryVariant, but for
         // backward compatibility on light themes we are leaving it as secondary.
-        secondary: isThemeDark ? colorScheme.primaryVariant : colorScheme.secondary,
+        secondary: buttonColor,
         secondaryVariant: colorScheme.onSecondary,
         surface: colorScheme.onSurface,
         background: themeBackgroundColor,
@@ -440,10 +452,13 @@ class _SnackBarState extends State<SnackBar> {
             ),
           ),
           if (widget.action != null)
-            ButtonTheme(
-              textTheme: ButtonTextTheme.accent,
-              minWidth: 64.0,
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            TextButtonTheme(
+              data: TextButtonThemeData(
+                style: TextButton.styleFrom(
+                  primary: buttonColor,
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                ),
+              ),
               child: widget.action,
             ),
         ],

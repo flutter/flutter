@@ -20,6 +20,7 @@ import 'src/web/bench_draw_rect.dart';
 import 'src/web/bench_dynamic_clip_on_static_picture.dart';
 import 'src/web/bench_mouse_region_grid_hover.dart';
 import 'src/web/bench_mouse_region_grid_scroll.dart';
+import 'src/web/bench_mouse_region_mixed_grid_hover.dart';
 import 'src/web/bench_paths.dart';
 import 'src/web/bench_picture_recording.dart';
 import 'src/web/bench_simple_lazy_text_scroll.dart';
@@ -52,6 +53,7 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchUpdateManyChildLayers.benchmarkName: () => BenchUpdateManyChildLayers(),
   BenchMouseRegionGridScroll.benchmarkName: () => BenchMouseRegionGridScroll(),
   BenchMouseRegionGridHover.benchmarkName: () => BenchMouseRegionGridHover(),
+  BenchMouseRegionMixedGridHover.benchmarkName: () => BenchMouseRegionMixedGridHover(),
   if (isCanvasKit)
     BenchBuildColorsGrid.canvasKitBenchmarkName: () => BenchBuildColorsGrid.canvasKit(),
 
@@ -71,6 +73,18 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
     '${_galleryBenchmarkPrefix}_studies_perf': () => GalleryRecorder(
       benchmarkName: '${_galleryBenchmarkPrefix}_studies_perf',
       shouldRunPredicate: (String demo) => typeOfDemo(demo) == DemoType.study,
+    ),
+    '${_galleryBenchmarkPrefix}_unanimated_perf': () => GalleryRecorder(
+      benchmarkName: '${_galleryBenchmarkPrefix}_unanimated_perf',
+      shouldRunPredicate: (String demo) => typeOfDemo(demo) == DemoType.unanimatedWidget,
+    ),
+    '${_galleryBenchmarkPrefix}_animated_perf': () => GalleryRecorder(
+      benchmarkName: '${_galleryBenchmarkPrefix}_animated_perf',
+      shouldRunPredicate: (String demo) => typeOfDemo(demo) == DemoType.animatedWidget,
+    ),
+    '${_galleryBenchmarkPrefix}_scroll_perf': () => GalleryRecorder(
+      benchmarkName: '${_galleryBenchmarkPrefix}_scroll_perf',
+      testScrollsOnly: true,
     ),
   },
 };

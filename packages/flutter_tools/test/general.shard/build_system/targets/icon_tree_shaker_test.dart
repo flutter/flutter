@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -30,12 +29,13 @@ const String dartPath = '/flutter/dart';
 const String constFinderPath = '/flutter/const_finder.snapshot.dart';
 const String fontSubsetPath = '/flutter/font-subset';
 
-const String inputPath = '/input/fonts/MaterialIcons-Regular.ttf';
-const String outputPath = '/output/fonts/MaterialIcons-Regular.ttf';
-const String relativePath = 'fonts/MaterialIcons-Regular.ttf';
+const String inputPath = '/input/fonts/MaterialIcons-Regular.otf';
+const String outputPath = '/output/fonts/MaterialIcons-Regular.otf';
+const String relativePath = 'fonts/MaterialIcons-Regular.otf';
 
 List<String> getConstFinderArgs(String appDillPath) => <String>[
   dartPath,
+  '--disable-dart-dev',
   constFinderPath,
   '--kernel-file', appDillPath,
   '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
@@ -138,7 +138,7 @@ void main() {
 
     expect(
       logger.errorText,
-      'Font subetting is not supported in debug mode. The --tree-shake-icons'
+      'Font subsetting is not supported in debug mode. The --tree-shake-icons'
       ' flag will be ignored.\n',
     );
     expect(iconTreeShaker.enabled, false);
@@ -269,7 +269,7 @@ void main() {
     verify(mockProcessManager.start(fontSubsetArgs)).called(2);
   });
 
-  testWithoutContext('Does not subset a non-ttf font', () async {
+  testWithoutContext('Does not subset a non-supported font', () async {
     final Environment environment = _createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -552,7 +552,7 @@ const String validFontManifestJson = '''
     "family": "MaterialIcons",
     "fonts": [
       {
-        "asset": "fonts/MaterialIcons-Regular.ttf"
+        "asset": "fonts/MaterialIcons-Regular.otf"
       }
     ]
   },
@@ -580,7 +580,7 @@ const String invalidFontManifestJson = '''
   "famly": "MaterialIcons",
   "fonts": [
     {
-      "asset": "fonts/MaterialIcons-Regular.ttf"
+      "asset": "fonts/MaterialIcons-Regular.otf"
     }
   ]
 }

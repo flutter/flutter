@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../color_scheme.dart';
+import '../debug.dart';
 import '../divider.dart';
 import '../icon_button.dart';
 import '../icons.dart';
@@ -58,7 +59,7 @@ const double _monthNavButtonsWidth = 108.0;
 ///    time picker.
 ///
 class CalendarDatePicker extends StatefulWidget {
-  /// Creates a calender date picker
+  /// Creates a calender date picker.
   ///
   /// It will display a grid of days for the [initialDate]'s month. The day
   /// indicated by [initialDate] will be selected.
@@ -164,14 +165,21 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   @override
   void initState() {
     super.initState();
-    _mode = widget.initialCalendarMode;
-    _currentDisplayedMonthDate = DateTime(widget.initialDate.year, widget.initialDate.month);
-    _selectedDate = widget.initialDate;
+    _initWidgetState();
+  }
+
+  @override
+  void didUpdateWidget(CalendarDatePicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _initWidgetState();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasDirectionality(context));
     _localizations = MaterialLocalizations.of(context);
     _textDirection = Directionality.of(context);
     if (!_announcedInitialDate) {
@@ -181,6 +189,12 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         _textDirection,
       );
     }
+  }
+
+  void _initWidgetState() {
+    _mode = widget.initialCalendarMode;
+    _currentDisplayedMonthDate = DateTime(widget.initialDate.year, widget.initialDate.month);
+    _selectedDate = widget.initialDate;
   }
 
   void _vibrate() {
@@ -281,6 +295,9 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasDirectionality(context));
     return Stack(
       children: <Widget>[
         SizedBox(
@@ -437,7 +454,7 @@ class _MonthPicker extends StatefulWidget {
        assert(!selectedDate.isAfter(lastDate)),
        super(key: key);
 
-  /// The initial month to display
+  /// The initial month to display.
   final DateTime initialMonth;
 
   /// The current date.
@@ -463,7 +480,7 @@ class _MonthPicker extends StatefulWidget {
   /// Called when the user picks a day.
   final ValueChanged<DateTime> onChanged;
 
-  /// Called when the user navigates to a new month
+  /// Called when the user navigates to a new month.
   final ValueChanged<DateTime> onDisplayedMonthChanged;
 
   /// Optional user supplied predicate function to customize selectable days.
@@ -512,6 +529,14 @@ class _MonthPickerState extends State<_MonthPicker> {
     super.didChangeDependencies();
     _localizations = MaterialLocalizations.of(context);
     _textDirection = Directionality.of(context);
+  }
+
+  @override
+  void didUpdateWidget(_MonthPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialMonth != oldWidget.initialMonth) {
+      _showMonth(widget.initialMonth);
+    }
   }
 
   @override

@@ -15,7 +15,7 @@ MaterialApp _appWithDialog(WidgetTester tester, Widget dialog, { ThemeData theme
       child: Builder(
         builder: (BuildContext context) {
           return Center(
-            child: RaisedButton(
+            child: ElevatedButton(
               child: const Text('X'),
               onPressed: () {
                 showDialog<void>(

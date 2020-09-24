@@ -10,8 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'button_bar_theme.dart';
 import 'button_theme.dart';
 import 'dialog.dart';
-import 'flat_button.dart';
-import 'raised_button.dart';
 
 /// An end-aligned row of buttons, laying out into a column if there is not
 /// enough horizontal space.
@@ -46,8 +44,9 @@ import 'raised_button.dart';
 ///
 /// See also:
 ///
-///  * [RaisedButton], a kind of button.
-///  * [FlatButton], another kind of button.
+///  * [TextButton], a simple flat button without a shadow.
+///  * [ElevatedButton], a filled button whose material elevates when pressed.
+///  * [OutlinedButton], a [TextButton] with a border outline.
 ///  * [Card], at the bottom of which it is common to place a [ButtonBar].
 ///  * [Dialog], which uses a [ButtonBar] for its actions.
 ///  * [ButtonBarTheme], which configures the [ButtonBar].
@@ -76,41 +75,42 @@ class ButtonBar extends StatelessWidget {
 
   /// How the children should be placed along the horizontal axis.
   ///
-  /// If null then it will use [ButtonBarTheme.alignment]. If that is null,
+  /// If null then it will use [ButtonBarThemeData.alignment]. If that is null,
   /// it will default to [MainAxisAlignment.end].
   final MainAxisAlignment alignment;
 
   /// How much horizontal space is available. See [Row.mainAxisSize].
   ///
-  /// If null then it will use the surrounding [ButtonBarTheme.mainAxisSize].
+  /// If null then it will use the surrounding [ButtonBarThemeData.mainAxisSize].
   /// If that is null, it will default to [MainAxisSize.max].
   final MainAxisSize mainAxisSize;
 
-  /// Overrides the surrounding [ButtonTheme.textTheme] to define a button's
-  /// base colors, size, internal padding and shape.
+  /// Overrides the surrounding [ButtonBarThemeData.buttonTextTheme] to define a
+  /// button's base colors, size, internal padding and shape.
   ///
-  /// If null then it will use the surrounding [ButtonBarTheme.buttonTextTheme].
-  /// If that is null, it will default to [ButtonTextTheme.primary].
+  /// If null then it will use the surrounding
+  /// [ButtonBarThemeData.buttonTextTheme]. If that is null, it will default to
+  /// [ButtonTextTheme.primary].
   final ButtonTextTheme buttonTextTheme;
 
   /// Overrides the surrounding [ButtonThemeData.minWidth] to define a button's
   /// minimum width.
   ///
-  /// If null then it will use the surrounding [ButtonBarTheme.buttonMinWidth].
+  /// If null then it will use the surrounding [ButtonBarThemeData.buttonMinWidth].
   /// If that is null, it will default to 64.0 logical pixels.
   final double buttonMinWidth;
 
   /// Overrides the surrounding [ButtonThemeData.height] to define a button's
   /// minimum height.
   ///
-  /// If null then it will use the surrounding [ButtonBarTheme.buttonHeight].
+  /// If null then it will use the surrounding [ButtonBarThemeData.buttonHeight].
   /// If that is null, it will default to 36.0 logical pixels.
   final double buttonHeight;
 
   /// Overrides the surrounding [ButtonThemeData.padding] to define the padding
   /// for a button's child (typically the button's label).
   ///
-  /// If null then it will use the surrounding [ButtonBarTheme.buttonPadding].
+  /// If null then it will use the surrounding [ButtonBarThemeData.buttonPadding].
   /// If that is null, it will default to 8.0 logical pixels on the left
   /// and right.
   final EdgeInsetsGeometry buttonPadding;
@@ -118,7 +118,7 @@ class ButtonBar extends StatelessWidget {
   /// Overrides the surrounding [ButtonThemeData.alignedDropdown] to define whether
   /// a [DropdownButton] menu's width will match the button's width.
   ///
-  /// If null then it will use the surrounding [ButtonBarTheme.buttonAlignedDropdown].
+  /// If null then it will use the surrounding [ButtonBarThemeData.buttonAlignedDropdown].
   /// If that is null, it will default to false.
   final bool buttonAlignedDropdown;
 
@@ -127,7 +127,7 @@ class ButtonBar extends StatelessWidget {
   ///
   /// Overrides the surrounding [ButtonThemeData.layoutBehavior].
   ///
-  /// If null then it will use the surrounding [ButtonBarTheme.layoutBehavior].
+  /// If null then it will use the surrounding [ButtonBarThemeData.layoutBehavior].
   /// If that is null, it will default [ButtonBarLayoutBehavior.padded].
   final ButtonBarLayoutBehavior layoutBehavior;
 
@@ -143,7 +143,7 @@ class ButtonBar extends StatelessWidget {
   /// bottom and "ends" at the top.
   ///
   /// If null then it will use the surrounding
-  /// [ButtonBarTheme.overflowDirection]. If that is null, it will
+  /// [ButtonBarThemeData.overflowDirection]. If that is null, it will
   /// default to [VerticalDirection.down].
   final VerticalDirection overflowDirection;
 
@@ -165,7 +165,7 @@ class ButtonBar extends StatelessWidget {
 
   /// The buttons to arrange horizontally.
   ///
-  /// Typically [RaisedButton] or [FlatButton] widgets.
+  /// Typically [ElevatedButton] or [TextButton] widgets.
   final List<Widget> children;
 
   @override

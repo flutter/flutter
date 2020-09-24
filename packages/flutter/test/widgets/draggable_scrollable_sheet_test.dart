@@ -23,7 +23,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Stack(
         children: <Widget>[
-          FlatButton(
+          TextButton(
             child: const Text('TapHere'),
             onPressed: onButtonPressed,
           ),

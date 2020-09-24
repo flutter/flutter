@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -17,6 +15,7 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../dart/analysis.dart';
 import '../globals.dart' as globals;
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
@@ -84,7 +83,16 @@ abstract class AnalyzeBase {
     logger.printStatus('Analysis benchmark written to $benchmarkOut ($data).');
   }
 
+  bool get isFlutterRepo => argResults['flutter-repo'] as bool;
+  String get sdkPath => argResults['dart-sdk'] as String ?? artifacts.getArtifactPath(Artifact.engineDartSdkPath);
   bool get isBenchmarking => argResults['benchmark'] as bool;
+  bool get isDartDocs => argResults['dartdocs'] as bool;
+
+  static int countMissingDartDocs(List<AnalysisError> errors) {
+    return errors.where((AnalysisError error) {
+      return error.code == 'public_member_api_docs';
+    }).length;
+  }
 
   static String generateDartDocMessage(int undocumentedMembers) {
     String dartDocMessage;
@@ -102,6 +110,41 @@ abstract class AnalyzeBase {
     }
 
     return dartDocMessage;
+  }
+
+  /// Generate an analysis summary for both [AnalyzeOnce], [AnalyzeContinuously].
+  static String generateErrorsMessage({
+    @required int issueCount,
+    int issueDiff,
+    int files,
+    @required String seconds,
+    int undocumentedMembers = 0,
+    String dartDocMessage = '',
+  }) {
+    final StringBuffer errorsMessage = StringBuffer(issueCount > 0
+      ? '$issueCount ${pluralize('issue', issueCount)} found.'
+      : 'No issues found!');
+
+    // Only [AnalyzeContinuously] has issueDiff message.
+    if (issueDiff != null) {
+      if (issueDiff > 0) {
+        errorsMessage.write(' ($issueDiff new)');
+      } else if (issueDiff < 0) {
+        errorsMessage.write(' (${-issueDiff} fixed)');
+      }
+    }
+
+    // Only [AnalyzeContinuously] has files message.
+    if (files != null) {
+      errorsMessage.write(' • analyzed $files ${pluralize('file', files)}');
+    }
+
+    if (undocumentedMembers > 0) {
+      errorsMessage.write(' (ran in ${seconds}s; $dartDocMessage)');
+    } else {
+      errorsMessage.write(' (ran in ${seconds}s)');
+    }
+    return errorsMessage.toString();
   }
 }
 

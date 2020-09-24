@@ -43,7 +43,7 @@ abstract class InputBorder extends ShapeBorder {
   /// No input border.
   ///
   /// Use this value with [InputDecoration.border] to specify that no border
-  /// should be drawn. The [InputDecoration.shrinkWrap] constructor sets
+  /// should be drawn. The [InputDecoration.collapsed] constructor sets
   /// its border to this value.
   static const InputBorder none = _NoInputBorder();
 

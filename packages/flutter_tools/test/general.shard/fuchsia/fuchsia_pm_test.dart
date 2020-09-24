@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -70,21 +68,6 @@ void main() {
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () => mockFuchsiaArtifacts,
       ProcessManager: () => mockProcessManager,
-    });
-
-    testWithoutContext('ipv6 formatting logic of FuchsiaPackageServer', () {
-      const String host = 'fe80::ec4:7aff:fecc:ea8f%eno2';
-      const int port = 23;
-
-      expect(
-        FuchsiaPackageServer('a', 'b', host, port).url,
-        'http://[fe80::ec4:7aff:fecc:ea8f%25eno2]:23',
-      );
-
-      expect(
-        FuchsiaPackageServer('a', 'b', host, port).interfaceStrippedUrl,
-        'http://[fe80::ec4:7aff:fecc:ea8f]:23',
-      );
     });
   });
 }

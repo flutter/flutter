@@ -22,6 +22,7 @@ import 'card_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'data_table_theme.dart';
 import 'dialog_theme.dart';
 import 'divider_theme.dart';
 import 'elevated_button_theme.dart';
@@ -37,6 +38,7 @@ import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
 import 'tab_bar_theme.dart';
 import 'text_button_theme.dart';
+import 'text_selection_theme.dart';
 import 'text_theme.dart';
 import 'time_picker_theme.dart';
 import 'toggle_buttons_theme.dart';
@@ -71,10 +73,13 @@ const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
 ///
 ///   * [FloatingActionButton], only the mini tap target size is increased.
 ///   * [MaterialButton]
+///   * [OutlinedButton]
+///   * [TextButton]
+///   * [ElevatedButton]
 ///   * [OutlineButton]
 ///   * [FlatButton]
 ///   * [RaisedButton]
-///   * [TimePicker]
+///   * The time picker widget ([showTimePicker])
 ///   * [SnackBar]
 ///   * [Chip]
 ///   * [RawChip]
@@ -88,7 +93,7 @@ const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
 enum MaterialTapTargetSize {
   /// Expands the minimum tap target size to 48px by 48px.
   ///
-  /// This is the default value of [ThemeData.materialHitTestSize] and the
+  /// This is the default value of [ThemeData.materialTapTargetSize] and the
   /// recommended size to conform to Android accessibility scanner
   /// recommendations.
   padded,
@@ -266,7 +271,7 @@ class ThemeData with Diagnosticable {
     FloatingActionButtonThemeData floatingActionButtonTheme,
     NavigationRailThemeData navigationRailTheme,
     Typography typography,
-    CupertinoThemeData cupertinoOverrideTheme,
+    NoDefaultCupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
     PopupMenuThemeData popupMenuTheme,
@@ -278,12 +283,15 @@ class ThemeData with Diagnosticable {
     TextButtonThemeData textButtonTheme,
     ElevatedButtonThemeData elevatedButtonTheme,
     OutlinedButtonThemeData outlinedButtonTheme,
+    TextSelectionThemeData textSelectionTheme,
+    DataTableThemeData dataTableTheme,
     bool fixTextFieldOutlineLabel,
+    bool useTextSelectionTheme,
   }) {
     assert(colorScheme?.brightness == null || brightness == null || colorScheme.brightness == brightness);
     final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
     final bool isDark = _brightness == Brightness.dark;
-    visualDensity ??= const VisualDensity();
+    visualDensity ??= VisualDensity.adaptivePlatformDensity;
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch;
     primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
@@ -319,13 +327,12 @@ class ThemeData with Diagnosticable {
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
     secondaryHeaderColor ??= isDark ? Colors.grey[700] : primarySwatch[50];
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
-    // TODO(hansmuller): We need a TextFieldTheme to handle this instead, https://github.com/flutter/flutter/issues/56082
     cursorColor = cursorColor ?? const Color.fromRGBO(66, 133, 244, 1.0);
     textSelectionHandleColor ??= isDark ? Colors.tealAccent[400] : primarySwatch[300];
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     dialogBackgroundColor ??= isDark ? Colors.grey[800] : Colors.white;
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
-    hintColor ??= isDark ? const Color(0x80FFFFFF) : const Color(0x8A000000);
+    hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
     pageTransitionsTheme ??= const PageTransitionsTheme();
@@ -394,7 +401,11 @@ class ThemeData with Diagnosticable {
     textButtonTheme ??= const TextButtonThemeData();
     elevatedButtonTheme ??= const ElevatedButtonThemeData();
     outlinedButtonTheme ??= const OutlinedButtonThemeData();
+    textSelectionTheme ??= const TextSelectionThemeData();
+    dataTableTheme ??= const DataTableThemeData();
+
     fixTextFieldOutlineLabel ??= false;
+    useTextSelectionTheme ??= true;
 
     return ThemeData.raw(
       visualDensity: visualDensity,
@@ -466,7 +477,10 @@ class ThemeData with Diagnosticable {
       textButtonTheme: textButtonTheme,
       elevatedButtonTheme: elevatedButtonTheme,
       outlinedButtonTheme: outlinedButtonTheme,
+      textSelectionTheme: textSelectionTheme,
+      dataTableTheme: dataTableTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
+      useTextSelectionTheme: useTextSelectionTheme,
     );
   }
 
@@ -550,7 +564,10 @@ class ThemeData with Diagnosticable {
     @required this.textButtonTheme,
     @required this.elevatedButtonTheme,
     @required this.outlinedButtonTheme,
+    @required this.textSelectionTheme,
+    @required this.dataTableTheme,
     @required this.fixTextFieldOutlineLabel,
+    @required this.useTextSelectionTheme,
   }) : assert(visualDensity != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -617,7 +634,10 @@ class ThemeData with Diagnosticable {
        assert(textButtonTheme != null),
        assert(elevatedButtonTheme != null),
        assert(outlinedButtonTheme != null),
-       assert(fixTextFieldOutlineLabel != null);
+       assert(textSelectionTheme != null),
+       assert(dataTableTheme != null),
+       assert(fixTextFieldOutlineLabel != null),
+       assert(useTextSelectionTheme != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -863,12 +883,21 @@ class ThemeData with Diagnosticable {
   final Color secondaryHeaderColor;
 
   /// The color of text selections in text fields, such as [TextField].
+  ///
+  /// By default this property is no longer used. It has been replaced with
+  /// [TextSelectionThemeData.selectionColor] and will soon be deprecated.
   final Color textSelectionColor;
 
   /// The color of cursors in Material-style text fields, such as [TextField].
+  ///
+  /// By default this property is no longer used. It has been replaced with
+  /// [TextSelectionThemeData.cursorColor] and will soon be deprecated.
   final Color cursorColor;
 
   /// The color of the handles used to adjust what part of the text is currently selected.
+  ///
+  /// By default this property is no longer used. It has been replaced with
+  /// [TextSelectionThemeData.selectionHandleColor] and will soon be deprecated.
   final Color textSelectionHandleColor;
 
   /// A color that contrasts with the [primaryColor], e.g. used as the
@@ -951,7 +980,7 @@ class ThemeData with Diagnosticable {
   /// objects at lower layers that try to emulate the underlying platform
   /// platform can depend on [defaultTargetPlatform] directly, or may require
   /// that the target platform be provided as an argument. The
-  /// [dart.io.Platform] object should only be used directly when it's critical
+  /// [dart:io.Platform] object should only be used directly when it's critical
   /// to actually know the current platform, without any overrides possible (for
   /// example, when a system API is about to be called).
   ///
@@ -976,17 +1005,17 @@ class ThemeData with Diagnosticable {
   /// overlay increases in opacity. [applyElevationOverlayColor] turns the
   /// application of this overlay on or off for dark themes.
   ///
-  /// If [true] and [brightness] is [Brightness.dark], a
-  /// semi-transparent version of [colorScheme.onSurface] will be
-  /// applied on top of [Material] widgets that have a [colorScheme.surface]
+  /// If true and [brightness] is [Brightness.dark], a
+  /// semi-transparent version of [ColorScheme.onSurface] will be
+  /// applied on top of [Material] widgets that have a [ColorScheme.surface]
   /// color. The level of transparency is based on [Material.elevation] as
   /// per the Material Dark theme specification.
   ///
-  /// If [false] the surface color will be used unmodified.
+  /// If false the surface color will be used unmodified.
   ///
-  /// Defaults to [false] in order to maintain backwards compatibility with
+  /// Defaults to false in order to maintain backwards compatibility with
   /// apps that were built before the Material Dark theme specification
-  /// was published. New apps should set this to [true] for any themes
+  /// was published. New apps should set this to true for any themes
   /// where [brightness] is [Brightness.dark].
   ///
   /// See also:
@@ -1001,9 +1030,9 @@ class ThemeData with Diagnosticable {
 
   /// Default [MaterialPageRoute] transitions per [TargetPlatform].
   ///
-  /// [MaterialPageRoute.buildTransitions] delegates to a [PageTransitionsBuilder]
-  /// whose [PageTransitionsBuilder.platform] matches [platform]. If a matching
-  /// builder is not found, a builder whose platform is null is used.
+  /// [MaterialPageRoute.buildTransitions] delegates to a [platform] specific
+  /// [PageTransitionsBuilder]. If a matching builder is not found, a builder
+  /// whose platform is null is used.
   final PageTransitionsTheme pageTransitionsTheme;
 
   /// A theme for customizing the color, elevation, brightness, iconTheme and
@@ -1046,12 +1075,12 @@ class ThemeData with Diagnosticable {
   ///
   /// By default, [cupertinoOverrideTheme] is null and Cupertino widgets
   /// descendant to the Material [Theme] will adhere to a [CupertinoTheme]
-  /// derived from the Material [ThemeData]. e.g. [ThemeData]'s [ColorTheme]
+  /// derived from the Material [ThemeData]. e.g. [ThemeData]'s [ColorScheme]
   /// will also inform the [CupertinoThemeData]'s `primaryColor` etc.
   ///
   /// This cascading effect for individual attributes of the [CupertinoThemeData]
   /// can be overridden using attributes of this [cupertinoOverrideTheme].
-  final CupertinoThemeData cupertinoOverrideTheme;
+  final NoDefaultCupertinoThemeData cupertinoOverrideTheme;
 
   /// A theme for customizing the color, elevation, and shape of a bottom sheet.
   final BottomSheetThemeData bottomSheetTheme;
@@ -1082,12 +1111,19 @@ class ThemeData with Diagnosticable {
   final TextButtonThemeData textButtonTheme;
 
   /// A theme for customizing the appearance and internal layout of
-  /// [ElevatedButton]s
+  /// [ElevatedButton]s.
   final ElevatedButtonThemeData elevatedButtonTheme;
 
   /// A theme for customizing the appearance and internal layout of
   /// [OutlinedButton]s.
   final OutlinedButtonThemeData outlinedButtonTheme;
+
+  /// A theme for customizing the appearance and layout of [TextField] widgets.
+  final TextSelectionThemeData textSelectionTheme;
+
+  /// A theme for customizing the appearance and layout of [DataTable]
+  /// widgets.
+  final DataTableThemeData dataTableTheme;
 
   /// A temporary flag to allow apps to opt-in to a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
@@ -1100,6 +1136,18 @@ class ThemeData with Diagnosticable {
   /// deprecated before the next beta release (1.18), and removed before the next
   /// stable release (1.19).
   final bool fixTextFieldOutlineLabel;
+
+  /// A temporary flag to allow apps to opt-in to the new [TextSelectionTheme], with
+  /// its new defaults for the [cursorColor] and [textSelectionHandleColor].
+  ///
+  /// Setting this flag to true will cause the [textSelectionTheme] to be used
+  /// instead of the [cursorColor] and [textSelectionHandleColor] by [TextField]
+  /// and [SelectableText] widgets. In addition, the default values of these
+  /// colors have changed to [ColorScheme.primary].
+  ///
+  /// The flag is currently false by default. It will be removed after migration
+  /// to the [TextSelectionTheme] has been completed.
+  final bool useTextSelectionTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
@@ -1163,7 +1211,7 @@ class ThemeData with Diagnosticable {
     FloatingActionButtonThemeData floatingActionButtonTheme,
     NavigationRailThemeData navigationRailTheme,
     Typography typography,
-    CupertinoThemeData cupertinoOverrideTheme,
+    NoDefaultCupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
     PopupMenuThemeData popupMenuTheme,
@@ -1175,7 +1223,10 @@ class ThemeData with Diagnosticable {
     TextButtonThemeData textButtonTheme,
     ElevatedButtonThemeData elevatedButtonTheme,
     OutlinedButtonThemeData outlinedButtonTheme,
+    TextSelectionThemeData textSelectionTheme,
+    DataTableThemeData dataTableTheme,
     bool fixTextFieldOutlineLabel,
+    bool useTextSelectionTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1248,7 +1299,10 @@ class ThemeData with Diagnosticable {
       textButtonTheme: textButtonTheme ?? this.textButtonTheme,
       elevatedButtonTheme: elevatedButtonTheme ?? this.elevatedButtonTheme,
       outlinedButtonTheme: outlinedButtonTheme ?? this.outlinedButtonTheme,
+      textSelectionTheme: textSelectionTheme ?? this.textSelectionTheme,
+      dataTableTheme: dataTableTheme ?? this.dataTableTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
+      useTextSelectionTheme: useTextSelectionTheme ?? this.useTextSelectionTheme,
     );
   }
 
@@ -1399,7 +1453,10 @@ class ThemeData with Diagnosticable {
       textButtonTheme: TextButtonThemeData.lerp(a.textButtonTheme, b.textButtonTheme, t),
       elevatedButtonTheme: ElevatedButtonThemeData.lerp(a.elevatedButtonTheme, b.elevatedButtonTheme, t),
       outlinedButtonTheme: OutlinedButtonThemeData.lerp(a.outlinedButtonTheme, b.outlinedButtonTheme, t),
+      textSelectionTheme: TextSelectionThemeData .lerp(a.textSelectionTheme, b.textSelectionTheme, t),
+      dataTableTheme: DataTableThemeData.lerp(a.dataTableTheme, b.dataTableTheme, t),
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
+      useTextSelectionTheme: t < 0.5 ? a.useTextSelectionTheme : b.useTextSelectionTheme,
     );
   }
 
@@ -1478,7 +1535,10 @@ class ThemeData with Diagnosticable {
         && other.textButtonTheme == textButtonTheme
         && other.elevatedButtonTheme == elevatedButtonTheme
         && other.outlinedButtonTheme == outlinedButtonTheme
-        && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel;
+        && other.textSelectionTheme == textSelectionTheme
+        && other.dataTableTheme == dataTableTheme
+        && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel
+        && other.useTextSelectionTheme == useTextSelectionTheme;
   }
 
   @override
@@ -1556,7 +1616,10 @@ class ThemeData with Diagnosticable {
       textButtonTheme,
       elevatedButtonTheme,
       outlinedButtonTheme,
+      textSelectionTheme,
+      dataTableTheme,
       fixTextFieldOutlineLabel,
+      useTextSelectionTheme,
     ];
     return hashList(values);
   }
@@ -1619,7 +1682,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationRailThemeData>('navigationRailThemeData', navigationRailTheme, defaultValue: defaultData.navigationRailTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<NoDefaultCupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme, level: DiagnosticLevel.debug));
@@ -1627,10 +1690,13 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ButtonBarThemeData>('buttonBarTheme', buttonBarTheme, defaultValue: defaultData.buttonBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TimePickerThemeData>('timePickerTheme', timePickerTheme, defaultValue: defaultData.timePickerTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<TextSelectionThemeData>('textSelectionTheme', textSelectionTheme, defaultValue: defaultData.textSelectionTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<TextSelectionThemeData>('textSelectionTheme', textSelectionTheme, defaultValue: defaultData.textSelectionTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomNavigationBarThemeData>('bottomNavigationBarTheme', bottomNavigationBarTheme, defaultValue: defaultData.bottomNavigationBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TextButtonThemeData>('textButtonTheme', textButtonTheme, defaultValue: defaultData.textButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ElevatedButtonThemeData>('elevatedButtonTheme', elevatedButtonTheme, defaultValue: defaultData.elevatedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<OutlinedButtonThemeData>('outlinedButtonTheme', outlinedButtonTheme, defaultValue: defaultData.outlinedButtonTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<DataTableThemeData>('dataTableTheme', dataTableTheme, defaultValue: defaultData.dataTableTheme, level: DiagnosticLevel.debug));
   }
 }
 
@@ -1693,7 +1759,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
       );
 
   final ThemeData _materialTheme;
-  final CupertinoThemeData _cupertinoOverrideTheme;
+  final NoDefaultCupertinoThemeData _cupertinoOverrideTheme;
 
   @override
   Brightness get brightness => _cupertinoOverrideTheme.brightness ?? _materialTheme.brightness;

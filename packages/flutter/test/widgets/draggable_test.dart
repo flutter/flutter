@@ -17,6 +17,7 @@ void main() {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     int dragStartedCount = 0;
+    int moveCount = 0;
 
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -33,6 +34,7 @@ void main() {
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target'));
             },
+            onMove: (_) => moveCount++,
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
@@ -46,6 +48,7 @@ void main() {
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
     expect(dragStartedCount, 0);
+    expect(moveCount, 0);
 
     final Offset firstLocation = tester.getCenter(find.text('Source'));
     final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
@@ -57,6 +60,7 @@ void main() {
     expect(find.text('Dragging'), findsOneWidget);
     expect(find.text('Target'), findsOneWidget);
     expect(dragStartedCount, 1);
+    expect(moveCount, 0);
 
     final Offset secondLocation = tester.getCenter(find.text('Target'));
     await gesture.moveTo(secondLocation);
@@ -68,6 +72,7 @@ void main() {
     expect(find.text('Dragging'), findsOneWidget);
     expect(find.text('Target'), findsOneWidget);
     expect(dragStartedCount, 1);
+    expect(moveCount, 1);
 
     await gesture.up();
     await tester.pump();
@@ -79,6 +84,7 @@ void main() {
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
     expect(dragStartedCount, 1);
+    expect(moveCount, 1);
   });
 
   testWidgets('Drag and drop - onLeave callback fires correctly', (WidgetTester tester) async {
@@ -154,6 +160,83 @@ void main() {
 
     expect(leftBehind['Target 1'], equals(1));
     expect(leftBehind['Target 2'], equals(1));
+  });
+
+  testWidgets('Drag and drop - onMove callback fires correctly', (WidgetTester tester) async {
+    final Map<String,int> targetMoveCount = <String,int>{
+      'Target 1': 0,
+      'Target 2': 0,
+    };
+
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          const Draggable<int>(
+            data: 1,
+            child: Text('Source'),
+            feedback: Text('Dragging'),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+              return Container(height: 100.0, child: const Text('Target 1'));
+            },
+            onMove: (DragTargetDetails<dynamic> details) {
+              if (details.data is int) {
+                targetMoveCount['Target 1'] =
+                    targetMoveCount['Target 1'] + (details.data as int);
+              }
+            },
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+              return Container(height: 100.0, child: const Text('Target 2'));
+            },
+            onMove: (DragTargetDetails<dynamic> details) {
+              if (details.data is int) {
+                targetMoveCount['Target 2'] =
+                    targetMoveCount['Target 2'] + (details.data as int);
+              }
+            },
+          ),
+        ],
+      ),
+    ));
+
+    expect(targetMoveCount['Target 1'], equals(0));
+    expect(targetMoveCount['Target 2'], equals(0));
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(0));
+    expect(targetMoveCount['Target 2'], equals(0));
+
+    final Offset secondLocation = tester.getCenter(find.text('Target 1'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(1));
+    expect(targetMoveCount['Target 2'], equals(0));
+
+    final Offset thirdLocation = tester.getCenter(find.text('Target 2'));
+    await gesture.moveTo(thirdLocation);
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(1));
+    expect(targetMoveCount['Target 2'], equals(1));
+
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(2));
+    expect(targetMoveCount['Target 2'], equals(1));
+
+    await gesture.up();
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(2));
+    expect(targetMoveCount['Target 2'], equals(1));
   });
 
   testWidgets('Drag and drop - dragging over button', (WidgetTester tester) async {

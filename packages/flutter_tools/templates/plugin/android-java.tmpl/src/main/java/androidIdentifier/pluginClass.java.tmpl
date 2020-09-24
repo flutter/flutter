@@ -19,7 +19,7 @@ public class {{pluginClass}} implements FlutterPlugin, MethodCallHandler {
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "{{projectName}}");
+    channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "{{projectName}}");
     channel.setMethodCallHandler(this);
   }
 

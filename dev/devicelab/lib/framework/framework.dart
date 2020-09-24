@@ -78,7 +78,7 @@ class _TaskRunner {
   Future<TaskResult> run(Duration taskTimeout) async {
     try {
       _taskStarted = true;
-      print('Running task.');
+      print('Running task with a timeout of $taskTimeout.');
       final String exe = Platform.isWindows ? '.exe' : '';
       section('Checking running Dart$exe processes');
       final Set<RunningProcessInfo> beforeRunningDartInstances = await getRunningProcesses(
@@ -189,7 +189,10 @@ class _TaskRunner {
 /// A result of running a single task.
 class TaskResult {
   /// Constructs a successful result.
-  TaskResult.success(this.data, {this.benchmarkScoreKeys = const <String>[]})
+  TaskResult.success(this.data, {
+    this.benchmarkScoreKeys = const <String>[],
+    this.detailFiles,
+  })
       : succeeded = true,
         message = 'success' {
     const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
@@ -219,6 +222,7 @@ class TaskResult {
   TaskResult.failure(this.message)
       : succeeded = false,
         data = null,
+        detailFiles = null,
         benchmarkScoreKeys = const <String>[];
 
   /// Whether the task succeeded.
@@ -226,6 +230,9 @@ class TaskResult {
 
   /// Task-specific JSON data
   final Map<String, dynamic> data;
+
+  /// Files containing detail on the run (e.g. timeline trace files)
+  final List<String> detailFiles;
 
   /// Keys in [data] that store scores that will be submitted to Cocoon.
   ///
@@ -245,6 +252,7 @@ class TaskResult {
   ///     {
   ///       "success": true|false,
   ///       "data": arbitrary JSON data valid only for successful results,
+  ///       "detailFiles": list of filenames containing detail on the run
   ///       "benchmarkScoreKeys": [
   ///         contains keys into "data" that represent benchmarks scores, which
   ///         can be uploaded, for example. to golem, valid only for successful
@@ -259,6 +267,8 @@ class TaskResult {
 
     if (succeeded) {
       json['data'] = data;
+      if (detailFiles != null)
+        json['detailFiles'] = detailFiles;
       json['benchmarkScoreKeys'] = benchmarkScoreKeys;
     } else {
       json['reason'] = message;

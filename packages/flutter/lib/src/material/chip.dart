@@ -86,7 +86,7 @@ abstract class ChipAttributes {
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
   /// such as [Text].
   ///
-  /// If [labelStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// If [TextStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
   /// is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.disabled].
@@ -130,8 +130,8 @@ abstract class ChipAttributes {
   ///
   /// See also:
   ///
-  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
-  ///    within a [Theme].
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
+  ///    widgets within a [Theme].
   VisualDensity get visualDensity;
 
   /// The padding around the [label] widget.
@@ -257,7 +257,7 @@ abstract class DeletableChipAttributes {
   VoidCallback get onDeleted;
 
   /// The [Color] for the delete icon. The default is based on the ambient
-  /// [IconTheme.color].
+  /// [IconThemeData.color].
   Color get deleteIconColor;
 
   /// The message to be used for the chip's delete button tooltip.
@@ -283,7 +283,8 @@ abstract class CheckmarkableChipAttributes {
   // ignore: unused_element
   factory CheckmarkableChipAttributes._() => null;
 
-  /// Whether or not to show a check mark when [selected] is true.
+  /// Whether or not to show a check mark when
+  /// [SelectableChipAttributes.selected] is true.
   ///
   /// Defaults to true.
   bool get showCheckmark;
@@ -431,7 +432,7 @@ abstract class DisabledChipAttributes {
   ///
   /// If this is true, but all of the user action callbacks are null (i.e.
   /// [SelectableChipAttributes.onSelected], [TappableChipAttributes.onPressed],
-  /// and [DeletableChipAttributes.onDelete]), then the
+  /// and [DeletableChipAttributes.onDeleted]), then the
   /// control will still be shown as disabled.
   ///
   /// This is typically used if you want the chip to be disabled, but also show
@@ -447,7 +448,7 @@ abstract class DisabledChipAttributes {
   ///
   /// The chip is disabled when [isEnabled] is false, or all three of
   /// [SelectableChipAttributes.onSelected], [TappableChipAttributes.onPressed],
-  /// and [DeletableChipAttributes.onDelete] are null.
+  /// and [DeletableChipAttributes.onDeleted] are null.
   ///
   /// It defaults to [Colors.black38].
   Color get disabledColor;
@@ -1259,8 +1260,8 @@ class FilterChip extends StatelessWidget
 /// Action chips are displayed after primary content, such as below a card or
 /// persistently at the bottom of a screen.
 ///
-/// The material button widgets, [RaisedButton], [FlatButton], and
-/// [OutlineButton], are an alternative to action chips, which should appear
+/// The material button widgets, [ElevatedButton], [TextButton], and
+/// [OutlinedButton], are an alternative to action chips, which should appear
 /// statically and consistently in a UI.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
@@ -1429,7 +1430,7 @@ class RawChip extends StatefulWidget
         CheckmarkableChipAttributes,
         DisabledChipAttributes,
         TappableChipAttributes {
-  /// Creates a RawChip
+  /// Creates a RawChip.
   ///
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
@@ -2066,7 +2067,6 @@ class _RenderChipElement extends RenderObjectElement {
   _RenderChipElement(_ChipRenderWidget chip) : super(chip);
 
   final Map<_ChipSlot, Element> slotToChild = <_ChipSlot, Element>{};
-  final Map<Element, _ChipSlot> childToSlot = <Element, _ChipSlot>{};
 
   @override
   _ChipRenderWidget get widget => super.widget as _ChipRenderWidget;
@@ -2081,11 +2081,10 @@ class _RenderChipElement extends RenderObjectElement {
 
   @override
   void forgetChild(Element child) {
-    assert(slotToChild.values.contains(child));
-    assert(childToSlot.keys.contains(child));
-    final _ChipSlot slot = childToSlot[child];
-    childToSlot.remove(child);
-    slotToChild.remove(slot);
+    assert(slotToChild.containsValue(child));
+    assert(child.slot is _ChipSlot);
+    assert(slotToChild.containsKey(child.slot));
+    slotToChild.remove(child.slot);
     super.forgetChild(child);
   }
 
@@ -2094,11 +2093,9 @@ class _RenderChipElement extends RenderObjectElement {
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
       slotToChild.remove(slot);
-      childToSlot.remove(oldChild);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -2114,12 +2111,10 @@ class _RenderChipElement extends RenderObjectElement {
     final Element oldChild = slotToChild[slot];
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
-      childToSlot.remove(oldChild);
       slotToChild.remove(slot);
     }
     if (newChild != null) {
       slotToChild[slot] = newChild;
-      childToSlot[newChild] = slot;
     }
   }
 
@@ -2147,26 +2142,22 @@ class _RenderChipElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, dynamic slotValue) {
+  void insertRenderObjectChild(RenderObject child, _ChipSlot slot) {
     assert(child is RenderBox);
-    assert(slotValue is _ChipSlot);
-    final _ChipSlot slot = slotValue as _ChipSlot;
     _updateRenderObject(child, slot);
-    assert(renderObject.childToSlot.keys.contains(child));
-    assert(renderObject.slotToChild.keys.contains(slot));
+    assert(renderObject.children.keys.contains(slot));
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, _ChipSlot slot) {
     assert(child is RenderBox);
-    assert(renderObject.childToSlot.keys.contains(child));
-    _updateRenderObject(null, renderObject.childToSlot[child]);
-    assert(!renderObject.childToSlot.keys.contains(child));
-    assert(!renderObject.slotToChild.keys.contains(slot));
+    assert(renderObject.children[slot] == child);
+    _updateRenderObject(null, slot);
+    assert(!renderObject.children.keys.contains(slot));
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, dynamic slotValue) {
+  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
     assert(false, 'not reachable');
   }
 }
@@ -2258,8 +2249,7 @@ class _RenderChip extends RenderBox {
     enableAnimation.addListener(markNeedsPaint);
   }
 
-  final Map<_ChipSlot, RenderBox> slotToChild = <_ChipSlot, RenderBox>{};
-  final Map<RenderBox, _ChipSlot> childToSlot = <RenderBox, _ChipSlot>{};
+  final Map<_ChipSlot, RenderBox> children = <_ChipSlot, RenderBox>{};
 
   bool value;
   bool isEnabled;
@@ -2274,12 +2264,10 @@ class _RenderChip extends RenderBox {
   RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _ChipSlot slot) {
     if (oldChild != null) {
       dropChild(oldChild);
-      childToSlot.remove(oldChild);
-      slotToChild.remove(slot);
+      children.remove(slot);
     }
     if (newChild != null) {
-      childToSlot[newChild] = slot;
-      slotToChild[slot] = newChild;
+      children[slot] = newChild;
       adoptChild(newChild);
     }
     return newChild;

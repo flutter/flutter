@@ -26,6 +26,17 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 
 /// Similar to a [FlatButton] with a thin grey rounded rectangle border.
 ///
+/// ### This class is obsolete, please use [OutlinedButton] instead.
+///
+/// FlatButton, RaisedButton, and OutlineButton have been replaced by
+/// TextButton, ElevatedButton, and OutlinedButton respectively.
+/// ButtonTheme has been replaced by TextButtonTheme,
+/// ElevatedButtonTheme, and OutlinedButtonTheme. The original classes
+/// will be deprecated soon, please migrate code that uses them.
+/// There's a detailed migration guide for the new button and button
+/// theme classes in
+/// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
+///
 /// The outline button's border shape is defined by [shape]
 /// and its appearance is defined by [borderSide], [disabledBorderColor],
 /// and [highlightedBorderColor]. By default the border is a one pixel
@@ -171,7 +182,7 @@ class OutlineButton extends MaterialButton {
   /// By default the border's color does not change when the button
   /// is pressed.
   ///
-  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty<Color>].
+  /// This field is ignored if [BorderSide.color] is a [MaterialStateProperty<Color>].
   final Color highlightedBorderColor;
 
   /// The outline border's color when the button is not [enabled].
@@ -179,7 +190,7 @@ class OutlineButton extends MaterialButton {
   /// By default the outline border's color does not change when the
   /// button is disabled.
   ///
-  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty<Color>].
+  /// This field is ignored if [BorderSide.color] is a [MaterialStateProperty<Color>].
   final Color disabledBorderColor;
 
   /// Defines the color of the border when the button is enabled but not
@@ -191,7 +202,7 @@ class OutlineButton extends MaterialButton {
   /// If null the default border's style is [BorderStyle.solid], its
   /// [BorderSide.width] is 1.0, and its color is a light shade of grey.
   ///
-  /// If [borderSide.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// If [BorderSide.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
   /// is used in all states and both [highlightedBorderColor] and [disabledBorderColor]
   /// are ignored.
   final BorderSide borderSide;

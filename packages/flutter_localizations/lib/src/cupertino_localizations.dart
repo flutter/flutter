@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart' as intl;
@@ -361,8 +359,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     ).replaceFirst(r'$second', _decimalFormat.format(second));
   }
 
-  /// A [LocalizationsDelegate] that uses [GlobalCupertinoLocalizations.load]
-  /// to create an instance of this class.
+  /// A [LocalizationsDelegate] for [CupertinoLocalizations].
   ///
   /// Most internationalized apps will use [GlobalCupertinoLocalizations.delegates]
   /// as the value of [CupertinoApp.localizationsDelegates] to include
