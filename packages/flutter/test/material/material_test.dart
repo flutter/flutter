@@ -364,7 +364,6 @@ void main() {
       expect(model.color, equals(surfaceColorWithOverlay));
       expect(model.color, isNot(equals(surfaceColor)));
     });
-
   });
 
   group('Transparency clipping', () {
