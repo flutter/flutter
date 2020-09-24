@@ -1772,7 +1772,7 @@ void main() {
   testWidgets('Load a good image after a bad image was loaded should not call errorBuilder', (WidgetTester tester) async {
     final UniqueKey errorKey = UniqueKey();
     final ui.Image image = await tester.runAsync(() => createTestImage(kBlueRectPng));
-    final TestImageStreamCompleter2 streamCompleter = TestImageStreamCompleter2();
+    final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
     final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
 
     await tester.pumpWidget(
@@ -1798,17 +1798,17 @@ void main() {
     expect(find.byKey(errorKey), findsNothing);
 
     // Loading good image succeed
-    streamCompleter.notifyListeners(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
+    streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     await tester.pump();
     expect(find.byType(Padding), findsOneWidget);
 
     // Loading bad image shows the error widget.
-    streamCompleter.notifyListeners(notifyFailure: true);
+    streamCompleter.setError(exception: 'thrown');
     await tester.pump();
     expect(find.byKey(errorKey), findsOneWidget);
 
     // Loading good image shows the image widget instead of the error widget.
-    streamCompleter.notifyListeners(imageInfo: ImageInfo(image: image));
+    streamCompleter.setData(imageInfo: ImageInfo(image: image));
     await tester.pump();
     expect(find.byType(Padding), findsOneWidget);
     expect(tester.widget<Padding>(find.byType(Padding)).child, isA<RawImage>());
@@ -1942,6 +1942,20 @@ class TestImageStreamCompleter extends ImageStreamCompleter {
       }
     }
   }
+
+  void setError({
+    dynamic exception,
+    StackTrace stackTrace,
+  }) {
+    assert(exception != null, 'exception must not be null.');
+
+    final List<ImageStreamListener> localListeners = listeners.toList();
+    for (final ImageStreamListener listener in localListeners) {
+      if (listener.onError != null) {
+        listener.onError(exception, stackTrace);
+      }
+    }
+  }
 }
 
 class TestImage implements ui.Image {
@@ -2025,38 +2039,5 @@ class FailingImageProvider extends ImageProvider<int> {
         ),
       ),
     );
-  }
-}
-
-class TestImageStreamCompleter2 extends ImageStreamCompleter {
-  final Set<ImageStreamListener> _listeners = <ImageStreamListener>{};
-
-  @override
-  void addListener(ImageStreamListener listener) => _listeners.add(listener);
-
-  @override
-  void removeListener(ImageStreamListener listener) => _listeners.remove(listener);
-
-  void notifyListeners({
-    bool notifyFailure = false,
-    ImageInfo imageInfo,
-    ImageChunkEvent chunkEvent,
-  }) {
-
-    // Make a copy to avoid concurrency!
-    final List<ImageStreamListener> localListeners = _listeners.toList();
-    for (final ImageStreamListener listener in localListeners) {
-      if (notifyFailure) {
-        if (listener.onError != null)
-          listener.onError('thrown', StackTrace.empty);
-      } else {
-        if (imageInfo != null) {
-          listener.onImage(imageInfo, false);
-        }
-        if (chunkEvent != null && listener.onChunk != null) {
-          listener.onChunk(chunkEvent);
-        }
-      }
-    }
   }
 }
