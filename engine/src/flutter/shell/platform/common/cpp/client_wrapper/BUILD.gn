@@ -20,24 +20,6 @@ source_set("client_wrapper") {
       [ "//flutter/shell/platform/common/cpp:relative_flutter_library_headers" ]
 }
 
-# Temporary test for the legacy EncodableValue implementation. Remove once the
-# legacy version is removed.
-source_set("client_wrapper_legacy_encodable_value") {
-  sources = core_cpp_client_wrapper_sources
-  public = core_cpp_client_wrapper_includes +
-           core_cpp_client_wrapper_internal_headers
-
-  deps = [ "//flutter/shell/platform/common/cpp:common_cpp_library_headers" ]
-
-  configs +=
-      [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
-
-  defines = [ "USE_LEGACY_ENCODABLE_VALUE" ]
-
-  public_configs =
-      [ "//flutter/shell/platform/common/cpp:relative_flutter_library_headers" ]
-}
-
 source_set("client_wrapper_library_stubs") {
   sources = [
     "testing/stub_flutter_api.cc",
@@ -75,9 +57,6 @@ executable("client_wrapper_unittests") {
     ":client_wrapper",
     ":client_wrapper_fixtures",
     ":client_wrapper_library_stubs",
-
-    # Build the legacy version as well as a sanity check.
-    ":client_wrapper_unittests_legacy_encodable_value",
     "//flutter/testing",
 
     # TODO(chunhtai): Consider refactoring flutter_root/testing so that there's a testing
@@ -87,32 +66,4 @@ executable("client_wrapper_unittests") {
   ]
 
   defines = [ "FLUTTER_DESKTOP_LIBRARY" ]
-}
-
-# Ensures that the legacy EncodableValue codepath still compiles.
-executable("client_wrapper_unittests_legacy_encodable_value") {
-  testonly = true
-
-  sources = [
-    "encodable_value_unittests.cc",
-    "standard_message_codec_unittests.cc",
-    "testing/test_codec_extensions.h",
-  ]
-
-  deps = [
-    ":client_wrapper_fixtures",
-    ":client_wrapper_legacy_encodable_value",
-    ":client_wrapper_library_stubs",
-    "//flutter/testing",
-
-    # TODO(chunhtai): Consider refactoring flutter_root/testing so that there's a testing
-    # target that doesn't require a Dart runtime to be linked in.
-    # https://github.com/flutter/flutter/issues/41414.
-    "//third_party/dart/runtime:libdart_jit",
-  ]
-
-  defines = [
-    "FLUTTER_DESKTOP_LIBRARY",
-    "USE_LEGACY_ENCODABLE_VALUE",
-  ]
 }
