@@ -56,6 +56,9 @@ class CkAnimatedImage implements ui.Image {
   ui.Image clone() => this;
 
   @override
+  bool isCloneOf(ui.Image other) => other == this;
+
+  @override
   List<StackTrace>? debugGetOpenHandleStackTraces() => null;
   int get frameCount => _skAnimatedImage.getFrameCount();
 
@@ -124,6 +127,9 @@ class CkImage implements ui.Image {
 
   @override
   ui.Image clone() => this;
+
+  @override
+  bool isCloneOf(ui.Image other) => other == this;
 
   @override
   List<StackTrace>? debugGetOpenHandleStackTraces() => null;
