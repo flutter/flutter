@@ -804,7 +804,7 @@ class FlutterPlugin implements Plugin<Project> {
                             filename += "-${abi}"
                         }
                         if (variant.flavorName != null && !variant.flavorName.isEmpty()) {
-                            filename += "-${variant.flavorName}"
+                            filename += "-${variant.flavorName.toLowerCase()}"
                         }
                         filename += "-${buildModeFor(variant.buildType)}"
                         project.copy {
