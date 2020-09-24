@@ -46,34 +46,6 @@ enum class EncodedType {
 
 // Returns the encoded type that should be written when serializing |value|.
 EncodedType EncodedTypeForValue(const EncodableValue& value) {
-#ifdef USE_LEGACY_ENCODABLE_VALUE
-  switch (value.type()) {
-    case EncodableValue::Type::kNull:
-      return EncodedType::kNull;
-    case EncodableValue::Type::kBool:
-      return value.BoolValue() ? EncodedType::kTrue : EncodedType::kFalse;
-    case EncodableValue::Type::kInt:
-      return EncodedType::kInt32;
-    case EncodableValue::Type::kLong:
-      return EncodedType::kInt64;
-    case EncodableValue::Type::kDouble:
-      return EncodedType::kFloat64;
-    case EncodableValue::Type::kString:
-      return EncodedType::kString;
-    case EncodableValue::Type::kByteList:
-      return EncodedType::kUInt8List;
-    case EncodableValue::Type::kIntList:
-      return EncodedType::kInt32List;
-    case EncodableValue::Type::kLongList:
-      return EncodedType::kInt64List;
-    case EncodableValue::Type::kDoubleList:
-      return EncodedType::kFloat64List;
-    case EncodableValue::Type::kList:
-      return EncodedType::kList;
-    case EncodableValue::Type::kMap:
-      return EncodedType::kMap;
-  }
-#else
   switch (value.index()) {
     case 0:
       return EncodedType::kNull;
@@ -100,7 +72,6 @@ EncodedType EncodedTypeForValue(const EncodableValue& value) {
     case 11:
       return EncodedType::kMap;
   }
-#endif
   assert(false);
   return EncodedType::kNull;
 }
@@ -125,59 +96,6 @@ EncodableValue StandardCodecSerializer::ReadValue(
 void StandardCodecSerializer::WriteValue(const EncodableValue& value,
                                          ByteStreamWriter* stream) const {
   stream->WriteByte(static_cast<uint8_t>(EncodedTypeForValue(value)));
-#ifdef USE_LEGACY_ENCODABLE_VALUE
-  switch (value.type()) {
-    case EncodableValue::Type::kNull:
-    case EncodableValue::Type::kBool:
-      // Null and bool are encoded directly in the type.
-      break;
-    case EncodableValue::Type::kInt:
-      stream->WriteInt32(value.IntValue());
-      break;
-    case EncodableValue::Type::kLong:
-      stream->WriteInt64(value.LongValue());
-      break;
-    case EncodableValue::Type::kDouble:
-      stream->WriteAlignment(8);
-      stream->WriteDouble(value.DoubleValue());
-      break;
-    case EncodableValue::Type::kString: {
-      const auto& string_value = value.StringValue();
-      size_t size = string_value.size();
-      WriteSize(size, stream);
-      if (size > 0) {
-        stream->WriteBytes(
-            reinterpret_cast<const uint8_t*>(string_value.data()), size);
-      }
-      break;
-    }
-    case EncodableValue::Type::kByteList:
-      WriteVector(value.ByteListValue(), stream);
-      break;
-    case EncodableValue::Type::kIntList:
-      WriteVector(value.IntListValue(), stream);
-      break;
-    case EncodableValue::Type::kLongList:
-      WriteVector(value.LongListValue(), stream);
-      break;
-    case EncodableValue::Type::kDoubleList:
-      WriteVector(value.DoubleListValue(), stream);
-      break;
-    case EncodableValue::Type::kList:
-      WriteSize(value.ListValue().size(), stream);
-      for (const auto& item : value.ListValue()) {
-        WriteValue(item, stream);
-      }
-      break;
-    case EncodableValue::Type::kMap:
-      WriteSize(value.MapValue().size(), stream);
-      for (const auto& pair : value.MapValue()) {
-        WriteValue(pair.first, stream);
-        WriteValue(pair.second, stream);
-      }
-      break;
-  }
-#else
   // TODO: Consider replacing this this with a std::visitor.
   switch (value.index()) {
     case 0:
@@ -239,7 +157,6 @@ void StandardCodecSerializer::WriteValue(const EncodableValue& value,
           << "Custom types require codec extensions." << std::endl;
       break;
   }
-#endif
 }
 
 EncodableValue StandardCodecSerializer::ReadValueOfType(
@@ -437,18 +354,6 @@ std::unique_ptr<MethodCall<EncodableValue>>
 StandardMethodCodec::DecodeMethodCallInternal(const uint8_t* message,
                                               size_t message_size) const {
   ByteBufferStreamReader stream(message, message_size);
-#ifdef USE_LEGACY_ENCODABLE_VALUE
-  EncodableValue method_name = serializer_->ReadValue(&stream);
-  if (!method_name.IsString()) {
-    std::cerr << "Invalid method call; method name is not a string."
-              << std::endl;
-    return nullptr;
-  }
-  auto arguments =
-      std::make_unique<EncodableValue>(serializer_->ReadValue(&stream));
-  return std::make_unique<MethodCall<EncodableValue>>(method_name.StringValue(),
-                                                      std::move(arguments));
-#else
   EncodableValue method_name_value = serializer_->ReadValue(&stream);
   const auto* method_name = std::get_if<std::string>(&method_name_value);
   if (!method_name) {
@@ -460,7 +365,6 @@ StandardMethodCodec::DecodeMethodCallInternal(const uint8_t* message,
       std::make_unique<EncodableValue>(serializer_->ReadValue(&stream));
   return std::make_unique<MethodCall<EncodableValue>>(*method_name,
                                                       std::move(arguments));
-#endif
 }
 
 std::unique_ptr<std::vector<uint8_t>>
@@ -533,15 +437,6 @@ bool StandardMethodCodec::DecodeAndProcessResponseEnvelopeInternal(
       EncodableValue code = serializer_->ReadValue(&stream);
       EncodableValue message = serializer_->ReadValue(&stream);
       EncodableValue details = serializer_->ReadValue(&stream);
-#ifdef USE_LEGACY_ENCODABLE_VALUE
-      if (details.IsNull()) {
-        result->Error(code.StringValue(),
-                      message.IsNull() ? "" : message.StringValue());
-      } else {
-        result->Error(code.StringValue(),
-                      message.IsNull() ? "" : message.StringValue(), details);
-      }
-#else
       const std::string& message_string =
           message.IsNull() ? "" : std::get<std::string>(message);
       if (details.IsNull()) {
@@ -549,7 +444,6 @@ bool StandardMethodCodec::DecodeAndProcessResponseEnvelopeInternal(
       } else {
         result->Error(std::get<std::string>(code), message_string, details);
       }
-#endif
       return true;
     }
     default:
