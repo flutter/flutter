@@ -647,7 +647,7 @@ class PubDependencies extends ArtifactSet {
       logger: _logger,
       throwOnError: false,
     );
-    if (packageConfig == null || packageConfig == PackageConfig.empty ) {
+    if (packageConfig == null || packageConfig == PackageConfig.empty) {
       return false;
     }
     for (final Package package in packageConfig.packages) {
@@ -667,6 +667,8 @@ class PubDependencies extends ArtifactSet {
       context: PubContext.pubGet,
       directory: _fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
       generateSyntheticPackage: false,
+      skipPubspecYamlCheck: true,
+      checkLastModified: false,
     );
   }
 }
