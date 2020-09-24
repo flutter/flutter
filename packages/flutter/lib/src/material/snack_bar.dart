@@ -125,9 +125,13 @@ class SnackBarAction extends StatefulWidget {
   final bool useScaffoldMessenger;
 
   /// Creates a copy of this snack bar but with useScaffoldMessenger set to true.
+  @Deprecated(
+    'Do not use, intended for migration interim. '
+    'This feature was deprecated after v1.22.0-2.0.pre.'
+  )
   SnackBarAction withScaffoldMessenger() {
     return SnackBarAction(
-      key: key ,
+      key: key,
       textColor: textColor,
       disabledTextColor: disabledTextColor,
       label: label,
@@ -388,6 +392,10 @@ class SnackBar extends StatefulWidget {
   ///
   /// If the original snack bar lacks a key, the newly created snack bar will
   /// use the given fallback key.
+  @Deprecated(
+    'Do not use, intended for migration interim. '
+      'This feature was deprecated after v1.22.0-2.0.pre.'
+  )
   SnackBar withScaffoldMessenger({ Key fallbackKey }) {
     return SnackBar(
       key: key ?? fallbackKey,

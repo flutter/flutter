@@ -2108,11 +2108,11 @@ typedef ElementVisitor = void Function(Element element);
 /// Widget build(BuildContext context) {
 ///   // here, Scaffold.of(context) returns null
 ///   return Scaffold(
-///     appBar: AppBar(title: Text('Demo')),
+///     appBar: const AppBar(title: Text('Demo')),
 ///     body: Builder(
 ///       builder: (BuildContext context) {
 ///         return TextButton(
-///           child: Text('BUTTON'),
+///           child: const Text('BUTTON'),
 ///           onPressed: () {
 ///             Scaffold.of(context).showBottomSheet<void>(
 ///               (BuildContext context) {

@@ -10,6 +10,7 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -69,11 +70,33 @@ enum _ScaffoldSlot {
 /// [BuildContext] via [ScaffoldMessenger.of] and use the
 /// [ScaffoldMessengerState.showSnackBar] function.
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// Here is an example of showing a [SnackBar] when the user presses a button.
+///
+/// ```dart
+///   Widget build(BuildContext context) {
+///     return OutlinedButton(
+///       onPressed: () {
+///         ScaffoldMessenger.of(context).showSnackBar(
+///           const SnackBar(
+///             content: Text('A SnackBar has been shown.'),
+///           ),
+///         );
+///       },
+///       child: const Text('Show SnackBar'),
+///     );
+///   }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SnackBar], which is a temporary notification typically shown near the
 ///    bottom of the app using the [ScaffoldMessengerState.showSnackBar] method.
-///  * Cookbook: [Display a snackbar](https://flutter.dev/docs/cookbook/design/snackbars)
+///  * [debugCheckHasScaffoldMessenger], which asserts that the given context
+///    has a [ScaffoldMessenger] ancestor.
+///  * Cookbook: [Display a SnackBar](https://flutter.dev/docs/cookbook/design/snackbars)
 class ScaffoldMessenger extends StatefulWidget {
   /// Creates a widget that manages [SnackBar]s for [Scaffold] descendants.
   const ScaffoldMessenger({
@@ -110,7 +133,7 @@ class ScaffoldMessenger extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// A less elegant but more expedient solution is assign a [GlobalKey] to the
+  /// A less elegant but more expedient solution is to assign a [GlobalKey] to the
   /// [ScaffoldMessenger], then use the `key.currentState` property to obtain the
   /// [ScaffoldMessengerState] rather than using the [ScaffoldMessenger.of]
   /// function. The [MaterialApp.scaffoldMessengerKey] refers to the root
@@ -118,8 +141,8 @@ class ScaffoldMessenger extends StatefulWidget {
   ///
   /// {@tool dartpad --template=freeform}
   /// Sometimes [SnackBar]s are produced by code that doesn't have ready access
-  /// to a valid [BuildContext]. One such example of this is when you may want
-  /// to show a SnackBar from a method outside of the `build` function. In these
+  /// to a valid [BuildContext]. One such example of this is when you show a
+  /// SnackBar from a method outside of the `build` function. In these
   /// cases, you can assign a [GlobalKey] to the [ScaffoldMessenger]. This
   /// example shows a key being used to obtain the [ScaffoldMessengerState]
   /// provided by the [MaterialApp].
@@ -183,8 +206,11 @@ class ScaffoldMessenger extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// If there is no [ScaffoldMessenger] in scope, then this will throw an
-  /// exception.
+  /// If there is no [ScaffoldMessenger] in scope, then this will return null.
+  /// See also:
+  ///
+  ///  * [debugCheckHasScaffoldMessenger], which asserts that the given context
+  ///    has a [ScaffoldMessenger] ancestor.
   static ScaffoldMessengerState of(BuildContext context) {
     assert(context != null);
     final _ScaffoldMessengerScope scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>();
@@ -235,7 +261,9 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   }
 
   void _unregister(ScaffoldState scaffold) {
-    _scaffolds.remove(scaffold);
+    final bool removed = _scaffolds.remove(scaffold);
+    // ScaffoldStates should only be removed once.
+    assert(removed);
   }
 
   /// Shows  a [SnackBar] across all registered [Scaffold]s.
@@ -290,9 +318,9 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       messengerSnackBar.withAnimation(_snackBarController, fallbackKey: UniqueKey()),
       Completer<SnackBarClosedReason>(),
         () {
-        assert(_snackBars.first == controller);
-        hideCurrentSnackBar(reason: SnackBarClosedReason.hide);
-      },
+          assert(_snackBars.first == controller);
+          hideCurrentSnackBar(reason: SnackBarClosedReason.hide);
+        },
       null, // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
     );
     setState(() {
@@ -2072,7 +2100,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ScaffoldMessengerState _scaffoldMessenger;
 
   /// [ScaffoldMessengerState.showSnackBar] shows a [SnackBar] at the bottom of
-  /// the scaffold. This method should not be used.
+  /// the scaffold. This method should not be used, and will be deprecated in
+  /// the near future..
   ///
   /// A scaffold can show at most one snack bar at a time. If this function is
   /// called while another snack bar is already visible, the given snack bar
@@ -2163,7 +2192,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   }
 
   /// [ScaffoldMessengerState.removeCurrentSnackBar] removes the current
-  /// [SnackBar] (if any) immediately. This method should not be used.
+  /// [SnackBar] (if any) immediately. This method should not be used, and will
+  /// be depracted in the near future.
   ///
   /// The removed snack bar does not run its normal exit animation. If there are
   /// any queued snack bars, they begin their entrance animation immediately.
@@ -2186,7 +2216,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   /// [ScaffoldMessengerState.hideCurrentSnackBar] removes the current
   /// [SnackBar] by running its normal exit animation. This method should not be
-  /// used.
+  /// used, and will be deprecated in the near future.
   ///
   /// The closed completer is called after the animation is complete.
   ///
@@ -2637,8 +2667,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   @override
   void didChangeDependencies() {
-    _scaffoldMessenger = ScaffoldMessenger.of(context);
+    final ScaffoldMessengerState _currentScaffoldMessenger = ScaffoldMessenger.of(context);
+    // If our ScaffoldMessenger has changed, unregister with the old one first.
+    if (_scaffoldMessenger != null &&
+      (_currentScaffoldMessenger == null || _scaffoldMessenger != _currentScaffoldMessenger)) {
+      _scaffoldMessenger._unregister(this);
+    }
+    // Register with the current ScaffoldMessenger, if there is one.
+    _scaffoldMessenger = _currentScaffoldMessenger;
     _scaffoldMessenger?._register(this);
+
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     // If we transition from accessible navigation to non-accessible navigation

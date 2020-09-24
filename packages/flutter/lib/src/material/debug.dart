@@ -141,7 +141,7 @@ bool debugCheckHasScaffold(BuildContext context) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasScaffoldMessenger(BuildContext context) {
   assert(() {
-    if (context.widget is! ScaffoldMessenger && context.findAncestorWidgetOfExactType<ScaffoldMessenger>() == null) {
+    if (context.findAncestorWidgetOfExactType<ScaffoldMessenger>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No ScaffoldMessenger widget found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a ScaffoldMessenger widget ancestor.'),
