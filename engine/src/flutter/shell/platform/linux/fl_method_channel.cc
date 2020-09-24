@@ -230,12 +230,18 @@ gboolean fl_method_channel_respond(
     FlMethodSuccessResponse* r = FL_METHOD_SUCCESS_RESPONSE(response);
     message = fl_method_codec_encode_success_envelope(
         self->codec, fl_method_success_response_get_result(r), error);
+    if (message == nullptr) {
+      return FALSE;
+    }
   } else if (FL_IS_METHOD_ERROR_RESPONSE(response)) {
     FlMethodErrorResponse* r = FL_METHOD_ERROR_RESPONSE(response);
     message = fl_method_codec_encode_error_envelope(
         self->codec, fl_method_error_response_get_code(r),
         fl_method_error_response_get_message(r),
         fl_method_error_response_get_details(r), error);
+    if (message == nullptr) {
+      return FALSE;
+    }
   } else if (FL_IS_METHOD_NOT_IMPLEMENTED_RESPONSE(response)) {
     message = nullptr;
   } else {
