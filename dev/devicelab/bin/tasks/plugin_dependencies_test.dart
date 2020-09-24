@@ -274,13 +274,20 @@ public class DummyPluginAClass {
         section('Build plugin A example iOS app');
 
         await inDirectory(exampleApp, () async {
-          await evalFlutter(
+          final String output = await evalFlutter(
             'build',
             options: <String>[
               'ios',
               '--no-codesign',
+              '-v',
             ],
           );
+          // This warning is confusing and shouldn't be emitted. Plugins often support lower versions than the
+          // Flutter app, but as long as they support the minimum it will work.
+          // warning: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99. (in target 'plugin_a' from project 'Pods')
+           if (output.contains('but the range of supported deployment target versions')) {
+            throw TaskResult.failure('Minimum plugin version warning present');
+          }
         });
 
         final Directory appBundle = Directory(path.join(
