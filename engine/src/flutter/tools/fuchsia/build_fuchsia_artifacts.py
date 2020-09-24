@@ -230,7 +230,8 @@ def ProcessCIPDPackage(upload, engine_version):
       if tries == num_tries - 1:
         raise
 
-def BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy, asan, additional_targets=[]):
+def BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy,
+                asan, dart_version_git_info, additional_targets=[]):
   unopt = "_unopt" if not optimized else ""
   out_dir = 'fuchsia_%s%s_%s' % (runtime_mode, unopt, arch)
   flags = [
@@ -250,6 +251,8 @@ def BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy, asan, 
     flags.append('--no-fuchsia-legacy')
   if asan:
     flags.append('--asan')
+  if not dart_version_git_info:
+    flags.append('--no-dart-version-git-info')
 
   RunGN(out_dir, flags)
   BuildNinjaTargets(out_dir, [ 'flutter' ] + additional_targets)
@@ -316,6 +319,12 @@ def main():
       help=('Comma-separated list; adds additional targets to build for '
            'Fuchsia.'))
 
+  parser.add_argument(
+      '--no-dart-version-git-info',
+      action='store_true',
+      default=False,
+      help='If set, skips building and just creates packages.')
+
   args = parser.parse_args()
   RemoveDirectoryIfExists(_bucket_directory)
   build_mode = args.runtime_mode
@@ -334,7 +343,9 @@ def main():
       product = product_modes[i]
       if build_mode == 'all' or runtime_mode == build_mode:
         if not args.skip_build:
-          BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy, args.asan, args.targets.split(","))
+          BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy,
+                      args.asan, not args.no_dart_version_git_info,
+                      args.targets.split(","))
         BuildBucket(runtime_mode, arch, optimized, product)
 
   if args.upload:

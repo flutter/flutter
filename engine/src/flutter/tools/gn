@@ -288,6 +288,8 @@ def to_gn_args(args):
         sys.exit(1)
       gn_args['enable_vulkan_validation_layers'] = True
 
+    gn_args['dart_version_git_info'] = not args.no_dart_version_git_info
+
     return gn_args
 
 def parse_args(args):
@@ -300,6 +302,8 @@ def parse_args(args):
   parser.add_argument('--interpreter', default=False, action='store_true')
   parser.add_argument('--dart-debug', default=False, action='store_true', help='Enables assertions in the Dart VM. ' +
       'Does not affect optimization levels. If you need to disable optimizations in Dart, use --full-dart-debug')
+  parser.add_argument('--no-dart-version-git-info', default=False, action='store_true',
+                      help='Set by default; if unset, turns off the dart SDK git hash check')
   parser.add_argument('--full-dart-debug', default=False, action='store_true', help='Implies --dart-debug ' +
       'and also disables optimizations in the Dart VM making it easier to step through VM code in the debugger.')
 
