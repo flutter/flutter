@@ -122,6 +122,82 @@ void main() {
     });
   });
 
+  testWidgets('Last month should be visible if last date is selected',
+      (WidgetTester tester) async {
+    initialDateRange = DateTimeRange(
+      start: DateTime(2016, DateTime.december, 31),
+      end: DateTime(2016, DateTime.december, 31),
+    );
+    await preparePicker(tester, (Future<DateTimeRange> range) async {
+      expect(find.text('December 2016'), findsOneWidget);
+      expect(find.text('November 2016'), findsNothing);
+    });
+  });
+
+  testWidgets('First month should be visible if first date is selected',
+      (WidgetTester tester) async {
+    initialDateRange = DateTimeRange(
+      start: DateTime(2015, DateTime.january, 01),
+      end: DateTime(2015, DateTime.january, 01),
+    );
+    await preparePicker(tester, (Future<DateTimeRange> range) async {
+      expect(find.text('January 2015'), findsOneWidget);
+      expect(find.text('February 2015'), findsOneWidget);
+      expect(find.text('March 2015'), findsNothing);
+    });
+  });
+
+  testWidgets('Current month should be visible if no date is selected',
+      (WidgetTester tester) async {
+    firstDate = DateTime(DateTime.now().year - 1);
+    lastDate = DateTime(DateTime.now().year + 1);
+    initialDateRange = null;
+
+    String _getMonthName(int month) {
+      switch (month) {
+        case DateTime.january:
+          return 'January';
+        case DateTime.february:
+          return 'February';
+        case DateTime.march:
+          return 'March';
+        case DateTime.april:
+          return 'April';
+        case DateTime.may:
+          return 'May';
+        case DateTime.june:
+          return 'June';
+        case DateTime.july:
+          return 'July';
+        case DateTime.august:
+          return 'August';
+        case DateTime.september:
+          return 'September';
+        case DateTime.october:
+          return 'October';
+        case DateTime.november:
+          return 'November';
+        case DateTime.december:
+          return 'December';
+      }
+      return '';
+    }
+
+    await preparePicker(tester, (Future<DateTimeRange> range) async {
+      final DateTime currentMonth = DateTime.now();
+      final DateTime lastMonth =
+          DateTime(currentMonth.year, currentMonth.month - 1);
+
+      final String currentMonthText =
+          '${_getMonthName(currentMonth.month)} ${currentMonth.year}';
+      final String lastMonthText =
+          '${_getMonthName(lastMonth.month)} ${lastMonth.year}';
+
+      expect(find.text(currentMonthText), findsOneWidget);
+      expect(find.text(lastMonthText), findsNothing);
+    });
+  });
+
   testWidgets('Can cancel', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTimeRange> range) async {
       await tester.tap(find.byIcon(Icons.close));
