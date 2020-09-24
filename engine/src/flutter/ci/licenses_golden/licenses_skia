@@ -1,4 +1,4 @@
-Signature: 19302e02ec2ca4bd90928b3b4fa2125a
+Signature: fd32a7a605526c7164072c171e4751a3
 
 UNUSED LICENSES:
 
@@ -6328,8 +6328,8 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/include/gpu/GrConfig.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/gpu/GrConfig.h
+FILE: ../../../third_party/skia/include/gpu/GrContext.h
 FILE: ../../../third_party/skia/include/gpu/GrTypes.h
-FILE: ../../../third_party/skia/include/private/GrContext.h
 FILE: ../../../third_party/skia/src/core/SkImageInfo.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterClip.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterClip.h
