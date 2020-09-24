@@ -126,6 +126,9 @@ class HtmlImage implements ui.Image {
   ui.Image clone() => this;
 
   @override
+  bool isCloneOf(ui.Image other) => other == this;
+
+  @override
   List<StackTrace>? debugGetOpenHandleStackTraces() => null;
 
   @override
