@@ -1,4 +1,4 @@
-Signature: fd32a7a605526c7164072c171e4751a3
+Signature: fb7eac50d8121330eed77f537266e9bd
 
 UNUSED LICENSES:
 
@@ -5587,6 +5587,7 @@ FILE: ../../../third_party/skia/src/opts/SkVM_opts.h
 FILE: ../../../third_party/skia/src/sksl/SkSLAnalysis.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLRehydrator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLRehydrator.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLIRNode.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google LLC.
 
