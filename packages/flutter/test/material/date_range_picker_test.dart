@@ -122,32 +122,38 @@ void main() {
     });
   });
 
-  testWidgets('Last month should be visible if last date is selected',
+  testWidgets('Last month header should be visible if last date is selected',
       (WidgetTester tester) async {
+    firstDate = DateTime(2015, DateTime.january, 1);
+    lastDate = DateTime(2016, DateTime.december, 31);
     initialDateRange = DateTimeRange(
-      start: DateTime(2016, DateTime.december, 31),
-      end: DateTime(2016, DateTime.december, 31),
+      start: lastDate,
+      end: lastDate,
     );
     await preparePicker(tester, (Future<DateTimeRange> range) async {
+      // December header should be showing, but no November
       expect(find.text('December 2016'), findsOneWidget);
       expect(find.text('November 2016'), findsNothing);
     });
   });
 
-  testWidgets('First month should be visible if first date is selected',
+  testWidgets('First month header should be visible if first date is selected',
       (WidgetTester tester) async {
+    firstDate = DateTime(2015, DateTime.january, 1);
+    lastDate = DateTime(2016, DateTime.december, 31);
     initialDateRange = DateTimeRange(
-      start: DateTime(2015, DateTime.january, 01),
-      end: DateTime(2015, DateTime.january, 01),
+      start: firstDate,
+      end: firstDate,
     );
     await preparePicker(tester, (Future<DateTimeRange> range) async {
+      // January and February headers should be showing, but no March
       expect(find.text('January 2015'), findsOneWidget);
       expect(find.text('February 2015'), findsOneWidget);
       expect(find.text('March 2015'), findsNothing);
     });
   });
 
-  testWidgets('Current month should be visible if no date is selected',
+  testWidgets('Current month header should be visible if no date is selected',
       (WidgetTester tester) async {
     firstDate = DateTime(DateTime.now().year - 1);
     lastDate = DateTime(DateTime.now().year + 1);
@@ -193,6 +199,8 @@ void main() {
       final String lastMonthText =
           '${_getMonthName(lastMonth.month)} ${lastMonth.year}';
 
+      // Current month header should be showing, previous month's header should
+      // not
       expect(find.text(currentMonthText), findsOneWidget);
       expect(find.text(lastMonthText), findsNothing);
     });
@@ -448,10 +456,10 @@ void main() {
 
     testWidgets('Navigating with arrow keys scrolls as needed', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange> range) async {
-        // Jan and Feb headers should be showing, but no Mar
+        // Jan and Feb headers should be showing, but no March
         expect(find.text('January 2016'), findsOneWidget);
         expect(find.text('February 2016'), findsOneWidget);
-        expect(find.text('Mar 2016'), findsNothing);
+        expect(find.text('March 2016'), findsNothing);
 
         // Navigate to the grid
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
