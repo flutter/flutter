@@ -29,6 +29,7 @@ end
 def flutter_additional_ios_build_settings(target)
   return unless target.platform_name == :ios
 
+  # [target.deployment_target] is a [String] formatted as "8.0".
   inherit_deployment_target = target.deployment_target[/\d+/].to_i < 9
   target.build_configurations.each do |build_configuration|
     build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
