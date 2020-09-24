@@ -1512,7 +1512,7 @@ class _TransitionableNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(() {
-      bool? inHero;
+      bool inHero = false;
       context.visitAncestorElements((Element ancestor) {
         if (ancestor is ComponentElement) {
           assert(
@@ -1526,11 +1526,10 @@ class _TransitionableNavigationBar extends StatelessWidget {
             inHero = true;
           }
         }
-        inHero ??= false;
         return true;
       });
       assert(
-        inHero == true,
+        inHero,
         '_TransitionableNavigationBar should only be added as the immediate '
         'child of Hero widgets.',
       );

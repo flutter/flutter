@@ -419,8 +419,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
                 onTap: (int newIndex) {
                   _controller!.index = newIndex;
                   // Chain the user's original callback.
-                  if (widget.tabBar.onTap != null)
-                    widget.tabBar.onTap!(newIndex);
+                  widget.tabBar.onTap?.call(newIndex);
                 },
               ),
             ),

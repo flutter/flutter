@@ -393,8 +393,8 @@ class _ToolbarRenderBox extends RenderShiftedBox {
         ..shader = ui.Gradient.linear(
           const Offset(0.0, 0.0),
           const Offset(10.0, 10.0),
-          <Color>[const Color(0x00000000), const Color(0xFFFF00FF), const Color(0xFFFF00FF), const Color(0x00000000)],
-          <double>[0.25, 0.25, 0.75, 0.75],
+          const <Color>[Color(0x00000000), Color(0xFFFF00FF), Color(0xFFFF00FF), Color(0x00000000)],
+          const <double>[0.25, 0.25, 0.75, 0.75],
           TileMode.repeated,
         )
         ..strokeWidth = 2.0
