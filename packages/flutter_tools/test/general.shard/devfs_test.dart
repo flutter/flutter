@@ -368,7 +368,6 @@ void main() {
       } else {
         // This branch shouldn't happen.
         fail('This branch should not happen');
-        return null;
       }
     });
 
