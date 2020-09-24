@@ -7,6 +7,7 @@ import 'dart:html' as html;
 import 'dart:ui' as ui;
 
 import 'js_url_strategy.dart';
+import 'utils.dart';
 
 /// Change the strategy to use for handling browser URL.
 ///
@@ -58,13 +59,10 @@ abstract class UrlStrategy {
 /// In order to use this [UrlStrategy] for an app, it needs to be set like this:
 ///
 /// ```dart
-/// import 'package:flutter/material.dart';
 /// import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 ///
-/// void main() {
-///   setUrlStrategy(const HashUrlStrategy());
-///   runApp(MyApp());
-/// }
+/// // Somewhere before calling `runApp()` do:
+/// setUrlStrategy(const HashUrlStrategy());
 /// ```
 class HashUrlStrategy extends UrlStrategy {
   /// Creates an instance of [HashUrlStrategy].
@@ -142,15 +140,30 @@ class HashUrlStrategy extends UrlStrategy {
   }
 }
 
+/// This is an implementation of [UrlStrategy] that uses the browser URL's
+/// pathname to represent Flutter's route name.
+///
+/// In order to use this [UrlStrategy] for an app, it needs to be set like this:
+///
+/// ```dart
+/// import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+///
+/// // Somewhere before calling `runApp()` do:
+/// setUrlStrategy(PathUrlStrategy());
+/// ```
 class PathUrlStrategy extends UrlStrategy {
   /// Creates an instance of [PathUrlStrategy].
   ///
   /// The [PlatformLocation] parameter is useful for testing to avoid
   /// interacting with the actual browser.
-  const PathUrlStrategy(
-      [this._platformLocation = const BrowserPlatformLocation()]);
+  PathUrlStrategy([
+    this._platformLocation = const BrowserPlatformLocation(),
+  ]) : _basePath = stripTrailingSlash(extractPathname(
+          _platformLocation.getBaseHref(),
+        ));
 
   final PlatformLocation _platformLocation;
+  final String _basePath;
 
   @override
   ui.VoidCallback onPopState(html.EventListener fn) {
@@ -160,7 +173,11 @@ class PathUrlStrategy extends UrlStrategy {
 
   @override
   String getPath() {
-    return _platformLocation.pathname + _platformLocation.search;
+    final String path = _platformLocation.pathname + _platformLocation.search;
+    if (_basePath.isNotEmpty && path.startsWith(_basePath)) {
+      return ensureLeadingSlash(path.substring(_basePath.length));
+    }
+    return ensureLeadingSlash(path);
   }
 
   @override
@@ -171,8 +188,7 @@ class PathUrlStrategy extends UrlStrategy {
     if (internalUrl.isNotEmpty && !internalUrl.startsWith('/')) {
       internalUrl = '/$internalUrl';
     }
-    // TODO: prepend `baseHref`.
-    return internalUrl;
+    return '$_basePath$internalUrl';
   }
 
   @override
@@ -262,6 +278,9 @@ abstract class PlatformLocation {
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
   void go(int count);
+
+  /// The base href where the flutter app is being served.
+  String getBaseHref();
 }
 
 /// An implementation of [PlatformLocation] for the browser.
@@ -308,4 +327,7 @@ class BrowserPlatformLocation extends PlatformLocation {
   void go(int count) {
     _history.go(count);
   }
+
+  @override
+  String getBaseHref() => html.document.baseUri;
 }
