@@ -379,25 +379,22 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    // Return the new value when the old value has not reached the max
-    // limit or the old value is composing too.
-    if (newValue.composing.isValid) {
-      if (maxLength != null && maxLength! > 0 &&
-          oldValue.text.characters.length == maxLength! &&
-          !oldValue.composing.isValid) {
-        return oldValue;
-      }
+    final int? maxLength = this.maxLength;
+
+    if (maxLength == null || maxLength == -1 || newValue.text.characters.length <= maxLength)
       return newValue;
+
+    assert(maxLength > 0);
+
+    // If already at the maximum and tried to enter even more, keep the old
+    // value.
+    if (oldValue.text.characters.length == maxLength && !oldValue.composing.isValid) {
+      return oldValue;
     }
-    if (maxLength != null && maxLength! > 0 && newValue.text.characters.length > maxLength!) {
-      // If already at the maximum and tried to enter even more, keep the old
-      // value.
-      if (oldValue.text.characters.length == maxLength) {
-        return oldValue;
-      }
-      return truncate(newValue, maxLength!);
-    }
-    return newValue;
+
+    // Temporarily exempt `newValue` from the maxLength limit if it has a
+    // composing text going, until the composing is finished.
+    return newValue.composing.isValid ? newValue : truncate(newValue, maxLength);
   }
 }
 
