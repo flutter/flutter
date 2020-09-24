@@ -268,7 +268,7 @@ typedef RefreshCallback = Future<void> Function();
 /// sliver such as [CupertinoSliverNavigationBar] and your main scrollable
 /// content's sliver.
 ///
-/// {@tool snippet}
+/// {@tool dartpad --template=stateful_widget_cupertino_page_scaffold}
 ///
 /// This example shows the usage of [CupertinoSliverRefreshControl].
 ///
