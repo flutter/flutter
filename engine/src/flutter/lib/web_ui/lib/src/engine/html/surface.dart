@@ -275,7 +275,6 @@ abstract class PersistedSurface implements ui.EngineLayer {
   /// retain came in.
   @mustCallSuper
   @visibleForTesting
-  @protected
   void revive() {
     assert(debugAssertSurfaceState(this, PersistedSurfaceState.released));
     state = PersistedSurfaceState.created;
@@ -304,6 +303,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
   html.Element? rootElement;
 
   /// Whether this surface can update an existing [oldSurface].
+  @mustCallSuper
   bool canUpdateAsMatch(PersistedSurface oldSurface) {
     return oldSurface.isActive && runtimeType == oldSurface.runtimeType;
   }
@@ -342,7 +342,6 @@ abstract class PersistedSurface implements ui.EngineLayer {
   ///
   /// This is called when we failed to locate an existing DOM element to reuse,
   /// such as on the very first frame.
-  @protected
   @mustCallSuper
   void build() {
     if (rootElement != null) {
@@ -371,7 +370,6 @@ abstract class PersistedSurface implements ui.EngineLayer {
   /// frame, we reuse old ones as much as possible. This method should only be
   /// called when [isTotalMatchFor] returns true for the [oldSurface]. Otherwise
   /// adopting the [oldSurface]'s elements could lead to correctness issues.
-  @protected
   @mustCallSuper
   void adoptElements(covariant PersistedSurface oldSurface) {
     assert(oldSurface.rootElement != null);
@@ -399,7 +397,6 @@ abstract class PersistedSurface implements ui.EngineLayer {
   ///
   /// Attempts to reuse [oldSurface]'s DOM element, if possible. Otherwise,
   /// creates a new element by calling [build].
-  @protected
   @mustCallSuper
   void update(covariant PersistedSurface oldSurface) {
     assert(oldSurface != null); // ignore: unnecessary_null_comparison
@@ -424,7 +421,6 @@ abstract class PersistedSurface implements ui.EngineLayer {
   ///
   /// This is also different from [build], which constructs a brand new surface
   /// sub-tree.
-  @protected
   @mustCallSuper
   void retain() {
     assert(rootElement != null);
@@ -448,7 +444,6 @@ abstract class PersistedSurface implements ui.EngineLayer {
   ///
   /// This method may be overridden by concrete implementations, for example, to
   /// recycle the resources owned by this surface.
-  @protected
   @mustCallSuper
   void discard() {
     assert(debugAssertSurfaceState(this, PersistedSurfaceState.active));
@@ -471,7 +466,6 @@ abstract class PersistedSurface implements ui.EngineLayer {
     state = PersistedSurfaceState.released;
   }
 
-  @protected
   @mustCallSuper
   void debugValidate(List<String> validationErrors) {
     if (rootElement == null) {
@@ -541,7 +535,6 @@ abstract class PersistedSurface implements ui.EngineLayer {
   /// clip behaviors.
   ///
   /// This method is called by the [preroll] method.
-  @protected
   void recomputeTransformAndClip() {
     _transform = parent!._transform;
     _localClipBounds = null;
@@ -578,7 +571,6 @@ abstract class PersistedSurface implements ui.EngineLayer {
     }
   }
 
-  @protected
   @mustCallSuper
   void debugPrintAttributes(StringBuffer buffer) {
     if (rootElement != null) {
@@ -586,7 +578,6 @@ abstract class PersistedSurface implements ui.EngineLayer {
     }
   }
 
-  @protected
   @mustCallSuper
   void debugPrintChildren(StringBuffer buffer, int indent) {}
 
@@ -1155,7 +1146,6 @@ abstract class PersistedContainerSurface extends PersistedSurface {
   }
 
   @override
-  @protected
   @mustCallSuper
   void debugValidate(List<String> validationErrors) {
     super.debugValidate(validationErrors);
