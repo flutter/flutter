@@ -1641,9 +1641,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // TextInputClient implementation:
 
-  // _lastFormattedUnmodifiedTextEditingValue tracks the last value
-  // that the formatter ran on and is used to prevent double-formatting.
-  TextEditingValue? _lastFormattedUnmodifiedTextEditingValue;
   /// The last reported [TextEditingValue] the platform text input plugin holds.
   ///
   /// This value is updated when the platform text input plugin sends a new
@@ -1947,7 +1944,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
-      _lastFormattedUnmodifiedTextEditingValue = localValue;
 
       // When _needsAutofill == true && currentAutofillScope == null, autofill
       // is allowed but saving the user input from the text field is
@@ -1988,7 +1984,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasInputConnection) {
       _textInputConnection!.close();
       _textInputConnection = null;
-      _lastFormattedUnmodifiedTextEditingValue = null;
       _lastKnownRemoteTextEditingValue = null;
     }
   }
@@ -2007,7 +2002,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasInputConnection) {
       _textInputConnection!.connectionClosedReceived();
       _textInputConnection = null;
-      _lastFormattedUnmodifiedTextEditingValue = null;
       _lastKnownRemoteTextEditingValue = null;
       _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
     }
@@ -2161,27 +2155,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   late final _WhitespaceDirectionalityFormatter _whitespaceFormatter = _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
 
-  /// Preprocesses the **user input** and updates the current editing state.
   void _formatAndSetValue(TextEditingValue value) {
     // Check if the new value is the same as the current local value, or is the same
     // as the pre-formatting value of the previous pass (repeat call).
     final bool textChanged = _value.text != value.text || _value.composing != _value.composing;
-    final bool isRepeat = value == _lastFormattedUnmodifiedTextEditingValue;
 
-    // There's no need to format when starting to compose or when continuing
-    // an existing composition.
-    final bool isComposing = value.composing.isValid;
-    final bool isPreviouslyComposing = _lastFormattedUnmodifiedTextEditingValue?.composing.isValid ?? false;
-
-    if ((textChanged || (!isComposing && isPreviouslyComposing)) &&
-        widget.inputFormatters != null &&
-        widget.inputFormatters!.isNotEmpty) {
+    if (textChanged) {
       // Only format when the text has changed and there are available formatters.
       // Pass through the formatter regardless of repeat status if the input value is
       // different than the stored value.
-      for (final TextInputFormatter formatter in widget.inputFormatters!) {
-        value = formatter.formatEditUpdate(_value, value);
-      }
+      value = widget.inputFormatters?.fold<TextEditingValue>(
+        value,
+        (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
+      ) ?? value;
+
       // Always pass the text through the whitespace directionality formatter to
       // maintain expected behavior with carets on trailing whitespace.
       value = _whitespaceFormatter.formatEditUpdate(_value, value);
@@ -2191,13 +2178,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // [_updateRemoteEditingValueIfNeeded] is muted, so we can consolidate the
     // changes and send them to the engine in one batch.
     _muteRemoteUpdate = true;
-    // Setting _value here ensures the selection and composing region info is passed.
     _value = value;
 
     if (textChanged)
       widget.onChanged?.call(value.text);
     _muteRemoteUpdate = false;
-    _lastFormattedUnmodifiedTextEditingValue = _lastKnownRemoteTextEditingValue;
     _updateRemoteEditingValueIfNeeded();
     assert(!_muteRemoteUpdate);
   }
@@ -2370,7 +2355,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   double get _devicePixelRatio => MediaQuery.of(context)?.devicePixelRatio ?? 1.0;
 
-  /// Update the current
   @override
   set textEditingValue(TextEditingValue value) {
     _selectionOverlay?.update(value);
