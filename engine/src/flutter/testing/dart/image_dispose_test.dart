@@ -91,6 +91,29 @@ void main() {
     frame.image.dispose();
     expect(frame.image.debugGetOpenHandleStackTraces(), isEmpty);
   }, skip: !assertsEnabled);
+
+  test('Clones can be compared', () async {
+    final Uint8List bytes = await readFile('2x2.png');
+    final Codec codec = await instantiateImageCodec(bytes);
+    final FrameInfo frame = await codec.getNextFrame();
+
+    final Image handle1 = frame.image.clone();
+    final Image handle2 = handle1.clone();
+
+    expect(handle1.isCloneOf(handle2), true);
+    expect(handle2.isCloneOf(handle1), true);
+    expect(handle1.isCloneOf(frame.image), true);
+
+    handle1.dispose();
+    expect(handle1.isCloneOf(handle2), true);
+    expect(handle2.isCloneOf(handle1), true);
+    expect(handle1.isCloneOf(frame.image), true);
+
+    final Codec codec2 = await instantiateImageCodec(bytes);
+    final FrameInfo frame2 = await codec2.getNextFrame();
+
+    expect(frame2.image.isCloneOf(frame.image), false);
+  });
 }
 
 Future<Uint8List> readFile(String fileName) async {

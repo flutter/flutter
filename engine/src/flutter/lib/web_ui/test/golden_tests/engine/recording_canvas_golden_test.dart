@@ -727,6 +727,9 @@ class TestImage implements Image {
   Image clone() => this;
 
   @override
+  bool isCloneOf(Image other) => other == this;
+
+  @override
   List<StackTrace>/*?*/ debugGetOpenHandleStackTraces() => <StackTrace>[];
 }
 

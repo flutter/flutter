@@ -332,6 +332,8 @@ abstract class Image {
 
   Image clone() => this;
 
+  bool isCloneOf(Image other) => other == this;
+
   List<StackTrace>? debugGetOpenHandleStackTraces() => null;
 
   @override
