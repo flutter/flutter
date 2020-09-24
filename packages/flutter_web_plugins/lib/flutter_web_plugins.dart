@@ -19,3 +19,4 @@ library flutter_web_plugins;
 
 export 'src/plugin_event_channel.dart';
 export 'src/plugin_registry.dart';
+export 'src/url_strategy.dart';
