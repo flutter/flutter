@@ -120,6 +120,19 @@ public class LocalizationPluginTest {
     assertEquals(result[0], "it");
     assertEquals(result[1], "IT");
     assertEquals(result[2], "");
+
+    supportedLocales =
+        new String[] {
+          "zh", "CN", "Hans",
+          "zh", "HK", "Hant",
+        };
+    localeList = new LocaleList(new Locale("zh", "CN"));
+    when(config.getLocales()).thenReturn(localeList);
+    result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
+    assertEquals(result.length, 3);
+    assertEquals(result[0], "zh");
+    assertEquals(result[1], "CN");
+    assertEquals(result[2], "Hans");
   }
 
   // This test should be synced with the version for API 26.

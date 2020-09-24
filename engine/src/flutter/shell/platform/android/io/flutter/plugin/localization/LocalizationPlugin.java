@@ -50,9 +50,15 @@ public class LocalizationPlugin {
       int localeCount = localeList.size();
       for (int index = 0; index < localeCount; ++index) {
         Locale locale = localeList.get(index);
-        String localeString = locale.toString();
-        // This string replacement converts the locale string into the ranges format.
-        languageRanges.add(new Locale.LanguageRange(localeString.replace("_", "-")));
+        // Convert locale string into language range format.
+        String fullRange = locale.getLanguage();
+        if (!locale.getScript().isEmpty()) {
+          fullRange += "-" + locale.getScript();
+        }
+        if (!locale.getCountry().isEmpty()) {
+          fullRange += "-" + locale.getCountry();
+        }
+        languageRanges.add(new Locale.LanguageRange(fullRange));
         languageRanges.add(new Locale.LanguageRange(locale.getLanguage()));
         languageRanges.add(new Locale.LanguageRange(locale.getLanguage() + "-*"));
       }
