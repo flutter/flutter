@@ -495,6 +495,7 @@ end
             continue;
           }
           final String binaryName = globals.fs.path.basenameWithoutExtension(podFrameworkName);
+          final String frameworkDir = globals.fs.path.basename(podProduct.dirname);
           if (boolArg('universal')) {
             globals.fsUtils.copyDirectorySync(
               podProduct as Directory,
@@ -508,7 +509,7 @@ end
               if (mode == BuildMode.debug)
                 simulatorBuildConfiguration
                   .childDirectory(binaryName)
-                  .childDirectory(podFrameworkName)
+                  .childDirectory(frameworkDir)
                   .childFile(binaryName)
                   .path,
               '-output',
@@ -539,7 +540,7 @@ end
                 '-framework',
               if (mode == BuildMode.debug)
                 simulatorBuildConfiguration
-                  .childDirectory(binaryName)
+                  .childDirectory(frameworkDir)
                   .childDirectory(podFrameworkName)
                   .path,
               '-output',
