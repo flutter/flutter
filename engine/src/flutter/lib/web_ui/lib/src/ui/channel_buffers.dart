@@ -119,6 +119,7 @@ class ChannelBuffers {
   }
 
   Future<void> drain(String channel, DrainChannelCallback callback) async {
+    await null; // Ensures that the rest of this method is scheduled in a microtask.
     while (!_isEmpty(channel)) {
       final _StoredMessage message = _pop(channel)!;
       await callback(message.data, message.callback);
