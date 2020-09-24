@@ -1769,16 +1769,11 @@ void main() {
     debugOnPaintImage = null;
   });
 
-  testWidgets('Load good image after a bad image was loaded', (WidgetTester tester) async {
+  testWidgets('Load a good image after a bad image was loaded should not call errorBuilder', (WidgetTester tester) async {
     final UniqueKey errorKey = UniqueKey();
     final ui.Image image = await tester.runAsync(() => createTestImage(kBlueRectPng));
-    final FailSuccessFailImageProvider imageProvider =
-        FailSuccessFailImageProvider(image: image, throws: 'threw');
-
-    int count = 0;
-    debugOnPaintImage = (ImageSizeInfo info) {
-      count += 1;
-    };
+    final TestImageStreamCompleter2 streamCompleter = TestImageStreamCompleter2();
+    final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
 
     await tester.pumpWidget(
       Center(
@@ -1787,29 +1782,37 @@ void main() {
           width: 50,
           child: Image(
             image: imageProvider,
-            errorBuilder:
-                (BuildContext context, Object error, StackTrace stackTrace) {
+            excludeFromSemantics: true,
+            errorBuilder: (BuildContext context, Object error, StackTrace stackTrace) {
               return Container(key: errorKey);
+            },
+            frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
+              return Padding(padding: const EdgeInsets.all(1), child: child);
             },
           ),
         ),
       ),
     );
 
-    // No error widget before loading a invalid image
+    // No error widget before loading a invalid image.
     expect(find.byKey(errorKey), findsNothing);
 
-    // Loading bad image fails
-    imageProvider.load(0, null);
+    // Loading good image succeed
+    streamCompleter.notifyListeners(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
+    await tester.pump();
+    expect(find.byType(Padding), findsOneWidget);
+
+    // Loading bad image shows the error widget.
+    streamCompleter.notifyListeners(notifyFailure: true);
     await tester.pump();
     expect(find.byKey(errorKey), findsOneWidget);
 
-    // Loading good image succeed
-    imageProvider.load(1, null);
+    // Loading good image shows the image widget instead of the error widget.
+    streamCompleter.notifyListeners(imageInfo: ImageInfo(image: image));
     await tester.pump();
-    expect(count, equals(1));
+    expect(find.byType(Padding), findsOneWidget);
+    expect(tester.widget<Padding>(find.byType(Padding)).child, isA<RawImage>());
     expect(find.byKey(errorKey), findsNothing);
-    debugOnPaintImage = null;
   });
 }
 
@@ -2025,43 +2028,35 @@ class FailingImageProvider extends ImageProvider<int> {
   }
 }
 
-class FailSuccessFailImageProvider extends ImageProvider<Object> {
-  FailSuccessFailImageProvider({this.image, this.throws});
-
-  final Object throws;
-  final ui.Image image;
+class TestImageStreamCompleter2 extends ImageStreamCompleter {
+  final Set<ImageStreamListener> _listeners = <ImageStreamListener>{};
 
   @override
-  Future<Object> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<FailSuccessFailImageProvider>(this);
-  }
+  void addListener(ImageStreamListener listener) => _listeners.add(listener);
 
   @override
-  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream,
-      Object key, ImageErrorListener handleError) {
-    super.resolveStreamForKey(configuration, stream, key, handleError);
-  }
+  void removeListener(ImageStreamListener listener) => _listeners.remove(listener);
 
-  int _loadCallCount = 0;
+  void notifyListeners({
+    bool notifyFailure = false,
+    ImageInfo imageInfo,
+    ImageChunkEvent chunkEvent,
+  }) {
 
-  @override
-  ImageStreamCompleter load(Object key, DecoderCallback decode) {
-    _loadCallCount += 1;
-    // Fail on first load, succeed on second and fails again on third load.
-    if (_loadCallCount == 1 || _loadCallCount == 3) {
-      throw throws;
+    // Make a copy to avoid concurrency!
+    final List<ImageStreamListener> localListeners = _listeners.toList();
+    for (final ImageStreamListener listener in localListeners) {
+      if (notifyFailure) {
+        if (listener.onError != null)
+          listener.onError('thrown', StackTrace.empty);
+      } else {
+        if (imageInfo != null) {
+          listener.onImage(imageInfo, false);
+        }
+        if (chunkEvent != null && listener.onChunk != null) {
+          listener.onChunk(chunkEvent);
+        }
+      }
     }
-
-    return OneFrameImageStreamCompleter(
-      Future<ImageInfo>.value(
-        ImageInfo(
-          image: image,
-          scale: 1.0,
-        ),
-      ),
-    );
   }
-
-  @override
-  String toString() => '${describeIdentity(this)}()';
 }
