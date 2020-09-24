@@ -18,6 +18,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/signals.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -63,6 +64,7 @@ class FlutterDevice {
          artifacts: globals.artifacts,
          processManager: globals.processManager,
          logger: globals.logger,
+         platform: globals.platform,
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
@@ -71,6 +73,7 @@ class FlutterDevice {
     @required FlutterProject flutterProject,
     @required String target,
     @required BuildInfo buildInfo,
+    @required Platform platform,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     TargetModel targetModel = TargetModel.flutter,
@@ -129,6 +132,7 @@ class FlutterDevice {
         artifacts: globals.artifacts,
         processManager: globals.processManager,
         logger: globals.logger,
+        platform: platform,
       );
     } else {
       // The flutter-widget-cache feature only applies to run mode.
@@ -161,6 +165,7 @@ class FlutterDevice {
         artifacts: globals.artifacts,
         processManager: globals.processManager,
         logger: globals.logger,
+        platform: platform,
       );
     }
 
@@ -692,6 +697,7 @@ class FlutterDevice {
         pathToReload: pathToReload,
         invalidatedFiles: invalidatedFiles,
         packageConfig: packageConfig,
+        devFSWriter: null,
       );
     } on DevFSException {
       devFSStatus.cancel();
@@ -795,7 +801,6 @@ abstract class ResidentRunner {
   bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
-  bool get supportsCanvasKit => false;
   bool get supportsWriteSkSL => supportsServiceProtocol;
   bool get trackWidgetCreation => debuggingOptions.buildInfo.trackWidgetCreation;
 
@@ -1319,9 +1324,6 @@ abstract class ResidentRunner {
         commandHelp.S.print();
         commandHelp.U.print();
       }
-      if (supportsCanvasKit){
-        commandHelp.k.print();
-      }
       if (supportsWriteSkSL) {
         commandHelp.M.print();
       }
@@ -1473,13 +1475,6 @@ class TerminalHandler {
       case 'I':
         if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
           await residentRunner.debugToggleInvertOversizedImages();
-          return true;
-        }
-        return false;
-      case 'k':
-        if (residentRunner.supportsCanvasKit) {
-          final bool result = await residentRunner.toggleCanvaskit();
-          globals.printStatus('${result ? 'Enabled' : 'Disabled'} CanvasKit');
           return true;
         }
         return false;

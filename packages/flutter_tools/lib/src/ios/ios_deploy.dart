@@ -268,6 +268,10 @@ class IOSDeployDebugger {
   // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
   static final RegExp _lldbRun = RegExp(r'\(lldb\)\s*run');
 
+  // (lldb)     run
+  // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
+  static final RegExp _lldbProcessExit = RegExp(r'Process \d* exited with status =');
+
   /// Launch the app on the device, and attach the debugger.
   ///
   /// Returns whether or not the debugger successfully attached.
@@ -306,11 +310,15 @@ class IOSDeployDebugger {
           return;
         }
         if (line.contains('PROCESS_STOPPED') ||
-            line.contains('PROCESS_EXITED')) {
+            line.contains('PROCESS_EXITED') ||
+            _lldbProcessExit.hasMatch(line)) {
           // The app exited or crashed, so stop echoing the output.
           // Don't pass any further ios-deploy debugging messages to the log reader after it exits.
           _debuggerState = _IOSDeployDebuggerState.detached;
           _logger.printTrace(line);
+          if (!debuggerCompleter.isCompleted) {
+            debuggerCompleter.complete(false);
+          }
           return;
         }
         if (_debuggerState != _IOSDeployDebuggerState.attached) {
