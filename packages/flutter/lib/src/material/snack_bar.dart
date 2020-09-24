@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
 import 'color_scheme.dart';
-import 'debug.dart';
+import 'debug.dart' show debugCheckHasScaffoldMessenger;
 import 'material.dart';
 import 'material_state.dart';
 import 'scaffold.dart';
