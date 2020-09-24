@@ -48,14 +48,15 @@ class ExpansionTile extends StatefulWidget {
     this.expandedCrossAxisAlignment,
     this.expandedAlignment,
     this.childrenPadding,
-  }) : assert(initiallyExpanded != null),
-       assert(maintainState != null),
-       assert(
-       expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
-       'CrossAxisAlignment.baseline is not supported since the expanded children '
-           'are aligned in a column, not a row. Try to use another constant.',
-       ),
-       super(key: key);
+    this.hasBorderOnExpand = true,
+  })  : assert(initiallyExpanded != null),
+        assert(maintainState != null),
+        assert(
+          expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
+          'CrossAxisAlignment.baseline is not supported since the expanded children '
+          'are aligned in a column, not a row. Try to use another constant.',
+        ),
+        super(key: key);
 
   /// A widget to display before the title.
   ///
@@ -146,6 +147,9 @@ class ExpansionTile extends StatefulWidget {
   /// When the value is null, the value of `childrenPadding` is [EdgeInsets.zero].
   final EdgeInsetsGeometry childrenPadding;
 
+  /// Specifies if the expanded list should have border or not.
+  final bool hasBorderOnExpand;
+
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
 }
@@ -218,10 +222,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     return Container(
       decoration: BoxDecoration(
         color: _backgroundColor.value ?? Colors.transparent,
-        border: Border(
+        border: hasBorderOnExpand ? Border(
           top: BorderSide(color: borderSideColor),
           bottom: BorderSide(color: borderSideColor),
-        ),
+        ) : null,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
