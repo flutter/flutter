@@ -601,6 +601,9 @@ class PerfTest {
         );
       }
 
+      // TODO(liyuqian): Remove isAndroid restriction once
+      // https://github.com/flutter/flutter/issues/61567 is fixed.
+      final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
       return TaskResult.success(
         data,
         detailFiles: detailFiles.isNotEmpty ? detailFiles : null,
@@ -609,9 +612,15 @@ class PerfTest {
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
-          if (measureCpuGpu) 'average_cpu_usage',
-          if (measureCpuGpu) 'average_gpu_usage',
-          if (measureMemory) ...<String>['average_memory_usage', '90th_percentile_memory_usage', '99th_percentile_memory_usage'],
+          if (measureCpuGpu && !isAndroid) ...<String>[
+            'average_cpu_usage',
+            'average_gpu_usage',
+          ],
+          if (measureMemory && !isAndroid) ...<String>[
+            'average_memory_usage',
+            '90th_percentile_memory_usage',
+            '99th_percentile_memory_usage',
+          ],
         ],
       );
     });
