@@ -239,7 +239,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ViewConfiguration createViewConfiguration() {
     final double devicePixelRatio = window.devicePixelRatio;
     return ViewConfiguration(
-      size: window.physicalSize / devicePixelRatio,
+      size: devicePixelRatio == 0.0 ? Size.zero : window.physicalSize / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
     );
   }

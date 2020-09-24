@@ -453,7 +453,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @override
   ViewConfiguration createViewConfiguration() {
     final double devicePixelRatio = window.devicePixelRatio;
-    final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
+    final Size size = _surfaceSize ?? (devicePixelRatio == 0.0 ? Size.zero : window.physicalSize / devicePixelRatio);
     return ViewConfiguration(
       size: size,
       devicePixelRatio: devicePixelRatio,

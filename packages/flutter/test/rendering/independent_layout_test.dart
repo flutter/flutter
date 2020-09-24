@@ -40,6 +40,23 @@ void main() {
     devicePixelRatio: 1.0,
   );
 
+  test('RenderView asserts that the size is finite', () {
+    final ViewConfiguration badConfiguration = ViewConfiguration(
+      size: Size.zero / 0.0,
+      devicePixelRatio: 0.0,
+    );
+    expect(
+      () => RenderView(configuration: badConfiguration, window: ui.window),
+      throwsAssertionError,
+    );
+
+    final RenderView renderView = RenderView(configuration: testConfiguration, window: ui.window);
+    expect(
+      () => renderView.configuration = badConfiguration,
+      throwsAssertionError,
+    );
+  });
+
   test('onscreen layout does not affect offscreen', () {
     final TestLayout onscreen = TestLayout();
     final TestLayout offscreen = TestLayout();

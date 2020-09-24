@@ -125,7 +125,7 @@ class MediaQueryData {
   /// window's metrics change. For example, see
   /// [WidgetsBindingObserver.didChangeMetrics] or [Window.onMetricsChanged].
   MediaQueryData.fromWindow(ui.Window window)
-    : size = window.physicalSize / window.devicePixelRatio,
+    : size = window.devicePixelRatio == 0 ? Size.zero : window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = window.textScaleFactor,
       platformBrightness = window.platformBrightness,
@@ -139,7 +139,10 @@ class MediaQueryData {
       boldText = window.accessibilityFeatures.boldText,
       highContrast = window.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat,
-      navigationMode = NavigationMode.traditional;
+      navigationMode = NavigationMode.traditional {
+    assert(size.isFinite);
+  }
+
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -147,6 +150,8 @@ class MediaQueryData {
   /// pixels are the size of the actual hardware pixels on the device. The
   /// number of physical pixels per logical pixel is described by the
   /// [devicePixelRatio].
+  ///
+  /// Size is expected to be finite, even if devicePixelRatio is 0.0.
   final Size size;
 
   /// The number of device pixels for each logical pixel. This number might not

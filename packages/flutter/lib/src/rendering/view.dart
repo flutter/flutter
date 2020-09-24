@@ -23,6 +23,8 @@ class ViewConfiguration {
   /// Creates a view configuration.
   ///
   /// By default, the view has zero [size] and a [devicePixelRatio] of 1.0.
+  ///
+  /// The [size] parameter must be finite and positive.
   const ViewConfiguration({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
@@ -59,6 +61,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     required ViewConfiguration configuration,
     required ui.Window window,
   }) : assert(configuration != null),
+       assert(configuration.size.isFinite),
        _configuration = configuration,
        _window = window {
     this.child = child;
@@ -77,6 +80,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Always call [prepareInitialFrame] before changing the configuration.
   set configuration(ViewConfiguration value) {
     assert(value != null);
+    assert(value.size.isFinite);
     if (configuration == value)
       return;
     _configuration = value;

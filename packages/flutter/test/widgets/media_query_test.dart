@@ -743,4 +743,16 @@ void main() {
     fail('The assert was never called when it should have been');
   });
 
+  testWidgets('MediaQuery.size is finite', (WidgetTester tester) async {
+    tester.binding.window.devicePixelRatioTestValue = 0.0;
+    final MediaQueryData data = MediaQueryData.fromWindow(tester.binding.window);
+
+    expect(data.size, Size.zero);
+
+    await tester.pumpWidget(const SizedBox.expand());
+
+    expect(find.byType(SizedBox), findsOneWidget);
+    tester.binding.window.clearAllTestValues();
+  });
+
 }
