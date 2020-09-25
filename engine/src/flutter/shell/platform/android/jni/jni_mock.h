@@ -93,6 +93,8 @@ class JNIMock final : public PlatformViewAndroidJNI {
               FlutterViewComputePlatformResolvedLocale,
               (std::vector<std::string> supported_locales_data),
               (override));
+
+  MOCK_METHOD(double, GetDisplayRefreshRate, (), (override));
 };
 
 }  // namespace flutter
