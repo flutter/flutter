@@ -152,6 +152,10 @@ class BuildInfo {
   String get modeName => getModeName(mode);
   String get friendlyModeName => getFriendlyModeName(mode);
 
+  /// the flavor name in the output files is lowercased (see flutter.gradle),
+  /// so the lower cased flavor name is used to compute the output file name
+  String get lowerCasedFlavor => flavor?.toLowerCase();
+
   /// Convert to a structued string encoded structure appropriate for usage as
   /// environment variables or to embed in other scripts.
   ///

@@ -1117,9 +1117,3 @@ String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
   }
   return result;
 }
-
-extension on BuildInfo {
-  /// the flavor name in the output files is lowercased (see flutter.gradle),
-  /// so use the lower cased flavor nam to compute the output file name
-  String get lowerCasedFlavor => flavor?.toLowerCase();
-}
