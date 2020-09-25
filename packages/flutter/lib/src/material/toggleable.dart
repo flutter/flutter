@@ -413,7 +413,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
       case true:
         onChanged!(tristate ? null : false);
         break;
-      default: // case null:
+      case null:
         onChanged!(false);
         break;
     }
