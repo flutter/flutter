@@ -952,7 +952,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   final Color? barrierColor;
 
   @override
-  bool get barrierDismissible => _barrierDismissable ?? true;
+  bool get barrierDismissible => _barrierDismissible ?? true;
 
   @override
   bool get semanticsDismissible => _semanticsDismissible ?? false;
