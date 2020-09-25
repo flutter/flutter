@@ -486,8 +486,8 @@ void _tests() {
     expect(minuteSize.width, greaterThanOrEqualTo(48.0));
     expect(minuteSize.height, greaterThanOrEqualTo(48.0));
 
-    tester.binding.window.physicalSizeTestValue = null;
-    tester.binding.window.devicePixelRatioTestValue = null;
+    tester.binding.window.clearPhysicalSizeTestValue();
+    tester.binding.window.clearDevicePixelRatioTestValue();
   });
 
   testWidgets('builder parameter', (WidgetTester tester) async {
