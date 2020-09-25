@@ -298,6 +298,36 @@ class ErrorHandlingDirectory
   }
 
   @override
+  Future<Directory> create({bool recursive = false}) {
+    return _run<Directory>(
+      () async => wrap(await delegate.create(recursive: recursive)),
+      platform: _platform,
+      failureMessage:
+        'Flutter failed to create a directory at "${delegate.path}"',
+    );
+  }
+
+  @override
+  Future<Directory> delete({bool recursive = false}) {
+    return _run<Directory>(
+      () async => wrap(fileSystem.directory((await delegate.delete(recursive: recursive)).path)),
+      platform: _platform,
+      failureMessage:
+        'Flutter failed to delete a directory at "${delegate.path}"',
+    );
+  }
+
+  @override
+  void deleteSync({bool recursive = false}) {
+    return _runSync<void>(
+      () => delegate.deleteSync(recursive: recursive),
+      platform: _platform,
+      failureMessage:
+        'Flutter failed to delete a directory at "${delegate.path}"',
+    );
+  }
+
+  @override
   String toString() => delegate.toString();
 }
 
@@ -495,6 +525,7 @@ void _handlePosixException(Exception e, String message, int errorCode) {
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
   // https://github.com/apple/darwin-xnu/blob/master/bsd/dev/dtrace/scripts/errno.d
+  const int eperm = 1;
   const int enospc = 28;
   const int eacces = 13;
   // Catch errors and bail when:
@@ -506,9 +537,10 @@ void _handlePosixException(Exception e, String message, int errorCode) {
         'Free up space and try again.',
       );
       break;
+    case eperm:
     case eacces:
       throwToolExit(
-        '$message. The flutter tool cannot access the file.\n'
+        '$message. The flutter tool cannot access the file or directory.\n'
         'Please ensure that the SDK and/or project is installed in a location '
         'that has read/write permissions for the current user.'
       );

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import 'base/common.dart';
@@ -400,7 +398,7 @@ class FlutterVersion {
         lenient: false
       ));
     } on VersionCheckError {
-      // Don't perform the update check if the verison check failed.
+      // Don't perform the update check if the version check failed.
       return;
     }
 

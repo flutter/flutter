@@ -136,9 +136,9 @@ void main() {
 
     expect(environment.outputDir.childFile('foo.txt')
       .readAsStringSync(), 'B');
-    // Appends number to requests for service worker and main.dart.js
+    // Appends number to requests for service worker only
     expect(environment.outputDir.childFile('index.html').readAsStringSync(), allOf(
-      contains('<script src="main.dart.js?v='),
+      contains('<script src="main.dart.js" type="application/javascript">'),
       contains('flutter_service_worker.js?v='),
     ));
   }));

@@ -53,7 +53,7 @@
   "remainingTextFieldCharacterCountOther": "$remainingCount tekens resterend",
   "refreshIndicatorSemanticLabel": "Vernieuwen",
   "moreButtonTooltip": "Meer",
-  "dateSeparator": "/",
+  "dateSeparator": "-",
   "dateHelpText": "dd-mm-jjjj",
   "selectYearSemanticsLabel": "Jaar selecteren",
   "unspecifiedDate": "Datum",

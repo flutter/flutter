@@ -61,7 +61,9 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
     required this.duration,
     this.reverseDuration,
     required this.vsync,
-  }) : super(key: key, child: child);
+    this.clipBehavior = Clip.hardEdge,
+  }) : assert(clipBehavior != null),
+       super(key: key, child: child);
 
   /// The alignment of the child within the parent when the parent is not yet
   /// the same size as the child.
@@ -101,6 +103,11 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
   /// The [TickerProvider] for this widget.
   final TickerProvider vsync;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  final Clip clipBehavior;
+
   @override
   RenderAnimatedSize createRenderObject(BuildContext context) {
     return RenderAnimatedSize(
@@ -110,6 +117,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
       curve: curve,
       vsync: vsync,
       textDirection: Directionality.of(context),
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -121,7 +129,8 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
       ..reverseDuration = reverseDuration
       ..curve = curve
       ..vsync = vsync
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.of(context)
+      ..clipBehavior = clipBehavior;
   }
 
   @override

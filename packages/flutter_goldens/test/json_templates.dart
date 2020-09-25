@@ -17,7 +17,7 @@ String authTemplate({
 }
 
 /// Json response template for Skia Gold ignore request:
-/// https://flutter-gold.skia.org/json/ignores
+/// https://flutter-gold.skia.org/json/v1/ignores
 String ignoreResponseTemplate({
   String pullRequestNumber = '0000',
   String testName = 'flutter.golden_test.1',

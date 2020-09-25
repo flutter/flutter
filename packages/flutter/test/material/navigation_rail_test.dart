@@ -1794,6 +1794,7 @@ void main() {
     expect(rail.size.width, equals(300.0));
   });
 
+  /// Regression test for https://github.com/flutter/flutter/issues/65657
   testWidgets('Extended rail transition does not jump from the beginning', (WidgetTester tester) async {
     bool extended = false;
     StateSetter stateSetter;
@@ -1833,9 +1834,10 @@ void main() {
       ),
     );
 
-    final RenderBox rail = tester.firstRenderObject<RenderBox>(find.byType(NavigationRail));
+    final Finder rail = find.byType(NavigationRail);
 
-    expect(rail.size.width, equals(72.0));
+    // Before starting the animation, the rail has a width of 72.
+    expect(tester.getSize(rail).width, 72.0);
 
     stateSetter(() {
       extended = true;
@@ -1845,10 +1847,10 @@ void main() {
     // Create very close to 0, but non-zero, animation value.
     await tester.pump(const Duration(milliseconds: 1));
     // Expect that it has started to extend.
-    expect(rail.size.width, greaterThan(72.0));
+    expect(tester.getSize(rail).width, greaterThan(72.0));
     // Expect that it has only extended by a small amount, or that the first
     // frame does not jump. This helps verify that it is a smooth animation.
-    expect(rail.size.width, closeTo(72.0, 1.0));
+    expect(tester.getSize(rail).width, closeTo(72.0, 1.0));
   });
 
   testWidgets('Extended rail animation can be consumed', (WidgetTester tester) async {

@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 @TestOn('!chrome') // This whole test suite needs triage.
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show window, BoxHeightStyle, BoxWidthStyle;
 

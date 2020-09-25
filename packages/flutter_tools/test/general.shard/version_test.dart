@@ -28,8 +28,10 @@ final DateTime _stampOutOfDate = _testClock.ago(FlutterVersion.checkAgeConsidere
 void main() {
   MockProcessManager mockProcessManager;
   MockCache mockCache;
+  FakeProcessManager processManager;
 
   setUp(() {
+    processManager = FakeProcessManager.list(<FakeCommand>[]);
     mockProcessManager = MockProcessManager();
     mockCache = MockCache();
   });
@@ -60,11 +62,57 @@ void main() {
           expectSetStamp: true,
           channel: channel,
         );
+
+        processManager.addCommand(const FakeCommand(
+          command: <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%H'],
+          stdout: '1234abcd',
+        ));
+
+        processManager.addCommand(const FakeCommand(
+          command: <String>['git', 'tag', '--points-at', 'HEAD'],
+        ));
+
+        processManager.addCommand(const FakeCommand(
+          command: <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+          stdout: '0.1.2-3-1234abcd',
+        ));
+
+        processManager.addCommand(FakeCommand(
+          command: const <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{u}'],
+          stdout: channel,
+        ));
+
+        processManager.addCommand(FakeCommand(
+          command: const <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+          stdout: getChannelUpToDateVersion().toString(),
+        ));
+
+        processManager.addCommand(const FakeCommand(
+          command: <String>['git', 'remote'],
+        ));
+
+        processManager.addCommand(const FakeCommand(
+          command: <String>['git', 'remote', 'add', '__flutter_version_check__', 'https://github.com/flutter/flutter.git'],
+        ));
+
+        processManager.addCommand(FakeCommand(
+          command: <String>['git', 'fetch', '__flutter_version_check__', channel],
+        ));
+
+        processManager.addCommand(FakeCommand(
+          command: <String>['git', '-c', 'log.showSignature=false', 'log', '__flutter_version_check__/$channel', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+          stdout: getChannelOutOfDateVersion().toString(),
+        ));
+        processManager.addCommand(const FakeCommand(
+          command: <String>['git', 'remote'],
+        ));
+
         await globals.flutterVersion.checkFlutterVersionFreshness();
         _expectVersionMessage('');
+        expect(processManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => FlutterVersion(_testClock),
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => processManager,
         Cache: () => mockCache,
       });
 

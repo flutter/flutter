@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
@@ -164,7 +163,7 @@ class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
   }) : assert(builder != null);
 
   /// Called lazily to build children.
-  final IndexedWidgetBuilder builder;
+  final NullableIndexedWidgetBuilder builder;
 
   /// {@template flutter.widgets.wheelList.childCount}
   /// If non-null, [childCount] is the maximum number of children that can be
