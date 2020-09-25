@@ -1488,7 +1488,7 @@ void main() {
 
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
-    await tester.tap(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
+    await tester.tapAt(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
     await tester.pumpAndSettle();
 
     expect(rootObserver.dialogCount, 0);
@@ -1515,7 +1515,7 @@ void main() {
 
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
-    await tester.tap(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
+    await tester.tapAt(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
     await tester.pumpAndSettle();
 
     expect(rootObserver.dialogCount, 1);
