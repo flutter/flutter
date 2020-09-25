@@ -22,12 +22,22 @@ class PageStorageKey<T> extends ValueKey<T> {
   const PageStorageKey(T value) : super(value);
 }
 
+// The reason for encapsulating `_StorageEntryDepth` is that dart does not support
+// passing value types by reference.
+class _StorageEntryDepth {
+  _StorageEntryDepth(this.depth);
+  int depth;
+}
+
 @immutable
 class _StorageEntryIdentifier {
-  const _StorageEntryIdentifier(this.keys)
+  const _StorageEntryIdentifier(this.keys, this.depth)
     : assert(keys != null);
 
   final List<PageStorageKey<dynamic>> keys;
+  // Depth to the first 'PageStorageKey' .
+  // Use this depth to distinguish situations where multiple widgets share one 'PageStorageKey' .
+  final int depth;
 
   bool get isNotEmpty => keys.isNotEmpty;
 
@@ -36,15 +46,16 @@ class _StorageEntryIdentifier {
     if (other.runtimeType != runtimeType)
       return false;
     return other is _StorageEntryIdentifier
-        && listEquals<PageStorageKey<dynamic>>(other.keys, keys);
+      && listEquals<PageStorageKey<dynamic>>(other.keys, keys)
+      && other.depth ==  depth;
   }
 
   @override
-  int get hashCode => hashList(keys);
+  int get hashCode => hashValues(hashList(keys), depth);
 
   @override
   String toString() {
-    return 'StorageEntryIdentifier(${keys.join(":")})';
+    return 'StorageEntryIdentifier(depth:$depth ${keys.join(":")})';
   }
 }
 
@@ -53,26 +64,31 @@ class _StorageEntryIdentifier {
 /// Useful for storing per-page state that persists across navigations from one
 /// page to another.
 class PageStorageBucket {
-  static bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys) {
+  static bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys, _StorageEntryDepth depth) {
     final Widget widget = context.widget;
     final Key? key = widget.key;
     if (key is PageStorageKey)
       keys.add(key);
+    if (keys.isEmpty)
+      depth.depth++;
     return widget is! PageStorage;
   }
 
-  List<PageStorageKey<dynamic>> _allKeys(BuildContext context) {
+  List<PageStorageKey<dynamic>> _allKeys(BuildContext context, _StorageEntryDepth depth) {
     final List<PageStorageKey<dynamic>> keys = <PageStorageKey<dynamic>>[];
-    if (_maybeAddKey(context, keys)) {
+    if (_maybeAddKey(context, keys, depth)) {
       context.visitAncestorElements((Element element) {
-        return _maybeAddKey(element, keys);
+        return _maybeAddKey(element, keys, depth);
       });
     }
     return keys;
   }
 
   _StorageEntryIdentifier _computeIdentifier(BuildContext context) {
-    return _StorageEntryIdentifier(_allKeys(context));
+    // The reason for encapsulating `_StorageEntryDepth` is that dart does not support
+    // passing value types by reference.
+    final _StorageEntryDepth depth = _StorageEntryDepth(0);
+    return _StorageEntryIdentifier(_allKeys(context, depth), depth.depth);
   }
 
   Map<Object, dynamic>? _storage;
@@ -131,10 +147,10 @@ class PageStorageBucket {
 /// [PageStorageKey] is used by [Scrollable] if [ScrollController.keepScrollOffset]
 /// is enabled to save their [ScrollPosition]s. When more than one
 /// scrollable ([ListView], [SingleChildScrollView], [TextField], etc.) appears
-/// within the widget's closest ancestor [PageStorage] (such as within the same route),
-/// if you want to save all of their positions independently,
-/// you should give each of them unique [PageStorageKey]s, or set some of their
-/// `keepScrollOffset` false to prevent saving.
+/// within the widget's closest ancestor [PageStorage] (such as within the same route)
+/// and share one [PageStorageKey], it can also work well. They are distinguished by
+/// the depth to the key. If you do not want to save some of their positions,
+/// you can set their `keepScrollOffset` false to prevent saving.
 ///
 /// {@tool dartpad --template=freeform}
 ///
