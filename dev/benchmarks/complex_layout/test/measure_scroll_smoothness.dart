@@ -6,8 +6,6 @@
 // the test should be run as:
 // flutter drive -t test/using_array.dart --driver test_driver/scrolling_test_e2e_test.dart
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,7 +38,7 @@ Iterable<PointerEvent> dragInputDatas(
     timeStamp: epoch,
     position: startLocation,
     pointer: 1,
-  )
+  );
   for (int t = 0; t < moveEventCount + 1; t++) {
     final Offset position = startLocation + movePerEvent * t.toDouble();
     yield PointerMoveEvent(
@@ -48,14 +46,14 @@ Iterable<PointerEvent> dragInputDatas(
       position: position,
       delta: movePerEvent,
       pointer: 1,
-    )
+    );
   }
   final Offset position = startLocation + totalMove;
   yield PointerUpEvent(
     timeStamp: epoch + totalTime,
     position: position,
     pointer: 1,
-  )
+  );
 }
 
 enum TestScenario {
@@ -161,9 +159,9 @@ Future<void> main() async {
         tester.getCenter(scrollerFinder),
         frequency: variant.frequency,
       )) {
-        await tester.binding.delayed(record.timeStamp - now());
+        await tester.binding.delayed(event.timeStamp - now());
         // This now measures how accurate the above delayed is.
-        final Duration delay = now() - record.timeStamp;
+        final Duration delay = now() - event.timeStamp;
         if (delays.length < frameTimestamp.length) {
           while (delays.length < frameTimestamp.length - 1) {
             delays.add(Duration.zero);
@@ -172,7 +170,7 @@ Future<void> main() async {
         } else if (delays.last < delay) {
           delays.last = delay;
         }
-        tester.binding.handlePointerEvent(event);
+        tester.binding.handlePointerEvent(event, source: TestBindingEventSource.test);
       }
     }
 
