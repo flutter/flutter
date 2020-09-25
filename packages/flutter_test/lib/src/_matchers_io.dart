@@ -22,7 +22,7 @@ import 'goldens.dart';
 ///
 ///  * [OffsetLayer.toImage] which is the actual method being called.
 Future<ui.Image> captureImage(Element element) {
-  RenderObject renderObject = element.renderObject;
+  RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
     renderObject = renderObject.parent as RenderObject;
     assert(renderObject != null);
@@ -45,10 +45,10 @@ class MatchesGoldenFile extends AsyncMatcher {
   final Uri key;
 
   /// The [version] of the golden image.
-  final int version;
+  final int? version;
 
   @override
-  Future<String> matchAsync(dynamic item) async {
+  Future<String?> matchAsync(dynamic item) async {
     Future<ui.Image> imageFuture;
     if (item is Future<ui.Image>) {
       imageFuture = item;
@@ -68,9 +68,9 @@ class MatchesGoldenFile extends AsyncMatcher {
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-    return binding.runAsync<String>(() async {
+    return binding.runAsync<String?>(() async {
       final ui.Image image = await imageFuture;
-      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+      final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
       if (bytes == null)
         return 'could not encode screenshot.';
       if (autoUpdateGoldenFiles) {

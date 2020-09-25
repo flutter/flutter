@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:ui';
 
-import 'package:meta/meta.dart';
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 // ignore: deprecated_member_use
@@ -284,7 +283,7 @@ Matcher equalsIgnoringHashCodes(String value) {
 /// method [name] and [arguments].
 ///
 /// Arguments checking implements deep equality for [List] and [Map] types.
-Matcher isMethodCall(String name, { @required dynamic arguments }) {
+Matcher isMethodCall(String name, { required dynamic arguments }) {
   return _IsMethodCall(name, arguments);
 }
 
@@ -297,7 +296,7 @@ Matcher isMethodCall(String name, { @required dynamic arguments }) {
 /// When using this matcher you typically want to use a rectangle larger than
 /// the area you expect to paint in for [areaToCompare] to catch errors where
 /// the path draws outside the expected area.
-Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int sampleSize = 20 })
+Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int sampleSize = 20 })
   => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
 
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
@@ -364,7 +363,7 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-AsyncMatcher matchesGoldenFile(dynamic key, {int version}) {
+AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
   if (key is Uri) {
     return MatchesGoldenFile(key, version);
   } else if (key is String) {
@@ -431,19 +430,19 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 ///
 ///   * [WidgetTester.getSemantics], the tester method which retrieves semantics.
 Matcher matchesSemantics({
-  String label,
-  String hint,
-  String value,
-  String increasedValue,
-  String decreasedValue,
-  TextDirection textDirection,
-  Rect rect,
-  Size size,
-  double elevation,
-  double thickness,
-  int platformViewId,
-  int maxValueLength,
-  int currentValueLength,
+  String? label,
+  String? hint,
+  String? value,
+  String? increasedValue,
+  String? decreasedValue,
+  TextDirection? textDirection,
+  Rect? rect,
+  Size? size,
+  double? elevation,
+  double? thickness,
+  int? platformViewId,
+  int? maxValueLength,
+  int? currentValueLength,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -490,10 +489,10 @@ Matcher matchesSemantics({
   bool hasDidLoseAccessibilityFocusAction = false,
   bool hasDismissAction = false,
   // Custom actions and overrides
-  String onTapHint,
-  String onLongPressHint,
-  List<CustomSemanticsAction> customActions,
-  List<Matcher> children,
+  String? onTapHint,
+  String? onLongPressHint,
+  List<CustomSemanticsAction>? customActions,
+  List<Matcher>? children,
 }) {
   final List<SemanticsFlag> flags = <SemanticsFlag>[
     if (hasCheckedState) SemanticsFlag.hasCheckedState,
@@ -544,7 +543,7 @@ Matcher matchesSemantics({
     if (hasMoveCursorForwardByWordAction) SemanticsAction.moveCursorForwardByWord,
     if (hasMoveCursorBackwardByWordAction) SemanticsAction.moveCursorBackwardByWord,
   ];
-  SemanticsHintOverrides hintOverrides;
+  SemanticsHintOverrides? hintOverrides;
   if (onTapHint != null || onLongPressHint != null)
     hintOverrides = SemanticsHintOverrides(
       onTapHint: onTapHint,
@@ -607,26 +606,26 @@ AsyncMatcher doesNotMeetGuideline(AccessibilityGuideline guideline) {
 class _FindsWidgetMatcher extends Matcher {
   const _FindsWidgetMatcher(this.min, this.max);
 
-  final int min;
-  final int max;
+  final int? min;
+  final int? max;
 
   @override
   bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
     assert(min != null || max != null);
-    assert(min == null || max == null || min <= max);
+    assert(min == null || max == null || min! <= max!);
     matchState[Finder] = finder;
     int count = 0;
     final Iterator<Element> iterator = finder.evaluate().iterator;
     if (min != null) {
-      while (count < min && iterator.moveNext())
+      while (count < min! && iterator.moveNext())
         count += 1;
-      if (count < min)
+      if (count < min!)
         return false;
     }
     if (max != null) {
-      while (count <= max && iterator.moveNext())
+      while (count <= max! && iterator.moveNext())
         count += 1;
-      if (count > max)
+      if (count > max!)
         return false;
     }
     return true;
@@ -665,7 +664,7 @@ class _FindsWidgetMatcher extends Matcher {
     final Finder finder = matchState[Finder] as Finder;
     final int count = finder.evaluate().length;
     if (count == 0) {
-      assert(min != null && min > 0);
+      assert(min != null && min! > 0);
       if (min == 1 && max == 1)
         return mismatchDescription.add('means none were found but one was expected');
       return mismatchDescription.add('means none were found but some were expected');
@@ -675,9 +674,9 @@ class _FindsWidgetMatcher extends Matcher {
         return mismatchDescription.add('means one was found but none were expected');
       return mismatchDescription.add('means some were found but none were expected');
     }
-    if (min != null && count < min)
+    if (min != null && count < min!)
       return mismatchDescription.add('is not enough');
-    assert(max != null && count > min);
+    assert(max != null && count > min!);
     return mismatchDescription.add('is too many');
   }
 }
@@ -765,7 +764,7 @@ class _HasOneLineDescription extends Matcher {
   const _HasOneLineDescription();
 
   @override
-  bool matches(Object object, Map<dynamic, dynamic> matchState) {
+  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
     final String description = object.toString();
     return description.isNotEmpty
         && !description.contains('\n')
@@ -975,13 +974,13 @@ typedef DistanceFunction<T> = num Function(T a, T b);
 ///
 /// This type is used to describe a collection of [DistanceFunction<T>]
 /// functions which have (potentially) unrelated argument types. Since the
-/// argument types of the functions may be unrelated, the only thing that the
-/// type system can statically assume about them is that they accept null (since
-/// all types in Dart are nullable).
+/// argument types of the functions may be unrelated, their type is declared as
+/// `Never`, which is the bottom type in dart to which all other types can be
+/// assigned to.
 ///
 /// Calling an instance of this type must either be done dynamically, or by
 /// first casting it to a [DistanceFunction<T>] for some concrete T.
-typedef AnyDistanceFunction = num Function(Null a, Null b);
+typedef AnyDistanceFunction = num Function(Never a, Never b);
 
 const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = <Type, AnyDistanceFunction>{
   Color: _maxComponentColorDistance,
@@ -1060,11 +1059,11 @@ double _sizeDistance(Size a, Size b) {
 ///    specializes in [Rect]s and has an optional `epsilon` parameter.
 ///  * [closeTo], which specializes in numbers only.
 Matcher within<T>({
-  @required num distance,
-  @required T from,
-  DistanceFunction<T> distanceFunction,
+  required num distance,
+  required T from,
+  DistanceFunction<T>? distanceFunction,
 }) {
-  distanceFunction ??= _kStandardDistanceFunctions[T] as DistanceFunction<T>;
+  distanceFunction ??= _kStandardDistanceFunctions[T] as DistanceFunction<T>?;
 
   if (distanceFunction == null) {
     throw ArgumentError(
@@ -1085,13 +1084,12 @@ class _IsWithinDistance<T> extends Matcher {
   final num epsilon;
 
   @override
-  bool matches(Object object, Map<dynamic, dynamic> matchState) {
+  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
     if (object is! T)
       return false;
     if (object == value)
       return true;
-    final T test = object as T;
-    final num distance = distanceFunction(test, value);
+    final num distance = distanceFunction(object, value);
     if (distance < 0) {
       throw ArgumentError(
         'Invalid distance function was used to compare a ${value.runtimeType} '
@@ -1108,7 +1106,7 @@ class _IsWithinDistance<T> extends Matcher {
 
   @override
   Description describeMismatch(
-    Object object,
+    dynamic object,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
     bool verbose,
@@ -1126,20 +1124,19 @@ class _MoreOrLessEquals extends Matcher {
   final double epsilon;
 
   @override
-  bool matches(Object object, Map<dynamic, dynamic> matchState) {
+  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
     if (object is! double)
       return false;
     if (object == value)
       return true;
-    final double test = object as double;
-    return (test - value).abs() <= epsilon;
+    return (object - value).abs() <= epsilon;
   }
 
   @override
   Description describe(Description description) => description.add('$value (±$epsilon)');
 
   @override
-  Description describeMismatch(Object item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
     return super.describeMismatch(item, mismatchDescription, matchState, verbose)
       ..add('$item is not in the range of $value (±$epsilon).');
   }
@@ -1211,14 +1208,14 @@ const Matcher hasNoImmediateClip = _MatchAnythingExceptClip();
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipRRect] with no clipper set, and border radius equals to
 /// [borderRadius], or an equivalent [RenderClipPath].
-Matcher clipsWithBoundingRRect({ @required BorderRadius borderRadius }) {
+Matcher clipsWithBoundingRRect({ required BorderRadius borderRadius }) {
   return _ClipsWithBoundingRRect(borderRadius: borderRadius);
 }
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipPath] with a [ShapeBorderClipper] that clips to
 /// [shape].
-Matcher clipsWithShapeBorder({ @required ShapeBorder shape }) {
+Matcher clipsWithShapeBorder({ required ShapeBorder shape }) {
   return _ClipsWithShapeBorder(shape: shape);
 }
 
@@ -1240,9 +1237,9 @@ Matcher clipsWithShapeBorder({ @required ShapeBorder shape }) {
 ///    - If [elevation] is non null asserts that [RenderPhysicalModel.elevation] is equal to
 ///   [elevation].
 Matcher rendersOnPhysicalModel({
-  BoxShape shape,
-  BorderRadius borderRadius,
-  double elevation,
+  BoxShape? shape,
+  BorderRadius? borderRadius,
+  double? elevation,
 }) {
   return _RendersOnPhysicalModel(
     shape: shape,
@@ -1257,8 +1254,8 @@ Matcher rendersOnPhysicalModel({
 /// If [elevation] is non null asserts that [RenderPhysicalShape.elevation] is
 /// equal to [elevation].
 Matcher rendersOnPhysicalShape({
-  ShapeBorder shape,
-  double elevation,
+  required ShapeBorder shape,
+  double? elevation,
 }) {
   return _RendersOnPhysicalShape(
     shape: shape,
@@ -1293,7 +1290,7 @@ class _MatchAnythingExceptClip extends _FailWithDescriptionMatcher {
     final Iterable<Element> nodes = finder.evaluate();
     if (nodes.length != 1)
       return failWithDescription(matchState, 'did not have a exactly one child element');
-    final RenderObject renderObject = nodes.single.renderObject;
+    final RenderObject renderObject = nodes.single.renderObject!;
 
     switch (renderObject.runtimeType) {
       case RenderClipPath:
@@ -1323,7 +1320,7 @@ abstract class _MatchRenderObject<M extends RenderObject, T extends RenderObject
     final Iterable<Element> nodes = finder.evaluate();
     if (nodes.length != 1)
       return failWithDescription(matchState, 'did not have a exactly one child element');
-    final RenderObject renderObject = nodes.single.renderObject;
+    final RenderObject renderObject = nodes.single.renderObject!;
 
     if (renderObject.runtimeType == T)
       return renderObjectMatchesT(matchState, renderObject as T);
@@ -1342,9 +1339,9 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
     this.elevation,
   });
 
-  final BoxShape shape;
-  final BorderRadius borderRadius;
-  final double elevation;
+  final BoxShape? shape;
+  final BorderRadius? borderRadius;
+  final double? elevation;
 
   @override
   bool renderObjectMatchesT(Map<dynamic, dynamic> matchState, RenderPhysicalModel renderObject) {
@@ -1366,7 +1363,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     final ShapeBorderClipper shapeClipper = renderObject.clipper as ShapeBorderClipper;
 
-    if (borderRadius != null && !assertRoundedRectangle(shapeClipper, borderRadius, matchState))
+    if (borderRadius != null && !assertRoundedRectangle(shapeClipper, borderRadius!, matchState))
       return false;
 
     if (
@@ -1421,12 +1418,12 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
 
 class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, RenderPhysicalModel> {
   const _RendersOnPhysicalShape({
-    this.shape,
+    required this.shape,
     this.elevation,
   });
 
   final ShapeBorder shape;
-  final double elevation;
+  final double? elevation;
 
   @override
   bool renderObjectMatchesM(Map<dynamic, dynamic> matchState, RenderPhysicalShape renderObject) {
@@ -1486,7 +1483,7 @@ class _ClipsWithBoundingRect extends _MatchRenderObject<RenderClipPath, RenderCl
 }
 
 class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipPath, RenderClipRRect> {
-  const _ClipsWithBoundingRRect({@required this.borderRadius});
+  const _ClipsWithBoundingRRect({required this.borderRadius});
 
   final BorderRadius borderRadius;
 
@@ -1521,7 +1518,7 @@ class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipPath, RenderC
 }
 
 class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, RenderClipRRect> {
-  const _ClipsWithShapeBorder({@required this.shape});
+  const _ClipsWithShapeBorder({required this.shape});
 
   final ShapeBorder shape;
 
@@ -1549,7 +1546,7 @@ class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, RenderCli
 class _CoversSameAreaAs extends Matcher {
   _CoversSameAreaAs(
     this.expectedPath, {
-    @required this.areaToCompare,
+    required this.areaToCompare,
     this.sampleSize = 20,
   }) : maxHorizontalNoise = areaToCompare.width / sampleSize,
        maxVerticalNoise = areaToCompare.height / sampleSize {
@@ -1562,7 +1559,7 @@ class _CoversSameAreaAs extends Matcher {
   final int sampleSize;
   final double maxHorizontalNoise;
   final double maxVerticalNoise;
-  math.Random random;
+  late math.Random random;
 
   @override
   bool matches(covariant Path actualPath, Map<dynamic, dynamic> matchState) {
@@ -1620,7 +1617,7 @@ class _CoversSameAreaAs extends Matcher {
 
 class _ColorMatcher extends Matcher {
   const _ColorMatcher({
-      @required this.targetColor,
+    required this.targetColor,
   }) : assert(targetColor != null);
 
   final Color targetColor;
@@ -1656,7 +1653,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
   final ui.Image referenceImage;
 
   @override
-  Future<String> matchAsync(dynamic item) async {
+  Future<String?> matchAsync(dynamic item) async {
     Future<ui.Image> imageFuture;
     if (item is Future<ui.Image>) {
       imageFuture = item;
@@ -1674,13 +1671,13 @@ class _MatchesReferenceImage extends AsyncMatcher {
     }
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-    return binding.runAsync<String>(() async {
+    return binding.runAsync<String?>(() async {
       final ui.Image image = await imageFuture;
-      final ByteData bytes = await image.toByteData();
+      final ByteData? bytes = await image.toByteData();
       if (bytes == null)
         return 'could not be encoded.';
 
-      final ByteData referenceBytes = await referenceImage.toByteData();
+      final ByteData? referenceBytes = await referenceImage.toByteData();
       if (referenceBytes == null)
         return 'could not have its reference image encoded.';
 
@@ -1723,24 +1720,24 @@ class _MatchesSemanticsData extends Matcher {
     this.children,
   });
 
-  final String label;
-  final String value;
-  final String hint;
-  final String increasedValue;
-  final String decreasedValue;
-  final SemanticsHintOverrides hintOverrides;
-  final List<SemanticsAction> actions;
-  final List<CustomSemanticsAction> customActions;
-  final List<SemanticsFlag> flags;
-  final TextDirection textDirection;
-  final Rect rect;
-  final Size size;
-  final double elevation;
-  final double thickness;
-  final int platformViewId;
-  final int maxValueLength;
-  final int currentValueLength;
-  final List<Matcher> children;
+  final String? label;
+  final String? value;
+  final String? hint;
+  final String? increasedValue;
+  final String? decreasedValue;
+  final SemanticsHintOverrides? hintOverrides;
+  final List<SemanticsAction>? actions;
+  final List<CustomSemanticsAction>? customActions;
+  final List<SemanticsFlag>? flags;
+  final TextDirection? textDirection;
+  final Rect? rect;
+  final Size? size;
+  final double? elevation;
+  final double? thickness;
+  final int? platformViewId;
+  final int? maxValueLength;
+  final int? currentValueLength;
+  final List<Matcher>? children;
 
   @override
   Description describe(Description description) {
@@ -1781,7 +1778,7 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with custom hints: $hintOverrides');
     if (children != null) {
       description.add(' with children:\n');
-      for (final _MatchesSemanticsData child in children.cast<_MatchesSemanticsData>())
+      for (final _MatchesSemanticsData child in children!.cast<_MatchesSemanticsData>())
         child.describe(description);
     }
     return description;
@@ -1823,7 +1820,7 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
     if (actions != null) {
       int actionBits = 0;
-      for (final SemanticsAction action in actions)
+      for (final SemanticsAction action in actions!)
         actionBits |= action.index;
       if (actionBits != data.actions) {
         final List<String> actionSummary = <String>[
@@ -1835,14 +1832,14 @@ class _MatchesSemanticsData extends Matcher {
       }
     }
     if (customActions != null || hintOverrides != null) {
-      final List<CustomSemanticsAction> providedCustomActions = data.customSemanticsActionIds.map((int id) {
-        return CustomSemanticsAction.getAction(id);
-      }).toList();
+      final List<CustomSemanticsAction> providedCustomActions = data.customSemanticsActionIds?.map<CustomSemanticsAction>((int id) {
+        return CustomSemanticsAction.getAction(id)!;
+      }).toList() ?? <CustomSemanticsAction>[];
       final List<CustomSemanticsAction> expectedCustomActions = customActions?.toList() ?? <CustomSemanticsAction>[];
       if (hintOverrides?.onTapHint != null)
-        expectedCustomActions.add(CustomSemanticsAction.overridingAction(hint: hintOverrides.onTapHint, action: SemanticsAction.tap));
+        expectedCustomActions.add(CustomSemanticsAction.overridingAction(hint: hintOverrides!.onTapHint!, action: SemanticsAction.tap));
       if (hintOverrides?.onLongPressHint != null)
-        expectedCustomActions.add(CustomSemanticsAction.overridingAction(hint: hintOverrides.onLongPressHint, action: SemanticsAction.longPress));
+        expectedCustomActions.add(CustomSemanticsAction.overridingAction(hint: hintOverrides!.onLongPressHint!, action: SemanticsAction.longPress));
       if (expectedCustomActions.length != providedCustomActions.length)
         return failWithDescription(matchState, 'custom actions where: $providedCustomActions');
       int sortActions(CustomSemanticsAction left, CustomSemanticsAction right) {
@@ -1857,7 +1854,7 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (flags != null) {
       int flagBits = 0;
-      for (final SemanticsFlag flag in flags)
+      for (final SemanticsFlag flag in flags!)
         flagBits |= flag.index;
       if (flagBits != data.flags) {
         final List<String> flagSummary = <String>[
@@ -1872,7 +1869,7 @@ class _MatchesSemanticsData extends Matcher {
     if (children != null) {
       int i = 0;
       node.visitChildren((SemanticsNode child) {
-        allMatched = children[i].matches(child, matchState) && allMatched;
+        allMatched = children![i].matches(child, matchState) && allMatched;
         i += 1;
         return allMatched;
       });
@@ -1907,7 +1904,7 @@ class _MatchesAccessibilityGuideline extends AsyncMatcher {
   }
 
   @override
-  Future<String> matchAsync(covariant WidgetTester tester) async {
+  Future<String?> matchAsync(covariant WidgetTester tester) async {
     final Evaluation result = await guideline.evaluate(tester);
     if (result.passed)
       return null;
@@ -1926,7 +1923,7 @@ class _DoesNotMatchAccessibilityGuideline extends AsyncMatcher {
   }
 
   @override
-  Future<String> matchAsync(covariant WidgetTester tester) async {
+  Future<String?> matchAsync(covariant WidgetTester tester) async {
     final Evaluation result = await guideline.evaluate(tester);
     if (result.passed)
       return 'Failed';
