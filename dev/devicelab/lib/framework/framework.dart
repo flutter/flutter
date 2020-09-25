@@ -247,7 +247,7 @@ class TaskResult {
 
   /// Combines the result of two sets of benchmarks.
   TaskResult combine(TaskResult other) {
-    final Set<String> keyIntersection = this.data.keys.toSet()
+    final Set<String> keyIntersection = data.keys.toSet()
         .intersection(other.data.keys.toSet());
 
     if (keyIntersection.isNotEmpty) {
