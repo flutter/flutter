@@ -182,7 +182,7 @@ class Checkbox extends StatefulWidget {
   final bool autofocus;
 
   /// The width of a checkbox widget.
-  static const double width = 18.0;
+  static const double width = 24.0;
 
   @override
   _CheckboxState createState() => _CheckboxState();
