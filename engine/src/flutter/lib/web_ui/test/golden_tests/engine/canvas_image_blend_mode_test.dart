@@ -108,7 +108,9 @@ void testMain() async {
       rc.restore();
       await _checkScreenshot(rc, 'canvas_image_blend_group$blendGroup',
           maxDiffRatePercent: 8.0);
-    });
+    },
+        skip: browserEngine == BrowserEngine.webkit &&
+            operatingSystem == OperatingSystem.iOs);
   }
 
   // Regression test for https://github.com/flutter/flutter/issues/56971
