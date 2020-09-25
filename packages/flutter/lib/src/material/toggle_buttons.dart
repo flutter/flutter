@@ -137,7 +137,7 @@ import 'toggle_buttons_theme.dart';
 ///
 /// ## ToggleButton Borders
 /// The toggle buttons, by default, have a solid, 1 logical pixel border
-/// surrounding itself and separating each button. The toggle button borders'
+/// surrounding itself and separating each button. The toggle button's borders'
 /// color, width, and corner radii are configurable.
 ///
 /// The [selectedBorderColor] determines the border's color when the button is
