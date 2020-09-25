@@ -9,7 +9,6 @@ import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
 import 'color_scheme.dart';
-import 'debug.dart' show debugCheckHasScaffoldMessenger;
 import 'material.dart';
 import 'material_state.dart';
 import 'scaffold.dart';
@@ -91,14 +90,8 @@ class SnackBarAction extends StatefulWidget {
     this.disabledTextColor,
     @required this.label,
     @required this.onPressed,
-    @Deprecated(
-      'Do not use, intended for migration interim. '
-      'This feature was deprecated after v1.22.0-2.0.pre.'
-    )
-    this.useScaffoldMessenger = false,
   }) : assert(label != null),
        assert(onPressed != null),
-       assert(useScaffoldMessenger != null),
        super(key: key);
 
   /// The button label color. If not provided, defaults to
@@ -118,28 +111,6 @@ class SnackBarAction extends StatefulWidget {
   /// displayed in a [SnackBar].
   final VoidCallback onPressed;
 
-  /// Indicates whether the SnackBar should be hidden using the Scaffold or the
-  /// ScaffoldMessenger.
-  ///
-  /// Defaults to false in order to use the Scaffold.
-  final bool useScaffoldMessenger;
-
-  /// Creates a copy of this snack bar but with useScaffoldMessenger set to true.
-  @Deprecated(
-    'Do not use, intended for migration interim. '
-    'This feature was deprecated after v1.22.0-2.0.pre.'
-  )
-  SnackBarAction withScaffoldMessenger() {
-    return SnackBarAction(
-      key: key,
-      textColor: textColor,
-      disabledTextColor: disabledTextColor,
-      label: label,
-      onPressed: onPressed,
-      useScaffoldMessenger: true,
-    );
-  }
-
   @override
   State<SnackBarAction> createState() => _SnackBarActionState();
 }
@@ -154,12 +125,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
       _haveTriggeredAction = true;
     });
     widget.onPressed();
-    if (widget.useScaffoldMessenger) {
-      debugCheckHasScaffoldMessenger(context);
-      ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
-    } else {
-      Scaffold.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
-    }
+    Scaffold.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
   }
 
   @override
@@ -225,11 +191,6 @@ class SnackBar extends StatefulWidget {
     this.duration = _snackBarDisplayDuration,
     this.animation,
     this.onVisible,
-    @Deprecated(
-      'Do not use, intended for migration interim. '
-      'This feature was deprecated after v1.22.0-2.0.pre.'
-    )
-    this.useScaffoldMessenger = false,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
        assert(
@@ -245,7 +206,6 @@ class SnackBar extends StatefulWidget {
          'Width and margin can not be used together',
        ),
        assert(duration != null),
-       assert(useScaffoldMessenger != null),
        super(key: key);
 
   /// The primary content of the snack bar.
@@ -347,12 +307,6 @@ class SnackBar extends StatefulWidget {
   /// Called the first time that the snackbar is visible within a [Scaffold].
   final VoidCallback onVisible;
 
-  /// Indicates whether the SnackBar should be removed using the Scaffold or the
-  /// ScaffoldMessenger.
-  ///
-  /// Defaults to false in order to use the Scaffold.
-  final bool useScaffoldMessenger;
-
   // API for ScaffoldMessengerState.showSnackBar():
 
 
@@ -384,34 +338,6 @@ class SnackBar extends StatefulWidget {
       duration: duration,
       animation: newAnimation,
       onVisible: onVisible,
-      useScaffoldMessenger: useScaffoldMessenger,
-    );
-  }
-
-  /// Creates a copy of this snack bar but with useScaffoldMessenger set to true.
-  ///
-  /// If the original snack bar lacks a key, the newly created snack bar will
-  /// use the given fallback key.
-  @Deprecated(
-    'Do not use, intended for migration interim. '
-    'This feature was deprecated after v1.22.0-2.0.pre.'
-  )
-  SnackBar withScaffoldMessenger({ Key fallbackKey }) {
-    return SnackBar(
-      key: key ?? fallbackKey,
-      content: content,
-      backgroundColor: backgroundColor,
-      elevation: elevation,
-      margin: margin,
-      padding: padding,
-      width: width,
-      shape: shape,
-      behavior: behavior,
-      action: action?.withScaffoldMessenger(),
-      duration: duration,
-      animation: animation,
-      onVisible: onVisible,
-      useScaffoldMessenger: true,
     );
   }
 
@@ -600,24 +526,14 @@ class _SnackBarState extends State<SnackBar> {
       container: true,
       liveRegion: true,
       onDismiss: () {
-        if (widget.useScaffoldMessenger) {
-          assert(debugCheckHasScaffoldMessenger(context));
-          ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
-        } else {
-          Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
-        }
+        Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
       },
       child: Dismissible(
         key: const Key('dismissible'),
         direction: DismissDirection.down,
         resizeDuration: null,
         onDismissed: (DismissDirection direction) {
-          if (widget.useScaffoldMessenger) {
-            assert(debugCheckHasScaffoldMessenger(context));
-            ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
-          } else {
-            Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
-          }
+          Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },
         child: snackBar,
       ),
@@ -644,13 +560,10 @@ class _SnackBarState extends State<SnackBar> {
         child: snackBar,
       );
     }
-    final ClipRect clipRect = ClipRect(child: snackBarTransition);
-    if (widget.useScaffoldMessenger) {
-      return Hero(
-        child: clipRect,
-        tag: '<SnackBar Hero tag - ${widget.content}>',
-      );
-    }
-    return clipRect;
+
+    return Hero(
+      child: ClipRect(child: snackBarTransition),
+      tag: '<SnackBar Hero tag - ${widget.content}>',
+    );
   }
 }

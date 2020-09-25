@@ -201,10 +201,38 @@ void main() {
 
   testWidgets('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     final SnackBar snackBar = SnackBar(
       content: const Text('Snack'),
       action: SnackBarAction(label: 'Test', onPressed: () {})
     );
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(),
+        child: ScaffoldMessenger(
+          key: _scaffoldMessengerKey,
+          child: Builder(
+            builder: (BuildContext context) {
+              return Scaffold(
+                key: _scaffoldKey,
+                body: Container(),
+              );
+            }
+          )
+        ),
+      )
+    ));
+    final List<dynamic> exceptions = <dynamic>[];
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exceptions.add(details.exception);
+    };
+    // ScaffoldMessenger shows SnackBar.
+    _scaffoldMessengerKey.currentState.showSnackBar(snackBar);
+    await tester.pumpAndSettle();
+
+    // Pump widget to rebuild without ScaffoldMessenger
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
@@ -215,17 +243,9 @@ void main() {
         ),
       ),
     ));
-    final List<dynamic> exceptions = <dynamic>[];
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      exceptions.add(details.exception);
-    };
-    _scaffoldKey.currentState.showSnackBar(snackBar.withScaffoldMessenger());
-    // The Scaffold will present the SnackBar, but will assert since the
-    // SnackBar will try to resolve using the ScaffoldMessenger.
-    await tester.pumpAndSettle();
+    // The Scaffold should assert we still have an ancestor ScaffoldMessenger in
+    // order to dismiss the SnackBar from the originator.
     await tester.tap(find.text('Test'));
-    // await tester.drag(find.text('Snack'), const Offset(0.0, 50.0));
     FlutterError.onError = oldHandler;
 
     expect(exceptions.length, 1);
@@ -245,65 +265,11 @@ void main() {
     expect(error.toStringDeep(), equalsIgnoringHashCodes(
       'FlutterError\n'
       '   No ScaffoldMessenger widget found.\n'
-      '   SnackBarAction widgets require a ScaffoldMessenger widget\n'
-      '   ancestor.\n'
+      '   Scaffold widgets require a ScaffoldMessenger widget ancestor.\n'
       '   The specific widget that could not find a ScaffoldMessenger\n'
       '   ancestor was:\n'
-      '     SnackBarAction\n'
+      '     Scaffold-[LabeledGlobalKey<ScaffoldState>#00829]\n'
       '   The ancestors of this widget were:\n'
-      '     TextButtonTheme\n'
-      '     Row\n'
-      '     Padding\n'
-      '     MediaQuery\n'
-      '     Padding\n'
-      '     SafeArea\n'
-      '     FadeTransition\n'
-      '     IconTheme\n'
-      '     IconTheme\n'
-      '     _InheritedCupertinoTheme\n'
-      '     CupertinoTheme\n'
-      '     _InheritedTheme\n'
-      '     Theme\n'
-      '     DefaultTextStyle\n'
-      '     AnimatedDefaultTextStyle\n'
-      '     _InkFeatures-[GlobalKey#00000 ink renderer]\n'
-      '     NotificationListener<LayoutChangedNotification>\n'
-      '     PhysicalModel\n'
-      '     AnimatedPhysicalModel\n'
-      '     Material\n'
-      '     FractionalTranslation\n'
-      '     SlideTransition\n'
-      '     _PointerListener\n'
-      '     Listener\n'
-      '     _GestureSemantics\n'
-      '     RawGestureDetector\n'
-      '     GestureDetector\n'
-      '     Dismissible-[<\'dismissible\'>]\n'
-      '     Semantics\n'
-      '     Align\n'
-      '     AnimatedBuilder\n'
-      '     ClipRect\n'
-      '     KeyedSubtree-[GlobalKey#00000]\n'
-      '     _EffectiveTickerMode\n'
-      '     TickerMode\n'
-      '     Offstage\n'
-      '     SizedBox\n'
-      '     Hero\n'
-      '     SnackBar-[#00000]\n'
-      '     MediaQuery\n'
-      '     LayoutId-[<_ScaffoldSlot.snackBar>]\n'
-      '     CustomMultiChildLayout\n'
-      '     AnimatedBuilder\n'
-      '     DefaultTextStyle\n'
-      '     AnimatedDefaultTextStyle\n'
-      '     _InkFeatures-[GlobalKey#00000 ink renderer]\n'
-      '     NotificationListener<LayoutChangedNotification>\n'
-      '     PhysicalModel\n'
-      '     AnimatedPhysicalModel\n'
-      '     Material\n'
-      '     PrimaryScrollController\n'
-      '     _ScaffoldScope\n'
-      '     Scaffold-[LabeledGlobalKey<ScaffoldState>#00000]\n'
       '     MediaQuery\n'
       '     Directionality\n'
       '     [root]\n'

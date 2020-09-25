@@ -19,6 +19,7 @@ import 'bottom_sheet.dart';
 import 'button_bar.dart';
 import 'colors.dart';
 import 'curves.dart';
+import 'debug.dart';
 import 'divider.dart';
 import 'drawer.dart';
 import 'flexible_space_bar.dart';
@@ -302,7 +303,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// ```
   /// {@end-tool}
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackBar) {
-    final SnackBar messengerSnackBar = snackBar.withScaffoldMessenger();
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleStatusChanged);
     if (_snackBars.isEmpty) {
@@ -314,7 +314,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       // We provide a fallback key so that if back-to-back snackbars happen to
       // match in structure, material ink splashes and highlights don't survive
       // from one to the next.
-      messengerSnackBar.withAnimation(_snackBarController, fallbackKey: UniqueKey()),
+      snackBar.withAnimation(_snackBarController, fallbackKey: UniqueKey()),
       Completer<SnackBarClosedReason>(),
         () {
           assert(_snackBars.first == controller);
@@ -2203,6 +2203,19 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // TODO(Piinks): Deprecate & defer to ScaffoldMessenger after customers are migrated
   void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
     assert(reason != null);
+
+    // SnackBars and SnackBarActions can call to hide and remove themselves, but
+    // they are not aware of who presented them, the Scaffold or the
+    // ScaffoldMessenger. As such, when the SnackBar classes call upon Scaffold
+    // to remove (the current default), we should re-direct to the
+    // ScaffoldMessenger here if that is where the SnackBar originated from.
+    if (_messengerSnackBar != null) {
+      // ScaffoldMessenger is presenting SnackBars.
+      assert(debugCheckHasScaffoldMessenger(context));
+      _scaffoldMessenger.removeCurrentSnackBar(reason: reason);
+      return;
+    }
+
     if (_snackBars.isEmpty)
       return;
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
@@ -2225,6 +2238,19 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // TODO(Piinks): Deprecate & defer to ScaffoldMessenger after customers are migrated.
   void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
     assert(reason != null);
+
+    // SnackBars and SnackBarActions can call to hide and remove themselves, but
+    // they are not aware of who presented them, the Scaffold or the
+    // ScaffoldMessenger. As such, when the SnackBar classes call upon Scaffold
+    // to remove (the current default), we should re-direct to the
+    // ScaffoldMessenger here if that is where the SnackBar originated from.
+    if (_messengerSnackBar != null) {
+      // ScaffoldMessenger is presenting SnackBars.
+      assert(debugCheckHasScaffoldMessenger(context));
+      _scaffoldMessenger.hideCurrentSnackBar(reason: reason);
+      return;
+    }
+
     if (_snackBars.isEmpty || _snackBarController.status == AnimationStatus.dismissed)
       return;
     final MediaQueryData mediaQuery = MediaQuery.of(context);
@@ -2903,7 +2929,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     double snackBarWidth;
     // We should only be using one API for SnackBars. Currently, we can use the
     // Scaffold, which creates a SnackBar queue (_snackBars), or the
-    // ScaffoldMessenger (_messengerSnackBar).
+    // ScaffoldMessenger, which sends a SnackBar to descendant Scaffolds.
+    // (_messengerSnackBar).
     assert(
       _snackBars.isEmpty || _messengerSnackBar == null,
       'Only one API should be used to manage SnackBars. The ScaffoldMessenger is '
