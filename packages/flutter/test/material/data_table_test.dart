@@ -474,10 +474,10 @@ void main() {
       ),
     ));
     expect(tester.renderObject<RenderBox>(
-      find.widgetWithText(Container, 'Name')
+      find.widgetWithText(Container, 'Name').first
     ).size.height, 56.0); // This is the header row height
     expect(tester.renderObject<RenderBox>(
-      find.widgetWithText(Container, 'Frozen yogurt')
+      find.widgetWithText(Container, 'Frozen yogurt').first
     ).size.height, 48.0); // This is the data row height
 
     // CUSTOM VALUES
@@ -485,28 +485,28 @@ void main() {
       home: Material(child: buildCustomTable(headingRowHeight: 48.0)),
     ));
     expect(tester.renderObject<RenderBox>(
-      find.widgetWithText(Container, 'Name')
+      find.widgetWithText(Container, 'Name').first
     ).size.height, 48.0);
 
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildCustomTable(headingRowHeight: 64.0)),
     ));
     expect(tester.renderObject<RenderBox>(
-      find.widgetWithText(Container, 'Name')
+      find.widgetWithText(Container, 'Name').first
     ).size.height, 64.0);
 
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildCustomTable(dataRowHeight: 30.0)),
     ));
     expect(tester.renderObject<RenderBox>(
-      find.widgetWithText(Container, 'Frozen yogurt')
+      find.widgetWithText(Container, 'Frozen yogurt').first
     ).size.height, 30.0);
 
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildCustomTable(dataRowHeight: 56.0)),
     ));
     expect(tester.renderObject<RenderBox>(
-      find.widgetWithText(Container, 'Frozen yogurt')
+      find.widgetWithText(Container, 'Frozen yogurt').first
     ).size.height, 56.0);
   });
 
