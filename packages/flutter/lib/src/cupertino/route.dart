@@ -1103,9 +1103,6 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// It is only used when the method is called. Its corresponding widget can
 /// be safely removed from the tree before the dialog is closed.
 ///
-/// The `barrierColor` argument determines the [Color] of the barrier underneath
-/// the popup. It is `_kModalBarrierColor` by default.
-///
 /// The `useRootNavigator` argument is used to determine whether to push the
 /// dialog to the [Navigator] furthest from or nearest to the given `context`.
 /// By default, `useRootNavigator` is `true` and the dialog route created by
@@ -1128,7 +1125,6 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 Future<T> showCupertinoDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
-  Color barrierColor = _kModalBarrierColor,
   bool useRootNavigator = true,
   bool barrierDismissible = false,
   RouteSettings? routeSettings,
@@ -1139,7 +1135,7 @@ Future<T> showCupertinoDialog<T>({
     context: context,
     barrierDismissible: barrierDismissible,
     barrierLabel: CupertinoLocalizations.of(context)!.modalBarrierDismissLabel,
-    barrierColor: CupertinoDynamicColor.resolve(barrierColor ?? _kModalBarrierColor, context)!,
+    barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context)!,
     // This transition duration was eyeballed comparing with iOS
     transitionDuration: const Duration(milliseconds: 250),
     pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
