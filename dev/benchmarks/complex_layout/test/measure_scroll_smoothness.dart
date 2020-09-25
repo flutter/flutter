@@ -18,68 +18,44 @@ import 'package:complex_layout/main.dart' as app;
 class PointerDataTestBinding extends E2EWidgetsFlutterBinding {
 }
 
-/// A union of [ui.PointerDataPacket] and the time it should be sent.
-class PointerDataRecord {
-  PointerDataRecord(this.timeStamp, List<ui.PointerData> data)
-    : data = ui.PointerDataPacket(data: data);
-  final ui.PointerDataPacket data;
-  final Duration timeStamp;
-}
-
-/// Generates the [PointerDataRecord] to simulate a drag operation from
+/// Generates the [PointerEvent] to simulate a drag operation from
 /// `center - totalMove/2` to `center + totalMove/2`.
-Iterable<PointerDataRecord> dragInputDatas(
+Iterable<PointerEvent> dragInputDatas(
   final Duration epoch,
   final Offset center, {
   final Offset totalMove = const Offset(0, -400),
   final Duration totalTime = const Duration(milliseconds: 2000),
   final double frequency = 90,
 }) sync* {
-  final Offset startLocation = (center - totalMove / 2) * ui.window.devicePixelRatio;
+  final Offset startLocation = center - totalMove / 2;
   // The issue is about 120Hz input on 90Hz refresh rate device.
   // We test 90Hz input on 60Hz device here, which shows similar pattern.
   final int moveEventCount = totalTime.inMicroseconds * frequency ~/ const Duration(seconds: 1).inMicroseconds;
-  final Offset movePerEvent = totalMove / moveEventCount.toDouble() * ui.window.devicePixelRatio;
-  yield PointerDataRecord(epoch, <ui.PointerData>[
-    ui.PointerData(
-      timeStamp: epoch,
-      change: ui.PointerChange.add,
-      physicalX: startLocation.dx,
-      physicalY: startLocation.dy,
-    ),
-    ui.PointerData(
-      timeStamp: epoch,
-      change: ui.PointerChange.down,
-      physicalX: startLocation.dx,
-      physicalY: startLocation.dy,
-      pointerIdentifier: 1,
-    ),
-  ]);
+  final Offset movePerEvent = totalMove / moveEventCount.toDouble();
+  yield PointerAddedEvent(
+    timeStamp: epoch,
+    position: startLocation,
+  );
+  yield PointerDownEvent(
+    timeStamp: epoch,
+    position: startLocation,
+    pointer: 1,
+  )
   for (int t = 0; t < moveEventCount + 1; t++) {
     final Offset position = startLocation + movePerEvent * t.toDouble();
-    yield PointerDataRecord(
-      epoch + totalTime * t ~/ moveEventCount,
-      <ui.PointerData>[ui.PointerData(
-        timeStamp: epoch + totalTime * t ~/ moveEventCount,
-        change: ui.PointerChange.move,
-        physicalX: position.dx,
-        physicalY: position.dy,
-        // Scrolling behavior depends on this delta rather
-        // than the position difference.
-        physicalDeltaX: movePerEvent.dx,
-        physicalDeltaY: movePerEvent.dy,
-        pointerIdentifier: 1,
-      )],
-    );
+    yield PointerMoveEvent(
+      timeStamp: epoch + totalTime * t ~/ moveEventCount,
+      position: position,
+      delta: movePerEvent,
+      pointer: 1,
+    )
   }
   final Offset position = startLocation + totalMove;
-  yield PointerDataRecord(epoch + totalTime, <ui.PointerData>[ui.PointerData(
+  yield PointerUpEvent(
     timeStamp: epoch + totalTime,
-    change: ui.PointerChange.up,
-    physicalX: position.dx,
-    physicalY: position.dy,
-    pointerIdentifier: 1,
-  )]);
+    position: position,
+    pointer: 1,
+  )
 }
 
 enum TestScenario {
@@ -180,7 +156,7 @@ Future<void> main() async {
     Future<void> scroll() async {
       // Extra 50ms to avoid timeouts.
       final Duration startTime = const Duration(milliseconds: 500) + now();
-      for (final PointerDataRecord record in dragInputDatas(
+      for (final PointerEvent event in dragInputDatas(
         startTime,
         tester.getCenter(scrollerFinder),
         frequency: variant.frequency,
@@ -196,7 +172,7 @@ Future<void> main() async {
         } else if (delays.last < delay) {
           delays.last = delay;
         }
-        ui.window.onPointerDataPacket(record.data);
+        tester.binding.handlePointerEvent(event);
       }
     }
 
