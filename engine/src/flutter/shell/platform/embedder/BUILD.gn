@@ -156,6 +156,8 @@ if (current_toolchain == host_toolchain) {
       "tests/embedder_test_context_software.cc",
       "tests/embedder_test_context_software.h",
       "tests/embedder_unittests.cc",
+      "tests/embedder_unittests_gl.cc",
+      "tests/embedder_unittests_util.cc",
     ]
 
     deps = [
