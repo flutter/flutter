@@ -245,6 +245,46 @@ class TaskResult {
   /// Explains the result in a human-readable format.
   final String message;
 
+  TaskResult combine(TaskResult other) {
+    final Set<String> keyIntersection = this.data.keys.toSet()
+        .intersection(other.data.keys.toSet());
+
+    if (keyIntersection.isNotEmpty) {
+      throw Exception('The benchmarks $this and $other are not disjoint; '
+          '$keyIntersection are found in both of them.');
+    }
+
+    final Map<String, dynamic> combinedData = <String, dynamic>{}
+      ..addAll(data)
+      ..addAll(other.data);
+
+    final List<String> combinedBenchmarkScoreKeys = _nullAwareConcatenation(
+      benchmarkScoreKeys,
+      other.benchmarkScoreKeys,
+    );
+
+    final List<String> combinedDetailFiles = _nullAwareConcatenation(
+      detailFiles,
+      other.detailFiles,
+    );
+
+    return TaskResult.success(
+      combinedData,
+      benchmarkScoreKeys: combinedBenchmarkScoreKeys,
+      detailFiles: combinedDetailFiles,
+    );
+  }
+
+  List<String> _nullAwareConcatenation(List<String> list1, List<String> list2) {
+    if (list1 == null) {
+      return list2;
+    } else if (list2 == null) {
+      return list1;
+    } else {
+      return list1 + list2;
+    }
+  }
+
   /// Serializes this task result to JSON format.
   ///
   /// The JSON format is as follows:

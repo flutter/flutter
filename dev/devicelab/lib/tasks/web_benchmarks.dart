@@ -71,36 +71,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
 
   // Both succeeded. Combine data.
 
-  final Map<String, dynamic> originalData = originalBenchmarkResult.data;
-  final Map<String, dynamic> galleryData = galleryBenchmarkResult.data;
-
-  final Set<String> keyIntersection = originalData.keys.toSet()
-      .intersection(galleryData.keys.toSet());
-
-  if (keyIntersection.isNotEmpty) {
-    throw Exception('Original and Gallery benchmarks are not disjoint; '
-        '$keyIntersection are found in both of them.');
-  }
-
-  final Map<String, dynamic> combinedData = <String, dynamic>{}
-      ..addAll(originalData)
-      ..addAll(galleryData);
-
-  final List<String> benchmarkScoreKeys = _nullAwareConcatenation(
-    originalBenchmarkResult.benchmarkScoreKeys,
-    galleryBenchmarkResult.benchmarkScoreKeys,
-  );
-
-  final List<String> detailFiles = _nullAwareConcatenation(
-    originalBenchmarkResult.detailFiles,
-    galleryBenchmarkResult.detailFiles,
-  );
-
-  return TaskResult.success(
-    combinedData,
-    benchmarkScoreKeys: benchmarkScoreKeys,
-    detailFiles: detailFiles,
-  );
+  return originalBenchmarkResult.combine(galleryBenchmarkResult);
 }
 
 List<String> _nullAwareConcatenation(List<String> list1, List<String> list2) {
