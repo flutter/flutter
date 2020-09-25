@@ -1052,7 +1052,7 @@ Future<T> showCupertinoModalPopup<T>({
   return Navigator.of(context, rootNavigator: useRootNavigator)!.push(
     _CupertinoModalPopupRoute<T>(
       barrierColor: CupertinoDynamicColor.resolve(barrierColor ?? _kModalBarrierColor, context),
-      barrierDismissble: barrierDismissible,
+      barrierDismissible: barrierDismissible,
       barrierLabel: 'Dismiss',
       builder: builder,
       filter: filter,
