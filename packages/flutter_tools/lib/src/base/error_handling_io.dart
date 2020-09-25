@@ -46,6 +46,9 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   final Platform _platform;
 
   @override
+  Directory get currentDirectory => directory(delegate.currentDirectory);
+
+  @override
   File file(dynamic path) => ErrorHandlingFile(
     platform: _platform,
     fileSystem: delegate,

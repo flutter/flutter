@@ -300,7 +300,6 @@ void main() {
     });
   });
 
-
   group('throws ToolExit on macOS', () {
     const int eperm = 1;
     const int enospc = 28;
@@ -445,6 +444,24 @@ void main() {
       expect(mockFile.toString(), isNotNull);
       expect(fs.file('file').toString(), equals(mockFile.toString()));
     });
+
+    testWithoutContext('ErrorHandlingDirectory', () {
+      final MockFileSystem mockFileSystem = MockFileSystem();
+      final FileSystem fs = ErrorHandlingFileSystem(
+        delegate: mockFileSystem,
+        platform: const LocalPlatform(),
+      );
+      final MockDirectory mockDirectory = MockDirectory();
+      when(mockFileSystem.directory(any)).thenReturn(mockDirectory);
+
+      expect(mockDirectory.toString(), isNotNull);
+      expect(fs.directory('directory').toString(), equals(mockDirectory.toString()));
+
+      when(mockFileSystem.currentDirectory).thenReturn(mockDirectory);
+
+      expect(fs.currentDirectory.toString(), equals(mockDirectory.toString()));
+      expect(fs.currentDirectory, isA<ErrorHandlingDirectory>());
+    });
   });
 
   group('ProcessManager on windows throws tool exit', () {
@@ -563,7 +580,7 @@ void main() {
     });
   });
 
-   group('ProcessManager on macOS throws tool exit', () {
+  group('ProcessManager on macOS throws tool exit', () {
     const int enospc = 28;
     const int eacces = 13;
 
