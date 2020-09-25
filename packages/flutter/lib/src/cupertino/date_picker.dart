@@ -1800,6 +1800,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildHourColumn(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
+    additionalPadding = EdgeInsetsDirectional.only(
+      start: math.max(additionalPadding.start, 0),
+      end: math.max(additionalPadding.end, 0),
+    );
+
     return Stack(
       children: <Widget>[
         NotificationListener<ScrollEndNotification>(
@@ -1859,6 +1864,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildMinuteColumn(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
+    additionalPadding = EdgeInsetsDirectional.only(
+      start: math.max(additionalPadding.start, 0),
+      end: math.max(additionalPadding.end, 0),
+    );
+
     return Stack(
       children: <Widget>[
         NotificationListener<ScrollEndNotification>(
@@ -1918,6 +1928,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildSecondColumn(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
+    additionalPadding = EdgeInsetsDirectional.only(
+      start: math.max(additionalPadding.start, 0),
+      end: math.max(additionalPadding.end, 0),
+    );
+
     return Stack(
       children: <Widget>[
         NotificationListener<ScrollEndNotification>(
