@@ -120,8 +120,9 @@ void main() {
         '''
 2 connected devices:
 
-ephemeral (mobile) • ephemeral • android-arm    • Test SDK (1.2.3) (emulator)
-webby (mobile)     • webby     • web-javascript • Web SDK (1.2.4) (emulator)
+[A]: device.name        [B]: device.id [C]: targetPlatform [D]: device.sdkNameAndVersion
+[A]: ephemeral (mobile) [B]: ephemeral [C]: android-arm    [D]: Test SDK (1.2.3) (emulator)
+[A]: webby (mobile)     [B]: webby     [C]: web-javascript [D]: Web SDK (1.2.4) (emulator)
 
 • Cannot connect to device ABC
 '''

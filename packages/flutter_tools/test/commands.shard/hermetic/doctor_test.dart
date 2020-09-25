@@ -253,7 +253,8 @@ void main() {
         final ValidationResult result = await deviceValidator.validate();
         expect(result.type, ValidationType.installed);
         expect(result.messages, const <ValidationMessage>[
-          ValidationMessage('null (null) • device-id • android • null'),
+          ValidationMessage('[A]: device.name [B]: device.id [C]: targetPlatform [D]: device.sdkNameAndVersion'),
+          ValidationMessage('[A]: null (null) [B]: device-id [C]: android        [D]: null'),
           ValidationMessage.hint('Device locked'),
         ]);
         expect(result.statusInfo, '1 available');
