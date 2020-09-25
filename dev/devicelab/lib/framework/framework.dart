@@ -247,6 +247,20 @@ class TaskResult {
 
   /// Combines the result of two sets of benchmarks.
   TaskResult combine(TaskResult other) {
+    if (other == null) {
+      return this;
+    }
+
+    // If at least one subtask failed, return a failure and description for
+    // both tasks.
+    if (failed || other.failed) {
+      return TaskResult.failure(
+        'Combined task failure:\n'
+        '  First subtask: ${succeeded ? "succeeded" : message}\n'
+        '  Second subtask: ${other.succeeded ? "succeeded" : other.message}\n',
+      );
+    }
+
     final Set<String> keyIntersection = data.keys.toSet()
         .intersection(other.data.keys.toSet());
 
