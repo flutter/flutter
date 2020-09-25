@@ -1014,7 +1014,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// The `barrierColor` argument determines the [Color] of the barrier underneath
 /// the popup. It is `_kModalBarrierColor` by default.
 ///
-/// The `barrierDismissable` argument determines whether clicking outside the
+/// The `barrierDismissible` argument determines whether clicking outside the
 /// popup results in dismissal. It is `true` by default.
 ///
 /// The `useRootNavigator` argument is used to determine whether to push the
@@ -1052,7 +1052,7 @@ Future<T> showCupertinoModalPopup<T>({
   return Navigator.of(context, rootNavigator: useRootNavigator)!.push(
     _CupertinoModalPopupRoute<T>(
       barrierColor: CupertinoDynamicColor.resolve(barrierColor ?? _kModalBarrierColor, context),
-      barrierDismissable: barrierDismissible,
+      barrierDismissble: barrierDismissible,
       barrierLabel: 'Dismiss',
       builder: builder,
       filter: filter,

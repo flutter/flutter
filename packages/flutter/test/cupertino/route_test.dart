@@ -1467,7 +1467,7 @@ void main() {
     );
   });
 
-  testWidgets('showCupertinoModalPopup barrier dismissable', (WidgetTester tester) async {
+  testWidgets('showCupertinoModalPopup barrier dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
@@ -1492,7 +1492,7 @@ void main() {
     expect(rootObserver.dialogCount, 0);
   });
 
-  testWidgets('showCupertinoModalPopup barrier not dismissable', (WidgetTester tester) async {
+  testWidgets('showCupertinoModalPopup barrier not dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
