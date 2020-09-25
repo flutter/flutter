@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'recorder.dart';
+import 'package:web_benchmarks/recorder.dart';
 
 class _NestedMouseRegion extends StatelessWidget {
   const _NestedMouseRegion({this.nests, this.child});

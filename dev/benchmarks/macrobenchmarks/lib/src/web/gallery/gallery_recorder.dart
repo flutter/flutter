@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:gallery/benchmarks/gallery_automator.dart';
 
-import 'package:macrobenchmarks/src/web/recorder.dart';
+import 'package:web_benchmarks/recorder.dart';
 
 /// A recorder that measures frame building durations for the Gallery.
 class GalleryRecorder extends WidgetRecorder {

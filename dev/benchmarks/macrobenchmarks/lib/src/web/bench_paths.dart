@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:macrobenchmarks/src/web/recorder.dart';
+import 'package:web_benchmarks/recorder.dart';
 import 'package:macrobenchmarks/src/web/bench_paths_recording.dart'
     as recording;
 

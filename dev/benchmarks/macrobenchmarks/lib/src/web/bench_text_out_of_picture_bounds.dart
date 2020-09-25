@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'recorder.dart';
+import 'package:web_benchmarks/recorder.dart';
 import 'test_data.dart';
 
 /// Draws 9 screens worth of text in a 3x3 grid with only the middle cell
