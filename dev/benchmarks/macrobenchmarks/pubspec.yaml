@@ -18,6 +18,7 @@ dependencies:
   flutter_gallery_assets: 0.2.6
 
   # This is needed for web_benchmarks.
+  # TODO: Remove.
   gallery:
     git:
       url: https://github.com/flutter/gallery.git
@@ -136,6 +137,7 @@ flutter:
     - assets/999x1000.png
 
     # The following assets are required for running Flutter Gallery benchmarks.
+    # TODO: Trim.
     - packages/flutter_gallery_assets/assets/icons/settings/settings_light.flr
     - packages/flutter_gallery_assets/assets/icons/settings/settings_dark.flr
     - packages/flutter_gallery_assets/assets/studies/shrine_card_dark.png
