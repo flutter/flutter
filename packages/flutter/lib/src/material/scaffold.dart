@@ -964,14 +964,13 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///
 /// ### Nested Scaffolds
 ///
-/// The Scaffold was designed to be a single top level container for
-/// most of the content in a route(although, not necessarly the first widget).
-/// It is recommended that you use Scaffold once per route(adhering to
-/// material guidelines) for most of the simple cases, unless you really
-/// need to nest them to achieve the functionality you need.
+/// The Scaffold is designed to be a top level container for
+/// a [MaterialApp]. This means that adding a Scaffold
+/// to each route on a Material app will provide the app with
+/// Material's basic visual layout structure.
 ///
-/// You'll find that it's typically not necessary to nest scaffolds. For
-/// example, in a tabbed UI, where the [bottomNavigationBar] is a [TabBar]
+/// It is typically not necessary to nest Scaffolds. For example, in a 
+/// tabbed UI, where the [bottomNavigationBar] is a [TabBar]
 /// and the body is a [TabBarView], you might be tempted to make each tab bar
 /// view a scaffold with a differently titled AppBar. Rather, it would be
 /// better to add a listener to the [TabController] that updates the
