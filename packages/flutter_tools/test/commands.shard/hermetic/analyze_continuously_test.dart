@@ -117,7 +117,7 @@ void main() {
       platform: const LocalPlatform(),
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
-      toolStampFile: globals.fs.file('test'),
+      toolStampFile: () => globals.fs.file('test'),
     );
     await pub.get(
       context: PubContext.flutterTests,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'framework.dart';
 import 'navigator.dart';
 import 'will_pop_scope.dart';
@@ -76,8 +74,8 @@ class Form extends StatefulWidget {
   ///
   /// The [child] argument must not be null.
   const Form({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     @Deprecated(
       'Use autoValidateMode parameter which provide more specific '
       'behaviour related to auto validation. '
@@ -86,7 +84,7 @@ class Form extends StatefulWidget {
     bool autovalidate = false,
     this.onWillPop,
     this.onChanged,
-    AutovalidateMode autovalidateMode,
+    AutovalidateMode? autovalidateMode,
   }) : assert(child != null),
        assert(autovalidate != null),
        assert(
@@ -107,8 +105,8 @@ class Form extends StatefulWidget {
   /// FormState form = Form.of(context);
   /// form.save();
   /// ```
-  static FormState of(BuildContext context) {
-    final _FormScope scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
+  static FormState? of(BuildContext context) {
+    final _FormScope? scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
     return scope?._formState;
   }
 
@@ -129,13 +127,13 @@ class Form extends StatefulWidget {
   ///
   ///  * [WillPopScope], another widget that provides a way to intercept the
   ///    back button.
-  final WillPopCallback onWillPop;
+  final WillPopCallback? onWillPop;
 
   /// Called when one of the form fields changes.
   ///
   /// In addition to this callback being invoked, all the form fields themselves
   /// will rebuild.
-  final VoidCallback onChanged;
+  final VoidCallback? onChanged;
 
   /// Used to enable/disable form fields auto validation and update their error
   /// text.
@@ -162,7 +160,7 @@ class FormState extends State<Form> {
   // to rebuild, useful if form fields have interdependencies.
   void _fieldDidChange() {
     if (widget.onChanged != null)
-      widget.onChanged();
+      widget.onChanged!();
 
 
     _hasInteractedByUser = _fields
@@ -249,10 +247,10 @@ class FormState extends State<Form> {
 
 class _FormScope extends InheritedWidget {
   const _FormScope({
-    Key key,
-    Widget child,
-    FormState formState,
-    int generation,
+    Key? key,
+    required Widget child,
+    required FormState formState,
+    required int generation,
   }) : _formState = formState,
        _generation = generation,
        super(key: key, child: child);
@@ -276,12 +274,12 @@ class _FormScope extends InheritedWidget {
 /// otherwise.
 ///
 /// Used by [FormField.validator].
-typedef FormFieldValidator<T> = String Function(T value);
+typedef FormFieldValidator<T> = String? Function(T? value);
 
 /// Signature for being notified when a form field changes value.
 ///
 /// Used by [FormField.onSaved].
-typedef FormFieldSetter<T> = void Function(T newValue);
+typedef FormFieldSetter<T> = void Function(T? newValue);
 
 /// Signature for building the widget representing the form field.
 ///
@@ -314,8 +312,8 @@ class FormField<T> extends StatefulWidget {
   ///
   /// The [builder] argument must not be null.
   const FormField({
-    Key key,
-    @required this.builder,
+    Key? key,
+    required this.builder,
     this.onSaved,
     this.validator,
     this.initialValue,
@@ -326,7 +324,7 @@ class FormField<T> extends StatefulWidget {
     )
     bool autovalidate = false,
     this.enabled = true,
-    AutovalidateMode autovalidateMode,
+    AutovalidateMode? autovalidateMode,
   }) : assert(builder != null),
        assert(
          autovalidate == false ||
@@ -340,7 +338,7 @@ class FormField<T> extends StatefulWidget {
 
   /// An optional method to call with the final value when the form is saved via
   /// [FormState.save].
-  final FormFieldSetter<T> onSaved;
+  final FormFieldSetter<T>? onSaved;
 
   /// An optional method that validates an input. Returns an error string to
   /// display if the input is invalid, or null otherwise.
@@ -355,7 +353,7 @@ class FormField<T> extends StatefulWidget {
   /// not an error is displayed, either wrap the  [TextFormField] in a fixed
   /// height parent like [SizedBox], or set the [InputDecoration.helperText]
   /// parameter to a space.
-  final FormFieldValidator<T> validator;
+  final FormFieldValidator<T>? validator;
 
   /// Function that returns the widget representing this form field. It is
   /// passed the form field state as input, containing the current value and
@@ -363,7 +361,7 @@ class FormField<T> extends StatefulWidget {
   final FormFieldBuilder<T> builder;
 
   /// An optional value to initialize the form field to, or null otherwise.
-  final T initialValue;
+  final T? initialValue;
 
   /// Whether the form is able to receive user input.
   ///
@@ -394,17 +392,17 @@ class FormField<T> extends StatefulWidget {
 /// The current state of a [FormField]. Passed to the [FormFieldBuilder] method
 /// for use in constructing the form field's widget.
 class FormFieldState<T> extends State<FormField<T>> {
-  T _value;
-  String _errorText;
+  T? _value;
+  String? _errorText;
   bool _hasInteractedByUser = false;
 
   /// The current value of the form field.
-  T get value => _value;
+  T? get value => _value;
 
   /// The current validation error returned by the [FormField.validator]
   /// callback, or null if no errors have been triggered. This only updates when
   /// [validate] is called.
-  String get errorText => _errorText;
+  String? get errorText => _errorText;
 
   /// True if this field has any validation errors.
   bool get hasError => _errorText != null;
@@ -422,7 +420,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
     if (widget.onSaved != null)
-      widget.onSaved(value);
+      widget.onSaved!(value);
   }
 
   /// Resets the field to its initial value.
@@ -451,7 +449,7 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   void _validate() {
     if (widget.validator != null)
-      _errorText = widget.validator(_value);
+      _errorText = widget.validator!(_value);
   }
 
   /// Updates this field's state to the new value. Useful for responding to
@@ -460,7 +458,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// Triggers the [Form.onChanged] callback and, if [Form.autovalidateMode] is
   /// [AutovalidateMode.always] or [AutovalidateMode.onUserInteraction],
   /// revalidates all the fields of the form.
-  void didChange(T value) {
+  void didChange(T? value) {
     setState(() {
       _value = value;
       _hasInteractedByUser = true;
@@ -476,7 +474,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// the value should be set by a call to [didChange], which ensures that
   /// `setState` is called.
   @protected
-  void setValue(T value) {
+  void setValue(T? value) {
     _value = value;
   }
 

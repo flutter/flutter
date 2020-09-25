@@ -513,6 +513,7 @@ void main() {
       bundleFirstUpload: true,
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
+      pathToReload: '',
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -520,6 +521,7 @@ void main() {
     expect(webDevFS.webAssetServer.getFile('main.dart'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('manifest.json'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('flutter_service_worker.js'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('version.json'),isNotNull);
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'HELLO');
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
 
@@ -626,6 +628,7 @@ void main() {
       bundleFirstUpload: true,
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
+      pathToReload: '',
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -633,6 +636,7 @@ void main() {
     expect(webDevFS.webAssetServer.getFile('main.dart'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('manifest.json'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('flutter_service_worker.js'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('version.json'), isNotNull);
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'HELLO');
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
 

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -257,6 +257,81 @@ void main() {
     expect(report.success, true);
     expect(devFS.lastCompiled, isNot(previousCompile));
   });
+
+   testWithoutContext('DevFS uses provided DevFSWriter instead of default HTTP writer', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeDevFSWriter writer = FakeDevFSWriter();
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[createDevFSRequest],
+    );
+
+    final DevFS devFS = DevFS(
+      fakeVmServiceHost.vmService,
+      'test',
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+      httpClient: MockHttpClient(),
+    );
+
+    await devFS.create();
+
+    final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+    )).thenAnswer((Invocation invocation) async {
+      fileSystem.file('example').createSync();
+      return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
+    });
+
+    expect(writer.written, false);
+
+    final UpdateFSReport report = await devFS.update(
+      mainUri: Uri.parse('lib/main.dart'),
+      generator: residentCompiler,
+      dillOutputPath: 'lib/foo.dill',
+      pathToReload: 'lib/foo.txt.dill',
+      trackWidgetCreation: false,
+      invalidatedFiles: <Uri>[],
+      packageConfig: PackageConfig.empty,
+      devFSWriter: writer,
+    );
+
+    expect(report.success, true);
+    expect(writer.written, true);
+  });
+
+  testWithoutContext('Local DevFSwriter can copy and write files', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('foo_bar')
+      ..writeAsStringSync('goodbye');
+    final LocalDevFSWriter writer = LocalDevFSWriter(fileSystem: fileSystem);
+
+    await writer.write(<Uri, DevFSContent>{
+      Uri.parse('hello'): DevFSStringContent('hello'),
+      Uri.parse('goodbye'): DevFSFileContent(file),
+    }, Uri.parse('/foo/bar/devfs/'));
+
+    expect(fileSystem.file('/foo/bar/devfs/hello'), exists);
+    expect(fileSystem.file('/foo/bar/devfs/hello').readAsStringSync(), 'hello');
+    expect(fileSystem.file('/foo/bar/devfs/goodbye'), exists);
+    expect(fileSystem.file('/foo/bar/devfs/goodbye').readAsStringSync(), 'goodbye');
+  });
+
+  testWithoutContext('Local DevFSwriter turns FileSystemException into DevFSException', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final LocalDevFSWriter writer = LocalDevFSWriter(fileSystem: fileSystem);
+    final File file = MockFile();
+    when(file.copySync(any)).thenThrow(const FileSystemException('foo'));
+
+    await expectLater(() async => await writer.write(<Uri, DevFSContent>{
+      Uri.parse('goodbye'): DevFSFileContent(file),
+    }, Uri.parse('/foo/bar/devfs/')), throwsA(isA<DevFSException>()));
+  });
 }
 
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}
@@ -264,3 +339,12 @@ class MockHttpHeaders extends Mock implements HttpHeaders {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
+class MockFile extends Mock implements File {}
+class FakeDevFSWriter implements DevFSWriter {
+  bool written = false;
+
+  @override
+  Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, DevFSWriter parent) async {
+    written = true;
+  }
+}

@@ -268,10 +268,14 @@ enum StackFit {
   passthrough,
 }
 
-// TODO(liyuqian): Deprecate and remove `Overflow` once its usages are removed from Google.
-
 /// Whether overflowing children should be clipped, or their overflow be
 /// visible.
+///
+/// Deprecated. Use [Stack.clipBehavior] instead.
+@Deprecated(
+  'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
+  'This feature was deprecated after v1.22.0-12.0.pre.'
+)
 enum Overflow {
   /// Overflowing children will be visible.
   ///

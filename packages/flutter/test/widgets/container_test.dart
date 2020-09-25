@@ -502,6 +502,36 @@ void main() {
     );
   });
 
+  testWidgets('getClipPath() works for lots of kinds of decorations', (WidgetTester tester) async {
+    Future<void> test(Decoration decoration) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: Center(
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+              child: RepaintBoundary(
+                child: Container(
+                  clipBehavior: Clip.hardEdge,
+                  decoration: decoration,
+                  child: ColoredBox(
+                    color: Colors.yellow.withOpacity(0.5),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await expectLater(find.byType(Container), matchesGoldenFile('container_test.getClipPath.${decoration.runtimeType}.png'));
+    }
+    await test(const BoxDecoration());
+    await test(const UnderlineTabIndicator());
+    await test(const ShapeDecoration(shape: StadiumBorder()));
+    await test(const FlutterLogoDecoration());
+  });
+
   testWidgets('Container is hittable only when having decorations', (WidgetTester tester) async {
     bool tapped = false;
     await tester.pumpWidget(GestureDetector(

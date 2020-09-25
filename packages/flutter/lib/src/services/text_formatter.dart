@@ -319,8 +319,8 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// The limit on the number of characters (i.e. Unicode scalar values) this formatter
   /// will allow.
   ///
-  /// The value must be null or greater than zero. If it is null, then no limit
-  /// is enforced.
+  /// The value must be null or greater than zero. If it is null or -1, then no
+  /// limit is enforced.
   ///
   /// This formatter does not currently count Unicode grapheme clusters (i.e.
   /// characters visible to the user), it counts Unicode scalar values, which leaves
@@ -356,7 +356,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///
   /// See also:
   ///  * [Dart's characters package](https://pub.dev/packages/characters).
-  ///  * [Dart's documenetation on runes and grapheme clusters](https://dart.dev/guides/language/language-tour#runes-and-grapheme-clusters).
+  ///  * [Dart's documentation on runes and grapheme clusters](https://dart.dev/guides/language/language-tour#runes-and-grapheme-clusters).
   @visibleForTesting
   static TextEditingValue truncate(TextEditingValue value, int maxLength) {
     final CharacterRange iterator = CharacterRange(value.text);
@@ -379,25 +379,22 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    // Return the new value when the old value has not reached the max
-    // limit or the old value is composing too.
-    if (newValue.composing.isValid) {
-      if (maxLength != null && maxLength! > 0 &&
-          oldValue.text.characters.length == maxLength! &&
-          !oldValue.composing.isValid) {
-        return oldValue;
-      }
+    final int? maxLength = this.maxLength;
+
+    if (maxLength == null || maxLength == -1 || newValue.text.characters.length <= maxLength)
       return newValue;
+
+    assert(maxLength > 0);
+
+    // If already at the maximum and tried to enter even more, keep the old
+    // value.
+    if (oldValue.text.characters.length == maxLength && !oldValue.composing.isValid) {
+      return oldValue;
     }
-    if (maxLength != null && maxLength! > 0 && newValue.text.characters.length > maxLength!) {
-      // If already at the maximum and tried to enter even more, keep the old
-      // value.
-      if (oldValue.text.characters.length == maxLength) {
-        return oldValue;
-      }
-      return truncate(newValue, maxLength!);
-    }
-    return newValue;
+
+    // Temporarily exempt `newValue` from the maxLength limit if it has a
+    // composing text going, until the composing is finished.
+    return newValue.composing.isValid ? newValue : truncate(newValue, maxLength);
   }
 }
 

@@ -95,6 +95,29 @@ void main() {
     });
   });
 
+  testWithoutContext('macos name', () async {
+    when(mockProcessManager.runSync(
+      <String>['sw_vers', '-productName'],
+    )).thenReturn(ProcessResult(0, 0, 'product', ''));
+    when(mockProcessManager.runSync(
+      <String>['sw_vers', '-productVersion'],
+    )).thenReturn(ProcessResult(0, 0, 'version', ''));
+    when(mockProcessManager.runSync(
+      <String>['sw_vers', '-buildVersion'],
+    )).thenReturn(ProcessResult(0, 0, 'build', ''));
+    when(mockProcessManager.runSync(
+      <String>['uname', '-m'],
+    )).thenReturn(ProcessResult(0, 0, 'arch', ''));
+    final MockFileSystem fileSystem = MockFileSystem();
+    final OperatingSystemUtils utils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'macos'),
+      processManager: mockProcessManager,
+    );
+    expect(utils.name, 'product version build arch');
+  });
+
   testWithoutContext('If unzip fails, include stderr in exception text', () {
     const String exceptionMessage = 'Something really bad happened.';
     when(mockProcessManager.runSync(

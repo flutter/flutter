@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
@@ -95,7 +93,7 @@ Future<void> main(List<String> args) async {
     DevicesCommand(),
     DoctorCommand(verbose: verbose),
     DowngradeCommand(),
-    DriveCommand(),
+    DriveCommand(verboseHelp: verboseHelp),
     EmulatorsCommand(),
     FormatCommand(),
     GenerateCommand(),
