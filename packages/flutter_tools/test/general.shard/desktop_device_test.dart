@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/desktop_device.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
@@ -191,5 +192,11 @@ void main() {
     final int result = await portForwarder.forward(2);
     expect(result, 2);
     expect(portForwarder.forwardedPorts.isEmpty, true);
+  });
+
+  testWithoutContext('createDevFSWriter returns a LocalDevFSWriter', () {
+    final FakeDesktopDevice device = FakeDesktopDevice();
+
+    expect(device.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());
   });
 }
