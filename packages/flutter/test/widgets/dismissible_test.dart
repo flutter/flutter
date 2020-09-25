@@ -798,4 +798,73 @@ void main() {
       '   handler has fired.\n',
     );
   });
+
+  testWidgets('Dismissible.behavior should behave correctly during hit testing', (WidgetTester tester) async {
+    bool didReceivePointerDown = false;
+
+    Widget buildStack({Widget child}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Listener(
+              onPointerDown: (_) {
+                didReceivePointerDown = true;
+              },
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                color: const Color(0xFF00FF00),
+              ),
+            ),
+            child,
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildStack(
+        child: const Dismissible(
+          key: ValueKey<int>(1),
+          child: SizedBox(
+            width: 100.0,
+            height: 100.0,
+          ),
+        ),
+      ),
+    );
+    await tester.tapAt(const Offset(10.0, 10.0));
+    expect(didReceivePointerDown, isFalse);
+
+    Future<void> pumpWidgetTree(HitTestBehavior behavior) {
+      return tester.pumpWidget(
+        buildStack(
+          child: Dismissible(
+            key: const ValueKey<int>(1),
+            behavior: behavior,
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      );
+    }
+
+    didReceivePointerDown = false;
+    await pumpWidgetTree(HitTestBehavior.deferToChild);
+    await tester.tapAt(const Offset(10.0, 10.0));
+    expect(didReceivePointerDown, isTrue);
+
+    didReceivePointerDown = false;
+    await pumpWidgetTree(HitTestBehavior.opaque);
+    await tester.tapAt(const Offset(10.0, 10.0));
+    expect(didReceivePointerDown, isFalse);
+
+    didReceivePointerDown = false;
+    await pumpWidgetTree(HitTestBehavior.translucent);
+    await tester.tapAt(const Offset(10.0, 10.0));
+    expect(didReceivePointerDown, isTrue);
+  });
 }

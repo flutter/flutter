@@ -303,6 +303,13 @@
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
+         "name": "Windows build_aar_module_test",
+         "repo": "flutter",
+         "task_name": "win_build_aar_module_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
          "name": "Windows build_tests",
          "repo": "flutter",
          "task_name": "win_build_tests",
@@ -330,6 +337,13 @@
          "run_if":["dev/**", "bin/**"]
       },
       {
+         "name": "Windows gradle_jetifier_test",
+         "repo": "flutter",
+         "task_name": "win_gradle_jetifier_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
          "name": "Windows gradle_non_android_plugin_test",
          "repo": "flutter",
          "task_name": "win_gradle_non_android_plugin_test",
@@ -344,6 +358,13 @@
          "run_if":["dev/**", "bin/**"]
       },
       {
+         "name": "Windows gradle_plugin_light_apk_test",
+         "repo": "flutter",
+         "task_name": "win_gradle_plugin_light_apk_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
          "name": "Windows gradle_r8_test",
          "repo": "flutter",
          "task_name": "win_gradle_r8_test",
@@ -351,9 +372,30 @@
          "run_if":["dev/**", "bin/**"]
       },
       {
+         "name": "Windows module_custom_host_app_name_test",
+         "repo": "flutter",
+         "task_name": "win_module_custom_host_app_name_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name": "Windows module_test",
+         "repo": "flutter",
+         "task_name": "win_module_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
          "name": "Windows module_host_with_custom_build_test",
          "repo": "flutter",
          "task_name": "win_module_host_with_custom_build_test",
+         "enabled":true,
+         "run_if":["dev/**", "bin/**"]
+      },
+      {
+         "name": "Windows plugin_dependencies_test",
+         "repo": "flutter",
+         "task_name": "win_plugin_dependencies_test",
          "enabled":true,
          "run_if":["dev/**", "bin/**"]
       },

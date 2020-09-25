@@ -638,17 +638,11 @@ class TextField extends StatefulWidget {
   /// The cursor indicates the current location of text insertion point in
   /// the field.
   ///
-  /// If this is null it will default to a value based on the following:
-  ///
-  /// * If the ambient [ThemeData.useTextSelectionTheme] is true then it
-  ///   will use the value of the ambient [TextSelectionThemeData.cursorColor].
-  ///   If that is null then if the [ThemeData.platform] is [TargetPlatform.iOS]
-  ///   or [TargetPlatform.macOS] then it will use [CupertinoThemeData.primaryColor].
-  ///   Otherwise it will use the value of [ColorScheme.primary] of [ThemeData.colorScheme].
-  ///
-  /// * If the ambient [ThemeData.useTextSelectionTheme] is false then it
-  ///   will use either [ThemeData.cursorColor] or [CupertinoThemeData.primaryColor]
-  ///   depending on [ThemeData.platform].
+  /// If this is null it will default to the ambient
+  /// [TextSelectionThemeData.cursorColor]. If that is null, and the
+  /// [ThemeData.platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS]
+  /// it will use [CupertinoThemeData.primaryColor]. Otherwise it will use
+  /// the value of [ColorScheme.primary] of [ThemeData.colorScheme].
   final Color cursorColor;
 
   /// Controls how tall the selection highlight boxes are computed to be.
@@ -1111,13 +1105,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         textSelectionControls = cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        if (theme.useTextSelectionTheme) {
-          cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
-          selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
-        } else {
-          cursorColor ??= CupertinoTheme.of(context).primaryColor;
-          selectionColor = theme.textSelectionColor;
-        }
+        cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         autocorrectionTextRectColor = selectionColor;
@@ -1131,13 +1120,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         textSelectionControls = materialTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        if (theme.useTextSelectionTheme) {
-          cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
-          selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-        } else {
-          cursorColor ??= theme.cursorColor;
-          selectionColor = theme.textSelectionColor;
-        }
+        cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         break;
     }
 
