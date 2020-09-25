@@ -397,12 +397,13 @@ class TestCommand extends Command<bool> with ArgUtils {
       'test',
     ));
 
-    // Screenshot tests and smoke tests only run on: "Chrome/iOS Safari locally"
-    // or "Chrome on a Linux bot". We can remove the Linux bot restriction
-    // after solving the git issue faced on macOS and Windows bots:
+    // Screenshot tests and smoke tests only run on: "Chrome/iOS Safari"
+    // locally and on LUCI. They are not available on Windows bots:
     // TODO: https://github.com/flutter/flutter/issues/63710
     if ((isChrome && isLuci && io.Platform.isLinux) ||
-        ((isChrome || isSafariIOS) && !isLuci)) {
+        ((isChrome || isSafariIOS) && !isLuci) ||
+        (isSafariIOS && isLuci)) {
+      print('INFO: Also running the screenshot tests.');
       // Separate screenshot tests from unit-tests. Screenshot tests must run
       // one at a time. Otherwise, they will end up screenshotting each other.
       // This is not an issue for unit-tests.

@@ -34,7 +34,7 @@ ios-safari:
   # `heightOfHeader` is the number of pixels taken by the phone's header menu
   # and the browsers address bar.
   # TODO: https://github.com/flutter/flutter/issues/65672
-  heightOfHeader: 282
+  heightOfHeader: 189
   # `heightOfFooter` is the number of pixels taken by the phone's navigation
   # menu.
   heightOfFooter: 250
@@ -45,7 +45,8 @@ ios-safari:
   # phone screeen we enlarge or shrink the area by applying a linear
   # transformation by a scale_factor (a.k.a. we perform isotropic scaling).
   # This value will be differ depending on the phone.
-  scaleFactor: 1.15
+  # For iOS 13.0 iPhone 11 Pro, this number is 1.15.
+  scaleFactor: 1.00
 
 ## geckodriver is used for testing Firefox Browser. It works with multiple
 ## Firefox Browser versions.
