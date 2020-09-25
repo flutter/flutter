@@ -927,7 +927,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     required this.barrierColor,
     required this.barrierLabel,
     required this.builder,
-    bool? barrierDismissable,
+    bool? barrierDismissible,
     bool? semanticsDismissible,
     required ImageFilter? filter,
     RouteSettings? settings,
@@ -935,7 +935,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
          filter: filter,
          settings: settings,
        ) {
-    _barrierDismissible = barrierDismissable;
+    _barrierDismissible = barrierDismissible;
     _semanticsDismissible = semanticsDismissible;
   }
 
