@@ -5734,6 +5734,43 @@ void main() {
     expect(state.currentTextEditingValue.text, '12345');
     expect(state.currentTextEditingValue.composing, TextRange.empty);
   });
+
+  testWidgets('Length formatter handles composing text correctly, continued', (WidgetTester tester) async {
+    final TextInputFormatter formatter = LengthLimitingTextInputFormatter(5);
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        inputFormatters: <TextInputFormatter>[formatter],
+        style: textStyle,
+        cursorColor: cursorColor,
+        selectionControls: materialTextSelectionControls,
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Initially we're at maxLength with no composing text.
+    controller.text = '12345' ;
+    assert(state.currentTextEditingValue == const TextEditingValue(text: '12345'));
+
+    // Should be able to change the editing value if the new value is still shorter
+    // than maxLength.
+    state.updateEditingValue(const TextEditingValue(text: '12345', composing: TextRange(start: 2, end: 4)));
+    expect(state.currentTextEditingValue.composing, const TextRange(start: 2, end: 4));
+
+    // Reset.
+    controller.text = '12345' ;
+    assert(state.currentTextEditingValue == const TextEditingValue(text: '12345'));
+
+    // The text should not change when trying to insert when the text is already
+    // at maxLength.
+    state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 5, end: 6)));
+    expect(state.currentTextEditingValue.text, '12345');
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+  });
 }
 
 class MockTextFormatter extends TextInputFormatter {
