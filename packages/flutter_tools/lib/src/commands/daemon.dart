@@ -66,7 +66,7 @@ class DaemonCommand extends FlutterCommand {
 
 typedef DispatchCommand = void Function(Map<String, dynamic> command);
 
-typedef CommandHandler = Future<dynamic> Function(Map<String, dynamic> args);
+typedef CommandHandler = FutureOr<dynamic> Function(Map<String, dynamic> args);
 
 class Daemon {
   Daemon(
@@ -826,21 +826,17 @@ class DeviceDomain extends Domain {
   }
 
   /// Enable device events.
-  Future<void> enable(Map<String, dynamic> args) {
-    final List<Future<void>> calls = <Future<void>>[];
+  void enable(Map<String, dynamic> args) {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      calls.add(discoverer.startPolling());
+      discoverer.startPolling();
     }
-    return Future.wait<void>(calls);
   }
 
   /// Disable device events.
-  Future<void> disable(Map<String, dynamic> args) async {
-    final List<Future<void>> calls = <Future<void>>[];
+  void disable(Map<String, dynamic> args) {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      calls.add(discoverer.stopPolling());
+      discoverer.stopPolling();
     }
-    return Future.wait<void>(calls);
   }
 
   /// Forward a host port to a device port.
@@ -874,10 +870,11 @@ class DeviceDomain extends Domain {
   }
 
   @override
-  Future<void> dispose() async {
+  Future<void> dispose() {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      await discoverer.dispose();
+      discoverer.dispose();
     }
+    return Future<void>.value();
   }
 
   /// Return the device matching the deviceId field in the args.
