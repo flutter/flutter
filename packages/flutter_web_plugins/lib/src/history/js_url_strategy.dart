@@ -95,7 +95,4 @@ abstract class JsUrlStrategy {
 
   /// Moves forwards or backwards through the history stack.
   external Future<void> go(int count);
-
-  // TODO: add this:
-  // external String getBaseHref();
 }

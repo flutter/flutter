@@ -13,7 +13,6 @@ import 'utils.dart';
 ///
 /// Setting this to null, all integration with browser history and URL will
 /// be disabled.
-// TODO(mdebbar): this should go under FlutterBindings.
 void setUrlStrategy(UrlStrategy strategy) {
   onUrlStrategy(convertToJsUrlStrategy(strategy));
 }
