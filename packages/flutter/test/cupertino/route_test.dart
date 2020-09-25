@@ -1469,7 +1469,7 @@ void main() {
 
   testWidgets('showCupertinoModalPopup barrier dismissible', (WidgetTester tester) async {
     final DialogObserver rootObserver = DialogObserver();
-    
+
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
@@ -1505,7 +1505,7 @@ void main() {
               await showCupertinoModalPopup<void>(
                   context: context,
                   builder: (BuildContext context) => const SizedBox(),
-                  barrierDismissible: fals);
+                  barrierDismissible: false);
             },
             child: const Text('tap'),
           );
