@@ -410,6 +410,11 @@ abstract class Route<T> {
     _navigator = null;
   }
 
+  @protected
+  void gracefullyDispose() {
+    dispose();
+  }
+
   /// Whether this route is the top-most route on the navigator.
   ///
   /// If this is true, then [isActive] is also true.
@@ -2566,6 +2571,12 @@ class _RouteEntry extends RouteTransitionRecord {
     currentState = _RouteLifecycle.disposed;
   }
 
+  void gracefullyDispose() {
+    assert(currentState.index < _RouteLifecycle.disposed.index);
+    route.gracefullyDispose();
+    currentState = _RouteLifecycle.disposed;
+  }
+
   bool get willBePresent {
     return currentState.index <= _RouteLifecycle.idle.index &&
            currentState.index >= _RouteLifecycle.add.index;
@@ -3319,7 +3330,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     for (final _RouteEntry entry in toBeDisposed) {
       for (final OverlayEntry overlayEntry in entry.route.overlayEntries)
         overlayEntry.remove();
-      entry.dispose();
+      entry.gracefullyDispose();
     }
     if (rearrangeOverlay)
       overlay?.rearrange(_allRouteOverlayEntries);

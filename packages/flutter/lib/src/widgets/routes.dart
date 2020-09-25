@@ -188,7 +188,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         // removing the route and disposing it.
         if (!isActive) {
           navigator!.finalizeRoute(this);
-          assert(overlayEntries.isEmpty);
         }
         break;
     }
@@ -691,10 +690,15 @@ class _ModalScopeStatus extends InheritedWidget {
 class _ModalScope<T> extends StatefulWidget {
   const _ModalScope({
     Key? key,
+    required this.onMount,
+    required this.onUnmount,
     required this.route,
   }) : super(key: key);
 
   final ModalRoute<T> route;
+
+  final VoidCallback onMount;
+  final VoidCallback onUnmount;
 
   @override
   _ModalScopeState<T> createState() => _ModalScopeState<T>();
@@ -716,6 +720,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   @override
   void initState() {
     super.initState();
+    widget.onMount();
     final List<Listenable> animations = <Listenable>[
       if (widget.route.animation != null) widget.route.animation!,
       if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation!,
@@ -748,8 +753,14 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   }
 
   @override
+  void deactivate() {
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     focusScopeNode.dispose();
+    widget.onUnmount();
     super.dispose();
   }
 
@@ -1492,6 +1503,22 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // frame so that we minimize the amount of building that happens.
   Widget? _modalScopeCache;
 
+  bool _holdDispose = false;
+  bool _hasDisposeHeld = false;
+
+  void _onMountScope() {
+    _holdDispose = true;
+    _hasDisposeHeld = false;
+  }
+
+  void _onUnmountScope() {
+    _holdDispose = false;
+    if (_hasDisposeHeld) {
+      _hasDisposeHeld = false;
+      super.dispose();
+    }
+  }
+
   // one of the builders
   Widget _buildModalScope(BuildContext context) {
     // To be sorted before the _modalBarrier.
@@ -1499,6 +1526,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       sortKey: const OrdinalSortKey(0.0),
       child: _ModalScope<T>(
         key: _scopeKey,
+        onMount: _onMountScope,
+        onUnmount: _onUnmountScope,
         route: this,
         // _ModalScope calls buildTransitions() and buildChild(), defined above
       )
@@ -1506,6 +1535,23 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   late OverlayEntry _modalScope;
+
+  @override
+  void dispose() {
+    _holdDispose = false;
+    _hasDisposeHeld = false;
+    super.dispose();
+  }
+
+  @protected
+  @override
+  void gracefullyDispose() {
+    if (_holdDispose) {
+      _hasDisposeHeld = true;
+    } else {
+      super.dispose();
+    }
+  }
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
