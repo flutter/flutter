@@ -298,7 +298,7 @@
          "name": "Windows gradle_plugin_light_apk_test",
          "repo": "flutter",
          "task_name": "win_gradle_plugin_light_apk_test",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Windows gradle_non_android_plugin_test",
