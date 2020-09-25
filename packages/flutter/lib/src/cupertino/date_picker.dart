@@ -1594,17 +1594,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
     selectedMinute = widget.initialTimerDuration.inMinutes % 60;
 
-    if (widget.mode == CupertinoTimerPickerMode.hms){
-      // Pad the widget to make it as wide as `_kPickerWidth`.
-      pickerColumnWidth =
-          _kTimerPickerColumnIntrinsicWidth + (_kTimerPickerHalfColumnPadding * 2);
-      totalWidth = pickerColumnWidth * 3;
-    } else {
-      // The default totalWidth for 2-column modes.
-      totalWidth = _kPickerWidth;
-      pickerColumnWidth = totalWidth / 2;
-    }
-
     if (widget.mode != CupertinoTimerPickerMode.ms)
       selectedHour = widget.initialTimerDuration.inHours;
 
@@ -1976,132 +1965,152 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   @override
   Widget build(BuildContext context) {
-    // The timer picker can be divided into columns corresponding to hour,
-    // minute, and second. Each column consists of a scrollable and a fixed
-    // label on top of it.
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        // The timer picker can be divided into columns corresponding to hour,
+        // minute, and second. Each column consists of a scrollable and a fixed
+        // label on top of it.
+        List<Widget> columns;
 
-    List<Widget> columns;
+        if (widget.mode == CupertinoTimerPickerMode.hms){
+          // Pad the widget to make it as wide as `_kPickerWidth`.
+          pickerColumnWidth =
+              _kTimerPickerColumnIntrinsicWidth + (_kTimerPickerHalfColumnPadding * 2);
+          totalWidth = pickerColumnWidth * 3;
+        } else {
+          // The default totalWidth for 2-column modes.
+          totalWidth = _kPickerWidth;
+          pickerColumnWidth = totalWidth / 2;
+        }
 
-    final double baseLabelContentWidth = numberLabelWidth + _kTimerPickerLabelPadSize;
-    final double minuteLabelContentWidth = baseLabelContentWidth + minuteLabelWidth;
+        if (constraints.maxWidth < totalWidth) {
+          totalWidth = constraints.maxWidth;
+          pickerColumnWidth =
+              totalWidth / (widget.mode == CupertinoTimerPickerMode.hms ? 3 : 2);
+        }
 
-    switch (widget.mode) {
-      case CupertinoTimerPickerMode.hm:
-        // Pad the widget to make it as wide as `_kPickerWidth`.
-        final double hourLabelContentWidth = baseLabelContentWidth + hourLabelWidth;
-        double hourColumnStartPadding =
-            pickerColumnWidth - hourLabelContentWidth - _kTimerPickerHalfColumnPadding;
-        if (hourColumnStartPadding < _kTimerPickerMinHorizontalPadding)
-          hourColumnStartPadding = _kTimerPickerMinHorizontalPadding;
+        final double baseLabelContentWidth = numberLabelWidth + _kTimerPickerLabelPadSize;
+        final double minuteLabelContentWidth = baseLabelContentWidth + minuteLabelWidth;
 
-        double minuteColumnEndPadding =
-            pickerColumnWidth - minuteLabelContentWidth - _kTimerPickerHalfColumnPadding;
-        if (minuteColumnEndPadding < _kTimerPickerMinHorizontalPadding)
-          minuteColumnEndPadding = _kTimerPickerMinHorizontalPadding;
+        switch (widget.mode) {
+          case CupertinoTimerPickerMode.hm:
+          // Pad the widget to make it as wide as `_kPickerWidth`.
+            final double hourLabelContentWidth = baseLabelContentWidth + hourLabelWidth;
+            double hourColumnStartPadding =
+                pickerColumnWidth - hourLabelContentWidth - _kTimerPickerHalfColumnPadding;
+            if (hourColumnStartPadding < _kTimerPickerMinHorizontalPadding)
+              hourColumnStartPadding = _kTimerPickerMinHorizontalPadding;
 
-        columns = <Widget>[
-          _buildHourColumn(
-              EdgeInsetsDirectional.only(
-                  start: hourColumnStartPadding,
-                  end: pickerColumnWidth - hourColumnStartPadding - hourLabelContentWidth
+            double minuteColumnEndPadding =
+                pickerColumnWidth - minuteLabelContentWidth - _kTimerPickerHalfColumnPadding;
+            if (minuteColumnEndPadding < _kTimerPickerMinHorizontalPadding)
+              minuteColumnEndPadding = _kTimerPickerMinHorizontalPadding;
+
+            columns = <Widget>[
+              _buildHourColumn(
+                  EdgeInsetsDirectional.only(
+                      start: hourColumnStartPadding,
+                      end: pickerColumnWidth - hourColumnStartPadding - hourLabelContentWidth
+                  ),
+                  _leftSelectionOverlay
               ),
-              _leftSelectionOverlay
-          ),
-          _buildMinuteColumn(
-              EdgeInsetsDirectional.only(
-                  start: pickerColumnWidth - minuteColumnEndPadding - minuteLabelContentWidth,
-                  end: minuteColumnEndPadding
+              _buildMinuteColumn(
+                  EdgeInsetsDirectional.only(
+                      start: pickerColumnWidth - minuteColumnEndPadding - minuteLabelContentWidth,
+                      end: minuteColumnEndPadding
+                  ),
+                  _rightSelectionOverlay
               ),
-              _rightSelectionOverlay
-          ),
-        ];
-        break;
-      case CupertinoTimerPickerMode.ms:
-        final double secondLabelContentWidth = baseLabelContentWidth + secondLabelWidth;
-        double secondColumnEndPadding =
-            pickerColumnWidth - secondLabelContentWidth - _kTimerPickerHalfColumnPadding;
-        if (secondColumnEndPadding < _kTimerPickerMinHorizontalPadding)
-          secondColumnEndPadding = _kTimerPickerMinHorizontalPadding;
+            ];
+            break;
+          case CupertinoTimerPickerMode.ms:
+            final double secondLabelContentWidth = baseLabelContentWidth + secondLabelWidth;
+            double secondColumnEndPadding =
+                pickerColumnWidth - secondLabelContentWidth - _kTimerPickerHalfColumnPadding;
+            if (secondColumnEndPadding < _kTimerPickerMinHorizontalPadding)
+              secondColumnEndPadding = _kTimerPickerMinHorizontalPadding;
 
-        double minuteColumnStartPadding =
-            pickerColumnWidth - minuteLabelContentWidth - _kTimerPickerHalfColumnPadding;
-        if (minuteColumnStartPadding < _kTimerPickerMinHorizontalPadding)
-          minuteColumnStartPadding = _kTimerPickerMinHorizontalPadding;
+            double minuteColumnStartPadding =
+                pickerColumnWidth - minuteLabelContentWidth - _kTimerPickerHalfColumnPadding;
+            if (minuteColumnStartPadding < _kTimerPickerMinHorizontalPadding)
+              minuteColumnStartPadding = _kTimerPickerMinHorizontalPadding;
 
-        columns = <Widget>[
-          _buildMinuteColumn(
-              EdgeInsetsDirectional.only(
-                start: minuteColumnStartPadding,
-                end: pickerColumnWidth - minuteColumnStartPadding - minuteLabelContentWidth
+            columns = <Widget>[
+              _buildMinuteColumn(
+                  EdgeInsetsDirectional.only(
+                      start: minuteColumnStartPadding,
+                      end: pickerColumnWidth - minuteColumnStartPadding - minuteLabelContentWidth
+                  ),
+                  _leftSelectionOverlay
               ),
-              _leftSelectionOverlay
-          ),
-          _buildSecondColumn(
-              EdgeInsetsDirectional.only(
-                  start: pickerColumnWidth - secondColumnEndPadding - minuteLabelContentWidth,
-                  end: secondColumnEndPadding
+              _buildSecondColumn(
+                  EdgeInsetsDirectional.only(
+                      start: pickerColumnWidth - secondColumnEndPadding - minuteLabelContentWidth,
+                      end: secondColumnEndPadding
+                  ),
+                  _rightSelectionOverlay
               ),
-              _rightSelectionOverlay
-          ),
-        ];
-        break;
-      case CupertinoTimerPickerMode.hms:
-        final double hourColumnEndPadding =
-            pickerColumnWidth - baseLabelContentWidth - hourLabelWidth - _kTimerPickerMinHorizontalPadding;
-        final double minuteColumnPadding =
-            (pickerColumnWidth - minuteLabelContentWidth) / 2;
-        final double secondColumnStartPadding =
-            pickerColumnWidth - baseLabelContentWidth - secondLabelWidth - _kTimerPickerMinHorizontalPadding;
+            ];
+            break;
+          case CupertinoTimerPickerMode.hms:
+            final double hourColumnEndPadding =
+                pickerColumnWidth - baseLabelContentWidth - hourLabelWidth - _kTimerPickerMinHorizontalPadding;
+            final double minuteColumnPadding =
+                (pickerColumnWidth - minuteLabelContentWidth) / 2;
+            final double secondColumnStartPadding =
+                pickerColumnWidth - baseLabelContentWidth - secondLabelWidth - _kTimerPickerMinHorizontalPadding;
 
-        columns = <Widget>[
-          _buildHourColumn(
-              EdgeInsetsDirectional.only(
-                  start: _kTimerPickerMinHorizontalPadding,
-                  end: math.max(hourColumnEndPadding, 0)
+            columns = <Widget>[
+              _buildHourColumn(
+                  EdgeInsetsDirectional.only(
+                      start: _kTimerPickerMinHorizontalPadding,
+                      end: math.max(hourColumnEndPadding, 0)
+                  ),
+                  _leftSelectionOverlay
               ),
-              _leftSelectionOverlay
-          ),
-          _buildMinuteColumn(
-              EdgeInsetsDirectional.only(
-                  start: minuteColumnPadding,
-                  end: minuteColumnPadding
+              _buildMinuteColumn(
+                  EdgeInsetsDirectional.only(
+                      start: minuteColumnPadding,
+                      end: minuteColumnPadding
+                  ),
+                  _centerSelectionOverlay
               ),
-              _centerSelectionOverlay
-          ),
-          _buildSecondColumn(
-              EdgeInsetsDirectional.only(
-                  start: math.max(secondColumnStartPadding, 0),
-                  end: _kTimerPickerMinHorizontalPadding
+              _buildSecondColumn(
+                  EdgeInsetsDirectional.only(
+                      start: math.max(secondColumnStartPadding, 0),
+                      end: _kTimerPickerMinHorizontalPadding
+                  ),
+                  _rightSelectionOverlay
               ),
-              _rightSelectionOverlay
-          ),
-        ];
-        break;
-    }
-    final CupertinoThemeData themeData = CupertinoTheme.of(context);
-    return MediaQuery(
-      // The native iOS picker's text scaling is fixed, so we will also fix it
-      // as well in our picker.
-      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-      child: CupertinoTheme(
-        data: themeData.copyWith(
-          textTheme: themeData.textTheme.copyWith(
-            pickerTextStyle: _textStyleFrom(context, _kTimerPickerMagnification),
-          ),
-        ),
-        child: Align(
-          alignment: widget.alignment,
-          child: Container(
-            color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
-            width: totalWidth,
-            height: _kPickerHeight,
-            child: DefaultTextStyle(
-              style: _textStyleFrom(context),
-              child: Row(children: columns.map((Widget child) => Expanded(child: child)).toList(growable: false)),
+            ];
+            break;
+        }
+        final CupertinoThemeData themeData = CupertinoTheme.of(context);
+        return MediaQuery(
+          // The native iOS picker's text scaling is fixed, so we will also fix it
+          // as well in our picker.
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: CupertinoTheme(
+            data: themeData.copyWith(
+              textTheme: themeData.textTheme.copyWith(
+                pickerTextStyle: _textStyleFrom(context, _kTimerPickerMagnification),
+              ),
+            ),
+            child: Align(
+              alignment: widget.alignment,
+              child: Container(
+                color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
+                width: totalWidth,
+                height: _kPickerHeight,
+                child: DefaultTextStyle(
+                  style: _textStyleFrom(context),
+                  child: Row(children: columns.map((Widget child) => Expanded(child: child)).toList(growable: false)),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
