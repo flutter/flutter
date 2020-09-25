@@ -2036,9 +2036,15 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 
 /// A box with a specified size.
 ///
-/// If given a child, this widget forces its child to have a specific width
-/// and/or height (assuming values are permitted by this widget's parent). If
-/// either the width or height is null, this widget will try to size itself to
+/// If given a child, this widget forces it to have a specific width and/or height.
+/// These values will be ignored if this widget's parent does not permit them.
+/// For example, this happens if the parent is the screen (forces the child to
+/// be the same size as the parent), or another [SizedBox] (forces its child to
+/// have a specific width and/or height). This can be remedied by wrapping the
+/// child [SizedBox] in a widget that does permit it to be any size up to the
+/// size of the parent, such as [Center] or [Align].
+///
+/// If either the width or height is null, this widget will try to size itself to
 /// match the child's size in that dimension. If the child's size depends on the
 /// size of its parent, the height and width must be provided.
 ///
@@ -2079,6 +2085,8 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
+///  * [Understanding constraints](https://flutter.dev/docs/development/ui/layout/constraints),
+///    an in-depth article about layout in Flutter.
 class SizedBox extends SingleChildRenderObjectWidget {
   /// Creates a fixed size box. The [width] and [height] parameters can be null
   /// to indicate that the size of the box should not be constrained in
