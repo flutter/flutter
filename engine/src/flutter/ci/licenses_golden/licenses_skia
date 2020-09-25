@@ -1,4 +1,4 @@
-Signature: ea71d2e180b42117f20c7703c1634c27
+Signature: 923302eac3f7ca1472962a1a83b6c57d
 
 UNUSED LICENSES:
 
@@ -6589,6 +6589,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/example.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/extra.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/node.example.js
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/package.json
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/shaping.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/viewer.html
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/example.html
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/package.json
