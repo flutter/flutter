@@ -48,6 +48,19 @@ void onPointerDataPacketMain() {
 void emptyMain() {}
 
 @pragma('vm:entry-point')
+void reportMetrics() {
+  window.onMetricsChanged = () {
+    _reportMetrics(
+      window.devicePixelRatio,
+      window.physicalSize.width,
+      window.physicalSize.height,
+    );
+  };
+}
+
+void _reportMetrics(double devicePixelRatio, double width, double height) native 'ReportMetrics';
+
+@pragma('vm:entry-point')
 void dummyReportTimingsMain() {
   window.onReportTimings = (List<FrameTiming> timings) {};
 }

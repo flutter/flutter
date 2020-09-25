@@ -42,10 +42,6 @@ ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
       physical_system_gesture_inset_bottom(
           p_physical_system_gesture_inset_bottom),
       physical_system_gesture_inset_left(p_physical_system_gesture_inset_left) {
-  // Ensure we don't have nonsensical dimensions.
-  FML_DCHECK(physical_width >= 0);
-  FML_DCHECK(physical_height >= 0);
-  FML_DCHECK(device_pixel_ratio > 0);
 }
 
 ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
@@ -53,11 +49,6 @@ ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
                                  double p_physical_height)
     : device_pixel_ratio(p_device_pixel_ratio),
       physical_width(p_physical_width),
-      physical_height(p_physical_height) {
-  // Ensure we don't have nonsensical dimensions.
-  FML_DCHECK(physical_width >= 0);
-  FML_DCHECK(physical_height >= 0);
-  FML_DCHECK(device_pixel_ratio > 0);
-}
+      physical_height(p_physical_height) {}
 
 }  // namespace flutter
