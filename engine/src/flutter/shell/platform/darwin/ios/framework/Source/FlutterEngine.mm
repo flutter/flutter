@@ -27,6 +27,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/connection_collection.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
@@ -539,6 +540,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   } else {
     [self setupChannels];
     [self onLocaleUpdated:nil];
+    [self initializeDisplays];
     if (!_platformViewsController) {
       _platformViewsController.reset(new flutter::FlutterPlatformViewsController());
     }
@@ -551,6 +553,12 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   }
 
   return _shell != nullptr;
+}
+
+- (void)initializeDisplays {
+  double refresh_rate = [[[DisplayLinkManager alloc] init] displayRefreshRate];
+  auto display = flutter::Display(refresh_rate);
+  _shell->OnDisplayUpdates(flutter::DisplayUpdateType::kStartup, {display});
 }
 
 - (BOOL)run {
