@@ -427,11 +427,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(CupertinoIcons.search),
-                title: Text('Tab 1'),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
                 icon: Icon(CupertinoIcons.settings),
-                title: Text('Tab 2'),
+                label: 'Tab 2',
               ),
             ],
           ),

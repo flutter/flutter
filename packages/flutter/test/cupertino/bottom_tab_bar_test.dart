@@ -37,7 +37,7 @@ Future<void> main() async {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            title: const Text('Tab 1'),
+            label: 'Tab 1',
           ),
         ],
       ));
@@ -55,11 +55,11 @@ Future<void> main() async {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            title: const Text('Tab 1'),
+            label: 'Tab 1',
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            title: const Text('Tab 2'),
+            label: 'Tab 2',
           ),
         ],
         currentIndex: 1,
@@ -121,11 +121,11 @@ Future<void> main() async {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            title: const Text('Tab 1'),
+            label: 'Tab 1',
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            title: const Text('Tab 2'),
+            label: 'Tab 2',
           ),
         ],
         currentIndex: 1,
@@ -162,11 +162,11 @@ Future<void> main() async {
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-              title: const Text('Tab 1'),
+              label: 'Tab 1',
             ),
             BottomNavigationBarItem(
               icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-              title: const Text('Tab 2'),
+              label: 'Tab 2',
             ),
           ],
           currentIndex: 1,
@@ -199,11 +199,11 @@ Future<void> main() async {
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-              title: const Text('Tab 1'),
+              label: 'Tab 1',
             ),
             BottomNavigationBarItem(
               icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-              title: const Text('Tab 2'),
+              label: 'Tab 2',
             ),
           ],
           currentIndex: 1,
@@ -230,11 +230,11 @@ Future<void> main() async {
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-              title: const Text('Tab 1'),
+              label: 'Tab 1',
             ),
             BottomNavigationBarItem(
               icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-              title: const Text('Tab 2'),
+              label: 'Tab 2',
             ),
           ],
           currentIndex: 1,
@@ -266,12 +266,12 @@ Future<void> main() async {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            title: const Text('Tab 1'),
+            label: 'Tab 1',
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(inactiveIcon),
             activeIcon: ImageIcon(activeIcon),
-            title: const Text('Tab 2'),
+            label: 'Tab 2',
           ),
         ],
         currentIndex: 1,
@@ -294,11 +294,11 @@ Future<void> main() async {
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-          title: const Text('Aka'),
+          label: 'Aka',
         ),
         BottomNavigationBarItem(
           icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-          title: const Text('Shiro'),
+          label: 'Shiro',
         ),
       ],
     );
@@ -335,11 +335,11 @@ Future<void> main() async {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            title: const Text('Tab 1'),
+            label: 'Tab 1',
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            title: const Text('Tab 2'),
+            label: 'Tab 2',
           ),
         ],
       ),
@@ -353,11 +353,11 @@ Future<void> main() async {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            title: const Text('Tab 1'),
+            label: 'Tab 1',
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            title: const Text('Tab 2'),
+            label: 'Tab 2',
           ),
         ],
         backgroundColor: const Color(0xFFFFFFFF), // Opaque white.
@@ -376,11 +376,11 @@ Future<void> main() async {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            title: const Text('Tab 1'),
+            label: 'Tab 1',
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            title: const Text('Tab 2'),
+            label: 'Tab 2',
           ),
         ],
         currentIndex: 1,
@@ -401,11 +401,11 @@ Future<void> main() async {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            title: const Text('Tab 1'),
+            label: 'Tab 1',
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            title: const Text('Tab 2'),
+            label: 'Tab 2',
           ),
         ],
       ),
@@ -441,7 +441,7 @@ Future<void> main() async {
                 icon: ImageIcon(
                   MemoryImage(Uint8List.fromList(kTransparentImage)),
                 ),
-                title: const Text('Tab 1'),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
                 icon: ImageIcon(
@@ -473,13 +473,13 @@ Future<void> main() async {
                 icon: ImageIcon(
                   MemoryImage(Uint8List.fromList(kTransparentImage)),
                 ),
-                title: const Text('Tab 1'),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
                 icon: ImageIcon(
                   MemoryImage(Uint8List.fromList(kTransparentImage)),
                 ),
-                title: const Text('Tab 2'),
+                label: 'Tab 2',
               ),
             ],
           ),
@@ -499,13 +499,13 @@ Future<void> main() async {
                 icon: ImageIcon(
                   MemoryImage(Uint8List.fromList(kTransparentImage)),
                 ),
-                title: const Text('Tab 1'),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
                 icon: ImageIcon(
                   MemoryImage(Uint8List.fromList(kTransparentImage)),
                 ),
-                title: const Text('Tab 2'),
+                label: 'Tab 2',
               ),
             ],
             backgroundColor: const Color(0xFFFFFFFF), // Opaque white.
