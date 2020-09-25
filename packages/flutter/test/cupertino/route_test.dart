@@ -1468,7 +1468,6 @@ void main() {
   });
 
   testWidgets('showCupertinoModalPopup barrier dismissable', (WidgetTester tester) async {
-
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
@@ -1491,6 +1490,31 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(rootObserver.dialogCount, 0);
+  });
+
+  testWidgets('showCupertinoModalPopup barrier not dismissable', (WidgetTester tester) async {
+    await tester.pumpWidget(CupertinoApp(
+      home: CupertinoPageScaffold(
+        child: Builder(builder: (BuildContext context) {
+          return GestureDetector(
+            onTap: () async {
+              await showCupertinoModalPopup<void>(
+                  context: context,
+                  builder: (BuildContext context) => const SizedBox(),
+                  barrierDismissible: false;
+            },
+            child: const Text('tap'),
+          );
+        }),
+      ),
+    ));
+
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+    await tester.tap(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
+    await tester.pumpAndSettle();
+
+    expect(rootObserver.dialogCount, 1);
   });
 
   testWidgets('CupertinoPage works', (WidgetTester tester) async {
