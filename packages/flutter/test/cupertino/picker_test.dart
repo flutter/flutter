@@ -151,6 +151,30 @@ void main() {
     expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF654321)));
   });
 
+  testWidgets('picker selectionOverlay', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            height: 300.0,
+            width: 300.0,
+            child: CupertinoPicker(
+              itemExtent: 15.0,
+              children: const <Widget>[Text('1'), Text('1')],
+              onSelectedItemChanged: (int i) {},
+              selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(
+                  background: Color(0x12345678)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoPicker), paints..rrect(color: const Color(0x12345678)));
+  });
+
   group('scroll', () {
     testWidgets(
       'scrolling calls onSelectedItemChanged and triggers haptic feedback',
