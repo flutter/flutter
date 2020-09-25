@@ -11,6 +11,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/src/rendering/image.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -1098,6 +1099,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     WidgetsBinding.instance!.removeObserver(this);
     _stopListeningToStream();
     _scrollAwareContext.dispose();
+    _disposeImage();
     super.dispose();
   }
 
@@ -1109,7 +1111,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     if (TickerMode.of(context))
       _listenToStream();
     else
-      _stopListeningToStream();
+      _stopListeningToStream(true);
 
     super.didChangeDependencies();
   }
@@ -1119,8 +1121,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     super.didUpdateWidget(oldWidget);
     if (_isListeningToStream &&
         (widget.loadingBuilder == null) != (oldWidget.loadingBuilder == null)) {
-      _imageStream!.removeListener(_getListener());
+      final ImageStreamListener oldListener = _getListener();
       _imageStream!.addListener(_getListener(recreateListener: true));
+      _imageStream!.removeListener(oldListener);
     }
     if (widget.image != oldWidget.image)
       _resolveImage();
@@ -1182,7 +1185,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
     setState(() {
-      _imageInfo = imageInfo;
+      assert(imageInfo.image.width > 0);
+      _disposeImage(imageInfo);
       _loadingProgress = null;
       _frameNumber = _frameNumber == null ? 0 : _frameNumber! + 1;
       _wasSynchronouslyLoaded = _wasSynchronouslyLoaded | synchronousCall;
@@ -1196,6 +1200,11 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     });
   }
 
+  void _disposeImage([ImageInfo? newInfo]) {
+    _imageInfo?.image.dispose();
+    _imageInfo = newInfo;
+  }
+
   // Updates _imageStream to newStream, and moves the stream listener
   // registration from the old stream to the new stream (if a listener was
   // registered).
@@ -1207,7 +1216,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStream!.removeListener(_getListener());
 
     if (!widget.gaplessPlayback)
-      setState(() { _imageInfo = null; });
+      setState(_disposeImage);
 
     setState(() {
       _loadingProgress = null;
@@ -1227,9 +1236,13 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _isListeningToStream = true;
   }
 
-  void _stopListeningToStream() {
+  void _stopListeningToStream([bool createPassiveListener = false]) {
+
     if (!_isListeningToStream)
       return;
+    // if (createPassiveListener) {
+    //   _imageStream!.completer?.addPassiveListener(null);
+    // }
     _imageStream!.removeListener(_getListener());
     _isListeningToStream = false;
   }
@@ -1242,6 +1255,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     }
 
     Widget result = RawImage(
+      // Do not clone the image, because RawImage is a stateless wrapper.
+      // The image will be disposed by this state object when it is not needed
+      // anymore, such as when it is unmounted or when the image stream pushes
+      // a new image.
       image: _imageInfo?.image,
       debugImageLabel: _imageInfo?.debugLabel,
       width: widget.width,

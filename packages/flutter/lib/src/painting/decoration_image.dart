@@ -295,6 +295,7 @@ class DecorationImagePainter {
   void _handleImage(ImageInfo value, bool synchronousCall) {
     if (_image == value)
       return;
+    _image?.image.dispose();
     _image = value;
     assert(_onChanged != null);
     if (!synchronousCall)
@@ -312,6 +313,8 @@ class DecorationImagePainter {
       _handleImage,
       onError: _details.onError,
     ));
+    _image?.image.dispose();
+    _image = null;
   }
 
   @override
@@ -429,6 +432,12 @@ void paintImage({
   assert(repeat != null);
   assert(flipHorizontally != null);
   assert(isAntiAlias != null);
+  assert(
+    image.debugGetOpenHandleStackTraces()!.length > 0,
+    'Cannot paint an image that is disposed.\n'
+    'The caller of paintImage is expected to wait to dispose the image until '
+    'after painting has completed.'
+  );
   if (rect.isEmpty)
     return;
   Size outputSize = rect.size;

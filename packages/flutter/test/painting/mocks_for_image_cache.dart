@@ -10,8 +10,10 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+// ignore: must_be_immutable
 class TestImageInfo implements ImageInfo {
-  const TestImageInfo(this.value, { this.image, this.scale = 1.0, this.debugLabel });
+  TestImageInfo(this.value, { @required this.image, this.scale = 1.0, this.debugLabel })
+    : assert(image != null);
 
   @override
   final ui.Image image;
@@ -26,6 +28,34 @@ class TestImageInfo implements ImageInfo {
 
   @override
   String toString() => '$runtimeType($value)';
+
+  @override
+  TestImageInfo clone() {
+    return TestImageInfo(value, image: image.clone(), scale: scale, debugLabel: debugLabel);
+  }
+
+  @override
+  bool isCloneOf(ImageInfo other) {
+    assert(other != null);
+    return other.image.isCloneOf(image)
+        && scale == scale
+        && other.debugLabel == debugLabel;
+  }
+
+  @override
+  int get hashCode => hashValues(value, image, scale, debugLabel);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is TestImageInfo
+        && other.value == value
+        && other.image.isCloneOf(image)
+        && other.scale == scale
+        && other.debugLabel == debugLabel;
+
+  }
 }
 
 class TestImageProvider extends ImageProvider<int> {
@@ -44,7 +74,7 @@ class TestImageProvider extends ImageProvider<int> {
   @override
   ImageStreamCompleter load(int key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(TestImageInfo(imageValue, image: image))
+      SynchronousFuture<ImageInfo>(TestImageInfo(imageValue, image: image.clone()))
     );
   }
 

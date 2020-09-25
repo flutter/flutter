@@ -176,4 +176,21 @@ Future<void> main() async {
     image.colorBlendMode = BlendMode.color;
     expect(image.colorBlendMode, BlendMode.color);
   });
+
+  test('Render image disposes its image', () async {
+    final ui.Image image = await createTestImage(width: 10, height: 10, cache: false);
+    expect(image.debugGetOpenHandleStackTraces().length, 1);
+
+    final RenderImage renderImage = RenderImage(image: image.clone());
+    expect(image.debugGetOpenHandleStackTraces().length, 2);
+
+    renderImage.image = image.clone();
+    expect(image.debugGetOpenHandleStackTraces().length, 2);
+
+    renderImage.image = null;
+    expect(image.debugGetOpenHandleStackTraces().length, 1);
+
+    image.dispose();
+    expect(image.debugGetOpenHandleStackTraces().length, 0);
+  });
 }

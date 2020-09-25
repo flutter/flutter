@@ -6,6 +6,7 @@
 
 @TestOn('!chrome')
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui show Image, ColorFilter;
 
 import 'package:flutter/foundation.dart';
@@ -13,6 +14,7 @@ import 'package:flutter/painting.dart';
 import 'package:fake_async/fake_async.dart';
 
 import '../flutter_test_alternative.dart';
+import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/rendering_tester.dart';
 
@@ -62,6 +64,10 @@ class SynchronousErrorTestImageProvider extends ImageProvider<int> {
 }
 
 class AsyncTestImageProvider extends ImageProvider<int> {
+  AsyncTestImageProvider(this.image);
+
+  final ui.Image image;
+
   @override
   Future<int> obtainKey(ImageConfiguration configuration) {
     return Future<int>.value(2);
@@ -70,7 +76,7 @@ class AsyncTestImageProvider extends ImageProvider<int> {
   @override
   ImageStreamCompleter load(int key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
-      Future<ImageInfo>.value(TestImageInfo(key))
+      Future<ImageInfo>.value(TestImageInfo(key, image: image))
     );
   }
 }
@@ -151,9 +157,10 @@ void main() {
     expect(onChangedCalled, equals(false));
   });
 
-  test('BoxDecorationImageListenerAsync', () {
+  test('BoxDecorationImageListenerAsync', () async {
+    final ui.Image image = await createTestImage(width: 10, height: 10);
     FakeAsync().run((FakeAsync async) {
-      final ImageProvider imageProvider = AsyncTestImageProvider();
+      final ImageProvider imageProvider = AsyncTestImageProvider(image);
       final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
 
       final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
@@ -625,5 +632,31 @@ void main() {
     // considering DecorationImage scale to be 4.0 and Image scale to be 1.0.
     expect(call.positionalArguments[2].size, const Size(25.0, 25.0));
     expect(call.positionalArguments[2], const Rect.fromLTRB(0.0, 0.0, 25.0, 25.0));
+  });
+
+  test('DecorationImagePainter disposes of image when disposed',  () async {
+    final ImageProvider provider = MemoryImage(Uint8List.fromList(kTransparentImage));
+
+    final ImageStream stream = provider.resolve(ImageConfiguration.empty);
+
+    final Completer<ImageInfo> infoCompleter = Completer<ImageInfo>();
+    void _listener(ImageInfo image, bool syncCall) {
+      assert(!infoCompleter.isCompleted);
+      infoCompleter.complete(image);
+    }
+    stream.addListener(ImageStreamListener(_listener));
+
+    final ImageInfo info = await infoCompleter.future;
+    final int baselineRefCount = info.image.debugGetOpenHandleStackTraces().length;
+
+    final DecorationImagePainter painter = DecorationImage(image: provider).createPainter(() {});
+    final Canvas canvas = TestCanvas();
+    painter.paint(canvas, Rect.zero, Path(), ImageConfiguration.empty);
+
+    expect(info.image.debugGetOpenHandleStackTraces().length, baselineRefCount + 1);
+    painter.dispose();
+    expect(info.image.debugGetOpenHandleStackTraces().length, baselineRefCount);
+
+    info.image.dispose();
   });
 }

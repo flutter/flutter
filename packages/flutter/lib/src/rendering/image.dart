@@ -85,8 +85,11 @@ class RenderImage extends RenderBox {
   ui.Image? get image => _image;
   ui.Image? _image;
   set image(ui.Image? value) {
-    if (value == _image)
+    if (value == _image) {
+      value?.dispose();
       return;
+    }
+    _image?.dispose();
     _image = value;
     markNeedsPaint();
     if (_width == null || _height == null)
