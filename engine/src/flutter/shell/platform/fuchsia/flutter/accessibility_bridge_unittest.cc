@@ -19,6 +19,20 @@
 
 namespace flutter_runner_test {
 
+namespace {
+
+void ExpectNodeHasRole(
+    const fuchsia::accessibility::semantics::Node& node,
+    const std::unordered_map<uint32_t, fuchsia::accessibility::semantics::Role>
+        roles_by_node_id) {
+  ASSERT_TRUE(node.has_node_id());
+  ASSERT_NE(roles_by_node_id.find(node.node_id()), roles_by_node_id.end());
+  EXPECT_TRUE(node.has_role());
+  EXPECT_EQ(node.role(), roles_by_node_id.at(node.node_id()));
+}
+
+}  // namespace
+
 class AccessibilityBridgeTestDelegate
     : public flutter_runner::AccessibilityBridge::Delegate {
  public:
@@ -87,6 +101,67 @@ TEST_F(AccessibilityBridgeTest, EnableDisable) {
       accessibility_bridge_.release());
   listener->OnSemanticsModeChanged(true, nullptr);
   EXPECT_TRUE(accessibility_delegate_.enabled());
+}
+
+TEST_F(AccessibilityBridgeTest, UpdatesNodeRoles) {
+  flutter::SemanticsNodeUpdates updates;
+
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+  node0.flags |= static_cast<int>(flutter::SemanticsFlags::kIsButton);
+  node0.childrenInTraversalOrder = {1, 2, 3, 4};
+  node0.childrenInHitTestOrder = {1, 2, 3, 4};
+  updates.emplace(0, node0);
+
+  flutter::SemanticsNode node1;
+  node1.id = 1;
+  node1.flags |= static_cast<int>(flutter::SemanticsFlags::kIsHeader);
+  node1.childrenInTraversalOrder = {};
+  node1.childrenInHitTestOrder = {};
+  updates.emplace(1, node1);
+
+  flutter::SemanticsNode node2;
+  node2.id = 2;
+  node2.flags |= static_cast<int>(flutter::SemanticsFlags::kIsImage);
+  node2.childrenInTraversalOrder = {};
+  node2.childrenInHitTestOrder = {};
+  updates.emplace(2, node2);
+
+  flutter::SemanticsNode node3;
+  node3.id = 3;
+  node3.flags |= static_cast<int>(flutter::SemanticsFlags::kIsTextField);
+  node3.childrenInTraversalOrder = {};
+  node3.childrenInHitTestOrder = {};
+  updates.emplace(3, node3);
+
+  flutter::SemanticsNode node4;
+  node4.childrenInTraversalOrder = {};
+  node4.childrenInHitTestOrder = {};
+  node4.id = 4;
+  node4.flags |= static_cast<int>(flutter::SemanticsFlags::kIsSlider);
+  updates.emplace(4, node4);
+
+  accessibility_bridge_->AddSemanticsNodeUpdate(std::move(updates));
+  RunLoopUntilIdle();
+
+  std::unordered_map<uint32_t, fuchsia::accessibility::semantics::Role>
+      roles_by_node_id = {
+          {0u, fuchsia::accessibility::semantics::Role::BUTTON},
+          {1u, fuchsia::accessibility::semantics::Role::HEADER},
+          {2u, fuchsia::accessibility::semantics::Role::IMAGE},
+          {3u, fuchsia::accessibility::semantics::Role::TEXT_FIELD},
+          {4u, fuchsia::accessibility::semantics::Role::SLIDER}};
+
+  EXPECT_EQ(0, semantics_manager_.DeleteCount());
+  EXPECT_EQ(1, semantics_manager_.UpdateCount());
+  EXPECT_EQ(1, semantics_manager_.CommitCount());
+  EXPECT_EQ(5U, semantics_manager_.LastUpdatedNodes().size());
+  for (const auto& node : semantics_manager_.LastUpdatedNodes()) {
+    ExpectNodeHasRole(node, roles_by_node_id);
+  }
+
+  EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
+  EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
 }
 
 TEST_F(AccessibilityBridgeTest, DeletesChildrenTransitively) {
