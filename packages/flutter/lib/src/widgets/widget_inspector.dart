@@ -1048,10 +1048,8 @@ mixin WidgetInspectorService {
               renderObject.markNeedsPaint();
               renderObject.visitChildren(markTreeNeedsPaint);
             }
-            final RenderObject? root = RendererBinding.instance!.renderView;
-            if (root != null) {
-              markTreeNeedsPaint(root);
-            }
+            final RenderObject root = RendererBinding.instance!.renderView;
+            markTreeNeedsPaint(root);
           } else {
             debugOnProfilePaint = null;
           }
