@@ -61,10 +61,12 @@ class CupertinoSwitch extends StatefulWidget {
     required this.onChanged,
     this.activeColor,
     this.trackColor,
+    this.borderColor,
+    this.borderWidth,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(value != null),
-       assert(dragStartBehavior != null),
-       super(key: key);
+        assert(dragStartBehavior != null),
+        super(key: key);
 
   /// Whether this switch is on or off.
   ///
@@ -105,6 +107,16 @@ class CupertinoSwitch extends StatefulWidget {
   ///
   /// Defaults to [CupertinoColors.secondarySystemFill] when null.
   final Color? trackColor;
+
+  /// The color to use for the border.
+  ///
+  /// Defaults to [CupertinoColors.secondarySystemFill] when null.
+  final Color? borderColor;
+
+  /// The width to use for the border.
+  ///
+  /// Defaults to 0.0 and is disabled when null.
+  final double? borderWidth;
 
   /// {@template flutter.cupertino.switch.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
@@ -218,7 +230,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   void _handleTapDown(TapDownDetails details) {
     if (isInteractive)
       needsPositionAnimation = false;
-      _reactionController.forward();
+    _reactionController.forward();
   }
 
   void _handleTap() {
@@ -301,6 +313,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
           context,
         )!,
         trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context)!,
+        borderColor: CupertinoDynamicColor.resolve(widget.borderColor ?? CupertinoColors.secondarySystemFill, context)!,
+        borderWidth: widget.borderWidth ?? 0.0,
         onChanged: widget.onChanged,
         textDirection: Directionality.of(context)!,
         state: this,
@@ -325,6 +339,8 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     required this.value,
     required this.activeColor,
     required this.trackColor,
+    required this.borderColor,
+    required this.borderWidth,
     required this.onChanged,
     required this.textDirection,
     required this.state,
@@ -333,6 +349,8 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final bool value;
   final Color activeColor;
   final Color trackColor;
+  final Color borderColor;
+  final double borderWidth;
   final ValueChanged<bool>? onChanged;
   final _CupertinoSwitchState state;
   final TextDirection textDirection;
@@ -343,6 +361,8 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       value: value,
       activeColor: activeColor,
       trackColor: trackColor,
+      borderColor: borderColor,
+      borderWidth: borderWidth,
       onChanged: onChanged,
       textDirection: textDirection,
       state: state,
@@ -355,6 +375,8 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = value
       ..activeColor = activeColor
       ..trackColor = trackColor
+      ..borderColor = borderColor
+      ..borderWidth = borderWidth
       ..onChanged = onChanged
       ..textDirection = textDirection;
   }
@@ -379,21 +401,25 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     required bool value,
     required Color activeColor,
     required Color trackColor,
+    required Color borderColor,
+    required double borderWidth,
     ValueChanged<bool>? onChanged,
     required TextDirection textDirection,
     required _CupertinoSwitchState state,
   }) : assert(value != null),
-       assert(activeColor != null),
-       assert(state != null),
-       _value = value,
-       _activeColor = activeColor,
-       _trackColor = trackColor,
-       _onChanged = onChanged,
-       _textDirection = textDirection,
-       _state = state,
-       super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
-         state.position.addListener(markNeedsPaint);
-         state._reaction.addListener(markNeedsPaint);
+        assert(activeColor != null),
+        assert(state != null),
+        _value = value,
+        _activeColor = activeColor,
+        _trackColor = trackColor,
+        _borderColor = borderColor,
+        _borderWidth = borderWidth,
+        _onChanged = onChanged,
+        _textDirection = textDirection,
+        _state = state,
+        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
+    state.position.addListener(markNeedsPaint);
+    state._reaction.addListener(markNeedsPaint);
   }
 
   final _CupertinoSwitchState _state;
@@ -425,6 +451,26 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     if (value == _trackColor)
       return;
     _trackColor = value;
+    markNeedsPaint();
+  }
+
+  Color get borderColor => _borderColor;
+  Color _borderColor;
+  set borderColor(Color value) {
+    assert(value != null);
+    if (value == _borderColor)
+      return;
+    _borderColor = value;
+    markNeedsPaint();
+  }
+
+  double get borderWidth => _borderWidth;
+  double _borderWidth;
+  set borderWidth(double value) {
+    assert(value != null);
+    if (value == _borderWidth)
+      return;
+    _borderWidth = value;
     markNeedsPaint();
   }
 
@@ -497,13 +543,23 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       ..color = Color.lerp(trackColor, activeColor, currentValue)!;
 
     final Rect trackRect = Rect.fromLTWH(
-        offset.dx + (size.width - _kTrackWidth) / 2.0,
-        offset.dy + (size.height - _kTrackHeight) / 2.0,
-        _kTrackWidth,
-        _kTrackHeight,
+      offset.dx + (size.width - _kTrackWidth) / 2.0,
+      offset.dy + (size.height - _kTrackHeight) / 2.0,
+      _kTrackWidth,
+      _kTrackHeight,
     );
     final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     canvas.drawRRect(trackRRect, paint);
+
+    final bool hasBorder = borderWidth > 0.0;
+    if (hasBorder) {
+      final Paint borderPaint = Paint()
+        ..color = borderColor
+        ..strokeWidth = borderWidth
+        ..style = PaintingStyle.stroke;
+
+      canvas.drawRRect(trackRRect, borderPaint);
+    }
 
     final double currentThumbExtension = CupertinoThumbPainter.extension * currentReactionValue;
     final double thumbLeft = lerpDouble(

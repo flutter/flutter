@@ -528,6 +528,68 @@ void main() {
     expect(find.byType(CupertinoSwitch), paints..rrect(color: trackColor));
   });
 
+  testWidgets('Switch is using border color when set', (WidgetTester tester) async {
+    const Color borderColor = Color(0xFF00FF00);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            borderColor: borderColor,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoSwitch), findsOneWidget);
+    expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).borderColor, borderColor);
+  });
+
+  testWidgets('Switch is using border width when set', (WidgetTester tester) async {
+    const double borderWidth = 2;
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            borderWidth: borderWidth,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoSwitch), findsOneWidget);
+    expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).borderWidth, borderWidth);
+  });
+
+  testWidgets('Switch does not cause exception when negative borderWidth is used', (WidgetTester tester) async {
+    const double borderWidth = -1;
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            borderWidth: borderWidth,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoSwitch), findsOneWidget);
+  });
+
   testWidgets('Switch is opaque when enabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
