@@ -1468,6 +1468,8 @@ void main() {
   });
 
   testWidgets('showCupertinoModalPopup barrier dismissible', (WidgetTester tester) async {
+    final DialogObserver rootObserver = DialogObserver();
+    
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
@@ -1493,6 +1495,8 @@ void main() {
   });
 
   testWidgets('showCupertinoModalPopup barrier not dismissible', (WidgetTester tester) async {
+    final DialogObserver rootObserver = DialogObserver();
+
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
