@@ -194,7 +194,7 @@ void main(List<String> args) async {
     final ReturnStatement replacement = verify(body.replaceWith(captureAny)).captured.single as ReturnStatement;
     expect(replacement.expression, isA<SuperMethodInvocation>());
     final SuperMethodInvocation superMethodInvocation = replacement.expression as SuperMethodInvocation;
-    expect(superMethodInvocation.name.name, 'toString');
+    expect(superMethodInvocation.name.text, 'toString');
   }
 
   test('ToStringVisitor replaces toString in specified libraries (dart:ui)', () {
