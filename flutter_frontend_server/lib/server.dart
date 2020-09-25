@@ -224,7 +224,7 @@ class ToStringVisitor extends RecursiveVisitor<void> {
   @override
   void visitProcedure(Procedure node) {
     if (
-      node.name.name        == 'toString' &&
+      node.name.text        == 'toString' &&
       node.enclosingClass   != null       &&
       node.enclosingLibrary != null       &&
       !node.isStatic                      &&
