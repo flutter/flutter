@@ -244,7 +244,7 @@ void main() {
       ),
     ));
     // The Scaffold should assert we still have an ancestor ScaffoldMessenger in
-    // order to dismiss the SnackBar from the originator.
+    // order to dismiss the SnackBar from the ScaffoldMessenger.
     await tester.tap(find.text('Test'));
     FlutterError.onError = oldHandler;
 
