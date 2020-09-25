@@ -5528,6 +5528,11 @@ class RawImage extends LeafRenderObjectWidget {
   @override
   RenderImage createRenderObject(BuildContext context) {
     assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
+    assert(
+      image == null || image!.debugGetOpenHandleStackTraces()!.isNotEmpty,
+      'Creator of a RawImage disposed of the image when the RawImage still '
+      'needed it.'
+    );
     return RenderImage(
       image: image?.clone(),
       debugImageLabel: debugImageLabel,
@@ -5550,6 +5555,11 @@ class RawImage extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderImage renderObject) {
+    assert(
+      image == null || image!.debugGetOpenHandleStackTraces()!.isNotEmpty,
+      'Creator of a RawImage disposed of the image when the RawImage still '
+      'needed it.'
+    );
     renderObject
       ..image = image?.clone()
       ..debugImageLabel = debugImageLabel

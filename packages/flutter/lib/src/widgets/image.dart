@@ -11,7 +11,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter/src/rendering/image.dart';
 
 import 'basic.dart';
 import 'binding.dart';
