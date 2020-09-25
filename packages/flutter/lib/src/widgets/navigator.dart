@@ -543,38 +543,6 @@ abstract class Page<T> extends RouteSettings {
   String toString() => '${objectRuntimeType(this, 'Page')}("$name", $key, $arguments)';
 }
 
-/// A [Page] that builds a customized [Route] based on the [routeBuilder].
-///
-/// The type argument `T` is the corresponding [Route]'s return type, as
-/// used by [Route.currentResult], [Route.popped], and [Route.didPop].
-class CustomBuilderPage<T> extends Page<T> {
-  /// Creates a page with a custom route builder.
-  ///
-  /// Use [routeBuilder] to specify the route that will be created from this
-  /// page.
-  const CustomBuilderPage({
-    required LocalKey key,
-    required this.routeBuilder,
-    String? name,
-    Object? arguments,
-  }) : assert(key != null),
-       assert(routeBuilder != null),
-       super(key: key, name: name, arguments: arguments);
-
-  /// A builder that will be called during [createRoute] to create a [Route].
-  ///
-  /// The routes returned from this builder must have their settings equal to
-  /// the input `settings`.
-  final RouteBuilder<T> routeBuilder;
-
-  @override
-  Route<T> createRoute(BuildContext context) {
-    final Route<T> route = routeBuilder(context, this);
-    assert(route.settings == this);
-    return route;
-  }
-}
-
 /// An interface for observing the behavior of a [Navigator].
 class NavigatorObserver {
   /// The navigator that the observer is observing, if any.
