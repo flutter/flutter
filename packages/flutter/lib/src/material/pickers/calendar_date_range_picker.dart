@@ -109,9 +109,8 @@ class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
     // Calculate the index for the initially displayed month. This is needed to
     // divide the list of months into two `SliverList`s.
     final DateTime initialDate = widget.initialStartDate ?? widget.currentDate;
-    if (widget.firstDate.isBefore(initialDate) &&
-        widget.lastDate.isAfter(initialDate) ||
-        widget.lastDate.isAtSameMomentAs(initialDate)) {
+    if (!initialDate.isBefore(widget.firstDate) &&
+        !initialDate.isAfter(widget.lastDate)) {
       _initialMonthIndex = utils.monthDelta(widget.firstDate, initialDate);
     }
 

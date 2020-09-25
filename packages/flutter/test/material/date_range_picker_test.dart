@@ -13,6 +13,7 @@ import 'feedback_tester.dart';
 void main() {
   DateTime firstDate;
   DateTime lastDate;
+  DateTime currentDate;
   DateTimeRange initialDateRange;
   DatePickerEntryMode initialEntryMode = DatePickerEntryMode.calendar;
 
@@ -31,6 +32,7 @@ void main() {
   setUp(() {
     firstDate = DateTime(2015, DateTime.january, 1);
     lastDate = DateTime(2016, DateTime.december, 31);
+    currentDate = null;
     initialDateRange = DateTimeRange(
       start: DateTime(2016, DateTime.january, 15),
       end: DateTime(2016, DateTime.january, 25),
@@ -79,6 +81,7 @@ void main() {
       initialDateRange: initialDateRange,
       firstDate: firstDate,
       lastDate: lastDate,
+      currentDate: currentDate,
       initialEntryMode: initialEntryMode,
       cancelText: cancelText,
       confirmText: confirmText,
@@ -155,54 +158,16 @@ void main() {
 
   testWidgets('Current month header should be visible if no date is selected',
       (WidgetTester tester) async {
-    firstDate = DateTime(DateTime.now().year - 1);
-    lastDate = DateTime(DateTime.now().year + 1);
+    firstDate = DateTime(2015, DateTime.january, 1);
+    lastDate = DateTime(2016, DateTime.december, 31);
+    currentDate = DateTime(2016, DateTime.september, 1);
     initialDateRange = null;
 
-    String _getMonthName(int month) {
-      switch (month) {
-        case DateTime.january:
-          return 'January';
-        case DateTime.february:
-          return 'February';
-        case DateTime.march:
-          return 'March';
-        case DateTime.april:
-          return 'April';
-        case DateTime.may:
-          return 'May';
-        case DateTime.june:
-          return 'June';
-        case DateTime.july:
-          return 'July';
-        case DateTime.august:
-          return 'August';
-        case DateTime.september:
-          return 'September';
-        case DateTime.october:
-          return 'October';
-        case DateTime.november:
-          return 'November';
-        case DateTime.december:
-          return 'December';
-      }
-      return '';
-    }
-
     await preparePicker(tester, (Future<DateTimeRange> range) async {
-      final DateTime currentMonth = DateTime.now();
-      final DateTime lastMonth =
-          DateTime(currentMonth.year, currentMonth.month - 1);
-
-      final String currentMonthText =
-          '${_getMonthName(currentMonth.month)} ${currentMonth.year}';
-      final String lastMonthText =
-          '${_getMonthName(lastMonth.month)} ${lastMonth.year}';
-
-      // Current month header should be showing, previous month's header should
-      // not
-      expect(find.text(currentMonthText), findsOneWidget);
-      expect(find.text(lastMonthText), findsNothing);
+      // September and October headers should be showing, but no August
+      expect(find.text('September 2016'), findsOneWidget);
+      expect(find.text('October 2016'), findsOneWidget);
+      expect(find.text('August 2016'), findsNothing);
     });
   });
 
