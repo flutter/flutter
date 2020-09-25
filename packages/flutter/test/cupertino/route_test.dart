@@ -1476,7 +1476,7 @@ void main() {
               await showCupertinoModalPopup<void>(
                   context: context,
                   builder: (BuildContext context) => const SizedBox(),
-                  barrierDismissible: true;
+                  barrierDismissible: true);
             },
             child: const Text('tap'),
           );
@@ -1501,7 +1501,7 @@ void main() {
               await showCupertinoModalPopup<void>(
                   context: context,
                   builder: (BuildContext context) => const SizedBox(),
-                  barrierDismissible: false;
+                  barrierDismissible: fals);
             },
             child: const Text('tap'),
           );
