@@ -15,10 +15,16 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
+/// Whether we are running on iOS Safari.
+// TODO: https://github.com/flutter/flutter/issues/66656
+bool get isIosSafari => browserEngine == BrowserEngine.webkit &&
+          operatingSystem == OperatingSystem.iOs;
+
 void testMain() async {
   final EngineScubaTester scuba = await EngineScubaTester.initialize(
     viewportSize: const Size(600, 600),
   );
+
 
   setUpStableTestFonts();
 
@@ -40,7 +46,9 @@ void testMain() async {
     }
     recordingCanvas.endRecording();
     recordingCanvas.apply(canvas, screenRect);
-    return scuba.diffCanvasScreenshot(canvas, 'text_with_placeholders');
+    if (!isIosSafari) {
+      return scuba.diffCanvasScreenshot(canvas, 'text_with_placeholders');
+    }
   });
 
   testEachCanvas('text alignment and placeholders', (EngineCanvas canvas) {

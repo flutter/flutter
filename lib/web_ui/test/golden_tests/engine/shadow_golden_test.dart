@@ -75,7 +75,8 @@ void testMain() async {
     builder.pop(); // offset
   }
 
-  void _paintBitmapCanvasShadow(double elevation, Offset offset, bool transparentOccluder) {
+  void _paintBitmapCanvasShadow(
+      double elevation, Offset offset, bool transparentOccluder) {
     final SurfacePath path = SurfacePath()
       ..addRect(const Rect.fromLTRB(0, 0, 20, 20));
     builder.pushOffset(offset.dx, offset.dy);
@@ -168,4 +169,15 @@ void testMain() async {
     },
     testOn: 'chrome',
   );
+
+  /// For dart testing having `no tests ran` in a file is considered an error
+  /// and result in exit code 1.
+  /// See: https://github.com/dart-lang/test/pull/1173
+  ///
+  /// Since screenshot tests run one by one and exit code is checked immediately
+  /// after that a test file that only runs in chrome will break the other
+  /// browsers. This method is added as a bandaid solution.
+  test('dummy tests to pass on other browsers', () async {
+    expect(2 + 2, 4);
+  });
 }
