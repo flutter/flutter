@@ -81,7 +81,10 @@ class OutputPreferences {
 
 /// The command line terminal, if available.
 abstract class Terminal {
-  factory Terminal.test() = _TestTerminal;
+  /// Create a new test [Terminal].
+  ///
+  /// If not specified, [supportsColor] defaults to `false`.
+  factory Terminal.test({bool supportsColor}) = _TestTerminal;
 
   /// Whether the current terminal supports color escape codes.
   bool get supportsColor;
@@ -300,6 +303,8 @@ class AnsiTerminal implements Terminal {
 }
 
 class _TestTerminal implements Terminal {
+  _TestTerminal({this.supportsColor = false});
+
   @override
   bool usesTerminalUi;
 
@@ -329,7 +334,7 @@ class _TestTerminal implements Terminal {
   set singleCharMode(bool value) { }
 
   @override
-  bool get supportsColor => false;
+  final bool supportsColor;
 
   @override
   bool get supportsEmoji => false;

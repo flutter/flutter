@@ -30,7 +30,7 @@ abstract class MultiDragPointerState {
   /// The [initialPosition] argument must not be null.
   MultiDragPointerState(this.initialPosition, this.kind)
     : assert(initialPosition != null),
-      _velocityTracker = VelocityTracker(kind);
+      _velocityTracker = VelocityTracker.withKind(kind);
 
   /// The global coordinates of the pointer when the pointer contacted the screen.
   final Offset initialPosition;
