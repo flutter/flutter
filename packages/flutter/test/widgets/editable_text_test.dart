@@ -4731,6 +4731,101 @@ void main() {
     );
   });
 
+  group('EditableText does not send editing values more than once', () {
+    final TextEditingController controller = TextEditingController(text: testText);
+    final EditableText editableText = EditableText(
+      showSelectionHandles: true,
+      maxLines: 2,
+      controller: controller,
+      focusNode: FocusNode(),
+      cursorColor: Colors.red,
+      backgroundCursorColor: Colors.blue,
+      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+      keyboardType: TextInputType.text,
+      inputFormatters: <TextInputFormatter>[LengthLimitingTextInputFormatter(6)],
+      onChanged: (String s) => controller.text += ' onChanged',
+    );
+
+    final Widget widget = MediaQuery(
+      data: const MediaQueryData(),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: editableText,
+      ),
+    );
+
+    controller.addListener(() {
+      if (!controller.text.endsWith('listener'))
+        controller.text += ' listener';
+    });
+
+    testWidgets('input from text input plugin', (WidgetTester tester) async {
+      await tester.pumpWidget(widget);
+
+      // Connect.
+      await tester.showKeyboard(find.byType(EditableText));
+      tester.testTextInput.log.clear();
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
+      state.updateEditingValue(const TextEditingValue(text: 'remoteremoteremote'));
+
+      // Apply in order: length formatter -> listener -> onChanged -> listener.
+      expect(controller.text, 'remote listener onChanged listener');
+      final List<TextEditingValue> updates = tester.testTextInput.log
+        .where((MethodCall call) => call.method == 'TextInput.setEditingState')
+        .map((MethodCall call) => TextEditingValue.fromJSON(call.arguments as Map<String, dynamic>))
+        .toList(growable: false);
+
+      expect(updates, const <TextEditingValue>[TextEditingValue(text: 'remote listener onChanged listener')]);
+
+      tester.testTextInput.log.clear();
+
+      // If by coincidence the text input plugin sends the same value back,
+      // do nothing.
+      state.updateEditingValue(const TextEditingValue(text: 'remote listener onChanged listener'));
+      expect(controller.text, 'remote listener onChanged listener');
+      expect(tester.testTextInput.log, isEmpty);
+    });
+
+    testWidgets('input from text selection menu', (WidgetTester tester) async {
+      await tester.pumpWidget(widget);
+
+      // Connect.
+      await tester.showKeyboard(find.byType(EditableText));
+      tester.testTextInput.log.clear();
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
+      state.textEditingValue = const TextEditingValue(text: 'remoteremoteremote');
+
+      // Apply in order: length formatter -> listener -> onChanged -> listener.
+      expect(controller.text, 'remote listener onChanged listener');
+      final List<TextEditingValue> updates = tester.testTextInput.log
+        .where((MethodCall call) => call.method == 'TextInput.setEditingState')
+        .map((MethodCall call) => TextEditingValue.fromJSON(call.arguments as Map<String, dynamic>))
+        .toList(growable: false);
+
+      expect(updates, const <TextEditingValue>[TextEditingValue(text: 'remote listener onChanged listener')]);
+
+      tester.testTextInput.log.clear();
+    });
+
+    testWidgets('input from controller', (WidgetTester tester) async {
+      await tester.pumpWidget(widget);
+
+      // Connect.
+      await tester.showKeyboard(find.byType(EditableText));
+      tester.testTextInput.log.clear();
+
+      controller.text = 'remoteremoteremote';
+      final List<TextEditingValue> updates = tester.testTextInput.log
+        .where((MethodCall call) => call.method == 'TextInput.setEditingState')
+        .map((MethodCall call) => TextEditingValue.fromJSON(call.arguments as Map<String, dynamic>))
+        .toList(growable: false);
+
+      expect(updates, const <TextEditingValue>[TextEditingValue(text: 'remoteremoteremote listener')]);
+    });
+  });
+
   testWidgets('input imm channel calls are ordered correctly', (WidgetTester tester) async {
     const String testText = 'flutter is the best!';
     final TextEditingController controller = TextEditingController(text: testText);
