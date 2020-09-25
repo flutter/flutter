@@ -226,16 +226,6 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _flushPointerEventQueue() {
     assert(!locked);
 
-    if (resamplingEnabled) {
-      _resampler.addOrDispatchAll(_pendingPointerEvents);
-      _resampler.sample(samplingOffset);
-      return;
-    }
-
-    // Stop resampler if resampling is not enabled. This is a no-op if
-    // resampling was never enabled.
-    _resampler.stop();
-
     while (_pendingPointerEvents.isNotEmpty)
       handlePointerEvent(_pendingPointerEvents.removeFirst());
   }
@@ -269,6 +259,17 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   ///    are dispatched without a hit test result.
   void handlePointerEvent(PointerEvent event) {
     assert(!locked);
+
+    if (resamplingEnabled) {
+      _resampler.addOrDispatchAll(_pendingPointerEvents);
+      _resampler.sample(samplingOffset);
+      return;
+    }
+
+    // Stop resampler if resampling is not enabled. This is a no-op if
+    // resampling was never enabled.
+    _resampler.stop();
+
     HitTestResult? hitTestResult;
     if (event is PointerDownEvent || event is PointerSignalEvent) {
       assert(!_hitTests.containsKey(event.pointer));
