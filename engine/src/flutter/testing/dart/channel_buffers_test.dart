@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
-
-import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -34,32 +32,6 @@ void main() {
       expect(drainedCallback, equals(callback));
       return;
     });
-  });
-
-  test('drain is async', () async {
-    const String channel = 'foo';
-    final ByteData data = _makeByteData('message');
-    final ui.ChannelBuffers buffers = ui.ChannelBuffers();
-    final ui.PlatformMessageResponseCallback callback = (ByteData responseData) {};
-    buffers.push(channel, data, callback);
-    final List<String> log = <String>[];
-    final Completer<void> completer = Completer<void>();
-    scheduleMicrotask(() { log.add('before drain, microtask'); });
-    log.add('before drain');
-    buffers.drain(channel, (ByteData drainedData, ui.PlatformMessageResponseCallback drainedCallback) async {
-      log.add('callback');
-      completer.complete();
-    });
-    log.add('after drain, before await');
-    await completer.future;
-    log.add('after await');
-    expect(log, <String>[
-      'before drain',
-      'after drain, before await',
-      'before drain, microtask',
-      'callback',
-      'after await'
-    ]);
   });
 
   test('push drain zero', () async {
