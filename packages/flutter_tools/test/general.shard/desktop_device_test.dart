@@ -194,7 +194,7 @@ void main() {
     expect(portForwarder.forwardedPorts.isEmpty, true);
   });
 
-  testWithoutContext('createDevFSWriter returns a LocalDevFSWriter', () {
+  testUsingContext('createDevFSWriter returns a LocalDevFSWriter', () {
     final FakeDesktopDevice device = FakeDesktopDevice();
 
     expect(device.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());
