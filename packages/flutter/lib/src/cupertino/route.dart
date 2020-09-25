@@ -927,6 +927,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     required this.barrierColor,
     required this.barrierLabel,
     required this.builder,
+    bool barrierDismissable,
     bool? semanticsDismissible,
     required ImageFilter? filter,
     RouteSettings? settings,
@@ -934,10 +935,14 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
          filter: filter,
          settings: settings,
        ) {
+    _barrierDismissible = barrierDismissable;
     _semanticsDismissible = semanticsDismissible;
   }
 
   final WidgetBuilder builder;
+
+  bool _barrierDismissible;
+
   bool? _semanticsDismissible;
 
   @override
@@ -947,7 +952,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   final Color? barrierColor;
 
   @override
-  bool get barrierDismissible => true;
+  bool get barrierDismissible => _barrierDismissable;
 
   @override
   bool get semanticsDismissible => _semanticsDismissible ?? false;
@@ -1006,6 +1011,12 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// It is only used when the method is called. Its corresponding widget can be
 /// safely removed from the tree before the popup is closed.
 ///
+/// The `barrierColor` argument determines the [Color] of the barrier underneath
+/// the popup. It is `_kModalBarrierColor` by default.
+///
+/// The `barrierDismissable` argument determines whether clicking outside the
+/// popup results in dismissal. It is `true` by default.
+///
 /// The `useRootNavigator` argument is used to determine whether to push the
 /// popup to the [Navigator] furthest from or nearest to the given `context`. It
 /// is `false` by default.
@@ -1032,13 +1043,16 @@ Future<T> showCupertinoModalPopup<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   ImageFilter? filter,
+  Color barrierColor = _kModalBarrierColor,
+  bool barrierDismissible = true,
   bool useRootNavigator = true,
   bool? semanticsDismissible,
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator)!.push(
     _CupertinoModalPopupRoute<T>(
-      barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
+      barrierColor: CupertinoDynamicColor.resolve(barrierColor ?? _kModalBarrierColor, context),
+      barrierDismissable: barrierDismissible,
       barrierLabel: 'Dismiss',
       builder: builder,
       filter: filter,
@@ -1089,6 +1103,9 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// It is only used when the method is called. Its corresponding widget can
 /// be safely removed from the tree before the dialog is closed.
 ///
+/// The `barrierColor` argument determines the [Color] of the barrier underneath
+/// the popup. It is `_kModalBarrierColor` by default.
+///
 /// The `useRootNavigator` argument is used to determine whether to push the
 /// dialog to the [Navigator] furthest from or nearest to the given `context`.
 /// By default, `useRootNavigator` is `true` and the dialog route created by
@@ -1111,6 +1128,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 Future<T> showCupertinoDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
+  Color barrierColor = _kModalBarrierColor,
   bool useRootNavigator = true,
   bool barrierDismissible = false,
   RouteSettings? routeSettings,
@@ -1121,7 +1139,7 @@ Future<T> showCupertinoDialog<T>({
     context: context,
     barrierDismissible: barrierDismissible,
     barrierLabel: CupertinoLocalizations.of(context)!.modalBarrierDismissLabel,
-    barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context)!,
+    barrierColor: CupertinoDynamicColor.resolve(barrierColor ?? _kModalBarrierColor, context)!,
     // This transition duration was eyeballed comparing with iOS
     transitionDuration: const Duration(milliseconds: 250),
     pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
