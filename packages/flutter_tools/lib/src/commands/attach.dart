@@ -340,7 +340,12 @@ class AttachCommand extends FlutterCommand {
         final Completer<void> onAppStart = Completer<void>.sync();
         TerminalHandler terminalHandler;
         unawaited(onAppStart.future.whenComplete(() {
-          terminalHandler = TerminalHandler(runner)
+          terminalHandler = TerminalHandler(
+            runner,
+            logger: globals.logger,
+            terminal: globals.terminal,
+            signals: globals.signals,
+          )
             ..setupTerminal()
             ..registerSignalHandlers();
         }));
@@ -385,6 +390,7 @@ class AttachCommand extends FlutterCommand {
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: getBuildInfo(),
       userIdentifier: userIdentifier,
+      platform: globals.platform,
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];

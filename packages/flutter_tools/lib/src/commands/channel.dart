@@ -72,7 +72,7 @@ class ChannelCommand extends FlutterCommand {
       throwToolExit('List channels failed: $result$details', exitCode: result);
     }
 
-    final List<String> officialChannels = FlutterVersion.officialChannels.toList();
+    final List<String> officialChannels = kOfficialChannels.toList();
     final List<bool> availableChannels = List<bool>.filled(officialChannels.length, false);
 
     for (final String line in rawOutput) {
@@ -116,10 +116,10 @@ class ChannelCommand extends FlutterCommand {
 
   Future<void> _switchChannel(String branchName) async {
     globals.printStatus("Switching to flutter channel '$branchName'...");
-    if (FlutterVersion.obsoleteBranches.containsKey(branchName)) {
-      final String alternative = FlutterVersion.obsoleteBranches[branchName];
+    if (kObsoleteBranches.containsKey(branchName)) {
+      final String alternative = kObsoleteBranches[branchName];
       globals.printStatus("This channel is obsolete. Consider switching to the '$alternative' channel instead.");
-    } else if (!FlutterVersion.officialChannels.contains(branchName)) {
+    } else if (!kOfficialChannels.contains(branchName)) {
       globals.printStatus('This is not an official channel. For a list of available channels, try "flutter channel".');
     }
     await _checkout(branchName);
@@ -129,8 +129,8 @@ class ChannelCommand extends FlutterCommand {
 
   static Future<void> upgradeChannel() async {
     final String channel = globals.flutterVersion.channel;
-    if (FlutterVersion.obsoleteBranches.containsKey(channel)) {
-      final String alternative = FlutterVersion.obsoleteBranches[channel];
+    if (kObsoleteBranches.containsKey(channel)) {
+      final String alternative = kObsoleteBranches[channel];
       globals.printStatus("Transitioning from '$channel' to '$alternative'...");
       return _checkout(alternative);
     }

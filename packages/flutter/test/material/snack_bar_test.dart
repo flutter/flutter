@@ -658,8 +658,8 @@ void main() {
           child: Scaffold(
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: Icon(Icons.favorite), title: Text('Animutation')),
-                BottomNavigationBarItem(icon: Icon(Icons.block), title: Text('Zombo.com')),
+                BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Animutation'),
+                BottomNavigationBarItem(icon: Icon(Icons.block), label: 'Zombo.com'),
               ],
             ),
             body: Builder(
@@ -821,8 +821,8 @@ void main() {
           child: Scaffold(
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: Icon(Icons.favorite), title: Text('Animutation')),
-                BottomNavigationBarItem(icon: Icon(Icons.block), title: Text('Zombo.com')),
+                BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Animutation'),
+                BottomNavigationBarItem(icon: Icon(Icons.block), label: 'Zombo.com'),
               ],
             ),
             body: Builder(

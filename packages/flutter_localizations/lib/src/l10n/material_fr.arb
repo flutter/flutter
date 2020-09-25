@@ -55,7 +55,7 @@
   "refreshIndicatorSemanticLabel": "Actualiser",
   "moreButtonTooltip": "Plus",
   "dateSeparator": "/",
-  "dateHelpText": "mm/jj/aaaa",
+  "dateHelpText": "jj/mm/aaaa",
   "selectYearSemanticsLabel": "Sélectionner une année",
   "unspecifiedDate": "Date",
   "unspecifiedDateRange": "Plage de dates",
