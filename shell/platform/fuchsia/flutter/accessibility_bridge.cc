@@ -150,6 +150,15 @@ fuchsia::accessibility::semantics::Role AccessibilityBridge::GetNodeRole(
   if (node.HasFlag(flutter::SemanticsFlags::kIsButton)) {
     return fuchsia::accessibility::semantics::Role::BUTTON;
   }
+
+  if (node.HasFlag(flutter::SemanticsFlags::kIsTextField)) {
+    return fuchsia::accessibility::semantics::Role::TEXT_FIELD;
+  }
+
+  if (node.HasFlag(flutter::SemanticsFlags::kIsSlider)) {
+    return fuchsia::accessibility::semantics::Role::SLIDER;
+  }
+
   if (node.HasFlag(flutter::SemanticsFlags::kIsHeader)) {
     return fuchsia::accessibility::semantics::Role::HEADER;
   }
@@ -281,6 +290,7 @@ void AccessibilityBridge::AddSemanticsNodeUpdate(
         .set_attributes(GetNodeAttributes(flutter_node, &this_node_size))
         .set_states(GetNodeStates(flutter_node, &this_node_size))
         .set_actions(GetNodeActions(flutter_node, &this_node_size))
+        .set_role(GetNodeRole(flutter_node))
         .set_child_ids(child_ids);
     this_node_size +=
         kNodeIdSize * flutter_node.childrenInTraversalOrder.size();
