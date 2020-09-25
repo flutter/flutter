@@ -32,7 +32,7 @@ class MatchesGoldenFile extends AsyncMatcher {
   final Uri key;
 
   /// The [version] of the golden image.
-  final int version;
+  final int? version;
 
   @override
   Future<String?> matchAsync(dynamic item) async {
