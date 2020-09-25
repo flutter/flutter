@@ -685,6 +685,13 @@ abstract class Device {
 
     // Extract device information
     final List<List<String>> table = <List<String>>[];
+    table.add(<String>[
+      '[A]: device.name',
+      '[B]: device.id',
+      '[C]: targetPlatform',
+      '[D]: device.sdkNameAndVersion',
+    ]);
+
     for (final Device device in devices) {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
       final TargetPlatform targetPlatform = await device.targetPlatform;
@@ -693,10 +700,10 @@ abstract class Device {
         supportIndicator += ' ($type)';
       }
       table.add(<String>[
-        '${device.name} (${device.category})',
-        device.id,
-        getNameForTargetPlatform(targetPlatform),
-        '${await device.sdkNameAndVersion}$supportIndicator',
+        '[A]: ${device.name} (${device.category})',
+        '[B]: ${device.id}',
+        '[C]: ${getNameForTargetPlatform(targetPlatform)}',
+        '[D]: ${await device.sdkNameAndVersion}$supportIndicator',
       ]);
     }
 
@@ -709,7 +716,10 @@ abstract class Device {
 
     // Join columns into lines of text
     for (final List<String> row in table) {
-      yield indices.map<String>((int i) => row[i].padRight(widths[i])).join(' • ') + ' • ${row.last}';
+      yield indices
+              .map<String>((int i) => row[i].padRight(widths[i]))
+              .join(' ') +
+          ' ${row.last}';
     }
   }
 
