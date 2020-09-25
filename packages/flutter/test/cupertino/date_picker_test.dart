@@ -1363,7 +1363,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.descendant(of: find.byKey(key), matching: find.byType(Row))), const Size(330, 216));
+    expect(tester.getSize(find.descendant(of: find.byKey(key), matching: find.byType(Row))), const Size(342, 216));
   });
 
   testWidgets('scrollController can be removed or added', (WidgetTester tester) async {
