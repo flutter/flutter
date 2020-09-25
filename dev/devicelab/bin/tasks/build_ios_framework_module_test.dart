@@ -31,7 +31,7 @@ Future<void> main() async {
       String content = pubspec.readAsStringSync();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  device_info: 0.4.1\n  package_info: 0.4.0+9\n',
+        '\ndependencies:\n  device_info: 0.4.1\n  package_info: 0.4.0+9\n  native_mixpanel: 0.1.2\n',
       );
       pubspec.writeAsStringSync(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -239,59 +239,63 @@ Future<void> main() async {
       section('Check all modes have plugins');
 
       for (final String mode in <String>['Debug', 'Profile', 'Release']) {
-        final String pluginFrameworkPath = path.join(
-          outputPath,
-          mode,
-          'device_info.framework',
-          'device_info',
-        );
-        await _checkFrameworkArchs(pluginFrameworkPath, mode);
-        await _checkBitcode(pluginFrameworkPath, mode);
+        for (final String frameworkName in <String>['device_info', 'Mixpanel']) {
+          final String frameworkNameXC = '$frameworkName.xcframework';
+          final String frameworkNameFramework = '$frameworkName.framework';
+          final String pluginFrameworkPath = path.join(
+            outputPath,
+            mode,
+            frameworkNameFramework,
+            frameworkName,
+          );
+          await _checkFrameworkArchs(pluginFrameworkPath, mode);
+          await _checkBitcode(pluginFrameworkPath, mode);
 
-        checkFileExists(path.join(
-          outputPath,
-          mode,
-          'device_info.xcframework',
-          xcodeArmDirectoryName,
-          'device_info.framework',
-          'device_info',
-        ));
+          checkFileExists(path.join(
+            outputPath,
+            mode,
+            frameworkNameXC,
+            xcodeArmDirectoryName,
+            frameworkNameFramework,
+            frameworkName,
+          ));
 
-        checkFileExists(path.join(
-          outputPath,
-          mode,
-          'device_info.xcframework',
-          xcodeArmDirectoryName,
-          'device_info.framework',
-          'Headers',
-          'DeviceInfoPlugin.h',
-        ));
+          checkFileExists(path.join(
+            outputPath,
+            mode,
+            frameworkNameXC,
+            xcodeArmDirectoryName,
+            frameworkNameFramework,
+            'Headers',
+            'DeviceInfoPlugin.h',
+          ));
 
-        final String simulatorFrameworkPath = path.join(
-          outputPath,
-          mode,
-          'device_info.xcframework',
-          'ios-x86_64-simulator',
-          'device_info.framework',
-          'device_info',
-        );
+          final String simulatorFrameworkPath = path.join(
+            outputPath,
+            mode,
+            frameworkNameXC,
+            'ios-x86_64-simulator',
+            frameworkNameFramework,
+            frameworkName,
+          );
 
-        final String simulatorFrameworkHeaderPath = path.join(
-          outputPath,
-          mode,
-          'device_info.xcframework',
-          'ios-x86_64-simulator',
-          'device_info.framework',
-          'Headers',
-          'DeviceInfoPlugin.h',
-        );
+          final String simulatorFrameworkHeaderPath = path.join(
+            outputPath,
+            mode,
+            frameworkNameXC,
+            'ios-x86_64-simulator',
+            frameworkNameFramework,
+            'Headers',
+            'DeviceInfoPlugin.h',
+          );
 
-        if (mode == 'Debug') {
-          checkFileExists(simulatorFrameworkPath);
-          checkFileExists(simulatorFrameworkHeaderPath);
-        } else {
-          checkFileNotExists(simulatorFrameworkPath);
-          checkFileNotExists(simulatorFrameworkHeaderPath);
+          if (mode == 'Debug') {
+            checkFileExists(simulatorFrameworkPath);
+            checkFileExists(simulatorFrameworkHeaderPath);
+          } else {
+            checkFileNotExists(simulatorFrameworkPath);
+            checkFileNotExists(simulatorFrameworkHeaderPath);
+          }
         }
       }
 
@@ -387,6 +391,12 @@ Future<void> main() async {
           cocoapodsOutputPath,
           mode,
           'package_info.framework',
+        ));
+
+        checkDirectoryExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'Mixpanel.framework',
         ));
       }
 
