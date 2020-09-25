@@ -969,7 +969,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// to each route on a Material app will provide the app with
 /// Material's basic visual layout structure.
 ///
-/// It is typically not necessary to nest Scaffolds. For example, in a 
+/// It is typically not necessary to nest Scaffolds. For example, in a
 /// tabbed UI, where the [bottomNavigationBar] is a [TabBar]
 /// and the body is a [TabBarView], you might be tempted to make each tab bar
 /// view a scaffold with a differently titled AppBar. Rather, it would be
