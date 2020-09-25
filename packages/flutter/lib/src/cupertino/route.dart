@@ -941,7 +941,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   final WidgetBuilder builder;
 
-  bool _barrierDismissible;
+  bool _barrierDismissible = true;
 
   bool? _semanticsDismissible;
 
