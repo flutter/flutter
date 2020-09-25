@@ -619,7 +619,7 @@ class DataTable extends StatelessWidget {
   /// Whether a border at the bottom of the table is displayed.
   ///
   /// By default, a border is not shown at the bottom to allow for a border
-  /// around the table set with [DataTable.decoration].
+  /// around the table set with [decoration].
   final bool showBottomBorder;
 
   // Set by the constructor to the index of the only Column that is
