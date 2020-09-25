@@ -264,7 +264,7 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   }
 
   @override
-  Future<void> tearDown(TargetPlatform value, TargetPlatform memento) async {
+  Future<void> tearDown(TargetPlatform value, TargetPlatform? memento) async {
     debugDefaultTargetPlatformOverride = memento;
   }
 }
