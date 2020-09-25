@@ -37,11 +37,6 @@ import 'ticker_provider.dart';
 ///  * [Navigator], which is where all the [Route]s end up.
 typedef RouteFactory = Route<dynamic>? Function(RouteSettings settings);
 
-/// Creates a route for the given context and route settings.
-///
-/// Used by [CustomBuilderPage.routeBuilder].
-typedef RouteBuilder<T> = Route<T> Function(BuildContext context, RouteSettings settings);
-
 /// Creates a series of one or more routes.
 ///
 /// Used by [Navigator.onGenerateInitialRoutes].
@@ -507,8 +502,6 @@ class RouteSettings {
 ///
 ///  * [Navigator.pages], which accepts a list of [Page]s and updates its routes
 ///    history.
-///  * [CustomBuilderPage], a [Page] subclass that provides the API to build a
-///    customized route.
 abstract class Page<T> extends RouteSettings {
   /// Creates a page and initializes [key] for subclasses.
   ///
@@ -1013,10 +1006,10 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// The [Navigator] will convert its [Navigator.pages] into a stack of [Route]s
 /// if it is provided. A change in [Navigator.pages] will trigger an update to
 /// the stack of [Route]s. The [Navigator] will update its routes to match the
-/// new configuration of its [Navigator.pages]. To use this API, one can use
-/// [CustomBuilderPage] or create a [Page] subclass and defines a list of
-/// [Page]s for [Navigator.pages]. A [Navigator.onPopPage] callback is also
-/// required to properly clean up the input pages in case of a pop.
+/// new configuration of its [Navigator.pages]. To use this API, one can create
+/// a [Page] subclass and defines a list of [Page]s for [Navigator.pages]. A
+/// [Navigator.onPopPage] callback is also required to properly clean up the
+/// input pages in case of a pop.
 ///
 /// By Default, the [Navigator] will use [DefaultTransitionDelegate] to decide
 /// how routes transition in or out of the screen. To customize it, define a
