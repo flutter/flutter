@@ -18,6 +18,7 @@ import io.flutter.embedding.engine.LocalizationPluginTest;
 import io.flutter.embedding.engine.RenderingComponentTest;
 import io.flutter.embedding.engine.loader.ApplicationInfoLoaderTest;
 import io.flutter.embedding.engine.loader.FlutterLoaderTest;
+import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorViewTest;
 import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistryTest;
 import io.flutter.embedding.engine.renderer.FlutterRendererTest;
 import io.flutter.embedding.engine.systemchannels.KeyEventChannelTest;
@@ -60,6 +61,7 @@ import test.io.flutter.embedding.engine.dart.DartExecutorTest;
   FlutterJNITest.class,
   FlutterLaunchTests.class,
   FlutterLoaderTest.class,
+  FlutterMutatorViewTest.class,
   FlutterShellArgsTest.class,
   FlutterRendererTest.class,
   FlutterShellArgsTest.class,
