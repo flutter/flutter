@@ -57,6 +57,44 @@ void main() {
     });
   });
 
+  testWithoutContext('deleteIfExists does not delete if file does not exist', () {
+    final File file = MockFile();
+    when(file.existsSync()).thenReturn(false);
+
+    expect(file.deleteIfExists(), false);
+  });
+
+  testWithoutContext('deleteIfExists deletes if file exists', () {
+    final File file = MockFile();
+    when(file.existsSync()).thenReturn(true);
+
+    expect(file.deleteIfExists(), true);
+  });
+
+  testWithoutContext('deleteIfExists handles separate program deleting file', () {
+    final File file = MockFile();
+    bool exists = true;
+    // Return true for the first call, false for any subsequent calls.
+    when(file.existsSync()).thenAnswer((Invocation _) {
+      final bool result = exists;
+      exists = false;
+      return result;
+    });
+    when(file.deleteSync(recursive: false))
+      .thenThrow(const FileSystemException('', '', OSError('', 2)));
+
+    expect(file.deleteIfExists(), true);
+  });
+
+  testWithoutContext('deleteIfExists rethrows state error if something funky is going on', () {
+    final File file = MockFile();
+    when(file.existsSync()).thenReturn(true);
+    when(file.deleteSync(recursive: false))
+      .thenThrow(const FileSystemException('', '', OSError('', 2)));
+
+    expect(() => file.deleteIfExists(), throwsA(isA<StateError>()));
+  });
+
   group('copyDirectorySync', () {
     /// Test file_systems.copyDirectorySync() using MemoryFileSystem.
     /// Copies between 2 instances of file systems which is also supported by copyDirectorySync().
@@ -180,3 +218,4 @@ void main() {
 }
 
 class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
+class MockFile extends Mock implements File {}
