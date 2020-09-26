@@ -55,7 +55,6 @@ Future<void> getPackages(String folder) async {
     fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter'),
     'pub',
     'get',
-    '--offline',
   ];
   final ProcessResult result = await processManager.run(command, workingDirectory: folder);
   if (result.exitCode != 0) {
