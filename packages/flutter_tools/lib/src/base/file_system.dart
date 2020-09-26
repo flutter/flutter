@@ -33,17 +33,17 @@ extension FileUtils on File {
     } on FileSystemException catch (err) {
       // Certain error codes indicate the file could not be found. It could have
       // been deleted by a different program while the tool was running.
-      // if it still exists, crash with a more detailed error.
+      // if it still exists, the file likely exists on a read-only volume.
       // This error code is the same across linux, windows, and macOS.
       const int kSystemCannotFindFile = 2;
       if (err?.osError?.errorCode != kSystemCannotFindFile) {
         rethrow;
       }
       if (existsSync()) {
-        throw StateError(
-          'The flutter tool tried to delete the file $path but was unable to '
-          'despite the file system reporting that it still exists. Please file an issue '
-          'on https://github.com/flutter/flutter/issues with more information.'
+        throwToolExit(
+          'The Flutter tool tried to delete the file $path but was unable to. '
+          'This may be due to the file and/or project\'s location on a read-only volume. '
+          'Consider relocating the project and trying again',
         );
       }
     }
