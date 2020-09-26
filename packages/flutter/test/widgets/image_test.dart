@@ -1765,7 +1765,7 @@ void main() {
 
   testWidgets('Load a good image after a bad image was loaded should not call errorBuilder', (WidgetTester tester) async {
     final UniqueKey errorKey = UniqueKey();
-    final ui.Image image = await tester.runAsync(() => createTestImage(kBlueRectPng));
+    final ui.Image image = await tester.runAsync(() => createTestImage());
     final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
     final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
 
