@@ -1,4 +1,4 @@
-Signature: 4d1b3d04986e12a2b9b63079b680d0b3
+Signature: 50b9f83ecd2e6446df9fa7df78530be8
 
 UNUSED LICENSES:
 
@@ -516,6 +516,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.scheduling/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
@@ -1402,6 +1403,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery/factory_reset.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.scheduling/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.scheduling/prediction_info.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/accessibility.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/audio.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/device.fidl
@@ -2172,6 +2174,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.scheduling/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
@@ -3202,6 +3205,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.interfaces/interfaces.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/routes.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/socket.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.posix/error.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings.policy/error.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings.policy/volume_policy.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/input.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/light.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl
