@@ -1905,8 +1905,6 @@ class Codec extends NativeFieldWrapperClass2 {
   int get repetitionCount => _cachedRepetitionCount ??= _repetitionCount;
   int get _repetitionCount native 'Codec_repetitionCount';
 
-  FrameInfo? _cachedFrame;
-
   /// Fetches the next animation frame.
   ///
   /// Wraps back to the first frame after returning the last frame.
@@ -1916,24 +1914,20 @@ class Codec extends NativeFieldWrapperClass2 {
   /// The caller of this method is responsible for disposing the
   /// [FrameInfo.image] on the returned object.
   Future<FrameInfo> getNextFrame() async {
-    if (_cachedFrame == null || frameCount != 1) {
-      final Completer<void> completer = Completer<void>.sync();
-      final String? error = _getNextFrame((_Image? image, int durationMilliseconds) {
-        if (image == null) {
-          throw Exception('Codec failed to produce an image, possibly due to invalid image data.');
-        }
-        _cachedFrame = FrameInfo._(
-          image: Image._(image),
-          duration: Duration(milliseconds: durationMilliseconds),
-        );
-        completer.complete();
-      });
-      if (error != null) {
-        throw Exception(error);
+    final Completer<FrameInfo> completer = Completer<FrameInfo>.sync();
+    final String? error = _getNextFrame((_Image? image, int durationMilliseconds) {
+      if (image == null) {
+        throw Exception('Codec failed to produce an image, possibly due to invalid image data.');
       }
-      await completer.future;
+      completer.complete(FrameInfo._(
+        image: Image._(image),
+        duration: Duration(milliseconds: durationMilliseconds),
+      ));
+    });
+    if (error != null) {
+      throw Exception(error);
     }
-    return _cachedFrame!;
+    return await completer.future;
   }
 
   /// Returns an error message on failure, null on success.
