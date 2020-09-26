@@ -150,11 +150,11 @@ Future<void> main() async {
         hostApp,
       );
       copy(
-        File(path.join(projectDir.path, '.android', gradlew)),
+        File(path.join(projectDir.path, 'android', gradlew)),
         hostApp,
       );
       copy(
-        File(path.join(projectDir.path, '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar')),
+        File(path.join(projectDir.path, 'android', 'gradle', 'wrapper', 'gradle-wrapper.jar')),
         Directory(path.join(hostApp.path, 'gradle', 'wrapper')),
       );
 
