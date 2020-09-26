@@ -229,6 +229,24 @@ void testMain() {
     await completer.future;
   });
 
+  test('sendPlatformMessage responds even when channel is unknown', () async {
+    bool responded = false;
+
+    final ByteData inputData = ByteData(4);
+    inputData.setUint32(0, 42);
+    window.sendPlatformMessage(
+      'flutter/__unknown__channel__',
+      null,
+      (outputData) {
+        responded = true;
+        expect(outputData, isNull);
+      },
+    );
+
+    await Future<void>.delayed(const Duration(milliseconds: 1));
+    expect(responded, isTrue);
+  });
+
   test('Window implements locale, locales, and locale change notifications', () async {
     // This will count how many times we notified about locale changes.
     int localeChangedCount = 0;
