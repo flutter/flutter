@@ -86,13 +86,13 @@ void main() {
     expect(file.deleteIfExists(), true);
   });
 
-  testWithoutContext('deleteIfExists rethrows state error if something funky is going on', () {
+  testWithoutContext('deleteIfExists throws tool exit if file exists on read-only volume', () {
     final File file = MockFile();
     when(file.existsSync()).thenReturn(true);
     when(file.deleteSync(recursive: false))
       .thenThrow(const FileSystemException('', '', OSError('', 2)));
 
-    expect(() => file.deleteIfExists(), throwsA(isA<StateError>()));
+    expect(() => file.deleteIfExists(), throwsA(isA<ToolExit>()));
   });
 
   group('copyDirectorySync', () {
