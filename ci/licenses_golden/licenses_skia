@@ -1,4 +1,4 @@
-Signature: 56e3145b422033b03f4fe66e4ff85b77
+Signature: 35cfb4f1a4c3bc252fb846e93259218e
 
 UNUSED LICENSES:
 
@@ -747,7 +747,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLParser.h
 FILE: ../../../third_party/skia/src/sksl/SkSLPosition.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVCodeGenerator.h
-FILE: ../../../third_party/skia/src/sksl/SkSLTestRehydrator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLUtil.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLUtil.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBinaryExpression.h
