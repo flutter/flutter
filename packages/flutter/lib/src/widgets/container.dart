@@ -363,7 +363,7 @@ class Container extends StatelessWidget {
  ///
  /// See also:
  ///
- ///  * [Transform.align], which is set by this property.
+ ///  * [Transform.alignment], which is set by this property.
   final Alignment? transformAlignment;
 
   /// The clip behavior when [Container.decoration] is not null.
