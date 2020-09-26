@@ -93,6 +93,8 @@ void setupDirectoryMocks({
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
   when(mockDirectory.deleteSync())
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.existsSync())
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
 void main() {
@@ -203,6 +205,20 @@ void main() {
       expect(() => directory.createSync(recursive: true),
              throwsToolExit(message: expectedMessage));
     });
+
+    testWithoutContext('when checking for directory existence with permission issues', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kUserPermissionDenied,
+      );
+
+      final Directory directory = fs.directory('directory');
+
+      const String expectedMessage = 'Flutter failed to check for directory existence at';
+      expect(() => directory.existsSync(),
+             throwsToolExit(message: expectedMessage));
+    });
   });
 
   group('throws ToolExit on Linux', () {
@@ -298,6 +314,20 @@ void main() {
       expect(() => directory.createTempSync('prefix'),
              throwsToolExit(message: expectedMessage));
     });
+
+    testWithoutContext('when checking for directory existence with permission issues', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eacces,
+      );
+
+      final Directory directory = fs.directory('directory');
+
+      const String expectedMessage = 'Flutter failed to check for directory existence at';
+      expect(() => directory.existsSync(),
+             throwsToolExit(message: expectedMessage));
+    });
   });
 
   group('throws ToolExit on macOS', () {
@@ -391,6 +421,20 @@ void main() {
       expect(() async => await directory.createTemp('prefix'),
              throwsToolExit(message: expectedMessage));
       expect(() => directory.createTempSync('prefix'),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when checking for directory existence with permission issues', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eacces,
+      );
+
+      final Directory directory = fs.directory('directory');
+
+      const String expectedMessage = 'Flutter failed to check for directory existence at';
+      expect(() => directory.existsSync(),
              throwsToolExit(message: expectedMessage));
     });
   });
