@@ -490,13 +490,12 @@ class DevFS {
       // are in the same location in DevFS and the iOS simulator.
       final String assetDirectory = getAssetBuildDirectory();
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, archivePath));
-        if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
-          archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-        }
-        // Only update assets if they have been modified, or if this is the
-        // first upload of the asset bundle.
-        if (content.isModified || (bundleFirstUpload && archivePath != null)) {
+        // Only update assets if they have been modified.
+        if (content.isModified) {
+          final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, archivePath));
+          if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
+            archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
+          }
           dirtyEntries[deviceUri] = content;
           syncedBytes += content.size;
           if (archivePath != null && !bundleFirstUpload) {
