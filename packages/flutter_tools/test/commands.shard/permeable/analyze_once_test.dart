@@ -241,9 +241,7 @@ flutter_project:lib/
         toolExit: true,
       );
     } finally {
-      if (optionsFile.existsSync()) {
-        optionsFile.deleteSync();
-      }
+      optionsFile.deleteIfExists();
     }
   });
 

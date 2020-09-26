@@ -307,9 +307,7 @@ class CocoaPods {
   /// Ensures that pod install is deemed needed on next check.
   void invalidatePodInstallOutput(XcodeBasedProject xcodeProject) {
     final File manifestLock = xcodeProject.podManifestLock;
-    if (manifestLock.existsSync()) {
-      manifestLock.deleteSync();
-    }
+    manifestLock.deleteIfExists();
   }
 
   // Check if you need to run pod install.

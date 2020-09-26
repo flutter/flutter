@@ -182,9 +182,7 @@ void main() {
       ].expand<String>((List<String> list) => list);
       for (final String path in allFiles) {
         final File file = globals.fs.file(globals.fs.path.join(projectPath, path));
-        if (file.existsSync()) {
-          file.deleteSync();
-        }
+        file.deleteIfExists();
       }
     }
 

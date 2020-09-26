@@ -429,11 +429,7 @@ const String _kFlutterPluginsDependenciesKey = 'dependencies';
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsDependenciesFile;
   if (plugins.isEmpty) {
-    if (pluginsFile.existsSync()) {
-      pluginsFile.deleteSync();
-      return true;
-    }
-    return false;
+    return pluginsFile.deleteIfExists();
   }
 
   final String iosKey = project.ios.pluginConfigKey;
@@ -500,11 +496,7 @@ List<dynamic> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
 bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsFile;
   if (plugins.isEmpty) {
-    if (pluginsFile.existsSync()) {
-      pluginsFile.deleteSync();
-      return true;
-    }
-    return false;
+    return pluginsFile.deleteIfExists();
   }
 
   const String info = 'This is a generated file; do not edit or check into version control.';
@@ -1045,9 +1037,7 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
   final String filePath = globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.dart');
   if (webPlugins.isEmpty) {
     final File file = globals.fs.file(filePath);
-    if (file.existsSync()) {
-      file.deleteSync();
-    }
+    file.deleteIfExists();
   } else {
     _renderTemplateToFile(
       _dartPluginRegistryTemplate,

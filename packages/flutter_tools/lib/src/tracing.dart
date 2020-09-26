@@ -94,9 +94,7 @@ Future<void> downloadStartupTrace(vm_service.VmService vmService, {
   final File traceInfoFile = output.childFile('start_up_info.json');
 
   // Delete old startup data, if any.
-  if (traceInfoFile.existsSync()) {
-    traceInfoFile.deleteSync();
-  }
+  traceInfoFile.deleteIfExists();
 
   // Create "build" directory, if missing.
   if (!traceInfoFile.parent.existsSync()) {
