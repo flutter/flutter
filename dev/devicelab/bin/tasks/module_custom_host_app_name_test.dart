@@ -134,38 +134,6 @@ Future<void> main() async {
         await flutter('clean');
       });
 
-      section('Make Android host app editable');
-
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'make-host-app-editable',
-          options: <String>['android'],
-        );
-      });
-
-      section('Build editable host app');
-
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'build',
-          options: <String>['apk'],
-        );
-      });
-
-      final bool editableHostApkBuilt = exists(File(path.join(
-        projectDir.path,
-        'build',
-        'host',
-        'outputs',
-        'apk',
-        'release',
-        'app-release.apk',
-      )));
-
-      if (!editableHostApkBuilt) {
-        return TaskResult.failure('Failed to build editable host .apk');
-      }
-
       section('Add to existing Android app');
 
       final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
