@@ -520,6 +520,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
           textTheme: theme.primaryTextTheme,
           brightness: theme.primaryColorBrightness,
           leading: widget.delegate.buildLeading(context),
+          // [TextField] uses the theme provided by SearchDelegate.appBarTheme(context)
           title: TextField(
             controller: widget.delegate._queryTextController,
             focusNode: focusNode,
@@ -529,7 +530,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             onSubmitted: (String _) {
               widget.delegate.showResults(context);
             },
-            decoration: InputDecoration(
+            decoration: const InputDecoration().applyDefaults(theme.inputDecorationTheme).copyWith(
               border: InputBorder.none,
               hintText: searchFieldLabel,
               hintStyle: searchFieldStyle,
