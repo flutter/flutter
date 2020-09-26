@@ -115,7 +115,7 @@ class CupertinoSwitch extends StatefulWidget {
 
   /// The width to use for the border.
   ///
-  /// Defaults to 0.0 and is disabled when null.
+  /// Defaults to 0.0 when null.
   final double? borderWidth;
 
   /// {@template flutter.cupertino.switch.dragStartBehavior}
