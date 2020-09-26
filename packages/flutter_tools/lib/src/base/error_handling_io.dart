@@ -331,6 +331,16 @@ class ErrorHandlingDirectory
   }
 
   @override
+  bool existsSync() {
+    return _runSync<bool>(
+      () => delegate.existsSync(),
+      platform: _platform,
+      failureMessage:
+        'Flutter failed to check for directory existence at "${delegate.path}"',
+    );
+  }
+
+  @override
   String toString() => delegate.toString();
 }
 
