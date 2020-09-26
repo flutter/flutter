@@ -508,6 +508,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _pointerEventSource = source;
     try {
       super.handlePointerEvent(event);
+      if (source == TestBindingEventSource.test && resamplingEnabled) {
+        triggerResample();
+      }
     } finally {
       _pointerEventSource = previousSource;
     }

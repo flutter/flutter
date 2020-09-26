@@ -50,28 +50,23 @@ class _Resampler {
   // Callback used to handle sample time changes.
   final _HandleSampleTimeChangedCallback _handleSampleTimeChanged;
 
-  // Enqueue `events` for resampling or dispatch them directly if
+  // Add `event` for resampling or dispatch it directly if
   // not a touch event.
-  void addOrDispatchAll(Queue<PointerEvent> events) {
+  void addOrDispatch(PointerEvent event) {
     final SchedulerBinding? scheduler = SchedulerBinding.instance;
     assert(scheduler != null);
-
-    while (events.isNotEmpty) {
-      final PointerEvent event = events.removeFirst();
-
       // Add touch event to resampler or dispatch pointer event directly.
-      if (event.kind == PointerDeviceKind.touch) {
-        // Save last event time for debugPrint of resampling margin.
-        _lastEventTime = event.timeStamp;
+    if (event.kind == PointerDeviceKind.touch) {
+      // Save last event time for debugPrint of resampling margin.
+      _lastEventTime = event.timeStamp;
 
-        final PointerEventResampler resampler = _resamplers.putIfAbsent(
-          event.device,
-          () => PointerEventResampler(),
-        );
-        resampler.addEvent(event);
-      } else {
-        _handlePointerEvent(event);
-      }
+      final PointerEventResampler resampler = _resamplers.putIfAbsent(
+        event.device,
+        () => PointerEventResampler(),
+      );
+      resampler.addEvent(event);
+    } else {
+      _handlePointerEvent(event);
     }
   }
 
@@ -226,18 +221,20 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _flushPointerEventQueue() {
     assert(!locked);
 
-    if (resamplingEnabled) {
-      _resampler.addOrDispatchAll(_pendingPointerEvents);
-      _resampler.sample(samplingOffset);
-      return;
-    }
-
-    // Stop resampler if resampling is not enabled. This is a no-op if
-    // resampling was never enabled.
-    _resampler.stop();
-
     while (_pendingPointerEvents.isNotEmpty)
       handlePointerEvent(_pendingPointerEvents.removeFirst());
+
+    if (resamplingEnabled) {
+      triggerResample();
+    }
+  }
+
+  /// to force resampler for triggering a resample operation.
+  ///
+  /// This should only be called when resampling is enabled.
+  void triggerResample() {
+    assert(resamplingEnabled);
+    _resampler.sample(samplingOffset);
   }
 
   /// A router that routes all pointer events received from the engine.
@@ -269,6 +266,19 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   ///    are dispatched without a hit test result.
   void handlePointerEvent(PointerEvent event) {
     assert(!locked);
+
+    if (resamplingEnabled) {
+      _resampler.addOrDispatch(event);
+      return;
+    }
+
+    // Stop resampler if resampling is not enabled. This is a no-op if
+    // resampling was never enabled.
+    _resampler.stop();
+    _handlePointerEventImmediately(event);
+  }
+
+  void _handlePointerEventImmediately(PointerEvent event) {
     HitTestResult? hitTestResult;
     if (event is PointerDownEvent || event is PointerSignalEvent) {
       assert(!_hitTests.containsKey(event.pointer));
@@ -396,7 +406,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   // Resampler used to filter incoming pointer events when resampling
   // is enabled.
   late final _Resampler _resampler = _Resampler(
-    handlePointerEvent,
+    _handlePointerEventImmediately,
     _handleSampleTimeChanged,
   );
 
