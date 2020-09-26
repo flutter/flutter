@@ -1424,7 +1424,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
     Key? key,
     this.fit = BoxFit.contain,
     this.alignment = Alignment.center,
-    this.clipBehavior = Clip.hardEdge,
+    this.clipBehavior = Clip.none,
     Widget? child,
   }) : assert(fit != null),
        assert(alignment != null),
@@ -1452,7 +1452,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.hardEdge].
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   @override
