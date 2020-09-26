@@ -19,6 +19,8 @@ public class FlutterMutatorView extends FrameLayout {
   private float screenDensity;
   private int left;
   private int top;
+  private int prevLeft;
+  private int prevTop;
 
   private final AndroidTouchProcessor androidTouchProcessor;
 
@@ -122,11 +124,26 @@ public class FlutterMutatorView extends FrameLayout {
       return super.onTouchEvent(event);
     }
 
-    // Mutator view itself doesn't rotate, scale, skew, etc.
-    // we only need to account for translation.
-    Matrix screenMatrix = new Matrix();
-    screenMatrix.postTranslate(left, top);
+    final Matrix screenMatrix = new Matrix();
 
+    switch (event.getAction()) {
+      case MotionEvent.ACTION_DOWN:
+        prevLeft = left;
+        prevTop = top;
+        screenMatrix.postTranslate(left, top);
+        break;
+      case MotionEvent.ACTION_MOVE:
+        // While the view is dragged, use the left and top positions as
+        // they were at the moment the touch event fired.
+        screenMatrix.postTranslate(prevLeft, prevTop);
+        prevLeft = left;
+        prevTop = top;
+        break;
+      case MotionEvent.ACTION_UP:
+      default:
+        screenMatrix.postTranslate(left, top);
+        break;
+    }
     return androidTouchProcessor.onTouchEvent(event, screenMatrix);
   }
 }
