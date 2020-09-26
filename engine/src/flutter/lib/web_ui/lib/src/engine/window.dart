@@ -679,14 +679,10 @@ class EngineWindow extends ui.Window {
       return;
     }
 
-    // TODO(flutter_web): Some Flutter widgets send platform messages that we
-    // don't handle on web. So for now, let's just ignore them. In the future,
-    // we should consider uncommenting the following "callback(null)" line.
-
     // Passing [null] to [callback] indicates that the platform message isn't
     // implemented. Look at [MethodChannel.invokeMethod] to see how [null] is
     // handled.
-    // callback(null);
+    _replyToPlatformMessage(callback, null);
   }
 
   int _getHapticFeedbackDuration(String? type) {
