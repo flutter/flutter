@@ -607,7 +607,7 @@ class HotRunner extends ResidentRunner {
   /// Returns [true] if the reload was successful.
   /// Prints errors if [printErrors] is [true].
   static bool validateReloadReport(
-    Map<String, dynamic> reloadReport, {
+    vm_service.ReloadReport reloadReport, {
     bool printErrors = true,
   }) {
     if (reloadReport == null) {
@@ -616,29 +616,12 @@ class HotRunner extends ResidentRunner {
       }
       return false;
     }
-    if (!(reloadReport['type'] == 'ReloadReport' &&
-          (reloadReport['success'] == true ||
-           (reloadReport['success'] == false &&
-            (reloadReport['details'] is Map<String, dynamic> &&
-             reloadReport['details']['notices'] is List<dynamic> &&
-             (reloadReport['details']['notices'] as List<dynamic>).isNotEmpty &&
-             (reloadReport['details']['notices'] as List<dynamic>).every(
-               (dynamic item) => item is Map<String, dynamic> && item['message'] is String
-             )
-            )
-           )
-          )
-         )) {
-      if (printErrors) {
-        globals.printError('Hot reload received invalid response: $reloadReport');
-      }
-      return false;
-    }
-    if (!(reloadReport['success'] as bool)) {
+    final ReloadReportContents contents = ReloadReportContents.fromReloadReport(reloadReport);
+    if (!reloadReport.success) {
       if (printErrors) {
         globals.printError('Hot reload was rejected:');
-        for (final Map<String, dynamic> notice in (reloadReport['details']['notices'] as List<dynamic>).cast<Map<String, dynamic>>()) {
-          globals.printError('${notice['message']}');
+        for (final ReasonForCancelling reason in contents.notices) {
+          globals.printError(reason.toString());
         }
       }
       return false;
@@ -865,7 +848,7 @@ class HotRunner extends ResidentRunner {
             // Don't print errors because they will be printed further down when
             // `validateReloadReport` is called again.
             await device.updateReloadStatus(
-              validateReloadReport(firstReport.json, printErrors: false),
+              validateReloadReport(firstReport, printErrors: false),
             );
             return DeviceReloadReport(device, reports);
           },
@@ -874,7 +857,7 @@ class HotRunner extends ResidentRunner {
       final List<DeviceReloadReport> reports = await Future.wait(allReportsFutures);
       for (final DeviceReloadReport report in reports) {
         final vm_service.ReloadReport reloadReport = report.reports[0];
-        if (!validateReloadReport(reloadReport.json)) {
+        if (!validateReloadReport(reloadReport)) {
           // Reload failed.
           HotEvent('reload-reject',
             targetPlatform: targetPlatform,
@@ -885,7 +868,8 @@ class HotRunner extends ResidentRunner {
             nullSafety: usageNullSafety,
             fastReassemble: null,
           ).send();
-          return OperationResult(1, 'Reload rejected');
+          final ReloadReportContents contents = ReloadReportContents.fromReloadReport(reloadReport);
+          return OperationResult(1, 'Reload rejected: ${contents.notices.join("\n")}');
         }
         // Collect stats only from the first device. If/when run -d all is
         // refactored, we'll probably need to send one hot reload/restart event
@@ -1319,5 +1303,66 @@ class ProjectFileInvalidator {
       _fileSystem.file(packagesPath),
       logger: _logger,
     );
+  }
+}
+
+/// Additional serialization logic for a hot reload response.
+class ReloadReportContents {
+  factory ReloadReportContents.fromReloadReport(vm_service.ReloadReport report) {
+    final List<ReasonForCancelling> reasons = <ReasonForCancelling>[];
+    final Object notices = report.json['notices'];
+    if (notices is List<dynamic>) {
+      for (final Object notice in notices) {
+        if (notice is Map<String, dynamic>) {
+          reasons.add(
+            ReasonForCancelling(
+              message: notice['message'] is String ? notice['message'] as String : 'Unknown Error',
+              library: notice['Library'] is String ? notice['Library'] as String : '',
+              className: notice['Class'] is String ? notice['Class'] as String : '',
+            ),
+          );
+        }
+      }
+    }
+
+    return ReloadReportContents._(
+      report.success,
+      reasons,
+      report,
+    );
+  }
+
+  ReloadReportContents._(
+    this.success,
+    this.notices,
+    this.report,
+  );
+
+  final bool success;
+  final List<ReasonForCancelling> notices;
+  final vm_service.ReloadReport report;
+}
+
+/// A serialization class for hot reload rejection reasons.
+class ReasonForCancelling {
+  ReasonForCancelling({
+    this.message,
+    this.library,
+    this.className,
+  });
+
+  final String message;
+  final String library;
+  final String className;
+
+  static const String kConstClassError = 'Const class cannot remove fields';
+
+  @override
+  String toString() {
+    String contextHint = '';
+    if (message.contains(kConstClassError)) {
+      contextHint = 'Try performing a hot restart instead.';
+    }
+    return '$message $library $className $contextHint';
   }
 }

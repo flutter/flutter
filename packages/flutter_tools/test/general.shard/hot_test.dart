@@ -55,21 +55,20 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
 void main() {
   group('validateReloadReport', () {
     testUsingContext('invalid', () async {
-      expect(HotRunner.validateReloadReport(<String, dynamic>{}), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{},
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{
           'notices': <Map<String, dynamic>>[
           ],
         },
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{
@@ -77,15 +76,15 @@ void main() {
             'message': 'error',
           },
         },
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{
           'notices': <Map<String, dynamic>>[],
         },
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{
@@ -93,8 +92,8 @@ void main() {
             <String, dynamic>{'message': false},
           ],
         },
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{
@@ -102,8 +101,8 @@ void main() {
             <String, dynamic>{'message': <String>['error']},
           ],
         },
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{
@@ -112,8 +111,8 @@ void main() {
             <String, dynamic>{'message': <String>['error']},
           ],
         },
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{
@@ -121,11 +120,21 @@ void main() {
             <String, dynamic>{'message': 'error'},
           ],
         },
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': true,
-      }), true);
+      })), true);
+    });
+
+    testWithoutContext('ReasonForCancelling toString has a hint for specific errors', () {
+      final ReasonForCancelling reasonForCancelling = ReasonForCancelling(
+        className: 'Foo',
+        library: 'fizz.dart',
+        message: 'Const class cannot remove fields',
+      );
+
+      expect(reasonForCancelling.toString(), contains('Try performing a hot restart instead.'));
     });
   });
 
