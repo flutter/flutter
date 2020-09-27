@@ -39,6 +39,7 @@ Future<void> withAllowedFailure(Future<void> Function() operation) async {
 void withAllowedFailureSync(void Function() operation) {
   try {
     ErrorHandlingFileSystem._allowFailure = true;
+    operation();
   } finally {
     ErrorHandlingFileSystem._allowFailure = false;
   }
