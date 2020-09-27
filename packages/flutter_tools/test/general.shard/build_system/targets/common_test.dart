@@ -72,7 +72,9 @@ void main() {
   });
 
   testWithoutContext('KernelSnapshot handles null result from kernel compilation', () async {
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -91,7 +93,7 @@ void main() {
         '--aot',
         '--tfa',
         '--packages',
-        '/.packages',
+       '/.dart_tool/package_config.json',
         '--output-dill',
         '$build/app.dill',
         '--depfile',
@@ -106,7 +108,9 @@ void main() {
   });
 
   testWithoutContext('KernelSnapshot does not use track widget creation on profile builds', () async {
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -125,7 +129,7 @@ void main() {
         '--aot',
         '--tfa',
         '--packages',
-        '/.packages',
+       '/.dart_tool/package_config.json',
         '--output-dill',
         '$build/app.dill',
         '--depfile',
@@ -140,7 +144,9 @@ void main() {
   });
 
   testWithoutContext('KernelSnapshot correctly handles an empty string in ExtraFrontEndOptions', () async {
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -159,7 +165,7 @@ void main() {
         '--aot',
         '--tfa',
         '--packages',
-        '/.packages',
+       '/.dart_tool/package_config.json',
         '--output-dill',
         '$build/app.dill',
         '--depfile',
@@ -175,7 +181,9 @@ void main() {
   });
 
   testWithoutContext('KernelSnapshot correctly forwards ExtraFrontEndOptions', () async {
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -194,7 +202,7 @@ void main() {
         '--aot',
         '--tfa',
         '--packages',
-        '/.packages',
+       '/.dart_tool/package_config.json',
         '--output-dill',
         '$build/app.dill',
         '--depfile',
@@ -212,7 +220,9 @@ void main() {
   });
 
   testWithoutContext('KernelSnapshot can disable track-widget-creation on debug builds', () async {
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -230,7 +240,7 @@ void main() {
         ...buildModeOptions(BuildMode.debug),
         '--no-link-platform',
         '--packages',
-        '/.packages',
+       '/.dart_tool/package_config.json',
         '--output-dill',
         '$build/app.dill',
         '--depfile',
@@ -247,7 +257,9 @@ void main() {
   });
 
   testWithoutContext('KernelSnapshot forces platform linking on debug for darwin target platforms', () async {
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -264,7 +276,7 @@ void main() {
         '-Ddart.developer.causal_async_stacks=true',
         ...buildModeOptions(BuildMode.debug),
         '--packages',
-        '/.packages',
+       '/.dart_tool/package_config.json',
         '--output-dill',
         '$build/app.dill',
         '--depfile',
@@ -283,7 +295,9 @@ void main() {
   });
 
   testWithoutContext('KernelSnapshot does use track widget creation on debug builds', () async {
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final Environment testEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
@@ -313,7 +327,7 @@ void main() {
         '--track-widget-creation',
         '--no-link-platform',
         '--packages',
-        '/.packages',
+       '/.dart_tool/package_config.json',
         '--output-dill',
         '$build/app.dill',
         '--depfile',
