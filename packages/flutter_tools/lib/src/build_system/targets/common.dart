@@ -162,6 +162,11 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
 }
 
 /// Generate a snapshot of the dart code used in the program.
+///
+/// Note that this target depends on the `.dart_tool/package_config.json` file
+/// even though it is not listed as an input. Pub inserts a timestamp into
+/// the file which causes unecessary rebuilds, so instead a subset of the contents
+/// are used an input instead.
 class KernelSnapshot extends Target {
   const KernelSnapshot();
 
@@ -170,7 +175,7 @@ class KernelSnapshot extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/.dart_tool/package_config.json'),
+    Source.pattern('{PROJECT_DIR}/.dart_tool/package_subset'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     Source.artifact(Artifact.platformKernelDill),
     Source.artifact(Artifact.engineDartBinary),

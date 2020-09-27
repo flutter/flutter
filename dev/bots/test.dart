@@ -418,7 +418,6 @@ Future<void> _flutterBuildApk(String relativePathToApplication, {
       <String>[
         'build',
         'apk',
-        '--no-pub',
         '--performance-measurement-file=perf.json',
         ...additionalArgs,
         if (release)
@@ -477,7 +476,6 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
       <String>[
         'build',
         'ios',
-        '--no-pub',
         '--performance-measurement-file=perf.json',
         ...additionalArgs,
         '--no-codesign',
