@@ -306,6 +306,7 @@ Future<ProcessResult> _runFlutterTest(
     'test',
     '--no-color',
     '--no-version-check',
+    '--no-pub',
     ...extraArguments,
     testPath,
   ];
