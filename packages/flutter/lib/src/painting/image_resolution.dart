@@ -230,7 +230,7 @@ class AssetImage extends AssetBundleImageProvider {
     return SynchronousFuture<Map<String, List<String>>?>(parsedManifest);
   }
 
-  String? _chooseVariant(String main, ImageConfiguration config, List<String>? candidates) {
+  String? _chooseVariant(String main, ImageConfiguration config, List<String>? candidates){
     if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty)
       return main;
     // TODO(ianh): Consider moving this parsing logic into _manifestParser.
@@ -240,19 +240,39 @@ class AssetImage extends AssetBundleImageProvider {
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
     // docs)
-    return _findNearest(mapping, config.devicePixelRatio!);
+    return _findNearest(mapping, config.devicePixelRatio!, config.platform);
   }
 
   // Return the value for the key in a [SplayTreeMap] nearest the provided key.
-  String? _findNearest(SplayTreeMap<double, String> candidates, double value) {
+  String? _findNearest(SplayTreeMap<double, String> candidates, double value, TargetPlatform? platform){
     if (candidates.containsKey(value))
       return candidates[value]!;
     final double? lower = candidates.lastKeyBefore(value);
     final double? upper = candidates.firstKeyAfter(value);
+
+    // Desktop devices frequently have high resolution screens but low DPR
+    // values. Until https://github.com/flutter/flutter/issues/63122 is resolved,
+    // improve the situation slightly by preferring the higher DPR image.
+    bool roundUp;
+    switch (platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case null:
+        roundUp = false;
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        roundUp = true;
+        break;
+    }
     if (lower == null)
       return candidates[upper];
     if (upper == null)
       return candidates[lower];
+    if (roundUp)
+      return candidates[upper];
     if (value > (lower + upper) / 2)
       return candidates[upper];
     else
