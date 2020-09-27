@@ -77,7 +77,7 @@ class PlatformType {
   String toString() => value;
 }
 
-/// A disover mechanism for flutter-supported development devices.
+/// A disovery mechanism for flutter-supported development devices.
 abstract class DeviceManager {
 
   /// Constructing DeviceManagers is cheap; they only do expensive work if some
