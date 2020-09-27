@@ -13,12 +13,12 @@ import 'test_utils.dart';
 
 // This test depends on some files in ///dev/automated_tests/flutter_test/*
 
-Future<void> _testExclusionLock;
+final String automatedTestsDirectory = fileSystem.path.join('..', '..', 'dev', 'automated_tests');
+final String flutterTestDirectory = fileSystem.path.join(automatedTestsDirectory, 'flutter_test');
+final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
+final String dartBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'dart.bat' : 'dart');
 
 void main() {
-  final String automatedTestsDirectory = fileSystem.path.join('..', '..', 'dev', 'automated_tests');
-  final String flutterTestDirectory = fileSystem.path.join(automatedTestsDirectory, 'flutter_test');
-
   setUpAll(() {
     processManager.run(
       <String>[
@@ -193,10 +193,6 @@ Future<void> _testFile(
     fail('missing expectation file: $expectationFile');
   }
 
-  while (_testExclusionLock != null) {
-    await _testExclusionLock;
-  }
-
   final ProcessResult exec = await _runFlutterTest(
     testName,
     workingDirectory,
@@ -299,22 +295,11 @@ Future<ProcessResult> _runFlutterTest(
     testPath,
   ];
 
-  while (_testExclusionLock != null) {
-    await _testExclusionLock;
-  }
-
-  final Completer<void> testExclusionCompleter = Completer<void>();
-  _testExclusionLock = testExclusionCompleter.future;
-  try {
-    return await Process.run(
-      dartBin,
-      args,
-      workingDirectory: workingDirectory,
-      stdoutEncoding: utf8,
-      stderrEncoding: utf8,
-    );
-  } finally {
-    _testExclusionLock = null;
-    testExclusionCompleter.complete();
-  }
+  return Process.run(
+    dartBin,
+    args,
+    workingDirectory: workingDirectory,
+    stdoutEncoding: utf8,
+    stderrEncoding: utf8,
+  );
 }
