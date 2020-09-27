@@ -74,7 +74,7 @@ void main() {
     testUsingContext('intellij validator', () async {
       const String installPath = '/path/to/intelliJ';
       final ValidationResult result = await IntelliJValidatorTestTarget('Test', installPath, fileSystem: fileSystem).validate();
-      expect(result.type, ValidationType.partial);
+      expect(result.type, ValidationType.installed);
       expect(result.statusInfo, 'version test.test.test');
       expect(result.messages, hasLength(4));
 
