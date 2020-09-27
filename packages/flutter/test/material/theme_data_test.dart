@@ -96,10 +96,24 @@ void main() {
     expect(darkTheme.accentTextTheme.headline6.color, typography.white.headline6.color);
   });
 
-  test('Defaults to MaterialTapTargetBehavior.expanded', () {
-    final ThemeData themeData = ThemeData();
+  test('Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop', () {
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+      TargetPlatform.fuchsia,
+    ]) {
+      final ThemeData themeData = ThemeData(platform: platform);
+      expect(themeData.materialTapTargetSize, MaterialTapTargetSize.padded);
+    }
 
-    expect(themeData.materialTapTargetSize, MaterialTapTargetSize.padded);
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+      TargetPlatform.macOS,
+    ]) {
+      final ThemeData themeData = ThemeData(platform: platform);
+      expect(themeData.materialTapTargetSize, MaterialTapTargetSize.shrinkWrap);
+    }
   });
 
   test('Can control fontFamily default', () {
