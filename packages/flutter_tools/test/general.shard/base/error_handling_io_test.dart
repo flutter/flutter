@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -112,6 +113,21 @@ void main() {
         platform: windowsPlatform,
       );
       when(mockFileSystem.path).thenReturn(MockPathContext());
+    });
+
+    testWithoutContext('bypasses error handling when withAllowedFailure is used', () {
+      setupWriteMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kUserPermissionDenied,
+      );
+
+      final File file = fs.file('file');
+
+      expect(() => withAllowedFailureSync(() => file.writeAsStringSync('')), throwsA(isA<FileSystemException>()));
+      expect(() async => await withAllowedFailure(() => file.writeAsString('')), throwsA(isA<FileSystemException>()));
+      // Check that state does not leak.
+      expect(() => file.writeAsStringSync(''), throwsA(isA<ToolExit>()));
     });
 
     testWithoutContext('when access is denied', () async {

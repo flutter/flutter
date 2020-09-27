@@ -20,6 +20,30 @@ import 'platform.dart';
 // ToolExit and a message that is more clear than the FileSystemException by
 // itself.
 
+/// Allow any file system operations executed within the closure to fail with any
+/// operating system error, rethrowing an [Exception] instead of a [ToolExit].
+///
+/// This can be used to bypass the [ErrorHandlingFileSystem] permission exit
+/// checks for situations where failure is acceptable, such as the flutter
+/// persistent settings cache.
+Future<void> withAllowedFailure(Future<void> Function() operation) async {
+  try {
+    ErrorHandlingFileSystem._allowFailure = true;
+    await operation();
+  } finally {
+    ErrorHandlingFileSystem._allowFailure = false;
+  }
+}
+
+/// The same as [withAllowedFailure] but can be run sync.
+void withAllowedFailureSync(void Function() operation) {
+  try {
+    ErrorHandlingFileSystem._allowFailure = true;
+  } finally {
+    ErrorHandlingFileSystem._allowFailure = false;
+  }
+}
+
 /// A [FileSystem] that throws a [ToolExit] on certain errors.
 ///
 /// If a [FileSystem] error is not caused by the Flutter tool, and can only be
@@ -44,6 +68,8 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   FileSystem get fileSystem => delegate;
 
   final Platform _platform;
+
+  static bool _allowFailure = false;
 
   @override
   Directory get currentDirectory => directory(delegate.currentDirectory);
@@ -542,26 +568,32 @@ void _handlePosixException(Exception e, String message, int errorCode) {
   const int enospc = 28;
   const int eacces = 13;
   // Catch errors and bail when:
+  String errorMessage;
   switch (errorCode) {
     case enospc:
-      throwToolExit(
+      errorMessage =
         '$message. The target device is full.'
         '\n$e\n'
-        'Free up space and try again.',
-      );
+        'Free up space and try again.';
       break;
     case eperm:
     case eacces:
-      throwToolExit(
+      errorMessage =
         '$message. The flutter tool cannot access the file or directory.\n'
         'Please ensure that the SDK and/or project is installed in a location '
-        'that has read/write permissions for the current user.'
-      );
+        'that has read/write permissions for the current user.';
       break;
     default:
       // Caller must rethrow the exception.
       break;
   }
+  if (errorMessage == null) {
+    return;
+  }
+  if (ErrorHandlingFileSystem._allowFailure) {
+    throw Exception(errorMessage);
+  }
+  throwToolExit(errorMessage);
 }
 
 void _handleWindowsException(Exception e, String message, int errorCode) {
@@ -571,31 +603,36 @@ void _handleWindowsException(Exception e, String message, int errorCode) {
   const int kUserMappedSectionOpened = 1224;
   const int kAccessDenied = 5;
   // Catch errors and bail when:
+  String errorMessage;
   switch (errorCode) {
     case kAccessDenied:
-      throwToolExit(
+      errorMessage =
         '$message. The flutter tool cannot access the file.\n'
         'Please ensure that the SDK and/or project is installed in a location '
-        'that has read/write permissions for the current user.'
-      );
+        'that has read/write permissions for the current user.';
       break;
     case kDeviceFull:
-      throwToolExit(
+      errorMessage =
         '$message. The target device is full.'
         '\n$e\n'
-        'Free up space and try again.',
-      );
+        'Free up space and try again.';
       break;
     case kUserMappedSectionOpened:
-      throwToolExit(
+      errorMessage =
         '$message. The file is being used by another program.'
         '\n$e\n'
         'Do you have an antivirus program running? '
-        'Try disabling your antivirus program and try again.',
-      );
+        'Try disabling your antivirus program and try again.';
       break;
     default:
       // Caller must rethrow the exception.
       break;
   }
+  if (errorMessage == null) {
+    return;
+  }
+  if (ErrorHandlingFileSystem._allowFailure) {
+    throw Exception(errorMessage);
+  }
+  throwToolExit(errorMessage);
 }

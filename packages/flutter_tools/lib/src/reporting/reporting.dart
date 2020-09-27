@@ -7,6 +7,7 @@ library reporting;
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
