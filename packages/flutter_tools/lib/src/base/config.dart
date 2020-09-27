@@ -42,7 +42,7 @@ class Config {
       return;
     }
     try {
-      withAllowedFailureSync(() {
+      withAllowedFailure(() {
         _values = castStringKeyedMap(json.decode(_file.readAsStringSync()));
       });
     } on FormatException {
