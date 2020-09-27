@@ -39,11 +39,6 @@ import 'ticker_provider.dart';
 ///  * [Navigator], which is where all the [Route]s end up.
 typedef RouteFactory = Route<dynamic> Function(RouteSettings settings);
 
-/// Creates a route for the given context and route settings.
-///
-/// Used by [CustomBuilderPage.routeBuilder].
-typedef RouteBuilder<T> = Route<T> Function(BuildContext context, RouteSettings settings);
-
 /// Creates a series of one or more routes.
 ///
 /// Used by [Navigator.onGenerateInitialRoutes].
@@ -509,8 +504,6 @@ class RouteSettings {
 ///
 ///  * [Navigator.pages], which accepts a list of [Page]s and updates its routes
 ///    history.
-///  * [CustomBuilderPage], a [Page] subclass that provides the API to build a
-///    customized route.
 abstract class Page<T> extends RouteSettings {
   /// Creates a page and initializes [key] for subclasses.
   ///
@@ -543,38 +536,6 @@ abstract class Page<T> extends RouteSettings {
 
   @override
   String toString() => '${objectRuntimeType(this, 'Page')}("$name", $key, $arguments)';
-}
-
-/// A [Page] that builds a customized [Route] based on the [routeBuilder].
-///
-/// The type argument `T` is the corresponding [Route]'s return type, as
-/// used by [Route.currentResult], [Route.popped], and [Route.didPop].
-class CustomBuilderPage<T> extends Page<T> {
-  /// Creates a page with a custom route builder.
-  ///
-  /// Use [routeBuilder] to specify the route that will be created from this
-  /// page.
-  const CustomBuilderPage({
-    @required LocalKey key,
-    @required this.routeBuilder,
-    String name,
-    Object arguments,
-  }) : assert(key != null),
-       assert(routeBuilder != null),
-       super(key: key, name: name, arguments: arguments);
-
-  /// A builder that will be called during [createRoute] to create a [Route].
-  ///
-  /// The routes returned from this builder must have their settings equal to
-  /// the input `settings`.
-  final RouteBuilder<T> routeBuilder;
-
-  @override
-  Route<T> createRoute(BuildContext context) {
-    final Route<T> route = routeBuilder(context, this);
-    assert(route.settings == this);
-    return route;
-  }
 }
 
 /// An interface for observing the behavior of a [Navigator].
@@ -1047,10 +1008,10 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// The [Navigator] will convert its [Navigator.pages] into a stack of [Route]s
 /// if it is provided. A change in [Navigator.pages] will trigger an update to
 /// the stack of [Route]s. The [Navigator] will update its routes to match the
-/// new configuration of its [Navigator.pages]. To use this API, one can use
-/// [CustomBuilderPage] or create a [Page] subclass and defines a list of
-/// [Page]s for [Navigator.pages]. A [Navigator.onPopPage] callback is also
-/// required to properly clean up the input pages in case of a pop.
+/// new configuration of its [Navigator.pages]. To use this API, one can create
+/// a [Page] subclass and defines a list of [Page]s for [Navigator.pages]. A
+/// [Navigator.onPopPage] callback is also required to properly clean up the
+/// input pages in case of a pop.
 ///
 /// By Default, the [Navigator] will use [DefaultTransitionDelegate] to decide
 /// how routes transition in or out of the screen. To customize it, define a
