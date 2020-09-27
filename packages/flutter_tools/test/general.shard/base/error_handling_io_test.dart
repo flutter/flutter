@@ -124,8 +124,8 @@ void main() {
 
       final File file = fs.file('file');
 
-      expect(() => withAllowedFailureSync(() => file.writeAsStringSync('')), throwsA(isA<FileSystemException>()));
-      expect(() async => await withAllowedFailure(() => file.writeAsString('')), throwsA(isA<FileSystemException>()));
+      expect(() => withAllowedFailureSync(() => file.writeAsStringSync('')), throwsA(isA<Exception>()));
+      expect(() async => await withAllowedFailure(() => file.writeAsString('')), throwsA(isA<Exception>()));
       // Check that state does not leak.
       expect(() => file.writeAsStringSync(''), throwsA(isA<ToolExit>()));
     });
