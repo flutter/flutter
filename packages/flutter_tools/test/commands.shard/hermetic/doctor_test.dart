@@ -73,8 +73,9 @@ void main() {
 
     testUsingContext('intellij validator', () async {
       const String installPath = '/path/to/intelliJ';
-      final ValidationResult result = await IntelliJValidatorTestTarget('Test', installPath, fileSystem: fileSystem).validate();
-      expect(result.type, ValidationType.installed);
+      // Uses real filesystem
+      final ValidationResult result = await IntelliJValidatorTestTarget('Test', installPath, fileSystem: globals.fs).validate();
+      expect(result.type, ValidationType.partial);
       expect(result.statusInfo, 'version test.test.test');
       expect(result.messages, hasLength(4));
 
@@ -875,13 +876,11 @@ class MockUsage extends Mock implements Usage {}
 
 class IntelliJValidatorTestTarget extends IntelliJValidator {
   IntelliJValidatorTestTarget(String title, String installPath, {@required FileSystem fileSystem})
-    : _fileSystem = fileSystem,
-      super(title, installPath, fileSystem: fileSystem);
+    : super(title, installPath, fileSystem: fileSystem);
 
-  final FileSystem _fileSystem;
-
+  // Warning: requires real test data.
   @override
-  String get pluginsPath => _fileSystem.path.join('test', 'data', 'intellij', 'plugins');
+  String get pluginsPath => globals.fs.path.join('test', 'data', 'intellij', 'plugins');
 
   @override
   String get version => 'test.test.test';
