@@ -68,7 +68,7 @@ class _ImageFilterRenderObject extends RenderProxyBox {
     if (layer == null) {
       layer = ImageFilterLayer(imageFilter: imageFilter);
     } else {
-      final ImageFilterLayer filterLayer = layer as ImageFilterLayer;
+      final ImageFilterLayer filterLayer = layer! as ImageFilterLayer;
       filterLayer.imageFilter = imageFilter;
     }
     context.pushLayer(layer!, super.paint, offset);

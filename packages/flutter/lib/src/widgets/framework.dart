@@ -269,7 +269,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
           assert(element != null);
           assert(element.widget != null);
           assert(element.widget.key != null);
-          final GlobalKey key = element.widget.key as GlobalKey;
+          final GlobalKey key = element.widget.key! as GlobalKey;
           assert(_registry.containsKey(key));
           duplicates ??= <GlobalKey, Set<Element>>{};
           // Uses ordered set to produce consistent error message.
@@ -5433,8 +5433,8 @@ abstract class RenderObjectElement extends Element {
 
   /// The underlying [RenderObject] for this element.
   @override
-  RenderObject? get renderObject => _renderObject;
-  RenderObject? _renderObject;
+  RenderObject get renderObject => _renderObject;
+  late RenderObject _renderObject;
 
   bool _debugDoingBuild = false;
   @override
@@ -5442,11 +5442,11 @@ abstract class RenderObjectElement extends Element {
 
   RenderObjectElement? _ancestorRenderObjectElement;
 
-  RenderObjectElement _findAncestorRenderObjectElement() {
+  RenderObjectElement? _findAncestorRenderObjectElement() {
     Element? ancestor = _parent;
     while (ancestor != null && ancestor is! RenderObjectElement)
       ancestor = ancestor._parent;
-    return ancestor as RenderObjectElement;
+    return ancestor as RenderObjectElement?;
   }
 
   ParentDataElement<ParentData>? _findAncestorParentDataElement() {
@@ -5468,7 +5468,7 @@ abstract class RenderObjectElement extends Element {
       ancestor = ancestor!._parent;
       while (ancestor != null && ancestor is! RenderObjectElement) {
         if (ancestor is ParentDataElement<ParentData>) {
-          badAncestors.add(ancestor as ParentDataElement<ParentData>);
+          badAncestors.add(ancestor! as ParentDataElement<ParentData>);
         }
         ancestor = ancestor!._parent;
       }
@@ -5526,7 +5526,7 @@ abstract class RenderObjectElement extends Element {
       _debugDoingBuild = true;
       return true;
     }());
-    widget.updateRenderObject(this, renderObject!);
+    widget.updateRenderObject(this, renderObject);
     assert(() {
       _debugDoingBuild = false;
       return true;
@@ -5536,7 +5536,7 @@ abstract class RenderObjectElement extends Element {
 
   void _debugUpdateRenderObjectOwner() {
     assert(() {
-      _renderObject!.debugCreator = DebugCreator(this);
+      _renderObject.debugCreator = DebugCreator(this);
       return true;
     }());
   }
@@ -5547,7 +5547,7 @@ abstract class RenderObjectElement extends Element {
       _debugDoingBuild = true;
       return true;
     }());
-    widget.updateRenderObject(this, renderObject!);
+    widget.updateRenderObject(this, renderObject);
     assert(() {
       _debugDoingBuild = false;
       return true;
@@ -5759,7 +5759,7 @@ abstract class RenderObjectElement extends Element {
   @override
   void deactivate() {
     super.deactivate();
-    assert(!renderObject!.attached,
+    assert(!renderObject.attached,
       'A RenderObject was still attached when attempting to deactivate its '
       'RenderObjectElement: $renderObject');
   }
@@ -5767,22 +5767,22 @@ abstract class RenderObjectElement extends Element {
   @override
   void unmount() {
     super.unmount();
-    assert(!renderObject!.attached,
+    assert(!renderObject.attached,
       'A RenderObject was still attached when attempting to unmount its '
       'RenderObjectElement: $renderObject');
-    widget.didUnmountRenderObject(renderObject!);
+    widget.didUnmountRenderObject(renderObject);
   }
 
   void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
     bool applyParentData = true;
     assert(() {
       try {
-        if (!parentDataWidget.debugIsValidRenderObject(renderObject!)) {
+        if (!parentDataWidget.debugIsValidRenderObject(renderObject)) {
           applyParentData = false;
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Incorrect use of ParentDataWidget.'),
             ...parentDataWidget._debugDescribeIncorrectParentDataType(
-              parentData: renderObject!.parentData,
+              parentData: renderObject.parentData,
               parentDataCreator: _ancestorRenderObjectElement!.widget,
               ownershipChain: ErrorDescription(debugGetCreatorChain(10)),
             ),
@@ -5797,7 +5797,7 @@ abstract class RenderObjectElement extends Element {
       return true;
     }());
     if (applyParentData)
-      parentDataWidget.applyParentData(renderObject!);
+      parentDataWidget.applyParentData(renderObject);
   }
 
   @override
@@ -5806,7 +5806,7 @@ abstract class RenderObjectElement extends Element {
     assert(oldSlot != newSlot);
     super._updateSlot(newSlot);
     assert(slot == newSlot);
-    _ancestorRenderObjectElement!.moveRenderObjectChild(renderObject!, oldSlot, slot);
+    _ancestorRenderObjectElement!.moveRenderObjectChild(renderObject, oldSlot, slot);
   }
 
   @override
@@ -5814,7 +5814,7 @@ abstract class RenderObjectElement extends Element {
     assert(_ancestorRenderObjectElement == null);
     _slot = newSlot;
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
-    _ancestorRenderObjectElement?.insertRenderObjectChild(renderObject!, newSlot);
+    _ancestorRenderObjectElement?.insertRenderObjectChild(renderObject, newSlot);
     final ParentDataElement<ParentData>? parentDataElement = _findAncestorParentDataElement();
     if (parentDataElement != null)
       _updateParentData(parentDataElement.widget);
@@ -5823,7 +5823,7 @@ abstract class RenderObjectElement extends Element {
   @override
   void detachRenderObject() {
     if (_ancestorRenderObjectElement != null) {
-      _ancestorRenderObjectElement!.removeRenderObjectChild(renderObject!, slot);
+      _ancestorRenderObjectElement!.removeRenderObjectChild(renderObject, slot);
       _ancestorRenderObjectElement = null;
     }
     _slot = null;

@@ -3423,7 +3423,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         }
         return true;
       }());
-      route = widget.onUnknownRoute!(settings) as Route<T>;
+      route = widget.onUnknownRoute!(settings) as Route<T>?;
       assert(() {
         if (route == null) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
