@@ -16,7 +16,6 @@ import 'test_utils.dart';
 final String automatedTestsDirectory = fileSystem.path.join('..', '..', 'dev', 'automated_tests');
 final String flutterTestDirectory = fileSystem.path.join(automatedTestsDirectory, 'flutter_test');
 final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
-final String dartBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'dart.bat' : 'dart');
 
 void main() {
   setUpAll(() {
@@ -286,7 +285,6 @@ Future<ProcessResult> _runFlutterTest(
   }
 
   final List<String> args = <String>[
-    flutterBin, // Uses the precompiled flutter tool for faster tests
     'test',
     '--no-color',
     '--no-version-check',
@@ -296,7 +294,7 @@ Future<ProcessResult> _runFlutterTest(
   ];
 
   return Process.run(
-    dartBin,
+    flutterBin, // Uses the precompiled flutter tool for faster tests,
     args,
     workingDirectory: workingDirectory,
     stdoutEncoding: utf8,
