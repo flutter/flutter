@@ -260,6 +260,44 @@ void main() {
     expect(_material(tester).elevation, equals(elevation));
     expect(_material(tester).color, equals(backgroundColor));
   });
+
+  testWidgets('BottomNavigationBar can apply [showSelectedLabels] value from the theme', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66738
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            showUnselectedLabels: false,
+            showSelectedLabels: false,
+            type: BottomNavigationBarType.fixed,
+          ),
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder findOpacity = find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.byType(Opacity),
+    );
+
+    // There should be two [Opacity]s widgets
+    // since showUnselectedLabels and showSelectedLabels are false.
+    expect(findOpacity, findsNWidgets(2));
+  });
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {
