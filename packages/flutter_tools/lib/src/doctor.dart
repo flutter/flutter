@@ -77,7 +77,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     final List<DoctorValidator> ideValidators = <DoctorValidator>[
       ...AndroidStudioValidator.allValidators,
       ...IntelliJValidator.installedValidators,
-      ...VsCodeValidator.installedValidators,
+      ...VsCodeValidator.installedValidators(globals.fs, globals.platform),
     ];
     final ProxyValidator proxyValidator = ProxyValidator(platform: globals.platform);
     _validators = <DoctorValidator>[

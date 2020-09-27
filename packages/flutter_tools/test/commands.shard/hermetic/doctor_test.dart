@@ -1207,7 +1207,7 @@ class FakeSmallGroupDoctor extends Doctor {
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {
   VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition})
-    : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
+    : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition, fileSystem: globals.fs));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>
       VsCodeValidatorTestTargets._(validInstall, validExtensions);
