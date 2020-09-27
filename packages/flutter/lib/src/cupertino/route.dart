@@ -96,7 +96,8 @@ final DecorationTween _kGradientShadowTween = DecorationTween(
 ///  * [CupertinoPageRoute], which is a [PageRoute] that leverages this mixin.
 mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   /// Builds the primary contents of the route.
-  WidgetBuilder get builder;
+  @protected
+  Widget buildContent(BuildContext context);
 
   /// {@template flutter.cupertino.cupertinoRouteTransitionMixin.title}
   /// A title string for this route.
@@ -228,7 +229,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget child = builder(context);
+    final Widget child = buildContent(context);
     final Widget result = Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
@@ -352,11 +353,14 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
        assert(opaque),
        super(settings: settings, fullscreenDialog: fullscreenDialog);
 
-  @override
+  /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
   @override
   final String title;
+
+  @override
+  Widget buildContent(BuildContext context) => builder(context);
 
   @override
   final bool maintainState;
@@ -379,7 +383,7 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
   CupertinoPage<T> get _page => settings as CupertinoPage<T>;
 
   @override
-  WidgetBuilder get builder => _page.builder;
+  Widget buildContent(BuildContext context) => _page.child;
 
   @override
   String get title => _page.title;
@@ -413,20 +417,20 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
 class CupertinoPage<T> extends Page<T> {
   /// Creates a cupertino page.
   const CupertinoPage({
-    @required this.builder,
+    @required this.child,
     this.maintainState = true,
     this.title,
     this.fullscreenDialog = false,
     LocalKey key,
     String name,
     Object arguments,
-  }) : assert(builder != null),
+  }) : assert(child != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
        super(key: key, name: name, arguments: arguments);
 
-  /// Builds the primary contents of the route.
-  final WidgetBuilder builder;
+  /// The content to be shown in the [Route] created by this page.
+  final Widget child;
 
   /// {@macro flutter.cupertino.cupertinoRouteTransitionMixin.title}
   final String title;
