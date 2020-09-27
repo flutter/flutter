@@ -3,15 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:archive/archive.dart';
+import 'package:meta/meta.dart';
 
+import '../base/file_system.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
-import '../globals.dart' as globals;
 
 class IntelliJPlugins {
-  IntelliJPlugins(this.pluginsPath);
+  IntelliJPlugins(this.pluginsPath, {
+    @required FileSystem fileSystem
+  }) : _fileSystem = fileSystem;
 
+  final FileSystem _fileSystem;
   final String pluginsPath;
 
   static final Version kMinFlutterPluginVersion = Version(16, 0, 0);
@@ -19,7 +23,8 @@ class IntelliJPlugins {
   void validatePackage(
     List<ValidationMessage> messages,
     List<String> packageNames,
-    String title, {
+    String title,
+    String url, {
     Version minVersion,
   }) {
     for (final String packageName in packageNames) {
@@ -40,27 +45,25 @@ class IntelliJPlugins {
       return;
     }
 
-    messages.add(ValidationMessage.error(
-        '$title plugin not installed; this adds $title specific functionality.'));
+    messages.add(ValidationMessage(
+        '$title plugin can be installed from\n$url'));
   }
 
   bool _hasPackage(String packageName) {
-    final String packagePath = globals.fs.path.join(pluginsPath, packageName);
+    final String packagePath = _fileSystem.path.join(pluginsPath, packageName);
     if (packageName.endsWith('.jar')) {
-      return globals.fs.isFileSync(packagePath);
+      return _fileSystem.isFileSync(packagePath);
     }
-    return globals.fs.isDirectorySync(packagePath);
+    return _fileSystem.isDirectorySync(packagePath);
   }
 
   String _readPackageVersion(String packageName) {
     final String jarPath = packageName.endsWith('.jar')
-        ? globals.fs.path.join(pluginsPath, packageName)
-        : globals.fs.path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
-    // TODO(danrubel): look for a better way to extract a single 2K file from the zip
-    // rather than reading the entire file into memory.
+        ? _fileSystem.path.join(pluginsPath, packageName)
+        : _fileSystem.path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
     try {
       final Archive archive =
-          ZipDecoder().decodeBytes(globals.fs.file(jarPath).readAsBytesSync());
+          ZipDecoder().decodeBytes(_fileSystem.file(jarPath).readAsBytesSync());
       final ArchiveFile file = archive.findFile('META-INF/plugin.xml');
       final String content = utf8.decode(file.content as List<int>);
       const String versionStartTag = '<version>';
