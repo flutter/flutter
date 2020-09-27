@@ -176,7 +176,7 @@ void main() {
 
     testUsingContext('vs code validator when extension missing', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithoutExtension.validate();
-      expect(result.type, ValidationType.partial);
+      expect(result.type, ValidationType.installed);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
