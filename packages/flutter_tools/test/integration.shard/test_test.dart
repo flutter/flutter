@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
-import 'downgrade_upgrade_integration_test.dart';
 import 'test_utils.dart';
 
 // This test depends on some files in ///dev/automated_tests/flutter_test/*
