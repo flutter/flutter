@@ -23,20 +23,12 @@ import 'platform.dart';
 /// Allow any file system operations executed within the closure to fail with any
 /// operating system error, rethrowing an [Exception] instead of a [ToolExit].
 ///
+/// This should not be used with async file system operation.
+///
 /// This can be used to bypass the [ErrorHandlingFileSystem] permission exit
 /// checks for situations where failure is acceptable, such as the flutter
 /// persistent settings cache.
-Future<void> withAllowedFailure(Future<void> Function() operation) async {
-  try {
-    ErrorHandlingFileSystem._allowFailure = true;
-    await operation();
-  } finally {
-    ErrorHandlingFileSystem._allowFailure = false;
-  }
-}
-
-/// The same as [withAllowedFailure] but can be run sync.
-void withAllowedFailureSync(void Function() operation) {
+void withAllowedFailure(void Function() operation) {
   try {
     ErrorHandlingFileSystem._allowFailure = true;
     operation();
