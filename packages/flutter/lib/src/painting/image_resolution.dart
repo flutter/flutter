@@ -230,7 +230,7 @@ class AssetImage extends AssetBundleImageProvider {
     return SynchronousFuture<Map<String, List<String>>?>(parsedManifest);
   }
 
-  String? _chooseVariant(String main, ImageConfiguration config, List<String>? candidates){
+  String? _chooseVariant(String main, ImageConfiguration config, List<String>? candidates) {
     if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty)
       return main;
     // TODO(ianh): Consider moving this parsing logic into _manifestParser.
