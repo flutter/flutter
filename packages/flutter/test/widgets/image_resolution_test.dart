@@ -273,7 +273,7 @@ void main() {
   ]) {
     testWidgets('Image for device pixel ratio 1.01 on $platform rounds up', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = platform;
-      const double ratio = 1.0;
+      const double ratio = 1.01;
       Key key = GlobalKey();
       await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, images));
       expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
@@ -294,15 +294,15 @@ void main() {
   ]) {
     testWidgets('Image for device pixel ratio 1.01 on $platform rounds down', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = platform;
-      const double ratio = 1.0;
+      const double ratio = 1.01;
       Key key = GlobalKey();
       await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, images));
       expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
-      expect(getRenderImage(tester, key).scale, 1.5);
+      expect(getRenderImage(tester, key).scale, 1.0);
       key = GlobalKey();
       await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true, images));
       expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
-      expect(getRenderImage(tester, key).scale, 1.5);
+      expect(getRenderImage(tester, key).scale, 1.0);
       debugDefaultTargetPlatformOverride = null;
     });
   }
