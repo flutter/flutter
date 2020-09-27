@@ -191,7 +191,6 @@ class TestCommand extends FlutterCommand {
 
       await pub.get(
         context: PubContext.getVerifyContext(name),
-        skipPubspecYamlCheck: true,
         generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
       );
     }
