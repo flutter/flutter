@@ -1250,6 +1250,7 @@ void main() {
           textTheme: CupertinoTextThemeData(
             pickerTextStyle: TextStyle(
               color: Color(0xFF663311),
+              fontSize: 21,
             ),
           ),
         ),
