@@ -1713,6 +1713,5 @@ void main() {
     final RenderBox renderBox = tester.renderObject(find.byKey(key));
     expect(renderBox.size.width, equals(0.0));
     expect(renderBox.size.height, equals(0.0));
-
   });
 }
