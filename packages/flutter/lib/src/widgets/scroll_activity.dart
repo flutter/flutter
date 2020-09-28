@@ -682,9 +682,9 @@ class PointerScrollActivity extends ScrollActivity {
       this.delta,
       ) : super(delegate) {
     scheduleMicrotask(() {
-      delegate?.applyUserOffset(delta);
+      delegate.applyUserOffset(delta);
       _isScrolling = false;
-      delegate?.goBallistic(0);
+      delegate.goBallistic(0);
     });
   }
 

@@ -642,7 +642,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
       // Only express interest in the event if it would actually result in a scroll.
       if (targetScrollOffset != 0) {
-        GestureBinding.instance.pointerSignalResolver.register(event, _handlePointerScroll);
+        GestureBinding.instance!.pointerSignalResolver.register(event, _handlePointerScroll);
       }
     }
   }
