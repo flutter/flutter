@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -1683,43 +1682,15 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
   }
 }
 
-class DevtoolsLauncher {
-  io.HttpServer _devtoolsServer;
-  Future<void> launch(Uri observatoryAddress) async {
-    try {
-      await serve();
-      await devtools_server.launchDevTools(
-        <String, dynamic>{
-          'reuseWindows': true,
-        },
-        observatoryAddress,
-        'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
-        false,  // headless mode,
-        false,  // machine mode
-      );
-    } on Exception catch (e, st) {
-      globals.printTrace('Failed to launch DevTools: $e\n$st');
-    }
-  }
+/// An launcher for the devtools debugger and analysis tool.
+abstract class DevtoolsLauncher {
+  Future<void> launch(Uri observatoryAddress);
 
-  Future<DevToolsServerAddress> serve() async {
-    try {
-      _devtoolsServer ??= await devtools_server.serveDevTools(
-        enableStdinCommands: false,
-      );
-      return DevToolsServerAddress(_devtoolsServer.address.host, _devtoolsServer.port);
-    } on Exception catch (e, st) {
-      globals.printTrace('Failed to serve DevTools: $e\n$st');
-      return null;
-    }
-  }
+  Future<DevToolsServerAddress> serve();
 
-  Future<void> close() async {
-    await _devtoolsServer?.close();
-    _devtoolsServer = null;
-  }
+  Future<void> close();
 
-  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>() ?? DevtoolsLauncher();
+  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>();
 }
 
 class DevToolsServerAddress {
