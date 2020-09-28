@@ -1299,4 +1299,57 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('DataTable renders with border and background decoration', (WidgetTester tester) async {
+    const double width = 800;
+    const double height = 600;
+    const double borderHorizontal = 5.0;
+    const double borderVertical = 10.0;
+    const Color borderColor = Color(0xff2196f3);
+    const Color backgroundColor = Color(0xfff5f5f5);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DataTable(
+          decoration: const BoxDecoration(
+            color: backgroundColor,
+            border: Border.symmetric(
+              vertical: BorderSide(width: borderVertical, color: borderColor),
+              horizontal: BorderSide(width: borderHorizontal, color: borderColor),
+            ),
+          ),
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Col1')),
+          ],
+          rows: const <DataRow>[
+            DataRow(cells: <DataCell>[DataCell(Text('1'))]),
+          ],
+        ),
+      ),
+    );
+
+    expect(
+      find.ancestor(of: find.byType(Table), matching: find.byType(Container)),
+      paints..rect(
+        rect: const Rect.fromLTRB(0.0, 0.0, width, height),
+        color: backgroundColor,
+      ),
+    );
+    expect(
+      find.ancestor(of: find.byType(Table), matching: find.byType(Container)),
+      paints
+        ..path(color: borderColor)
+        ..path(color: borderColor)
+        ..path(color: borderColor)
+        ..path(color: borderColor),
+    );
+    expect(
+      tester.getTopLeft(find.byType(Table)),
+      const Offset(borderVertical, borderHorizontal),
+    );
+    expect(
+      tester.getBottomRight(find.byType(Table)),
+      const Offset(width - borderVertical, height - borderHorizontal),
+    );
+  });
+
 }
