@@ -120,11 +120,12 @@ class ObjectKey extends LocalKey {
 /// GlobalKeys should not be re-created on every build. They should usually be
 /// long-lived objects owned by a [State] object, for example.
 ///
-/// Creating a new GlobalKey on every build will indicate to the framework that
-/// the corresponding widget subtree has changed on every build. Besides harming
-/// performance, this can also cause unexpected behavior in widgets in the
-/// subtree. For example, a GestureDetector in the subtree will be unable to
-/// track ongoing gestures since it will be recreated on each build.
+/// Creating a new GlobalKey on every build will throw away the state of the
+/// subtree associated with the old key and create a new fresh subtree for the
+/// new key. Besides harming performance, this can also cause unexpected
+/// behavior in widgets in the subtree. For example, a [GestureDetector] in the
+/// subtree will be unable to track ongoing gestures since it will be recreated
+/// on each build.
 ///
 /// Instead, a good practice is to let a State object own the GlobalKey, and
 /// instantiate it outside the build method, such as in [State.initState].
