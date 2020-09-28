@@ -758,12 +758,92 @@ fuchsia_test_archive("ui_tests") {
   resources += vulkan_icds
 }
 
+fuchsia_test_archive("embedder_tests") {
+  deps = [
+    "//flutter/shell/platform/embedder:embedder_unittests",
+    "//flutter/shell/platform/embedder:fixtures",
+  ]
+
+  binary = "embedder_unittests"
+
+  # TODO(gw280): https://github.com/flutter/flutter/issues/50294
+  # Right now we need to manually specify all the fixtures that are
+  # declared in the test_fixtures() call above.
+  resources = [
+    {
+      path =
+          "$root_gen_dir/flutter/shell/platform/embedder/assets/kernel_blob.bin"
+      dest = "assets/kernel_blob.bin"
+    },
+    {
+      path = "$root_gen_dir/flutter/shell/platform/embedder/assets/arc_end_caps.png"
+      dest = "assets/arc_end_caps.png"
+    },
+    {
+      path =
+          "$root_gen_dir/flutter/shell/platform/embedder/assets/compositor.png"
+      dest = "assets/compositor.png"
+    },
+    {
+      path = "$root_gen_dir/flutter/shell/platform/embedder/assets/compositor_root_surface_xformation.png"
+      dest = "assets/compositor_root_surface_xformation.png"
+    },
+    {
+      path = "$root_gen_dir/flutter/shell/platform/embedder/assets/compositor_software.png"
+      dest = "assets/compositor_software.png"
+    },
+    {
+      path = "$root_gen_dir/flutter/shell/platform/embedder/assets/compositor_with_platform_layer_on_bottom.png"
+      dest = "assets/compositor_with_platform_layer_on_bottom.png"
+    },
+    {
+      path = "$root_gen_dir/flutter/shell/platform/embedder/assets/compositor_with_root_layer_only.png"
+      dest = "assets/compositor_with_root_layer_only.png"
+    },
+    {
+      path =
+          "$root_gen_dir/flutter/shell/platform/embedder/assets/dpr_noxform.png"
+      dest = "assets/dpr_noxform.png"
+    },
+    {
+      path =
+          "$root_gen_dir/flutter/shell/platform/embedder/assets/dpr_xform.png"
+      dest = "assets/dpr_xform.png"
+    },
+    {
+      path = "$root_gen_dir/flutter/shell/platform/embedder/assets/gradient.png"
+      dest = "assets/gradient.png"
+    },
+    {
+      path = "$root_gen_dir/flutter/shell/platform/embedder/assets/gradient_xform.png"
+      dest = "assets/gradient_xform.png"
+    },
+    {
+      path = "$root_gen_dir/flutter/shell/platform/embedder/assets/scene_without_custom_compositor.png"
+      dest = "assets/scene_without_custom_compositor.png"
+    },
+    {
+      path = "$root_gen_dir/flutter/shell/platform/embedder/assets/scene_without_custom_compositor_with_xform.png"
+      dest = "assets/scene_without_custom_compositor_with_xform.png"
+    },
+    {
+      path = "$root_gen_dir/flutter/shell/platform/embedder/assets/verifyb143464703.png"
+      dest = "assets/verifyb143464703.png"
+    },
+    {
+      path = "$root_gen_dir/flutter/shell/platform/embedder/assets/verifyb143464703_soft_noxform.png"
+      dest = "assets/verifyb143464703_soft_noxform.png"
+    },
+  ]
+}
+
 # When adding a new dep here, please also ensure the dep is added to
 # testing/fuchsia/run_tests.sh and testing/fuchsia/test_fars
 group("tests") {
   testonly = true
 
   deps = [
+    ":embedder_tests",
     ":flow_tests",
     ":flutter_runner_scenic_tests",
     ":flutter_runner_tests",

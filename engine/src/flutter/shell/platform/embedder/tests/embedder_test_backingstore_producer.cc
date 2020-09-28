@@ -23,10 +23,12 @@ bool EmbedderTestBackingStoreProducer::Create(
   switch (type_) {
     case RenderTargetType::kSoftwareBuffer:
       return CreateSoftware(config, renderer_out);
+#ifdef SHELL_ENABLE_GL
     case RenderTargetType::kOpenGLTexture:
       return CreateTexture(config, renderer_out);
     case RenderTargetType::kOpenGLFramebuffer:
       return CreateFramebuffer(config, renderer_out);
+#endif
     default:
       return false;
   }
@@ -35,6 +37,7 @@ bool EmbedderTestBackingStoreProducer::Create(
 bool EmbedderTestBackingStoreProducer::CreateFramebuffer(
     const FlutterBackingStoreConfig* config,
     FlutterBackingStore* backing_store_out) {
+#ifdef SHELL_ENABLE_GL
   const auto image_info =
       SkImageInfo::MakeN32Premul(config->size.width, config->size.height);
 
@@ -79,11 +82,15 @@ bool EmbedderTestBackingStoreProducer::CreateFramebuffer(
       [](void* user_data) { reinterpret_cast<SkSurface*>(user_data)->unref(); };
 
   return true;
+#else
+  return false;
+#endif
 }
 
 bool EmbedderTestBackingStoreProducer::CreateTexture(
     const FlutterBackingStoreConfig* config,
     FlutterBackingStore* backing_store_out) {
+#ifdef SHELL_ENABLE_GL
   const auto image_info =
       SkImageInfo::MakeN32Premul(config->size.width, config->size.height);
 
@@ -129,6 +136,9 @@ bool EmbedderTestBackingStoreProducer::CreateTexture(
       [](void* user_data) { reinterpret_cast<SkSurface*>(user_data)->unref(); };
 
   return true;
+#else
+  return false;
+#endif
 }
 
 bool EmbedderTestBackingStoreProducer::CreateSoftware(

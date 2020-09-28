@@ -141,13 +141,6 @@ template("shell_host_executable") {
 }
 
 if (enable_unittests) {
-  declare_args() {
-    test_enable_vulkan = is_fuchsia
-    test_enable_gl = !is_fuchsia
-    test_enable_software = true
-    test_enable_metal = false
-  }
-
   config("test_enable_gl_config") {
     defines = [ "SHELL_ENABLE_GL" ]
   }

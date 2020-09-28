@@ -33,4 +33,21 @@ template("shell_gpu_configuration") {
       public_deps += [ "//flutter/shell/gpu:gpu_surface_metal" ]
     }
   }
+
+  config("${target_name}_config") {
+    defines = []
+
+    if (invoker.enable_software) {
+      defines += [ "SHELL_ENABLE_SOFTWARE" ]
+    }
+    if (invoker.enable_gl) {
+      defines += [ "SHELL_ENABLE_GL" ]
+    }
+    if (invoker.enable_vulkan) {
+      defines += [ "SHELL_ENABLE_VULKAN" ]
+    }
+    if (invoker.enable_metal) {
+      defines += [ "SHELL_ENABLE_METAL" ]
+    }
+  }
 }
