@@ -228,7 +228,6 @@ class ChromiumLauncher {
 
     // When the process exits, copy the user settings back to the provided data-dir.
     if (cacheDir != null) {
-      print('gonna save');
       unawaited(process.exitCode.whenComplete(() {
         _cacheUserSessionInformation(userDataDir, cacheDir);
       }));
