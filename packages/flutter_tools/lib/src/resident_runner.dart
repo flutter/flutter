@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:dds/dds.dart';
 import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -230,15 +231,23 @@ class FlutterDevice {
       isWaitingForVm = true;
       vm_service.VmService service;
       if (!disableDds) {
-        await device.dds.startDartDevelopmentService(
-          observatoryUri,
-          ddsPort,
-          ipv6,
-          disableServiceAuthCodes,
-        );
+        try {
+          await device.dds.startDartDevelopmentService(
+            observatoryUri,
+            ddsPort,
+            ipv6,
+            disableServiceAuthCodes,
+          );
+        }  catch(e) {
+          globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
+          if (!completer.isCompleted && !_isListeningForObservatoryUri) {
+            completer.completeError('failed to connect to $observatoryUri');
+          }
+          return;
+        }
       }
       try {
-        service = await connectToVmService(
+        service = await Future.any<dynamic>(<Future<dynamic>>[connectToVmService(
           disableDds ? observatoryUri : device.dds.uri,
           reloadSources: reloadSources,
           restart: restart,
@@ -247,7 +256,9 @@ class FlutterDevice {
           getSkSLMethod: getSkSLMethod,
           printStructuredErrorLogMethod: printStructuredErrorLogMethod,
           device: device,
-        );
+        ), device.dds.done.whenComplete(() {
+          throw Exception('DDS shut down too early');
+        }),]) as vm_service.VmService;
       } on Exception catch (exception) {
         globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
         if (!completer.isCompleted && !_isListeningForObservatoryUri) {

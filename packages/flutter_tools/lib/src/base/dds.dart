@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:dds/dds.dart' as dds;
 import 'package:meta/meta.dart';
 
@@ -17,6 +19,8 @@ class DartDevelopmentService {
   dds.DartDevelopmentService _ddsInstance;
 
   Uri get uri => _ddsInstance.uri;
+
+  Future<void> get done => _ddsInstance.done;
 
   Future<void> startDartDevelopmentService(
     Uri observatoryUri,
@@ -45,7 +49,7 @@ class DartDevelopmentService {
         );
       logger.printTrace('DDS is listening at ${_ddsInstance.uri}.');
     } on dds.DartDevelopmentServiceException catch (e) {
-      logger.printError('Warning: Failed to start DDS: ${e.message}');
+      logger.printTrace('Warning: Failed to start DDS: ${e.message}');
       rethrow;
     }
   }
