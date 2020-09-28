@@ -65,8 +65,6 @@ IOSContextMetal::IOSContextMetal() {
     return;
   }
   texture_cache_.Reset(texture_cache_raw);
-
-  is_valid_ = false;
 }
 
 IOSContextMetal::~IOSContextMetal() = default;

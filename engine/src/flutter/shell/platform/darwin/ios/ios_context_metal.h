@@ -37,7 +37,6 @@ class IOSContextMetal final : public IOSContext {
   sk_sp<GrDirectContext> main_context_;
   sk_sp<GrDirectContext> resource_context_;
   fml::CFRef<CVMetalTextureCacheRef> texture_cache_;
-  bool is_valid_ = false;
 
   // |IOSContext|
   sk_sp<GrDirectContext> CreateResourceContext() override;
