@@ -329,7 +329,7 @@ class CommonFinders {
         if (element is! RenderObjectElement) {
           return false;
         }
-        final String? semanticsLabel = element.renderObject?.debugSemantics?.label;
+        final String? semanticsLabel = element.renderObject.debugSemantics?.label;
         if (semanticsLabel == null) {
           return false;
         }
