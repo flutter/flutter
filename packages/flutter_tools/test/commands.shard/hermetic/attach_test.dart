@@ -90,7 +90,7 @@ void main() {
         when(portForwarder.unforward(any))
           .thenAnswer((_) async {});
         when(device.dds).thenReturn(mockDds);
-        final Completer noopCompleter = Completer<void>();
+        final Completer<void> noopCompleter = Completer<void>();
         when(mockDds.startDartDevelopmentService(any, any, false, any)).thenReturn(null);
         when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
         when(mockDds.done).thenAnswer((_) => noopCompleter.future);
@@ -301,7 +301,7 @@ void main() {
         .thenReturn(portForwarder);
       when(device.dds)
         .thenReturn(mockDds);
-      final Completer noopCompleter = Completer<void>();
+      final Completer<void> noopCompleter = Completer<void>();
       when(mockDds.done).thenAnswer((_) => noopCompleter.future);
       when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
         .thenAnswer((_) async => hostPort);
@@ -383,7 +383,7 @@ void main() {
         .thenReturn(portForwarder);
       when(device.dds)
         .thenReturn(mockDds);
-      final Completer noopCompleter = Completer<void>();
+      final Completer<void> noopCompleter = Completer<void>();
       when(mockDds.done).thenAnswer((_) => noopCompleter.future);
       when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
         .thenAnswer((_) => mockLogReader);
@@ -455,7 +455,7 @@ void main() {
         when(mockDds.startDartDevelopmentService(any, any, any, any))
           .thenReturn(null);
         when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
-        final Completer noopCompleter = Completer<void>();
+        final Completer<void> noopCompleter = Completer<void>();
         when(mockDds.done).thenAnswer((_) => noopCompleter.future);
       });
 
