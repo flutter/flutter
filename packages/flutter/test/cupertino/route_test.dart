@@ -1420,7 +1420,7 @@ void main() {
               await showCupertinoModalPopup<void>(
                 context: context,
                 builder: (BuildContext context) => const SizedBox(),
-                barrierColor: null,
+                barrierColor: kModalBarrierColor,
               );
             },
             child: const Text('tap'),
@@ -1468,8 +1468,6 @@ void main() {
   });
 
   testWidgets('showCupertinoModalPopup barrier dismissible', (WidgetTester tester) async {
-    final DialogObserver rootObserver = DialogObserver();
-
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
@@ -1477,7 +1475,7 @@ void main() {
             onTap: () async {
               await showCupertinoModalPopup<void>(
                   context: context,
-                  builder: (BuildContext context) => const SizedBox(),
+                  builder: (BuildContext context) => const Text('Visible'),
                   barrierDismissible: true);
             },
             child: const Text('tap'),
@@ -1488,15 +1486,15 @@ void main() {
 
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
-    await tester.tapAt(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
+    final Offset topLeft = tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold)));
+    print(topLeft);
+    await tester.tapAt(topLeft);
     await tester.pumpAndSettle();
 
-    expect(rootObserver.dialogCount, 0);
+    expect(find.text('Visible'), findsNothing);
   });
 
   testWidgets('showCupertinoModalPopup barrier not dismissible', (WidgetTester tester) async {
-    final DialogObserver rootObserver = DialogObserver();
-
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
@@ -1504,7 +1502,7 @@ void main() {
             onTap: () async {
               await showCupertinoModalPopup<void>(
                   context: context,
-                  builder: (BuildContext context) => const SizedBox(),
+                  builder: (BuildContext context) => const Text('Visible'),
                   barrierDismissible: false);
             },
             child: const Text('tap'),
@@ -1515,10 +1513,12 @@ void main() {
 
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
-    await tester.tapAt(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
+    final Offset topLeft = tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold)));
+    print(topLeft);
+    await tester.tapAt(topLeft);
     await tester.pumpAndSettle();
 
-    expect(rootObserver.dialogCount, 1);
+    expect(find.text('Visible'), findsOneWidget);
   });
 
   testWidgets('CupertinoPage works', (WidgetTester tester) async {
