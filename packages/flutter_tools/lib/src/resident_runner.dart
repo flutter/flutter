@@ -253,18 +253,21 @@ class FlutterDevice {
       // shuts down, including after an error. If `done` completes before `connectToVmService`,
       // something went wrong that caused DDS to shutdown early.
       try {
-        service = await Future.any<dynamic>(<Future<dynamic>>[connectToVmService(
-          disableDds ? observatoryUri : device.dds.uri,
-          reloadSources: reloadSources,
-          restart: restart,
-          compileExpression: compileExpression,
-          reloadMethod: reloadMethod,
-          getSkSLMethod: getSkSLMethod,
-          printStructuredErrorLogMethod: printStructuredErrorLogMethod,
-          device: device,
-        ), device.dds.done.whenComplete(() {
-          throw Exception('DDS shut down too early');
-        }),]) as vm_service.VmService;
+        service = await Future.any<dynamic>(
+          <Future<dynamic>>[
+            connectToVmService(
+              disableDds ? observatoryUri : device.dds.uri,
+              reloadSources: reloadSources,
+              restart: restart,
+              compileExpression: compileExpression,
+              reloadMethod: reloadMethod,
+              getSkSLMethod: getSkSLMethod,
+              printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+              device: device,
+            ),
+            device.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
+          ]
+        ) as vm_service.VmService;
       } on Exception catch (exception) {
         globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
         if (!completer.isCompleted && !_isListeningForObservatoryUri) {
