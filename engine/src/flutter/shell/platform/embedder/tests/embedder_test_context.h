@@ -19,7 +19,6 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_compositor.h"
 #include "flutter/testing/elf_loader.h"
 #include "flutter/testing/test_dart_native_resolver.h"
-#include "flutter/testing/test_gl_surface.h"
 #include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter {
