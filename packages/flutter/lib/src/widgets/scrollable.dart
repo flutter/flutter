@@ -307,6 +307,13 @@ class Scrollable extends StatefulWidget {
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
+    // The `targetRenderObject` is used to record the first target renderObject.
+    // If there are multiple scrollable widgets nested, we should let
+    // the `targetRenderObject` as visible as possible to improve the user experience.
+    // Otherwise, let the outer renderObject as visible as possible maybe cause
+    // the `targetRenderObject` invisible.
+    // Also see https://github.com/flutter/flutter/issues/65100
+    RenderObject? targetRenderObject;
     ScrollableState? scrollable = Scrollable.of(context);
     while (scrollable != null) {
       futures.add(scrollable.position.ensureVisible(
@@ -315,7 +322,10 @@ class Scrollable extends StatefulWidget {
         duration: duration,
         curve: curve,
         alignmentPolicy: alignmentPolicy,
+        targetRenderObject: targetRenderObject,
       ));
+
+      targetRenderObject = targetRenderObject ?? context.findRenderObject();
       context = scrollable.context;
       scrollable = Scrollable.of(context);
     }
@@ -549,7 +559,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       return;
     _shouldIgnorePointer = value;
     if (_ignorePointerKey.currentContext != null) {
-      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext!.findRenderObject() as RenderIgnorePointer;
+      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext!.findRenderObject()! as RenderIgnorePointer;
       renderBox.ignoring = _shouldIgnorePointer;
     }
   }

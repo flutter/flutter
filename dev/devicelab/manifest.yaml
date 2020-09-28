@@ -251,6 +251,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  backdrop_filter_perf__e2e_summary:
+    description: >
+      Measures the runtime performance of backdrop filter blurs on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   textfield_perf__timeline_summary:
     description: >
       Measures the runtime performance of textfield on Android.
@@ -775,13 +781,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-#  TODO(jmagman): https://github.com/flutter/flutter/issues/66166
-#  flutter_gallery__transition_perf_e2e_ios32:
-#    description: >
-#      Measures the performance of screen transitions in Flutter Gallery on
-#      Android with e2e.
-#    stage: devicelab_ios
-#    required_agent_capabilities: ["mac/ios32"]
+  flutter_gallery__transition_perf_e2e_ios32:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      Android with e2e.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios32"]
 
   flutter_gallery__transition_perf_e2e_ios:
     description: >
@@ -896,7 +901,6 @@ tasks:
       placeholder.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   analyzer_benchmark:
     description: >

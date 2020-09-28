@@ -42,6 +42,7 @@ export 'package:flutter/rendering.dart' show
   MainAxisAlignment,
   MainAxisSize,
   MultiChildLayoutDelegate,
+  Overflow,
   PaintingContext,
   PointerCancelEvent,
   PointerCancelEventListener,
@@ -1963,7 +1964,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is MultiChildLayoutParentData);
-    final MultiChildLayoutParentData parentData = renderObject.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData parentData = renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
       final AbstractNode? targetParent = renderObject.parent;
@@ -3275,6 +3276,11 @@ class Stack extends MultiChildRenderObjectWidget {
     this.alignment = AlignmentDirectional.topStart,
     this.textDirection,
     this.fit = StackFit.loose,
+    @Deprecated(
+      'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
+      'This feature was deprecated after v1.22.0-12.0.pre.'
+    )
+    this.overflow = Overflow.clip,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
   }) : assert(clipBehavior != null),
@@ -3315,6 +3321,24 @@ class Stack extends MultiChildRenderObjectWidget {
   /// ([StackFit.expand]).
   final StackFit fit;
 
+  /// Whether overflowing children should be clipped. See [Overflow].
+  ///
+  /// Some children in a stack might overflow its box. When this flag is set to
+  /// [Overflow.clip], children cannot paint outside of the stack's box.
+  ///
+  /// When set to [Overflow.visible], the visible overflow area will not accept
+  /// hit testing.
+  ///
+  /// This overrides [clipBehavior] for now due to a staged roll out.
+  /// We will remove it and only use [clipBehavior] soon.
+  ///
+  /// Deprecated. Use [clipBehavior] instead.
+  @Deprecated(
+    'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
+    'This feature was deprecated after v1.22.0-12.0.pre.'
+  )
+  final Overflow overflow;
+
   /// {@macro flutter.widgets.Clip}
   ///
   /// Defaults to [Clip.hardEdge].
@@ -3339,7 +3363,7 @@ class Stack extends MultiChildRenderObjectWidget {
       alignment: alignment,
       textDirection: textDirection ?? Directionality.of(context),
       fit: fit,
-      clipBehavior: clipBehavior,
+      clipBehavior: overflow == Overflow.visible ? Clip.none : clipBehavior,
     );
   }
 
@@ -3350,7 +3374,7 @@ class Stack extends MultiChildRenderObjectWidget {
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.of(context)
       ..fit = fit
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = overflow == Overflow.visible ? Clip.none : clipBehavior;
   }
 
   @override
@@ -3630,7 +3654,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData = renderObject.parentData as StackParentData;
+    final StackParentData parentData = renderObject.parentData! as StackParentData;
     bool needsLayout = false;
 
     if (parentData.left != left) {
@@ -4526,7 +4550,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
-    final FlexParentData parentData = renderObject.parentData as FlexParentData;
+    final FlexParentData parentData = renderObject.parentData! as FlexParentData;
     bool needsLayout = false;
 
     if (parentData.flex != flex) {

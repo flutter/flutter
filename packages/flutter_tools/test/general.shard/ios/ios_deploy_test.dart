@@ -98,6 +98,26 @@ void main () {
           '', '']);
       });
 
+      testWithoutContext('app exit', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['ios-deploy'],
+            stdout: '(lldb)     run\r\nsuccess\r\nLog on attach\r\nProcess 100 exited with status = 0\r\nLog after process exit',
+          ),
+        ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        final List<String> receivedLogLines = <String>[];
+        final Stream<String> logLines = iosDeployDebugger.logLines
+          ..listen(receivedLogLines.add);
+
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
+        await logLines.toList();
+        expect(receivedLogLines, <String>['Log on attach']);
+      });
+
       testWithoutContext('attach failed', () async {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(

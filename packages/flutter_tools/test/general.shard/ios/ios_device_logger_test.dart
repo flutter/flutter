@@ -193,6 +193,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         equals('  This is a message '),
         equals('  And this is an error '),
       ]));
+      verify(vmService.streamListen('Debug'));
     });
 
     testWithoutContext('IOSDeviceLogReader ignores VM Service logs when attached to debugger', () async {
