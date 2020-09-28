@@ -14,18 +14,27 @@ import 'test_utils.dart';
 // This test depends on some files in ///dev/automated_tests/flutter_test/*
 
 final String automatedTestsDirectory = fileSystem.path.join('..', '..', 'dev', 'automated_tests');
+final String missingDependencyDirectory = fileSystem.path.join('..', '..', 'dev', 'missing_dependency_tests');
 final String flutterTestDirectory = fileSystem.path.join(automatedTestsDirectory, 'flutter_test');
 final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
 
 void main() {
-  setUpAll(() {
-    processManager.run(
+  setUpAll(() async {
+    await processManager.run(
       <String>[
         flutterBin,
         'pub',
         'get'
       ],
       workingDirectory: flutterTestDirectory
+    );
+    await processManager.run(
+      <String>[
+        flutterBin,
+        'pub',
+        'get'
+      ],
+      workingDirectory: missingDependencyDirectory
     );
   });
 
