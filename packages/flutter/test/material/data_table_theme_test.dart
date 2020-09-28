@@ -90,14 +90,10 @@ void main() {
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
-    final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.resolveWith<Color>(
-      (Set<MaterialState> states) => const Color(0xfffffff1),
-    );
+    final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
     const double dataRowHeight = 51.0;
     const TextStyle dataTextStyle = TextStyle(fontSize: 12.5);
-    final MaterialStateProperty<Color> headingRowColor = MaterialStateProperty.resolveWith<Color>(
-      (Set<MaterialState> states) => const Color(0xfffffff2),
-    );
+    final MaterialStateProperty<Color> headingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff2));
     const double headingRowHeight = 52.0;
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
@@ -164,14 +160,10 @@ void main() {
 
   testWidgets('DataTable properties are taken over the theme values', (WidgetTester tester) async {
     const BoxDecoration themeDecoration = BoxDecoration(color: Color(0xfffffff1));
-    final MaterialStateProperty<Color> themeDataRowColor = MaterialStateProperty.resolveWith<Color>(
-      (Set<MaterialState> states) => const Color(0xfffffff0),
-    );
+    final MaterialStateProperty<Color> themeDataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff0));
     const double themeDataRowHeight = 50.0;
     const TextStyle themeDataTextStyle = TextStyle(fontSize: 11.5);
-    final MaterialStateProperty<Color> themeHeadingRowColor = MaterialStateProperty.resolveWith<Color>(
-      (Set<MaterialState> states) => const Color(0xfffffff1),
-    );
+    final MaterialStateProperty<Color> themeHeadingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
     const double themeHeadingRowHeight = 51.0;
     const TextStyle themeHeadingTextStyle = TextStyle(fontSize: 13.5);
     const double themeHorizontalMargin = 2.0;
@@ -179,14 +171,10 @@ void main() {
     const double themeDividerThickness = 4.0;
 
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
-    final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.resolveWith<Color>(
-      (Set<MaterialState> states) => const Color(0xfffffff1),
-    );
+    final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
     const double dataRowHeight = 51.0;
     const TextStyle dataTextStyle = TextStyle(fontSize: 12.5);
-    final MaterialStateProperty<Color> headingRowColor = MaterialStateProperty.resolveWith<Color>(
-      (Set<MaterialState> states) => const Color(0xfffffff2),
-    );
+    final MaterialStateProperty<Color> headingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff2));
     const double headingRowHeight = 52.0;
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
