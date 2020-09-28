@@ -10,7 +10,6 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
-// import '../globals.dart' as globals;
 
 // Include VS Code insiders (useful for debugging).
 const bool _includeInsiders = false;
