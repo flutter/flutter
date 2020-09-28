@@ -10,33 +10,7 @@
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/vsync_waiter.h"
 
-@interface DisplayLinkManager : NSObject
-
-- (instancetype)init;
-
-//------------------------------------------------------------------------------
-/// @brief      The display refresh rate used for reporting purposes. The engine does not care
-///             about this for frame scheduling. It is only used by tools for instrumentation. The
-///             engine uses the duration field of the link per frame for frame scheduling.
-///
-/// @attention  Do not use the this call in frame scheduling. It is only meant for reporting.
-///
-/// @return     The refresh rate in frames per second.
-///
-- (double)displayRefreshRate;
-
-@end
-
-@interface VSyncClient : NSObject
-
-- (instancetype)initWithTaskRunner:(fml::RefPtr<fml::TaskRunner>)task_runner
-                          callback:(flutter::VsyncWaiter::Callback)callback;
-
-- (void)await;
-
-- (void)invalidate;
-
-@end
+@class VSyncClient;
 
 namespace flutter {
 
@@ -51,6 +25,9 @@ class VsyncWaiterIOS final : public VsyncWaiter {
 
   // |VsyncWaiter|
   void AwaitVSync() override;
+
+  // |VsyncWaiter|
+  float GetDisplayRefreshRate() const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterIOS);
 };

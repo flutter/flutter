@@ -193,8 +193,6 @@ class PlatformViewAndroidJNI {
   virtual std::unique_ptr<std::vector<std::string>>
   FlutterViewComputePlatformResolvedLocale(
       std::vector<std::string> supported_locales_data) = 0;
-
-  virtual double GetDisplayRefreshRate() = 0;
 };
 
 }  // namespace flutter
