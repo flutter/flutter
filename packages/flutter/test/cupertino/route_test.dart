@@ -1486,9 +1486,7 @@ void main() {
 
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
-    final Offset topLeft = tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold)));
-    print(topLeft);
-    await tester.tapAt(topLeft);
+    await tester.tapAt(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
     await tester.pumpAndSettle();
 
     expect(find.text('Visible'), findsNothing);
@@ -1513,9 +1511,7 @@ void main() {
 
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
-    final Offset topLeft = tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold)));
-    print(topLeft);
-    await tester.tapAt(topLeft);
+    await tester.tapAt(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
     await tester.pumpAndSettle();
 
     expect(find.text('Visible'), findsOneWidget);

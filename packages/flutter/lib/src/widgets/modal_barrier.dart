@@ -76,7 +76,9 @@ class ModalBarrier extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(!dismissible || semanticsLabel == null || debugCheckHasDirectionality(context));
+    assert(!dismissible ||
+        semanticsLabel == null ||
+        debugCheckHasDirectionality(context));
     bool platformSupportsDismissingBarrier;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -91,8 +93,10 @@ class ModalBarrier extends StatelessWidget {
         break;
     }
     assert(platformSupportsDismissingBarrier != null);
-    final bool semanticsDismissible = dismissible && platformSupportsDismissingBarrier;
-    final bool modalBarrierSemanticsDismissible = barrierSemanticsDismissible ?? semanticsDismissible;
+    final bool semanticsDismissible =
+        dismissible && platformSupportsDismissingBarrier;
+    final bool modalBarrierSemanticsDismissible =
+        barrierSemanticsDismissible ?? semanticsDismissible;
     return BlockSemantics(
       child: ExcludeSemantics(
         // On Android, the back button is used to dismiss a modal. On iOS, some
@@ -107,17 +111,21 @@ class ModalBarrier extends StatelessWidget {
           },
           child: Semantics(
             label: semanticsDismissible ? semanticsLabel : null,
-            textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
+            textDirection: semanticsDismissible && semanticsLabel != null
+                ? Directionality.of(context)
+                : null,
             child: MouseRegion(
               cursor: SystemMouseCursors.basic,
               opaque: true,
               child: ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
-                child: color == null ? null : DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: color,
-                  ),
-                ),
+                child: color == null
+                    ? null
+                    : DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: color,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -203,16 +211,15 @@ class AnimatedModalBarrier extends AnimatedWidget {
 // It is similar to [TapGestureRecognizer.onTapDown], but accepts any single
 // button, which means the gesture also takes parts in gesture arenas.
 class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
-  _AnyTapGestureRecognizer({ Object? debugOwner })
-    : super(debugOwner: debugOwner);
+  _AnyTapGestureRecognizer({Object? debugOwner})
+      : super(debugOwner: debugOwner);
 
   VoidCallback? onAnyTapUp;
 
   @protected
   @override
   bool isPointerAllowed(PointerDownEvent event) {
-    if (onAnyTapUp == null)
-      return false;
+    if (onAnyTapUp == null) return false;
     return super.isPointerAllowed(event);
   }
 
@@ -225,13 +232,13 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
   @protected
   @override
   void handleTapUp({PointerDownEvent? down, PointerUpEvent? up}) {
-    if (onAnyTapUp != null)
-      onAnyTapUp!();
+    if (onAnyTapUp != null) onAnyTapUp!();
   }
 
   @protected
   @override
-  void handleTapCancel({PointerDownEvent? down, PointerCancelEvent? cancel, String? reason}) {
+  void handleTapCancel(
+      {PointerDownEvent? down, PointerCancelEvent? cancel, String? reason}) {
     // Do nothing.
   }
 
@@ -250,8 +257,8 @@ class _ModalBarrierSemanticsDelegate extends SemanticsGestureDelegate {
   }
 }
 
-
-class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGestureRecognizer> {
+class _AnyTapGestureRecognizerFactory
+    extends GestureRecognizerFactory<_AnyTapGestureRecognizer> {
   const _AnyTapGestureRecognizerFactory({this.onAnyTapUp});
 
   final VoidCallback? onAnyTapUp;
@@ -272,9 +279,9 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
     Key? key,
     required this.child,
     required this.onDismiss,
-  }) : assert(child != null),
-       assert(onDismiss != null),
-       super(key: key);
+  })   : assert(child != null),
+        assert(onDismiss != null),
+        super(key: key);
 
   /// The widget below this widget in the tree.
   /// See [RawGestureDetector.child].
@@ -286,8 +293,10 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{
-      _AnyTapGestureRecognizer: _AnyTapGestureRecognizerFactory(onAnyTapUp: onDismiss),
+    final Map<Type, GestureRecognizerFactory> gestures =
+        <Type, GestureRecognizerFactory>{
+      _AnyTapGestureRecognizer:
+          _AnyTapGestureRecognizerFactory(onAnyTapUp: onDismiss),
     };
 
     return RawGestureDetector(
