@@ -291,6 +291,31 @@ enum ListTileControlAffinity {
 /// {@end-tool}
 /// {@tool snippet}
 ///
+/// To use a [ListTile] within a [Row], it needs to be wrapped in an
+/// [Expanded] widget. [ListTile] requires fixed width constraints,
+/// whereas a [Row] does not constrain its children.
+///
+/// ```dart
+/// Row(
+///   children: const <Widget>[
+///     Expanded(
+///       child: ListTile(
+///         leading: FlutterLogo(),
+///         title: Text('These ListTiles are expanded '),
+///       ),
+///     ),
+///     Expanded(
+///       child: ListTile(
+///         trailing: FlutterLogo(),
+///         title: Text('to fill the available space.'),
+///       ),
+///     ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+/// {@tool snippet}
+///
 /// Tiles can be much more elaborate. Here is a tile which can be tapped, but
 /// which is disabled when the `_act` variable is not 2. When the tile is
 /// tapped, the whole row has an ink splash effect (see [InkWell]).

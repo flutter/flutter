@@ -1282,4 +1282,27 @@ void main() {
     expect(box, paints..circle(x: 68.0, y: 24.0, color: pressedColor));
     await gesture.up();
   });
+
+  testWidgets('DataTable can render inside an AlertDialog', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: AlertDialog(
+            content: DataTable(
+              columns: const <DataColumn>[
+                DataColumn(label: Text('Col1')),
+              ],
+              rows: const <DataRow>[
+                DataRow(cells: <DataCell>[DataCell(Text('1'))]),
+              ],
+            ),
+            scrollable: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
 }

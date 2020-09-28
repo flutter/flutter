@@ -664,6 +664,53 @@ void main() {
 
     expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -20.0)));
   });
+
+  testWidgets("LicensePage's color must be same whether loading or done", (WidgetTester tester) async {
+    const Color scaffoldColor = Color(0xFF123456);
+    const Color cardColor = Color(0xFF654321);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData.light().copyWith(
+        scaffoldBackgroundColor: scaffoldColor,
+        cardColor: cardColor,
+      ),
+      home: Scaffold(
+        body: Center(
+          child: Builder(
+            builder: (BuildContext context) => GestureDetector(
+              child: const Text('Show licenses'),
+              onTap: () {
+                showLicensePage(
+                  context: context,
+                  applicationName: 'MyApp',
+                  applicationVersion: '1.0.0',
+                );
+              }
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('Show licenses'));
+    await tester.pump();
+    await tester.pump();
+
+    // Check color when loading.
+    final List<Material> materialLoadings = tester.widgetList<Material>(find.byType(Material)).toList();
+    expect(materialLoadings.length, equals(4));
+    expect(materialLoadings[1].color, scaffoldColor);
+    expect(materialLoadings[2].color, cardColor);
+
+    await tester.pumpAndSettle();
+
+    // Check color when done.
+    expect(find.byKey(const ValueKey<ConnectionState>(ConnectionState.done)), findsOneWidget);
+    final List<Material> materialDones = tester.widgetList<Material>(find.byType(Material)).toList();
+    expect(materialDones.length, equals(3));
+    expect(materialDones[0].color, scaffoldColor);
+    expect(materialDones[1].color, cardColor);
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {

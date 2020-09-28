@@ -1747,7 +1747,7 @@ void main() {
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(rail.size.width, equals(332.0));
+    expect(rail.size.width, equals(328.0));
 
     await tester.pumpAndSettle();
     expect(rail.size.width, equals(584.0));
@@ -1792,6 +1792,65 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(rail.size.width, equals(300.0));
+  });
+
+  /// Regression test for https://github.com/flutter/flutter/issues/65657
+  testWidgets('Extended rail transition does not jump from the beginning', (WidgetTester tester) async {
+    bool extended = false;
+    StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    selectedIndex: 0,
+                    destinations: const <NavigationRailDestination>[
+                      NavigationRailDestination(
+                        icon: Icon(Icons.favorite_border),
+                        selectedIcon: Icon(Icons.favorite),
+                        label: Text('Abc'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.bookmark_border),
+                        selectedIcon: Icon(Icons.bookmark),
+                        label: Text('Longer Label'),
+                      ),
+                    ],
+                    extended: extended,
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Finder rail = find.byType(NavigationRail);
+
+    // Before starting the animation, the rail has a width of 72.
+    expect(tester.getSize(rail).width, 72.0);
+
+    stateSetter(() {
+      extended = true;
+    });
+
+    await tester.pump();
+    // Create very close to 0, but non-zero, animation value.
+    await tester.pump(const Duration(milliseconds: 1));
+    // Expect that it has started to extend.
+    expect(tester.getSize(rail).width, greaterThan(72.0));
+    // Expect that it has only extended by a small amount, or that the first
+    // frame does not jump. This helps verify that it is a smooth animation.
+    expect(tester.getSize(rail).width, closeTo(72.0, 1.0));
   });
 
   testWidgets('Extended rail animation can be consumed', (WidgetTester tester) async {

@@ -931,7 +931,7 @@ class FakeCache implements Cache {
   }
 
   @override
-  bool isUpToDate() {
+  Future<bool> isUpToDate() async {
     return true;
   }
 

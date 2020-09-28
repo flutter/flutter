@@ -4,19 +4,20 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' as io; // ignore: dart_io_import
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
 import '../src/common.dart';
+import 'test_utils.dart';
 
 // Set this to true for debugging to get verbose logs written to stdout.
 // The logs include the following:
@@ -83,8 +84,9 @@ abstract class FlutterTestDriver {
     String script,
     bool withDebugger = false,
     File pidFile,
+    bool singleWidgetReloads = false,
   }) async {
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     if (withDebugger) {
       arguments.add('--start-paused');
     }
@@ -106,7 +108,12 @@ abstract class FlutterTestDriver {
         .toList(),
       workingDirectory: _projectFolder.path,
       // The web environment variable has the same effect as `flutter config --enable-web`.
-      environment: <String, String>{'FLUTTER_TEST': 'true', 'FLUTTER_WEB': 'true'},
+      environment: <String, String>{
+        'FLUTTER_TEST': 'true',
+        'FLUTTER_WEB': 'true',
+        if (singleWidgetReloads)
+          'FLUTTER_SINGLE_WIDGET_RELOAD': 'true',
+      },
     );
 
     // This class doesn't use the result of the future. It's made available
@@ -175,7 +182,7 @@ abstract class FlutterTestDriver {
         .catchError((Object e) => _debugPrint('Ignoring failure to resume during shutdown'));
 
     _debugPrint('Sending SIGTERM to $_processPid..');
-    ProcessSignal.SIGTERM.send(_processPid);
+    io.Process.killPid(_processPid, io.ProcessSignal.sigterm);
     return _process.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
   }
 
@@ -441,6 +448,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool expressionEvaluation = true,
     bool structuredErrors = false,
     bool machine = true,
+    bool singleWidgetReloads = false,
     File pidFile,
     String script,
   }) async {
@@ -451,6 +459,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           '--disable-service-auth-codes',
         if (machine) '--machine',
         if (!spawnDdsInstance) '--disable-dds',
+        ...getLocalEngineArguments(),
         '-d',
         if (chrome)
           ...<String>[
@@ -468,6 +477,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       pauseOnExceptions: pauseOnExceptions,
       pidFile: pidFile,
       script: script,
+      singleWidgetReloads: singleWidgetReloads,
     );
   }
 
@@ -477,10 +487,12 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool startPaused = false,
     bool pauseOnExceptions = false,
     File pidFile,
+    bool singleWidgetReloads = false,
   }) async {
     await _setupProcess(
       <String>[
         'attach',
+         ...getLocalEngineArguments(),
         '--machine',
         if (!spawnDdsInstance)
           '--disable-dds',
@@ -493,6 +505,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       startPaused: startPaused,
       pauseOnExceptions: pauseOnExceptions,
       pidFile: pidFile,
+      singleWidgetReloads: singleWidgetReloads,
     );
   }
 
@@ -503,6 +516,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
+    bool singleWidgetReloads = false,
     File pidFile,
   }) async {
     assert(!startPaused || withDebugger);
@@ -511,6 +525,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       script: script,
       withDebugger: withDebugger,
       pidFile: pidFile,
+      singleWidgetReloads: singleWidgetReloads,
     );
 
     final Completer<void> prematureExitGuard = Completer<void>();
@@ -704,6 +719,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   }) async {
     await _setupProcess(<String>[
       'test',
+       ...getLocalEngineArguments(),
       '--disable-service-auth-codes',
       '--machine',
       if (coverage)
@@ -719,12 +735,14 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     bool pauseOnExceptions = false,
     File pidFile,
     Future<void> Function() beforeStart,
+    bool singleWidgetReloads = false,
   }) async {
     await super._setupProcess(
       args,
       script: script,
       withDebugger: withDebugger,
       pidFile: pidFile,
+      singleWidgetReloads: singleWidgetReloads,
     );
 
     // Stash the PID so that we can terminate the VM more reliably than using

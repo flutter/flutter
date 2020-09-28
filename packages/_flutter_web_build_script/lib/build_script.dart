@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 // ignore_for_file: implementation_imports
-import 'dart:async';
 import 'dart:isolate';
 
 import 'package:analyzer/dart/analysis/results.dart';
