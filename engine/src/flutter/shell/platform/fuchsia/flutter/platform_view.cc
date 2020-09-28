@@ -574,7 +574,7 @@ void PlatformView::DispatchSemanticsAction(int32_t node_id,
 void PlatformView::UpdateSemantics(
     flutter::SemanticsNodeUpdates update,
     flutter::CustomAccessibilityActionUpdates actions) {
-  accessibility_bridge_->AddSemanticsNodeUpdate(update, view_pixel_ratio_);
+  accessibility_bridge_->AddSemanticsNodeUpdate(update);
 }
 
 // Channel handler for kAccessibilityChannel
