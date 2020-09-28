@@ -477,9 +477,7 @@ void main() {
     // The finder matches with the Container of the cell content, as well as the
     // Container wrapping the whole table. The first one is used to test row
     // heights.
-    Finder findFirstContainerFor(String text) {
-      return find.widgetWithText(Container, text).first;
-    }
+    Finder findFirstContainerFor(String text) => find.widgetWithText(Container, text).first;
 
     expect(tester.getSize(findFirstContainerFor('Name')).height, 56.0);
     expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 48.0);

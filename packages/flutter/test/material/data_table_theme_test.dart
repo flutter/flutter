@@ -252,6 +252,4 @@ BoxDecoration _tableRowBoxDecoration({WidgetTester tester, int index}) {
 // The finder matches with the Container of the cell content, as well as the
 // Container wrapping the whole table. The first one is used to test row
 // heights.
-Finder _findFirstContainerFor(String text) {
-  return find.widgetWithText(Container, text).first;
-}
+Finder _findFirstContainerFor(String text) => find.widgetWithText(Container, text).first;
