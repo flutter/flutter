@@ -82,7 +82,8 @@ class AccessibilityBridge
   void SetSemanticsEnabled(bool enabled);
 
   // Adds a semantics node update to the buffer of node updates to apply.
-  void AddSemanticsNodeUpdate(const flutter::SemanticsNodeUpdates update);
+  void AddSemanticsNodeUpdate(const flutter::SemanticsNodeUpdates update,
+                              float view_pixel_ratio);
 
   // Notifies the bridge of a 'hover move' touch exploration event.
   zx_status_t OnHoverMove(double x, double y);
@@ -115,6 +116,8 @@ class AccessibilityBridge
   AccessibilityBridge::Delegate& delegate_;
 
   static constexpr int32_t kRootNodeId = 0;
+  flutter::SemanticsNode root_flutter_semantics_node_;
+  float last_seen_view_pixel_ratio_ = 1.f;
   fidl::Binding<fuchsia::accessibility::semantics::SemanticListener> binding_;
   fuchsia::accessibility::semantics::SemanticsManagerPtr
       fuchsia_semantics_manager_;
@@ -124,14 +127,20 @@ class AccessibilityBridge
   // Assists with pruning unreachable nodes and hit testing.
   std::unordered_map<int32_t, SemanticsNode> nodes_;
 
+  fuchsia::accessibility::semantics::Node GetRootNodeUpdate(size_t& node_size);
+
   // Derives the BoundingBox of a Flutter semantics node from its
   // rect and elevation.
   fuchsia::ui::gfx::BoundingBox GetNodeLocation(
       const flutter::SemanticsNode& node) const;
 
-  // Converts a Flutter semantics node's transformation to a mat4.
+  // Gets mat4 transformation from a Flutter semantics node.
   fuchsia::ui::gfx::mat4 GetNodeTransform(
       const flutter::SemanticsNode& node) const;
+
+  // Converts a Flutter semantics node's transformation to a mat4.
+  fuchsia::ui::gfx::mat4 ConvertSkiaTransformToMat4(
+      const SkM44 transform) const;
 
   // Derives the attributes for a Fuchsia semantics node from a Flutter
   // semantics node.
