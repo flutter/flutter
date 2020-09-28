@@ -27,8 +27,17 @@ end
 # end
 # @param [PBXAggregateTarget] target Pod target.
 def flutter_additional_ios_build_settings(target)
+  return unless target.platform_name == :ios
+
+  # [target.deployment_target] is a [String] formatted as "8.0".
+  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 9
   target.build_configurations.each do |build_configuration|
-     build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
+    build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
+    # Suppress warning when pod supports a version lower than the minimum supported by Xcode (Xcode 12 - iOS 9).
+    # This warning is harmless but confusing--it's not a bad thing for dependencies to support a lower version.
+    # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
+    # If the pod only supports a higher version, do not delete to correctly produce an error.
+    build_configuration.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET' if inherit_deployment_target
   end
 end
 
