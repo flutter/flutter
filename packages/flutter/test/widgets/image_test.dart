@@ -1803,6 +1803,35 @@ void main() {
     // Image is now at zero.
     expect(image.debugGetOpenHandleStackTraces().length, 0);
   });
+
+  testWidgets('Keeps stream alive when ticker mode is disabled',  (WidgetTester tester) async {
+    imageCache.maximumSize = 0;
+    final ui.Image image = await tester.runAsync(() => createTestImage(width: 1, height: 1, cache: false));
+    final TestImageProvider provider = TestImageProvider();
+    provider.complete(image);
+
+    await tester.pumpWidget(
+      TickerMode(
+        enabled: true,
+        child: Image(image: provider),
+      ),
+    );
+    expect(find.byType(Image), findsOneWidget);
+
+    await tester.pumpWidget(TickerMode(
+        enabled: false,
+        child: Image(image: provider),
+      ),
+    );
+    expect(find.byType(Image), findsOneWidget);
+
+    await tester.pumpWidget(TickerMode(
+        enabled: true,
+        child: Image(image: provider),
+      ),
+    );
+    expect(find.byType(Image), findsOneWidget);
+  });
 }
 
 class ImagePainter extends CustomPainter {

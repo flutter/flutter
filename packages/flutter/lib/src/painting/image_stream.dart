@@ -56,7 +56,31 @@ class ImageInfo {
 
   /// Whether this [ImageInfo] is a [clone] of the `other`.
   ///
+  /// This method is a convenience wrapper for [Image.isCloneOf], and is useful
+  /// for clients that are trying to determine whether new layout or painting
+  /// logic is required when recieving a new image reference.
   ///
+  /// {@tool snippet}
+  ///
+  /// The following sample shows how to appropriately check whether the
+  /// [ImageInfo] reference refers to new image data or not.
+  ///
+  /// ```dart
+  /// ImageInfo _imageInfo;
+  /// set imageInfo (ImageInfo value) {
+  ///   // If the image reference is exactly the same, or its a clone of the
+  ///   // current reference, we can immediately dispose of it and avoid
+  ///   // recalculating anything.
+  ///   if (value == _imageInfo || value != null && _imageInfo != null && value.isCloneOf(_image)) {
+  ///     value?.image?.dispose();
+  ///     return;
+  ///   }
+  ///   _imageInfo?.image?.dispose();
+  ///   _imageInfo = value;
+  ///   markNeedsLayout();
+  ///   markNeedsPaint();
+  /// }
+  /// ```
   bool isCloneOf(ImageInfo other) {
     return other.image.isCloneOf(image)
         && scale == scale
@@ -174,6 +198,10 @@ class ImageStreamListener {
 /// Signature for callbacks reporting that an image is available.
 ///
 /// Used in [ImageStreamListener].
+///
+/// The `image` argument contains information about the image to be rendered.
+/// The implementer of [ImageStreamListener.onImage] is expected to call dispose
+/// on the [ui.Image] it receives.
 ///
 /// The `synchronousCall` argument is true if the listener is being invoked
 /// during the call to `addListener`. This can be useful if, for example,
@@ -306,6 +334,9 @@ class ImageStream with Diagnosticable {
   /// times when the image stream completes (whether because a new image is
   /// available or because an error occurs). Likewise, to remove all instances
   /// of the listener, [removeListener] would need to called N times as well.
+  ///
+  /// When a `listener` receives an [ImageInfo] object, the `listener` is
+  /// responsible for disposing of the [ImageInfo.image].
   /// {@endtemplate}
   void addListener(ImageStreamListener listener) {
     if (_completer != null)
@@ -370,7 +401,7 @@ class ImageStream with Diagnosticable {
 /// [ImageProvider] subclass will return an [ImageStream] and automatically
 /// configure it with the right [ImageStreamCompleter] when possible.
 abstract class ImageStreamCompleter with Diagnosticable {
-  final List<ImageStreamListener> _listeners = <ImageStreamListener>[];
+  final List<ImageStreamListener> _activeListeners = <ImageStreamListener>[];
   final List<ImageStreamListener> _passiveListeners = <ImageStreamListener>[];
   ImageInfo? _currentImage;
   FlutterErrorDetails? _currentError;
@@ -397,7 +428,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// This method ignores passive listeners added via [addPassiveListener].
   @protected
   @visibleForTesting
-  bool get hasListeners => _listeners.isNotEmpty;
+  bool get hasListeners => _activeListeners.isNotEmpty;
 
 
   void _processNewListener(ImageStreamListener listener) {
@@ -444,11 +475,11 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// {@macro flutter.painting.imageStream.addListener}
   void addListener(ImageStreamListener listener) {
     _checkDisposed();
-    _listeners.add(listener);
+    _activeListeners.add(listener);
     _processNewListener(listener);
   }
 
-  /// Adds a listener callback that is called only called if there are listeners
+  /// Adds a listener callback that is only called if there are listeners
   /// added via [addListener] and a new concrete [ImageInfo]
   /// object is available or an error is reported. If a concrete image is
   /// already available, or if an error has been already reported, this object
@@ -481,13 +512,13 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// is no longer usable, and new listeners cannot be added.
   void removeListener(ImageStreamListener listener) {
     _checkDisposed();
-    for (int i = 0; i < _listeners.length; i += 1) {
-      if (_listeners[i] == listener) {
-        _listeners.removeAt(i);
+    for (int i = 0; i < _activeListeners.length; i += 1) {
+      if (_activeListeners[i] == listener) {
+        _activeListeners.removeAt(i);
         break;
       }
     }
-    if (_listeners.isEmpty) {
+    if (_activeListeners.isEmpty) {
       final List<VoidCallback> callbacks = _onLastListenerRemovedCallbacks.toList();
       for (final VoidCallback callback in callbacks) {
         callback();
@@ -514,7 +545,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
         break;
       }
     }
-    if (_listeners.isEmpty && _passiveListeners.isEmpty) {
+    if (_activeListeners.isEmpty && _passiveListeners.isEmpty) {
       _dispose();
     }
   }
@@ -522,7 +553,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   bool _disposed = false;
   void _dispose() {
     assert(!_disposed);
-    assert(_listeners.isEmpty);
+    assert(_activeListeners.isEmpty);
     assert(_passiveListeners.isEmpty);
     _currentImage?.image.dispose();
     _currentImage = null;
@@ -545,7 +576,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   final List<VoidCallback> _onLastListenerRemovedCallbacks = <VoidCallback>[];
 
   /// Adds a callback to call when [removeListener] results in an empty
-  /// list of listeners.
+  /// list of listeners, considering both active and passive listeners.
   ///
   /// This callback will never fire if [removeListener] is never called.
   void addOnLastListenerRemovedCallback(VoidCallback callback) {
@@ -588,9 +619,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _currentImage?.image.dispose();
     _currentImage = image;
 
-    if (_listeners.isEmpty)
+    if (_activeListeners.isEmpty)
       return;
-    _notify(image, _listeners);
+    _notify(image, _activeListeners);
     _notify(image, _passiveListeners);
   }
 
@@ -640,7 +671,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     );
 
     // Make a copy to allow for concurrent modification.
-    final List<ImageErrorListener> localErrorListeners = _listeners
+    final List<ImageErrorListener> localErrorListeners = _activeListeners
         .map<ImageErrorListener?>((ImageStreamListener listener) => listener.onError)
         .whereType<ImageErrorListener>()
         .toList();
@@ -673,7 +704,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _checkDisposed();
     if (hasListeners) {
       // Make a copy to allow for concurrent modification.
-      final List<ImageChunkListener> localListeners = _listeners
+      final List<ImageChunkListener> localListeners = _activeListeners
           .map<ImageChunkListener?>((ImageStreamListener listener) => listener.onChunk)
           .whereType<ImageChunkListener>()
           .toList();
@@ -691,8 +722,8 @@ abstract class ImageStreamCompleter with Diagnosticable {
     description.add(DiagnosticsProperty<ImageInfo>('current', _currentImage, ifNull: 'unresolved', showName: false));
     description.add(ObjectFlagProperty<List<ImageStreamListener>>(
       'listeners',
-      _listeners,
-      ifPresent: '${_listeners.length} listener${_listeners.length == 1 ? "" : "s" }',
+      _activeListeners,
+      ifPresent: '${_activeListeners.length} listener${_activeListeners.length == 1 ? "" : "s" }',
     ));
     description.add(FlagProperty('disposed', value: _disposed, ifTrue: '<disposed>'));
   }
@@ -873,12 +904,12 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   }
 
   Future<void> _decodeNextFrameAndSchedule() async {
+    // This will be null if we gave it away. If not, it's still ours and it
+    // must be disposed of.
     _nextFrame?.image.dispose();
     _nextFrame = null;
     try {
       _nextFrame = await _codec!.getNextFrame();
-      // No need to clone() the image in the next frame since we will not retain
-      // it once we have given it to someone else.
     } catch (exception, stack) {
       reportError(
         context: ErrorDescription('resolving an image frame'),

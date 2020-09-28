@@ -293,7 +293,8 @@ class ImageCache {
       // Even if no callers to ImageProvider.resolve have listened to the stream,
       // the cache is listening to the stream and will remove itself once the
       // image completes to move it from pending to keepAlive.
-      // Even if the cache size is 0, we still add this listener.
+      // Even if the cache size is 0, we still add this tracker, which will add
+      // a passive listener to the stream.
       return _LiveImage(
         completer,
         () {

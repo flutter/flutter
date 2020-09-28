@@ -1084,6 +1084,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   late DisposableBuildContext<State<Image>> _scrollAwareContext;
   Object? _lastException;
   StackTrace? _lastStack;
+  ImageStreamListener? _passiveListener;
 
   @override
   void initState() {
@@ -1098,7 +1099,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     WidgetsBinding.instance!.removeObserver(this);
     _stopListeningToStream();
     _scrollAwareContext.dispose();
-    _disposeImage();
+    _replaceImage();
     super.dispose();
   }
 
@@ -1185,7 +1186,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
     setState(() {
       assert(imageInfo.image.width > 0);
-      _disposeImage(imageInfo);
+      _replaceImage(imageInfo);
       _loadingProgress = null;
       _frameNumber = _frameNumber == null ? 0 : _frameNumber! + 1;
       _wasSynchronouslyLoaded = _wasSynchronouslyLoaded | synchronousCall;
@@ -1199,7 +1200,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     });
   }
 
-  void _disposeImage([ImageInfo? newInfo]) {
+  void _replaceImage([ImageInfo? newInfo]) {
     _imageInfo?.image.dispose();
     _imageInfo = newInfo;
   }
@@ -1215,7 +1216,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStream!.removeListener(_getListener());
 
     if (!widget.gaplessPlayback)
-      setState(_disposeImage);
+      setState(_replaceImage);
 
     setState(() {
       _loadingProgress = null;
@@ -1231,17 +1232,26 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   void _listenToStream() {
     if (_isListeningToStream)
       return;
+
     _imageStream!.addListener(_getListener());
+    if (_passiveListener != null) {
+      assert(_imageStream?.completer != null);
+     _imageStream!.completer!.removePassiveListener(_passiveListener!);
+     _passiveListener = null;
+    }
+
     _isListeningToStream = true;
   }
 
   void _stopListeningToStream([bool createPassiveListener = false]) {
-
     if (!_isListeningToStream)
       return;
-    // if (createPassiveListener) {
-    //   _imageStream!.completer?.addPassiveListener(null);
-    // }
+
+    if (createPassiveListener && _passiveListener == null && _imageStream?.completer != null) {
+      _passiveListener = ImageStreamListener((_, __) {});
+      _imageStream!.completer!.addPassiveListener(_passiveListener!);
+    }
+
     _imageStream!.removeListener(_getListener());
     _isListeningToStream = false;
   }
