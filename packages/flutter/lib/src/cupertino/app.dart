@@ -318,7 +318,7 @@ class CupertinoApp extends StatefulWidget {
   final Map<Type, Action<Intent>>? actions;
 
   /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
-  final String restorationScopeId;
+  final String? restorationScopeId;
 
   @override
   _CupertinoAppState createState() => _CupertinoAppState();

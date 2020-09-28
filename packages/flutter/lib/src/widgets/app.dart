@@ -951,11 +951,8 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.restorationScopeId}
   /// The identifier to use for state restoration of this app.
   ///
-  /// Providing a restoration ID enables state restoration for the app.
-  ///
-  /// If non-null, a [RootRestorationScope] is inserted into the widget
-  /// hierarchy, which descendant widgets can use to store and restore their
-  /// state (for example by using the [RestorationMixin]).
+  /// Providing a restoration ID inserts a [RootRestorationScope] into the
+  /// widget hierarchy, which enables state restoration for descendant widgets.
   ///
   /// Providing a restoration ID also enables the [Navigator] built by the
   /// [WidgetsApp] to restore its state (i.e. to restore the history stack of
