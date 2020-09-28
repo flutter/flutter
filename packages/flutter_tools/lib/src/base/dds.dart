@@ -20,7 +20,8 @@ class DartDevelopmentService {
 
   Uri get uri => _ddsInstance.uri;
 
-  Future<void> get done => _ddsInstance.done;
+  Future<void> get done => _completer.done;
+  final Completer<void> _completer = Completer<void>();
 
   Future<void> startDartDevelopmentService(
     Uri observatoryUri,
@@ -47,9 +48,11 @@ class DartDevelopmentService {
           enableAuthCodes: !disableServiceAuthCodes,
           ipv6: ipv6,
         );
+      _ddsInstance.done.whenComplete(() => _completer.complete());
       logger.printTrace('DDS is listening at ${_ddsInstance.uri}.');
     } on dds.DartDevelopmentServiceException catch (e) {
       logger.printTrace('Warning: Failed to start DDS: ${e.message}');
+      _completer.complete();
       rethrow;
     }
   }
