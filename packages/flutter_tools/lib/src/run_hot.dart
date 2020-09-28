@@ -1357,8 +1357,8 @@ class ReasonForCancelling {
   String toString() {
     String contextHint = '';
     if (message.contains(kConstClassError)) {
-      contextHint = 'Try performing a hot restart instead.';
+      contextHint = ' Try performing a hot restart instead.';
     }
-    return '$message $contextHint';
+    return '$message$contextHint';
   }
 }
