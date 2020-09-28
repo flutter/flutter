@@ -96,25 +96,21 @@ void main() {
     expect(darkTheme.accentTextTheme.headline6.color, typography.white.headline6.color);
   });
 
-  test('Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop', () {
-    for (final TargetPlatform platform in <TargetPlatform>[
-      TargetPlatform.android,
-      TargetPlatform.iOS,
-      TargetPlatform.fuchsia,
-    ]) {
-      final ThemeData themeData = ThemeData(platform: platform);
-      expect(themeData.materialTapTargetSize, MaterialTapTargetSize.padded);
+  testWidgets('Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(platform: defaultTargetPlatform);
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        expect(themeData.materialTapTargetSize, MaterialTapTargetSize.padded);
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(themeData.materialTapTargetSize, MaterialTapTargetSize.shrinkWrap);
+        break;
     }
-
-    for (final TargetPlatform platform in <TargetPlatform>[
-      TargetPlatform.windows,
-      TargetPlatform.linux,
-      TargetPlatform.macOS,
-    ]) {
-      final ThemeData themeData = ThemeData(platform: platform);
-      expect(themeData.materialTapTargetSize, MaterialTapTargetSize.shrinkWrap);
-    }
-  });
+  }, variant: TargetPlatformVariant.all());
 
   test('Can control fontFamily default', () {
     final ThemeData themeData = ThemeData(
