@@ -72,9 +72,16 @@ void PlatformView::NotifyCreated() {
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetRasterTaskRunner(), [platform_view, &surface, &latch]() {
         surface = platform_view->CreateRenderingSurface();
+        if (surface && !surface->IsValid()) {
+          surface.reset();
+        }
         latch.Signal();
       });
   latch.Wait();
+  if (!surface) {
+    FML_LOG(ERROR) << "Failed to create platform view rendering surface";
+    return;
+  }
   delegate_.OnPlatformViewCreated(std::move(surface));
 }
 
