@@ -237,7 +237,7 @@ class FlutterDevice {
             ipv6,
             disableServiceAuthCodes,
           );
-        }  catch(e) {
+        } on Exception catch(e) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
           if (!completer.isCompleted && !_isListeningForObservatoryUri) {
             completer.completeError('failed to connect to $observatoryUri');
