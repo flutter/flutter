@@ -144,16 +144,13 @@ void main() {
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 1).color, dataRowColor.resolve(<MaterialState>{}));
     expect(_tableRowBoxDecoration(tester: tester, index: 1).border.top.width, dividerThickness);
-
-    final Finder dataRowContainer = find.ancestor(of: find.text('Data'), matching: find.byType(Container)).first;
-    expect(tester.getSize(dataRowContainer).height, dataRowHeight);
+    expect(tester.getSize(_findFirstContainerFor('Data')).height, dataRowHeight);
 
     final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style;
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 0).color, headingRowColor.resolve(<MaterialState>{}));
 
-    final Finder headingRowContainer = find.ancestor(of: find.text('A'), matching: find.byType(Container)).first;
-    expect(tester.getSize(headingRowContainer).height, headingRowHeight);
+    expect(tester.getSize(_findFirstContainerFor('A')).height, headingRowHeight);
     expect(tester.getTopLeft(find.text('A')).dx, horizontalMargin);
     expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, columnSpacing);
   });
@@ -234,16 +231,13 @@ void main() {
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 1).color, dataRowColor.resolve(<MaterialState>{}));
     expect(_tableRowBoxDecoration(tester: tester, index: 1).border.top.width, dividerThickness);
-
-    final Finder dataRowContainer = find.ancestor(of: find.text('Data'), matching: find.byType(Container)).first;
-    expect(tester.getSize(dataRowContainer).height, dataRowHeight);
+    expect(tester.getSize(_findFirstContainerFor('Data')).height, dataRowHeight);
 
     final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style;
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 0).color, headingRowColor.resolve(<MaterialState>{}));
 
-    final Finder headingRowContainer = find.ancestor(of: find.text('A'), matching: find.byType(Container)).first;
-    expect(tester.getSize(headingRowContainer).height, headingRowHeight);
+    expect(tester.getSize(_findFirstContainerFor('A')).height, headingRowHeight);
     expect(tester.getTopLeft(find.text('A')).dx, horizontalMargin);
     expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, columnSpacing);
   });
@@ -253,4 +247,11 @@ BoxDecoration _tableRowBoxDecoration({WidgetTester tester, int index}) {
   final Table table = tester.widget(find.byType(Table));
   final TableRow tableRow = table.children[index];
   return tableRow.decoration as BoxDecoration;
+}
+
+// The finder matches with the Container of the cell content, as well as the
+// Container wrapping the whole table. The first one is used to test row
+// heights.
+Finder _findFirstContainerFor(String text) {
+  return find.widgetWithText(Container, text).first;
 }
