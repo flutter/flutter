@@ -17,6 +17,16 @@ String extractPathname(String url) {
   return (pathname.isEmpty || pathname[0] == '/') ? pathname : '/$pathname';
 }
 
+/// Checks that [baseHref] is set.
+///
+/// Throws an exception otherwise.
+String checkBaseHref(String baseHref) {
+  if (baseHref != null) {
+    return baseHref;
+  }
+  throw Exception('Please add a <base> element to your index.html');
+}
+
 /// Prepends a slash to [path] if it doesn't start with a slash already.
 ///
 /// If the path already starts with a slash, it'll be returned unchanged.

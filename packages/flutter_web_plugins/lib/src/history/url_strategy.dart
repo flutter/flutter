@@ -157,9 +157,9 @@ class PathUrlStrategy extends UrlStrategy {
   /// interacting with the actual browser.
   PathUrlStrategy([
     this._platformLocation = const BrowserPlatformLocation(),
-  ]) : _basePath = stripTrailingSlash(extractPathname(
+  ]) : _basePath = stripTrailingSlash(extractPathname(checkBaseHref(
           _platformLocation.getBaseHref(),
-        ));
+        )));
 
   final PlatformLocation _platformLocation;
   final String _basePath;
@@ -228,7 +228,7 @@ class PathUrlStrategy extends UrlStrategy {
 /// [UrlStrategy] when they need to interact with the DOM apis like
 /// pushState, popState, etc...
 abstract class PlatformLocation {
-  ///
+  /// This constructor is here only to allow subclasses to be const.
   const PlatformLocation();
 
   /// Registers an event listener for the `onpopstate` event.
@@ -284,7 +284,7 @@ abstract class PlatformLocation {
 
 /// An implementation of [PlatformLocation] for the browser.
 class BrowserPlatformLocation extends PlatformLocation {
-  ///
+  /// Default constructor for [BrowserPlatformLocation].
   const BrowserPlatformLocation();
 
   html.Location get _location => html.window.location;
