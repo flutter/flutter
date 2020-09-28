@@ -193,6 +193,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
   static const double kMinimumRatioLargeText = 3.0;
 
+  static const double _kDefaultFontSize = 12.0;
+
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
     final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
@@ -276,7 +278,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
       double targetContrastRatio;
-      if ((isBold && (fontSize ?? 12.0) > kBoldTextMinimumSize) || (fontSize ?? 12.0) > kLargeTextMinimumSize) {
+      if ((isBold && (fontSize ?? _kDefaultFontSize) > kBoldTextMinimumSize) || (fontSize ?? _kDefaultFontSize) > kLargeTextMinimumSize) {
         targetContrastRatio = kMinimumRatioLargeText;
       } else {
         targetContrastRatio = kMinimumRatioNormalText;

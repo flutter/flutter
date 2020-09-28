@@ -59,13 +59,13 @@ class TestWindow implements Window {
   /// instead.
   set devicePixelRatioTestValue(double devicePixelRatio) {
     _devicePixelRatio = devicePixelRatio;
-    _metricsChanged();
+    onMetricsChanged?.call();
   }
   /// Deletes any existing test device pixel ratio and returns to using the real
   /// device pixel ratio.
   void clearDevicePixelRatioTestValue() {
     _devicePixelRatio = null;
-    _metricsChanged();
+    onMetricsChanged?.call();
   }
 
   @override
@@ -75,13 +75,13 @@ class TestWindow implements Window {
   /// instead.
   set physicalSizeTestValue (Size physicalSizeTestValue) {
     _physicalSizeTestValue = physicalSizeTestValue;
-    _metricsChanged();
+    onMetricsChanged?.call();
   }
   /// Deletes any existing test physical size and returns to using the real
   /// physical size.
   void clearPhysicalSizeTestValue() {
     _physicalSizeTestValue = null;
-    _metricsChanged();
+    onMetricsChanged?.call();
   }
 
   @override
@@ -91,13 +91,13 @@ class TestWindow implements Window {
   /// instead.
   set viewInsetsTestValue(WindowPadding viewInsetsTestValue) {
     _viewInsetsTestValue = viewInsetsTestValue;
-    _metricsChanged();
+    onMetricsChanged?.call();
   }
   /// Deletes any existing test view insets and returns to using the real view
   /// insets.
   void clearViewInsetsTestValue() {
     _viewInsetsTestValue = null;
-    _metricsChanged();
+    onMetricsChanged?.call();
   }
 
   @override
@@ -107,13 +107,13 @@ class TestWindow implements Window {
   /// instead.
   set viewPaddingTestValue(WindowPadding viewPaddingTestValue) {
     _viewPaddingTestValue = viewPaddingTestValue;
-    _metricsChanged();
+    onMetricsChanged?.call();
   }
   /// Deletes any existing test view padding and returns to using the real
   /// viewPadding.
   void clearViewPaddingTestValue() {
     _viewPaddingTestValue = null;
-    _metricsChanged();
+    onMetricsChanged?.call();
   }
 
   @override
@@ -122,12 +122,12 @@ class TestWindow implements Window {
   /// Hides the real padding and reports the given [paddingTestValue] instead.
   set paddingTestValue(WindowPadding paddingTestValue) {
     _paddingTestValue = paddingTestValue;
-    _metricsChanged();
+    onMetricsChanged?.call();
   }
   /// Deletes any existing test padding and returns to using the real padding.
   void clearPaddingTestValue() {
     _paddingTestValue = null;
-    _metricsChanged();
+    onMetricsChanged?.call();
   }
 
   @override
@@ -136,12 +136,12 @@ class TestWindow implements Window {
   /// Hides the real system gesture insets and reports the given [systemGestureInsetsTestValue] instead.
   set systemGestureInsetsTestValue(WindowPadding systemGestureInsetsTestValue) {
     _systemGestureInsetsTestValue = systemGestureInsetsTestValue;
-    _metricsChanged();
+    onMetricsChanged?.call();
   }
   /// Deletes any existing test system gesture insets and returns to using the real system gesture insets.
   void clearSystemGestureInsetsTestValue() {
     _systemGestureInsetsTestValue = null;
-    _metricsChanged();
+    onMetricsChanged?.call();
   }
 
   @override
@@ -151,24 +151,18 @@ class TestWindow implements Window {
     _window.onMetricsChanged = callback;
   }
 
-  void _metricsChanged() {
-    if (onMetricsChanged != null) {
-      onMetricsChanged!();
-    }
-  }
-
   @override
   Locale? get locale => _localeTestValue ?? _window.locale;
   Locale? _localeTestValue;
   /// Hides the real locale and reports the given [localeTestValue] instead.
   set localeTestValue(Locale localeTestValue) {
     _localeTestValue = localeTestValue;
-    _localeChanged();
+    onLocaleChanged?.call();
   }
   /// Deletes any existing test locale and returns to using the real locale.
   void clearLocaleTestValue() {
     _localeTestValue = null;
-    _localeChanged();
+    onLocaleChanged?.call();
   }
 
   @override
@@ -177,12 +171,12 @@ class TestWindow implements Window {
   /// Hides the real locales and reports the given [localesTestValue] instead.
   set localesTestValue(List<Locale> localesTestValue) {
     _localesTestValue = localesTestValue;
-    _localeChanged();
+    onLocaleChanged?.call();
   }
   /// Deletes any existing test locales and returns to using the real locales.
   void clearLocalesTestValue() {
     _localesTestValue = null;
-    _localeChanged();
+    onLocaleChanged?.call();
   }
 
   @override
@@ -190,12 +184,6 @@ class TestWindow implements Window {
   @override
   set onLocaleChanged(VoidCallback? callback) {
     _window.onLocaleChanged = callback;
-  }
-
-  void _localeChanged() {
-    if (onLocaleChanged != null) {
-      onLocaleChanged!();
-    }
   }
 
   @override
@@ -213,13 +201,13 @@ class TestWindow implements Window {
   /// [textScaleFactorTestValue] instead.
   set textScaleFactorTestValue(double textScaleFactorTestValue) {
     _textScaleFactorTestValue = textScaleFactorTestValue;
-    _testScaleFactorChanged();
+    onTextScaleFactorChanged?.call();
   }
   /// Deletes any existing test text scale factor and returns to using the real
   /// text scale factor.
   void clearTextScaleFactorTestValue() {
     _textScaleFactorTestValue = null;
-    _testScaleFactorChanged();
+    onTextScaleFactorChanged?.call();
   }
 
   @override
@@ -235,19 +223,13 @@ class TestWindow implements Window {
   /// [platformBrightnessTestValue] instead.
   set platformBrightnessTestValue(Brightness platformBrightnessTestValue) {
     _platformBrightnessTestValue = platformBrightnessTestValue;
-    _platformBrightnessChanged();
+    onPlatformBrightnessChanged?.call();
   }
   /// Deletes any existing test platform brightness and returns to using the
   /// real platform brightness.
   void clearPlatformBrightnessTestValue() {
     _platformBrightnessTestValue = null;
-    _platformBrightnessChanged();
-  }
-
-  void _platformBrightnessChanged() {
-    if (onPlatformBrightnessChanged != null) {
-      onPlatformBrightnessChanged!();
-    }
+    onPlatformBrightnessChanged?.call();
   }
 
   @override
@@ -269,12 +251,6 @@ class TestWindow implements Window {
   @override
   set onTextScaleFactorChanged(VoidCallback? callback) {
     _window.onTextScaleFactorChanged = callback;
-  }
-
-  void _testScaleFactorChanged() {
-    if (onTextScaleFactorChanged != null) {
-      onTextScaleFactorChanged!();
-    }
   }
 
   @override
@@ -336,13 +312,13 @@ class TestWindow implements Window {
   /// [semanticsEnabledTestValue] instead.
   set semanticsEnabledTestValue(bool semanticsEnabledTestValue) {
     _semanticsEnabledTestValue = semanticsEnabledTestValue;
-    _semanticsEnabledChanged();
+    onSemanticsEnabledChanged?.call();
   }
   /// Deletes any existing test semantics enabled and returns to using the real
   /// semantics enabled.
   void clearSemanticsEnabledTestValue() {
     _semanticsEnabledTestValue = null;
-    _semanticsEnabledChanged();
+    onSemanticsEnabledChanged?.call();
   }
 
   @override
@@ -350,12 +326,6 @@ class TestWindow implements Window {
   @override
   set onSemanticsEnabledChanged(VoidCallback? callback) {
     _window.onSemanticsEnabledChanged = callback;
-  }
-
-  void _semanticsEnabledChanged() {
-    if (onSemanticsEnabledChanged != null) {
-      onSemanticsEnabledChanged!();
-    }
   }
 
   @override
@@ -372,13 +342,13 @@ class TestWindow implements Window {
   /// [accessibilityFeaturesTestValue] instead.
   set accessibilityFeaturesTestValue(AccessibilityFeatures accessibilityFeaturesTestValue) {
     _accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
-    _accessibilityFeaturesChanged();
+    onAccessibilityFeaturesChanged?.call();
   }
   /// Deletes any existing test accessibility features and returns to using the
   /// real accessibility features.
   void clearAccessibilityFeaturesTestValue() {
     _accessibilityFeaturesTestValue = null;
-    _accessibilityFeaturesChanged();
+    onAccessibilityFeaturesChanged?.call();
   }
 
   @override
@@ -386,12 +356,6 @@ class TestWindow implements Window {
   @override
   set onAccessibilityFeaturesChanged(VoidCallback? callback) {
     _window.onAccessibilityFeaturesChanged = callback;
-  }
-
-  void _accessibilityFeaturesChanged() {
-    if (onAccessibilityFeaturesChanged != null) {
-      onAccessibilityFeaturesChanged!();
-    }
   }
 
   @override

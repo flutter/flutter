@@ -30,7 +30,7 @@ Declarer get _declarer {
   // If no declarer is defined, this test is being run via `flutter run -t test_file.dart`.
   if (_localDeclarer == null) {
     _localDeclarer = Declarer();
-    Future<dynamic>(() {
+    Future<void>(() {
       Invoker.guard<Future<void>>(() async {
         final _Reporter reporter = _Reporter(color: false); // disable color when run directly.
         final Group group = _declarer.build();
