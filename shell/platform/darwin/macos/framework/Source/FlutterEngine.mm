@@ -281,7 +281,6 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 
   [self sendUserLocales];
   [self updateWindowMetrics];
-  [self updateDisplayConfig];
   return YES;
 }
 
@@ -316,31 +315,6 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
     _resourceContext = [[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil];
   }
   return _resourceContext;
-}
-
-- (void)updateDisplayConfig {
-  if (!_engine) {
-    return;
-  }
-
-  CVDisplayLinkRef displayLinkRef;
-  CGDirectDisplayID mainDisplayID = CGMainDisplayID();
-  CVDisplayLinkCreateWithCGDisplay(mainDisplayID, &displayLinkRef);
-  CVTime nominal = CVDisplayLinkGetNominalOutputVideoRefreshPeriod(displayLinkRef);
-  if (!(nominal.flags & kCVTimeIsIndefinite)) {
-    double refreshRate = static_cast<double>(nominal.timeScale) / nominal.timeValue;
-
-    FlutterEngineDisplay display;
-    display.struct_size = sizeof(display);
-    display.display_id = mainDisplayID;
-    display.refresh_rate = round(refreshRate);
-
-    std::vector<FlutterEngineDisplay> displays = {display};
-    FlutterEngineNotifyDisplayUpdate(_engine, kFlutterEngineDisplaysUpdateTypeStartup,
-                                     displays.data(), displays.size());
-  }
-
-  CVDisplayLinkRelease(displayLinkRef);
 }
 
 - (void)updateWindowMetrics {
