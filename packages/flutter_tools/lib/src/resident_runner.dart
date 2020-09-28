@@ -1682,7 +1682,7 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
   }
 }
 
-/// An launcher for the devtools debugger and analysis tool.
+/// A launcher for the devtools debugger and analysis tool.
 abstract class DevtoolsLauncher {
   Future<void> launch(Uri observatoryAddress);
 
