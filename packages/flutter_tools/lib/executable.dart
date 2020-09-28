@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
@@ -52,6 +51,7 @@ import 'src/isolated/mustache_template.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/isolated/web_compilation_delegate.dart';
 //
+import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/web/compile.dart';
 import 'src/web/web_runner.dart';
