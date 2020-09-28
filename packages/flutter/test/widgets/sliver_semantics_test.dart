@@ -986,13 +986,18 @@ void _tests() {
                   TestSemantics(
                     tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
+                      TestSemantics(),
                       TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.namesRoute,
-                          SemanticsFlag.isHeader,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
+                            ],
+                            label: 'Forward app bar',
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
-                        label: 'Forward app bar',
-                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -1096,13 +1101,18 @@ void _tests() {
                   TestSemantics(
                     tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
+                      TestSemantics(),
                       TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.namesRoute,
-                          SemanticsFlag.isHeader,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
+                            ],
+                            label: 'Backward app bar',
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
-                        label: 'Backward app bar',
-                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),

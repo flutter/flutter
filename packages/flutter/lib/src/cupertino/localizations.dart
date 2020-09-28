@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -158,7 +154,7 @@ abstract class CupertinoLocalizations {
   /// there are, e.g. 'tab, 1 of 2' in United States English.
   ///
   /// `tabIndex` and `tabCount` must be greater than or equal to one.
-  String tabSemanticsLabel({int tabIndex, int tabCount});
+  String tabSemanticsLabel({required int tabIndex, required int tabCount});
 
   /// Hour that is shown in [CupertinoTimerPicker] corresponding to
   /// the given hour value.
@@ -255,7 +251,7 @@ abstract class CupertinoLocalizations {
   /// ```dart
   /// CupertinoLocalizations.of(context).anteMeridiemAbbreviation;
   /// ```
-  static CupertinoLocalizations of(BuildContext context) {
+  static CupertinoLocalizations? of(BuildContext context) {
     return Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations);
   }
 }
@@ -378,7 +374,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get alertDialogLabel => 'Alert';
 
   @override
-  String tabSemanticsLabel({int tabIndex, int tabCount}) {
+  String tabSemanticsLabel({required int tabIndex, required int tabCount}) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     return 'Tab $tabIndex of $tabCount';

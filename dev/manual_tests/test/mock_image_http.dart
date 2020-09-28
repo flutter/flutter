@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:mockito/mockito.dart';
 
-import '../../../packages/flutter/test/painting/image_data.dart';
+import '../../../packages/flutter/test/image_data.dart';
 
 // Returns a mock HTTP client that responds with an image to all requests.
 MockHttpClient createMockImageHttpClient(SecurityContext _) {
@@ -20,6 +19,7 @@ MockHttpClient createMockImageHttpClient(SecurityContext _) {
   when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
   when(response.contentLength).thenReturn(kTransparentImage.length);
   when(response.statusCode).thenReturn(HttpStatus.ok);
+  when(response.compressionState).thenReturn(HttpClientResponseCompressionState.notCompressed);
   when(response.listen(any)).thenAnswer((Invocation invocation) {
     final void Function(List<int>) onData = invocation.positionalArguments[0] as void Function(List<int>);
     final void Function() onDone = invocation.namedArguments[#onDone] as void Function();

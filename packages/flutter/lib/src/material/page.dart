@@ -48,8 +48,11 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
        assert(opaque),
        super(settings: settings, fullscreenDialog: fullscreenDialog);
 
-  @override
+  /// Builds the primary contents of the route.
   final WidgetBuilder builder;
+
+  @override
+  Widget buildContent(BuildContext context) => builder(context);
 
   @override
   final bool maintainState;
@@ -77,7 +80,8 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
 ///    by the [MaterialRouteTransitionMixin.buildTransitions].
 mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   /// Builds the primary contents of the route.
-  WidgetBuilder get builder;
+  @protected
+  Widget buildContent(BuildContext context);
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 300);
@@ -101,7 +105,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    final Widget result = builder(context);
+    final Widget result = buildContent(context);
     assert(() {
       if (result == null) {
         throw FlutterError(
@@ -148,19 +152,19 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 class MaterialPage<T> extends Page<T> {
   /// Creates a material page.
   const MaterialPage({
-    @required this.builder,
+    @required this.child,
     this.maintainState = true,
     this.fullscreenDialog = false,
     LocalKey key,
     String name,
     Object arguments,
-  }) : assert(builder != null),
+  }) : assert(child != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
        super(key: key, name: name, arguments: arguments);
 
-  /// Builds the primary contents of the route.
-  final WidgetBuilder builder;
+  /// The content to be shown in the [Route] created by this page.
+  final Widget child;
 
   /// {@macro flutter.widgets.modalRoute.maintainState}
   final bool maintainState;
@@ -188,7 +192,9 @@ class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTran
   MaterialPage<T> get _page => settings as MaterialPage<T>;
 
   @override
-  WidgetBuilder get builder => _page.builder;
+  Widget buildContent(BuildContext context) {
+    return _page.child;
+  }
 
   @override
   bool get maintainState => _page.maintainState;

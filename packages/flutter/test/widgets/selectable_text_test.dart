@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -2444,7 +2442,7 @@ void main() {
       );
 
       // But don't trigger the toolbar.
-      expect(find.byType(FlatButton), findsNothing);
+      expect(find.byType(TextButton), findsNothing);
     },
   );
 
@@ -2566,7 +2564,7 @@ void main() {
       );
 
       // Selected text shows 2 toolbar buttons: copy, select all
-      expect(find.byType(FlatButton), findsNWidgets(2));
+      expect(find.byType(TextButton), findsNWidgets(2));
     },
   );
 
@@ -2615,7 +2613,7 @@ void main() {
       );
 
       // Selected text shows 2 toolbar buttons: copy, select all
-      expect(find.byType(FlatButton), findsNWidgets(2));
+      expect(find.byType(TextButton), findsNWidgets(2));
     },
   );
 
@@ -2771,7 +2769,7 @@ void main() {
       );
 
       // Collapsed toolbar shows 2 buttons: copy, select all
-      expect(find.byType(FlatButton), findsNWidgets(2));
+      expect(find.byType(TextButton), findsNWidgets(2));
     },
   );
 
@@ -3177,7 +3175,7 @@ void main() {
 
     await gesture.up();
     await tester.pump();
-    expect(find.byType(FlatButton), findsNothing);
+    expect(find.byType(TextButton), findsNothing);
   });
 
   testWidgets('force press selects word', (WidgetTester tester) async {
@@ -3971,4 +3969,74 @@ void main() {
       TargetPlatform.windows,
     }),
   );
+
+  testWidgets('Does not show handles when updated from the web engine', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: SelectableText('abc def ghi'),
+        ),
+      ),
+    );
+
+    // Interact with the selectable text to establish the input connection.
+    final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+    final TestGesture gesture = await tester.startGesture(
+      topLeft + const Offset(0.0, 5.0),
+      kind: PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 50));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    final EditableTextState state = tester.state(find.byType(EditableText));
+    expect(state.selectionOverlay.handlesAreVisible, isFalse);
+    expect(
+      state.currentTextEditingValue.selection,
+      const TextSelection.collapsed(offset: 0),
+    );
+
+    if (kIsWeb) {
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+        selection: TextSelection(baseOffset: 2, extentOffset: 7),
+      ));
+      // Wait for all the `setState` calls to be flushed.
+      await tester.pumpAndSettle();
+      expect(
+        state.currentTextEditingValue.selection,
+        const TextSelection(baseOffset: 2, extentOffset: 7),
+      );
+      expect(state.selectionOverlay.handlesAreVisible, isFalse);
+    }
+  });
+
+  testWidgets('onSelectionChanged is called when selection changes', (WidgetTester tester) async {
+    int onSelectionChangedCallCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SelectableText(
+            'abc def ghi',
+            onSelectionChanged: (TextSelection selection, SelectionChangedCause cause) {
+              onSelectionChangedCallCount += 1;
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Long press to select 'abc'.
+    final Offset aLocation = textOffsetToPosition(tester, 1);
+    await tester.longPressAt(aLocation);
+    await tester.pump();
+    expect(onSelectionChangedCallCount, equals(1));
+
+    // Tap on 'Select all' option to select the whole text.
+    await tester.longPressAt(textOffsetToPosition(tester, 5));
+    await tester.pump();
+    await tester.tap(find.text('Select all'));
+    expect(onSelectionChangedCallCount, equals(2));
+  });
 }

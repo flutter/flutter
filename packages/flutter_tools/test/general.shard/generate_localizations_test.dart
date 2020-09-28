@@ -793,7 +793,7 @@ void main() {
       l10nDirectory.childFile('app_zh.arb')
         .writeAsStringSync(singleZhMessageArbFileString);
 
-      const String preferredSupportedLocaleString = '["zh", "es"]';
+      const List<String> preferredSupportedLocale = <String>['zh', 'es'];
       LocalizationsGenerator generator;
       try {
         generator = LocalizationsGenerator(fs);
@@ -803,7 +803,7 @@ void main() {
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
-          preferredSupportedLocaleString: preferredSupportedLocaleString,
+          preferredSupportedLocale: preferredSupportedLocale,
         );
         generator.loadResources();
       } on L10nException catch (e) {
@@ -814,47 +814,6 @@ void main() {
       expect(generator.supportedLocales.elementAt(1), LocaleInfo.fromString('es'));
       expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('en'));
     });
-
-    test(
-      'throws an error attempting to add preferred locales '
-      'with incorrect runtime type',
-      () {
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile('app_en.arb')
-          .writeAsStringSync(singleMessageArbFileString);
-        l10nDirectory.childFile('app_es.arb')
-          .writeAsStringSync(singleEsMessageArbFileString);
-        l10nDirectory.childFile('app_zh.arb')
-          .writeAsStringSync(singleZhMessageArbFileString);
-
-        const String preferredSupportedLocaleString = '[44, "en"]';
-        LocalizationsGenerator generator;
-        try {
-          generator = LocalizationsGenerator(fs);
-          generator.initialize(
-            inputPathString: defaultL10nPathString,
-            outputPathString: defaultL10nPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-            preferredSupportedLocaleString: preferredSupportedLocaleString,
-          );
-          generator.loadResources();
-        } on L10nException catch (e) {
-          expect(
-            e.message,
-            contains('Incorrect runtime type'),
-          );
-          return;
-        }
-
-        fail(
-          'Should fail since an incorrect runtime type was used '
-          'in the preferredSupportedLocales list.'
-        );
-      },
-    );
 
     test(
       'throws an error attempting to add preferred locales '
@@ -870,7 +829,7 @@ void main() {
         l10nDirectory.childFile('app_zh.arb')
           .writeAsStringSync(singleZhMessageArbFileString);
 
-        const String preferredSupportedLocaleString = '["am", "es"]';
+        const List<String> preferredSupportedLocale = <String>['am', 'es'];
         LocalizationsGenerator generator;
         try {
           generator = LocalizationsGenerator(fs);
@@ -880,7 +839,7 @@ void main() {
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
-            preferredSupportedLocaleString: preferredSupportedLocaleString,
+            preferredSupportedLocale: preferredSupportedLocale,
           );
           generator.loadResources();
         } on L10nException catch (e) {
@@ -1152,7 +1111,7 @@ void main() {
         ..childFile('app_zh.arb').writeAsStringSync(singleZhMessageArbFileString)
         ..childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
 
-      const String preferredSupportedLocaleString = '["zh"]';
+      const List<String> preferredSupportedLocale = <String>['zh'];
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
         generator.initialize(
@@ -1161,7 +1120,7 @@ void main() {
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
-          preferredSupportedLocaleString: preferredSupportedLocaleString,
+          preferredSupportedLocale: preferredSupportedLocale,
         );
         generator.loadResources();
         generator.writeOutputFiles();
