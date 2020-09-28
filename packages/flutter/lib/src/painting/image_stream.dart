@@ -14,9 +14,9 @@ import 'package:flutter/scheduler.dart';
 /// ImageInfo objects are used by [ImageStream] objects to represent the
 /// actual data of the image once it has been obtained.
 ///
-/// If you receive an [ImageInfo] object, it is your responsibility to call
-/// [Image.dispose] on the [image]. If you need to share that image with other
-/// callers, use the [clone] method.
+/// The receiver of an [ImageInfo] object must call [Image.dispose] on the
+/// [image]. To safely share the object with other clients, use the [clone]
+/// method.
 @immutable
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given [image] and [scale].
@@ -29,6 +29,23 @@ class ImageInfo {
       assert(scale != null);
 
   /// Creates an [ImageInfo] with a cloned [image].
+  ///
+  /// Once all outstanding references to the [image] are disposed, it is no
+  /// longer safe to access properties of it or attempt to draw it. Clones serve
+  /// to create new references to the underlying image data that can safely be
+  /// disposed without knowledge of whether some other reference holder will
+  /// still need access to the underlying image. Once a client disposes of its
+  /// own image reference, it can no longer access the image, but other clients
+  /// will be able to access their own references.
+  ///
+  /// This method must be used in cases where a client holding an [ImageInfo]
+  /// needs to share the image info object with another client and will still
+  /// need to access the underlying image data at some later point, e.g. to
+  /// share it again with another client.
+  ///
+  /// See also:
+  ///
+  ///  * [Image.clone]
   ImageInfo clone() {
     return ImageInfo(
       image: image.clone(),

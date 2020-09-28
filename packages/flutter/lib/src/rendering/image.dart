@@ -85,7 +85,7 @@ class RenderImage extends RenderBox {
   ui.Image? get image => _image;
   ui.Image? _image;
   set image(ui.Image? value) {
-    if (value == _image) {
+    if (value == _image || value != null && _image != null && value.isCloneOf(_image!)) {
       value?.dispose();
       return;
     }
