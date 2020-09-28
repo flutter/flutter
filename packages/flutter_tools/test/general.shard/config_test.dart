@@ -4,10 +4,12 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/convert.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 
@@ -62,13 +64,7 @@ void main() {
   });
 
   testWithoutContext('Config parse error', () {
-    final BufferLogger bufferLogger = BufferLogger(
-      terminal: AnsiTerminal(
-        stdio: null,
-        platform: const LocalPlatform(),
-      ),
-      outputPreferences: OutputPreferences.test(),
-    );
+    final BufferLogger bufferLogger = BufferLogger.test();
     final File file = memoryFileSystem.file('example')
       ..writeAsStringSync('{"hello":"bar');
     config = Config(
@@ -81,4 +77,50 @@ void main() {
     expect(file.existsSync(), false);
     expect(bufferLogger.errorText, contains('Failed to decode preferences'));
   });
+
+  testWithoutContext('Config does not error on missing file', () {
+    final BufferLogger bufferLogger = BufferLogger.test();
+    final File file = memoryFileSystem.file('example');
+    config = Config(
+      'example',
+      fileSystem: memoryFileSystem,
+      logger: bufferLogger,
+      platform: fakePlatform,
+    );
+
+    expect(file.existsSync(), false);
+    expect(bufferLogger.errorText, isEmpty);
+  });
+
+  testWithoutContext('Config does not error on a normally fatal file system exception', () {
+    final BufferLogger bufferLogger = BufferLogger.test();
+    final File file = ErrorHandlingFile(
+      platform: FakePlatform(operatingSystem: 'linux'),
+      fileSystem: MemoryFileSystem.test(),
+      delegate: FakeFile('testfile'),
+    );
+
+    config = Config.createForTesting(file, bufferLogger);
+
+    expect(bufferLogger.errorText, contains('Could not read preferences in testfile'));
+    // Also contains original error message:
+    expect(bufferLogger.errorText, contains('The flutter tool cannot access the file or directory'));
+  });
+}
+
+class FakeFile extends Fake implements File {
+  FakeFile(this.path);
+
+  @override
+  final String path;
+
+  @override
+  bool existsSync() {
+    return true;
+  }
+
+  @override
+  String readAsStringSync({Encoding encoding = utf8ForTesting}) {
+    throw const FileSystemException('', '', OSError('', 13)); // EACCES error on linux
+  }
 }
