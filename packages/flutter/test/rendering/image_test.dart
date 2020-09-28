@@ -192,5 +192,5 @@ Future<void> main() async {
 
     image.dispose();
     expect(image.debugGetOpenHandleStackTraces().length, 0);
-  });
+  }, skip: kIsWeb); // Web doesn't track open image handles.
 }

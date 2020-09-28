@@ -1802,7 +1802,7 @@ void main() {
     // Image cache listener go away and Image stream listeners go away.
     // Image is now at zero.
     expect(image.debugGetOpenHandleStackTraces().length, 0);
-  });
+  }, skip: kIsWeb); // Web does not care about image handle/disposal.
 
   testWidgets('Keeps stream alive when ticker mode is disabled',  (WidgetTester tester) async {
     imageCache.maximumSize = 0;

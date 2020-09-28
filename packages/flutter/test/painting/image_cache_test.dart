@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -552,7 +553,7 @@ void main() {
 
     imageInfo.image.dispose();
     expect(testImage.debugGetOpenHandleStackTraces().length, 0);
-  });
+  }, skip: kIsWeb); // Web does not care about image handles.
 
   test('Image is obtained and disposed of properly for cache when listener is still active', () async {
     const int key = 1;
@@ -591,5 +592,5 @@ void main() {
     expect(testImage.debugGetOpenHandleStackTraces().length, 1);
     imageInfo.image.dispose();
     expect(testImage.debugGetOpenHandleStackTraces().length, 0);
-  });
+  }, skip: kIsWeb); // Web does not care about open image handles.
 }
