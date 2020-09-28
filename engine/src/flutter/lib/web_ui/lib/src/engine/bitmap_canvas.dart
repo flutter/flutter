@@ -608,11 +608,11 @@ class BitmapCanvas extends EngineCanvas {
     double x,
     double y,
   ) {
-    html.CanvasRenderingContext2D? ctx = _canvasPool.context;
+    html.CanvasRenderingContext2D ctx = _canvasPool.context;
     x += line.left;
     final double? letterSpacing = style.letterSpacing;
     if (letterSpacing == null || letterSpacing == 0.0) {
-      ctx!.fillText(line.displayText!, x, y);
+      ctx.fillText(line.displayText!, x, y);
     } else {
       // When letter-spacing is set, we go through a more expensive code path
       // that renders each character separately with the correct spacing
@@ -627,7 +627,7 @@ class BitmapCanvas extends EngineCanvas {
       final int len = line.displayText!.length;
       for (int i = 0; i < len; i++) {
         final String char = line.displayText![i];
-        ctx!.fillText(char, x, y);
+        ctx.fillText(char, x, y);
         x += letterSpacing + ctx.measureText(char).width!;
       }
     }
