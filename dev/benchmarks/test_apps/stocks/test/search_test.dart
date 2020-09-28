@@ -19,10 +19,8 @@ void main() {
     expect(find.text('AAPL'), findsNothing);
     expect(find.text('BANA'), findsNothing);
 
-    final stock_state.StockStateScope app = tester.widget<stock_state.StockStateScope>(
-      find.byType(stock_state.StockStateScope)
-    );
-    app.stocks.add(<List<String>>[
+    final Element context = tester.element(find.byType(stocks.StocksApp));
+    stock_state.StockStateScope.stockDataOf(context).add(<List<String>>[
       // "Symbol","Name","LastSale","MarketCap","IPOyear","Sector","industry","Summary Quote"
       <String>['AAPL', 'Apple', '', '', '', '', '', ''],
       <String>['BANA', 'Banana', '', '', '', '', '', ''],

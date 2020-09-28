@@ -2,18 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'stock_data.dart';
-
-@immutable
-abstract class StockRoutePath { const StockRoutePath(); }
-class StockHomePath extends StockRoutePath { const StockHomePath(); }
-class StockSettingsPath extends StockRoutePath { const StockSettingsPath(); }
-class StockSymbolPath extends StockRoutePath {
-  const StockSymbolPath(this.symbol);
-  final String symbol;
-}
 
 enum StockMode { optimistic, pessimistic }
 enum BackupMode { enabled, disabled }
@@ -79,40 +71,6 @@ class StockConfiguration {
   }
 }
 
-class RouterState extends ChangeNotifier {
-  RouterState();
-
-  bool get debugInitialized {
-    bool answer;
-    assert((){
-      answer = routePath != null;
-      return true;
-    }());
-    return answer;
-  }
-
-  StockRoutePath get routePath => _routePath;
-  StockRoutePath _routePath;
-  set routePath(StockRoutePath value) {
-    if (value != _routePath) {
-      _routePath = value;
-      notifyListeners();
-    }
-  }
-}
-
-class RouterStateScope extends InheritedNotifier<RouterState> {
-  const RouterStateScope({
-    Key key,
-    RouterState routerState,
-    Widget child,
-  }) : super(key: key, notifier: routerState, child: child);
-
-  static RouterState of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<RouterStateScope>().notifier;
-  }
-}
-
 class _StockConfigurationScope extends InheritedWidget {
   const _StockConfigurationScope({
     Key key,
@@ -128,14 +86,27 @@ class _StockConfigurationScope extends InheritedWidget {
   }
 }
 
+class _StockDataScope extends InheritedWidget {
+  const _StockDataScope({
+    Key key,
+    this.data,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  final StockData data;
+
+  @override
+  bool updateShouldNotify(covariant _StockDataScope oldWidget) {
+    return data != oldWidget.data;
+  }
+}
+
 class StockStateScope extends StatefulWidget {
   const StockStateScope({
     Key key,
-    this.stocks,
     this.child,
   }) : super(key: key);
 
-  final StockData stocks;
   final Widget child;
 
   static StockState of(BuildContext context) {
@@ -143,7 +114,9 @@ class StockStateScope extends StatefulWidget {
   }
 
   static StockData stockDataOf(BuildContext context) {
-    return context.findAncestorWidgetOfExactType<StockStateScope>().stocks;
+    return context
+      .dependOnInheritedWidgetOfExactType<_StockDataScope>()
+      .data;
   }
 
   static StockConfiguration configurationOf(BuildContext context) {
@@ -157,31 +130,62 @@ class StockStateScope extends StatefulWidget {
 }
 
 class StockState extends State<StockStateScope> {
-  StockConfiguration _configuration = const StockConfiguration(
-    stockMode: StockMode.optimistic,
-    backupMode: BackupMode.enabled,
-    debugShowGrid: false,
-    debugShowSizes: false,
-    debugShowBaselines: false,
-    debugShowLayers: false,
-    debugShowPointers: false,
-    debugShowRainbow: false,
-    showPerformanceOverlay: false,
-    showSemanticsDebugger: false,
-  );
+  StockConfiguration _configuration;
+  StockData _data;
 
-  void updateConfiguration(StockConfiguration configuration) {
-    if (_configuration != configuration) {
-      _configuration = configuration;
-      setState(() {/* Rebuilds to trigger a inherited widget update. */});
-    }
+  @override
+  void initState() {
+    super.initState();
+    _data = StockData();
+    _configuration = const StockConfiguration(
+      stockMode: StockMode.optimistic,
+      backupMode: BackupMode.enabled,
+      debugShowGrid: false,
+      debugShowSizes: false,
+      debugShowBaselines: false,
+      debugShowLayers: false,
+      debugShowPointers: false,
+      debugShowRainbow: false,
+      showPerformanceOverlay: false,
+      showSemanticsDebugger: false,
+    );
+  }
+
+  void updateConfiguration({
+    StockMode stockMode,
+    BackupMode backupMode,
+    bool debugShowGrid,
+    bool debugShowSizes,
+    bool debugShowBaselines,
+    bool debugShowLayers,
+    bool debugShowPointers,
+    bool debugShowRainbow,
+    bool showPerformanceOverlay,
+    bool showSemanticsDebugger,
+  }) {
+    _configuration = _configuration.copyWith(
+      stockMode: stockMode,
+      backupMode: backupMode,
+      debugShowGrid: debugShowGrid,
+      debugShowSizes: debugShowSizes,
+      debugShowBaselines: debugShowBaselines,
+      debugShowLayers: debugShowLayers,
+      debugShowPointers: debugShowPointers,
+      debugShowRainbow: debugShowRainbow,
+      showPerformanceOverlay: showPerformanceOverlay,
+      showSemanticsDebugger: showSemanticsDebugger,
+    );
+    setState(() {/* Rebuilds to trigger a inherited widget update. */});
   }
 
   @override
   Widget build(BuildContext context) {
     return _StockConfigurationScope(
       configuration: _configuration,
-      child: widget.child,
+      child: _StockDataScope(
+        data: _data,
+        child: widget.child,
+      ),
     );
   }
 }

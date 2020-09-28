@@ -16,53 +16,53 @@ class StockSettingsState extends State<StockSettings> {
   void _handleOptimismChanged(bool value) {
     value ??= false;
     final StockState state = StockStateScope.of(context);
-    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(stockMode: value ? StockMode.optimistic : StockMode.pessimistic));
+    state.updateConfiguration(stockMode: value ? StockMode.optimistic : StockMode.pessimistic);
   }
 
   void _handleBackupChanged(bool value) {
     final StockState state = StockStateScope.of(context);
-    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(backupMode: value ? BackupMode.enabled : BackupMode.disabled));
+    state.updateConfiguration(backupMode: value ? BackupMode.enabled : BackupMode.disabled);
   }
 
   void _handleShowGridChanged(bool value) {
     final StockState state = StockStateScope.of(context);
-    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(debugShowGrid: value));
+    state.updateConfiguration(debugShowGrid: value);
   }
 
   void _handleShowSizesChanged(bool value) {
     final StockState state = StockStateScope.of(context);
-    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(debugShowSizes: value));
+    state.updateConfiguration(debugShowSizes: value);
   }
 
   void _handleShowBaselinesChanged(bool value) {
     final StockState state = StockStateScope.of(context);
-    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(debugShowBaselines: value));
+    state.updateConfiguration(debugShowBaselines: value);
   }
 
   void _handleShowLayersChanged(bool value) {
     final StockState state = StockStateScope.of(context);
-    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(debugShowLayers: value));
+    state.updateConfiguration(debugShowLayers: value);
   }
 
   void _handleShowPointersChanged(bool value) {
     final StockState state = StockStateScope.of(context);
-    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(debugShowPointers: value));
+    state.updateConfiguration(debugShowPointers: value);
   }
 
   void _handleShowRainbowChanged(bool value) {
     final StockState state = StockStateScope.of(context);
-    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(debugShowRainbow: value));
+    state.updateConfiguration(debugShowRainbow: value);
   }
 
 
   void _handleShowPerformanceOverlayChanged(bool value) {
     final StockState state = StockStateScope.of(context);
-    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(showPerformanceOverlay: value));
+    state.updateConfiguration(showPerformanceOverlay: value);
   }
 
   void _handleShowSemanticsDebuggerChanged(bool value) {
     final StockState state = StockStateScope.of(context);
-    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(showSemanticsDebugger: value));
+    state.updateConfiguration(showSemanticsDebugger: value);
   }
 
   void _confirmOptimismChange() {

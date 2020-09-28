@@ -8,6 +8,7 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'i18n/stock_strings.dart';
+import 'routing/router_state.dart';
 import 'stock_data.dart';
 import 'stock_list.dart';
 import 'stock_state.dart';
@@ -58,11 +59,44 @@ class StockHome extends StatefulWidget {
   StockHomeState createState() => StockHomeState();
 }
 
-class StockHomeState extends State<StockHome> {
+class StockHomeState extends State<StockHome> with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _searchQuery = TextEditingController();
+  TabController _tabController;
   bool _isSearching = false;
   bool _autorefresh = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final Map<String, dynamic> state = RouterStateScope.of(context).browserState;
+    if (state['homeTab'] == null) {
+      state['homeTab'] = 0;
+    }
+    final int tabIndex = state['homeTab'] as int;
+    _tabController ??= TabController(initialIndex: tabIndex, length: 2, vsync: this)..addListener(_onTabIndexChange);
+    _tabController.index = tabIndex;
+  }
+
+
+  @override
+  void dispose() {
+    _tabController?.removeListener(_onTabIndexChange);
+    _tabController?.dispose();
+    super.dispose();
+  }
+
+  void _onTabIndexChange(){
+    if (_tabController.indexIsChanging)
+      return;
+    final Map<String, dynamic> state = RouterStateScope.of(context).browserState;
+    if (state['homeTab'] == _tabController.index)
+      return;
+    state['homeTab'] = _tabController.index;
+    Router.navigate(context, () {
+      RouterStateScope.of(context).browserState = Map<String, dynamic>.from(state);
+    });
+  }
 
   void _handleSearchBegin() {
     ModalRoute.of(context).addLocalHistoryEntry(LocalHistoryEntry(
@@ -80,7 +114,7 @@ class StockHomeState extends State<StockHome> {
 
   void _handleStockModeChange(StockMode value) {
     final StockState state = StockStateScope.of(context);
-    state.updateConfiguration(StockStateScope.configurationOf(context).copyWith(stockMode: value));
+    state.updateConfiguration(stockMode: value);
   }
 
   void _handleStockMenu(BuildContext context, _StockMenuItem value) {
@@ -221,6 +255,7 @@ class StockHomeState extends State<StockHome> {
         ),
       ],
       bottom: TabBar(
+        controller: _tabController,
         tabs: <Widget>[
           Tab(text: StockStrings.of(context).market),
           Tab(text: StockStrings.of(context).portfolio),
@@ -318,21 +353,19 @@ class StockHomeState extends State<StockHome> {
   @override
   Widget build(BuildContext context) {
     final StockData stocks = StockStateScope.stockDataOf(context);
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        drawerDragStartBehavior: DragStartBehavior.down,
-        key: _scaffoldKey,
-        appBar: _isSearching ? buildSearchBar() : buildAppBar(),
-        floatingActionButton: buildFloatingActionButton(),
-        drawer: _buildDrawer(context),
-        body: TabBarView(
-          dragStartBehavior: DragStartBehavior.down,
-          children: <Widget>[
-            _buildStockTab(context, stocks, StockHomeTab.market, stocks.allSymbols),
-            _buildStockTab(context, stocks, StockHomeTab.portfolio, portfolioSymbols),
-          ],
-        ),
+    return Scaffold(
+      drawerDragStartBehavior: DragStartBehavior.down,
+      key: _scaffoldKey,
+      appBar: _isSearching ? buildSearchBar() : buildAppBar(),
+      floatingActionButton: buildFloatingActionButton(),
+      drawer: _buildDrawer(context),
+      body: TabBarView(
+        dragStartBehavior: DragStartBehavior.down,
+        controller: _tabController,
+        children: <Widget>[
+          _buildStockTab(context, stocks, StockHomeTab.market, stocks.allSymbols),
+          _buildStockTab(context, stocks, StockHomeTab.portfolio, portfolioSymbols),
+        ],
       ),
     );
   }

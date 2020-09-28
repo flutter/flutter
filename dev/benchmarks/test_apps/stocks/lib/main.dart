@@ -15,23 +15,15 @@ import 'package:flutter/rendering.dart' show
   debugRepaintRainbowEnabled;
 
 import 'i18n/stock_strings.dart';
-
-import 'stock_data.dart';
-import 'stock_home.dart';
-import 'stock_settings.dart';
+import 'routing/router.dart';
+import 'routing/router_state.dart';
 import 'stock_state.dart';
-import 'stock_symbol_viewer.dart';
 
 void main() => runApp(
-  StockStateScope(
-    stocks: StockData(),
-    child: const StocksApp()
+  const StockStateScope(
+    child: StocksApp()
   ),
 );
-
-const String _kSettingsPageLocation = '/settings';
-const String _kStockPageLocation = '/stock';
-const String _kHomePageLocation = '/';
 
 class StocksApp extends StatefulWidget {
   const StocksApp({Key key}) : super(key: key);
@@ -52,7 +44,7 @@ class StocksAppState extends State<StocksApp> {
     _routerDelegate = StockRouterDelegate(_routerState);
   }
 
-  ThemeData geThemeFromConfiguration(StockConfiguration configuration) {
+  ThemeData _geThemeFromConfiguration(StockConfiguration configuration) {
     switch (configuration.stockMode) {
       case StockMode.optimistic:
         return ThemeData(
@@ -89,7 +81,7 @@ class StocksAppState extends State<StocksApp> {
     }());
     return MaterialApp.router(
       title: 'Stocks',
-      theme: geThemeFromConfiguration(configuration),
+      theme: _geThemeFromConfiguration(configuration),
       localizationsDelegates: StockStrings.localizationsDelegates,
       supportedLocales: StockStrings.supportedLocales,
       debugShowMaterialGrid: configuration.debugShowGrid,
@@ -97,108 +89,6 @@ class StocksAppState extends State<StocksApp> {
       showSemanticsDebugger: configuration.showSemanticsDebugger,
       routeInformationParser: _routeInformationParser,
       routerDelegate: _routerDelegate,
-    );
-  }
-}
-
-class StockRouteInformationParser extends RouteInformationParser<StockRoutePath> {
-  @override
-  Future<StockRoutePath> parseRouteInformation(RouteInformation routeInformation) {
-    final Uri url = Uri.parse(routeInformation.location);
-    if (url.path == _kSettingsPageLocation) {
-      return SynchronousFuture<StockRoutePath>(const StockSettingsPath());
-    }
-
-    if (url.path == _kStockPageLocation) {
-      final String symbol = url.queryParameters['symbol'];
-      if (symbol != null && symbol.isNotEmpty)
-        return SynchronousFuture<StockRoutePath>(StockSymbolPath(symbol));
-    }
-
-    return SynchronousFuture<StockRoutePath>(const StockHomePath());
-  }
-
-  @override
-  RouteInformation restoreRouteInformation(StockRoutePath configuration) {
-    if (configuration is StockSettingsPath)
-      return const RouteInformation(location: _kSettingsPageLocation);
-    if (configuration is StockHomePath)
-      return const RouteInformation(location: _kHomePageLocation);
-    if (configuration is StockSymbolPath)
-      return RouteInformation(location: '$_kStockPageLocation?symbol=${configuration.symbol}');
-    assert(false);
-    return null;
-  }
-}
-
-class StockRouterDelegate extends RouterDelegate<StockRoutePath> with ChangeNotifier, PopNavigatorRouterDelegateMixin<StockRoutePath>{
-  StockRouterDelegate(
-    this.routerState
-  ) : navigatorKey = GlobalObjectKey<NavigatorState>(routerState) {
-    routerState.addListener(notifyListeners);
-  }
-
-  final RouterState routerState;
-
-  @override
-  final GlobalObjectKey<NavigatorState> navigatorKey;
-
-  @override
-  StockRoutePath get currentConfiguration => routerState.routePath;
-
-  @override
-  Future<void> setNewRoutePath(StockRoutePath configuration) {
-    assert(configuration != null);
-    routerState.routePath = configuration;
-    return SynchronousFuture<void>(null);
-  }
-
-  bool _handlePopPage(Route<dynamic> route, dynamic result) {
-    // _handlePopPage should not be called on the home page because the
-    // PopNavigatorRouterDelegateMixin will bubble up the pop to the
-    // SystemNavigator if there is only one route in the navigator.
-    assert(route.willHandlePopInternally ||
-           routerState.routePath is StockSettingsPath ||
-           routerState.routePath is StockSymbolPath);
-
-    final bool success = route.didPop(result);
-    if (success)
-      routerState.routePath = const StockHomePath();
-    return success;
-  }
-
-  List<Page<void>> _buildPages(BuildContext context) {
-    final List<Page<void>> pages = <Page<void>>[
-      StockHomePage()
-    ];
-
-    if (routerState.routePath is StockSettingsPath) {
-      pages.add(StockSettingsPage());
-    }
-
-    if (routerState.routePath is StockSymbolPath) {
-      final StockSymbolPath routePath = routerState.routePath as StockSymbolPath;
-      pages.add(StockPage(routePath.symbol));
-    }
-    return pages;
-  }
-
-  @override
-  void dispose() {
-    routerState.removeListener(notifyListeners);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    assert(routerState.debugInitialized);
-    return RouterStateScope(
-      routerState: routerState,
-      child: Navigator(
-        key: navigatorKey,
-        pages: _buildPages(context),
-        onPopPage: _handlePopPage,
-      ),
     );
   }
 }
