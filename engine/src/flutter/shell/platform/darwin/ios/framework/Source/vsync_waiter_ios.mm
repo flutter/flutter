@@ -15,6 +15,28 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 
+@interface VSyncClient : NSObject
+
+- (instancetype)initWithTaskRunner:(fml::RefPtr<fml::TaskRunner>)task_runner
+                          callback:(flutter::VsyncWaiter::Callback)callback;
+
+- (void)await;
+
+- (void)invalidate;
+
+//------------------------------------------------------------------------------
+/// @brief      The display refresh rate used for reporting purposes. The engine does not care
+///             about this for frame scheduling. It is only used by tools for instrumentation. The
+///             engine uses the duration field of the link per frame for frame scheduling.
+///
+/// @attention  Do not use the this call in frame scheduling. It is only meant for reporting.
+///
+/// @return     The refresh rate in frames per second.
+///
+- (float)displayRefreshRate;
+
+@end
+
 namespace flutter {
 
 VsyncWaiterIOS::VsyncWaiterIOS(flutter::TaskRunners task_runners)
@@ -35,11 +57,16 @@ void VsyncWaiterIOS::AwaitVSync() {
   [client_.get() await];
 }
 
+// |VsyncWaiter|
+float VsyncWaiterIOS::GetDisplayRefreshRate() const {
+  return [client_.get() displayRefreshRate];
+}
+
 }  // namespace flutter
 
 @implementation VSyncClient {
   flutter::VsyncWaiter::Callback callback_;
-  CADisplayLink* display_link_;
+  fml::scoped_nsobject<CADisplayLink> display_link_;
 }
 
 - (instancetype)initWithTaskRunner:(fml::RefPtr<fml::TaskRunner>)task_runner
@@ -48,11 +75,14 @@ void VsyncWaiterIOS::AwaitVSync() {
 
   if (self) {
     callback_ = std::move(callback);
-    display_link_ = [CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)];
-    display_link_.paused = YES;
+    display_link_ = fml::scoped_nsobject<CADisplayLink> {
+      [[CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)] retain]
+    };
+    display_link_.get().paused = YES;
 
     task_runner->PostTask([client = [self retain]]() {
-      [client->display_link_ addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+      [client->display_link_.get() addToRunLoop:[NSRunLoop currentRunLoop]
+                                        forMode:NSRunLoopCommonModes];
       [client release];
     });
   }
@@ -60,52 +90,9 @@ void VsyncWaiterIOS::AwaitVSync() {
   return self;
 }
 
-- (void)await {
-  display_link_.paused = NO;
-}
-
-- (void)onDisplayLink:(CADisplayLink*)link {
-  TRACE_EVENT0("flutter", "VSYNC");
-
-  CFTimeInterval delay = CACurrentMediaTime() - link.timestamp;
-  fml::TimePoint frame_start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
-  fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(link.duration);
-
-  display_link_.paused = YES;
-
-  callback_(frame_start_time, frame_target_time);
-}
-
-- (void)invalidate {
-  [display_link_ invalidate];
-}
-
-- (void)dealloc {
-  [self invalidate];
-
-  [super dealloc];
-}
-
-@end
-
-@implementation DisplayLinkManager {
-  CADisplayLink* display_link_;
-}
-
-- (instancetype)init {
-  self = [super init];
-
-  if (self) {
-    display_link_ = [CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)];
-    display_link_.paused = YES;
-  }
-
-  return self;
-}
-
-- (double)displayRefreshRate {
+- (float)displayRefreshRate {
   if (@available(iOS 10.3, *)) {
-    auto preferredFPS = display_link_.preferredFramesPerSecond;  // iOS 10.0
+    auto preferredFPS = display_link_.get().preferredFramesPerSecond;  // iOS 10.0
 
     // From Docs:
     // The default value for preferredFramesPerSecond is 0. When this value is 0, the preferred
@@ -122,12 +109,29 @@ void VsyncWaiterIOS::AwaitVSync() {
   }
 }
 
+- (void)await {
+  display_link_.get().paused = NO;
+}
+
 - (void)onDisplayLink:(CADisplayLink*)link {
-  // no-op.
+  TRACE_EVENT0("flutter", "VSYNC");
+
+  CFTimeInterval delay = CACurrentMediaTime() - link.timestamp;
+  fml::TimePoint frame_start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
+  fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(link.duration);
+
+  display_link_.get().paused = YES;
+
+  callback_(frame_start_time, frame_target_time);
+}
+
+- (void)invalidate {
+  // [CADisplayLink invalidate] is thread-safe.
+  [display_link_.get() invalidate];
 }
 
 - (void)dealloc {
-  [display_link_ invalidate];
+  [self invalidate];
 
   [super dealloc];
 }

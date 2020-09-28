@@ -68,9 +68,7 @@ class Rasterizer final : public SnapshotDelegate {
     ///
     virtual void OnFrameRasterized(const FrameTiming& frame_timing) = 0;
 
-    /// Time limit for a smooth frame.
-    ///
-    /// See: `DisplayManager::GetMainDisplayRefreshRate`.
+    /// Time limit for a smooth frame. See `Engine::GetDisplayRefreshRate`.
     virtual fml::Milliseconds GetFrameBudget() = 0;
 
     /// Target time for the latest frame. See also `Shell::OnAnimatorBeginFrame`

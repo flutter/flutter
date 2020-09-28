@@ -333,8 +333,6 @@ Shell::Shell(DartVMRef vm, TaskRunners task_runners, Settings settings)
   FML_DCHECK(task_runners_.IsValid());
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  display_manager_ = std::make_unique<DisplayManager>();
-
   // Generate a WeakPtrFactory for use with the raster thread. This does not
   // need to wait on a latch because it can only ever be used from the raster
   // thread from this class, so we have ordering guarantees.
@@ -575,6 +573,14 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   if (settings_.purge_persistent_cache) {
     PersistentCache::GetCacheForProcess()->Purge();
   }
+
+  // TODO(gw280): The WeakPtr here asserts that we are derefing it on the
+  // same thread as it was created on. Shell is constructed on the platform
+  // thread but we need to call into the Engine on the UI thread, so we need
+  // to use getUnsafe() here to avoid failing the assertion.
+  //
+  // https://github.com/flutter/flutter/issues/42947
+  display_refresh_rate_ = weak_engine_.getUnsafe()->GetDisplayRefreshRate();
 
   return true;
 }
@@ -1254,9 +1260,8 @@ void Shell::OnFrameRasterized(const FrameTiming& timing) {
 }
 
 fml::Milliseconds Shell::GetFrameBudget() {
-  double display_refresh_rate = display_manager_->GetMainDisplayRefreshRate();
-  if (display_refresh_rate > 0) {
-    return fml::RefreshRateToFrameBudget(display_refresh_rate);
+  if (display_refresh_rate_ > 0) {
+    return fml::RefreshRateToFrameBudget(display_refresh_rate_.load());
   } else {
     return fml::kDefaultFrameBudget;
   }
@@ -1447,13 +1452,9 @@ bool Shell::OnServiceProtocolGetDisplayRefreshRate(
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
   response->SetObject();
   response->AddMember("type", "DisplayRefreshRate", response->GetAllocator());
-  response->AddMember("fps", display_manager_->GetMainDisplayRefreshRate(),
+  response->AddMember("fps", engine_->GetDisplayRefreshRate(),
                       response->GetAllocator());
   return true;
-}
-
-double Shell::GetMainDisplayRefreshRate() {
-  return display_manager_->GetMainDisplayRefreshRate();
 }
 
 bool Shell::OnServiceProtocolGetSkSLs(
@@ -1615,11 +1616,6 @@ bool Shell::ReloadSystemFonts() {
 
 std::shared_ptr<fml::SyncSwitch> Shell::GetIsGpuDisabledSyncSwitch() const {
   return is_gpu_disabled_sync_switch_;
-}
-
-void Shell::OnDisplayUpdates(DisplayUpdateType update_type,
-                             std::vector<Display> displays) {
-  display_manager_->HandleDisplayUpdates(update_type, displays);
 }
 
 }  // namespace flutter
