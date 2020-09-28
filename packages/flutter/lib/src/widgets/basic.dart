@@ -1964,7 +1964,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is MultiChildLayoutParentData);
-    final MultiChildLayoutParentData parentData = renderObject.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData parentData = renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
       final AbstractNode? targetParent = renderObject.parent;
@@ -3654,7 +3654,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData = renderObject.parentData as StackParentData;
+    final StackParentData parentData = renderObject.parentData! as StackParentData;
     bool needsLayout = false;
 
     if (parentData.left != left) {
@@ -4550,7 +4550,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
-    final FlexParentData parentData = renderObject.parentData as FlexParentData;
+    final FlexParentData parentData = renderObject.parentData! as FlexParentData;
     bool needsLayout = false;
 
     if (parentData.flex != flex) {

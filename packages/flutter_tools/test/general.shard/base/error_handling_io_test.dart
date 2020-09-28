@@ -93,6 +93,8 @@ void setupDirectoryMocks({
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
   when(mockDirectory.deleteSync())
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.existsSync())
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
 void main() {
@@ -203,6 +205,20 @@ void main() {
       expect(() => directory.createSync(recursive: true),
              throwsToolExit(message: expectedMessage));
     });
+
+    testWithoutContext('when checking for directory existence with permission issues', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kUserPermissionDenied,
+      );
+
+      final Directory directory = fs.directory('directory');
+
+      const String expectedMessage = 'Flutter failed to check for directory existence at';
+      expect(() => directory.existsSync(),
+             throwsToolExit(message: expectedMessage));
+    });
   });
 
   group('throws ToolExit on Linux', () {
@@ -298,8 +314,21 @@ void main() {
       expect(() => directory.createTempSync('prefix'),
              throwsToolExit(message: expectedMessage));
     });
-  });
 
+    testWithoutContext('when checking for directory existence with permission issues', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eacces,
+      );
+
+      final Directory directory = fs.directory('directory');
+
+      const String expectedMessage = 'Flutter failed to check for directory existence at';
+      expect(() => directory.existsSync(),
+             throwsToolExit(message: expectedMessage));
+    });
+  });
 
   group('throws ToolExit on macOS', () {
     const int eperm = 1;
@@ -394,6 +423,20 @@ void main() {
       expect(() => directory.createTempSync('prefix'),
              throwsToolExit(message: expectedMessage));
     });
+
+    testWithoutContext('when checking for directory existence with permission issues', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eacces,
+      );
+
+      final Directory directory = fs.directory('directory');
+
+      const String expectedMessage = 'Flutter failed to check for directory existence at';
+      expect(() => directory.existsSync(),
+             throwsToolExit(message: expectedMessage));
+    });
   });
 
   testWithoutContext('Caches path context correctly', () {
@@ -444,6 +487,24 @@ void main() {
 
       expect(mockFile.toString(), isNotNull);
       expect(fs.file('file').toString(), equals(mockFile.toString()));
+    });
+
+    testWithoutContext('ErrorHandlingDirectory', () {
+      final MockFileSystem mockFileSystem = MockFileSystem();
+      final FileSystem fs = ErrorHandlingFileSystem(
+        delegate: mockFileSystem,
+        platform: const LocalPlatform(),
+      );
+      final MockDirectory mockDirectory = MockDirectory();
+      when(mockFileSystem.directory(any)).thenReturn(mockDirectory);
+
+      expect(mockDirectory.toString(), isNotNull);
+      expect(fs.directory('directory').toString(), equals(mockDirectory.toString()));
+
+      when(mockFileSystem.currentDirectory).thenReturn(mockDirectory);
+
+      expect(fs.currentDirectory.toString(), equals(mockDirectory.toString()));
+      expect(fs.currentDirectory, isA<ErrorHandlingDirectory>());
     });
   });
 
@@ -563,7 +624,7 @@ void main() {
     });
   });
 
-   group('ProcessManager on macOS throws tool exit', () {
+  group('ProcessManager on macOS throws tool exit', () {
     const int enospc = 28;
     const int eacces = 13;
 

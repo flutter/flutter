@@ -31,6 +31,24 @@
          "flaky": false
       },
       {
+         "name": "Linux firebase_abstract_method_smoke_test",
+         "repo": "flutter",
+         "task_name": "linux_firebase_abstract_method_smoke_test",
+         "flaky": false
+      },
+      {
+         "name": "Linux firebase_android_embedding_v2_smoke_test",
+         "repo": "flutter",
+         "task_name": "linux_firebase_android_embedding_v2_smoke_test",
+         "flaky": false
+      },
+      {
+         "name": "Linux firebase_release_smoke_test",
+         "repo": "flutter",
+         "task_name": "linux_firebase_release_smoke_test",
+         "flaky": false
+      },
+      {
          "name": "Linux framework_tests",
          "repo": "flutter",
          "task_name": "linux_framework_tests",
@@ -298,7 +316,7 @@
          "name": "Windows gradle_plugin_light_apk_test",
          "repo": "flutter",
          "task_name": "win_gradle_plugin_light_apk_test",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Windows gradle_non_android_plugin_test",

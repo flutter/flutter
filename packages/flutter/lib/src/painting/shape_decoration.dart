@@ -194,7 +194,7 @@ class ShapeDecoration extends Decoration {
     if (a is BoxDecoration) {
       return ShapeDecoration.lerp(ShapeDecoration.fromBoxDecoration(a), this, t);
     } else if (a == null || a is ShapeDecoration) {
-      return ShapeDecoration.lerp(a as ShapeDecoration, this, t);
+      return ShapeDecoration.lerp(a as ShapeDecoration?, this, t);
     }
     return super.lerpFrom(a, t) as ShapeDecoration?;
   }
@@ -204,7 +204,7 @@ class ShapeDecoration extends Decoration {
     if (b is BoxDecoration) {
       return ShapeDecoration.lerp(this, ShapeDecoration.fromBoxDecoration(b), t);
     } else if (b == null || b is ShapeDecoration) {
-      return ShapeDecoration.lerp(this, b as ShapeDecoration, t);
+      return ShapeDecoration.lerp(this, b as ShapeDecoration?, t);
     }
     return super.lerpTo(b, t) as ShapeDecoration?;
   }

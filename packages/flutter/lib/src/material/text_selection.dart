@@ -11,15 +11,14 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button_theme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'flat_button.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'text_button.dart';
 import 'text_selection_theme.dart';
 import 'theme.dart';
 
@@ -84,22 +83,26 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   Widget _getItem(_ItemData itemData, bool isFirst, bool isLast) {
     assert(isFirst != null);
     assert(isLast != null);
-    return ButtonTheme.fromButtonThemeData(
-      data: ButtonTheme.of(context).copyWith(
-        height: kMinInteractiveDimension,
-        minWidth: kMinInteractiveDimension,
-      ),
-      child: FlatButton(
-        onPressed: itemData.onPressed,
+
+    // TODO(hansmuller): Should be colorScheme.onSurface
+    final ThemeData theme = Theme.of(context);
+    final bool isDark = theme.colorScheme.brightness == Brightness.dark;
+    final Color primary = isDark ? Colors.white : Colors.black87;
+
+    return TextButton(
+      style: TextButton.styleFrom(
+        primary: primary,
+        shape: const RoundedRectangleBorder(),
+        minimumSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
         padding: EdgeInsets.only(
           // These values were eyeballed to match the native text selection menu
           // on a Pixel 2 running Android 10.
           left: 9.5 + (isFirst ? 5.0 : 0.0),
           right: 9.5 + (isLast ? 5.0 : 0.0),
         ),
-        shape: Border.all(width: 0.0, color: Colors.transparent),
-        child: Text(itemData.label),
       ),
+      onPressed: itemData.onPressed,
+      child: Text(itemData.label),
     );
   }
 

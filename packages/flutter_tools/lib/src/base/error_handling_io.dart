@@ -46,6 +46,9 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   final Platform _platform;
 
   @override
+  Directory get currentDirectory => directory(delegate.currentDirectory);
+
+  @override
   File file(dynamic path) => ErrorHandlingFile(
     platform: _platform,
     fileSystem: delegate,
@@ -324,6 +327,16 @@ class ErrorHandlingDirectory
       platform: _platform,
       failureMessage:
         'Flutter failed to delete a directory at "${delegate.path}"',
+    );
+  }
+
+  @override
+  bool existsSync() {
+    return _runSync<bool>(
+      () => delegate.existsSync(),
+      platform: _platform,
+      failureMessage:
+        'Flutter failed to check for directory existence at "${delegate.path}"',
     );
   }
 
