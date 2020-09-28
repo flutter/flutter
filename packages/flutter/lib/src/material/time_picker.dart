@@ -1642,7 +1642,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
       );
     }
     final Color unfocusedFillColor = timePickerTheme.hourMinuteColor ?? colorScheme.onSurface.withOpacity(0.12);
-    // If screen reader is in use, make the hint text says hours/minutes.
+    // If screen reader is in use, make the hint text say hours/minutes.
     // Otherwise, remove the hint text when focused because the centered cursor
     // appears odd above the hint text.
     final String hintText = MediaQuery.of(context).accessibleNavigation
