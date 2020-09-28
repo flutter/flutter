@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:dds/dds.dart' as dds;
 import 'package:meta/meta.dart';
+import 'package:pedantic/pedantic.dart';
 
 import 'io.dart' as io;
 import 'logger.dart';
@@ -48,7 +49,7 @@ class DartDevelopmentService {
           enableAuthCodes: !disableServiceAuthCodes,
           ipv6: ipv6,
         );
-      _ddsInstance.done.whenComplete(_completer.complete);
+      unawaited(_ddsInstance.done.whenComplete(_completer.complete));
       logger.printTrace('DDS is listening at ${_ddsInstance.uri}.');
     } on dds.DartDevelopmentServiceException catch (e) {
       logger.printTrace('Warning: Failed to start DDS: ${e.message}');
