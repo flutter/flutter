@@ -233,7 +233,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       Rect paintBounds;
       if (elements.length == 1) {
         final Element element = elements.single;
-        final RenderBox renderObject = element.renderObject as RenderBox;
+        final RenderBox renderObject = element.renderObject! as RenderBox;
         paintBounds = Rect.fromPoints(
           renderObject.localToGlobal(renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
           renderObject.localToGlobal(renderObject.paintBounds.bottomRight + const Offset(4.0, 4.0)),
@@ -250,8 +250,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
           isBold = widget.style.fontWeight == FontWeight.bold;
           fontSize = widget.style.fontSize;
         } else {
-          assert(false);
-          isBold = false;
+          throw StateError('Unexpected widget type: ${widget.runtimeType}');
         }
       } else if (elements.length > 1) {
         return Evaluation.fail('Multiple nodes with the same label: ${data.label}\n');
@@ -300,7 +299,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   bool _shouldSkipNode(SemanticsData data) {
     if (data.hasFlag(ui.SemanticsFlag.scopesRoute))
       return true;
-    if (data.label.trim().isEmpty == true && data.value.trim().isEmpty == true)
+    if (data.label.trim().isEmpty && data.value.trim().isEmpty)
       return true;
     return false;
   }

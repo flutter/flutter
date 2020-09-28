@@ -927,8 +927,8 @@ abstract class WidgetController {
     RenderObject? renderObject = element.findRenderObject();
     SemanticsNode? result = renderObject?.debugSemantics;
     while (renderObject != null && (result == null || result.isMergedIntoParent)) {
-      renderObject = renderObject.parent as RenderObject;
-      result = renderObject.debugSemantics;
+      renderObject = renderObject.parent as RenderObject?;
+      result = renderObject?.debugSemantics;
     }
     if (result == null)
       throw StateError('No Semantics data found.');

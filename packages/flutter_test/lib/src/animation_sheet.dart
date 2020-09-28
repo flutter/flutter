@@ -226,7 +226,7 @@ class _AnimationSheetRecorderState extends State<_AnimationSheetRecorder> {
 
   void _record(Duration duration) {
     assert(widget.handleRecorded != null);
-    final RenderRepaintBoundary boundary = boundaryKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    final RenderRepaintBoundary boundary = boundaryKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
     widget.handleRecorded!(boundary.toImage());
   }
 

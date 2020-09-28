@@ -240,9 +240,7 @@ class _MockHttpRequest extends HttpClientRequest {
   List<Cookie> get cookies => <Cookie>[];
 
   @override
-  Future<HttpClientResponse> get done {
-    return Future<HttpClientResponse>.value(_MockHttpResponse());
-  }
+  Future<HttpClientResponse> get done async => _MockHttpResponse();
 
   @override
   Future<void> flush() {

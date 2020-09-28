@@ -117,6 +117,7 @@ class KeyEventSimulator {
     for (final String code in kWebToLogicalKey.keys) {
       if (key.keyId == kWebToLogicalKey[code]!.keyId) {
         result = code;
+        break;
       }
     }
     assert(result != null, 'Key $key not found in web keyCode map');
