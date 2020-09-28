@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart' as flutter_material;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
@@ -501,10 +500,12 @@ class _ContrastReport {
         isEmptyRect = false;
 
   const _ContrastReport.emptyRect()
-      : lightColor = flutter_material.Colors.transparent,
-        darkColor = flutter_material.Colors.transparent,
+      : lightColor = _transparent,
+        darkColor = _transparent,
         isSingleColor = false,
         isEmptyRect = true;
+
+  static const Color _transparent = Color(0x00000000);
 
   /// The most frequently occurring light color. Uses [Colors.transparent] if
   /// the rectangle is empty.
