@@ -385,6 +385,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// the methods spawn isolates or OS threads and thus cannot be executed
   /// synchronously by calling [pump].
   ///
+  /// The `callback` must return a [Future] that completes to a value of type
+  /// `T`.
+  ///
   /// If `callback` completes successfully, this will return the future
   /// returned by `callback`.
   ///

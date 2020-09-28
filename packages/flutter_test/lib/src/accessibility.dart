@@ -234,6 +234,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       Rect paintBounds;
       if (elements.length == 1) {
         final Element element = elements.single;
+        assert(element.renderObject != null && element.renderObject is RenderBox);
         final RenderBox renderObject = element.renderObject! as RenderBox;
         paintBounds = Rect.fromPoints(
           renderObject.localToGlobal(renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),

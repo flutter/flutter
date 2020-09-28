@@ -22,6 +22,7 @@ import 'goldens.dart';
 ///
 ///  * [OffsetLayer.toImage] which is the actual method being called.
 Future<ui.Image> captureImage(Element element) {
+  assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
     renderObject = renderObject.parent as RenderObject;

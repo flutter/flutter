@@ -987,7 +987,7 @@ abstract class WidgetController {
     scrollable ??= find.byType(Scrollable);
     return TestAsyncUtils.guard<void>(() async {
       Offset moveStep;
-      switch(widget<Scrollable>(scrollable!).axisDirection) {
+      switch (widget<Scrollable>(scrollable!).axisDirection) {
         case AxisDirection.up:
           moveStep = Offset(0, delta);
           break;
