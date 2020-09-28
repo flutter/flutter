@@ -346,7 +346,7 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
   /// rectangular overlay.
   /// Default to true and must not be null.
   const CupertinoPickerDefaultSelectionOverlay({
-    Key key,
+    Key? key,
     this.background = CupertinoColors.tertiarySystemFill,
     this.capLeftEdge = true,
     this.capRightEdge = true,

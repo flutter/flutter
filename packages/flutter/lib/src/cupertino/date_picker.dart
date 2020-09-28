@@ -806,7 +806,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     );
   }
 
-  Widget _buildMinutePicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
+  Widget _buildMinutePicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder, Widget selectionOverlay) {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
         if (notification is ScrollStartNotification) {
@@ -1572,12 +1572,12 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   late double numberLabelHeight;
   late double numberLabelBaseline;
 
-  double hourLabelWidth;
-  double minuteLabelWidth;
-  double secondLabelWidth;
+  late double hourLabelWidth;
+  late double minuteLabelWidth;
+  late double secondLabelWidth;
 
-  double totalWidth;
-  double pickerColumnWidth;
+  late double totalWidth;
+  late double pickerColumnWidth;
 
   @override
   void initState() {
@@ -1678,10 +1678,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   // Measures all possible time text labels and return maximum width.
-  double _measureLabelsMaxWidth(List<String> labels, TextStyle style) {
+  double _measureLabelsMaxWidth(List<String?> labels, TextStyle style) {
     double maxWidth = double.negativeInfinity;
     for (int i = 0; i < labels.length; i++) {
-      final String label = labels[i];
+      final String? label = labels[i];
       if(label == null) {
         continue;
       }
@@ -1933,10 +1933,9 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   // Returns [CupertinoTextThemeData.pickerTextStyle] and magnifies the fontSize
   // by [magnification].
   TextStyle _textStyleFrom(BuildContext context, [double magnification = 1.0]) {
-    final TextStyle textStyle = CupertinoTheme.of(context).textTheme
-        .pickerTextStyle;
+    final TextStyle textStyle = CupertinoTheme.of(context).textTheme.pickerTextStyle;
     return textStyle.copyWith(
-      fontSize: textStyle.fontSize * magnification
+      fontSize: textStyle.fontSize! * magnification
     );
   }
 
