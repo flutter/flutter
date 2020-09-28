@@ -1786,12 +1786,12 @@ void main() {
 
     await tester.pumpWidget(Image(image: provider));
 
-    // Image widget + 1, render object + 1, image cache + 1
-    expect(image.debugGetOpenHandleStackTraces().length, 4);
+    // Image widget + 1, RawImage + 1, render object + 1, image cache + 1
+    expect(image.debugGetOpenHandleStackTraces().length, 5);
 
     await tester.pumpWidget(const SizedBox());
 
-    // Image widget and render object go away
+    // Image widget/RawImage widget and render object go away
     expect(image.debugGetOpenHandleStackTraces().length, 2);
 
     await provider.evict();
