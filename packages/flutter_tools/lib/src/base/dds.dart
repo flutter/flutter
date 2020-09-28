@@ -20,7 +20,7 @@ class DartDevelopmentService {
 
   Uri get uri => _ddsInstance.uri;
 
-  Future<void> get done => _completer.done;
+  Future<void> get done => _completer.future;
   final Completer<void> _completer = Completer<void>();
 
   Future<void> startDartDevelopmentService(
