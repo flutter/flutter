@@ -1315,4 +1315,21 @@ PlatformViewAndroidJNIImpl::FlutterViewComputePlatformResolvedLocale(
   return out;
 }
 
+double PlatformViewAndroidJNIImpl::GetDisplayRefreshRate() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return kUnknownDisplayRefreshRate;
+  }
+
+  jclass clazz = env->GetObjectClass(java_object.obj());
+  if (clazz == nullptr) {
+    return kUnknownDisplayRefreshRate;
+  }
+
+  jfieldID fid = env->GetStaticFieldID(clazz, "refreshRateFPS", "F");
+  return static_cast<double>(env->GetStaticFloatField(clazz, fid));
+}
+
 }  // namespace flutter

@@ -30,12 +30,6 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
   /// See also |PointerDataDispatcher::ScheduleSecondaryVsyncCallback|.
   void ScheduleSecondaryCallback(const fml::closure& callback);
 
-  static constexpr float kUnknownRefreshRateFPS = 0.0;
-
-  // Get the display's maximum refresh rate in the unit of frame per second.
-  // Return kUnknownRefreshRateFPS if the refresh rate is unknown.
-  virtual float GetDisplayRefreshRate() const;
-
  protected:
   // On some backends, the |FireCallback| needs to be made from a static C
   // method.

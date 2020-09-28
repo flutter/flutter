@@ -15,28 +15,6 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 
-@interface VSyncClient : NSObject
-
-- (instancetype)initWithTaskRunner:(fml::RefPtr<fml::TaskRunner>)task_runner
-                          callback:(flutter::VsyncWaiter::Callback)callback;
-
-- (void)await;
-
-- (void)invalidate;
-
-//------------------------------------------------------------------------------
-/// @brief      The display refresh rate used for reporting purposes. The engine does not care
-///             about this for frame scheduling. It is only used by tools for instrumentation. The
-///             engine uses the duration field of the link per frame for frame scheduling.
-///
-/// @attention  Do not use the this call in frame scheduling. It is only meant for reporting.
-///
-/// @return     The refresh rate in frames per second.
-///
-- (float)displayRefreshRate;
-
-@end
-
 namespace flutter {
 
 VsyncWaiterIOS::VsyncWaiterIOS(flutter::TaskRunners task_runners)
@@ -55,11 +33,6 @@ VsyncWaiterIOS::~VsyncWaiterIOS() {
 
 void VsyncWaiterIOS::AwaitVSync() {
   [client_.get() await];
-}
-
-// |VsyncWaiter|
-float VsyncWaiterIOS::GetDisplayRefreshRate() const {
-  return [client_.get() displayRefreshRate];
 }
 
 }  // namespace flutter
@@ -90,7 +63,52 @@ float VsyncWaiterIOS::GetDisplayRefreshRate() const {
   return self;
 }
 
-- (float)displayRefreshRate {
+- (void)await {
+  display_link_.get().paused = NO;
+}
+
+- (void)onDisplayLink:(CADisplayLink*)link {
+  TRACE_EVENT0("flutter", "VSYNC");
+
+  CFTimeInterval delay = CACurrentMediaTime() - link.timestamp;
+  fml::TimePoint frame_start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
+  fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(link.duration);
+
+  display_link_.get().paused = YES;
+
+  callback_(frame_start_time, frame_target_time);
+}
+
+- (void)invalidate {
+  [display_link_.get() invalidate];
+}
+
+- (void)dealloc {
+  [self invalidate];
+
+  [super dealloc];
+}
+
+@end
+
+@implementation DisplayLinkManager {
+  fml::scoped_nsobject<CADisplayLink> display_link_;
+}
+
+- (instancetype)init {
+  self = [super init];
+
+  if (self) {
+    display_link_ = fml::scoped_nsobject<CADisplayLink> {
+      [[CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)] retain]
+    };
+    display_link_.get().paused = YES;
+  }
+
+  return self;
+}
+
+- (double)displayRefreshRate {
   if (@available(iOS 10.3, *)) {
     auto preferredFPS = display_link_.get().preferredFramesPerSecond;  // iOS 10.0
 
@@ -109,29 +127,12 @@ float VsyncWaiterIOS::GetDisplayRefreshRate() const {
   }
 }
 
-- (void)await {
-  display_link_.get().paused = NO;
-}
-
 - (void)onDisplayLink:(CADisplayLink*)link {
-  TRACE_EVENT0("flutter", "VSYNC");
-
-  CFTimeInterval delay = CACurrentMediaTime() - link.timestamp;
-  fml::TimePoint frame_start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
-  fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(link.duration);
-
-  display_link_.get().paused = YES;
-
-  callback_(frame_start_time, frame_target_time);
-}
-
-- (void)invalidate {
-  // [CADisplayLink invalidate] is thread-safe.
-  [display_link_.get() invalidate];
+  // no-op.
 }
 
 - (void)dealloc {
-  [self invalidate];
+  [display_link_.get() invalidate];
 
   [super dealloc];
 }

@@ -30,6 +30,7 @@
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/runtime/service_protocol.h"
 #include "flutter/shell/common/animator.h"
+#include "flutter/shell/common/display_manager.h"
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
@@ -369,6 +370,17 @@ class Shell final : public PlatformView::Delegate,
   ///
   DartVM* GetDartVM();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Notifies the display manager of the updates.
+  ///
+  void OnDisplayUpdates(DisplayUpdateType update_type,
+                        std::vector<Display> displays);
+
+  //----------------------------------------------------------------------------
+  /// @brief Queries the `DisplayManager` for the main display refresh rate.
+  ///
+  double GetMainDisplayRefreshRate();
+
  private:
   using ServiceProtocolHandler =
       std::function<bool(const ServiceProtocol::Handler::ServiceProtocolMap&,
@@ -418,12 +430,9 @@ class Shell final : public PlatformView::Delegate,
   // here for easier conversions to Dart objects.
   std::vector<int64_t> unreported_timings_;
 
-  // A cache of `Engine::GetDisplayRefreshRate` (only callable in the UI thread)
-  // so we can access it from `Rasterizer` (in the raster thread).
-  //
-  // The atomic is for extra thread safety as this is written in the UI thread
-  // and read from the raster thread.
-  std::atomic<float> display_refresh_rate_ = 0.0f;
+  /// Manages the displays. This class is thread safe, can be accessed from any
+  /// of the threads.
+  std::unique_ptr<DisplayManager> display_manager_;
 
   // protects expected_frame_size_ which is set on platform thread and read on
   // raster thread

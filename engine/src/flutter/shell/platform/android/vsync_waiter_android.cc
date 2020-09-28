@@ -38,19 +38,6 @@ void VsyncWaiterAndroid::AwaitVSync() {
   });
 }
 
-float VsyncWaiterAndroid::GetDisplayRefreshRate() const {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  if (g_vsync_waiter_class == nullptr) {
-    return kUnknownRefreshRateFPS;
-  }
-  jclass clazz = g_vsync_waiter_class->obj();
-  if (clazz == nullptr) {
-    return kUnknownRefreshRateFPS;
-  }
-  jfieldID fid = env->GetStaticFieldID(clazz, "refreshRateFPS", "F");
-  return env->GetStaticFloatField(clazz, fid);
-}
-
 // static
 void VsyncWaiterAndroid::OnNativeVsync(JNIEnv* env,
                                        jclass jcaller,
