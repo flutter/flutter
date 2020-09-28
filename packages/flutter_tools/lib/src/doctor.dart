@@ -76,8 +76,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     }
 
     final List<DoctorValidator> ideValidators = <DoctorValidator>[
-      if (androidWorkflow.appliesToHostPlatform)
-        ...AndroidStudioValidator.allValidators(globals.config, globals.platform, globals.fs, globals.userMessages),
+      ...AndroidStudioValidator.allValidators(globals.config, globals.platform, globals.fs, globals.userMessages),
       ...IntelliJValidator.installedValidators(globals.fs, globals.platform),
       ...VsCodeValidator.installedValidators,
     ];
