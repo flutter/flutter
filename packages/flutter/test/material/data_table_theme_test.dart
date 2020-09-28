@@ -225,7 +225,7 @@ void main() {
     );
 
     final Finder tableContainerFinder = find.ancestor(of: find.byType(Table), matching: find.byType(Container));
-    expect(tester.widgetList<Container>(tableContainerFinder).first.decoration, decoration);
+    expect(tester.widget<Container>(tableContainerFinder).decoration, decoration);
 
     final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
