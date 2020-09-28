@@ -1316,9 +1316,9 @@ class ReloadReportContents {
         if (notice is Map<String, dynamic>) {
           reasons.add(
             ReasonForCancelling(
-              message: notice['message'] is String ? notice['message'] as String : 'Unknown Error',
-              library: notice['Library'] is String ? notice['Library'] as String : '',
-              className: notice['Class'] is String ? notice['Class'] as String : '',
+              message: notice['message'] is String
+                ? notice['message'] as String
+                : 'Unknown Error',
             ),
           );
         }
@@ -1347,13 +1347,9 @@ class ReloadReportContents {
 class ReasonForCancelling {
   ReasonForCancelling({
     this.message,
-    this.library,
-    this.className,
   });
 
   final String message;
-  final String library;
-  final String className;
 
   static const String kConstClassError = 'Const class cannot remove fields';
 
@@ -1363,6 +1359,6 @@ class ReasonForCancelling {
     if (message.contains(kConstClassError)) {
       contextHint = 'Try performing a hot restart instead.';
     }
-    return '$message $library $className $contextHint';
+    return '$message $contextHint';
   }
 }
