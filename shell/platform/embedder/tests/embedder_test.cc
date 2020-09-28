@@ -3,6 +3,11 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_context_software.h"
+
+#ifdef SHELL_ENABLE_GL
+#include "flutter/shell/platform/embedder/tests/embedder_test_context_gl.h"
+#endif
 
 namespace flutter {
 namespace testing {
@@ -23,10 +28,12 @@ EmbedderTestContext& EmbedderTest::GetEmbedderContext(ContextType type) {
             std::make_unique<EmbedderTestContextSoftware>(
                 GetFixturesDirectory());
         break;
+#ifdef SHELL_ENABLE_GL
       case ContextType::kOpenGLContext:
         embedder_contexts_[type] =
             std::make_unique<EmbedderTestContextGL>(GetFixturesDirectory());
         break;
+#endif
       default:
         FML_DCHECK(false) << "Invalid context type specified.";
         break;

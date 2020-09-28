@@ -95,6 +95,7 @@ group("flutter") {
       "//flutter/lib/ui:ui_unittests",
       "//flutter/runtime:runtime_unittests",
       "//flutter/shell/common:shell_unittests",
+      "//flutter/shell/platform/embedder:embedder_unittests",
       "//flutter/testing:testing_unittests",
       "//flutter/third_party/txt:txt_unittests",
     ]
@@ -114,11 +115,6 @@ group("flutter") {
         "//flutter/shell/platform/android/jni:jni_unittests",
         "//flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
       ]
-    }
-
-    # TODO(): Enable embedder_unittests on fucsia.
-    if (!is_fuchsia) {
-      public_deps += [ "//flutter/shell/platform/embedder:embedder_unittests" ]
     }
 
     # Unit tests for desktop embeddings should only be built if the desktop

@@ -8,6 +8,11 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 
+#ifdef SHELL_ENABLE_GL
+#include "flutter/shell/platform/embedder/tests/embedder_test_compositor_gl.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_context_gl.h"
+#endif
+
 namespace flutter {
 namespace testing {
 
@@ -25,6 +30,7 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
 
   custom_task_runners_.struct_size = sizeof(FlutterCustomTaskRunners);
 
+#ifdef SHELL_ENABLE_GL
   opengl_renderer_config_.struct_size = sizeof(FlutterOpenGLRendererConfig);
   opengl_renderer_config_.make_current = [](void* context) -> bool {
     return reinterpret_cast<EmbedderTestContextGL*>(context)->GLMakeCurrent();
@@ -57,6 +63,7 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
     return reinterpret_cast<EmbedderTestContext*>(context)
         ->GetRootSurfaceTransformation();
   };
+#endif
 
   software_renderer_config_.struct_size = sizeof(FlutterSoftwareRendererConfig);
   software_renderer_config_.surface_present_callback =
@@ -111,6 +118,7 @@ void EmbedderConfigBuilder::SetSoftwareRendererConfig(SkISize surface_size) {
 }
 
 void EmbedderConfigBuilder::SetOpenGLFBOCallBack() {
+#ifdef SHELL_ENABLE_GL
   // SetOpenGLRendererConfig must be called before this.
   FML_CHECK(renderer_config_.type == FlutterRendererType::kOpenGL);
   renderer_config_.open_gl.fbo_callback = [](void* context) -> uint32_t {
@@ -123,21 +131,26 @@ void EmbedderConfigBuilder::SetOpenGLFBOCallBack() {
     return reinterpret_cast<EmbedderTestContextGL*>(context)->GLGetFramebuffer(
         frame_info);
   };
+#endif
 }
 
 void EmbedderConfigBuilder::SetOpenGLPresentCallBack() {
+#ifdef SHELL_ENABLE_GL
   // SetOpenGLRendererConfig must be called before this.
   FML_CHECK(renderer_config_.type == FlutterRendererType::kOpenGL);
   renderer_config_.open_gl.present = [](void* context) -> bool {
     // passing a placeholder fbo_id.
     return reinterpret_cast<EmbedderTestContextGL*>(context)->GLPresent(0);
   };
+#endif
 }
 
 void EmbedderConfigBuilder::SetOpenGLRendererConfig(SkISize surface_size) {
+#ifdef SHELL_ENABLE_GL
   renderer_config_.type = FlutterRendererType::kOpenGL;
   renderer_config_.open_gl = opengl_renderer_config_;
   context_.SetupSurface(surface_size);
+#endif
 }
 
 void EmbedderConfigBuilder::SetAssetsPath() {

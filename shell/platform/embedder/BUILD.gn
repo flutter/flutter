@@ -8,11 +8,18 @@ import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/embedder/embedder.gni")
 import("//flutter/testing/testing.gni")
 
+declare_args() {
+  embedder_enable_software = shell_enable_software
+  embedder_enable_vulkan = shell_enable_vulkan
+  embedder_enable_gl = shell_enable_gl
+  embedder_enable_metal = shell_enable_metal
+}
+
 shell_gpu_configuration("embedder_gpu_configuration") {
-  enable_software = true
-  enable_vulkan = false
-  enable_gl = true
-  enable_metal = false
+  enable_software = embedder_enable_software
+  enable_vulkan = embedder_enable_vulkan
+  enable_gl = embedder_enable_gl
+  enable_metal = embedder_enable_metal
 }
 
 _framework_binary_subpath = "Versions/A/FlutterEmbedder"
@@ -27,8 +34,6 @@ template("embedder_source_set") {
       "embedder.cc",
       "embedder_engine.cc",
       "embedder_engine.h",
-      "embedder_external_texture_gl.cc",
-      "embedder_external_texture_gl.h",
       "embedder_external_view.cc",
       "embedder_external_view.h",
       "embedder_external_view_embedder.cc",
@@ -46,8 +51,6 @@ template("embedder_source_set") {
       "embedder_safe_access.h",
       "embedder_surface.cc",
       "embedder_surface.h",
-      "embedder_surface_gl.cc",
-      "embedder_surface_gl.h",
       "embedder_surface_software.cc",
       "embedder_surface_software.h",
       "embedder_task_runner.cc",
@@ -59,6 +62,15 @@ template("embedder_source_set") {
       "vsync_waiter_embedder.cc",
       "vsync_waiter_embedder.h",
     ]
+
+    if (embedder_enable_gl) {
+      sources += [
+        "embedder_external_texture_gl.cc",
+        "embedder_external_texture_gl.h",
+        "embedder_surface_gl.cc",
+        "embedder_surface_gl.h",
+      ]
+    }
 
     deps = [
       ":embedder_gpu_configuration",
@@ -77,7 +89,10 @@ template("embedder_source_set") {
 
     public_deps = [ ":embedder_headers" ]
 
-    public_configs += [ "//flutter:config" ]
+    public_configs += [
+      ":embedder_gpu_configuration_config",
+      "//flutter:config",
+    ]
   }
 }
 
@@ -127,11 +142,14 @@ test_fixtures("fixtures") {
   ]
 }
 
-if (current_toolchain == host_toolchain) {
+if (enable_unittests) {
   executable("embedder_unittests") {
     testonly = true
 
-    configs += [ "//flutter:export_dynamic_symbols" ]
+    configs += [
+      ":embedder_gpu_configuration_config",
+      "//flutter:export_dynamic_symbols",
+    ]
 
     include_dirs = [ "." ]
 
@@ -145,35 +163,42 @@ if (current_toolchain == host_toolchain) {
       "tests/embedder_test_backingstore_producer.h",
       "tests/embedder_test_compositor.cc",
       "tests/embedder_test_compositor.h",
-      "tests/embedder_test_compositor_gl.cc",
-      "tests/embedder_test_compositor_gl.h",
       "tests/embedder_test_compositor_software.cc",
       "tests/embedder_test_compositor_software.h",
       "tests/embedder_test_context.cc",
       "tests/embedder_test_context.h",
-      "tests/embedder_test_context_gl.cc",
-      "tests/embedder_test_context_gl.h",
       "tests/embedder_test_context_software.cc",
       "tests/embedder_test_context_software.h",
       "tests/embedder_unittests.cc",
-      "tests/embedder_unittests_gl.cc",
       "tests/embedder_unittests_util.cc",
     ]
 
     deps = [
       ":embedder",
+      ":embedder_gpu_configuration",
       ":fixtures",
       "//flutter/flow",
       "//flutter/lib/ui",
       "//flutter/runtime",
       "//flutter/testing",
       "//flutter/testing:dart",
-      "//flutter/testing:opengl",
       "//flutter/testing:skia",
       "//flutter/third_party/tonic",
       "//third_party/dart/runtime/bin:elf_loader",
       "//third_party/skia",
     ]
+
+    if (test_enable_gl) {
+      sources += [
+        "tests/embedder_test_compositor_gl.cc",
+        "tests/embedder_test_compositor_gl.h",
+        "tests/embedder_test_context_gl.cc",
+        "tests/embedder_test_context_gl.h",
+        "tests/embedder_unittests_gl.cc",
+      ]
+
+      deps += [ "//flutter/testing:opengl" ]
+    }
   }
 }
 

@@ -9,8 +9,7 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/platform/embedder/tests/embedder_test_context_gl.h"
-#include "flutter/shell/platform/embedder/tests/embedder_test_context_software.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_context.h"
 #include "flutter/testing/testing.h"
 #include "flutter/testing/thread_test.h"
 
