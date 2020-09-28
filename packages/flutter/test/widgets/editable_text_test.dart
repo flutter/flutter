@@ -4695,7 +4695,7 @@ void main() {
 
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     final Rect rect = state.renderEditable.getLocalRectForCaret(const TextPosition(offset: 0));
-    expect(rect.isFinite, false);
+    expect(rect.isFinite, true);
     expect(tester.takeException(), isNull);
   });
 
