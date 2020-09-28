@@ -308,6 +308,14 @@ class ToolbarOptions {
 /// movement. This widget does not provide any focus management (e.g.,
 /// tap-to-focus).
 ///
+/// ## Handling User Input
+///
+/// Currently the user may change the text this widget contains via keyboard or
+/// the text selection menu. When the user inserted or deleted text,
+/// [EditableText] first applies the [inputFormatters] in the provided order, if
+/// any, then the [TextEditingController] will be updated with the formatted
+/// result. Lastly [onChanged] will be called.
+///
 /// ## Input Actions
 ///
 /// A [TextInputAction] can be provided to customize the appearance of the
@@ -351,34 +359,6 @@ class ToolbarOptions {
 /// [TextField] or [CupertinoTextField]. For custom selection behavior, call
 /// methods such as [RenderEditable.selectPosition],
 /// [RenderEditable.selectWord], etc. programmatically.
-///
-/// ## Communication with the Platform Text Input Plugin
-///
-/// [EditableText] communicates asynchronously with the platform text input
-/// plugin to keep the [TextEditingValue] in sync. Currently the communication
-/// flow is:
-///
-/// * [EditableText] sends its latest [TextEditingValue] to the platform text
-///   input plugin using [TextInputConnection.setEditingState], and it
-///   unconditionally overwrites the platform text input plugin's current
-///   [TextEditingValue].
-///
-/// * With the exception of autofill, the text input plugin can only send
-///   [TextEditingValue] to the currently connected [EditableText]. Once
-///   received by the [EditableText], the [TextEditingValue] will be treated as
-///   user input and processed by the supplied [inputFormatters] and then the
-///   [onChanged] callback.
-///
-/// These rules need to be followed:
-///
-/// * To prevent feedback loops, it is vital that the receiving end not sending
-///   the value back to the sending end.
-///
-/// * The message handler for the "TextInput.setEditingState" message in the
-///   platform text input plugin must set the [TextEditingValue] as is.
-///   Attempting to change the editing value and reporting the change back to
-///   the framework may cause the [EditableText] and the text input plugin to
-///   stuck in an infinite loop.
 ///
 /// See also:
 ///
@@ -1641,7 +1621,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // TextInputClient implementation:
 
-  /// The last reported [TextEditingValue] the platform text input plugin holds.
+  /// The last known [TextEditingValue] of the platform text input plugin.
   ///
   /// This value is updated when the platform text input plugin sends a new
   /// update via [updateEditingValue], or when [EditableText] calls
@@ -1659,8 +1639,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void updateEditingValue(TextEditingValue value) {
     // This method handles text editing state updates from the platform text
     // input plugin. The [EditableText] may not have the focus or an open input
-    // connection, as autofill can updated an [EditableText] without an active
-    // connection.
+    // connection, as autofill can update a disconnected [EditableText].
 
     // Since we still have to support keyboard select, this is the best place
     // to disable text updating.

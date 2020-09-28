@@ -759,14 +759,14 @@ abstract class TextSelectionDelegate {
   /// Indicates that the user has requested the delegate to replace its current
   /// text editing state with [value].
   ///
-  /// The new [value] should be treated as user input and thus may subject to
-  /// user-input-specific pre-processing such as input formatters.
+  /// The new [value] is treated as user input and thus may subject to input
+  /// formatting.
   ///
   /// See also:
   ///
-  /// * [EditableTextState.textEditingValue]: an concrete implementation that
-  ///   appleis additional pre-processing to the specified [value], before
-  ///   updating the text editing state.
+  /// * [EditableTextState.textEditingValue]: an implementation that appleis
+  ///   additional pre-processing to the specified [value], before updating the
+  ///   text editing state.
   set textEditingValue(TextEditingValue value);
 
   /// Hides the text selection toolbar.
@@ -794,6 +794,8 @@ abstract class TextSelectionDelegate {
 /// See also:
 ///
 ///  * [TextInput.attach]
+///
+///  * [EditableText], a [TextInputClient] implementation.
 abstract class TextInputClient {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -816,8 +818,8 @@ abstract class TextInputClient {
 
   /// Requests that this client update its editing state to the given value.
   ///
-  /// The new [value] should be treated as user input and thus may subject to
-  /// user-input-specific pre-processing such as input formatters.
+  /// The new [value] is treated as user input and thus may subject to input
+  /// formatting.
   void updateEditingValue(TextEditingValue value);
 
   /// Requests that this client perform the given action.
@@ -845,7 +847,11 @@ abstract class TextInputClient {
 ///
 /// See also:
 ///
-///  * [TextInput.attach]
+///  * [TextInput.attach], a method used to establish a [TextInputConnection]
+///    between the system's text input and a [TextInputClient].
+/// 
+///  * [EditableText], a [TextInputClient] that connects to and interacts with
+///    the system's text input using a [TextInputConnection].
 class TextInputConnection {
   TextInputConnection._(this._client)
       : assert(_client != null),
@@ -902,7 +908,8 @@ class TextInputConnection {
     TextInput._instance._updateConfig(configuration);
   }
 
-  /// Requests that the text input control change its internal state to match the given state.
+  /// Requests that the text input control change its internal state to match
+  /// the given state.
   void setEditingState(TextEditingValue value) {
     assert(attached);
     TextInput._instance._setEditingState(value);
@@ -1055,9 +1062,59 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
 
 /// An low-level interface to the system's text input control.
 ///
+/// To start interacting with the system's text input control, call [attach] to
+/// establish a [TextInputConnection] between the system's text input control
+/// and a [TextInputClient]. The majority of commands available for
+/// interacting with the text input control reside in the returned
+/// [TextInputConnection]. The communication between the system text input and
+/// the [TextInputClient] is asynchronous.
+///
+/// The platform text input plugin (which represents the system's text input)
+/// and the [TextInputClient] usually maintain their own text editing states
+/// ([TextEditingValue]) separately. They must be kept in sync as long as the
+/// [TextInputClient] is connected. The following methods can be used to send
+/// [TextEditingValue] to update the other party, when either party's text
+/// editing states change:
+///
+/// * The [TextInput.attach] method allows a [TextInputClient] to establish a
+///   connection to the text input. An optional field in its `configuration`
+///   parameter can be used to specify an initial value for the system text
+///   input's [TextEditingValue].
+///
+/// * The [TextInputClient] sends its [TextEditingValue] to the system text
+///   input plugin using [TextInputConnection.setEditingState].
+///
+/// * The platform text input plugin sends its [TextEditingValue] to the
+///   connected [TextInputClient] via a "TextInput.setEditingState" message.
+///
+/// * When autofill happens on a disconnected [TextInputClient], the platform
+///   text input plugin sends the [TextInputValue] to the connected
+///   [TextinputClient]'s [AutofillScope], and the [AutofillScope] will further
+///   rely the value to the correct [TextInputClient].
+///
+/// When synchronizing the [TextEditingValue]s, the communication may stuck in
+/// an infinity loop when both parties are trying to send their own update. To
+/// mitigate the problem while keep the text editing states in sync, only
+/// [TextInputClient]s are allowed to alter the received [TextEditingValue]s
+/// while platform text input plugins are to accept the received values
+/// unmodified. More specifically:
+///
+/// * When a [TextInputClient] receives a new [TextEditingValue] from the
+///   platform text input plugin, it's allowed to modify the value (for example,
+///   apply [TextInputFormatter]s). If it decides to do so, it must send the
+///   updated [TextEditingValue] back to the platform text input plugin to keep
+///   the [TextEditingValue]s in sync.
+///
+/// * When the platform text input plugin receives a new value from the
+///   connected [TextInputClient], it must accept the new value as-is, to avoid
+///   sending back an updated value.
+///
 /// See also:
 ///
 ///  * [TextField], a widget in which the user may enter text.
+///
+///  * [EditableText], a [TextInputClient] that connects to [TextInput] when it
+///    wants to take user input from the keyboard.
 class TextInput {
   TextInput._() {
     _channel = SystemChannels.textInput;
