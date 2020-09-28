@@ -433,7 +433,7 @@ void paintImage({
   assert(flipHorizontally != null);
   assert(isAntiAlias != null);
   assert(
-    image.debugGetOpenHandleStackTraces()!.isNotEmpty,
+    image.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
     'Cannot paint an image that is disposed.\n'
     'The caller of paintImage is expected to wait to dispose the image until '
     'after painting has completed.'
