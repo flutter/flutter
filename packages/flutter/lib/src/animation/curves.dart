@@ -182,7 +182,7 @@ class Interval extends Curve {
     assert(end >= 0.0);
     assert(end <= 1.0);
     assert(end >= begin);
-    t = ((t - begin) / (end - begin)).clamp(0.0, 1.0) as double; // ignore: unnecessary_cast
+    t = ((t - begin) / (end - begin)).clamp(0.0, 1.0);
     if (t == 0.0 || t == 1.0)
       return t;
     return curve.transform(t);
@@ -1189,7 +1189,7 @@ class ElasticInCurve extends Curve {
   double transformInternal(double t) {
     final double s = period / 4.0;
     t = t - 1.0;
-    return -math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period) as double; // ignore: unnecessary_cast
+    return -math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period);
   }
 
   @override
@@ -1216,7 +1216,7 @@ class ElasticOutCurve extends Curve {
   @override
   double transformInternal(double t) {
     final double s = period / 4.0;
-    return math.pow(2.0, -10 * t) * math.sin((t - s) * (math.pi * 2.0) / period) + 1.0 as double; // ignore: unnecessary_cast
+    return math.pow(2.0, -10 * t) * math.sin((t - s) * (math.pi * 2.0) / period) + 1.0;
   }
 
   @override
@@ -1248,7 +1248,7 @@ class ElasticInOutCurve extends Curve {
     if (t < 0.0)
       return -0.5 * math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period);
     else
-      return math.pow(2.0, -10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period) * 0.5 + 1.0 as double; // ignore: unnecessary_cast
+      return math.pow(2.0, -10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period) * 0.5 + 1.0;
   }
 
   @override

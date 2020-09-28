@@ -153,25 +153,25 @@ void main() {
     controller.forward();
     tick(const Duration(milliseconds: 10));
     tick(const Duration(milliseconds: 30));
-    expect(controller.value, closeTo(0.2, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(0.2));
     tick(const Duration(milliseconds: 60));
-    expect(controller.value, closeTo(0.5, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(0.5));
     tick(const Duration(milliseconds: 90));
-    expect(controller.value, closeTo(0.8, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(0.8));
     tick(const Duration(milliseconds: 120));
-    expect(controller.value, closeTo(1.0, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(1.0));
     controller.stop();
 
     controller.reverse();
     tick(const Duration(milliseconds: 210));
     tick(const Duration(milliseconds: 220));
-    expect(controller.value, closeTo(0.8, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(0.8));
     tick(const Duration(milliseconds: 230));
-    expect(controller.value, closeTo(0.6, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(0.6));
     tick(const Duration(milliseconds: 240));
-    expect(controller.value, closeTo(0.4, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(0.4));
     tick(const Duration(milliseconds: 260));
-    expect(controller.value, closeTo(0.0, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(0.0));
     controller.stop();
 
     // Swap which duration is longer.
@@ -184,25 +184,25 @@ void main() {
     controller.forward();
     tick(const Duration(milliseconds: 10));
     tick(const Duration(milliseconds: 30));
-    expect(controller.value, closeTo(0.4, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(0.4));
     tick(const Duration(milliseconds: 60));
-    expect(controller.value, closeTo(1.0, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(1.0));
     tick(const Duration(milliseconds: 90));
-    expect(controller.value, closeTo(1.0, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(1.0));
     controller.stop();
 
     controller.reverse();
     tick(const Duration(milliseconds: 210));
     tick(const Duration(milliseconds: 220));
-    expect(controller.value, closeTo(0.9, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(0.9));
     tick(const Duration(milliseconds: 230));
-    expect(controller.value, closeTo(0.8, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(0.8));
     tick(const Duration(milliseconds: 240));
-    expect(controller.value, closeTo(0.7, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(0.7));
     tick(const Duration(milliseconds: 260));
-    expect(controller.value, closeTo(0.5, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(0.5));
     tick(const Duration(milliseconds: 310));
-    expect(controller.value, closeTo(0.0, precisionErrorTolerance));
+    expect(controller.value, moreOrLessEquals(0.0));
     controller.stop();
   });
 

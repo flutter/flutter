@@ -502,6 +502,36 @@ void main() {
     );
   });
 
+  testWidgets('getClipPath() works for lots of kinds of decorations', (WidgetTester tester) async {
+    Future<void> test(Decoration decoration) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: Center(
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+              child: RepaintBoundary(
+                child: Container(
+                  clipBehavior: Clip.hardEdge,
+                  decoration: decoration,
+                  child: ColoredBox(
+                    color: Colors.yellow.withOpacity(0.5),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await expectLater(find.byType(Container), matchesGoldenFile('container_test.getClipPath.${decoration.runtimeType}.png'));
+    }
+    await test(const BoxDecoration());
+    await test(const UnderlineTabIndicator());
+    await test(const ShapeDecoration(shape: StadiumBorder()));
+    await test(const FlutterLogoDecoration());
+  });
+
   testWidgets('Container is hittable only when having decorations', (WidgetTester tester) async {
     bool tapped = false;
     await tester.pumpWidget(GestureDetector(
@@ -554,6 +584,37 @@ void main() {
 
     await tester.tap(find.byType(Container));
     expect(tapped, false);
+  });
+
+  testWidgets('using clipBehaviour and shadow, should not clip the shadow', (WidgetTester tester) async {
+    final Container container = Container(
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          color: Colors.red,
+          boxShadow: const <BoxShadow>[
+            BoxShadow(
+              color: Colors.blue,
+              offset: Offset.zero,
+              spreadRadius: 10,
+              blurRadius: 20.0,
+            ),
+          ]),
+      child: const SizedBox(width: 50, height: 50),
+    );
+
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: Padding(
+          padding: const EdgeInsets.all(30.0),
+          child: container,
+      )),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('container.clipBehaviour.with.shadow.png'),
+    );
   });
 }
 

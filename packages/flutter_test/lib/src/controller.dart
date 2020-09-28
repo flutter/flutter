@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:clock/clock.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -378,27 +376,26 @@ abstract class WidgetController {
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard<void>(() async {
       final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), PointerDeviceKind.touch, null, buttons);
-      final HitTestResult result = hitTestOnBinding(startLocation);
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);
       double timeStamp = 0.0;
       double lastTimeStamp = timeStamp;
-      await sendEventToBinding(testPointer.down(startLocation, timeStamp: Duration(microseconds: timeStamp.round())), result);
+      await sendEventToBinding(testPointer.down(startLocation, timeStamp: Duration(microseconds: timeStamp.round())));
       if (initialOffset.distance > 0.0) {
-        await sendEventToBinding(testPointer.move(startLocation + initialOffset, timeStamp: Duration(microseconds: timeStamp.round())), result);
+        await sendEventToBinding(testPointer.move(startLocation + initialOffset, timeStamp: Duration(microseconds: timeStamp.round())));
         timeStamp += initialOffsetDelay.inMicroseconds;
         await pump(initialOffsetDelay);
       }
       for (int i = 0; i <= kMoveCount; i += 1) {
         final Offset location = startLocation + initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount);
-        await sendEventToBinding(testPointer.move(location, timeStamp: Duration(microseconds: timeStamp.round())), result);
+        await sendEventToBinding(testPointer.move(location, timeStamp: Duration(microseconds: timeStamp.round())));
         timeStamp += timeStampDelta;
         if (timeStamp - lastTimeStamp > frameInterval.inMicroseconds) {
           await pump(Duration(microseconds: (timeStamp - lastTimeStamp).truncate()));
           lastTimeStamp = timeStamp;
         }
       }
-      await sendEventToBinding(testPointer.up(timeStamp: Duration(microseconds: timeStamp.round())), result);
+      await sendEventToBinding(testPointer.up(timeStamp: Duration(microseconds: timeStamp.round())));
     });
   }
 
@@ -739,7 +736,6 @@ abstract class WidgetController {
     int buttons = kPrimaryButton,
   }) async {
     return TestGesture(
-      hitTester: hitTestOnBinding,
       dispatcher: sendEventToBinding,
       kind: kind,
       pointer: pointer ?? _getNextPointer(),
@@ -759,6 +755,7 @@ abstract class WidgetController {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
+    assert(downLocation != null);
     final TestGesture result = await createGesture(
       pointer: pointer,
       kind: kind,
@@ -776,9 +773,9 @@ abstract class WidgetController {
   }
 
   /// Forwards the given pointer event to the binding.
-  Future<void> sendEventToBinding(PointerEvent event, HitTestResult result) {
+  Future<void> sendEventToBinding(PointerEvent event) {
     return TestAsyncUtils.guard<void>(() async {
-      binding.dispatchEvent(event, result);
+      binding.handlePointerEvent(event);
     });
   }
 
@@ -1086,9 +1083,7 @@ class LiveWidgetController extends WidgetController {
           // processing of the events.
           // Flush all past events
           handleTimeStampDiff.add(-timeDiff);
-          for (final PointerEvent event in record.events) {
-            _handlePointerEvent(event, hitTestHistory);
-          }
+          record.events.forEach(binding.handlePointerEvent);
         } else {
           await Future<void>.delayed(timeDiff);
           handleTimeStampDiff.add(
@@ -1097,9 +1092,7 @@ class LiveWidgetController extends WidgetController {
             // fake async this new diff should be zero.
             clock.now().difference(startTime) - record.timeDelay,
           );
-          for (final PointerEvent event in record.events) {
-            _handlePointerEvent(event, hitTestHistory);
-          }
+          record.events.forEach(binding.handlePointerEvent);
         }
       }
       // This makes sure that a gesture is completed, with no more pointers
@@ -1107,47 +1100,5 @@ class LiveWidgetController extends WidgetController {
       assert(hitTestHistory.isEmpty);
       return handleTimeStampDiff;
     });
-  }
-
-  // This method is almost identical to [GestureBinding._handlePointerEvent]
-  // to replicate the behavior of the real binding.
-  void _handlePointerEvent(
-    PointerEvent event,
-    Map<int, HitTestResult> _hitTests
-  ) {
-    HitTestResult hitTestResult;
-    if (event is PointerDownEvent || event is PointerSignalEvent) {
-      assert(!_hitTests.containsKey(event.pointer));
-      hitTestResult = HitTestResult();
-      binding.hitTest(hitTestResult, event.position);
-      if (event is PointerDownEvent) {
-        _hitTests[event.pointer] = hitTestResult;
-      }
-      assert(() {
-        if (debugPrintHitTestResults)
-          debugPrint('$event: $hitTestResult');
-        return true;
-      }());
-    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
-      hitTestResult = _hitTests.remove(event.pointer);
-    } else if (event.down) {
-      // Because events that occur with the pointer down (like
-      // PointerMoveEvents) should be dispatched to the same place that their
-      // initial PointerDownEvent was, we want to re-use the path we found when
-      // the pointer went down, rather than do hit detection each time we get
-      // such an event.
-      hitTestResult = _hitTests[event.pointer];
-    }
-    assert(() {
-      if (debugPrintMouseHoverEvents && event is PointerHoverEvent)
-        debugPrint('$event');
-      return true;
-    }());
-    if (hitTestResult != null ||
-        event is PointerHoverEvent ||
-        event is PointerAddedEvent ||
-        event is PointerRemovedEvent) {
-      binding.dispatchEvent(event, hitTestResult);
-    }
   }
 }

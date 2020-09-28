@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
@@ -93,7 +91,7 @@ String getAarTaskFor(BuildInfo buildInfo) {
 /// For example, when [splitPerAbi] is true, multiple APKs are created.
 Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
-  final String productFlavor = androidBuildInfo.buildInfo.flavor ?? '';
+  final String productFlavor = androidBuildInfo.buildInfo.lowerCasedFlavor ?? '';
   final String flavorString = productFlavor.isEmpty ? '' : '-$productFlavor';
   if (androidBuildInfo.splitPerAbi) {
     return androidBuildInfo.targetArchs.map<String>((AndroidArch arch) {
@@ -397,7 +395,7 @@ Future<void> buildGradleApp({
       environment: gradleEnvironment,
       mapFunction: consumeLog,
     );
-  } on ProcessException catch(exception) {
+  } on ProcessException catch (exception) {
     consumeLog(exception.toString());
     // Rethrow the exception if the error isn't handled by any of the
     // `localGradleErrors`.
@@ -903,7 +901,7 @@ Iterable<String> listApkPaths(
   final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
   final List<String> apkPartialName = <String>[
     if (androidBuildInfo.buildInfo.flavor?.isNotEmpty ?? false)
-      androidBuildInfo.buildInfo.flavor,
+      androidBuildInfo.buildInfo.lowerCasedFlavor,
     '$buildType.apk',
   ];
   if (androidBuildInfo.splitPerAbi) {
@@ -940,7 +938,7 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo) {
     // the directory name is `foo_barRelease`.
     fileCandidates.add(
       getBundleDirectory(project)
-        .childDirectory('${buildInfo.flavor}${camelCase('_' + buildInfo.modeName)}')
+        .childDirectory('${buildInfo.lowerCasedFlavor}${camelCase('_' + buildInfo.modeName)}')
         .childFile('app.aab'));
 
     // The Android Gradle plugin 3.5.0 adds the flavor name to file name.
@@ -948,8 +946,8 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo) {
     // the file name name is `app-foo_bar-release.aab`.
     fileCandidates.add(
       getBundleDirectory(project)
-        .childDirectory('${buildInfo.flavor}${camelCase('_' + buildInfo.modeName)}')
-        .childFile('app-${buildInfo.flavor}-${buildInfo.modeName}.aab'));
+        .childDirectory('${buildInfo.lowerCasedFlavor}${camelCase('_' + buildInfo.modeName)}')
+        .childFile('app-${buildInfo.lowerCasedFlavor}-${buildInfo.modeName}.aab'));
   }
   for (final File bundleFile in fileCandidates) {
     if (bundleFile.existsSync()) {

@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
@@ -26,6 +25,7 @@ void main() {
       final String reply = await channel.send('hello');
       expect(reply, equals('hello world'));
     });
+
     test('can receive string message and send reply', () async {
       channel.setMessageHandler((String message) async => message + ' world');
       String reply;
@@ -171,13 +171,25 @@ void main() {
       expect(result, isNull);
     });
 
-    test('can handle method call with no registered plugin', () async {
+    test('can handle method call with no registered plugin (setting before)', () async {
       channel.setMethodCallHandler(null);
       final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData envelope;
       await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (ByteData result) {
         envelope = result;
       });
+      await null; // just in case there's something async happening
+      expect(envelope, isNull);
+    });
+
+    test('can handle method call with no registered plugin (setting after)', () async {
+      final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
+      ByteData envelope;
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (ByteData result) {
+        envelope = result;
+      });
+      channel.setMethodCallHandler(null);
+      await null; // just in case there's something async happening
       expect(envelope, isNull);
     });
 
@@ -263,6 +275,7 @@ void main() {
       expect(channel.checkMockMethodCallHandler(handler), true);
     });
   });
+
   group('EventChannel', () {
     const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
     const MethodCodec jsonMethod = JSONMethodCodec();
@@ -299,6 +312,7 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(canceled, isTrue);
     });
+
     test('can receive error event', () async {
       ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch',

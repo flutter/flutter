@@ -195,6 +195,21 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
+  testWidgets('VisualDensity in ThemeData defaults to "compact" on desktop and "standard" on mobile', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    switch (debugDefaultTargetPlatformOverride) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        expect(themeData.visualDensity, equals(const VisualDensity()));
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(themeData.visualDensity, equals(VisualDensity.compact));
+    }
+  }, variant: TargetPlatformVariant.all());
+
   testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
 
     final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
@@ -288,6 +303,7 @@ void main() {
       elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colors.green)),
       outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(primary: Colors.blue)),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
+      dataTableTheme: const DataTableThemeData(),
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
     );
@@ -376,6 +392,7 @@ void main() {
       elevatedButtonTheme: const ElevatedButtonThemeData(),
       outlinedButtonTheme: const OutlinedButtonThemeData(),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.white),
+      dataTableTheme: const DataTableThemeData(),
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
     );

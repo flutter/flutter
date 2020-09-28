@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
@@ -72,15 +71,6 @@ class SkiaGoldClient {
   /// This is informed by the [FlutterGoldenFileComparator] [basedir]. It cannot
   /// be null.
   final Directory workDirectory;
-
-  /// A map of known golden file tests and their associated positive image
-  /// hashes.
-  ///
-  /// This is set and used by the [FlutterLocalFileComparator] and the
-  /// [_UnauthorizedFlutterPreSubmitComparator] to test against golden masters
-  /// maintained in the Flutter Gold dashboard.
-  Map<String, List<String>> get expectations => _expectations;
-  late Map<String, List<String>> _expectations;
 
   /// The local [Directory] where the Flutter repository is hosted.
   ///
@@ -421,15 +411,15 @@ class SkiaGoldClient {
     return result.exitCode == 0;
   }
 
-  /// Requests and sets the [_expectations] known to Flutter Gold at head.
-  Future<void> getExpectations() async {
-    _expectations = <String, List<String>>{};
+  /// Returns the latest positive digest for the given test known to Flutter
+  /// Gold at head.
+  Future<String?> getExpectationForTest(String testName) async {
+    late String? expectation;
+    final String traceID = getTraceID(testName);
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForExpectations = Uri.parse(
-        'https://flutter-gold.skia.org/json/expectations/commit/HEAD'
+        'https://flutter-gold.skia.org/json/v1/latestpositivedigest/$traceID'
       );
-      const String mainKey = 'master';
-      const String temporaryKey = 'master_str';
       late String rawResponse;
       try {
         final io.HttpClientRequest request = await httpClient.getUrl(requestForExpectations);
@@ -438,13 +428,7 @@ class SkiaGoldClient {
         final dynamic jsonResponse = json.decode(rawResponse);
         if (jsonResponse is! Map<String, dynamic>)
           throw const FormatException('Skia gold expectations do not match expected format.');
-        final Map<String, dynamic>? skiaJson = (jsonResponse[mainKey] ?? jsonResponse[temporaryKey]) as Map<String, dynamic>?;
-        if (skiaJson == null)
-          throw FormatException('Skia gold expectations are missing the "$mainKey" key (and also doesn\'t have "$temporaryKey")! Available keys: ${jsonResponse.keys.join(", ")}');
-        skiaJson.forEach((String key, dynamic value) {
-          final Map<String, dynamic> hashesMap = value as Map<String, dynamic>;
-          _expectations[key] = hashesMap.keys.toList();
-        });
+        expectation = jsonResponse['digest'] as String?;
       } on FormatException catch (error) {
         print(
           'Formatting error detected requesting expectations from Flutter Gold.\n'
@@ -457,6 +441,7 @@ class SkiaGoldClient {
     },
       SkiaGoldHttpOverrides(),
     );
+    return expectation;
   }
 
   /// Returns a list of bytes representing the golden image retrieved from the
@@ -499,7 +484,7 @@ class SkiaGoldClient {
     late String rawResponse;
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForIgnores = Uri.parse(
-        'https://flutter-gold.skia.org/json/ignores'
+        'https://flutter-gold.skia.org/json/v1/ignores'
       );
 
       try {
@@ -546,44 +531,6 @@ class SkiaGoldClient {
       SkiaGoldHttpOverrides(),
     );
     return ignoreIsActive;
-  }
-
-  /// The [_expectations] retrieved from Flutter Gold do not include the
-  /// parameters of the given test. This function queries the Flutter Gold
-  /// details api to determine if the given expectation for a test matches the
-  /// configuration of the executing machine.
-  Future<bool> isValidDigestForExpectation(String expectation, String testName) async {
-    bool isValid = false;
-    testName = cleanTestName(testName);
-    late String rawResponse;
-    await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
-      final Uri requestForDigest = Uri.parse(
-        'https://flutter-gold.skia.org/json/details?test=$testName&digest=$expectation'
-      );
-
-      try {
-        final io.HttpClientRequest request = await httpClient.getUrl(requestForDigest);
-        final io.HttpClientResponse response = await request.close();
-        rawResponse = await utf8.decodeStream(response);
-        final Map<String, dynamic> skiaJson = json.decode(rawResponse) as Map<String, dynamic>;
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
-        isValid = digest.isValid(platform, testName, expectation);
-
-      } on FormatException catch(_) {
-        if (rawResponse.contains('stream timeout')) {
-          final StringBuffer buf = StringBuffer()
-            ..writeln("Stream timeout on Gold's /details api.");
-          throw Exception(buf.toString());
-        } else {
-          print('Formatting error detected requesting /ignores from Flutter Gold.'
-            '\nrawResponse: $rawResponse');
-          rethrow;
-        }
-      }
-    },
-      SkiaGoldHttpOverrides(),
-    );
-    return isValid;
   }
 
   /// Returns the current commit hash of the Flutter repository.
@@ -669,53 +616,26 @@ class SkiaGoldClient {
       '--jobid', jobId,
     ];
   }
+
+  /// Returns a trace id based on the current testing environment to lookup
+  /// the latest positive digest on Flutter Gold.
+  ///
+  /// Trace IDs are case sensitive and should be in alphabetical order for the
+  /// keys, followed by the rest of the paramset, also in alphabetical order.
+  /// There should also be leading and trailing commas.
+  ///
+  /// Example TraceID for Flutter Gold:
+  ///   ',CI=cirrus,Platform=linux,name=cupertino.activityIndicator.inprogress.1.0,source_type=flutter,'
+  String getTraceID(String testName) {
+    // If we are not in a CI environment, fallback on luci.
+    return '${platform.environment[_kTestBrowserKey] == null ? ',' : ',Browser=${platform.environment[_kTestBrowserKey]},'}'
+      'CI=${ci == ContinuousIntegrationEnvironment.none ? 'luci' : ci.toString().split('.').last},'
+      'Platform=${platform.operatingSystem},'
+      'name=$testName,'
+      'source_type=flutter,';
+  }
+
 }
 
 /// Used to make HttpRequests during testing.
 class SkiaGoldHttpOverrides extends io.HttpOverrides {}
-
-/// A digest returned from a request to the Flutter Gold dashboard.
-class SkiaGoldDigest {
-  const SkiaGoldDigest({
-    required this.imageHash,
-    required this.paramSet,
-    required this.testName,
-    required this.status,
-  });
-
-  /// Create a digest from requested JSON.
-  factory SkiaGoldDigest.fromJson(Map<String, dynamic> json) {
-    return SkiaGoldDigest(
-      imageHash: json['digest'] as String,
-      paramSet: Map<String, dynamic>.from(json['paramset'] as Map<String, dynamic>? ??
-        <String, List<String>>{
-          'Platform': <String>[],
-          'Browser' : <String>[],
-        }),
-      testName: json['test'] as String,
-      status: json['status'] as String,
-    );
-  }
-
-  /// Unique identifier for the image associated with the digest.
-  final String imageHash;
-
-  /// Parameter set for the given test, e.g. Platform : Windows.
-  final Map<String, dynamic> paramSet;
-
-  /// Test name associated with the digest, e.g. positive or un-triaged.
-  final String testName;
-
-  /// Status of the given digest, e.g. positive or un-triaged.
-  final String status;
-
-  /// Validates a given digest against the current testing conditions.
-  bool isValid(Platform platform, String name, String expectation) {
-    return imageHash == expectation
-      && (paramSet['Platform'] as List<dynamic>/*!*/).contains(platform.operatingSystem)
-      && (platform.environment[_kTestBrowserKey] == null
-         || paramSet['Browser'] == platform.environment[_kTestBrowserKey])
-      && testName == name
-      && status == 'positive';
-  }
-}

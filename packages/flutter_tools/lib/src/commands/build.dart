@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import '../commands/build_linux.dart';
 import '../commands/build_macos.dart';
 import '../commands/build_windows.dart';
@@ -42,7 +40,7 @@ class BuildCommand extends FlutterCommand {
   final String name = 'build';
 
   @override
-  final String description = 'Flutter build commands.';
+  final String description = 'Build an executable app or install bundle.';
 
   @override
   Future<FlutterCommandResult> runCommand() async => null;

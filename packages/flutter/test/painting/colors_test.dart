@@ -26,11 +26,11 @@ void main() {
     expect(color.toColor(), const Color(0xb399816b));
 
     final HSVColor result = HSVColor.lerp(color, const HSVColor.fromAHSV(0.3, 128.0, 0.7, 0.2), 0.25);
-    expect(result.alpha, 0.6);
-    expect(result.hue, 53.0);
+    expect(result.alpha, moreOrLessEquals(0.6));
+    expect(result.hue, moreOrLessEquals(53.0));
     expect(result.saturation, greaterThan(0.3999));
     expect(result.saturation, lessThan(0.4001));
-    expect(result.value, 0.5);
+    expect(result.value, moreOrLessEquals(0.5));
   });
 
   test('HSVColor hue sweep test', () {
@@ -222,11 +222,11 @@ void main() {
     expect(color.toColor(), const Color(0xb3b8977a));
 
     final HSLColor result = HSLColor.lerp(color, const HSLColor.fromAHSL(0.3, 128.0, 0.7, 0.2), 0.25);
-    expect(result.alpha, 0.6);
-    expect(result.hue, 53.0);
+    expect(result.alpha, moreOrLessEquals(0.6));
+    expect(result.hue, moreOrLessEquals(53.0));
     expect(result.saturation, greaterThan(0.3999));
     expect(result.saturation, lessThan(0.4001));
-    expect(result.lightness, 0.5);
+    expect(result.lightness, moreOrLessEquals(0.5));
   });
 
   test('HSLColor hue sweep test', () {

@@ -275,10 +275,7 @@ class ImageCache {
   /// Resizes the cache as appropriate to maintain the constraints of
   /// [maximumSize] and [maximumSizeBytes].
   void _touch(Object key, _CachedImage image, TimelineTask? timelineTask) {
-    // TODO(dnfield): Some customers test in release mode with asserts enabled.
-    // This is bound to cause problems, b/150295238 is tracking that. For now,
-    // avoid this being a point of failure.
-    assert(kReleaseMode || timelineTask != null);
+    assert(timelineTask != null);
     if (image.sizeBytes != null && image.sizeBytes! <= maximumSizeBytes) {
       _currentSizeBytes += image.sizeBytes!;
       _cache[key] = image;

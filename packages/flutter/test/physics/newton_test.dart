@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('test_friction', () {
@@ -21,7 +22,7 @@ void main() {
 
     expect(friction.dx(1.0), 120.0);
     expect(friction.dx(2.0), 36.0);
-    expect(friction.dx(3.0), closeTo(10.8, 0.00001));
+    expect(friction.dx(3.0), moreOrLessEquals(10.8));
     expect(friction.dx(4.0) < 3.5, true);
 
     expect(friction.isDone(5.0), true);
@@ -48,10 +49,9 @@ void main() {
     expect(friction.x(0.0), 10.0);
     expect(friction.dx(0.0), 600.0);
 
-    const double epsilon = 1e-4;
-    expect(friction.isDone(1.0 + epsilon), true);
-    expect(friction.x(1.0), closeTo(endPosition, epsilon));
-    expect(friction.dx(1.0), closeTo(endVelocity, epsilon));
+    expect(friction.isDone(1.0 + precisionErrorTolerance), true);
+    expect(friction.x(1.0), moreOrLessEquals(endPosition));
+    expect(friction.dx(1.0), moreOrLessEquals(endVelocity));
 
     // Same scenario as above except that the velocities are
     // are negative.
@@ -65,9 +65,9 @@ void main() {
 
     friction = FrictionSimulation.through(
         startPosition, endPosition, startVelocity, endVelocity);
-    expect(friction.isDone(1.0 + epsilon), true);
-    expect(friction.x(1.0), closeTo(endPosition, epsilon));
-    expect(friction.dx(1.0), closeTo(endVelocity, epsilon));
+    expect(friction.isDone(1.0 + precisionErrorTolerance), true);
+    expect(friction.x(1.0), moreOrLessEquals(endPosition));
+    expect(friction.dx(1.0), moreOrLessEquals(endVelocity));
   });
 
   test('BoundedFrictionSimulation control test', () {
@@ -248,14 +248,14 @@ void main() {
     expect(scroll.x(0.0), 100);
     expect(scroll.dx(0.0), 400.0);
 
-    expect(scroll.x(1.0), closeTo(272.0, 1.0));
+    expect(scroll.x(1.0), moreOrLessEquals(272.0, epsilon: 1.0));
 
-    expect(scroll.dx(1.0), closeTo(54.0, 1.0));
-    expect(scroll.dx(2.0), closeTo(7.0, 1.0));
+    expect(scroll.dx(1.0), moreOrLessEquals(54.0, epsilon: 1.0));
+    expect(scroll.dx(2.0), moreOrLessEquals(7.0, epsilon: 1.0));
     expect(scroll.dx(3.0), lessThan(1.0));
 
     expect(scroll.isDone(5.0), true);
-    expect(scroll.x(5.0), closeTo(300.0, 1.0));
+    expect(scroll.x(5.0), moreOrLessEquals(300.0, epsilon: 1.0));
   });
 
   test('over/under scroll spring', () {
@@ -270,33 +270,33 @@ void main() {
     scroll.tolerance = const Tolerance(velocity: 45.0, distance: 1.5);
 
     expect(scroll.isDone(0.0), false);
-    expect(scroll.x(0.0), closeTo(500.0, .0001));
-    expect(scroll.dx(0.0), closeTo(-7500.0, .0001));
+    expect(scroll.x(0.0), moreOrLessEquals(500.0));
+    expect(scroll.dx(0.0), moreOrLessEquals(-7500.0));
 
     // Expect to reach 0.0 at about t=.07 at which point the simulation will
     // switch from friction to the spring
     expect(scroll.isDone(0.065), false);
-    expect(scroll.x(0.065), closeTo(42.0, 1.0));
-    expect(scroll.dx(0.065), closeTo(-6584.0, 1.0));
+    expect(scroll.x(0.065), moreOrLessEquals(42.0, epsilon: 1.0));
+    expect(scroll.dx(0.065), moreOrLessEquals(-6584.0, epsilon: 1.0));
 
     // We've overscrolled (0.1 > 0.07). Trigger the underscroll
     // simulation, and reverse direction
     expect(scroll.isDone(0.1), false);
-    expect(scroll.x(0.1), closeTo(-123.0, 1.0));
-    expect(scroll.dx(0.1), closeTo(-2613.0, 1.0));
+    expect(scroll.x(0.1), moreOrLessEquals(-123.0, epsilon: 1.0));
+    expect(scroll.dx(0.1), moreOrLessEquals(-2613.0, epsilon: 1.0));
 
     // Headed back towards 0.0 and slowing down.
     expect(scroll.isDone(0.5), false);
-    expect(scroll.x(0.5), closeTo(-15.0, 1.0));
-    expect(scroll.dx(0.5), closeTo(124.0, 1.0));
+    expect(scroll.x(0.5), moreOrLessEquals(-15.0, epsilon: 1.0));
+    expect(scroll.dx(0.5), moreOrLessEquals(124.0, epsilon: 1.0));
 
     // Now jump back to the beginning, because we can.
     expect(scroll.isDone(0.0), false);
-    expect(scroll.x(0.0), closeTo(500.0, .0001));
-    expect(scroll.dx(0.0), closeTo(-7500.0, .0001));
+    expect(scroll.x(0.0), moreOrLessEquals(500.0));
+    expect(scroll.dx(0.0), moreOrLessEquals(-7500.0));
 
     expect(scroll.isDone(2.0), true);
     expect(scroll.x(2.0), 0.0);
-    expect(scroll.dx(2.0), closeTo(0.0, 1.0));
+    expect(scroll.dx(2.0), moreOrLessEquals(0.0, epsilon: 1.0));
   });
 }
