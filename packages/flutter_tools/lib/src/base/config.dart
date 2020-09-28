@@ -26,7 +26,7 @@ class Config {
       _userHomePath(platform),
       name,
     ));
-    return Config._(file, logger);
+    return Config.createForTesting(file, logger);
   }
 
   /// Constructs a new [Config] object from a file called [name] in
@@ -35,14 +35,16 @@ class Config {
     String name, {
     @required Directory directory,
     @required Logger logger,
-  }) => Config._(directory.childFile(name), logger);
+  }) => Config.createForTesting(directory.childFile(name), logger);
 
-  Config._(File file, Logger logger) : _file = file, _logger = logger {
+  /// Test only access to the Config constructor.
+  @visibleForTesting
+  Config.createForTesting(File file, Logger logger) : _file = file, _logger = logger {
     if (!_file.existsSync()) {
       return;
     }
     try {
-      withAllowedFailure(() {
+      ErrorHandlingFileSystem.noExitOnFailure(() {
         _values = castStringKeyedMap(json.decode(_file.readAsStringSync()));
       });
     } on FormatException {

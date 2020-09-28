@@ -221,7 +221,7 @@ class _DefaultUsage implements Usage {
       _analytics = LogToFileAnalytics(logFilePath);
     } else {
       try {
-        withAllowedFailure(() {
+        ErrorHandlingFileSystem.noExitOnFailure(() {
           _analytics = analyticsIOFactory(
             _kFlutterUA,
             settingsName,

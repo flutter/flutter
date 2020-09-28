@@ -20,23 +20,6 @@ import 'platform.dart';
 // ToolExit and a message that is more clear than the FileSystemException by
 // itself.
 
-/// Allow any file system operations executed within the closure to fail with any
-/// operating system error, rethrowing an [Exception] instead of a [ToolExit].
-///
-/// This should not be used with async file system operation.
-///
-/// This can be used to bypass the [ErrorHandlingFileSystem] permission exit
-/// checks for situations where failure is acceptable, such as the flutter
-/// persistent settings cache.
-void withAllowedFailure(void Function() operation) {
-  try {
-    ErrorHandlingFileSystem._allowFailure = true;
-    operation();
-  } finally {
-    ErrorHandlingFileSystem._allowFailure = false;
-  }
-}
-
 /// A [FileSystem] that throws a [ToolExit] on certain errors.
 ///
 /// If a [FileSystem] error is not caused by the Flutter tool, and can only be
@@ -62,7 +45,25 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
 
   final Platform _platform;
 
-  static bool _allowFailure = false;
+  /// Allow any file system operations executed within the closure to fail with any
+  /// operating system error, rethrowing an [Exception] instead of a [ToolExit].
+  ///
+  /// This should not be used with async file system operation.
+  ///
+  /// This can be used to bypass the [ErrorHandlingFileSystem] permission exit
+  /// checks for situations where failure is acceptable, such as the flutter
+  /// persistent settings cache.
+  static void noExitOnFailure(void Function() operation) {
+    final bool previousValue = ErrorHandlingFileSystem._noExitOnFailure;
+    try {
+      ErrorHandlingFileSystem._noExitOnFailure = true;
+      operation();
+    } finally {
+      ErrorHandlingFileSystem._noExitOnFailure = previousValue;
+    }
+  }
+
+  static bool _noExitOnFailure = false;
 
   @override
   Directory get currentDirectory => directory(delegate.currentDirectory);
@@ -163,6 +164,15 @@ class ErrorHandlingFile
       )),
       platform: _platform,
       failureMessage: 'Flutter failed to write to a file at "${delegate.path}"',
+    );
+  }
+
+  @override
+  String readAsStringSync({Encoding encoding = utf8}) {
+    return _runSync<String>(
+      () => delegate.readAsStringSync(),
+      platform: _platform,
+      failureMessage: 'Flutter failed to read a file at "${delegate.path}"',
     );
   }
 
@@ -580,13 +590,7 @@ void _handlePosixException(Exception e, String message, int errorCode) {
       // Caller must rethrow the exception.
       break;
   }
-  if (errorMessage == null) {
-    return;
-  }
-  if (ErrorHandlingFileSystem._allowFailure) {
-    throw Exception(errorMessage);
-  }
-  throwToolExit(errorMessage);
+  _throwFileSystemException(errorMessage);
 }
 
 void _handleWindowsException(Exception e, String message, int errorCode) {
@@ -621,10 +625,14 @@ void _handleWindowsException(Exception e, String message, int errorCode) {
       // Caller must rethrow the exception.
       break;
   }
+  _throwFileSystemException(errorMessage);
+}
+
+void _throwFileSystemException(String errorMessage) {
   if (errorMessage == null) {
     return;
   }
-  if (ErrorHandlingFileSystem._allowFailure) {
+  if (ErrorHandlingFileSystem._noExitOnFailure) {
     throw Exception(errorMessage);
   }
   throwToolExit(errorMessage);

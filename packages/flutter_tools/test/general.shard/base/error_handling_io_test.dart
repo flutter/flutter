@@ -72,6 +72,18 @@ void setupWriteMocks({
   )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
+void setupReadMocks({
+  FileSystem mockFileSystem,
+  ErrorHandlingFileSystem fs,
+  int errorCode,
+}) {
+  final MockFile mockFile = MockFile();
+  when(mockFileSystem.file(any)).thenReturn(mockFile);
+  when(mockFile.readAsStringSync(
+    encoding: anyNamed('encoding'),
+  )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
+}
+
 void setupDirectoryMocks({
   FileSystem mockFileSystem,
   ErrorHandlingFileSystem fs,
@@ -124,7 +136,17 @@ void main() {
 
       final File file = fs.file('file');
 
-      expect(() => withAllowedFailure(() => file.writeAsStringSync('')), throwsA(isA<Exception>()));
+      expect(() => ErrorHandlingFileSystem.noExitOnFailure(
+        () => file.writeAsStringSync('')), throwsA(isA<Exception>()));
+
+      // nesting does not unconditionally re-enable errors.
+      expect(() {
+        ErrorHandlingFileSystem.noExitOnFailure(() {
+          ErrorHandlingFileSystem.noExitOnFailure(() { });
+          file.writeAsStringSync('');
+        });
+      }, throwsA(isA<Exception>()));
+
       // Check that state does not leak.
       expect(() => file.writeAsStringSync(''), throwsA(isA<ToolExit>()));
     });
@@ -232,6 +254,20 @@ void main() {
 
       const String expectedMessage = 'Flutter failed to check for directory existence at';
       expect(() => directory.existsSync(),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('When reading from a file without permission', () {
+      setupReadMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kUserPermissionDenied,
+      );
+
+      final File file = fs.file('file');
+
+      const String expectedMessage = 'Flutter failed to read a file at';
+      expect(() => file.readAsStringSync(),
              throwsToolExit(message: expectedMessage));
     });
   });
@@ -450,6 +486,20 @@ void main() {
 
       const String expectedMessage = 'Flutter failed to check for directory existence at';
       expect(() => directory.existsSync(),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('When reading from a file without permission', () {
+      setupReadMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eacces,
+      );
+
+      final File file = fs.file('file');
+
+      const String expectedMessage = 'Flutter failed to read a file at';
+      expect(() => file.readAsStringSync(),
              throwsToolExit(message: expectedMessage));
     });
   });
