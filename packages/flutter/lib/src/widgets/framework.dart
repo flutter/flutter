@@ -116,6 +116,19 @@ class ObjectKey extends LocalKey {
 /// You cannot simultaneously include two widgets in the tree with the same
 /// global key. Attempting to do so will assert at runtime.
 ///
+/// ## Pitfalls
+/// It is not advised to instantiate a GlobalKey inside of a build method. Doing
+/// so will create a new GlobalKey on every build, which will indicate that the
+/// corresponding widget subtree has changed on every build.
+///
+/// Besides harming performance, this can also cause unexpected behavior in
+/// widgets in the subtree. For example, a GestureDetector in the subtree will
+/// be unable to track ongoing gestures since it will be recreated on each
+/// build.
+///
+/// Instead, instantiate the GlobalKey outside of the build method, such as when
+/// the class instance is created.
+///
 /// See also:
 ///
 ///  * The discussion at [Widget.key] for more information about how widgets use
