@@ -1351,5 +1351,4 @@ void main() {
       const Offset(width - borderVertical, height - borderHorizontal),
     );
   });
-
 }
