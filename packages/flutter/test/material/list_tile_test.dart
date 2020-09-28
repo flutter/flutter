@@ -1692,4 +1692,27 @@ void main() {
     coloredBox = tester.widget(find.byType(ColoredBox));
     expect(coloredBox.color, selectedTileColor);
   });
+
+  testWidgets('ListTile layout at zero size', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66636
+    const Key key = Key('key');
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        body: SizedBox(
+          width: 0.0,
+          height: 0.0,
+          child: ListTile(
+            key: key,
+            tileColor: Colors.green,
+          ),
+        ),
+      ),
+    ));
+
+    final RenderBox renderBox = tester.renderObject(find.byKey(key));
+    expect(renderBox.size.width, equals(0.0));
+    expect(renderBox.size.height, equals(0.0));
+
+  });
 }
