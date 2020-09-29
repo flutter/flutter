@@ -238,8 +238,20 @@ class ThemeData with Diagnosticable {
     ButtonThemeData buttonTheme,
     ToggleButtonsThemeData toggleButtonsTheme,
     Color secondaryHeaderColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.selectionColor instead. '
+      'This feature was deprecated after v1.23.0-4.0.pre.'
+    )
     Color textSelectionColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.cursorColor instead. '
+      'This feature was deprecated after v1.23.0-4.0.pre.'
+    )
     Color cursorColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.selectionHandleColor instead. '
+      'This feature was deprecated after v1.23.0-4.0.pre.'
+    )
     Color textSelectionHandleColor,
     Color backgroundColor,
     Color dialogBackgroundColor,
@@ -286,12 +298,16 @@ class ThemeData with Diagnosticable {
     TextSelectionThemeData textSelectionTheme,
     DataTableThemeData dataTableTheme,
     bool fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v1.23.0-4.0.pre.'
+    )
     bool useTextSelectionTheme,
   }) {
     assert(colorScheme?.brightness == null || brightness == null || colorScheme.brightness == brightness);
     final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
     final bool isDark = _brightness == Brightness.dark;
-    visualDensity ??= const VisualDensity();
+    visualDensity ??= VisualDensity.adaptivePlatformDensity;
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch;
     primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
@@ -352,7 +368,18 @@ class ThemeData with Diagnosticable {
     textTheme = defaultTextTheme.merge(textTheme);
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
     accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
-    materialTapTargetSize ??= MaterialTapTargetSize.padded;
+    switch (platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        materialTapTargetSize ??= MaterialTapTargetSize.padded;
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+         materialTapTargetSize ??= MaterialTapTargetSize.shrinkWrap;
+        break;
+    }
     applyElevationOverlayColor ??= false;
 
     // Used as the default color (fill color) for RaisedButtons. Computing the
@@ -883,21 +910,24 @@ class ThemeData with Diagnosticable {
   final Color secondaryHeaderColor;
 
   /// The color of text selections in text fields, such as [TextField].
-  ///
-  /// By default this property is no longer used. It has been replaced with
-  /// [TextSelectionThemeData.selectionColor] and will soon be deprecated.
+  @Deprecated(
+    'Use TextSelectionThemeData.selectionColor instead. '
+    'This feature was deprecated after v1.23.0-4.0.pre.'
+  )
   final Color textSelectionColor;
 
   /// The color of cursors in Material-style text fields, such as [TextField].
-  ///
-  /// By default this property is no longer used. It has been replaced with
-  /// [TextSelectionThemeData.cursorColor] and will soon be deprecated.
+  @Deprecated(
+    'Use TextSelectionThemeData.cursorColor instead. '
+    'This feature was deprecated after v1.23.0-4.0.pre.'
+  )
   final Color cursorColor;
 
   /// The color of the handles used to adjust what part of the text is currently selected.
-  ///
-  /// By default this property is no longer used. It has been replaced with
-  /// [TextSelectionThemeData.selectionHandleColor] and will soon be deprecated.
+  @Deprecated(
+    'Use TextSelectionThemeData.selectionHandleColor instead. '
+    'This feature was deprecated after v1.23.0-4.0.pre.'
+  )
   final Color textSelectionHandleColor;
 
   /// A color that contrasts with the [primaryColor], e.g. used as the
@@ -1137,16 +1167,14 @@ class ThemeData with Diagnosticable {
   /// stable release (1.19).
   final bool fixTextFieldOutlineLabel;
 
-  /// A temporary flag to allow apps to opt-in to the new [TextSelectionTheme], with
-  /// its new defaults for the [cursorColor] and [textSelectionHandleColor].
-  ///
-  /// Setting this flag to true will cause the [textSelectionTheme] to be used
-  /// instead of the [cursorColor] and [textSelectionHandleColor] by [TextField]
-  /// and [SelectableText] widgets. In addition, the default values of these
-  /// colors have changed to [ColorScheme.primary].
-  ///
-  /// The flag is currently false by default. It will be removed after migration
-  /// to the [TextSelectionTheme] has been completed.
+  /// A temporary flag that was used to opt-in to the new [TextSelectionTheme]
+  /// during the migration to this new theme. That migration is now complete
+  /// and this flag is not longer used by the framework. Please remove any
+  /// reference to this property, as it will be removed in future releases.
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v1.23.0-4.0.pre.'
+  )
   final bool useTextSelectionTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
@@ -1179,8 +1207,20 @@ class ThemeData with Diagnosticable {
     ToggleButtonsThemeData toggleButtonsTheme,
     Color buttonColor,
     Color secondaryHeaderColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.selectionColor instead. '
+      'This feature was deprecated after v1.23.0-4.0.pre.'
+    )
     Color textSelectionColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.cursorColor instead. '
+      'This feature was deprecated after v1.23.0-4.0.pre.'
+    )
     Color cursorColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.selectionHandleColor instead. '
+      'This feature was deprecated after v1.23.0-4.0.pre.'
+    )
     Color textSelectionHandleColor,
     Color backgroundColor,
     Color dialogBackgroundColor,
@@ -1226,6 +1266,10 @@ class ThemeData with Diagnosticable {
     TextSelectionThemeData textSelectionTheme,
     DataTableThemeData dataTableTheme,
     bool fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v1.23.0-4.0.pre.'
+    )
     bool useTextSelectionTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();

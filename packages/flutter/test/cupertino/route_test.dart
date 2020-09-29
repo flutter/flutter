@@ -1382,12 +1382,10 @@ void main() {
       CupertinoPage<void>(
         key: pageKey,
         title: 'title one',
-        builder: (BuildContext context) {
-          return CupertinoPageScaffold(
-            navigationBar: CupertinoNavigationBar(key: UniqueKey()),
-            child: const Text('first'),
-          );
-        }
+        child: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(key: UniqueKey()),
+          child: const Text('first'),
+        ),
       ),
     ];
     await tester.pumpWidget(
@@ -1406,12 +1404,10 @@ void main() {
       CupertinoPage<void>(
         key: pageKey,
         title: 'title two',
-        builder: (BuildContext context) {
-          return CupertinoPageScaffold(
-            navigationBar: CupertinoNavigationBar(key: UniqueKey()),
-            child: const Text('second'),
-          );
-        }
+        child: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(key: UniqueKey()),
+          child: const Text('second'),
+        ),
       ),
     ];
 
@@ -1437,8 +1433,8 @@ void main() {
     final LocalKey pageKeyTwo = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
     List<Page<void>> myPages = <Page<void>>[
-      CupertinoPage<void>(key: pageKeyOne, maintainState: false, builder: (BuildContext context) => const Text('first')),
-      CupertinoPage<void>(key: pageKeyTwo, builder: (BuildContext context) => const Text('second')),
+      CupertinoPage<void>(key: pageKeyOne, maintainState: false, child: const Text('first')),
+      CupertinoPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
     await tester.pumpWidget(
       buildNavigator(
@@ -1454,8 +1450,8 @@ void main() {
     expect(find.text('second'), findsOneWidget);
 
     myPages = <Page<void>>[
-      CupertinoPage<void>(key: pageKeyOne, maintainState: true, builder: (BuildContext context) => const Text('first')),
-      CupertinoPage<void>(key: pageKeyTwo, builder: (BuildContext context) => const Text('second')),
+      CupertinoPage<void>(key: pageKeyOne, maintainState: true, child: const Text('first')),
+      CupertinoPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
 
     await tester.pumpWidget(

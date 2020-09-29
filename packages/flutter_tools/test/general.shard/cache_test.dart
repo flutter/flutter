@@ -636,6 +636,28 @@ void main() {
     expect(logger.errorText, contains('Failed to delete some stamp files'));
   });
 
+  testWithoutContext('FlutterWebSdk deletes previous directory contents', () {
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final Directory webStuff = fileSystem.directory('web-stuff');
+    final MockCache cache = MockCache();
+    final MockArtifactUpdater artifactUpdater = MockArtifactUpdater();
+    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform(operatingSystem: 'linux'));
+
+    when(cache.getWebSdkDirectory()).thenReturn(webStuff);
+    when(artifactUpdater.downloadZipArchive('Downloading Web SDK...', any, any))
+      .thenAnswer((Invocation invocation) async {
+        final Directory location = invocation.positionalArguments[2] as Directory;
+        location.createSync(recursive: true);
+        location.childFile('foo').createSync();
+      });
+    webStuff.childFile('bar').createSync(recursive: true);
+
+    webSdk.updateInner(artifactUpdater);
+
+    expect(webStuff.childFile('foo'), exists);
+    expect(webStuff.childFile('bar'), isNot(exists));
+  });
+
   testWithoutContext('Cache handles exception thrown if stamp file cannot be parsed', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Logger logger = BufferLogger.test();
@@ -722,6 +744,8 @@ void main() {
       context: PubContext.pubGet,
       directory: 'packages/flutter_tools',
       generateSyntheticPackage: false,
+      skipPubspecYamlCheck: true,
+      checkLastModified: false,
     )).called(1);
   });
 }

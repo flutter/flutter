@@ -242,7 +242,7 @@ const Feature singleWidgetReload = Feature(
   environmentOverride: 'FLUTTER_SINGLE_WIDGET_RELOAD',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   dev: FeatureChannelSetting(
     available: true,

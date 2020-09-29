@@ -49,7 +49,7 @@ class ElevationOverlay {
     if (elevation > 0.0 &&
         theme.applyElevationOverlayColor &&
         theme.brightness == Brightness.dark &&
-        color == theme.colorScheme.surface) {
+        color.withOpacity(1.0) == theme.colorScheme.surface.withOpacity(1.0)) {
       return Color.alphaBlend(overlayColor(context, elevation), color);
     }
     return color;

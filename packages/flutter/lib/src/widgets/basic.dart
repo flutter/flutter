@@ -1424,7 +1424,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
     Key? key,
     this.fit = BoxFit.contain,
     this.alignment = Alignment.center,
-    this.clipBehavior = Clip.hardEdge,
+    this.clipBehavior = Clip.none,
     Widget? child,
   }) : assert(fit != null),
        assert(alignment != null),
@@ -1452,7 +1452,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.hardEdge].
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   @override
@@ -1964,7 +1964,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is MultiChildLayoutParentData);
-    final MultiChildLayoutParentData parentData = renderObject.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData parentData = renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
       final AbstractNode? targetParent = renderObject.parent;
@@ -3004,11 +3004,7 @@ class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
 /// is a basic sliver that insets another sliver by applying padding on each
 /// side.
 ///
-/// Applying padding to anything but the most mundane sliver is likely to have
-/// undesired effects. For example, wrapping a [SliverPersistentHeader] with
-/// `pinned:true` will cause the app bar to overlap earlier slivers (contrary to
-/// the normal behavior of pinned app bars), and while the app bar is pinned,
-/// the padding will scroll away.
+/// {@macro flutter.rendering.sliverPadding.limitation}
 ///
 /// See also:
 ///
@@ -3654,7 +3650,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData = renderObject.parentData as StackParentData;
+    final StackParentData parentData = renderObject.parentData! as StackParentData;
     bool needsLayout = false;
 
     if (parentData.left != left) {
@@ -4550,7 +4546,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
-    final FlexParentData parentData = renderObject.parentData as FlexParentData;
+    final FlexParentData parentData = renderObject.parentData! as FlexParentData;
     bool needsLayout = false;
 
     if (parentData.flex != flex) {
