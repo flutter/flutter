@@ -1099,7 +1099,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     WidgetsBinding.instance!.removeObserver(this);
     _stopListeningToStream();
     _scrollAwareContext.dispose();
-    _replaceImage();
+    _replaceImage(info: null);
     super.dispose();
   }
 
@@ -1111,7 +1111,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     if (TickerMode.of(context))
       _listenToStream();
     else
-      _stopListeningToStream(true);
+      _stopListeningToStream(keepStreamAlive: true);
 
     super.didChangeDependencies();
   }
@@ -1185,8 +1185,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
     setState(() {
-      assert(imageInfo.image.width > 0);
-      _replaceImage(imageInfo);
+      _replaceImage(info: imageInfo);
       _loadingProgress = null;
       _frameNumber = _frameNumber == null ? 0 : _frameNumber! + 1;
       _wasSynchronouslyLoaded = _wasSynchronouslyLoaded | synchronousCall;
@@ -1200,9 +1199,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     });
   }
 
-  void _replaceImage([ImageInfo? newInfo]) {
+  void _replaceImage({required ImageInfo? info}) {
     _imageInfo?.image.dispose();
-    _imageInfo = newInfo;
+    _imageInfo = info;
   }
 
   // Updates _imageStream to newStream, and moves the stream listener
@@ -1216,7 +1215,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStream!.removeListener(_getListener());
 
     if (!widget.gaplessPlayback)
-      setState(_replaceImage);
+      setState(() => _replaceImage(info: null));
 
     setState(() {
       _loadingProgress = null;
@@ -1243,11 +1242,18 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _isListeningToStream = true;
   }
 
-  void _stopListeningToStream([bool createPassiveListener = false]) {
+  /// Stops listening to the image stream, if this state object has attached a
+  /// listener.
+  ///
+  /// If the listener from this state is the last listener on the stream, the
+  /// stream will be disposed. To keep the stream alive, set `keepStreamAlive`
+  /// to true, which will add a passive listener on the stream and is compatible
+  /// with the [TickerMode] being off.
+  void _stopListeningToStream({bool keepStreamAlive = false}) {
     if (!_isListeningToStream)
       return;
 
-    if (createPassiveListener && _passiveListener == null && _imageStream?.completer != null) {
+    if (keepStreamAlive && _passiveListener == null && _imageStream?.completer != null) {
       _passiveListener = ImageStreamListener((_, __) {});
       _imageStream!.completer!.addPassiveListener(_passiveListener!);
     }

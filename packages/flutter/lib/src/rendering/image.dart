@@ -85,8 +85,13 @@ class RenderImage extends RenderBox {
   ui.Image? get image => _image;
   ui.Image? _image;
   set image(ui.Image? value) {
-    if (value == _image || value != null && _image != null && value.isCloneOf(_image!)) {
-      value?.dispose();
+    if (value == _image) {
+      return;
+    }
+    // If we get a clone of our image, it's the same underlying native data -
+    // dispose of the new clone and return early.
+    if (value != null && _image != null && value.isCloneOf(_image!)) {
+      value.dispose();
       return;
     }
     _image?.dispose();

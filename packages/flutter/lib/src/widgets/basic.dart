@@ -5580,6 +5580,7 @@ class RawImage extends LeafRenderObjectWidget {
 
   @override
   void didUnmountRenderObject(RenderImage renderObject) {
+    // Have the render object dispose its image handle.
     renderObject.image = null;
   }
 
