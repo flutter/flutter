@@ -213,6 +213,7 @@ class _PosixUtils extends OperatingSystemUtils {
         <String>['zip', '-r', '-q', zipFile.path, '.'],
         workingDirectory: data.path,
         throwOnError: true,
+        verboseExceptions: true,
       );
     } on ArgumentError {
       // zip is not available. this error message is modeled after the download
