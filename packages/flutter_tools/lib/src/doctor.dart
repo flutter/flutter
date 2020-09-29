@@ -344,8 +344,7 @@ class Doctor {
             indent = 6;
           }
           if (message.contextUrl != null) {
-            final String prefix = globals.terminal.supportsEmoji ? '🔨 ' : ' ';
-            _logger.printStatus('$prefix${message.contextUrl}', hangingIndent: hangingIndent, indent: indent, emphasis: true);
+            _logger.printStatus('🔨 ${message.contextUrl}', hangingIndent: hangingIndent, indent: indent, emphasis: true);
           }
         }
       }
