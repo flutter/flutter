@@ -312,8 +312,7 @@ sk_sp<SkSurface> TestGLSurface::GetOnscreenSurface() {
       framebuffer_info  // framebuffer info
   );
 
-  SkSurfaceProps surface_properties(
-      SkSurfaceProps::InitType::kLegacyFontHost_InitType);
+  SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
 
   auto surface = SkSurface::MakeFromBackendRenderTarget(
       GetGrContext().get(),         // context
