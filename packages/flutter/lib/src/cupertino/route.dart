@@ -1012,7 +1012,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// safely removed from the tree before the popup is closed.
 ///
 /// The `barrierColor` argument determines the [Color] of the barrier underneath
-/// the popup. When unspecified, the barrier color defaults to a light opacity 
+/// the popup. When unspecified, the barrier color defaults to a light opacity
 /// black scrim based on iOS's dialog screens.
 ///
 /// The `barrierDismissible` argument determines whether clicking outside the
