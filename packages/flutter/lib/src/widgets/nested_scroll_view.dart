@@ -1074,16 +1074,37 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   void pointerScroll(double delta) {
-    final PointerScrollActivity pointerScrollActivity = PointerScrollActivity(this, delta);
-    beginActivity(
-      pointerScrollActivity,
-        (_NestedScrollPosition position) => createInnerBallisticScrollActivity(
-          position,
-          delta,
-        ),
-    );
-  }
+    goIdle();
+    updateUserScrollDirection(
+        delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
+    if (_innerPositions.isEmpty) {
+      _outerPosition!.applyClampedDragUpdate(delta);
+    } else {
+      double innerDelta = delta;
+      // Apply delta to the outer header first if it is configured to float.
+      if (delta > 0.0 && _floatHeaderSlivers)
+        innerDelta = _outerPosition!.applyClampedDragUpdate(delta);
 
+      // Scroll "up", apply delta to the outerPosition scroll extent.
+      if(delta < 0.0 && innerDelta != 0.0)
+        innerDelta = _outerPosition!.applyClampedDragUpdate(innerDelta);
+
+      if (innerDelta != 0.0) {
+        double outerDelta = delta > 0.0 ? 0 : innerDelta;
+        for (final _NestedScrollPosition position in _innerPositions) {
+            final double potentialOuterDelta =
+                position.applyClampedDragUpdate(innerDelta);
+            outerDelta = math.max(outerDelta, potentialOuterDelta);
+        }
+
+        // Scroll "down", Apply the maximum delta of innerPositions to
+        // outerPosition.
+        if (delta > 0.0 && outerDelta != 0.0)
+          _outerPosition!.applyClampedDragUpdate(outerDelta);
+      }
+    }
+    goBallistic(0.0);
+  }
 
   @override
   double setPixels(double newPixels) {

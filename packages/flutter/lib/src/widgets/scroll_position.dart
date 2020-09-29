@@ -762,7 +762,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void jumpTo(double value);
 
   /// Jumps the scrolling position from current value to delta without animation
-  /// and without checking if new value is in range.
+  /// and without checking if new value is in range, taking min/max scroll
+  /// extent into account.
   ///
   /// Any active animation is canceled. If the user is currently scrolling, that
   /// action is canceled.
@@ -775,6 +776,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// This is usually used in processing pointer signals, where delta is given
   /// to [ScrollPosition] to calculate target value sliding.
+  // TODO(YeungKC): On macOS, a distinction should be made between mouse wheel
+  //  events and touchpad events, which can trigger an overscroll.
   void pointerScroll(double delta);
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
