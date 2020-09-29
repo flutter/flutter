@@ -191,7 +191,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Scroll Pointer signals should not cause overscroll.', (WidgetTester tester) async {
+  testWidgets('Scroll Pointer signals should not cause overscroll', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(buildTest(controller: controller));
 
