@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
 import 'test_data/project_with_immediate_exit.dart';
@@ -28,7 +27,7 @@ void main() {
 
   testWithoutContext('flutter_tools gracefully handles quick app shutdown', () async {
     try {
-    await _flutter.run();
+      await _flutter.run();
     } on Exception {
       expect(_flutter.lastErrorInfo, contains('Error connecting to the service protocol:'));
       expect(_flutter.lastErrorInfo.contains(
