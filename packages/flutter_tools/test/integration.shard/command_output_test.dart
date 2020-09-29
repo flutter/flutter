@@ -170,4 +170,28 @@ void main() {
     expect(result.exitCode, 1);
     expect(result.stderr, contains('Invalid `--debug-uri`: http://127.0.0.1:3333*/'));
   });
+
+  testWithoutContext('will load bootstrap script before starting', () async {
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+
+    final File bootstrap = fileSystem.file(fileSystem.path.join(
+        getFlutterRoot(),
+        'bin',
+        'internal',
+        platform.isWindows ? 'boostrap.bat' : 'bootstrap.sh'));
+
+    try {
+      bootstrap.writeAsStringSync('echo TESTING 1 2 3');
+
+      final ProcessResult result = await processManager.run(<String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+      ]);
+
+      expect(result.stdout, contains('TESTING 1 2 3'));
+    } finally {
+      bootstrap.deleteSync();
+    }
+  });
 }
