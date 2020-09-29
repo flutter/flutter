@@ -191,6 +191,29 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  testWidgets('Scroll Pointer signals should not cause overscroll.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(buildTest(controller: controller));
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    expect(controller.offset, 20);
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -40.0)));
+    expect(controller.offset, 0);
+
+    await tester.tap(find.text('DD'));
+    await tester.pumpAndSettle();
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 1000000.0)));
+    expect(find.text('ddd1'), findsOneWidget);
+  });
+
+
   testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
@@ -230,6 +253,13 @@ void main() {
 
   testWidgets('NestedScrollView', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
+
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    // AppBar expandedHeight is 200, testPointer hover on innerPosition.
+    // Regression test for https://github.com/flutter/flutter/issues/55362.
+    testPointer.hover(const Offset(0, 250));
+
     expect(find.text('aaa2'), findsOneWidget);
     expect(find.text('aaa3'), findsNothing);
     expect(find.text('bbb1'), findsNothing);
@@ -246,6 +276,15 @@ void main() {
       180.0,
     );
 
+    await tester.drag(find.text('AA'), const Offset(0.0, 20.0));
+    await tester.pump(const Duration(milliseconds: 250));
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    await tester.pump();
+    expect(
+      tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+      180.0,
+    );
+
     await tester.drag(find.text('AA'), const Offset(0.0, -20.0));
     await tester.pump(const Duration(milliseconds: 250));
     expect(
@@ -253,8 +292,26 @@ void main() {
       160.0,
     );
 
+    await tester.drag(find.text('AA'), const Offset(0.0, 20.0));
+    await tester.pump(const Duration(milliseconds: 250));
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    await tester.pump();
+    expect(
+      tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+      160.0,
+    );
+
     await tester.drag(find.text('AA'), const Offset(0.0, -20.0));
     await tester.pump(const Duration(milliseconds: 250));
+    expect(
+      tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+      140.0,
+    );
+
+    await tester.drag(find.text('AA'), const Offset(0.0, 20.0));
+    await tester.pump(const Duration(milliseconds: 250));
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    await tester.pump();
     expect(
       tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
       140.0,
@@ -378,6 +435,11 @@ void main() {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(buildTest(controller: controller));
 
+    final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+
     controller.addListener(() {
       if(controller.position.userScrollDirection != ScrollDirection.idle)
         lastUserScrollingDirection = controller.position.userScrollDirection;
@@ -387,23 +449,15 @@ void main() {
 
     expect(lastUserScrollingDirection, ScrollDirection.reverse);
 
-    final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
-    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
-    // Create a hover event so that |testPointer| has a location when generating the scroll.
-    testPointer.hover(scrollEventLocation);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
-
     expect(lastUserScrollingDirection, ScrollDirection.reverse);
 
     await tester.drag(find.byType(NestedScrollView), const Offset(0.0, 20.0), touchSlopY: 0.0);
-
     expect(lastUserScrollingDirection, ScrollDirection.forward);
 
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)));
-
     expect(lastUserScrollingDirection, ScrollDirection.forward);
   });
-
 
   testWidgets('Three NestedScrollViews with one ScrollController', (WidgetTester tester) async {
     final TrackingScrollController controller = TrackingScrollController();
@@ -1367,6 +1421,12 @@ void main() {
         nestedFloat: true,
         appBarKey: appBarKey,
       ));
+
+      final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
+      final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      // Create a hover event so that |testPointer| has a location when generating the scroll.
+      testPointer.hover(scrollEventLocation);
+
       expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('Item 1'), findsOneWidget);
       expect(find.text('Item 5'), findsOneWidget);
@@ -1387,6 +1447,14 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
 
+      await tester.dragFrom(point1, const Offset(0.0, 300.0));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
+      await tester.pump();
+      expect(find.text('Test Title'), findsNothing);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
+
       // The outer scrollable should float back in, inner should not change
       await tester.dragFrom(point1, const Offset(0.0, 50.0));
       await tester.pump();
@@ -1399,8 +1467,33 @@ void main() {
       );
       verifyGeometry(key: appBarKey, paintExtent: 50.0, visible: true);
 
+      await tester.dragFrom(point1, const Offset(0.0, -50.0));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -50.0)));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        56.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 50.0, visible: true);
+
+
       // Float the rest of the way in.
       await tester.dragFrom(point1, const Offset(0.0, 150.0));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        56.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+
+      await tester.dragFrom(point1, const Offset(0.0, -150.0));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -150.0)));
       await tester.pump();
       expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('Item 1'), findsNothing);
@@ -1420,6 +1513,12 @@ void main() {
         expanded: true,
         appBarKey: appBarKey,
       ));
+
+      final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
+      final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      // Create a hover event so that |testPointer| has a location when generating the scroll.
+      testPointer.hover(scrollEventLocation);
+
       expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('Item 1'), findsOneWidget);
       expect(find.text('Item 5'), findsOneWidget);
@@ -1440,9 +1539,29 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
 
+      await tester.dragFrom(point1, const Offset(0.0, 300.0));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
+      await tester.pump();
+      expect(find.text('Test Title'), findsNothing);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
+
       // The outer scrollable should float back in, inner should not change
       // On initial float in, the app bar is collapsed.
       await tester.dragFrom(point1, const Offset(0.0, 50.0));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        56.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 50.0, visible: true);
+
+      await tester.dragFrom(point1, const Offset(0.0, -50.0));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -50.0)));
       await tester.pump();
       expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('Item 1'), findsNothing);
@@ -1465,6 +1584,18 @@ void main() {
         200.0,
       );
       verifyGeometry(key: appBarKey, paintExtent: 200.0, visible: true);
+
+      await tester.dragFrom(point1, const Offset(0.0, -200.0));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -200.0)));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        200.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 200.0, visible: true);
     });
 
     testWidgets('only snap', (WidgetTester tester) async {
@@ -1476,6 +1607,12 @@ void main() {
         appBarKey: appBarKey,
         nestedKey: nestedKey,
       ));
+
+      final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
+      final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      // Create a hover event so that |testPointer| has a location when generating the scroll.
+      testPointer.hover(scrollEventLocation);
+
       expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('Item 1'), findsOneWidget);
       expect(find.text('Item 5'), findsOneWidget);
@@ -1489,6 +1626,17 @@ void main() {
       // visible.
       final Offset point1 = tester.getCenter(find.text('Item 5'));
       await tester.dragFrom(point1, const Offset(0.0, -300.0));
+      await tester.pump();
+      expect(find.text('Test Title'), findsNothing);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
+      // The outer scroll view should be at its full extent, here the size of
+      // the app bar.
+      expect(nestedKey.currentState.outerController.offset, 56.0);
+
+      await tester.dragFrom(point1, const Offset(0.0, 300.0));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
       await tester.pump();
       expect(find.text('Test Title'), findsNothing);
       expect(find.text('Item 1'), findsNothing);
@@ -1612,6 +1760,12 @@ void main() {
         appBarKey: appBarKey,
         nestedKey: nestedKey,
       ));
+
+      final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
+      final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      // Create a hover event so that |testPointer| has a location when generating the scroll.
+      testPointer.hover(scrollEventLocation);
+
       expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('Item 1'), findsOneWidget);
       expect(find.text('Item 5'), findsOneWidget);
@@ -1625,6 +1779,17 @@ void main() {
       // visible.
       final Offset point1 = tester.getCenter(find.text('Item 5'));
       await tester.dragFrom(point1, const Offset(0.0, -400.0));
+      await tester.pump();
+      expect(find.text('Test Title'), findsNothing);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
+      // The outer scroll view should be at its full extent, here the size of
+      // the app bar.
+      expect(nestedKey.currentState.outerController.offset, 200.0);
+
+      await tester.dragFrom(point1, const Offset(0.0, 400.0));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 400.0)));
       await tester.pump();
       expect(find.text('Test Title'), findsNothing);
       expect(find.text('Item 1'), findsNothing);
@@ -1748,6 +1913,12 @@ void main() {
         nestedFloat: true,
         appBarKey: appBarKey,
       ));
+
+      final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
+      final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      // Create a hover event so that |testPointer| has a location when generating the scroll.
+      testPointer.hover(scrollEventLocation);
+
       expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('Item 1'), findsOneWidget);
       expect(find.text('Item 5'), findsOneWidget);
@@ -1770,6 +1941,18 @@ void main() {
       );
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
 
+      await tester.dragFrom(point1, const Offset(0.0, 300.0));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        56.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+
       await tester.dragFrom(point1, const Offset(0.0, 50.0));
       await tester.pump();
       expect(find.text('Test Title'), findsOneWidget);
@@ -1781,7 +1964,32 @@ void main() {
       );
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
 
+      await tester.dragFrom(point1, const Offset(0.0, -50.0));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -50.0)));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        56.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+
+
       await tester.dragFrom(point1, const Offset(0.0, 150.0));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        56.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+
+      await tester.dragFrom(point1, const Offset(0.0, -150.0));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -150.0)));
       await tester.pump();
       expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('Item 1'), findsOneWidget);
@@ -1804,6 +2012,12 @@ void main() {
         nestedFloat: true,
         appBarKey: appBarKey,
       ));
+
+      final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
+      final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      // Create a hover event so that |testPointer| has a location when generating the scroll.
+      testPointer.hover(scrollEventLocation);
+
       expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('Item 1'), findsOneWidget);
       expect(find.text('Item 5'), findsOneWidget);
@@ -1827,6 +2041,18 @@ void main() {
       );
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
 
+      await tester.dragFrom(point1, const Offset(0.0, 300.0));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        56.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+
       // Scroll back some, the app bar should expand.
       await tester.dragFrom(point1, const Offset(0.0, 50.0));
       await tester.pump();
@@ -1839,8 +2065,32 @@ void main() {
       );
       verifyGeometry(key: appBarKey, paintExtent: 106.0, visible: true);
 
+      await tester.dragFrom(point1, const Offset(0.0, -50.0));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -50.0)));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        106.0, // 56.0 + 50.0
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 106.0, visible: true);
+
       // Finish scrolling the rest of the way in.
       await tester.dragFrom(point1, const Offset(0.0, 150.0));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        200.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 200.0, visible: true);
+
+      await tester.dragFrom(point1, const Offset(0.0, -150.0));
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -150.0)));
       await tester.pump();
       expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('Item 1'), findsOneWidget);
