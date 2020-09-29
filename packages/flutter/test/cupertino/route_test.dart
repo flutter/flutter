@@ -1398,10 +1398,7 @@ void main() {
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
 
-    expect(
-      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color,
-      null,
-    );
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, null);
   });
 
   testWidgets('showCupertinoModalPopup null barrier color must be default gray barrier color', (WidgetTester tester) async {
@@ -1420,7 +1417,6 @@ void main() {
               await showCupertinoModalPopup<void>(
                 context: context,
                 builder: (BuildContext context) => const SizedBox(),
-                barrierColor: kModalBarrierColor,
               );
             },
             child: const Text('tap'),
@@ -1432,14 +1428,10 @@ void main() {
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
 
-    expect(
-      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color,
-      kModalBarrierColor,
-    );
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, kModalBarrierColor);
   });
 
   testWidgets('showCupertinoModalPopup custom barrier color', (WidgetTester tester) async {
-    // Color shoule be the same both for Light and Dark theme
     const Color customColor = Color(0x11223344);
 
     await tester.pumpWidget(CupertinoApp(
@@ -1461,10 +1453,7 @@ void main() {
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
 
-    expect(
-      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color,
-      customColor,
-    );
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, customColor);
   });
 
   testWidgets('showCupertinoModalPopup barrier dismissible', (WidgetTester tester) async {
