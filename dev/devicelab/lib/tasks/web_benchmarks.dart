@@ -53,7 +53,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
 
   await inDirectory<void>(galleryDirectory, () async {
     // TODO(pennzht): When gallery PR merges, use `galleryVersion`. https://github.com/flutter/gallery/issues/326
-    await exec('git', <String>['checkout', '1d285dfe37cc3bd68f2965f8c4186932118d8ee8']);
+    await exec('git', <String>['checkout', 'd458dc22a27db8ce2207c8f53153d06b51cd3d2e']);
     print('Git checkout finished.');
   });
 
