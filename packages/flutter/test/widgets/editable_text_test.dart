@@ -5039,10 +5039,9 @@ void main() {
 
     await tester.pumpWidget(builder());
     await tester.tap(find.byType(EditableText));
-    await tester.showKeyboard(find.byType(EditableText));
     await tester.pump();
 
-    // The keyboard is shown after the request.
+    // The keyboard is shown after tap the EditableText.
     expect(focusNode.hasFocus, true);
 
     log.clear();
