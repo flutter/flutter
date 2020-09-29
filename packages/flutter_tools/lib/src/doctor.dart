@@ -11,6 +11,7 @@ import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
@@ -75,8 +76,8 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     }
 
     final List<DoctorValidator> ideValidators = <DoctorValidator>[
-      ...AndroidStudioValidator.allValidators,
-      ...IntelliJValidator.installedValidators,
+      ...AndroidStudioValidator.allValidators(globals.config, globals.platform, globals.fs, globals.userMessages),
+      ...IntelliJValidator.installedValidators(globals.fs, globals.platform),
       ...VsCodeValidator.installedValidators,
     ];
     final ProxyValidator proxyValidator = ProxyValidator(platform: globals.platform);
@@ -342,6 +343,9 @@ class Doctor {
             hangingIndent = 0;
             indent = 6;
           }
+          if (message.contextUrl != null) {
+            _logger.printStatus('🔨 ${message.contextUrl}', hangingIndent: hangingIndent, indent: indent, emphasis: true);
+          }
         }
       }
       if (verbose) {
@@ -573,16 +577,40 @@ class ValidationResult {
   }
 }
 
+/// A status line for the flutter doctor validation to display.
+///
+/// The [message] is required and represents either an informational statement
+/// about the particular doctor validation that passed, or more context
+/// on the cause and/or solution to the validation failure.
 @immutable
 class ValidationMessage {
-  const ValidationMessage(this.message) : type = ValidationMessageType.information;
-  const ValidationMessage.error(this.message) : type = ValidationMessageType.error;
-  const ValidationMessage.hint(this.message) : type = ValidationMessageType.hint;
+  /// Create a validation message with information for a passing validatior.
+  ///
+  /// By default this is not displayed unless the doctor is run in
+  /// verbose mode.
+  ///
+  /// The [contextUrl] may be supplied to link to external resources. This
+  /// is displayed after the informative message in verbose modes.
+  const ValidationMessage(this.message, {this.contextUrl}) : type = ValidationMessageType.information;
+
+  /// Create a validation message with information for a failing validator.
+  const ValidationMessage.error(this.message)
+    : type = ValidationMessageType.error,
+      contextUrl = null;
+
+  /// Create a validation message with information for a partially failing
+  /// validator.
+  const ValidationMessage.hint(this.message)
+    : type = ValidationMessageType.hint,
+      contextUrl = null;
 
   final ValidationMessageType type;
-  bool get isError => type == ValidationMessageType.error;
-  bool get isHint => type == ValidationMessageType.hint;
+  final String contextUrl;
   final String message;
+
+  bool get isError => type == ValidationMessageType.error;
+
+  bool get isHint => type == ValidationMessageType.hint;
 
   String get indicator {
     switch (type) {
@@ -613,16 +641,14 @@ class ValidationMessage {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
     return other is ValidationMessage
         && other.message == message
-        && other.type == type;
+        && other.type == type
+        && other.contextUrl == contextUrl;
   }
 
   @override
-  int get hashCode => type.hashCode ^ message.hashCode;
+  int get hashCode => type.hashCode ^ message.hashCode ^ contextUrl.hashCode;
 }
 
 class FlutterValidator extends DoctorValidator {
@@ -709,10 +735,15 @@ class NoIdeValidator extends DoctorValidator {
   }
 }
 
+/// A doctor validator for both Intellij and Android Studio.
 abstract class IntelliJValidator extends DoctorValidator {
-  IntelliJValidator(String title, this.installPath) : super(title);
+  IntelliJValidator(String title, this.installPath, {
+    @required FileSystem fileSystem,
+  }) : _fileSystem = fileSystem,
+       super(title);
 
   final String installPath;
+  final FileSystem _fileSystem;
 
   String get version;
   String get pluginsPath;
@@ -724,12 +755,12 @@ abstract class IntelliJValidator extends DoctorValidator {
 
   static final Version kMinIdeaVersion = Version(2017, 1, 0);
 
-  static Iterable<DoctorValidator> get installedValidators {
-    if (globals.platform.isLinux || globals.platform.isWindows) {
-      return IntelliJValidatorOnLinuxAndWindows.installed;
+  static Iterable<DoctorValidator> installedValidators(FileSystem fileSystem, Platform platform) {
+    if (platform.isLinux || platform.isWindows) {
+      return IntelliJValidatorOnLinuxAndWindows.installed(fileSystem);
     }
-    if (globals.platform.isMacOS) {
-      return IntelliJValidatorOnMac.installed;
+    if (platform.isMacOS) {
+      return IntelliJValidatorOnMac.installed(fileSystem);
     }
     return <DoctorValidator>[];
   }
@@ -743,10 +774,20 @@ abstract class IntelliJValidator extends DoctorValidator {
     } else {
       messages.add(ValidationMessage(userMessages.intellijLocation(installPath)));
 
-      final IntelliJPlugins plugins = IntelliJPlugins(pluginsPath);
-      plugins.validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
-          'Flutter', minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
-      plugins.validatePackage(messages, <String>['Dart'], 'Dart');
+      final IntelliJPlugins plugins = IntelliJPlugins(pluginsPath, fileSystem: _fileSystem);
+      plugins.validatePackage(
+        messages,
+        <String>['flutter-intellij', 'flutter-intellij.jar'],
+        'Flutter',
+        IntelliJPlugins.kIntellijFlutterPluginUrl,
+        minVersion: IntelliJPlugins.kMinFlutterPluginVersion,
+      );
+      plugins.validatePackage(
+        messages,
+        <String>['Dart'],
+        'Dart',
+        IntelliJPlugins.kIntellijDartPluginUrl,
+      );
 
       if (_hasIssues(messages)) {
         messages.add(ValidationMessage(userMessages.intellijPluginInfo));
@@ -758,7 +799,8 @@ abstract class IntelliJValidator extends DoctorValidator {
     return ValidationResult(
       _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
       messages,
-      statusInfo: userMessages.intellijStatusInfo(version));
+      statusInfo: userMessages.intellijStatusInfo(version),
+    );
   }
 
   bool _hasIssues(List<ValidationMessage> messages) {
@@ -782,8 +824,11 @@ abstract class IntelliJValidator extends DoctorValidator {
   }
 }
 
+/// A linux and windows specific implementation of the intellij validator.
 class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
-  IntelliJValidatorOnLinuxAndWindows(String title, this.version, String installPath, this.pluginsPath) : super(title, installPath);
+  IntelliJValidatorOnLinuxAndWindows(String title, this.version, String installPath, this.pluginsPath, {
+    @required FileSystem fileSystem,
+  }) : super(title, installPath, fileSystem: fileSystem);
 
   @override
   final String version;
@@ -791,7 +836,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
   @override
   final String pluginsPath;
 
-  static Iterable<DoctorValidator> get installed {
+  static Iterable<DoctorValidator> installed(FileSystem fileSystem) {
     final List<DoctorValidator> validators = <DoctorValidator>[];
     if (globals.fsUtils.homeDirPath == null) {
       return validators;
@@ -799,7 +844,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
 
     void addValidator(String title, String version, String installPath, String pluginsPath) {
       final IntelliJValidatorOnLinuxAndWindows validator =
-        IntelliJValidatorOnLinuxAndWindows(title, version, installPath, pluginsPath);
+        IntelliJValidatorOnLinuxAndWindows(title, version, installPath, pluginsPath, fileSystem: fileSystem);
       for (int index = 0; index < validators.length; ++index) {
         final DoctorValidator other = validators[index];
         if (other is IntelliJValidatorOnLinuxAndWindows && validator.installPath == other.installPath) {
@@ -835,8 +880,11 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
   }
 }
 
+/// A macOS specific implementation of the intellij validator.
 class IntelliJValidatorOnMac extends IntelliJValidator {
-  IntelliJValidatorOnMac(String title, this.id, String installPath) : super(title, installPath);
+  IntelliJValidatorOnMac(String title, this.id, String installPath, {
+    @required FileSystem fileSystem,
+  }) : super(title, installPath, fileSystem: fileSystem);
 
   final String id;
 
@@ -846,29 +894,29 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     'IntelliJ IDEA CE.app': 'IdeaIC',
   };
 
-  static Iterable<DoctorValidator> get installed {
+  static Iterable<DoctorValidator> installed(FileSystem fileSystem) {
     final List<DoctorValidator> validators = <DoctorValidator>[];
     final List<String> installPaths = <String>[
       '/Applications',
-      globals.fs.path.join(globals.fsUtils.homeDirPath, 'Applications'),
+      fileSystem.path.join(globals.fsUtils.homeDirPath, 'Applications'),
     ];
 
     void checkForIntelliJ(Directory dir) {
-      final String name = globals.fs.path.basename(dir.path);
+      final String name = fileSystem.path.basename(dir.path);
       _dirNameToId.forEach((String dirName, String id) {
         if (name == dirName) {
           final String title = IntelliJValidator._idToTitle[id];
-          validators.add(IntelliJValidatorOnMac(title, id, dir.path));
+          validators.add(IntelliJValidatorOnMac(title, id, dir.path, fileSystem: fileSystem));
         }
       });
     }
 
     try {
       final Iterable<Directory> installDirs = installPaths
-              .map<Directory>((String installPath) => globals.fs.directory(installPath))
-              .map<List<FileSystemEntity>>((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
-              .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
-              .whereType<Directory>();
+        .map(fileSystem.directory)
+        .map<List<FileSystemEntity>>((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
+        .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
+        .whereType<Directory>();
       for (final Directory dir in installDirs) {
         checkForIntelliJ(dir);
         if (!dir.path.endsWith('.app')) {
@@ -892,7 +940,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   @visibleForTesting
   String get plistFile {
-    _plistFile ??= globals.fs.path.join(installPath, 'Contents', 'Info.plist');
+    _plistFile ??= _fileSystem.path.join(installPath, 'Contents', 'Info.plist');
     return _plistFile;
   }
   String _plistFile;
