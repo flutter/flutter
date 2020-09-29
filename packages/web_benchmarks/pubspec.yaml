@@ -1,0 +1,24 @@
+name: web_benchmarks
+description: A framework to run performance tests for flutter apps in Chrome.
+version: 0.0.1
+author:
+homepage:
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+  flutter: ">=1.17.0 <2.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  logging: ">=0.11.4"
+  process: ">=3.0.13"
+  shelf: ">=0.7.5"
+  shelf_static: ">=0.2.8"
+  webkit_inspection_protocol: ">=0.7.3"
+
+flutter:

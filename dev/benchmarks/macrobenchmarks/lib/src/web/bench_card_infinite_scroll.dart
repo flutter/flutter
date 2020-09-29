@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'recorder.dart';
+import 'package:web_benchmarks/recorder.dart';
 import 'test_data.dart';
 
 /// Creates an infinite list of Material cards and scrolls it.

@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'recorder.dart';
+import 'package:web_benchmarks/recorder.dart';
 
 /// Draws many pictures in a grid with only the middle picture visible on the
 /// screen, all others are clipped out, for example:

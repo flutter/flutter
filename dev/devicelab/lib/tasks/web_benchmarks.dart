@@ -22,9 +22,80 @@ const int benchmarkServerPort = 9999;
 const int chromeDebugPort = 10000;
 
 Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
+  // Original (non-gallery) benchmarks.
+  final TaskResult originalBenchmarkResult = await runWebBenchmarkIn(
+    useCanvasKit: useCanvasKit,
+    macrobenchmarksDirectory: path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks'),
+    entryPoint: 'lib/web_benchmarks.dart',
+  );
+
+  if (originalBenchmarkResult.failed) {
+    return originalBenchmarkResult;
+  }
+
+  // If using canvas kit, skip gallery benchmarks and return benchmark results.
+  if (useCanvasKit) {
+    return originalBenchmarkResult;
+  }
+
+  // Gallery benchmarks.
+  section('Get New Flutter Gallery!');
+
+  final io.Directory temp = io.Directory.systemTemp.createTempSync('new_gallery_web_benchmarks');
+
+  print('Created temporary directory $temp for Gallery.');
+
+  // TODO(pennzht): When gallery PR merges, move to flutter/gallery. https://github.com/flutter/gallery/issues/326
+  await inDirectory<void>(temp, () async {
+    await exec('git', <String>['clone', 'https://github.com/pennzht/newfluttergallery.git']);
+  });
+
+  print('Cloned into $temp.');
+
+  final io.FileSystemEntity galleryDirectory = temp.listSync().single;
+
+  print('Gallery directory is $galleryDirectory.');
+
+  await inDirectory<void>(galleryDirectory, () async {
+    // TODO(pennzht): When gallery PR merges, use `galleryVersion`. https://github.com/flutter/gallery/issues/326
+    await exec('git', <String>['checkout', 'd458dc22a27db8ce2207c8f53153d06b51cd3d2e']);
+    print('Git checkout finished.');
+  });
+
+  final TaskResult galleryBenchmarkResult = await runWebBenchmarkIn(
+    useCanvasKit: useCanvasKit,
+    macrobenchmarksDirectory: galleryDirectory.absolute.path,
+    entryPoint: 'lib/benchmarks/runner.dart',
+  );
+
+  rmTree(temp);
+
+  if (galleryBenchmarkResult.failed) {
+    return galleryBenchmarkResult;
+  }
+
+  // Both succeeded. Combine data.
+
+  return originalBenchmarkResult.combine(galleryBenchmarkResult);
+}
+
+List<String> _nullAwareConcatenation(List<String> list1, List<String> list2) {
+  if (list1 == null) {
+    return list2;
+  } else if (list2 == null) {
+    return list1;
+  } else {
+    return list1 + list2;
+  }
+}
+
+Future<TaskResult> runWebBenchmarkIn({
+  @required bool useCanvasKit,
+  @required String macrobenchmarksDirectory,
+  @required String entryPoint,
+}) async {
   // Reduce logging level. Otherwise, package:webkit_inspection_protocol is way too spammy.
   Logger.root.level = Level.INFO;
-  final String macrobenchmarksDirectory = path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks');
   return await inDirectory(macrobenchmarksDirectory, () async {
     await evalFlutter('build', options: <String>[
       'web',
@@ -33,7 +104,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
         '--dart-define=FLUTTER_WEB_USE_SKIA=true',
       '--profile',
       '-t',
-      'lib/web_benchmarks.dart',
+      entryPoint,
     ]);
     final Completer<List<Map<String, dynamic>>> profileData = Completer<List<Map<String, dynamic>>>();
     final List<Map<String, dynamic>> collectedProfiles = <Map<String, dynamic>>[];

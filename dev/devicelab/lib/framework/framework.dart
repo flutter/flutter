@@ -245,6 +245,61 @@ class TaskResult {
   /// Explains the result in a human-readable format.
   final String message;
 
+  /// Combines the result of two sets of benchmarks.
+  TaskResult combine(TaskResult other) {
+    if (other == null) {
+      return this;
+    }
+
+    // If at least one subtask failed, return a failure and description for
+    // both tasks.
+    if (failed || other.failed) {
+      return TaskResult.failure(
+        'Combined task failure:\n'
+        '  First subtask: ${succeeded ? "succeeded" : message}\n'
+        '  Second subtask: ${other.succeeded ? "succeeded" : other.message}\n',
+      );
+    }
+
+    final Set<String> keyIntersection = data.keys.toSet()
+        .intersection(other.data.keys.toSet());
+
+    if (keyIntersection.isNotEmpty) {
+      throw Exception('The benchmarks $this and $other are not disjoint; '
+          '$keyIntersection are found in both of them.');
+    }
+
+    final Map<String, dynamic> combinedData = <String, dynamic>{}
+      ..addAll(data)
+      ..addAll(other.data);
+
+    final List<String> combinedBenchmarkScoreKeys = _nullAwareConcatenation(
+      benchmarkScoreKeys,
+      other.benchmarkScoreKeys,
+    );
+
+    final List<String> combinedDetailFiles = _nullAwareConcatenation(
+      detailFiles,
+      other.detailFiles,
+    );
+
+    return TaskResult.success(
+      combinedData,
+      benchmarkScoreKeys: combinedBenchmarkScoreKeys,
+      detailFiles: combinedDetailFiles,
+    );
+  }
+
+  List<String> _nullAwareConcatenation(List<String> list1, List<String> list2) {
+    if (list1 == null) {
+      return list2;
+    } else if (list2 == null) {
+      return list1;
+    } else {
+      return list1 + list2;
+    }
+  }
+
   /// Serializes this task result to JSON format.
   ///
   /// The JSON format is as follows:
