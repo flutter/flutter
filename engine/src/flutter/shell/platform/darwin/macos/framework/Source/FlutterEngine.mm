@@ -6,6 +6,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 
+#include <algorithm>
 #include <vector>
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
@@ -236,13 +237,20 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 
   // TODO(stuartmorgan): Move internal channel registration from FlutterViewController to here.
 
+  // FlutterProjectArgs is expecting a full argv, so when processing it for
+  // flags the first item is treated as the executable and ignored. Add a dummy
+  // value so that all provided arguments are used.
+  std::vector<std::string> switches = _project.switches;
+  std::vector<const char*> argv = {"placeholder"};
+  std::transform(switches.begin(), switches.end(), std::back_inserter(argv),
+                 [](const std::string& arg) -> const char* { return arg.c_str(); });
+
   FlutterProjectArgs flutterArguments = {};
   flutterArguments.struct_size = sizeof(FlutterProjectArgs);
   flutterArguments.assets_path = _project.assetsPath.UTF8String;
   flutterArguments.icu_data_path = _project.ICUDataPath.UTF8String;
-  std::vector<const char*> arguments = _project.argv;
-  flutterArguments.command_line_argc = static_cast<int>(arguments.size());
-  flutterArguments.command_line_argv = &arguments[0];
+  flutterArguments.command_line_argc = static_cast<int>(argv.size());
+  flutterArguments.command_line_argv = argv.size() > 0 ? argv.data() : nullptr;
   flutterArguments.platform_message_callback = (FlutterPlatformMessageCallback)OnPlatformMessage;
   flutterArguments.custom_dart_entrypoint = entrypoint.UTF8String;
   static size_t sTaskRunnerIdentifiers = 0;

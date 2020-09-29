@@ -7,6 +7,8 @@
 
 #include <vector>
 
+#include "flutter/shell/platform/common/cpp/engine_switches.h"
+
 static NSString* const kICUBundlePath = @"icudtl.dat";
 static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
 
@@ -67,13 +69,10 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
   return path;
 }
 
-- (std::vector<const char*>)argv {
-  // FlutterProjectArgs expects a full argv, so when processing it for flags the first item is
-  // treated as the executable and ignored. Add a dummy value so that all provided arguments
-  // are used.
-  std::vector<const char*> arguments = {"placeholder"};
-  for (NSUInteger i = 0; i < _engineSwitches.count; ++i) {
-    arguments.push_back([_engineSwitches[i] UTF8String]);
+- (std::vector<std::string>)switches {
+  std::vector<std::string> arguments = flutter::GetSwitchesFromEnvironment();
+  if (self.enableMirrors) {
+    arguments.push_back("--dart-flags=--enable_mirrors=true");
   }
   return arguments;
 }
