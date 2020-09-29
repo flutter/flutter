@@ -5005,13 +5005,11 @@ void main() {
       log.add(methodCall);
     });
     final TextEditingController controller = TextEditingController();
-    StateSetter setState;
 
     final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
     Widget builder() {
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setter) {
-          setState = setter;
           return MaterialApp(
             home: MediaQuery(
               data: const MediaQueryData(devicePixelRatio: 1.0),
