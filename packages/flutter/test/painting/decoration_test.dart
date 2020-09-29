@@ -106,6 +106,31 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   String toString() => '${describeIdentity(this)}()';
 }
 
+class MultiFrameImageProvider extends ImageProvider<MultiFrameImageProvider> {
+  MultiFrameImageProvider(this.completer);
+
+  final MultiImageCompleter completer;
+
+  @override
+  Future<MultiFrameImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<MultiFrameImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(MultiFrameImageProvider key, DecoderCallback decode) {
+    return completer;
+  }
+
+  @override
+  String toString() => '${describeIdentity(this)}()';
+}
+
+class MultiImageCompleter extends ImageStreamCompleter {
+  void testSetImage(ImageInfo info) {
+    setImage(info);
+  }
+}
+
 void main() {
   TestRenderingFlutterBinding(); // initializes the imageCache
 
@@ -178,6 +203,42 @@ void main() {
       async.flushMicrotasks();
       expect(onChangedCalled, equals(true));
     });
+  });
+
+  test('BoxDecorationImageListener does not change when image is clone', () async {
+    final ui.Image image1 = await createTestImage(width: 10, height: 10, cache: false);
+    final ui.Image image2 = await createTestImage(width: 10, height: 10, cache: false);
+    final MultiImageCompleter completer = MultiImageCompleter();
+    final MultiFrameImageProvider imageProvider = MultiFrameImageProvider(completer);
+    final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
+
+    final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
+    bool onChangedCalled = false;
+    final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
+      onChangedCalled = true;
+    });
+
+    final TestCanvas canvas = TestCanvas();
+    const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size.zero);
+    boxPainter.paint(canvas, Offset.zero, imageConfiguration);
+
+    // The onChanged callback should be invoked asynchronously.
+    expect(onChangedCalled, equals(false));
+
+    completer.testSetImage(ImageInfo(image: image1.clone()));
+    await null;
+
+    expect(onChangedCalled, equals(true));
+    onChangedCalled = false;
+    completer.testSetImage(ImageInfo(image: image1.clone()));
+    await null;
+
+    expect(onChangedCalled, equals(false));
+
+    completer.testSetImage(ImageInfo(image: image2.clone()));
+    await null;
+
+    expect(onChangedCalled, equals(true));
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/7289.

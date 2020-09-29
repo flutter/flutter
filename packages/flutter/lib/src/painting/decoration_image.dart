@@ -295,6 +295,10 @@ class DecorationImagePainter {
   void _handleImage(ImageInfo value, bool synchronousCall) {
     if (_image == value)
       return;
+    if (_image != null && _image!.isCloneOf(value)) {
+      value.image.dispose();
+      return;
+    }
     _image?.image.dispose();
     _image = value;
     assert(_onChanged != null);
