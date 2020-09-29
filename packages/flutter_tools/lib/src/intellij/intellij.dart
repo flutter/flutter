@@ -19,6 +19,8 @@ class IntelliJPlugins {
   final String pluginsPath;
 
   static final Version kMinFlutterPluginVersion = Version(16, 0, 0);
+  static const String kIntellijDartPluginUrl = 'https://plugins.jetbrains.com/plugin/6351-dart';
+  static const String kIntellijFlutterPluginUrl = 'https://plugins.jetbrains.com/plugin/9212-flutter';
 
   void validatePackage(
     List<ValidationMessage> messages,
@@ -36,17 +38,19 @@ class IntelliJPlugins {
       final Version version = Version.parse(versionText);
       if (version != null && minVersion != null && version < minVersion) {
         messages.add(ValidationMessage.error(
-            '$title plugin version $versionText - the recommended minimum version is $minVersion'));
+          '$title plugin version $versionText - the recommended minimum version is $minVersion'),
+        );
       } else {
         messages.add(ValidationMessage(
-            '$title plugin ${version != null ? "version $version" : "installed"}'));
+          '$title plugin ${version != null ? "version $version" : "installed"}'),
+        );
       }
-
       return;
     }
-
     messages.add(ValidationMessage(
-        '$title plugin can be installed from\n$url'));
+      '$title plugin can be installed from:',
+      contextUrl: url,
+    ));
   }
 
   bool _hasPackage(String packageName) {

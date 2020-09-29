@@ -343,6 +343,10 @@ class Doctor {
             hangingIndent = 0;
             indent = 6;
           }
+          if (message.contextUrl != null) {
+            final String prefix = globals.terminal.supportsEmoji ? '🔨 ' : ' ';
+            _logger.printStatus('$prefix${message.contextUrl}', hangingIndent: hangingIndent, indent: indent, emphasis: true);
+          }
         }
       }
       if (verbose) {
@@ -574,16 +578,40 @@ class ValidationResult {
   }
 }
 
+/// A status line for the flutter doctor validation to display.
+///
+/// The [message] is required and represents either an informational statement
+/// about the particular doctor validation that passed, or more context
+/// on the cause and/or solution to the validation failure.
 @immutable
 class ValidationMessage {
-  const ValidationMessage(this.message) : type = ValidationMessageType.information;
-  const ValidationMessage.error(this.message) : type = ValidationMessageType.error;
-  const ValidationMessage.hint(this.message) : type = ValidationMessageType.hint;
+  /// Create a validation message with information for a passing validatior.
+  ///
+  /// By default this is not displayed unless the doctor is run in
+  /// verbose mode.
+  ///
+  /// The [contextUrl] may be supplied to link to external resources. This
+  /// is displayed after the informative message in verbose modes.
+  const ValidationMessage(this.message, {this.contextUrl}) : type = ValidationMessageType.information;
+
+  /// Create a validation message with information for a failing validator.
+  const ValidationMessage.error(this.message)
+    : type = ValidationMessageType.error,
+      contextUrl = null;
+
+  /// Create a validation message with information for a partially failing
+  /// validator.
+  const ValidationMessage.hint(this.message)
+    : type = ValidationMessageType.hint,
+      contextUrl = null;
 
   final ValidationMessageType type;
-  bool get isError => type == ValidationMessageType.error;
-  bool get isHint => type == ValidationMessageType.hint;
+  final String contextUrl;
   final String message;
+
+  bool get isError => type == ValidationMessageType.error;
+
+  bool get isHint => type == ValidationMessageType.hint;
 
   String get indicator {
     switch (type) {
@@ -614,16 +642,14 @@ class ValidationMessage {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
     return other is ValidationMessage
         && other.message == message
-        && other.type == type;
+        && other.type == type
+        && other.contextUrl == contextUrl;
   }
 
   @override
-  int get hashCode => type.hashCode ^ message.hashCode;
+  int get hashCode => type.hashCode ^ message.hashCode ^ contextUrl.hashCode;
 }
 
 class FlutterValidator extends DoctorValidator {
@@ -710,6 +736,7 @@ class NoIdeValidator extends DoctorValidator {
   }
 }
 
+/// A doctor validator for both Intellij and Android Studio.
 abstract class IntelliJValidator extends DoctorValidator {
   IntelliJValidator(String title, this.installPath, {
     @required FileSystem fileSystem,
@@ -749,9 +776,19 @@ abstract class IntelliJValidator extends DoctorValidator {
       messages.add(ValidationMessage(userMessages.intellijLocation(installPath)));
 
       final IntelliJPlugins plugins = IntelliJPlugins(pluginsPath, fileSystem: _fileSystem);
-      plugins.validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
-          'Flutter', 'https://plugins.jetbrains.com/plugin/9212-flutter', minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
-      plugins.validatePackage(messages, <String>['Dart'], 'Dart', 'https://plugins.jetbrains.com/plugin/6351-dart');
+      plugins.validatePackage(
+        messages,
+        <String>['flutter-intellij', 'flutter-intellij.jar'],
+        'Flutter',
+        IntelliJPlugins.kIntellijFlutterPluginUrl,
+        minVersion: IntelliJPlugins.kMinFlutterPluginVersion,
+      );
+      plugins.validatePackage(
+        messages,
+        <String>['Dart'],
+        'Dart',
+        IntelliJPlugins.kIntellijDartPluginUrl,
+      );
 
       if (_hasIssues(messages)) {
         messages.add(ValidationMessage(userMessages.intellijPluginInfo));
@@ -763,7 +800,8 @@ abstract class IntelliJValidator extends DoctorValidator {
     return ValidationResult(
       _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
       messages,
-      statusInfo: userMessages.intellijStatusInfo(version));
+      statusInfo: userMessages.intellijStatusInfo(version),
+    );
   }
 
   bool _hasIssues(List<ValidationMessage> messages) {
@@ -787,6 +825,7 @@ abstract class IntelliJValidator extends DoctorValidator {
   }
 }
 
+/// A linux and windows specific implementation of the intellij validator.
 class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
   IntelliJValidatorOnLinuxAndWindows(String title, this.version, String installPath, this.pluginsPath, {
     @required FileSystem fileSystem,
@@ -842,6 +881,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
   }
 }
 
+/// A macOS specific implementation of the intellij validator.
 class IntelliJValidatorOnMac extends IntelliJValidator {
   IntelliJValidatorOnMac(String title, this.id, String installPath, {
     @required FileSystem fileSystem,
@@ -901,7 +941,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   @visibleForTesting
   String get plistFile {
-    _plistFile ??= globals.fs.path.join(installPath, 'Contents', 'Info.plist');
+    _plistFile ??= _fileSystem.path.join(installPath, 'Contents', 'Info.plist');
     return _plistFile;
   }
   String _plistFile;

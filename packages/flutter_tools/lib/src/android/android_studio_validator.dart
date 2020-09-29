@@ -50,10 +50,15 @@ class AndroidStudioValidator extends DoctorValidator {
       messages,
       <String>['flutter-intellij', 'flutter-intellij.jar'],
       'Flutter',
-      'https://plugins.jetbrains.com/plugin/9212-flutter',
+      IntelliJPlugins.kIntellijFlutterPluginUrl,
       minVersion: IntelliJPlugins.kMinFlutterPluginVersion,
     );
-    plugins.validatePackage(messages, <String>['Dart'], 'Dart', 'https://plugins.jetbrains.com/plugin/6351-dart');
+    plugins.validatePackage(
+      messages,
+      <String>['Dart'],
+      'Dart',
+      IntelliJPlugins.kIntellijDartPluginUrl,
+    );
 
     if (_studio.isValid) {
       type = _hasIssues(messages)

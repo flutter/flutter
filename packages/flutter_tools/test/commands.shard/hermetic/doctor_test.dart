@@ -62,6 +62,16 @@ void main() {
     logger = BufferLogger.test();
   });
 
+  testWithoutContext('ValidationMessage equality and hashCode includes contextUrl', () {
+    const ValidationMessage messageA = ValidationMessage('ab', contextUrl: 'a');
+    const ValidationMessage messageB = ValidationMessage('ab', contextUrl: 'b');
+
+    expect(messageB, isNot(messageA));
+    expect(messageB.hashCode, isNot(messageA.hashCode));
+    expect(messageA, isNot(messageB));
+    expect(messageA.hashCode, isNot(messageB.hashCode));
+  });
+
   group('doctor', () {
     MockPlistParser mockPlistParser;
     MemoryFileSystem fileSystem;
