@@ -2,12 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:vm_service/vm_service.dart';
-import 'package:vm_service/vm_service_io.dart';
 
 import '../src/common.dart';
 import 'test_data/project_with_immediate_exit.dart';
@@ -31,24 +27,17 @@ void main() {
 
 
   testWithoutContext('flutter_tools gracefully handles quick app shutdown', () async {
-    final String flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
-
-    final StringBuffer stderr = StringBuffer();
-
-    final Process process = await processManager.start(<String>[
-      flutterBin,
-      'run',
-      '--disable-service-auth-codes',
-      '--show-test-device',
-      '-dflutter-tester',
-    ], workingDirectory: tempDir.path);
-
-    transformToLines(process.stderr).listen((String line) => stderr.writeln(line));
-    await process.exitCode;
-    expect(stderr.toString(), contains('Error connecting to the service protocol'));
+    try {
+    await _flutter.run();
+    } on Exception catch(_) {
+      expect(_flutter.lastErrorInfo, contains('Error connecting to the service protocol:'));
+      expect(_flutter.lastErrorInfo.contains(
+                // Looks for stack trace entry of the form:
+                //   test/integration.shard/test_driver.dart 379:18  FlutterTestDriver._waitFor.<fn>
+                RegExp('^(.+)\/([^\/]+)\.dart \d*:\d*\s*.*\$')
+              ),
+              isFalse
+            );
+    }
   });
 }
