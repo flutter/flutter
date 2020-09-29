@@ -38,7 +38,7 @@ SessionConnection::SessionConnection(
         // A frame was presented: Update our |frames_in_flight| to match the
         // updated unfinalized present requests.
         frames_in_flight_ -= num_presents_handled;
-        TRACE_EVENT2("gfx", "OnFramePresentedFelipe", "frames_in_flight",
+        TRACE_EVENT2("gfx", "OnFramePresented", "frames_in_flight",
                      frames_in_flight_, "max_frames_in_flight",
                      kMaxFramesInFlight);
         FML_DCHECK(frames_in_flight_ >= 0);
