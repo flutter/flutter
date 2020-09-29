@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -461,7 +460,6 @@ void main() {
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
       ..addListener(listener);
 
-
     imageCache.putIfAbsent(testImage, () => completer1);
     expect(imageCache.statusForKey(testImage).pending, true);
     expect(imageCache.statusForKey(testImage).live, true);
@@ -490,23 +488,6 @@ void main() {
     expect(imageCache.currentSizeBytes, testImageSize);
   });
 
-  test('ImageCache does not cause new frames to be pumped', () async {
-    final ImageProvider provider = MemoryImage(Uint8List.fromList(kAnimatedGif));
-    final ImageStream stream = provider.resolve(ImageConfiguration.empty);
-    final Completer<void> completer = Completer<void>();
-
-    ImageStreamListener listener;
-    listener = ImageStreamListener((ImageInfo info, bool syncCall) {
-      completer.complete();
-      stream.completer.removePassiveListener(listener);
-    });
-    stream.completer.addPassiveListener(listener);
-    await completer.future;
-
-    expect(imageCache.containsKey(provider), true);
-    expect(stream.completer.hasListeners, false);
-  });
-
   test('Image is obtained and disposed of properly for cache', () async {
     const int key = 1;
     final ui.Image testImage = await createTestImage(width: 8, height: 8, cache: false);
@@ -527,10 +508,8 @@ void main() {
     // This should cause keepAlive to be set to true.
     completer.testSetImage(testImage);
     expect(imageInfo, isNotNull);
-    // +1 _CachedImage
-    // +1 _LiveImage
     // +1 ImageStreamCompleter
-    expect(testImage.debugGetOpenHandleStackTraces().length, 4);
+    expect(testImage.debugGetOpenHandleStackTraces().length, 2);
 
     completer.removeListener(listener);
 
@@ -538,8 +517,7 @@ void main() {
     SchedulerBinding.instance.scheduleFrame();
     await SchedulerBinding.instance.endOfFrame;
 
-    // -1 _LiveImage
-    expect(testImage.debugGetOpenHandleStackTraces().length, 3);
+    expect(testImage.debugGetOpenHandleStackTraces().length, 2);
 
     expect(imageCache.evict(key), true);
 
@@ -575,8 +553,8 @@ void main() {
     // This should cause keepAlive to be set to true.
     completer.testSetImage(testImage);
     expect(imageInfo, isNotNull);
-    // live/keep alive listeners, plus our imageInfo.
-    expect(testImage.debugGetOpenHandleStackTraces().length, 4);
+    // Just our imageInfo and the completer.
+    expect(testImage.debugGetOpenHandleStackTraces().length, 2);
 
     expect(imageCache.evict(key), true);
 

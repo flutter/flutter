@@ -287,21 +287,21 @@ class ImageCache {
     }
   }
 
-  void _trackLiveImage(Object key, ImageStreamCompleter completer) {
+  void _trackLiveImage(Object key, ImageStreamCompleter completer, int? sizeBytes) {
     // Avoid adding unnecessary callbacks to the completer.
     _liveImages.putIfAbsent(key, () {
       // Even if no callers to ImageProvider.resolve have listened to the stream,
       // the cache is listening to the stream and will remove itself once the
       // image completes to move it from pending to keepAlive.
       // Even if the cache size is 0, we still add this tracker, which will add
-      // a passive listener to the stream.
+      // a keep alive handle to the stream.
       return _LiveImage(
         completer,
         () {
           _liveImages.remove(key);
         },
       );
-    });
+    }).sizeBytes ??= sizeBytes;
   }
 
   /// Returns the previously cached [ImageStream] for the given key, if available;
@@ -349,6 +349,7 @@ class ImageCache {
       _trackLiveImage(
         key,
         image.completer,
+        image.sizeBytes,
       );
       _cache[key] = image;
       return image.completer;
@@ -372,10 +373,7 @@ class ImageCache {
 
     try {
       result = loader();
-      _trackLiveImage(
-        key,
-        result,
-      );
+      _trackLiveImage(key, result, null);
     } catch (error, stackTrace) {
       if (!kReleaseMode) {
         timelineTask!.finish(arguments: <String, dynamic>{
@@ -406,7 +404,7 @@ class ImageCache {
     // If the cache is disabled, this variable will be set.
     _PendingImage? untrackedPendingImage;
     void listener(ImageInfo? info, bool syncCall) {
-      int sizeBytes = 0;
+      int? sizeBytes;
       if (info != null) {
         sizeBytes = info.image.height * info.image.width * 4;
         info.image.dispose();
@@ -416,7 +414,7 @@ class ImageCache {
         sizeBytes: sizeBytes,
       );
 
-      _trackLiveImage(key, result);
+      _trackLiveImage(key, result, sizeBytes);
 
       // Only touch if the cache was enabled when resolve was initially called.
       if (untrackedPendingImage == null) {
@@ -607,35 +605,23 @@ abstract class _CachedImageBase {
   _CachedImageBase(
     this.completer, {
     this.sizeBytes,
-  }) : assert(completer != null) {
-    completer.addPassiveListener(ImageStreamListener(_listener));
-  }
+  }) : assert(completer != null),
+       handle = completer.keepAlive();
 
   final ImageStreamCompleter completer;
-  ImageInfo? info;
   int? sizeBytes;
-
-  void _listener(ImageInfo? newInfo, bool syncCall) {
-    if (info != null && newInfo != null && newInfo.isCloneOf(info!)) {
-      newInfo.image.dispose();
-      return;
-    }
-    info?.image.dispose();
-    info = newInfo;
-    if (sizeBytes == null && info != null) {
-      sizeBytes = info!.image.width * info!.image.height * 4;
-    }
-  }
+  ImageStreamCompleterHandle? handle;
 
   @mustCallSuper
   void dispose() {
+    assert(handle != null);
     // Give any interested parties a chance to listen to the stream before we
     // potentially dispose it.
     // scheduleMicrotask(() {
     SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
-      completer.removePassiveListener(ImageStreamListener(_listener));
-      info?.image.dispose();
-      info = null;
+      assert(handle != null);
+      handle?.dispose();
+      handle = null;
     });
   }
 }

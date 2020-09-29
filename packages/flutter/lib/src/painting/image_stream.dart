@@ -394,6 +394,37 @@ class ImageStream with Diagnosticable {
   }
 }
 
+/// An opaque handle that keeps an [ImageStreamCompleter] alive even if it has
+/// lost its last listener.
+///
+/// To create a handle, use [ImageStreamCompleter.keepAlive].
+///
+/// Such handles are useful when an image cache needs to keep a completer alive
+/// but does not actually have a listener subscribed, or when a widget that
+/// displays an image needs to temporarily unsubscribe from the completer but
+/// may re-subscribe in the future, for example when the [TickerMode] changes.
+class ImageStreamCompleterHandle {
+  ImageStreamCompleterHandle._(ImageStreamCompleter this._completer) {
+    _completer!._keepAliveHandles += 1;
+  }
+
+  ImageStreamCompleter? _completer;
+
+  /// Call this method to signal the [ImageStreamCompleter] that it can now be
+  /// disposed when its last listener drops.
+  ///
+  /// This method must only be called once per object.
+  void dispose() {
+    assert(_completer != null);
+    assert(_completer!._keepAliveHandles > 0);
+    assert(!_completer!._disposed);
+
+    _completer!._keepAliveHandles -= 1;
+    _completer!._maybeDispose();
+    _completer = null;
+  }
+}
+
 /// Base class for those that manage the loading of [dart:ui.Image] objects for
 /// [ImageStream]s.
 ///
@@ -401,8 +432,7 @@ class ImageStream with Diagnosticable {
 /// [ImageProvider] subclass will return an [ImageStream] and automatically
 /// configure it with the right [ImageStreamCompleter] when possible.
 abstract class ImageStreamCompleter with Diagnosticable {
-  final List<ImageStreamListener> _activeListeners = <ImageStreamListener>[];
-  final List<ImageStreamListener> _passiveListeners = <ImageStreamListener>[];
+  final List<ImageStreamListener> _listeners = <ImageStreamListener>[];
   ImageInfo? _currentImage;
   FlutterErrorDetails? _currentError;
 
@@ -424,14 +454,27 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// and similarly, by overriding [removeListener], checking if [hasListeners]
   /// is false after calling `super.removeListener()`, and if so, stopping that
   /// same work.
-  ///
-  /// This method ignores passive listeners added via [addPassiveListener].
   @protected
   @visibleForTesting
-  bool get hasListeners => _activeListeners.isNotEmpty;
+  bool get hasListeners => _listeners.isNotEmpty;
 
+  /// We should avoid disposing a completer if it has never had a listener, even
+  /// if all [keepAlive] handles get disposed.
+  bool _hadAtLeastOneListener = false;
 
-  void _processNewListener(ImageStreamListener listener) {
+  /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
+  /// object is available or an error is reported. If a concrete image is
+  /// already available, or if an error has been already reported, this object
+  /// will notify the listener synchronously.
+  ///
+  /// If the [ImageStreamCompleter] completes multiple images over its lifetime,
+  /// this listener's [ImageStreamListener.onImage] will fire multiple times.
+  ///
+  /// {@macro flutter.painting.imageStream.addListener}
+  void addListener(ImageStreamListener listener) {
+    _checkDisposed();
+    _hadAtLeastOneListener = true;
+    _listeners.add(listener);
     if (_currentImage != null) {
       try {
         listener.onImage(_currentImage!.clone(), true);
@@ -459,48 +502,18 @@ abstract class ImageStreamCompleter with Diagnosticable {
     }
   }
 
-  /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
-  /// object is available or an error is reported. If a concrete image is
-  /// already available, or if an error has been already reported, this object
-  /// will notify the listener synchronously.
+  int _keepAliveHandles = 0;
+  /// Creates an [ImageStreamCompleterHandle] that will prevent this stream from
+  /// being disposed at least until the handle is disposed.
   ///
-  /// If the [ImageStreamCompleter] completes multiple images over its lifetime,
-  /// this listener's [ImageStreamListener.onImage] will fire multiple times.
-  ///
-  /// Listeners added by this method are considered to be actively interested
-  /// in decoding and using new frames from multi-frame image streams. It is
-  /// also possible to [addPassiveListener], which will only be called if there
-  /// are other active listeners to drive the stream forward.
-  ///
-  /// {@macro flutter.painting.imageStream.addListener}
-  void addListener(ImageStreamListener listener) {
+  /// Such handles are useful when an image cache needs to keep a completer
+  /// alive but does not itself have a listener subscribed, or when a widget
+  /// that displays an image needs to temporarily unsubscribe from the completer
+  /// but may re-subscribe in the future, for example when the [TickerMode]
+  /// changes.
+  ImageStreamCompleterHandle keepAlive() {
     _checkDisposed();
-    _activeListeners.add(listener);
-    _processNewListener(listener);
-  }
-
-  /// Adds a listener callback that is only called if there are listeners
-  /// added via [addListener] and a new concrete [ImageInfo]
-  /// object is available or an error is reported. If a concrete image is
-  /// already available, or if an error has been already reported, this object
-  /// will notify the listener synchronously.
-  ///
-  /// If the [ImageStreamCompleter] completes multiple images over its lifetime,
-  /// this listener's [ImageStreamListener.onImage] will fire multiple times.
-  ///
-  /// This call will not contribute to [hasListeners], and implementers of this
-  /// class should not consider passive listeners when deciding whether to
-  /// schedule additional frames or decode jobs.
-  ///
-  /// An example of this kind of listener would be the [ImageCache], which
-  /// does not wish to drive an animated image forward, but does want to know
-  /// the latest frame used in case new clients ask for the cached image.
-  ///
-  /// {@macro flutter.painting.imageStream.addListener}
-  void addPassiveListener(ImageStreamListener listener) {
-    _checkDisposed();
-    _passiveListeners.add(listener);
-    _processNewListener(listener);
+    return ImageStreamCompleterHandle._(this);
   }
 
   /// Stops the specified [listener] from receiving image stream events.
@@ -508,53 +521,32 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// If [listener] has been added multiple times, this removes the _first_
   /// instance of the listener.
   ///
-  /// Once all active and passive listeners have been removed, this image stream
-  /// is no longer usable, and new listeners cannot be added.
+  /// Once all listeners have been removed and all [keepAlive] handles have been
+  /// disposed, this image stream is no longer usable.
   void removeListener(ImageStreamListener listener) {
     _checkDisposed();
-    for (int i = 0; i < _activeListeners.length; i += 1) {
-      if (_activeListeners[i] == listener) {
-        _activeListeners.removeAt(i);
+    for (int i = 0; i < _listeners.length; i += 1) {
+      if (_listeners[i] == listener) {
+        _listeners.removeAt(i);
         break;
       }
     }
-    if (_activeListeners.isEmpty) {
+    if (_listeners.isEmpty) {
       final List<VoidCallback> callbacks = _onLastListenerRemovedCallbacks.toList();
       for (final VoidCallback callback in callbacks) {
         callback();
       }
       _onLastListenerRemovedCallbacks.clear();
-      if (_passiveListeners.isEmpty && !_disposed) {
-        _dispose();
-      }
-    }
-  }
-
-  /// Stops the specified [listener] from receiving image stream events.
-  ///
-  /// If [listener] has been added multiple times, this removes the _first_
-  /// instance of the listener.
-  ///
-  /// Once all active and passive listeners have been removed, this image stream
-  /// is no longer usable, and new listeners cannot be added.
-  void removePassiveListener(ImageStreamListener listener) {
-    _checkDisposed();
-    for (int i = 0; i < _passiveListeners.length; i += 1) {
-      if (_passiveListeners[i] == listener) {
-        _passiveListeners.removeAt(i);
-        break;
-      }
-    }
-    if (_activeListeners.isEmpty && _passiveListeners.isEmpty) {
-      _dispose();
+      _maybeDispose();
     }
   }
 
   bool _disposed = false;
-  void _dispose() {
-    assert(!_disposed);
-    assert(_activeListeners.isEmpty);
-    assert(_passiveListeners.isEmpty);
+  void _maybeDispose() {
+    if (!_hadAtLeastOneListener || _disposed || _listeners.isNotEmpty || _keepAliveHandles != 0) {
+      return;
+    }
+
     _currentImage?.image.dispose();
     _currentImage = null;
     _disposed = true;
@@ -564,11 +556,12 @@ abstract class ImageStreamCompleter with Diagnosticable {
     if (_disposed) {
       throw StateError(
         'Stream has been disposed.\n'
-        'An ImageStream is considered disposed once at least one active or '
-        'passive listener has been added and subsequently all passive and '
-        'active listeners have been removed.\n'
-        'To prevent this from happening, maintain at least one listener on '
-        'stream, or create a new stream for the image.',
+        'An ImageStream is considered disposed once at least one listener has '
+        'been added and subsequently all listeners have been removed and no '
+        'handles are outstanding from the keepAlive method.\n'
+        'To resolve this error, maintain at least one listener on the stream, '
+        'or create an ImageStreamCompleterHandle from the keepAlive '
+        'method, or create a new stream for the image.',
       );
     }
   }
@@ -576,7 +569,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   final List<VoidCallback> _onLastListenerRemovedCallbacks = <VoidCallback>[];
 
   /// Adds a callback to call when [removeListener] results in an empty
-  /// list of listeners, considering both active and passive listeners.
+  /// list of listeners and there are no [keepAlive] handles outstanding.
   ///
   /// This callback will never fire if [removeListener] is never called.
   void addOnLastListenerRemovedCallback(VoidCallback callback) {
@@ -593,12 +586,18 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _onLastListenerRemovedCallbacks.remove(callback);
   }
 
-  void _notify(ImageInfo image, List<ImageStreamListener> listeners) {
-    if (listeners.isEmpty)
+  /// Calls all the registered listeners to notify them of a new image.
+  @protected
+  void setImage(ImageInfo image) {
+    _checkDisposed();
+    _currentImage?.image.dispose();
+    _currentImage = image;
+
+    if (_listeners.isEmpty)
       return;
     // Make a copy to allow for concurrent modification.
     final List<ImageStreamListener> localListeners =
-        List<ImageStreamListener>.from(listeners);
+        List<ImageStreamListener>.from(_listeners);
     for (final ImageStreamListener listener in localListeners) {
       try {
         listener.onImage(image.clone(), false);
@@ -610,19 +609,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
         );
       }
     }
-  }
-
-  /// Calls all the registered listeners to notify them of a new image.
-  @protected
-  void setImage(ImageInfo image) {
-    _checkDisposed();
-    _currentImage?.image.dispose();
-    _currentImage = image;
-
-    if (_activeListeners.isEmpty)
-      return;
-    _notify(image, _activeListeners);
-    _notify(image, _passiveListeners);
   }
 
   /// Calls all the registered error listeners to notify them of an error that
@@ -671,7 +657,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     );
 
     // Make a copy to allow for concurrent modification.
-    final List<ImageErrorListener> localErrorListeners = _activeListeners
+    final List<ImageErrorListener> localErrorListeners = _listeners
         .map<ImageErrorListener?>((ImageStreamListener listener) => listener.onError)
         .whereType<ImageErrorListener>()
         .toList();
@@ -704,7 +690,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _checkDisposed();
     if (hasListeners) {
       // Make a copy to allow for concurrent modification.
-      final List<ImageChunkListener> localListeners = _activeListeners
+      final List<ImageChunkListener> localListeners = _listeners
           .map<ImageChunkListener?>((ImageStreamListener listener) => listener.onChunk)
           .whereType<ImageChunkListener>()
           .toList();
@@ -722,8 +708,8 @@ abstract class ImageStreamCompleter with Diagnosticable {
     description.add(DiagnosticsProperty<ImageInfo>('current', _currentImage, ifNull: 'unresolved', showName: false));
     description.add(ObjectFlagProperty<List<ImageStreamListener>>(
       'listeners',
-      _activeListeners,
-      ifPresent: '${_activeListeners.length} listener${_activeListeners.length == 1 ? "" : "s" }',
+      _listeners,
+      ifPresent: '${_listeners.length} listener${_listeners.length == 1 ? "" : "s" }',
     ));
     description.add(FlagProperty('disposed', value: _disposed, ifTrue: '<disposed>'));
   }

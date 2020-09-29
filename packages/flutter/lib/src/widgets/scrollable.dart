@@ -313,7 +313,7 @@ class Scrollable extends StatefulWidget {
     // Otherwise, let the outer renderObject as visible as possible maybe cause
     // the `targetRenderObject` invisible.
     // Also see https://github.com/flutter/flutter/issues/65100
-    // RenderObject? targetRenderObject;
+    RenderObject? targetRenderObject;
     ScrollableState? scrollable = Scrollable.of(context);
     while (scrollable != null) {
       futures.add(scrollable.position.ensureVisible(
@@ -322,10 +322,10 @@ class Scrollable extends StatefulWidget {
         duration: duration,
         curve: curve,
         alignmentPolicy: alignmentPolicy,
-        // targetRenderObject: targetRenderObject,
+        targetRenderObject: targetRenderObject,
       ));
 
-      // targetRenderObject = targetRenderObject ?? context.findRenderObject();
+      targetRenderObject = targetRenderObject ?? context.findRenderObject();
       context = scrollable.context;
       scrollable = Scrollable.of(context);
     }

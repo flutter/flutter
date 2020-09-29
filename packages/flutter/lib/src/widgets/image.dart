@@ -1084,7 +1084,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   late DisposableBuildContext<State<Image>> _scrollAwareContext;
   Object? _lastException;
   StackTrace? _lastStack;
-  ImageStreamListener? _passiveListener;
+  ImageStreamCompleterHandle? _completerHandle;
 
   @override
   void initState() {
@@ -1098,6 +1098,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     assert(_imageStream != null);
     WidgetsBinding.instance!.removeObserver(this);
     _stopListeningToStream();
+    _completerHandle?.dispose();
     _scrollAwareContext.dispose();
     _replaceImage(info: null);
     super.dispose();
@@ -1233,11 +1234,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       return;
 
     _imageStream!.addListener(_getListener());
-    if (_passiveListener != null) {
-      assert(_imageStream?.completer != null);
-     _imageStream!.completer!.removePassiveListener(_passiveListener!);
-     _passiveListener = null;
-    }
+    _completerHandle?.dispose();
+    _completerHandle = null;
 
     _isListeningToStream = true;
   }
@@ -1253,9 +1251,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     if (!_isListeningToStream)
       return;
 
-    if (keepStreamAlive && _passiveListener == null && _imageStream?.completer != null) {
-      _passiveListener = ImageStreamListener((_, __) {});
-      _imageStream!.completer!.addPassiveListener(_passiveListener!);
+    if (keepStreamAlive && _completerHandle == null && _imageStream?.completer != null) {
+      _completerHandle = _imageStream!.completer!.keepAlive();
     }
 
     _imageStream!.removeListener(_getListener());

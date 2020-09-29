@@ -435,7 +435,7 @@ void main() {
     expect(emittedImages[1].image.isCloneOf(frame2.image), true);
   });
 
-  testWidgets('frames are only decoded when there are active listeners', (WidgetTester tester) async {
+  testWidgets('frames are only decoded when there are listeners', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
@@ -448,7 +448,7 @@ void main() {
 
     final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
     imageStream.addListener(ImageStreamListener(listener));
-    imageStream.addPassiveListener(ImageStreamListener(listener));
+    final ImageStreamCompleterHandle handle = imageStream.keepAlive();
 
     codecCompleter.complete(mockCodec);
     await tester.idle();
@@ -471,6 +471,8 @@ void main() {
     imageStream.addListener(ImageStreamListener(listener));
     await tester.idle(); // let nextFrameFuture complete
     expect(mockCodec.numFramesAsked, 3);
+
+    handle.dispose();
   });
 
   testWidgets('multiple stream listeners', (WidgetTester tester) async {
@@ -687,7 +689,7 @@ void main() {
     compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, onError2: handleError, areEqual: false);
   });
 
-  testWidgets('Passive listeners do not drive frames', (WidgetTester tester) async {
+  testWidgets('Keep alive handles do not drive frames or prevent last listener callbacks', (WidgetTester tester) async {
     final Image image10x10 = await tester.runAsync(() => createTestImage(width: 10, height: 10));
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
@@ -699,32 +701,31 @@ void main() {
       scale: 1.0,
     );
 
-    int activeCount = 0;
-    int passiveCount = 0;
+    int onImageCount = 0;
     final ImageListener activeListener = (ImageInfo image, bool synchronousCall) {
-      activeCount += 1;
+      onImageCount += 1;
     };
-    final ImageListener passiveListener = (ImageInfo image, bool synchronousCall) {
-      passiveCount += 1;
-    };
+    bool lastListenerDropped = false;
+    imageStream.addOnLastListenerRemovedCallback(() {
+      lastListenerDropped = true;
+    });
 
-    imageStream.addPassiveListener(ImageStreamListener(passiveListener));
+    expect(lastListenerDropped, false);
+    final ImageStreamCompleterHandle handle = imageStream.keepAlive();
+    expect(lastListenerDropped, false);
     SchedulerBinding.instance.debugAssertNoTransientCallbacks('Only passive listeners');
-
 
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    expect(activeCount, 0);
-    expect(passiveCount, 0);
+    expect(onImageCount, 0);
 
     final FakeFrameInfo frame1 = FakeFrameInfo(Duration.zero, image20x10);
     mockCodec.completeNextFrame(frame1);
     await tester.idle();
     SchedulerBinding.instance.debugAssertNoTransientCallbacks('Only passive listeners');
     await tester.pump();
-    expect(activeCount, 0);
-    expect(passiveCount, 0);
+    expect(onImageCount, 0);
 
     imageStream.addListener(ImageStreamListener(activeListener));
 
@@ -734,18 +735,17 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, 1);
     await tester.pump();
 
-    expect(activeCount, 1);
-    expect(passiveCount, 1);
+    expect(onImageCount, 1);
 
     imageStream.removeListener(ImageStreamListener(activeListener));
+    expect(lastListenerDropped, true);
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle();
     expect(SchedulerBinding.instance.transientCallbackCount, 1);
     await tester.pump();
 
-    expect(activeCount, 1);
-    expect(passiveCount, 1);
+    expect(onImageCount, 1);
 
     SchedulerBinding.instance.debugAssertNoTransientCallbacks('Only passive listeners');
 
@@ -754,8 +754,9 @@ void main() {
     SchedulerBinding.instance.debugAssertNoTransientCallbacks('Only passive listeners');
     await tester.pump();
 
-    expect(activeCount, 1);
-    expect(passiveCount, 1);
+    expect(onImageCount, 1);
+
+    handle.dispose();
   });
 
   // TODO(amirh): enable this once WidgetTester supports flushTimers.
