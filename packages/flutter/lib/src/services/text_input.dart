@@ -849,7 +849,7 @@ abstract class TextInputClient {
 ///
 ///  * [TextInput.attach], a method used to establish a [TextInputConnection]
 ///    between the system's text input and a [TextInputClient].
-/// 
+///
 ///  * [EditableText], a [TextInputClient] that connects to and interacts with
 ///    the system's text input using a [TextInputConnection].
 class TextInputConnection {
@@ -1088,16 +1088,15 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
 ///   connected [TextInputClient] via a "TextInput.setEditingState" message.
 ///
 /// * When autofill happens on a disconnected [TextInputClient], the platform
-///   text input plugin sends the [TextInputValue] to the connected
-///   [TextinputClient]'s [AutofillScope], and the [AutofillScope] will further
-///   rely the value to the correct [TextInputClient].
+///   text input plugin sends the [TextEditingValue] to the connected
+///   [TextInputClient]'s [AutofillScope], and the [AutofillScope] will further
+///   relay the value to the correct [TextInputClient].
 ///
 /// When synchronizing the [TextEditingValue]s, the communication may stuck in
 /// an infinity loop when both parties are trying to send their own update. To
-/// mitigate the problem while keep the text editing states in sync, only
-/// [TextInputClient]s are allowed to alter the received [TextEditingValue]s
-/// while platform text input plugins are to accept the received values
-/// unmodified. More specifically:
+/// mitigate the problem, only [TextInputClient]s are allowed to alter the
+/// received [TextEditingValue]s while platform text input plugins are to accept
+/// the received [TextEditingValue]s unmodified. More specifically:
 ///
 /// * When a [TextInputClient] receives a new [TextEditingValue] from the
 ///   platform text input plugin, it's allowed to modify the value (for example,

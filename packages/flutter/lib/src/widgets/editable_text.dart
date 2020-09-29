@@ -311,10 +311,15 @@ class ToolbarOptions {
 /// ## Handling User Input
 ///
 /// Currently the user may change the text this widget contains via keyboard or
-/// the text selection menu. When the user inserted or deleted text,
-/// [EditableText] first applies the [inputFormatters] in the provided order, if
-/// any, then the [TextEditingController] will be updated with the formatted
-/// result. Lastly [onChanged] will be called.
+/// the text selection menu. When the user inserted or deleted text, you will be
+/// notified of the change and get a chance to modify the new text value:
+///
+/// * The [inputFormatters] will be first applied to the user input.
+///
+/// * The [controller]'s [TextEditingController.value] will be updated with the
+///   formatted result, and the [controller]'s listeners will be notified.
+///
+/// * The [onChanged] callback, if specified, will be called last.
 ///
 /// ## Input Actions
 ///
@@ -1062,7 +1067,9 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.inputFormatters}
   /// Optional input validation and formatting overrides.
   ///
-  /// Formatters are run in the provided order when the text input changes.
+  /// Formatters are run in the provided order when the text input changes. When
+  /// this parameter changes, the new formatters will not be applied until the
+  /// next time the user inserts or deletes text.
   /// {@endtemplate}
   final List<TextInputFormatter>? inputFormatters;
 

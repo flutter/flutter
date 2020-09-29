@@ -4852,14 +4852,24 @@ void main() {
       // Connect.
       await tester.showKeyboard(find.byType(EditableText));
       tester.testTextInput.log.clear();
-
       await tester.pumpWidget(build(textEditingController: TextEditingController(text: 'new text')));
-      final List<TextEditingValue> updates = tester.testTextInput.log
+
+      List<TextEditingValue> updates = tester.testTextInput.log
         .where((MethodCall call) => call.method == 'TextInput.setEditingState')
         .map((MethodCall call) => TextEditingValue.fromJSON(call.arguments as Map<String, dynamic>))
         .toList(growable: false);
 
       expect(updates, const <TextEditingValue>[TextEditingValue(text: 'new text')]);
+
+      tester.testTextInput.log.clear();
+      await tester.pumpWidget(build(textEditingController: TextEditingController(text: 'new new text')));
+
+      updates = tester.testTextInput.log
+        .where((MethodCall call) => call.method == 'TextInput.setEditingState')
+        .map((MethodCall call) => TextEditingValue.fromJSON(call.arguments as Map<String, dynamic>))
+        .toList(growable: false);
+
+      expect(updates, const <TextEditingValue>[TextEditingValue(text: 'new new text')]);
     });
   });
 
