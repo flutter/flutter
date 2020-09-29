@@ -383,6 +383,7 @@ class _SnackBarState extends State<SnackBar> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMediaQuery(context));
     final MediaQueryData mediaQueryData = MediaQuery.of(context)!;
     assert(widget.animation != null);
     final ThemeData theme = Theme.of(context)!;

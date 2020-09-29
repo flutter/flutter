@@ -311,8 +311,7 @@ class Material extends StatefulWidget {
   /// MaterialInkController inkController = Material.of(context);
   /// ```
   static MaterialInkController? of(BuildContext context) {
-    final _RenderInkFeatures? result = context.findAncestorRenderObjectOfType<_RenderInkFeatures>();
-    return result;
+    return context.findAncestorRenderObjectOfType<_RenderInkFeatures>();
   }
 
   @override
