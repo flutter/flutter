@@ -753,11 +753,6 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   }
 
   @override
-  void deactivate() {
-    super.deactivate();
-  }
-
-  @override
   void dispose() {
     focusScopeNode.dispose();
     widget.onUnmount();
@@ -1503,20 +1498,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // frame so that we minimize the amount of building that happens.
   Widget? _modalScopeCache;
 
-  bool _holdDispose = false;
-  bool _hasDisposeHeld = false;
-
   void _onMountScope() {
-    _holdDispose = true;
-    _hasDisposeHeld = false;
+    markHoldingGracefulDisposal(true);
   }
 
   void _onUnmountScope() {
-    _holdDispose = false;
-    if (_hasDisposeHeld) {
-      _hasDisposeHeld = false;
-      super.dispose();
-    }
+    markHoldingGracefulDisposal(false);
   }
 
   // one of the builders
@@ -1535,23 +1522,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   late OverlayEntry _modalScope;
-
-  @override
-  void dispose() {
-    _holdDispose = false;
-    _hasDisposeHeld = false;
-    super.dispose();
-  }
-
-  @protected
-  @override
-  void gracefullyDispose() {
-    if (_holdDispose) {
-      _hasDisposeHeld = true;
-    } else {
-      super.dispose();
-    }
-  }
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {

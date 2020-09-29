@@ -538,8 +538,7 @@ class _HeroFlight {
     if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
       _proxyAnimation.parent = null;
 
-      if (overlayEntry == null)
-        return;
+      assert(overlayEntry != null);
       overlayEntry!.remove();
       overlayEntry = null;
       // We want to keep the hero underneath the current page hidden. If
@@ -553,9 +552,11 @@ class _HeroFlight {
     }
   }
 
+  bool _scheduledPerformAnimtationUpdate = false;
   void _handleAnimationUpdate(AnimationStatus status) {
     // The animation will not finish until the user lifts their finger, so we
-    // should ignore the status update if the gesture is in progress.
+    // should suppress the status update if the gesture is in progress, and
+    // delay it until the finger is lifted.
     //
     // This also relies on the animation to update its status at the end of the
     // gesture. See the _CupertinoBackGestureController.dragEnd for how
@@ -566,16 +567,19 @@ class _HeroFlight {
     }
 
     final NavigatorState? navigator = manifest!.fromRoute.navigator;
-    if (navigator == null)
+    if (navigator == null || _scheduledPerformAnimtationUpdate)
       return;
 
     // final AnimationStatus localStatus = _proxyAnimation.status;
     void delayedPerformAnimtationUpdate() {
       assert(!navigator.userGestureInProgress);
-      _performAnimationUpdate(_proxyAnimation.status);
+      assert(_scheduledPerformAnimtationUpdate);
+      _scheduledPerformAnimtationUpdate = false;
       navigator.userGestureInProgressNotifier.removeListener(delayedPerformAnimtationUpdate);
+      _performAnimationUpdate(_proxyAnimation.status);
     }
     assert(navigator.userGestureInProgress);
+    _scheduledPerformAnimtationUpdate = true;
     navigator.userGestureInProgressNotifier.addListener(delayedPerformAnimtationUpdate);
   }
 

@@ -393,7 +393,26 @@ abstract class Route<T> {
   @mustCallSuper
   void changedExternalState() { }
 
-  /// Discards any resources used by the object.
+  bool _holdingGracefulDisposal = false;
+  /// Set whether [gracefullyDispose] should call [dispose] at a later time.
+  ///
+  /// Calling [markHoldingGracefulDisposal] with false will invoke [dispose] if
+  /// [gracefullyDispose] has been called while [markHoldingGracefulDisposal] is
+  /// set to true. See [gracefullyDispose] for detailed usage.
+  @protected
+  void markHoldingGracefulDisposal(bool value) {
+    if (value == _holdingGracefulDisposal)
+      return;
+    _holdingGracefulDisposal = value;
+    final bool localScheduledDisposal = _scheduledGracefulDisposal;
+    _scheduledGracefulDisposal = false;
+    if (!value && localScheduledDisposal) {
+      dispose();
+    }
+  }
+  bool _scheduledGracefulDisposal = false;
+  bool _debugDisposed = false;
+  /// Discards any resources used by the object immediately.
   ///
   /// This method should not remove its [overlayEntries] from the [Overlay]. The
   /// object's owner is in charge of doing that.
@@ -404,15 +423,41 @@ abstract class Route<T> {
   /// This method should only be called by the object's owner; typically the
   /// [Navigator] owns a route and so will call this method when the route is
   /// removed, after which the route is no longer referenced by the navigator.
+  ///
+  /// Calling [dispose] is not affected by [holdGracefulDisposal] and will cancel
+  /// any scheduled [gracefullyDispose].
+  ///
+  /// The [dispose] will only be called once.
   @mustCallSuper
   @protected
   void dispose() {
+    assert(!_debugDisposed);
+    assert(() {
+      _debugDisposed = true;
+      return true;
+    }());
+    _scheduledGracefulDisposal = false;
+    _holdingGracefulDisposal = false;
+
     _navigator = null;
   }
 
-  @protected
+  /// Call [dispose] at the next appropriate moment, which is decided by the
+  /// state of [markHoldingGracefulDisposal].
+  ///
+  /// By default, [gracefullyDispose] immediately calls [dispose]. If
+  /// [markHoldingGracefulDisposal] is called with true, [gracefullyDispose] will
+  /// instead schedule a [dispose] to be called as soon as
+  /// [markHoldingGracefulDisposal] is called with false.
+  ///
+  /// This is useful when a subclass contains resources that might be depended
+  /// beyond the disposal of this route, such as [TransitionRoute].
   void gracefullyDispose() {
-    dispose();
+    if (_holdingGracefulDisposal) {
+      _scheduledGracefulDisposal = true;
+    } else {
+      dispose();
+    }
   }
 
   /// Whether this route is the top-most route on the navigator.
