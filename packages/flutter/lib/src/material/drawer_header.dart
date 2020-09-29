@@ -33,6 +33,7 @@ class DrawerHeader extends StatelessWidget {
   const DrawerHeader({
     Key key,
     this.decoration,
+    this.constraints,
     this.margin = const EdgeInsets.only(bottom: 8.0),
     this.padding = const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
     this.duration = const Duration(milliseconds: 250),
@@ -47,6 +48,14 @@ class DrawerHeader extends StatelessWidget {
   ///
   /// If this is changed, it will be animated according to [duration] and [curve].
   final Decoration decoration;
+
+  /// Size constraints for the header.
+  ///
+  /// By default, the drawer header will be adhering to standard size
+  /// recommendations by the Material Design spec, which is a fixed height.
+  ///
+  /// Changing the constraints allows for a flexible height, for example.
+  final BoxConstraints constraints;
 
   /// The padding by which to inset [child].
   ///
@@ -80,7 +89,9 @@ class DrawerHeader extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return Container(
-      height: statusBarHeight + _kDrawerHeaderHeight,
+      constraints: constraints ??
+          BoxConstraints.tightFor(
+              height: statusBarHeight + _kDrawerHeaderHeight),
       margin: margin,
       decoration: BoxDecoration(
         border: Border(
@@ -92,14 +103,16 @@ class DrawerHeader extends StatelessWidget {
         decoration: decoration,
         duration: duration,
         curve: curve,
-        child: child == null ? null : DefaultTextStyle(
-          style: theme.textTheme.bodyText1,
-          child: MediaQuery.removePadding(
-            context: context,
-            removeTop: true,
-            child: child,
-          ),
-        ),
+        child: child == null
+            ? null
+            : DefaultTextStyle(
+                style: theme.textTheme.bodyText1,
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: true,
+                  child: child,
+                ),
+              ),
       ),
     );
   }
