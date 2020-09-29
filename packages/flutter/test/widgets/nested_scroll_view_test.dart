@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -369,6 +371,39 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('ddd1'), findsOneWidget);
   });
+
+  testWidgets('Holding scroll and Scroll pointer signal will update ScrollDirection.forward / ScrollDirection.reverse', (WidgetTester tester) async {
+    ScrollDirection lastUserScrollingDirection;
+
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(buildTest(controller: controller));
+
+    controller.addListener(() {
+      if(controller.position.userScrollDirection != ScrollDirection.idle)
+        lastUserScrollingDirection = controller.position.userScrollDirection;
+    });
+
+    await tester.drag(find.byType(NestedScrollView), const Offset(0.0, -20.0), touchSlopY: 0.0);
+
+    expect(lastUserScrollingDirection, ScrollDirection.reverse);
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+
+    expect(lastUserScrollingDirection, ScrollDirection.reverse);
+
+    await tester.drag(find.byType(NestedScrollView), const Offset(0.0, 20.0), touchSlopY: 0.0);
+
+    expect(lastUserScrollingDirection, ScrollDirection.forward);
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)));
+
+    expect(lastUserScrollingDirection, ScrollDirection.forward);
+  });
+
 
   testWidgets('Three NestedScrollViews with one ScrollController', (WidgetTester tester) async {
     final TrackingScrollController controller = TrackingScrollController();
