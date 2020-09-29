@@ -1268,7 +1268,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       // The image will be disposed by this state object when it is not needed
       // anymore, such as when it is unmounted or when the image stream pushes
       // a new image.
-      image: _imageInfo?.image.clone(),
+      image: _imageInfo?.image,
       debugImageLabel: _imageInfo?.debugLabel,
       width: widget.width,
       height: widget.height,

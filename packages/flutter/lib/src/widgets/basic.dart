@@ -5367,8 +5367,12 @@ class RichText extends MultiChildRenderObjectWidget {
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
 ///
+/// The [image] is not disposed of by this widget. Creators of the widget are
+/// expected to call [Image.dispose] on the [image] once the [RawImage] is no
+/// longer buildable.
+///
 /// This widget is rarely used directly. Instead, consider using [Image].
-class RawImage extends StatefulWidget {
+class RawImage extends LeafRenderObjectWidget {
   /// Creates a widget that displays an image.
   ///
   /// The [scale], [alignment], [repeat], [matchTextDirection] and [filterQuality] arguments must
@@ -5398,6 +5402,10 @@ class RawImage extends StatefulWidget {
        super(key: key);
 
   /// The image to display.
+  ///
+  /// Since a [RawImage] is stateless, it does not ever dispose this image.
+  /// Creators of a [RawImage] are expected to call [Image.dispose] on this
+  /// image handle when the [RawImage] will no longer be needed.
   final ui.Image? image;
 
   /// A string identifying the source of the image.
@@ -5515,84 +5523,6 @@ class RawImage extends StatefulWidget {
   /// Whether to paint the image with anti-aliasing.
   ///
   /// Anti-aliasing alleviates the sawtooth artifact when the image is rotated.
-  final bool isAntiAlias;
-
-  @override
-  _RawImageState createState() => _RawImageState();
-}
-
-class _RawImageState extends State<RawImage> {
-  @override
-  Widget build(BuildContext context) {
-    return _RawImage(
-      image: widget.image,
-      debugImageLabel: widget.debugImageLabel,
-      width: widget.width,
-      height: widget.height,
-      scale: widget.scale,
-      color: widget.color,
-      colorBlendMode: widget.colorBlendMode,
-      fit: widget.fit,
-      alignment: widget.alignment,
-      repeat: widget.repeat,
-      centerSlice: widget.centerSlice,
-      matchTextDirection: widget.matchTextDirection,
-      invertColors: widget.invertColors,
-      filterQuality: widget.filterQuality,
-      isAntiAlias: widget.isAntiAlias,
-    );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    widget.image?.dispose();
-  }
-}
-
-class _RawImage extends LeafRenderObjectWidget {
-  /// Creates a widget that displays an image.
-  ///
-  /// The [scale], [alignment], [repeat], [matchTextDirection] and [filterQuality] arguments must
-  /// not be null.
-  const _RawImage({
-    Key? key,
-    this.image,
-    this.debugImageLabel,
-    this.width,
-    this.height,
-    this.scale = 1.0,
-    this.color,
-    this.colorBlendMode,
-    this.fit,
-    this.alignment = Alignment.center,
-    this.repeat = ImageRepeat.noRepeat,
-    this.centerSlice,
-    this.matchTextDirection = false,
-    this.invertColors = false,
-    this.filterQuality = FilterQuality.low,
-    this.isAntiAlias = false,
-  }) : assert(scale != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       assert(isAntiAlias != null),
-       super(key: key);
-
-  final ui.Image? image;
-  final String? debugImageLabel;
-  final double? width;
-  final double? height;
-  final double scale;
-  final Color? color;
-  final FilterQuality filterQuality;
-  final BlendMode? colorBlendMode;
-  final BoxFit? fit;
-  final AlignmentGeometry alignment;
-  final ImageRepeat repeat;
-  final Rect? centerSlice;
-  final bool matchTextDirection;
-  final bool invertColors;
   final bool isAntiAlias;
 
   @override
