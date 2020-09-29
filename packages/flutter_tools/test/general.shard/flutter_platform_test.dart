@@ -61,7 +61,7 @@ void main() {
 
     group('Observatory and DDS setup', () {
       Platform fakePlatform;
-      MockProcessManager mockProcessManager;
+      ProcessManager mockProcessManager;
       FlutterPlatform flutterPlatform;
       final Map<Type, Generator> contextOverrides = <Type, Generator>{
         Platform: () => fakePlatform,
@@ -71,31 +71,32 @@ void main() {
 
       setUp(() {
         fakePlatform = FakePlatform(operatingSystem: 'linux', environment: {});
-        mockProcessManager = MockProcessManager();
+        mockProcessManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              '/',
+              '--observatory-port=0',
+              '--ipv6',
+              '--enable-checked-mode',
+              '--verify-entry-points',
+              '--enable-software-rendering',
+              '--skia-deterministic-rendering',
+              '--enable-dart-profiling',
+              '--non-interactive',
+              '--use-test-fonts',
+              '--packages=.packages',
+              'example.dill'
+            ],
+            stdout: 'success',
+            stderr: 'failure',
+            exitCode: 0,
+          )
+        ]);
         flutterPlatform = TestObservatoryFlutterPlatform();
       });
 
-      Future<List<String>> captureCommand() async {
-        flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
-        when(mockProcessManager.start(
-            any,
-            environment: anyNamed('environment')),
-        ).thenAnswer((_) {
-          return Future<Process>.value(MockProcess());
-        });
-        await untilCalled(mockProcessManager.start(any, environment: anyNamed('environment')));
-        final VerificationResult toVerify = verify(mockProcessManager.start(
-          captureAny,
-          environment: anyNamed('environment'),
-        ));
-        expect(toVerify.captured, hasLength(1));
-        expect(toVerify.captured[0], isA<List<String>>());
-        return toVerify.captured[0] as List<String>;
-      }
-
       testUsingContext('skips setting observatory port and uses the input port for for DDS instead', () async {
-        final List<String> capturedEnvironment = await captureCommand();
-        expect(capturedEnvironment.contains('--observatory-port=0'), true);
+        flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
         final TestObservatoryFlutterPlatform testPlatform = flutterPlatform as TestObservatoryFlutterPlatform;
         await testPlatform.ddsServiceUriCompleter.future.then((Uri uri) => expect(uri.port, 1234));
       }, overrides: contextOverrides);
