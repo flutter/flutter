@@ -420,6 +420,12 @@ class HotRunner extends ResidentRunner {
     return results;
   }
 
+  void _resetDevFSCompileTime() {
+    for (final FlutterDevice device in flutterDevices) {
+      device.devFS.resetLastCompiled();
+    }
+  }
+
   void _resetDirtyAssets() {
     for (final FlutterDevice device in flutterDevices) {
       device.devFS.assetPathsToEvict.clear();
@@ -868,6 +874,9 @@ class HotRunner extends ResidentRunner {
             nullSafety: usageNullSafety,
             fastReassemble: null,
           ).send();
+          // Reset devFS lastCompileTime to ensure the file will still be marked
+          // as dirty on subsequent reloads.
+          _resetDevFSCompileTime();
           final ReloadReportContents contents = ReloadReportContents.fromReloadReport(reloadReport);
           return OperationResult(1, 'Reload rejected: ${contents.notices.join("\n")}');
         }
