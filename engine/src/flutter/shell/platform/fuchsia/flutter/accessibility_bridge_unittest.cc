@@ -286,7 +286,6 @@ TEST_F(AccessibilityBridgeTest, PopulatesCheckedState) {
   // HasCheckedState = true
   // IsChecked = true
   // IsSelected = false
-  // IsHidden = false
   node0.flags |= static_cast<int>(flutter::SemanticsFlags::kHasCheckedState);
   node0.flags |= static_cast<int>(flutter::SemanticsFlags::kIsChecked);
   node0.value = "value";
@@ -307,8 +306,6 @@ TEST_F(AccessibilityBridgeTest, PopulatesCheckedState) {
             fuchsia::accessibility::semantics::CheckedState::CHECKED);
   EXPECT_TRUE(states.has_selected());
   EXPECT_FALSE(states.selected());
-  EXPECT_TRUE(states.has_hidden());
-  EXPECT_FALSE(states.hidden());
   EXPECT_TRUE(states.has_value());
   EXPECT_EQ(states.value(), node0.value);
 
@@ -322,7 +319,6 @@ TEST_F(AccessibilityBridgeTest, PopulatesSelectedState) {
   // HasCheckedState = false
   // IsChecked = false
   // IsSelected = true
-  // IsHidden = false
   node0.flags = static_cast<int>(flutter::SemanticsFlags::kIsSelected);
 
   accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}}, 1.f);
@@ -341,8 +337,6 @@ TEST_F(AccessibilityBridgeTest, PopulatesSelectedState) {
             fuchsia::accessibility::semantics::CheckedState::NONE);
   EXPECT_TRUE(states.has_selected());
   EXPECT_TRUE(states.selected());
-  EXPECT_TRUE(states.has_hidden());
-  EXPECT_FALSE(states.hidden());
 
   EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
@@ -362,7 +356,9 @@ TEST_F(AccessibilityBridgeTest, ApplyViewPixelRatioToRoot) {
   EXPECT_EQ(fuchsia_node.transform().matrix[10], 1.f);
 }
 
-TEST_F(AccessibilityBridgeTest, PopulatesHiddenState) {
+TEST_F(AccessibilityBridgeTest, DoesNotPopulatesHiddenState) {
+  // Flutter's notion of a hidden node is different from Fuchsia's hidden node.
+  // This test make sures that this state does not get sent.
   flutter::SemanticsNode node0;
   node0.id = 0;
   // HasCheckedState = false
@@ -387,8 +383,7 @@ TEST_F(AccessibilityBridgeTest, PopulatesHiddenState) {
             fuchsia::accessibility::semantics::CheckedState::NONE);
   EXPECT_TRUE(states.has_selected());
   EXPECT_FALSE(states.selected());
-  EXPECT_TRUE(states.has_hidden());
-  EXPECT_TRUE(states.hidden());
+  EXPECT_FALSE(states.has_hidden());
 
   EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
