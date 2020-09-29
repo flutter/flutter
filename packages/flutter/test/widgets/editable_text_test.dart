@@ -4998,6 +4998,89 @@ void main() {
     );
   });
 
+  testWidgets('Receive repeat [TextEditingValue] will not trigger the request keyboard', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66036
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+    final TextEditingController controller = TextEditingController();
+    StateSetter setState;
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
+    Widget builder() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          return MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(devicePixelRatio: 1.0),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Material(
+                    child: EditableText(
+                      controller: controller,
+                      focusNode: focusNode,
+                      style: textStyle,
+                      cursorColor: Colors.red,
+                      backgroundCursorColor: Colors.red,
+                      keyboardType: TextInputType.multiline,
+                      onChanged: (String value) { },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pump();
+
+    // The keyboard is shown after the request.
+    expect(focusNode.hasFocus, true);
+
+    log.clear();
+
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+
+    state.updateEditingValue(const TextEditingValue(
+      text: 'a',
+    ));
+    // Nothing called when only the remote changes
+    expect(log.length, 0);
+
+    // Hide the keyboard
+    focusNode.unfocus();
+    await tester.pump();
+    expect(log.length, 2);
+    MethodCall methodCall = log[0];
+    // Close the InputConnection.
+    expect(methodCall, isMethodCall('TextInput.clearClient', arguments: null),);
+    methodCall = log[1];
+    expect(methodCall, isMethodCall('TextInput.hide', arguments: null),);
+    // The keyboard lose focus.
+    expect(focusNode.hasFocus, false);
+
+    log.clear();
+
+    // The keyboard does not be requested when receiving repeat value from the engine
+    state.updateEditingValue(const TextEditingValue(
+      text: 'a',
+    ));
+    // Nothing called when only the remote changes
+    expect(log.length, 0);
+    await tester.pump();
+
+    //The keyboard does not be requested after a repeat value from the engine.
+    expect(focusNode.hasFocus, false);
+  });
+
   testWidgets('autofocus:true on first frame does not throw', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
