@@ -1344,6 +1344,9 @@ class ReloadReportContents {
 }
 
 /// A serialization class for hot reload rejection reasons.
+///
+/// Injects an additional error message that a hot restart will
+/// resolve the issue.
 class ReasonForCancelling {
   ReasonForCancelling({
     this.message,
@@ -1351,14 +1354,8 @@ class ReasonForCancelling {
 
   final String message;
 
-  static const String kConstClassError = 'Const class cannot remove fields';
-
   @override
   String toString() {
-    String contextHint = '';
-    if (message.contains(kConstClassError)) {
-      contextHint = ' Try performing a hot restart instead.';
-    }
-    return '$message$contextHint';
+    return '$message Try performing a hot restart instead.';
   }
 }

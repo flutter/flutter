@@ -129,8 +129,6 @@ void main() {
 
     testWithoutContext('ReasonForCancelling toString has a hint for specific errors', () {
       final ReasonForCancelling reasonForCancelling = ReasonForCancelling(
-        className: 'Foo',
-        library: 'fizz.dart',
         message: 'Const class cannot remove fields',
       );
 
