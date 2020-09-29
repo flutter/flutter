@@ -74,7 +74,7 @@ enum HeroFlightDirection {
 // The bounding box for context in ancestorContext coordinate system, or in the global
 // coordinate system when null.
 Rect _boundingBoxFor(BuildContext context, [BuildContext? ancestorContext]) {
-  final RenderBox box = context.findRenderObject() as RenderBox;
+  final RenderBox box = context.findRenderObject()! as RenderBox;
   assert(box != null && box.hasSize);
   return MatrixUtils.transformRect(
       box.getTransformTo(ancestorContext?.findRenderObject()),
@@ -345,7 +345,7 @@ class _HeroState extends State<Hero> {
   void startFlight({ bool shouldIncludedChildInPlaceholder = false }) {
     _shouldIncludeChild = shouldIncludedChildInPlaceholder;
     assert(mounted);
-    final RenderBox box = context.findRenderObject() as RenderBox;
+    final RenderBox box = context.findRenderObject()! as RenderBox;
     assert(box != null && box.hasSize);
     setState(() {
       _placeholderSize = box.size;
@@ -504,7 +504,7 @@ class _HeroFlight {
         } else if (toHeroBox.hasSize) {
           // The toHero has been laid out. If it's no longer where the hero animation is
           // supposed to end up then recreate the heroRect tween.
-          final RenderBox finalRouteBox = manifest!.toRoute.subtreeContext?.findRenderObject() as RenderBox;
+          final RenderBox? finalRouteBox = manifest!.toRoute.subtreeContext?.findRenderObject() as RenderBox?;
           final Offset toHeroOrigin = toHeroBox.localToGlobal(Offset.zero, ancestor: finalRouteBox);
           if (toHeroOrigin != heroRectTween.end!.topLeft) {
             final Rect heroRectEnd = toHeroOrigin & heroRectTween.end!.size;

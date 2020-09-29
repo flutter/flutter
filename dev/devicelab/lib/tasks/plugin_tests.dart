@@ -37,12 +37,12 @@ class PluginTest {
     try {
       section('Create plugin');
       final _FlutterProject plugin = await _FlutterProject.create(
-          tempDir, options,
+          tempDir, options, buildTarget,
           name: 'plugintest', template: 'plugin', environment: pluginCreateEnvironment);
       section('Test plugin');
       await plugin.test();
       section('Create Flutter app');
-      final _FlutterProject app = await _FlutterProject.create(tempDir, options,
+      final _FlutterProject app = await _FlutterProject.create(tempDir, options, buildTarget,
           name: 'plugintestapp', template: 'app', environment: appCreateEnvironment);
       try {
         section('Add plugins');
@@ -95,6 +95,7 @@ class _FlutterProject {
   static Future<_FlutterProject> create(
       Directory directory,
       List<String> options,
+      String target,
       {
         String name,
         String template,
@@ -113,12 +114,46 @@ class _FlutterProject {
         environment: environment,
       );
     });
-    return _FlutterProject(directory, name);
+
+    final _FlutterProject project = _FlutterProject(directory, name);
+    if (template == 'plugin' && target == 'ios') {
+      project._reduceIOSPluginMinimumVersion(name);
+    }
+    return project;
+  }
+
+  // Make the platform version artificially low to test that the "deployment
+  // version too low" warning is never emitted.
+  void _reduceIOSPluginMinimumVersion(String plugin) {
+    final File podspec = File(path.join(rootPath, 'ios', '$plugin.podspec'));
+    if (!podspec.existsSync()) {
+      throw TaskResult.failure('podspec file missing at ${podspec.path}');
+    }
+    const String versionString = "s.platform = :ios, '8.0'";
+    String podspecContent = podspec.readAsStringSync();
+    if (!podspecContent.contains(versionString)) {
+      throw TaskResult.failure('Update this test to match plugin minimum iOS deployment version');
+    }
+    podspecContent = podspecContent.replaceFirst(
+      versionString,
+      "s.platform = :ios, '7.0'",
+    );
+    podspec.writeAsStringSync(podspecContent, flush: true);
   }
 
   Future<void> build(String target) async {
     await inDirectory(Directory(rootPath), () async {
-      await flutter('build', options: <String>[target]);
+      final String buildOutput =  await evalFlutter('build', options: <String>[target, '-v']);
+
+      if (target == 'ios') {
+        // This warning is confusing and shouldn't be emitted. Plugins often support lower versions than the
+        // Flutter app, but as long as they support the minimum it will work.
+        // warning: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0,
+        // but the range of supported deployment target versions is 9.0 to 14.0.99.
+        if (buildOutput.contains('the range of supported deployment target versions')) {
+          throw TaskResult.failure('Minimum plugin version warning present');
+        }
+      }
     });
   }
 

@@ -376,7 +376,7 @@ abstract class FlutterTestDriver {
         if (json['params'] != null && json['params']['trace'] != null) {
           error.write('${json['params']['trace']}\n\n');
         }
-        response.completeError(error.toString());
+        response.completeError(Exception(error.toString()));
       }
     });
 
@@ -536,7 +536,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     // fast.
     unawaited(_process.exitCode.then((_) {
       if (!prematureExitGuard.isCompleted) {
-        prematureExitGuard.completeError('Process exited prematurely: ${args.join(' ')}: $_errorBuffer');
+        prematureExitGuard.completeError(Exception('Process exited prematurely: ${args.join(' ')}: $_errorBuffer'));
       }
     }));
 
@@ -567,7 +567,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         _currentRunningAppId = (await started)['params']['appId'] as String;
         prematureExitGuard.complete();
       } on Exception catch (error, stackTrace) {
-        prematureExitGuard.completeError(error, stackTrace);
+        prematureExitGuard.completeError(Exception(error.toString()), stackTrace);
       }
     }());
 

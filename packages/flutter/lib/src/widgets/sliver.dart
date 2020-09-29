@@ -1077,14 +1077,14 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         final Element? newChild = updateChild(newChildren[index], _build(index), index);
         if (newChild != null) {
           _childElements[index] = newChild;
-          final SliverMultiBoxAdaptorParentData parentData = newChild.renderObject!.parentData as SliverMultiBoxAdaptorParentData;
+          final SliverMultiBoxAdaptorParentData parentData = newChild.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
           if (index == 0) {
             parentData.layoutOffset = 0.0;
           } else if (indexToLayoutOffset.containsKey(index)) {
             parentData.layoutOffset = indexToLayoutOffset[index];
           }
           if (!parentData.keptAlive)
-            _currentBeforeChild = newChild.renderObject as RenderBox;
+            _currentBeforeChild = newChild.renderObject as RenderBox?;
         } else {
           _childElements.remove(index);
         }
@@ -1313,7 +1313,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 
@@ -1331,7 +1331,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     assert(renderObject.debugValidateChild(child));
     renderObject.insert(child as RenderBox, after: _currentBeforeChild);
     assert(() {
-      final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       assert(slot == childParentData.index);
       return true;
     }());
@@ -1361,7 +1361,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     _childElements.values.cast<Element>().where((Element child) {
-      final SliverMultiBoxAdaptorParentData parentData = child.renderObject!.parentData as SliverMultiBoxAdaptorParentData;
+      final SliverMultiBoxAdaptorParentData parentData = child.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
       double itemExtent;
       switch (renderObject.constraints.axis) {
         case Axis.horizontal:
@@ -1639,7 +1639,7 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is KeepAliveParentDataMixin);
-    final KeepAliveParentDataMixin parentData = renderObject.parentData as KeepAliveParentDataMixin;
+    final KeepAliveParentDataMixin parentData = renderObject.parentData! as KeepAliveParentDataMixin;
     if (parentData.keepAlive != keepAlive) {
       parentData.keepAlive = keepAlive;
       final AbstractNode? targetParent = renderObject.parent;

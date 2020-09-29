@@ -368,7 +368,18 @@ class ThemeData with Diagnosticable {
     textTheme = defaultTextTheme.merge(textTheme);
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
     accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
-    materialTapTargetSize ??= MaterialTapTargetSize.padded;
+    switch (platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        materialTapTargetSize ??= MaterialTapTargetSize.padded;
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+         materialTapTargetSize ??= MaterialTapTargetSize.shrinkWrap;
+        break;
+    }
     applyElevationOverlayColor ??= false;
 
     // Used as the default color (fill color) for RaisedButtons. Computing the
