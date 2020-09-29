@@ -60,18 +60,17 @@ void main() {
     });
 
     group('Observatory and DDS setup', () {
-      MockPlatform mockPlatform;
+      Platform fakePlatform;
       MockProcessManager mockProcessManager;
       FlutterPlatform flutterPlatform;
       final Map<Type, Generator> contextOverrides = <Type, Generator>{
-        Platform: () => mockPlatform,
+        Platform: () => fakePlatform,
         ProcessManager: () => mockProcessManager,
         FileSystem: () => fileSystem,
       };
 
       setUp(() {
-        mockPlatform = MockPlatform();
-        when(mockPlatform.isWindows).thenReturn(false);
+        fakePlatform = FakePlatform(operatingSystem: 'linux', environment: {});
         mockProcessManager = MockProcessManager();
         flutterPlatform = TestObservatoryFlutterPlatform();
       });
@@ -95,7 +94,6 @@ void main() {
       }
 
       testUsingContext('skips setting observatory port and uses the input port for for DDS instead', () async {
-        when(mockPlatform.environment).thenReturn(<String, String>{});
         final List<String> capturedEnvironment = await captureCommand();
         expect(capturedEnvironment.contains('--observatory-port=0'), true);
         final TestObservatoryFlutterPlatform testPlatform = flutterPlatform as TestObservatoryFlutterPlatform;

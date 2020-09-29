@@ -913,8 +913,8 @@ class FlutterPlatform extends PlatformPlugin {
     return Uri(
       scheme: 'http',
       host: (host.type == InternetAddressType.IPv6 ?
-      InternetAddress.loopbackIPv6 :
-      InternetAddress.loopbackIPv4
+        InternetAddress.loopbackIPv6 :
+        InternetAddress.loopbackIPv4
       ).host,
       port: explicitObservatoryPort ?? 0,
     );
