@@ -30,13 +30,14 @@ void main() {
       await _flutter.run();
     } on Exception {
       expect(_flutter.lastErrorInfo, contains('Error connecting to the service protocol:'));
-      expect(_flutter.lastErrorInfo.contains(
-                // Looks for stack trace entry of the form:
-                //   test/integration.shard/test_driver.dart 379:18  FlutterTestDriver._waitFor.<fn>
-                RegExp('^(.+)\/([^\/]+)\.dart \d*:\d*\s*.*\$')
-              ),
-              isFalse
-            );
+      expect(
+        _flutter.lastErrorInfo.contains(
+          // Looks for stack trace entry of the form:
+          //   test/integration.shard/test_driver.dart 379:18  FlutterTestDriver._waitFor.<fn>
+          RegExp('^(.+)\/([^\/]+)\.dart \d*:\d*\s*.*\$')
+        ),
+        isFalse
+      );
     }
   });
 }

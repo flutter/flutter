@@ -19,9 +19,11 @@ class ProjectWithImmediateExit extends Project {
 
   @override
   final String main = r'''
+  import 'dart:async';
   import 'dart:io';
 
-  void main() {
+  Future<void> main() async {
+    await Future.delayed(const Duration(milliseconds: 50));
     exit(0);
   }
   ''';
