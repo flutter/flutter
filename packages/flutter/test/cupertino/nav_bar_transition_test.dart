@@ -1106,7 +1106,7 @@ void main() {
     expect(topBuildTimes, 3);
   });
 
-  testWidgets('Back swipe gesture transitions should work', (WidgetTester tester) async {
+  testWidgets('Back swipe gesture transitions', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -1160,7 +1160,7 @@ void main() {
     expect(find.text('Page 1'), findsOneWidget);
   });
 
-  testWidgets('Back swipe gesture should cancel properly with transition', (WidgetTester tester) async {
+  testWidgets('Back swipe gesture cancels properly with transition', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',

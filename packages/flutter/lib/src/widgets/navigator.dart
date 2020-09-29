@@ -419,8 +419,8 @@ abstract class Route<T> {
   /// [Navigator] owns a route and so will call this method when the route is
   /// removed, after which the route is no longer referenced by the navigator.
   ///
-  /// Calling [dispose] is not affected by [holdGracefulDisposal] and will cancel
-  /// any scheduled [gracefullyDispose].
+  /// Calling [dispose] is not affected by [markHoldingGracefulDisposal] and will
+  /// cancel any scheduled [gracefullyDispose].
   ///
   /// The [dispose] will only be called once.
   @mustCallSuper
