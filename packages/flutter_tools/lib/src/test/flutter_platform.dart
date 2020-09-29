@@ -495,6 +495,7 @@ class FlutterPlatform extends PlatformPlugin {
       // Pipe stdout and stderr from the subprocess to our printStatus console.
       // We also keep track of what observatory port the engine used, if any.
       Uri processObservatoryUri;
+      final Uri ddsServiceUri = getDdsServiceUri();
       _pipeStandardStreamsToConsole(
         process,
         reportObservatoryUri: (Uri detectedUri) async {
@@ -502,17 +503,9 @@ class FlutterPlatform extends PlatformPlugin {
           assert(explicitObservatoryPort == null ||
               explicitObservatoryPort == detectedUri.port);
           if (!disableDds) {
-            final Uri serviceUri = Uri(
-              scheme: 'http',
-              host: (host.type == InternetAddressType.IPv6 ?
-              InternetAddress.loopbackIPv6 :
-              InternetAddress.loopbackIPv4
-              ).host,
-              port: explicitObservatoryPort ?? 0,
-            );
             final DartDevelopmentService dds = await DartDevelopmentService.startDartDevelopmentService(
               detectedUri,
-              serviceUri: serviceUri,
+              serviceUri: ddsServiceUri,
               enableAuthCodes: !disableServiceAuthCodes,
               ipv6: host.type == InternetAddressType.IPv6,
             );
@@ -912,6 +905,19 @@ class FlutterPlatform extends PlatformPlugin {
       default:
         return 'Shell subprocess crashed with unexpected exit code $exitCode $when.';
     }
+  }
+
+  @visibleForTesting
+  @protected
+  Uri getDdsServiceUri() {
+    return Uri(
+      scheme: 'http',
+      host: (host.type == InternetAddressType.IPv6 ?
+      InternetAddress.loopbackIPv6 :
+      InternetAddress.loopbackIPv4
+      ).host,
+      port: explicitObservatoryPort ?? 0,
+    );
   }
 }
 
