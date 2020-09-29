@@ -86,6 +86,7 @@ source_set("flutter_windows_source") {
     ":flutter_windows_headers",
     "//flutter/shell/platform/common/cpp:common_cpp",
     "//flutter/shell/platform/common/cpp:common_cpp_input",
+    "//flutter/shell/platform/common/cpp:common_cpp_switches",
     "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows",

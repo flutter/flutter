@@ -4,11 +4,10 @@
 
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
 
-#include <cstdlib>
 #include <filesystem>
 #include <iostream>
-#include <sstream>
 
+#include "flutter/shell/platform/common/cpp/engine_switches.h"
 #include "flutter/shell/platform/common/cpp/path_utils.h"
 
 namespace flutter {
@@ -76,29 +75,7 @@ UniqueAotDataPtr FlutterProjectBundle::LoadAotData() {
 FlutterProjectBundle::~FlutterProjectBundle() {}
 
 const std::vector<std::string> FlutterProjectBundle::GetSwitches() {
-  std::vector<std::string> switches;
-  // Read engine switches from the environment in debug/profile.
-#ifndef FLUTTER_RELEASE
-  const char* switch_count_key = "FLUTTER_ENGINE_SWITCHES";
-  const int kMaxSwitchCount = 50;
-  const char* switch_count_string = std::getenv(switch_count_key);
-  int switch_count = std::min(
-      kMaxSwitchCount, switch_count_string ? atoi(switch_count_string) : 0);
-  for (int i = 1; i <= switch_count; ++i) {
-    std::ostringstream switch_key;
-    switch_key << "FLUTTER_ENGINE_SWITCH_" << i;
-    const char* switch_value = std::getenv(switch_key.str().c_str());
-    if (switch_value) {
-      std::ostringstream switch_value_as_flag;
-      switch_value_as_flag << "--" << switch_value;
-      switches.push_back(switch_value_as_flag.str());
-    } else {
-      std::cerr << switch_count << " keys expected from " << switch_count_key
-                << ", but " << switch_key.str() << " is missing." << std::endl;
-    }
-  }
-#endif  // !FLUTTER_RELEASE
-  return switches;
+  return GetSwitchesFromEnvironment();
 }
 
 }  // namespace flutter

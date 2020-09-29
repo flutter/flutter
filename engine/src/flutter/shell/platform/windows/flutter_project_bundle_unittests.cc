@@ -64,43 +64,6 @@ TEST(FlutterProjectBundle, Switches) {
   EXPECT_EQ(switches[0], "--abc");
   EXPECT_EQ(switches[1], "--foo=\"bar, baz\"");
 }
-
-TEST(FlutterProjectBundle, SwitchesExtraValues) {
-  FlutterDesktopEngineProperties properties = {};
-  properties.assets_path = L"foo\\flutter_assets";
-  properties.icu_data_path = L"foo\\icudtl.dat";
-
-  _putenv_s("FLUTTER_ENGINE_SWITCHES", "1");
-  _putenv_s("FLUTTER_ENGINE_SWITCH_1", "abc");
-  _putenv_s("FLUTTER_ENGINE_SWITCH_2", "foo=\"bar, baz\"");
-
-  FlutterProjectBundle project(properties);
-
-  std::vector<std::string> switches = project.GetSwitches();
-  EXPECT_EQ(switches.size(), 1);
-  EXPECT_EQ(switches[0], "--abc");
-}
-
-TEST(FlutterProjectBundle, SwitchesMissingValues) {
-  FlutterDesktopEngineProperties properties = {};
-  properties.assets_path = L"foo\\flutter_assets";
-  properties.icu_data_path = L"foo\\icudtl.dat";
-
-  _putenv_s("FLUTTER_ENGINE_SWITCHES", "4");
-  _putenv_s("FLUTTER_ENGINE_SWITCH_1", "abc");
-  _putenv_s("FLUTTER_ENGINE_SWITCH_2", "foo=\"bar, baz\"");
-  _putenv_s("FLUTTER_ENGINE_SWITCH_4", "oops");
-
-  FlutterProjectBundle project(properties);
-
-  std::vector<std::string> switches = project.GetSwitches();
-  EXPECT_EQ(switches.size(), 3);
-  EXPECT_EQ(switches[0], "--abc");
-  EXPECT_EQ(switches[1], "--foo=\"bar, baz\"");
-  // The missing switch should be skipped, leaving SWITCH_4 as the third
-  // switch in the array.
-  EXPECT_EQ(switches[2], "--oops");
-}
 #endif  // !FLUTTER_RELEASE
 
 }  // namespace testing

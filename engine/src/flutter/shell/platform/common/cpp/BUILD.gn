@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
 
 config("desktop_library_implementation") {
@@ -42,10 +43,23 @@ source_set("common_cpp_input") {
 
   configs += [ ":desktop_library_implementation" ]
 
+  public_configs = [ "//flutter:config" ]
+
   if (is_win) {
     # For wstring_conversion. See issue #50053.
     defines = [ "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING" ]
   }
+}
+
+source_set("common_cpp_switches") {
+  public = [ "engine_switches.h" ]
+
+  sources = [ "engine_switches.cc" ]
+
+  public_configs = [
+    "//flutter:config",
+    "//flutter/common:flutter_config",
+  ]
 }
 
 source_set("common_cpp") {
@@ -64,6 +78,8 @@ source_set("common_cpp") {
   ]
 
   configs += [ ":desktop_library_implementation" ]
+
+  public_configs = [ "//flutter:config" ]
 
   deps = [
     ":common_cpp_library_headers",
@@ -85,6 +101,8 @@ source_set("common_cpp_core") {
   public = [ "path_utils.h" ]
 
   sources = [ "path_utils.cc" ]
+
+  public_configs = [ "//flutter:config" ]
 }
 
 if (enable_unittests) {
@@ -115,6 +133,7 @@ if (enable_unittests) {
     testonly = true
 
     sources = [
+      "engine_switches_unittests.cc",
       "json_message_codec_unittests.cc",
       "json_method_codec_unittests.cc",
       "text_input_model_unittests.cc",
@@ -124,6 +143,7 @@ if (enable_unittests) {
       ":common_cpp",
       ":common_cpp_fixtures",
       ":common_cpp_input",
+      ":common_cpp_switches",
       "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
       "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper_library_stubs",
       "//flutter/testing",
