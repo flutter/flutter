@@ -169,7 +169,6 @@ function shared::execute() {
   # If present, run the bootstrap script first
   BOOTSTRAP_PATH="$FLUTTER_ROOT/bin/internal/bootstrap.sh"
   if [ -x "$BOOTSTRAP_PATH" ]; then
-    >&2 echo "Running bin/internal/bootstrap.sh..."
     source "$BOOTSTRAP_PATH"
   fi
 

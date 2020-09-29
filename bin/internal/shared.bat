@@ -64,7 +64,6 @@ GOTO :after_subroutine
   REM If present, run the bootstrap script first
   SET bootstrap_path=%FLUTTER_ROOT%\bin\internal\bootstrap.bat
   IF EXIST "%bootstrap_path%" (
-    ECHO Running bin/internal/bootstrap.bat... 1>&2
     CALL "%bootstrap_path%"
   )
 
