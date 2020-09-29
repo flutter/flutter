@@ -71,7 +71,7 @@ class ImageInfo {
   ///   // If the image reference is exactly the same, or its a clone of the
   ///   // current reference, we can immediately dispose of it and avoid
   ///   // recalculating anything.
-  ///   if (value == _imageInfo || value != null && _imageInfo != null && value.isCloneOf(_image)) {
+  ///   if (value == _imageInfo || value != null && _imageInfo != null && value.isCloneOf(_imageInfo)) {
   ///     value?.image?.dispose();
   ///     return;
   ///   }
