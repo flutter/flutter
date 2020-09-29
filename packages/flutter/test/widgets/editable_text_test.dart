@@ -4824,6 +4824,43 @@ void main() {
 
       expect(updates, const <TextEditingValue>[TextEditingValue(text: 'remoteremoteremote listener')]);
     });
+
+    testWidgets('input from changing controller', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: testText);
+      Widget build({ TextEditingController textEditingController }) {
+        return MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              showSelectionHandles: true,
+              maxLines: 2,
+              controller: textEditingController ?? controller,
+              focusNode: FocusNode(),
+              cursorColor: Colors.red,
+              backgroundCursorColor: Colors.blue,
+              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+              keyboardType: TextInputType.text,
+              inputFormatters: <TextInputFormatter>[LengthLimitingTextInputFormatter(6)],
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build());
+
+      // Connect.
+      await tester.showKeyboard(find.byType(EditableText));
+      tester.testTextInput.log.clear();
+
+      await tester.pumpWidget(build(textEditingController: TextEditingController(text: 'new text')));
+      final List<TextEditingValue> updates = tester.testTextInput.log
+        .where((MethodCall call) => call.method == 'TextInput.setEditingState')
+        .map((MethodCall call) => TextEditingValue.fromJSON(call.arguments as Map<String, dynamic>))
+        .toList(growable: false);
+
+      expect(updates, const <TextEditingValue>[TextEditingValue(text: 'new text')]);
+    });
   });
 
   testWidgets('input imm channel calls are ordered correctly', (WidgetTester tester) async {
