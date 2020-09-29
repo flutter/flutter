@@ -81,11 +81,13 @@ void main() {
 
     ValidationMessage message = messages
         .firstWhere((ValidationMessage m) => m.message.startsWith('Dart '));
-    expect(message.message, contains('Dart plugin can be installed from\ndownload-Dart'));
+    expect(message.message, contains('Dart plugin can be installed from'));
+    expect(message.contextUrl, isNotNull);
 
     message = messages.firstWhere(
         (ValidationMessage m) => m.message.startsWith('Flutter '));
-    expect(message.message, contains('Flutter plugin can be installed from\ndownload-Flutter'));
+    expect(message.message, contains('Flutter plugin can be installed from'));
+    expect(message.contextUrl, isNotNull);
   });
 }
 
