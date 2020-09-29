@@ -33,6 +33,11 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
     return originalBenchmarkResult;
   }
 
+  // If using canvas kit, skip gallery benchmarks and return benchmark results.
+  if (useCanvasKit) {
+    return originalBenchmarkResult;
+  }
+
   // Gallery benchmarks.
   section('Get New Flutter Gallery!');
 
