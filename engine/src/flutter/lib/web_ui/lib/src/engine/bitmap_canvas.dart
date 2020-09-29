@@ -201,8 +201,8 @@ class BitmapCanvas extends EngineCanvas {
     return _devicePixelRatio == EngineWindow.browserDevicePixelRatio;
   }
 
-  /// Returns a data URI containing a representation of the image in this
-  /// canvas.
+  /// Returns a "data://" URI containing a representation of the image in this
+  /// canvas in PNG format.
   String toDataUrl() {
     return _canvasPool.toDataUrl();
   }
