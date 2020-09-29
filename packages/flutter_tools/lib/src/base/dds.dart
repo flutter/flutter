@@ -6,8 +6,8 @@ import 'dart:async';
 
 import 'package:dds/dds.dart' as dds;
 import 'package:meta/meta.dart';
-import 'package:pedantic/pedantic.dart';
 
+import 'common.dart';
 import 'io.dart' as io;
 import 'logger.dart';
 
