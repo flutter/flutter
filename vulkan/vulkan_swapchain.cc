@@ -232,7 +232,7 @@ sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(
   // TODO(chinmaygarde): Setup the stencil buffer and the sampleCnt.
   GrBackendRenderTarget backend_render_target(size.fWidth, size.fHeight, 0,
                                               image_info);
-  SkSurfaceProps props(SkSurfaceProps::InitType::kLegacyFontHost_InitType);
+  SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
   return SkSurface::MakeFromBackendRenderTarget(
       gr_context,                // context
