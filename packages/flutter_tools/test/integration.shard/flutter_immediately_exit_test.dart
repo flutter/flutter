@@ -29,7 +29,7 @@ void main() {
   testWithoutContext('flutter_tools gracefully handles quick app shutdown', () async {
     try {
     await _flutter.run();
-    } on Exception catch(_) {
+    } on Exception {
       expect(_flutter.lastErrorInfo, contains('Error connecting to the service protocol:'));
       expect(_flutter.lastErrorInfo.contains(
                 // Looks for stack trace entry of the form:
