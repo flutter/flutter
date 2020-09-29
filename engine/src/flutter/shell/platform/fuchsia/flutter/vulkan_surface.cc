@@ -349,8 +349,7 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrDirectContext> context,
   GrBackendRenderTarget sk_render_target(size.width(), size.height(), 0,
                                          image_info);
 
-  SkSurfaceProps sk_surface_props(
-      SkSurfaceProps::InitType::kLegacyFontHost_InitType);
+  SkSurfaceProps sk_surface_props(0, kUnknown_SkPixelGeometry);
 
   auto sk_surface =
       SkSurface::MakeFromBackendRenderTarget(context.get(),             //

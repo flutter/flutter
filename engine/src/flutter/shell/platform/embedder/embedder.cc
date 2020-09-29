@@ -353,8 +353,7 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
                                    texture_info         //
   );
 
-  SkSurfaceProps surface_properties(
-      SkSurfaceProps::InitType::kLegacyFontHost_InitType);
+  SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
 
   auto surface = SkSurface::MakeFromBackendTexture(
       context,                      // context
@@ -398,8 +397,7 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
       framebuffer_info     // framebuffer info
   );
 
-  SkSurfaceProps surface_properties(
-      SkSurfaceProps::InitType::kLegacyFontHost_InitType);
+  SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
 
   auto surface = SkSurface::MakeFromBackendRenderTarget(
       context,                      //  context
