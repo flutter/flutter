@@ -179,7 +179,7 @@ void main() {
         getFlutterRoot(),
         'bin',
         'internal',
-        platform.isWindows ? 'boostrap.bat' : 'bootstrap.sh'));
+        platform.isWindows ? 'bootstrap.bat' : 'bootstrap.sh'));
 
     try {
       bootstrap.writeAsStringSync('echo TESTING 1 2 3');
