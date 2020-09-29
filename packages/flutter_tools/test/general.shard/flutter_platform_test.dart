@@ -70,7 +70,7 @@ void main() {
       };
 
       setUp(() {
-        fakePlatform = FakePlatform(operatingSystem: 'linux', environment: {});
+        fakePlatform = FakePlatform(operatingSystem: 'linux', environment: <String, String>{});
         mockProcessManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>[
