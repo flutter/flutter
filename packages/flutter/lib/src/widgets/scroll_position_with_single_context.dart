@@ -206,12 +206,14 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
 
   @override
   void pointerScroll(double delta) {
+    assert(delta != 0.0);
+
     final double targetPixels =
         math.min(math.max(pixels + delta, minScrollExtent), maxScrollExtent);
     if (targetPixels != pixels) {
       goIdle();
       updateUserScrollDirection(
-          delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse
+          -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse
       );
       final double oldPixels = pixels;
       forcePixels(targetPixels);

@@ -324,7 +324,7 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
   });
 
-  testWidgets('Scroll pointer signal will update ScrollDirection.forward / ScrollDirection.reverse', (WidgetTester tester) async {
+  testWidgets('Holding scroll and Scroll pointer signal will update ScrollDirection.forward / ScrollDirection.reverse', (WidgetTester tester) async {
     ScrollDirection lastUserScrollingDirection;
 
     final ScrollController controller = ScrollController();
@@ -335,17 +335,25 @@ void main() {
         lastUserScrollingDirection = controller.position.userScrollDirection;
     });
 
+    await tester.drag(find.byType(Viewport), const Offset(0.0, -20.0), touchSlopY: 0.0);
+
+    expect(lastUserScrollingDirection, ScrollDirection.reverse);
+
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
 
+    expect(lastUserScrollingDirection, ScrollDirection.reverse);
+
+    await tester.drag(find.byType(Viewport), const Offset(0.0, 20.0), touchSlopY: 0.0);
+
     expect(lastUserScrollingDirection, ScrollDirection.forward);
 
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)));
 
-    expect(lastUserScrollingDirection, ScrollDirection.reverse);
+    expect(lastUserScrollingDirection, ScrollDirection.forward);
   });
 
 

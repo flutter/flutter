@@ -1074,6 +1074,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   void pointerScroll(double delta) {
+    assert(delta != 0.0);
+
+    delta = -delta;
+
     goIdle();
     updateUserScrollDirection(
         delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
