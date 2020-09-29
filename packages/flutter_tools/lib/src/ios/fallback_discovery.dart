@@ -23,6 +23,8 @@ typedef VmServiceConnector = Future<VmService> Function(String, {Log log});
 /// down, such as when the device is connected to certain wifi networks or with
 /// certain hotspot connections enabled.
 ///
+/// If [mDnsObservatoryDiscovery] is null, mDNS fallback is skipped.
+///
 /// Another approach to discover a vmservice is to attempt to assign a
 /// specific port and then attempt to connect. This may fail if the port is
 /// not available. This port value should be either random, or otherwise
@@ -104,30 +106,35 @@ class FallbackDiscovery {
       flutterUsage: _flutterUsage,
     ).send();
 
-    try {
-      final Uri result = await _mDnsObservatoryDiscovery.getObservatoryUri(
-        packageId,
-        device,
-        usesIpv6: usesIpv6,
-        hostVmservicePort: hostVmservicePort,
-      );
-      if (result != null) {
-        UsageEvent(
-          _kEventName,
-          'mdns-success',
-          flutterUsage: _flutterUsage,
-        ).send();
-        return result;
+    // On iOS 14+, mDNS prompts a local network permission dialog,
+    // which cannot be accepted or dismissed in a CI environment.
+    // Skip mDNS discovery if the app was told not to publish the port.
+    if (_mDnsObservatoryDiscovery != null) {
+      try {
+        final Uri result = await _mDnsObservatoryDiscovery.getObservatoryUri(
+          packageId,
+          device,
+          usesIpv6: usesIpv6,
+          hostVmservicePort: hostVmservicePort,
+        );
+        if (result != null) {
+          UsageEvent(
+            _kEventName,
+            'mdns-success',
+            flutterUsage: _flutterUsage,
+          ).send();
+          return result;
+        }
+      } on Exception catch (err) {
+        _logger.printTrace(err.toString());
       }
-    } on Exception catch (err) {
-      _logger.printTrace(err.toString());
+      _logger.printTrace('Failed to connect with mDNS');
+      UsageEvent(
+        _kEventName,
+        'mdns-failure',
+        flutterUsage: _flutterUsage,
+      ).send();
     }
-    _logger.printTrace('Failed to connect with mDNS');
-    UsageEvent(
-      _kEventName,
-      'mdns-failure',
-      flutterUsage: _flutterUsage,
-    ).send();
     return null;
   }
 

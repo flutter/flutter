@@ -179,6 +179,75 @@ void main() {
     Usage: () => MockUsage(),
   });
 
+  testUsingContext('IOSDevice.startApp can skip mDNS discovery', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      kDeployCommand,
+      FakeCommand(
+        command: <String>[
+          'script',
+          '-t',
+          '0',
+          '/dev/null',
+          'Artifact.iosDeploy.TargetPlatform.ios',
+          '--id',
+          '123',
+          '--bundle',
+          '/',
+          '--debug',
+          '--no-wifi',
+          '--args',
+          <String>[
+            '--enable-dart-profiling',
+            '--enable-service-port-fallback',
+            '--disable-service-auth-codes',
+            '--observatory-port=60700',
+            '--disable-observatory-publication',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+          ].join(' '),
+        ], environment: const <String, String>{
+        'PATH': '/usr/bin:null',
+        'DYLD_LIBRARY_PATH': '/path/to/libraries',
+      },
+        stdout: '(lldb)     run\nsuccess',
+      ),
+    ]);
+    final IOSDevice device = setUpIOSDevice(
+      processManager: processManager,
+      fileSystem: fileSystem,
+      vmServiceConnector: (String string, {Log log}) async {
+        throw const io.SocketException(
+          'OS Error: Connection refused, errno = 61, address = localhost, port '
+              '= 58943',
+        );
+      },
+    );
+    final IOSApp iosApp = PrebuiltIOSApp(
+      projectBundleId: 'app',
+      bundleName: 'Runner',
+      bundleDir: fileSystem.currentDirectory,
+    );
+
+    device.portForwarder = const NoOpDevicePortForwarder();
+    device.setLogReader(iosApp, FakeDeviceLogReader());
+
+    final LaunchResult launchResult = await device.startApp(iosApp,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, disableObservatoryPublication: true),
+      platformArgs: <String, dynamic>{},
+      fallbackPollingDelay: Duration.zero,
+      fallbackThrottleTimeout: const Duration(milliseconds: 10),
+    );
+
+    verifyNever(globals.flutterUsage.sendEvent('ios-handshake', 'mdns-success'));
+    verifyNever(globals.flutterUsage.sendEvent('ios-handshake', 'mdns-failure'));
+    expect(launchResult.started, false);
+    expect(launchResult.hasObservatory, false);
+  }, overrides: <Type, Generator>{
+    Usage: () => MockUsage(),
+  });
+
   // Still uses context for analytics and mDNS.
   testUsingContext('IOSDevice.startApp attaches in debug mode via log reading on iOS 13+', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -397,6 +466,7 @@ void main() {
             '--enable-service-port-fallback',
             '--disable-service-auth-codes',
             '--observatory-port=60700',
+            '--disable-observatory-publication',
             '--start-paused',
             '--dart-flags="--foo,--null_assertions"',
             '--enable-checked-mode',
@@ -449,6 +519,7 @@ void main() {
         BuildInfo.debug,
         startPaused: true,
         disableServiceAuthCodes: true,
+        disableObservatoryPublication: true,
         dartFlags: '--foo',
         enableSoftwareRendering: true,
         skiaDeterministicRendering: true,

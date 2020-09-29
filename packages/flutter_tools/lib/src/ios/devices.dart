@@ -369,6 +369,7 @@ class IOSDevice extends Device {
       '--enable-service-port-fallback',
       '--disable-service-auth-codes',
       '--observatory-port=$assumedObservatoryPort',
+      if (debuggingOptions.disableObservatoryPublication) '--disable-observatory-publication',
       if (debuggingOptions.startPaused) '--start-paused',
       if (dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
       if (debuggingOptions.useTestFonts) '--use-test-fonts',
@@ -453,7 +454,7 @@ class IOSDevice extends Device {
       _logger.printTrace('Application launched on the device. Waiting for observatory port.');
       final FallbackDiscovery fallbackDiscovery = FallbackDiscovery(
         logger: _logger,
-        mDnsObservatoryDiscovery: MDnsObservatoryDiscovery.instance,
+        mDnsObservatoryDiscovery: debuggingOptions.disableObservatoryPublication ? null : MDnsObservatoryDiscovery.instance,
         portForwarder: portForwarder,
         protocolDiscovery: observatoryDiscovery,
         flutterUsage: globals.flutterUsage,

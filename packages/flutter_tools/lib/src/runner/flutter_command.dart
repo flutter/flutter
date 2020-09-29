@@ -369,6 +369,17 @@ abstract class FlutterCommand extends Command<void> {
     return null;
   }
 
+  void addPublishObservatoryPort({ bool enabledByDefault = true, bool verboseHelp = false }) {
+    argParser.addFlag('publish-observatory-port',
+        negatable: true,
+        hide: !verboseHelp,
+        help: 'Publish the observatory URL over mDNS. Disable to prevent the'
+            'local network permission app dialog in debug and profile build modes (iOS devices only.)',
+        defaultsTo: enabledByDefault);
+  }
+
+  bool get disableObservatoryPublication => !boolArg('publish-observatory-port');
+
   void usesIpv6Flag() {
     argParser.addFlag(ipv6Flag,
       hide: true,

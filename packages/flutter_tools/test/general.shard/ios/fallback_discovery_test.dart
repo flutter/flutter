@@ -168,6 +168,31 @@ void main() {
       packageName: 'hello',
     ), Uri.parse('http://localhost:5678'));
   });
+
+  testWithoutContext('Skips mDNS observation if not requested', () async {
+    when(mockVmService.getVM()).thenThrow(Exception());
+    when(mockPrototcolDiscovery.uri).thenAnswer((Invocation invocation) async => null);
+
+    final FallbackDiscovery fallbackDiscoveryNoMDNS = FallbackDiscovery(
+      logger: logger,
+      mDnsObservatoryDiscovery: null,
+      portForwarder: mockPortForwarder,
+      protocolDiscovery: mockPrototcolDiscovery,
+      flutterUsage: Usage.test(),
+      vmServiceConnectUri: (String uri, {Log log}) async {
+        return mockVmService;
+      },
+      pollingDelay: Duration.zero,
+    );
+    expect(await fallbackDiscoveryNoMDNS.discover(
+      assumedDevicePort: 23,
+      device: null,
+      hostVmservicePort: 1,
+      packageId: 'hello',
+      usesIpv6: false,
+      packageName: 'hello',
+    ), isNull);
+  });
 }
 
 class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}

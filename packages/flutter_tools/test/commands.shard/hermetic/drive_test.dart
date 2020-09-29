@@ -708,6 +708,11 @@ void main() {
         '--purge-persistent-cache',
         () => debuggingOptions.purgePersistentCache,
       );
+
+      testOptionThatDefaultsToFalse(
+        '--publish-observatory-port',
+            () => !debuggingOptions.disableObservatoryPublication,
+      );
     });
   });
 

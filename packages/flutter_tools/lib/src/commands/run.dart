@@ -97,6 +97,7 @@ class RunCommand extends RunCommandBase {
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraFrontendOptions();
     addEnableExperimentation(hide: !verboseHelp);
+    addPublishObservatoryPort(enabledByDefault: true, verboseHelp: verboseHelp);
     argParser
       ..addFlag('start-paused',
         negatable: false,
@@ -407,6 +408,7 @@ class RunCommand extends RunCommandBase {
         purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
+        disableObservatoryPublication: disableObservatoryPublication,
         ddsPort: ddsPort,
         verboseSystemLogs: boolArg('verbose-system-logs'),
         initializePlatform: boolArg('web-initialize-platform'),
