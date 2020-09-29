@@ -528,8 +528,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     assert(records != null);
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
-      // hitTestHistory is an equivalence of _hitTests in [GestureBinding]
-      final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
       final List<Duration> handleTimeStampDiff = <Duration>[];
       DateTime startTime;
       for (final PointerEventRecord record in records) {
@@ -544,8 +542,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
             binding.handlePointerEvent(event, source: TestBindingEventSource.test);
           }
         } else {
-          // TODO(CareF): reconsider the pumping strategy after
-          // https://github.com/flutter/flutter/issues/60739 is fixed
           await binding.pump();
           await binding.delayed(timeDiff);
           handleTimeStampDiff.add(
@@ -559,7 +555,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       await binding.pump();
       // This makes sure that a gesture is completed, with no more pointers
       // active.
-      assert(hitTestHistory.isEmpty);
       return handleTimeStampDiff;
     });
   }

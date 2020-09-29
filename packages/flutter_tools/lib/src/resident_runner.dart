@@ -230,24 +230,44 @@ class FlutterDevice {
       isWaitingForVm = true;
       vm_service.VmService service;
       if (!disableDds) {
-        await device.dds.startDartDevelopmentService(
-          observatoryUri,
-          ddsPort,
-          ipv6,
-          disableServiceAuthCodes,
-        );
+        // This first try block is meant to catch errors that occur during DDS startup
+        // (e.g., failure to bind to a port, failure to connect to the VM service,
+        // attaching to a VM service with existing clients, etc.).
+        try {
+          await device.dds.startDartDevelopmentService(
+            observatoryUri,
+            ddsPort,
+            ipv6,
+            disableServiceAuthCodes,
+          );
+        } on Exception catch (e) {
+          globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
+          if (!completer.isCompleted && !_isListeningForObservatoryUri) {
+            completer.completeError('failed to connect to $observatoryUri');
+          }
+          return;
+        }
       }
+      // This second try block handles cases where the VM service connection goes down
+      // before flutter_tools connects to DDS. The DDS `done` future completes when DDS
+      // shuts down, including after an error. If `done` completes before `connectToVmService`,
+      // something went wrong that caused DDS to shutdown early.
       try {
-        service = await connectToVmService(
-          disableDds ? observatoryUri : device.dds.uri,
-          reloadSources: reloadSources,
-          restart: restart,
-          compileExpression: compileExpression,
-          reloadMethod: reloadMethod,
-          getSkSLMethod: getSkSLMethod,
-          printStructuredErrorLogMethod: printStructuredErrorLogMethod,
-          device: device,
-        );
+        service = await Future.any<dynamic>(
+          <Future<dynamic>>[
+            connectToVmService(
+              disableDds ? observatoryUri : device.dds.uri,
+              reloadSources: reloadSources,
+              restart: restart,
+              compileExpression: compileExpression,
+              reloadMethod: reloadMethod,
+              getSkSLMethod: getSkSLMethod,
+              printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+              device: device,
+            ),
+            device.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
+          ]
+        ) as vm_service.VmService;
       } on Exception catch (exception) {
         globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
         if (!completer.isCompleted && !_isListeningForObservatoryUri) {
