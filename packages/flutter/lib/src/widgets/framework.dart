@@ -1904,19 +1904,20 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// objects.
   MultiChildRenderObjectWidget({ Key? key, this.children = const <Widget>[] })
     : assert(children != null),
-      assert(() {
-        for (int index = 0; index < children.length; index++) {
-          // TODO(a14n): remove this check to have a lot more const widget
-          if (children[index] == null) { // ignore: dead_code
-            throw FlutterError(
+      super(key: key) {
+    assert(() {
+      for (int index = 0; index < children.length; index++) {
+        // TODO(a14n): remove this check to have a lot more const widget
+        if (children[index] == null) { // ignore: dead_code
+          throw FlutterError(
               "$runtimeType's children must not contain any null values, "
-              'but a null value was found at index $index'
-            );
-          }
+                  'but a null value was found at index $index'
+          );
         }
-        return true;
-      }()), // https://github.com/dart-lang/sdk/issues/29276
-      super(key: key);
+      }
+      return true;
+    }()); // https://github.com/dart-lang/sdk/issues/29276
+  }
 
   /// The widgets below this widget in the tree.
   ///

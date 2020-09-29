@@ -349,8 +349,9 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
   }) : assert(builder != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
-       assert(opaque),
-       super(settings: settings, fullscreenDialog: fullscreenDialog);
+       super(settings: settings, fullscreenDialog: fullscreenDialog) {
+    assert(opaque);
+  }
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
@@ -376,8 +377,9 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
   _PageBasedCupertinoPageRoute({
     required CupertinoPage<T> page,
   }) : assert(page != null),
-       assert(opaque),
-       super(settings: page);
+       super(settings: page) {
+    assert(opaque);
+  }
 
   CupertinoPage<T> get _page => settings as CupertinoPage<T>;
 
