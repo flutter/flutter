@@ -195,7 +195,7 @@ class TestCase {
 
     // Use Flutter's analysis_options.yaml file from packages/flutter.
     File(path.join(tmpdir.absolute.path, 'analysis_options.yaml'))
-        .writeAsStringSync('include: ${path.join(flutterRoot.path, 'packages', 'flutter', 'analysis_options.yaml')}');
+        .writeAsStringSync('include: ${path.join(flutterRoot.path, 'packages', 'flutter', 'analysis_options.yaml').replaceAll(path.separator, '/')}');
 
     return true;
   }
