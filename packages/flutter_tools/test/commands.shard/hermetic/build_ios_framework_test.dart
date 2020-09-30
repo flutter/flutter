@@ -32,7 +32,7 @@ void main() {
     });
 
     setUp(() {
-      memoryFileSystem = MemoryFileSystem();
+      memoryFileSystem = MemoryFileSystem.test();
       mockFlutterVersion = MockFlutterVersion();
       mockGitTagVersion = MockGitTagVersion();
       mockCache = MockCache();

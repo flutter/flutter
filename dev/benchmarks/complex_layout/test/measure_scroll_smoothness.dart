@@ -16,6 +16,16 @@ import 'package:e2e/e2e.dart';
 import 'package:complex_layout/main.dart' as app;
 
 class PointerDataTestBinding extends E2EWidgetsFlutterBinding {
+  // PointerData injection would usually be considered device input and therefore
+  // blocked by [TestWidgetsFlutterBinding]. Override this behavior
+  // to help events go into widget tree.
+  @override
+  void handlePointerEvent(
+    PointerEvent event, {
+    TestBindingEventSource source = TestBindingEventSource.device,
+  }) {
+    super.handlePointerEvent(event, source: TestBindingEventSource.test);
+  }
 }
 
 /// A union of [ui.PointerDataPacket] and the time it should be sent.

@@ -32,7 +32,7 @@ void main() {
 
     setUp(() {
       mockFileSystem = MockFileSystem();
-      memoryFileSystem = MemoryFileSystem();
+      memoryFileSystem = MemoryFileSystem.test();
       mockFile = MockFile();
       mockRandomAccessFile = MockRandomAccessFile();
       when(mockFileSystem.path).thenReturn(memoryFileSystem.path);
@@ -89,7 +89,7 @@ void main() {
 
     setUp(() {
       mockCache = MockCache();
-      memoryFileSystem = MemoryFileSystem();
+      memoryFileSystem = MemoryFileSystem.test();
     });
 
     testUsingContext('Continues on failed stamp file update', () async {
@@ -247,9 +247,9 @@ void main() {
   });
 
   testWithoutContext('flattenNameSubdirs', () {
-    expect(flattenNameSubdirs(Uri.parse('http://flutter.dev/foo/bar'), MemoryFileSystem()), 'flutter.dev/foo/bar');
-    expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar'), MemoryFileSystem()), 'docs.flutter.io/foo/bar');
-    expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev'), MemoryFileSystem()), 'www.flutter.dev');
+    expect(flattenNameSubdirs(Uri.parse('http://flutter.dev/foo/bar'), MemoryFileSystem.test()), 'flutter.dev/foo/bar');
+    expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar'), MemoryFileSystem.test()), 'docs.flutter.io/foo/bar');
+    expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev'), MemoryFileSystem.test()), 'www.flutter.dev');
   });
 
   group('EngineCachedArtifact', () {
@@ -303,7 +303,7 @@ void main() {
     MockCache mockCache;
 
     setUp(() {
-      memoryFileSystem = MemoryFileSystem();
+      memoryFileSystem = MemoryFileSystem.test();
       processManager = MockProcessManager();
       mockCache = MockCache();
     });
@@ -372,7 +372,7 @@ void main() {
       expect(iosUsbArtifacts.isUpToDateInner(), false);
     }, overrides: <Type, Generator>{
       Cache: () => mockCache,
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -390,7 +390,7 @@ void main() {
       expect(iosUsbArtifacts.isUpToDateInner(), false);
     }, overrides: <Type, Generator>{
       Cache: () => mockCache,
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -402,7 +402,7 @@ void main() {
       expect(iosUsbArtifacts.isUpToDateInner(), true);
     }, overrides: <Type, Generator>{
       Cache: () => mockCache,
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 

@@ -31,7 +31,6 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
 class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockFile extends Mock implements File {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockIosProject extends Mock implements IosProject {}
 
@@ -58,21 +57,18 @@ void main() {
     });
 
     group('screenshot', () {
-      final String outputPath = globals.fs.path.join('some', 'test', 'path', 'image.png');
       MockProcessManager mockProcessManager;
-      MockFile mockOutputFile;
+      File outputFile;
 
       setUp(() {
         mockProcessManager = MockProcessManager();
-        mockOutputFile = MockFile();
+        outputFile = MemoryFileSystem.test().file('image.png');
         when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
       });
 
       testWithoutContext('error if idevicescreenshot is not installed', () async {
-        when(mockOutputFile.path).thenReturn(outputPath);
-
         // Let `idevicescreenshot` fail with exit code 1.
-        when(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath],
+        when(mockProcessManager.run(<String>[idevicescreenshotPath, outputFile.path],
             environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
             workingDirectory: null,
         )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(4, 1, '', '')));
@@ -85,14 +81,13 @@ void main() {
         );
 
         expect(() async => await iMobileDevice.takeScreenshot(
-          mockOutputFile,
+          outputFile,
           '1234',
           IOSDeviceInterface.usb,
         ), throwsA(anything));
       });
 
       testWithoutContext('idevicescreenshot captures and returns USB screenshot', () async {
-        when(mockOutputFile.path).thenReturn(outputPath);
         when(mockProcessManager.run(any, environment: anyNamed('environment'), workingDirectory: null)).thenAnswer(
             (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
 
@@ -104,18 +99,17 @@ void main() {
         );
 
         await iMobileDevice.takeScreenshot(
-          mockOutputFile,
+          outputFile,
           '1234',
           IOSDeviceInterface.usb,
         );
-        verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath, '--udid', '1234'],
+        verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputFile.path, '--udid', '1234'],
             environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
             workingDirectory: null,
         ));
       });
 
       testWithoutContext('idevicescreenshot captures and returns network screenshot', () async {
-        when(mockOutputFile.path).thenReturn(outputPath);
         when(mockProcessManager.run(any, environment: anyNamed('environment'), workingDirectory: null)).thenAnswer(
             (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
 
@@ -127,11 +121,11 @@ void main() {
         );
 
         await iMobileDevice.takeScreenshot(
-          mockOutputFile,
+          outputFile,
           '1234',
           IOSDeviceInterface.network,
         );
-        verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath, '--udid', '1234', '--network'],
+        verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputFile.path, '--udid', '1234', '--network'],
           environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
           workingDirectory: null,
         ));
@@ -403,33 +397,27 @@ Exited (sigterm)''',
   });
 
   group('Upgrades project.pbxproj for old asset usage', () {
-    const List<String> flutterAssetPbxProjLines = <String>[
-      '/* flutter_assets */',
-      '/* App.framework',
-      'another line',
-    ];
+    const String flutterAssetPbxProjLines =
+      '/* flutter_assets */\n'
+      '/* App.framework\n'
+      'another line';
 
-    const List<String> appFlxPbxProjLines = <String>[
-      '/* app.flx',
-      '/* App.framework',
-      'another line',
-    ];
+    const String appFlxPbxProjLines =
+      '/* app.flx\n'
+      '/* App.framework\n'
+      'another line';
 
-    const List<String> cleanPbxProjLines = <String>[
-      '/* App.framework',
-      'another line',
-    ];
+    const String cleanPbxProjLines =
+      '/* App.framework\n'
+      'another line';
 
     testWithoutContext('upgradePbxProjWithFlutterAssets', () async {
       final MockIosProject project = MockIosProject();
-      final MockFile pbxprojFile = MockFile();
+      final File pbxprojFile = MemoryFileSystem.test().file('project.pbxproj')
+        ..writeAsStringSync(flutterAssetPbxProjLines);
 
       when(project.xcodeProjectInfoFile).thenReturn(pbxprojFile);
       when(project.hostAppBundleName(any)).thenAnswer((_) => Future<String>.value('UnitTestRunner.app'));
-      when(pbxprojFile.readAsLinesSync())
-          .thenAnswer((_) => flutterAssetPbxProjLines);
-      when(pbxprojFile.existsSync())
-          .thenAnswer((_) => true);
 
       bool result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
@@ -439,8 +427,7 @@ Exited (sigterm)''',
       );
       logger.clear();
 
-      when(pbxprojFile.readAsLinesSync())
-          .thenAnswer((_) => appFlxPbxProjLines);
+      pbxprojFile.writeAsStringSync(appFlxPbxProjLines);
       result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
       expect(
@@ -449,8 +436,7 @@ Exited (sigterm)''',
       );
       logger.clear();
 
-      when(pbxprojFile.readAsLinesSync())
-          .thenAnswer((_) => cleanPbxProjLines);
+      pbxprojFile.writeAsStringSync(cleanPbxProjLines);
       result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
       expect(
