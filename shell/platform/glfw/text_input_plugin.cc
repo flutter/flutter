@@ -139,6 +139,7 @@ void TextInputPlugin::HandleMethodCall(
     if (client_config.IsNull()) {
       result->Error(kBadArgumentError,
                     "Could not set client, missing arguments.");
+      return;
     }
     client_id_ = client_id_json.GetInt();
     input_action_ = "";
