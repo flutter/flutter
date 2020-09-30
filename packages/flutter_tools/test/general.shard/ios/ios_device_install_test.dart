@@ -337,7 +337,6 @@ class FakeEnvironmentArtifact extends ArtifactSet {
   String get name => 'fake';
 
   @override
-  Future<void> update(ArtifactUpdater artifactUpdater) {
-    return null;
+  Future<void> update(ArtifactUpdater artifactUpdater) async {
   }
 }
