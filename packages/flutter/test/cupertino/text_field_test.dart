@@ -1988,7 +1988,7 @@ void main() {
     expect(lastCharEndpoint.length, 1);
     // Just testing the test and making sure that the last character is off
     // the right side of the screen.
-    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(1094.73486328125));
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(1094.73, epsilon: 0.01));
 
     final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
@@ -2041,14 +2041,14 @@ void main() {
 
     expect(lastCharEndpoint.length, 1);
     // The last character is now on screen.
-    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(786.73486328125));
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(786.73, epsilon: 0.01));
 
     final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 0), // First character's position.
     );
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-308.20499999821186));
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-308.20, epsilon: 0.01));
   });
 
   testWidgets(
