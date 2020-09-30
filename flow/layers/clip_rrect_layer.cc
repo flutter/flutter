@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/flow/layers/clip_rrect_layer.h"
+#include "flutter/flow/paint_utils.h"
 
 namespace flutter {
 
@@ -66,6 +67,9 @@ void ClipRRectLayer::Paint(PaintContext& context) const {
   PaintChildren(context);
   if (UsesSaveLayer()) {
     context.internal_nodes_canvas->restore();
+    if (context.checkerboard_offscreen_layers) {
+      DrawCheckerboard(context.internal_nodes_canvas, paint_bounds());
+    }
   }
 }
 

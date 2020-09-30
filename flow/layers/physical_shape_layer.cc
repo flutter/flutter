@@ -87,6 +87,12 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
   PaintChildren(context);
 
   context.internal_nodes_canvas->restoreToCount(saveCount);
+
+  if (UsesSaveLayer()) {
+    if (context.checkerboard_offscreen_layers) {
+      DrawCheckerboard(context.internal_nodes_canvas, paint_bounds());
+    }
+  }
 }
 
 SkRect PhysicalShapeLayer::ComputeShadowBounds(const SkRect& bounds,
