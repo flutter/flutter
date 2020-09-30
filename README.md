@@ -7,11 +7,12 @@
 Flutter is Google's SDK for crafting beautiful, fast user experiences for
 mobile, web, and desktop from a single codebase. Flutter works with existing
 code, is used by developers and organizations around the world, and is free
-and open source.
+and open source.Flutter is an open-source UI software development kit created by Google. It is used to develop applications for Android, iOS, Linux, Mac, Windows, Google Fuchsia, and the web from a single codebase. The first version of Flutter was known as codename "Sky" and ran on the Android operating system
 
 ## Documentation
 
 * [Install Flutter](https://flutter.dev/get-started/)
+* [Set up an editor-flutter](https://flutter.dev/docs/get-started/editor)
 * [Flutter documentation](https://flutter.dev/docs)
 * [Development wiki](https://github.com/flutter/flutter/wiki)
 * [Contributing to Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
