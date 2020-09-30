@@ -98,7 +98,7 @@ void main() {
       testUsingContext('skips setting observatory port and uses the input port for for DDS instead', () async {
         flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
         final TestObservatoryFlutterPlatform testPlatform = flutterPlatform as TestObservatoryFlutterPlatform;
-        await testPlatform.ddsServiceUriCompleter.future.then((Uri uri) => expect(uri.port, 1234));
+        await testPlatform.ddsServiceUriFuture().then((Uri uri) => expect(uri.port, 1234));
       }, overrides: contextOverrides);
     });
 
@@ -282,7 +282,11 @@ class TestObservatoryFlutterPlatform extends FlutterPlatform {
     disableDds: false,
   );
 
-  Completer<Uri> ddsServiceUriCompleter = Completer<Uri>();
+  final Completer<Uri> _ddsServiceUriCompleter = Completer<Uri>();
+
+  Future<Uri> ddsServiceUriFuture() {
+    return _ddsServiceUriCompleter.future;
+  }
 
   @override
   @protected
@@ -291,7 +295,7 @@ class TestObservatoryFlutterPlatform extends FlutterPlatform {
   @override
   Uri getDdsServiceUri() {
     final Uri result = super.getDdsServiceUri();
-    ddsServiceUriCompleter.complete(result);
+    _ddsServiceUriCompleter.complete(result);
     return result;
   }
 }
