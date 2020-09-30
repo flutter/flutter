@@ -90,7 +90,7 @@ void main() {
     mockProcessManager = MockProcessManager();
     fontSubsetProcess = MockProcess();
     mockArtifacts = MockArtifacts();
-    fileSystem = MemoryFileSystem();
+    fileSystem = MemoryFileSystem.test();
     logger = BufferLogger(
       terminal: AnsiTerminal(
         stdio: mocks.MockStdio(),

@@ -26,7 +26,7 @@ void main() {
     expect(vsCode.version, Version.unknown);
     expect(bufferLogger.traceText, contains('Error parsing VSCode'));
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 }

@@ -39,7 +39,7 @@ void main() {
     });
 
     setUp(() {
-      fs = MemoryFileSystem();
+      fs = MemoryFileSystem.test();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
       fs.directory(_kProjectRoot).createSync(recursive: true);
       fs.currentDirectory = _kProjectRoot;

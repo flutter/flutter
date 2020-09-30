@@ -51,7 +51,7 @@ void main() {
     setUp(() async {
       sdk = MockitoAndroidSdk();
       mockProcessManager = MockitoProcessManager();
-      fs = MemoryFileSystem();
+      fs = MemoryFileSystem.test();
       mockCache = MockCache();
       Cache.flutterRoot = '../..';
       when(sdk.licensesAvailable).thenReturn(true);
@@ -217,7 +217,7 @@ void main() {
   group('PrebuiltIOSApp', () {
     MockOperatingSystemUtils os;
     final Map<Type, Generator> overrides = <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       PlistParser: () => MockPlistUtils(),
       Platform: _kNoColorTerminalPlatform,
@@ -365,7 +365,7 @@ void main() {
 
   group('FuchsiaApp', () {
     final Map<Type, Generator> overrides = <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       Platform: _kNoColorTerminalPlatform,
       OperatingSystemUtils: () => MockOperatingSystemUtils(),

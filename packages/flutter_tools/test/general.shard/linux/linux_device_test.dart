@@ -104,7 +104,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
     ).isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -119,7 +119,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
     ).isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -141,7 +141,7 @@ void main() {
     expect(device.executablePathForDevice(mockApp, BuildMode.profile), profilePath);
     expect(device.executablePathForDevice(mockApp, BuildMode.release), releasePath);
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 }

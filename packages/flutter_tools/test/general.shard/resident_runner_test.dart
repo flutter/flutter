@@ -2196,7 +2196,7 @@ void main() {
     expect(testLogger.errorText, contains('Failed to write vmservice-out-file at foo'));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
-    FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem()),
+    FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem.test()),
   }));
 
 

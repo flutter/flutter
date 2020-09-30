@@ -19,7 +19,7 @@ void main() {
   FakePlatform fakePlatform;
 
   setUp(() {
-    memoryFileSystem = MemoryFileSystem();
+    memoryFileSystem = MemoryFileSystem.test();
     fakePlatform = FakePlatform(
       operatingSystem: 'linux',
       environment: <String, String>{
