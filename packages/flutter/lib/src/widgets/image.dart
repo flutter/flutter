@@ -1216,7 +1216,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStream!.removeListener(_getListener());
 
     if (!widget.gaplessPlayback)
-      setState(() => _replaceImage(info: null));
+      setState(() { _replaceImage(info: null); });
 
     setState(() {
       _loadingProgress = null;
