@@ -43,6 +43,11 @@ class TestImageInfo implements ImageInfo {
   }
 
   @override
+  void dispose() {
+    image.dispose();
+  }
+
+  @override
   int get hashCode => hashValues(value, image, scale, debugLabel);
 
   @override
