@@ -19,6 +19,7 @@ import 'pointer_router.dart';
 import 'pointer_signal_resolver.dart';
 import 'resampler.dart';
 
+/// Sample time change callback.
 typedef HandleSampleTimeChangedCallback = void Function();
 
 // Class that handles resampling of touch events for multiple pointer

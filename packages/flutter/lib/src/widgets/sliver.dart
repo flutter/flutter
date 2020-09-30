@@ -213,6 +213,8 @@ class _SaltedValueKey extends ValueKey<Key>{
   const _SaltedValueKey(Key key): assert(key != null), super(key);
 }
 
+/// Called to find the new index of a child based on its key in case of
+/// reordering.
 typedef ChildIndexGetter = int Function(Key key);
 
 /// A delegate that supplies children for slivers using a builder callback.

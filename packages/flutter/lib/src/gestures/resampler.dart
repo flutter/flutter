@@ -6,6 +6,7 @@ import 'dart:collection';
 
 import 'events.dart';
 
+/// A callback for pointer events.
 typedef HandleEventCallback = void Function(PointerEvent event);
 
 /// Class for pointer event resampling.

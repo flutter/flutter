@@ -33,6 +33,7 @@ typedef GestureDragEndCallback = void Function(DragEndDetails details);
 /// See [DragGestureRecognizer.onCancel].
 typedef GestureDragCancelCallback = void Function();
 
+/// Signature for functions that build [VelocityTracker]s.
 typedef GestureVelocityTrackerBuilder = VelocityTracker Function(PointerEvent event);
 
 /// Recognizes movement.
