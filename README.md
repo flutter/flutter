@@ -4,8 +4,8 @@
 [![Gitter Channel][]][Gitter badge]
 [![Twitter handle][]][Twitter badge]
 
-Flutter is Google's SDK for crafting beautiful, fast user experiences for
-mobile, web, and desktop from a single codebase. Flutter works with existing
+Flutter is Google's UI toolkit for building beautiful, natively compiled applications
+for mobile, web, and desktop from a single codebase. Flutter works with existing
 code, is used by developers and organizations around the world, and is free
 and open source.
 
@@ -40,7 +40,7 @@ iOS and Android.
 ### Fast results
 
 Flutter is fast. It's powered by the same hardware-accelerated 2D graphics
-library that underpins Chome and Android: [Skia]. We architected Flutter to
+library that underpins Chrome and Android: [Skia]. We architected Flutter to
 support glitch-free, jank-free graphics at the native speed of your device.
 Flutter code is powered by the world-class [Dart platform], which enables
 compilation to 32-bit and 64-bit ARM machine code for iOS and Android, as well
