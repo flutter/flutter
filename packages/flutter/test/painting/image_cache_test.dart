@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -12,7 +11,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../flutter_test_alternative.dart';
-import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
 import 'mocks_for_image_cache.dart';
 
