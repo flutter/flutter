@@ -25,6 +25,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 List<String> _xattrArgs(FlutterProject flutterProject) {
   return <String>[
@@ -68,6 +69,14 @@ final FakePlatform macPlatform = FakePlatform(
 );
 
 void main() {
+  Artifacts artifacts;
+  String iosDeployPath;
+
+  setUp(() {
+    artifacts = Artifacts.test();
+    iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+  });
+
   group('IOSDevice.startApp succeeds in release mode', () {
     FileSystem fileSystem;
     FakeProcessManager processManager;
@@ -104,6 +113,7 @@ void main() {
         fileSystem: fileSystem,
         processManager: processManager,
         logger: logger,
+        artifacts: artifacts,
       );
       setUpIOSProject(fileSystem);
       final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
@@ -114,7 +124,7 @@ void main() {
       processManager.addCommand(const FakeCommand(command: <String>[...kRunReleaseArgs, '-showBuildSettings']));
       processManager.addCommand(FakeCommand(
         command: <String>[
-          'ios-deploy',
+          iosDeployPath,
           '--id',
           '123',
           '--bundle',
@@ -155,6 +165,7 @@ void main() {
           fileSystem: fileSystem,
           processManager: processManager,
           logger: logger,
+          artifacts: artifacts,
         );
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
@@ -176,7 +187,7 @@ void main() {
           ));
         processManager.addCommand(FakeCommand(
           command: <String>[
-            'ios-deploy',
+            iosDeployPath,
             '--id',
             '123',
             '--bundle',
@@ -228,6 +239,7 @@ void main() {
         fileSystem: fileSystem,
         processManager: processManager,
         logger: logger,
+        artifacts: artifacts,
       );
       setUpIOSProject(fileSystem);
       final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
@@ -250,7 +262,7 @@ void main() {
         ));
       processManager.addCommand(FakeCommand(
         command: <String>[
-          'ios-deploy',
+          iosDeployPath,
           '--id',
           '123',
           '--bundle',
@@ -306,17 +318,16 @@ IOSDevice setUpIOSDevice({
   FileSystem fileSystem,
   Logger logger,
   ProcessManager processManager,
+  Artifacts artifacts,
 }) {
-  const MapEntry<String, String> dyldLibraryEntry = MapEntry<String, String>(
-    'DYLD_LIBRARY_PATH',
-    '/path/to/libraries',
+  artifacts ??= Artifacts.test();
+  final Cache cache = Cache.test(
+    artifacts: <ArtifactSet>[
+      FakeDyldEnvironmentArtifact(),
+    ],
   );
-  final MockCache cache = MockCache();
-  final MockArtifacts artifacts = MockArtifacts();
+
   logger ??= BufferLogger.test();
-  when(cache.dyLdLibEntry).thenReturn(dyldLibraryEntry);
-  when(artifacts.getArtifactPath(Artifact.iosDeploy, platform: anyNamed('platform')))
-    .thenReturn('ios-deploy');
   return IOSDevice('123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
@@ -343,8 +354,6 @@ IOSDevice setUpIOSDevice({
   );
 }
 
-class MockArtifacts extends Mock implements Artifacts {}
-class MockCache extends Mock implements Cache {}
 class MockXcode extends Mock implements Xcode {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockVmService extends Mock implements VmService {}

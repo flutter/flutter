@@ -85,10 +85,17 @@ void main() {
 
   group('Cache', () {
     MockCache mockCache;
+    Cache cache;
     MemoryFileSystem memoryFileSystem;
+    ProcessManager fakeProcessManager;
 
     setUp(() {
+      fakeProcessManager = FakeProcessManager.any();
       mockCache = MockCache();
+      cache = Cache.test(
+        fileSystem: memoryFileSystem,
+        processManager: fakeProcessManager,
+      );
       memoryFileSystem = MemoryFileSystem.test();
     });
 
@@ -110,30 +117,27 @@ void main() {
     });
 
     testUsingContext('Gradle wrapper should not be up to date, if some cached artifact is not available', () {
-      final GradleWrapper gradleWrapper = GradleWrapper(mockCache);
-      final Directory directory = globals.fs.directory('/Applications/flutter/bin/cache');
-      directory.createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradle', 'wrapper', 'gradle-wrapper.jar')).createSync(recursive: true);
-      when(mockCache.getCacheDir(globals.fs.path.join('artifacts', 'gradle_wrapper'))).thenReturn(globals.fs.directory(globals.fs.path.join(directory.path, 'artifacts', 'gradle_wrapper')));
+      final GradleWrapper gradleWrapper = GradleWrapper(cache);
+      final Directory directory = cache.getCacheDir(globals.fs.path.join('artifacts', 'gradle_wrapper'));
+      globals.fs.file(globals.fs.path.join(directory.path, 'gradle', 'wrapper', 'gradle-wrapper.jar')).createSync(recursive: true);
+
       expect(gradleWrapper.isUpToDateInner(), false);
     }, overrides: <Type, Generator>{
-      Cache: () => mockCache,
+      Cache: () => cache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Gradle wrapper should be up to date, only if all cached artifact are available', () {
-      final GradleWrapper gradleWrapper = GradleWrapper(mockCache);
-      final Directory directory = globals.fs.directory('/Applications/flutter/bin/cache');
-      directory.createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradle', 'wrapper', 'gradle-wrapper.jar')).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradlew')).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradlew.bat')).createSync(recursive: true);
+      final GradleWrapper gradleWrapper = GradleWrapper(cache);
+      final Directory directory = cache.getCacheDir(globals.fs.path.join('artifacts', 'gradle_wrapper'));
+      globals.fs.file(globals.fs.path.join(directory.path, 'gradle', 'wrapper', 'gradle-wrapper.jar')).createSync(recursive: true);
+      globals.fs.file(globals.fs.path.join(directory.path, 'gradlew')).createSync(recursive: true);
+      globals.fs.file(globals.fs.path.join(directory.path, 'gradlew.bat')).createSync(recursive: true);
 
-      when(mockCache.getCacheDir(globals.fs.path.join('artifacts', 'gradle_wrapper'))).thenReturn(globals.fs.directory(globals.fs.path.join(directory.path, 'artifacts', 'gradle_wrapper')));
       expect(gradleWrapper.isUpToDateInner(), true);
     }, overrides: <Type, Generator>{
-      Cache: () => mockCache,
+      Cache: () => cache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -201,9 +205,8 @@ void main() {
         cache.dyLdLibEntry.value,
         '/path/to/alpha:/path/to/beta:/path/to/gamma:/path/to/delta:/path/to/epsilon',
       );
-    }, overrides: <Type, Generator>{
-      Cache: () => mockCache,
     });
+
     testUsingContext('failed storage.googleapis.com download shows China warning', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
@@ -300,33 +303,29 @@ void main() {
   group('AndroidMavenArtifacts', () {
     MemoryFileSystem memoryFileSystem;
     MockProcessManager processManager;
-    MockCache mockCache;
+    Cache cache;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
       processManager = MockProcessManager();
-      mockCache = MockCache();
+      cache = Cache.test(
+        fileSystem: memoryFileSystem,
+        processManager: FakeProcessManager.any(),
+      );
     });
 
     test('development artifact', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(mockCache);
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache);
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
     testUsingContext('update', () async {
-      final Directory cacheRoot = globals.fs.directory('/bin/cache')
-        ..createSync(recursive: true);
-      when(mockCache.getRoot()).thenReturn(cacheRoot);
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(mockCache);
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache);
       expect(await mavenArtifacts.isUpToDate(), isFalse);
 
-      final Directory gradleWrapperDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_gradle_wrapper.');
-      when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
-
-      globals.fs.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))
-          .createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join(gradleWrapperDir.path, 'gradlew')).writeAsStringSync('irrelevant');
-      globals.fs.file(globals.fs.path.join(gradleWrapperDir.path, 'gradlew.bat')).writeAsStringSync('irrelevant');
+      final Directory gradleWrapperDir = cache.getArtifactDirectory('gradle_wrapper')..createSync(recursive: true);
+      gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
+      gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
 
       when(globals.processManager.run(any, environment: captureAnyNamed('environment')))
         .thenAnswer((Invocation invocation) {
@@ -343,22 +342,23 @@ void main() {
 
       expect(await mavenArtifacts.isUpToDate(), isFalse);
     }, overrides: <Type, Generator>{
-      Cache: () => mockCache,
+      Cache: () => cache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => processManager,
     });
   });
 
   group('macOS artifacts', () {
-    MockCache mockCache;
+    Cache cache;
 
     setUp(() {
-      mockCache = MockCache();
+      cache = Cache.test(
+        processManager: FakeProcessManager.any(),
+      );
     });
 
     testUsingContext('verifies executables for libimobiledevice in isUpToDateInner', () async {
-      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('libimobiledevice', mockCache);
-      when(mockCache.getArtifactDirectory(any)).thenReturn(globals.fs.currentDirectory);
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('libimobiledevice', cache);
       iosUsbArtifacts.location.createSync();
       final File ideviceScreenshotFile = iosUsbArtifacts.location.childFile('idevicescreenshot')
         ..createSync();
@@ -371,14 +371,13 @@ void main() {
 
       expect(iosUsbArtifacts.isUpToDateInner(), false);
     }, overrides: <Type, Generator>{
-      Cache: () => mockCache,
+      Cache: () => cache,
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('verifies iproxy for usbmuxd in isUpToDateInner', () async {
-      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('usbmuxd', mockCache);
-      when(mockCache.getArtifactDirectory(any)).thenReturn(globals.fs.currentDirectory);
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('usbmuxd', cache);
       iosUsbArtifacts.location.createSync();
       final File iproxy = iosUsbArtifacts.location.childFile('iproxy')
         ..createSync();
@@ -389,47 +388,48 @@ void main() {
 
       expect(iosUsbArtifacts.isUpToDateInner(), false);
     }, overrides: <Type, Generator>{
-      Cache: () => mockCache,
+      Cache: () => cache,
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Does not verify executables for openssl in isUpToDateInner', () async {
-      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('openssl', mockCache);
-      when(mockCache.getArtifactDirectory(any)).thenReturn(globals.fs.currentDirectory);
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('openssl', cache);
       iosUsbArtifacts.location.createSync();
 
       expect(iosUsbArtifacts.isUpToDateInner(), true);
     }, overrides: <Type, Generator>{
-      Cache: () => mockCache,
+      Cache: () => cache,
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('use unsigned when specified', () async {
-      when(mockCache.useUnsignedMacBinaries).thenReturn(true);
+      cache.useUnsignedMacBinaries = true;
 
-      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('name', mockCache);
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('name', cache);
       expect(iosUsbArtifacts.archiveUri.toString(), contains('/unsigned/'));
     }, overrides: <Type, Generator>{
-      Cache: () => mockCache,
+      Cache: () => cache,
     });
 
     testUsingContext('not use unsigned when not specified', () async {
-      when(mockCache.useUnsignedMacBinaries).thenReturn(false);
+      cache.useUnsignedMacBinaries = false;
 
-      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('name', mockCache);
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('name', cache);
       expect(iosUsbArtifacts.archiveUri.toString(), isNot(contains('/unsigned/')));
     }, overrides: <Type, Generator>{
-      Cache: () => mockCache,
+      Cache: () => cache,
     });
   });
 
   testWithoutContext('Downloads Flutter runner debug symbols', () async {
-    final MockCache mockCache = MockCache();
+    final Cache cache = Cache.test(
+      processManager: FakeProcessManager.any(),
+    );
     final MockVersionedPackageResolver mockPackageResolver = MockVersionedPackageResolver();
     final FlutterRunnerDebugSymbols flutterRunnerDebugSymbols = FlutterRunnerDebugSymbols(
-      mockCache,
+      cache,
       packageResolver: mockPackageResolver,
       platform: FakePlatform(operatingSystem: 'linux'),
     );
@@ -444,51 +444,51 @@ void main() {
   });
 
   testUsingContext('FontSubset in univeral artifacts', () {
-    final MockCache mockCache = MockCache();
-    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    final Cache cache = Cache.test();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache);
     expect(artifacts.developmentArtifact, DevelopmentArtifact.universal);
   });
 
   testUsingContext('FontSubset artifacts on linux', () {
-    final MockCache mockCache = MockCache();
-    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
-    when(mockCache.includeAllPlatforms).thenReturn(false);
+    final Cache cache = Cache.test();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache);
+    cache.includeAllPlatforms = false;
     expect(artifacts.getBinaryDirs(), <List<String>>[<String>['linux-x64', 'linux-x64/font-subset.zip']]);
   }, overrides: <Type, Generator> {
     Platform: () => FakePlatform(operatingSystem: 'linux'),
   });
 
   testUsingContext('FontSubset artifacts on windows', () {
-    final MockCache mockCache = MockCache();
-    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
-    when(mockCache.includeAllPlatforms).thenReturn(false);
+    final Cache cache = Cache.test();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache);
+    cache.includeAllPlatforms = false;
     expect(artifacts.getBinaryDirs(), <List<String>>[<String>['windows-x64', 'windows-x64/font-subset.zip']]);
   }, overrides: <Type, Generator> {
     Platform: () => FakePlatform(operatingSystem: 'windows'),
   });
 
   testUsingContext('FontSubset artifacts on macos', () {
-    final MockCache mockCache = MockCache();
-    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
-    when(mockCache.includeAllPlatforms).thenReturn(false);
+    final Cache cache = Cache.test();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache);
+    cache.includeAllPlatforms = false;
     expect(artifacts.getBinaryDirs(), <List<String>>[<String>['darwin-x64', 'darwin-x64/font-subset.zip']]);
   }, overrides: <Type, Generator> {
     Platform: () => FakePlatform(operatingSystem: 'macos'),
   });
 
   testUsingContext('FontSubset artifacts on fuchsia', () {
-    final MockCache mockCache = MockCache();
-    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
-    when(mockCache.includeAllPlatforms).thenReturn(false);
+    final Cache cache = Cache.test();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache);
+    cache.includeAllPlatforms = false;
     expect(artifacts.getBinaryDirs, throwsToolExit(message: 'Unsupported operating system: ${globals.platform.operatingSystem}'));
   }, overrides: <Type, Generator> {
     Platform: () => FakePlatform(operatingSystem: 'fuchsia'),
   });
 
   testUsingContext('FontSubset artifacts for all platforms', () {
-    final MockCache mockCache = MockCache();
-    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
-    when(mockCache.includeAllPlatforms).thenReturn(true);
+    final Cache cache = Cache.test();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache);
+    cache.includeAllPlatforms = true;
     expect(artifacts.getBinaryDirs(), <List<String>>[
         <String>['darwin-x64', 'darwin-x64/font-subset.zip'],
         <String>['linux-x64', 'linux-x64/font-subset.zip'],
@@ -499,10 +499,10 @@ void main() {
   });
 
   testUsingContext('macOS desktop artifacts ignore filtering when requested', () {
-    final MockCache mockCache = MockCache();
-    final MacOSEngineArtifacts artifacts = MacOSEngineArtifacts(mockCache);
-    when(mockCache.includeAllPlatforms).thenReturn(false);
-    when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'macos'});
+    final Cache cache = Cache.test();
+    final MacOSEngineArtifacts artifacts = MacOSEngineArtifacts(cache);
+    cache.includeAllPlatforms = false;
+    cache.platformOverrideArtifacts = <String>{'macos'};
 
     expect(artifacts.getBinaryDirs(), isNotEmpty);
   }, overrides: <Type, Generator> {
@@ -510,21 +510,21 @@ void main() {
   });
 
   testWithoutContext('Windows desktop artifacts ignore filtering when requested', () {
-    final MockCache mockCache = MockCache();
+    final Cache cache = Cache.test();
     final WindowsEngineArtifacts artifacts = WindowsEngineArtifacts(
-      mockCache,
+      cache,
       platform: FakePlatform(operatingSystem: 'linux'),
     );
-    when(mockCache.includeAllPlatforms).thenReturn(false);
-    when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'windows'});
+    cache.includeAllPlatforms = false;
+    cache.platformOverrideArtifacts = <String>{'windows'};
 
     expect(artifacts.getBinaryDirs(), isNotEmpty);
   });
 
   testWithoutContext('Windows desktop artifacts include profile and release artifacts', () {
-    final MockCache mockCache = MockCache();
+    final Cache cache = Cache.test();
     final WindowsEngineArtifacts artifacts = WindowsEngineArtifacts(
-      mockCache,
+      cache,
       platform: FakePlatform(operatingSystem: 'windows'),
     );
 
@@ -535,21 +535,21 @@ void main() {
   });
 
   testWithoutContext('Linux desktop artifacts ignore filtering when requested', () {
-    final MockCache mockCache = MockCache();
+    final Cache cache = Cache.test();
     final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
-      mockCache,
+      cache,
       platform: FakePlatform(operatingSystem: 'macos'),
     );
-    when(mockCache.includeAllPlatforms).thenReturn(false);
-    when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'linux'});
+    cache.includeAllPlatforms = false;
+    cache.platformOverrideArtifacts = <String>{'linux'};
 
     expect(artifacts.getBinaryDirs(), isNotEmpty);
   });
 
   testWithoutContext('Linux desktop artifacts include profile and release artifacts', () {
-    final MockCache mockCache = MockCache();
+    final Cache cache = Cache.test();
     final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
-      mockCache,
+      cache,
       platform: FakePlatform(operatingSystem: 'linux'),
     );
 
