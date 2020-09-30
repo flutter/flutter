@@ -407,7 +407,7 @@ class ImageCache {
       int? sizeBytes;
       if (info != null) {
         sizeBytes = info.image.height * info.image.width * 4;
-        info.image.dispose();
+        info.dispose();
       }
       final _CachedImage image = _CachedImage(
         result!,

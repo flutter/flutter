@@ -1201,7 +1201,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _replaceImage({required ImageInfo? info}) {
-    _imageInfo?.image.dispose();
+    _imageInfo?.dispose();
     _imageInfo = info;
   }
 

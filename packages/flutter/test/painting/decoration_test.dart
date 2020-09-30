@@ -718,6 +718,6 @@ void main() {
     painter.dispose();
     expect(info.image.debugGetOpenHandleStackTraces().length, baselineRefCount);
 
-    info.image.dispose();
+    info.dispose();
   });
 }

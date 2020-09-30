@@ -14,9 +14,9 @@ import 'package:flutter/scheduler.dart';
 /// ImageInfo objects are used by [ImageStream] objects to represent the
 /// actual data of the image once it has been obtained.
 ///
-/// The receiver of an [ImageInfo] object must call [Image.dispose] on the
-/// [image]. To safely share the object with other clients, use the [clone]
-/// method.
+/// The receiver of an [ImageInfo] object must call [dispose]. To safely share
+/// the object with other clients, use the [clone] method before calling
+/// dispose.
 @immutable
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given [image] and [scale].
@@ -106,6 +106,15 @@ class ImageInfo {
 
   /// A string used for debugging purpopses to identify the source of this image.
   final String? debugLabel;
+
+  /// Disposes of this object.
+  ///
+  /// Once this method has been called, the object should not be used anymore,
+  /// and no clones of it or the image it contains can be made.
+  void dispose() {
+    assert((image.debugGetOpenHandleStackTraces()?.length ?? 1) > 0);
+    image.dispose();
+  }
 
   @override
   String toString() => '${debugLabel != null ? '$debugLabel ' : ''}$image @ ${debugFormatDouble(scale)}x';
@@ -546,7 +555,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
       return;
     }
 
-    _currentImage?.image.dispose();
+    _currentImage?.dispose();
     _currentImage = null;
     _disposed = true;
   }
@@ -589,7 +598,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   @protected
   void setImage(ImageInfo image) {
     _checkDisposed();
-    _currentImage?.image.dispose();
+    _currentImage?.dispose();
     _currentImage = image;
 
     if (_listeners.isEmpty)

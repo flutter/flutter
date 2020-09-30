@@ -296,10 +296,10 @@ class DecorationImagePainter {
     if (_image == value)
       return;
     if (_image != null && _image!.isCloneOf(value)) {
-      value.image.dispose();
+      value.dispose();
       return;
     }
-    _image?.image.dispose();
+    _image?.dispose();
     _image = value;
     assert(_onChanged != null);
     if (!synchronousCall)
@@ -317,7 +317,7 @@ class DecorationImagePainter {
       _handleImage,
       onError: _details.onError,
     ));
-    _image?.image.dispose();
+    _image?.dispose();
     _image = null;
   }
 

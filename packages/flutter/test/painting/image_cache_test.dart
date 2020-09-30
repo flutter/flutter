@@ -527,7 +527,7 @@ void main() {
     // -1 ImageStreamCompleter
     expect(testImage.debugGetOpenHandleStackTraces().length, 1);
 
-    imageInfo.image.dispose();
+    imageInfo.dispose();
     expect(testImage.debugGetOpenHandleStackTraces().length, 0);
   }, skip: kIsWeb); // Web does not care about image handles.
 
@@ -566,7 +566,7 @@ void main() {
     completer.removeListener(listener);
 
     expect(testImage.debugGetOpenHandleStackTraces().length, 1);
-    imageInfo.image.dispose();
+    imageInfo.dispose();
     expect(testImage.debugGetOpenHandleStackTraces().length, 0);
   }, skip: kIsWeb); // Web does not care about open image handles.
 }
