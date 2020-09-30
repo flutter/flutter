@@ -1762,6 +1762,52 @@ void main() {
 
     debugOnPaintImage = null;
   });
+
+  testWidgets('Load a good image after a bad image was loaded should not call errorBuilder', (WidgetTester tester) async {
+    final UniqueKey errorKey = UniqueKey();
+    final ui.Image image = await tester.runAsync(() => createTestImage());
+    final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
+    final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
+
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          height: 50,
+          width: 50,
+          child: Image(
+            image: imageProvider,
+            excludeFromSemantics: true,
+            errorBuilder: (BuildContext context, Object error, StackTrace stackTrace) {
+              return Container(key: errorKey);
+            },
+            frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
+              return Padding(padding: const EdgeInsets.all(1), child: child);
+            },
+          ),
+        ),
+      ),
+    );
+
+    // No error widget before loading a invalid image.
+    expect(find.byKey(errorKey), findsNothing);
+
+    // Loading good image succeed
+    streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
+    await tester.pump();
+    expect(find.byType(Padding), findsOneWidget);
+
+    // Loading bad image shows the error widget.
+    streamCompleter.setError(exception: 'thrown');
+    await tester.pump();
+    expect(find.byKey(errorKey), findsOneWidget);
+
+    // Loading good image shows the image widget instead of the error widget.
+    streamCompleter.setData(imageInfo: ImageInfo(image: image));
+    await tester.pump();
+    expect(find.byType(Padding), findsOneWidget);
+    expect(tester.widget<Padding>(find.byType(Padding)).child, isA<RawImage>());
+    expect(find.byKey(errorKey), findsNothing);
+  });
 }
 
 class ImagePainter extends CustomPainter {
@@ -1886,6 +1932,20 @@ class TestImageStreamCompleter extends ImageStreamCompleter {
       }
       if (chunkEvent != null && listener.onChunk != null) {
         listener.onChunk(chunkEvent);
+      }
+    }
+  }
+
+  void setError({
+    dynamic exception,
+    StackTrace stackTrace,
+  }) {
+    assert(exception != null, 'exception must not be null.');
+
+    final List<ImageStreamListener> localListeners = listeners.toList();
+    for (final ImageStreamListener listener in localListeners) {
+      if (listener.onError != null) {
+        listener.onError(exception, stackTrace);
       }
     }
   }
