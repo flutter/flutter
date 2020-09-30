@@ -852,12 +852,12 @@ void main() {
     testWidgets('Key handling bubbles up and terminates when handled.', (WidgetTester tester) async {
       final Set<FocusNode> receivedAnEvent = <FocusNode>{};
       final Set<FocusNode> shouldHandle = <FocusNode>{};
-      bool handleEvent(FocusNode node, RawKeyEvent event) {
+      KeyEventResult handleEvent(FocusNode node, RawKeyEvent event) {
         if (shouldHandle.contains(node)) {
           receivedAnEvent.add(node);
-          return true;
+          return KeyEventResult.handled;
         }
-        return false;
+        return KeyEventResult.ignored;
       }
 
       Future<void> sendEvent() async {

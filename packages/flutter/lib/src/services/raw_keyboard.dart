@@ -499,12 +499,73 @@ class RawKeyUpEvent extends RawKeyEvent {
   }) : super(data: data, character: character);
 }
 
+/// An enum that describes how to handle a key event.
+enum KeyEventDisposition {
+  /// The key event has been handled, and the event should not be propagated to
+  /// other key event handlers.
+  handled,
+  /// The key event has not been handled, and the event should continue to be
+  /// propagated to other key event handlers, even non-Flutter ones.
+  ignored,
+  /// The key event has not been handled, but the key event should not be
+  /// propagated to other key event handlers.
+  ///
+  /// It will be returned to the platform embedding to be propagated to text
+  /// fields and non-Flutter key event handlers on the platform.
+  skipRemainingHandlers,
+}
+
+/// A class that represents a result returned from a [RawKeyEventHandler], which
+/// is invoked when a key event is received.
+class KeyEventResult {
+  /// Const constructor for a [KeyEventResult].
+  ///
+  /// Takes a [disposition] to describe how to handle the event after the
+  /// [RawKeyEventHandler] is called.
+  const KeyEventResult(this.disposition);
+
+  /// The [KeyEventDisposition] of the result. This describes how to handle
+  /// the event after the callback has been called.
+  final KeyEventDisposition disposition;
+
+  /// A constant that may be used to return a "handled" result from a
+  /// [RawKeyEventHandler] to indicate that a key event should not be propagated
+  /// further.
+  ///
+  /// See also:
+  ///
+  ///   * [KeyEventDisposition], the enum that describes the possible key event
+  ///     dispositions.
+  static const KeyEventResult handled = KeyEventResult(KeyEventDisposition.handled);
+
+  /// A constant that may be used to return a "ignored" result from a
+  /// [RawKeyEventHandler] to indicate that a key should continue to be
+  /// propagated to other key handlers.
+  ///
+  /// See also:
+  ///
+  ///   * [KeyEventDisposition], the enum that describes the possible key event
+  ///     dispositions.
+  static const KeyEventResult ignored = KeyEventResult(KeyEventDisposition.ignored);
+
+  /// A constant that may be used to return a "skipRemainingHandlers" result from a
+  /// [RawKeyEventHandler] to indicate that the key event was not handled, but
+  /// should not be propagated to other Flutter handlers. This allows text
+  /// fields and non-Flutter components to still receive the event.
+  ///
+  /// See also:
+  ///
+  ///   * [KeyEventDisposition], the enum that describes the possible key event
+  ///     dispositions.
+  static const KeyEventResult skipRemainingHandlers = KeyEventResult(KeyEventDisposition.skipRemainingHandlers);
+}
+
 /// A callback type used by [RawKeyboard.keyEventHandler] to send key events to
 /// a handler that can determine if the key has been handled or not.
 ///
 /// The handler should return true if the key has been handled, and false if the
 /// key was not handled.  It must not return null.
-typedef RawKeyEventHandler = bool Function(RawKeyEvent event);
+typedef RawKeyEventHandler = KeyEventResult Function(RawKeyEvent event);
 
 /// An interface for listening to raw key events.
 ///
@@ -628,8 +689,18 @@ class RawKeyboard {
 
     // Send the key event to the keyEventHandler, then send the appropriate
     // response to the platform so that it can resolve the event's handling.
-    // Defaults to false if keyEventHandler is null.
-    final bool handled = keyEventHandler != null && keyEventHandler!(event);
+    // Defaults to not handling the event if keyEventHandler is null.
+    final KeyEventResult result = keyEventHandler?.call(event) ?? KeyEventResult.ignored;
+    late bool handled;
+    switch(result.disposition) {
+      case KeyEventDisposition.handled:
+        handled = true;
+        break;
+      case KeyEventDisposition.ignored:
+      case KeyEventDisposition.skipRemainingHandlers:
+        handled = false;
+        break;
+    }
     assert(handled != null, 'keyEventHandler returned null, which is not allowed');
     return <String, dynamic>{ 'handled': handled };
   }

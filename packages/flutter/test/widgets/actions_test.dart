@@ -264,10 +264,7 @@ void main() {
       );
 
       await tester.pump();
-      final ActionDispatcher dispatcher = Actions.of(
-        containerKey.currentContext!,
-        nullOk: true,
-      );
+      final ActionDispatcher dispatcher = Actions.of(containerKey.currentContext!);
       expect(dispatcher, equals(testDispatcher));
     });
     testWidgets('Action can be found with find', (WidgetTester tester) async {

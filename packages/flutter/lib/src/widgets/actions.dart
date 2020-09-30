@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'focus_manager.dart';
@@ -44,7 +45,8 @@ class Intent with Diagnosticable {
   /// A const constructor for an [Intent].
   const Intent();
 
-  /// An intent that can't be mapped to an action.
+  /// An intent that is mapped to a [DoNothingAction], which, as the name
+  /// implies, does nothing.
   ///
   /// This Intent is mapped to an action in the [WidgetsApp] that does nothing,
   /// so that it can be bound to a key in a [Shortcuts] widget in order to
@@ -91,6 +93,19 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// If the enabled state changes, overriding subclasses must call
   /// [notifyActionListeners] to notify any listeners of the change.
   bool isEnabled(covariant T intent) => true;
+
+  /// Indicates whether this action should treat key events mapped to this
+  /// action as being "handled" when it is invoked via the key event.
+  ///
+  /// If the key is handled, then no other key event handlers in the focus chain
+  /// will receive the event.
+  ///
+  /// If the key event is not handled, it will be passed back to the engine, and
+  /// continue to be processed there, allowing text fields and non-Flutter
+  /// widgets to receive the key event.
+  ///
+  /// The default implementation returns true.
+  bool shouldHandleKey(covariant T intent) => true;
 
   /// Called when the action is to be performed.
   ///
@@ -380,21 +395,25 @@ class ActionDispatcher with Diagnosticable {
   /// the action is a [ContextAction], then the context from the [primaryFocus]
   /// is used.
   ///
-  /// Returns the object returned from [Action.invoke] if the action was
-  /// successfully invoked, and null if the action is not enabled. May also
-  /// return null if [Action.invoke] returns null.
-  Object? invokeAction(covariant Action<Intent> action, covariant Intent intent, [BuildContext? context]) {
+  /// Returns the object returned from [Action.invoke].
+  ///
+  /// The caller must receive a `true` result from [Action.isEnabled] before
+  /// calling this function. This function will assert if the action is not
+  /// enabled when called.
+  Object? invokeAction(
+    covariant Action<Intent> action,
+    covariant Intent intent, [
+    BuildContext? context,
+  ]) {
     assert(action != null);
     assert(intent != null);
-    context ??= primaryFocus?.context;
-    if (action.isEnabled(intent)) {
-      if (action is ContextAction) {
-        return action.invoke(intent, context);
-      } else {
-        return action.invoke(intent);
-      }
+    assert(action.isEnabled(intent), 'Action must be enabled when calling invokeAction');
+    if (action is ContextAction) {
+      context ??= primaryFocus?.context;
+      return action.invoke(intent, context);
+    } else {
+      return action.invoke(intent);
     }
-    return null;
   }
 }
 
@@ -496,7 +515,11 @@ class Actions extends StatefulWidget {
     final Action<T>? action = Actions.find<T>(context, nullOk: nullOk);
     if (action != null && action.isEnabled(intent)) {
       return () {
-        Actions.of(context).invokeAction(action, intent, context);
+        // Could be that the action was enabled when the closure was created,
+        // but is now no longer enabled, so check again.
+        if (action.isEnabled(intent)) {
+          Actions.of(context).invokeAction(action, intent, context);
+        }
       };
     }
     return null;
@@ -507,12 +530,20 @@ class Actions extends StatefulWidget {
   /// Creates a dependency on the [Actions] widget that maps the bound action so
   /// that if the actions change, the context will be rebuilt and find the
   /// updated action.
-  static Action<T>? find<T extends Intent>(BuildContext context, {bool nullOk = false}) {
+  ///
+  /// The optional `intent` argument supplies the type of the intent to look for
+  /// if the concrete type of the intent sought isn't available. If not
+  /// supplied, then `T` is used.
+  static Action<T>? find<T extends Intent>(BuildContext context, {bool nullOk = false, T? intent}) {
     Action<T>? action;
+    // Specialize the type if a runtime example instance of the intent is given.
+    // This allows this function to be called by code that doesn't know the
+    // concrete type of the intent at compile time.
+    final Type type = intent?.runtimeType ?? T;
 
     _visitActionsAncestors(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
-      final Action<T>? result = actions.actions[T] as Action<T>?;
+      final Action<T>? result = actions.actions[type] as Action<T>?;
       if (result != null) {
         context.dependOnInheritedElement(element);
         action = result;
@@ -526,14 +557,14 @@ class Actions extends StatefulWidget {
         return true;
       }
       if (action == null) {
-        throw FlutterError('Unable to find an action for a $T in an $Actions widget '
+        throw FlutterError('Unable to find an action for a $type in an $Actions widget '
             'in the given context.\n'
             "$Actions.find() was called on a context that doesn\'t contain an "
             '$Actions widget with a mapping for the given intent type.\n'
             'The context used was:\n'
             '  $context\n'
             'The intent type requested was:\n'
-            '  $T');
+            '  $type');
       }
       return true;
     }());
@@ -543,31 +574,11 @@ class Actions extends StatefulWidget {
   /// Returns the [ActionDispatcher] associated with the [Actions] widget that
   /// most tightly encloses the given [BuildContext].
   ///
-  /// Will throw if no ambient [Actions] widget is found.
-  ///
-  /// If `nullOk` is set to true, then if no ambient [Actions] widget is found,
-  /// this will return null.
-  ///
-  /// The `context` argument must not be null.
-  static ActionDispatcher of(BuildContext context, {bool nullOk = false}) {
+  /// Will return a newly created [ActionDispatcher] if no ambient [Actions]
+  /// widget is found.
+  static ActionDispatcher of(BuildContext context) {
     assert(context != null);
     final _ActionsMarker? marker = context.dependOnInheritedWidgetOfExactType<_ActionsMarker>();
-    assert(() {
-      if (nullOk) {
-        return true;
-      }
-      if (marker == null) {
-        throw FlutterError('Unable to find an $Actions widget in the given context.\n'
-            '$Actions.of() was called with a context that does not contain an '
-            '$Actions widget.\n'
-            'No $Actions ancestor could be found starting from the context that '
-            'was passed to $Actions.of(). This can happen if the context comes '
-            'from a widget above those widgets.\n'
-            'The context used was:\n'
-            '  $context');
-      }
-      return true;
-    }());
     return marker?.dispatcher ?? _findDispatcher(context);
   }
 
@@ -632,9 +643,15 @@ class Actions extends StatefulWidget {
       }
       return true;
     }());
-    // Invoke the action we found using the relevant dispatcher from the Actions
-    // Element we found.
-    return actionElement != null ? _findDispatcher(actionElement!).invokeAction(action!, intent, context) : null;
+    if (actionElement == null || action == null) {
+      return null;
+    }
+    if (action!.isEnabled(intent)) {
+      // Invoke the action we found using the relevant dispatcher from the Actions
+      // Element we found.
+      return _findDispatcher(actionElement!).invokeAction(action!, intent, context);
+    }
+    return null;
   }
 
   @override
@@ -1116,12 +1133,19 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 }
 
-/// An [Intent], that, as the name implies, is bound to a [DoNothingAction].
+/// An [Intent], that is bound to a [DoNothingAction].
 ///
 /// Attaching a [DoNothingIntent] to a [Shortcuts] mapping is one way to disable
-/// a keyboard shortcut defined by a widget higher in the widget hierarchy.
+/// a keyboard shortcut defined by a widget higher in the widget hierarchy and
+/// consume any key event that triggers it via a shortcut.
 ///
 /// This intent cannot be subclassed.
+///
+/// See also:
+///
+///  * [DoNothingAndStopPropagationIntent], a similar intent that will not
+///    handle the key event, but will still keep it from being passed to other key
+///    handlers in the focus chain.
 class DoNothingIntent extends Intent {
   /// Creates a const [DoNothingIntent].
   factory DoNothingIntent() => const DoNothingIntent._();
@@ -1130,17 +1154,61 @@ class DoNothingIntent extends Intent {
   const DoNothingIntent._();
 }
 
-/// An [Action], that, as the name implies, does nothing.
+/// An [Intent], that is bound to a [DoNothingAction], but, in addition to not
+/// performing an action, also stops the propagation of the key event bound to
+/// this intent to other key event handlers in the focus chain.
 ///
-/// Attaching a [DoNothingAction] to an [Actions] mapping is one way to disable
-/// an action defined by a widget higher in the widget hierarchy.
+/// Attaching a [DoNothingAndStopPropagationIntent] to a [Shortcuts.shortcuts]
+/// mapping is one way to disable a keyboard shortcut defined by a widget higher
+/// in the widget hierarchy. In addition, the bound [DoNothingAction] will
+/// return false from [DoNothingAction.shouldHandleKey], causing the key bound to
+/// this intent to be passed on to the platform embedding as "not handled" with
+/// out passing it to other key handlers in the focus chain (e.g. parent
+/// `Shortcuts` widgets higher up in the chain).
 ///
-/// This action can be bound to any intent.
+/// This intent cannot be subclassed.
 ///
 /// See also:
-///  - [DoNothingIntent], which is an intent that can be bound to a keystroke in
+///
+///  * [DoNothingIntent], a similar intent that will handle the key event.
+class DoNothingAndStopPropagationIntent extends Intent {
+  /// Creates a const [DoNothingAndStopPropagationIntent].
+  factory DoNothingAndStopPropagationIntent() => const DoNothingAndStopPropagationIntent._();
+
+  // Make DoNothingAndStopPropagationIntent constructor private so it can't be subclassed.
+  const DoNothingAndStopPropagationIntent._();
+}
+
+/// An [Action], that doesn't perform any action when invoked.
+///
+/// Attaching a [DoNothingAction] to an [Actions.actions] mapping is a way to
+/// disable an action defined by a widget higher in the widget hierarchy.
+///
+/// If [shouldHandleKey] returns false, then not only will this action do
+/// nothing, but it will also terminate the propagation of the key event used to
+/// trigger it to other widgets in the focus chain and tell the embedding that
+/// the key wasn't handled, allowing text input fields or other non-Flutter
+/// elements to receive that key event. The return value of `shouldHandleKey`
+/// can be set via the `shouldHandleKey` argument to the constructor.
+///
+/// This action can be bound to any [Intent].
+///
+/// See also:
+///  - [DoNothingIntent], which is an intent that can be bound to a [KeySet] in
 ///    a [Shortcuts] widget to do nothing.
+///  - [DoNothingAndStopPropagationIntent], which is an intent that can be bound
+///    to a [KeySet] in a [Shortcuts] widget to do nothing and also stop key event
+///    propagation to other key handlers in the focus chain.
 class DoNothingAction extends Action<Intent> {
+  /// Creates a [DoNothingAction].
+  ///
+  /// The optional [shouldHandleKey] argument defaults to true.
+  DoNothingAction({bool shouldHandleKey = true}) : _shouldHandleKey = shouldHandleKey;
+
+  @override
+  bool shouldHandleKey(Intent intent) => _shouldHandleKey;
+  final bool _shouldHandleKey;
+
   @override
   void invoke(Intent intent) {}
 }

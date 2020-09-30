@@ -35,7 +35,10 @@ bool _focusDebug(String message, [Iterable<String>? details]) {
 /// to receive key events.
 ///
 /// The [node] is the node that received the event.
-typedef FocusOnKeyCallback = bool Function(FocusNode node, RawKeyEvent event);
+///
+/// Returns a [KeyEventResult], containing a [KeyEventDisposition] that
+/// describes how, and whether, the key event was handled.
+typedef FocusOnKeyCallback = KeyEventResult Function(FocusNode node, RawKeyEvent event);
 
 /// An attachment point for a [FocusNode].
 ///
@@ -321,7 +324,7 @@ enum UnfocusDisposition {
 ///     }
 ///   }
 ///
-///   bool _handleKeyPress(FocusNode node, RawKeyEvent event) {
+///   KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
 ///     if (event is RawKeyDownEvent) {
 ///       print('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
 ///       if (event.logicalKey == LogicalKeyboardKey.keyR) {
@@ -329,22 +332,22 @@ enum UnfocusDisposition {
 ///         setState(() {
 ///           _color = Colors.red;
 ///         });
-///         return true;
+///         return KeyEventResult.handled;
 ///       } else if (event.logicalKey == LogicalKeyboardKey.keyG) {
 ///         print('Changing color to green.');
 ///         setState(() {
 ///           _color = Colors.green;
 ///         });
-///         return true;
+///         return KeyEventResult.handled;
 ///       } else if (event.logicalKey == LogicalKeyboardKey.keyB) {
 ///         print('Changing color to blue.');
 ///         setState(() {
 ///           _color = Colors.blue;
 ///         });
-///         return true;
+///         return KeyEventResult.handled;
 ///       }
 ///     }
-///     return false;
+///     return KeyEventResult.ignored;
 ///   }
 ///
 ///   @override
@@ -1606,7 +1609,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  bool _handleRawKeyEvent(RawKeyEvent event) {
+  KeyEventResult _handleRawKeyEvent(RawKeyEvent event) {
     // Update highlightMode first, since things responding to the keys might
     // look at the highlight mode, and it should be accurate.
     _lastInteractionWasTouch = false;
@@ -1614,23 +1617,31 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
     assert(_focusDebug('Received key event ${event.logicalKey}'));
     // Walk the current focus from the leaf to the root, calling each one's
-    // onKey on the way up, and if one responds that they handled it, stop.
+    // onKey on the way up, and if one responds that they handled it or want to
+    // stop propagation, stop.
     if (_primaryFocus == null) {
       assert(_focusDebug('No primary focus for key event, ignored: $event'));
-      return false;
+      return KeyEventResult.ignored;
     }
-    bool handled = false;
+    KeyEventResult result = KeyEventResult.ignored;
     for (final FocusNode node in <FocusNode>[_primaryFocus!, ..._primaryFocus!.ancestors]) {
-      if (node.onKey != null && node.onKey!(node, event)) {
-        assert(_focusDebug('Node $node handled key event $event.'));
-        handled = true;
+      if (node.onKey != null) {
+        result = node.onKey!(node, event);
+        switch (result.disposition) {
+          case KeyEventDisposition.handled:
+            assert(_focusDebug('Node $node handled key event $event.'));
+            break;
+          case KeyEventDisposition.ignored:
+            assert(_focusDebug('Key event ignored: $event.'));
+            continue;
+          case KeyEventDisposition.skipRemainingHandlers:
+            assert(_focusDebug('Key event stopped propagation: $event.'));
+            break;
+        }
         break;
       }
     }
-    if (!handled) {
-      assert(_focusDebug('Key event not handled by anyone: $event.'));
-    }
-    return handled;
+    return result;
   }
 
   /// The node that currently has the primary focus.

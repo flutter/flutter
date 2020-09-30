@@ -841,15 +841,18 @@ abstract class WidgetController {
   /// key press. To simulate individual down and/or up events, see
   /// [sendKeyDownEvent] and [sendKeyUpEvent].
   ///
+  /// Returns true if the key down event was handled by the framework.
+  ///
   /// See also:
   ///
   ///  - [sendKeyDownEvent] to simulate only a key down event.
   ///  - [sendKeyUpEvent] to simulate only a key up event.
-  Future<void> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+  Future<bool> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
     assert(platform != null);
-    await simulateKeyDownEvent(key, platform: platform);
+    final bool handled = await simulateKeyDownEvent(key, platform: platform);
     // Internally wrapped in async guard.
-    return simulateKeyUpEvent(key, platform: platform);
+    await simulateKeyUpEvent(key, platform: platform);
+    return handled;
   }
 
   /// Simulates sending a physical key down event through the system channel.
@@ -864,11 +867,13 @@ abstract class WidgetController {
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
+  /// Returns true if the key event was handled by the framework.
+  ///
   /// See also:
   ///
   ///  - [sendKeyUpEvent] to simulate the corresponding key up event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<void> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+  Future<bool> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyDownEvent(key, platform: platform);
@@ -883,11 +888,13 @@ abstract class WidgetController {
   /// [Platform.operatingSystem] to make the event appear to be from that type
   /// of system. Defaults to "android". May not be null.
   ///
+  /// Returns true if the key event was handled by the framework.
+  ///
   /// See also:
   ///
   ///  - [sendKeyDownEvent] to simulate the corresponding key down event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<void> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+  Future<bool> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyUpEvent(key, platform: platform);
