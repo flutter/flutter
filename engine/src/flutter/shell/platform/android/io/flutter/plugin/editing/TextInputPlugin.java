@@ -33,7 +33,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
-import io.flutter.embedding.android.AndroidKeyProcessor;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.platform.PlatformViewsController;
 import java.util.HashMap;
@@ -55,7 +54,6 @@ public class TextInputPlugin {
   @Nullable private Rect lastClientRect;
   private final boolean restartAlwaysRequired;
   private ImeSyncDeferringInsetsCallback imeSyncCallback;
-  private AndroidKeyProcessor keyProcessor;
 
   // When true following calls to createInputConnection will return the cached lastInputConnection
   // if the input
@@ -329,15 +327,6 @@ public class TextInputPlugin {
     return imeSyncCallback;
   }
 
-  @NonNull
-  public AndroidKeyProcessor getKeyEventProcessor() {
-    return keyProcessor;
-  }
-
-  public void setKeyEventProcessor(AndroidKeyProcessor processor) {
-    keyProcessor = processor;
-  }
-
   /**
    * Use the current platform view input connection until unlockPlatformViewInputConnection is
    * called.
@@ -480,8 +469,7 @@ public class TextInputPlugin {
     outAttrs.imeOptions |= enterAction;
 
     InputConnectionAdaptor connection =
-        new InputConnectionAdaptor(
-            view, inputTarget.id, textInputChannel, keyProcessor, mEditable, outAttrs);
+        new InputConnectionAdaptor(view, inputTarget.id, textInputChannel, mEditable, outAttrs);
     outAttrs.initialSelStart = Selection.getSelectionStart(mEditable);
     outAttrs.initialSelEnd = Selection.getSelectionEnd(mEditable);
 
