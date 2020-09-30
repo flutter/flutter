@@ -7,8 +7,8 @@ import 'dart:collection';
 import 'events.dart';
 
 /// A callback for pointer events.
-/// 
-/// Used by [PointerEventResampler.sample] and [PointerEventResampler.stop]. 
+///
+/// Used by [PointerEventResampler.sample] and [PointerEventResampler.stop].
 typedef HandleEventCallback = void Function(PointerEvent event);
 
 /// Class for pointer event resampling.
