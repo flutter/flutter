@@ -188,7 +188,7 @@ void main() {
 
     testUsingContext('vs code validator when extension missing', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithoutExtension.validate();
-      expect(result.type, ValidationType.partial);
+      expect(result.type, ValidationType.installed);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
@@ -198,8 +198,9 @@ void main() {
 
       message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
-      expect(message.message, startsWith('Flutter extension not installed'));
-      expect(message.isError, isTrue);
+      expect(message.message, startsWith('Flutter extension can be installed from'));
+      expect(message.contextUrl, 'https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter');
+      expect(message.isError, false);
     }, overrides: noColorTerminalOverride);
 
     group('device validator', () {
@@ -1221,7 +1222,7 @@ class FakeSmallGroupDoctor extends Doctor {
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {
   VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition})
-    : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
+    : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition, fileSystem: globals.fs));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>
       VsCodeValidatorTestTargets._(validInstall, validExtensions);
