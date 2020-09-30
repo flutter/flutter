@@ -198,8 +198,8 @@ void main() {
 
       message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
-      expect(message.message, startsWith('Flutter extension can be installed from\n'
-          'https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter'));
+      expect(message.message, startsWith('Flutter extension can be installed from'));
+      expect(message.contextUrl, 'https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter');
       expect(message.isError, false);
     }, overrides: noColorTerminalOverride);
 
