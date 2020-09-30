@@ -333,12 +333,16 @@ class FlutterDeviceManager extends DeviceManager {
     @required Config config,
     @required Artifacts artifacts,
     @required MacOSWorkflow macOSWorkflow,
+    @required UserMessages userMessages,
   }) : deviceDiscoverers =  <DeviceDiscovery>[
     AndroidDevices(
       logger: logger,
       androidSdk: androidSdk,
       androidWorkflow: androidWorkflow,
       processManager: processManager,
+      fileSystem: fileSystem,
+      platform: platform,
+      userMessages: userMessages,
     ),
     IOSDevices(
       platform: platform,

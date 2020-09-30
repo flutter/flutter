@@ -358,7 +358,7 @@ flutter:
       ])
     );
 
-    expect(device.lastLogcatTimestamp, isNull);
+    expect(await device.lastLogcatTimestamp(), isNull);
   });
 
   testWithoutContext('AndroidDevice AdbLogReaders for past+future and future logs are not the same', () async {
