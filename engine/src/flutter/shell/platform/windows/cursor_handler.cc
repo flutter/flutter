@@ -40,6 +40,7 @@ void CursorHandler::HandleMethodCall(
     if (kind_iter == arguments.end()) {
       result->Error("Argument error",
                     "Missing argument while trying to activate system cursor");
+      return;
     }
     const auto& kind = std::get<std::string>(kind_iter->second);
     delegate_->UpdateFlutterCursor(kind);
