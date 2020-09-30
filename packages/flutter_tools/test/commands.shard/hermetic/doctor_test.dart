@@ -27,6 +27,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:fake_async/fake_async.dart';
@@ -61,6 +62,16 @@ void main() {
     logger = BufferLogger.test();
   });
 
+  testWithoutContext('ValidationMessage equality and hashCode includes contextUrl', () {
+    const ValidationMessage messageA = ValidationMessage('ab', contextUrl: 'a');
+    const ValidationMessage messageB = ValidationMessage('ab', contextUrl: 'b');
+
+    expect(messageB, isNot(messageA));
+    expect(messageB.hashCode, isNot(messageA.hashCode));
+    expect(messageA, isNot(messageB));
+    expect(messageA.hashCode, isNot(messageB.hashCode));
+  });
+
   group('doctor', () {
     MockPlistParser mockPlistParser;
     MemoryFileSystem fileSystem;
@@ -72,7 +83,8 @@ void main() {
 
     testUsingContext('intellij validator', () async {
       const String installPath = '/path/to/intelliJ';
-      final ValidationResult result = await IntelliJValidatorTestTarget('Test', installPath).validate();
+      // Uses real filesystem
+      final ValidationResult result = await IntelliJValidatorTestTarget('Test', installPath, fileSystem: globals.fs).validate();
       expect(result.type, ValidationType.partial);
       expect(result.statusInfo, 'version test.test.test');
       expect(result.messages, hasLength(4));
@@ -96,7 +108,7 @@ void main() {
 
       final Directory pluginsDirectory = fileSystem.directory('/foo/bar/Library/Application Support/JetBrains/TestID2020.10/plugins')
         ..createSync(recursive: true);
-      final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/path/to/app');
+      final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/path/to/app', fileSystem: fileSystem);
       expect(validator.plistFile, '/path/to/app/Contents/Info.plist');
       expect(validator.pluginsPath, pluginsDirectory.path);
     }, overrides: <Type, Generator>{
@@ -113,7 +125,7 @@ void main() {
     testUsingContext('legacy intellij plugins path checking on mac', () async {
       when(mockPlistParser.getValueFromFile(any, PlistParser.kCFBundleShortVersionStringKey)).thenReturn('2020.10');
 
-      final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/foo');
+      final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/foo', fileSystem: fileSystem);
       expect(validator.pluginsPath, '/foo/bar/Library/Application Support/TestID2020.10');
     }, overrides: <Type, Generator>{
       Platform: () => macPlatform,
@@ -129,7 +141,7 @@ void main() {
     testUsingContext('intellij plugins path checking on mac with override', () async {
       when(mockPlistParser.getValueFromFile(any, 'JetBrainsToolboxApp')).thenReturn('/path/to/JetBrainsToolboxApp');
 
-      final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/foo');
+      final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/foo', fileSystem: fileSystem);
       expect(validator.pluginsPath, '/path/to/JetBrainsToolboxApp.plugins');
     }, overrides: <Type, Generator>{
       PlistParser: () => mockPlistParser,
@@ -874,8 +886,10 @@ class NoOpDoctor implements Doctor {
 class MockUsage extends Mock implements Usage {}
 
 class IntelliJValidatorTestTarget extends IntelliJValidator {
-  IntelliJValidatorTestTarget(String title, String installPath) : super(title, installPath);
+  IntelliJValidatorTestTarget(String title, String installPath, {@required FileSystem fileSystem})
+    : super(title, installPath, fileSystem: fileSystem);
 
+  // Warning: requires real test data.
   @override
   String get pluginsPath => globals.fs.path.join('test', 'data', 'intellij', 'plugins');
 

@@ -427,7 +427,7 @@ class _CupertinoAlertRenderElement extends RenderObjectElement {
   _CupertinoAlertRenderWidget get widget => super.widget as _CupertinoAlertRenderWidget;
 
   @override
-  _RenderCupertinoAlert? get renderObject => super.renderObject as _RenderCupertinoAlert?;
+  _RenderCupertinoAlert get renderObject => super.renderObject as _RenderCupertinoAlert;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -480,11 +480,11 @@ class _CupertinoAlertRenderElement extends RenderObjectElement {
 
   @override
   void removeRenderObjectChild(RenderObject child, _AlertSections slot) {
-    assert(child == renderObject!.contentSection || child == renderObject!.actionsSection);
-    if (renderObject!.contentSection == child) {
-      renderObject!.contentSection = null;
-    } else if (renderObject!.actionsSection == child) {
-      renderObject!.actionsSection = null;
+    assert(child == renderObject.contentSection || child == renderObject.actionsSection);
+    if (renderObject.contentSection == child) {
+      renderObject.contentSection = null;
+    } else if (renderObject.actionsSection == child) {
+      renderObject.actionsSection = null;
     }
   }
 
@@ -492,10 +492,10 @@ class _CupertinoAlertRenderElement extends RenderObjectElement {
     assert(slot != null);
     switch (slot) {
       case _AlertSections.contentSection:
-        renderObject!.contentSection = child as RenderBox;
+        renderObject.contentSection = child as RenderBox;
         break;
       case _AlertSections.actionsSection:
-        renderObject!.actionsSection = child as RenderBox;
+        renderObject.actionsSection = child as RenderBox;
         break;
     }
   }

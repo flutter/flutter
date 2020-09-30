@@ -77,7 +77,7 @@ class AttachCommand extends FlutterCommand {
         help: 'The URI at which the observatory is listening.',
       )..addOption(
         'app-id',
-        help: 'The package name (Android) or bundle identifier (iOS) for the application. '
+        help: 'The package name (Android) or bundle identifier (iOS) for the app. '
               'This can be specified to avoid being prompted if multiple observatory ports '
               'are advertised.\n'
               'If you have multiple devices or emulators running, you should include the '
@@ -110,7 +110,7 @@ class AttachCommand extends FlutterCommand {
   final String name = 'attach';
 
   @override
-  final String description = '''Attach to a running application.
+  final String description = '''Attach to a running app.
 
   For attaching to Android or iOS devices, simply using `flutter attach` is
   usually sufficient. The tool will search for a running Flutter app or module,
