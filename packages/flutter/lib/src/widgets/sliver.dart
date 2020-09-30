@@ -216,7 +216,7 @@ class _SaltedValueKey extends ValueKey<Key>{
 /// Called to find the new index of a child based on its key in case of
 /// reordering.
 /// 
-/// See: [SliverChildBuilderDelegate.findChildIndexCallback].
+/// Used by [SliverChildBuilderDelegate.findChildIndexCallback].
 typedef ChildIndexGetter = int Function(Key key);
 
 /// A delegate that supplies children for slivers using a builder callback.
