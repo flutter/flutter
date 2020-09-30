@@ -16,6 +16,7 @@
 
 #include <cassert>
 
+#include "flutter/fml/backtrace.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/icu_util.h"
 #include "flutter/fml/logging.h"
@@ -24,6 +25,7 @@
 #include "txt_test_utils.h"
 
 int main(int argc, char** argv) {
+  fml::InstallCrashHandler();
   fml::CommandLine cmd = fml::CommandLineFromArgcArgv(argc, argv);
   txt::SetCommandLine(cmd);
   txt::SetFontDir(flutter::testing::GetFixturesPath());
