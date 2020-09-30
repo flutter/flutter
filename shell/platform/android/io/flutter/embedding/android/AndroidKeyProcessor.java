@@ -66,8 +66,7 @@ public class AndroidKeyProcessor {
       @NonNull TextInputPlugin textInputPlugin) {
     this.keyEventChannel = keyEventChannel;
     this.textInputPlugin = textInputPlugin;
-    textInputPlugin.setKeyEventProcessor(this);
-    this.eventResponder = new EventResponder(view, textInputPlugin);
+    this.eventResponder = new EventResponder(view);
     this.keyEventChannel.setEventResponseHandler(eventResponder);
   }
 
@@ -81,20 +80,13 @@ public class AndroidKeyProcessor {
   }
 
   /**
-   * Called when a key event is received by the {@link FlutterView} or the {@link
-   * InputConnectionAdaptor}.
+   * Called when a key up event is received by the {@link FlutterView}.
    *
    * @param keyEvent the Android key event to respond to.
    * @return true if the key event should not be propagated to other Android components. Delayed
    *     synthesis events will return false, so that other components may handle them.
    */
-  public boolean onKeyEvent(@NonNull KeyEvent keyEvent) {
-    int action = keyEvent.getAction();
-    if (action != KeyEvent.ACTION_DOWN && action != KeyEvent.ACTION_UP) {
-      // There is theoretically a KeyEvent.ACTION_MULTIPLE, but that shouldn't
-      // be sent anymore anyhow.
-      return false;
-    }
+  public boolean onKeyUp(@NonNull KeyEvent keyEvent) {
     if (eventResponder.dispatchingKeyEvent) {
       // Don't handle it if it is from our own delayed event synthesis.
       return false;
@@ -103,11 +95,38 @@ public class AndroidKeyProcessor {
     Character complexCharacter = applyCombiningCharacterToBaseCharacter(keyEvent.getUnicodeChar());
     KeyEventChannel.FlutterKeyEvent flutterEvent =
         new KeyEventChannel.FlutterKeyEvent(keyEvent, complexCharacter, eventIdSerial++);
-    if (action == KeyEvent.ACTION_DOWN) {
-      keyEventChannel.keyDown(flutterEvent);
-    } else {
-      keyEventChannel.keyUp(flutterEvent);
+    keyEventChannel.keyUp(flutterEvent);
+    eventResponder.addEvent(flutterEvent.eventId, keyEvent);
+    return true;
+  }
+
+  /**
+   * Called when a key down event is received by the {@link FlutterView}.
+   *
+   * @param keyEvent the Android key event to respond to.
+   * @return true if the key event should not be propagated to other Android components. Delayed
+   *     synthesis events will return false, so that other components may handle them.
+   */
+  public boolean onKeyDown(@NonNull KeyEvent keyEvent) {
+    if (eventResponder.dispatchingKeyEvent) {
+      // Don't handle it if it is from our own delayed event synthesis.
+      return false;
     }
+
+    // If the textInputPlugin is still valid and accepting text, then we'll try
+    // and send the key event to it, assuming that if the event can be sent,
+    // that it has been handled.
+    if (textInputPlugin.getLastInputConnection() != null
+        && textInputPlugin.getInputMethodManager().isAcceptingText()) {
+      if (textInputPlugin.getLastInputConnection().sendKeyEvent(keyEvent)) {
+        return true;
+      }
+    }
+
+    Character complexCharacter = applyCombiningCharacterToBaseCharacter(keyEvent.getUnicodeChar());
+    KeyEventChannel.FlutterKeyEvent flutterEvent =
+        new KeyEventChannel.FlutterKeyEvent(keyEvent, complexCharacter, eventIdSerial++);
+    keyEventChannel.keyDown(flutterEvent);
     eventResponder.addEvent(flutterEvent.eventId, keyEvent);
     return true;
   }
@@ -177,12 +196,10 @@ public class AndroidKeyProcessor {
     private static final long MAX_PENDING_EVENTS = 1000;
     final Deque<Entry<Long, KeyEvent>> pendingEvents = new ArrayDeque<Entry<Long, KeyEvent>>();
     @NonNull private final View view;
-    @NonNull private final TextInputPlugin textInputPlugin;
     boolean dispatchingKeyEvent = false;
 
-    public EventResponder(@NonNull View view, @NonNull TextInputPlugin textInputPlugin) {
+    public EventResponder(@NonNull View view) {
       this.view = view;
-      this.textInputPlugin = textInputPlugin;
     }
 
     /**
@@ -250,26 +267,12 @@ public class AndroidKeyProcessor {
      * @param event the event to be dispatched to the activity.
      */
     public void dispatchKeyEvent(KeyEvent event) {
-      // If the textInputPlugin is still valid and accepting text, then we'll try
-      // and send the key event to it, assuming that if the event can be sent,
-      // that it has been handled.
-      if (textInputPlugin.getLastInputConnection() != null
-          && textInputPlugin.getInputMethodManager().isAcceptingText()) {
-        dispatchingKeyEvent = true;
-        boolean handled = textInputPlugin.getLastInputConnection().sendKeyEvent(event);
-        dispatchingKeyEvent = false;
-        if (handled) {
-          return;
-        }
-      }
-
       // Since the framework didn't handle it, dispatch the key again.
       if (view != null) {
         // Turn on dispatchingKeyEvent so that we don't dispatch to ourselves and
         // send it to the framework again.
         dispatchingKeyEvent = true;
-
-        view.getRootView().dispatchKeyEventPreIme(event);
+        view.getRootView().dispatchKeyEvent(event);
         dispatchingKeyEvent = false;
       }
     }
