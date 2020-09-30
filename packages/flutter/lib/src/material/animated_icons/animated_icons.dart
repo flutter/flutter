@@ -104,8 +104,10 @@ class AnimatedIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
     final _AnimatedIconData iconData = icon as _AnimatedIconData;
     final IconThemeData iconTheme = IconTheme.of(context);
+    assert(iconTheme.isConcrete);
     final double iconSize = size ?? iconTheme.size!;
     final TextDirection textDirection = this.textDirection ?? Directionality.of(context)!;
     final double iconOpacity = iconTheme.opacity!;

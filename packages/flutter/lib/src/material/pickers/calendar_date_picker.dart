@@ -158,7 +158,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   final GlobalKey _monthPickerKey = GlobalKey();
   final GlobalKey _yearPickerKey = GlobalKey();
   late MaterialLocalizations _localizations;
-  TextDirection? _textDirection;
+  late TextDirection _textDirection;
 
   @override
   void initState() {
@@ -179,12 +179,12 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     _localizations = MaterialLocalizations.of(context)!;
-    _textDirection = Directionality.of(context);
+    _textDirection = Directionality.of(context)!;
     if (!_announcedInitialDate) {
       _announcedInitialDate = true;
       SemanticsService.announce(
         _localizations.formatFullDate(_selectedDate),
-        _textDirection!,
+        _textDirection,
       );
     }
   }
@@ -216,12 +216,12 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       if (_mode == DatePickerMode.day) {
         SemanticsService.announce(
           _localizations.formatMonthYear(_selectedDate),
-          _textDirection!,
+          _textDirection,
         );
       } else {
         SemanticsService.announce(
           _localizations.formatYear(_selectedDate),
-          _textDirection!,
+          _textDirection,
         );
       }
     });
