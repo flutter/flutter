@@ -42,7 +42,18 @@ BuildContext _getParent(BuildContext context) {
 @immutable
 class Intent with Diagnosticable {
   /// A const constructor for an [Intent].
-  const Intent();
+  const Intent({this.shouldStopPropagation = false});
+
+  /// Set if this intent should stop key event propagation to other focus nodes
+  /// in the focus chain if triggered by a shortcut.
+  ///
+  /// If true, then when a key matches this intent, it will not fire the
+  /// associated action, but will stop keyboard event propagation to other
+  /// focus nodes. This is used by the focus system to decide if a key should be
+  /// handled or rejected.
+  ///
+  /// Defaults to false;
+  final bool shouldStopPropagation;
 
   /// An intent that can't be mapped to an action.
   ///
@@ -1128,6 +1139,10 @@ class DoNothingIntent extends Intent {
 
   // Make DoNothingIntent constructor private so it can't be subclassed.
   const DoNothingIntent._();
+
+  // Make DoNothingIntent 
+  @override
+  bool get shouldStopPropagation => true;
 }
 
 /// An [Action], that, as the name implies, does nothing.

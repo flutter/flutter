@@ -555,6 +555,19 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   FocusOnKeyCallback? get onKey => _onKey;
   FocusOnKeyCallback? _onKey;
 
+  /// Called if this focus node would receive a key event while focused (i.e. when
+  /// [hasFocus] returns true), and returns true if that event should not be
+  /// propagated to nodes further up the focus chain.
+  ///
+  /// If propagation is stopped, then the [onKey] handler is not invoked for
+  /// that event, and the key event doesn't propagate to other nodes in the
+  /// focus chain.
+  ///
+  /// If this callback is not set, or it returns false, propagation is not
+  /// stopped, and the key event proceeds to be propagated to other nodes in the
+  /// focus chain.
+  FocusOnKeyCallback? shouldStopKeyEventPropagation;
+
   FocusManager? _manager;
   List<FocusNode>? _ancestors;
   List<FocusNode>? _descendants;
@@ -1620,14 +1633,24 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       return false;
     }
     bool handled = false;
+    bool shouldStopPropagation = false;
     for (final FocusNode node in <FocusNode>[_primaryFocus!, ..._primaryFocus!.ancestors]) {
-      if (node.onKey != null && node.onKey!(node, event)) {
+      shouldStopPropagation = node.shouldStopKeyEventPropagation?.call(node, event) ?? false;
+      if (shouldStopPropagation) {
+        assert(_focusDebug('Node $node stopped propagation of key event $event.'));
+        break;
+      }
+      if (node.onKey == null) {
+        continue;
+      }
+      final bool nodeHandled = node.onKey!(node, event);
+      if (nodeHandled == true) {
         assert(_focusDebug('Node $node handled key event $event.'));
         handled = true;
         break;
       }
     }
-    if (!handled) {
+    if (handled == false && !shouldStopPropagation) {
       assert(_focusDebug('Key event not handled by anyone: $event.'));
     }
     return handled;

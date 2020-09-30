@@ -27,6 +27,7 @@ import 'media_query.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'shortcuts.dart';
 import 'text.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
@@ -1506,6 +1507,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.addListener(_didChangeTextEditingValue);
     _focusAttachment = widget.focusNode.attach(context);
     widget.focusNode.addListener(_handleFocusChanged);
+    widget.focusNode.shouldStopKeyEventPropagation = _shouldStopPropagation;
     _scrollController = widget.scrollController ?? ScrollController();
     _scrollController!.addListener(() { _selectionOverlay?.updateForScroll(); });
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
@@ -2261,6 +2263,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // TODO(abarth): Teach RenderEditable about ValueNotifier<TextEditingValue>
     // to avoid this setState().
     setState(() { /* We use widget.controller.value in build(). */ });
+  }
+
+  bool _shouldStopPropagation(FocusNode node, RawKeyEvent event) {
+    final ShortcutManager? manager = Shortcuts.of(context, nullOk: true);
+    if (manager == null) {
+      return false;
+    }
+    final LogicalKeySet keySet = LogicalKeySet.fromSet(RawKeyboard.instance.keysPressed);
+    return manager.shortcuts[keySet]?.shouldStopPropagation ?? false;
   }
 
   void _handleFocusChanged() {
