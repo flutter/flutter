@@ -424,14 +424,14 @@ void main() {
   });
 
   group('doctor with fake validators', () {
-    MockArtifacts mockArtifacts;
-    const String genSnapshotPath = '/path/to/gen_snapshot';
+    Artifacts artifacts;
+    String genSnapshotPath;
     FileSystem memoryFileSystem;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
-      mockArtifacts = MockArtifacts();
-      when(mockArtifacts.getArtifactPath(Artifact.genSnapshot)).thenReturn(genSnapshotPath);
+      artifacts = Artifacts.test();
+      genSnapshotPath = artifacts.getArtifactPath(Artifact.genSnapshot);
     });
 
     testUsingContext('validate non-verbose output format for run without issues', () async {
@@ -594,7 +594,7 @@ void main() {
         }
       }
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
+      Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       OutputPreferences: () => OutputPreferences(wrapText: false),
       ProcessManager: () => mockProcessManager,
@@ -607,7 +607,7 @@ void main() {
       // fail if the gen_snapshot binary is not present.
       expect(logger.statusText, contains('No issues found!'));
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
+      Artifacts: () => artifacts,
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -635,7 +635,7 @@ void main() {
           '! Doctor found issues in 1 category.\n'
       ));
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
+      Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       OutputPreferences: () => OutputPreferences(wrapText: false),
       ProcessManager: () => mockProcessManager,
@@ -653,7 +653,7 @@ void main() {
       expect(logger.statusText, contains('Pub download mirror https://example.com/pub'));
       expect(logger.statusText, contains('Flutter download mirror https://example.com/flutter'));
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
+      Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       OutputPreferences: () => OutputPreferences(wrapText: false),
       ProcessManager: () => mockProcessManager,
@@ -1239,7 +1239,6 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockArtifacts extends Mock implements Artifacts {}
 class MockPlistParser extends Mock implements PlistParser {}
 class MockDeviceManager extends Mock implements DeviceManager {}
 class MockDevice extends Mock implements Device {

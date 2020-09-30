@@ -58,7 +58,6 @@ void main() {
       setUp(() {
         mockProcessManager = MockProcessManager();
         outputFile = MemoryFileSystem.test().file('image.png');
-        // when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
       });
 
       testWithoutContext('error if idevicescreenshot is not installed', () async {

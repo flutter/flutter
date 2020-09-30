@@ -36,7 +36,6 @@ void main() {
 
   group('IOSDevice', () {
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
-    Artifacts mockArtifacts;
     Cache cache;
     MockVmService mockVmService;
     Logger logger;
@@ -45,19 +44,19 @@ void main() {
     FileSystem nullFileSystem;
 
     setUp(() {
-      mockArtifacts = MockArtifacts();
+      final Artifacts artifacts = Artifacts.test();
       cache = Cache.test();
       mockVmService = MockVmService();
       logger = BufferLogger.test();
       iosDeploy = IOSDeploy(
-        artifacts: mockArtifacts,
+        artifacts: artifacts,
         cache: cache,
         logger: logger,
         platform: macPlatform,
         processManager: FakeProcessManager.any(),
       );
       iMobileDevice = IMobileDevice(
-        artifacts: mockArtifacts,
+        artifacts: artifacts,
         cache: cache,
         logger: logger,
         processManager: FakeProcessManager.any(),
@@ -211,7 +210,6 @@ void main() {
       MockProcess mockProcess3;
       IOSDevicePortForwarder portForwarder;
       ForwardedPort forwardedPort;
-      Artifacts mockArtifacts;
       Cache cache;
       Logger logger;
       IOSDeploy iosDeploy;
@@ -259,10 +257,9 @@ void main() {
         mockProcess2 = MockProcess();
         mockProcess3 = MockProcess();
         forwardedPort = ForwardedPort.withContext(123, 456, mockProcess3);
-        mockArtifacts = MockArtifacts();
         cache = Cache.test();
         iosDeploy = IOSDeploy(
-          artifacts: mockArtifacts,
+          artifacts: Artifacts.test(),
           cache: cache,
           logger: logger,
           platform: macPlatform,
@@ -303,7 +300,6 @@ void main() {
 
   group('polling', () {
     MockXcdevice mockXcdevice;
-    MockArtifacts mockArtifacts;
     Cache cache;
     MockVmService mockVmService1;
     MockVmService mockVmService2;
@@ -317,7 +313,7 @@ void main() {
 
     setUp(() {
       mockXcdevice = MockXcdevice();
-      mockArtifacts = MockArtifacts();
+      final Artifacts artifacts = Artifacts.test();
       cache = Cache.test();
       mockVmService1 = MockVmService();
       mockVmService2 = MockVmService();
@@ -325,14 +321,14 @@ void main() {
       mockIosWorkflow = MockIOSWorkflow();
       fakeProcessManager = FakeProcessManager.any();
       iosDeploy = IOSDeploy(
-        artifacts: mockArtifacts,
+        artifacts: artifacts,
         cache: cache,
         logger: logger,
         platform: macPlatform,
         processManager: fakeProcessManager,
       );
       iMobileDevice = IMobileDevice(
-        artifacts: mockArtifacts,
+        artifacts: artifacts,
         cache: cache,
         processManager: fakeProcessManager,
         logger: logger,
@@ -602,7 +598,6 @@ void main() {
 }
 
 class MockIOSApp extends Mock implements IOSApp {}
-class MockArtifacts extends Mock implements Artifacts {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockIOSDeploy extends Mock implements IOSDeploy {}
 class MockIOSWorkflow extends Mock implements IOSWorkflow {}
