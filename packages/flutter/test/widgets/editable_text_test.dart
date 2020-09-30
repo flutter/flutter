@@ -4998,7 +4998,7 @@ void main() {
     );
   });
 
-  testWidgets('Receive repeat [TextEditingValue] will not trigger the request keyboard', (WidgetTester tester) async {
+  testWidgets('Repeatedly receiving [TextEditingValue] will not trigger a keyboard request', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66036
     final List<MethodCall> log = <MethodCall>[];
     SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -5049,32 +5049,35 @@ void main() {
     state.updateEditingValue(const TextEditingValue(
       text: 'a',
     ));
+    await tester.pump();
+
     // Nothing called when only the remote changes
     expect(log.length, 0);
 
     // Hide the keyboard
     focusNode.unfocus();
     await tester.pump();
+
     expect(log.length, 2);
     MethodCall methodCall = log[0];
     // Close the InputConnection.
     expect(methodCall, isMethodCall('TextInput.clearClient', arguments: null),);
     methodCall = log[1];
     expect(methodCall, isMethodCall('TextInput.hide', arguments: null),);
-    // The keyboard lose focus.
+    // The keyboard loses focus.
     expect(focusNode.hasFocus, false);
 
     log.clear();
 
-    // The keyboard does not be requested when receiving repeat value from the engine
+    // Send repeat value from the engine
     state.updateEditingValue(const TextEditingValue(
       text: 'a',
     ));
-    // Nothing called when only the remote changes
-    expect(log.length, 0);
     await tester.pump();
 
-    //The keyboard does not be requested after a repeat value from the engine.
+    // Nothing called when only the remote changes
+    expect(log.length, 0);
+    // The keyboard is not be requested after a repeat value from the engine.
     expect(focusNode.hasFocus, false);
   });
 
