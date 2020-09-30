@@ -21,9 +21,10 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 const Map<String, String> kDyLdLibEntry = <String, String>{
-  'DYLD_LIBRARY_PATH': '/path/to/libs',
+  'DYLD_LIBRARY_PATH': '/path/to/libraries',
 };
 
 void main() {
@@ -291,7 +292,7 @@ IOSDevice setUpIOSDevice({
   final Cache cache = Cache.test(
     platform: platform,
     artifacts: <ArtifactSet>[
-      FakeEnvironmentArtifact(),
+      FakeDyldEnvironmentArtifact(),
     ],
   );
   return IOSDevice(
@@ -322,21 +323,3 @@ IOSDevice setUpIOSDevice({
 }
 
 class MockVmService extends Mock implements VmService {}
-
-class FakeEnvironmentArtifact extends ArtifactSet {
-  FakeEnvironmentArtifact() : super(DevelopmentArtifact.iOS);
-  @override
-  Map<String, String> get environment => <String, String>{
-    'DYLD_LIBRARY_PATH': '/path/to/libs'
-  };
-
-  @override
-  Future<bool> isUpToDate() => Future<bool>.value(true);
-
-  @override
-  String get name => 'fake';
-
-  @override
-  Future<void> update(ArtifactUpdater artifactUpdater) async {
-  }
-}

@@ -491,7 +491,7 @@ IOSDevice setUpIOSDevice({
   final Cache cache = Cache.test(
     platform: macPlatform,
     artifacts: <ArtifactSet>[
-      FakeEnvironmentArtifact(),
+      FakeDyldEnvironmentArtifact(),
     ],
   );
 
@@ -528,21 +528,3 @@ class MockUsage extends Mock implements Usage {}
 class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
 class MockVmService extends Mock implements VmService {}
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
-
-class FakeEnvironmentArtifact extends ArtifactSet {
-  FakeEnvironmentArtifact() : super(DevelopmentArtifact.iOS);
-  @override
-  Map<String, String> get environment => <String, String>{
-    'DYLD_LIBRARY_PATH': '/path/to/libraries'
-  };
-
-  @override
-  Future<bool> isUpToDate() => Future<bool>.value(true);
-
-  @override
-  String get name => 'fake';
-
-  @override
-  Future<void> update(ArtifactUpdater artifactUpdater) async {
-  }
-}

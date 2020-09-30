@@ -94,8 +94,8 @@ class Cache {
   /// [rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
   Cache({
-    @visibleForOverriding Directory rootOverride,
-    @visibleForOverriding List<ArtifactSet> artifacts,
+    @protected Directory rootOverride,
+    @protected List<ArtifactSet> artifacts,
     // TODO(jonahwilliams): make required once migrated to context-free.
     Logger logger,
     FileSystem fileSystem,

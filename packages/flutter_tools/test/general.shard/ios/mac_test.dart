@@ -21,8 +21,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-
-const String _libimobiledevicePath = '/bin/cache/artifacts/libimobiledevice';
+import '../../src/fakes.dart';
 
 final Generator _kNoColorTerminalPlatform = () => FakePlatform(stdoutSupportsAnsi: false);
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
@@ -48,7 +47,7 @@ void main() {
       artifacts = Artifacts.test();
       cache = Cache.test(
         artifacts: <ArtifactSet>[
-          FakeEnvironmentArtifact(),
+          FakeDyldEnvironmentArtifact(),
         ]);
     });
 
@@ -100,7 +99,7 @@ void main() {
           IOSDeviceInterface.usb,
         );
         verify(mockProcessManager.run(<String>['Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path, '--udid', '1234'],
-            environment: <String, String>{'DYLD_LIBRARY_PATH': _libimobiledevicePath},
+            environment: <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
             workingDirectory: null,
         ));
       });
@@ -122,7 +121,7 @@ void main() {
           IOSDeviceInterface.network,
         );
         verify(mockProcessManager.run(<String>['Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path, '--udid', '1234', '--network'],
-          environment: <String, String>{'DYLD_LIBRARY_PATH': _libimobiledevicePath},
+          environment: <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
           workingDirectory: null,
         ));
       });
@@ -484,21 +483,3 @@ Exited (sigterm)''',
 }
 
 class MockUsage extends Mock implements Usage {}
-
-class FakeEnvironmentArtifact extends ArtifactSet {
-  FakeEnvironmentArtifact() : super(DevelopmentArtifact.iOS);
-  @override
-  Map<String, String> get environment => <String, String>{
-    'DYLD_LIBRARY_PATH': _libimobiledevicePath,
-  };
-
-  @override
-  Future<bool> isUpToDate() => Future<bool>.value(true);
-
-  @override
-  String get name => 'fake';
-
-  @override
-  Future<void> update(ArtifactUpdater artifactUpdater) async {
-  }
-}
