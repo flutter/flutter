@@ -60,6 +60,16 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
             nullptr, /* raster_cache */
             false,   /* checkerboard_offscreen_layers */
             1.0f,    /* frame_device_pixel_ratio */
+        }),
+        check_board_context_({
+            TestT::mock_canvas().internal_canvas(), /* internal_nodes_canvas */
+            &TestT::mock_canvas(),                  /* leaf_nodes_canvas */
+            nullptr,                                /* gr_context */
+            nullptr,                                /* external_view_embedder */
+            raster_time_, ui_time_, texture_registry_,
+            nullptr, /* raster_cache */
+            true,    /* checkerboard_offscreen_layers */
+            1.0f,    /* frame_device_pixel_ratio */
         }) {
     use_null_raster_cache();
   }
@@ -117,6 +127,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   RasterCache* raster_cache() { return raster_cache_.get(); }
   PrerollContext* preroll_context() { return &preroll_context_; }
   Layer::PaintContext& paint_context() { return paint_context_; }
+  Layer::PaintContext& check_board_context() { return check_board_context_; }
 
  private:
   void set_raster_cache_(std::unique_ptr<RasterCache> raster_cache) {
@@ -133,6 +144,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   std::unique_ptr<RasterCache> raster_cache_;
   PrerollContext preroll_context_;
   Layer::PaintContext paint_context_;
+  Layer::PaintContext check_board_context_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(LayerTestBase);
 };

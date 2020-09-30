@@ -108,6 +108,10 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
     ClipEdgeStyle style;
   };
 
+  struct DrawPaint {
+    SkPaint paint;
+  };
+
   // Discriminated union of all the different |DrawCall| types.  It is roughly
   // equivalent to the different methods in |SkCanvas|' public API.
   using DrawCallData = std::variant<SaveData,
@@ -123,7 +127,8 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
                                     DrawShadowData,
                                     ClipRectData,
                                     ClipRRectData,
-                                    ClipPathData>;
+                                    ClipPathData,
+                                    DrawPaint>;
 
   // A single call made against this canvas.
   struct DrawCall {
@@ -305,7 +310,10 @@ extern bool operator==(const MockCanvas::DrawCall& a,
                        const MockCanvas::DrawCall& b);
 extern std::ostream& operator<<(std::ostream& os,
                                 const MockCanvas::DrawCall& draw);
-
+extern bool operator==(const MockCanvas::DrawPaint& a,
+                       const MockCanvas::DrawPaint& b);
+extern std::ostream& operator<<(std::ostream& os,
+                                const MockCanvas::DrawPaint& data);
 }  // namespace testing
 }  // namespace flutter
 
