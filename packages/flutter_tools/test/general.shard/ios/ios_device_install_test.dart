@@ -27,6 +27,14 @@ const Map<String, String> kDyLdLibEntry = <String, String>{
 };
 
 void main() {
+  Artifacts artifacts;
+  String iosDeployPath;
+
+  setUp(() {
+    artifacts = Artifacts.test();
+    iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+  });
+  
   testWithoutContext('IOSDevice.installApp calls ios-deploy correctly with USB', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final IOSApp iosApp = PrebuiltIOSApp(
@@ -34,14 +42,14 @@ void main() {
       bundleDir: fileSystem.currentDirectory,
     );
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(command: <String>[
-        'Artifact.iosDeploy.TargetPlatform.ios',
+      FakeCommand(command: <String>[
+        iosDeployPath,
         '--id',
         '1234',
         '--bundle',
         '/',
         '--no-wifi',
-      ], environment: <String, String>{
+      ], environment: const <String, String>{
         'PATH': '/usr/bin:null',
         ...kDyLdLibEntry,
       })
@@ -50,6 +58,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       interfaceType: IOSDeviceInterface.usb,
+      artifacts: artifacts,
     );
     final bool wasInstalled = await device.installApp(iosApp);
 
@@ -64,13 +73,13 @@ void main() {
       bundleDir: fileSystem.currentDirectory,
     );
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(command: <String>[
-        'Artifact.iosDeploy.TargetPlatform.ios',
+      FakeCommand(command: <String>[
+        iosDeployPath,
         '--id',
         '1234',
         '--bundle',
         '/',
-      ], environment: <String, String>{
+      ], environment: const <String, String>{
         'PATH': '/usr/bin:null',
         ...kDyLdLibEntry,
       })
@@ -79,6 +88,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       interfaceType: IOSDeviceInterface.network,
+      artifacts: artifacts,
     );
     final bool wasInstalled = await device.installApp(iosApp);
 
@@ -89,19 +99,19 @@ void main() {
   testWithoutContext('IOSDevice.uninstallApp calls ios-deploy correctly', () async {
     final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app');
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(command: <String>[
-        'Artifact.iosDeploy.TargetPlatform.ios',
+      FakeCommand(command: <String>[
+        iosDeployPath,
         '--id',
         '1234',
         '--uninstall_only',
         '--bundle_id',
         'app',
-      ], environment: <String, String>{
+      ], environment: const <String, String>{
         'PATH': '/usr/bin:null',
         ...kDyLdLibEntry,
       })
     ]);
-    final IOSDevice device = setUpIOSDevice(processManager: processManager);
+    final IOSDevice device = setUpIOSDevice(processManager: processManager, artifacts: artifacts);
     final bool wasUninstalled = await device.uninstallApp(iosApp);
 
     expect(wasUninstalled, true);
@@ -112,8 +122,8 @@ void main() {
     testWithoutContext('catches ProcessException from ios-deploy', () async {
       final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app');
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(command: const <String>[
-          'Artifact.iosDeploy.TargetPlatform.ios',
+        FakeCommand(command: <String>[
+          iosDeployPath,
           '--id',
           '1234',
           '--exists',
@@ -125,10 +135,10 @@ void main() {
           'PATH': '/usr/bin:null',
           ...kDyLdLibEntry,
         }, onRun: () {
-          throw const ProcessException('Artifact.iosDeploy.TargetPlatform.ios', <String>[]);
+          throw const ProcessException('ios-deploy', <String>[]);
         })
       ]);
-      final IOSDevice device = setUpIOSDevice(processManager: processManager);
+      final IOSDevice device = setUpIOSDevice(processManager: processManager, artifacts: artifacts);
       final bool isAppInstalled = await device.isAppInstalled(iosApp);
 
       expect(isAppInstalled, false);
@@ -138,8 +148,8 @@ void main() {
     testWithoutContext('returns true when app is installed', () async {
       final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app');
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>[
-          'Artifact.iosDeploy.TargetPlatform.ios',
+        FakeCommand(command: <String>[
+          iosDeployPath,
           '--id',
           '1234',
           '--exists',
@@ -147,12 +157,12 @@ void main() {
           '10',
           '--bundle_id',
           'app',
-        ], environment: <String, String>{
+        ], environment: const <String, String>{
           'PATH': '/usr/bin:null',
           ...kDyLdLibEntry,
         }, exitCode: 0)
       ]);
-      final IOSDevice device = setUpIOSDevice(processManager: processManager);
+      final IOSDevice device = setUpIOSDevice(processManager: processManager, artifacts: artifacts);
       final bool isAppInstalled = await device.isAppInstalled(iosApp);
 
       expect(isAppInstalled, isTrue);
@@ -162,8 +172,8 @@ void main() {
     testWithoutContext('returns false when app is not installed', () async {
       final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app');
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>[
-          'Artifact.iosDeploy.TargetPlatform.ios',
+        FakeCommand(command: <String>[
+          iosDeployPath,
           '--id',
           '1234',
           '--exists',
@@ -171,13 +181,13 @@ void main() {
           '10',
           '--bundle_id',
           'app',
-        ], environment: <String, String>{
+        ], environment: const <String, String>{
           'PATH': '/usr/bin:null',
           ...kDyLdLibEntry,
         }, exitCode: 255)
       ]);
       final BufferLogger logger = BufferLogger.test();
-      final IOSDevice device = setUpIOSDevice(processManager: processManager, logger: logger);
+      final IOSDevice device = setUpIOSDevice(processManager: processManager, logger: logger, artifacts: artifacts);
       final bool isAppInstalled = await device.isAppInstalled(iosApp);
 
       expect(isAppInstalled, isFalse);
@@ -189,8 +199,8 @@ void main() {
       final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app');
       const String stderr = '2020-03-26 17:48:43.484 ios-deploy[21518:5501783] [ !! ] Timed out waiting for device';
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>[
-          'Artifact.iosDeploy.TargetPlatform.ios',
+        FakeCommand(command: <String>[
+          iosDeployPath,
           '--id',
           '1234',
           '--exists',
@@ -198,14 +208,14 @@ void main() {
           '10',
           '--bundle_id',
           'app',
-        ], environment: <String, String>{
+        ], environment: const <String, String>{
           'PATH': '/usr/bin:null',
           ...kDyLdLibEntry,
         }, stderr: stderr,
           exitCode: 253)
       ]);
       final BufferLogger logger = BufferLogger.test();
-      final IOSDevice device = setUpIOSDevice(processManager: processManager, logger: logger);
+      final IOSDevice device = setUpIOSDevice(processManager: processManager, logger: logger, artifacts: artifacts);
       final bool isAppInstalled = await device.isAppInstalled(iosApp);
 
       expect(isAppInstalled, isFalse);
@@ -221,8 +231,8 @@ void main() {
       bundleDir: fileSystem.currentDirectory,
     );
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(command: const <String>[
-        'Artifact.iosDeploy.TargetPlatform.ios',
+      FakeCommand(command: <String>[
+        iosDeployPath,
         '--id',
         '1234',
         '--bundle',
@@ -232,10 +242,10 @@ void main() {
         'PATH': '/usr/bin:null',
         ...kDyLdLibEntry,
       }, onRun: () {
-        throw const ProcessException('Artifact.iosDeploy.TargetPlatform.ios', <String>[]);
+        throw const ProcessException('ios-deploy', <String>[]);
       })
     ]);
-    final IOSDevice device = setUpIOSDevice(processManager: processManager);
+    final IOSDevice device = setUpIOSDevice(processManager: processManager, artifacts: artifacts);
     final bool wasAppInstalled = await device.installApp(iosApp);
 
     expect(wasAppInstalled, false);
@@ -244,8 +254,8 @@ void main() {
   testWithoutContext('IOSDevice.uninstallApp catches ProcessException from ios-deploy', () async {
     final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app');
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(command: const <String>[
-        'Artifact.iosDeploy.TargetPlatform.ios',
+      FakeCommand(command: <String>[
+        iosDeployPath,
         '--id',
         '1234',
         '--uninstall_only',
@@ -255,10 +265,10 @@ void main() {
         'PATH': '/usr/bin:null',
         ...kDyLdLibEntry,
       }, onRun: () {
-        throw const ProcessException('Artifact.iosDeploy.TargetPlatform.ios', <String>[]);
+        throw const ProcessException('ios-deploy', <String>[]);
       })
     ]);
-    final IOSDevice device = setUpIOSDevice(processManager: processManager);
+    final IOSDevice device = setUpIOSDevice(processManager: processManager, artifacts: artifacts);
     final bool wasAppUninstalled = await device.uninstallApp(iosApp);
 
     expect(wasAppUninstalled, false);
@@ -270,13 +280,14 @@ IOSDevice setUpIOSDevice({
   FileSystem fileSystem,
   Logger logger,
   IOSDeviceInterface interfaceType,
+  Artifacts artifacts,
 }) {
   logger ??= BufferLogger.test();
   final FakePlatform platform = FakePlatform(
     operatingSystem: 'macos',
     environment: <String, String>{},
   );
-  final Artifacts artifacts = Artifacts.test();
+  artifacts ??= Artifacts.test();
   final Cache cache = Cache.test(
     platform: platform,
     artifacts: <ArtifactSet>[

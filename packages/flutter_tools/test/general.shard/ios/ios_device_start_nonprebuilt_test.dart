@@ -68,6 +68,14 @@ final FakePlatform macPlatform = FakePlatform(
 );
 
 void main() {
+  Artifacts artifacts;
+  String iosDeployPath;
+
+  setUp(() {
+    artifacts = Artifacts.test();
+    iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+  });
+
   group('IOSDevice.startApp succeeds in release mode', () {
     FileSystem fileSystem;
     FakeProcessManager processManager;
@@ -104,6 +112,7 @@ void main() {
         fileSystem: fileSystem,
         processManager: processManager,
         logger: logger,
+        artifacts: artifacts,
       );
       setUpIOSProject(fileSystem);
       final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
@@ -114,7 +123,7 @@ void main() {
       processManager.addCommand(const FakeCommand(command: <String>[...kRunReleaseArgs, '-showBuildSettings']));
       processManager.addCommand(FakeCommand(
         command: <String>[
-          'Artifact.iosDeploy.TargetPlatform.ios',
+          iosDeployPath,
           '--id',
           '123',
           '--bundle',
@@ -155,6 +164,7 @@ void main() {
           fileSystem: fileSystem,
           processManager: processManager,
           logger: logger,
+          artifacts: artifacts,
         );
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
@@ -176,7 +186,7 @@ void main() {
           ));
         processManager.addCommand(FakeCommand(
           command: <String>[
-            'Artifact.iosDeploy.TargetPlatform.ios',
+            iosDeployPath,
             '--id',
             '123',
             '--bundle',
@@ -228,6 +238,7 @@ void main() {
         fileSystem: fileSystem,
         processManager: processManager,
         logger: logger,
+        artifacts: artifacts,
       );
       setUpIOSProject(fileSystem);
       final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
@@ -250,7 +261,7 @@ void main() {
         ));
       processManager.addCommand(FakeCommand(
         command: <String>[
-          'Artifact.iosDeploy.TargetPlatform.ios',
+          iosDeployPath,
           '--id',
           '123',
           '--bundle',
@@ -306,8 +317,9 @@ IOSDevice setUpIOSDevice({
   FileSystem fileSystem,
   Logger logger,
   ProcessManager processManager,
+  Artifacts artifacts,
 }) {
-  final Artifacts artifacts = Artifacts.test();
+  artifacts ??= Artifacts.test();
   final Cache cache = Cache.test(
     artifacts: <ArtifactSet>[
       FakeEnvironmentArtifact(),
