@@ -26,9 +26,13 @@ const double _minFlingVelocity = 700.0;
 const double _closeProgressThreshold = 0.5;
 
 /// A callback for when the user begins dragging the bottom sheet.
+/// 
+/// See: [BottomSheet.onDragStart].
 typedef BottomSheetDragStartHandler = void Function(DragStartDetails details);
 
 /// A callback for when the user stops dragging the bottom sheet.
+/// 
+/// See: [BottomSheet.onDragEnd].
 typedef BottomSheetDragEndHandler = void Function(
   DragEndDetails details, {
   bool isClosing,
