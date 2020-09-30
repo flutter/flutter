@@ -13,6 +13,7 @@ import 'stock_data.dart';
 import 'stock_list.dart';
 import 'stock_state.dart';
 import 'stock_symbol_viewer.dart';
+import 'stock_type.dart';
 
 typedef ModeUpdater = void Function(StockMode mode);
 
@@ -391,8 +392,8 @@ class _CreateCompanySheet extends StatelessWidget {
 }
 
 class StockHomePage extends MaterialPage<void> {
-  StockHomePage() : super(
-        key: const ValueKey<String>('home'),
-        builder: (BuildContext context) => const StockHome(),
-      );
+  const StockHomePage() : super(
+                            key: const ValueKey<String>('home'),
+                            child: const StockHome(),
+                          );
 }

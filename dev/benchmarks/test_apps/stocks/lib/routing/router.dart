@@ -104,22 +104,6 @@ class StockRouterDelegate extends RouterDelegate<_RouterConfiguration> with Chan
     return success;
   }
 
-  List<Page<void>> _buildPages(BuildContext context) {
-    final List<Page<void>> pages = <Page<void>>[
-      StockHomePage()
-    ];
-
-    if (routerState.routePath is StockSettingsPath) {
-      pages.add(StockSettingsPage());
-    }
-
-    if (routerState.routePath is StockSymbolPath) {
-      final StockSymbolPath routePath = routerState.routePath as StockSymbolPath;
-      pages.add(StockPage(routePath.symbol));
-    }
-    return pages;
-  }
-
   @override
   void dispose() {
     routerState.removeListener(notifyListeners);
@@ -133,7 +117,13 @@ class StockRouterDelegate extends RouterDelegate<_RouterConfiguration> with Chan
       routerState: routerState,
       child: Navigator(
         key: navigatorKey,
-        pages: _buildPages(context),
+        pages: <Page<void>>[
+          const StockHomePage(),
+          if (routerState.routePath is StockSettingsPath)
+            const StockSettingsPage(),
+          if (routerState.routePath is StockSymbolPath)
+            StockPage((routerState.routePath as StockSymbolPath).symbol),
+        ],
         onPopPage: _handlePopPage,
       ),
     );

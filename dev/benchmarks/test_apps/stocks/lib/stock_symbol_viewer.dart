@@ -139,6 +139,6 @@ class StockPage extends MaterialPage<void> {
     String symbol
   ) : super(
         key: const ValueKey<String>('stock'),
-        builder: (BuildContext context) => StockSymbolPage(symbol),
+        child: StockSymbolPage(symbol),
       );
 }

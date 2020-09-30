@@ -18,6 +18,7 @@ import 'i18n/stock_strings.dart';
 import 'routing/router.dart';
 import 'routing/router_state.dart';
 import 'stock_state.dart';
+import 'stock_type.dart';
 
 void main() => runApp(
   const StockStateScope(

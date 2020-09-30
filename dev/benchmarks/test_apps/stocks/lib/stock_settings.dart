@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:stocks/stock_state.dart';
+import 'package:stocks/stock_type.dart';
 
 class StockSettings extends StatefulWidget {
   const StockSettings();
@@ -221,8 +222,8 @@ class StockSettingsState extends State<StockSettings> {
 }
 
 class StockSettingsPage extends MaterialPage<void> {
-  StockSettingsPage() : super(
-                          key: const ValueKey<String>('settings'),
-                          builder: (BuildContext context) => const StockSettings(),
-                        );
+  const StockSettingsPage() : super(
+                                key: const ValueKey<String>('settings'),
+                                child: const StockSettings(),
+                              );
 }
