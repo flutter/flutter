@@ -43,7 +43,7 @@ void main() {
       setUp(() {
         xcode = Xcode(
           logger: logger,
-          platform: FakePlatform(),
+          platform: MockPlatform(),
           fileSystem: MemoryFileSystem.test(),
           processManager: processManager,
           xcodeProjectInterpreter: MockXcodeProjectInterpreter(),
@@ -137,7 +137,7 @@ void main() {
         platform = MockPlatform();
         xcode = Xcode(
           logger: logger,
-          platform: FakePlatform(),
+          platform: platform,
           fileSystem: MemoryFileSystem.test(),
           processManager: fakeProcessManager,
           xcodeProjectInterpreter: mockXcodeProjectInterpreter,
