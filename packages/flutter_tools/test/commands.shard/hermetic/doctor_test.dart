@@ -607,7 +607,7 @@ void main() {
       expect(logger.statusText, contains('No issues found!'));
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
