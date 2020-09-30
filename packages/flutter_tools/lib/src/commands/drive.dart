@@ -130,7 +130,7 @@ class DriveCommand extends RunCommandBase {
   final String name = 'drive';
 
   @override
-  final String description = 'Runs Flutter Driver tests for the current project.';
+  final String description = 'Run integration tests for the project on an attached device or emulator.';
 
   @override
   final List<String> aliases = <String>['driver'];

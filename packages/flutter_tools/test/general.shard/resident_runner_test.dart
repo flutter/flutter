@@ -2328,10 +2328,12 @@ void main() {
     final MockDevice mockDevice = MockDevice();
     final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
     final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
+    final Completer<void> noopCompleter = Completer<void>();
     when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
     when(mockDevice.dds).thenReturn(mockDds);
     when(mockDds.startDartDevelopmentService(any, any, any, any)).thenReturn(null);
     when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
+    when(mockDds.done).thenAnswer((_) => noopCompleter.future);
 
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,

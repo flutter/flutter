@@ -24,7 +24,7 @@ class ChannelCommand extends FlutterCommand {
   final String name = 'channel';
 
   @override
-  final String description = 'List or switch flutter channels.';
+  final String description = 'List or switch Flutter channels.';
 
   @override
   String get invocation => '${runner.executableName} $name [<channel-name>]';

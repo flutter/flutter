@@ -15,7 +15,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
-TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = false}) {
+TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
@@ -38,6 +38,7 @@ TaskFunction createUiKitViewScrollPerfTest() {
     'test_driver/uikit_view_scroll_perf.dart',
     'platform_views_scroll_perf',
     testDriver: 'test_driver/scroll_perf_test.dart',
+    needsFullTimeline: false,
   ).run;
 }
 
@@ -131,7 +132,7 @@ TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupE2ETest() {
   ).run;
 }
 
-TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = false}) {
+TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -149,7 +150,7 @@ TaskFunction createBackdropFilterPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = false}) {
+TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -160,7 +161,7 @@ TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = false}) {
   ).run;
 }
 
-TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = false}) {
+TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -171,7 +172,7 @@ TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = false}) {
   ).run;
 }
 
-TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = false}) {
+TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -482,7 +483,7 @@ class PerfTest {
     this.testDirectory,
     this.testTarget,
     this.timelineFileName, {
-    this.measureCpuGpu = false,
+    this.measureCpuGpu = true,
     this.measureMemory = false,
     this.saveTraceFile = false,
     this.testDriver,
@@ -495,7 +496,7 @@ class PerfTest {
   const PerfTest.e2e(
     this.testDirectory,
     this.testTarget, {
-    this.measureCpuGpu = false,
+    this.measureCpuGpu = true,
     this.measureMemory = false,
     this.testDriver =  'test_driver/e2e_test.dart',
     this.needsFullTimeline = false,
@@ -601,6 +602,9 @@ class PerfTest {
         );
       }
 
+      // TODO(liyuqian): Remove isAndroid restriction once
+      // https://github.com/flutter/flutter/issues/61567 is fixed.
+      final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
       return TaskResult.success(
         data,
         detailFiles: detailFiles.isNotEmpty ? detailFiles : null,
@@ -609,9 +613,15 @@ class PerfTest {
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
-          if (measureCpuGpu) 'average_cpu_usage',
-          if (measureCpuGpu) 'average_gpu_usage',
-          if (measureMemory) ...<String>['average_memory_usage', '90th_percentile_memory_usage', '99th_percentile_memory_usage'],
+          if (measureCpuGpu && !isAndroid) ...<String>[
+            'average_cpu_usage',
+            'average_gpu_usage',
+          ],
+          if (measureMemory && !isAndroid) ...<String>[
+            'average_memory_usage',
+            '90th_percentile_memory_usage',
+            '99th_percentile_memory_usage',
+          ],
         ],
       );
     });

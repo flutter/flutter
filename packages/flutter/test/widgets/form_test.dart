@@ -886,4 +886,87 @@ void main() {
     expect(fieldValue, '123456');
     expect(formKey.currentState.validate(), isFalse);
   });
+
+  testWidgets('FormField.autovalidate parameter is passed into class the property', (WidgetTester tester) async {
+    String errorText(String value) => '$value/error';
+    const ObjectKey widgetKey = ObjectKey('key');
+
+    Widget builder({@required bool autovalidate}) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: FormField<String>(
+                  key: widgetKey,
+                  initialValue: 'foo',
+                  autovalidate: autovalidate,
+                  builder: (FormFieldState<String> state) {
+                    return Container();
+                  },
+                  validator: errorText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // When autovalidate is true
+    await tester.pumpWidget(builder(autovalidate: true));
+
+    final Finder formFieldFinder = find.byKey(widgetKey);
+    FormField<String> formField = tester.widget(formFieldFinder);
+    expect(formField.autovalidate, isTrue);
+    expect(formField.autovalidateMode, equals(AutovalidateMode.always));
+
+    // When autovalidate is false
+    await tester.pumpWidget(builder(autovalidate: false));
+
+    formField = tester.widget(formFieldFinder);
+    expect(formField.autovalidate, isFalse);
+    expect(formField.autovalidateMode, equals(AutovalidateMode.disabled));
+  });
+
+  testWidgets('Form.autovalidate parameter is passed into class the property', (WidgetTester tester) async {
+    const ObjectKey widgetKey = ObjectKey('key');
+
+    Widget builder({@required bool autovalidate}) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: widgetKey,
+                  autovalidate: autovalidate,
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // When autovalidate is true
+    await tester.pumpWidget(builder(autovalidate: true));
+
+    final Finder formFinder = find.byKey(widgetKey);
+    Form formWidget = tester.widget(formFinder);
+    expect(formWidget.autovalidate, isTrue);
+    expect(formWidget.autovalidateMode, equals(AutovalidateMode.always));
+
+    // When autovalidate is false
+    await tester.pumpWidget(builder(autovalidate: false));
+
+    formWidget = tester.widget(formFinder);
+    expect(formWidget.autovalidate, isFalse);
+    expect(formWidget.autovalidateMode, equals(AutovalidateMode.disabled));
+  });
 }
