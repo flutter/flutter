@@ -21,13 +21,12 @@ import '../src/fake_devices.dart';
 import '../src/mocks.dart';
 
 void main() {
-  MockCache cache;
+  Cache cache;
   BufferLogger logger;
 
   setUp(() {
-    cache = MockCache();
+    cache = Cache.test();
     logger = BufferLogger.test();
-    when(cache.dyLdLibEntry).thenReturn(const MapEntry<String, String>('foo', 'bar'));
   });
 
   group('DeviceManager', () {
@@ -550,5 +549,4 @@ class TestDeviceManager extends DeviceManager {
 class MockProcess extends Mock implements Process {}
 class MockTerminal extends Mock implements AnsiTerminal {}
 class MockStdio extends Mock implements Stdio {}
-class MockCache extends Mock implements Cache {}
 class MockDeviceDiscovery extends Mock implements DeviceDiscovery {}

@@ -150,7 +150,7 @@ void main() {
         mockArtifacts = MockArtifacts();
         mockCache = MockCache();
         mockUsage = MockUsage();
-        fs = MemoryFileSystem();
+        fs = MemoryFileSystem.test();
         mockProcessManager = MockProcessManager();
 
         tempDir = fs.systemTempDirectory.createTempSync('flutter_run_test.');

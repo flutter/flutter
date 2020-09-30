@@ -1188,6 +1188,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     setState(() {
       _replaceImage(info: imageInfo);
       _loadingProgress = null;
+      _lastException = null;
+      _lastStack = null;
       _frameNumber = _frameNumber == null ? 0 : _frameNumber! + 1;
       _wasSynchronouslyLoaded = _wasSynchronouslyLoaded | synchronousCall;
     });
@@ -1197,6 +1199,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     assert(widget.loadingBuilder != null);
     setState(() {
       _loadingProgress = event;
+      _lastException = null;
+      _lastStack = null;
     });
   }
 

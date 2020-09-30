@@ -3565,6 +3565,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool? toggled,
     bool? selected,
     bool? button,
+    bool? slider,
     bool? link,
     bool? header,
     bool? textField,
@@ -3618,6 +3619,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _toggled = toggled,
        _selected = selected,
        _button = button,
+       _slider = slider,
        _link = link,
        _header = header,
        _textField = textField,
@@ -3761,6 +3763,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (button == value)
       return;
     _button = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsConfiguration.isSlider] semantic to the
+  /// given value.
+  bool? get slider => _slider;
+  bool? _slider;
+  set slider(bool? value) {
+    if (slider == value)
+      return;
+    _slider = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4477,6 +4490,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isButton = button!;
     if (link != null)
       config.isLink = link!;
+    if (slider != null)
+      config.isSlider = slider!;
     if (header != null)
       config.isHeader = header!;
     if (textField != null)

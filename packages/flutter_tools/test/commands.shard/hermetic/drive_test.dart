@@ -38,7 +38,7 @@ void main() {
     setUp(() {
       command = DriveCommand();
       applyMocksToCommand(command);
-      fs = MemoryFileSystem();
+      fs = MemoryFileSystem.test();
       tempDir = fs.systemTempDirectory.createTempSync('flutter_drive_test.');
       fs.currentDirectory = tempDir;
       fs.directory('test').createSync();

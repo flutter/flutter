@@ -60,13 +60,11 @@ final vm_service.Isolate fakeIsolate = vm_service.Isolate(
 void main() {
   group('fuchsia device', () {
     MemoryFileSystem memoryFileSystem;
-    MockFile sshConfig;
+    File sshConfig;
 
     setUp(() {
-      memoryFileSystem = MemoryFileSystem();
-      sshConfig = MockFile();
-      when(sshConfig.existsSync()).thenReturn(true);
-      when(sshConfig.absolute).thenReturn(sshConfig);
+      memoryFileSystem = MemoryFileSystem.test();
+      sshConfig = memoryFileSystem.file('ssh_config')..writeAsStringSync('\n');
     });
 
     testWithoutContext('stores the requested id and name', () {
@@ -293,14 +291,14 @@ void main() {
   group('displays friendly error when', () {
     MockProcessManager mockProcessManager;
     MockProcessResult mockProcessResult;
-    MockFile mockFile;
+    File artifactFile;
     MockProcessManager emptyStdoutProcessManager;
     MockProcessResult emptyStdoutProcessResult;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
       mockProcessResult = MockProcessResult();
-      mockFile = MockFile();
+      artifactFile = MemoryFileSystem.test().file('artifact');
       when(mockProcessManager.run(
         any,
         environment: anyNamed('environment'),
@@ -310,8 +308,6 @@ void main() {
       when(mockProcessResult.exitCode).thenReturn(1);
       when<String>(mockProcessResult.stdout as String).thenReturn('');
       when<String>(mockProcessResult.stderr as String).thenReturn('');
-      when(mockFile.absolute).thenReturn(mockFile);
-      when(mockFile.path).thenReturn('');
 
       emptyStdoutProcessManager = MockProcessManager();
       emptyStdoutProcessResult = MockProcessResult();
@@ -341,8 +337,8 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => emptyStdoutProcessManager,
       FuchsiaArtifacts: () => FuchsiaArtifacts(
-            sshConfig: mockFile,
-            devFinder: mockFile,
+            sshConfig: artifactFile,
+            devFinder: artifactFile,
           ),
       FuchsiaSdk: () => MockFuchsiaSdk(),
     });
@@ -362,8 +358,8 @@ void main() {
       Completer<int> exitCode;
       StreamController<List<int>> stdout;
       StreamController<List<int>> stderr;
-      MockFile devFinder;
-      MockFile sshConfig;
+      File devFinder;
+      File sshConfig;
 
       setUp(() {
         mockProcessManager = MockProcessManager();
@@ -376,12 +372,9 @@ void main() {
         when(mockProcess.exitCode).thenAnswer((Invocation _) => exitCode.future);
         when(mockProcess.stdout).thenAnswer((Invocation _) => stdout.stream);
         when(mockProcess.stderr).thenAnswer((Invocation _) => stderr.stream);
-        devFinder = MockFile();
-        sshConfig = MockFile();
-        when(devFinder.existsSync()).thenReturn(true);
-        when(sshConfig.existsSync()).thenReturn(true);
-        when(devFinder.absolute).thenReturn(devFinder);
-        when(sshConfig.absolute).thenReturn(sshConfig);
+        final FileSystem memoryFileSystem = MemoryFileSystem.test();
+        devFinder = memoryFileSystem.file('device-finder')..writeAsStringSync('\n');
+        sshConfig = memoryFileSystem.file('ssh_config')..writeAsStringSync('\n');
       });
 
       tearDown(() {
@@ -700,15 +693,11 @@ void main() {
 
   group('portForwarder', () {
     MockProcessManager mockProcessManager;
-    MockFile sshConfig;
+    File sshConfig;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
-
-      sshConfig = MockFile();
-      when(sshConfig.path).thenReturn('irrelevant');
-      when(sshConfig.existsSync()).thenReturn(true);
-      when(sshConfig.absolute).thenReturn(sshConfig);
+      sshConfig = MemoryFileSystem.test().file('irrelevant')..writeAsStringSync('\n');
     });
 
     testUsingContext('`unforward` prints stdout and stderr if ssh command failed', () async {
@@ -721,7 +710,7 @@ void main() {
       when(mockProcessManager.run(<String>[
         'ssh',
         '-F',
-        'irrelevant',
+        sshConfig.absolute.path,
         '-O',
         'cancel',
         '-vvv',
@@ -838,9 +827,10 @@ void main() {
   });
 
   testUsingContext('Correct flutter runner', () async {
-    final MockCache cache = MockCache();
+    final Cache cache = Cache.test(
+      processManager: FakeProcessManager.any(),
+    );
     final FileSystem fileSystem = MemoryFileSystem.test();
-    when(cache.getArtifactDirectory('flutter_runner')).thenReturn(fileSystem.directory('fuchsia'));
     final CachedArtifacts artifacts = CachedArtifacts(
       cache: cache,
       fileSystem: fileSystem,
@@ -890,7 +880,7 @@ void main() {
     File runner;
 
     setUp(() {
-      memoryFileSystem = MemoryFileSystem();
+      memoryFileSystem = MemoryFileSystem.test();
       osUtils = FakeOperatingSystemUtils();
       fuchsiaDeviceTools = FakeFuchsiaDeviceTools();
       fuchsiaSdk = MockFuchsiaSdk();
@@ -1105,7 +1095,7 @@ void main() {
   });
 
   group('sdkNameAndVersion: ', () {
-    MockFile sshConfig;
+    File sshConfig;
     MockProcessManager mockSuccessProcessManager;
     MockProcessResult mockSuccessProcessResult;
     MockProcessManager mockFailureProcessManager;
@@ -1114,9 +1104,7 @@ void main() {
     MockProcessResult emptyStdoutProcessResult;
 
     setUp(() {
-      sshConfig = MockFile();
-      when(sshConfig.existsSync()).thenReturn(true);
-      when(sshConfig.absolute).thenReturn(sshConfig);
+      sshConfig = MemoryFileSystem.test().file('ssh_config')..writeAsStringSync('\n');
 
       mockSuccessProcessManager = MockProcessManager();
       mockSuccessProcessResult = MockProcessResult();
@@ -1195,8 +1183,6 @@ class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
 
 class MockProcessResult extends Mock implements ProcessResult {}
-
-class MockFile extends Mock implements File {}
 
 class MockProcess extends Mock implements Process {}
 
@@ -1606,4 +1592,3 @@ class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
 
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
 class MockFuchsiaWorkflow extends Mock implements FuchsiaWorkflow {}
-class MockCache extends Mock implements Cache {}

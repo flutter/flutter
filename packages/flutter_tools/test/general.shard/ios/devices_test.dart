@@ -37,30 +37,28 @@ void main() {
   group('IOSDevice', () {
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     Artifacts mockArtifacts;
-    MockCache mockCache;
+    Cache cache;
     MockVmService mockVmService;
     Logger logger;
     IOSDeploy iosDeploy;
     IMobileDevice iMobileDevice;
-    FileSystem mockFileSystem;
+    FileSystem nullFileSystem;
 
     setUp(() {
       mockArtifacts = MockArtifacts();
-      mockCache = MockCache();
+      cache = Cache.test();
       mockVmService = MockVmService();
-      const MapEntry<String, String> dyLdLibEntry = MapEntry<String, String>('DYLD_LIBRARY_PATH', '/path/to/libs');
-      when(mockCache.dyLdLibEntry).thenReturn(dyLdLibEntry);
       logger = BufferLogger.test();
       iosDeploy = IOSDeploy(
         artifacts: mockArtifacts,
-        cache: mockCache,
+        cache: cache,
         logger: logger,
         platform: macPlatform,
         processManager: FakeProcessManager.any(),
       );
       iMobileDevice = IMobileDevice(
         artifacts: mockArtifacts,
-        cache: mockCache,
+        cache: cache,
         logger: logger,
         processManager: FakeProcessManager.any(),
       );
@@ -70,7 +68,7 @@ void main() {
       IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: mockFileSystem,
+        fileSystem: nullFileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -87,7 +85,7 @@ void main() {
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: mockFileSystem,
+        fileSystem: nullFileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -101,7 +99,7 @@ void main() {
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: mockFileSystem,
+        fileSystem: nullFileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -115,7 +113,7 @@ void main() {
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: mockFileSystem,
+        fileSystem: nullFileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -129,7 +127,7 @@ void main() {
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: mockFileSystem,
+        fileSystem: nullFileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -143,7 +141,7 @@ void main() {
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: mockFileSystem,
+        fileSystem: nullFileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -160,7 +158,7 @@ void main() {
       final IOSDevice device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: mockFileSystem,
+        fileSystem: nullFileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -185,7 +183,7 @@ void main() {
             IOSDevice(
               'device-123',
               iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-              fileSystem: mockFileSystem,
+              fileSystem: nullFileSystem,
               logger: logger,
               platform: platform,
               iosDeploy: iosDeploy,
@@ -214,10 +212,10 @@ void main() {
       IOSDevicePortForwarder portForwarder;
       ForwardedPort forwardedPort;
       Artifacts mockArtifacts;
-      MockCache mockCache;
+      Cache cache;
       Logger logger;
       IOSDeploy iosDeploy;
-      FileSystem mockFileSystem;
+      FileSystem nullFileSystem;
       IProxy iproxy;
 
       IOSDevicePortForwarder createPortForwarder(
@@ -228,7 +226,7 @@ void main() {
           id: device.id,
           logger: logger,
           operatingSystemUtils: OperatingSystemUtils(
-            fileSystem: mockFileSystem,
+            fileSystem: nullFileSystem,
             logger: logger,
             platform: FakePlatform(operatingSystem: 'macos'),
             processManager: FakeProcessManager.any(),
@@ -262,10 +260,10 @@ void main() {
         mockProcess3 = MockProcess();
         forwardedPort = ForwardedPort.withContext(123, 456, mockProcess3);
         mockArtifacts = MockArtifacts();
-        mockCache = MockCache();
+        cache = Cache.test();
         iosDeploy = IOSDeploy(
           artifacts: mockArtifacts,
-          cache: mockCache,
+          cache: cache,
           logger: logger,
           platform: macPlatform,
           processManager: FakeProcessManager.any(),
@@ -276,7 +274,7 @@ void main() {
         device = IOSDevice(
           '123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: mockFileSystem,
+          fileSystem: nullFileSystem,
           logger: logger,
           platform: macPlatform,
           iosDeploy: iosDeploy,
@@ -306,7 +304,7 @@ void main() {
   group('polling', () {
     MockXcdevice mockXcdevice;
     MockArtifacts mockArtifacts;
-    MockCache mockCache;
+    Cache cache;
     MockVmService mockVmService1;
     MockVmService mockVmService2;
     FakeProcessManager fakeProcessManager;
@@ -320,7 +318,7 @@ void main() {
     setUp(() {
       mockXcdevice = MockXcdevice();
       mockArtifacts = MockArtifacts();
-      mockCache = MockCache();
+      cache = Cache.test();
       mockVmService1 = MockVmService();
       mockVmService2 = MockVmService();
       logger = BufferLogger.test();
@@ -328,14 +326,14 @@ void main() {
       fakeProcessManager = FakeProcessManager.any();
       iosDeploy = IOSDeploy(
         artifacts: mockArtifacts,
-        cache: mockCache,
+        cache: cache,
         logger: logger,
         platform: macPlatform,
         processManager: fakeProcessManager,
       );
       iMobileDevice = IMobileDevice(
         artifacts: mockArtifacts,
-        cache: mockCache,
+        cache: cache,
         processManager: fakeProcessManager,
         logger: logger,
       );
@@ -605,7 +603,6 @@ void main() {
 
 class MockIOSApp extends Mock implements IOSApp {}
 class MockArtifacts extends Mock implements Artifacts {}
-class MockCache extends Mock implements Cache {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockIOSDeploy extends Mock implements IOSDeploy {}
 class MockIOSWorkflow extends Mock implements IOSWorkflow {}

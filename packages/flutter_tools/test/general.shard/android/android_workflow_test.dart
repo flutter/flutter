@@ -35,7 +35,7 @@ void main() {
 
   setUp(() {
     sdk = MockAndroidSdk();
-    fs = MemoryFileSystem();
+    fs = MemoryFileSystem.test();
     fs.directory('/home/me').createSync(recursive: true);
     logger = BufferLogger(
       terminal: AnsiTerminal(
