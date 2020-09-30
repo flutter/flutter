@@ -40,234 +40,6 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 
 // TODO(justinmc): Link to Autocomplete and AutocompleteCupertino when they are
 // implemented.
-/// A controller for the [AutocompleteCore] widget.
-///
-/// Can also be used in a stand-alone manner to implement autocomplete behavior
-/// in a fully custom UI.
-///
-/// {@tool dartpad --template=freeform}
-/// This example shows how to build an autocomplete widget with your own UI
-/// using AutocompleteController. Most typical use cases would instead pass the
-/// AutocompleteController directly to Autocomplete or
-/// AutocompleteCupertino.
-///
-/// ```dart imports
-/// import 'package:flutter/widgets.dart';
-/// import 'package:flutter/material.dart';
-/// ```
-///
-/// ```dart
-/// class CustomUIAutocomplete extends StatefulWidget {
-///   CustomUIAutocomplete({Key key}) : super(key: key);
-///
-///   @override
-///   CustomUIAutocompleteState createState() => CustomUIAutocompleteState();
-/// }
-///
-/// class CustomUIAutocompleteState extends State<CustomUIAutocomplete> {
-///   AutocompleteController<String> _autocompleteController;
-///   String _selection;
-///
-///   void _onChangeResults() {
-///     setState(() {});
-///   }
-///
-///   void _onChangedField() {
-///     if (_autocompleteController.textEditingController.value.text != _selection) {
-///       setState(() {
-///         _selection = null;
-///       });
-///     }
-///   }
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _autocompleteController = AutocompleteController<String>(
-///       buildOptions: (TextEditingValue textEditingValue) {
-///         return <String>['aardvark', 'bobcat', 'chameleon']
-///            .contains(value.text.toLowerCase());
-///       }
-///     );
-///     _autocompleteController.textEditingController.addListener(_onChangedField);
-///     _autocompleteController.results.addListener(_onChangeResults);
-///   }
-///
-///   @override
-///   void dispose() {
-///     _autocompleteController.textEditingController.removeListener(_onChangedField);
-///     _autocompleteController.results.removeListener(_onChangeResults);
-///     _autocompleteController.dispose();
-///     super.dispose();
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Column(
-///       children: <Widget>[
-///         TextFormField(
-///           controller: _autocompleteController.textEditingController,
-///         ),
-///         if (_selection == null)
-///           Expanded(
-///             child: ListView(
-///               children: _autocompleteController.results.value.map((String result) => GestureDetector(
-///                 onTap: () {
-///                   setState(() {
-///                     _selection = result;
-///                     _autocompleteController.textEditingController.value = TextEditingValue(
-///                       selection: TextSelection.collapsed(offset: result.length),
-///                       text: result,
-///                     );
-///                   });
-///                 },
-///                 child: ListTile(
-///                   title: Text(result),
-///                 ),
-///               )).toList(),
-///             ),
-///           ),
-///       ],
-///     );
-///   }
-/// }
-/// ```
-/// {@end-tool}
-/*
-@immutable
-class AutocompleteController<T> {
-  /// Create an instance of AutocompleteController with a known list of options.
-  ///
-  /// When the text in the textEditingController changes, the options list will
-  /// be filtered using simple case-insensitive string matching.
-  ///
-  /// See also:
-  ///   * [AutocompleteController.generated], which generates the options with a
-  ///     [getResults] method instead of specifying all possible options up
-  ///     front.
-  AutocompleteController({
-    required List<T> options,
-    AutocompleteOptionToString<T>? displayStringForOption,
-    AutocompleteOptionToString<T>? filterStringForOption,
-    TextEditingController? textEditingController,
-  }) : assert(options != null && options.isNotEmpty),
-       displayStringForOption = displayStringForOption ?? _defaultStringForOption,
-       filterStringForOption = filterStringForOption ?? _defaultStringForOption,
-       _ownsTextEditingController = textEditingController == null,
-       textEditingController = textEditingController ?? TextEditingController(),
-       getResults = ((TextEditingValue value) {
-         return _filterByString(
-           options,
-           value,
-           filterStringForOption ?? _defaultStringForOption,
-         );
-       }) {
-    this.textEditingController.addListener(_onChangedField);
-  }
-
-  /// Create an instance of AutocompleteController with a function [getResults]
-  /// that returns options based on the text.
-  ///
-  /// See also:
-  ///   * [AutocompleteController], which receives a list of all possible
-  ///     options up front instead of generating them in [getResults].
-  AutocompleteController.generated({
-    required this.getResults,
-    AutocompleteOptionToString<T>? displayStringForOption,
-    TextEditingController? textEditingController,
-  }) : assert(getResults != null),
-       displayStringForOption = displayStringForOption ?? _defaultStringForOption,
-       filterStringForOption = null,
-       _ownsTextEditingController = textEditingController == null,
-       textEditingController = textEditingController ?? TextEditingController() {
-    this.textEditingController.addListener(_onChangedField);
-  }
-
-  // When the instance owns textEditingController, it is responsible for
-  // disposing it.
-  final bool _ownsTextEditingController;
-
-  /// The [TextEditingController] that represents the field.
-  final TextEditingController textEditingController;
-
-  /// A function that returns the results given the text in the field.
-  ///
-  /// See also:
-  ///   * [AutocompleteController()]'s options parameter, which can be used
-  ///     instead to simply pass a list of all possible options and filter them
-  ///     with string matching.
-  final AutocompleteResultsGetter<T> getResults;
-
-  /// Returns the string to display in the field when the option is selected.
-  ///
-  /// This is useful when using a custom T type for AutocompleteController and
-  /// the string to display is different than the string to search by.
-  ///
-  /// If not provided, will use `option.toString()`.
-  ///
-  /// See also:
-  ///   * [filterStringForOption], which can be used to specify a custom string
-  ///     to filter by.
-  final AutocompleteOptionToString<T> displayStringForOption;
-
-  /// Returns the string to match against when filtering the given option.
-  ///
-  /// This is useful when using a custom T type for AutocompleteController and
-  /// the string to display is different than the string to search by. This is
-  /// not used when using [getResults].
-  ///
-  /// If not provided, will use `option.toString()`.
-  ///
-  /// See also:
-  ///   * [displayStringForOption], which can be used to specify a custom String
-  ///     to be shown in the field.
-  final AutocompleteOptionToString<T>? filterStringForOption;
-
-  /// The current results being returned by [getResults].
-  ///
-  /// This is a [ValueNotifier], so it can be listened to for changes.
-  final ValueNotifier<List<T>> results = ValueNotifier<List<T>>(<T>[]);
-
-  // The default way to convert an option to a string.
-  static String _defaultStringForOption<T>(T option) {
-    return option.toString();
-  }
-
-  // The default filter when using options instead of getResults. Simply filters
-  // based on case-insensitive string matching.
-  static List<T> _filterByString<T>(List<T> options, TextEditingValue value, AutocompleteOptionToString<T> filterStringForOption) {
-    assert(options != null);
-    return options
-        .where((T option) {
-          return filterStringForOption(option)
-              .toLowerCase()
-              .contains(value.text.toLowerCase());
-        })
-        .toList();
-  }
-
-  /// Clean up memory created by the AutocompleteController.
-  ///
-  /// Call this when the AutocompleteController is no longer needed, such as in
-  // the dispose method of the widget it was created in.
-  void dispose() {
-    textEditingController.removeListener(_onChangedField);
-    if (_ownsTextEditingController) {
-      textEditingController.dispose();
-    }
-  }
-
-  // Called when textEditingController reports a change in its value.
-  void _onChangedField() {
-    final List<T> resultsValue = getResults(textEditingController.value);
-    assert(resultsValue != null);
-    results.value = resultsValue;
-  }
-}
-*/
-
-// TODO(justinmc): Link to Autocomplete and AutocompleteCupertino when they are
-// implemented.
 /// A widget for helping the user to make a selection by entering some text and
 /// choosing from among a list of results.
 ///
@@ -420,8 +192,7 @@ class AutocompleteController<T> {
 class AutocompleteCore<T> extends StatefulWidget {
   /// Create an instance of AutocompleteCore.
   ///
-  /// [autocompleteController], [buildField], and [buildResults] must not be
-  /// null.
+  /// [buildField] and [buildResults] must not be null.
   const AutocompleteCore({
     required this.buildField,
     required this.buildResults,
@@ -432,13 +203,6 @@ class AutocompleteCore<T> extends StatefulWidget {
        assert(buildResults != null),
        displayStringForOption = displayStringForOption ?? _defaultStringForOption;
 
-  /// The controller that provides access to the main autocomplete state and
-  /// logic.
-  ///
-  /// The owner of autocompleteController must call
-  /// [AutocompleteController.dispose] on this when it's no longer needed.
-  //final AutocompleteController<T>? autocompleteController;
-
   /// Builds the field whose input is used to find the results.
   final AutocompleteFieldBuilder buildField;
 
@@ -447,8 +211,8 @@ class AutocompleteCore<T> extends StatefulWidget {
 
   /// Returns the string to display in the field when the option is selected.
   ///
-  /// This is useful when using a custom T type for AutocompleteController and
-  /// the string to display is different than the string to search by.
+  /// This is useful when using a custom T type and the string to display is
+  /// different than the string to search by.
   ///
   /// If not provided, will use `option.toString()`.
   ///
@@ -460,11 +224,8 @@ class AutocompleteCore<T> extends StatefulWidget {
   /// Called when a result is selected by the user.
   final AutocompleteOnSelected<T>? onSelected;
 
-  /// All possible options that can be selected.
-  ///
-  /// If passing an AutocompleteController, use [AutocompleteController()]'s
-  /// options parameter instead.
-  /// TODO(justinmc): update docs.
+  /// A function that returns the current selectable options given the current
+  /// TextEditingValue.
   final AutocompleteResultsGetter<T> buildOptions;
 
   // The default way to convert an option to a string.
@@ -473,15 +234,13 @@ class AutocompleteCore<T> extends StatefulWidget {
   }
 
   @override
-  _AutocompleteCoreState<T> createState() =>
-      _AutocompleteCoreState<T>();
+  _AutocompleteCoreState<T> createState() => _AutocompleteCoreState<T>();
 }
 
 class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _resultsLayerLink = LayerLink();
   final TextEditingController _textEditingController = TextEditingController();
-  // TODO(justinmc): Listen to changes on _textEditingController and update this.
   List<T> _results = <T>[];
   T? _selection;
 
@@ -595,6 +354,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
 
   @override
   void dispose() {
+    _textEditingController.removeListener(_onChangedField);
     _floatingResults?.remove();
     _floatingResults = null;
     super.dispose();
