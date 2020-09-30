@@ -137,6 +137,7 @@ if (enable_unittests) {
       "flow_test_utils.h",
       "gl_context_switch_unittests.cc",
       "layers/backdrop_filter_layer_unittests.cc",
+      "layers/checkerboard_layertree_unittests.cc",
       "layers/clip_path_layer_unittests.cc",
       "layers/clip_rect_layer_unittests.cc",
       "layers/clip_rrect_layer_unittests.cc",

@@ -41,6 +41,7 @@ FILE: ../../../flutter/flow/instrumentation.h
 FILE: ../../../flutter/flow/layers/backdrop_filter_layer.cc
 FILE: ../../../flutter/flow/layers/backdrop_filter_layer.h
 FILE: ../../../flutter/flow/layers/backdrop_filter_layer_unittests.cc
+FILE: ../../../flutter/flow/layers/checkerboard_layertree_unittests.cc
 FILE: ../../../flutter/flow/layers/child_scene_layer.cc
 FILE: ../../../flutter/flow/layers/child_scene_layer.h
 FILE: ../../../flutter/flow/layers/clip_path_layer.cc
