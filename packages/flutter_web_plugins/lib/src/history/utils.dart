@@ -11,20 +11,39 @@ AnchorElement _urlParsingNode;
 /// Example: for the url `http://example.com/foo`, the extracted pathname will
 /// be `/foo`.
 String extractPathname(String url) {
+  // TODO(mdebbar): Use the `URI` class instead?
   _urlParsingNode ??= AnchorElement();
   _urlParsingNode.href = url;
   final String pathname = _urlParsingNode.pathname;
   return (pathname.isEmpty || pathname[0] == '/') ? pathname : '/$pathname';
 }
 
+Element _baseElement;
+
+/// Finds the <base> element in the document and returns its `href` attribute.
+///
+/// Returns null if the element isn't found.
+String getBaseElementHrefFromDom() {
+  if (_baseElement == null) {
+    _baseElement = document.querySelector('base');
+    if (_baseElement == null) {
+      return null;
+    }
+  }
+  return _baseElement.getAttribute('href');
+}
+
 /// Checks that [baseHref] is set.
 ///
 /// Throws an exception otherwise.
 String checkBaseHref(String baseHref) {
-  if (baseHref != null) {
-    return baseHref;
+  if (baseHref == null) {
+    throw Exception('Please add a <base> element to your index.html');
   }
-  throw Exception('Please add a <base> element to your index.html');
+  if (!baseHref.endsWith('/')) {
+    throw Exception('The base href has to end with a "/" to work correctly');
+  }
+  return baseHref;
 }
 
 /// Prepends a slash to [path] if it doesn't start with a slash already.

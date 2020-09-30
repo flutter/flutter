@@ -124,12 +124,12 @@ class TestPlatformLocation extends PlatformLocation {
   String baseHref = '';
 
   @override
-  void onPopState(EventListener fn) {
+  void addPopStateListener(EventListener fn) {
     throw UnimplementedError();
   }
 
   @override
-  void offPopState(EventListener fn) {
+  void removePopStateListener(EventListener fn) {
     throw UnimplementedError();
   }
 

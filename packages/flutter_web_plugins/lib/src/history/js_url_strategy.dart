@@ -14,24 +14,26 @@ import 'package:meta/meta.dart';
 
 import 'url_strategy.dart';
 
-typedef _UrlStrategyListener = void Function(JsUrlStrategy);
+typedef _JsSetUrlStrategy = void Function(JsUrlStrategy);
 
-// KEEP THIS IN SYNC WITH THE JS NAME IN THE WEB ENGINE!
-// Find it at: `lib/src/engine/window.dart`.
-@JS('_flutter_web_set_location_strategy')
 /// A JavaScript hook to customize the URL strategy of a Flutter app.
-external _UrlStrategyListener get onUrlStrategy;
+//
+// KEEP THIS IN SYNC WITH THE JS NAME IN THE WEB ENGINE!
+// Find it at: https://github.com/flutter/engine/blob/custom_location_strategy/lib/web_ui/lib/src/engine/history/js_url_strategy.dart
+// TODO: Add integration test https://github.com/flutter/flutter/issues/66852
+@JS('_flutter_web_set_location_strategy')
+external _JsSetUrlStrategy get jsSetUrlStrategy;
 
 typedef _PathGetter = String Function();
 
-typedef _StateGetter = dynamic Function();
+typedef _StateGetter = Object Function();
 
-typedef _OnPopState = ui.VoidCallback Function(html.EventListener);
+typedef _AddPopStateListener = ui.VoidCallback Function(html.EventListener);
 
 typedef _StringToString = String Function(String);
 
 typedef _StateOperation = void Function(
-    dynamic state, String title, String url);
+    Object state, String title, String url);
 
 typedef _HistoryMove = Future<void> Function(int count);
 
@@ -45,19 +47,18 @@ JsUrlStrategy convertToJsUrlStrategy(UrlStrategy strategy) {
   return JsUrlStrategy(
     getPath: allowInterop(strategy.getPath),
     getState: allowInterop(strategy.getState),
-    onPopState: allowInterop(strategy.onPopState),
+    addPopStateListener: allowInterop(strategy.addPopStateListener),
     prepareExternalUrl: allowInterop(strategy.prepareExternalUrl),
     pushState: allowInterop(strategy.pushState),
     replaceState: allowInterop(strategy.replaceState),
     go: allowInterop(strategy.go),
-    // getBaseHref: allowInterop(strategy.getBaseHref),
   );
 }
 
 /// The JavaScript representation of a URL strategy.
 ///
 /// This is used to pass URL strategy implementations across a JS-interop
-/// bridge.
+/// bridge from the app to the engine.
 @JS()
 @anonymous
 abstract class JsUrlStrategy {
@@ -66,33 +67,49 @@ abstract class JsUrlStrategy {
   external factory JsUrlStrategy({
     @required _PathGetter getPath,
     @required _StateGetter getState,
-    @required _OnPopState onPopState,
+    @required _AddPopStateListener addPopStateListener,
     @required _StringToString prepareExternalUrl,
     @required _StateOperation pushState,
     @required _StateOperation replaceState,
     @required _HistoryMove go,
   });
 
-  /// Subscribes to popstate events and returns a function that could be used to
-  /// unsubscribe from popstate events.
-  external ui.VoidCallback onPopState(html.EventListener fn);
+  /// Adds a listener to the `popstate` event and returns a function that, when
+  /// invoked, removes the listener.
+  external ui.VoidCallback addPopStateListener(html.EventListener fn);
 
   /// Returns the active path in the browser.
   external String getPath();
 
   /// Returns the history state in the browser.
-  external dynamic getState();
+  ///
+  /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/state
+  external Object getState();
 
   /// Given a path that's internal to the app, create the external url that
   /// will be used in the browser.
   external String prepareExternalUrl(String internalUrl);
 
   /// Push a new history entry.
-  external void pushState(dynamic state, String title, String url);
+  ///
+  /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
+  external void pushState(Object state, String title, String url);
 
   /// Replace the currently active history entry.
-  external void replaceState(dynamic state, String title, String url);
+  ///
+  /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
+  external void replaceState(Object state, String title, String url);
 
   /// Moves forwards or backwards through the history stack.
+  ///
+  /// A negative [count] value causes a backward move in the history stack. And
+  /// a positive [count] value causs a forward move.
+  ///
+  /// Examples:
+  ///
+  /// * `go(-2)` moves back 2 steps in history.
+  /// * `go(3)` moves forward 3 steps in hisotry.
+  ///
+  /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
   external Future<void> go(int count);
 }
