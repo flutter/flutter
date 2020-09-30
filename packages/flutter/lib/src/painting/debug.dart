@@ -34,7 +34,7 @@ HttpClientProvider? debugNetworkImageHttpClientProvider;
 /// Called when the framework is about to paint an [Image] to a [Canvas] with an
 /// [ImageSizeInfo] that contains the decoded size of the image as well as its
 /// output size.
-/// 
+///
 /// See: [debugOnPaintImage].
 typedef PaintImageCallback = void Function(ImageSizeInfo);
 
