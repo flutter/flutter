@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -23,13 +22,13 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
+const String _libimobiledevicePath = '/bin/cache/artifacts/libimobiledevice';
+
 final Generator _kNoColorTerminalPlatform = () => FakePlatform(stdoutSupportsAnsi: false);
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
 
-class MockArtifacts extends Mock implements Artifacts {}
-class MockCache extends Mock implements Cache {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockIosProject extends Mock implements IosProject {}
@@ -42,18 +41,15 @@ void main() {
   });
 
   group('IMobileDevice', () {
-    final String libimobiledevicePath = globals.fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
-    final String idevicescreenshotPath = globals.fs.path.join(libimobiledevicePath, 'idevicescreenshot');
-    MockArtifacts mockArtifacts;
-    MockCache mockCache;
+    Artifacts artifacts;
+    Cache cache;
 
     setUp(() {
-      mockCache = MockCache();
-      mockArtifacts = MockArtifacts();
-      when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
-      when(mockCache.dyLdLibEntry).thenReturn(
-        MapEntry<String, String>('DYLD_LIBRARY_PATH', libimobiledevicePath)
-      );
+      artifacts = Artifacts.test();
+      cache = Cache.test(
+        artifacts: <ArtifactSet>[
+          FakeEnvironmentArtifact(),
+        ]);
     });
 
     group('screenshot', () {
@@ -63,19 +59,19 @@ void main() {
       setUp(() {
         mockProcessManager = MockProcessManager();
         outputFile = MemoryFileSystem.test().file('image.png');
-        when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
+        // when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
       });
 
       testWithoutContext('error if idevicescreenshot is not installed', () async {
         // Let `idevicescreenshot` fail with exit code 1.
-        when(mockProcessManager.run(<String>[idevicescreenshotPath, outputFile.path],
-            environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+        when(mockProcessManager.run(<String>['Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path],
+            environment: <String, String>{'DYLD_LIBRARY_PATH': 'Artifact.idevicescreenshot.TargetPlatform.ios'},
             workingDirectory: null,
         )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(4, 1, '', '')));
 
         final IMobileDevice iMobileDevice = IMobileDevice(
-          artifacts: mockArtifacts,
-          cache: mockCache,
+          artifacts: artifacts,
+          cache: cache,
           processManager: mockProcessManager,
           logger: logger,
         );
@@ -92,8 +88,8 @@ void main() {
             (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
 
         final IMobileDevice iMobileDevice = IMobileDevice(
-          artifacts: mockArtifacts,
-          cache: mockCache,
+          artifacts: artifacts,
+          cache: cache,
           processManager: mockProcessManager,
           logger: logger,
         );
@@ -103,8 +99,8 @@ void main() {
           '1234',
           IOSDeviceInterface.usb,
         );
-        verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputFile.path, '--udid', '1234'],
-            environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+        verify(mockProcessManager.run(<String>['Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path, '--udid', '1234'],
+            environment: <String, String>{'DYLD_LIBRARY_PATH': _libimobiledevicePath},
             workingDirectory: null,
         ));
       });
@@ -114,8 +110,8 @@ void main() {
             (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
 
         final IMobileDevice iMobileDevice = IMobileDevice(
-          artifacts: mockArtifacts,
-          cache: mockCache,
+          artifacts: artifacts,
+          cache: cache,
           processManager: mockProcessManager,
           logger: logger,
         );
@@ -125,8 +121,8 @@ void main() {
           '1234',
           IOSDeviceInterface.network,
         );
-        verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputFile.path, '--udid', '1234', '--network'],
-          environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+        verify(mockProcessManager.run(<String>['Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path, '--udid', '1234', '--network'],
+          environment: <String, String>{'DYLD_LIBRARY_PATH': _libimobiledevicePath},
           workingDirectory: null,
         ));
       });
@@ -488,3 +484,22 @@ Exited (sigterm)''',
 }
 
 class MockUsage extends Mock implements Usage {}
+
+class FakeEnvironmentArtifact extends ArtifactSet {
+  FakeEnvironmentArtifact() : super(DevelopmentArtifact.iOS);
+  @override
+  Map<String, String> get environment => <String, String>{
+    'DYLD_LIBRARY_PATH': _libimobiledevicePath,
+  };
+
+  @override
+  Future<bool> isUpToDate() => Future<bool>.value(true);
+
+  @override
+  String get name => 'fake';
+
+  @override
+  Future<void> update(ArtifactUpdater artifactUpdater) {
+    return null;
+  }
+}

@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:archive/archive.dart';
+import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 
 import 'android/gradle_utils.dart';
 import 'base/common.dart';
@@ -92,8 +94,8 @@ class Cache {
   /// [rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
   Cache({
-    Directory rootOverride,
-    List<ArtifactSet> artifacts,
+    @visibleForOverriding Directory rootOverride,
+    @visibleForOverriding List<ArtifactSet> artifacts,
     // TODO(jonahwilliams): make required once migrated to context-free.
     Logger logger,
     FileSystem fileSystem,
@@ -141,6 +143,38 @@ class Cache {
     } else {
       _artifacts.addAll(artifacts);
     }
+  }
+
+  /// Create a [Cache] for testing.
+  ///
+  /// Defaults to a memory file system, fake platform,
+  /// buffer logger, and no accessible artifacts.
+  /// By default, the root cache directory path is "cache".
+  @visibleForTesting
+  factory Cache.test({
+    Directory rootOverride,
+    List<ArtifactSet> artifacts,
+    Logger logger,
+    FileSystem fileSystem,
+    Platform platform,
+    ProcessManager processManager,
+  }) {
+    fileSystem ??= rootOverride?.fileSystem ?? MemoryFileSystem.test();
+    platform ??= FakePlatform(environment: <String, String>{});
+    logger ??= BufferLogger.test();
+    return Cache(
+      rootOverride: rootOverride ??= fileSystem.directory('cache'),
+      artifacts: artifacts ?? <ArtifactSet>[],
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: platform,
+      osUtils: OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
+    );
   }
 
   final Logger _logger;

@@ -827,9 +827,10 @@ void main() {
   });
 
   testUsingContext('Correct flutter runner', () async {
-    final MockCache cache = MockCache();
+    final Cache cache = Cache.test(
+      processManager: FakeProcessManager.any(),
+    );
     final FileSystem fileSystem = MemoryFileSystem.test();
-    when(cache.getArtifactDirectory('flutter_runner')).thenReturn(fileSystem.directory('fuchsia'));
     final CachedArtifacts artifacts = CachedArtifacts(
       cache: cache,
       fileSystem: fileSystem,
@@ -1591,4 +1592,3 @@ class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
 
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
 class MockFuchsiaWorkflow extends Mock implements FuchsiaWorkflow {}
-class MockCache extends Mock implements Cache {}

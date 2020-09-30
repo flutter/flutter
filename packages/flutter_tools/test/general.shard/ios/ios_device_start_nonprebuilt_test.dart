@@ -114,7 +114,7 @@ void main() {
       processManager.addCommand(const FakeCommand(command: <String>[...kRunReleaseArgs, '-showBuildSettings']));
       processManager.addCommand(FakeCommand(
         command: <String>[
-          'ios-deploy',
+          'Artifact.iosDeploy.TargetPlatform.ios',
           '--id',
           '123',
           '--bundle',
@@ -176,7 +176,7 @@ void main() {
           ));
         processManager.addCommand(FakeCommand(
           command: <String>[
-            'ios-deploy',
+            'Artifact.iosDeploy.TargetPlatform.ios',
             '--id',
             '123',
             '--bundle',
@@ -250,7 +250,7 @@ void main() {
         ));
       processManager.addCommand(FakeCommand(
         command: <String>[
-          'ios-deploy',
+          'Artifact.iosDeploy.TargetPlatform.ios',
           '--id',
           '123',
           '--bundle',
@@ -307,16 +307,14 @@ IOSDevice setUpIOSDevice({
   Logger logger,
   ProcessManager processManager,
 }) {
-  const MapEntry<String, String> dyldLibraryEntry = MapEntry<String, String>(
-    'DYLD_LIBRARY_PATH',
-    '/path/to/libraries',
+  final Artifacts artifacts = Artifacts.test();
+  final Cache cache = Cache.test(
+    artifacts: <ArtifactSet>[
+      FakeEnvironmentArtifact(),
+    ],
   );
-  final MockCache cache = MockCache();
-  final MockArtifacts artifacts = MockArtifacts();
+
   logger ??= BufferLogger.test();
-  when(cache.dyLdLibEntry).thenReturn(dyldLibraryEntry);
-  when(artifacts.getArtifactPath(Artifact.iosDeploy, platform: anyNamed('platform')))
-    .thenReturn('ios-deploy');
   return IOSDevice('123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
@@ -343,8 +341,25 @@ IOSDevice setUpIOSDevice({
   );
 }
 
-class MockArtifacts extends Mock implements Artifacts {}
-class MockCache extends Mock implements Cache {}
 class MockXcode extends Mock implements Xcode {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockVmService extends Mock implements VmService {}
+
+class FakeEnvironmentArtifact extends ArtifactSet {
+  FakeEnvironmentArtifact() : super(DevelopmentArtifact.iOS);
+  @override
+  Map<String, String> get environment => <String, String>{
+    'DYLD_LIBRARY_PATH': '/path/to/libraries'
+  };
+
+  @override
+  Future<bool> isUpToDate() => Future<bool>.value(true);
+
+  @override
+  String get name => 'fake';
+
+  @override
+  Future<void> update(ArtifactUpdater artifactUpdater) {
+    return null;
+  }
+}

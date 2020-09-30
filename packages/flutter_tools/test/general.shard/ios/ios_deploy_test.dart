@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -35,7 +34,7 @@ void main () {
             '-t',
             '0',
             '/dev/null',
-            'ios-deploy',
+            'Artifact.iosDeploy.TargetPlatform.ios',
             '--id',
             '123',
             '--bundle',
@@ -230,7 +229,7 @@ void main () {
       const String bundleId = 'com.example.app';
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
-          'ios-deploy',
+          'Artifact.iosDeploy.TargetPlatform.ios',
           '--id',
           deviceId,
           '--uninstall_only',
@@ -253,7 +252,7 @@ void main () {
       const String bundleId = 'com.example.app';
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
-          'ios-deploy',
+          'Artifact.iosDeploy.TargetPlatform.ios',
           '--id',
           deviceId,
           '--uninstall_only',
@@ -274,21 +273,20 @@ void main () {
 }
 
 IOSDeploy setUpIOSDeploy(ProcessManager processManager) {
-  const MapEntry<String, String> kDyLdLibEntry = MapEntry<String, String>(
-    'DYLD_LIBRARY_PATH', '/path/to/libs',
-  );
   final FakePlatform macPlatform = FakePlatform(
     operatingSystem: 'macos',
     environment: <String, String>{
       'PATH': '/usr/local/bin:/usr/bin'
     }
   );
-  final MockArtifacts artifacts = MockArtifacts();
-  final MockCache cache = MockCache();
+  final Artifacts artifacts = Artifacts.test();
+  final Cache cache = Cache.test(
+    platform: macPlatform,
+    artifacts: <ArtifactSet>[
+      FakeEnvironmentArtifact(),
+    ],
+  );
 
-  when(cache.dyLdLibEntry).thenReturn(kDyLdLibEntry);
-  when(artifacts.getArtifactPath(Artifact.iosDeploy, platform: anyNamed('platform')))
-    .thenReturn('ios-deploy');
   return IOSDeploy(
     logger: BufferLogger.test(),
     platform: macPlatform,
@@ -298,5 +296,21 @@ IOSDeploy setUpIOSDeploy(ProcessManager processManager) {
   );
 }
 
-class MockArtifacts extends Mock implements Artifacts {}
-class MockCache extends Mock implements Cache {}
+class FakeEnvironmentArtifact extends ArtifactSet {
+  FakeEnvironmentArtifact() : super(DevelopmentArtifact.iOS);
+  @override
+  Map<String, String> get environment => <String, String>{
+    'DYLD_LIBRARY_PATH': '/path/to/libs'
+  };
+
+  @override
+  Future<bool> isUpToDate() => Future<bool>.value(true);
+
+  @override
+  String get name => 'fake';
+
+  @override
+  Future<void> update(ArtifactUpdater artifactUpdater) {
+    return null;
+  }
+}

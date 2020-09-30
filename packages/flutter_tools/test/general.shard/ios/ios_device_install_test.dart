@@ -35,7 +35,7 @@ void main() {
     );
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
-        'ios-deploy',
+        'Artifact.iosDeploy.TargetPlatform.ios',
         '--id',
         '1234',
         '--bundle',
@@ -65,7 +65,7 @@ void main() {
     );
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
-        'ios-deploy',
+        'Artifact.iosDeploy.TargetPlatform.ios',
         '--id',
         '1234',
         '--bundle',
@@ -90,7 +90,7 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app');
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
-        'ios-deploy',
+        'Artifact.iosDeploy.TargetPlatform.ios',
         '--id',
         '1234',
         '--uninstall_only',
@@ -113,7 +113,7 @@ void main() {
       final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app');
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'ios-deploy',
+          'Artifact.iosDeploy.TargetPlatform.ios',
           '--id',
           '1234',
           '--exists',
@@ -125,7 +125,7 @@ void main() {
           'PATH': '/usr/bin:null',
           ...kDyLdLibEntry,
         }, onRun: () {
-          throw const ProcessException('ios-deploy', <String>[]);
+          throw const ProcessException('Artifact.iosDeploy.TargetPlatform.ios', <String>[]);
         })
       ]);
       final IOSDevice device = setUpIOSDevice(processManager: processManager);
@@ -139,7 +139,7 @@ void main() {
       final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app');
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
-          'ios-deploy',
+          'Artifact.iosDeploy.TargetPlatform.ios',
           '--id',
           '1234',
           '--exists',
@@ -163,7 +163,7 @@ void main() {
       final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app');
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
-          'ios-deploy',
+          'Artifact.iosDeploy.TargetPlatform.ios',
           '--id',
           '1234',
           '--exists',
@@ -190,7 +190,7 @@ void main() {
       const String stderr = '2020-03-26 17:48:43.484 ios-deploy[21518:5501783] [ !! ] Timed out waiting for device';
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
-          'ios-deploy',
+          'Artifact.iosDeploy.TargetPlatform.ios',
           '--id',
           '1234',
           '--exists',
@@ -222,7 +222,7 @@ void main() {
     );
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: const <String>[
-        'ios-deploy',
+        'Artifact.iosDeploy.TargetPlatform.ios',
         '--id',
         '1234',
         '--bundle',
@@ -232,7 +232,7 @@ void main() {
         'PATH': '/usr/bin:null',
         ...kDyLdLibEntry,
       }, onRun: () {
-        throw const ProcessException('ios-deploy', <String>[]);
+        throw const ProcessException('Artifact.iosDeploy.TargetPlatform.ios', <String>[]);
       })
     ]);
     final IOSDevice device = setUpIOSDevice(processManager: processManager);
@@ -245,7 +245,7 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app');
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: const <String>[
-        'ios-deploy',
+        'Artifact.iosDeploy.TargetPlatform.ios',
         '--id',
         '1234',
         '--uninstall_only',
@@ -255,7 +255,7 @@ void main() {
         'PATH': '/usr/bin:null',
         ...kDyLdLibEntry,
       }, onRun: () {
-        throw const ProcessException('ios-deploy', <String>[]);
+        throw const ProcessException('Artifact.iosDeploy.TargetPlatform.ios', <String>[]);
       })
     ]);
     final IOSDevice device = setUpIOSDevice(processManager: processManager);
@@ -276,11 +276,13 @@ IOSDevice setUpIOSDevice({
     operatingSystem: 'macos',
     environment: <String, String>{},
   );
-  final MockArtifacts artifacts = MockArtifacts();
-  final MockCache cache = MockCache();
-  when(cache.dyLdLibEntry).thenReturn(kDyLdLibEntry.entries.first);
-  when(artifacts.getArtifactPath(Artifact.iosDeploy, platform: anyNamed('platform')))
-    .thenReturn('ios-deploy');
+  final Artifacts artifacts = Artifacts.test();
+  final Cache cache = Cache.test(
+    platform: platform,
+    artifacts: <ArtifactSet>[
+      FakeEnvironmentArtifact(),
+    ],
+  );
   return IOSDevice(
     '1234',
     name: 'iPhone 1',
@@ -308,6 +310,23 @@ IOSDevice setUpIOSDevice({
   );
 }
 
-class MockArtifacts extends Mock implements Artifacts {}
-class MockCache extends Mock implements Cache {}
 class MockVmService extends Mock implements VmService {}
+
+class FakeEnvironmentArtifact extends ArtifactSet {
+  FakeEnvironmentArtifact() : super(DevelopmentArtifact.iOS);
+  @override
+  Map<String, String> get environment => <String, String>{
+    'DYLD_LIBRARY_PATH': '/path/to/libs'
+  };
+
+  @override
+  Future<bool> isUpToDate() => Future<bool>.value(true);
+
+  @override
+  String get name => 'fake';
+
+  @override
+  Future<void> update(ArtifactUpdater artifactUpdater) {
+    return null;
+  }
+}

@@ -39,20 +39,22 @@ void main() {
     AndroidSdk sdk;
     ProcessManager mockProcessManager;
     MemoryFileSystem fs;
-    Cache mockCache;
+    Cache cache;
     File gradle;
     final Map<Type, Generator> overrides = <Type, Generator>{
       AndroidSdk: () => sdk,
       ProcessManager: () => mockProcessManager,
       FileSystem: () => fs,
-      Cache: () => mockCache,
+      Cache: () => cache,
     };
 
     setUp(() async {
       sdk = MockitoAndroidSdk();
       mockProcessManager = MockitoProcessManager();
       fs = MemoryFileSystem.test();
-      mockCache = MockCache();
+      cache = Cache.test(
+        processManager: FakeProcessManager.any()
+      );
       Cache.flutterRoot = '../..';
       when(sdk.licensesAvailable).thenReturn(true);
       when(mockProcessManager.canRun(any)).thenReturn(true);
@@ -108,13 +110,12 @@ void main() {
         .childFile('gradle.properties')
         .writeAsStringSync('irrelevant');
 
-      final Directory gradleWrapperDir = globals.fs.systemTempDirectory.createTempSync('flutter_application_package_test_gradle_wrapper.');
-      when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
+      final Directory gradleWrapperDir = cache.getArtifactDirectory('gradle_wrapper');
 
-      globals.fs.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))
+      gradleWrapperDir.fileSystem.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))
           .createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join(gradleWrapperDir.path, 'gradlew')).writeAsStringSync('irrelevant');
-      globals.fs.file(globals.fs.path.join(gradleWrapperDir.path, 'gradlew.bat')).writeAsStringSync('irrelevant');
+      gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
+      gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
@@ -691,5 +692,4 @@ const String plistData = '''
 {"CFBundleIdentifier": "fooBundleId"}
 ''';
 
-class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils { }
