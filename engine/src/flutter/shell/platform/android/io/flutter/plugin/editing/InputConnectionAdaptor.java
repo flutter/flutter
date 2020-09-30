@@ -27,7 +27,6 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import io.flutter.Log;
-import io.flutter.embedding.android.AndroidKeyProcessor;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 
@@ -35,7 +34,6 @@ class InputConnectionAdaptor extends BaseInputConnection {
   private final View mFlutterView;
   private final int mClient;
   private final TextInputChannel textInputChannel;
-  private final AndroidKeyProcessor keyProcessor;
   private final Editable mEditable;
   private final EditorInfo mEditorInfo;
   private int mBatchCount;
@@ -99,7 +97,6 @@ class InputConnectionAdaptor extends BaseInputConnection {
       View view,
       int client,
       TextInputChannel textInputChannel,
-      AndroidKeyProcessor keyProcessor,
       Editable editable,
       EditorInfo editorInfo,
       FlutterJNI flutterJNI) {
@@ -110,7 +107,6 @@ class InputConnectionAdaptor extends BaseInputConnection {
     mEditable = editable;
     mEditorInfo = editorInfo;
     mBatchCount = 0;
-    this.keyProcessor = keyProcessor;
     this.flutterTextUtils = new FlutterTextUtils(flutterJNI);
     // We create a dummy Layout with max width so that the selection
     // shifting acts as if all text were in one line.
@@ -132,10 +128,9 @@ class InputConnectionAdaptor extends BaseInputConnection {
       View view,
       int client,
       TextInputChannel textInputChannel,
-      AndroidKeyProcessor keyProcessor,
       Editable editable,
       EditorInfo editorInfo) {
-    this(view, client, textInputChannel, keyProcessor, editable, editorInfo, new FlutterJNI());
+    this(view, client, textInputChannel, editable, editorInfo, new FlutterJNI());
   }
 
   // Send the current state of the editable to Flutter.
@@ -328,14 +323,6 @@ class InputConnectionAdaptor extends BaseInputConnection {
 
   @Override
   public boolean sendKeyEvent(KeyEvent event) {
-    // Give the key processor a chance to process this event.  It will send it
-    // to the framework to be handled and return true. If the framework ends up
-    // not handling it, the processor will re-send the event, this time
-    // returning false so that it can be processed here.
-    if (keyProcessor != null && keyProcessor.onKeyEvent(event)) {
-      return true;
-    }
-
     markDirty();
     if (event.getAction() == KeyEvent.ACTION_DOWN) {
       if (event.getKeyCode() == KeyEvent.KEYCODE_DEL) {
