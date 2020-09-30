@@ -77,8 +77,7 @@ class ImageInfo {
   ///   }
   ///   _imageInfo?.image?.dispose();
   ///   _imageInfo = value;
-  ///   markNeedsLayout();
-  ///   markNeedsPaint();
+  ///   // Perform work to determine size, or paint the image.
   /// }
   /// ```
   bool isCloneOf(ImageInfo other) {
