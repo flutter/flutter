@@ -4604,7 +4604,7 @@ typedef TransitionBuilder = Widget Function(BuildContext context, Widget? child)
 /// See also:
 ///
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
-typedef ControlsWidgetBuilder = Widget Function(BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel });
+typedef ControlsWidgetBuilder = Widget Function(BuildContext context, { VoidCallback? onStepContinue, VoidCallback? onStepCancel });
 
 /// An [Element] that composes other [Element]s.
 ///

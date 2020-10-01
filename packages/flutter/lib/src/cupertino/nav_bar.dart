@@ -1376,7 +1376,7 @@ class _BackChevron extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context)!;
-    final TextStyle textStyle = DefaultTextStyle.of(context).style!;
+    final TextStyle textStyle = DefaultTextStyle.of(context).style;
 
     // Replicate the Icon logic here to get a tightly sized icon and add
     // custom non-square padding.
@@ -1982,7 +1982,7 @@ class _NavigationBarComponentsTransition {
           opacity: fadeOutBy(0.4),
           // Keep the font when transitioning into a non-back-label leading.
           child: DefaultTextStyle(
-            style: bottomLargeTitleTextStyle,
+            style: bottomLargeTitleTextStyle!,
             child: bottomLargeTitle.child,
           ),
         ),
@@ -2219,7 +2219,7 @@ class _NavigationBarComponentsTransition {
       child: FadeTransition(
         opacity: fadeInFrom(0.3),
         child: DefaultTextStyle(
-          style: topLargeTitleTextStyle,
+          style: topLargeTitleTextStyle!,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           child: topLargeTitle.child,

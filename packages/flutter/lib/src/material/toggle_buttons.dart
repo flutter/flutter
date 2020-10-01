@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -166,9 +164,9 @@ class ToggleButtons extends StatelessWidget {
   /// [isSelected] values must be non-null. [focusNodes] must be null or a
   /// list of non-null nodes. [renderBorder] must not be null.
   const ToggleButtons({
-    Key key,
-    @required this.children,
-    @required this.isSelected,
+    Key? key,
+    required this.children,
+    required this.isSelected,
     this.onPressed,
     this.mouseCursor,
     this.textStyle,
@@ -221,17 +219,17 @@ class ToggleButtons extends StatelessWidget {
   /// tapped or otherwise activated.
   ///
   /// When the callback is null, all toggle buttons will be disabled.
-  final void Function(int index) onPressed;
+  final void Function(int index)? onPressed;
 
   /// {@macro flutter.material.button.mouseCursor}
-  final MouseCursor mouseCursor;
+  final MouseCursor? mouseCursor;
 
   /// The [TextStyle] to apply to any text in these toggle buttons.
   ///
   /// [TextStyle.color] will be ignored and substituted by [color],
   /// [selectedColor] or [disabledColor] depending on whether the buttons
   /// are active, selected, or disabled.
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
 
   /// Defines the button's size.
   ///
@@ -239,7 +237,7 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// If this property is null, then
   /// BoxConstraints(minWidth: 48.0, minHeight: 48.0) is be used.
-  final BoxConstraints constraints;
+  final BoxConstraints? constraints;
 
   /// The color for descendant [Text] and [Icon] widgets if the button is
   /// enabled and not selected.
@@ -250,7 +248,7 @@ class ToggleButtons extends StatelessWidget {
   /// If this property is null, then ToggleButtonTheme.of(context).color
   /// is used. If [ToggleButtonsThemeData.color] is also null, then
   /// Theme.of(context).colorScheme.onSurface is used.
-  final Color color;
+  final Color? color;
 
   /// The color for descendant [Text] and [Icon] widgets if the button is
   /// selected.
@@ -262,7 +260,7 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).selectedColor is used. If
   /// [ToggleButtonsThemeData.selectedColor] is also null, then
   /// Theme.of(context).colorScheme.primary is used.
-  final Color selectedColor;
+  final Color? selectedColor;
 
   /// The color for descendant [Text] and [Icon] widgets if the button is
   /// disabled.
@@ -273,7 +271,7 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).disabledColor is used. If
   /// [ToggleButtonsThemeData.disabledColor] is also null, then
   /// Theme.of(context).colorScheme.onSurface.withOpacity(0.38) is used.
-  final Color disabledColor;
+  final Color? disabledColor;
 
   /// The fill color for selected toggle buttons.
   ///
@@ -281,7 +279,7 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).fillColor is used. If
   /// [ToggleButtonsThemeData.fillColor] is also null, then
   /// the fill color is null.
-  final Color fillColor;
+  final Color? fillColor;
 
   /// The color to use for filling the button when the button has input focus.
   ///
@@ -289,7 +287,7 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).focusColor is used. If
   /// [ToggleButtonsThemeData.focusColor] is also null, then
   /// Theme.of(context).focusColor is used.
-  final Color focusColor;
+  final Color? focusColor;
 
   /// The highlight color for the button's [InkWell].
   ///
@@ -297,7 +295,7 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).highlightColor is used. If
   /// [ToggleButtonsThemeData.highlightColor] is also null, then
   /// Theme.of(context).highlightColor is used.
-  final Color highlightColor;
+  final Color? highlightColor;
 
   /// The splash color for the button's [InkWell].
   ///
@@ -305,7 +303,7 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).splashColor is used. If
   /// [ToggleButtonsThemeData.splashColor] is also null, then
   /// Theme.of(context).splashColor is used.
-  final Color splashColor;
+  final Color? splashColor;
 
   /// The color to use for filling the button when the button has a pointer
   /// hovering over it.
@@ -314,7 +312,7 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).hoverColor is used. If
   /// [ToggleButtonsThemeData.hoverColor] is also null, then
   /// Theme.of(context).hoverColor is used.
-  final Color hoverColor;
+  final Color? hoverColor;
 
   /// The list of [FocusNode]s, corresponding to each toggle button.
   ///
@@ -326,7 +324,7 @@ class ToggleButtons extends StatelessWidget {
   /// [children].
   ///
   /// See [FocusNode] for more information about how focus nodes are used.
-  final List<FocusNode> focusNodes;
+  final List<FocusNode>? focusNodes;
 
   /// Whether or not to render a border around each toggle button.
   ///
@@ -342,7 +340,7 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).borderColor is used. If
   /// [ToggleButtonsThemeData.borderColor] is also null, then
   /// Theme.of(context).colorScheme.onSurface is used.
-  final Color borderColor;
+  final Color? borderColor;
 
   /// The border color to display when the toggle button is selected.
   ///
@@ -350,7 +348,7 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).selectedBorderColor is used. If
   /// [ToggleButtonsThemeData.selectedBorderColor] is also null, then
   /// Theme.of(context).colorScheme.primary is used.
-  final Color selectedBorderColor;
+  final Color? selectedBorderColor;
 
   /// The border color to display when the toggle button is disabled.
   ///
@@ -358,7 +356,7 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).disabledBorderColor is used. If
   /// [ToggleButtonsThemeData.disabledBorderColor] is also null, then
   /// Theme.of(context).disabledBorderColor is used.
-  final Color disabledBorderColor;
+  final Color? disabledBorderColor;
 
   /// The width of the border surrounding each toggle button.
   ///
@@ -374,7 +372,7 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).borderWidth is used. If
   /// [ToggleButtonsThemeData.borderWidth] is also null, then
   /// a width of 1.0 is used.
-  final double borderWidth;
+  final double? borderWidth;
 
   /// The radii of the border's corners.
   ///
@@ -382,7 +380,7 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).borderRadius is used. If
   /// [ToggleButtonsThemeData.borderRadius] is also null, then
   /// the buttons default to non-rounded borders.
-  final BorderRadius borderRadius;
+  final BorderRadius? borderRadius;
 
   bool _isFirstIndex(int index, int length, TextDirection textDirection) {
     return index == 0 && textDirection == TextDirection.ltr
@@ -524,7 +522,7 @@ class ToggleButtons extends StatelessWidget {
       return BorderSide.none;
 
     if (index != children.length - 1)
-      return null;
+      return BorderSide.none;
 
     final double resultingBorderWidth = borderWidth
       ?? toggleButtonsTheme.borderWidth
@@ -562,7 +560,7 @@ class ToggleButtons extends StatelessWidget {
       '$isSelected'
     );
     assert(
-      focusNodes == null || !focusNodes.any((FocusNode val) => val == null),
+      focusNodes == null || !focusNodes!.any((FocusNode val) => val == null),
       'All elements of focusNodes must be non-null.\n'
       'The current list of focus node values is as follows:\n'
       '$focusNodes'
@@ -570,16 +568,16 @@ class ToggleButtons extends StatelessWidget {
     assert(
       () {
         if (focusNodes != null)
-          return focusNodes.length == children.length;
+          return focusNodes!.length == children.length;
         return true;
       }(),
       'focusNodes.length must match children.length.\n'
-      'There are ${focusNodes.length} focus nodes, while '
+      'There are ${focusNodes!.length} focus nodes, while '
       'there are ${children.length} children.'
     );
-    final ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context)!;
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
-    final TextDirection textDirection = Directionality.of(context);
+    final TextDirection textDirection = Directionality.of(context)!;
 
     return IntrinsicHeight(
       child: Row(
@@ -605,9 +603,9 @@ class ToggleButtons extends StatelessWidget {
             highlightColor: highlightColor ?? toggleButtonsTheme.highlightColor,
             hoverColor: hoverColor ?? toggleButtonsTheme.hoverColor,
             splashColor: splashColor ?? toggleButtonsTheme.splashColor,
-            focusNode: focusNodes != null ? focusNodes[index] : null,
+            focusNode: focusNodes != null ? focusNodes![index] : null,
             onPressed: onPressed != null
-              ? () { onPressed(index); }
+              ? () { onPressed!(index); }
               : null,
             mouseCursor: mouseCursor,
             leadingBorderSide: leadingBorderSide,
@@ -662,82 +660,82 @@ class _ToggleButton extends StatelessWidget {
   /// which is used by [ToggleButtons] to customize borders based on the
   /// order in which this button appears in the list.
   const _ToggleButton({
-    Key key,
+    Key? key,
     this.selected = false,
     this.textStyle,
     this.constraints,
     this.color,
     this.selectedColor,
     this.disabledColor,
-    this.fillColor,
-    this.focusColor,
-    this.highlightColor,
-    this.hoverColor,
-    this.splashColor,
+    required this.fillColor,
+    required this.focusColor,
+    required this.highlightColor,
+    required this.hoverColor,
+    required this.splashColor,
     this.focusNode,
     this.onPressed,
     this.mouseCursor,
-    this.leadingBorderSide,
-    this.horizontalBorderSide,
-    this.trailingBorderSide,
-    this.borderRadius,
-    this.clipRadius,
-    this.isFirstButton,
-    this.isLastButton,
-    this.child,
+    required this.leadingBorderSide,
+    required this.horizontalBorderSide,
+    required this.trailingBorderSide,
+    required this.borderRadius,
+    required this.clipRadius,
+    required this.isFirstButton,
+    required this.isLastButton,
+    required this.child,
   }) : super(key: key);
 
   /// Determines if the button is displayed as active/selected or enabled.
   final bool selected;
 
   /// The [TextStyle] to apply to any text that appears in this button.
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
 
   /// Defines the button's size.
   ///
   /// Typically used to constrain the button's minimum size.
-  final BoxConstraints constraints;
+  final BoxConstraints? constraints;
 
   /// The color for [Text] and [Icon] widgets if the button is enabled.
   ///
   /// If [selected] is false and [onPressed] is not null, this color will be used.
-  final Color color;
+  final Color? color;
 
   /// The color for [Text] and [Icon] widgets if the button is selected.
   ///
   /// If [selected] is true and [onPressed] is not null, this color will be used.
-  final Color selectedColor;
+  final Color? selectedColor;
 
   /// The color for [Text] and [Icon] widgets if the button is disabled.
   ///
   /// If [onPressed] is null, this color will be used.
-  final Color disabledColor;
+  final Color? disabledColor;
 
   /// The color of the button's [Material].
-  final Color fillColor;
+  final Color? fillColor;
 
   /// The color for the button's [Material] when it has the input focus.
-  final Color focusColor;
+  final Color? focusColor;
 
   /// The color for the button's [Material] when a pointer is hovering over it.
-  final Color hoverColor;
+  final Color? hoverColor;
 
   /// The highlight color for the button's [InkWell].
-  final Color highlightColor;
+  final Color? highlightColor;
 
   /// The splash color for the button's [InkWell].
-  final Color splashColor;
+  final Color? splashColor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
-  final FocusNode focusNode;
+  final FocusNode? focusNode;
 
   /// Called when the button is tapped or otherwise activated.
   ///
   /// If this is null, the button will be disabled, see [enabled].
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   /// {@macro flutter.material.button.mouseCursor}
-  final MouseCursor mouseCursor;
+  final MouseCursor? mouseCursor;
 
   /// The width and color of the button's leading side border.
   final BorderSide leadingBorderSide;
@@ -771,10 +769,10 @@ class _ToggleButton extends StatelessWidget {
     assert(debugCheckHasMaterial(context));
     Color currentColor;
     Color currentFillColor;
-    Color currentFocusColor;
-    Color currentHoverColor;
-    Color currentSplashColor;
-    final ThemeData theme = Theme.of(context);
+    Color? currentFocusColor;
+    Color? currentHoverColor;
+    Color? currentSplashColor;
+    final ThemeData theme = Theme.of(context)!;
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
 
     if (onPressed != null && selected) {
@@ -813,7 +811,7 @@ class _ToggleButton extends StatelessWidget {
       currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
     }
 
-    final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.bodyText2;
+    final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.bodyText2!;
     final BoxConstraints currentConstraints = constraints ?? toggleButtonsTheme.constraints ?? const BoxConstraints(minWidth: kMinInteractiveDimension, minHeight: kMinInteractiveDimension);
 
     final Widget result = ClipRRect(
@@ -864,14 +862,14 @@ class _ToggleButton extends StatelessWidget {
 
 class _SelectToggleButton extends SingleChildRenderObjectWidget {
   const _SelectToggleButton({
-    Key key,
-    Widget child,
-    this.leadingBorderSide,
-    this.horizontalBorderSide,
-    this.trailingBorderSide,
-    this.borderRadius,
-    this.isFirstButton,
-    this.isLastButton,
+    Key? key,
+    required Widget child,
+    required this.leadingBorderSide,
+    required this.horizontalBorderSide,
+    required this.trailingBorderSide,
+    required this.borderRadius,
+    required this.isFirstButton,
+    required this.isLastButton,
   }) : super(
     key: key,
     child: child,
@@ -903,7 +901,7 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
     borderRadius,
     isFirstButton,
     isLastButton,
-    Directionality.of(context),
+    Directionality.of(context)!,
   );
 
   @override
@@ -915,7 +913,7 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
       ..borderRadius = borderRadius
       ..isFirstButton = isFirstButton
       ..isLastButton = isLastButton
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.of(context)!;
   }
 }
 
@@ -928,7 +926,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     this._isFirstButton,
     this._isLastButton,
     this._textDirection, [
-    RenderBox child,
+    RenderBox? child,
   ]) : super(child);
 
   // The width and color of the button's leading side border.
@@ -1001,22 +999,22 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  static double _maxHeight(RenderBox box, double width) {
+  static double _maxHeight(RenderBox? box, double width) {
     return box == null ? 0.0 : box.getMaxIntrinsicHeight(width);
   }
 
-  static double _minWidth(RenderBox box, double height) {
+  static double _minWidth(RenderBox? box, double height) {
     return box == null ? 0.0 : box.getMinIntrinsicWidth(height);
   }
 
-  static double _maxWidth(RenderBox box, double height) {
+  static double _maxWidth(RenderBox? box, double height) {
     return box == null ? 0.0 : box.getMaxIntrinsicWidth(height);
   }
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     // The baseline of this widget is the baseline of its child
-    return child.computeDistanceToActualBaseline(baseline) +
+    return child!.computeDistanceToActualBaseline(baseline)! +
       horizontalBorderSide.width;
   }
 
@@ -1032,18 +1030,16 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double trailingWidth = trailingBorderSide == null ? 0.0 : trailingBorderSide.width;
     return leadingBorderSide.width +
            _maxWidth(child, height) +
-           trailingWidth;
+           trailingBorderSide.width;
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    final double trailingWidth = trailingBorderSide == null ? 0.0 : trailingBorderSide.width;
     return leadingBorderSide.width +
            _minWidth(child, height) +
-           trailingWidth;
+           trailingBorderSide.width;
   }
 
   @override
@@ -1074,13 +1070,13 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           ),
         );
 
-        child.layout(innerConstraints, parentUsesSize: true);
-        final BoxParentData childParentData = child.parentData as BoxParentData;
+        child!.layout(innerConstraints, parentUsesSize: true);
+        final BoxParentData childParentData = child!.parentData! as BoxParentData;
         childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
 
         size = constraints.constrain(Size(
-          leftConstraint + child.size.width + rightConstraint,
-          horizontalBorderSide.width * 2.0 + child.size.height,
+          leftConstraint + child!.size.width + rightConstraint,
+          horizontalBorderSide.width * 2.0 + child!.size.height,
         ));
         break;
       case TextDirection.rtl:
@@ -1096,8 +1092,8 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           ),
         );
 
-        child.layout(innerConstraints, parentUsesSize: true);
-        final BoxParentData childParentData = child.parentData as BoxParentData;
+        child!.layout(innerConstraints, parentUsesSize: true);
+        final BoxParentData childParentData = child!.parentData! as BoxParentData;
 
         if (isLastButton) {
           childParentData.offset = Offset(trailingBorderOffset, trailingBorderOffset);
@@ -1106,8 +1102,8 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         }
 
         size = constraints.constrain(Size(
-          leftConstraint + child.size.width + rightConstraint,
-          horizontalBorderSide.width * 2.0 + child.size.height,
+          leftConstraint + child!.size.width + rightConstraint,
+          horizontalBorderSide.width * 2.0 + child!.size.height,
         ));
         break;
     }
