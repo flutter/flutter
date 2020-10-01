@@ -1692,7 +1692,7 @@ void main() {
           return MediaQuery(
             data: const MediaQueryData(
               padding: EdgeInsets.only(
-                top: windowPaddingTop, 
+                top: windowPaddingTop,
                 bottom: windowPaddingBottom,
               ),
             ),
