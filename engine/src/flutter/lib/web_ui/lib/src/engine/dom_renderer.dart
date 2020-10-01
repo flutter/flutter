@@ -536,18 +536,18 @@ flt-glass-pane * {
   Future<bool> setPreferredOrientation(List<dynamic>? orientations) {
     final html.Screen screen = html.window.screen!;
     if (!_unsafeIsNull(screen)) {
-      final html.ScreenOrientation screenOrientation =
-          screen.orientation!;
+      final html.ScreenOrientation? screenOrientation =
+          screen.orientation;
       if (!_unsafeIsNull(screenOrientation)) {
         if (orientations!.isEmpty) {
-          screenOrientation.unlock();
+          screenOrientation!.unlock();
           return Future.value(true);
         } else {
           String? lockType = _deviceOrientationToLockType(orientations.first);
           if (lockType != null) {
             final Completer<bool> completer = Completer<bool>();
             try {
-              screenOrientation.lock(lockType).then((dynamic _) {
+              screenOrientation!.lock(lockType).then((dynamic _) {
                 completer.complete(true);
               }).catchError((dynamic error) {
                 // On Chrome desktop an error with 'not supported on this device
