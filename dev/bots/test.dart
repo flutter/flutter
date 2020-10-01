@@ -423,7 +423,7 @@ Future<void> _flutterBuildApk(String relativePathToApplication, {
   List<String> additionalArgs = const <String>[],
 }) async {
   print('${green}Testing APK build$reset for $cyan$relativePathToApplication$reset...');
-  _flutterBuild(relativePathToApplication, 'APK', 'apk',
+  await _flutterBuild(relativePathToApplication, 'APK', 'apk',
     release: release,
     verifyCaching: verifyCaching,
     additionalArgs: additionalArgs
@@ -449,7 +449,7 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
       },
     );
   }
-  _flutterBuild(relativePathToApplication, 'IPA', 'ios',
+  await _flutterBuild(relativePathToApplication, 'IPA', 'ios',
     release: release,
     verifyCaching: verifyCaching,
     additionalArgs: additionalArgs
@@ -463,7 +463,7 @@ Future<void> _flutterBuildLinux(String relativePathToApplication, {
 }) async {
   assert(Platform.isLinux);
   print('${green}Testing Linux build$reset for $cyan$relativePathToApplication$reset...');
-  _flutterBuild(relativePathToApplication, 'Linux', 'linux',
+  await _flutterBuild(relativePathToApplication, 'Linux', 'linux',
     release: release,
     verifyCaching: verifyCaching,
     additionalArgs: additionalArgs
@@ -477,7 +477,7 @@ Future<void> _flutterBuildMacOS(String relativePathToApplication, {
 }) async {
   assert(Platform.isMacOS);
   print('${green}Testing macOS build$reset for $cyan$relativePathToApplication$reset...');
-  _flutterBuild(relativePathToApplication, 'macOS', 'macos',
+  await _flutterBuild(relativePathToApplication, 'macOS', 'macos',
     release: release,
     verifyCaching: verifyCaching,
     additionalArgs: additionalArgs
@@ -491,7 +491,7 @@ Future<void> _flutterBuildWin32(String relativePathToApplication, {
 }) async {
   assert(Platform.isWindows);
   print('${green}Testing Windows build$reset for $cyan$relativePathToApplication$reset...');
-  _flutterBuild(relativePathToApplication, 'Windows', 'windows',
+  await _flutterBuild(relativePathToApplication, 'Windows', 'windows',
     release: release,
     verifyCaching: verifyCaching,
     additionalArgs: additionalArgs
