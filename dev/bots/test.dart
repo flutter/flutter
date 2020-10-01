@@ -462,6 +462,7 @@ Future<void> _flutterBuildLinux(String relativePathToApplication, {
   List<String> additionalArgs = const <String>[],
 }) async {
   assert(Platform.isLinux);
+  await runCommand(flutter, <String>['config', '--enable-linux-desktop']);
   print('${green}Testing Linux build$reset for $cyan$relativePathToApplication$reset...');
   await _flutterBuild(relativePathToApplication, 'Linux', 'linux',
     release: release,
@@ -476,6 +477,7 @@ Future<void> _flutterBuildMacOS(String relativePathToApplication, {
   List<String> additionalArgs = const <String>[],
 }) async {
   assert(Platform.isMacOS);
+  await runCommand(flutter, <String>['config', '--enable-macos-desktop']);
   print('${green}Testing macOS build$reset for $cyan$relativePathToApplication$reset...');
   await _flutterBuild(relativePathToApplication, 'macOS', 'macos',
     release: release,
@@ -490,6 +492,7 @@ Future<void> _flutterBuildWin32(String relativePathToApplication, {
   List<String> additionalArgs = const <String>[],
 }) async {
   assert(Platform.isWindows);
+  await runCommand(flutter, <String>['config', '--enable-windows-desktop']);
   print('${green}Testing Windows build$reset for $cyan$relativePathToApplication$reset...');
   await _flutterBuild(relativePathToApplication, 'Windows', 'windows',
     release: release,
