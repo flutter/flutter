@@ -86,9 +86,9 @@ function deploy_docs() {
     # Ensure google webmaster tools can verify our site.
     cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
 
-    case "$CIRRUS_BRANCH" in
+    case "$LUCI_BRANCH" in
         master)
-            echo "$(date): Updating $CIRRUS_BRANCH docs: https://master-api.flutter.dev/"
+            echo "$(date): Updating $LUCI_BRANCH docs: https://master-api.flutter.dev/"
             # Disable search indexing on the master staging site so searches get only
             # the stable site.
             echo -e "User-agent: *\nDisallow: /" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
@@ -96,7 +96,7 @@ function deploy_docs() {
             deploy 5 master-docs-flutter-dev
             ;;
         stable)
-            echo "$(date): Updating $CIRRUS_BRANCH docs: https://api.flutter.dev/"
+            echo "$(date): Updating $LUCI_BRANCH docs: https://api.flutter.dev/"
             # Enable search indexing on the master staging site so searches get only
             # the stable site.
             echo -e "# All robots welcome!" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
@@ -104,7 +104,7 @@ function deploy_docs() {
             deploy 5 docs-flutter-dev
             ;;
         *)
-            >&2 echo "Docs deployment cannot be run on the $CIRRUS_BRANCH branch."
+            >&2 echo "Docs deployment cannot be run on the $LUCI_BRANCH branch."
             exit 0
     esac
 }
@@ -118,14 +118,13 @@ function move_offline_into_place() {
   mkdir -p doc/offline
   mv flutter.docs.zip doc/offline/flutter.docs.zip
   du -sh doc/offline/flutter.docs.zip
-  # TODO(tvolkert): re-enable (https://github.com/flutter/flutter/issues/60646)
-  # if [[ "$CIRRUS_BRANCH" == "stable" ]]; then
-  #   echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
-  # else
-  #   echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://master-api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
-  # fi
-  # mv flutter.docset.tar.gz doc/offline/flutter.docset.tar.gz
-  # du -sh doc/offline/flutter.docset.tar.gz
+  if [[ "$LUCI_BRANCH" == "stable" ]]; then
+    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
+  else
+    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://master-api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
+  fi
+  mv flutter.docset.tar.gz doc/offline/flutter.docset.tar.gz
+  du -sh doc/offline/flutter.docset.tar.gz
 }
 
 # So that users can run this script from anywhere and it will work as expected.
@@ -163,10 +162,9 @@ fi
 
 generate_docs
 # Skip publishing docs for PRs and release candidate branches
-if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
+if [[ -n "$LUCI_CI" && -z "$LUCI_PR" ]]; then
   (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
-  # TODO(tvolkert): re-enable (https://github.com/flutter/flutter/issues/60646)
-  # (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
+  (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
   (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
   deploy_docs
 fi
