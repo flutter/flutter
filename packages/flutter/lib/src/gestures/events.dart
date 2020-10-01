@@ -837,7 +837,6 @@ class PointerAddedEvent extends PointerEvent with _PointerEventDescription, _Cop
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
-         synthesized: false,
          embedderId: embedderId,
        );
 
@@ -942,7 +941,6 @@ class PointerRemovedEvent extends PointerEvent with _PointerEventDescription, _C
          radiusMin: radiusMin,
          radiusMax: radiusMax,
          original: original,
-         synthesized: false,
          embedderId: embedderId,
        );
 
@@ -1559,7 +1557,6 @@ class PointerDownEvent extends PointerEvent with _PointerEventDescription, _Copy
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
-         synthesized: false,
          embedderId: embedderId,
        );
 
@@ -1831,7 +1828,6 @@ class PointerUpEvent extends PointerEvent with _PointerEventDescription, _CopyPo
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
-         synthesized: false,
          embedderId: embedderId,
        );
 
@@ -2103,7 +2099,6 @@ class PointerCancelEvent extends PointerEvent with _PointerEventDescription, _Co
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
-         synthesized: false,
          embedderId: embedderId,
        );
 
