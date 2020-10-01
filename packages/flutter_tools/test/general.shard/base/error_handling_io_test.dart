@@ -149,6 +149,20 @@ void main() {
     expect(() => ErrorHandlingFileSystem.deleteFileIfExists(file), throwsA(isA<ToolExit>()));
   });
 
+  testWithoutContext('deleteIfExists does not tool exit if file exists on read-only '
+    'volume and it is run under noExitOnFailure', () {
+    final File file = MockFile();
+    when(file.existsSync()).thenReturn(true);
+    when(file.deleteSync(recursive: false))
+      .thenThrow(const FileSystemException('', '', OSError('', 2)));
+
+    expect(() {
+      ErrorHandlingFileSystem.noExitOnFailure(() {
+        ErrorHandlingFileSystem.deleteFileIfExists(file);
+      });
+    }, throwsA(isA<FileSystemException>()));
+  });
+
   group('throws ToolExit on Windows', () {
     const int kDeviceFull = 112;
     const int kUserMappedSectionOpened = 1224;

@@ -81,7 +81,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       // if it still exists, the file likely exists on a read-only volume.
       // This error code is the same across linux, windows, and macOS.
       const int kSystemCannotFindFile = 2;
-      if (err?.osError?.errorCode != kSystemCannotFindFile) {
+      if (err?.osError?.errorCode != kSystemCannotFindFile || _noExitOnFailure) {
         rethrow;
       }
       if (file.existsSync()) {
