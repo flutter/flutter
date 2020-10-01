@@ -812,7 +812,7 @@ void _testsInput() {
 
     expect(find.byType(TextField), findsNothing);
 
-    // Double tap the hour
+    // Double tap the hour.
     await tester.tap(hourFinder);
     await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(hourFinder);
@@ -834,11 +834,11 @@ void _testsInput() {
 
     expect(find.byType(TextField), findsNothing);
 
-    // Switch to minutes mode
+    // Switch to minutes mode.
     await tester.tap(minuteFinder);
     await tester.pumpAndSettle();
 
-    // Double tap the hour
+    // Double tap the hour.
     await tester.tap(hourFinder);
     await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(hourFinder);
@@ -856,11 +856,11 @@ void _testsInput() {
 
     expect(find.byType(TextField), findsNothing);
 
-    // Switch to minutes mode
+    // Switch to minutes mode.
     await tester.tap(minuteFinder);
     await tester.pumpAndSettle();
 
-    // Double tap the minutes
+    // Double tap the minutes.
     await tester.tap(minuteFinder);
     await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(minuteFinder);
@@ -878,7 +878,7 @@ void _testsInput() {
 
     expect(find.byType(TextField), findsNothing);
 
-    // Double tap the minutes
+    // Double tap the minutes.
     await tester.tap(minuteFinder);
     await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(minuteFinder);
