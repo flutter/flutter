@@ -5506,6 +5506,13 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///     registerForRestoration(_lastCount, 'count');
 ///   }
 ///
+///   @override
+///   void dispose() {
+///     super.dispose();
+///     _lastCount.dispose();
+///     _counterRoute?.dispose();
+///   }
+///
 ///   // A static `RestorableRouteBuilder` that can re-create the route during
 ///   // state restoration.
 ///   static Route<int> _counterRouteBuilder(BuildContext context, Object arguments) {
@@ -5555,6 +5562,12 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///   @override
 ///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
 ///     registerForRestoration(_count, 'count');
+///   }
+///
+///   @override
+///   void dispose() {
+///     super.dispose();
+///     _count.dispose();
 ///   }
 ///
 ///   @override
