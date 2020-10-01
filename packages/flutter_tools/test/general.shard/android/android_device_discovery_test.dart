@@ -62,29 +62,6 @@ void main() {
     expect(await androidDevices.getDiagnostics(), isEmpty);
   });
 
-  testWithoutContext('AndroidDevices throwsToolExit on missing adb path', () {
-    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: const <String>['adb', 'devices', '-l'],
-        onRun: () {
-          throw ArgumentError('adb');
-        }
-      )
-    ]);
-    final AndroidDevices androidDevices = AndroidDevices(
-      androidSdk: FakeAndroidSdk(),
-      logger: BufferLogger.test(),
-      androidWorkflow: androidWorkflow,
-      processManager: processManager,
-      fileSystem: MemoryFileSystem.test(),
-      platform: FakePlatform(),
-      userMessages: UserMessages(),
-    );
-
-    expect(androidDevices.pollingGetDevices(),
-      throwsToolExit(message: RegExp('Unable to find "adb"')));
-  });
-
   testWithoutContext('AndroidDevices throwsToolExit on failing adb', () {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
