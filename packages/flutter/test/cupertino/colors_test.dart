@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,15 +11,15 @@ import '../rendering/mock_canvas.dart';
 
 class DependentWidget extends StatelessWidget {
   const DependentWidget({
-    Key key,
-    this.color,
+    Key? key,
+    required this.color,
   }) : super(key: key);
 
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final Color resolved = CupertinoDynamicColor.resolve(color, context, nullOk: false);
+    final Color? resolved = CupertinoDynamicColor.resolve(color, context, nullOk: false);
     return DecoratedBox(
       decoration: BoxDecoration(color: resolved),
       child: const SizedBox.expand(),
@@ -422,7 +420,7 @@ void main() {
   });
 
   testWidgets('CupertinoDynamicColor used in a CupertinoTheme', (WidgetTester tester) async {
-    CupertinoDynamicColor color;
+    CupertinoDynamicColor? color;
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(
@@ -438,7 +436,7 @@ void main() {
       ),
     );
 
-    expect(color.value, dynamicColor.darkColor.value);
+    expect(color!.value, dynamicColor.darkColor.value);
 
     // Changing dependencies works.
     await tester.pumpWidget(
@@ -456,7 +454,7 @@ void main() {
       ),
     );
 
-    expect(color.value, dynamicColor.color.value);
+    expect(color!.value, dynamicColor.color.value);
 
     // Having a dependency below the CupertinoTheme widget works.
     await tester.pumpWidget(
@@ -477,7 +475,7 @@ void main() {
       ),
     );
 
-    expect(color.value, dynamicColor.color.value);
+    expect(color!.value, dynamicColor.color.value);
 
     // Changing dependencies works.
     await tester.pumpWidget(
@@ -499,11 +497,11 @@ void main() {
       ),
     );
 
-    expect(color.value, dynamicColor.darkHighContrastElevatedColor.value);
+    expect(color!.value, dynamicColor.darkHighContrastElevatedColor.value);
   });
 
   group('MaterialApp:', () {
-    Color color;
+    Color? color;
     setUp(() { color = null; });
 
     testWidgets('dynamic color works in cupertino override theme', (WidgetTester tester) async {

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 
@@ -63,7 +61,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.widgetWithText(DefaultTextStyle, 'Ok'));
 
-    expect(widget.style.color, const CupertinoDynamicColor.withBrightnessAndContrast(
+    expect(widget.style!.color, const CupertinoDynamicColor.withBrightnessAndContrast(
       color: Color.fromARGB(255, 255, 59, 48),
       darkColor: Color.fromARGB(255, 255, 69, 58),
       highContrastColor: Color.fromARGB(255, 215, 0, 21),
@@ -78,7 +76,7 @@ void main() {
     );
 
     Brightness brightness = Brightness.light;
-    StateSetter stateSetter;
+    StateSetter? stateSetter;
 
     TextStyle actionTextStyle(String text) {
       return tester.widget<DefaultTextStyle>(
@@ -86,7 +84,7 @@ void main() {
           of: find.widgetWithText(CupertinoActionSheetAction, text),
           matching: find.byType(DefaultTextStyle),
         ),
-      ).style;
+      ).style!;
     }
 
     await tester.pumpWidget(
@@ -115,15 +113,15 @@ void main() {
     await tester.pump();
 
     expect(
-      actionTextStyle('action').color.value,
+      actionTextStyle('action').color!.value,
       const Color.fromARGB(255, 0, 122, 255).value,
     );
 
-    stateSetter(() { brightness = Brightness.dark; });
+    stateSetter!(() { brightness = Brightness.dark; });
     await tester.pump();
 
     expect(
-      actionTextStyle('action').color.value,
+      actionTextStyle('action').color!.value,
       const Color.fromARGB(255, 10, 132, 255).value,
     );
   });
@@ -141,7 +139,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.widgetWithText(DefaultTextStyle, 'Ok'));
 
-    expect(widget.style.fontWeight, equals(FontWeight.w600));
+    expect(widget.style!.fontWeight, equals(FontWeight.w600));
   });
 
   testWidgets('Action sheet text styles are correct when both title and message are included', (WidgetTester tester) async {
@@ -162,8 +160,8 @@ void main() {
     final DefaultTextStyle messageStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle,
         'An action sheet'));
 
-    expect(titleStyle.style.fontWeight, FontWeight.w600);
-    expect(messageStyle.style.fontWeight, FontWeight.w400);
+    expect(titleStyle.style!.fontWeight, FontWeight.w600);
+    expect(messageStyle.style!.fontWeight, FontWeight.w400);
   });
 
   testWidgets('Action sheet text styles are correct when title but no message is included', (WidgetTester tester) async {
@@ -181,7 +179,7 @@ void main() {
     final DefaultTextStyle titleStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle,
         'Action Sheet'));
 
-    expect(titleStyle.style.fontWeight, FontWeight.w400);
+    expect(titleStyle.style!.fontWeight, FontWeight.w400);
   });
 
   testWidgets('Action sheet text styles are correct when message but no title is included', (WidgetTester tester) async {
@@ -199,7 +197,7 @@ void main() {
     final DefaultTextStyle messageStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle,
         'An action sheet'));
 
-    expect(messageStyle.style.fontWeight, FontWeight.w600);
+    expect(messageStyle.style!.fontWeight, FontWeight.w600);
   });
 
   testWidgets('Content section but no actions', (WidgetTester tester) async {
@@ -285,7 +283,7 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 3.0),
             child: CupertinoActionSheet(
               title: const Text('The title'),
               message: const Text('The message.'),
@@ -346,13 +344,13 @@ void main() {
 
   testWidgets('Content section is scrollable', (WidgetTester tester) async {
     final ScrollController messageScrollController = ScrollController();
-    double screenHeight;
+    double? screenHeight;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
-          screenHeight = MediaQuery.of(context).size.height;
+          screenHeight = MediaQuery.of(context)!.size.height;
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 3.0),
             child: CupertinoActionSheet(
               title: const Text('The title'),
               message: Text('Very long content' * 200),
@@ -383,7 +381,7 @@ void main() {
     messageScrollController.jumpTo(0.0);
 
     // Expect the action sheet to take all available height.
-    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, screenHeight);
+    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, screenHeight!);
   });
 
   testWidgets('Tap on button calls onPressed', (WidgetTester tester) async {
