@@ -83,7 +83,6 @@ class AndroidDevices extends PollingDeviceDiscovery {
       text,
       devices: devices,
     );
-    print(devices);
     return devices;
   }
 
