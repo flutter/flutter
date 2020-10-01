@@ -45,7 +45,7 @@ class ImageInfo {
   ///
   /// See also:
   ///
-  ///  * [Image.clone]
+  ///  * [Image.clone], which describes how and why to clone images.
   ImageInfo clone() {
     return ImageInfo(
       image: image.clone(),
@@ -68,11 +68,15 @@ class ImageInfo {
   /// ```dart
   /// ImageInfo _imageInfo;
   /// set imageInfo (ImageInfo value) {
-  ///   // If the image reference is exactly the same, or its a clone of the
-  ///   // current reference, we can immediately dispose of it and avoid
-  ///   // recalculating anything.
-  ///   if (value == _imageInfo || value != null && _imageInfo != null && value.isCloneOf(_imageInfo)) {
-  ///     value?.dispose();
+  ///   // If the image reference is exactly the same, do nothing.
+  ///   if (value == _imageInfo) {
+  ///     return;
+  ///   }
+  ///   // If it is a clone of the current reference, we must dispose of it and
+  ///   // can do so immediately. Since the underlying image has not changed,
+  ///   // We don't have any additional work to do here.
+  ///   if (value != null && _imageInfo != null && value.isCloneOf(_imageInfo)) {
+  ///     value.dispose();
   ///     return;
   ///   }
   ///   _imageInfo?.dispose();
@@ -467,7 +471,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   @visibleForTesting
   bool get hasListeners => _listeners.isNotEmpty;
 
-  /// We should avoid disposing a completer if it has never had a listener, even
+  /// We must avoid disposing a completer if it has never had a listener, even
   /// if all [keepAlive] handles get disposed.
   bool _hadAtLeastOneListener = false;
 
