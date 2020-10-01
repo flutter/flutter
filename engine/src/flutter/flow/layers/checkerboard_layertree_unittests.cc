@@ -285,8 +285,6 @@ TEST_F(CheckerBoardLayerTest, ClipRRectSaveLayerCheckBoard) {
 TEST_F(CheckerBoardLayerTest, PhysicalSaveLayerNotCheckBoard) {
   constexpr float initial_elevation = 20.0f;
   SkPath layer_path;
-  const SkRect paint_bounds = SkRect::MakeXYWH(0, 0, 8, 8);
-  const SkPaint clip_paint;
   layer_path.addRect(0, 0, 8, 8).close();
   auto layer = std::make_shared<PhysicalShapeLayer>(
       SK_ColorGREEN, SK_ColorBLACK, initial_elevation, layer_path,
@@ -305,6 +303,8 @@ TEST_F(CheckerBoardLayerTest, PhysicalSaveLayerNotCheckBoard) {
   // The Fuchsia system compositor handles all elevated PhysicalShapeLayers and
   // their shadows , so we do not use the direct |Paint()| path there.
 #if !defined(LEGACY_FUCHSIA_EMBEDDER)
+  const SkRect paint_bounds = SkRect::MakeXYWH(0, 0, 8, 8);
+  const SkPaint clip_paint;
   SkPaint layer_paint;
   layer_paint.setColor(SK_ColorGREEN);
   layer_paint.setAntiAlias(true);
@@ -329,8 +329,6 @@ TEST_F(CheckerBoardLayerTest, PhysicalSaveLayerNotCheckBoard) {
 TEST_F(CheckerBoardLayerTest, PhysicalSaveLayerCheckBoard) {
   constexpr float initial_elevation = 20.0f;
   SkPath layer_path;
-  const SkRect paint_bounds = SkRect::MakeXYWH(0, 0, 8, 8);
-  const SkPaint clip_paint;
   layer_path.addRect(0, 0, 8, 8).close();
   auto layer = std::make_shared<PhysicalShapeLayer>(
       SK_ColorGREEN, SK_ColorBLACK, initial_elevation, layer_path,
@@ -349,6 +347,8 @@ TEST_F(CheckerBoardLayerTest, PhysicalSaveLayerCheckBoard) {
   // The Fuchsia system compositor handles all elevated PhysicalShapeLayers and
   // their shadows , so we do not use the direct |Paint()| path there.
 #if !defined(LEGACY_FUCHSIA_EMBEDDER)
+  const SkRect paint_bounds = SkRect::MakeXYWH(0, 0, 8, 8);
+  const SkPaint clip_paint;
   SkPaint layer_paint;
   layer_paint.setColor(SK_ColorGREEN);
   layer_paint.setAntiAlias(true);
