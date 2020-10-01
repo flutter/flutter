@@ -236,22 +236,6 @@ class AndroidDevice extends Device {
     return <String>[_androidSdk.adbPath, '-s', id, ...args];
   }
 
-  // String runAdbCheckedSync(
-  //   List<String> params, {
-  //   String workingDirectory,
-  //   bool allowReentrantFlutter = false,
-  //   Map<String, String> environment,
-  // }) {
-  //   return _processUtils.runSync(
-  //     adbCommandForDevice(params),
-  //     throwOnError: true,
-  //     workingDirectory: workingDirectory,
-  //     allowReentrantFlutter: allowReentrantFlutter,
-  //     environment: environment,
-  //     allowedFailures: (int value) => _allowHeapCorruptionOnWindows(value, _platform),
-  //   ).stdout.trim();
-  // }
-
   Future<RunResult> runAdbCheckedAsync(
     List<String> params, {
     String workingDirectory,
