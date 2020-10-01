@@ -231,7 +231,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///                 title: const Text('Thanks!'),
 ///                 content: Text ('You typed "$value".'),
 ///                 actions: <Widget>[
-///                   FlatButton(
+///                   TextButton(
 ///                     onPressed: () { Navigator.pop(context); },
 ///                     child: const Text('OK'),
 ///                   ),
@@ -578,32 +578,7 @@ class TextField extends StatefulWidget {
   /// to the [decoration]'s [InputDecoration.errorStyle] when the limit is
   /// exceeded.
   ///
-  /// ## Limitations
-  ///
-  /// The text field does not currently count Unicode grapheme clusters (i.e.
-  /// characters visible to the user), it counts Unicode scalar values, which
-  /// leaves out a number of useful possible characters (like many emoji and
-  /// composed characters), so this will be inaccurate in the presence of those
-  /// characters. If you expect to encounter these kinds of characters, be
-  /// generous in the maxLength used.
-  ///
-  /// For instance, the character "ö" can be represented as '\u{006F}\u{0308}',
-  /// which is the letter "o" followed by a composed diaeresis "¨", or it can
-  /// be represented as '\u{00F6}', which is the Unicode scalar value "LATIN
-  /// SMALL LETTER O WITH DIAERESIS". In the first case, the text field will
-  /// count two characters, and the second case will be counted as one
-  /// character, even though the user can see no difference in the input.
-  ///
-  /// Similarly, some emoji are represented by multiple scalar values. The
-  /// Unicode "THUMBS UP SIGN + MEDIUM SKIN TONE MODIFIER", "👍🏽", should be
-  /// counted as a single character, but because it is a combination of two
-  /// Unicode scalar values, '\u{1F44D}\u{1F3FD}', it is counted as two
-  /// characters.
-  ///
-  /// See also:
-  ///
-  ///  * [LengthLimitingTextInputFormatter] for more information on how it
-  ///    counts characters, and how it may differ from the intuitive meaning.
+  /// {@macro flutter.services.lengthLimitingTextInputFormatter.maxLength}
   final int maxLength;
 
   /// If true, prevents the field from allowing more than [maxLength]
@@ -663,17 +638,11 @@ class TextField extends StatefulWidget {
   /// The cursor indicates the current location of text insertion point in
   /// the field.
   ///
-  /// If this is null it will default to a value based on the following:
-  ///
-  /// * If the ambient [ThemeData.useTextSelectionTheme] is true then it
-  ///   will use the value of the ambient [TextSelectionThemeData.cursorColor].
-  ///   If that is null then if the [ThemeData.platform] is [TargetPlatform.iOS]
-  ///   or [TargetPlatform.macOS] then it will use [CupertinoThemeData.primaryColor].
-  ///   Otherwise it will use the value of [ColorScheme.primary] of [ThemeData.colorScheme].
-  ///
-  /// * If the ambient [ThemeData.useTextSelectionTheme] is false then it
-  ///   will use either [ThemeData.cursorColor] or [CupertinoThemeData.primaryColor]
-  ///   depending on [ThemeData.platform].
+  /// If this is null it will default to the ambient
+  /// [TextSelectionThemeData.cursorColor]. If that is null, and the
+  /// [ThemeData.platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS]
+  /// it will use [CupertinoThemeData.primaryColor]. Otherwise it will use
+  /// the value of [ColorScheme.primary] of [ThemeData.colorScheme].
   final Color cursorColor;
 
   /// Controls how tall the selection highlight boxes are computed to be.
@@ -1098,11 +1067,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
   }
 
-  Color _defaultSelectionColor(BuildContext context, Color primary) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    return primary.withOpacity(isDark ? 0.40 : 0.12);
-  }
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1136,17 +1100,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
         forcePressEnabled = true;
         textSelectionControls = cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        if (theme.useTextSelectionTheme) {
-          cursorColor ??= selectionTheme.cursorColor ?? CupertinoTheme.of(context).primaryColor;
-          selectionColor = selectionTheme.selectionColor ?? _defaultSelectionColor(context, CupertinoTheme.of(context).primaryColor);
-        } else {
-          cursorColor ??= CupertinoTheme.of(context).primaryColor;
-          selectionColor = theme.textSelectionColor;
-        }
+        cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         autocorrectionTextRectColor = selectionColor;
@@ -1160,13 +1120,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         textSelectionControls = materialTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        if (theme.useTextSelectionTheme) {
-          cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
-          selectionColor = selectionTheme.selectionColor ?? _defaultSelectionColor(context, theme.colorScheme.primary);
-        } else {
-          cursorColor ??= theme.cursorColor;
-          selectionColor = theme.textSelectionColor;
-        }
+        cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         break;
     }
 

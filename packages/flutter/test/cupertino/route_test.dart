@@ -6,6 +6,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1374,6 +1375,137 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
+  testWidgets('showCupertinoModalPopup transparent barrier color is transparent', (WidgetTester tester) async {
+    const Color _kTransparentColor = Color(0x00000000);
+
+    await tester.pumpWidget(CupertinoApp(
+      home: CupertinoPageScaffold(
+        child: Builder(builder: (BuildContext context) {
+          return GestureDetector(
+            onTap: () async {
+              await showCupertinoModalPopup<void>(
+                context: context,
+                builder: (BuildContext context) => const SizedBox(),
+                barrierColor: _kTransparentColor,
+              );
+            },
+            child: const Text('tap'),
+          );
+        }),
+      ),
+    ));
+
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, null);
+  });
+
+  testWidgets('showCupertinoModalPopup null barrier color must be default gray barrier color', (WidgetTester tester) async {
+    // Barrier color for a Cupertino modal barrier.
+    // Extracted from https://developer.apple.com/design/resources/.
+    const Color kModalBarrierColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0x33000000),
+      darkColor: Color(0x7A000000),
+    );
+
+    await tester.pumpWidget(CupertinoApp(
+      home: CupertinoPageScaffold(
+        child: Builder(builder: (BuildContext context) {
+          return GestureDetector(
+            onTap: () async {
+              await showCupertinoModalPopup<void>(
+                context: context,
+                builder: (BuildContext context) => const SizedBox(),
+              );
+            },
+            child: const Text('tap'),
+          );
+        }),
+      ),
+    ));
+
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, kModalBarrierColor);
+  });
+
+  testWidgets('showCupertinoModalPopup custom barrier color', (WidgetTester tester) async {
+    const Color customColor = Color(0x11223344);
+
+    await tester.pumpWidget(CupertinoApp(
+      home: CupertinoPageScaffold(
+        child: Builder(builder: (BuildContext context) {
+          return GestureDetector(
+            onTap: () async {
+              await showCupertinoModalPopup<void>(
+                  context: context,
+                  builder: (BuildContext context) => const SizedBox(),
+                  barrierColor: customColor);
+            },
+            child: const Text('tap'),
+          );
+        }),
+      ),
+    ));
+
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, customColor);
+  });
+
+  testWidgets('showCupertinoModalPopup barrier dismissible', (WidgetTester tester) async {
+    await tester.pumpWidget(CupertinoApp(
+      home: CupertinoPageScaffold(
+        child: Builder(builder: (BuildContext context) {
+          return GestureDetector(
+            onTap: () async {
+              await showCupertinoModalPopup<void>(
+                  context: context,
+                  builder: (BuildContext context) => const Text('Visible'),
+                  barrierDismissible: true);
+            },
+            child: const Text('tap'),
+          );
+        }),
+      ),
+    ));
+
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+    await tester.tapAt(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Visible'), findsNothing);
+  });
+
+  testWidgets('showCupertinoModalPopup barrier not dismissible', (WidgetTester tester) async {
+    await tester.pumpWidget(CupertinoApp(
+      home: CupertinoPageScaffold(
+        child: Builder(builder: (BuildContext context) {
+          return GestureDetector(
+            onTap: () async {
+              await showCupertinoModalPopup<void>(
+                  context: context,
+                  builder: (BuildContext context) => const Text('Visible'),
+                  barrierDismissible: false);
+            },
+            child: const Text('tap'),
+          );
+        }),
+      ),
+    ));
+
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+    await tester.tapAt(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Visible'), findsOneWidget);
+  });
+
   testWidgets('CupertinoPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
@@ -1381,12 +1513,10 @@ void main() {
       CupertinoPage<void>(
         key: pageKey,
         title: 'title one',
-        builder: (BuildContext context) {
-          return CupertinoPageScaffold(
-            navigationBar: CupertinoNavigationBar(key: UniqueKey()),
-            child: const Text('first'),
-          );
-        }
+        child: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(key: UniqueKey()),
+          child: const Text('first'),
+        ),
       ),
     ];
     await tester.pumpWidget(
@@ -1405,12 +1535,10 @@ void main() {
       CupertinoPage<void>(
         key: pageKey,
         title: 'title two',
-        builder: (BuildContext context) {
-          return CupertinoPageScaffold(
-            navigationBar: CupertinoNavigationBar(key: UniqueKey()),
-            child: const Text('second'),
-          );
-        }
+        child: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(key: UniqueKey()),
+          child: const Text('second'),
+        ),
       ),
     ];
 
@@ -1436,8 +1564,8 @@ void main() {
     final LocalKey pageKeyTwo = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
     List<Page<void>> myPages = <Page<void>>[
-      CupertinoPage<void>(key: pageKeyOne, maintainState: false, builder: (BuildContext context) => const Text('first')),
-      CupertinoPage<void>(key: pageKeyTwo, builder: (BuildContext context) => const Text('second')),
+      CupertinoPage<void>(key: pageKeyOne, maintainState: false, child: const Text('first')),
+      CupertinoPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
     await tester.pumpWidget(
       buildNavigator(
@@ -1453,8 +1581,8 @@ void main() {
     expect(find.text('second'), findsOneWidget);
 
     myPages = <Page<void>>[
-      CupertinoPage<void>(key: pageKeyOne, maintainState: true, builder: (BuildContext context) => const Text('first')),
-      CupertinoPage<void>(key: pageKeyTwo, builder: (BuildContext context) => const Text('second')),
+      CupertinoPage<void>(key: pageKeyOne, maintainState: true, child: const Text('first')),
+      CupertinoPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
 
     await tester.pumpWidget(
@@ -1470,6 +1598,25 @@ void main() {
     // built.
     expect(find.text('first', skipOffstage: false), findsOneWidget);
     expect(find.text('second'), findsOneWidget);
+  });
+
+  testWidgets('Popping routes should cancel down events', (WidgetTester tester) async {
+    await tester.pumpWidget(_TestPostRouteCancel());
+
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.down(tester.getCenter(find.text('PointerCancelEvents: 0')));
+    await gesture.up();
+
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoButton), findsNothing);
+    expect(find.text('Hold'), findsOneWidget);
+
+    await gesture.down(tester.getCenter(find.text('Hold')));
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    expect(find.text('Hold'), findsNothing);
+    expect(find.byType(CupertinoButton), findsOneWidget);
+    expect(find.text('PointerCancelEvents: 1'), findsOneWidget);
   });
 }
 
@@ -1570,4 +1717,76 @@ Widget buildNavigator({
       ),
     ),
   );
+}
+
+
+// A test target for post-route cancel events.
+//
+// It contains 2 routes:
+//
+//  * The initial route, 'home', displays a button showing 'PointerCancelEvents: #',
+//    where # is the number of cancel events received. Tapping the button pushes
+//    route 'sub'.
+//  * The 'sub' route, displays a text showing 'Hold'. Holding the button (a down
+//    event) will pop this route after 1 second.
+//
+// Holding the 'Hold' button at the moment of popping will force the navigator to
+// cancel the down event, increasing the Home counter by 1.
+class _TestPostRouteCancel extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _TestPostRouteCancelState();
+}
+
+class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
+
+  int counter = 0;
+
+  Widget _buildHome(BuildContext context) {
+    return Center(
+      child: CupertinoButton(
+        child: Text('PointerCancelEvents: $counter'),
+        onPressed: () => Navigator.pushNamed<void>(context, 'sub'),
+      ),
+    );
+  }
+
+  Widget _buildSub(BuildContext context) {
+    return Listener(
+      onPointerDown: (_) {
+        Future<void>.delayed(const Duration(seconds: 1)).then((_) {
+          Navigator.pop(context);
+        });
+      },
+      onPointerCancel: (_) {
+        setState(() {
+          counter += 1;
+        });
+      },
+      child: const Center(
+        child: Text('Hold', style: TextStyle(color: Colors.blue)),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoApp(
+      initialRoute: 'home',
+      onGenerateRoute: (RouteSettings settings) {
+        return CupertinoPageRoute<void>(
+          settings: settings,
+          builder: (BuildContext context) {
+            switch (settings.name) {
+              case 'home':
+                return _buildHome(context);
+              case 'sub':
+                return _buildSub(context);
+              default:
+                throw UnimplementedError();
+            }
+          },
+        );
+      },
+    );
+  }
 }

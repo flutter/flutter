@@ -2728,6 +2728,50 @@ void main() {
     // There was a time where this would throw an exception
     // because we tried to send a notification on dispose.
   });
+
+  testWidgets('TabController\'s animation value should be in sync with TabBarView\'s scroll value when user interrupts ballistic scroll', (WidgetTester tester) async {
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: 3,
+    );
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SizedBox.expand(
+        child: Center(
+          child: SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    expect(tabController.index, 0);
+    expect(position.pixels, 0.0);
+
+    pageController.jumpTo(300.0);
+    await tester.pump();
+    expect(tabController.animation.value, pageController.page);
+
+    // Touch TabBarView while ballistic scrolling is happening and
+    // check if tabController's animation value properly follows page value.
+    await tester.startGesture(tester.getCenter(find.byType(PageView)));
+    await tester.pump();
+    expect(tabController.animation.value, pageController.page);
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {

@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 
 import 'package:flutter/cupertino.dart';
@@ -3217,8 +3216,8 @@ void main() {
         ),
       );
 
-      tester.binding.window.physicalSizeTestValue = null;
-      tester.binding.window.devicePixelRatioTestValue = null;
+      tester.binding.window.clearPhysicalSizeTestValue();
+      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets('selecting multiple words works', (WidgetTester tester) async {
@@ -3288,8 +3287,8 @@ void main() {
         ),
       );
 
-      tester.binding.window.physicalSizeTestValue = null;
-      tester.binding.window.devicePixelRatioTestValue = null;
+      tester.binding.window.clearPhysicalSizeTestValue();
+      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets('selecting multiline works', (WidgetTester tester) async {
@@ -3363,8 +3362,8 @@ void main() {
         ),
       );
 
-      tester.binding.window.physicalSizeTestValue = null;
-      tester.binding.window.devicePixelRatioTestValue = null;
+      tester.binding.window.clearPhysicalSizeTestValue();
+      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     // This is a regression test for
