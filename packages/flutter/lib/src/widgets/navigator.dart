@@ -3835,6 +3835,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       _flushHistoryUpdates(rearrangeOverlay: false);
       assert(entry.route._popCompleter.isCompleted);
     }
+    if (_history.length == 1) {
+      debugPrint('There is no navigation history in the current context. You may need to check Navigator routes.');
+    }
     assert(() {
       _debugLocked = false;
       return true;
@@ -4050,7 +4053,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(!_debugLocked);
-    assert(_history.isNotEmpty, 'There is no navigation history in the current context. You may need to check Navigator routes.');
     // Hides the HeroControllerScope for the widget subtree so that the other
     // nested navigator underneath will not pick up the hero controller above
     // this level.
