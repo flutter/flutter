@@ -376,6 +376,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
   final List<String> additionalArgs = hasNullSafety
     ? <String>['--enable-experiment', 'non-nullable', '--no-sound-null-safety']
     : <String>[];
+  final String branch = Platform.environment['CIRRUS_BRANCH'];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
     await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
     await _flutterBuildApk(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -390,6 +391,30 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
     }
   }
+  if (Platform.isLinux && (branch != 'beta' && branch != 'stable')) {
+    if (Directory(path.join(examplePath, 'linux')).existsSync()) {
+      await _flutterBuildLinux(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+      await _flutterBuildLinux(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+    } else {
+      print('Example project ${path.basename(examplePath)} has no linux directory, skipping Linux');
+    }
+  }
+  if (Platform.isMacOS && (branch != 'beta' && branch != 'stable')) {
+    if (Directory(path.join(examplePath, 'macos')).existsSync()) {
+      await _flutterBuildMacOS(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+      await _flutterBuildMacOS(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+    } else {
+      print('Example project ${path.basename(examplePath)} has no macos directory, skipping macOS');
+    }
+  }
+  if (Platform.isWindows && (branch != 'beta' && branch != 'stable')) {
+    if (Directory(path.join(examplePath, 'windows')).existsSync()) {
+      await _flutterBuildWin32(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+      await _flutterBuildWin32(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+    } else {
+      print('Example project ${path.basename(examplePath)} has no windows directory, skipping Win32');
+    }
+  }
 }
 
 Future<void> _flutterBuildApk(String relativePathToApplication, {
@@ -398,43 +423,11 @@ Future<void> _flutterBuildApk(String relativePathToApplication, {
   List<String> additionalArgs = const <String>[],
 }) async {
   print('${green}Testing APK build$reset for $cyan$relativePathToApplication$reset...');
-  await runCommand(flutter,
-    <String>[
-      'build',
-      'apk',
-      ...additionalArgs,
-      if (release)
-        '--release'
-      else
-        '--debug',
-      '-v',
-    ],
-    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+  _flutterBuild(relativePathToApplication, 'APK', 'apk',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: additionalArgs
   );
-
-  if (verifyCaching) {
-    print('${green}Testing APK cache$reset for $cyan$relativePathToApplication$reset...');
-    await runCommand(flutter,
-      <String>[
-        'build',
-        'apk',
-        '--performance-measurement-file=perf.json',
-        ...additionalArgs,
-        if (release)
-          '--release'
-        else
-          '--debug',
-        '-v',
-      ],
-      workingDirectory: path.join(flutterRoot, relativePathToApplication),
-    );
-    final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json'));
-    if (!_allTargetsCached(file)) {
-      print('${red}Not all build targets cached after second run.$reset');
-      print('The target performance data was: ${file.readAsStringSync()}');
-      exit(1);
-    }
-  }
 }
 
 Future<void> _flutterBuildIpa(String relativePathToApplication, {
@@ -456,12 +449,68 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
       },
     );
   }
+  _flutterBuild(relativePathToApplication, 'IPA', 'ios',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: additionalArgs
+  );
+}
+
+Future<void> _flutterBuildLinux(String relativePathToApplication, {
+  @required bool release,
+  bool verifyCaching = false,
+  List<String> additionalArgs = const <String>[],
+}) async {
+  assert(Platform.isLinux);
+  print('${green}Testing Linux build$reset for $cyan$relativePathToApplication$reset...');
+  _flutterBuild(relativePathToApplication, 'Linux', 'linux',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: additionalArgs
+  );
+}
+
+Future<void> _flutterBuildMacOS(String relativePathToApplication, {
+  @required bool release,
+  bool verifyCaching = false,
+  List<String> additionalArgs = const <String>[],
+}) async {
+  assert(Platform.isMacOS);
+  print('${green}Testing macOS build$reset for $cyan$relativePathToApplication$reset...');
+  _flutterBuild(relativePathToApplication, 'macOS', 'macos',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: additionalArgs
+  );
+}
+
+Future<void> _flutterBuildWin32(String relativePathToApplication, {
+  @required bool release,
+  bool verifyCaching = false,
+  List<String> additionalArgs = const <String>[],
+}) async {
+  assert(Platform.isWindows);
+  print('${green}Testing Windows build$reset for $cyan$relativePathToApplication$reset...');
+  _flutterBuild(relativePathToApplication, 'Windows', 'windows',
+    release: release,
+    verifyCaching: verifyCaching,
+    additionalArgs: additionalArgs
+  );
+}
+
+Future<void> _flutterBuild(
+  String relativePathToApplication,
+  String platformLabel,
+  String platformBuildName, {
+  @required bool release,
+  bool verifyCaching = false,
+  List<String> additionalArgs = const <String>[],
+}) async {
   await runCommand(flutter,
     <String>[
       'build',
-      'ios',
+      platformBuildName,
       ...additionalArgs,
-      '--no-codesign',
       if (release)
         '--release'
       else
@@ -470,15 +519,15 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
     ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
+
   if (verifyCaching) {
-    print('${green}Testing IPA cache$reset for $cyan$relativePathToApplication$reset...');
+    print('${green}Testing $platformLabel cache$reset for $cyan$relativePathToApplication$reset...');
     await runCommand(flutter,
       <String>[
         'build',
-        'ios',
+        platformBuildName,
         '--performance-measurement-file=perf.json',
         ...additionalArgs,
-        '--no-codesign',
         if (release)
           '--release'
         else
