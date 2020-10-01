@@ -463,16 +463,14 @@ void paintImage({
   final Paint paint = Paint()..isAntiAlias = isAntiAlias;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
-  if (sourceSize != destinationSize) {
-    paint.filterQuality = filterQuality;
-  }
+  paint.filterQuality = filterQuality;
   paint.invertColors = invertColors;
   final double halfWidthDelta = (outputSize.width - destinationSize.width) / 2.0;
   final double halfHeightDelta = (outputSize.height - destinationSize.height) / 2.0;
   final double dx = halfWidthDelta + (flipHorizontally ? -alignment.x : alignment.x) * halfWidthDelta;
   final double dy = halfHeightDelta + alignment.y * halfHeightDelta;
   final Offset destinationPosition = rect.topLeft.translate(dx, dy);
-  final Rect destinationRect = destinationPosition & destinationSize;
+  Rect destinationRect = destinationPosition & destinationSize;
 
   // Set to true if we added a saveLayer to the canvas to invert/flip the image.
   bool invertedCanvas = false;
@@ -561,6 +559,14 @@ void paintImage({
     final Rect sourceRect = alignment.inscribe(
       sourceSize, Offset.zero & inputSize,
     );
+    if (sourceSize == destinationSize) {
+      // If we are rendering the image without scaling, we can improve the
+      // rendering clarity by snapping the image to pixel grid.
+      paint.filterQuality = FilterQuality.none;
+      final Offset delta = destinationRect.topLeft - sourceRect.topLeft;
+      final Offset rounded = Offset(delta.dx.roundToDouble(), delta.dy.roundToDouble());
+      destinationRect = (sourceRect.topLeft + rounded) & destinationRect.size;
+    }
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageRect(image, sourceRect, destinationRect, paint);
     } else {

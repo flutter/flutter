@@ -205,7 +205,7 @@ void main() {
       ..translate(x: 50.0, y: 0.0)
       ..scale(x: -1.0, y: 1.0)
       ..translate(x: -50.0, y: 0.0)
-      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(0.0, 20.5, 16.0, 29.5))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(0.0, 21.0, 16.0, 30.0))
       ..restore(),
     );
     expect(find.byType(Container), isNot(paints..scale()..scale()));
@@ -233,7 +233,7 @@ void main() {
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
-      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 21.0, 100.0, 30.0)),
     );
     expect(find.byType(Container), isNot(paints..scale()));
     expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
@@ -261,7 +261,7 @@ void main() {
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
-      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 21.0, 100.0, 30.0)),
     );
     expect(find.byType(Container), isNot(paints..scale()));
     expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
@@ -289,7 +289,7 @@ void main() {
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
-      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 21.0, 100.0, 30.0)),
     );
     expect(find.byType(Container), isNot(paints..scale()));
     expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
@@ -453,7 +453,7 @@ void main() {
       ..translate(x: 50.0, y: 0.0)
       ..scale(x: -1.0, y: 1.0)
       ..translate(x: -50.0, y: 0.0)
-      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(0.0, 20.5, 16.0, 29.5))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(0.0, 21.0, 16.0, 30.0))
       ..restore(),
     );
     expect(find.byType(Container), isNot(paints..scale()..scale()));
@@ -479,7 +479,7 @@ void main() {
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
-      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 21.0, 100.0, 30.0)),
     );
     expect(find.byType(Container), isNot(paints..scale()));
     expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
@@ -505,7 +505,7 @@ void main() {
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
-      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 21.0, 100.0, 30.0)),
     );
     expect(find.byType(Container), isNot(paints..scale()));
     expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
@@ -531,7 +531,7 @@ void main() {
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
-      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 21.0, 100.0, 30.0)),
     );
     expect(find.byType(Container), isNot(paints..scale()));
     expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
