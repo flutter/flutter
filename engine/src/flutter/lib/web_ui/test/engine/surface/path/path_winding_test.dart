@@ -298,6 +298,7 @@ void testMain() {
         }
       }
     });
+
     test('Concave lines path', () {
       final SurfacePath path = SurfacePath();
       path.moveTo(-0.284071773, -0.0622361786);
@@ -423,6 +424,20 @@ void testMain() {
         }
       }
       expect(strokedSin.convexityType, SPathConvexityType.kConcave);
+    });
+
+    /// Regression test for https://github.com/flutter/flutter/issues/66560.
+    test('Quadratic', () {
+      final SurfacePath path = SurfacePath();
+      path.moveTo(100.0, 0.0);
+      path.quadraticBezierTo(200.0, 0.0, 200.0, 100.0);
+      path.quadraticBezierTo(200.0, 200.0, 100.0, 200.0);
+      path.quadraticBezierTo(0.0, 200.0, 0.0, 100.0);
+      path.quadraticBezierTo(0.0, 0.0, 100.0, 0.0);
+      path.close();
+      expect(path.contains(Offset(100, 20)), true);
+      expect(path.contains(Offset(100, 120)), true);
+      expect(path.contains(Offset(100, -10)), false);
     });
   });
 }
