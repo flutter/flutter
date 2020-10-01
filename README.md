@@ -20,6 +20,8 @@ For announcements about new releases and breaking changes, follow the
 [flutter-announce@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-announce)
 mailing list.
 
+* [Flutter depedency](https://flutter.dev/docs/development/packages-and-plugins/using-packages)
+
 ## About Flutter
 
 We think Flutter will help you create beautiful, fast apps, with a productive,
