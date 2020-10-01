@@ -268,10 +268,14 @@ enum StackFit {
   passthrough,
 }
 
-// TODO(liyuqian): Deprecate and remove `Overflow` once its usages are removed from Google.
-
 /// Whether overflowing children should be clipped, or their overflow be
 /// visible.
+///
+/// Deprecated. Use [Stack.clipBehavior] instead.
+@Deprecated(
+  'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
+  'This feature was deprecated after v1.22.0-12.0.pre.'
+)
 enum Overflow {
   /// Overflowing children will be visible.
   ///
@@ -434,7 +438,7 @@ class RenderStack extends RenderBox
     double extent = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
       if (!childParentData.isPositioned)
         extent = math.max(extent, mainChildSizeGetter(child));
       assert(child.parentData == childParentData);
@@ -552,7 +556,7 @@ class RenderStack extends RenderBox
 
     RenderBox? child = firstChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
 
       if (!childParentData.isPositioned) {
         hasNonPositionedChildren = true;
@@ -579,7 +583,7 @@ class RenderStack extends RenderBox
 
     child = firstChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
 
       if (!childParentData.isPositioned) {
         childParentData.offset = _resolvedAlignment!.alongOffset(size - child.size as Offset);
@@ -670,7 +674,7 @@ class RenderIndexedStack extends RenderStack {
     RenderBox? child = firstChild;
     int i = 0;
     while (child != null && i < index!) {
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
       child = childParentData.nextSibling;
       i += 1;
     }
@@ -685,7 +689,7 @@ class RenderIndexedStack extends RenderStack {
       return false;
     assert(position != null);
     final RenderBox child = _childAtIndex();
-    final StackParentData childParentData = child.parentData as StackParentData;
+    final StackParentData childParentData = child.parentData! as StackParentData;
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
@@ -701,7 +705,7 @@ class RenderIndexedStack extends RenderStack {
     if (firstChild == null || index == null)
       return;
     final RenderBox child = _childAtIndex();
-    final StackParentData childParentData = child.parentData as StackParentData;
+    final StackParentData childParentData = child.parentData! as StackParentData;
     context.paintChild(child, childParentData.offset + offset);
   }
 

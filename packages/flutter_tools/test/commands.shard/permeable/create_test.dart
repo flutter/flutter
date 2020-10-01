@@ -811,6 +811,25 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
+  testUsingContext('Windows has correct VERSIONINFO', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
+
+    final File resourceFile = projectDir.childDirectory('windows').childDirectory('runner').childFile('Runner.rc');
+    expect(resourceFile.existsSync(), true);
+    final String contents = resourceFile.readAsStringSync();
+    expect(contents, contains('"CompanyName", "com.foo.bar"'));
+    expect(contents, contains('"ProductName", "flutter_project"'));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
   testUsingContext('app does not include Windows by default', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
@@ -2025,6 +2044,148 @@ void main() {
     expect(buildContent.contains('targetSdkVersion 29'), true);
   });
 
+  testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    const String projectName = 'foo_BarBaz';
+    final Directory projectDir = tempDir.childDirectory(projectName);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=linux', projectDir.path]);
+    final Directory platformDir = projectDir.childDirectory('linux');
+
+    const String classFilenameBase = 'foo_bar_baz_plugin';
+    const String headerName = '$classFilenameBase.h';
+    final File headerFile = platformDir
+        .childDirectory('include')
+        .childDirectory(projectName)
+        .childFile(headerName);
+    final File implFile = platformDir.childFile('$classFilenameBase.cc');
+    // Ensure that the files have the right names.
+    expect(headerFile.existsSync(), true);
+    expect(implFile.existsSync(), true);
+    // Ensure that the include is correct.
+    expect(implFile.readAsStringSync(), contains(headerName));
+    // Ensure that the CMake file has the right target and source values.
+    final String cmakeContents = platformDir.childFile('CMakeLists.txt').readAsStringSync();
+    expect(cmakeContents, contains('"$classFilenameBase.cc"'));
+    expect(cmakeContents, contains('set(PLUGIN_NAME "foo_BarBaz_plugin")'));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('Windows plugins handle partially camel-case project names correctly', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    const String projectName = 'foo_BarBaz';
+    final Directory projectDir = tempDir.childDirectory(projectName);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', projectDir.path]);
+    final Directory platformDir = projectDir.childDirectory('windows');
+
+    const String classFilenameBase = 'foo_bar_baz_plugin';
+    const String headerName = '$classFilenameBase.h';
+    final File headerFile = platformDir
+        .childDirectory('include')
+        .childDirectory(projectName)
+        .childFile(headerName);
+    final File implFile = platformDir.childFile('$classFilenameBase.cpp');
+    // Ensure that the files have the right names.
+    expect(headerFile.existsSync(), true);
+    expect(implFile.existsSync(), true);
+    // Ensure that the include is correct.
+    expect(implFile.readAsStringSync(), contains(headerName));
+    // Ensure that the plugin target name matches the post-processed version.
+    // Ensure that the CMake file has the right target and source values.
+    final String cmakeContents = platformDir.childFile('CMakeLists.txt').readAsStringSync();
+    expect(cmakeContents, contains('"$classFilenameBase.cpp"'));
+    expect(cmakeContents, contains('set(PLUGIN_NAME "foo_BarBaz_plugin")'));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('Linux plugins handle project names ending in _plugin correctly', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    const String projectName = 'foo_bar_plugin';
+    final Directory projectDir = tempDir.childDirectory(projectName);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=linux', projectDir.path]);
+    final Directory platformDir = projectDir.childDirectory('linux');
+
+    // If the project already ends in _plugin, it shouldn't be added again.
+    const String classFilenameBase = projectName;
+    const String headerName = '$classFilenameBase.h';
+    final File headerFile = platformDir
+        .childDirectory('include')
+        .childDirectory(projectName)
+        .childFile(headerName);
+    final File implFile = platformDir.childFile('$classFilenameBase.cc');
+    // Ensure that the files have the right names.
+    expect(headerFile.existsSync(), true);
+    expect(implFile.existsSync(), true);
+    // Ensure that the include is correct.
+    expect(implFile.readAsStringSync(), contains(headerName));
+    // Ensure that the CMake file has the right target and source values.
+    final String cmakeContents = platformDir.childFile('CMakeLists.txt').readAsStringSync();
+    expect(cmakeContents, contains('"$classFilenameBase.cc"'));
+    // The "_plugin_plugin" suffix is intentional; because the target names must
+    // be unique across the ecosystem, no canonicalization can be done,
+    // otherwise plugins called "foo_bar" and "foo_bar_plugin" would collide in
+    // builds.
+    expect(cmakeContents, contains('set(PLUGIN_NAME "foo_bar_plugin_plugin")'));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('Windows plugins handle project names ending in _plugin correctly', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    const String projectName = 'foo_bar_plugin';
+    final Directory projectDir = tempDir.childDirectory(projectName);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', projectDir.path]);
+    final Directory platformDir = projectDir.childDirectory('windows');
+
+    // If the project already ends in _plugin, it shouldn't be added again.
+    const String classFilenameBase = projectName;
+    const String headerName = '$classFilenameBase.h';
+    final File headerFile = platformDir
+        .childDirectory('include')
+        .childDirectory(projectName)
+        .childFile(headerName);
+    final File implFile = platformDir.childFile('$classFilenameBase.cpp');
+    // Ensure that the files have the right names.
+    expect(headerFile.existsSync(), true);
+    expect(implFile.existsSync(), true);
+    // Ensure that the include is correct.
+    expect(implFile.readAsStringSync(), contains(headerName));
+    // Ensure that the CMake file has the right target and source values.
+    final String cmakeContents = platformDir.childFile('CMakeLists.txt').readAsStringSync();
+    expect(cmakeContents, contains('"$classFilenameBase.cpp"'));
+    // The "_plugin_plugin" suffix is intentional; because the target names must
+    // be unique across the ecosystem, no canonicalization can be done,
+    // otherwise plugins called "foo_bar" and "foo_bar_plugin" would collide in
+    // builds.
+    expect(cmakeContents, contains('set(PLUGIN_NAME "foo_bar_plugin_plugin")'));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
 }
 
 Future<void> _createProject(

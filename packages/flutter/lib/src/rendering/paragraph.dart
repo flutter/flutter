@@ -435,7 +435,7 @@ class RenderParagraph extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     RenderBox? child = firstChild;
     while (child != null) {
-      final TextParentData textParentData = child.parentData as TextParentData;
+      final TextParentData textParentData = child.parentData! as TextParentData;
       final Matrix4 transform = Matrix4.translationValues(
         textParentData.offset.dx,
         textParentData.offset.dy,
@@ -574,7 +574,7 @@ class RenderParagraph extends RenderBox
     RenderBox? child = firstChild;
     int childIndex = 0;
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      final TextParentData textParentData = child.parentData as TextParentData;
+      final TextParentData textParentData = child.parentData! as TextParentData;
       textParentData.offset = Offset(
         _textPainter.inlinePlaceholderBoxes![childIndex].left,
         _textPainter.inlinePlaceholderBoxes![childIndex].top,
@@ -706,7 +706,7 @@ class RenderParagraph extends RenderBox
     // it until we finish layout, and RenderObject is in immutable state at
     // this point.
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      final TextParentData textParentData = child.parentData as TextParentData;
+      final TextParentData textParentData = child.parentData! as TextParentData;
 
       final double scale = textParentData.scale!;
       context.pushTransform(
@@ -742,6 +742,15 @@ class RenderParagraph extends RenderBox
     assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getOffsetForCaret(position, caretPrototype);
+  }
+
+  /// {@macro flutter.painting.textPainter.getFullHeightForCaret}
+  ///
+  /// Valid only after [layout].
+  double? getFullHeightForCaret(TextPosition position) {
+    assert(!debugNeedsLayout);
+    _layoutTextWithConstraints(constraints);
+    return _textPainter.getFullHeightForCaret(position, Rect.zero);
   }
 
   /// Returns a list of rects that bound the given selection.
@@ -909,16 +918,18 @@ class RenderParagraph extends RenderBox
       );
 
       if (info.isPlaceholder) {
-        final SemanticsNode childNode = children.elementAt(placeholderIndex++);
-        final TextParentData parentData = child!.parentData as TextParentData;
-        childNode.rect = Rect.fromLTWH(
-          childNode.rect.left,
-          childNode.rect.top,
-          childNode.rect.width * parentData.scale!,
-          childNode.rect.height * parentData.scale!,
-        );
-        newChildren.add(childNode);
-        child = childAfter(child);
+        if (children.isNotEmpty) {
+          final SemanticsNode childNode = children.elementAt(placeholderIndex++);
+          final TextParentData parentData = child!.parentData! as TextParentData;
+          childNode.rect = Rect.fromLTWH(
+            childNode.rect.left,
+            childNode.rect.top,
+            childNode.rect.width * parentData.scale!,
+            childNode.rect.height * parentData.scale!,
+          );
+          newChildren.add(childNode);
+          child = childAfter(child);
+        }
       } else {
         final SemanticsConfiguration configuration = SemanticsConfiguration()
           ..sortKey = OrdinalSortKey(ordinal++)

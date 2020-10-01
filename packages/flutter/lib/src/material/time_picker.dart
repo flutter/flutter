@@ -560,6 +560,7 @@ class _DayPeriodControl extends StatelessWidget {
         onTap: Feedback.wrapForTap(() => _setAm(context), context),
         child: Semantics(
           selected: amSelected,
+          button: true,
           child: Center(
             child: Text(
               materialLocalizations.anteMeridiemAbbreviation,
@@ -577,6 +578,7 @@ class _DayPeriodControl extends StatelessWidget {
         onTap: Feedback.wrapForTap(() => _setPm(context), context),
         child: Semantics(
           selected: pmSelected,
+          button: true,
           child: Center(
             child: Text(
               materialLocalizations.postMeridiemAbbreviation,
@@ -1522,6 +1524,7 @@ class _HourTextField extends StatelessWidget {
       selectedTime: selectedTime,
       isHour: true,
       style: style,
+      semanticHintText: MaterialLocalizations.of(context).timePickerHourLabel,
       validator: validator,
       onSavedSubmitted: onSavedSubmitted,
       onChanged: onChanged,
@@ -1549,6 +1552,7 @@ class _MinuteTextField extends StatelessWidget {
       selectedTime: selectedTime,
       isHour: false,
       style: style,
+      semanticHintText: MaterialLocalizations.of(context).timePickerMinuteLabel,
       validator: validator,
       onSavedSubmitted: onSavedSubmitted,
     );
@@ -1561,6 +1565,7 @@ class _HourMinuteTextField extends StatefulWidget {
     @required this.selectedTime,
     @required this.isHour,
     @required this.style,
+    @required this.semanticHintText,
     @required this.validator,
     @required this.onSavedSubmitted,
     this.onChanged,
@@ -1569,6 +1574,7 @@ class _HourMinuteTextField extends StatefulWidget {
   final TimeOfDay selectedTime;
   final bool isHour;
   final TextStyle style;
+  final String semanticHintText;
   final FormFieldValidator<String> validator;
   final ValueChanged<String> onSavedSubmitted;
   final ValueChanged<String> onChanged;
@@ -1636,10 +1642,14 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
       );
     }
     final Color unfocusedFillColor = timePickerTheme.hourMinuteColor ?? colorScheme.onSurface.withOpacity(0.12);
+    // If screen reader is in use, make the hint text say hours/minutes.
+    // Otherwise, remove the hint text when focused because the centered cursor
+    // appears odd above the hint text.
+    final String hintText = MediaQuery.of(context).accessibleNavigation
+        ? widget.semanticHintText
+        : (focusNode.hasFocus ? null : _formattedValue);
     inputDecoration = inputDecoration.copyWith(
-      // Remove the hint text when focused because the centered cursor appears
-      // odd above the hint text.
-      hintText: focusNode.hasFocus ? null : _formattedValue,
+      hintText: hintText,
       fillColor: focusNode.hasFocus ? Colors.transparent : inputDecorationTheme?.fillColor ?? unfocusedFillColor,
     );
 

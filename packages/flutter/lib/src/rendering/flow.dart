@@ -181,8 +181,11 @@ class RenderFlow extends RenderBox
   RenderFlow({
     List<RenderBox>? children,
     required FlowDelegate delegate,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(delegate != null),
-       _delegate = delegate {
+       assert(clipBehavior != null),
+       _delegate = delegate,
+       _clipBehavior = clipBehavior {
     addAll(children);
   }
 
@@ -218,6 +221,20 @@ class RenderFlow extends RenderBox
     if (attached) {
       oldDelegate._repaint?.removeListener(markNeedsPaint);
       newDelegate._repaint?.addListener(markNeedsPaint);
+    }
+  }
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.hardEdge;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
     }
   }
 
@@ -288,7 +305,7 @@ class RenderFlow extends RenderBox
       _randomAccessChildren.add(child);
       final BoxConstraints innerConstraints = _delegate.getConstraintsForChild(i, constraints);
       child.layout(innerConstraints, parentUsesSize: true);
-      final FlowParentData childParentData = child.parentData as FlowParentData;
+      final FlowParentData childParentData = child.parentData! as FlowParentData;
       childParentData.offset = Offset.zero;
       child = childParentData.nextSibling;
       i += 1;
@@ -316,7 +333,7 @@ class RenderFlow extends RenderBox
   void paintChild(int i, { Matrix4? transform, double opacity = 1.0 }) {
     transform ??= Matrix4.identity();
     final RenderBox child = _randomAccessChildren[i];
-    final FlowParentData childParentData = child.parentData as FlowParentData;
+    final FlowParentData childParentData = child.parentData! as FlowParentData;
     assert(() {
       if (childParentData._transform != null) {
         throw FlutterError(
@@ -352,7 +369,7 @@ class RenderFlow extends RenderBox
     _paintingContext = context;
     _paintingOffset = offset;
     for (final RenderBox child in _randomAccessChildren) {
-      final FlowParentData childParentData = child.parentData as FlowParentData;
+      final FlowParentData childParentData = child.parentData! as FlowParentData;
       childParentData._transform = null;
     }
     try {
@@ -365,7 +382,11 @@ class RenderFlow extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintWithDelegate);
+    if (clipBehavior == Clip.none) {
+      _paintWithDelegate(context, offset);
+    } else {
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintWithDelegate, clipBehavior: clipBehavior);
+    }
   }
 
   @override
@@ -376,7 +397,7 @@ class RenderFlow extends RenderBox
       if (childIndex >= children.length)
         continue;
       final RenderBox child = children[childIndex];
-      final FlowParentData childParentData = child.parentData as FlowParentData;
+      final FlowParentData childParentData = child.parentData! as FlowParentData;
       final Matrix4? transform = childParentData._transform;
       if (transform == null)
         continue;
@@ -395,7 +416,7 @@ class RenderFlow extends RenderBox
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final FlowParentData childParentData = child.parentData as FlowParentData;
+    final FlowParentData childParentData = child.parentData! as FlowParentData;
     if (childParentData._transform != null)
       transform.multiply(childParentData._transform!);
     super.applyPaintTransform(child, transform);

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 
-import 'dart:async';
 import 'dart:ui' show TextDirection;
 
 import 'package:flutter/services.dart' show SystemChannels;

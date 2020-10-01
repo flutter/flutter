@@ -4,10 +4,10 @@
 
 // @dart = 2.8
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
@@ -497,7 +497,7 @@ void main() {
       addRepaintBoundaries: false,
       addSemanticIndexes: false,
     );
-    final KeyedSubtree wrapped = builderThrowsDelegate.build(null, 0) as KeyedSubtree;
+    final KeyedSubtree wrapped = builderThrowsDelegate.build(_NullBuildContext(), 0) as KeyedSubtree;
     expect(wrapped.child, errorText);
     expect(tester.takeException(), 'builder');
     ErrorWidget.builder = oldBuilder;
@@ -1043,4 +1043,9 @@ class KeepAliveState extends State<KeepAlive> with AutomaticKeepAliveClientMixin
     super.build(context);
     return Text(widget.data);
   }
+}
+
+class _NullBuildContext implements BuildContext {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }

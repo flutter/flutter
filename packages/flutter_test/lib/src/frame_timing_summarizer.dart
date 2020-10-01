@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui';
-import 'package:meta/meta.dart';
 
 /// The maximum amount of time considered safe to spend for a frame's build
 /// phase. Anything past that is in the danger of missing the frame as 60FPS.
@@ -64,23 +63,23 @@ class FrameTimingSummarizer {
   }
 
   const FrameTimingSummarizer._({
-    @required this.frameBuildTime,
-    @required this.frameRasterizerTime,
-    @required this.averageFrameBuildTime,
-    @required this.p90FrameBuildTime,
-    @required this.p99FrameBuildTime,
-    @required this.worstFrameBuildTime,
-    @required this.missedFrameBuildBudget,
-    @required this.averageFrameRasterizerTime,
-    @required this.p90FrameRasterizerTime,
-    @required this.p99FrameRasterizerTime,
-    @required this.worstFrameRasterizerTime,
-    @required this.missedFrameRasterizerBudget,
-    @required this.vsyncOverhead,
-    @required this.averageVsyncOverhead,
-    @required this.p90VsyncOverhead,
-    @required this.p99VsyncOverhead,
-    @required this.worstVsyncOverhead,
+    required this.frameBuildTime,
+    required this.frameRasterizerTime,
+    required this.averageFrameBuildTime,
+    required this.p90FrameBuildTime,
+    required this.p99FrameBuildTime,
+    required this.worstFrameBuildTime,
+    required this.missedFrameBuildBudget,
+    required this.averageFrameRasterizerTime,
+    required this.p90FrameRasterizerTime,
+    required this.p99FrameRasterizerTime,
+    required this.worstFrameRasterizerTime,
+    required this.missedFrameRasterizerBudget,
+    required this.vsyncOverhead,
+    required this.averageVsyncOverhead,
+    required this.p90VsyncOverhead,
+    required this.p99VsyncOverhead,
+    required this.worstVsyncOverhead,
   });
 
   /// List of frame build time in microseconds

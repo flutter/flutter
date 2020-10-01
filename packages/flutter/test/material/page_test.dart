@@ -841,7 +841,7 @@ void main() {
     final LocalKey pageKey = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
     List<Page<void>> myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKey, builder: (BuildContext context) => const Text('first')),
+      MaterialPage<void>(key: pageKey, child: const Text('first')),
     ];
     await tester.pumpWidget(
       buildNavigator(
@@ -855,7 +855,7 @@ void main() {
     expect(find.text('first'), findsOneWidget);
 
     myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKey, builder: (BuildContext context) => const Text('second')),
+      MaterialPage<void>(key: pageKey, child: const Text('second')),
     ];
 
     await tester.pumpWidget(
@@ -877,8 +877,8 @@ void main() {
     final LocalKey pageKeyTwo = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
     List<Page<void>> myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKeyOne, maintainState: false, builder: (BuildContext context) => const Text('first')),
-      MaterialPage<void>(key: pageKeyTwo, builder: (BuildContext context) => const Text('second')),
+      MaterialPage<void>(key: pageKeyOne, maintainState: false, child: const Text('first')),
+      MaterialPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
     await tester.pumpWidget(
       buildNavigator(
@@ -894,8 +894,8 @@ void main() {
     expect(find.text('second'), findsOneWidget);
 
     myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKeyOne, maintainState: true, builder: (BuildContext context) => const Text('first')),
-      MaterialPage<void>(key: pageKeyTwo, builder: (BuildContext context) => const Text('second')),
+      MaterialPage<void>(key: pageKeyOne, maintainState: true, child: const Text('first')),
+      MaterialPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
 
     await tester.pumpWidget(
@@ -911,6 +911,19 @@ void main() {
     // built.
     expect(find.text('first', skipOffstage: false), findsOneWidget);
     expect(find.text('second'), findsOneWidget);
+  });
+
+  testWidgets('MaterialPage does not lose its state when transitioning out', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(KeepsStateTestWidget(navigatorKey: navigator));
+    expect(find.text('subpage'), findsOneWidget);
+    expect(find.text('home'), findsNothing);
+
+    navigator.currentState.pop();
+    await tester.pump();
+
+    expect(find.text('subpage'), findsOneWidget);
+    expect(find.text('home'), findsOneWidget);
   });
 }
 
@@ -956,4 +969,39 @@ Widget buildNavigator({
       ),
     ),
   );
+}
+
+class KeepsStateTestWidget extends StatefulWidget {
+  const KeepsStateTestWidget({this.navigatorKey});
+
+  final Key navigatorKey;
+
+  @override
+  State<KeepsStateTestWidget> createState() => _KeepsStateTestWidgetState();
+}
+
+class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
+  String _subpage = 'subpage';
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Navigator(
+        key: widget.navigatorKey,
+        pages: <Page<void>>[
+          const MaterialPage<void>(child: Text('home')),
+          if (_subpage != null) MaterialPage<void>(child: Text(_subpage)),
+        ],
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          if (!route.didPop(result)) {
+            return false;
+          }
+          setState(() {
+            _subpage = null;
+          });
+          return true;
+        },
+      ),
+    );
+  }
 }

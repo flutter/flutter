@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.9
+
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -618,7 +620,7 @@ void main() {
          hasDismissAction: true,
          customActions: <CustomSemanticsAction>[action],
       ));
-    });
+    }, skip: true); // TODO(abrusher): Enable once engine PR #20385 lands.
 
     testWidgets('Can match child semantics', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();

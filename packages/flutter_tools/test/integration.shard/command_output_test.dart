@@ -7,17 +7,16 @@ import 'dart:convert';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:process/process.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  test('All development tools and deprecated commands are hidden and help text is not verbose', () async {
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await const LocalProcessManager().run(<String>[
+  testWithoutContext('All development tools and deprecated commands are hidden and help text is not verbose', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       '-h',
       '-v',
     ]);
@@ -34,10 +33,11 @@ void main() {
     expect(result.stdout, isNot(contains('exiting with code 0')));
   });
 
-  test('flutter doctor is not verbose', () async {
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await const LocalProcessManager().run(<String>[
+  testWithoutContext('flutter doctor is not verbose', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       'doctor',
       '-v',
     ]);
@@ -46,10 +46,11 @@ void main() {
     expect(result.stdout, isNot(contains('exiting with code 0')));
   });
 
-  test('flutter doctor -vv super verbose', () async {
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await const LocalProcessManager().run(<String>[
+  testWithoutContext('flutter doctor -vv super verbose', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       'doctor',
       '-vv',
     ]);
@@ -58,10 +59,11 @@ void main() {
     expect(result.stdout, contains('Running shutdown hooks'));
   });
 
-  test('flutter config contains all features', () async {
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await const LocalProcessManager().run(<String>[
+  testWithoutContext('flutter config contains all features', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       'config',
     ]);
 
@@ -72,7 +74,7 @@ void main() {
     ]));
   });
 
-  test('flutter run --machine uses AppRunLogger', () async {
+  testWithoutContext('flutter run --machine uses AppRunLogger', () async {
     final Directory directory = createResolvedTempDirectorySync('flutter_run_test.')
       .createTempSync('_flutter_run_test.')
       ..createSync(recursive: true);
@@ -88,9 +90,10 @@ void main() {
         .childDirectory('lib')
         .childFile('main.dart')
         .createSync(recursive: true);
-      final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-      final ProcessResult result = await const LocalProcessManager().run(<String>[
+      final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+      final ProcessResult result = await processManager.run(<String>[
         flutterBin,
+        ...getLocalEngineArguments(),
         'run',
         '--show-test-device', // ensure command can fail to run and hit injection of correct logger.
         '--machine',
@@ -103,10 +106,11 @@ void main() {
     }
   });
 
-  test('flutter attach --machine uses AppRunLogger', () async {
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await const LocalProcessManager().run(<String>[
+  testWithoutContext('flutter attach --machine uses AppRunLogger', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       'attach',
       '--machine',
       '-v',
@@ -115,10 +119,11 @@ void main() {
     expect(result.stderr, contains('Target file')); // Target file not found, but different paths on Windows and Linux/macOS.
   });
 
-  test('flutter build aot is deprecated', () async {
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await const LocalProcessManager().run(<String>[
+  testWithoutContext('flutter build aot is deprecated', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       'build',
       '-h',
       '-v',
@@ -131,10 +136,11 @@ void main() {
     expect(result.stdout, isNot(contains('exiting with code 0')));
   });
 
-  test('flutter --version --machine outputs JSON with flutterRoot', () async {
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await const LocalProcessManager().run(<String>[
+  testWithoutContext('flutter --version --machine outputs JSON with flutterRoot', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       '--version',
       '--machine',
     ]);
@@ -146,5 +152,46 @@ void main() {
       .trim()) as Map<String, Object>;
 
     expect(versionInfo, containsPair('flutterRoot', isNotNull));
+  });
+
+  testWithoutContext('A tool exit is thrown for an invalid debug-uri in flutter attach', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      '--show-test-device',
+      'attach',
+      '-d',
+      'flutter-tester',
+      '--debug-uri=http://127.0.0.1:3333*/',
+    ], workingDirectory: helloWorld);
+
+    expect(result.exitCode, 1);
+    expect(result.stderr, contains('Invalid `--debug-uri`: http://127.0.0.1:3333*/'));
+  });
+
+  testWithoutContext('will load bootstrap script before starting', () async {
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+
+    final File bootstrap = fileSystem.file(fileSystem.path.join(
+        getFlutterRoot(),
+        'bin',
+        'internal',
+        platform.isWindows ? 'bootstrap.bat' : 'bootstrap.sh'));
+
+    try {
+      bootstrap.writeAsStringSync('echo TESTING 1 2 3');
+
+      final ProcessResult result = await processManager.run(<String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+      ]);
+
+      expect(result.stdout, contains('TESTING 1 2 3'));
+    } finally {
+      bootstrap.deleteSync();
+    }
   });
 }

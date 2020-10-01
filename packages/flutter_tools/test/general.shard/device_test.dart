@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -23,13 +21,12 @@ import '../src/fake_devices.dart';
 import '../src/mocks.dart';
 
 void main() {
-  MockCache cache;
+  Cache cache;
   BufferLogger logger;
 
   setUp(() {
-    cache = MockCache();
+    cache = Cache.test();
     logger = BufferLogger.test();
-    when(cache.dyLdLibEntry).thenReturn(const MapEntry<String, String>('foo', 'bar'));
   });
 
   group('DeviceManager', () {
@@ -552,5 +549,4 @@ class TestDeviceManager extends DeviceManager {
 class MockProcess extends Mock implements Process {}
 class MockTerminal extends Mock implements AnsiTerminal {}
 class MockStdio extends Mock implements Stdio {}
-class MockCache extends Mock implements Cache {}
 class MockDeviceDiscovery extends Mock implements DeviceDiscovery {}
