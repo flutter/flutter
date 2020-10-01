@@ -48,7 +48,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to create a very basic autocomplete widget using the
-/// [buildField] and [buildResults] parameters.
+/// [fieldBuilder] and [resultsBuilder] parameters.
 ///
 /// ```dart imports
 /// import 'package:flutter/widgets.dart';
@@ -68,7 +68,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///         return <String>['aardvark', 'bobcat', 'chameleon']
 ///            .contains(value.text.toLowerCase());
 ///       }
-///       buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+///       fieldBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
 ///         return TextFormField(
 ///           controller: textEditingController,
 ///           onFieldSubmitted: (String value) {
@@ -76,7 +76,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///           },
 ///         );
 ///       },
-///       buildResults: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
+///       resultsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
 ///         return Material(
 ///           elevation: 4.0,
 ///           child: SizedBox(
@@ -156,7 +156,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///       body: Center(
 ///         child: AutocompleteCore<User>(
 ///           autocompleteController: _autocompleteController,
-///           buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+///           fieldBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
 ///             return TextFormField(
 ///               controller: _autocompleteController.textEditingController,
 ///               onFieldSubmitted: (String value) {
@@ -164,7 +164,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///               },
 ///             );
 ///           },
-///           buildResults: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
+///           resultsBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
 ///             return SizedBox(
 ///               height: 200.0,
 ///               child: Material(
@@ -192,22 +192,22 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 class AutocompleteCore<T> extends StatefulWidget {
   /// Create an instance of AutocompleteCore.
   ///
-  /// [buildField] and [buildResults] must not be null.
+  /// [fieldBuilder] and [resultsBuilder] must not be null.
   const AutocompleteCore({
-    required this.buildField,
-    required this.buildResults,
+    required this.fieldBuilder,
+    required this.resultsBuilder,
     required this.buildOptions,
     AutocompleteOptionToString<T>? displayStringForOption,
     this.onSelected,
-  }) : assert(buildField != null),
-       assert(buildResults != null),
+  }) : assert(fieldBuilder != null),
+       assert(resultsBuilder != null),
        displayStringForOption = displayStringForOption ?? _defaultStringForOption;
 
   /// Builds the field whose input is used to find the results.
-  final AutocompleteFieldBuilder buildField;
+  final AutocompleteFieldBuilder fieldBuilder;
 
   /// Builds the selectable results of filtering.
-  final AutocompleteResultsBuilder<T> buildResults;
+  final AutocompleteResultsBuilder<T> resultsBuilder;
 
   /// Returns the string to display in the field when the option is selected.
   ///
@@ -286,7 +286,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     _updateOverlay();
   }
 
-  // Called from buildField when the user submits the field.
+  // Called from fieldBuilder when the user submits the field.
   void _onFieldSubmitted() {
     if (_results.isEmpty) {
       return;
@@ -320,7 +320,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
       _floatingResults = OverlayEntry(
         builder: (BuildContext context) {
           return _FloatingResults<T>(
-            buildResults: widget.buildResults,
+            resultsBuilder: widget.resultsBuilder,
             fieldSize: renderBox.size,
             layerLink: _resultsLayerLink,
             onSelected: _select,
@@ -366,7 +366,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
       key: _fieldKey,
       child: CompositedTransformTarget(
         link: _resultsLayerLink,
-        child: widget.buildField(
+        child: widget.fieldBuilder(
           context,
           _textEditingController,
           _onFieldSubmitted,
@@ -379,19 +379,19 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
 class _FloatingResults<T> extends StatelessWidget {
   const _FloatingResults({
     Key? key,
-    required this.buildResults,
+    required this.resultsBuilder,
     required this.fieldSize,
     required this.layerLink,
     required this.onSelected,
     required this.results,
-  }) : assert(buildResults != null),
+  }) : assert(resultsBuilder != null),
        assert(fieldSize != null),
        assert(layerLink != null),
        assert(onSelected != null),
        assert(results != null),
        super(key: key);
 
-  final AutocompleteResultsBuilder<T> buildResults;
+  final AutocompleteResultsBuilder<T> resultsBuilder;
   final Size fieldSize;
   final LayerLink layerLink;
   final AutocompleteOnSelected<T> onSelected;
@@ -408,7 +408,7 @@ class _FloatingResults<T> extends StatelessWidget {
           0.0,
           fieldSize.height,
         ),
-        child: buildResults(context, onSelected, results),
+        child: resultsBuilder(context, onSelected, results),
       ),
     );
   }

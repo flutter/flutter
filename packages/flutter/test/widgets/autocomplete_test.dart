@@ -47,166 +47,27 @@ void main() {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
-  group('AutocompleteController', () {
-    testWidgets('default filter on options', (WidgetTester tester) async {
-      final AutocompleteController<String> autocompleteController =
-          AutocompleteController<String>(
-            options: kOptions,
-          );
-
-      // Enter text and see that the results are filtered.
-      autocompleteController.textEditingController.text = 'ele';
-      expect(autocompleteController.results.value.length, 2);
-      expect(autocompleteController.results.value[0], 'chameleon');
-      expect(autocompleteController.results.value[1], 'elephant');
-
-      // Modify the text. The results are filtered again.
-      autocompleteController.textEditingController.text = 'e';
-      expect(autocompleteController.results.value.length, 6);
-      expect(autocompleteController.results.value[0], 'chameleon');
-      expect(autocompleteController.results.value[1], 'elephant');
-      expect(autocompleteController.results.value[2], 'goose');
-      expect(autocompleteController.results.value[3], 'lemur');
-      expect(autocompleteController.results.value[4], 'mouse');
-      expect(autocompleteController.results.value[5], 'northern white rhinocerous');
-
-      // The filter is not case sensitive.
-      autocompleteController.textEditingController.text = 'ELE';
-      expect(autocompleteController.results.value.length, 2);
-      expect(autocompleteController.results.value[0], 'chameleon');
-      expect(autocompleteController.results.value[1], 'elephant');
-    });
-
-    testWidgets('custom getResults', (WidgetTester tester) async {
-      final AutocompleteController<String> autocompleteController =
-          AutocompleteController<String>.generated(
-            // A custom getResults that always includes 'goose' in the results.
-            getResults: (TextEditingValue value) {
-              return kOptions
-                .where((String option) => option.contains(value.text) || option == 'goose')
-                .toList();
-            },
-          );
-
-      // Set text in the field and see that the results are filtered by
-      // getResults.
-      autocompleteController.textEditingController.text = 'ele';
-      expect(autocompleteController.results.value.length, 3);
-      expect(autocompleteController.results.value[0], 'chameleon');
-      expect(autocompleteController.results.value[1], 'elephant');
-      expect(autocompleteController.results.value[2], 'goose');
-
-      // Modify the text. The results are filtered again.
-      autocompleteController.textEditingController.text = 'e';
-      expect(autocompleteController.results.value.length, 6);
-      expect(autocompleteController.results.value[0], 'chameleon');
-      expect(autocompleteController.results.value[1], 'elephant');
-      expect(autocompleteController.results.value[2], 'goose');
-      expect(autocompleteController.results.value[3], 'lemur');
-      expect(autocompleteController.results.value[4], 'mouse');
-      expect(autocompleteController.results.value[5], 'northern white rhinocerous');
-    });
-
-    testWidgets('User options with custom filter string', (WidgetTester tester) async {
-      final AutocompleteController<User> autocompleteController =
-          AutocompleteController<User>(
-            options: kOptionsUsers,
-            filterStringForOption: (User option) => option.name + option.email,
-          );
-
-      // Set the field text based on the email and see that the results are
-      // filtered.
-      autocompleteController.textEditingController.text = 'example';
-      expect(autocompleteController.results.value.length, 2);
-      expect(autocompleteController.results.value[0], kOptionsUsers[0]);
-      expect(autocompleteController.results.value[1], kOptionsUsers[1]);
-
-      // Modify the field text. The results appear again and are filtered, this
-      // time by name instead of email.
-      autocompleteController.textEditingController.text = 'B';
-      expect(autocompleteController.results.value.length, 1);
-      expect(autocompleteController.results.value[0], kOptionsUsers[1]);
-    });
-
-    testWidgets('custom getResults on User options', (WidgetTester tester) async {
-      final AutocompleteController<User> autocompleteController =
-          AutocompleteController<User>.generated(
-            // A custom getResults that searches by name case sensitively.
-            getResults: (TextEditingValue value) {
-              return kOptionsUsers
-                .where((User option) => option.name.contains(value.text))
-                .toList();
-            },
-          );
-
-      // Set field text based on the email and see that nothing is found.
-      autocompleteController.textEditingController.text = 'example';
-      expect(autocompleteController.results.value.length, 0);
-
-      // Modify the field text. The results appear again and are filtered. A
-      // lowercase "a" matches "Charlie" and not "Alice".
-      autocompleteController.textEditingController.text = 'a';
-      expect(autocompleteController.results.value.length, 1);
-      expect(autocompleteController.results.value[0], kOptionsUsers[2]);
-
-      // Modify the field text. An uppercase "A" matches "Alice" and not
-      // "Charlie".
-      autocompleteController.textEditingController.text = 'A';
-      expect(autocompleteController.results.value.length, 1);
-      expect(autocompleteController.results.value[0], kOptionsUsers[0]);
-    });
-
-    group('dispose', () {
-      testWidgets('disposes the TextEditingController when not passed in', (WidgetTester tester) async {
-        final AutocompleteController<String> autocompleteController =
-            AutocompleteController<String>(
-              options: kOptions,
-            );
-        expect(autocompleteController.textEditingController, isNotNull);
-
-        autocompleteController.dispose();
-        expect(() {
-          autocompleteController.textEditingController.addListener(() {});
-        }, throwsFlutterError);
-      });
-
-      testWidgets("doesn't dispose the TextEditingController when passed in", (WidgetTester tester) async {
-        final TextEditingController textEditingController = TextEditingController();
-        final AutocompleteController<String> autocompleteController =
-            AutocompleteController<String>(
-              options: kOptions,
-              textEditingController: textEditingController,
-            );
-        expect(autocompleteController.textEditingController, isNotNull);
-
-        autocompleteController.dispose();
-        expect(() {
-          autocompleteController.textEditingController.addListener(() {});
-        }, isNot(throwsException));
-        // No error thrown
-      });
-    });
-  });
-
   group('AutocompleteCore', () {
     testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey resultsKey = GlobalKey();
-      final AutocompleteController<String> autocompleteController =
-          AutocompleteController<String>(
-            options: kOptions,
-          );
       List<String> lastResults;
       AutocompleteOnSelected<String> lastOnSelected;
+      TextEditingController textEditingController;
 
       await tester.pumpWidget(
         MaterialApp(
           home: AutocompleteCore<String>(
-            autocompleteController: autocompleteController,
-            buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+            buildOptions: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              }).toList();
+            },
+            fieldBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
+              textEditingController ??= fieldTextEditingController;
               return Container(key: fieldKey);
             },
-            buildResults: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
+            resultsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
               lastResults = results;
               lastOnSelected = onSelected;
               return Container(key: resultsKey);
@@ -220,7 +81,7 @@ void main() {
       expect(find.byKey(resultsKey), findsNothing);
 
       // Enter text. The results are filtered by the text.
-      autocompleteController.textEditingController.value = const TextEditingValue(
+      textEditingController.value = const TextEditingValue(
         text: 'ele',
         selection: TextSelection(baseOffset: 3, extentOffset: 3),
       );
@@ -238,10 +99,10 @@ void main() {
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(resultsKey), findsNothing);
-      expect(autocompleteController.textEditingController.text, selection);
+      expect(textEditingController.text, selection);
 
       // Modify the field text. The results appear again and are filtered.
-      autocompleteController.textEditingController.value = const TextEditingValue(
+      textEditingController.value = const TextEditingValue(
         text: 'e',
         selection: TextSelection(baseOffset: 1, extentOffset: 1),
       );
@@ -260,25 +121,27 @@ void main() {
     testWidgets('can filter and select a list of custom User options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey resultsKey = GlobalKey();
-      final AutocompleteController<User> autocompleteController =
-          AutocompleteController<User>(
-            options: kOptionsUsers,
-          );
       List<User> lastResults;
       AutocompleteOnSelected<User> lastOnSelected;
       User lastUserSelected;
+      TextEditingController textEditingController;
 
       await tester.pumpWidget(
         MaterialApp(
           home: AutocompleteCore<User>(
-            autocompleteController: autocompleteController,
+            buildOptions: (TextEditingValue textEditingValue) {
+              return kOptionsUsers.where((User option) {
+                return option.toString().contains(textEditingValue.text.toLowerCase());
+              }).toList();
+            },
             onSelected: (User selected) {
               lastUserSelected = selected;
             },
-            buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+            fieldBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
+              textEditingController ??= fieldTextEditingController;
               return Container(key: fieldKey);
             },
-            buildResults: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
+            resultsBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
               lastResults = results;
               lastOnSelected = onSelected;
               return Container(key: resultsKey);
@@ -291,7 +154,7 @@ void main() {
       expect(find.byKey(resultsKey), findsNothing);
 
       // Enter text. The results are filtered by the text.
-      autocompleteController.textEditingController.value = const TextEditingValue(
+      textEditingController.value = const TextEditingValue(
         text: 'example',
         selection: TextSelection(baseOffset: 7, extentOffset: 7),
       );
@@ -309,11 +172,11 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(resultsKey), findsNothing);
       expect(lastUserSelected, selection);
-      expect(autocompleteController.textEditingController.text, selection.toString());
+      expect(textEditingController.text, selection.toString());
 
       // Modify the field text. The results appear again and are filtered, this
       // time by name instead of email.
-      autocompleteController.textEditingController.value = const TextEditingValue(
+      textEditingController.value = const TextEditingValue(
         text: 'B',
         selection: TextSelection(baseOffset: 1, extentOffset: 1),
       );
@@ -327,26 +190,31 @@ void main() {
     testWidgets('can specify a custom display string for a list of custom User options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey resultsKey = GlobalKey();
-      final AutocompleteController<User> autocompleteController =
-          AutocompleteController<User>(
-            options: kOptionsUsers,
-            displayStringForOption: (User option) => option.name,
-          );
       List<User> lastResults;
       AutocompleteOnSelected<User> lastOnSelected;
       User lastUserSelected;
+      final AutocompleteOptionToString<User> displayStringForOption = (User option) => option.name;
+      TextEditingController textEditingController;
 
       await tester.pumpWidget(
         MaterialApp(
           home: AutocompleteCore<User>(
-            autocompleteController: autocompleteController,
+            buildOptions: (TextEditingValue textEditingValue) {
+              return kOptionsUsers.where((User option) {
+                return option
+                    .toString()
+                    .contains(textEditingValue.text.toLowerCase());
+              }).toList();
+            },
+            displayStringForOption: displayStringForOption,
             onSelected: (User selected) {
               lastUserSelected = selected;
             },
-            buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+            fieldBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
+              textEditingController ??= fieldTextEditingController;
               return Container(key: fieldKey);
             },
-            buildResults: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
+            resultsBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
               lastResults = results;
               lastOnSelected = onSelected;
               return Container(key: resultsKey);
@@ -359,7 +227,7 @@ void main() {
       expect(find.byKey(resultsKey), findsNothing);
 
       // Enter text. The results are filtered by the text.
-      autocompleteController.textEditingController.value = const TextEditingValue(
+      textEditingController.value = const TextEditingValue(
         text: 'example',
         selection: TextSelection(baseOffset: 7, extentOffset: 7),
       );
@@ -378,11 +246,11 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(resultsKey), findsNothing);
       expect(lastUserSelected, selection);
-      expect(autocompleteController.textEditingController.text, selection.name);
+      expect(textEditingController.text, selection.name);
 
       // Modify the field text. The results appear again and are filtered, this
       // time by name instead of email.
-      autocompleteController.textEditingController.value = const TextEditingValue(
+      textEditingController.value = const TextEditingValue(
         text: 'B',
         selection: TextSelection(baseOffset: 1, extentOffset: 1),
       );
@@ -396,22 +264,24 @@ void main() {
     testWidgets('onFieldSubmitted selects the first result', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey resultsKey = GlobalKey();
-      final AutocompleteController<String> autocompleteController =
-          AutocompleteController<String>(
-            options: kOptions,
-          );
       List<String> lastResults;
       VoidCallback lastOnFieldSubmitted;
+      TextEditingController textEditingController;
 
       await tester.pumpWidget(
         MaterialApp(
           home: AutocompleteCore<String>(
-            autocompleteController: autocompleteController,
-            buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+            buildOptions: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              }).toList();
+            },
+            fieldBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
+              textEditingController ??= fieldTextEditingController;
               lastOnFieldSubmitted = onFieldSubmitted;
               return Container(key: fieldKey);
             },
-            buildResults: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
+            resultsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
               lastResults = results;
               return Container(key: resultsKey);
             },
@@ -420,7 +290,7 @@ void main() {
       );
 
       // Enter text. The results are filtered by the text.
-      autocompleteController.textEditingController.value = const TextEditingValue(
+      textEditingController.value = const TextEditingValue(
         text: 'ele',
         selection: TextSelection(baseOffset: 3, extentOffset: 3),
       );
@@ -437,18 +307,15 @@ void main() {
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(resultsKey), findsNothing);
-      expect(autocompleteController.textEditingController.text, lastResults[0]);
+      expect(textEditingController.text, lastResults[0]);
     });
 
     testWidgets('results follow field when it moves', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey resultsKey = GlobalKey();
-      final AutocompleteController<String> autocompleteController =
-          AutocompleteController<String>(
-            options: kOptions,
-          );
       StateSetter setState;
       Alignment alignment = Alignment.center;
+      TextEditingController textEditingController;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -459,13 +326,19 @@ void main() {
                 return Align(
                   alignment: alignment,
                   child: AutocompleteCore<String>(
-                    autocompleteController: autocompleteController,
-                    buildField: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+                    buildOptions: (TextEditingValue textEditingValue) {
+                      return kOptions.where((String option) {
+                        return option.contains(textEditingValue.text.toLowerCase());
+                      }).toList();
+                    },
+                    fieldBuilder: (BuildContext context, TextEditingController fieldTextEditingController, VoidCallback onFieldSubmitted) {
+                      textEditingController ??= fieldTextEditingController;
                       return TextFormField(
+                        controller: fieldTextEditingController,
                         key: fieldKey,
                       );
                     },
-                    buildResults: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
+                    resultsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
                       return Container(key: resultsKey);
                     },
                   ),
@@ -481,7 +354,7 @@ void main() {
       expect(find.byKey(resultsKey), findsNothing);
 
       // Enter text to show the results.
-      autocompleteController.textEditingController.value = const TextEditingValue(
+      textEditingController.value = const TextEditingValue(
         text: 'ele',
         selection: TextSelection(baseOffset: 3, extentOffset: 3),
       );
