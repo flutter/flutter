@@ -264,8 +264,7 @@ class UserMessages {
   String get flutterNoConnectedDevices => 'No connected devices.';
   String get flutterNoPubspec =>
       'Error: No pubspec.yaml file found.\n'
-      'This command should be run from the root of your Flutter project.\n'
-      'Do not run this command from the root of your git clone of Flutter.';
+      'This command should be run from the root of your Flutter project.';
   String flutterTargetFileMissing(String path) => 'Target file "$path" not found.';
   String get flutterBasePatchFlagsExclusive => 'Error: Only one of --baseline, --patch is allowed.';
   String get flutterBaselineRequiresTraceFile => 'Error: --baseline requires --compilation-trace-file to be specified.';

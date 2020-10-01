@@ -25,7 +25,14 @@ const Curve _modalBottomSheetCurve = decelerateEasing;
 const double _minFlingVelocity = 700.0;
 const double _closeProgressThreshold = 0.5;
 
+/// A callback for when the user begins dragging the bottom sheet.
+///
+/// Used by [BottomSheet.onDragStart].
 typedef BottomSheetDragStartHandler = void Function(DragStartDetails details);
+
+/// A callback for when the user stops dragging the bottom sheet.
+///
+/// Used by [BottomSheet.onDragEnd].
 typedef BottomSheetDragEndHandler = void Function(
   DragEndDetails details, {
   bool isClosing,

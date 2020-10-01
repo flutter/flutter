@@ -2350,7 +2350,7 @@ class FollowerLayer extends ContainerLayer {
     if (_lastTransform != null) {
       engineLayer = builder.pushTransform(
         _lastTransform!.storage,
-        oldLayer: _engineLayer as ui.TransformEngineLayer,
+        oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
       addChildrenToScene(builder);
       builder.pop();
@@ -2360,7 +2360,7 @@ class FollowerLayer extends ContainerLayer {
       final Matrix4 matrix = Matrix4.translationValues(unlinkedOffset!.dx, unlinkedOffset!.dy, .0);
       engineLayer = builder.pushTransform(
         matrix.storage,
-        oldLayer: _engineLayer as ui.TransformEngineLayer,
+        oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
       addChildrenToScene(builder);
       builder.pop();

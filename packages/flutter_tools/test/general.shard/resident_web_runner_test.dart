@@ -15,8 +15,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_runner/devfs_web.dart';
-import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
+import 'package:flutter_tools/src/isolated/devfs_web.dart';
+import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -759,7 +759,6 @@ void main() {
     final WebAssetServer webAssetServer = WebAssetServer(null, null, null, null, null, null);
     when(mockWebDevFS.webAssetServer).thenReturn(webAssetServer);
 
-    expect(residentWebRunner.supportsCanvasKit, true);
     expect(webAssetServer.canvasKitRendering, false);
 
     final bool toggleResult = await residentWebRunner.toggleCanvaskit();
