@@ -334,7 +334,7 @@ abstract class PaintPattern {
   /// offset.
   ///
   /// If no call to [Canvas.drawParagraph] was made, then this results in failure.
-  void paragraph({ ui.Paragraph? paragraph, dynamic? offset });
+  void paragraph({ ui.Paragraph? paragraph, dynamic offset });
 
   /// Indicates that a shadow is expected next.
   ///
@@ -449,7 +449,7 @@ class _PathMatcher extends Matcher {
   List<Offset> excludes;
 
   @override
-  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
+  bool matches(Object? object, Map<dynamic, dynamic> matchState) {
     if (object is! Path) {
       matchState[this] = 'The given object ($object) was not a Path.';
       return false;
@@ -498,7 +498,7 @@ class _MismatchedCall {
   final RecordedInvocation call;
 }
 
-bool _evaluatePainter(dynamic object, Canvas canvas, PaintingContext context) {
+bool _evaluatePainter(Object? object, Canvas canvas, PaintingContext context) {
   if (object is _ContextPainterFunction) {
     final _ContextPainterFunction function = object;
     function(context, Offset.zero);
@@ -523,7 +523,7 @@ bool _evaluatePainter(dynamic object, Canvas canvas, PaintingContext context) {
 
 abstract class _TestRecordingCanvasMatcher extends Matcher {
   @override
-  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
+  bool matches(Object? object, Map<dynamic, dynamic> matchState) {
     final TestRecordingCanvas canvas = TestRecordingCanvas();
     final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
     final StringBuffer description = StringBuffer();
@@ -628,7 +628,7 @@ class _TestRecordingCanvasPaintsNothingMatcher extends _TestRecordingCanvasMatch
 
 class _TestRecordingCanvasPaintsAssertionMatcher extends Matcher {
   @override
-  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
+  bool matches(Object? object, Map<dynamic, dynamic> matchState) {
     final TestRecordingCanvas canvas = TestRecordingCanvas();
     final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
     final StringBuffer description = StringBuffer();
