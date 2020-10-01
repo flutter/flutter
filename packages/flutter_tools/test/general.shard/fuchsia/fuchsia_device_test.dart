@@ -872,12 +872,7 @@ void main() {
     FakeFuchsiaDeviceTools fuchsiaDeviceTools;
     MockFuchsiaSdk fuchsiaSdk;
     MockFuchsiaArtifacts fuchsiaArtifacts;
-    MockArtifacts mockArtifacts;
-
-    File compilerSnapshot;
-    File platformDill;
-    File patchedSdk;
-    File runner;
+    Artifacts artifacts;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -886,32 +881,28 @@ void main() {
       fuchsiaSdk = MockFuchsiaSdk();
       fuchsiaArtifacts = MockFuchsiaArtifacts();
 
-      compilerSnapshot = memoryFileSystem.file('kernel_compiler.snapshot')..createSync();
-      platformDill = memoryFileSystem.file('platform_strong.dill')..createSync();
-      patchedSdk = memoryFileSystem.file('flutter_runner_patched_sdk')..createSync();
-      runner = memoryFileSystem.file('flutter_jit_runner')..createSync();
+      artifacts = Artifacts.test();
+      for (final BuildMode mode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
+        memoryFileSystem.file(
+          artifacts.getArtifactPath(Artifact.fuchsiaKernelCompiler,
+              platform: TargetPlatform.fuchsia_arm64, mode: mode),
+        ).createSync();
 
-      mockArtifacts = MockArtifacts();
-      when(mockArtifacts.getArtifactPath(
-        Artifact.fuchsiaKernelCompiler,
-        platform: anyNamed('platform'),
-        mode: anyNamed('mode'),
-      )).thenReturn(compilerSnapshot.path);
-      when(mockArtifacts.getArtifactPath(
-        Artifact.platformKernelDill,
-        platform: anyNamed('platform'),
-        mode: anyNamed('mode'),
-      )).thenReturn(platformDill.path);
-      when(mockArtifacts.getArtifactPath(
-        Artifact.flutterPatchedSdkPath,
-        platform: anyNamed('platform'),
-        mode: anyNamed('mode'),
-      )).thenReturn(patchedSdk.path);
-      when(mockArtifacts.getArtifactPath(
-        Artifact.fuchsiaFlutterRunner,
-        platform: anyNamed('platform'),
-        mode: anyNamed('mode'),
-      )).thenReturn(runner.path);
+        memoryFileSystem.file(
+          artifacts.getArtifactPath(Artifact.platformKernelDill,
+              platform: TargetPlatform.fuchsia_arm64, mode: mode),
+        ).createSync();
+
+        memoryFileSystem.file(
+          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath,
+              platform: TargetPlatform.fuchsia_arm64, mode: mode),
+        ).createSync();
+
+        memoryFileSystem.file(
+          artifacts.getArtifactPath(Artifact.fuchsiaFlutterRunner,
+              platform: TargetPlatform.fuchsia_arm64, mode: mode),
+        ).createSync();
+      }
     });
 
     Future<LaunchResult> setupAndStartApp({
@@ -951,7 +942,7 @@ void main() {
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
+      Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
@@ -978,7 +969,7 @@ void main() {
       expect(launchResult.hasObservatory, isFalse);
       expect(await device.stopApp(app), isTrue);
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
+      Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
@@ -993,7 +984,7 @@ void main() {
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isTrue);
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
+      Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
@@ -1008,7 +999,7 @@ void main() {
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
+      Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
@@ -1023,7 +1014,7 @@ void main() {
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isTrue);
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
+      Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
@@ -1038,7 +1029,7 @@ void main() {
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
+      Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
@@ -1053,7 +1044,7 @@ void main() {
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
+      Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
@@ -1068,7 +1059,7 @@ void main() {
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
+      Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => FakeFuchsiaDeviceTools(amber: FailingAmberCtl()),
@@ -1083,7 +1074,7 @@ void main() {
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
+      Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => FakeFuchsiaDeviceTools(tiles: FailingTilesCtl()),
@@ -1175,8 +1166,6 @@ class FuchsiaModulePackage extends ApplicationPackage {
   @override
   final String name;
 }
-
-class MockArtifacts extends Mock implements Artifacts {}
 
 class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
 
