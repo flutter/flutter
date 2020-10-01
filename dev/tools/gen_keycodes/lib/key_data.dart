@@ -569,15 +569,21 @@ class Key {
   /// These include synonyms for keys which don't have printable
   /// representations, and appear in more than one place on the keyboard (e.g.
   /// SHIFT, ALT, etc.).
-  static Map<String, List<dynamic>> get synonyms {
+  static Map<String, List<String>> get synonyms {
     if (_synonym == null) {
       final String synonymKeys = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'synonyms.json',)).readAsStringSync();
-      final Map<String, dynamic> synonym = json.decode(synonymKeys) as Map<String, dynamic>;
-      _synonym = synonym.cast<String, List<dynamic>>();
+      final Map<String, dynamic> dynamicSynonym = json.decode(synonymKeys) as Map<String, dynamic>;
+      _synonym = <String, List<String>>{};
+      dynamicSynonym.forEach((String name, dynamic values) {
+        // The keygen and algorithm of macOS relies on synonyms being pairs.
+        // See siblingKeyMap in macos_code_gen.dart.
+        _synonym[name] = (values as List<dynamic>).whereType<String>().toList();
+        assert(_synonym[name].length == 2);
+      });
     }
     return _synonym;
   }
-  static Map<String, List<dynamic>> _synonym;
+  static Map<String, List<String>> _synonym;
 
   /// Mask for the 32-bit value portion of the code.
   static const int valueMask = 0x000FFFFFFFF;

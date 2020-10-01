@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import <Foundation/Foundation.h>
+#import <Cocoa/Cocoa.h>
 #include "./KeyCodeMap_internal.h"
 
 // DO NOT EDIT -- DO NOT EDIT -- DO NOT EDIT
@@ -25,3 +26,13 @@ const NSDictionary* keyCodeToNumpad = @{
 const NSDictionary* keyCodeToFunctionKey = @{
 @@@MACOS_FUNCTION_KEY_MAP@@@
 };
+
+const NSDictionary* siblingPhysicalKeys = @{
+@@@SIBLING_KEY_MAP@@@
+};
+
+const NSDictionary* modiferFlags = @{
+@@@MODIFIER_FLAG_MAP@@@
+};
+
+@@@SPECIAL_KEY_CONSTANTS@@@
