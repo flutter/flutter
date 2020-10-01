@@ -38,7 +38,7 @@ Future<ui.Image> createTestImage({
 
   final int cacheKey = hashValues(width, height);
   if (cache && _cache.containsKey(cacheKey)) {
-    return _cache[cacheKey];
+    return _cache[cacheKey]!;
   }
 
   final ui.Image image = await _createImage(width, height);
@@ -74,8 +74,8 @@ Future<ui.Image> _createImage(int width, int height) async {
 // TODO(dnfield): Remove this when https://github.com/flutter/flutter/issues/49244
 // is resolved.
 Future<ui.Image> _webCreateTestImage({
-  int width,
-  int height,
+  required int width,
+  required int height,
 }) async {
   // See https://en.wikipedia.org/wiki/BMP_file_format for format examples.
   final int bufferSize = 0x36 + (width * height);
