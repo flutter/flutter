@@ -4,6 +4,7 @@
 
 // @dart = 2.6
 import 'dart:async';
+import 'dart:js_util' as js_util;
 import 'dart:html' as html;
 import 'dart:typed_data';
 
@@ -245,6 +246,29 @@ void testMain() {
 
     await Future<void>.delayed(const Duration(milliseconds: 1));
     expect(responded, isTrue);
+  });
+
+  /// Regression test for https://github.com/flutter/flutter/issues/66128.
+  test('setPreferredOrientation responds even if browser doesn\'t support api', () async {
+    final html.Screen screen = html.window.screen;
+    js_util.setProperty(screen, 'orientation', null);
+    bool responded = false;
+
+    final Completer<void> completer = Completer<void>();
+    final ByteData inputData = JSONMethodCodec().encodeMethodCall(MethodCall(
+        'SystemChrome.setPreferredOrientations',
+        <dynamic>[]));
+
+    window.sendPlatformMessage(
+      'flutter/platform',
+          inputData,
+          (outputData) {
+        responded = true;
+        completer.complete();
+      },
+    );
+    await completer.future;
+    expect(responded, true);
   });
 
   test('Window implements locale, locales, and locale change notifications', () async {
