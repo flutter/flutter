@@ -59,6 +59,10 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "rapidjson/rapidjson.h"
 #include "rapidjson/writer.h"
 
+#ifdef SHELL_ENABLE_GL
+#include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
+#endif
+
 const int32_t kFlutterSemanticsNodeIdBatchEnd = -1;
 const int32_t kFlutterSemanticsCustomActionIdBatchEnd = -1;
 
@@ -1034,11 +1038,11 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         return std::make_unique<flutter::Rasterizer>(shell);
       };
 
+#ifdef SHELL_ENABLE_GL
   // TODO(chinmaygarde): This is the wrong spot for this. It belongs in the
   // platform view jump table.
   flutter::EmbedderExternalTextureGL::ExternalTextureCallback
       external_texture_callback;
-#ifdef SHELL_ENABLE_GL
   if (config->type == kOpenGL) {
     const FlutterOpenGLRendererConfig* open_gl_config = &config->open_gl;
     if (SAFE_ACCESS(open_gl_config, gl_external_texture_frame_callback,
@@ -1135,8 +1139,11 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       std::move(settings),           //
       std::move(run_configuration),  //
       on_create_platform_view,       //
-      on_create_rasterizer,          //
-      external_texture_callback      //
+      on_create_rasterizer           //
+#ifdef SHELL_ENABLE_GL
+      ,
+      external_texture_callback  //
+#endif
   );
 
   // Release the ownership of the embedder engine to the caller.

@@ -12,8 +12,11 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 #include "flutter/shell/platform/embedder/embedder_thread_host.h"
+
+#ifdef SHELL_ENABLE_GL
+#include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
+#endif
 
 namespace flutter {
 
@@ -28,9 +31,13 @@ class EmbedderEngine {
                  Settings settings,
                  RunConfiguration run_configuration,
                  Shell::CreateCallback<PlatformView> on_create_platform_view,
-                 Shell::CreateCallback<Rasterizer> on_create_rasterizer,
+                 Shell::CreateCallback<Rasterizer> on_create_rasterizer
+#ifdef SHELL_ENABLE_GL
+                 ,
                  EmbedderExternalTextureGL::ExternalTextureCallback
-                     external_texture_callback);
+                     external_texture_callback
+#endif
+  );
 
   ~EmbedderEngine();
 
@@ -90,8 +97,10 @@ class EmbedderEngine {
   RunConfiguration run_configuration_;
   std::unique_ptr<ShellArgs> shell_args_;
   std::unique_ptr<Shell> shell_;
+#ifdef SHELL_ENABLE_GL
   const EmbedderExternalTextureGL::ExternalTextureCallback
       external_texture_callback_;
+#endif
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderEngine);
 };

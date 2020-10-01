@@ -11,9 +11,12 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_surface.h"
-#include "flutter/shell/platform/embedder/embedder_surface_gl.h"
 #include "flutter/shell/platform/embedder/embedder_surface_software.h"
 #include "flutter/shell/platform/embedder/vsync_waiter_embedder.h"
+
+#ifdef SHELL_ENABLE_GL
+#include "flutter/shell/platform/embedder/embedder_surface_gl.h"
+#endif
 
 namespace flutter {
 
@@ -40,6 +43,15 @@ class PlatformViewEmbedder final : public PlatformView {
         compute_platform_resolved_locale_callback;
   };
 
+  // Create a platform view that sets up a software rasterizer.
+  PlatformViewEmbedder(
+      PlatformView::Delegate& delegate,
+      flutter::TaskRunners task_runners,
+      EmbedderSurfaceSoftware::SoftwareDispatchTable software_dispatch_table,
+      PlatformDispatchTable platform_dispatch_table,
+      std::unique_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
+
+#ifdef SHELL_ENABLE_GL
   // Creates a platform view that sets up an OpenGL rasterizer.
   PlatformViewEmbedder(
       PlatformView::Delegate& delegate,
@@ -48,14 +60,7 @@ class PlatformViewEmbedder final : public PlatformView {
       bool fbo_reset_after_present,
       PlatformDispatchTable platform_dispatch_table,
       std::unique_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
-
-  // Create a platform view that sets up a software rasterizer.
-  PlatformViewEmbedder(
-      PlatformView::Delegate& delegate,
-      flutter::TaskRunners task_runners,
-      EmbedderSurfaceSoftware::SoftwareDispatchTable software_dispatch_table,
-      PlatformDispatchTable platform_dispatch_table,
-      std::unique_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
+#endif
 
   ~PlatformViewEmbedder() override;
 
