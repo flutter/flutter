@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -181,7 +179,7 @@ void main() {
   });
 
   group('custom minimum contrast guideline', () {
-    Widget _icon ({IconData icon = Icons.search, Color color, Color background}) {
+    Widget _icon({IconData icon = Icons.search, required Color color, required Color background}) {
       return Container(
         padding: const EdgeInsets.all(8.0),
         color: background,
@@ -189,7 +187,7 @@ void main() {
       );
     }
 
-    Widget _text ({String text = 'Text', Color color, Color background}) {
+    Widget _text ({String text = 'Text', required Color color, required Color background}) {
       return Container(
         padding: const EdgeInsets.all(8.0),
         color: background,
@@ -252,10 +250,10 @@ void main() {
 
     testWidgets('White on different colors, passing', (WidgetTester tester) async {
       await tester.pumpWidget(_row(<Widget>[
-        _icon (color: Colors.white, background: Colors.red[800], icon: Icons.more_horiz),
-        _icon (color: Colors.white, background: Colors.green[800], icon: Icons.description),
-        _icon (color: Colors.white, background: Colors.blue[800], icon: Icons.image),
-        _icon (color: Colors.white, background: Colors.purple[800], icon: Icons.beach_access),
+        _icon (color: Colors.white, background: Colors.red[800]!, icon: Icons.more_horiz),
+        _icon (color: Colors.white, background: Colors.green[800]!, icon: Icons.description),
+        _icon (color: Colors.white, background: Colors.blue[800]!, icon: Icons.image),
+        _icon (color: Colors.white, background: Colors.purple[800]!, icon: Icons.beach_access),
       ]));
 
       await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
@@ -263,10 +261,10 @@ void main() {
 
     testWidgets('White on different colors, failing', (WidgetTester tester) async {
       await tester.pumpWidget(_row(<Widget>[
-        _icon (color: Colors.white, background: Colors.red[200], icon: Icons.more_horiz),
-        _icon (color: Colors.white, background: Colors.green[400], icon: Icons.description),
-        _icon (color: Colors.white, background: Colors.blue[600], icon: Icons.image),
-        _icon (color: Colors.white, background: Colors.purple[800], icon: Icons.beach_access),
+        _icon (color: Colors.white, background: Colors.red[200]!, icon: Icons.more_horiz),
+        _icon (color: Colors.white, background: Colors.green[400]!, icon: Icons.description),
+        _icon (color: Colors.white, background: Colors.blue[600]!, icon: Icons.image),
+        _icon (color: Colors.white, background: Colors.purple[800]!, icon: Icons.beach_access),
       ]));
 
       await expectLater(tester, doesNotMeetGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));

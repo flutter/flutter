@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -13,9 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Class that makes it easy to mock common toStringDeep behavior.
 class _MockToStringDeep {
-  _MockToStringDeep(String str) {
+  _MockToStringDeep(String str) : _lines = <String>[] {
     final List<String> lines = str.split('\n');
-    _lines = <String>[];
     for (int i = 0; i < lines.length - 1; ++i)
       _lines.add('${lines[i]}\n');
 
@@ -31,7 +28,7 @@ class _MockToStringDeep {
   /// Lines in the message to display when [toStringDeep] is called.
   /// For correct toStringDeep behavior, each line should be terminated with a
   /// line break.
-  List<String> _lines;
+  final List<String> _lines;
 
   String toStringDeep({ String prefixLineOne = '', String prefixOtherLines = '' }) {
     final StringBuffer sb = StringBuffer();
@@ -340,7 +337,7 @@ void main() {
   });
 
   group('matchesGoldenFile', () {
-    _FakeComparator comparator;
+    late _FakeComparator comparator;
 
     Widget boilerplate(Widget child) {
       return Directionality(
@@ -561,8 +558,7 @@ void main() {
         currentValueLength: 10,
         maxValueLength: 15,
       );
-      final _FakeSemanticsNode node = _FakeSemanticsNode();
-      node.data = data;
+      final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
       expect(node, matchesSemantics(
          rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
@@ -666,9 +662,9 @@ enum _ComparatorInvocation {
 
 class _FakeComparator implements GoldenFileComparator {
   _ComparatorBehavior behavior = _ComparatorBehavior.returnTrue;
-  _ComparatorInvocation invocation;
-  Uint8List imageBytes;
-  Uri golden;
+  _ComparatorInvocation? invocation;
+  Uint8List? imageBytes;
+  Uri? golden;
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) {
@@ -683,7 +679,6 @@ class _FakeComparator implements GoldenFileComparator {
       case _ComparatorBehavior.throwTestFailure:
         throw TestFailure('fake message');
     }
-    return Future<bool>.value(false);
   }
 
   @override
@@ -695,12 +690,14 @@ class _FakeComparator implements GoldenFileComparator {
   }
 
   @override
-  Uri getTestUri(Uri key, int version) {
+  Uri getTestUri(Uri key, int? version) {
     return key;
   }
 }
 
 class _FakeSemanticsNode extends SemanticsNode {
+  _FakeSemanticsNode(this.data);
+
   SemanticsData data;
   @override
   SemanticsData getSemanticsData() => data;
@@ -709,7 +706,7 @@ class _FakeSemanticsNode extends SemanticsNode {
 @immutable
 class _CustomColor extends Color {
   const _CustomColor(int value, {this.isEqual}) : super(value);
-  final bool isEqual;
+  final bool? isEqual;
 
   @override
   bool operator ==(Object other) => isEqual ?? super == other;
