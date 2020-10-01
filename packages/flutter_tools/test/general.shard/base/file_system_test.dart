@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -56,44 +55,6 @@ void main() {
       expect(directoryA.path, '/foo_01');
       expect(directoryB.path, '/foo_02');
     });
-  });
-
-  testWithoutContext('deleteIfExists does not delete if file does not exist', () {
-    final File file = MockFile();
-    when(file.existsSync()).thenReturn(false);
-
-    expect(file.deleteIfExists(), false);
-  });
-
-  testWithoutContext('deleteIfExists deletes if file exists', () {
-    final File file = MockFile();
-    when(file.existsSync()).thenReturn(true);
-
-    expect(file.deleteIfExists(), true);
-  });
-
-  testWithoutContext('deleteIfExists handles separate program deleting file', () {
-    final File file = MockFile();
-    bool exists = true;
-    // Return true for the first call, false for any subsequent calls.
-    when(file.existsSync()).thenAnswer((Invocation _) {
-      final bool result = exists;
-      exists = false;
-      return result;
-    });
-    when(file.deleteSync(recursive: false))
-      .thenThrow(const FileSystemException('', '', OSError('', 2)));
-
-    expect(file.deleteIfExists(), true);
-  });
-
-  testWithoutContext('deleteIfExists throws tool exit if file exists on read-only volume', () {
-    final File file = MockFile();
-    when(file.existsSync()).thenReturn(true);
-    when(file.deleteSync(recursive: false))
-      .thenThrow(const FileSystemException('', '', OSError('', 2)));
-
-    expect(() => file.deleteIfExists(), throwsA(isA<ToolExit>()));
   });
 
   group('copyDirectorySync', () {

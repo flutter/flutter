@@ -111,6 +111,44 @@ void setupDirectoryMocks({
 }
 
 void main() {
+  testWithoutContext('deleteIfExists does not delete if file does not exist', () {
+    final File file = MockFile();
+    when(file.existsSync()).thenReturn(false);
+
+    expect(ErrorHandlingFileSystem.deleteFileIfExists(file), false);
+  });
+
+  testWithoutContext('deleteIfExists deletes if file exists', () {
+    final File file = MockFile();
+    when(file.existsSync()).thenReturn(true);
+
+     expect(ErrorHandlingFileSystem.deleteFileIfExists(file), true);
+  });
+
+  testWithoutContext('deleteIfExists handles separate program deleting file', () {
+    final File file = MockFile();
+    bool exists = true;
+    // Return true for the first call, false for any subsequent calls.
+    when(file.existsSync()).thenAnswer((Invocation _) {
+      final bool result = exists;
+      exists = false;
+      return result;
+    });
+    when(file.deleteSync(recursive: false))
+      .thenThrow(const FileSystemException('', '', OSError('', 2)));
+
+    expect(ErrorHandlingFileSystem.deleteFileIfExists(file), true);
+  });
+
+  testWithoutContext('deleteIfExists throws tool exit if file exists on read-only volume', () {
+    final File file = MockFile();
+    when(file.existsSync()).thenReturn(true);
+    when(file.deleteSync(recursive: false))
+      .thenThrow(const FileSystemException('', '', OSError('', 2)));
+
+    expect(() => ErrorHandlingFileSystem.deleteFileIfExists(file), throwsA(isA<ToolExit>()));
+  });
+
   group('throws ToolExit on Windows', () {
     const int kDeviceFull = 112;
     const int kUserMappedSectionOpened = 1224;
