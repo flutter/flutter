@@ -1634,50 +1634,50 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(
-            viewInsets: EdgeInsets.only(top: statusBarHeight), // status bar
-          ),
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Scaffold(
-                appBar: AppBar(
-                  title: const Text('PopupMenu Test'),
-                  actions: <Widget>[
-                    PopupMenuButton<int>(
-                      onSelected: (int result) {
-                        setState(() {
-                          _selectedValue = result;
-                        });
-                      },
-                      initialValue: _selectedValue,
-                      itemBuilder: (BuildContext context) {
-                        return choices;
-                      },
-                    ),
-                  ],
-                ),
-              );
-            }
-          ),
+        builder: (BuildContext context, Widget child) {
+          return MediaQuery(
+            data: const MediaQueryData(padding: EdgeInsets.only(top: statusBarHeight)), // status bar
+            child: child,
+          );
+        },
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('PopupMenu Test'),
+                actions: <Widget>[
+                  PopupMenuButton<int>(
+                    onSelected: (int result) {
+                      setState(() {
+                        _selectedValue = result;
+                      });
+                    },
+                    initialValue: _selectedValue,
+                    itemBuilder: (BuildContext context) {
+                      return choices;
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
 
     await tester.tap(find.byIcon(Icons.more_vert));
     await tester.pumpAndSettle();
-    // tap third item
+
+    // Tap third item.
     await tester.tap(find.text('Item 3'));
     await tester.pumpAndSettle();
 
-    // open popupMenuItems again
+    // Open popupMenu again.
     await tester.tap(find.byIcon(Icons.more_vert));
     await tester.pumpAndSettle();
-    // expected value
-    // before: less than statusBarHeight(overlapping)
-    // after: greater than statusBarHeight(not overlapping)
-    print(tester.getTopLeft(find.byWidget(firstItem)).dy);
-    expect(tester.getTopLeft(find.byWidget(firstItem)).dy, greaterThan(statusBarHeight)); // failing
+
+    // Check whether the first item is not overlapping with status bar.
+    expect(tester.getTopLeft(find.byWidget(firstItem)).dy, greaterThan(statusBarHeight));
   });
 
   testWidgets('Vertically long PopupMenu does not overlap with the status bar and bottom notch', (WidgetTester tester) async {
@@ -1688,26 +1688,31 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(
-            viewPadding: EdgeInsets.only(bottom: windowPaddingBottom), // bottom notch
-            viewInsets: EdgeInsets.only(top: windowPaddingTop), // status bar
+        builder: (BuildContext context, Widget child) {
+          return MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(
+                top: windowPaddingTop, 
+                bottom: windowPaddingBottom,
+              ),
+            ),
+            child: child,
+          );
+        },
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('PopupMenu Test'),
           ),
-          child: Scaffold(
-            appBar: AppBar(
-              title: const Text('PopupMenu Test'),
-            ),
-            body: PopupMenuButton<int>(
-              child: const Text('Show Menu'),
-              itemBuilder: (BuildContext context) => Iterable<PopupMenuItem<int>>.generate(
-                20, (int i) => PopupMenuItem<int>(
-                  // set globalKey to the first and last item
-                  key: i == 0 ? _firstKey : i == 19 ? _lastKey : null,
-                  value: i,
-                  child: Text('Item $i'),
-                ),
-              ).toList(),
-            ),
+          body: PopupMenuButton<int>(
+            child: const Text('Show Menu'),
+            itemBuilder: (BuildContext context) => Iterable<PopupMenuItem<int>>.generate(
+              20, (int i) => PopupMenuItem<int>(
+                // Set globalKey to the first and last item.
+                key: i == 0 ? _firstKey : i == 19 ? _lastKey : null,
+                value: i,
+                child: Text('Item $i'),
+              ),
+            ).toList(),
           ),
         ),
       ),
@@ -1715,20 +1720,18 @@ void main() {
 
     await tester.tap(find.text('Show Menu'));
     await tester.pumpAndSettle();
-    // expected value
-    // before: less than windowPaddingTop(overlapping)
-    // after: greater than windowPaddingTop(not overlapping)
-    print(tester.getTopLeft(find.byKey(_firstKey)).dy);
 
-    // drag to see the last item
-    await tester.drag(find.byKey(_lastKey), const Offset(0.0, -300));
+    // Check whether the first item is not overlapping with status bar.
+    expect(tester.getTopLeft(find.byKey(_firstKey)).dy, greaterThan(windowPaddingTop));
+
+    await tester.ensureVisible(find.byKey(_lastKey, skipOffstage: false));
     await tester.pumpAndSettle();
-    // expected value
-    // before: greater than windowPaddingBottom(overlapping)
-    // after: less than windowPaddingBottom(not overlapping)
-    print(tester.getBottomLeft(find.byKey(_lastKey)).dy);
-    expect(tester.getTopLeft(find.byKey(_firstKey)).dy, greaterThan(windowPaddingTop)); // failing
-    expect(tester.getBottomLeft(find.byKey(_lastKey)).dy, lessThan(windowPaddingBottom)); // failing
+
+    // Check whether the last item is not overlapping with bottom notch.
+    expect(
+      tester.getBottomLeft(find.byKey(_lastKey)).dy,
+      lessThan(600 - windowPaddingBottom), // Device height is 600.
+    );
   });
 }
 
