@@ -56,7 +56,7 @@ void main() {
         defines: <String, String>{
           kTargetFile: globals.fs.path.join('foo', 'lib', 'main.dart'),
         },
-        artifacts: MockArtifacts(),
+        artifacts: Artifacts.test(),
         processManager: FakeProcessManager.any(),
         logger: globals.logger,
         fileSystem: globals.fs,
@@ -557,4 +557,3 @@ void main() {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockArtifacts extends Mock implements Artifacts {}

@@ -1424,7 +1424,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
     Key? key,
     this.fit = BoxFit.contain,
     this.alignment = Alignment.center,
-    this.clipBehavior = Clip.hardEdge,
+    this.clipBehavior = Clip.none,
     Widget? child,
   }) : assert(fit != null),
        assert(alignment != null),
@@ -1452,7 +1452,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.hardEdge].
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   @override
@@ -1964,7 +1964,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is MultiChildLayoutParentData);
-    final MultiChildLayoutParentData parentData = renderObject.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData parentData = renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
       final AbstractNode? targetParent = renderObject.parent;
@@ -3004,11 +3004,7 @@ class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
 /// is a basic sliver that insets another sliver by applying padding on each
 /// side.
 ///
-/// Applying padding to anything but the most mundane sliver is likely to have
-/// undesired effects. For example, wrapping a [SliverPersistentHeader] with
-/// `pinned:true` will cause the app bar to overlap earlier slivers (contrary to
-/// the normal behavior of pinned app bars), and while the app bar is pinned,
-/// the padding will scroll away.
+/// {@macro flutter.rendering.sliverPadding.limitation}
 ///
 /// See also:
 ///
@@ -3654,7 +3650,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData = renderObject.parentData as StackParentData;
+    final StackParentData parentData = renderObject.parentData! as StackParentData;
     bool needsLayout = false;
 
     if (parentData.left != left) {
@@ -4550,7 +4546,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
-    final FlexParentData parentData = renderObject.parentData as FlexParentData;
+    final FlexParentData parentData = renderObject.parentData! as FlexParentData;
     bool needsLayout = false;
 
     if (parentData.flex != flex) {
@@ -5367,6 +5363,10 @@ class RichText extends MultiChildRenderObjectWidget {
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
 ///
+/// The [image] is not disposed of by this widget. Creators of the widget are
+/// expected to call [Image.dispose] on the [image] once the [RawImage] is no
+/// longer buildable.
+///
 /// This widget is rarely used directly. Instead, consider using [Image].
 class RawImage extends LeafRenderObjectWidget {
   /// Creates a widget that displays an image.
@@ -5398,6 +5398,10 @@ class RawImage extends LeafRenderObjectWidget {
        super(key: key);
 
   /// The image to display.
+  ///
+  /// Since a [RawImage] is stateless, it does not ever dispose this image.
+  /// Creators of a [RawImage] are expected to call [Image.dispose] on this
+  /// image handle when the [RawImage] will no longer be needed.
   final ui.Image? image;
 
   /// A string identifying the source of the image.
@@ -5520,8 +5524,13 @@ class RawImage extends LeafRenderObjectWidget {
   @override
   RenderImage createRenderObject(BuildContext context) {
     assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
+    assert(
+      image?.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
+      'Creator of a RawImage disposed of the image when the RawImage still '
+      'needed it.'
+    );
     return RenderImage(
-      image: image,
+      image: image?.clone(),
       debugImageLabel: debugImageLabel,
       width: width,
       height: height,
@@ -5542,8 +5551,13 @@ class RawImage extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderImage renderObject) {
+    assert(
+      image?.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
+      'Creator of a RawImage disposed of the image when the RawImage still '
+      'needed it.'
+    );
     renderObject
-      ..image = image
+      ..image = image?.clone()
       ..debugImageLabel = debugImageLabel
       ..width = width
       ..height = height
@@ -5558,6 +5572,12 @@ class RawImage extends LeafRenderObjectWidget {
       ..textDirection = matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null
       ..invertColors = invertColors
       ..filterQuality = filterQuality;
+  }
+
+  @override
+  void didUnmountRenderObject(RenderImage renderObject) {
+    // Have the render object dispose its image handle.
+    renderObject.image = null;
   }
 
   @override
@@ -6666,6 +6686,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? selected,
     bool? toggled,
     bool? button,
+    bool? slider,
     bool? link,
     bool? header,
     bool? textField,
@@ -6721,6 +6742,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       toggled: toggled,
       selected: selected,
       button: button,
+      slider: slider,
       link: link,
       header: header,
       textField: textField,
@@ -6835,6 +6857,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       toggled: properties.toggled,
       selected: properties.selected,
       button: properties.button,
+      slider: properties.slider,
       link: properties.link,
       header: properties.header,
       textField: properties.textField,
@@ -6906,6 +6929,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..toggled = properties.toggled
       ..selected = properties.selected
       ..button = properties.button
+      ..slider = properties.slider
       ..link = properties.link
       ..header = properties.header
       ..textField = properties.textField

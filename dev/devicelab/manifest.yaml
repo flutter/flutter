@@ -256,7 +256,6 @@ tasks:
       Measures the runtime performance of backdrop filter blurs on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   textfield_perf__timeline_summary:
     description: >
@@ -507,7 +506,6 @@ tasks:
       Measures the runtime performance of platform views in the Complex Layout sample app on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   flutter_gallery_ios32__start_up:
     description: >
