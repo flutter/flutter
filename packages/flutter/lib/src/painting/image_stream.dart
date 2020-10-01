@@ -72,10 +72,10 @@ class ImageInfo {
   ///   // current reference, we can immediately dispose of it and avoid
   ///   // recalculating anything.
   ///   if (value == _imageInfo || value != null && _imageInfo != null && value.isCloneOf(_imageInfo)) {
-  ///     value?.image?.dispose();
+  ///     value?.dispose();
   ///     return;
   ///   }
-  ///   _imageInfo?.image?.dispose();
+  ///   _imageInfo?.dispose();
   ///   _imageInfo = value;
   ///   // Perform work to determine size, or paint the image.
   /// }

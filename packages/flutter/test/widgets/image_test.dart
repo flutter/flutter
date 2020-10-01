@@ -1999,7 +1999,7 @@ class TestImageStreamCompleter extends ImageStreamCompleter {
     ImageChunkEvent chunkEvent,
   }) {
     if (imageInfo != null) {
-      _currentImage?.image?.dispose();
+      _currentImage?.dispose();
       _currentImage = imageInfo;
     }
     final List<ImageStreamListener> localListeners = listeners.toList();
