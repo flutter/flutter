@@ -1249,7 +1249,7 @@ void main() {
   });
 
   testWidgets('TimerPicker only changes hour label after scrolling stops', (WidgetTester tester) async {
-    late Duration duration;
+    Duration? duration;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -1272,13 +1272,13 @@ void main() {
 
     await tester.drag(find.text('2'), Offset(0, -_kRowOffset.dy));
     // Duration should change but not the label.
-    expect(duration.inHours, 1);
+    expect(duration!.inHours, 1);
     expect(find.text('hour'), findsNothing);
     expect(find.text('hours'), findsOneWidget);
     await tester.pumpAndSettle();
 
     // Now the label should change.
-    expect(duration.inHours, 1);
+    expect(duration!.inHours, 1);
     expect(find.text('hours'), findsNothing);
     expect(find.text('hour'), findsOneWidget);
   });
