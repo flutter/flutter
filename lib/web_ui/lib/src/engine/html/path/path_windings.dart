@@ -146,7 +146,7 @@ class PathWinding {
 
     _QuadRoots quadRoots = _QuadRoots();
     final int n = quadRoots.findRoots(
-        startY - 2 * y1 + endY, 2 * (y1 - startY), endY - y);
+        startY - 2 * y1 + endY, 2 * (y1 - startY), startY - y);
     assert(n <= 1);
     double xt;
     if (0 == n) {
