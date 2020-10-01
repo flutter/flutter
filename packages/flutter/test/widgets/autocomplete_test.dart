@@ -50,8 +50,8 @@ void main() {
   group('AutocompleteCore', () {
     testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
-      final GlobalKey resultsKey = GlobalKey();
-      List<String> lastResults;
+      final GlobalKey optionsKey = GlobalKey();
+      List<String> lastOptions;
       AutocompleteOnSelected<String> lastOnSelected;
       TextEditingController textEditingController;
 
@@ -67,61 +67,61 @@ void main() {
               textEditingController ??= fieldTextEditingController;
               return Container(key: fieldKey);
             },
-            resultsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
-              lastResults = results;
+            optionsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
+              lastOptions = options;
               lastOnSelected = onSelected;
-              return Container(key: resultsKey);
+              return Container(key: optionsKey);
             },
           ),
         ),
       );
 
-      // The field is always rendered, but the results are not unless needed.
+      // The field is always rendered, but the options are not unless needed.
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsNothing);
+      expect(find.byKey(optionsKey), findsNothing);
 
-      // Enter text. The results are filtered by the text.
+      // Enter text. The options are filtered by the text.
       textEditingController.value = const TextEditingValue(
         text: 'ele',
         selection: TextSelection(baseOffset: 3, extentOffset: 3),
       );
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsOneWidget);
-      expect(lastResults.length, 2);
-      expect(lastResults[0], 'chameleon');
-      expect(lastResults[1], 'elephant');
+      expect(find.byKey(optionsKey), findsOneWidget);
+      expect(lastOptions.length, 2);
+      expect(lastOptions[0], 'chameleon');
+      expect(lastOptions[1], 'elephant');
 
-      // Select a result. The results hide and the field updates to show the
+      // Select a option. The options hide and the field updates to show the
       // selection.
-      final String selection = lastResults[1];
+      final String selection = lastOptions[1];
       lastOnSelected(selection);
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsNothing);
+      expect(find.byKey(optionsKey), findsNothing);
       expect(textEditingController.text, selection);
 
-      // Modify the field text. The results appear again and are filtered.
+      // Modify the field text. The options appear again and are filtered.
       textEditingController.value = const TextEditingValue(
         text: 'e',
         selection: TextSelection(baseOffset: 1, extentOffset: 1),
       );
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsOneWidget);
-      expect(lastResults.length, 6);
-      expect(lastResults[0], 'chameleon');
-      expect(lastResults[1], 'elephant');
-      expect(lastResults[2], 'goose');
-      expect(lastResults[3], 'lemur');
-      expect(lastResults[4], 'mouse');
-      expect(lastResults[5], 'northern white rhinocerous');
+      expect(find.byKey(optionsKey), findsOneWidget);
+      expect(lastOptions.length, 6);
+      expect(lastOptions[0], 'chameleon');
+      expect(lastOptions[1], 'elephant');
+      expect(lastOptions[2], 'goose');
+      expect(lastOptions[3], 'lemur');
+      expect(lastOptions[4], 'mouse');
+      expect(lastOptions[5], 'northern white rhinocerous');
     });
 
     testWidgets('can filter and select a list of custom User options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
-      final GlobalKey resultsKey = GlobalKey();
-      List<User> lastResults;
+      final GlobalKey optionsKey = GlobalKey();
+      List<User> lastOptions;
       AutocompleteOnSelected<User> lastOnSelected;
       User lastUserSelected;
       TextEditingController textEditingController;
@@ -141,40 +141,40 @@ void main() {
               textEditingController ??= fieldTextEditingController;
               return Container(key: fieldKey);
             },
-            resultsBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
-              lastResults = results;
+            optionsBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> options) {
+              lastOptions = options;
               lastOnSelected = onSelected;
-              return Container(key: resultsKey);
+              return Container(key: optionsKey);
             },
           ),
         ),
       );
 
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsNothing);
+      expect(find.byKey(optionsKey), findsNothing);
 
-      // Enter text. The results are filtered by the text.
+      // Enter text. The options are filtered by the text.
       textEditingController.value = const TextEditingValue(
         text: 'example',
         selection: TextSelection(baseOffset: 7, extentOffset: 7),
       );
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsOneWidget);
-      expect(lastResults.length, 2);
-      expect(lastResults[0], kOptionsUsers[0]);
-      expect(lastResults[1], kOptionsUsers[1]);
+      expect(find.byKey(optionsKey), findsOneWidget);
+      expect(lastOptions.length, 2);
+      expect(lastOptions[0], kOptionsUsers[0]);
+      expect(lastOptions[1], kOptionsUsers[1]);
 
-      // Select a result. The results hide and onSelected is called.
-      final User selection = lastResults[1];
+      // Select a option. The options hide and onSelected is called.
+      final User selection = lastOptions[1];
       lastOnSelected(selection);
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsNothing);
+      expect(find.byKey(optionsKey), findsNothing);
       expect(lastUserSelected, selection);
       expect(textEditingController.text, selection.toString());
 
-      // Modify the field text. The results appear again and are filtered, this
+      // Modify the field text. The options appear again and are filtered, this
       // time by name instead of email.
       textEditingController.value = const TextEditingValue(
         text: 'B',
@@ -182,15 +182,15 @@ void main() {
       );
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsOneWidget);
-      expect(lastResults.length, 1);
-      expect(lastResults[0], kOptionsUsers[1]);
+      expect(find.byKey(optionsKey), findsOneWidget);
+      expect(lastOptions.length, 1);
+      expect(lastOptions[0], kOptionsUsers[1]);
     });
 
     testWidgets('can specify a custom display string for a list of custom User options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
-      final GlobalKey resultsKey = GlobalKey();
-      List<User> lastResults;
+      final GlobalKey optionsKey = GlobalKey();
+      List<User> lastOptions;
       AutocompleteOnSelected<User> lastOnSelected;
       User lastUserSelected;
       final AutocompleteOptionToString<User> displayStringForOption = (User option) => option.name;
@@ -214,41 +214,41 @@ void main() {
               textEditingController ??= fieldTextEditingController;
               return Container(key: fieldKey);
             },
-            resultsBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
-              lastResults = results;
+            optionsBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> options) {
+              lastOptions = options;
               lastOnSelected = onSelected;
-              return Container(key: resultsKey);
+              return Container(key: optionsKey);
             },
           ),
         ),
       );
 
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsNothing);
+      expect(find.byKey(optionsKey), findsNothing);
 
-      // Enter text. The results are filtered by the text.
+      // Enter text. The options are filtered by the text.
       textEditingController.value = const TextEditingValue(
         text: 'example',
         selection: TextSelection(baseOffset: 7, extentOffset: 7),
       );
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsOneWidget);
-      expect(lastResults.length, 2);
-      expect(lastResults[0], kOptionsUsers[0]);
-      expect(lastResults[1], kOptionsUsers[1]);
+      expect(find.byKey(optionsKey), findsOneWidget);
+      expect(lastOptions.length, 2);
+      expect(lastOptions[0], kOptionsUsers[0]);
+      expect(lastOptions[1], kOptionsUsers[1]);
 
-      // Select a result. The results hide and onSelected is called. The field
+      // Select a option. The options hide and onSelected is called. The field
       // has its text set to the selection's display string.
-      final User selection = lastResults[1];
+      final User selection = lastOptions[1];
       lastOnSelected(selection);
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsNothing);
+      expect(find.byKey(optionsKey), findsNothing);
       expect(lastUserSelected, selection);
       expect(textEditingController.text, selection.name);
 
-      // Modify the field text. The results appear again and are filtered, this
+      // Modify the field text. The options appear again and are filtered, this
       // time by name instead of email.
       textEditingController.value = const TextEditingValue(
         text: 'B',
@@ -256,15 +256,15 @@ void main() {
       );
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsOneWidget);
-      expect(lastResults.length, 1);
-      expect(lastResults[0], kOptionsUsers[1]);
+      expect(find.byKey(optionsKey), findsOneWidget);
+      expect(lastOptions.length, 1);
+      expect(lastOptions[0], kOptionsUsers[1]);
     });
 
-    testWidgets('onFieldSubmitted selects the first result', (WidgetTester tester) async {
+    testWidgets('onFieldSubmitted selects the first option', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
-      final GlobalKey resultsKey = GlobalKey();
-      List<String> lastResults;
+      final GlobalKey optionsKey = GlobalKey();
+      List<String> lastOptions;
       VoidCallback lastOnFieldSubmitted;
       TextEditingController textEditingController;
 
@@ -281,38 +281,38 @@ void main() {
               lastOnFieldSubmitted = onFieldSubmitted;
               return Container(key: fieldKey);
             },
-            resultsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
-              lastResults = results;
-              return Container(key: resultsKey);
+            optionsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
+              lastOptions = options;
+              return Container(key: optionsKey);
             },
           ),
         ),
       );
 
-      // Enter text. The results are filtered by the text.
+      // Enter text. The options are filtered by the text.
       textEditingController.value = const TextEditingValue(
         text: 'ele',
         selection: TextSelection(baseOffset: 3, extentOffset: 3),
       );
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsOneWidget);
-      expect(lastResults.length, 2);
-      expect(lastResults[0], 'chameleon');
-      expect(lastResults[1], 'elephant');
+      expect(find.byKey(optionsKey), findsOneWidget);
+      expect(lastOptions.length, 2);
+      expect(lastOptions[0], 'chameleon');
+      expect(lastOptions[1], 'elephant');
 
-      // Select the current string, as if the field was submitted. The results
+      // Select the current string, as if the field was submitted. The options
       // hide and the field updates to show the selection.
       lastOnFieldSubmitted();
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsNothing);
-      expect(textEditingController.text, lastResults[0]);
+      expect(find.byKey(optionsKey), findsNothing);
+      expect(textEditingController.text, lastOptions[0]);
     });
 
-    testWidgets('results follow field when it moves', (WidgetTester tester) async {
+    testWidgets('options follow field when it moves', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
-      final GlobalKey resultsKey = GlobalKey();
+      final GlobalKey optionsKey = GlobalKey();
       StateSetter setState;
       Alignment alignment = Alignment.center;
       TextEditingController textEditingController;
@@ -338,8 +338,8 @@ void main() {
                         key: fieldKey,
                       );
                     },
-                    resultsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
-                      return Container(key: resultsKey);
+                    optionsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
+                      return Container(key: optionsKey);
                     },
                   ),
                 );
@@ -349,35 +349,35 @@ void main() {
         ),
       );
 
-      // Field is shown but not results.
+      // Field is shown but not options.
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsNothing);
+      expect(find.byKey(optionsKey), findsNothing);
 
-      // Enter text to show the results.
+      // Enter text to show the options.
       textEditingController.value = const TextEditingValue(
         text: 'ele',
         selection: TextSelection(baseOffset: 3, extentOffset: 3),
       );
       await tester.pump();
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byKey(resultsKey), findsOneWidget);
+      expect(find.byKey(optionsKey), findsOneWidget);
 
-      // Results are just below the field.
-      final Offset resultsOffset = tester.getTopLeft(find.byKey(resultsKey));
+      // Options are just below the field.
+      final Offset optionsOffset = tester.getTopLeft(find.byKey(optionsKey));
       Offset fieldOffset = tester.getTopLeft(find.byKey(fieldKey));
       final Size fieldSize = tester.getSize(find.byKey(fieldKey));
-      expect(resultsOffset.dy, fieldOffset.dy + fieldSize.height);
+      expect(optionsOffset.dy, fieldOffset.dy + fieldSize.height);
 
-      // Move the field (similar to as if the keyboard opened). The results
-      // move to follow the field.
+      // Move the field (similar to as if the keyboard opened). The options move
+      // to follow the field.
       setState(() {
         alignment = Alignment.topCenter;
       });
       await tester.pump();
       fieldOffset = tester.getTopLeft(find.byKey(fieldKey));
-      final Offset resultsOffsetOpen = tester.getTopLeft(find.byKey(resultsKey));
-      expect(resultsOffsetOpen.dy, isNot(equals(resultsOffset.dy)));
-      expect(resultsOffsetOpen.dy, fieldOffset.dy + fieldSize.height);
+      final Offset optionsOffsetOpen = tester.getTopLeft(find.byKey(optionsKey));
+      expect(optionsOffsetOpen.dy, isNot(equals(optionsOffset.dy)));
+      expect(optionsOffsetOpen.dy, fieldOffset.dy + fieldSize.height);
     });
   });
 }

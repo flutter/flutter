@@ -11,21 +11,21 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'overlay.dart';
 
-/// A type for getting some list of results based on a String.
+/// A type for getting a list of options based on a String.
 ///
 /// See also:
-///   * [AutocompleteController.getResults], which is of this type.
-typedef AutocompleteResultsGetter<T> = List<T> Function(TextEditingValue textEditingValue);
+///   * [AutocompleteController.buildOptions], which is of this type.
+typedef AutocompleteBuildOptions<T> = List<T> Function(TextEditingValue textEditingValue);
 
-/// A type for indicating the selection of an autocomplete result.
-typedef AutocompleteOnSelected<T> = void Function(T? result);
+/// A type for indicating the selection of an autocomplete option.
+typedef AutocompleteOnSelected<T> = void Function(T? option);
 
-/// A builder for the selectable results given the current autocomplete field
-/// text.
-typedef AutocompleteResultsBuilder<T> = Widget Function(
+/// A builder for the selectable options given the current autocomplete field
+/// value.
+typedef AutocompleteOptionsBuilder<T> = Widget Function(
   BuildContext context,
   AutocompleteOnSelected<T> onSelected,
-  List<T> results,
+  List<T> options,
 );
 
 /// A builder for the field in autocomplete.
@@ -41,14 +41,14 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 // TODO(justinmc): Link to Autocomplete and AutocompleteCupertino when they are
 // implemented.
 /// A widget for helping the user to make a selection by entering some text and
-/// choosing from among a list of results.
+/// choosing from among a list of options.
 ///
 /// This is a core framework widget with very basic UI. Try using Autocomplete
 /// or AutocompleteCupertino before resorting to this widget.
 ///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to create a very basic autocomplete widget using the
-/// [fieldBuilder] and [resultsBuilder] parameters.
+/// [fieldBuilder] and [optionsBuilder] parameters.
 ///
 /// ```dart imports
 /// import 'package:flutter/widgets.dart';
@@ -76,7 +76,7 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///           },
 ///         );
 ///       },
-///       resultsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> results) {
+///       optionsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
 ///         return Material(
 ///           elevation: 4.0,
 ///           child: SizedBox(
@@ -192,22 +192,22 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 class AutocompleteCore<T> extends StatefulWidget {
   /// Create an instance of AutocompleteCore.
   ///
-  /// [fieldBuilder] and [resultsBuilder] must not be null.
+  /// [fieldBuilder] and [optionsBuilder] must not be null.
   const AutocompleteCore({
     required this.fieldBuilder,
-    required this.resultsBuilder,
+    required this.optionsBuilder,
     required this.buildOptions,
     AutocompleteOptionToString<T>? displayStringForOption,
     this.onSelected,
   }) : assert(fieldBuilder != null),
-       assert(resultsBuilder != null),
+       assert(optionsBuilder != null),
        displayStringForOption = displayStringForOption ?? _defaultStringForOption;
 
-  /// Builds the field whose input is used to find the results.
+  /// Builds the field whose input is used to get the options.
   final AutocompleteFieldBuilder fieldBuilder;
 
-  /// Builds the selectable results of filtering.
-  final AutocompleteResultsBuilder<T> resultsBuilder;
+  /// Builds the selectable options widgets from a list of options objects.
+  final AutocompleteOptionsBuilder<T> optionsBuilder;
 
   /// Returns the string to display in the field when the option is selected.
   ///
@@ -221,12 +221,12 @@ class AutocompleteCore<T> extends StatefulWidget {
   ///     to filter by.
   final AutocompleteOptionToString<T> displayStringForOption;
 
-  /// Called when a result is selected by the user.
+  /// Called when an option is selected by the user.
   final AutocompleteOnSelected<T>? onSelected;
 
-  /// A function that returns the current selectable options given the current
-  /// TextEditingValue.
-  final AutocompleteResultsGetter<T> buildOptions;
+  /// A function that returns the current selectable options objects given the
+  /// current TextEditingValue.
+  final AutocompleteBuildOptions<T> buildOptions;
 
   // The default way to convert an option to a string.
   static String _defaultStringForOption<T>(T option) {
@@ -239,42 +239,31 @@ class AutocompleteCore<T> extends StatefulWidget {
 
 class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   final GlobalKey _fieldKey = GlobalKey();
-  final LayerLink _resultsLayerLink = LayerLink();
+  final LayerLink _optionsLayerLink = LayerLink();
   final TextEditingController _textEditingController = TextEditingController();
-  List<T> _results = <T>[];
+  List<T> _options = <T>[];
   T? _selection;
 
+  // The OverlayEntry containing the options.
+  OverlayEntry? _floatingOptions;
 
-  /// The current results being returned by [getResults].
-  ///
-  /// This is a [ValueNotifier], so it can be listened to for changes.
-  final ValueNotifier<List<T>> results = ValueNotifier<List<T>>(<T>[]);
-
-  // The OverlayEntry containing the results.
-  OverlayEntry? _floatingResults;
-
-  // True iff the state indicates that the results should be visible.
-  bool get _shouldShowResults {
+  // True iff the state indicates that the options should be visible.
+  bool get _shouldShowOptions {
     final TextSelection selection = _textEditingController.selection;
     final bool fieldIsFocused = selection.baseOffset >= 0
         && selection.extentOffset >= 0;
-    final bool hasResults = _results != null && _results.isNotEmpty;
-    return fieldIsFocused && _selection == null && hasResults;
-  }
-
-  // Called when _results changes.
-  void _onChangedResults() {
-    _updateOverlay();
+    final bool hasOptions = _options != null && _options.isNotEmpty;
+    return fieldIsFocused && _selection == null && hasOptions;
   }
 
   // Called when _textEditingController changes.
   void _onChangedField() {
-    final List<T> results = widget.buildOptions(
+    final List<T> options = widget.buildOptions(
       _textEditingController.value,
     );
-    assert(results != null);
+    assert(options != null);
     setState(() {
-      _results = results;
+      _options = options;
       if (_selection != null) {
         final String selectionString = widget.displayStringForOption(_selection!);
         if (_textEditingController.text == selectionString) {
@@ -288,10 +277,10 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
 
   // Called from fieldBuilder when the user submits the field.
   void _onFieldSubmitted() {
-    if (_results.isEmpty) {
+    if (_options.isEmpty) {
       return;
     }
-    _select(_results[0]);
+    _select(_options[0]);
   }
 
   // Select the given option and update the widget.
@@ -312,26 +301,26 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     });
   }
 
-  // Hide or show the results overlay, if needed.
+  // Hide or show the options overlay, if needed.
   void _updateOverlay() {
-    if (_shouldShowResults) {
+    if (_shouldShowOptions) {
       final RenderBox renderBox = context.findRenderObject() as RenderBox;
-      _floatingResults?.remove();
-      _floatingResults = OverlayEntry(
+      _floatingOptions?.remove();
+      _floatingOptions= OverlayEntry(
         builder: (BuildContext context) {
-          return _FloatingResults<T>(
-            resultsBuilder: widget.resultsBuilder,
+          return _FloatingOptions<T>(
+            optionsBuilder: widget.optionsBuilder,
             fieldSize: renderBox.size,
-            layerLink: _resultsLayerLink,
+            layerLink: _optionsLayerLink,
             onSelected: _select,
-            results: _results,
+            options: _options,
           );
         },
       );
-      Overlay.of(context, rootOverlay: true)!.insert(_floatingResults!);
-    } else if (_floatingResults != null) {
-      _floatingResults!.remove();
-      _floatingResults = null;
+      Overlay.of(context, rootOverlay: true)!.insert(_floatingOptions!);
+    } else if (_floatingOptions != null) {
+      _floatingOptions!.remove();
+      _floatingOptions = null;
     }
   }
 
@@ -355,8 +344,8 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   @override
   void dispose() {
     _textEditingController.removeListener(_onChangedField);
-    _floatingResults?.remove();
-    _floatingResults = null;
+    _floatingOptions?.remove();
+    _floatingOptions = null;
     super.dispose();
   }
 
@@ -365,7 +354,7 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
     return Container(
       key: _fieldKey,
       child: CompositedTransformTarget(
-        link: _resultsLayerLink,
+        link: _optionsLayerLink,
         child: widget.fieldBuilder(
           context,
           _textEditingController,
@@ -376,26 +365,26 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   }
 }
 
-class _FloatingResults<T> extends StatelessWidget {
-  const _FloatingResults({
+class _FloatingOptions<T> extends StatelessWidget {
+  const _FloatingOptions({
     Key? key,
-    required this.resultsBuilder,
+    required this.optionsBuilder,
     required this.fieldSize,
     required this.layerLink,
     required this.onSelected,
-    required this.results,
-  }) : assert(resultsBuilder != null),
+    required this.options,
+  }) : assert(optionsBuilder != null),
        assert(fieldSize != null),
        assert(layerLink != null),
        assert(onSelected != null),
-       assert(results != null),
+       assert(options != null),
        super(key: key);
 
-  final AutocompleteResultsBuilder<T> resultsBuilder;
+  final AutocompleteOptionsBuilder<T> optionsBuilder;
   final Size fieldSize;
   final LayerLink layerLink;
   final AutocompleteOnSelected<T> onSelected;
-  final List<T> results;
+  final List<T> options;
 
   @override
   Widget build(BuildContext context) {
@@ -408,7 +397,7 @@ class _FloatingResults<T> extends StatelessWidget {
           0.0,
           fieldSize.height,
         ),
-        child: resultsBuilder(context, onSelected, results),
+        child: optionsBuilder(context, onSelected, options),
       ),
     );
   }
