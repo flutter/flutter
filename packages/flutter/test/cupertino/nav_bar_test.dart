@@ -396,8 +396,8 @@ void main() {
         });
 
     Iterable<double> opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity? renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
-      return renderOpacity!.opacity.value;
+      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+      return renderOpacity.opacity.value;
     });
 
     expect(opacities, <double> [
@@ -421,8 +421,8 @@ void main() {
         });
 
     opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity? renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
-      return renderOpacity!.opacity.value;
+      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+      return renderOpacity.opacity.value;
     });
 
     expect(opacities, <double> [
@@ -528,11 +528,11 @@ void main() {
     expect(find.text('Title'), findsOneWidget);
     expect(find.text('Different title'), findsOneWidget);
 
-    RenderAnimatedOpacity? largeTitleOpacity =
-        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+    RenderAnimatedOpacity largeTitleOpacity =
+        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
     // Large title initially visible.
     expect(
-      largeTitleOpacity!.opacity.value,
+      largeTitleOpacity.opacity.value,
       1.0,
     );
     // Middle widget not even wrapped with RenderOpacity, i.e. is always visible.
@@ -548,10 +548,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     largeTitleOpacity =
-        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
     // Large title no longer visible.
     expect(
-      largeTitleOpacity!.opacity.value,
+      largeTitleOpacity.opacity.value,
       0.0,
     );
 

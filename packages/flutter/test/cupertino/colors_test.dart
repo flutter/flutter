@@ -19,7 +19,7 @@ class DependentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color? resolved = CupertinoDynamicColor.resolve(color, context, nullOk: false);
+    final Color resolved = CupertinoDynamicColor.resolve(color, context, nullOk: false)!;
     return DecoratedBox(
       decoration: BoxDecoration(color: resolved),
       child: const SizedBox.expand(),
@@ -420,7 +420,7 @@ void main() {
   });
 
   testWidgets('CupertinoDynamicColor used in a CupertinoTheme', (WidgetTester tester) async {
-    CupertinoDynamicColor? color;
+    late CupertinoDynamicColor color;
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(
@@ -436,7 +436,7 @@ void main() {
       ),
     );
 
-    expect(color!.value, dynamicColor.darkColor.value);
+    expect(color.value, dynamicColor.darkColor.value);
 
     // Changing dependencies works.
     await tester.pumpWidget(
@@ -454,7 +454,7 @@ void main() {
       ),
     );
 
-    expect(color!.value, dynamicColor.color.value);
+    expect(color.value, dynamicColor.color.value);
 
     // Having a dependency below the CupertinoTheme widget works.
     await tester.pumpWidget(
@@ -475,7 +475,7 @@ void main() {
       ),
     );
 
-    expect(color!.value, dynamicColor.color.value);
+    expect(color.value, dynamicColor.color.value);
 
     // Changing dependencies works.
     await tester.pumpWidget(
@@ -497,7 +497,7 @@ void main() {
       ),
     );
 
-    expect(color!.value, dynamicColor.darkHighContrastElevatedColor.value);
+    expect(color.value, dynamicColor.darkHighContrastElevatedColor.value);
   });
 
   group('MaterialApp:', () {

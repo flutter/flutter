@@ -1022,7 +1022,7 @@ void main() {
     });
 
     testWidgets('picker persists am/pm value when scrolling hours', (WidgetTester tester) async {
-      DateTime? date;
+      late DateTime date;
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -1071,7 +1071,7 @@ void main() {
     });
 
     testWidgets('picker automatically scrolls the am/pm column when the hour column changes enough', (WidgetTester tester) async {
-      DateTime? date;
+      late DateTime date;
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -1249,7 +1249,7 @@ void main() {
   });
 
   testWidgets('TimerPicker only changes hour label after scrolling stops', (WidgetTester tester) async {
-    Duration? duration;
+    late Duration duration;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -1272,13 +1272,13 @@ void main() {
 
     await tester.drag(find.text('2'), Offset(0, -_kRowOffset.dy));
     // Duration should change but not the label.
-    expect(duration?.inHours, 1);
+    expect(duration.inHours, 1);
     expect(find.text('hour'), findsNothing);
     expect(find.text('hours'), findsOneWidget);
     await tester.pumpAndSettle();
 
     // Now the label should change.
-    expect(duration?.inHours, 1);
+    expect(duration.inHours, 1);
     expect(find.text('hours'), findsNothing);
     expect(find.text('hour'), findsOneWidget);
   });
@@ -1332,7 +1332,7 @@ void main() {
 
   testWidgets('scrollController can be removed or added', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    int? lastSelectedItem;
+    late int lastSelectedItem;
     void onSelectedItemChanged(int index) {
       lastSelectedItem = index;
     }
@@ -1368,7 +1368,7 @@ void main() {
   testWidgets('CupertinoDataPicker does not provide invalid MediaQuery', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/47989.
     Brightness brightness = Brightness.light;
-    StateSetter? setState;
+    late StateSetter setState;
 
     await tester.pumpWidget(
       CupertinoApp(

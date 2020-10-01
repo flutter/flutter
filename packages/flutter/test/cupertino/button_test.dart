@@ -316,35 +316,35 @@ void main() {
   });
 
   testWidgets('Button respects themes', (WidgetTester tester) async {
-    TextStyle? textStyle;
+    late TextStyle textStyle;
 
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoButton(
           onPressed: () { },
           child: Builder(builder: (BuildContext context) {
-            textStyle = DefaultTextStyle.of(context).style;
+            textStyle = DefaultTextStyle.of(context).style!;
             return const Placeholder();
           }),
         ),
       ),
     );
 
-    expect(textStyle!.color, CupertinoColors.activeBlue);
+    expect(textStyle.color, CupertinoColors.activeBlue);
 
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoButton.filled(
           onPressed: () { },
           child: Builder(builder: (BuildContext context) {
-            textStyle = DefaultTextStyle.of(context).style;
+            textStyle = DefaultTextStyle.of(context).style!;
             return const Placeholder();
           }),
         ),
       ),
     );
 
-    expect(textStyle!.color, isSameColorAs(CupertinoColors.white));
+    expect(textStyle.color, isSameColorAs(CupertinoColors.white));
     BoxDecoration decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),
@@ -359,13 +359,13 @@ void main() {
         home: CupertinoButton(
           onPressed: () { },
           child: Builder(builder: (BuildContext context) {
-            textStyle = DefaultTextStyle.of(context).style;
+            textStyle = DefaultTextStyle.of(context).style!;
             return const Placeholder();
           }),
         ),
       ),
     );
-    expect(textStyle!.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
+    expect(textStyle.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -373,13 +373,13 @@ void main() {
         home: CupertinoButton.filled(
           onPressed: () { },
           child: Builder(builder: (BuildContext context) {
-            textStyle = DefaultTextStyle.of(context).style;
+            textStyle = DefaultTextStyle.of(context).style!;
             return const Placeholder();
           }),
         ),
       ),
     );
-    expect(textStyle!.color, isSameColorAs(CupertinoColors.black));
+    expect(textStyle.color, isSameColorAs(CupertinoColors.black));
     decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),

@@ -76,7 +76,7 @@ void main() {
     );
 
     Brightness brightness = Brightness.light;
-    StateSetter? stateSetter;
+    late StateSetter stateSetter;
 
     TextStyle actionTextStyle(String text) {
       return tester.widget<DefaultTextStyle>(
@@ -117,7 +117,7 @@ void main() {
       const Color.fromARGB(255, 0, 122, 255).value,
     );
 
-    stateSetter!(() { brightness = Brightness.dark; });
+    stateSetter(() { brightness = Brightness.dark; });
     await tester.pump();
 
     expect(
@@ -344,7 +344,7 @@ void main() {
 
   testWidgets('Content section is scrollable', (WidgetTester tester) async {
     final ScrollController messageScrollController = ScrollController();
-    double? screenHeight;
+    late double screenHeight;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
@@ -381,7 +381,7 @@ void main() {
     messageScrollController.jumpTo(0.0);
 
     // Expect the action sheet to take all available height.
-    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, screenHeight!);
+    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, screenHeight);
   });
 
   testWidgets('Tap on button calls onPressed', (WidgetTester tester) async {
