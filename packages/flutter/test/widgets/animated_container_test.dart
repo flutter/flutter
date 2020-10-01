@@ -287,7 +287,7 @@ void main() {
     expect(text.size.height, equals(100.0));
   });
 
-  testWidgets('AnimatedContainer transformAlignment', (WidgetTester tester) async {
+  testWidgets('AnimatedContainer sets transformAlignment', (WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -333,5 +333,27 @@ void main() {
 
     expect(tester.getSize(find.byKey(target)), const Size(100.0, 200.0));
     expect(tester.getTopLeft(find.byKey(target)), const Offset(400.0, 300.0));
+  });
+
+  testWidgets('AnimatedContainer sets clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      AnimatedContainer(
+        decoration: const BoxDecoration(
+          color: Color(0xFFED1D7F),
+        ),
+        duration: const Duration(milliseconds: 200),
+      )
+    );
+    expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior, Clip.none);
+    await tester.pumpWidget(
+      AnimatedContainer(
+        decoration: const BoxDecoration(
+          color: Color(0xFFED1D7F),
+        ),
+        duration: const Duration(milliseconds: 200),
+        clipBehavior: Clip.antiAlias,
+      )
+    );
+    expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior, Clip.antiAlias);
   });
 }
