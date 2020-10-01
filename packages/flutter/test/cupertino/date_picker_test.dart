@@ -1401,7 +1401,7 @@ void main() {
       isSameColorAs(const Color(0xFFFFFFFF)),
     );
 
-    setState!(() { brightness = Brightness.dark; });
+    setState(() { brightness = Brightness.dark; });
     await tester.pump();
 
     expect(
