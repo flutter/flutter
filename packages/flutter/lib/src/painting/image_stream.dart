@@ -80,6 +80,7 @@ class ImageInfo {
   ///   // Perform work to determine size, or paint the image.
   /// }
   /// ```
+  /// {@end-tool}
   bool isCloneOf(ImageInfo other) {
     return other.image.isCloneOf(image)
         && scale == scale
