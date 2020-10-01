@@ -10,6 +10,7 @@ import 'package:yaml/yaml.dart';
 import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/version.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
@@ -1113,10 +1114,22 @@ void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<dynamic> pla
       link.createSync(path);
     } on FileSystemException catch (e) {
       if (globals.platform.isWindows && (e.osError?.errorCode ?? 0) == 1314) {
-        throwToolExit(
-          'Building with plugins requires symlink support. '
-          'Please enable Developer Mode in your system settings.\n\n$e'
-        );
+        final String versionString = RegExp(r'[\d.]+').firstMatch(globals.os.name)?.group(0);
+        final Version version = Version.parse(versionString);
+        // Window 10 14972 is the oldest version that allows creating symlinks
+        // just by enabling developer mode; before that it requires running the
+        // terminal as Administrator.
+        // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
+        String instructions;
+        if (version != null && version >= Version(10, 0, 14972)) {
+          instructions = 'Please enable Developer Mode in your system settings. Run\n'
+              '  start ms-settings:developers\n'
+              'to open settings.';
+        } else {
+          instructions = 'You must build from a terminal run as administrator.';
+        }
+        throwToolExit('Building with plugins requires symlink support.\n\n' +
+            instructions);
       }
       rethrow;
     }
