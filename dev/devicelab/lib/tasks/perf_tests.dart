@@ -484,7 +484,7 @@ class PerfTest {
     this.testTarget,
     this.timelineFileName, {
     this.measureCpuGpu = true,
-    this.measureMemory = false,
+    this.measureMemory = true,
     this.saveTraceFile = false,
     this.testDriver,
     this.needsFullTimeline = true,
@@ -497,7 +497,7 @@ class PerfTest {
     this.testDirectory,
     this.testTarget, {
     this.measureCpuGpu = true,
-    this.measureMemory = false,
+    this.measureMemory = true,
     this.testDriver =  'test_driver/e2e_test.dart',
     this.needsFullTimeline = false,
     this.benchmarkScoreKeys = _kCommonScoreKeys,
