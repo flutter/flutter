@@ -635,11 +635,11 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.star),
-                  title: Text('0'),
+                  label: '0',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.star_border),
-                  title: Text('1'),
+                  label: '1',
                 ),
               ],
               currentIndex: 0,
@@ -1561,11 +1561,11 @@ Widget _singleFabScaffold(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
-              title: Text('Home'),
+              label: 'Home',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.school),
-              title: Text('School'),
+              label: 'School',
             ),
           ],
         ),

@@ -379,7 +379,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
     Offset dragStartPoint;
     switch (widget.dragAnchor) {
       case DragAnchor.child:
-        final RenderBox renderObject = context.findRenderObject() as RenderBox;
+        final RenderBox renderObject = context.findRenderObject()! as RenderBox;
         dragStartPoint = renderObject.globalToLocal(position);
         break;
       case DragAnchor.pointer:
@@ -593,9 +593,9 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
       _candidateAvatars.remove(avatar);
     });
     if (widget.onAccept != null)
-      widget.onAccept!(avatar.data as T);
+      widget.onAccept!(avatar.data! as T);
     if (widget.onAcceptWithDetails != null)
-      widget.onAcceptWithDetails!(DragTargetDetails<T>(data: avatar.data as T, offset: avatar._lastOffset!));
+      widget.onAcceptWithDetails!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
   }
 
   void didMove(_DragAvatar<Object> avatar) {
@@ -763,7 +763,7 @@ class _DragAvatar<T extends Object> extends Drag {
   }
 
   Widget _build(BuildContext context) {
-    final RenderBox box = overlayState.context.findRenderObject() as RenderBox;
+    final RenderBox box = overlayState.context.findRenderObject()! as RenderBox;
     final Offset overlayTopLeft = box.localToGlobal(Offset.zero);
     return Positioned(
       left: _lastOffset!.dx - overlayTopLeft.dx,

@@ -4311,4 +4311,44 @@ void main() {
     expect(textTop, greaterThan(textFieldTop));
     expect(textTop, lessThan(textFieldBottom));
   });
+
+  testWidgets('visual density is included in the intrinsic height calculation', (WidgetTester tester) async {
+    final UniqueKey key = UniqueKey();
+    final UniqueKey intrinsicHeightKey = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Builder(
+          builder: (BuildContext context) {
+            return Theme(
+              data: Theme.of(context).copyWith(visualDensity: VisualDensity.compact),
+              child: Center(
+                child: Row(
+                  children: <Widget>[
+                    SizedBox(
+                      width: 35.0,
+                      child: TextField(
+                        key: key,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 35.0,
+                      child: IntrinsicHeight(
+                        child: TextField(
+                          key: intrinsicHeightKey,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    final double height = tester.getSize(find.byKey(key)).height;
+    final double intrinsicHeight = tester.getSize(find.byKey(intrinsicHeightKey)).height;
+    expect(intrinsicHeight, equals(height));
+  });
 }

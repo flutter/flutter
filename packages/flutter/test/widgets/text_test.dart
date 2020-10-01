@@ -943,7 +943,7 @@ void main() {
         if (method != #drawParagraph)
           return false;
         final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
-        if (paragraph.width > paragraph.longestLine)
+        if (paragraph.longestLine > paragraph.width)
           throw 'paragraph width (${paragraph.width}) greater than its longest line (${paragraph.longestLine}).';
         if (paragraph.width >= 400)
           throw 'paragraph.width (${paragraph.width}) >= 400';

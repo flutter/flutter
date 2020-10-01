@@ -193,9 +193,9 @@ class TestCase {
     makeAbsolute(pubspec, workingDirectory: privateTestsDir)
         .copySync(path.join(tmpdir.absolute.path, 'pubspec.yaml'));
 
-    // Copy Flutter's analysis_options.yaml file to the root of the tmpdir.
-    makeAbsolute(File('analysis_options.yaml'), workingDirectory: flutterRoot)
-        .copySync(path.join(tmpdir.absolute.path, 'analysis_options.yaml'));
+    // Use Flutter's analysis_options.yaml file from packages/flutter.
+    File(path.join(tmpdir.absolute.path, 'analysis_options.yaml'))
+        .writeAsStringSync('include: ${path.toUri(path.join(flutterRoot.path, 'packages', 'flutter', 'analysis_options.yaml'))}');
 
     return true;
   }
@@ -225,7 +225,7 @@ class TestCase {
     for (final File test in tests) {
       final String testPath = path.join(path.dirname(test.path), 'lib', path.basenameWithoutExtension(test.path));
       final ProcessRunnerResult result = await runner.runProcess(
-        <String>[flutter, 'test', testPath],
+        <String>[flutter, 'test', '--enable-experiment=non-nullable', '--null-assertions', testPath],
         failOk: true,
       );
       if (result.exitCode != 0) {

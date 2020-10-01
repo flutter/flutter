@@ -236,12 +236,12 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
       pages: <Page<void>>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        CupertinoPage<void>(
-          builder: (BuildContext context) => const Text('base'),
+        const CupertinoPage<void>(
+          child:  Text('base'),
         ),
         CupertinoPage<void>(
           key: ValueKey<String>(routeInformation?.location),
-          builder: (BuildContext context) => builder(context, routeInformation),
+          child: builder(context, routeInformation),
         )
       ],
     );
