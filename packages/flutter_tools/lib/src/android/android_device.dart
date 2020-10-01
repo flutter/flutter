@@ -26,6 +26,26 @@ import 'android.dart';
 import 'android_console.dart';
 import 'android_sdk.dart';
 
+/// Whether the [AndroidDevice] is believed to be a physical device or an emulator.
+enum HardwareType { emulator, physical }
+
+/// Map to help our `isLocalEmulator` detection.
+///
+/// See [AndroidDevice] for more explaination of why this is needed.
+const Map<String, HardwareType> kKnownHardware = <String, HardwareType>{
+  'goldfish': HardwareType.emulator,
+  'qcom': HardwareType.physical,
+  'ranchu': HardwareType.emulator,
+  'samsungexynos7420': HardwareType.physical,
+  'samsungexynos7580': HardwareType.physical,
+  'samsungexynos7870': HardwareType.physical,
+  'samsungexynos7880': HardwareType.physical,
+  'samsungexynos8890': HardwareType.physical,
+  'samsungexynos8895': HardwareType.physical,
+  'samsungexynos9810': HardwareType.physical,
+  'samsungexynos7570': HardwareType.physical,
+};
+
 /// A physical Android device or emulator.
 ///
 /// While [isEmulator] attempts to distinguish between the device categories,
@@ -976,11 +996,9 @@ class AdbLogReader extends DeviceLogReader {
   /// Create a new [AdbLogReader] from an [AndroidDevice] instance.
   static Future<AdbLogReader> createLogReader(
     AndroidDevice device,
-    ProcessManager processManager,
-    {
-      bool includePastLogs = false,
-    }
-  ) async {
+    ProcessManager processManager, {
+    bool includePastLogs = false,
+  }) async {
     // logcat -T is not supported on Android releases before Lollipop.
     const int kLollipopVersionCode = 21;
     final int apiVersion = (String v) {
@@ -992,24 +1010,26 @@ class AdbLogReader extends DeviceLogReader {
     // Start the adb logcat process and filter the most recent logs since `lastTimestamp`.
     // Some devices (notably LG) will only output logcat via shell
     // https://github.com/flutter/flutter/issues/51853
-    final String lastLogcatTimestamp = await device.lastLogcatTimestamp();
     final List<String> args = <String>[
       'shell',
       '-x',
       'logcat',
       '-v',
       'time',
-      // If we include logs from the past, filter for 'flutter' logs only.
-      if (includePastLogs) ...<String>[
-        '-s',
-        'flutter',
-      ] else if (apiVersion != null && apiVersion >= kLollipopVersionCode) ...<String>[
-        // Otherwise, filter for logs appearing past the present.
-        // '-T 0` means the timestamp of the logcat command invocation.
+    ];
+
+    // If past logs are included then filter for 'flutter' logs only.
+    if (includePastLogs) {
+      args.addAll(<String>['-s', 'flutter']);
+    } else if (apiVersion != null && apiVersion >= kLollipopVersionCode) {
+      // Otherwise, filter for logs appearing past the present.
+      // '-T 0` means the timestamp of the logcat command invocation.
+      final String lastLogcatTimestamp = await device.lastLogcatTimestamp();
+      args.addAll(<String>[
         '-T',
         if (lastLogcatTimestamp != null) '\'$lastLogcatTimestamp\'' else '0',
-      ],
-    ];
+      ]);
+    }
     final Process process = await processManager.start(device.adbCommandForDevice(args));
     return AdbLogReader._(process, device.name);
   }
@@ -1312,23 +1332,3 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
 bool _allowHeapCorruptionOnWindows(int exitCode, Platform platform) {
   return exitCode == -1073740940 && platform.isWindows;
 }
-
-/// Whether the [AndroidDevice] is believed to be a physical device or an emulator.
-enum HardwareType { emulator, physical }
-
-/// Map to help our `isLocalEmulator` detection.
-///
-/// See [AndroidDevice] for more explaination of why this is needed.
-const Map<String, HardwareType> kKnownHardware = <String, HardwareType>{
-  'goldfish': HardwareType.emulator,
-  'qcom': HardwareType.physical,
-  'ranchu': HardwareType.emulator,
-  'samsungexynos7420': HardwareType.physical,
-  'samsungexynos7580': HardwareType.physical,
-  'samsungexynos7870': HardwareType.physical,
-  'samsungexynos7880': HardwareType.physical,
-  'samsungexynos8890': HardwareType.physical,
-  'samsungexynos8895': HardwareType.physical,
-  'samsungexynos9810': HardwareType.physical,
-  'samsungexynos7570': HardwareType.physical,
-};
