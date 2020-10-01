@@ -803,6 +803,89 @@ void _testsInput() {
     expect(find.byType(TextField), findsNothing);
   });
 
+  testWidgets('Can double tap hours (when selected) to enter input mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, false, entryMode: TimePickerEntryMode.dial);
+    final Finder hourFinder = find.ancestor(
+      of: find.text('7'),
+      matching: find.byType(InkWell),
+    );
+
+    expect(find.byType(TextField), findsNothing);
+
+    // Double tap the hour
+    await tester.tap(hourFinder);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(hourFinder);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TextField), findsWidgets);
+  });
+
+  testWidgets('Can not double tap hours (when not selected) to enter input mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, false, entryMode: TimePickerEntryMode.dial);
+    final Finder hourFinder = find.ancestor(
+      of: find.text('7'),
+      matching: find.byType(InkWell),
+    );
+    final Finder minuteFinder = find.ancestor(
+      of: find.text('00'),
+      matching: find.byType(InkWell),
+    );
+
+    expect(find.byType(TextField), findsNothing);
+
+    // Switch to minutes mode
+    await tester.tap(minuteFinder);
+    await tester.pumpAndSettle();
+
+    // Double tap the hour
+    await tester.tap(hourFinder);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(hourFinder);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TextField), findsNothing);
+  });
+
+  testWidgets('Can double tap minutes (when selected) to enter input mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, false, entryMode: TimePickerEntryMode.dial);
+    final Finder minuteFinder = find.ancestor(
+      of: find.text('00'),
+      matching: find.byType(InkWell),
+    );
+
+    expect(find.byType(TextField), findsNothing);
+
+    // Switch to minutes mode
+    await tester.tap(minuteFinder);
+    await tester.pumpAndSettle();
+
+    // Double tap the minutes
+    await tester.tap(minuteFinder);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(minuteFinder);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TextField), findsWidgets);
+  });
+
+  testWidgets('Can not double tap minutes (when not selected) to enter input mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, false, entryMode: TimePickerEntryMode.dial);
+    final Finder minuteFinder = find.ancestor(
+      of: find.text('00'),
+      matching: find.byType(InkWell),
+    );
+
+    expect(find.byType(TextField), findsNothing);
+
+    // Double tap the minutes
+    await tester.tap(minuteFinder);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(minuteFinder);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TextField), findsNothing);
+  });
 
   testWidgets('Entered text returns time', (WidgetTester tester) async {
     TimeOfDay result;
