@@ -329,7 +329,13 @@ void _tests() {
       includesNodeWith(
         label: 'AM',
         actions: <SemanticsAction>[SemanticsAction.tap],
-        flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.isSelected, SemanticsFlag.isFocusable],
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isButton,
+          SemanticsFlag.isChecked,
+          SemanticsFlag.isInMutuallyExclusiveGroup,
+          SemanticsFlag.hasCheckedState,
+          SemanticsFlag.isFocusable,
+        ],
       ),
     );
     expect(
@@ -337,7 +343,12 @@ void _tests() {
       includesNodeWith(
         label: 'PM',
         actions: <SemanticsAction>[SemanticsAction.tap],
-        flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.isFocusable],
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isButton,
+          SemanticsFlag.isInMutuallyExclusiveGroup,
+          SemanticsFlag.hasCheckedState,
+          SemanticsFlag.isFocusable,
+        ],
       ),
     );
 

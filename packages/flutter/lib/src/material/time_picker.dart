@@ -559,7 +559,8 @@ class _DayPeriodControl extends StatelessWidget {
       child: InkWell(
         onTap: Feedback.wrapForTap(() => _setAm(context), context),
         child: Semantics(
-          selected: amSelected,
+          checked: amSelected,
+          inMutuallyExclusiveGroup: true,
           button: true,
           child: Center(
             child: Text(
@@ -577,7 +578,8 @@ class _DayPeriodControl extends StatelessWidget {
       child: InkWell(
         onTap: Feedback.wrapForTap(() => _setPm(context), context),
         child: Semantics(
-          selected: pmSelected,
+          checked: pmSelected,
+          inMutuallyExclusiveGroup: true,
           button: true,
           child: Center(
             child: Text(
