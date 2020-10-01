@@ -9,6 +9,10 @@ mobile, web, and desktop from a single codebase. Flutter works with existing
 code, is used by developers and organizations around the world, and is free
 and open source.
 
+## Flutter 1.12.13 - Latest Version 
+
+Please check out the Flutter 1.12.13 [Release Notes](https://flutter.dev/docs/development/tools/sdk/release-notes)
+
 ## Documentation
 
 * [Install Flutter](https://flutter.dev/get-started/)
