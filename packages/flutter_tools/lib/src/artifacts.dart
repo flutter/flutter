@@ -67,7 +67,7 @@ enum Artifact {
   windowsDesktopPath,
   /// The root of the cpp client code for Windows desktop.
   windowsCppClientWrapper,
-  /// The root of the sky_engine package
+  /// The root of the sky_engine package.
   skyEnginePath,
   /// The location of the macOS engine podspec file.
   flutterMacOSPodspec,

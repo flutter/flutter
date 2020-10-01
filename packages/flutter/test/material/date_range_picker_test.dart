@@ -13,6 +13,7 @@ import 'feedback_tester.dart';
 void main() {
   DateTime firstDate;
   DateTime lastDate;
+  DateTime currentDate;
   DateTimeRange initialDateRange;
   DatePickerEntryMode initialEntryMode = DatePickerEntryMode.calendar;
 
@@ -31,6 +32,7 @@ void main() {
   setUp(() {
     firstDate = DateTime(2015, DateTime.january, 1);
     lastDate = DateTime(2016, DateTime.december, 31);
+    currentDate = null;
     initialDateRange = DateTimeRange(
       start: DateTime(2016, DateTime.january, 15),
       end: DateTime(2016, DateTime.january, 25),
@@ -79,6 +81,7 @@ void main() {
       initialDateRange: initialDateRange,
       firstDate: firstDate,
       lastDate: lastDate,
+      currentDate: currentDate,
       initialEntryMode: initialEntryMode,
       cancelText: cancelText,
       confirmText: confirmText,
@@ -119,6 +122,52 @@ void main() {
         start: DateTime(2016, DateTime.january, 15),
         end: DateTime(2016, DateTime.january, 25)
       ));
+    });
+  });
+
+  testWidgets('Last month header should be visible if last date is selected',
+      (WidgetTester tester) async {
+    firstDate = DateTime(2015, DateTime.january, 1);
+    lastDate = DateTime(2016, DateTime.december, 31);
+    initialDateRange = DateTimeRange(
+      start: lastDate,
+      end: lastDate,
+    );
+    await preparePicker(tester, (Future<DateTimeRange> range) async {
+      // December header should be showing, but no November
+      expect(find.text('December 2016'), findsOneWidget);
+      expect(find.text('November 2016'), findsNothing);
+    });
+  });
+
+  testWidgets('First month header should be visible if first date is selected',
+      (WidgetTester tester) async {
+    firstDate = DateTime(2015, DateTime.january, 1);
+    lastDate = DateTime(2016, DateTime.december, 31);
+    initialDateRange = DateTimeRange(
+      start: firstDate,
+      end: firstDate,
+    );
+    await preparePicker(tester, (Future<DateTimeRange> range) async {
+      // January and February headers should be showing, but no March
+      expect(find.text('January 2015'), findsOneWidget);
+      expect(find.text('February 2015'), findsOneWidget);
+      expect(find.text('March 2015'), findsNothing);
+    });
+  });
+
+  testWidgets('Current month header should be visible if no date is selected',
+      (WidgetTester tester) async {
+    firstDate = DateTime(2015, DateTime.january, 1);
+    lastDate = DateTime(2016, DateTime.december, 31);
+    currentDate = DateTime(2016, DateTime.september, 1);
+    initialDateRange = null;
+
+    await preparePicker(tester, (Future<DateTimeRange> range) async {
+      // September and October headers should be showing, but no August
+      expect(find.text('September 2016'), findsOneWidget);
+      expect(find.text('October 2016'), findsOneWidget);
+      expect(find.text('August 2016'), findsNothing);
     });
   });
 
@@ -205,6 +254,62 @@ void main() {
         end: DateTime(2016, DateTime.january, 14),
       ));
     });
+  });
+
+  testWidgets('OK Cancel button layout', (WidgetTester tester) async {
+     Widget buildFrame(TextDirection textDirection) {
+       return MaterialApp(
+         home: Material(
+           child: Center(
+             child: Builder(
+               builder: (BuildContext context) {
+                 return ElevatedButton(
+                   child: const Text('X'),
+                   onPressed: () {
+                     showDateRangePicker(
+                       context: context,
+                       firstDate:DateTime(2001, DateTime.january, 1),
+                       lastDate: DateTime(2031, DateTime.december, 31),
+                       builder: (BuildContext context, Widget child) {
+                         return Directionality(
+                           textDirection: textDirection,
+                           child: child,
+                         );
+                       },
+                     );
+                   },
+                 );
+               },
+             ),
+           ),
+         ),
+       );
+     }
+
+    Future<void> showOkCancelDialog(TextDirection textDirection) async {
+      await tester.pumpWidget(buildFrame(textDirection));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.edit));
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> dismissOkCancelDialog() async {
+      await tester.tap(find.text('CANCEL'));
+      await tester.pumpAndSettle();
+    }
+
+    await showOkCancelDialog(TextDirection.ltr);
+    expect(tester.getBottomRight(find.text('OK')).dx, 622);
+    expect(tester.getBottomLeft(find.text('OK')).dx, 594);
+    expect(tester.getBottomRight(find.text('CANCEL')).dx, 560);
+    await dismissOkCancelDialog();
+
+    await showOkCancelDialog(TextDirection.rtl);
+    expect(tester.getBottomRight(find.text('OK')).dx, 206);
+    expect(tester.getBottomLeft(find.text('OK')).dx, 178);
+    expect(tester.getBottomRight(find.text('CANCEL')).dx, 324);
+    await dismissOkCancelDialog();
   });
 
   group('Haptic feedback', () {
@@ -316,10 +421,10 @@ void main() {
 
     testWidgets('Navigating with arrow keys scrolls as needed', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange> range) async {
-        // Jan and Feb headers should be showing, but no Mar
+        // Jan and Feb headers should be showing, but no March
         expect(find.text('January 2016'), findsOneWidget);
         expect(find.text('February 2016'), findsOneWidget);
-        expect(find.text('Mar 2016'), findsNothing);
+        expect(find.text('March 2016'), findsNothing);
 
         // Navigate to the grid
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);

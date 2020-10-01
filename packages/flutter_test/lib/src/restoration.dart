@@ -20,7 +20,7 @@ class TestRestorationManager extends RestorationManager {
   }
 
   @override
-  Future<RestorationBucket> get rootBucket {
+  Future<RestorationBucket?> get rootBucket {
     _debugRootBucketAccessed = true;
     return super.rootBucket;
   }
@@ -35,7 +35,7 @@ class TestRestorationManager extends RestorationManager {
   ///  * [WidgetTester.getRestorationData], which makes this data available
   ///    in a widget test.
   TestRestorationData get restorationData => _restorationData;
-  TestRestorationData _restorationData;
+  late TestRestorationData _restorationData;
 
   /// Whether the [rootBucket] has been obtained.
   bool get debugRootBucketAccessed => _debugRootBucketAccessed;
@@ -53,6 +53,14 @@ class TestRestorationManager extends RestorationManager {
   void restoreFrom(TestRestorationData data) {
     _restorationData = data;
     handleRestorationUpdateFromEngine(enabled: true, data: data.binary);
+  }
+
+  /// Disabled state restoration.
+  ///
+  /// To turn restoration back on call [restoreFrom].
+  void disableRestoration() {
+    _restorationData = TestRestorationData.empty;
+    handleRestorationUpdateFromEngine(enabled: false, data: null);
   }
 
   @override
@@ -81,5 +89,5 @@ class TestRestorationData {
   ///
   /// Should only be accessed by the test framework.
   @protected
-  final Uint8List binary;
+  final Uint8List? binary;
 }

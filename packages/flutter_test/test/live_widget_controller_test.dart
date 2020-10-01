@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.9
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -18,13 +20,46 @@ class _CountButtonState extends State<CountButton> {
   int counter = 0;
   @override
   Widget build(BuildContext context) {
-    return RaisedButton(
+    return ElevatedButton(
       child: Text('Counter $counter'),
       onPressed: () {
         setState(() {
           counter += 1;
         });
       },
+    );
+  }
+}
+
+class AnimateSample extends StatefulWidget {
+  @override
+  _AnimateSampleState createState() => _AnimateSampleState();
+}
+
+class _AnimateSampleState extends State<AnimateSample>
+    with SingleTickerProviderStateMixin {
+  AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (BuildContext context, _) => Text('Value: ${_controller.value}'),
     );
   }
 }
@@ -42,6 +77,16 @@ void main() {
     await controller.pump();
     expect(find.text('Counter 0'), findsNothing);
     expect(find.text('Counter 1'), findsOneWidget);
+  });
+
+  test('Test pumpAndSettle on LiveWidgetController', () async {
+    runApp(MaterialApp(home: Center(child: AnimateSample())));
+    await SchedulerBinding.instance.endOfFrame;
+    final WidgetController controller =
+        LiveWidgetController(WidgetsBinding.instance);
+    expect(find.text('Value: 1.0'), findsNothing);
+    await controller.pumpAndSettle();
+    expect(find.text('Value: 1.0'), findsOneWidget);
   });
 
   test('Input event array on LiveWidgetController', () async {

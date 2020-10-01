@@ -19,7 +19,6 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
-import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
@@ -27,7 +26,6 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../web/web_runner.dart';
-import '../widget_cache.dart';
 
 const String protocolVersion = '0.6.0';
 
@@ -82,6 +80,7 @@ class Daemon {
     _registerDomain(appDomain = AppDomain(this));
     _registerDomain(deviceDomain = DeviceDomain(this));
     _registerDomain(emulatorDomain = EmulatorDomain(this));
+    _registerDomain(devToolsDomain = DevToolsDomain(this));
 
     // Start listening.
     _commandSubscription = commandStream.listen(
@@ -98,6 +97,7 @@ class Daemon {
   AppDomain appDomain;
   DeviceDomain deviceDomain;
   EmulatorDomain emulatorDomain;
+  DevToolsDomain devToolsDomain;
   StreamSubscription<Map<String, dynamic>> _commandSubscription;
   int _outgoingRequestId = 1;
   final Map<String, Completer<dynamic>> _outgoingRequestCompleters = <String, Completer<dynamic>>{};
@@ -182,6 +182,7 @@ class Daemon {
   void _send(Map<String, dynamic> map) => sendCommand(map);
 
   Future<void> shutdown({ dynamic error }) async {
+    await devToolsDomain?.dispose();
     await _commandSubscription?.cancel();
     for (final Domain domain in _domainMap.values) {
       await domain.dispose();
@@ -467,10 +468,9 @@ class AppDomain extends Domain {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       flutterProject: flutterProject,
-      viewFilter: isolateFilter,
       target: target,
       buildInfo: options.buildInfo,
-      widgetCache: WidgetCache(featureFlags: featureFlags),
+      platform: globals.platform,
     );
 
     ResidentRunner runner;
@@ -543,6 +543,12 @@ class AppDomain extends Domain {
     final AppInstance app = AppInstance(_getNewAppId(),
         runner: runner, logToStdout: daemon.logToStdout, logger: logger);
     _apps.add(app);
+
+    // Set the domain and app for the given AppRunLogger. This allows the logger
+    // to log messages containing the app ID to the host.
+    logger.domain = this;
+    logger.app = app;
+
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
       'directory': projectDirectory,
@@ -886,6 +892,29 @@ class DeviceDomain extends Domain {
   }
 }
 
+class DevToolsDomain extends Domain {
+  DevToolsDomain(Daemon daemon) : super(daemon, 'devtools') {
+    registerHandler('serve', serve);
+  }
+
+  DevtoolsLauncher _devtoolsLauncher;
+
+  Future<Map<String, dynamic>> serve([ Map<String, dynamic> args ]) async {
+    _devtoolsLauncher ??= DevtoolsLauncher.instance;
+    final DevToolsServerAddress server = await _devtoolsLauncher.serve();
+
+    return<String, dynamic>{
+      'host': server?.host,
+      'port': server?.port,
+    };
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _devtoolsLauncher?.close();
+  }
+}
+
 Stream<Map<String, dynamic>> get stdinCommandStream => globals.stdio.stdin
   .transform<String>(utf8.decoder)
   .transform<String>(const LineSplitter())
@@ -1080,8 +1109,6 @@ class AppInstance {
   }
 
   Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) async {
-    _logger.domain = domain;
-    _logger.app = this;
     return method();
   }
 }
@@ -1226,25 +1253,24 @@ class AppRunLogger extends Logger {
     bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
-    assert(timeout != null);
     final int id = _nextProgressId++;
 
-    _sendProgressEvent(<String, dynamic>{
-      'id': id.toString(),
-      'progressId': progressId,
-      'message': message,
-    });
+    _sendProgressEvent(
+      eventId: id.toString(),
+      eventType: progressId,
+      message: message,
+    );
 
     _status = SilentStatus(
       timeout: timeout,
       timeoutConfiguration: timeoutConfiguration,
       onFinish: () {
         _status = null;
-        _sendProgressEvent(<String, dynamic>{
-          'id': id.toString(),
-          'progressId': progressId,
-          'finished': true,
-        });
+        _sendProgressEvent(
+          eventId: id.toString(),
+          eventType: progressId,
+          finished: true,
+        );
       }, stopwatch: Stopwatch())..start();
     return _status;
   }
@@ -1261,10 +1287,26 @@ class AppRunLogger extends Logger {
     }
   }
 
-  void _sendProgressEvent(Map<String, dynamic> event) {
+  void _sendProgressEvent({
+    @required String eventId,
+    @required String eventType,
+    bool finished = false,
+    String message,
+  }) {
     if (domain == null) {
-      printStatus('event sent after app closed: $event');
+      // If we're sending progress events before an app has started, send the
+      // progress messages as plain status messages.
+      if (message != null) {
+        printStatus(message);
+      }
     } else {
+      final Map<String, dynamic> event = <String, dynamic>{
+        'id': eventId,
+        'progressId': eventType,
+        if (message != null) 'message': message,
+        if (finished != null) 'finished': finished,
+      };
+
       domain._sendAppEvent(app, 'progress', event);
     }
   }

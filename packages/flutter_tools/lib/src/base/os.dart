@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../globals.dart' as globals;
+import 'common.dart';
 import 'file_system.dart';
 import 'io.dart';
 import 'logger.dart';
@@ -93,13 +94,7 @@ abstract class OperatingSystemUtils {
 
   void unzip(File file, Directory targetDirectory);
 
-  /// Returns true if the ZIP is not corrupt.
-  bool verifyZip(File file);
-
   void unpack(File gzippedTarFile, Directory targetDirectory);
-
-  /// Returns true if the gzip is not corrupt (does not check tar).
-  bool verifyGzip(File gzippedFile);
 
   /// Compresses a stream using gzip level 1 (faster but larger).
   Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) {
@@ -213,26 +208,51 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   void zip(Directory data, File zipFile) {
-    _processUtils.runSync(
-      <String>['zip', '-r', '-q', zipFile.path, '.'],
-      workingDirectory: data.path,
-      throwOnError: true,
-    );
+    try {
+      _processUtils.runSync(
+        <String>['zip', '-r', '-q', zipFile.path, '.'],
+        workingDirectory: data.path,
+        throwOnError: true,
+        verboseExceptions: true,
+      );
+    } on ArgumentError {
+      // zip is not available. this error message is modeled after the download
+      // error in bin/internal/update_dart_sdk.sh
+      String message = 'Please install zip.';
+      if (_platform.isMacOS) {
+        message = 'Consider running "brew install zip".';
+      } else if (_platform.isLinux) {
+        message = 'Consider running "sudo apt-get install zip".';
+      }
+      throwToolExit(
+        'Missing "zip" tool. Unable to compress ${data.path}.\n$message'
+      );
+    }
   }
 
   // unzip -o -q zipfile -d dest
   @override
   void unzip(File file, Directory targetDirectory) {
-    _processUtils.runSync(
-      <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
-      throwOnError: true,
-      verboseExceptions: true,
-    );
+    try {
+      _processUtils.runSync(
+        <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
+        throwOnError: true,
+        verboseExceptions: true,
+      );
+    } on ArgumentError {
+      // unzip is not available. this error message is modeled after the download
+      // error in bin/internal/update_dart_sdk.sh
+      String message = 'Please install unzip.';
+      if (_platform.isMacOS) {
+        message = 'Consider running "brew install unzip".';
+      } else if (_platform.isLinux) {
+        message = 'Consider running "sudo apt-get install unzip".';
+      }
+      throwToolExit(
+        'Missing "unzip" tool. Unable to extract ${file.path}.\n$message'
+      );
+    }
   }
-
-  @override
-  bool verifyZip(File zipFile) =>
-    _processUtils.exitsHappySync(<String>['unzip', '-t', '-qq', zipFile.path]);
 
   // tar -xzf tarball -C dest
   @override
@@ -242,10 +262,6 @@ class _PosixUtils extends OperatingSystemUtils {
       throwOnError: true,
     );
   }
-
-  @override
-  bool verifyGzip(File gzippedFile) =>
-    _processUtils.exitsHappySync(<String>['gzip', '-t', gzippedFile.path]);
 
   @override
   File makePipe(String path) {
@@ -266,10 +282,11 @@ class _PosixUtils extends OperatingSystemUtils {
           _processUtils.runSync(<String>['sw_vers', '-productName']),
           _processUtils.runSync(<String>['sw_vers', '-productVersion']),
           _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
+          _processUtils.runSync(<String>['uname', '-m']),
         ];
         if (results.every((RunResult result) => result.exitCode == 0)) {
           _name = '${results[0].stdout.trim()} ${results[1].stdout
-              .trim()} ${results[2].stdout.trim()}';
+              .trim()} ${results[2].stdout.trim()} ${results[3].stdout.trim()}';
         }
       }
       _name ??= super.name;
@@ -303,7 +320,18 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   List<File> _which(String execName, { bool all = false }) {
     // `where` always returns all matches, not just the first one.
-    final ProcessResult result = _processManager.runSync(<String>['where', execName]);
+    ProcessResult result;
+    try {
+      result = _processManager.runSync(<String>['where', execName]);
+    } on ArgumentError {
+      // `where` could be missing if system32 is not on the PATH.
+      throwToolExit(
+        'Cannot find the executable for `where`. This can happen if the System32 '
+        'folder (e.g. C:\\Windows\\System32 ) is removed from the PATH environment '
+        'variable. Ensure that this is present and then try again after restarting '
+        'the terminal and/or IDE.'
+      );
+    }
     if (result.exitCode != 0) {
       return const <File>[];
     }
@@ -336,37 +364,11 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   @override
-  bool verifyZip(File zipFile) {
-    try {
-      ZipDecoder().decodeBytes(zipFile.readAsBytesSync(), verify: true);
-    } on FileSystemException catch (_) {
-      return false;
-    } on ArchiveException catch (_) {
-      return false;
-    }
-    return true;
-  }
-
-  @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
     final Archive archive = TarDecoder().decodeBytes(
       GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
     );
     _unpackArchive(archive, targetDirectory);
-  }
-
-  @override
-  bool verifyGzip(File gzipFile) {
-    try {
-      GZipDecoder().decodeBytes(gzipFile.readAsBytesSync(), verify: true);
-    } on FileSystemException catch (_) {
-      return false;
-    } on ArchiveException catch (_) {
-      return false;
-    } on RangeError catch (_) {
-      return false;
-    }
-    return true;
   }
 
   void _unpackArchive(Archive archive, Directory targetDirectory) {

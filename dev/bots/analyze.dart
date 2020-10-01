@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:core' hide print;
 import 'dart:io' hide exit;
@@ -1142,6 +1141,8 @@ Iterable<File> _allFiles(String workingDirectory, String extension, { @required 
         continue;
       if (path.basename(entity.path) == 'gradlew.bat')
         continue;
+      if (path.basename(entity.path) == '.DS_Store')
+        continue;
       if (extension == null || path.extension(entity.path) == '.$extension') {
         matches += 1;
         yield entity;
@@ -1308,5 +1309,6 @@ bool _isGeneratedPluginRegistrant(File file) {
       && (filename == 'GeneratedPluginRegistrant.java' ||
           filename == 'GeneratedPluginRegistrant.h' ||
           filename == 'GeneratedPluginRegistrant.m' ||
-          filename == 'generated_plugin_registrant.dart');
+          filename == 'generated_plugin_registrant.dart' ||
+          filename == 'generated_plugin_registrant.h');
 }

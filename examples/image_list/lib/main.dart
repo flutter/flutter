@@ -16,28 +16,36 @@ import 'package:flutter/services.dart';
 ///
 /// This is used in [$FH/flutter/devicelab/bin/tasks/image_list_reported_duration.dart] test.
 ///
+///
+/// To generate new certificate:
+///
+/// $ openssl req -new -out image_list.csr
+///   Generating a 2048 bit RSA private key
+///   Enter PEM pass phrase: <random string>
+///   ...
+///   Common Name (eg, fully qualified host name) []:localhost
+///
+/// Copy content of the privateKey below into image_list.key file, then
+/// $ openssl x509 -req -sha256 -days 3650 -in image_list.csr -signkey image_list.key -out image_list.crt
+///
+/// Copy content of the image_list.crt into certificate string below.
 String certificate = '''
 -----BEGIN CERTIFICATE-----
-MIIDlTCCAn2gAwIBAgIUNfw2s1D9qwYw8bMEZ1rdNVQXi9YwDQYJKoZIhvcNAQEL
-BQAwcjELMAkGA1UEBhMCVVMxETAPBgNVBAgMCE5ldyBZb3JrMRIwEAYDVQQHDAlS
-b2NoZXN0ZXIxEjAQBgNVBAoMCWxvY2FsaG9zdDEUMBIGA1UECwwLRGV2ZWxvcG1l
-bnQxEjAQBgNVBAMMCWxvY2FsaG9zdDAeFw0xOTA4MjIyMzMwMjdaFw0yMDA4MjEy
-MzMwMjdaMHIxCzAJBgNVBAYTAlVTMREwDwYDVQQIDAhOZXcgWW9yazESMBAGA1UE
-BwwJUm9jaGVzdGVyMRIwEAYDVQQKDAlsb2NhbGhvc3QxFDASBgNVBAsMC0RldmVs
-b3BtZW50MRIwEAYDVQQDDAlsb2NhbGhvc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IB
-DwAwggEKAoIBAQCi/fmozdYuCIZbJS7y4zYPp2NRboLXrpUcUzzvzz+24k/TYUPN
-eRvf6wiNXHvr1ijMg1j3wQP72RphxI7cY7XCwzRiM5QeQy3EtRz4ETYBzOev3mHL
-LEgZ9RnSq/u42siSS9CNjoz97liPyQUq8h37/09qhYG0hR/2pRN+YB9g7sNYoGe2
-B7zkh3azRS0/LtgltXwHUId7QzJc15W9Q7adsNVTpOCo7dOj2KWz6sEtFGkYfwLV
-5uiTslRdWCCOUD9iZjCtlPqALkGnWyhNiFJESLbVNC6MURyMngcALW0JTMwc2oDj
-MxtdNkMl0cdzPlhXMDKIKpY9bWbRKUUdsfOnAgMBAAGjIzAhMB8GA1UdEQQYMBaC
-CWxvY2FsaG9zdIIJMTI3LjAuMC4xMA0GCSqGSIb3DQEBCwUAA4IBAQAOYegYQ05v
-S/220FvmwH2X+/r0rcjJ5ZyOGq/MTNMhqXZKHgcNELpOLpDMZVvseXHeUKDrqZFi
-4aemMT5zbuYy3yRkQ/X39GEsksi2/Ii6Xk2zw6IJGL6hvneJEbUP3LN1POy2JLJ/
-Wt7Uda8CWa+H9+0sognT6+/86Q2fWMYnFFnAQk5wW4pYDlgInupoXzjcG0kmPgOO
-ijFsQ67xa0nUn1Llviy3pHX50IU2C+cwlWKNgxfmj6HKG9XIlu8gC/R+Ruf4aSUZ
-QT170jY8Lf6PzqLmbIW86tcKftbkP5RiEp8ESg9jDdNjhwZjxlF13aAVE8uJxP0j
-I12tWIG+68AM
+MIICpDCCAYwCCQD1kfAz8IhbazANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls
+b2NhbGhvc3QwHhcNMjAwODI0MjE1MTUwWhcNMzAwODIyMjE1MTUwWjAUMRIwEAYD
+VQQDDAlsb2NhbGhvc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCi
+/fmozdYuCIZbJS7y4zYPp2NRboLXrpUcUzzvzz+24k/TYUPNeRvf6wiNXHvr1ijM
+g1j3wQP72RphxI7cY7XCwzRiM5QeQy3EtRz4ETYBzOev3mHLLEgZ9RnSq/u42siS
+S9CNjoz97liPyQUq8h37/09qhYG0hR/2pRN+YB9g7sNYoGe2B7zkh3azRS0/Ltgl
+tXwHUId7QzJc15W9Q7adsNVTpOCo7dOj2KWz6sEtFGkYfwLV5uiTslRdWCCOUD9i
+ZjCtlPqALkGnWyhNiFJESLbVNC6MURyMngcALW0JTMwc2oDjMxtdNkMl0cdzPlhX
+MDKIKpY9bWbRKUUdsfOnAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAHZo/Io7hE9P
+jDhSSP+4iSwx6xjnkRjBHReoea+XwSCv1s9Alwe1Nub6u5jUBhCpGCyU4diKFV1W
+zhunXKY+zRGGtr09nYoN9UVizS5fAFb+h2x3Tw8lsxs4JpPQeWTbGK9Ci+jyfuZu
+xPvdU8I8oxiTRPoWa1KpPm6UVvcrjyftvbqJ4l7cZ8KZN4JNSZlphX8lIM14xR4H
+12sFFTcYWPNDTqO1A9MSflG4OkG59LDHV36JAEqB61pP8hipowVp48+rzD2DVpqb
+r/Mw+0x0HENUTMVExSA5rj/3fxNMggUSl2YsujVJjkb1LiQNPORX7rBndcjknAMt
+TvaTkrwwZA4=
 -----END CERTIFICATE-----
 ''';
 

@@ -158,14 +158,16 @@ void main() {
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
       primaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.subhead
-        .merge(Typography.material2014().black.subhead),
+      Typography.material2014().englishLike.bodyText1
+        .merge(Typography.material2014().black.bodyText1)
+        .copyWith(color: defaultTheme.colorScheme.onSurface),
     );
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
       secondaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.subhead
-          .merge(Typography.material2014().white.subhead),
+      Typography.material2014().englishLike.bodyText1
+        .merge(Typography.material2014().white.bodyText1)
+        .copyWith(color: defaultTheme.colorScheme.onPrimary),
     );
 
     final Material hourMaterial = _textMaterial(tester, '7');
@@ -297,15 +299,15 @@ void main() {
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
       primaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.subhead
-          .merge(Typography.material2014().black.subhead)
+      Typography.material2014().englishLike.bodyText1
+          .merge(Typography.material2014().black.bodyText1)
           .copyWith(color: _unselectedColor),
     );
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
       secondaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.subhead
-          .merge(Typography.material2014().white.subhead)
+      Typography.material2014().englishLike.bodyText1
+          .merge(Typography.material2014().white.bodyText1)
           .copyWith(color: _selectedColor),
     );
 

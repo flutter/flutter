@@ -57,11 +57,18 @@ class _DemoButtonState extends State<DemoButton> {
 
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
+    return TextButton(
       focusNode: focusNode,
       autofocus: widget.autofocus,
-      focusColor: Colors.red,
-      hoverColor: Colors.blue,
+      style: ButtonStyle(
+        overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+          if (states.contains(MaterialState.focused))
+            return Colors.red.withOpacity(0.25);
+          if (states.contains(MaterialState.hovered))
+            return Colors.blue.withOpacity(0.25);
+          return null;
+        }),
+      ),
       onPressed: () => _handleOnPressed(),
       child: Text(widget.name),
     );
@@ -178,7 +185,7 @@ class _FocusDemoState extends State<FocusDemo> {
                         DemoButton(name: 'Six'),
                       ],
                     ),
-                    OutlineButton(onPressed: () => print('pressed'), child: const Text('PRESS ME')),
+                    OutlinedButton(onPressed: () => print('pressed'), child: const Text('PRESS ME')),
                     const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: TextField(

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import 'base/common.dart';
@@ -15,6 +13,20 @@ import 'cache.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
 
+/// The flutter GitHub repository.
+String get _flutterGit => globals.platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
+
+/// This maps old branch names to the names of branches that replaced them.
+///
+/// For example, in early 2018 we changed from having an "alpha" branch to
+/// having a "dev" branch, so anyone using "alpha" now gets transitioned to
+/// "dev".
+const Map<String, String> kObsoleteBranches = <String, String>{
+  'alpha': 'dev',
+  'hackathon': 'dev',
+  'codelab': 'dev',
+};
+
 /// The names of each channel/branch in order of increasing stability.
 enum Channel {
   master,
@@ -23,23 +35,28 @@ enum Channel {
   stable,
 }
 
-/// The flutter GitHub repository.
-String get _flutterGit => globals.platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
+// Beware: Keep order in accordance with stability
+const Set<String> kOfficialChannels = <String>{
+  'master',
+  'dev',
+  'beta',
+  'stable',
+};
 
 /// Retrieve a human-readable name for a given [channel].
 ///
-/// Requires [FlutterVersion.officialChannels] to be correctly ordered.
+/// Requires [kOfficialChannels] to be correctly ordered.
 String getNameForChannel(Channel channel) {
-  return FlutterVersion.officialChannels.elementAt(channel.index);
+  return kOfficialChannels.elementAt(channel.index);
 }
 
 /// Retrieve the [Channel] representation for a string [name].
 ///
 /// Returns `null` if [name] is not in the list of official channels, according
-/// to [FlutterVersion.officialChannels].
+/// to [kOfficialChannels].
 Channel getChannelForName(String name) {
-  if (FlutterVersion.officialChannels.contains(name)) {
-    return Channel.values[FlutterVersion.officialChannels.toList().indexOf(name)];
+  if (kOfficialChannels.contains(name)) {
+    return Channel.values[kOfficialChannels.toList().indexOf(name)];
   }
   return null;
 }
@@ -85,25 +102,6 @@ class FlutterVersion {
     final String branchName = getBranchName();
     return !<String>['dev', 'beta', 'stable'].contains(branchName);
   }
-
-  // Beware: Keep order in accordance with stability
-  static const Set<String> officialChannels = <String>{
-    'master',
-    'dev',
-    'beta',
-    'stable',
-  };
-
-  /// This maps old branch names to the names of branches that replaced them.
-  ///
-  /// For example, in early 2018 we changed from having an "alpha" branch to
-  /// having a "dev" branch, so anyone using "alpha" now gets transitioned to
-  /// "dev".
-  static Map<String, String> obsoleteBranches = <String, String>{
-    'alpha': 'dev',
-    'hackathon': 'dev',
-    'codelab': 'dev',
-  };
 
   String _channel;
   /// The channel is the upstream branch.
@@ -300,8 +298,8 @@ class FlutterVersion {
     }();
     if (redactUnknownBranches || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
-      if (!officialChannels.contains(_branch) &&
-          !obsoleteBranches.containsKey(_branch)) {
+      if (!kOfficialChannels.contains(_branch) &&
+          !kObsoleteBranches.containsKey(_branch)) {
         return '[user-branch]';
       }
     }
@@ -390,7 +388,7 @@ class FlutterVersion {
   /// writes shared cache files.
   Future<void> checkFlutterVersionFreshness() async {
     // Don't perform update checks if we're not on an official channel.
-    if (!officialChannels.contains(channel)) {
+    if (!kOfficialChannels.contains(channel)) {
       return;
     }
 
@@ -400,7 +398,7 @@ class FlutterVersion {
         lenient: false
       ));
     } on VersionCheckError {
-      // Don't perform the update check if the verison check failed.
+      // Don't perform the update check if the version check failed.
       return;
     }
 
@@ -699,7 +697,7 @@ String _shortGitRevision(String revision) {
   return revision.length > 10 ? revision.substring(0, 10) : revision;
 }
 
-/// Version of Flutter SDK parsed from git
+/// Version of Flutter SDK parsed from Git.
 class GitTagVersion {
   const GitTagVersion({
     this.x,
@@ -732,7 +730,7 @@ class GitTagVersion {
   /// The Z in vX.Y.Z.
   final int z;
 
-  /// the F in vX.Y.Z+hotfix.F
+  /// the F in vX.Y.Z+hotfix.F.
   final int hotfix;
 
   /// Number of commits since the vX.Y.Z tag.
@@ -741,10 +739,10 @@ class GitTagVersion {
   /// The git hash (or an abbreviation thereof) for this commit.
   final String hash;
 
-  /// The N in X.Y.Z-dev.N.M
+  /// The N in X.Y.Z-dev.N.M.
   final int devVersion;
 
-  /// The M in X.Y.Z-dev.N.M
+  /// The M in X.Y.Z-dev.N.M.
   final int devPatch;
 
   /// The git tag that is this version's closest ancestor.
@@ -760,22 +758,20 @@ class GitTagVersion {
       }
     }
     final List<String> tags = _runGit(
-      'git tag --contains HEAD', processUtils, workingDirectory).split('\n');
+      'git tag --points-at HEAD', processUtils, workingDirectory).trim().split('\n');
 
     // Check first for a stable tag
     final RegExp stableTagPattern = RegExp(r'^\d+\.\d+\.\d+$');
     for (final String tag in tags) {
-      final String trimmedTag = tag.trim();
-      if (stableTagPattern.hasMatch(trimmedTag)) {
-        return parse(trimmedTag);
+      if (stableTagPattern.hasMatch(tag.trim())) {
+        return parse(tag);
       }
     }
     // Next check for a dev tag
     final RegExp devTagPattern = RegExp(r'^\d+\.\d+\.\d+-\d+\.\d+\.pre$');
     for (final String tag in tags) {
-      final String trimmedTag = tag.trim();
-      if (devTagPattern.hasMatch(trimmedTag)) {
-        return parse(trimmedTag);
+      if (devTagPattern.hasMatch(tag.trim())) {
+        return parse(tag);
       }
     }
 
@@ -783,7 +779,7 @@ class GitTagVersion {
     // recent tag and number of commits past.
     return parse(
       _runGit(
-        'git describe --match *.*.*-*.*.pre --first-parent --long --tags',
+        'git describe --match *.*.* --first-parent --long --tags',
         processUtils,
         workingDirectory,
       )
@@ -858,7 +854,7 @@ class GitTagVersion {
     if (devPatch != null && devVersion != null) {
       return '$x.$y.$z-${devVersion + 1}.0.pre.$commits';
     }
-    return '$x.$y.${z + 1}.pre.$commits';
+    return '$x.$y.${z + 1}-0.0.pre.$commits';
   }
 }
 

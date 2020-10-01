@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -18,13 +17,12 @@ import '../../src/mocks.dart';
 
 void main() {
   group('FuchsiaPM', () {
-    MockFile pm;
+    File pm;
     MockProcessManager mockProcessManager;
     MockFuchsiaArtifacts mockFuchsiaArtifacts;
 
     setUp(() {
-      pm = MockFile();
-      when(pm.path).thenReturn('pm');
+      pm = MemoryFileSystem.test().file('pm');
 
       mockFuchsiaArtifacts = MockFuchsiaArtifacts();
       when(mockFuchsiaArtifacts.pm).thenReturn(pm);
@@ -71,26 +69,10 @@ void main() {
       FuchsiaArtifacts: () => mockFuchsiaArtifacts,
       ProcessManager: () => mockProcessManager,
     });
-
-    testWithoutContext('ipv6 formatting logic of FuchsiaPackageServer', () {
-      const String host = 'fe80::ec4:7aff:fecc:ea8f%eno2';
-      const int port = 23;
-
-      expect(
-        FuchsiaPackageServer('a', 'b', host, port).url,
-        'http://[fe80::ec4:7aff:fecc:ea8f%25eno2]:23',
-      );
-
-      expect(
-        FuchsiaPackageServer('a', 'b', host, port).interfaceStrippedUrl,
-        'http://[fe80::ec4:7aff:fecc:ea8f]:23',
-      );
-    });
   });
 }
 
 class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
 class MockProcessUtils extends Mock implements ProcessUtils {}
-class MockFile extends Mock implements File {}
 class MockProcess extends Mock implements Process {}
 class MockProcessManager extends Mock implements ProcessManager {}

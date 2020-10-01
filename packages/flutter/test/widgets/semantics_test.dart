@@ -475,6 +475,7 @@ void main() {
           checked: true,
           selected: true,
           button: true,
+          slider: true,
           link: true,
           textField: true,
           readOnly: true,
@@ -542,7 +543,7 @@ void main() {
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
     semantics.dispose();
-  });
+  }, skip: true); // TODO(abrusher): Enable once engine PR #20385 lands.
 
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

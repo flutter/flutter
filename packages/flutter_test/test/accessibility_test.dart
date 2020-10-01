@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.9
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -583,9 +585,11 @@ void main() {
         theme: ThemeData.light(),
         home: Scaffold(
           backgroundColor: Colors.white,
-          body: RaisedButton(
-            color: const Color(0xFFFBBC04),
-            elevation: 0,
+          body: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: const Color(0xFFFBBC04),
+              elevation: 0,
+            ),
             onPressed: () {},
             child: const Text('Button', style: TextStyle(color: Colors.black)),
         ),

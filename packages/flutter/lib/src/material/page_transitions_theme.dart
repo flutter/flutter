@@ -194,7 +194,7 @@ class _ZoomPageTransition extends StatelessWidget {
   /// See also:
   ///
   ///  * [TransitionRoute.secondaryAnimation], which is the value given to this
-  //     property when the [_ZoomPageTransition] is used as a page transition.
+  ///    property when the [_ZoomPageTransition] is used as a page transition.
   final Animation<double> secondaryAnimation;
 
   /// The widget below this widget in the tree.

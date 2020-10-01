@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -36,19 +32,19 @@ enum DatePickerDateTimeOrder {
 enum DatePickerDateOrder {
   /// Order of the columns, from left to right: day, month, year.
   ///
-  /// Example: 12 | March | 1996
+  /// Example: 12 | March | 1996.
   dmy,
   /// Order of the columns, from left to right: month, day, year.
   ///
-  /// Example: March | 12 | 1996
+  /// Example: March | 12 | 1996.
   mdy,
   /// Order of the columns, from left to right: year, month, day.
   ///
-  /// Example: 1996 | March | 12
+  /// Example: 1996 | March | 12.
   ymd,
   /// Order of the columns, from left to right: year, day, month.
   ///
-  /// Example: 1996 | 12 | March
+  /// Example: 1996 | 12 | March.
   ydm,
 }
 
@@ -158,7 +154,7 @@ abstract class CupertinoLocalizations {
   /// there are, e.g. 'tab, 1 of 2' in United States English.
   ///
   /// `tabIndex` and `tabCount` must be greater than or equal to one.
-  String tabSemanticsLabel({int tabIndex, int tabCount});
+  String tabSemanticsLabel({required int tabIndex, required int tabCount});
 
   /// Hour that is shown in [CupertinoTimerPicker] corresponding to
   /// the given hour value.
@@ -208,19 +204,19 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String timerPickerSecondLabel(int second);
 
-  /// The term used for cutting
+  /// The term used for cutting.
   // The global version uses the translated string from the arb file.
   String get cutButtonLabel;
 
-  /// The term used for copying
+  /// The term used for copying.
   // The global version uses the translated string from the arb file.
   String get copyButtonLabel;
 
-  /// The term used for pasting
+  /// The term used for pasting.
   // The global version uses the translated string from the arb file.
   String get pasteButtonLabel;
 
-  /// The term used for selecting everything
+  /// The term used for selecting everything.
   // The global version uses the translated string from the arb file.
   String get selectAllButtonLabel;
 
@@ -243,7 +239,7 @@ abstract class CupertinoLocalizations {
   /// ```dart
   /// CupertinoLocalizations.of(context).anteMeridiemAbbreviation;
   /// ```
-  static CupertinoLocalizations of(BuildContext context) {
+  static CupertinoLocalizations? of(BuildContext context) {
     return Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations);
   }
 }
@@ -366,7 +362,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get alertDialogLabel => 'Alert';
 
   @override
-  String tabSemanticsLabel({int tabIndex, int tabCount}) {
+  String tabSemanticsLabel({required int tabIndex, required int tabCount}) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     return 'Tab $tabIndex of $tabCount';

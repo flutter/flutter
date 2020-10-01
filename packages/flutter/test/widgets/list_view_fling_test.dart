@@ -29,10 +29,11 @@ void main() {
 
     await tester.fling(find.byType(ListView), const Offset(0.0, -kFlingOffset), 1000.0);
     expect(getCurrentOffset(), kFlingOffset);
+    await tester.pump(); // process the up event
     while (tester.binding.transientCallbackCount > 0) {
       final double lastOffset = getCurrentOffset();
       await tester.pump(const Duration(milliseconds: 20));
       expect(getCurrentOffset(), greaterThan(lastOffset));
     }
-  }, skip: true); // https://github.com/flutter/flutter/issues/5339
+  });
 }

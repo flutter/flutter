@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import '../android/android_builder.dart';
 import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
@@ -34,6 +32,7 @@ class BuildApkCommand extends BuildSubCommand {
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
+    usesAnalyzeSizeFlag();
     argParser
       ..addFlag('split-per-abi',
         negatable: false,
@@ -109,12 +108,12 @@ class BuildApkCommand extends BuildSubCommand {
       globals.printStatus('To generate an app bundle, run:', emphasis: true, indent: 4);
       globals.printStatus('flutter build appbundle '
                   '--target-platform ${targetPlatforms.replaceAll(' ', '')}',indent: 8);
-      globals.printStatus('Learn more on: https://developer.android.com/guide/app-bundle',indent: 8);
+      globals.printStatus('Learn more: https://developer.android.com/guide/app-bundle',indent: 8);
       globals.printStatus('To split the APKs per ABI, run:', emphasis: true, indent: 4);
       globals.printStatus('flutter build apk '
                   '--target-platform ${targetPlatforms.replaceAll(' ', '')} '
                   '--split-per-abi', indent: 8);
-      globals.printStatus('Learn more on:  https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',indent: 8);
+      globals.printStatus('Learn more: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',indent: 8);
     }
     await androidBuilder.buildApk(
       project: FlutterProject.current(),

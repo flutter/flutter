@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
-import 'package:mockito/mockito.dart';
+import '../flutter_test_alternative.dart' show Fake;
 
 void main() {
   group('PhysicalShape', () {
@@ -263,11 +263,11 @@ void main() {
       final double belowBaseline = math.max(belowBaseline1, belowBaseline2);
       expect(rowBox.size.height, greaterThan(textBox1.size.height));
       expect(rowBox.size.height, greaterThan(textBox2.size.height));
-      expect(rowBox.size.height, closeTo(aboveBaseline + belowBaseline, .001));
+      expect(rowBox.size.height, moreOrLessEquals(aboveBaseline + belowBaseline, epsilon: .001));
       expect(tester.getTopLeft(find.byKey(key1)).dy, 0);
       expect(
         tester.getTopLeft(find.byKey(key2)).dy,
-        closeTo(aboveBaseline1 - aboveBaseline2, .001),
+        moreOrLessEquals(aboveBaseline1 - aboveBaseline2, epsilon: .001),
       );
     });
 
@@ -321,7 +321,7 @@ void main() {
       expect(tester.getTopLeft(find.byKey(key1)).dy, 0);
       expect(
         tester.getTopLeft(find.byKey(key2)).dy,
-        closeTo(aboveBaseline1 - aboveBaseline2, .001),
+        moreOrLessEquals(aboveBaseline1 - aboveBaseline2, epsilon: .001),
       );
     });
   });
@@ -340,7 +340,7 @@ void main() {
   testWidgets('UnconstrainedBox can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(const UnconstrainedBox());
     final RenderUnconstrainedBox renderObject = tester.allRenderObjects.whereType<RenderUnconstrainedBox>().first;
-    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+    expect(renderObject.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(const UnconstrainedBox(clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
@@ -353,8 +353,7 @@ void main() {
 
     setUp(() {
       mockContext = _MockPaintingContext();
-      mockCanvas = _MockCanvas();
-      when(mockContext.canvas).thenReturn(mockCanvas);
+      mockCanvas = mockContext.canvas;
     });
 
     testWidgets('ColoredBox - no size, no child', (WidgetTester tester) async {
@@ -372,8 +371,10 @@ void main() {
 
       renderColoredBox.paint(mockContext, Offset.zero);
 
-      verifyNever(mockCanvas.drawRect(any, any));
-      verifyNever(mockContext.paintChild(any, any));
+      expect(mockCanvas.rects, isEmpty);
+      expect(mockCanvas.paints, isEmpty);
+      expect(mockContext.children, isEmpty);
+      expect(mockContext.offets, isEmpty);
     });
 
     testWidgets('ColoredBox - no size, child', (WidgetTester tester) async {
@@ -394,8 +395,10 @@ void main() {
 
       renderColoredBox.paint(mockContext, Offset.zero);
 
-      verifyNever(mockCanvas.drawRect(any, any));
-      verify(mockContext.paintChild(renderSizedBox, Offset.zero)).called(1);
+      expect(mockCanvas.rects, isEmpty);
+      expect(mockCanvas.paints, isEmpty);
+      expect(mockContext.children.single, renderSizedBox);
+      expect(mockContext.offets.single, Offset.zero);
     });
 
     testWidgets('ColoredBox - size, no child', (WidgetTester tester) async {
@@ -405,11 +408,10 @@ void main() {
 
       renderColoredBox.paint(mockContext, Offset.zero);
 
-      final List<dynamic> drawRect = verify(mockCanvas.drawRect(captureAny, captureAny)).captured;
-      expect(drawRect.length, 2);
-      expect(drawRect[0], const Rect.fromLTWH(0, 0, 800, 600));
-      expect(drawRect[1].color, colorToPaint);
-      verifyNever(mockContext.paintChild(any, any));
+      expect(mockCanvas.rects.single, const Rect.fromLTWH(0, 0, 800, 600));
+      expect(mockCanvas.paints.single.color, colorToPaint);
+      expect(mockContext.children, isEmpty);
+      expect(mockContext.offets, isEmpty);
     });
 
     testWidgets('ColoredBox - size, child', (WidgetTester tester) async {
@@ -422,11 +424,10 @@ void main() {
 
       renderColoredBox.paint(mockContext, Offset.zero);
 
-      final List<dynamic> drawRect = verify(mockCanvas.drawRect(captureAny, captureAny)).captured;
-      expect(drawRect.length, 2);
-      expect(drawRect[0], const Rect.fromLTWH(0, 0, 800, 600));
-      expect(drawRect[1].color, colorToPaint);
-      verify(mockContext.paintChild(renderSizedBox, Offset.zero)).called(1);
+      expect(mockCanvas.rects.single, const Rect.fromLTWH(0, 0, 800, 600));
+      expect(mockCanvas.paints.single.color, colorToPaint);
+      expect(mockContext.children.single, renderSizedBox);
+      expect(mockContext.offets.single, Offset.zero);
     });
 
     testWidgets('ColoredBox - properties', (WidgetTester tester) async {
@@ -650,5 +651,28 @@ class DoesNotHitRenderBox extends Matcher {
   }
 }
 
-class _MockPaintingContext extends Mock implements PaintingContext {}
-class _MockCanvas extends Mock implements Canvas {}
+class _MockPaintingContext extends Fake implements PaintingContext {
+  final List<RenderObject> children = <RenderObject>[];
+  final List<Offset> offets = <Offset>[];
+
+  @override
+  final _MockCanvas canvas = _MockCanvas();
+
+  @override
+  void paintChild(RenderObject child, Offset offset) {
+    children.add(child);
+    offets.add(offset);
+  }
+}
+
+class _MockCanvas extends Fake implements Canvas {
+  final List<Rect> rects = <Rect>[];
+  final List<Paint> paints = <Paint>[];
+  bool didPaint = false;
+
+  @override
+  void drawRect(Rect rect, Paint paint) {
+    rects.add(rect);
+    paints.add(paint);
+  }
+}

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.9
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -30,6 +32,46 @@ void main() {
     });
   });
 
+  group('textContaining', () {
+    testWidgets('finds Text widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Text('this is a test'),
+      ));
+      expect(find.textContaining(RegExp(r'test')), findsOneWidget);
+      expect(find.textContaining('test'), findsOneWidget);
+      expect(find.textContaining('a'), findsOneWidget);
+      expect(find.textContaining('s'), findsOneWidget);
+    });
+
+    testWidgets('finds Text.rich widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+          const Text.rich(
+            TextSpan(text: 'this', children: <TextSpan>[
+              TextSpan(text: 'is'),
+              TextSpan(text: 'a'),
+              TextSpan(text: 'test'),
+            ],
+            ),
+          )));
+
+      expect(find.textContaining(RegExp(r'isatest')), findsOneWidget);
+      expect(find.textContaining('isatest'), findsOneWidget);
+    });
+
+    testWidgets('finds EditableText widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: _boilerplate(TextField(
+            controller: TextEditingController()..text = 'this is test',
+          )),
+        ),
+      ));
+
+      expect(find.textContaining(RegExp(r'test')), findsOneWidget);
+      expect(find.textContaining('test'), findsOneWidget);
+    });
+  });
+
   group('semantics', () {
     testWidgets('Throws StateError if semantics are not enabled', (WidgetTester tester) async {
       expect(() => find.bySemanticsLabel('Add'), throwsStateError);
@@ -41,7 +83,7 @@ void main() {
         Semantics(
           label: 'Add',
           button: true,
-          child: const FlatButton(
+          child: const TextButton(
             child: Text('+'),
             onPressed: null,
           ),

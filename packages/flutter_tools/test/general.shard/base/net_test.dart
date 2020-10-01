@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:quiver/testing/async.dart';
+import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/mocks.dart' show MockStdio;
@@ -55,7 +55,7 @@ void main() {
 
     testWithoutContext('fetchUrl(destFile) writes the data to a file', () async {
       final Net net = createNet(FakeHttpClient(200, data: responseString));
-      final MemoryFileSystem fs = MemoryFileSystem();
+      final MemoryFileSystem fs = MemoryFileSystem.test();
       final File destFile = fs.file('dest_file')..createSync();
       final List<int> data = await net.fetchUrl(
         Uri.parse('http://example.invalid/'),

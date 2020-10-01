@@ -578,7 +578,15 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating) {
         snackBarYOffsetBase = floatingActionButtonRect.top;
       } else {
-        snackBarYOffsetBase = contentBottom;
+        // SnackBarBehavior.fixed applies a SafeArea automatically.
+        // SnackBarBehavior.floating does not since the positioning is affected
+        // if there is a FloatingActionButton (see condition above). If there is
+        // no FAB, make sure we account for safe space when the SnackBar is
+        // floating.
+        final double safeYOffsetBase = size.height - minViewPadding.bottom;
+        snackBarYOffsetBase = isSnackBarFloating
+          ? math.min(contentBottom, safeYOffsetBase)
+          : contentBottom;
       }
 
       final double xOffset = hasCustomWidth ? (size.width - snackBarWidth) / 2 : 0.0;
@@ -956,13 +964,17 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///
 /// ### Nested Scaffolds
 ///
-/// The Scaffold was designed to be the single top level container for
-/// a [MaterialApp] and it's typically not necessary to nest
-/// scaffolds. For example in a tabbed UI, where the
-/// [bottomNavigationBar] is a [TabBar] and the body is a
-/// [TabBarView], you might be tempted to make each tab bar view a
-/// scaffold with a differently titled AppBar. It would be better to add a
-/// listener to the [TabController] that updates the AppBar.
+/// The Scaffold is designed to be a top level container for
+/// a [MaterialApp]. This means that adding a Scaffold
+/// to each route on a Material app will provide the app with
+/// Material's basic visual layout structure.
+///
+/// It is typically not necessary to nest Scaffolds. For example, in a
+/// tabbed UI, where the [bottomNavigationBar] is a [TabBar]
+/// and the body is a [TabBarView], you might be tempted to make each tab bar
+/// view a scaffold with a differently titled AppBar. Rather, it would be
+/// better to add a listener to the [TabController] that updates the
+/// AppBar
 ///
 /// {@tool snippet}
 /// Add a listener to the app's tab controller so that the [AppBar] title of the
@@ -1006,6 +1018,10 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///    it is shown using the [showModalBottomSheet] function.
 ///  * [ScaffoldState], which is the state associated with this widget.
 ///  * <https://material.io/design/layout/responsive-layout-grid.html>
+///  * Cookbook: [Add a Drawer to a screen](https://flutter.dev/docs/cookbook/design/drawer)
+///  * Cookbook: [Display a snackbar](https://flutter.dev/docs/cookbook/design/snackbars)
+///  * See our
+///    [Scaffold Sample Apps](https://flutter.dev/docs/catalog/samples/Scaffold).
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for material design widgets.
   const Scaffold({

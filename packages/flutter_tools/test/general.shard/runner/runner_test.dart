@@ -89,7 +89,7 @@ void main() {
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
         'FLUTTER_ROOT': '/',
       }),
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       Usage: () => CrashingUsage(),
     });
@@ -108,7 +108,7 @@ void main() {
         () {
           unawaited(runner.run(
             <String>['crash'],
-            <FlutterCommand>[
+            () => <FlutterCommand>[
               CrashingFlutterCommand(asyncCrash: true, completer: commandCompleter),
             ],
             // This flutterVersion disables crash reporting.
@@ -130,7 +130,7 @@ void main() {
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
         'FLUTTER_ROOT': '/',
       }),
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
 
       CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
@@ -190,7 +190,7 @@ void main() {
         },
         operatingSystem: 'linux'
       ),
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       UserMessages: () => CustomBugInstructions(),
     });

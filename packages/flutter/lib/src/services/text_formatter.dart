@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:math' as math;
 
@@ -54,7 +53,7 @@ abstract class TextInputFormatter {
 }
 
 /// Function signature expected for creating custom [TextInputFormatter]
-/// shorthands via [TextInputFormatter.withFunction];
+/// shorthands via [TextInputFormatter.withFunction].
 typedef TextInputFormatFunction = TextEditingValue Function(
   TextEditingValue oldValue,
   TextEditingValue newValue,
@@ -103,7 +102,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// must not be null.
   FilteringTextInputFormatter(
     this.filterPattern, {
-    @required this.allow,
+    required this.allow,
     this.replacementString = '',
   }) : assert(filterPattern != null),
        assert(allow != null),
@@ -317,38 +316,50 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   LengthLimitingTextInputFormatter(this.maxLength)
     : assert(maxLength == null || maxLength == -1 || maxLength > 0);
 
-  /// The limit on the number of characters (i.e. Unicode scalar values) this formatter
+  /// The limit on the number of user-perceived characters that this formatter
   /// will allow.
   ///
-  /// The value must be null or greater than zero. If it is null, then no limit
-  /// is enforced.
+  /// The value must be null or greater than zero. If it is null or -1, then no
+  /// limit is enforced.
   ///
-  /// This formatter does not currently count Unicode grapheme clusters (i.e.
-  /// characters visible to the user), it counts Unicode scalar values, which leaves
-  /// out a number of useful possible characters (like many emoji and composed
-  /// characters), so this will be inaccurate in the presence of those
-  /// characters. If you expect to encounter these kinds of characters, be
-  /// generous in the maxLength used.
+  /// {@template flutter.services.lengthLimitingTextInputFormatter.maxLength}
+  /// ## Characters
+  ///
+  /// For a specific definition of what is considered a character, see the
+  /// [characters](https://pub.dev/packages/characters) package on Pub, which is
+  /// what Flutter uses to delineate characters. In general, even complex
+  /// characters like surrogate pairs and extended grapheme clusters are
+  /// correctly interpreted by Flutter as each being a single user-perceived
+  /// character.
   ///
   /// For instance, the character "ö" can be represented as '\u{006F}\u{0308}',
   /// which is the letter "o" followed by a composed diaeresis "¨", or it can
   /// be represented as '\u{00F6}', which is the Unicode scalar value "LATIN
-  /// SMALL LETTER O WITH DIAERESIS". In the first case, the text field will
-  /// count two characters, and the second case will be counted as one
-  /// character, even though the user can see no difference in the input.
+  /// SMALL LETTER O WITH DIAERESIS". It will be counted as a single character
+  /// in both cases.
   ///
   /// Similarly, some emoji are represented by multiple scalar values. The
-  /// Unicode "THUMBS UP SIGN + MEDIUM SKIN TONE MODIFIER", "👍🏽", should be
-  /// counted as a single character, but because it is a combination of two
-  /// Unicode scalar values, '\u{1F44D}\u{1F3FD}', it is counted as two
-  /// characters.
-  final int maxLength;
+  /// Unicode "THUMBS UP SIGN + MEDIUM SKIN TONE MODIFIER", "👍🏽"is counted as
+  /// a single character, even though it is a combination of two Unicode scalar
+  /// values, '\u{1F44D}\u{1F3FD}'.
+  /// {@endtemplate}
+  ///
+  /// ### Composing text behaviors
+  ///
+  /// There is no guarantee for the final value before the composing ends.
+  /// So while the value is composing, the constraint of [maxLength] will be
+  /// temporary lifted until the composing ends.
+  ///
+  /// In addition, if the current value already reached the [maxLength],
+  /// composing is not allowed.
+  final int? maxLength;
 
-  /// Truncate the given TextEditingValue to maxLength characters.
+  /// Truncate the given TextEditingValue to maxLength user-perceived
+  /// characters.
   ///
   /// See also:
   ///  * [Dart's characters package](https://pub.dev/packages/characters).
-  ///  * [Dart's documenetation on runes and grapheme clusters](https://dart.dev/guides/language/language-tour#runes-and-grapheme-clusters).
+  ///  * [Dart's documentation on runes and grapheme clusters](https://dart.dev/guides/language/language-tour#runes-and-grapheme-clusters).
   @visibleForTesting
   static TextEditingValue truncate(TextEditingValue value, int maxLength) {
     final CharacterRange iterator = CharacterRange(value.text);
@@ -368,18 +379,25 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue, // unused.
+    TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    if (maxLength != null && maxLength > 0 && newValue.text.characters.length > maxLength) {
-      // If already at the maximum and tried to enter even more, keep the old
-      // value.
-      if (oldValue.text.characters.length == maxLength) {
-        return oldValue;
-      }
-      return truncate(newValue, maxLength);
+    final int? maxLength = this.maxLength;
+
+    if (maxLength == null || maxLength == -1 || newValue.text.characters.length <= maxLength)
+      return newValue;
+
+    assert(maxLength > 0);
+
+    // If already at the maximum and tried to enter even more, keep the old
+    // value.
+    if (oldValue.text.characters.length == maxLength && !oldValue.composing.isValid) {
+      return oldValue;
     }
-    return newValue;
+
+    // Temporarily exempt `newValue` from the maxLength limit if it has a
+    // composing text going, until the composing is finished.
+    return newValue.composing.isValid ? newValue : truncate(newValue, maxLength);
   }
 }
 
@@ -390,7 +408,7 @@ TextEditingValue _selectionAwareTextManipulation(
   final int selectionStartIndex = value.selection.start;
   final int selectionEndIndex = value.selection.end;
   String manipulatedText;
-  TextSelection manipulatedSelection;
+  TextSelection? manipulatedSelection;
   if (selectionStartIndex < 0 || selectionEndIndex < 0) {
     manipulatedText = substringManipulation(value.text);
   } else {

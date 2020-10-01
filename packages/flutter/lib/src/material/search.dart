@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -175,7 +173,7 @@ abstract class SearchDelegate<T> {
   /// clear the query and show the suggestions again (via [showSuggestions]) if
   /// the results are currently shown.
   ///
-  /// Returns null if no widget should be shown
+  /// Returns null if no widget should be shown.
   ///
   /// See also:
   ///

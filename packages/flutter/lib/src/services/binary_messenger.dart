@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
-import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -12,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'binding.dart';
 
 /// A function which takes a platform message and asynchronously returns an encoded response.
-typedef MessageHandler = Future<ByteData> Function(ByteData message);
+typedef MessageHandler = Future<ByteData?> Function(ByteData? message);
 
 /// A messenger which sends binary data across the Flutter platform barrier.
 ///
@@ -27,13 +25,13 @@ abstract class BinaryMessenger {
   /// from [Window.onPlatformMessage].
   ///
   /// To register a handler for a given message channel, see [setMessageHandler].
-  Future<void> handlePlatformMessage(String channel, ByteData data, ui.PlatformMessageResponseCallback callback);
+  Future<void> handlePlatformMessage(String channel, ByteData? data, ui.PlatformMessageResponseCallback? callback);
 
   /// Send a binary message to the platform plugins on the given channel.
   ///
   /// Returns a [Future] which completes to the received response, undecoded,
   /// in binary form.
-  Future<ByteData> send(String channel, ByteData message);
+  Future<ByteData?> send(String channel, ByteData? message);
 
   /// Set a callback for receiving messages from the platform plugins on the
   /// given channel, without decoding them.
@@ -43,14 +41,14 @@ abstract class BinaryMessenger {
   /// argument.
   ///
   /// The handler's return value, if non-null, is sent as a response, unencoded.
-  void setMessageHandler(String channel, MessageHandler handler);
+  void setMessageHandler(String channel, MessageHandler? handler);
 
   /// Returns true if the `handler` argument matches the `handler` previously
   /// passed to [setMessageHandler].
   ///
   /// This method is useful for tests or test harnesses that want to assert the
   /// handler for the specified channel has not been altered by a previous test.
-  bool checkMessageHandler(String channel, MessageHandler handler);
+  bool checkMessageHandler(String channel, MessageHandler? handler);
 
   /// Set a mock callback for intercepting messages from the [send] method on
   /// this class, on the given channel, without decoding them.
@@ -63,7 +61,7 @@ abstract class BinaryMessenger {
   ///
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
-  void setMockMessageHandler(String channel, MessageHandler handler);
+  void setMockMessageHandler(String channel, MessageHandler? handler);
 
   /// Returns true if the `handler` argument matches the `handler` previously
   /// passed to [setMockMessageHandler].
@@ -71,7 +69,7 @@ abstract class BinaryMessenger {
   /// This method is useful for tests or test harnesses that want to assert the
   /// mock handler for the specified channel has not been altered by a previous
   /// test.
-  bool checkMockMessageHandler(String channel, MessageHandler handler);
+  bool checkMockMessageHandler(String channel, MessageHandler? handler);
 }
 
 /// The default instance of [BinaryMessenger].
@@ -104,5 +102,5 @@ BinaryMessenger get defaultBinaryMessenger {
     }
     return true;
   }());
-  return ServicesBinding.instance.defaultBinaryMessenger;
+  return ServicesBinding.instance!.defaultBinaryMessenger;
 }
