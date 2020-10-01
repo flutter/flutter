@@ -284,7 +284,7 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 ///   void _updateImage(ImageInfo imageInfo, bool synchronousCall) {
 ///     setState(() {
 ///       // Trigger a build whenever the image changes.
-///       _imageInfo?.dispose();
+///       _imageInfo?.image?.dispose();
 ///       _imageInfo = imageInfo;
 ///     });
 ///   }
@@ -292,7 +292,7 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 ///   @override
 ///   void dispose() {
 ///     _imageStream.removeListener(ImageStreamListener(_updateImage));
-///     _imageInfo?.dispose();
+///     _imageInfo?.image?.dispose();
 ///     _imageInfo = null;
 ///     super.dispose();
 ///   }
