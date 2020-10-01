@@ -1702,6 +1702,14 @@ class Navigator extends StatefulWidget {
   /// [Navigator.onUnknownRoute] to construct the route.
   /// {@endtemplate}
   ///
+  /// {@template flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// The method returns an opaque ID for the pushed route that can be used by
+  /// the [RestorableRouteFuture] to gain access to the actual [Route] object
+  /// added to the navigator and its return value. You can ignore the return
+  /// value of this method, if you do not care about the route object or the
+  /// route's return value.
+  /// {@endtemplate}
+  ///
   /// {@tool snippet}
   ///
   /// Typical usage is as follows:
@@ -1719,12 +1727,6 @@ class Navigator extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// {@template flutter.widgets.navigator.restorablePushNamed.returnValue}
-  /// The method returns an opaque ID for the pushed route that can be used by
-  /// the [RestorableRouteFuture] to gain access to the actual [Route] object
-  /// added to the navigator and its return value.
-  /// {@endtemplate}
   @optionalTypeArgs
   static String restorablePushNamed<T extends Object?>(
     BuildContext context,
@@ -1811,6 +1813,8 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
   ///
+  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  ///
   /// {@tool snippet}
   ///
   /// Typical usage is as follows:
@@ -1821,8 +1825,6 @@ class Navigator extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   static String restorablePushReplacementNamed<T extends Object?, TO extends Object?>(
     BuildContext context,
@@ -1904,6 +1906,8 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
   ///
+  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  ///
   /// {@tool snippet}
   ///
   /// Typical usage is as follows:
@@ -1914,8 +1918,6 @@ class Navigator extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   static String restorablePopAndPushNamed<T extends Object?, TO extends Object?>(
       BuildContext context,
@@ -2009,6 +2011,8 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
   ///
+  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  ///
   /// {@tool snippet}
   ///
   /// Typical usage is as follows:
@@ -2019,8 +2023,6 @@ class Navigator extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   static String restorablePushNamedAndRemoveUntil<T extends Object?>(
       BuildContext context,
@@ -2091,6 +2093,8 @@ class Navigator extends StatefulWidget {
   /// passed as `arguments`. Often, a Map is used to pass key-value pairs.
   /// {@endtemplate}
   ///
+  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
@@ -2116,8 +2120,6 @@ class Navigator extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   static String restorablePush<T extends Object?>(BuildContext context, RestorableRouteBuilder<T> routeBuilder, {Object? arguments}) {
     return Navigator.of(context)!.restorablePush(routeBuilder, arguments: arguments);
@@ -2186,6 +2188,8 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.restorablePush.arguments}
   ///
+  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
@@ -2211,8 +2215,6 @@ class Navigator extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   static String restorablePushReplacement<T extends Object?, TO extends Object?>(BuildContext context, RestorableRouteBuilder<T> routeBuilder, { TO? result, Object? arguments }) {
     return Navigator.of(context)!.restorablePushReplacement<T, TO>(routeBuilder, result: result, arguments: arguments);
@@ -2291,6 +2293,8 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.restorablePush.arguments}
   ///
+  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
@@ -2320,8 +2324,6 @@ class Navigator extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   static String restorablePushAndRemoveUntil<T extends Object?>(BuildContext context, RestorableRouteBuilder<T> newRouteBuilder, RoutePredicate predicate, {Object? arguments}) {
     return Navigator.of(context)!.restorablePushAndRemoveUntil<T>(newRouteBuilder, predicate, arguments: arguments);
@@ -3993,6 +3995,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
   ///
+  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  ///
   /// {@tool snippet}
   ///
   /// Typical usage is as follows:
@@ -4003,8 +4007,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   String restorablePushNamed<T extends Object?>(
     String routeName, {
@@ -4063,6 +4065,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
   ///
+  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  ///
   /// {@tool snippet}
   ///
   /// Typical usage is as follows:
@@ -4073,8 +4077,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   String restorablePushReplacementNamed<T extends Object?, TO extends Object?>(
     String routeName, {
@@ -4133,6 +4135,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
   ///
+  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  ///
   /// {@tool snippet}
   ///
   /// Typical usage is as follows:
@@ -4143,8 +4147,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   String restorablePopAndPushNamed<T extends Object?, TO extends Object?>(
     String routeName, {
@@ -4195,6 +4197,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
   ///
+  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  ///
   /// {@tool snippet}
   ///
   /// Typical usage is as follows:
@@ -4205,8 +4209,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   String restorablePushNamedAndRemoveUntil<T extends Object?>(
     String newRouteName,
@@ -4267,6 +4269,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.restorablePush.arguments}
   ///
+  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
@@ -4292,8 +4296,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   String restorablePush<T extends Object?>(RestorableRouteBuilder<T> routeBuilder, {Object? arguments}) {
     assert(routeBuilder != null);
@@ -4405,6 +4407,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.restorablePush.arguments}
   ///
+  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
@@ -4432,8 +4436,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   String restorablePushReplacement<T extends Object?, TO extends Object?>(RestorableRouteBuilder<T> routeBuilder, { TO? result, Object? arguments }) {
     assert(routeBuilder != null);
@@ -4511,6 +4513,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.restorablePush.arguments}
   ///
+  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
@@ -4539,8 +4543,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   String restorablePushAndRemoveUntil<T extends Object?>(RestorableRouteBuilder<T> newRouteBuilder, RoutePredicate predicate, {Object? arguments}) {
     assert(newRouteBuilder != null);
