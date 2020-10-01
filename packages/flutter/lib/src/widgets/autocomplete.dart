@@ -56,18 +56,23 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 /// ```
 ///
 /// ```dart
-/// class AutocompleteCoreExample extends StatelessWidget {
-///   AutocompleteCoreExample({Key key, this.title}) : super(key: key);
+/// class AutocompleteBasicExample extends StatelessWidget {
+///   AutocompleteBasicExample({Key key}) : super(key: key);
 ///
-///   final String title;
+///   final List<String> _kOptions = <String>[
+///     'aardvark',
+///     'bobcat',
+///     'chameleon',
+///   ];
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return AutocompleteCore<String>(
 ///       buildOptions: (TextEditingValue textEditingValue) {
-///         return <String>['aardvark', 'bobcat', 'chameleon']
-///            .contains(value.text.toLowerCase());
-///       }
+///         return _kOptions.where((String option) {
+///           return option.contains(textEditingValue.text.toLowerCase());
+///         }).toList();
+///       },
 ///       fieldBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
 ///         return TextFormField(
 ///           controller: textEditingController,
@@ -79,17 +84,22 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///       optionsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
 ///         return Material(
 ///           elevation: 4.0,
-///           child: SizedBox(
+///           child: Container(
 ///             height: 200.0,
-///             child: ListView(
-///               children: results.map((String result) => GestureDetector(
-///                 onTap: () {
-///                   onSelected(result);
-///                 },
-///                 child: ListTile(
-///                   title: Text(result),
-///                 ),
-///               )).toList(),
+///             child: ListView.builder(
+///               padding: EdgeInsets.all(8.0),
+///               itemCount: options.length,
+///               itemBuilder: (BuildContext context, int index) {
+///                 final String option = options[index];
+///                 return GestureDetector(
+///                   onTap: () {
+///                     onSelected(option);
+///                   },
+///                   child: ListTile(
+///                     title: Text(option),
+///                   ),
+///                 );
+///               },
 ///             ),
 ///           ),
 ///         );
@@ -120,68 +130,228 @@ typedef AutocompleteOptionToString<T> = String Function(T option);
 ///   final String email;
 ///   final String name;
 ///
-///   // When using a default getResults function, the text will be matched
-///   // directly with the output of this toString method. In this case,
-///   // including both the email and name allows the user to filter by both.
-///   // If you wanted even more advanced logic, you could pass a custom
-///   // getResults function into AutocompleteController and/or
-///   // filterStringForOption into AutocompleteCore.
+///   // The displayStringForOption parameter can be used to get even more
+///   // control over the strings that represent the options objects.
 ///   @override
 ///   String toString() {
 ///     return '$name, $email';
 ///   }
 /// }
 ///
-/// class AutocompleteCoreCustomTypeExample extends StatelessWidget {
-///   AutocompleteCoreCustomTypeExample({Key key, this.title}) : super(key: key);
+/// class AutocompleteCustomTypeExample extends StatelessWidget {
+///   AutocompleteCustomTypeExample({Key key});
 ///
-///   final String title;
-///   final AutocompleteController<User> _autocompleteController = AutocompleteController<User>(
-///     options: <User>[
-///       User(name: 'Alice', email: 'alice@example.com'),
-///       User(name: 'Bob', email: 'bob@example.com'),
-///       User(name: 'Charlie', email: 'charlie123@gmail.com'),
-///     ],
-///     // This shows just the name in the field, even though we can also filter
-///     // by email address.
-///     displayStringForOption: (User option) => option.name,
-///   );
+///   final List<User> _kUserOptions = <User>[
+///     User(name: 'Alice', email: 'alice@example.com'),
+///     User(name: 'Bob', email: 'bob@example.com'),
+///     User(name: 'Charlie', email: 'charlie123@gmail.com'),
+///   ];
+///
+///   static String _displayStringForOption(User option) => option.name;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return AutocompleteCore<User>(
+///       buildOptions: (TextEditingValue textEditingValue) {
+///         return _kUserOptions.where((User option) {
+///           return option.toString().contains(textEditingValue.text.toLowerCase());
+///         }).toList();
+///       },
+///       displayStringForOption: _displayStringForOption,
+///       fieldBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+///         return TextFormField(
+///           controller: textEditingController,
+///           onFieldSubmitted: (String value) {
+///             onFieldSubmitted();
+///           },
+///         );
+///       },
+///       optionsBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> options) {
+///         return SizedBox(
+///           height: 200.0,
+///           child: Material(
+///             elevation: 4.0,
+///             child: ListView(
+///               padding: EdgeInsets.all(8.0),
+///               children: options.map((User option) => GestureDetector(
+///                 onTap: () {
+///                   onSelected(option);
+///                 },
+///                 child: ListTile(
+///                   title: Text(_displayStringForOption(option)),
+///                 ),
+///               )).toList(),
+///             ),
+///           ),
+///         );
+///       },
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=freeform}
+/// This example shows the use of AutocompleteCore in a form.
+///
+/// ```dart imports
+/// import 'package:flutter/widgets.dart';
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// class AutocompleteFormExamplePage extends StatefulWidget {
+///   AutocompleteFormExamplePage({Key key}) : super(key: key);
+///
+///   @override
+///   AutocompleteFormExample createState() => AutocompleteFormExample();
+/// }
+///
+/// class AutocompleteFormExample extends State<AutocompleteFormExamplePage> {
+///   final _formKey = GlobalKey<FormState>();
+///   final TextEditingController _textEditingController = TextEditingController();
+///   String _dropdownValue;
+///   String _autocompleteSelection;
+///
+///   final List<String> _kOptions = <String>[
+///     'aardvark',
+///     'bobcat',
+///     'chameleon',
+///   ];
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       appBar: AppBar(
-///         title: Text(title),
+///         title: Text('Autocomplete Form Example'),
 ///       ),
 ///       body: Center(
-///         child: AutocompleteCore<User>(
-///           autocompleteController: _autocompleteController,
-///           fieldBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
-///             return TextFormField(
-///               controller: _autocompleteController.textEditingController,
-///               onFieldSubmitted: (String value) {
-///                 onFieldSubmitted();
-///               },
-///             );
-///           },
-///           resultsBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, List<User> results) {
-///             return SizedBox(
-///               height: 200.0,
-///               child: Material(
-///                 elevation: 4.0,
-///                 child: ListView(
-///                   children: results.map((User result) => GestureDetector(
-///                     onTap: () {
-///                       onSelected(result);
-///                     },
-///                     child: ListTile(
-///                       title: Text(_autocompleteController.displayStringForOption(result)),
-///                     ),
-///                   )).toList(),
-///                 ),
+///         child: Form(
+///           key: _formKey,
+///           child: Column(
+///             children: <Widget>[
+///               DropdownButtonFormField<String>(
+///                 value: _dropdownValue,
+///                 icon: Icon(Icons.arrow_downward),
+///                 hint: const Text('This is a regular DropdownButtonFormField'),
+///                 iconSize: 24,
+///                 elevation: 16,
+///                 style: TextStyle(color: Colors.deepPurple),
+///                 onChanged: (String newValue) {
+///                   setState(() {
+///                     _dropdownValue = newValue;
+///                   });
+///                 },
+///                 items: <String>['One', 'Two', 'Free', 'Four']
+///                     .map<DropdownMenuItem<String>>((String value) {
+///                   return DropdownMenuItem<String>(
+///                     value: value,
+///                     child: Text(value),
+///                   );
+///                 }).toList(),
+///                 validator: (String value) {
+///                   if (value == null) {
+///                     return 'Must make a selection.';
+///                   }
+///                   return null;
+///                 },
 ///               ),
-///             );
-///           },
+///               TextFormField(
+///                 controller: _textEditingController,
+///                 decoration: InputDecoration(
+///                   hintText: 'This is a regular TextFormField',
+///                 ),
+///                 validator: (String value) {
+///                   if (value.isEmpty) {
+///                     return 'Can\'t be empty.';
+///                   }
+///                   return null;
+///                 },
+///               ),
+///               AutocompleteCore<String>(
+///                 buildOptions: (TextEditingValue textEditingValue) {
+///                   return _kOptions.where((String option) {
+///                     return option.contains(textEditingValue.text.toLowerCase());
+///                   }).toList();
+///                 },
+///                 onSelected: (String selection) {
+///                   setState(() {
+///                     _autocompleteSelection = selection;
+///                   });
+///                 },
+///                 fieldBuilder: (BuildContext context, TextEditingController textEditingController, VoidCallback onFieldSubmitted) {
+///                   return TextFormField(
+///                     controller: textEditingController,
+///                     decoration: InputDecoration(
+///                       hintText: 'This is an AutocompleteCore!',
+///                     ),
+///                     onFieldSubmitted: (String value) {
+///                       onFieldSubmitted();
+///                     },
+///                     validator: (String value) {
+///                       if (!_kOptions.contains(value)) {
+///                         return 'Nothing selected.';
+///                       }
+///                       return null;
+///                     },
+///                   );
+///                 },
+///                 optionsBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, List<String> options) {
+///                   return Material(
+///                     elevation: 4.0,
+///                     child: SizedBox(
+///                       height: 200.0,
+///                       child: ListView(
+///                         padding: EdgeInsets.all(8.0),
+///                         children: options.map((String option) => GestureDetector(
+///                           onTap: () {
+///                             onSelected(option);
+///                           },
+///                           child: ListTile(
+///                             title: Text(option),
+///                           ),
+///                         )).toList(),
+///                       ),
+///                     ),
+///                   );
+///                 },
+///               ),
+///               RaisedButton(
+///                 onPressed: () {
+///                   FocusScope.of(context).requestFocus(new FocusNode());
+///                   if (!_formKey.currentState.validate()) {
+///                     return;
+///                   }
+///                   showDialog<void>(
+///                     context: context,
+///                     builder: (BuildContext context) {
+///                       return AlertDialog(
+///                         title: Text('Successfully submitted'),
+///                         content: SingleChildScrollView(
+///                           child: ListBody(
+///                             children: <Widget>[
+///                               Text('DropdownButtonFormField: "$_dropdownValue"'),
+///                               Text('TextFormField: "${_textEditingController.text}"'),
+///                               Text('AutocompleteCore: "$_autocompleteSelection"'),
+///                             ],
+///                           ),
+///                         ),
+///                         actions: <Widget>[
+///                           FlatButton(
+///                             child: Text('Ok'),
+///                             onPressed: () {
+///                               Navigator.of(context).pop();
+///                             },
+///                           ),
+///                         ],
+///                       );
+///                     },
+///                   );
+///                 },
+///                 child: Text('Submit'),
+///               ),
+///             ],
+///           ),
 ///         ),
 ///       ),
 ///     );
@@ -365,6 +535,8 @@ class _AutocompleteCoreState<T> extends State<AutocompleteCore<T>> {
   }
 }
 
+// The floating options, meant to be built inside of an Overlay. Will position
+// itself at the bottom of the field indicated by layerLink and fieldSize.
 class _FloatingOptions<T> extends StatelessWidget {
   const _FloatingOptions({
     Key? key,
