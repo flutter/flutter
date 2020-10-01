@@ -724,6 +724,9 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   ///
   /// Defaults to [Clip.none]. Must be [Clip.none] if [decoration] is null.
   ///
+  /// Unlike other properties of [AnimatedContainer], changes to this property
+  /// apply immediately and have no animation.
+  ///
   /// If a clip is to be applied, the [Decoration.getClipPath] method
   /// for the provided decoration must return a clip path. (This is not
   /// supported by all decorations; the default implementation of that
