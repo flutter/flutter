@@ -720,7 +720,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   ///  * [Transform.alignment], which is set by this property.
   final AlignmentGeometry? transformAlignment;
 
-  /// The clip behavior when [Container.decoration] is not null.
+  /// The clip behavior when [AnimatedContainer.decoration] is not null.
   ///
   /// Defaults to [Clip.none]. Must be [Clip.none] if [decoration] is null.
   ///
