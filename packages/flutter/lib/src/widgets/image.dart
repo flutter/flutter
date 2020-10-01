@@ -1084,7 +1084,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   late DisposableBuildContext<State<Image>> _scrollAwareContext;
   Object? _lastException;
   StackTrace? _lastStack;
-  ImageStreamCompleterHandle? _completerHandle;
 
   @override
   void initState() {
@@ -1098,9 +1097,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     assert(_imageStream != null);
     WidgetsBinding.instance!.removeObserver(this);
     _stopListeningToStream();
-    _completerHandle?.dispose();
     _scrollAwareContext.dispose();
-    _replaceImage(info: null);
     super.dispose();
   }
 
@@ -1112,7 +1109,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     if (TickerMode.of(context))
       _listenToStream();
     else
-      _stopListeningToStream(keepStreamAlive: true);
+      _stopListeningToStream();
 
     super.didChangeDependencies();
   }
@@ -1122,9 +1119,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     super.didUpdateWidget(oldWidget);
     if (_isListeningToStream &&
         (widget.loadingBuilder == null) != (oldWidget.loadingBuilder == null)) {
-      final ImageStreamListener oldListener = _getListener();
+      _imageStream!.removeListener(_getListener());
       _imageStream!.addListener(_getListener(recreateListener: true));
-      _imageStream!.removeListener(oldListener);
     }
     if (widget.image != oldWidget.image)
       _resolveImage();
@@ -1186,7 +1182,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
     setState(() {
-      _replaceImage(info: imageInfo);
+      _imageInfo = imageInfo;
       _loadingProgress = null;
       _lastException = null;
       _lastStack = null;
@@ -1204,11 +1200,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     });
   }
 
-  void _replaceImage({required ImageInfo? info}) {
-    _imageInfo?.dispose();
-    _imageInfo = info;
-  }
-
   // Updates _imageStream to newStream, and moves the stream listener
   // registration from the old stream to the new stream (if a listener was
   // registered).
@@ -1220,7 +1211,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStream!.removeListener(_getListener());
 
     if (!widget.gaplessPlayback)
-      setState(() { _replaceImage(info: null); });
+      setState(() { _imageInfo = null; });
 
     setState(() {
       _loadingProgress = null;
@@ -1236,29 +1227,13 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   void _listenToStream() {
     if (_isListeningToStream)
       return;
-
     _imageStream!.addListener(_getListener());
-    _completerHandle?.dispose();
-    _completerHandle = null;
-
     _isListeningToStream = true;
   }
 
-  /// Stops listening to the image stream, if this state object has attached a
-  /// listener.
-  ///
-  /// If the listener from this state is the last listener on the stream, the
-  /// stream will be disposed. To keep the stream alive, set `keepStreamAlive`
-  /// to true, which create [ImageStreamCompleterHandle] to keep the completer
-  /// alive and is compatible with the [TickerMode] being off.
-  void _stopListeningToStream({bool keepStreamAlive = false}) {
+  void _stopListeningToStream() {
     if (!_isListeningToStream)
       return;
-
-    if (keepStreamAlive && _completerHandle == null && _imageStream?.completer != null) {
-      _completerHandle = _imageStream!.completer!.keepAlive();
-    }
-
     _imageStream!.removeListener(_getListener());
     _isListeningToStream = false;
   }
@@ -1271,10 +1246,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     }
 
     Widget result = RawImage(
-      // Do not clone the image, because RawImage is a stateless wrapper.
-      // The image will be disposed by this state object when it is not needed
-      // anymore, such as when it is unmounted or when the image stream pushes
-      // a new image.
       image: _imageInfo?.image,
       debugImageLabel: _imageInfo?.debugLabel,
       width: widget.width,
