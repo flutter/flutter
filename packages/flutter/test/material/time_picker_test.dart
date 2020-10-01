@@ -324,8 +324,22 @@ void _tests() {
     final SemanticsTester semantics = SemanticsTester(tester);
     await mediaQueryBoilerplate(tester, false);
 
-    expect(semantics, includesNodeWith(label: 'AM', actions: <SemanticsAction>[SemanticsAction.tap]));
-    expect(semantics, includesNodeWith(label: 'PM', actions: <SemanticsAction>[SemanticsAction.tap]));
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'AM',
+        actions: <SemanticsAction>[SemanticsAction.tap],
+        flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.isSelected, SemanticsFlag.isFocusable],
+      ),
+    );
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'PM',
+        actions: <SemanticsAction>[SemanticsAction.tap],
+        flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.isFocusable],
+      ),
+    );
 
     semantics.dispose();
   });
@@ -345,6 +359,32 @@ void _tests() {
     // In 24-hour mode we don't have AM/PM control.
     expect(semantics, isNot(includesNodeWith(label: 'AM')));
     expect(semantics, isNot(includesNodeWith(label: 'PM')));
+
+    semantics.dispose();
+  });
+
+  testWidgets('provides semantics information for text fields', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, accessibleNavigation: true);
+
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Hour',
+        value: '07',
+        actions: <SemanticsAction>[SemanticsAction.tap],
+        flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isMultiline],
+      ),
+    );
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Minute',
+        value: '00',
+        actions: <SemanticsAction>[SemanticsAction.tap],
+        flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isMultiline],
+      ),
+    );
 
     semantics.dispose();
   });
@@ -840,6 +880,7 @@ Future<void> mediaQueryBoilerplate(
       double textScaleFactor = 1.0,
       TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
       String helpText,
+      bool accessibleNavigation = false,
     }) async {
   await tester.pumpWidget(
     Localizations(
@@ -852,6 +893,7 @@ Future<void> mediaQueryBoilerplate(
         data: MediaQueryData(
           alwaysUse24HourFormat: alwaysUse24HourFormat,
           textScaleFactor: textScaleFactor,
+          accessibleNavigation: accessibleNavigation,
         ),
         child: Material(
           child: Directionality(
