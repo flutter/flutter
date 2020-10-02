@@ -264,6 +264,7 @@ class CheckboxListTile extends StatelessWidget {
     @required this.onChanged,
     this.activeColor,
     this.checkColor,
+    this.tileColor,
     this.title,
     this.subtitle,
     this.isThreeLine = false,
@@ -320,6 +321,9 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// Defaults to Color(0xFFFFFFFF).
   final Color checkColor;
+
+  /// {@macro flutter.material.ListTile.tileColor}
+  final Color tileColor;
 
   /// The primary content of the list tile.
   ///
@@ -423,6 +427,7 @@ class CheckboxListTile extends StatelessWidget {
     return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
+        tileColor: tileColor,
         child: ListTile(
           leading: leading,
           title: title,

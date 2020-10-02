@@ -260,6 +260,7 @@ class SwitchListTile extends StatelessWidget {
     Key key,
     @required this.value,
     @required this.onChanged,
+    this.tileColor,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
@@ -295,6 +296,7 @@ class SwitchListTile extends StatelessWidget {
     Key key,
     @required this.value,
     @required this.onChanged,
+    this.tileColor,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
@@ -373,6 +375,9 @@ class SwitchListTile extends StatelessWidget {
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
   final Color inactiveTrackColor;
+
+  /// {@macro flutter.material.ListTile.tileColor}
+  final Color tileColor;
 
   /// An image to use on the thumb of this switch when the switch is on.
   final ImageProvider activeThumbImage;
@@ -487,6 +492,7 @@ class SwitchListTile extends StatelessWidget {
     return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
+        tileColor: tileColor,
         child: ListTile(
           leading: leading,
           title: title,
