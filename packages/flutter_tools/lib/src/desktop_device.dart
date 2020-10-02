@@ -149,6 +149,7 @@ abstract class DesktopDevice extends Device {
       devicePort: debuggingOptions?.deviceVmServicePort,
       hostPort: debuggingOptions?.hostVmServicePort,
       ipv6: ipv6,
+      logger: _logger,
     );
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
@@ -177,7 +178,7 @@ abstract class DesktopDevice extends Device {
     // Walk a copy of _runningProcesses, since the exit handler removes from the
     // set.
     for (final Process process in Set<Process>.of(_runningProcesses)) {
-      succeeded &= process.kill();
+      succeeded &= _processManager.killPid(process.pid);
     }
     return succeeded;
   }

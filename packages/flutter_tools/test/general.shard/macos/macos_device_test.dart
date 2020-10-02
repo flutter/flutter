@@ -161,7 +161,7 @@ void main() {
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
     fileSystem.directory('macos').createSync();
-    final FlutterProject flutterProject = FlutterProject.current();
+    final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(device.isSupportedForProject(flutterProject), true);
   });
@@ -176,7 +176,7 @@ void main() {
     );
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
-    final FlutterProject flutterProject = FlutterProject.current();
+    final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(device.isSupportedForProject(flutterProject), false);
   });
@@ -200,6 +200,14 @@ void main() {
     expect(device.executablePathForDevice(mockApp, BuildMode.profile), profilePath);
     expect(device.executablePathForDevice(mockApp, BuildMode.release), releasePath);
   });
+}
+
+FlutterProject setUpFlutterProject(Directory directory) {
+  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
+    fileSystem: directory.fileSystem,
+    logger: BufferLogger.test(),
+  );
+  return flutterProjectFactory.fromDirectory(directory);
 }
 
 class MockMacOSApp extends Mock implements MacOSApp {}

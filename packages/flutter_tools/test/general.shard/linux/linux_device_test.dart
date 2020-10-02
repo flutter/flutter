@@ -102,7 +102,7 @@ void main() {
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
     fileSystem.directory('linux').createSync();
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
+    final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(LinuxDevice(
       logger: BufferLogger.test(),
@@ -116,7 +116,7 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
+    final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(LinuxDevice(
       logger: BufferLogger.test(),
@@ -145,6 +145,14 @@ void main() {
     expect(device.executablePathForDevice(mockApp, BuildMode.profile), profilePath);
     expect(device.executablePathForDevice(mockApp, BuildMode.release), releasePath);
   });
+}
+
+FlutterProject setUpFlutterProject(Directory directory) {
+  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
+    fileSystem: directory.fileSystem,
+    logger: BufferLogger.test(),
+  );
+  return flutterProjectFactory.fromDirectory(directory);
 }
 
 class MockLinuxApp extends Mock implements LinuxApp {}

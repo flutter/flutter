@@ -86,7 +86,7 @@ void main() {
     fileSystem.file('.packages').createSync();
     fileSystem.directory('windows').createSync();
     fileSystem.file(fileSystem.path.join('windows', 'CMakeLists.txt')).createSync();
-    final FlutterProject flutterProject = FlutterProject.current();
+    final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(windowsDevice.isSupportedForProject(flutterProject), true);
   });
@@ -96,7 +96,7 @@ void main() {
     final WindowsDevice windowsDevice = setUpWindowsDevice(fileSystem: fileSystem);
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
-    final FlutterProject flutterProject = FlutterProject.current();
+    final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(windowsDevice.isSupportedForProject(flutterProject), false);
   });
@@ -107,7 +107,7 @@ void main() {
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
     fileSystem.directory('windows').createSync();
-    final FlutterProject flutterProject = FlutterProject.current();
+    final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(windowsDevice.isSupportedForProject(flutterProject), false);
   });
@@ -126,6 +126,14 @@ void main() {
     expect(windowsDevice.executablePathForDevice(mockApp, BuildMode.profile), profilePath);
     expect(windowsDevice.executablePathForDevice(mockApp, BuildMode.release), releasePath);
   });
+}
+
+FlutterProject setUpFlutterProject(Directory directory) {
+  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
+    fileSystem: directory.fileSystem,
+    logger: BufferLogger.test(),
+  );
+  return flutterProjectFactory.fromDirectory(directory);
 }
 
 WindowsDevice setUpWindowsDevice({

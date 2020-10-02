@@ -3,12 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -22,7 +20,6 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
 
 void main() {
   group('Basic info', () {
@@ -71,28 +68,6 @@ void main() {
   });
 
   group('Starting and stopping application', () {
-    final FileSystem memoryFileSystem = MemoryFileSystem.test();
-    final MockProcessManager mockProcessManager = MockProcessManager();
-
-    // Configures mock environment so that startApp will be able to find and
-    // run an FakeDesktopDevice exectuable with for the given mode.
-    void setUpMockExecutable(FakeDesktopDevice device, BuildMode mode, {Future<int> exitFuture}) {
-      final String executableName = device.executablePathForDevice(null, mode);
-      memoryFileSystem.file(executableName).writeAsStringSync('\n');
-      when(mockProcessManager.start(<String>[executableName])).thenAnswer((Invocation invocation) async {
-        return FakeProcess(
-          exitCode: Completer<int>().future,
-          stdout: Stream<List<int>>.fromIterable(<List<int>>[
-            utf8.encode('Observatory listening on http://127.0.0.1/0\n'),
-          ]),
-          stderr: const Stream<List<int>>.empty(),
-        );
-      });
-      when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
-        return ProcessResult(0, 1, '', '');
-      });
-    }
-
     testWithoutContext('Stop without start is a successful no-op', () async {
       final FakeDesktopDevice device = setUpDesktopDevice();
       final FakeAppplicationPackage package = FakeAppplicationPackage();
@@ -101,9 +76,19 @@ void main() {
     });
 
     testWithoutContext('Can run from prebuilt application', () async {
-      final FakeDesktopDevice device = setUpDesktopDevice();
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Completer<void> completer = Completer<void>();
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>['null'],
+          stdout: 'Observatory listening on http://127.0.0.1/0\n',
+          completer: completer,
+        ),
+      ]);
+      final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager, fileSystem: fileSystem);
+      final String executableName = device.executablePathForDevice(null, BuildMode.debug);
+      fileSystem.file(executableName).writeAsStringSync('\n');
       final FakeAppplicationPackage package = FakeAppplicationPackage();
-      setUpMockExecutable(device, null);
       final LaunchResult result = await device.startApp(package, prebuiltApplication: true);
 
       expect(result.started, true);
@@ -111,18 +96,26 @@ void main() {
     });
 
     testWithoutContext('Null executable path fails gracefully', () async {
-      final NullExecutableDesktopDevice device = NullExecutableDesktopDevice();
+      final BufferLogger logger = BufferLogger.test();
+      final DesktopDevice device = setUpDesktopDevice(nullExecutablePathForDevice: true, logger: logger);
       final FakeAppplicationPackage package = FakeAppplicationPackage();
       final LaunchResult result = await device.startApp(package, prebuiltApplication: true);
 
       expect(result.started, false);
-      expect(testLogger.errorText, contains('Unable to find executable to run'));
+      expect(logger.errorText, contains('Unable to find executable to run'));
     });
 
     testWithoutContext('stopApp kills process started by startApp', () async {
-      final FakeDesktopDevice device = setUpDesktopDevice();
+      final Completer<void> completer = Completer<void>();
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>['null'],
+          stdout: 'Observatory listening on http://127.0.0.1/0\n',
+          completer: completer,
+        ),
+      ]);
+      final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
       final FakeAppplicationPackage package = FakeAppplicationPackage();
-      setUpMockExecutable(device, null);
       final LaunchResult result = await device.startApp(package, prebuiltApplication: true);
 
       expect(result.started, true);
@@ -145,12 +138,14 @@ FakeDesktopDevice setUpDesktopDevice({
   Logger logger,
   ProcessManager processManager,
   OperatingSystemUtils operatingSystemUtils,
+  bool nullExecutablePathForDevice = false,
 }) {
   return FakeDesktopDevice(
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     logger: logger ?? BufferLogger.test(),
     processManager: processManager ?? FakeProcessManager.any(),
     operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
+    nullExecutablePathForDevice: nullExecutablePathForDevice,
   );
 }
 
@@ -161,6 +156,7 @@ class FakeDesktopDevice extends DesktopDevice {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required OperatingSystemUtils operatingSystemUtils,
+    this.nullExecutablePathForDevice,
   }) : super(
       'dummy',
       platformType: PlatformType.linux,
@@ -176,6 +172,8 @@ class FakeDesktopDevice extends DesktopDevice {
 
   /// The [buildInfo] last passed to [buildForDevice].
   BuildInfo lastBuildInfo;
+
+  final bool nullExecutablePathForDevice;
 
   @override
   String get name => 'dummy';
@@ -202,15 +200,10 @@ class FakeDesktopDevice extends DesktopDevice {
   // Dummy implementation that just returns the build mode name.
   @override
   String executablePathForDevice(ApplicationPackage package, BuildMode buildMode) {
+    if (nullExecutablePathForDevice) {
+      return null;
+    }
     return buildMode == null ? 'null' : getNameForBuildMode(buildMode);
-  }
-}
-
-/// A desktop device that returns a null executable path, for failure testing.
-class NullExecutableDesktopDevice extends FakeDesktopDevice {
-  @override
-  String executablePathForDevice(ApplicationPackage package, BuildMode buildMode) {
-    return null;
   }
 }
 
