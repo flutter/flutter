@@ -454,7 +454,7 @@ class StartupTest {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
-      const int iterations = 3;
+      const int iterations = 15;
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
       for (int i = 0; i < iterations; ++i) {
         await flutter('run', options: <String>[
