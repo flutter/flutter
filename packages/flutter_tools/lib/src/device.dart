@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -21,6 +22,7 @@ import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
@@ -333,6 +335,8 @@ class FlutterDeviceManager extends DeviceManager {
     @required Config config,
     @required Artifacts artifacts,
     @required MacOSWorkflow macOSWorkflow,
+    @required OperatingSystemUtils operatingSystemUtils,
+    @required WindowsWorkflow windowsWorkflow,
   }) : deviceDiscoverers =  <DeviceDiscovery>[
     AndroidDevices(
       logger: logger,
@@ -369,6 +373,7 @@ class FlutterDeviceManager extends DeviceManager {
       logger: logger,
       platform: platform,
       fileSystem: fileSystem,
+      operatingSystemUtils: operatingSystemUtils,
     ),
     LinuxDevices(
       platform: platform,
@@ -376,8 +381,15 @@ class FlutterDeviceManager extends DeviceManager {
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
+      operatingSystemUtils: operatingSystemUtils,
     ),
-    WindowsDevices(),
+    WindowsDevices(
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      logger: logger,
+      fileSystem: fileSystem,
+      windowsWorkflow: windowsWorkflow,
+    ),
     WebDevices(
       featureFlags: featureFlags,
       fileSystem: fileSystem,

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -16,7 +17,6 @@ import 'build_info.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
 import 'protocol_discovery.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit
@@ -25,12 +25,14 @@ abstract class DesktopDevice extends Device {
   DesktopDevice(String identifier, {
       @required PlatformType platformType,
       @required bool ephemeral,
-      Logger logger,
-      ProcessManager processManager,
-      FileSystem fileSystem,
-    }) : _logger = logger ?? globals.logger, // TODO(jonahwilliams): remove after updating google3
-         _processManager = processManager ?? globals.processManager,
-         _fileSystem = fileSystem ?? globals.fs,
+      @required Logger logger,
+      @required ProcessManager processManager,
+      @required FileSystem fileSystem,
+      @required OperatingSystemUtils operatingSystemUtils,
+    }) : _logger = logger,
+         _processManager = processManager,
+         _fileSystem = fileSystem,
+         _operatingSystemUtils = operatingSystemUtils,
          super(
           identifier,
           category: Category.desktop,
@@ -41,6 +43,7 @@ abstract class DesktopDevice extends Device {
   final Logger _logger;
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
+  final OperatingSystemUtils _operatingSystemUtils;
   final Set<Process> _runningProcesses = <Process>{};
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
@@ -86,7 +89,7 @@ abstract class DesktopDevice extends Device {
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 
   @override
-  Future<String> get sdkNameAndVersion async => globals.os.name;
+  Future<String> get sdkNameAndVersion async => _operatingSystemUtils.name;
 
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
@@ -121,6 +124,7 @@ abstract class DesktopDevice extends Device {
         mainPath: mainPath,
       );
     }
+    final bool traceStartup = (platformArgs['trace-startup'] as bool) ?? false;
 
     // Ensure that the executable is locatable.
     final BuildMode buildMode = debuggingOptions?.buildInfo?.mode;
@@ -130,9 +134,11 @@ abstract class DesktopDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final Process process = await _processManager.start(<String>[
-      executable,
-    ]);
+    final Process process = await _processManager.start(
+      <String>[
+        executable,
+      ],
+    );
     _runningProcesses.add(process);
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
 
@@ -198,6 +204,7 @@ abstract class DesktopDevice extends Device {
   void onAttached(ApplicationPackage package, BuildMode buildMode, Process process) {}
 }
 
+/// A log reader for desktop applications.
 class DesktopLogReader extends DeviceLogReader {
   final StreamController<List<int>> _inputController = StreamController<List<int>>.broadcast();
 

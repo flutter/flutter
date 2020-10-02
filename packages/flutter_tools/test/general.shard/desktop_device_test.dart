@@ -7,14 +7,16 @@ import 'dart:convert';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/desktop_device.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
+
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -22,12 +24,151 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
+void main() {
+  group('Basic info', () {
+    testWithoutContext('Category is desktop', () async {
+      final FakeDesktopDevice device = setUpDesktopDevice();
+
+      expect(device.category, Category.desktop);
+    });
+
+    testWithoutContext('Not an emulator', () async {
+      final FakeDesktopDevice device = setUpDesktopDevice();
+
+      expect(await device.isLocalEmulator, false);
+      expect(await device.emulatorId, null);
+    });
+
+    testWithoutContext('Uses OS name as SDK name', () async {
+      final FakeDesktopDevice device = setUpDesktopDevice();
+
+      expect(await device.sdkNameAndVersion, 'Example');
+    });
+  });
+
+  group('Install', () {
+    testWithoutContext('Install checks always return true', () async {
+      final FakeDesktopDevice device = setUpDesktopDevice();
+
+      expect(await device.isAppInstalled(null), true);
+      expect(await device.isLatestBuildInstalled(null), true);
+      expect(device.category, Category.desktop);
+    });
+
+    testWithoutContext('Install and uninstall are no-ops that report success', () async {
+      final FakeDesktopDevice device = setUpDesktopDevice();
+      final FakeAppplicationPackage package = FakeAppplicationPackage();
+
+      expect(await device.uninstallApp(package), true);
+      expect(await device.isAppInstalled(package), true);
+      expect(await device.isLatestBuildInstalled(package), true);
+
+      expect(await device.installApp(package), true);
+      expect(await device.isAppInstalled(package), true);
+      expect(await device.isLatestBuildInstalled(package), true);
+      expect(device.category, Category.desktop);
+    });
+  });
+
+  group('Starting and stopping application', () {
+    final FileSystem memoryFileSystem = MemoryFileSystem.test();
+    final MockProcessManager mockProcessManager = MockProcessManager();
+
+    // Configures mock environment so that startApp will be able to find and
+    // run an FakeDesktopDevice exectuable with for the given mode.
+    void setUpMockExecutable(FakeDesktopDevice device, BuildMode mode, {Future<int> exitFuture}) {
+      final String executableName = device.executablePathForDevice(null, mode);
+      memoryFileSystem.file(executableName).writeAsStringSync('\n');
+      when(mockProcessManager.start(<String>[executableName])).thenAnswer((Invocation invocation) async {
+        return FakeProcess(
+          exitCode: Completer<int>().future,
+          stdout: Stream<List<int>>.fromIterable(<List<int>>[
+            utf8.encode('Observatory listening on http://127.0.0.1/0\n'),
+          ]),
+          stderr: const Stream<List<int>>.empty(),
+        );
+      });
+      when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
+        return ProcessResult(0, 1, '', '');
+      });
+    }
+
+    testWithoutContext('Stop without start is a successful no-op', () async {
+      final FakeDesktopDevice device = setUpDesktopDevice();
+      final FakeAppplicationPackage package = FakeAppplicationPackage();
+
+      expect(await device.stopApp(package), true);
+    });
+
+    testWithoutContext('Can run from prebuilt application', () async {
+      final FakeDesktopDevice device = setUpDesktopDevice();
+      final FakeAppplicationPackage package = FakeAppplicationPackage();
+      setUpMockExecutable(device, null);
+      final LaunchResult result = await device.startApp(package, prebuiltApplication: true);
+
+      expect(result.started, true);
+      expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
+    });
+
+    testWithoutContext('Null executable path fails gracefully', () async {
+      final NullExecutableDesktopDevice device = NullExecutableDesktopDevice();
+      final FakeAppplicationPackage package = FakeAppplicationPackage();
+      final LaunchResult result = await device.startApp(package, prebuiltApplication: true);
+
+      expect(result.started, false);
+      expect(testLogger.errorText, contains('Unable to find executable to run'));
+    });
+
+    testWithoutContext('stopApp kills process started by startApp', () async {
+      final FakeDesktopDevice device = setUpDesktopDevice();
+      final FakeAppplicationPackage package = FakeAppplicationPackage();
+      setUpMockExecutable(device, null);
+      final LaunchResult result = await device.startApp(package, prebuiltApplication: true);
+
+      expect(result.started, true);
+      expect(await device.stopApp(package), true);
+    });
+  });
+
+  testWithoutContext('Port forwarder is a no-op', () async {
+    final FakeDesktopDevice device = setUpDesktopDevice();
+    final DevicePortForwarder portForwarder = device.portForwarder;
+    final int result = await portForwarder.forward(2);
+
+    expect(result, 2);
+    expect(portForwarder.forwardedPorts.isEmpty, true);
+  });
+}
+
+FakeDesktopDevice setUpDesktopDevice({
+  FileSystem fileSystem,
+  Logger logger,
+  ProcessManager processManager,
+  OperatingSystemUtils operatingSystemUtils,
+}) {
+  return FakeDesktopDevice(
+    fileSystem: fileSystem ?? MemoryFileSystem.test(),
+    logger: logger ?? BufferLogger.test(),
+    processManager: processManager ?? FakeProcessManager.any(),
+    operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
+  );
+}
+
 /// A trivial subclass of DesktopDevice for testing the shared functionality.
 class FakeDesktopDevice extends DesktopDevice {
-  FakeDesktopDevice() : super(
+  FakeDesktopDevice({
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required FileSystem fileSystem,
+    @required OperatingSystemUtils operatingSystemUtils,
+  }) : super(
       'dummy',
       platformType: PlatformType.linux,
       ephemeral: false,
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      operatingSystemUtils: operatingSystemUtils,
   );
 
   /// The [mainPath] last passed to [buildForDevice].
@@ -73,118 +214,8 @@ class NullExecutableDesktopDevice extends FakeDesktopDevice {
   }
 }
 
-class MockAppplicationPackage extends Mock implements ApplicationPackage {}
-
-class MockProcessManager extends Mock implements ProcessManager {}
-
-void main() {
-  group('Basic info', () {
-    test('Category is desktop', () async {
-      final FakeDesktopDevice device = FakeDesktopDevice();
-      expect(device.category, Category.desktop);
-    });
-
-    test('Not an emulator', () async {
-      final FakeDesktopDevice device = FakeDesktopDevice();
-      expect(await device.isLocalEmulator, false);
-      expect(await device.emulatorId, null);
-    });
-
-    testUsingContext('Uses OS name as SDK name', () async {
-      final FakeDesktopDevice device = FakeDesktopDevice();
-      expect(await device.sdkNameAndVersion, globals.os.name);
-    });
-  });
-
-  group('Install', () {
-    test('Install checks always return true', () async {
-      final FakeDesktopDevice device = FakeDesktopDevice();
-      expect(await device.isAppInstalled(null), true);
-      expect(await device.isLatestBuildInstalled(null), true);
-      expect(device.category, Category.desktop);
-    });
-
-    test('Install and uninstall are no-ops that report success', () async {
-      final FakeDesktopDevice device = FakeDesktopDevice();
-      final MockAppplicationPackage package = MockAppplicationPackage();
-      expect(await device.uninstallApp(package), true);
-      expect(await device.isAppInstalled(package), true);
-      expect(await device.isLatestBuildInstalled(package), true);
-
-      expect(await device.installApp(package), true);
-      expect(await device.isAppInstalled(package), true);
-      expect(await device.isLatestBuildInstalled(package), true);
-      expect(device.category, Category.desktop);
-    });
-  });
-
-  group('Starting and stopping application', () {
-    final FileSystem memoryFileSystem = MemoryFileSystem.test();
-    final MockProcessManager mockProcessManager = MockProcessManager();
-
-    // Configures mock environment so that startApp will be able to find and
-    // run an FakeDesktopDevice exectuable with for the given mode.
-    void setUpMockExecutable(FakeDesktopDevice device, BuildMode mode, {Future<int> exitFuture}) {
-      final String executableName = device.executablePathForDevice(null, mode);
-      memoryFileSystem.file(executableName).writeAsStringSync('\n');
-      when(mockProcessManager.start(<String>[executableName])).thenAnswer((Invocation invocation) async {
-        return FakeProcess(
-          exitCode: Completer<int>().future,
-          stdout: Stream<List<int>>.fromIterable(<List<int>>[
-            utf8.encode('Observatory listening on http://127.0.0.1/0\n'),
-          ]),
-          stderr: const Stream<List<int>>.empty(),
-        );
-      });
-      when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
-        return ProcessResult(0, 1, '', '');
-      });
-    }
-
-    test('Stop without start is a successful no-op', () async {
-      final FakeDesktopDevice device = FakeDesktopDevice();
-    final MockAppplicationPackage package = MockAppplicationPackage();
-      expect(await device.stopApp(package), true);
-    });
-
-    testUsingContext('Can run from prebuilt application', () async {
-      final FakeDesktopDevice device = FakeDesktopDevice();
-      final MockAppplicationPackage package = MockAppplicationPackage();
-      setUpMockExecutable(device, null);
-      final LaunchResult result = await device.startApp(package, prebuiltApplication: true);
-      expect(result.started, true);
-      expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('Null executable path fails gracefully', () async {
-      final NullExecutableDesktopDevice device = NullExecutableDesktopDevice();
-      final MockAppplicationPackage package = MockAppplicationPackage();
-      final LaunchResult result = await device.startApp(package, prebuiltApplication: true);
-      expect(result.started, false);
-      expect(testLogger.errorText, contains('Unable to find executable to run'));
-    });
-
-    testUsingContext('stopApp kills process started by startApp', () async {
-      final FakeDesktopDevice device = FakeDesktopDevice();
-      final MockAppplicationPackage package = MockAppplicationPackage();
-      setUpMockExecutable(device, null);
-      final LaunchResult result = await device.startApp(package, prebuiltApplication: true);
-      expect(result.started, true);
-      expect(await device.stopApp(package), true);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => mockProcessManager,
-    });
-  });
-
-  test('Port forwarder is a no-op', () async {
-    final FakeDesktopDevice device = FakeDesktopDevice();
-    final DevicePortForwarder portForwarder = device.portForwarder;
-    final int result = await portForwarder.forward(2);
-    expect(result, 2);
-    expect(portForwarder.forwardedPorts.isEmpty, true);
-  });
+class FakeAppplicationPackage extends Fake implements ApplicationPackage {}
+class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
+  @override
+  String get name => 'Example';
 }
