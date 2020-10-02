@@ -163,3 +163,19 @@ void localtimesMatch() {
   // formatting since package:intl is not available.
   notifyLocalTime(timeStr.split(":")[0]);
 }
+
+void notifyCanAccessResource(bool success) native 'NotifyCanAccessResource';
+
+void notifySetAssetBundlePath() native 'NotifySetAssetBundlePath';
+
+@pragma('vm:entry-point')
+void canAccessResourceFromAssetDir() async {
+  notifySetAssetBundlePath();
+  window.sendPlatformMessage(
+    'flutter/assets',
+    Uint8List.fromList(utf8.encode('kernel_blob.bin')).buffer.asByteData(),
+    (ByteData byteData) {
+      notifyCanAccessResource(byteData != null);
+    },
+  );
+}

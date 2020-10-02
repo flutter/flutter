@@ -2135,5 +2135,54 @@ TEST_F(ShellTest, IgnoresInvalidMetrics) {
   DestroyShell(std::move(shell), std::move(task_runners));
 }
 
+TEST_F(ShellTest, OnServiceProtocolSetAssetBundlePathWorks) {
+  Settings settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+  RunConfiguration configuration =
+      RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("canAccessResourceFromAssetDir");
+
+  // Verify isolate can load a known resource with the
+  // default asset directory - kernel_blob.bin
+  fml::AutoResetWaitableEvent latch;
+
+  // Callback used to signal whether the resource was loaded successfully.
+  bool can_access_resource = false;
+  auto native_can_access_resource = [&can_access_resource,
+                                     &latch](Dart_NativeArguments args) {
+    Dart_Handle exception = nullptr;
+    can_access_resource =
+        tonic::DartConverter<bool>::FromArguments(args, 0, exception);
+    latch.Signal();
+  };
+  AddNativeCallback("NotifyCanAccessResource",
+                    CREATE_NATIVE_ENTRY(native_can_access_resource));
+
+  // Callback used to delay the asset load until after the service
+  // protocol method has finished.
+  auto native_notify_set_asset_bundle_path =
+      [&shell](Dart_NativeArguments args) {
+        // Update the asset directory to a bonus path.
+        ServiceProtocol::Handler::ServiceProtocolMap params;
+        params["assetDirectory"] = "assetDirectory";
+        rapidjson::Document document;
+        OnServiceProtocol(shell.get(), ServiceProtocolEnum::kSetAssetBundlePath,
+                          shell->GetTaskRunners().GetUITaskRunner(), params,
+                          &document);
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        document.Accept(writer);
+      };
+  AddNativeCallback("NotifySetAssetBundlePath",
+                    CREATE_NATIVE_ENTRY(native_notify_set_asset_bundle_path));
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  latch.Wait();
+  ASSERT_TRUE(can_access_resource);
+
+  DestroyShell(std::move(shell));
+}
+
 }  // namespace testing
 }  // namespace flutter
