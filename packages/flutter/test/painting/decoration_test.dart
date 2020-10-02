@@ -155,9 +155,9 @@ void main() {
     expect(onChangedCalled, equals(false));
   });
 
-  test('BoxDecorationImageListenerAsync', () {
-    FakeAsync().run((FakeAsync async) async  {
-      final ui.Image image = await createTestImage(width: 10, height: 10);
+  test('BoxDecorationImageListenerAsync', () async {
+    final ui.Image image = await createTestImage(width: 10, height: 10);
+    FakeAsync().run((FakeAsync async)  {
       final ImageProvider imageProvider = AsyncTestImageProvider(image);
       final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
 
