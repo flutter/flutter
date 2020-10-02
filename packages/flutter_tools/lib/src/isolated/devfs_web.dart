@@ -1046,14 +1046,32 @@ String _parseBasePathFromIndexHtml(File indexHtml) {
 
   if (baseHref == null) {
     baseHref = '';
-    print('WARNING: Please add a <base> element to your index.html file.');
   } else if (!baseHref.startsWith('/')) {
-    throw ToolExit('Base href in index.html must be an absolute path to work correctly. Found `${baseElement.outerHtml}`');
+    throw ToolExit(
+      'Error: The base href in "web/index.html" must be absolute (i.e. start '
+      'with a "/"), but found: `${baseElement.outerHtml}`.\n'
+      '$basePathExample',
+    );
   } else if (!baseHref.endsWith('/')) {
-    throw ToolExit('Base href in index.html must end with a "/" to work correctly. Found `${baseElement.outerHtml}`');
+    throw ToolExit(
+      'Error: The base href in "web/index.html" must end with a "/", but found: `${baseElement.outerHtml}`.\n'
+      '$basePathExample',
+    );
   } else {
     baseHref = _stripLeadingSlashes(_stripTrailingSlashes(baseHref));
   }
 
   return baseHref;
 }
+
+const String basePathExample = '''
+For example, to serve from the root use:
+
+    <base href="/">
+
+To serve from a subpath "foo" (i.e. http://localhost:8080/foo/ instead of http://localhost:8080/) use:
+
+    <base href="/foo/">
+
+For more information, see: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+''';
