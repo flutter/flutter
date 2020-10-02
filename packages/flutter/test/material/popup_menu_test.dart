@@ -667,9 +667,7 @@ void main() {
     );
 
     final Finder buttonFinder = find.byKey(buttonKey);
-    final Finder popupFinder = find.byWidgetPredicate(
-      (Widget w) => '${w.runtimeType}' == '_PopupMenu<int>',
-    );
+    final Finder popupFinder = find.bySemanticsLabel('Popup menu');
     await tester.tap(buttonFinder);
     await tester.pumpAndSettle();
 
@@ -713,9 +711,7 @@ void main() {
     );
 
     final Finder buttonFinder = find.byKey(buttonKey);
-    final Finder popupFinder = find.byWidgetPredicate(
-      (Widget w) => '${w.runtimeType}' == '_PopupMenu<int>',
-    );
+    final Finder popupFinder = find.bySemanticsLabel('Popup menu');
     await tester.tap(buttonFinder);
     await tester.pumpAndSettle();
 
