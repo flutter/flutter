@@ -53,4 +53,31 @@ void main() {
     await flutter.hotReload();
     await onSecondLoad.future;
   });
+
+  testWithoutContext('hot restart does not need to sync assets on the first reload', () async {
+    final Completer<void> onFirstLoad = Completer<void>();
+    final Completer<void> onSecondLoad = Completer<void>();
+
+    flutter.stdout.listen((String line) {
+      // If the asset fails to load, this message will be printed instead.
+      // this indicates that the devFS was not able to locate the asset
+      // after the hot reload.
+      if (line.contains('FAILED TO LOAD')) {
+        fail('Did not load asset: $line');
+      }
+      if (line.contains('LOADED DATA')) {
+        onFirstLoad.complete();
+      }
+      if (line.contains('SECOND DATA')) {
+        onSecondLoad.complete();
+      }
+    });
+    flutter.stdout.listen(print);
+    await flutter.run();
+    await onFirstLoad.future;
+
+    project.uncommentHotReloadPrint();
+    await flutter.hotRestart();
+    await onSecondLoad.future;
+  });
 }
