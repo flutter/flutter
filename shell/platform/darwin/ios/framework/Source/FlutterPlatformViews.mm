@@ -279,6 +279,11 @@ PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
     CancelFrame();
     return PostPrerollResult::kSkipAndRetryFrame;
   }
+  // If the post preroll action is successful, we will display platform views in the current frame.
+  // In order to sync the rendering of the platform views (quartz) with skia's rendering,
+  // We need to begin an explicit CATransaction. This transaction needs to be submitted
+  // after the current frame is submitted.
+  BeginCATransaction();
   raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
   return PostPrerollResult::kSuccess;
 }
@@ -286,6 +291,9 @@ PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
 void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(
     int view_id,
     std::unique_ptr<EmbeddedViewParams> params) {
+  // All the CATransactions should be committed by the end of the last frame,
+  // so catransaction_added_ must be false.
+  FML_DCHECK(!catransaction_added_);
   picture_recorders_[view_id] = std::make_unique<SkPictureRecorder>();
 
   auto rtree_factory = RTreeFactory();
@@ -548,6 +556,10 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
 
   did_submit &= frame->Submit();
 
+  // If the frame is submitted with embedded platform views,
+  // there should be a |[CATransaction begin]| call in this frame prior to all the drawing.
+  // If that case, we need to commit the transaction.
+  CommitCATransactionIfNeeded();
   return did_submit;
 }
 
@@ -660,6 +672,21 @@ void FlutterPlatformViewsController::DisposeViews() {
     views_to_recomposite_.erase(viewId);
   }
   views_to_dispose_.clear();
+}
+
+void FlutterPlatformViewsController::BeginCATransaction() {
+  FML_DCHECK([[NSThread currentThread] isMainThread]);
+  FML_DCHECK(!catransaction_added_);
+  [CATransaction begin];
+  catransaction_added_ = true;
+}
+
+void FlutterPlatformViewsController::CommitCATransactionIfNeeded() {
+  if (catransaction_added_) {
+    FML_DCHECK([[NSThread currentThread] isMainThread]);
+    [CATransaction commit];
+    catransaction_added_ = false;
+  }
 }
 
 }  // namespace flutter
