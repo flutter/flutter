@@ -223,18 +223,6 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
     while (_pendingPointerEvents.isNotEmpty)
       handlePointerEvent(_pendingPointerEvents.removeFirst());
-
-    if (resamplingEnabled) {
-      triggerResample();
-    }
-  }
-
-  /// to force resampler for triggering a resample operation.
-  ///
-  /// This should only be called when resampling is enabled.
-  void triggerResample() {
-    assert(resamplingEnabled);
-    _resampler.sample(samplingOffset);
   }
 
   /// A router that routes all pointer events received from the engine.
@@ -269,6 +257,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
     if (resamplingEnabled) {
       _resampler.addOrDispatch(event);
+      _resampler.sample(samplingOffset);
       return;
     }
 
@@ -399,7 +388,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   void _handleSampleTimeChanged() {
     if (!locked) {
-      _flushPointerEventQueue();
+      _resampler.sample(samplingOffset);
     }
   }
 
