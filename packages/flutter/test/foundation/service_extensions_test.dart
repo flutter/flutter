@@ -74,13 +74,10 @@ class TestServiceExtensionsBinding extends BindingBase
   }
   Future<void> doFrame() async {
     frameScheduled = false;
-    if (ui.window.onBeginFrame != null)
-      ui.window.onBeginFrame!(Duration.zero);
+    ui.window.onBeginFrame?.call(Duration.zero);
     await flushMicrotasks();
-    if (ui.window.onDrawFrame != null)
-      ui.window.onDrawFrame!();
-    if (ui.window.onReportTimings != null)
-      ui.window.onReportTimings!(<ui.FrameTiming>[]);
+    ui.window.onDrawFrame?.call();
+    ui.window.onReportTimings?.call(<ui.FrameTiming>[]);
   }
 
   @override

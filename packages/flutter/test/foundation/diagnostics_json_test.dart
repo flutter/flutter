@@ -255,9 +255,8 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final DiagnosticsTreeStyle? localStyle = style;
-    if (localStyle != null)
-      properties.defaultDiagnosticsTreeStyle = localStyle;
+    if (style != null)
+      properties.defaultDiagnosticsTreeStyle = style!;
 
     this.properties.forEach(properties.add);
   }
@@ -291,9 +290,8 @@ class TestDiagnosticsSerializationDelegate implements DiagnosticsSerializationDe
 
   @override
   DiagnosticsSerializationDelegate delegateForNode(DiagnosticsNode node) {
-    final NodeDelegator? localNodeDelegator = nodeDelegator;
-    if (localNodeDelegator != null) {
-      return localNodeDelegator(node, this);
+    if (nodeDelegator != null) {
+      return nodeDelegator!(node, this);
     }
     return subtreeDepth > 0 ? copyWith(subtreeDepth: subtreeDepth - 1) : this;
   }
