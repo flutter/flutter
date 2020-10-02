@@ -1999,15 +1999,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     offset.applyContentDimensions(0.0, _maxScrollExtent);
   }
 
+  /// Computes the offset to apply to the given [caretRect] so it perfectly
+  /// snaps to physical pixels.
   Offset _getPixelPerfectCursorOffset(Rect caretRect) {
     final Offset caretPosition = localToGlobal(caretRect.topLeft);
     final double pixelMultiple = 1.0 / _devicePixelRatio;
     final double pixelPerfectOffsetX = caretPosition.dx.isFinite
       ? (caretPosition.dx / pixelMultiple).round() * pixelMultiple - caretPosition.dx
-      : caretPosition.dx;
+      : 0;
     final double pixelPerfectOffsetY = caretPosition.dy.isFinite
       ? (caretPosition.dy / pixelMultiple).round() * pixelMultiple - caretPosition.dy
-      : caretPosition.dy;
+      : 0;
     return Offset(pixelPerfectOffsetX, pixelPerfectOffsetY);
   }
 

@@ -5,7 +5,6 @@
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -13,14 +12,12 @@ import '../../src/testbed.dart';
 
 void main() {
   Testbed testbed;
-  MockPlatform windows;
-  MockPlatform notWindows;
+  FakePlatform windows;
+  FakePlatform notWindows;
 
   setUp(() {
-    windows = MockPlatform();
-    notWindows = MockPlatform();
-    when(windows.isWindows).thenReturn(true);
-    when(notWindows.isWindows).thenReturn(false);
+    windows = FakePlatform(operatingSystem: 'windows');
+    notWindows = FakePlatform(operatingSystem: 'linux');
     testbed = Testbed(
       overrides: <Type, Generator>{
         Platform: () => windows,
@@ -53,9 +50,4 @@ void main() {
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
   }));
-}
-
-class MockPlatform extends Mock implements Platform {
-  @override
-  final Map<String, String> environment = <String, String>{};
 }

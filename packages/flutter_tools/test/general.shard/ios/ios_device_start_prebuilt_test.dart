@@ -32,7 +32,7 @@ import '../../src/fakes.dart';
 
 const FakeCommand kDeployCommand = FakeCommand(
   command: <String>[
-    'ios-deploy',
+    'Artifact.iosDeploy.TargetPlatform.ios',
     '--id',
     '123',
     '--bundle',
@@ -48,7 +48,7 @@ const FakeCommand kDeployCommand = FakeCommand(
 // The command used to actually launch the app with args in release/profile.
 const FakeCommand kLaunchReleaseCommand = FakeCommand(
   command: <String>[
-    'ios-deploy',
+    'Artifact.iosDeploy.TargetPlatform.ios',
     '--id',
     '123',
     '--bundle',
@@ -67,7 +67,7 @@ const FakeCommand kLaunchReleaseCommand = FakeCommand(
 
 // The command used to just launch the app with args in debug.
 const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
-  'ios-deploy',
+  'Artifact.iosDeploy.TargetPlatform.ios',
   '--id',
   '123',
   '--bundle',
@@ -87,7 +87,7 @@ const FakeCommand kAttachDebuggerCommand = FakeCommand(command: <String>[
   '-t',
   '0',
   '/dev/null',
-  'ios-deploy',
+  'Artifact.iosDeploy.TargetPlatform.ios',
   '--id',
   '123',
   '--bundle',
@@ -338,106 +338,6 @@ void main() {
       Usage: () => MockUsage(),
     });
 
-  group('IOSDevice.startApp on discovery failure local network permissions', () {
-    // Still uses context for analytics and mDNS.
-    testUsingContext('is not prompted on < iOS 14', () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        kDeployCommand,
-        kAttachDebuggerCommand,
-      ]);
-     final  BufferLogger logger = BufferLogger.test();
-      final IOSDevice device = setUpIOSDevice(
-        sdkVersion: '13.0',
-        processManager: processManager,
-        fileSystem: fileSystem,
-        logger: logger,
-        vmServiceConnector: (String string, {Log log}) async {
-          throw const io.SocketException(
-            'OS Error: Connection refused, errno = 61, address = localhost, port '
-                '= 58943',
-          );
-        },
-      );
-      final IOSApp iosApp = PrebuiltIOSApp(
-        projectBundleId: 'app',
-        bundleName: 'Runner',
-        bundleDir: fileSystem.currentDirectory,
-      );
-      final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
-
-      device.portForwarder = const NoOpDevicePortForwarder();
-      device.setLogReader(iosApp, deviceLogReader);
-
-      when(MDnsObservatoryDiscovery.instance.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
-          .thenAnswer((Invocation invocation) async => null);
-
-      final LaunchResult launchResult = await device.startApp(iosApp,
-        prebuiltApplication: true,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        platformArgs: <String, dynamic>{},
-        fallbackPollingDelay: Duration.zero,
-        fallbackThrottleTimeout: const Duration(milliseconds: 10),
-      );
-
-      expect(launchResult.started, false);
-      expect(launchResult.hasObservatory, false);
-      expect(logger.errorText, isEmpty);
-    }, overrides: <Type, Generator>{
-      MDnsObservatoryDiscovery: () => MockMDnsObservatoryDiscovery(),
-      Usage: () => MockUsage(),
-    });
-
-    // Still uses context for analytics and mDNS.
-    testUsingContext('is prompted on >= iOS 14', () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        kDeployCommand,
-        kAttachDebuggerCommand,
-      ]);
-      final BufferLogger logger = BufferLogger.test();
-      final IOSDevice device = setUpIOSDevice(
-        sdkVersion: '14.0',
-        processManager: processManager,
-        fileSystem: fileSystem,
-        logger: logger,
-        vmServiceConnector: (String string, {Log log}) async {
-          throw const io.SocketException(
-            'OS Error: Connection refused, errno = 61, address = localhost, port '
-                '= 58943',
-          );
-        },
-      );
-      final IOSApp iosApp = PrebuiltIOSApp(
-        projectBundleId: 'app',
-        bundleName: 'Runner',
-        bundleDir: fileSystem.currentDirectory,
-      );
-      final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
-
-      device.portForwarder = const NoOpDevicePortForwarder();
-      device.setLogReader(iosApp, deviceLogReader);
-
-      when(MDnsObservatoryDiscovery.instance.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
-          .thenAnswer((Invocation invocation) async => null);
-
-      final LaunchResult launchResult = await device.startApp(iosApp,
-        prebuiltApplication: true,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        platformArgs: <String, dynamic>{},
-        fallbackPollingDelay: Duration.zero,
-        fallbackThrottleTimeout: const Duration(milliseconds: 10),
-      );
-
-      expect(launchResult.started, false);
-      expect(launchResult.hasObservatory, false);
-      expect(logger.errorText, contains('Settings > Privacy > Local Network'));
-    }, overrides: <Type, Generator>{
-      MDnsObservatoryDiscovery: () => MockMDnsObservatoryDiscovery(),
-      Usage: () => MockUsage(),
-    });
-  });
-
   // Still uses context for TimeoutConfiguration and usage
   testUsingContext('IOSDevice.startApp succeeds in release mode', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -482,7 +382,7 @@ void main() {
           '-t',
           '0',
           '/dev/null',
-          'ios-deploy',
+          'Artifact.iosDeploy.TargetPlatform.ios',
           '--id',
           '123',
           '--bundle',
@@ -582,20 +482,20 @@ IOSDevice setUpIOSDevice({
   ProcessManager processManager,
   VmServiceConnector vmServiceConnector,
 }) {
-  const MapEntry<String, String> dyldLibraryEntry = MapEntry<String, String>(
-    'DYLD_LIBRARY_PATH',
-    '/path/to/libraries',
-  );
-  final MockCache cache = MockCache();
-  final MockArtifacts artifacts = MockArtifacts();
+  final Artifacts artifacts = Artifacts.test();
   final FakePlatform macPlatform = FakePlatform(
     operatingSystem: 'macos',
     environment: <String, String>{},
   );
+
+  final Cache cache = Cache.test(
+    platform: macPlatform,
+    artifacts: <ArtifactSet>[
+      FakeDyldEnvironmentArtifact(),
+    ],
+  );
+
   vmServiceConnector ??= (String uri, {Log log}) async => MockVmService();
-  when(cache.dyLdLibEntry).thenReturn(dyldLibraryEntry);
-  when(artifacts.getArtifactPath(Artifact.iosDeploy, platform: anyNamed('platform')))
-    .thenReturn('ios-deploy');
   return IOSDevice('123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
@@ -626,7 +526,5 @@ class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader  {}
 class MockUsage extends Mock implements Usage {}
 class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
-class MockArtifacts extends Mock implements Artifacts {}
-class MockCache extends Mock implements Cache {}
 class MockVmService extends Mock implements VmService {}
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}

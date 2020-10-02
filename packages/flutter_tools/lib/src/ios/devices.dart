@@ -469,12 +469,6 @@ class IOSDevice extends Device {
         packageName: FlutterProject.current().manifest.appName,
       );
       if (localUri == null) {
-        if (majorSdkVersion >= 14) {
-          _logger.printError('Failed to attach to the observatory.');
-          _logger.printError(
-              'Try accepting the local network permissions popup, or enable "Settings > Privacy > Local Network" for your app.');
-          _logger.printError('For more information, see https://flutter.dev/docs/development/ios-14#debugging-flutter');
-        }
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(observatoryUri: localUri);

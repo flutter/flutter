@@ -24,11 +24,10 @@ void main() {
       Cache.disableLocking();
     });
 
-    MockCache cache;
+    Cache cache;
 
     setUp(() {
-      cache = MockCache();
-      when(cache.dyLdLibEntry).thenReturn(const MapEntry<String, String>('foo', 'bar'));
+      cache = Cache.test();
     });
 
     testUsingContext('returns 0 when called', () async {
@@ -192,5 +191,3 @@ class NoDevicesManager extends DeviceManager {
 @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 }
-
-class MockCache extends Mock implements Cache {}

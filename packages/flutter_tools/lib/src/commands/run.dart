@@ -531,6 +531,7 @@ class RunCommand extends RunCommandBase {
           target: stringArg('target'),
           buildInfo: getBuildInfo(),
           userIdentifier: userIdentifier,
+          platform: globals.platform,
         ),
     ];
     // Only support "web mode" with a single web device due to resident runner
@@ -591,7 +592,12 @@ class RunCommand extends RunCommandBase {
       (_) {
         appStartedTime = globals.systemClock.now();
         if (stayResident) {
-          TerminalHandler(runner)
+          TerminalHandler(
+            runner,
+            logger: globals.logger,
+            terminal: globals.terminal,
+            signals: globals.signals,
+          )
             ..setupTerminal()
             ..registerSignalHandlers();
         }

@@ -58,13 +58,13 @@ void main() {
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 5'), findsNothing);
     expect(find.text('Page 100'), findsOneWidget);
-    await tester.tap(find.byType(FlatButton)); // 6
+    await tester.tap(find.byType(TextButton)); // 6
     await tester.pump();
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 6'), findsNothing);
     expect(find.text('Page 5'), findsNothing);
     expect(find.text('Page 100'), findsOneWidget);
-    await tester.tap(find.byType(FlatButton)); // 7
+    await tester.tap(find.byType(TextButton)); // 7
     await tester.pump();
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 6'), findsNothing);
@@ -82,7 +82,7 @@ void main() {
     expect(find.text('Page 4'), findsOneWidget);
     expect(find.text('Page 5'), findsNothing);
     expect(find.text('Page 100'), findsNothing);
-    await tester.tap(find.byType(FlatButton)); // 8
+    await tester.tap(find.byType(TextButton)); // 8
     await tester.pump();
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 8'), findsNothing);
@@ -107,7 +107,7 @@ void main() {
     await tester.drag(find.byType(PageView62209), const Offset(800.0, 0.0));
     await tester.pump();
     expect(find.text('Page 1'), findsOneWidget);
-    await tester.tap(find.byType(FlatButton)); // 9
+    await tester.tap(find.byType(TextButton)); // 9
     await tester.pump();
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 9'), findsNothing);
@@ -146,7 +146,7 @@ class _PageView62209State extends State<PageView62209> {
       body: Column(
         children: <Widget>[
           Expanded(child: Carousel62209(pages: _pages)),
-          FlatButton(
+          TextButton(
             child: const Text('ADD PAGE'),
             onPressed: () {
               setState(() {

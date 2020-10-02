@@ -234,6 +234,7 @@ StreamTransformer<S, S> _throttle<S>({
   S latestLine;
   int lastExecution;
   Future<void> throttleFuture;
+  bool done = false;
 
   return StreamTransformer<S, S>
     .fromHandlers(
@@ -249,14 +250,20 @@ StreamTransformer<S, S> _throttle<S>({
         final int nextExecutionTime = isFirstMessage || remainingTime > waitDuration.inMilliseconds
           ? 0
           : waitDuration.inMilliseconds - remainingTime;
-
         throttleFuture ??= Future<void>
           .delayed(Duration(milliseconds: nextExecutionTime))
           .whenComplete(() {
+            if (done) {
+              return;
+            }
             sink.add(latestLine);
             throttleFuture = null;
             lastExecution = DateTime.now().millisecondsSinceEpoch;
           });
+      },
+      handleDone: (EventSink<S> sink) {
+        done = true;
+        sink.close();
       }
     );
 }
