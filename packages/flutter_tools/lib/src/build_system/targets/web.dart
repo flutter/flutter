@@ -5,6 +5,7 @@
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter_tools/src/dart/language_version.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
@@ -94,6 +95,13 @@ class WebEntrypointTarget extends Target {
       environment.fileSystem.file(packageFile),
       logger: environment.logger,
     );
+    print(packageConfig);
+    final FlutterProject flutterProject = FlutterProject.current();
+        print(flutterProject.manifest.appName);
+    final String languageVersion = determineLanguageVersion(
+      environment.fileSystem.file(targetFile),
+      packageConfig[flutterProject.manifest.appName],
+    ) ?? '';
 
     // Use the PackageConfig to find the correct package-scheme import path
     // for the user application. If the application has a mix of package-scheme
@@ -117,6 +125,8 @@ class WebEntrypointTarget extends Target {
       final String generatedImport = packageConfig.toPackageUri(generatedUri)?.toString()
         ?? generatedUri.toString();
       contents = '''
+$languageVersion
+
 import 'dart:ui' as ui;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -134,6 +144,8 @@ Future<void> main() async {
 ''';
     } else {
       contents = '''
+$languageVersion
+
 import 'dart:ui' as ui;
 
 import '$mainImport' as entrypoint;
