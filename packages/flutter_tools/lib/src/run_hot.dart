@@ -21,6 +21,7 @@ import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'features.dart';
 import 'globals.dart' as globals;
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -553,7 +554,11 @@ class HotRunner extends ResidentRunner {
           .catchError((dynamic error, StackTrace stackTrace) {
             // Do nothing on a SentinelException since it means the isolate
             // has already been killed.
-          }, test: (dynamic error) => error is vm_service.SentinelException));
+            // Error code 105 indicates the isolate is not yet runnable, and might
+            // be triggered if the tool is attempting to kill the asset parsing
+            // isolate before it has finished starting up.
+          }, test: (dynamic error) => error is vm_service.SentinelException
+            || (error is vm_service.RPCError && error.code == 105)));
       }
     }
     await Future.wait(operations);
@@ -567,7 +572,6 @@ class HotRunner extends ResidentRunner {
     // Send timing analytics.
     globals.flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
 
-    // In benchmark mode, make sure all stream notifications have finished.
     if (benchmarkMode) {
       final List<Future<void>> isolateNotifications = <Future<void>>[];
       for (final FlutterDevice device in flutterDevices) {
@@ -583,7 +587,17 @@ class HotRunner extends ResidentRunner {
         );
       }
       await Future.wait(isolateNotifications);
+      final List<Future<void>> futures = <Future<void>>[];
+      for (final FlutterDevice device in flutterDevices) {
+        final List<FlutterView> views = await device.vmService.getFlutterViews();
+        for (final FlutterView view in views) {
+          futures.add(device.vmService
+            .flushUIThreadTasks(uiIsolateId: view.uiIsolate.id));
+        }
+      }
+      await Future.wait(futures);
     }
+
     // Toggle the main dill name after successfully uploading.
     _swap =! _swap;
 
@@ -744,7 +758,9 @@ class HotRunner extends ResidentRunner {
         emulator: emulator,
         fullRestart: true,
         nullSafety: usageNullSafety,
-        reason: reason).send();
+        reason: reason,
+        fastReassemble: null,
+      ).send();
       status?.cancel();
     }
     return result;
@@ -787,6 +803,7 @@ class HotRunner extends ResidentRunner {
         fullRestart: false,
         nullSafety: usageNullSafety,
         reason: reason,
+        fastReassemble: null,
       ).send();
       return OperationResult(1, 'hot reload failed to complete', fatal: true);
     } finally {
@@ -866,6 +883,7 @@ class HotRunner extends ResidentRunner {
             fullRestart: false,
             reason: reason,
             nullSafety: usageNullSafety,
+            fastReassemble: null,
           ).send();
           return OperationResult(1, 'Reload rejected');
         }
@@ -894,6 +912,7 @@ class HotRunner extends ResidentRunner {
           fullRestart: false,
           reason: reason,
           nullSafety: usageNullSafety,
+          fastReassemble: null,
         ).send();
         return OperationResult(errorCode, errorMessage);
       }
@@ -936,9 +955,10 @@ class HotRunner extends ResidentRunner {
           // If the tool identified a change in a single widget, do a fast instead
           // of a full reassemble.
           Future<void> reassembleWork;
-          if (updatedDevFS.fastReassemble == true) {
+          if (updatedDevFS.fastReassembleClassName != null) {
             reassembleWork = device.vmService.flutterFastReassemble(
               isolateId: view.uiIsolate.id,
+              className: updatedDevFS.fastReassembleClassName,
             );
           } else {
             reassembleWork = device.vmService.flutterReassemble(
@@ -1030,6 +1050,9 @@ class HotRunner extends ResidentRunner {
       invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
       transferTimeInMs: devFSTimer.elapsed.inMilliseconds,
       nullSafety: usageNullSafety,
+      fastReassemble: featureFlags.isSingleWidgetReloadEnabled
+        ? updatedDevFS.fastReassembleClassName != null
+        : null,
     ).send();
 
     if (shouldReportReloadTime) {

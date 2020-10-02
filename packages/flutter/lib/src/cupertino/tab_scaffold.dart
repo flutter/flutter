@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'bottom_tab_bar.dart';
@@ -207,9 +205,9 @@ class CupertinoTabScaffold extends StatefulWidget {
   ///
   /// The [tabBar] and [tabBuilder] arguments must not be null.
   CupertinoTabScaffold({
-    Key key,
-    @required this.tabBar,
-    @required this.tabBuilder,
+    Key? key,
+    required this.tabBar,
+    required this.tabBuilder,
     this.controller,
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
@@ -258,7 +256,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// index value.
   ///
   /// Defaults to null.
-  final CupertinoTabController controller;
+  final CupertinoTabController? controller;
 
   /// An [IndexedWidgetBuilder] that's called when tabs become active.
   ///
@@ -280,7 +278,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// The color of the widget that underlies the entire scaffold.
   ///
   /// By default uses [CupertinoTheme]'s `scaffoldBackgroundColor` when null.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// Whether the body should size itself to avoid the window's bottom inset.
   ///
@@ -296,7 +294,7 @@ class CupertinoTabScaffold extends StatefulWidget {
 }
 
 class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
-  CupertinoTabController _controller;
+  CupertinoTabController? _controller;
 
   @override
   void initState() {
@@ -317,7 +315,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     if (shouldDisposeOldController) {
       _controller?.dispose();
     } else if (_controller?._isDisposed == false) {
-      _controller.removeListener(_onCurrentIndexChange);
+      _controller!.removeListener(_onCurrentIndexChange);
     }
 
     newController.addListener(_onCurrentIndexChange);
@@ -326,8 +324,8 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
   void _onCurrentIndexChange() {
     assert(
-      _controller.index >= 0 && _controller.index < widget.tabBar.items.length,
-      "The $runtimeType's current index ${_controller.index} is "
+      _controller!.index >= 0 && _controller!.index < widget.tabBar.items.length,
+      "The $runtimeType's current index ${_controller!.index} is "
       'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs'
     );
 
@@ -341,20 +339,20 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
       _updateTabController(shouldDisposeOldController: oldWidget.controller == null);
-    } else if (_controller.index >= widget.tabBar.items.length) {
+    } else if (_controller!.index >= widget.tabBar.items.length) {
       // If a new [tabBar] with less than (_controller.index + 1) items is provided,
       // clamp the current index.
-      _controller.index = widget.tabBar.items.length - 1;
+      _controller!.index = widget.tabBar.items.length - 1;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData existingMediaQuery = MediaQuery.of(context);
-    MediaQueryData newMediaQuery = MediaQuery.of(context);
+    final MediaQueryData existingMediaQuery = MediaQuery.of(context)!;
+    MediaQueryData newMediaQuery = MediaQuery.of(context)!;
 
     Widget content = _TabSwitchingView(
-      currentTabIndex: _controller.index,
+      currentTabIndex: _controller!.index,
       tabCount: widget.tabBar.items.length,
       tabBuilder: widget.tabBuilder,
     );
@@ -417,12 +415,11 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
               // our own listener to update the [_controller.currentIndex] on top of a possibly user
               // provided callback.
               child: widget.tabBar.copyWith(
-                currentIndex: _controller.index,
+                currentIndex: _controller!.index,
                 onTap: (int newIndex) {
-                  _controller.index = newIndex;
+                  _controller!.index = newIndex;
                   // Chain the user's original callback.
-                  if (widget.tabBar.onTap != null)
-                    widget.tabBar.onTap(newIndex);
+                  widget.tabBar.onTap?.call(newIndex);
                 },
               ),
             ),
@@ -438,7 +435,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     if (widget.controller == null) {
       _controller?.dispose();
     } else if (_controller?._isDisposed == false) {
-      _controller.removeListener(_onCurrentIndexChange);
+      _controller!.removeListener(_onCurrentIndexChange);
     }
 
     super.dispose();
@@ -449,9 +446,9 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 /// at a time and on stage. Off stage tabs' animations are stopped.
 class _TabSwitchingView extends StatefulWidget {
   const _TabSwitchingView({
-    @required this.currentTabIndex,
-    @required this.tabCount,
-    @required this.tabBuilder,
+    required this.currentTabIndex,
+    required this.tabCount,
+    required this.tabBuilder,
   }) : assert(currentTabIndex != null),
        assert(tabCount != null && tabCount > 0),
        assert(tabBuilder != null);

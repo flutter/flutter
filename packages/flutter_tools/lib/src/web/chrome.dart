@@ -106,13 +106,14 @@ class ChromiumLauncher {
     @required OperatingSystemUtils operatingSystemUtils,
     @required BrowserFinder browserFinder,
     @required Logger logger,
+    @visibleForTesting FileSystemUtils fileSystemUtils,
   }) : _fileSystem = fileSystem,
        _platform = platform,
        _processManager = processManager,
        _operatingSystemUtils = operatingSystemUtils,
        _browserFinder = browserFinder,
        _logger = logger,
-       _fileSystemUtils = FileSystemUtils(
+       _fileSystemUtils = fileSystemUtils ?? FileSystemUtils(
          fileSystem: fileSystem,
          platform: platform,
        );
@@ -268,7 +269,13 @@ class ChromiumLauncher {
 
     if (sourceLocalStorageDir.existsSync()) {
       targetLocalStorageDir.createSync(recursive: true);
-      _fileSystemUtils.copyDirectorySync(sourceLocalStorageDir, targetLocalStorageDir);
+      try {
+        _fileSystemUtils.copyDirectorySync(sourceLocalStorageDir, targetLocalStorageDir);
+      } on FileSystemException catch (err) {
+        // This is a best-effort update. Display the message in case the failure is relevant.
+        // one possible example is a file lock due to multiple running chrome instances.
+        _logger.printError('Failed to save Chrome preferences: $err');
+      }
     }
   }
 

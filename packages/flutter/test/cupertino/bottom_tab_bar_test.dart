@@ -10,7 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../painting/image_data.dart';
+import '../image_data.dart';
 import '../widgets/semantics_tester.dart';
 
 Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async {
@@ -257,7 +257,7 @@ Future<void> main() async {
   });
 
   testWidgets('Use active icon', (WidgetTester tester) async {
-    final MemoryImage activeIcon = MemoryImage(Uint8List.fromList(kBlueSquare));
+    final MemoryImage activeIcon = MemoryImage(Uint8List.fromList(kBlueSquarePng));
     final MemoryImage inactiveIcon = MemoryImage(Uint8List.fromList(kTransparentImage));
 
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
