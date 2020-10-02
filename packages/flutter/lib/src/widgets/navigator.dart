@@ -73,7 +73,7 @@ typedef WillPopCallback = Future<bool> Function();
 /// [Navigator.pages] so that it no longer includes the corresponding [Page].
 /// (Otherwise, the page will be interpreted as a new page to show when the
 /// [Navigator.pages] list is next updated.)
-typedef PopPageCallback = bool Function(Route<dynamic> route, dynamic result);
+typedef PopPageCallback = bool? Function(Route<dynamic> route, dynamic result);
 
 /// Indicates whether the current route should be popped.
 ///
