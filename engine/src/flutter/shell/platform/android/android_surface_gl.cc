@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/android/android_surface_gl.h"
 
+#include <GLES/gl.h>
 #include <utility>
 
 #include "flutter/fml/logging.h"
@@ -11,6 +12,12 @@
 #include "flutter/shell/platform/android/android_shell_holder.h"
 
 namespace flutter {
+
+namespace {
+// GL renderer string prefix used by the Android emulator GLES implementation.
+constexpr char kEmulatorRendererPrefix[] =
+    "Android Emulator OpenGL ES Translator";
+}  // anonymous namespace
 
 AndroidSurfaceGL::AndroidSurfaceGL(
     std::shared_ptr<AndroidContext> android_context,
@@ -131,6 +138,39 @@ intptr_t AndroidSurfaceGL::GLContextFBO(GLFrameInfo frame_info) const {
 // |GPUSurfaceGLDelegate|
 ExternalViewEmbedder* AndroidSurfaceGL::GetExternalViewEmbedder() {
   return external_view_embedder_.get();
+}
+
+// |GPUSurfaceGLDelegate|
+sk_sp<const GrGLInterface> AndroidSurfaceGL::GetGLInterface() const {
+  // This is a workaround for a bug in the Android emulator EGL/GLES
+  // implementation.  Some versions of the emulator will not update the
+  // GL version string when the process switches to a new EGL context
+  // unless the EGL context is being made current for the first time.
+  // The inaccurate version string will be rejected by Skia when it
+  // tries to build the GrGLInterface.  Flutter can work around this
+  // by creating a new context, making it current to force an update
+  // of the version, and then reverting to the previous context.
+  const char* gl_renderer =
+      reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+  if (gl_renderer && strncmp(gl_renderer, kEmulatorRendererPrefix,
+                             strlen(kEmulatorRendererPrefix)) == 0) {
+    EGLContext new_context = android_context_->CreateNewContext();
+    if (new_context != EGL_NO_CONTEXT) {
+      EGLContext old_context = eglGetCurrentContext();
+      EGLDisplay display = eglGetCurrentDisplay();
+      EGLSurface draw_surface = eglGetCurrentSurface(EGL_DRAW);
+      EGLSurface read_surface = eglGetCurrentSurface(EGL_READ);
+      EGLBoolean result =
+          eglMakeCurrent(display, draw_surface, read_surface, new_context);
+      FML_DCHECK(result == EGL_TRUE);
+      result = eglMakeCurrent(display, draw_surface, read_surface, old_context);
+      FML_DCHECK(result == EGL_TRUE);
+      result = eglDestroyContext(display, new_context);
+      FML_DCHECK(result == EGL_TRUE);
+    }
+  }
+
+  return GPUSurfaceGLDelegate::GetGLInterface();
 }
 
 }  // namespace flutter
