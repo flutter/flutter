@@ -831,10 +831,21 @@ void PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
     });
     focuser_->RequestFocus(
         std::move(ref),
-        [view_ref = view_ref->value.GetUint64()](
-            fuchsia::ui::views::Focuser_RequestFocus_Result result) {
-          if (result.is_err()) {
-            FML_LOG(ERROR) << "Failed to request focus for view: " << view_ref;
+        [view_ref = view_ref->value.GetUint64(),
+         message](fuchsia::ui::views::Focuser_RequestFocus_Result result) {
+          if (message->response().get()) {
+            int result_code =
+                result.is_err()
+                    ? static_cast<
+                          std::underlying_type_t<fuchsia::ui::views::Error>>(
+                          result.err())
+                    : 0;
+
+            std::ostringstream out;
+            out << "[" << result_code << "]";
+            message->response()->Complete(
+                std::make_unique<fml::NonOwnedMapping>(
+                    (const uint8_t*)out.str().c_str(), out.str().length()));
           }
         });
   } else {
