@@ -1822,8 +1822,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     // Invoke optional callback with the user's submitted content.
-    if (widget.onSubmitted != null)
-      widget.onSubmitted!(_value.text);
+    if (widget.onSubmitted != null) {
+      try {
+        widget.onSubmitted!(_value.text);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while calling onSubmitted for $action'),
+        ));
+      }
+    }
   }
 
   void _updateRemoteEditingValueIfNeeded() {
