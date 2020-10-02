@@ -106,9 +106,9 @@ void main() {
 
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 3);
-    expect(events[0].runtimeType, equals(PointerHoverEvent));
-    expect(events[1].runtimeType, equals(PointerHoverEvent));
-    expect(events[2].runtimeType, equals(PointerHoverEvent));
+    expect(events[0], isA<PointerHoverEvent>());
+    expect(events[1], isA<PointerHoverEvent>());
+    expect(events[2], isA<PointerHoverEvent>());
     expect(pointerRouterEvents.length, 6,
         reason: 'pointerRouterEvents contains: $pointerRouterEvents');
     expect(pointerRouterEvents[0], isA<PointerAddedEvent>());
