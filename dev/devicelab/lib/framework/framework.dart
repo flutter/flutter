@@ -218,6 +218,16 @@ class TaskResult {
     );
   }
 
+  /// Constructs a [TaskResult] from JSON.
+  factory TaskResult.fromJson(Map<String, dynamic> json) {
+    if (json['success'] == true) {
+      return TaskResult.success(json['data'] as Map<String, dynamic>,
+          benchmarkScoreKeys: json['benchmarkScoreKeys'] as List<String>); 
+    }
+
+    return TaskResult.failure(json['reason'] as String);
+  }
+
   /// Constructs an unsuccessful result.
   TaskResult.failure(this.message)
       : succeeded = false,

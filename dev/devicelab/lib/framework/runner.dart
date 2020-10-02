@@ -12,6 +12,8 @@ import 'package:vm_service_client/vm_service_client.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 
+import 'framework.dart';
+
 /// Runs a task in a separate Dart VM and collects the result using the VM
 /// service protocol.
 ///
@@ -20,12 +22,13 @@ import 'package:flutter_devicelab/framework/adb.dart';
 ///
 /// Running the task in [silent] mode will suppress standard output from task
 /// processes and only print standard errors.
-Future<Map<String, dynamic>> runTask(
+Future<TaskResult> runTask(
   String taskName, {
   bool silent = false,
   String localEngine,
   String localEngineSrcPath,
   String deviceId,
+  String cocoonAuthToken,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
@@ -79,9 +82,10 @@ Future<Map<String, dynamic>> runTask(
 
   try {
     final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future);
-    final Map<String, dynamic> taskResult = await isolate.invokeExtension('ext.cocoonRunTask') as Map<String, dynamic>;
+    final Map<String, dynamic> taskResultRaw = await isolate.invokeExtension('ext.cocoonRunTask') as Map<String, dynamic>;
+    final TaskResult result = TaskResult.fromJson(taskResultRaw);
     await runner.exitCode;
-    return taskResult;
+    return result;
   } finally {
     if (!runnerFinished)
       runner.kill(ProcessSignal.sigkill);
