@@ -388,7 +388,12 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   void _handleSampleTimeChanged() {
     if (!locked) {
-      _resampler.sample(samplingOffset);
+      if (resamplingEnabled) {
+        _resampler.sample(samplingOffset);
+      }
+      else {
+        _resampler.stop();
+      }
     }
   }
 
