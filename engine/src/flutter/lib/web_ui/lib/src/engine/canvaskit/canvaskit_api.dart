@@ -683,6 +683,8 @@ class SkAnimatedImage {
   ///
   /// This object is no longer usable after calling this method.
   external void delete();
+  external bool isAliasOf(SkAnimatedImage other);
+  external bool isDeleted();
 }
 
 @JS()
@@ -698,6 +700,8 @@ class SkImage {
   );
   external Uint8List readPixels(SkImageInfo imageInfo, int srcX, int srcY);
   external SkData encodeToData();
+  external bool isAliasOf(SkImage other);
+  external bool isDeleted();
 }
 
 @JS()

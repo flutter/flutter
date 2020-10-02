@@ -12,6 +12,7 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/src/engine.dart';
 
 import 'common.dart';
+import '../matchers.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -153,9 +154,49 @@ void _tests() {
       expect(SkiaObjects.oneShotCache.debugContains(object2), isFalse);
     });
   });
+
+
+  group(SkiaObjectBox, () {
+    test('Records stack traces and respects refcounts', () async {
+      TestOneShotSkiaObject.deleteCount = 0;
+      final TestOneShotSkiaObject skObject = TestOneShotSkiaObject();
+      final Object wrapper = Object();
+      final SkiaObjectBox box = SkiaObjectBox(wrapper, skObject);
+
+      expect(box.debugGetStackTraces().length, 1);
+
+      final SkiaObjectBox clone = box.clone(wrapper);
+      expect(clone, isNot(same(box)));
+      expect(clone.debugGetStackTraces().length, 2);
+      expect(box.debugGetStackTraces().length, 2);
+
+      box.delete();
+
+      expect(() => box.clone(wrapper), throwsAssertionError);
+
+      expect(box.isDeleted, true);
+
+      // Let any timers elapse.
+      await Future<void>.delayed(Duration.zero);
+      expect(TestOneShotSkiaObject.deleteCount, 0);
+
+      expect(clone.debugGetStackTraces().length, 1);
+      expect(box.debugGetStackTraces().length, 1);
+
+      clone.delete();
+      expect(() => clone.clone(wrapper), throwsAssertionError);
+
+      // Let any timers elapse.
+      await Future<void>.delayed(Duration.zero);
+      expect(TestOneShotSkiaObject.deleteCount, 1);
+
+      expect(clone.debugGetStackTraces().length, 0);
+      expect(box.debugGetStackTraces().length, 0);
+    });
+  });
 }
 
-class TestOneShotSkiaObject extends OneShotSkiaObject<SkPaint> {
+class TestOneShotSkiaObject extends OneShotSkiaObject<SkPaint> implements SkDeletable {
   static int deleteCount = 0;
 
   TestOneShotSkiaObject() : super(SkPaint());
