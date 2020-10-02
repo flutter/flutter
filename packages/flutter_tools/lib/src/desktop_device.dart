@@ -204,10 +204,12 @@ abstract class DesktopDevice extends Device {
   void onAttached(ApplicationPackage package, BuildMode buildMode, Process process) {}
 }
 
-/// A log reader for desktop applications.
+/// A log reader for desktop applications that delegates to a [Process] stdout
+/// and stderr streams.
 class DesktopLogReader extends DeviceLogReader {
   final StreamController<List<int>> _inputController = StreamController<List<int>>.broadcast();
 
+  /// Begin listening to the stdout and stderr streams of the provided [process].
   void initializeProcess(Process process) {
     process.stdout.listen(_inputController.add);
     process.stderr.listen(_inputController.add);
