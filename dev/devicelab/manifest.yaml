@@ -269,6 +269,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  color_filter_and_fade_perf__e2e_summary:
+    description: >
+      Measures the runtime performance of color filter with fade on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   fading_child_animation_perf__timeline_summary:
     description: >
       Measures the runtime performance of opacity filter with fade on Android.

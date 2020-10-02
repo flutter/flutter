@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -22,7 +20,7 @@ void main() {
     }
 
     try {
-      throw null;
+      throw Object();
     } catch (e, stack) {
       final List<DiagnosticsNode> information = <DiagnosticsNode>[];
       expect(reportExpectCall(stack, information), 0);

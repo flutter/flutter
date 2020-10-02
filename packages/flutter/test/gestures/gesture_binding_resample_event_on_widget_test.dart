@@ -97,9 +97,13 @@ void main() {
 
     // Now the system time is epoch + 11ms
     await tester.pump(const Duration(milliseconds: 2));
-    expect(events.length, 3);
+    expect(events.length, 4);
     expect(events[2].timeStamp, currentTestFrameTime() + kSamplingOffset);
-    expect(events[2], isA<PointerUpEvent>());
+    expect(events[2], isA<PointerMoveEvent>());
     expect(events[2].position, Offset(40.0 / ui.window.devicePixelRatio, 0.0));
+    expect(events[2].delta, Offset(15.0 / ui.window.devicePixelRatio, 0.0));
+    expect(events[3].timeStamp, currentTestFrameTime() + kSamplingOffset);
+    expect(events[3].runtimeType, equals(PointerUpEvent));
+    expect(events[3].position, Offset(40.0 / ui.window.devicePixelRatio, 0.0));
   });
 }

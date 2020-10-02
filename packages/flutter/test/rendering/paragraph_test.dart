@@ -16,6 +16,28 @@ import 'rendering_tester.dart';
 
 const String _kText = "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
 
+// A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
+// for a given TextSelection.
+// This is intended to simulate SkParagraph's implementation of Paragraph.getBoxesForRange,
+// which may return an empty list in some situations where Libtxt would return a list
+// containing an empty box.
+class RenderParagraphWithEmptySelectionBoxList extends RenderParagraph {
+  RenderParagraphWithEmptySelectionBoxList(InlineSpan text, {
+    TextDirection textDirection,
+    this.emptyListSelection,
+  }) : super(text, textDirection: textDirection);
+
+  TextSelection emptyListSelection;
+
+  @override
+  List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
+    if (selection == emptyListSelection) {
+      return <ui.TextBox>[];
+    }
+    return super.getBoxesForSelection(selection);
+  }
+}
+
 void main() {
   test('getOffsetForCaret control test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -545,5 +567,22 @@ void main() {
       expect(e.message, 'MultiTapGestureRecognizer is not supported.');
     }
     expect(failed, true);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+  test('assembleSemanticsNode handles text spans that do not yield selection boxes', () {
+    final RenderParagraph paragraph = RenderParagraphWithEmptySelectionBoxList(
+      TextSpan(text: '', children: <InlineSpan>[
+        TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
+        TextSpan(text: 'B', recognizer: TapGestureRecognizer()..onTap = () {}),
+        TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
+      ]),
+      textDirection: TextDirection.rtl,
+      emptyListSelection: const TextSelection(baseOffset: 0, extentOffset: 1),
+    );
+    layout(paragraph);
+
+    final SemanticsNode node = SemanticsNode();
+    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    expect(node.childrenCount, 2);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 }

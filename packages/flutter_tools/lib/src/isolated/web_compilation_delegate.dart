@@ -223,6 +223,7 @@ class BuildDaemonCreator {
       '--packages=$buildScriptPackages',
       buildScript,
       'daemon',
+      '--enable-experiment=non-nullable',
       '--skip-build-script-check',
       '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
       '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
