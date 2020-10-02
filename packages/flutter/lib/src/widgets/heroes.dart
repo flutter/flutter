@@ -557,20 +557,16 @@ class _HeroFlight {
     // The animation will not finish until the user lifts their finger, so we
     // should suppress the status update if the gesture is in progress, and
     // delay it until the finger is lifted.
-    //
-    // This also relies on the animation to update its status at the end of the
-    // gesture. See the _CupertinoBackGestureController.dragEnd for how
-    // cupertino page route achieves that.
     if (manifest!.fromRoute.navigator?.userGestureInProgress != true) {
       _performAnimationUpdate(status);
       return;
     }
 
-    final NavigatorState? navigator = manifest!.fromRoute.navigator;
-    if (navigator == null || _scheduledPerformAnimtationUpdate)
+    // The `navigator` must be null, or the first if clause would have returned.
+    final NavigatorState navigator = manifest!.fromRoute.navigator!;
+    if (_scheduledPerformAnimtationUpdate)
       return;
 
-    // final AnimationStatus localStatus = _proxyAnimation.status;
     void delayedPerformAnimtationUpdate() {
       assert(!navigator.userGestureInProgress);
       assert(_scheduledPerformAnimtationUpdate);
