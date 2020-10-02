@@ -13,19 +13,6 @@ import 'package:e2e/e2e.dart';
 
 import 'package:complex_layout/main.dart' as app;
 
-class PointerDataTestBinding extends E2EWidgetsFlutterBinding {
-  // PointerData injection would usually be considered device input and therefore
-  // blocked by [TestWidgetsFlutterBinding]. Override this behavior
-  // to help events go into widget tree.
-  @override
-  void handlePointerEvent(
-    PointerEvent event, {
-    TestBindingEventSource source = TestBindingEventSource.device,
-  }) {
-    super.handlePointerEvent(event, source: TestBindingEventSource.test);
-  }
-}
-
 /// Generates the [PointerEvent] to simulate a drag operation from
 /// `center - totalMove/2` to `center + totalMove/2`.
 Iterable<PointerEvent> dragInputEvents(
@@ -137,8 +124,9 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
 }
 
 Future<void> main() async {
-  final PointerDataTestBinding binding = PointerDataTestBinding();
-  assert(WidgetsBinding.instance == binding);
+  final WidgetsBinding _binding = E2EWidgetsFlutterBinding.ensureInitialized();
+  assert(_binding is E2EWidgetsFlutterBinding);
+  final E2EWidgetsFlutterBinding binding = _binding as E2EWidgetsFlutterBinding;
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
   binding.reportData ??= <String, dynamic>{};
   final ResampleFlagVariant variant = ResampleFlagVariant(binding);
