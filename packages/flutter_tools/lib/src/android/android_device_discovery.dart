@@ -92,13 +92,13 @@ class AndroidDevices extends PollingDeviceDiscovery {
       return <String>[];
     }
 
-    final ProcessResult result = await _processManager.run(<String>[_androidSdk.adbPath, 'devices', '-l']);
+    final RunResult result = await _processUtils.run(<String>[_androidSdk.adbPath, 'devices', '-l']);
     if (result.exitCode != 0) {
       return <String>[];
     }
     final List<String> diagnostics = <String>[];
     _parseADBDeviceOutput(
-      result.stdout.toString(),
+      result.stdout,
       diagnostics: diagnostics,
     );
     return diagnostics;
