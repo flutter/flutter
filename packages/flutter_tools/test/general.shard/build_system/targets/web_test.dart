@@ -72,6 +72,10 @@ void main() {
   });
 
   test('WebEntrypointTarget generates an entrypoint with plugins and init platform', () => testbed.run(() async {
+    final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() {}');
+    environment.defines[kTargetFile] = mainFile.path;
     environment.defines[kHasWebPlugins] = 'true';
     environment.defines[kInitializePlatform] = 'true';
     await const WebEntrypointTarget().build(environment);
