@@ -251,12 +251,7 @@ void main() {
             },
           ),
           routes: <String, WidgetBuilder>{
-            '/2' : (BuildContext context) => CupertinoButton(
-              child: const Text('second route'),
-              onPressed: () {
-                Navigator.of(context).restorablePush(_routeBuilder, arguments: 'yay');
-              },
-            ),
+            '/2' : (BuildContext context) => const Text('second route'),
           }
         ),
       ),
@@ -269,59 +264,28 @@ void main() {
     expect(find.text('home'), findsNothing);
     expect(find.text('second route'), findsOneWidget);
 
-    await tester.tap(find.text('second route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('home'), findsNothing);
-    expect(find.text('second route'), findsNothing);
-    expect(find.text('third route: yay'), findsOneWidget);
-
     final TestRestorationData data = await tester.getRestorationData();
 
     await tester.restartAndRestore();
 
     expect(find.text('home'), findsNothing);
-    expect(find.text('second route'), findsNothing);
-    expect(find.text('third route: yay'), findsOneWidget);
-
-    Navigator.of(tester.element(find.text('third route: yay'))).pop();
-    await tester.pumpAndSettle();
-
-    expect(find.text('home'), findsNothing);
     expect(find.text('second route'), findsOneWidget);
-    expect(find.text('third route: yay'), findsNothing);
 
     Navigator.of(tester.element(find.text('second route'))).pop();
     await tester.pumpAndSettle();
 
     expect(find.text('home'), findsOneWidget);
     expect(find.text('second route'), findsNothing);
-    expect(find.text('third route: yay'), findsNothing);
 
     await tester.restoreFrom(data);
 
     expect(find.text('home'), findsNothing);
-    expect(find.text('second route'), findsNothing);
-    expect(find.text('third route: yay'), findsOneWidget);
-
-    Navigator.of(tester.element(find.text('third route: yay'))).pop();
-    await tester.pumpAndSettle();
-
-    expect(find.text('home'), findsNothing);
     expect(find.text('second route'), findsOneWidget);
-    expect(find.text('third route: yay'), findsNothing);
 
     Navigator.of(tester.element(find.text('second route'))).pop();
     await tester.pumpAndSettle();
 
     expect(find.text('home'), findsOneWidget);
     expect(find.text('second route'), findsNothing);
-    expect(find.text('third route: yay'), findsNothing);
   });
-}
-
-Route<void> _routeBuilder(BuildContext context, Object arguments) {
-  return CupertinoPageRoute<void>(
-    builder: (BuildContext context) => Text('third route: $arguments'),
-  );
 }
