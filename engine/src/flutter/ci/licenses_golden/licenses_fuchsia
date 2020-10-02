@@ -1,4 +1,4 @@
-Signature: 9b48e46f159d6de579f7f185cc23dec4
+Signature: dbb5ba7d07e0a2359f59cdfa309e5708
 
 UNUSED LICENSES:
 
@@ -3139,11 +3139,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/string_view.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/testonly-syscalls.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/string_view.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/testonly-syscalls.h
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/module/internal/_view_provider_impl.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/module/noop_view_provider.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/module/view_provider.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular_testing/lib/src/module_interceptor.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular_testing/lib/src/module_with_view_provider_impl.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/child_view_render_box_2.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/component.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/device.dart
