@@ -1528,6 +1528,7 @@ class Navigator extends StatefulWidget {
   /// Restoration ID to save and restore the state of the navigator, including
   /// its history.
   ///
+  /// {@template flutter.widgets.navigator.restorationScopeId}
   /// If a restoration ID is provided, the navigator will persist its internal
   /// state (including the route history as well as the restorable state of the
   /// routes) and restore it during state restoration.
@@ -1543,6 +1544,7 @@ class Navigator extends StatefulWidget {
   ///
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
+  /// {@endtemplate}
   final String? restorationScopeId;
 
   /// The name for the default route of the application.
