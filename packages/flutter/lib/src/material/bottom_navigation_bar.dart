@@ -385,7 +385,7 @@ class _BottomNavigationTile extends StatelessWidget {
 
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 
-    final double? selectedFontSize = selectedLabelStyle.fontSize;
+    final double selectedFontSize = selectedLabelStyle.fontSize!;
 
     final double selectedIconSize = selectedIconTheme?.size
       ?? bottomTheme.selectedIconTheme?.size
@@ -423,7 +423,7 @@ class _BottomNavigationTile extends StatelessWidget {
     if (showSelectedLabels! && !showUnselectedLabels!) {
       bottomPadding = Tween<double>(
         begin: selectedIconDiff / 2.0,
-        end: selectedFontSize! / 2.0 - unselectedIconDiff / 2.0,
+        end: selectedFontSize / 2.0 - unselectedIconDiff / 2.0,
       ).evaluate(animation);
       topPadding = Tween<double>(
         begin: selectedFontSize + selectedIconDiff / 2.0,
@@ -435,12 +435,12 @@ class _BottomNavigationTile extends StatelessWidget {
         end: unselectedIconDiff / 2.0,
       ).evaluate(animation);
       topPadding = Tween<double>(
-        begin: selectedFontSize! + selectedIconDiff / 2.0,
+        begin: selectedFontSize + selectedIconDiff / 2.0,
         end: selectedFontSize + unselectedIconDiff / 2.0,
       ).evaluate(animation);
     } else {
       bottomPadding = Tween<double>(
-        begin: selectedFontSize! / 2.0 + selectedIconDiff / 2.0,
+        begin: selectedFontSize / 2.0 + selectedIconDiff / 2.0,
         end: selectedFontSize / 2.0 + unselectedIconDiff / 2.0,
       ).evaluate(animation);
       topPadding = Tween<double>(

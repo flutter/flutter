@@ -621,7 +621,7 @@ class MaterialApp extends StatefulWidget {
   final Map<Type, Action<Intent>>? actions;
 
   /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
-  final String restorationScopeId;
+  final String? restorationScopeId;
 
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps.
