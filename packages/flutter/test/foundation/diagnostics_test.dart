@@ -33,10 +33,8 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final DiagnosticsTreeStyle? localStyle = style;
-    if (localStyle != null)
-      properties.defaultDiagnosticsTreeStyle = localStyle;
-
+    if (style != null)
+      properties.defaultDiagnosticsTreeStyle = style!;
     this.properties.forEach(properties.add);
   }
 }
