@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../convert.dart';
+import 'error_handling_io.dart';
 import 'file_system.dart';
 import 'logger.dart';
 import 'platform.dart';
@@ -25,7 +26,7 @@ class Config {
       _userHomePath(platform),
       name,
     ));
-    return Config._(file, logger);
+    return Config.createForTesting(file, logger);
   }
 
   /// Constructs a new [Config] object from a file called [name] in
@@ -34,14 +35,18 @@ class Config {
     String name, {
     @required Directory directory,
     @required Logger logger,
-  }) => Config._(directory.childFile(name), logger);
+  }) => Config.createForTesting(directory.childFile(name), logger);
 
-  Config._(File file, Logger logger) : _file = file, _logger = logger {
+  /// Test only access to the Config constructor.
+  @visibleForTesting
+  Config.createForTesting(File file, Logger logger) : _file = file, _logger = logger {
     if (!_file.existsSync()) {
       return;
     }
     try {
-      _values = castStringKeyedMap(json.decode(_file.readAsStringSync()));
+      ErrorHandlingFileSystem.noExitOnFailure(() {
+        _values = castStringKeyedMap(json.decode(_file.readAsStringSync()));
+      });
     } on FormatException {
       _logger
         ..printError('Failed to decode preferences in ${_file.path}.')
@@ -50,6 +55,13 @@ class Config {
             'with the "flutter config" command.',
         );
       _file.deleteSync();
+    } on Exception catch (err) {
+      _logger
+        ..printError('Could not read preferences in ${file.path}.\n$err')
+        ..printError(
+            'You may need to resolve the error above and reapply any previously '
+            'saved configuration with the "flutter config" command.',
+        );
     }
   }
 

@@ -322,7 +322,7 @@ void main() {
         ),
       ).called(1);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       Usage: () => mockUsage,
     });
@@ -472,7 +472,7 @@ include ':app'
       expect(tempDir.childFile('settings_aar.gradle').existsSync(), isTrue);
 
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -505,7 +505,7 @@ include ':app'
       expect(tempDir.childFile('settings_aar.gradle').existsSync(), isTrue);
 
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -517,7 +517,7 @@ include ':app'
     FileSystem fs;
 
     setUp(() {
-      fs = MemoryFileSystem();
+      fs = MemoryFileSystem.test();
       mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
       android = fakePlatform('android');
@@ -786,7 +786,7 @@ flutter:
     FileSystem fs;
 
     setUp(() {
-      fs = MemoryFileSystem();
+      fs = MemoryFileSystem.test();
     });
 
     testUsingContext('returns true when the project is using AndroidX', () async {
@@ -834,7 +834,7 @@ flutter:
     MockAndroidSdk mockAndroidSdk;
 
     setUp(() {
-      fs = MemoryFileSystem();
+      fs = MemoryFileSystem.test();
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
       mockAndroidSdk = MockAndroidSdk();
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
@@ -1013,7 +1013,7 @@ plugin1=${plugin1.path}
 
     setUp(() {
       mockUsage = MockUsage();
-      fileSystem = MemoryFileSystem();
+      fileSystem = MemoryFileSystem.test();
       fileSystemUtils = MockFileSystemUtils();
       mockAndroidSdk = MockAndroidSdk();
       mockAndroidStudio = MockAndroidStudio();

@@ -76,7 +76,7 @@ void main() {
 
       expect(WindowsDevice().isSupportedForProject(flutterProject), true);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -87,7 +87,7 @@ void main() {
 
       expect(WindowsDevice().isSupportedForProject(flutterProject), false);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -99,7 +99,7 @@ void main() {
 
       expect(WindowsDevice().isSupportedForProject(flutterProject), false);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -116,7 +116,7 @@ void main() {
       expect(WindowsDevice().executablePathForDevice(mockApp, BuildMode.profile), profilePath);
       expect(WindowsDevice().executablePathForDevice(mockApp, BuildMode.release), releasePath);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
   });

@@ -1424,7 +1424,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
     Key? key,
     this.fit = BoxFit.contain,
     this.alignment = Alignment.center,
-    this.clipBehavior = Clip.hardEdge,
+    this.clipBehavior = Clip.none,
     Widget? child,
   }) : assert(fit != null),
        assert(alignment != null),
@@ -1452,7 +1452,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.hardEdge].
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   @override
@@ -6662,6 +6662,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? selected,
     bool? toggled,
     bool? button,
+    bool? slider,
     bool? link,
     bool? header,
     bool? textField,
@@ -6717,6 +6718,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       toggled: toggled,
       selected: selected,
       button: button,
+      slider: slider,
       link: link,
       header: header,
       textField: textField,
@@ -6831,6 +6833,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       toggled: properties.toggled,
       selected: properties.selected,
       button: properties.button,
+      slider: properties.slider,
       link: properties.link,
       header: properties.header,
       textField: properties.textField,
@@ -6902,6 +6905,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..toggled = properties.toggled
       ..selected = properties.selected
       ..button = properties.button
+      ..slider = properties.slider
       ..link = properties.link
       ..header = properties.header
       ..textField = properties.textField

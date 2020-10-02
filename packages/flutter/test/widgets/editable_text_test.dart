@@ -3427,17 +3427,22 @@ void main() {
     });
 
     testWidgets(
-      'does not throw when sending infinite Rect',
+      'zero matrix paint transform',
       (WidgetTester tester) async {
         controller.value = TextEditingValue(text: 'a' * 100, composing: const TextRange(start: 0, end: 10));
+        // Use a FittedBox with an zero-sized child to set the paint transform
+        // to the zero matrix.
         await tester.pumpWidget(FittedBox(child: SizedBox.fromSize(size: Size.zero, child: builder())));
         await tester.showKeyboard(find.byType(EditableText));
-        expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.setMarkedTextRect', args: <String, dynamic> {
-          'width': -1,
-          'height': -1,
-          'x': 0,
-          'y': 0,
-        })));
+        expect(tester.testTextInput.log, contains(matchesMethodCall(
+          'TextInput.setMarkedTextRect',
+          args: allOf(
+            containsPair('width', isNotNaN),
+            containsPair('height', isNotNaN),
+            containsPair('x', isNotNaN),
+            containsPair('y', isNotNaN),
+          ),
+        )));
     });
   });
 
@@ -4695,7 +4700,7 @@ void main() {
 
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     final Rect rect = state.renderEditable.getLocalRectForCaret(const TextPosition(offset: 0));
-    expect(rect.isFinite, false);
+    expect(rect.isFinite, true);
     expect(tester.takeException(), isNull);
   });
 

@@ -596,6 +596,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.link,
     this.header,
     this.textField,
+    this.slider,
     this.readOnly,
     this.focusable,
     this.focused,
@@ -693,6 +694,12 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack/VoiceOver provide special affordances to enter text into a
   /// text field.
   final bool? textField;
+
+  /// If non-null, indicates that this subtree represents a slider.
+  ///
+  /// Talkback/\VoiceOver provides users with the hint "slider" when a
+  /// slider is focused.
+  final bool? slider;
 
   /// If non-null, indicates that this subtree is read only.
   ///
@@ -3638,6 +3645,12 @@ class SemanticsConfiguration {
   bool get isHeader => _hasFlag(SemanticsFlag.isHeader);
   set isHeader(bool value) {
     _setFlag(SemanticsFlag.isHeader, value);
+  }
+
+  /// Whether the owning [RenderObject] is a slider (true) or not (false).
+  bool get isSlider => _hasFlag(SemanticsFlag.isSlider);
+  set isSlider(bool value) {
+    _setFlag(SemanticsFlag.isSlider, value);
   }
 
   /// Whether the owning [RenderObject] is considered hidden.

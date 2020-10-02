@@ -269,6 +269,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  color_filter_and_fade_perf__e2e_summary:
+    description: >
+      Measures the runtime performance of color filter with fade on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   fading_child_animation_perf__timeline_summary:
     description: >
       Measures the runtime performance of opacity filter with fade on Android.
@@ -506,7 +513,6 @@ tasks:
       Measures the runtime performance of platform views in the Complex Layout sample app on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   flutter_gallery_ios32__start_up:
     description: >
