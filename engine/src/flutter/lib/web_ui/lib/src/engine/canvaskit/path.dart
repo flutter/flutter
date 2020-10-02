@@ -257,6 +257,7 @@ class CkPath implements ui.Path {
 
   @override
   void reset() {
+    _fillType = ui.PathFillType.nonZero;
     _skPath.reset();
   }
 
