@@ -110,6 +110,13 @@ class AndroidContextGL : public AndroidContext {
   ///
   bool ClearCurrent();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Create a new EGLContext using the same EGLConfig.
+  ///
+  /// @return     The EGLContext.
+  ///
+  EGLContext CreateNewContext() const;
+
  private:
   fml::RefPtr<AndroidEnvironmentGL> environment_;
   EGLConfig config_;

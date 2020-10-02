@@ -248,4 +248,12 @@ bool AndroidContextGL::ClearCurrent() {
   return true;
 }
 
+EGLContext AndroidContextGL::CreateNewContext() const {
+  bool success;
+  EGLContext context;
+  std::tie(success, context) =
+      CreateContext(environment_->Display(), config_, EGL_NO_CONTEXT);
+  return success ? context : EGL_NO_CONTEXT;
+}
+
 }  // namespace flutter

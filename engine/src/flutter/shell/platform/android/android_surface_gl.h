@@ -65,6 +65,9 @@ class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
   // |GPUSurfaceGLDelegate|
   ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
+  // |GPUSurfaceGLDelegate|
+  sk_sp<const GrGLInterface> GetGLInterface() const override;
+
  private:
   const std::unique_ptr<AndroidExternalViewEmbedder> external_view_embedder_;
   const std::shared_ptr<AndroidContextGL> android_context_;
