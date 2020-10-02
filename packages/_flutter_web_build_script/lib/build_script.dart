@@ -261,6 +261,7 @@ class FlutterWebTestBootstrapBuilder implements Builder {
 
     if (metadata.testOn.evaluate(SuitePlatform(Runtime.chrome))) {
       await buildStep.writeAsString(id.addExtension('.browser_test.dart'), '''
+// @dart = 2.8
 import 'dart:ui' as ui;
 import 'dart:html';
 import 'dart:js';

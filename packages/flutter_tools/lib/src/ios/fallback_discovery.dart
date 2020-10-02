@@ -82,6 +82,29 @@ class FallbackDiscovery {
     }
 
     try {
+      final Uri result = await _protocolDiscovery.uri;
+      if (result != null) {
+        UsageEvent(
+          _kEventName,
+          'log-success',
+          flutterUsage: _flutterUsage,
+        ).send();
+        return result;
+      }
+    } on ArgumentError {
+      // In the event of an invalid InternetAddress, this code attempts to catch
+      // an ArgumentError from protocol_discovery.dart
+    } on Exception catch (err) {
+      _logger.printTrace(err.toString());
+    }
+    _logger.printTrace('Failed to connect with log scanning, falling back to mDNS');
+    UsageEvent(
+      _kEventName,
+      'log-failure',
+      flutterUsage: _flutterUsage,
+    ).send();
+
+    try {
       final Uri result = await _mDnsObservatoryDiscovery.getObservatoryUri(
         packageId,
         device,
@@ -99,33 +122,10 @@ class FallbackDiscovery {
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
     }
-    _logger.printTrace('Failed to connect with mDNS, falling back to log scanning');
+    _logger.printTrace('Failed to connect with mDNS');
     UsageEvent(
       _kEventName,
       'mdns-failure',
-      flutterUsage: _flutterUsage,
-    ).send();
-
-    try {
-      final Uri result = await _protocolDiscovery.uri;
-      if (result != null) {
-        UsageEvent(
-          _kEventName,
-          'fallback-success',
-          flutterUsage: _flutterUsage,
-        ).send();
-        return result;
-      }
-    } on ArgumentError {
-    // In the event of an invalid InternetAddress, this code attempts to catch
-    // an ArgumentError from protocol_discovery.dart
-    } on Exception catch (err) {
-      _logger.printTrace(err.toString());
-    }
-    _logger.printTrace('Failed to connect with log scanning');
-    UsageEvent(
-      _kEventName,
-      'fallback-failure',
       flutterUsage: _flutterUsage,
     ).send();
     return null;
@@ -148,7 +148,7 @@ class FallbackDiscovery {
       assumedWsUri = Uri.parse('ws://localhost:$hostPort/ws');
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
-      _logger.printTrace('Failed to connect directly, falling back to mDNS');
+      _logger.printTrace('Failed to connect directly, falling back to log scanning');
       _sendFailureEvent(err, assumedDevicePort);
       return null;
     }
@@ -156,9 +156,10 @@ class FallbackDiscovery {
     // Attempt to connect to the VM service 5 times.
     int attempts = 0;
     Exception firstException;
+    VmService vmService;
     while (attempts < 5) {
       try {
-        final VmService vmService = await _vmServiceConnectUri(
+        vmService = await _vmServiceConnectUri(
           assumedWsUri.toString(),
         );
         final VM vm = await vmService.getVM();
@@ -167,15 +168,17 @@ class FallbackDiscovery {
             isolateRefs.id,
           );
           final LibraryRef library = isolateResponse.rootLib;
-          if (library != null && library.uri.startsWith('package:$packageName')) {
+          if (library != null &&
+             (library.uri.startsWith('package:$packageName') ||
+              library.uri.startsWith(RegExp(r'file:\/\/\/.*\/' + packageName)))) {
             UsageEvent(
               _kEventName,
               'success',
               flutterUsage: _flutterUsage,
             ).send();
 
-            // We absolutely must dispose this vmService instance, otherwise
-            // DDS will fail to start.
+            // This vmService instance must be disposed of, otherwise DDS will
+            // fail to start.
             vmService.dispose();
             return Uri.parse('http://localhost:$hostPort');
           }
@@ -184,6 +187,10 @@ class FallbackDiscovery {
         // No action, we might have failed to connect.
         firstException ??= err;
         _logger.printTrace(err.toString());
+      } finally {
+        // This vmService instance must be disposed of, otherwise DDS will
+        // fail to start.
+        vmService?.dispose();
       }
 
       // No exponential backoff is used here to keep the amount of time the

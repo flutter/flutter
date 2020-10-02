@@ -273,7 +273,7 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
   /// [RestorationMixin.registerForRestoration].
   T get value {
     assert(isRegistered);
-    return _value as T;
+    return _value!;
   }
   T? _value;
 

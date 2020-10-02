@@ -7,6 +7,8 @@ import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
+import 'package:html/dom.dart';
+import 'package:html/parser.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
@@ -56,6 +58,9 @@ typedef DwdsLauncher = Future<Dwds> Function({
 // A minimal index for projects that do not yet support web.
 const String _kDefaultIndex = '''
 <html>
+    <head>
+        <base href="/">
+    </head>
     <body>
         <script src="main.dart.js"></script>
     </body>
@@ -108,7 +113,9 @@ class WebAssetServer implements AssetReader {
     this._modules,
     this._digests,
     this._buildInfo,
-  );
+  ) : basePath = _parseBasePathFromIndexHtml(globals.fs.currentDirectory
+            .childDirectory('web')
+            .childFile('index.html'));
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -190,6 +197,7 @@ class WebAssetServer implements AssetReader {
           platform: globals.platform,
           flutterRoot: Cache.flutterRoot,
           webBuildDirectory: getWebBuildDirectory(),
+          basePath: server.basePath,
         );
         shelf.serveRequests(httpServer, releaseAssetServer.handle);
         return server;
@@ -316,29 +324,27 @@ class WebAssetServer implements AssetReader {
   @visibleForTesting
   Uint8List getMetadata(String path) => _metadataFiles[path];
 
+  @visibleForTesting
+  /// The base path to serve from.
+  ///
+  /// It should have no leading or trailing slashes.
+  String basePath = '';
+
   // handle requests for JavaScript source, dart sources maps, or asset files.
   @visibleForTesting
   Future<shelf.Response> handleRequest(shelf.Request request) async {
-    String requestPath = request.url.path;
-    while (requestPath.startsWith('/')) {
-      requestPath = requestPath.substring(1);
+    final String requestPath = _stripBasePath(request.url.path, basePath);
+
+    if (requestPath == null) {
+      return shelf.Response.notFound('');
     }
-    final Map<String, String> headers = <String, String>{};
+
     // If the response is `/`, then we are requesting the index file.
-    if (request.url.path == '/' || request.url.path.isEmpty) {
-      final File indexFile = globals.fs.currentDirectory
-        .childDirectory('web')
-        .childFile('index.html');
-      if (indexFile.existsSync()) {
-        headers[HttpHeaders.contentTypeHeader] = 'text/html';
-        headers[HttpHeaders.contentLengthHeader] = indexFile.lengthSync().toString();
-        return shelf.Response.ok(indexFile.openRead(), headers: headers);
-      } else {
-        headers[HttpHeaders.contentTypeHeader] = 'text/html';
-        headers[HttpHeaders.contentLengthHeader] = _kDefaultIndex.length.toString();
-        return shelf.Response.ok(_kDefaultIndex, headers: headers);
-      }
+    if (requestPath == '/' || requestPath.isEmpty) {
+      return _serveIndex();
     }
+
+    final Map<String, String> headers = <String, String>{};
 
     // Track etag headers for better caching of resources.
     final String ifNoneMatch = request.headers[HttpHeaders.ifNoneMatchHeader];
@@ -407,7 +413,12 @@ class WebAssetServer implements AssetReader {
     }
 
     if (!file.existsSync()) {
-      return shelf.Response.notFound('');
+      // Paths starting with these prefixes should've been resolved above.
+      if (requestPath.startsWith('assets/') ||
+          requestPath.startsWith('packages/')) {
+        return shelf.Response.notFound('');
+      }
+      return _serveIndex();
     }
 
     // For real files, use a serialized file stat plus path as a revision.
@@ -535,6 +546,23 @@ class WebAssetServer implements AssetReader {
 
   /// Whether to use the cavaskit SDK for rendering.
   bool canvasKitRendering = false;
+
+  shelf.Response _serveIndex() {
+    final Map<String, String> headers = <String, String>{
+      HttpHeaders.contentTypeHeader: 'text/html',
+    };
+    final File indexFile = globals.fs.currentDirectory
+      .childDirectory('web')
+      .childFile('index.html');
+
+    if (indexFile.existsSync()) {
+      headers[HttpHeaders.contentLengthHeader] = indexFile.lengthSync().toString();
+      return shelf.Response.ok(indexFile.openRead(), headers: headers);
+    }
+
+    headers[HttpHeaders.contentLengthHeader] = _kDefaultIndex.length.toString();
+    return shelf.Response.ok(_kDefaultIndex, headers: headers);
+  }
 
   // Attempt to resolve `path` to a dart file.
   File _resolveDartFile(String path) {
@@ -776,20 +804,21 @@ class WebDevFS implements DevFS {
 
   @override
   Future<UpdateFSReport> update({
-    Uri mainUri,
+    @required Uri mainUri,
+    @required ResidentCompiler generator,
+    @required bool trackWidgetCreation,
+    @required String pathToReload,
+    @required List<Uri> invalidatedFiles,
+    @required PackageConfig packageConfig,
+    DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
-    @required ResidentCompiler generator,
     String dillOutputPath,
-    @required bool trackWidgetCreation,
     bool fullRestart = false,
     String projectRootPath,
-    String pathToReload,
-    List<Uri> invalidatedFiles,
     bool skipAssets = false,
-    @required PackageConfig packageConfig,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
@@ -906,6 +935,7 @@ class ReleaseAssetServer {
     @required String webBuildDirectory,
     @required String flutterRoot,
     @required Platform platform,
+    this.basePath = '',
   }) : _fileSystem = fileSystem,
        _platform = platform,
        _flutterRoot = flutterRoot,
@@ -919,6 +949,12 @@ class ReleaseAssetServer {
   final FileSystemUtils _fileSystemUtils;
   final Platform _platform;
 
+  @visibleForTesting
+  /// The base path to serve from.
+  ///
+  /// It should have no leading or trailing slashes.
+  final String basePath;
+
   // Locations where source files, assets, or source maps may be located.
   List<Uri> _searchPaths() => <Uri>[
     _fileSystem.directory(_webBuildDirectory).uri,
@@ -930,11 +966,17 @@ class ReleaseAssetServer {
 
   Future<shelf.Response> handle(shelf.Request request) async {
     Uri fileUri;
+    final String requestPath = _stripBasePath(request.url.path, basePath);
+
+    if (requestPath == null) {
+      return shelf.Response.notFound('');
+    }
+
     if (request.url.toString() == 'main.dart') {
       fileUri = entrypoint;
     } else {
       for (final Uri uri in _searchPaths()) {
-        final Uri potential = uri.resolve(request.url.path);
+        final Uri potential = uri.resolve(requestPath);
         if (potential == null || !_fileSystem.isFileSync(
           potential.toFilePath(windows: _platform.isWindows))) {
           continue;
@@ -954,13 +996,11 @@ class ReleaseAssetServer {
         'Content-Type': mimeType,
       });
     }
-    if (request.url.path == '') {
-      final File file = _fileSystem.file(_fileSystem.path.join(_webBuildDirectory, 'index.html'));
-      return shelf.Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': 'text/html',
-      });
-    }
-    return shelf.Response.notFound('');
+
+    final File file = _fileSystem.file(_fileSystem.path.join(_webBuildDirectory, 'index.html'));
+    return shelf.Response.ok(file.readAsBytesSync(), headers: <String, String>{
+      'Content-Type': 'text/html',
+    });
   }
 }
 
@@ -974,3 +1014,69 @@ Future<Directory> _loadDwdsDirectory(FileSystem fileSystem, Logger logger) async
   );
   return fileSystem.directory(packageConfig['dwds'].packageUriRoot);
 }
+
+String _stripBasePath(String path, String basePath) {
+  path = _stripLeadingSlashes(path);
+  if (path.startsWith(basePath)) {
+    path = path.substring(basePath.length);
+  } else {
+    // The given path isn't under base path, return null to indicate that.
+    return null;
+  }
+  return _stripLeadingSlashes(path);
+}
+
+String _stripLeadingSlashes(String path) {
+  while (path.startsWith('/')) {
+    path = path.substring(1);
+  }
+  return path;
+}
+
+String _stripTrailingSlashes(String path) {
+  while (path.endsWith('/')) {
+    path = path.substring(0, path.length - 1);
+  }
+  return path;
+}
+
+String _parseBasePathFromIndexHtml(File indexHtml) {
+  final String htmlContent = indexHtml.existsSync()
+      ? indexHtml.readAsStringSync()
+      : _kDefaultIndex;
+
+  final Document document = parse(htmlContent);
+  final Element baseElement = document.querySelector('base');
+  String baseHref = baseElement?.attributes == null ? null : baseElement.attributes['href'];
+
+  if (baseHref == null) {
+    baseHref = '';
+  } else if (!baseHref.startsWith('/')) {
+    throw ToolExit(
+      'Error: The base href in "web/index.html" must be absolute (i.e. start '
+      'with a "/"), but found: `${baseElement.outerHtml}`.\n'
+      '$basePathExample',
+    );
+  } else if (!baseHref.endsWith('/')) {
+    throw ToolExit(
+      'Error: The base href in "web/index.html" must end with a "/", but found: `${baseElement.outerHtml}`.\n'
+      '$basePathExample',
+    );
+  } else {
+    baseHref = _stripLeadingSlashes(_stripTrailingSlashes(baseHref));
+  }
+
+  return baseHref;
+}
+
+const String basePathExample = '''
+For example, to serve from the root use:
+
+    <base href="/">
+
+To serve from a subpath "foo" (i.e. http://localhost:8080/foo/ instead of http://localhost:8080/) use:
+
+    <base href="/foo/">
+
+For more information, see: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+''';

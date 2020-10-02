@@ -103,6 +103,45 @@ void main() {
     );
   });
 
+  testWithoutContext('does not crash if saving profile information fails due to a file system exception.', () async {
+    final MockFileSystemUtils fileSystemUtils = MockFileSystemUtils();
+    final BufferLogger logger = BufferLogger.test();
+    chromeLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: logger,
+      fileSystemUtils: fileSystemUtils,
+    );
+    when(fileSystemUtils.copyDirectorySync(any, any))
+      .thenThrow(const FileSystemException());
+    processManager.addCommand(const FakeCommand(
+      command: <String>[
+        'example_chrome',
+        '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+        '--remote-debugging-port=1234',
+        ...kChromeArgs,
+        'example_url',
+      ],
+      stderr: kDevtoolsStderr,
+    ));
+
+    final Chromium chrome = await chromeLauncher.launch(
+      'example_url',
+      skipCheck: true,
+      cacheDir: fileSystem.currentDirectory,
+    );
+
+    // Create cache dir that the Chrome launcher will atttempt to persist.
+    fileSystem.directory('/.tmp_rand0/flutter_tools_chrome_device.rand0/Default/Local Storage')
+      .createSync(recursive: true);
+
+    await chrome.close(); // does not exit with error.
+    expect(logger.errorText, contains('Failed to save Chrome preferences'));
+  });
+
   testWithoutContext('can launch chrome with a custom debug port', () async {
     processManager.addCommand(const FakeCommand(
       command: <String>[
@@ -207,6 +246,7 @@ void main() {
   });
 }
 
+class MockFileSystemUtils extends Mock implements FileSystemUtils {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 
 Future<Chromium> _testLaunchChrome(String userDataDir, FakeProcessManager processManager, ChromiumLauncher chromeLauncher) {
