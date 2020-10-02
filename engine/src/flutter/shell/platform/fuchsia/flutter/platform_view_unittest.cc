@@ -18,6 +18,7 @@
 #include "flutter/flow/embedded_views.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/window.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "surface.h"
@@ -131,12 +132,26 @@ class MockFocuser : public fuchsia::ui::views::Focuser {
   ~MockFocuser() override = default;
 
   bool request_focus_called = false;
+  bool fail_request_focus = false;
 
  private:
   void RequestFocus(fuchsia::ui::views::ViewRef view_ref,
                     RequestFocusCallback callback) override {
     request_focus_called = true;
+    auto result =
+        fail_request_focus
+            ? fuchsia::ui::views::Focuser_RequestFocus_Result::WithErr(
+                  fuchsia::ui::views::Error::DENIED)
+            : fuchsia::ui::views::Focuser_RequestFocus_Result::WithResponse(
+                  fuchsia::ui::views::Focuser_RequestFocus_Response());
+    callback(std::move(result));
   }
+};
+
+class MockResponse : public flutter::PlatformMessageResponse {
+ public:
+  MOCK_METHOD1(Complete, void(std::unique_ptr<fml::Mapping> data));
+  MOCK_METHOD0(CompleteEmpty, void());
 };
 
 TEST_F(PlatformViewTests, ChangesAccessibilitySettings) {
@@ -513,16 +528,115 @@ TEST_F(PlatformViewTests, RequestFocusTest) {
            "}",
            b.get());
 
+  // Define a custom gmock matcher to capture the response to platform message.
+  struct DataArg {
+    void Complete(std::unique_ptr<fml::Mapping> data) {
+      this->data = std::move(data);
+    }
+    std::unique_ptr<fml::Mapping> data;
+  };
+  DataArg data_arg;
+  fml::RefPtr<MockResponse> response = fml::MakeRefCounted<MockResponse>();
+  EXPECT_CALL(*response, Complete(testing::_))
+      .WillOnce(testing::Invoke(&data_arg, &DataArg::Complete));
+
   fml::RefPtr<flutter::PlatformMessage> message =
       fml::MakeRefCounted<flutter::PlatformMessage>(
           "flutter/platform_views",
-          std::vector<uint8_t>(buff, buff + sizeof(buff)),
-          fml::RefPtr<flutter::PlatformMessageResponse>());
+          std::vector<uint8_t>(buff, buff + sizeof(buff)), response);
   base_view->HandlePlatformMessage(message);
 
   RunLoopUntilIdle();
 
   EXPECT_TRUE(mock_focuser.request_focus_called);
+  auto result = std::string((const char*)data_arg.data->GetMapping(),
+                            data_arg.data->GetSize());
+  EXPECT_EQ(std::string("[0]"), result);
+}
+
+// Test to make sure that PlatformView correctly registers messages sent on
+// the "flutter/platform_views" channel, correctly parses the JSON it receives
+// and calls the focuser's RequestFocus with the appropriate args.
+TEST_F(PlatformViewTests, RequestFocusFailTest) {
+  sys::testing::ServiceDirectoryProvider services_provider(dispatcher());
+  MockPlatformViewDelegate delegate;
+  zx::eventpair a, b;
+  zx::eventpair::create(/* flags */ 0u, &a, &b);
+  auto view_ref = fuchsia::ui::views::ViewRef({
+      .reference = std::move(a),
+  });
+  flutter::TaskRunners task_runners =
+      flutter::TaskRunners("test_runners", nullptr, nullptr, nullptr, nullptr);
+
+  MockFocuser mock_focuser;
+  mock_focuser.fail_request_focus = true;
+  fidl::BindingSet<fuchsia::ui::views::Focuser> focuser_bindings;
+  auto focuser_handle = focuser_bindings.AddBinding(&mock_focuser);
+
+  auto platform_view = flutter_runner::PlatformView(
+      delegate,                               // delegate
+      "test_platform_view",                   // label
+      std::move(view_ref),                    // view_refs
+      std::move(task_runners),                // task_runners
+      services_provider.service_directory(),  // runner_services
+      nullptr,                    // parent_environment_service_provider_handle
+      nullptr,                    // session_listener_request
+      std::move(focuser_handle),  // focuser,
+      nullptr,                    // on_session_listener_error_callback
+      nullptr,                    // on_enable_wireframe_callback,
+      nullptr,                    // on_create_view_callback,
+      nullptr,                    // on_update_view_callback,
+      nullptr,                    // on_destroy_view_callback,
+      nullptr,                    // on_create_surface_callback,
+      fml::TimeDelta::Zero(),     // vsync_offset
+      ZX_HANDLE_INVALID           // vsync_event_handle
+  );
+
+  // Cast platform_view to its base view so we can have access to the public
+  // "HandlePlatformMessage" function.
+  auto base_view = dynamic_cast<flutter::PlatformView*>(&platform_view);
+  EXPECT_TRUE(base_view);
+
+  // JSON for the message to be passed into the PlatformView.
+  char buff[254];
+  snprintf(buff, sizeof(buff),
+           "{"
+           "    \"method\":\"View.requestFocus\","
+           "    \"args\": {"
+           "       \"viewRef\":%u"
+           "    }"
+           "}",
+           b.get());
+
+  // Define a custom gmock matcher to capture the response to platform message.
+  struct DataArg {
+    void Complete(std::unique_ptr<fml::Mapping> data) {
+      this->data = std::move(data);
+    }
+    std::unique_ptr<fml::Mapping> data;
+  };
+  DataArg data_arg;
+  fml::RefPtr<MockResponse> response = fml::MakeRefCounted<MockResponse>();
+  EXPECT_CALL(*response, Complete(testing::_))
+      .WillOnce(testing::Invoke(&data_arg, &DataArg::Complete));
+
+  fml::RefPtr<flutter::PlatformMessage> message =
+      fml::MakeRefCounted<flutter::PlatformMessage>(
+          "flutter/platform_views",
+          std::vector<uint8_t>(buff, buff + sizeof(buff)), response);
+  base_view->HandlePlatformMessage(message);
+
+  RunLoopUntilIdle();
+
+  EXPECT_TRUE(mock_focuser.request_focus_called);
+  auto result = std::string((const char*)data_arg.data->GetMapping(),
+                            data_arg.data->GetSize());
+  std::ostringstream out;
+  out << "["
+      << static_cast<std::underlying_type_t<fuchsia::ui::views::Error>>(
+             fuchsia::ui::views::Error::DENIED)
+      << "]";
+  EXPECT_EQ(out.str(), result);
 }
 
 // Test to make sure that PlatformView correctly returns a Surface instance
