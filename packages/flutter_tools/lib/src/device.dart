@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -44,6 +43,7 @@ import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
+import 'windows/windows_workflow.dart';
 
 DeviceManager get deviceManager => context.get<DeviceManager>();
 

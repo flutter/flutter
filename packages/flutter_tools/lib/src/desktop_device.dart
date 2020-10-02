@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -13,6 +12,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'devfs.dart';
@@ -124,7 +124,6 @@ abstract class DesktopDevice extends Device {
         mainPath: mainPath,
       );
     }
-    final bool traceStartup = (platformArgs['trace-startup'] as bool) ?? false;
 
     // Ensure that the executable is locatable.
     final BuildMode buildMode = debuggingOptions?.buildInfo?.mode;
