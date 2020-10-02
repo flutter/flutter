@@ -456,9 +456,14 @@ void main() {
     Map<String, dynamic> result;
     bool completed;
 
+    Never throwError() {
+      expect(true, isFalse);
+      throw Error();
+    }
+
     completed = false;
-    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) async {
-      expect(utf8.decode(message.buffer.asUint8List()), 'test');
+    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
+      expect(utf8.decode(message!.buffer.asUint8List()), 'test');
       completed = true;
       return ByteData(5); // 0x0000000000
     });
@@ -471,8 +476,7 @@ void main() {
     expect(completed, isTrue);
     completed = false;
     data = await rootBundle.loadStructuredData('test', (String value) async {
-      expect(true, isFalse);
-      return null;
+      throwError();
     });
     expect(data, isTrue);
     expect(completed, isFalse);
@@ -485,7 +489,7 @@ void main() {
     });
     expect(data, isFalse);
     expect(completed, isTrue);
-    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
+    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
   });
 
   test('Service extensions - exit', () async {

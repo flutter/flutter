@@ -2507,7 +2507,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
        );
 
   @override
-  Map<String, T> get value => super.value!;
+  Map<String, T?> get value => super.value!;
 
   @override
   String valueToString({TextTreeConfiguration? parentConfiguration}) {
@@ -2545,7 +2545,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
     return json;
   }
 
-  bool _hasNonNullEntry() => value.values.any((T o) => o != null);
+  bool _hasNonNullEntry() => value.values.any((T? o) => o != null);
 
   // An iterable of each entry's description in [value].
   //
@@ -2554,7 +2554,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
   // For a null value, it is omitted unless `includeEmtpy` is true and
   // [ifEntryNull] contains a corresponding description.
   Iterable<String> _formattedValues() sync* {
-    for (final MapEntry<String, T> entry in value.entries) {
+    for (final MapEntry<String, T?> entry in value.entries) {
       if (entry.value != null) {
         yield entry.key;
       }

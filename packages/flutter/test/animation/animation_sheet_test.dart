@@ -105,7 +105,7 @@ class _DecuplePixelsState extends State<_DecuplePixels> with SingleTickerProvide
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller.view,
-      builder: (BuildContext context, Widget child) {
+      builder: (BuildContext context, Widget? child) {
         return CustomPaint(
           painter: _PaintDecuplePixels(_controller.value),
         );

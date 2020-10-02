@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
-    WidgetsBinding.instance.resetEpoch();
+    WidgetsBinding.instance!.resetEpoch();
   });
 
   test('AnimationController with mutating listener', () {
