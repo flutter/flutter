@@ -5776,6 +5776,122 @@ void main() {
     expect(state.currentTextEditingValue.text, '12345');
     expect(state.currentTextEditingValue.composing, TextRange.empty);
   });
+
+  group('callback errors', () {
+    testWidgets('onSelectionChanged can throw errors', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            readOnly: true,
+            controller: TextEditingController(text: 'Lorem ipsum dolor sit amet'),
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+            onSelectionChanged: (TextSelection selection, SelectionChangedCause cause) {
+              throw Exception('Oh no');
+            },
+          ),
+        ),
+      );
+
+      // Interact with the field to establish the input connection.
+      final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+      await tester.tapAt(topLeft + const Offset(0.0, 5.0));
+      await tester.pump();
+
+      // Modify the selection and expect an exception.
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      state.updateEditingValue(const TextEditingValue(
+        text: 'Foo bar',
+        selection: TextSelection(baseOffset: 0, extentOffset: 3),
+      ));
+      expect(tester.takeException(), isNotNull);
+    });
+
+    testWidgets('onChanged can throw errors', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          showSelectionHandles: true,
+          maxLines: 2,
+          controller: TextEditingController(
+            text: 'flutter is the best!',
+          ),
+          focusNode: FocusNode(),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.blue,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+          keyboardType: TextInputType.text,
+          onChanged: (String text) {
+            throw Exception('Oh no');
+          },
+        ),
+      ));
+
+      // Modify the text and expect an error from onChanged.
+      await tester.enterText(find.byType(EditableText), '...');
+      expect(tester.takeException(), isNotNull);
+    });
+
+    testWidgets('onEditingComplete can throw errors', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          showSelectionHandles: true,
+          maxLines: 2,
+          controller: TextEditingController(
+            text: 'flutter is the best!',
+          ),
+          focusNode: FocusNode(),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.blue,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+          keyboardType: TextInputType.text,
+          onEditingComplete: () {
+            throw Exception('Oh no');
+          },
+        ),
+      ));
+
+      // Interact with the field to establish the input connection.
+      final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+      await tester.tapAt(topLeft + const Offset(0.0, 5.0));
+      await tester.pump();
+
+      // Submit and expect an error from onEditingComplete.
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      expect(tester.takeException(), isNotNull);
+    });
+
+    testWidgets('onSubmitted can throw errors', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          showSelectionHandles: true,
+          maxLines: 2,
+          controller: TextEditingController(
+            text: 'flutter is the best!',
+          ),
+          focusNode: FocusNode(),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.blue,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+          keyboardType: TextInputType.text,
+          onSubmitted: (String text) {
+            throw Exception('Oh no');
+          },
+        ),
+      ));
+
+      // Interact with the field to establish the input connection.
+      final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+      await tester.tapAt(topLeft + const Offset(0.0, 5.0));
+      await tester.pump();
+
+      // Submit and expect an error from onSubmitted.
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      expect(tester.takeException(), isNotNull);
+    });
+  });
 }
 
 class MockTextFormatter extends TextInputFormatter {
