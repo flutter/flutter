@@ -778,7 +778,7 @@ void main() {
     );
 
     expect(appliedTheme.primaryColor, Colors.blue);
-    tester.binding.window.accessibilityFeaturesTestValue = null;
+    tester.binding.window.clearAccessibilityFeaturesTestValue();
   });
 
   testWidgets('MaterialApp uses high contrast dark theme when appropriate', (WidgetTester tester) async {
@@ -811,7 +811,7 @@ void main() {
     );
 
     expect(appliedTheme.primaryColor, Colors.green);
-    tester.binding.window.accessibilityFeaturesTestValue = null;
+    tester.binding.window.clearAccessibilityFeaturesTestValue();
   });
 
   testWidgets('MaterialApp uses dark theme when no high contrast dark theme is provided', (WidgetTester tester) async {
@@ -838,8 +838,8 @@ void main() {
     );
 
     expect(appliedTheme.primaryColor, Colors.lightGreen);
-    tester.binding.window.accessibilityFeaturesTestValue = null;
-    tester.binding.window.platformBrightnessTestValue = null;
+    tester.binding.window.clearAccessibilityFeaturesTestValue();
+    tester.binding.window.clearPlatformBrightnessTestValue();
   });
 
   testWidgets('MaterialApp switches themes when the Window platformBrightness changes.', (WidgetTester tester) async {
@@ -1056,12 +1056,12 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
       pages: <Page<void>>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        MaterialPage<void>(
-          builder: (BuildContext context) => const Text('base'),
+        const MaterialPage<void>(
+          child: Text('base'),
         ),
         MaterialPage<void>(
           key: ValueKey<String>(routeInformation?.location),
-          builder: (BuildContext context) => builder(context, routeInformation),
+          child: builder(context, routeInformation),
         )
       ],
     );

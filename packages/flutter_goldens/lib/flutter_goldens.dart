@@ -9,6 +9,7 @@ import 'dart:typed_data' show Uint8List;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
@@ -648,7 +649,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     late String? testExpectation;
     testExpectation = await skiaClient.getExpectationForTest(testName);
 
-    if (testExpectation == null) {
+    if (testExpectation == null || testExpectation.isEmpty) {
       // There is no baseline for this test
       print('No expectations provided by Skia Gold for test: $golden. '
         'This may be a new test. If this is an unexpected result, check '
@@ -670,7 +671,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     if (result.passed)
       return true;
 
-    generateFailureOutput(result, golden, basedir);
-    return false;
+    final String error = await generateFailureOutput(result, golden, basedir);
+    throw FlutterError(error);
   }
 }

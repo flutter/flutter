@@ -195,6 +195,18 @@ void main() {
         expect('$uri', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
       });
 
+      testUsingContext('protocol discovery does not crash if the log reader is closed while delaying', () async {
+        initialize(devicePort: 12346, throttleDuration: const Duration(milliseconds: 10));
+        final Future<List<Uri>> results = discoverer.uris.toList();
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        await logReader.dispose();
+
+        // Give time for throttle to finish.
+        await Future<void>.delayed(const Duration(milliseconds: 11));
+        expect(await results, isEmpty);
+      });
+
       testUsingContext('uris in the stream are throttled', () async {
         const Duration kThrottleDuration = Duration(milliseconds: 10);
 

@@ -239,13 +239,14 @@ const Feature flutterFuchsiaFeature = Feature(
 const Feature singleWidgetReload = Feature(
   name: 'Hot reload optimization for changes to class body of a single widget',
   configSetting: 'single-widget-reload-optimization',
+  environmentOverride: 'FLUTTER_SINGLE_WIDGET_RELOAD',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   beta: FeatureChannelSetting(
     available: true,

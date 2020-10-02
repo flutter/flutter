@@ -2507,7 +2507,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
        );
 
   @override
-  Map<String, T> get value => super.value as Map<String, T>;
+  Map<String, T> get value => super.value!;
 
   @override
   String valueToString({TextTreeConfiguration? parentConfiguration}) {

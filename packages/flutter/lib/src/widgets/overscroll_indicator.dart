@@ -289,7 +289,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
           assert(notification.overscroll != 0.0);
           if (notification.dragDetails != null) {
             assert(notification.dragDetails!.globalPosition != null);
-            final RenderBox renderer = notification.context!.findRenderObject() as RenderBox;
+            final RenderBox renderer = notification.context!.findRenderObject()! as RenderBox;
             assert(renderer != null);
             assert(renderer.hasSize);
             final Size size = renderer.size;

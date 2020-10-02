@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
 
 /// Tests that Jetifier can translate plugins that use support libraries.
 Future<void> main() async {
@@ -43,8 +44,8 @@ Future<void> main() async {
       final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = pubspec.readAsStringSync();
       content = content.replaceFirst(
-        '\ndependencies:\n',
-        '\ndependencies:\n  firebase_auth: 0.7.0\n',
+        '${platformLineSep}dependencies:$platformLineSep',
+        '${platformLineSep}dependencies:$platformLineSep  firebase_auth: 0.7.0$platformLineSep',
       );
       pubspec.writeAsStringSync(content, flush: true);
       await inDirectory(projectDir, () async {

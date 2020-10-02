@@ -197,55 +197,74 @@ abstract class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
-  Future<void> debugDumpApp() async {
+  Future<bool> debugDumpApp() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     try {
       await _vmService
         ?.flutterDebugDumpApp(
           isolateId: null,
         );
     } on vmservice.RPCError {
-      return;
+      // do nothing.
     }
+    return true;
   }
 
   @override
-  Future<void> debugDumpRenderTree() async {
+  Future<bool> debugDumpRenderTree() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     try {
       await _vmService
         ?.flutterDebugDumpRenderTree(
           isolateId: null,
         );
     } on vmservice.RPCError {
-      return;
+      // do nothing.
     }
+    return true;
   }
 
   @override
-  Future<void> debugDumpLayerTree() async {
+  Future<bool> debugDumpLayerTree() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     try {
       await _vmService
         ?.flutterDebugDumpLayerTree(
           isolateId: null,
         );
     } on vmservice.RPCError {
-      return;
+      // do nothing.
     }
+    return true;
   }
 
   @override
-  Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
+  Future<bool> debugDumpSemanticsTreeInTraversalOrder() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     try {
       await _vmService
         ?.flutterDebugDumpSemanticsTreeInTraversalOrder(
           isolateId: null,
         );
     } on vmservice.RPCError {
-      return;
+      // do nothing.
     }
+    return true;
   }
 
   @override
-  Future<void> debugTogglePlatform() async {
+  Future<bool> debugTogglePlatform() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     try {
       final String currentPlatform = await _vmService
         ?.flutterPlatformOverride(
@@ -259,12 +278,16 @@ abstract class ResidentWebRunner extends ResidentRunner {
           );
       globals.printStatus('Switched operating system to $platform');
     } on vmservice.RPCError {
-      return;
+      // do nothing.
     }
+    return true;
   }
 
   @override
-  Future<void> debugToggleBrightness() async {
+  Future<bool> debugToggleBrightness() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     try {
       final Brightness currentBrightness = await _vmService
         ?.flutterBrightnessOverride(
@@ -283,8 +306,9 @@ abstract class ResidentWebRunner extends ResidentRunner {
           );
       globals.logger.printStatus('Changed brightness to $next.');
     } on vmservice.RPCError {
-      return;
+      // do nothing.
     }
+    return true;
   }
 
   @override
@@ -294,87 +318,115 @@ abstract class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
-  Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
+  Future<bool> debugDumpSemanticsTreeInInverseHitTestOrder() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     try {
       await _vmService
         ?.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
           isolateId: null,
         );
     } on vmservice.RPCError {
-      return;
+      // do nothing.
     }
+    return true;
   }
 
   @override
-  Future<void> debugToggleDebugPaintSizeEnabled() async {
+  Future<bool> debugToggleDebugPaintSizeEnabled() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     try {
       await _vmService
         ?.flutterToggleDebugPaintSizeEnabled(
           isolateId: null,
         );
     } on vmservice.RPCError {
-      return;
+      // do nothing.
     }
+    return true;
   }
 
   @override
-  Future<void> debugToggleDebugCheckElevationsEnabled() async {
+  Future<bool> debugToggleDebugCheckElevationsEnabled() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     try {
       await _vmService
         ?.flutterToggleDebugCheckElevationsEnabled(
           isolateId: null,
         );
     } on vmservice.RPCError {
-      return;
+      // do nothing.
     }
+    return true;
   }
 
   @override
-  Future<void> debugTogglePerformanceOverlayOverride() async {
+  Future<bool> debugTogglePerformanceOverlayOverride() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     try {
       await _vmService
         ?.flutterTogglePerformanceOverlayOverride(
           isolateId: null,
         );
     } on vmservice.RPCError {
-      return;
+      // do nothing.
     }
+    return true;
   }
 
   @override
-  Future<void> debugToggleWidgetInspector() async {
+  Future<bool> debugToggleWidgetInspector() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     try {
       await _vmService
         ?.flutterToggleWidgetInspector(
           isolateId: null,
         );
     } on vmservice.RPCError {
-      return;
+      // do nothing.
     }
+    return true;
   }
 
   @override
-  Future<void> debugToggleInvertOversizedImages() async {
+  Future<bool> debugToggleInvertOversizedImages() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     try {
       await _vmService
         ?.flutterToggleInvertOversizedImages(
           isolateId: null,
         );
     } on vmservice.RPCError {
-      return;
+      // do nothing.
     }
+    return true;
   }
 
   @override
-  Future<void> debugToggleProfileWidgetBuilds() async {
+  Future<bool> debugToggleProfileWidgetBuilds() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
     try {
       await _vmService
         ?.flutterToggleProfileWidgetBuilds(
           isolateId: null,
         );
     } on vmservice.RPCError {
-      return;
+      // do nothing.
     }
+    return true;
   }
 }
 
@@ -588,6 +640,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
         nullSafety: usageNullSafety,
+        fastReassemble: null,
       ).send();
     }
     return OperationResult.ok;
@@ -695,6 +748,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       invalidatedFiles: invalidationResult.uris,
       packageConfig: invalidationResult.packageConfig,
       trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
+      devFSWriter: null,
     );
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
@@ -797,9 +851,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
     await cleanupAtFinish();
     return 0;
   }
-
-  @override
-  bool get supportsCanvasKit => supportsServiceProtocol;
 
   @override
   Future<bool> toggleCanvaskit() async {

@@ -506,15 +506,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
             'directory in order to launch your app.');
         globals.printStatus('Your $application code is in $relativeAppMain');
       }
-
-      // Warn about unstable templates. This shuold be last so that it's not
-      // lost among the other output.
-      if (featureFlags.isWindowsEnabled && platforms.contains('windows')) {
-        globals.printStatus('');
-        globals.printStatus('WARNING: The Windows tooling and APIs are not yet stable. '
-            'You will likely need to re-create the "windows" directory after future '
-            'Flutter updates.');
-      }
     }
     return FlutterCommandResult.success();
   }
