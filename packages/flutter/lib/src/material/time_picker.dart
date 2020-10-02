@@ -82,6 +82,8 @@ class _TimePickerFragmentContext {
     @required this.mode,
     @required this.onTimeChange,
     @required this.onModeChange,
+    @required this.onHourDoubleTapped,
+    @required this.onMinuteDoubleTapped,
     @required this.use24HourDials,
   }) : assert(selectedTime != null),
        assert(mode != null),
@@ -93,6 +95,8 @@ class _TimePickerFragmentContext {
   final _TimePickerMode mode;
   final ValueChanged<TimeOfDay> onTimeChange;
   final ValueChanged<_TimePickerMode> onModeChange;
+  final GestureTapCallback onHourDoubleTapped;
+  final GestureTapCallback onMinuteDoubleTapped;
   final bool use24HourDials;
 }
 
@@ -103,6 +107,8 @@ class _TimePickerHeader extends StatelessWidget {
     @required this.orientation,
     @required this.onModeChanged,
     @required this.onChanged,
+    @required this.onHourDoubleTapped,
+    @required this.onMinuteDoubleTapped,
     @required this.use24HourDials,
     @required this.helpText,
   }) : assert(selectedTime != null),
@@ -115,6 +121,8 @@ class _TimePickerHeader extends StatelessWidget {
   final Orientation orientation;
   final ValueChanged<_TimePickerMode> onModeChanged;
   final ValueChanged<TimeOfDay> onChanged;
+  final GestureTapCallback onHourDoubleTapped;
+  final GestureTapCallback onMinuteDoubleTapped;
   final bool use24HourDials;
   final String helpText;
 
@@ -136,6 +144,8 @@ class _TimePickerHeader extends StatelessWidget {
       mode: mode,
       onTimeChange: onChanged,
       onModeChange: _handleChangeMode,
+      onHourDoubleTapped: onHourDoubleTapped,
+      onMinuteDoubleTapped: onMinuteDoubleTapped,
       use24HourDials: use24HourDials,
     );
 
@@ -246,6 +256,7 @@ class _HourMinuteControl extends StatelessWidget {
   const _HourMinuteControl({
     @required this.text,
     @required this.onTap,
+    @required this.onDoubleTap,
     @required this.isSelected,
   }) : assert(text != null),
        assert(onTap != null),
@@ -253,6 +264,7 @@ class _HourMinuteControl extends StatelessWidget {
 
   final String text;
   final GestureTapCallback onTap;
+  final GestureTapCallback onDoubleTap;
   final bool isSelected;
 
   @override
@@ -284,6 +296,7 @@ class _HourMinuteControl extends StatelessWidget {
         shape: shape,
         child: InkWell(
           onTap: onTap,
+          onDoubleTap: isSelected ? onDoubleTap : null,
           child: Center(
             child: Text(
               text,
@@ -359,6 +372,7 @@ class _HourControl extends StatelessWidget {
         isSelected: fragmentContext.mode == _TimePickerMode.hour,
         text: formattedHour,
         onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.hour), context),
+        onDoubleTap: fragmentContext.onHourDoubleTapped,
       ),
     );
   }
@@ -448,6 +462,7 @@ class _MinuteControl extends StatelessWidget {
         isSelected: fragmentContext.mode == _TimePickerMode.minute,
         text: formattedMinute,
         onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.minute), context),
+        onDoubleTap: fragmentContext.onMinuteDoubleTapped,
       ),
     );
   }
@@ -1265,6 +1280,8 @@ class _TimePickerInput extends StatefulWidget {
     Key key,
     @required this.initialSelectedTime,
     @required this.helpText,
+    @required this.autofocusHour,
+    @required this.autofocusMinute,
     @required this.onChanged,
   }) : assert(initialSelectedTime != null),
        assert(onChanged != null),
@@ -1275,6 +1292,10 @@ class _TimePickerInput extends StatefulWidget {
 
   /// Optionally provide your own help text to the time picker.
   final String helpText;
+
+  final bool autofocusHour;
+
+  final bool autofocusMinute;
 
   final ValueChanged<TimeOfDay> onChanged;
 
@@ -1430,6 +1451,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
                           _HourTextField(
                             selectedTime: _selectedTime,
                             style: hourMinuteStyle,
+                            autofocus: widget.autofocusHour,
                             validator: _validateHour,
                             onSavedSubmitted: _handleHourSavedSubmitted,
                             onChanged: _handleHourChanged,
@@ -1460,6 +1482,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
                           _MinuteTextField(
                             selectedTime: _selectedTime,
                             style: hourMinuteStyle,
+                            autofocus: widget.autofocusMinute,
                             validator: _validateMinute,
                             onSavedSubmitted: _handleMinuteSavedSubmitted,
                           ),
@@ -1507,6 +1530,7 @@ class _HourTextField extends StatelessWidget {
     Key key,
     @required this.selectedTime,
     @required this.style,
+    @required this.autofocus,
     @required this.validator,
     @required this.onSavedSubmitted,
     @required this.onChanged,
@@ -1514,6 +1538,7 @@ class _HourTextField extends StatelessWidget {
 
   final TimeOfDay selectedTime;
   final TextStyle style;
+  final bool autofocus;
   final FormFieldValidator<String> validator;
   final ValueChanged<String> onSavedSubmitted;
   final ValueChanged<String> onChanged;
@@ -1523,6 +1548,7 @@ class _HourTextField extends StatelessWidget {
     return _HourMinuteTextField(
       selectedTime: selectedTime,
       isHour: true,
+      autofocus: autofocus,
       style: style,
       semanticHintText: MaterialLocalizations.of(context).timePickerHourLabel,
       validator: validator,
@@ -1537,12 +1563,14 @@ class _MinuteTextField extends StatelessWidget {
     Key key,
     @required this.selectedTime,
     @required this.style,
+    @required this.autofocus,
     @required this.validator,
     @required this.onSavedSubmitted,
   }) : super(key: key);
 
   final TimeOfDay selectedTime;
   final TextStyle style;
+  final bool autofocus;
   final FormFieldValidator<String> validator;
   final ValueChanged<String> onSavedSubmitted;
 
@@ -1551,6 +1579,7 @@ class _MinuteTextField extends StatelessWidget {
     return _HourMinuteTextField(
       selectedTime: selectedTime,
       isHour: false,
+      autofocus: autofocus,
       style: style,
       semanticHintText: MaterialLocalizations.of(context).timePickerMinuteLabel,
       validator: validator,
@@ -1564,6 +1593,7 @@ class _HourMinuteTextField extends StatefulWidget {
     Key key,
     @required this.selectedTime,
     @required this.isHour,
+    @required this.autofocus,
     @required this.style,
     @required this.semanticHintText,
     @required this.validator,
@@ -1573,6 +1603,7 @@ class _HourMinuteTextField extends StatefulWidget {
 
   final TimeOfDay selectedTime;
   final bool isHour;
+  final bool autofocus;
   final TextStyle style;
   final String semanticHintText;
   final FormFieldValidator<String> validator;
@@ -1658,6 +1689,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
       child: MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
         child: TextFormField(
+          autofocus: widget.autofocus ?? false,
           expands: true,
           maxLines: null,
           inputFormatters: <TextInputFormatter>[
@@ -1746,6 +1778,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   _TimePickerMode _mode = _TimePickerMode.hour;
   _TimePickerMode _lastModeAnnounced;
   bool _autoValidate;
+  bool _autofocusHour;
+  bool _autofocusMinute;
 
   TimeOfDay get selectedTime => _selectedTime;
   TimeOfDay _selectedTime;
@@ -1788,6 +1822,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           break;
         case TimePickerEntryMode.input:
           _formKey.currentState.save();
+          _autofocusHour = false;
+          _autofocusMinute = false;
           _entryMode = TimePickerEntryMode.dial;
           break;
       }
@@ -1831,6 +1867,16 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     setState(() {
       _selectedTime = value;
     });
+  }
+
+  void _handleHourDoubleTapped() {
+    _autofocusHour = true;
+    _handleEntryModeToggle();
+  }
+
+  void _handleMinuteDoubleTapped() {
+    _autofocusMinute = true;
+    _handleEntryModeToggle();
   }
 
   void _handleHourSelected() {
@@ -1962,6 +2008,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           orientation: orientation,
           onModeChanged: _handleModeChanged,
           onChanged: _handleTimeChanged,
+          onHourDoubleTapped: _handleHourDoubleTapped,
+          onMinuteDoubleTapped: _handleMinuteDoubleTapped,
           use24HourDials: use24HourDials,
           helpText: widget.helpText,
         );
@@ -2014,6 +2062,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                 _TimePickerInput(
                   initialSelectedTime: _selectedTime,
                   helpText: widget.helpText,
+                  autofocusHour: _autofocusHour,
+                  autofocusMinute: _autofocusMinute,
                   onChanged: _handleTimeChanged,
                 ),
                 actions,

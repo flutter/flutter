@@ -891,6 +891,7 @@ class RenderParagraph extends RenderBox
         extentOffset: start + info.text.length,
       );
       final List<ui.TextBox> rects = getBoxesForSelection(selection);
+      start += info.text.length;
       if (rects.isEmpty) {
         continue;
       }
@@ -958,7 +959,6 @@ class RenderParagraph extends RenderBox
         newChildCache.addLast(newChild);
         newChildren.add(newChild);
       }
-      start += info.text.length;
     }
     _cachedChildNodes = newChildCache;
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
