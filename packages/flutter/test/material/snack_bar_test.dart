@@ -1505,5 +1505,78 @@ void main() {
         expect(snackBarBottomRight.dy, equals(fabTopRight.dy));
       },
     );
+
+    testWidgets(
+      'SnackBar has correct end padding when it contains an action with fixed behavior',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                    return GestureDetector(
+                      onTap: () {
+                        Scaffold.of(context).showSnackBar(SnackBar(
+                          content: const Text('Some content'),
+                          behavior: SnackBarBehavior.fixed,
+                          action: SnackBarAction(
+                            label: 'ACTION',
+                            onPressed: () {},
+                          ),
+                        ));
+                      },
+                      child: const Text('X'),
+                    );
+                },
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('X'));
+        await tester.pumpAndSettle();
+
+        final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
+        final Offset actionTopRight = tester.getTopRight(find.byType(SnackBarAction));
+
+        expect(snackBarTopRight.dx - actionTopRight.dx, 12.0);
+      },
+    );
+
+    testWidgets(
+      'SnackBar has correct end padding when it contains an action with floating behavior',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                    return GestureDetector(
+                      onTap: () {
+                        Scaffold.of(context).showSnackBar(SnackBar(
+                          content: const Text('Some content'),
+                          behavior: SnackBarBehavior.floating,
+                          action: SnackBarAction(
+                            label: 'ACTION',
+                            onPressed: () {},
+                          ),
+                        ));
+                      },
+                      child: const Text('X'),
+                    );
+                },
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('X'));
+        await tester.pumpAndSettle();
+        final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
+        final Offset actionTopRight = tester.getTopRight(find.byType(SnackBarAction));
+
+        expect(snackBarTopRight.dx - actionTopRight.dx, 8.0 + 15.0); // button margin + horizontal scaffold outside margin
+      },
+    );
   });
 }
