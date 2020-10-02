@@ -226,12 +226,6 @@ class BuildDaemonCreator {
       '--enable-experiment=non-nullable',
       '--skip-build-script-check',
       '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
-      '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
-      '--define', 'flutter_tools:entrypoint=release=$release',
-      '--define', 'flutter_tools:entrypoint=profile=$profile',
-      '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
-      '--define', 'flutter_tools:shell=hasPlugins=$hasPlugins',
-      '--define', 'flutter_tools:shell=initializePlatform=$initializePlatform',
       // The following will cause build runner to only build tests that were requested.
       if (testTargets != null && testTargets.hasBuildFilters)
         for (final String buildFilter in testTargets.buildFilters)
