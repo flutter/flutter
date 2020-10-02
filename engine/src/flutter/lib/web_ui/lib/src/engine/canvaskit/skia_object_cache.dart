@@ -239,21 +239,44 @@ abstract class OneShotSkiaObject<T extends Object> extends SkiaObject<T> {
   }
 }
 
-/// Manages the lifecycle of a Skia object owned by a wrapper object.
+/// Uses reference counting to manage the lifecycle of a Skia object owned by a
+/// wrapper object.
 ///
-/// When the wrapper is garbage collected, deletes the corresponding
-/// [skObject] (only in browsers that support weak references).
+/// When the wrapper is garbage collected, decrements the refcount (only in
+/// browsers that support weak references).
 ///
-/// The [delete] method can be used to eagerly delete the [skObject]
-/// before the wrapper is garbage collected.
+/// The [delete] method can be used to eagerly decrement the refcount before the
+/// wrapper is garbage collected.
 ///
 /// The [delete] method may be called any number of times. The box
 /// will only delete the object once.
 class SkiaObjectBox {
-  SkiaObjectBox(Object wrapper, this.skObject) {
+  SkiaObjectBox(Object wrapper, SkDeletable skObject)
+      : this._(wrapper, skObject, <SkiaObjectBox>{});
+
+  SkiaObjectBox._(Object wrapper, this.skObject, this._refs) {
+    if (assertionsEnabled) {
+      _debugStackTrace = StackTrace.current;
+    }
+    _refs.add(this);
     if (browserSupportsFinalizationRegistry) {
       boxRegistry.register(wrapper, this);
     }
+  }
+
+  /// Reference handles to the same underlying [skObject].
+  final Set<SkiaObjectBox> _refs;
+
+  late final StackTrace? _debugStackTrace;
+  /// If asserts are enabled, the [StackTrace]s representing when a reference
+  /// was created.
+  List<StackTrace>? debugGetStackTraces() {
+    if (assertionsEnabled) {
+      return _refs
+          .map<StackTrace>((SkiaObjectBox box) => box._debugStackTrace!)
+          .toList();
+    }
+    return null;
   }
 
   /// The Skia object whose lifecycle is being managed.
@@ -269,16 +292,33 @@ class SkiaObjectBox {
     box.delete();
   }));
 
-  /// Deletes the [skObject].
+  /// Returns a clone of this object, which increases its reference count.
+  ///
+  /// Clones must be [dispose]d when finished.
+  SkiaObjectBox clone(Object wrapper) {
+    assert(!_isDeleted, 'Cannot clone from a deleted handle.');
+    assert(_refs.isNotEmpty);
+    return SkiaObjectBox._(wrapper, skObject, _refs);
+  }
+
+  /// Decrements the reference count for the [skObject].
   ///
   /// Does nothing if the object has already been deleted.
+  ///
+  /// If this causes the reference count to drop to zero, deletes the
+  /// [skObject].
   void delete() {
     if (_isDeleted) {
+      assert(!_refs.contains(this));
       return;
     }
+    final bool removed = _refs.remove(this);
+    assert(removed);
     _isDeleted = true;
-    _skObjectDeleteQueue.add(skObject);
-    _skObjectCollector ??= _scheduleSkObjectCollection();
+    if (_refs.isEmpty) {
+      _skObjectDeleteQueue.add(skObject);
+      _skObjectCollector ??= _scheduleSkObjectCollection();
+    }
   }
 }
 
