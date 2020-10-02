@@ -10,6 +10,7 @@
 #include <string_view>
 #include <unordered_map>
 
+#include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/surface.h"
@@ -611,6 +612,10 @@ class Shell final : public PlatformView::Delegate,
   bool OnServiceProtocolEstimateRasterCacheMemory(
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document* response);
+
+  // Creates an asset bundle from the original settings asset path or
+  // directory.
+  std::unique_ptr<DirectoryAssetBundle> RestoreOriginalAssetResolver();
 
   // For accessing the Shell via the raster thread, necessary for various
   // rasterizer callbacks.
