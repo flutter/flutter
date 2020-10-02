@@ -29,7 +29,7 @@ void main() {
 
   OperatingSystemUtils createOSUtils(Platform platform) {
     return OperatingSystemUtils(
-      fileSystem: MemoryFileSystem(),
+      fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: platform,
       processManager: mockProcessManager,

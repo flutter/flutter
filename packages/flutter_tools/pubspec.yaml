@@ -26,7 +26,7 @@ dependencies:
   package_config: 1.9.3
   process: 4.0.0-nullsafety.2
   fake_async: 1.2.0-nullsafety.1
-  stack_trace: 1.10.0-nullsafety.1
+  stack_trace: 1.10.0-nullsafety.2
   usage: 3.4.2
   webdriver: 2.1.2
   webkit_inspection_protocol: 0.7.3
@@ -113,4 +113,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 3d85
+# PUBSPEC CHECKSUM: 9d86

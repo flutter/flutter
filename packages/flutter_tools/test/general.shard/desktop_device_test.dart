@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -74,10 +75,6 @@ class NullExecutableDesktopDevice extends FakeDesktopDevice {
 
 class MockAppplicationPackage extends Mock implements ApplicationPackage {}
 
-class MockFileSystem extends Mock implements FileSystem {}
-
-class MockFile extends Mock implements File {}
-
 class MockProcessManager extends Mock implements ProcessManager {}
 
 void main() {
@@ -122,16 +119,14 @@ void main() {
   });
 
   group('Starting and stopping application', () {
-    final MockFileSystem mockFileSystem = MockFileSystem();
+    final FileSystem memoryFileSystem = MemoryFileSystem.test();
     final MockProcessManager mockProcessManager = MockProcessManager();
 
     // Configures mock environment so that startApp will be able to find and
     // run an FakeDesktopDevice exectuable with for the given mode.
     void setUpMockExecutable(FakeDesktopDevice device, BuildMode mode, {Future<int> exitFuture}) {
       final String executableName = device.executablePathForDevice(null, mode);
-      final MockFile mockFile = MockFile();
-      when(mockFileSystem.file(executableName)).thenReturn(mockFile);
-      when(mockFile.existsSync()).thenReturn(true);
+      memoryFileSystem.file(executableName).writeAsStringSync('\n');
       when(mockProcessManager.start(<String>[executableName])).thenAnswer((Invocation invocation) async {
         return FakeProcess(
           exitCode: Completer<int>().future,
@@ -160,7 +155,7 @@ void main() {
       expect(result.started, true);
       expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
     }, overrides: <Type, Generator>{
-      FileSystem: () => mockFileSystem,
+      FileSystem: () => memoryFileSystem,
       ProcessManager: () => mockProcessManager,
     });
 
@@ -180,7 +175,7 @@ void main() {
       expect(result.started, true);
       expect(await device.stopApp(package), true);
     }, overrides: <Type, Generator>{
-      FileSystem: () => mockFileSystem,
+      FileSystem: () => memoryFileSystem,
       ProcessManager: () => mockProcessManager,
     });
   });

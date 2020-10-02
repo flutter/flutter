@@ -38,7 +38,7 @@ Future<void> main() async {
       );
 
       completer.completeError(const CustomException());
-    }, null);
+    }, () { });
 
     final FlutterErrorDetails details = await errorCompleter.future;
     expect(details, isNotNull);

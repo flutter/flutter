@@ -406,6 +406,11 @@ class WebAssetServer implements AssetReader {
     }
 
     if (!file.existsSync()) {
+      // Paths starting with these prefixes should've been resolved above.
+      if (requestPath.startsWith('assets/') ||
+          requestPath.startsWith('packages/')) {
+        return shelf.Response.notFound('');
+      }
       return _serveIndex();
     }
 

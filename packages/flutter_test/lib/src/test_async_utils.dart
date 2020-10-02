@@ -70,8 +70,8 @@ class TestAsyncUtils {
     final _AsyncScope scope = _AsyncScope(StackTrace.current, zone);
     _scopeStack.add(scope);
     final Future<T> result = scope.zone.run<Future<T>>(body);
-    T resultValue; // This is set when the body of work completes with a result value.
-    Future<T> completionHandler(dynamic error, StackTrace stack) {
+    late T resultValue; // This is set when the body of work completes with a result value.
+    Future<T> completionHandler(dynamic error, StackTrace? stack) {
       assert(_scopeStack.isNotEmpty);
       assert(_scopeStack.contains(scope));
       bool leaked = false;
@@ -86,7 +86,7 @@ class TestAsyncUtils {
           information.add(ErrorHint('You must use "await" with all Future-returning test APIs.'));
           leaked = true;
         }
-        final _StackEntry originalGuarder = _findResponsibleMethod(closedScope.creationStack, 'guard', information);
+        final _StackEntry? originalGuarder = _findResponsibleMethod(closedScope.creationStack, 'guard', information);
         if (originalGuarder != null) {
           information.add(ErrorDescription(
             'The test API method "${originalGuarder.methodName}" '
@@ -109,7 +109,7 @@ class TestAsyncUtils {
         throw FlutterError.fromParts(information);
       }
       if (error != null)
-        return Future<T>.error(error, stack);
+        return Future<T>.error(error! as Object, stack);
       return Future<T>.value(resultValue);
     }
     return result.then<T>(
@@ -121,8 +121,8 @@ class TestAsyncUtils {
     );
   }
 
-  static Zone get _currentScopeZone {
-    Zone zone = Zone.current;
+  static Zone? get _currentScopeZone {
+    Zone? zone = Zone.current;
     while (zone != null) {
       if (zone[_scopeStack] == true)
         return zone;
@@ -142,7 +142,7 @@ class TestAsyncUtils {
       return;
     }
     // Find the current TestAsyncUtils scope zone so we can see if it's the one we expect.
-    final Zone zone = _currentScopeZone;
+    final Zone? zone = _currentScopeZone;
     if (zone == _scopeStack.last.zone) {
       // We're still in the current scope zone. All good.
       return;
@@ -192,8 +192,8 @@ class TestAsyncUtils {
       ErrorSummary('Guarded function conflict.'),
       ErrorHint('You must use "await" with all Future-returning test APIs.'),
     ];
-    final _StackEntry originalGuarder = _findResponsibleMethod(scope.creationStack, 'guard', information);
-    final _StackEntry collidingGuarder = _findResponsibleMethod(StackTrace.current, 'guardSync', information);
+    final _StackEntry? originalGuarder = _findResponsibleMethod(scope.creationStack, 'guard', information);
+    final _StackEntry? collidingGuarder = _findResponsibleMethod(StackTrace.current, 'guardSync', information);
     if (originalGuarder != null && collidingGuarder != null) {
       final String originalKind = originalGuarder.className == null ? 'function' : 'method';
       String originalName;
@@ -278,7 +278,7 @@ class TestAsyncUtils {
         ErrorHint('You must use "await" with all Future-returning test APIs.')
       ];
       for (final _AsyncScope scope in _scopeStack) {
-        final _StackEntry guarder = _findResponsibleMethod(scope.creationStack, 'guard', information);
+        final _StackEntry? guarder = _findResponsibleMethod(scope.creationStack, 'guard', information);
         if (guarder != null) {
           information.add(ErrorDescription(
             'The guarded method "${guarder.methodName}" '
@@ -297,29 +297,29 @@ class TestAsyncUtils {
     return line != '<asynchronous suspension>';
   }
 
-  static _StackEntry _findResponsibleMethod(StackTrace rawStack, String method, List<DiagnosticsNode> information) {
+  static _StackEntry? _findResponsibleMethod(StackTrace rawStack, String method, List<DiagnosticsNode> information) {
     assert(method == 'guard' || method == 'guardSync');
     final List<String> stack = rawStack.toString().split('\n').where(_stripAsynchronousSuspensions).toList();
     assert(stack.last == '');
     stack.removeLast();
     final RegExp getClassPattern = RegExp(r'^#[0-9]+ +([^. ]+)');
-    Match lineMatch;
+    Match? lineMatch;
     int index = -1;
     do { // skip past frames that are from this class
       index += 1;
       assert(index < stack.length);
-      lineMatch = getClassPattern.matchAsPrefix(stack[index]);
+      lineMatch = getClassPattern.matchAsPrefix(stack[index])!;
       assert(lineMatch != null);
       assert(lineMatch.groupCount == 1);
     } while (lineMatch.group(1) == _className);
     // try to parse the stack to find the interesting frame
     if (index < stack.length) {
       final RegExp guardPattern = RegExp(r'^#[0-9]+ +(?:([^. ]+)\.)?([^. ]+)');
-      final Match guardMatch = guardPattern.matchAsPrefix(stack[index]); // find the class that called us
+      final Match? guardMatch = guardPattern.matchAsPrefix(stack[index]); // find the class that called us
       if (guardMatch != null) {
         assert(guardMatch.groupCount == 2);
-        final String guardClass = guardMatch.group(1); // might be null
-        final String guardMethod = guardMatch.group(2);
+        final String? guardClass = guardMatch.group(1); // might be null
+        final String? guardMethod = guardMatch.group(2);
         while (index < stack.length) { // find the last stack frame that called the class that called us
           lineMatch = getClassPattern.matchAsPrefix(stack[index]);
           if (lineMatch != null) {
@@ -333,11 +333,11 @@ class TestAsyncUtils {
         }
         if (index < stack.length) {
           final RegExp callerPattern = RegExp(r'^#[0-9]+ .* \((.+?):([0-9]+)(?::[0-9]+)?\)$');
-          final Match callerMatch = callerPattern.matchAsPrefix(stack[index]); // extract the caller's info
+          final Match? callerMatch = callerPattern.matchAsPrefix(stack[index]); // extract the caller's info
           if (callerMatch != null) {
             assert(callerMatch.groupCount == 2);
-            final String callerFile = callerMatch.group(1);
-            final String callerLine = callerMatch.group(2);
+            final String? callerFile = callerMatch.group(1);
+            final String? callerLine = callerMatch.group(2);
             return _StackEntry(guardClass, guardMethod, callerFile, callerLine);
           } else {
             // One reason you might get here is if the guarding method was called directly from
@@ -362,8 +362,8 @@ class TestAsyncUtils {
 
 class _StackEntry {
   const _StackEntry(this.className, this.methodName, this.callerFile, this.callerLine);
-  final String className;
-  final String methodName;
-  final String callerFile;
-  final String callerLine;
+  final String? className;
+  final String? methodName;
+  final String? callerFile;
+  final String? callerLine;
 }

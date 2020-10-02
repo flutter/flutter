@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_runner/devfs_web.dart';
+import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -258,6 +258,47 @@ void main() {
 
     expect(response.statusCode, HttpStatus.ok);
     expect(await response.readAsString(), htmlContent);
+  }));
+
+  test('does not serve outside the base path', () => testbed.run(() async {
+    webAssetServer.basePath = 'base/path';
+
+    const String htmlContent = '<html><head></head><body id="test"></body></html>';
+    final Directory webDir = globals.fs.currentDirectory
+      .childDirectory('web')
+      ..createSync();
+    webDir.childFile('index.html').writeAsStringSync(htmlContent);
+
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/')));
+
+    expect(response.statusCode, HttpStatus.notFound);
+  }));
+
+  test('does not serve index.html when path is inside assets or packages', () => testbed.run(() async {
+    const String htmlContent = '<html><head></head><body id="test"></body></html>';
+    final Directory webDir = globals.fs.currentDirectory
+      .childDirectory('web')
+      ..createSync();
+    webDir.childFile('index.html').writeAsStringSync(htmlContent);
+
+    Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/assets/foo/bar.png')));
+    expect(response.statusCode, HttpStatus.notFound);
+
+    response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/packages/foo/bar.dart.js')));
+    expect(response.statusCode, HttpStatus.notFound);
+
+    webAssetServer.basePath = 'base/path';
+
+    response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/base/path/assets/foo/bar.png')));
+    expect(response.statusCode, HttpStatus.notFound);
+
+    response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/base/path/packages/foo/bar.dart.js')));
+    expect(response.statusCode, HttpStatus.notFound);
   }));
 
   test('serves default index.html', () => testbed.run(() async {
