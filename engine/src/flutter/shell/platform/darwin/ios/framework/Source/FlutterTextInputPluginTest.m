@@ -16,7 +16,7 @@ FLUTTER_ASSERT_ARC
 @property(nonatomic, copy) NSString* autofillId;
 
 - (void)setEditableTransform:(NSArray*)matrix;
-- (BOOL)setTextInputState:(NSDictionary*)state;
+- (void)setTextInputState:(NSDictionary*)state;
 - (void)setMarkedRect:(CGRect)markedRect;
 - (void)updateEditingState;
 - (BOOL)isVisibleToAutofill;
@@ -211,71 +211,45 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(updateCount, 6);
 }
 
-- (void)testTextChangesTriggerUpdateEditingClient {
+- (void)testTextChangesDoNotTriggerUpdateEditingClient {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
   inputView.textInputDelegate = engine;
+
+  __block int updateCount = 0;
+  OCMStub([engine updateEditingClient:0 withState:[OCMArg isNotNil]])
+      .andDo(^(NSInvocation* invocation) {
+        updateCount++;
+      });
 
   [inputView.text setString:@"BEFORE"];
+  XCTAssertEqual(updateCount, 0);
+
   inputView.markedTextRange = nil;
   inputView.selectedTextRange = nil;
+  XCTAssertEqual(updateCount, 1);
 
-  // Text changes trigger update.
-  XCTAssertTrue([inputView setTextInputState:@{@"text" : @"AFTER"}]);
+  // Text changes don't trigger an update.
+  XCTAssertEqual(updateCount, 1);
+  [inputView setTextInputState:@{@"text" : @"AFTER"}];
+  XCTAssertEqual(updateCount, 1);
+  [inputView setTextInputState:@{@"text" : @"AFTER"}];
+  XCTAssertEqual(updateCount, 1);
 
-  // Don't send anything if there's nothing new.
-  XCTAssertFalse([inputView setTextInputState:@{@"text" : @"AFTER"}]);
-}
-
-- (void)testSelectionChangeDoesNotTriggerUpdateEditingClient {
-  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
-  inputView.textInputDelegate = engine;
-
-  [inputView.text setString:@"SELECTION"];
-  inputView.markedTextRange = nil;
-  inputView.selectedTextRange = nil;
-
-  BOOL shouldUpdate = [inputView
+  // Selection changes don't trigger an update.
+  [inputView
       setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @0, @"selectionExtent" : @3}];
-  XCTAssertFalse(shouldUpdate);
-
-  shouldUpdate = [inputView
+  XCTAssertEqual(updateCount, 1);
+  [inputView
       setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @3}];
-  XCTAssertFalse(shouldUpdate);
+  XCTAssertEqual(updateCount, 1);
 
-  shouldUpdate = [inputView
-      setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @2}];
-  XCTAssertFalse(shouldUpdate);
-
-  // Don't send anything if there's nothing new.
-  shouldUpdate = [inputView
-      setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @2}];
-  XCTAssertFalse(shouldUpdate);
-}
-
-- (void)testComposingChangeDoesNotTriggerUpdateEditingClient {
-  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
-  inputView.textInputDelegate = engine;
-
-  // Reset to test marked text.
-  [inputView.text setString:@"COMPOSING"];
-  inputView.markedTextRange = nil;
-  inputView.selectedTextRange = nil;
-
-  BOOL shouldUpdate = [inputView
-      setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @0, @"composingExtent" : @3}];
-  XCTAssertFalse(shouldUpdate);
-
-  shouldUpdate = [inputView
+  // Composing region changes don't trigger an update.
+  [inputView
+      setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @2}];
+  XCTAssertEqual(updateCount, 1);
+  [inputView
       setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @3}];
-  XCTAssertFalse(shouldUpdate);
-
-  shouldUpdate = [inputView
-      setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @2}];
-  XCTAssertFalse(shouldUpdate);
-
-  shouldUpdate = [inputView
-      setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @2}];
-  XCTAssertFalse(shouldUpdate);
+  XCTAssertEqual(updateCount, 1);
 }
 
 - (void)testUITextInputAvoidUnnecessaryUndateEditingClientCalls {
