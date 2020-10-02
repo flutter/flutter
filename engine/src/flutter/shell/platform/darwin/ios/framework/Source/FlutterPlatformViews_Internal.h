@@ -245,6 +245,8 @@ class FlutterPlatformViewsController {
 
   std::unique_ptr<fml::WeakPtrFactory<FlutterPlatformViewsController>> weak_factory_;
 
+  bool catransaction_added_ = false;
+
   void OnCreate(FlutterMethodCall* call, FlutterResult& result);
   void OnDispose(FlutterMethodCall* call, FlutterResult& result);
   void OnAcceptGesture(FlutterMethodCall* call, FlutterResult& result);
@@ -293,6 +295,13 @@ class FlutterPlatformViewsController {
   // Appends the overlay views and platform view and sets their z index based on the composition
   // order.
   void BringLayersIntoView(LayersMap layer_map);
+
+  // Begin a CATransaction.
+  // This transaction needs to be balanced with |CommitCATransactionIfNeeded|.
+  void BeginCATransaction();
+
+  // Commit a CATransaction if |BeginCATransaction| has been called during the frame.
+  void CommitCATransactionIfNeeded();
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterPlatformViewsController);
 };
