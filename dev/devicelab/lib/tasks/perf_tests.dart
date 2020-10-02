@@ -291,6 +291,13 @@ TaskFunction createColorFilterAndFadePerfTest() {
   ).run;
 }
 
+TaskFunction createColorFilterAndFadePerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/color_filter_and_fade_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createFadingChildAnimationPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
