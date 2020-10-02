@@ -224,4 +224,25 @@ void main() {
     await tester.pumpAndSettle();
     expect(_value, false);
   });
+
+  testWidgets('CheckboxListTile.tileColor is passed into the inner ListTile', (WidgetTester tester) async {
+    const Color tileColor = Colors.black;
+
+    await tester.pumpWidget(
+        wrap(
+          child: const Center(
+            child: CheckboxListTile(
+              value: false,
+              onChanged: null,
+              title: Text('Title'),
+              tileColor: tileColor,
+            ),
+          ),
+        )
+    );
+
+    final Finder coloredBoxFinder = find.byType(ColoredBox);
+    final ColoredBox coloredBox = tester.firstWidget(coloredBoxFinder);
+    expect(coloredBox.color, equals(tileColor));
+  });
 }

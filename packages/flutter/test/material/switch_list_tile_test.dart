@@ -340,4 +340,25 @@ void main() {
     expect(listTile.leading.runtimeType, Icon);
     expect(listTile.trailing.runtimeType, Switch);
   });
+
+  testWidgets('SwitchListTile.tileColor is passed into the inner ListTile', (WidgetTester tester) async {
+    const Color tileColor = Colors.red;
+
+    await tester.pumpWidget(
+        wrap(
+          child: const Center(
+            child: SwitchListTile(
+              value: false,
+              onChanged: null,
+              title: Text('Title'),
+              tileColor: tileColor,
+            ),
+          ),
+        )
+    );
+
+    final Finder coloredBoxFinder = find.byType(ColoredBox);
+    final ColoredBox coloredBox = tester.firstWidget(coloredBoxFinder);
+    expect(coloredBox.color, equals(tileColor));
+  });
 }
