@@ -646,7 +646,7 @@ void main() {
           body: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Overlay(
-              initialEntries: [
+              initialEntries: <OverlayEntry>[
                 OverlayEntry(
                   builder: (_) => Center(
                     child: PopupMenuButton<int>(
