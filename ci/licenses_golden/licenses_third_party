@@ -1,4 +1,4 @@
-Signature: f7f2dde13633b0c56c6d8b79c881dace
+Signature: 817edaad792668c12084853893cbe3b5
 
 UNUSED LICENSES:
 
@@ -8062,6 +8062,7 @@ FILE: ../../../third_party/dart/runtime/bin/dartdev_isolate.cc
 FILE: ../../../third_party/dart/runtime/bin/dartdev_isolate.h
 FILE: ../../../third_party/dart/runtime/bin/exe_utils.cc
 FILE: ../../../third_party/dart/runtime/bin/exe_utils.h
+FILE: ../../../third_party/dart/runtime/bin/file_win.h
 FILE: ../../../third_party/dart/runtime/bin/platform_macos.h
 FILE: ../../../third_party/dart/runtime/bin/platform_macos_test.cc
 FILE: ../../../third_party/dart/runtime/include/dart_api_dl.c
@@ -8106,6 +8107,7 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_type.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/recognized_method.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/recognized_method.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph_test.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/multiple_entrypoints_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/write_barrier_elimination.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/write_barrier_elimination.h
