@@ -453,11 +453,6 @@ void main() {
     Map<String, dynamic> result;
     bool completed;
 
-    Never throwError() {
-      expect(true, isFalse);
-      throw Error();
-    }
-
     completed = false;
     ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
       expect(utf8.decode(message!.buffer.asUint8List()), 'test');
@@ -473,7 +468,7 @@ void main() {
     expect(completed, isTrue);
     completed = false;
     data = await rootBundle.loadStructuredData('test', (String value) async {
-      throwError();
+      throw Error();
     });
     expect(data, isTrue);
     expect(completed, isFalse);
