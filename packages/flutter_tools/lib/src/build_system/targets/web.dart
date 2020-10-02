@@ -5,7 +5,6 @@
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter_tools/src/dart/language_version.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
@@ -13,6 +12,7 @@ import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
+import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
@@ -95,9 +95,7 @@ class WebEntrypointTarget extends Target {
       environment.fileSystem.file(packageFile),
       logger: environment.logger,
     );
-    print(packageConfig);
     final FlutterProject flutterProject = FlutterProject.current();
-        print(flutterProject.manifest.appName);
     final String languageVersion = determineLanguageVersion(
       environment.fileSystem.file(targetFile),
       packageConfig[flutterProject.manifest.appName],
