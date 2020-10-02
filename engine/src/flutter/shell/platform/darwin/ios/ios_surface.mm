@@ -71,9 +71,6 @@ void IOSSurface::CancelFrame() {
   TRACE_EVENT0("flutter", "IOSSurface::CancelFrame");
   FML_CHECK(platform_views_controller_ != nullptr);
   platform_views_controller_->CancelFrame();
-  // Committing the current transaction as |BeginFrame| will create a nested
-  // CATransaction otherwise.
-  [CATransaction commit];
 }
 
 // |ExternalViewEmbedder|
@@ -84,7 +81,6 @@ void IOSSurface::BeginFrame(SkISize frame_size,
   TRACE_EVENT0("flutter", "IOSSurface::BeginFrame");
   FML_CHECK(platform_views_controller_ != nullptr);
   platform_views_controller_->SetFrameSize(frame_size);
-  [CATransaction begin];
 }
 
 // |ExternalViewEmbedder|
@@ -102,10 +98,6 @@ PostPrerollResult IOSSurface::PostPrerollAction(
   TRACE_EVENT0("flutter", "IOSSurface::PostPrerollAction");
   FML_CHECK(platform_views_controller_ != nullptr);
   PostPrerollResult result = platform_views_controller_->PostPrerollAction(raster_thread_merger);
-  if (result == PostPrerollResult::kSkipAndRetryFrame) {
-    // Commit the current transaction if the frame is dropped.
-    [CATransaction commit];
-  }
   return result;
 }
 
@@ -126,13 +118,8 @@ SkCanvas* IOSSurface::CompositeEmbeddedView(int view_id) {
 void IOSSurface::SubmitFrame(GrDirectContext* context, std::unique_ptr<SurfaceFrame> frame) {
   TRACE_EVENT0("flutter", "IOSSurface::SubmitFrame");
   FML_CHECK(platform_views_controller_ != nullptr);
-  bool submitted =
-      platform_views_controller_->SubmitFrame(std::move(context), ios_context_, std::move(frame));
-
-  if (submitted) {
-    TRACE_EVENT0("flutter", "IOSSurface::DidSubmitFrame");
-    [CATransaction commit];
-  }
+  platform_views_controller_->SubmitFrame(std::move(context), ios_context_, std::move(frame));
+  TRACE_EVENT0("flutter", "IOSSurface::DidSubmitFrame");
 }
 
 // |ExternalViewEmbedder|
