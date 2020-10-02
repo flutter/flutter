@@ -343,12 +343,6 @@ class _FakeAnyProcessManager extends FakeProcessManager {
 
   @override
   bool get hasRemainingExpectations => true;
-
-  @override
-  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
-    // Killing a fake process has no effect unless it has an attached completer.
-    return false;
-  }
 }
 
 class _SequenceProcessManager extends FakeProcessManager {
