@@ -14,7 +14,7 @@ import 'overlay.dart';
 /// A type for getting a list of options based on a String.
 ///
 /// See also:
-///   * [AutocompleteController.buildOptions], which is of this type.
+///   * [AutocompleteCore.buildOptions], which is of this type.
 typedef AutocompleteBuildOptions<T> = List<T> Function(TextEditingValue textEditingValue);
 
 /// A type for indicating the selection of an autocomplete option.
@@ -385,10 +385,6 @@ class AutocompleteCore<T> extends StatefulWidget {
   /// different than the string to search by.
   ///
   /// If not provided, will use `option.toString()`.
-  ///
-  /// See also:
-  ///   * [filterStringForOption], which can be used to specify a custom string
-  ///     to filter by.
   final AutocompleteOptionToString<T> displayStringForOption;
 
   /// Called when an option is selected by the user.
