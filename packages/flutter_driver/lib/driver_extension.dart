@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.11
-
 /// This library provides a Dart VM service extension that is required for
 /// tests that use `package:flutter_driver` to drive applications from a
 /// separate process, similar to Selenium (web), Espresso (Android) and UI

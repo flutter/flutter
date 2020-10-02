@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.11
-
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -134,13 +132,13 @@ class _InternalNoPendingPlatformMessagesCondition implements WaitCondition {
 
   @override
   bool get condition {
-    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger as TestDefaultBinaryMessenger;
+    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance!.defaultBinaryMessenger as TestDefaultBinaryMessenger;
     return binaryMessenger.pendingMessageCount == 0;
   }
 
   @override
   Future<void> wait() async {
-    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger as TestDefaultBinaryMessenger;
+    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance!.defaultBinaryMessenger as TestDefaultBinaryMessenger;
     while (!condition) {
       await binaryMessenger.platformMessagesFinished;
     }

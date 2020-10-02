@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.11
-
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -620,7 +618,8 @@ class FlutterDriverExtension with DeserializeFinderFactory {
     await Scrollable.ensureVisible(
       target.evaluate().single,
       duration: const Duration(milliseconds: 100),
-      alignment: scrollIntoViewCommand.alignment);
+      alignment: scrollIntoViewCommand.alignment,
+    );
     return const ScrollResult();
   }
 
