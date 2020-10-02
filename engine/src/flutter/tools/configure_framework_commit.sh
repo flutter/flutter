@@ -31,5 +31,8 @@ COMMIT_NO=`git log --before="$LATEST_COMMIT_TIME_ENGINE" -n 1 | grep commit | cu
 echo "Using the flutter/flutter commit $COMMIT_NO";
 git reset --hard $COMMIT_NO
 
+# Write the commit number to a file. This file will be read by the LUCI recipe.
+echo "$COMMIT_NO" >> flutter_ref.txt
+
 # Print out the flutter version for troubleshooting
-$FLUTTER_CLONE_REPO_PATH/bin/flutter --version
+$FLUTTER_CLONE_REPO_PATH/bin/flutter --version -v
