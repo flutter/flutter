@@ -1713,6 +1713,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
+    assert(context.debugDoingBuild, 'SnackBar cannot be shown during build!');
+
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);
     if (_snackBars.isEmpty) {
