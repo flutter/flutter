@@ -195,7 +195,7 @@ task:
         - chromedriver/chromedriver --port=4444 &
         - sleep 5
         - cd ../../../examples/hello_world/
-        - flutter drive --target=test_driver/smoke_web_engine.dart -d web-server --profile --browser-name=chrome
+        - flutter drive --target=test_driver/smoke_web_engine.dart -d web-server --profile --browser-name=chrome --enable-experiment=non-nullable --no-sound-null-safety
 
     - name: deploy_gallery-linux # linux- and macos- only
       # Do not add more tasks here. Nothing is currently deployed from master branch, so it is safe to run
