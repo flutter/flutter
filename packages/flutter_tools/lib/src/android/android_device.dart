@@ -31,7 +31,7 @@ enum HardwareType { emulator, physical }
 
 /// Map to help our `isLocalEmulator` detection.
 ///
-/// See [AndroidDevice] for more explaination of why this is needed.
+/// See [AndroidDevice] for more explanation of why this is needed.
 const Map<String, HardwareType> kKnownHardware = <String, HardwareType>{
   'goldfish': HardwareType.emulator,
   'qcom': HardwareType.physical,
