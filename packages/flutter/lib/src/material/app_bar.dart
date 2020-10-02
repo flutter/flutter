@@ -210,7 +210,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.primary = true,
     this.centerTitle,
     this.excludeHeaderSemantics = false,
-    this.titleSpacing = NavigationToolbar.kMiddleSpacing,
+    this.titleSpacing,
     this.toolbarOpacity = 1.0,
     this.bottomOpacity = 1.0,
     this.toolbarHeight,
@@ -218,7 +218,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation == null || elevation >= 0.0),
        assert(primary != null),
-       assert(titleSpacing != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
        preferredSize = Size.fromHeight(toolbarHeight ?? kToolbarHeight + (bottom?.preferredSize?.height ?? 0.0)),
@@ -642,7 +641,7 @@ class _AppBarState extends State<AppBar> {
       middle: title,
       trailing: actions,
       centerMiddle: widget._getEffectiveCenterTitle(theme),
-      middleSpacing: widget.titleSpacing,
+      middleSpacing: widget.titleSpacing ?? appBarTheme.titleSpacing ?? NavigationToolbar.kMiddleSpacing,
     );
 
     // If the toolbar is allocated less than toolbarHeight make it
@@ -1072,7 +1071,7 @@ class SliverAppBar extends StatefulWidget {
     this.primary = true,
     this.centerTitle,
     this.excludeHeaderSemantics = false,
-    this.titleSpacing = NavigationToolbar.kMiddleSpacing,
+    this.titleSpacing,
     this.collapsedHeight,
     this.expandedHeight,
     this.floating = false,
@@ -1087,7 +1086,6 @@ class SliverAppBar extends StatefulWidget {
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),
-       assert(titleSpacing != null),
        assert(floating != null),
        assert(pinned != null),
        assert(snap != null),

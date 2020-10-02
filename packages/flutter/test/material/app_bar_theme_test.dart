@@ -245,6 +245,54 @@ void main() {
     // The AppBar.shadowColor should be used instead of AppBarTheme.shadowColor.
     expect(appBar.shadowColor, Colors.yellow);
   });
+
+  testWidgets('AppBar uses AppBar.titleSpacing', (WidgetTester tester) async {
+    const double kTitleSpacing = 10;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Title'),
+        ),
+      ),
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolBar.middleSpacing, kTitleSpacing);
+  });
+
+  testWidgets('AppBar.titleSpacing takes priority over AppBarTheme.titleSpacing', (WidgetTester tester) async {
+    const double kTitleSpacing = 10;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Title'),
+          titleSpacing: 40,
+        ),
+      ),
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolBar.middleSpacing, 40);
+  });
+
+  testWidgets('SliverAppBar uses AppBar.titleSpacing', (WidgetTester tester) async {
+    const double kTitleSpacing = 10;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      home: const CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: Text('Title'),
+          )
+        ],
+      )
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolBar.middleSpacing, kTitleSpacing);
+  });
 }
 
 AppBarTheme _appBarTheme() {

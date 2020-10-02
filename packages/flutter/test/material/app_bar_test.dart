@@ -2211,4 +2211,17 @@ void main() {
     NavigationToolbar getAppBarWidget(Finder finder) => tester.widget<NavigationToolbar>(finder);
     expect(getAppBarWidget(appBarFinder).leading, null);
   });
+  
+  testWidgets('AppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Title'),
+        ),
+      )
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);
+  });
 }

@@ -41,6 +41,7 @@ class AppBarTheme with Diagnosticable {
     this.actionsIconTheme,
     this.textTheme,
     this.centerTitle,
+    this.titleSpacing,
   });
 
   /// Default value for [AppBar.brightness].
@@ -83,6 +84,11 @@ class AppBarTheme with Diagnosticable {
   /// If null, the value is adapted to current [TargetPlatform].
   final bool centerTitle;
 
+  /// Default value for [AppBar.titleSpacing].
+  ///
+  /// If null, [AppBar] uses default value of [NavigationToolbar.kMiddleSpacing].
+  final double titleSpacing;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
@@ -94,6 +100,7 @@ class AppBarTheme with Diagnosticable {
     IconThemeData iconTheme,
     TextTheme textTheme,
     bool centerTitle,
+    double titleSpacing,
   }) {
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
@@ -104,6 +111,7 @@ class AppBarTheme with Diagnosticable {
       actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
       textTheme: textTheme ?? this.textTheme,
       centerTitle: centerTitle ?? this.centerTitle,
+      titleSpacing: titleSpacing ?? this.titleSpacing,
     );
   }
 
@@ -128,6 +136,7 @@ class AppBarTheme with Diagnosticable {
       actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
       textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
       centerTitle: t < 0.5 ? a?.centerTitle : b?.centerTitle,
+      titleSpacing: lerpDouble(a?.titleSpacing, b?.titleSpacing, t),
     );
   }
 
@@ -142,6 +151,7 @@ class AppBarTheme with Diagnosticable {
       actionsIconTheme,
       textTheme,
       centerTitle,
+      titleSpacing,
     );
   }
 
@@ -159,7 +169,8 @@ class AppBarTheme with Diagnosticable {
         && other.iconTheme == iconTheme
         && other.actionsIconTheme == actionsIconTheme
         && other.textTheme == textTheme
-        && other.centerTitle == centerTitle;
+        && other.centerTitle == centerTitle
+        && other.titleSpacing == titleSpacing;
   }
 
   @override
@@ -173,5 +184,6 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('centerTitle', centerTitle, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('titleSpacing', titleSpacing, defaultValue: null));
   }
 }
