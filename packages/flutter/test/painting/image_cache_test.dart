@@ -6,9 +6,11 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter/scheduler.dart';
 
+import '../flutter_test_alternative.dart';
 import '../rendering/rendering_tester.dart';
 import 'mocks_for_image_cache.dart';
 
@@ -456,7 +458,6 @@ void main() {
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
       ..addListener(listener);
 
-
     imageCache.putIfAbsent(testImage, () => completer1);
     expect(imageCache.statusForKey(testImage).pending, true);
     expect(imageCache.statusForKey(testImage).live, true);
@@ -484,4 +485,88 @@ void main() {
     expect(imageCache.statusForKey(testImage).keepAlive, true);
     expect(imageCache.currentSizeBytes, testImageSize);
   });
+
+  test('Image is obtained and disposed of properly for cache', () async {
+    const int key = 1;
+    final ui.Image testImage = await createTestImage(width: 8, height: 8, cache: false);
+    expect(testImage.debugGetOpenHandleStackTraces().length, 1);
+
+    ImageInfo imageInfo;
+    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {
+      imageInfo = info;
+    });
+
+    final TestImageStreamCompleter completer = TestImageStreamCompleter();
+
+    completer.addListener(listener);
+    imageCache.putIfAbsent(key, () => completer);
+
+    expect(testImage.debugGetOpenHandleStackTraces().length, 1);
+
+    // This should cause keepAlive to be set to true.
+    completer.testSetImage(testImage);
+    expect(imageInfo, isNotNull);
+    // +1 ImageStreamCompleter
+    expect(testImage.debugGetOpenHandleStackTraces().length, 2);
+
+    completer.removeListener(listener);
+
+    // Force us to the end of the frame.
+    SchedulerBinding.instance.scheduleFrame();
+    await SchedulerBinding.instance.endOfFrame;
+
+    expect(testImage.debugGetOpenHandleStackTraces().length, 2);
+
+    expect(imageCache.evict(key), true);
+
+    // Force us to the end of the frame.
+    SchedulerBinding.instance.scheduleFrame();
+    await SchedulerBinding.instance.endOfFrame;
+
+    // -1 _CachedImage
+    // -1 ImageStreamCompleter
+    expect(testImage.debugGetOpenHandleStackTraces().length, 1);
+
+    imageInfo.dispose();
+    expect(testImage.debugGetOpenHandleStackTraces().length, 0);
+  }, skip: kIsWeb); // Web does not care about image handles.
+
+  test('Image is obtained and disposed of properly for cache when listener is still active', () async {
+    const int key = 1;
+    final ui.Image testImage = await createTestImage(width: 8, height: 8, cache: false);
+    expect(testImage.debugGetOpenHandleStackTraces().length, 1);
+
+    ImageInfo imageInfo;
+    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {
+      imageInfo = info;
+    });
+
+    final TestImageStreamCompleter completer = TestImageStreamCompleter();
+
+    completer.addListener(listener);
+    imageCache.putIfAbsent(key, () => completer);
+
+    expect(testImage.debugGetOpenHandleStackTraces().length, 1);
+
+    // This should cause keepAlive to be set to true.
+    completer.testSetImage(testImage);
+    expect(imageInfo, isNotNull);
+    // Just our imageInfo and the completer.
+    expect(testImage.debugGetOpenHandleStackTraces().length, 2);
+
+    expect(imageCache.evict(key), true);
+
+    // Force us to the end of the frame.
+    SchedulerBinding.instance.scheduleFrame();
+    await SchedulerBinding.instance.endOfFrame;
+
+    // Live image still around since there's still a listener, and the listener
+    // should be holding a handle.
+    expect(testImage.debugGetOpenHandleStackTraces().length, 2);
+    completer.removeListener(listener);
+
+    expect(testImage.debugGetOpenHandleStackTraces().length, 1);
+    imageInfo.dispose();
+    expect(testImage.debugGetOpenHandleStackTraces().length, 0);
+  }, skip: kIsWeb); // Web does not care about open image handles.
 }
