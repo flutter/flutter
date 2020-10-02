@@ -91,12 +91,12 @@ class ScrollBehavior {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        return _bouncingPhysics;
+        return const BouncingScrollPhysics();
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return _clampingPhysics;
+        return const ClampingScrollPhysics();
     }
   }
 
