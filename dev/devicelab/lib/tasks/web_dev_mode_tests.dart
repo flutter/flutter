@@ -34,7 +34,7 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
     int hotRestartCount = 0;
     final String expectedMessage = webDevice == WebDevice.webServer
       ? 'Recompile complete'
-      : 'Reloaded application';
+      : 'Restarted application';
     final Map<String, int> measurements = <String, int>{};
     await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
