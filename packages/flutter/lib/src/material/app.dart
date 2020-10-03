@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -164,7 +166,7 @@ class MaterialApp extends StatefulWidget {
   ///
   /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   const MaterialApp({
-    Key? key,
+    Key key,
     this.navigatorKey,
     this.home,
     this.routes = const <String, WidgetBuilder>{},
@@ -213,10 +215,10 @@ class MaterialApp extends StatefulWidget {
 
   /// Creates a [MaterialApp] that uses the [Router] instead of a [Navigator].
   const MaterialApp.router({
-    Key? key,
+    Key key,
     this.routeInformationProvider,
-    required this.routeInformationParser,
-    required this.routerDelegate,
+    @required this.routeInformationParser,
+    @required this.routerDelegate,
     this.backButtonDispatcher,
     this.builder,
     this.title = '',
@@ -261,10 +263,10 @@ class MaterialApp extends StatefulWidget {
        super(key: key);
 
   /// {@macro flutter.widgets.widgetsApp.navigatorKey}
-  final GlobalKey<NavigatorState>? navigatorKey;
+  final GlobalKey<NavigatorState> navigatorKey;
 
   /// {@macro flutter.widgets.widgetsApp.home}
-  final Widget? home;
+  final Widget home;
 
   /// The application's top-level routing table.
   ///
@@ -274,41 +276,41 @@ class MaterialApp extends StatefulWidget {
   /// an appropriate transition, including [Hero] animations, to the new route.
   ///
   /// {@macro flutter.widgets.widgetsApp.routes}
-  final Map<String, WidgetBuilder>? routes;
+  final Map<String, WidgetBuilder> routes;
 
   /// {@macro flutter.widgets.widgetsApp.initialRoute}
-  final String? initialRoute;
+  final String initialRoute;
 
   /// {@macro flutter.widgets.widgetsApp.onGenerateRoute}
-  final RouteFactory? onGenerateRoute;
+  final RouteFactory onGenerateRoute;
 
   /// {@macro flutter.widgets.widgetsApp.onGenerateInitialRoutes}
-  final InitialRouteListFactory? onGenerateInitialRoutes;
+  final InitialRouteListFactory onGenerateInitialRoutes;
 
   /// {@macro flutter.widgets.widgetsApp.onUnknownRoute}
-  final RouteFactory? onUnknownRoute;
+  final RouteFactory onUnknownRoute;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
-  final List<NavigatorObserver>? navigatorObservers;
+  final List<NavigatorObserver> navigatorObservers;
 
   /// {@macro flutter.widgets.widgetsApp.routeInformationProvider}
-  final RouteInformationProvider? routeInformationProvider;
+  final RouteInformationProvider routeInformationProvider;
 
   /// {@macro flutter.widgets.widgetsApp.routeInformationParser}
-  final RouteInformationParser<Object>? routeInformationParser;
+  final RouteInformationParser<Object> routeInformationParser;
 
   /// {@macro flutter.widgets.widgetsApp.routerDelegate}
-  final RouterDelegate<Object>? routerDelegate;
+  final RouterDelegate<Object> routerDelegate;
 
   /// {@macro flutter.widgets.widgetsApp.backButtonDispatcher}
-  final BackButtonDispatcher? backButtonDispatcher;
+  final BackButtonDispatcher backButtonDispatcher;
 
   /// {@macro flutter.widgets.widgetsApp.builder}
   ///
   /// Material specific features such as [showDialog] and [showMenu], and widgets
   /// such as [Tooltip], [PopupMenuButton], also require a [Navigator] to properly
   /// function.
-  final TransitionBuilder? builder;
+  final TransitionBuilder builder;
 
   /// {@macro flutter.widgets.widgetsApp.title}
   ///
@@ -318,7 +320,7 @@ class MaterialApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.onGenerateTitle}
   ///
   /// This value is passed unmodified to [WidgetsApp.onGenerateTitle].
-  final GenerateAppTitle? onGenerateTitle;
+  final GenerateAppTitle onGenerateTitle;
 
   /// Default visual properties, like colors fonts and shapes, for this app's
   /// material widgets.
@@ -337,7 +339,7 @@ class MaterialApp extends StatefulWidget {
   ///    and [darkTheme] in [MaterialApp].
   ///  * [ThemeData.brightness], which indicates the [Brightness] of a theme's
   ///    colors.
-  final ThemeData? theme;
+  final ThemeData theme;
 
   /// The [ThemeData] to use when a 'dark mode' is requested by the system.
   ///
@@ -359,7 +361,7 @@ class MaterialApp extends StatefulWidget {
   ///    and [darkTheme] in [MaterialApp].
   ///  * [ThemeData.brightness], which is typically set to the value of
   ///    [MediaQueryData.platformBrightness].
-  final ThemeData? darkTheme;
+  final ThemeData darkTheme;
 
   /// The [ThemeData] to use when 'high contrast' is requested by the system.
   ///
@@ -372,7 +374,7 @@ class MaterialApp extends StatefulWidget {
   ///
   ///  * [MediaQueryData.highContrast], which indicates the platform's
   ///    desire to increase contrast.
-  final ThemeData? highContrastTheme;
+  final ThemeData highContrastTheme;
 
   /// The [ThemeData] to use when a 'dark mode' and 'high contrast' is requested
   /// by the system.
@@ -388,7 +390,7 @@ class MaterialApp extends StatefulWidget {
   ///
   ///  * [MediaQueryData.highContrast], which indicates the platform's
   ///    desire to increase contrast.
-  final ThemeData? highContrastDarkTheme;
+  final ThemeData highContrastDarkTheme;
 
   /// Determines which theme will be used by the application if both [theme]
   /// and [darkTheme] are provided.
@@ -414,13 +416,13 @@ class MaterialApp extends StatefulWidget {
   ///  * [darkTheme], which is used when a dark mode is selected.
   ///  * [ThemeData.brightness], which indicates to various parts of the
   ///    system what kind of theme is being used.
-  final ThemeMode? themeMode;
+  final ThemeMode themeMode;
 
   /// {@macro flutter.widgets.widgetsApp.color}
-  final Color? color;
+  final Color color;
 
   /// {@macro flutter.widgets.widgetsApp.locale}
-  final Locale? locale;
+  final Locale locale;
 
   /// {@macro flutter.widgets.widgetsApp.localizationsDelegates}
   ///
@@ -513,17 +515,17 @@ class MaterialApp extends StatefulWidget {
   ///    which provides material localizations for many languages.
   ///  * The Flutter Internationalization Tutorial,
   ///    <https://flutter.dev/tutorials/internationalization/>.
-  final Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates;
+  final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
 
   /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
   ///
   /// This callback is passed along to the [WidgetsApp] built by this widget.
-  final LocaleListResolutionCallback? localeListResolutionCallback;
+  final LocaleListResolutionCallback localeListResolutionCallback;
 
   /// {@macro flutter.widgets.widgetsApp.localeResolutionCallback}
   ///
   /// This callback is passed along to the [WidgetsApp] built by this widget.
-  final LocaleResolutionCallback? localeResolutionCallback;
+  final LocaleResolutionCallback localeResolutionCallback;
 
   /// {@macro flutter.widgets.widgetsApp.supportedLocales}
   ///
@@ -585,7 +587,7 @@ class MaterialApp extends StatefulWidget {
   /// ```
   /// {@end-tool}
   /// {@macro flutter.widgets.widgetsApp.shortcuts.seeAlso}
-  final Map<LogicalKeySet, Intent>? shortcuts;
+  final Map<LogicalKeySet, Intent> shortcuts;
 
   /// {@macro flutter.widgets.widgetsApp.actions}
   /// {@tool snippet}
@@ -618,10 +620,10 @@ class MaterialApp extends StatefulWidget {
   /// ```
   /// {@end-tool}
   /// {@macro flutter.widgets.widgetsApp.actions.seeAlso}
-  final Map<Type, Action<Intent>>? actions;
+  final Map<Type, Action<Intent>> actions;
 
   /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
-  final String? restorationScopeId;
+  final String restorationScopeId;
 
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps.
@@ -641,7 +643,7 @@ class MaterialApp extends StatefulWidget {
   /// Used by the [MaterialApp].
   static HeroController createMaterialHeroController() {
     return HeroController(
-      createRectTween: (Rect? begin, Rect? end) {
+      createRectTween: (Rect begin, Rect end) {
         return MaterialRectArcTween(begin: begin, end: end);
       },
     );
@@ -651,7 +653,7 @@ class MaterialApp extends StatefulWidget {
 class _MaterialScrollBehavior extends ScrollBehavior {
   @override
   TargetPlatform getPlatform(BuildContext context) {
-    return Theme.of(context)!.platform;
+    return Theme.of(context).platform;
   }
 
   @override
@@ -669,14 +671,15 @@ class _MaterialScrollBehavior extends ScrollBehavior {
         return GlowingOverscrollIndicator(
           child: child,
           axisDirection: axisDirection,
-          color: Theme.of(context)!.accentColor,
+          color: Theme.of(context).accentColor,
         );
     }
+    return null;
   }
 }
 
 class _MaterialAppState extends State<MaterialApp> {
-  late HeroController _heroController;
+  HeroController _heroController;
 
   bool get _usesRouter => widget.routerDelegate != null;
 
@@ -693,7 +696,7 @@ class _MaterialAppState extends State<MaterialApp> {
   // _MaterialLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
     if (widget.localizationsDelegates != null)
-      yield* widget.localizationsDelegates!;
+      yield* widget.localizationsDelegates;
     yield DefaultMaterialLocalizations.delegate;
     yield DefaultCupertinoLocalizations.delegate;
   }
@@ -706,14 +709,14 @@ class _MaterialAppState extends State<MaterialApp> {
     );
   }
 
-  Widget _materialBuilder(BuildContext context, Widget? child) {
+  Widget _materialBuilder(BuildContext context, Widget child) {
     // Resolve which theme to use based on brightness and high contrast.
     final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
     final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
     final bool useDarkTheme = mode == ThemeMode.dark
       || (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
     final bool highContrast = MediaQuery.highContrastOf(context);
-    ThemeData? theme;
+    ThemeData theme;
 
     if (useDarkTheme && highContrast && widget.highContrastDarkTheme != null) {
       theme = widget.highContrastDarkTheme;
@@ -741,10 +744,10 @@ class _MaterialAppState extends State<MaterialApp> {
               // surround widget.builder with yet another builder so that
               // a context separates them and Theme.of() correctly
               // resolves to the theme we passed to AnimatedTheme.
-              return widget.builder!(context, child);
+              return widget.builder(context, child);
             },
           )
-        : child!,
+        : child,
     );
   }
 
@@ -761,8 +764,8 @@ class _MaterialAppState extends State<MaterialApp> {
       return WidgetsApp.router(
         key: GlobalObjectKey(this),
         routeInformationProvider: widget.routeInformationProvider,
-        routeInformationParser: widget.routeInformationParser!,
-        routerDelegate: widget.routerDelegate!,
+        routeInformationParser: widget.routeInformationParser,
+        routerDelegate: widget.routerDelegate,
         backButtonDispatcher: widget.backButtonDispatcher,
         builder: _materialBuilder,
         title: widget.title,
@@ -789,12 +792,12 @@ class _MaterialAppState extends State<MaterialApp> {
     return WidgetsApp(
       key: GlobalObjectKey(this),
       navigatorKey: widget.navigatorKey,
-      navigatorObservers: widget.navigatorObservers!,
+      navigatorObservers: widget.navigatorObservers,
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
         return MaterialPageRoute<T>(settings: settings, builder: builder);
       },
       home: widget.home,
-      routes: widget.routes!,
+      routes: widget.routes,
       initialRoute: widget.initialRoute,
       onGenerateRoute: widget.onGenerateRoute,
       onGenerateInitialRoutes: widget.onGenerateInitialRoutes,

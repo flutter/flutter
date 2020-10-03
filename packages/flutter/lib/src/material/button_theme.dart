@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -79,23 +81,23 @@ class ButtonTheme extends InheritedTheme {
   /// The [textTheme], [minWidth], [height], and [colorScheme] arguments
   /// must not be null.
   ButtonTheme({
-    Key? key,
+    Key key,
     ButtonTextTheme textTheme = ButtonTextTheme.normal,
     ButtonBarLayoutBehavior layoutBehavior = ButtonBarLayoutBehavior.padded,
     double minWidth = 88.0,
     double height = 36.0,
-    EdgeInsetsGeometry? padding,
-    ShapeBorder? shape,
+    EdgeInsetsGeometry padding,
+    ShapeBorder shape,
     bool alignedDropdown = false,
-    Color? buttonColor,
-    Color? disabledColor,
-    Color? focusColor,
-    Color? hoverColor,
-    Color? highlightColor,
-    Color? splashColor,
-    ColorScheme? colorScheme,
-    MaterialTapTargetSize? materialTapTargetSize,
-    required Widget child,
+    Color buttonColor,
+    Color disabledColor,
+    Color focusColor,
+    Color hoverColor,
+    Color highlightColor,
+    Color splashColor,
+    ColorScheme colorScheme,
+    MaterialTapTargetSize materialTapTargetSize,
+    Widget child,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
@@ -124,9 +126,9 @@ class ButtonTheme extends InheritedTheme {
   ///
   /// The [data] argument must not be null.
   const ButtonTheme.fromButtonThemeData({
-    Key? key,
-    required this.data,
-    required Widget child,
+    Key key,
+    @required this.data,
+    Widget child,
   }) : assert(data != null),
        super(key: key, child: child);
 
@@ -175,21 +177,21 @@ class ButtonTheme extends InheritedTheme {
     'This feature was deprecated after v1.9.1.'
   )
   ButtonTheme.bar({
-    Key? key,
+    Key key,
     ButtonTextTheme textTheme = ButtonTextTheme.accent,
     double minWidth = 64.0,
     double height = 36.0,
     EdgeInsetsGeometry padding = const EdgeInsets.symmetric(horizontal: 8.0),
-    ShapeBorder? shape,
+    ShapeBorder shape,
     bool alignedDropdown = false,
-    Color? buttonColor,
-    Color? disabledColor,
-    Color? focusColor,
-    Color? hoverColor,
-    Color? highlightColor,
-    Color? splashColor,
-    ColorScheme? colorScheme,
-    required Widget child,
+    Color buttonColor,
+    Color disabledColor,
+    Color focusColor,
+    Color hoverColor,
+    Color highlightColor,
+    Color splashColor,
+    ColorScheme colorScheme,
+    Widget child,
     ButtonBarLayoutBehavior layoutBehavior = ButtonBarLayoutBehavior.padded,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
@@ -224,10 +226,10 @@ class ButtonTheme extends InheritedTheme {
   /// ButtonThemeData theme = ButtonTheme.of(context);
   /// ```
   static ButtonThemeData of(BuildContext context) {
-    final ButtonTheme? inheritedButtonTheme = context.dependOnInheritedWidgetOfExactType<ButtonTheme>();
-    ButtonThemeData? buttonTheme = inheritedButtonTheme?.data;
+    final ButtonTheme inheritedButtonTheme = context.dependOnInheritedWidgetOfExactType<ButtonTheme>();
+    ButtonThemeData buttonTheme = inheritedButtonTheme?.data;
     if (buttonTheme?.colorScheme == null) { // if buttonTheme or buttonTheme.colorScheme is null
-      final ThemeData theme = Theme.of(context)!;
+      final ThemeData theme = Theme.of(context);
       buttonTheme ??= theme.buttonTheme;
       if (buttonTheme.colorScheme == null) {
         buttonTheme = buttonTheme.copyWith(
@@ -236,12 +238,12 @@ class ButtonTheme extends InheritedTheme {
         assert(buttonTheme.colorScheme != null);
       }
     }
-    return buttonTheme!;
+    return buttonTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ButtonTheme? ancestorTheme = context.findAncestorWidgetOfExactType<ButtonTheme>();
+    final ButtonTheme ancestorTheme = context.findAncestorWidgetOfExactType<ButtonTheme>();
     return identical(this, ancestorTheme) ? child : ButtonTheme.fromButtonThemeData(data: data, child: child);
   }
 
@@ -287,18 +289,18 @@ class ButtonThemeData with Diagnosticable {
     this.textTheme = ButtonTextTheme.normal,
     this.minWidth = 88.0,
     this.height = 36.0,
-    EdgeInsetsGeometry? padding,
-    ShapeBorder? shape,
+    EdgeInsetsGeometry padding,
+    ShapeBorder shape,
     this.layoutBehavior = ButtonBarLayoutBehavior.padded,
     this.alignedDropdown = false,
-    Color? buttonColor,
-    Color? disabledColor,
-    Color? focusColor,
-    Color? hoverColor,
-    Color? highlightColor,
-    Color? splashColor,
+    Color buttonColor,
+    Color disabledColor,
+    Color focusColor,
+    Color hoverColor,
+    Color highlightColor,
+    Color splashColor,
     this.colorScheme,
-    MaterialTapTargetSize? materialTapTargetSize,
+    MaterialTapTargetSize materialTapTargetSize,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
@@ -367,7 +369,7 @@ class ButtonThemeData with Diagnosticable {
   ///    and [FlatButton].
   EdgeInsetsGeometry get padding {
     if (_padding != null)
-      return _padding!;
+      return _padding;
     switch (textTheme) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
@@ -375,8 +377,10 @@ class ButtonThemeData with Diagnosticable {
       case ButtonTextTheme.primary:
         return const EdgeInsets.symmetric(horizontal: 24.0);
     }
+    assert(false);
+    return EdgeInsets.zero;
   }
-  final EdgeInsetsGeometry? _padding;
+  final EdgeInsetsGeometry _padding;
 
   /// The shape of a button's material.
   ///
@@ -394,7 +398,7 @@ class ButtonThemeData with Diagnosticable {
   ///    and [FlatButton].
   ShapeBorder get shape {
     if (_shape != null)
-      return _shape!;
+      return _shape;
     switch (textTheme) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
@@ -406,8 +410,9 @@ class ButtonThemeData with Diagnosticable {
           borderRadius: BorderRadius.all(Radius.circular(4.0)),
         );
     }
+    return const RoundedRectangleBorder();
   }
-  final ShapeBorder? _shape;
+  final ShapeBorder _shape;
 
   /// If true, then a [DropdownButton] menu's width will match the button's
   /// width.
@@ -432,7 +437,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   ///  * [getFillColor], which is used by [RaisedButton] to compute its
   ///    background fill color.
-  final Color? _buttonColor;
+  final Color _buttonColor;
 
   /// The background fill color for disabled [RaisedButton]s.
   ///
@@ -442,7 +447,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   ///  * [getDisabledFillColor], which is used by [RaisedButton] to compute its
   ///    background fill color.
-  final Color? _disabledColor;
+  final Color _disabledColor;
 
   /// The fill color of the button when it has the input focus.
   ///
@@ -455,7 +460,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   ///  * [getFocusColor], which is used by [RaisedButton], [OutlineButton]
   ///    and [FlatButton].
-  final Color? _focusColor;
+  final Color _focusColor;
 
   /// The fill color of the button when a pointer is hovering over it.
   ///
@@ -468,7 +473,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   ///  * [getHoverColor], which is used by [RaisedButton], [OutlineButton]
   ///    and [FlatButton].
-  final Color? _hoverColor;
+  final Color _hoverColor;
 
   /// The color of the overlay that appears when a button is pressed.
   ///
@@ -478,7 +483,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   ///  * [getHighlightColor], which is used by [RaisedButton], [OutlineButton]
   ///    and [FlatButton].
-  final Color? _highlightColor;
+  final Color _highlightColor;
 
   /// The color of the ink "splash" overlay that appears when a button is tapped.
   ///
@@ -488,7 +493,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   ///  * [getSplashColor], which is used by [RaisedButton], [OutlineButton]
   ///    and [FlatButton].
-  final Color? _splashColor;
+  final Color _splashColor;
 
   /// A set of thirteen colors that can be used to derive the button theme's
   /// colors.
@@ -500,7 +505,7 @@ class ButtonThemeData with Diagnosticable {
   /// The colors for new button classes can be defined exclusively in terms
   /// of [colorScheme]. When it's possible, the existing buttons will
   /// (continue to) gradually migrate to it.
-  final ColorScheme? colorScheme;
+  final ColorScheme colorScheme;
 
   // The minimum size of a button's tap target.
   //
@@ -510,14 +515,14 @@ class ButtonThemeData with Diagnosticable {
   //
   //  * [getMaterialTargetTapSize], which is used by [RaisedButton],
   //    [OutlineButton] and [FlatButton].
-  final MaterialTapTargetSize? _materialTapTargetSize;
+  final MaterialTapTargetSize _materialTapTargetSize;
 
   /// The [button]'s overall brightness.
   ///
   /// Returns the button's [MaterialButton.colorBrightness] if it is non-null,
   /// otherwise the color scheme's [ColorScheme.brightness] is returned.
   Brightness getBrightness(MaterialButton button) {
-    return button.colorBrightness ?? colorScheme!.brightness;
+    return button.colorBrightness ?? colorScheme.brightness;
   }
 
   /// Defines the [button]'s base colors, and the defaults for the button's
@@ -540,10 +545,10 @@ class ButtonThemeData with Diagnosticable {
   /// used as the `disabledTextColor`. It will be resolved in the [MaterialState.disabled] state.
   Color getDisabledTextColor(MaterialButton button) {
     if (button.textColor is MaterialStateProperty<Color>)
-      return button.textColor!;
+      return button.textColor;
     if (button.disabledTextColor != null)
-      return button.disabledTextColor!;
-    return colorScheme!.onSurface.withOpacity(0.38);
+      return button.disabledTextColor;
+    return colorScheme.onSurface.withOpacity(0.38);
   }
 
   /// The [button]'s background color when [MaterialButton.onPressed] is null
@@ -558,10 +563,10 @@ class ButtonThemeData with Diagnosticable {
   /// with its opacity set to 0.38.
   Color getDisabledFillColor(MaterialButton button) {
     if (button.disabledColor != null)
-      return button.disabledColor!;
+      return button.disabledColor;
     if (_disabledColor != null)
-      return _disabledColor!;
-    return colorScheme!.onSurface.withOpacity(0.38);
+      return _disabledColor;
+    return colorScheme.onSurface.withOpacity(0.38);
   }
 
   /// The button's background fill color or null for buttons that don't have
@@ -589,8 +594,8 @@ class ButtonThemeData with Diagnosticable {
   ///    otherwise the color scheme's ColorScheme.primary color. If the button
   ///    is not enabled then the colorScheme's [ColorScheme.onSurface] color
   ///    with opacity 0.12.
-  Color? getFillColor(MaterialButton button) {
-    final Color? fillColor = button.enabled ? button.color : button.disabledColor;
+  Color getFillColor(MaterialButton button) {
+    final Color fillColor = button.enabled ? button.color : button.disabledColor;
     if (fillColor != null)
       return fillColor;
 
@@ -603,12 +608,15 @@ class ButtonThemeData with Diagnosticable {
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
-        return button.enabled ? colorScheme!.primary : getDisabledFillColor(button);
+        return button.enabled ? colorScheme.primary : getDisabledFillColor(button);
       case ButtonTextTheme.primary:
         return button.enabled
-          ? _buttonColor ?? colorScheme!.primary
-          : colorScheme!.onSurface.withOpacity(0.12);
+          ? _buttonColor ?? colorScheme.primary
+          : colorScheme.onSurface.withOpacity(0.12);
     }
+
+    assert(false);
+    return null;
   }
 
   /// The foreground color of the [button]'s text and icon.
@@ -633,26 +641,29 @@ class ButtonThemeData with Diagnosticable {
       return getDisabledTextColor(button);
 
     if (button.textColor != null)
-      return button.textColor!;
+      return button.textColor;
 
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
         return getBrightness(button) == Brightness.dark ? Colors.white : Colors.black87;
 
       case ButtonTextTheme.accent:
-        return colorScheme!.secondary;
+        return colorScheme.secondary;
 
       case ButtonTextTheme.primary:
-        final Color? fillColor = getFillColor(button);
+        final Color fillColor = getFillColor(button);
         final bool fillIsDark = fillColor != null
           ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
           : getBrightness(button) == Brightness.dark;
         if (fillIsDark)
           return Colors.white;
         if (button is FlatButton || button is OutlineButton)
-          return colorScheme!.primary;
+          return colorScheme.primary;
         return Colors.black;
     }
+
+    assert(false);
+    return null;
   }
 
   /// The color of the ink "splash" overlay that appears when the (enabled)
@@ -670,16 +681,16 @@ class ButtonThemeData with Diagnosticable {
   /// Otherwise, returns [getTextColor] with an opacity of 0.12.
   Color getSplashColor(MaterialButton button) {
     if (button.splashColor != null)
-      return button.splashColor!;
+      return button.splashColor;
 
     if (_splashColor != null && (button is RaisedButton || button is OutlineButton))
-      return _splashColor!;
+      return _splashColor;
 
     if (_splashColor != null && button is FlatButton) {
       switch (getTextTheme(button)) {
         case ButtonTextTheme.normal:
         case ButtonTextTheme.accent:
-          return _splashColor!;
+          return _splashColor;
         case ButtonTextTheme.primary:
           break;
       }
@@ -725,7 +736,7 @@ class ButtonThemeData with Diagnosticable {
   ///  * [ButtonTextTheme.primary], returns [Colors.transparent].
   Color getHighlightColor(MaterialButton button) {
     if (button.highlightColor != null)
-      return button.highlightColor!;
+      return button.highlightColor;
 
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
@@ -734,6 +745,9 @@ class ButtonThemeData with Diagnosticable {
       case ButtonTextTheme.primary:
         return Colors.transparent;
     }
+
+    assert(false);
+    return Colors.transparent;
   }
 
   /// The [button]'s elevation when it is enabled and has not been pressed.
@@ -743,7 +757,7 @@ class ButtonThemeData with Diagnosticable {
   /// If button is a [FlatButton] then elevation is 0.0, otherwise it is 2.0.
   double getElevation(MaterialButton button) {
     if (button.elevation != null)
-      return button.elevation!;
+      return button.elevation;
     if (button is FlatButton)
       return 0.0;
     return 2.0;
@@ -757,7 +771,7 @@ class ButtonThemeData with Diagnosticable {
   /// elevation is 0.0, otherwise the highlight elevation is 4.0.
   double getFocusElevation(MaterialButton button) {
     if (button.focusElevation != null)
-      return button.focusElevation!;
+      return button.focusElevation;
     if (button is FlatButton)
       return 0.0;
     if (button is OutlineButton)
@@ -773,7 +787,7 @@ class ButtonThemeData with Diagnosticable {
   /// elevation is 0.0, otherwise the highlight elevation is 4.0.
   double getHoverElevation(MaterialButton button) {
     if (button.hoverElevation != null)
-      return button.hoverElevation!;
+      return button.hoverElevation;
     if (button is FlatButton)
       return 0.0;
     if (button is OutlineButton)
@@ -789,7 +803,7 @@ class ButtonThemeData with Diagnosticable {
   /// elevation is 0.0, otherwise the highlight elevation is 8.0.
   double getHighlightElevation(MaterialButton button) {
     if (button.highlightElevation != null)
-      return button.highlightElevation!;
+      return button.highlightElevation;
     if (button is FlatButton)
       return 0.0;
     if (button is OutlineButton)
@@ -805,7 +819,7 @@ class ButtonThemeData with Diagnosticable {
   /// Otherwise the disabled elevation is 0.0.
   double getDisabledElevation(MaterialButton button) {
     if (button.disabledElevation != null)
-      return button.disabledElevation!;
+      return button.disabledElevation;
     return 0.0;
   }
 
@@ -824,13 +838,13 @@ class ButtonThemeData with Diagnosticable {
   /// otherwise.
   EdgeInsetsGeometry getPadding(MaterialButton button) {
     if (button.padding != null)
-      return button.padding!;
+      return button.padding;
 
     if (button is MaterialButtonWithIconMixin)
       return const EdgeInsetsDirectional.only(start: 12.0, end: 16.0);
 
     if (_padding != null)
-      return _padding!;
+      return _padding;
 
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
@@ -839,6 +853,8 @@ class ButtonThemeData with Diagnosticable {
       case ButtonTextTheme.primary:
         return const EdgeInsets.symmetric(horizontal: 24.0);
     }
+    assert(false);
+    return EdgeInsets.zero;
   }
 
   /// The shape of the [button]'s [Material].
@@ -879,21 +895,21 @@ class ButtonThemeData with Diagnosticable {
   /// Creates a copy of this button theme data object with the matching fields
   /// replaced with the non-null parameter values.
   ButtonThemeData copyWith({
-    ButtonTextTheme? textTheme,
-    ButtonBarLayoutBehavior? layoutBehavior,
-    double? minWidth,
-    double? height,
-    EdgeInsetsGeometry? padding,
-    ShapeBorder? shape,
-    bool? alignedDropdown,
-    Color? buttonColor,
-    Color? disabledColor,
-    Color? focusColor,
-    Color? hoverColor,
-    Color? highlightColor,
-    Color? splashColor,
-    ColorScheme? colorScheme,
-    MaterialTapTargetSize? materialTapTargetSize,
+    ButtonTextTheme textTheme,
+    ButtonBarLayoutBehavior layoutBehavior,
+    double minWidth,
+    double height,
+    EdgeInsetsGeometry padding,
+    ShapeBorder shape,
+    bool alignedDropdown,
+    Color buttonColor,
+    Color disabledColor,
+    Color focusColor,
+    Color hoverColor,
+    Color highlightColor,
+    Color splashColor,
+    ColorScheme colorScheme,
+    MaterialTapTargetSize materialTapTargetSize,
   }) {
     return ButtonThemeData(
       textTheme: textTheme ?? this.textTheme,
