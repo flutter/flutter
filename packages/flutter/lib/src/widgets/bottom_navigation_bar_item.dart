@@ -25,16 +25,16 @@ class BottomNavigationBarItem {
   const BottomNavigationBarItem({
     required this.icon,
     @Deprecated(
-        'Use "label" instead, as it allows for an improved text-scaling experience. '
-        'This feature was deprecated after v1.19.0.'
-        )
-        this.title,
+      'Use "label" instead, as it allows for an improved text-scaling experience. '
+      'This feature was deprecated after v1.19.0.'
+    )
+    this.title,
     this.label,
     Widget? activeIcon,
     this.backgroundColor,
-  })  : activeIcon = activeIcon ?? icon,
-        assert(label == null || title == null),
-        assert(icon != null);
+  }) : activeIcon = activeIcon ?? icon,
+       assert(label == null || title == null),
+       assert(icon != null);
 
   /// The icon of the item.
   ///
@@ -70,9 +70,9 @@ class BottomNavigationBarItem {
   ///
   /// This field is deprecated, use [label] instead.
   @Deprecated(
-      'Use "label" instead, as it allows for an improved text-scaling experience. '
-      'This feature was deprecated after v1.19.0.'
-      )
+    'Use "label" instead, as it allows for an improved text-scaling experience. '
+    'This feature was deprecated after v1.19.0.'
+  )
   final Widget? title;
 
   /// The text label for this [BottomNavigationBarItem].
