@@ -7,6 +7,8 @@ import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
+import 'package:html/dom.dart';
+import 'package:html/parser.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
@@ -56,6 +58,9 @@ typedef DwdsLauncher = Future<Dwds> Function({
 // A minimal index for projects that do not yet support web.
 const String _kDefaultIndex = '''
 <html>
+    <head>
+        <base href="/">
+    </head>
     <body>
         <script src="main.dart.js"></script>
     </body>
@@ -108,7 +113,9 @@ class WebAssetServer implements AssetReader {
     this._modules,
     this._digests,
     this._buildInfo,
-  );
+  ) : basePath = _parseBasePathFromIndexHtml(globals.fs.currentDirectory
+            .childDirectory('web')
+            .childFile('index.html'));
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -1009,17 +1016,67 @@ Future<Directory> _loadDwdsDirectory(FileSystem fileSystem, Logger logger) async
 }
 
 String _stripBasePath(String path, String basePath) {
-  while (path.startsWith('/')) {
-    path = path.substring(1);
-  }
+  path = _stripLeadingSlashes(path);
   if (path.startsWith(basePath)) {
     path = path.substring(basePath.length);
   } else {
     // The given path isn't under base path, return null to indicate that.
     return null;
   }
+  return _stripLeadingSlashes(path);
+}
+
+String _stripLeadingSlashes(String path) {
   while (path.startsWith('/')) {
     path = path.substring(1);
   }
   return path;
 }
+
+String _stripTrailingSlashes(String path) {
+  while (path.endsWith('/')) {
+    path = path.substring(0, path.length - 1);
+  }
+  return path;
+}
+
+String _parseBasePathFromIndexHtml(File indexHtml) {
+  final String htmlContent = indexHtml.existsSync()
+      ? indexHtml.readAsStringSync()
+      : _kDefaultIndex;
+
+  final Document document = parse(htmlContent);
+  final Element baseElement = document.querySelector('base');
+  String baseHref = baseElement?.attributes == null ? null : baseElement.attributes['href'];
+
+  if (baseHref == null) {
+    baseHref = '';
+  } else if (!baseHref.startsWith('/')) {
+    throw ToolExit(
+      'Error: The base href in "web/index.html" must be absolute (i.e. start '
+      'with a "/"), but found: `${baseElement.outerHtml}`.\n'
+      '$basePathExample',
+    );
+  } else if (!baseHref.endsWith('/')) {
+    throw ToolExit(
+      'Error: The base href in "web/index.html" must end with a "/", but found: `${baseElement.outerHtml}`.\n'
+      '$basePathExample',
+    );
+  } else {
+    baseHref = _stripLeadingSlashes(_stripTrailingSlashes(baseHref));
+  }
+
+  return baseHref;
+}
+
+const String basePathExample = '''
+For example, to serve from the root use:
+
+    <base href="/">
+
+To serve from a subpath "foo" (i.e. http://localhost:8080/foo/ instead of http://localhost:8080/) use:
+
+    <base href="/foo/">
+
+For more information, see: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+''';

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 // Logically this file should be part of `gesture_binding_test.dart` but is here
 // due to conflict of `flutter_test` and `package:test`.
 // See https://github.com/dart-lang/matcher/issues/98
@@ -75,15 +73,15 @@ void main() {
       ),
     );
 
-    GestureBinding.instance.resamplingEnabled = true;
+    GestureBinding.instance!.resamplingEnabled = true;
     const Duration kSamplingOffset = Duration(microseconds: -5500);
-    GestureBinding.instance.samplingOffset = kSamplingOffset;
-    ui.window.onPointerDataPacket(packet);
+    GestureBinding.instance!.samplingOffset = kSamplingOffset;
+    ui.window.onPointerDataPacket!(packet);
     expect(events.length, 0);
 
     await tester.pump(const Duration(milliseconds: 7));
     expect(events.length, 1);
-    expect(events[0].runtimeType, equals(PointerDownEvent));
+    expect(events[0], isA<PointerDownEvent>());
     expect(events[0].timeStamp, currentTestFrameTime() + kSamplingOffset);
     expect(events[0].position, Offset(5.0 / ui.window.devicePixelRatio, 0.0));
 
@@ -91,7 +89,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 2));
     expect(events.length, 2);
     expect(events[1].timeStamp, currentTestFrameTime() + kSamplingOffset);
-    expect(events[1].runtimeType, equals(PointerMoveEvent));
+    expect(events[1], isA<PointerMoveEvent>());
     expect(events[1].position, Offset(25.0 / ui.window.devicePixelRatio, 0.0));
     expect(events[1].delta, Offset(20.0 / ui.window.devicePixelRatio, 0.0));
 
@@ -99,11 +97,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 2));
     expect(events.length, 4);
     expect(events[2].timeStamp, currentTestFrameTime() + kSamplingOffset);
-    expect(events[2].runtimeType, equals(PointerMoveEvent));
+    expect(events[2], isA<PointerMoveEvent>());
     expect(events[2].position, Offset(40.0 / ui.window.devicePixelRatio, 0.0));
     expect(events[2].delta, Offset(15.0 / ui.window.devicePixelRatio, 0.0));
     expect(events[3].timeStamp, currentTestFrameTime() + kSamplingOffset);
-    expect(events[3].runtimeType, equals(PointerUpEvent));
+    expect(events[3], isA<PointerUpEvent>());
     expect(events[3].position, Offset(40.0 / ui.window.devicePixelRatio, 0.0));
   });
 }
