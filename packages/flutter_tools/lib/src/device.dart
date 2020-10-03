@@ -21,6 +21,7 @@ import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
@@ -42,6 +43,7 @@ import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
+import 'windows/windows_workflow.dart';
 
 DeviceManager get deviceManager => context.get<DeviceManager>();
 
@@ -340,6 +342,8 @@ class FlutterDeviceManager extends DeviceManager {
     @required Config config,
     @required Artifacts artifacts,
     @required MacOSWorkflow macOSWorkflow,
+    @required OperatingSystemUtils operatingSystemUtils,
+    @required WindowsWorkflow windowsWorkflow,
   }) : deviceDiscoverers =  <DeviceDiscovery>[
     AndroidDevices(
       logger: logger,
@@ -376,6 +380,7 @@ class FlutterDeviceManager extends DeviceManager {
       logger: logger,
       platform: platform,
       fileSystem: fileSystem,
+      operatingSystemUtils: operatingSystemUtils,
     ),
     LinuxDevices(
       platform: platform,
@@ -383,8 +388,15 @@ class FlutterDeviceManager extends DeviceManager {
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
+      operatingSystemUtils: operatingSystemUtils,
     ),
-    WindowsDevices(),
+    WindowsDevices(
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      logger: logger,
+      fileSystem: fileSystem,
+      windowsWorkflow: windowsWorkflow,
+    ),
     WebDevices(
       featureFlags: featureFlags,
       fileSystem: fileSystem,

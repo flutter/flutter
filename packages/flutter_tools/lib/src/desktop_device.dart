@@ -12,11 +12,11 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
 import 'protocol_discovery.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit
@@ -25,12 +25,14 @@ abstract class DesktopDevice extends Device {
   DesktopDevice(String identifier, {
       @required PlatformType platformType,
       @required bool ephemeral,
-      Logger logger,
-      ProcessManager processManager,
-      FileSystem fileSystem,
-    }) : _logger = logger ?? globals.logger, // TODO(jonahwilliams): remove after updating google3
-         _processManager = processManager ?? globals.processManager,
-         _fileSystem = fileSystem ?? globals.fs,
+      @required Logger logger,
+      @required ProcessManager processManager,
+      @required FileSystem fileSystem,
+      @required OperatingSystemUtils operatingSystemUtils,
+    }) : _logger = logger,
+         _processManager = processManager,
+         _fileSystem = fileSystem,
+         _operatingSystemUtils = operatingSystemUtils,
          super(
           identifier,
           category: Category.desktop,
@@ -41,6 +43,7 @@ abstract class DesktopDevice extends Device {
   final Logger _logger;
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
+  final OperatingSystemUtils _operatingSystemUtils;
   final Set<Process> _runningProcesses = <Process>{};
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
@@ -86,7 +89,7 @@ abstract class DesktopDevice extends Device {
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 
   @override
-  Future<String> get sdkNameAndVersion async => globals.os.name;
+  Future<String> get sdkNameAndVersion async => _operatingSystemUtils.name;
 
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
@@ -130,9 +133,11 @@ abstract class DesktopDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final Process process = await _processManager.start(<String>[
-      executable,
-    ]);
+    final Process process = await _processManager.start(
+      <String>[
+        executable,
+      ],
+    );
     _runningProcesses.add(process);
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
 
@@ -144,6 +149,7 @@ abstract class DesktopDevice extends Device {
       devicePort: debuggingOptions?.deviceVmServicePort,
       hostPort: debuggingOptions?.hostVmServicePort,
       ipv6: ipv6,
+      logger: _logger,
     );
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
@@ -172,7 +178,7 @@ abstract class DesktopDevice extends Device {
     // Walk a copy of _runningProcesses, since the exit handler removes from the
     // set.
     for (final Process process in Set<Process>.of(_runningProcesses)) {
-      succeeded &= process.kill();
+      succeeded &= _processManager.killPid(process.pid);
     }
     return succeeded;
   }
@@ -198,9 +204,12 @@ abstract class DesktopDevice extends Device {
   void onAttached(ApplicationPackage package, BuildMode buildMode, Process process) {}
 }
 
+/// A log reader for desktop applications that delegates to a [Process] stdout
+/// and stderr streams.
 class DesktopLogReader extends DeviceLogReader {
   final StreamController<List<int>> _inputController = StreamController<List<int>>.broadcast();
 
+  /// Begin listening to the stdout and stderr streams of the provided [process].
   void initializeProcess(Process process) {
     process.stdout.listen(_inputController.add);
     process.stderr.listen(_inputController.add);
