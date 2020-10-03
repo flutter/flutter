@@ -26,7 +26,8 @@ class BottomNavigationBarItem {
     required this.icon,
     @Deprecated(
         'Use "label" instead, as it allows for an improved text-scaling experience. '
-        'This feature was deprecated after v1.19.0.')
+        'This feature was deprecated after v1.19.0.'
+        )
         this.title,
     this.label,
     Widget? activeIcon,
@@ -70,7 +71,8 @@ class BottomNavigationBarItem {
   /// This field is deprecated, use [label] instead.
   @Deprecated(
       'Use "label" instead, as it allows for an improved text-scaling experience. '
-      'This feature was deprecated after v1.19.0.')
+      'This feature was deprecated after v1.19.0.'
+      )
   final Widget? title;
 
   /// The text label for this [BottomNavigationBarItem].
