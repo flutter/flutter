@@ -58,6 +58,10 @@ class SynchronousErrorTestImageProvider extends ImageProvider<int> {
 }
 
 class AsyncTestImageProvider extends ImageProvider<int> {
+  AsyncTestImageProvider(this.image);
+
+  final ui.Image image;
+
   @override
   Future<int> obtainKey(ImageConfiguration configuration) {
     return Future<int>.value(2);
@@ -66,7 +70,7 @@ class AsyncTestImageProvider extends ImageProvider<int> {
   @override
   ImageStreamCompleter load(int key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
-      Future<ImageInfo>.value(TestImageInfo(key))
+      Future<ImageInfo>.value(TestImageInfo(key, image: image))
     );
   }
 }
@@ -147,9 +151,10 @@ void main() {
     expect(onChangedCalled, equals(false));
   });
 
-  test('BoxDecorationImageListenerAsync', () {
-    FakeAsync().run((FakeAsync async) {
-      final ImageProvider imageProvider = AsyncTestImageProvider();
+  test('BoxDecorationImageListenerAsync', () async {
+    final ui.Image image = await createTestImage(width: 10, height: 10);
+    FakeAsync().run((FakeAsync async)  {
+      final ImageProvider imageProvider = AsyncTestImageProvider(image);
       final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
 
       final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
