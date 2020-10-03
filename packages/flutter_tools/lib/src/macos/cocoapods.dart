@@ -66,6 +66,13 @@ enum CocoaPodsStatus {
   brokenInstall,
 }
 
+/// Cocoapods is a depenency management solution for iOS and macOS applications.
+///
+/// Cocoapods is generally installed via homebrew and interacted with via
+/// the `pod` CLI command.
+///
+/// See also:
+///   * https://cocoapods.org/ , the cocoapods website.
 class CocoaPods {
   CocoaPods({
     @required FileSystem fileSystem,
