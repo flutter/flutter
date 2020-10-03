@@ -164,8 +164,6 @@ void registerHotRestartListener(ui.VoidCallback listener) {
 ///
 /// This is only available on the Web, as native Flutter configures the
 /// environment in the native embedder.
-// TODO(yjbanov): we should refactor the code such that the framework does not
-//                call this method directly.
 void initializeEngine() {
   if (_engineInitialized) {
     return;
@@ -205,6 +203,8 @@ void initializeEngine() {
     if (!waitingForAnimation) {
       waitingForAnimation = true;
       html.window.requestAnimationFrame((num highResTime) {
+        _frameTimingsOnVsync();
+
         // Reset immediately, because `frameHandler` can schedule more frames.
         waitingForAnimation = false;
 
@@ -215,6 +215,13 @@ void initializeEngine() {
         // microsecond precision, and only then convert to `int`.
         final int highResTimeMicroseconds = (1000 * highResTime).toInt();
 
+        // In Flutter terminology "building a frame" consists of "beginning
+        // frame" and "drawing frame".
+        //
+        // We do not call `_frameTimingsOnBuildFinish` from here because
+        // part of the rasterization process, particularly in the HTML
+        // renderer, takes place in the `SceneBuilder.build()`.
+        _frameTimingsOnBuildStart();
         if (window._onBeginFrame != null) {
           window.invokeOnBeginFrame(
               Duration(microseconds: highResTimeMicroseconds));
