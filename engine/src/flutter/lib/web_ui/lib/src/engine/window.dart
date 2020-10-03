@@ -765,12 +765,23 @@ class EngineWindow extends ui.Window {
   @override
   void render(ui.Scene scene) {
     if (experimentalUseSkia) {
+      // "Build finish" and "raster start" happen back-to-back because we
+      // render on the same thread, so there's no overhead from hopping to
+      // another thread.
+      //
+      // CanvasKit works differently from the HTML renderer in that in HTML
+      // we update the DOM in SceneBuilder.build, which is these function calls
+      // here are CanvasKit-only.
+      _frameTimingsOnBuildFinish();
+      _frameTimingsOnRasterStart();
+
       final LayerScene layerScene = scene as LayerScene;
       rasterizer!.draw(layerScene.layerTree);
     } else {
       final SurfaceScene surfaceScene = scene as SurfaceScene;
       domRenderer.renderScene(surfaceScene.webOnlyRootElement);
     }
+    _frameTimingsOnRasterFinish();
   }
 
   @visibleForTesting
