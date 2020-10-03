@@ -5363,10 +5363,6 @@ class RichText extends MultiChildRenderObjectWidget {
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
 ///
-/// The [image] is not disposed of by this widget. Creators of the widget are
-/// expected to call [Image.dispose] on the [image] once the [RawImage] is no
-/// longer buildable.
-///
 /// This widget is rarely used directly. Instead, consider using [Image].
 class RawImage extends LeafRenderObjectWidget {
   /// Creates a widget that displays an image.
@@ -5398,10 +5394,6 @@ class RawImage extends LeafRenderObjectWidget {
        super(key: key);
 
   /// The image to display.
-  ///
-  /// Since a [RawImage] is stateless, it does not ever dispose this image.
-  /// Creators of a [RawImage] are expected to call [Image.dispose] on this
-  /// image handle when the [RawImage] will no longer be needed.
   final ui.Image? image;
 
   /// A string identifying the source of the image.
@@ -5524,13 +5516,8 @@ class RawImage extends LeafRenderObjectWidget {
   @override
   RenderImage createRenderObject(BuildContext context) {
     assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
-    assert(
-      image?.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
-      'Creator of a RawImage disposed of the image when the RawImage still '
-      'needed it.'
-    );
     return RenderImage(
-      image: image?.clone(),
+      image: image,
       debugImageLabel: debugImageLabel,
       width: width,
       height: height,
@@ -5551,13 +5538,8 @@ class RawImage extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderImage renderObject) {
-    assert(
-      image?.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
-      'Creator of a RawImage disposed of the image when the RawImage still '
-      'needed it.'
-    );
     renderObject
-      ..image = image?.clone()
+      ..image = image
       ..debugImageLabel = debugImageLabel
       ..width = width
       ..height = height
@@ -5572,12 +5554,6 @@ class RawImage extends LeafRenderObjectWidget {
       ..textDirection = matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null
       ..invertColors = invertColors
       ..filterQuality = filterQuality;
-  }
-
-  @override
-  void didUnmountRenderObject(RenderImage renderObject) {
-    // Have the render object dispose its image handle.
-    renderObject.image = null;
   }
 
   @override

@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+// @dart = 2.10
 import 'package:flutter/foundation.dart';
 import 'package:fake_async/fake_async.dart';
 import '../flutter_test_alternative.dart';
 
 import 'capture_output.dart';
+
+String? foo;
 
 void main() {
   test('debugPrint', () {

@@ -50,7 +50,7 @@ void main() {
     ).devices, <Device>[]);
   });
 
-  testWithoutContext('WindowsDevices lists a devices if the workflow is supported ', () async {
+  testWithoutContext('WindowsDevices lists a devices if the workflow is supported', () async {
     expect(await WindowsDevices(
       windowsWorkflow: WindowsWorkflow(
         featureFlags: TestFeatureFlags(isWindowsEnabled: true),

@@ -38,12 +38,12 @@ Future<ui.Image> createTestImage({
 
   final int cacheKey = hashValues(width, height);
   if (cache && _cache.containsKey(cacheKey)) {
-    return _cache[cacheKey]!.clone();
+    return _cache[cacheKey]!;
   }
 
   final ui.Image image = await _createImage(width, height);
   if (cache) {
-    _cache[cacheKey] = image.clone();
+    _cache[cacheKey] = image;
   }
   return image;
 });

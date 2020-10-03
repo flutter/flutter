@@ -765,6 +765,16 @@ Future<void> _runWebIntegrationTests() async {
       '--dart-define=test.valueB=Value',
     ]
   );
+  await _runWebDebugTest('lib/sound_mode.dart', additionalArguments: <String>[
+    '--enable-experiment',
+    'non-nullable',
+    '--sound-null-safety',
+  ]);
+  await _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
+    '--enable-experiment',
+    'non-nullable',
+    '--sound-null-safety',
+  ]);
 }
 
 Future<void> _runWebStackTraceTest(String buildMode) async {

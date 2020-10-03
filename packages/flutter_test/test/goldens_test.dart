@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 import 'dart:async';
 import 'dart:io' as io;
 import 'dart:typed_data';
@@ -35,7 +33,7 @@ const List<int> _kSizeFailurePngBytes =
     0, 0, 73, 69, 78, 68, 174, 66, 96, 130];
 
 void main() {
-  MemoryFileSystem fs;
+  late MemoryFileSystem fs;
 
   setUp(() {
     final FileSystemStyle style = io.Platform.isWindows
@@ -86,7 +84,7 @@ void main() {
   });
 
   group('LocalFileComparator', () {
-    LocalFileComparator comparator;
+    late LocalFileComparator comparator;
 
     setUp(() {
       comparator = LocalFileComparator(fs.file(fix('/golden_test.dart')).uri, pathStyle: fs.path.style);
