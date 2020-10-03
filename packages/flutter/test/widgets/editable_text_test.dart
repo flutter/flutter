@@ -5706,6 +5706,119 @@ void main() {
     expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: -1, end: 9)), false);
   });
 
+  testWidgets('Preserves composing range if cursor moves within that range', (WidgetTester tester) async {
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+        selectionControls: materialTextSelectionControls,
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    controller.selection = const TextSelection.collapsed(offset: 5);
+    expect(state.currentTextEditingValue.composing, const TextRange(start: 4, end: 12));
+  });
+
+  testWidgets('Clears composing range if cursor moves outside that range', (WidgetTester tester) async {
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+        selectionControls: materialTextSelectionControls,
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Positioning cursor before the composing range should clear the composing range.
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    controller.selection = const TextSelection.collapsed(offset: 2);
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+    // Reset the composing range.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    expect(state.currentTextEditingValue.composing, const TextRange(start: 4, end: 12));
+
+    // Positioning cursor after the composing range should clear the composing range.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    controller.selection = const TextSelection.collapsed(offset: 14);
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+  });
+
+  testWidgets('Clears composing range if cursor moves outside that range', (WidgetTester tester) async {
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+        selectionControls: materialTextSelectionControls,
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Setting a selection before the composing range clears the composing range.
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    controller.selection = const TextSelection(baseOffset: 1, extentOffset: 2);
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+    // Reset the composing range.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    expect(state.currentTextEditingValue.composing, const TextRange(start: 4, end: 12));
+
+    // Setting a selection within the composing range clears the composing range.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    controller.selection = const TextSelection(baseOffset: 5, extentOffset: 7);
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+    // Reset the composing range.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    expect(state.currentTextEditingValue.composing, const TextRange(start: 4, end: 12));
+
+    // Setting a selection after the composing range clears the composing range.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'foo composing bar',
+      composing: TextRange(start: 4, end: 12),
+    ));
+    controller.selection = const TextSelection(baseOffset: 13, extentOffset: 15);
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/65374.
   testWidgets('Length formatter will not cause crash while the TextEditingValue is composing', (WidgetTester tester) async {
     final TextInputFormatter formatter = LengthLimitingTextInputFormatter(5);
