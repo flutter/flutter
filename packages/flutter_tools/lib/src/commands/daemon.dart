@@ -66,7 +66,7 @@ class DaemonCommand extends FlutterCommand {
 
 typedef DispatchCommand = void Function(Map<String, dynamic> command);
 
-typedef CommandHandler = FutureOr<dynamic> Function(Map<String, dynamic> args);
+typedef CommandHandler = Future<dynamic> Function(Map<String, dynamic> args);
 
 class Daemon {
   Daemon(
@@ -826,14 +826,14 @@ class DeviceDomain extends Domain {
   }
 
   /// Enable device events.
-  void enable(Map<String, dynamic> args) {
+  Future<void> enable(Map<String, dynamic> args) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.startPolling();
     }
   }
 
   /// Disable device events.
-  void disable(Map<String, dynamic> args) {
+  Future<void> disable(Map<String, dynamic> args) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.stopPolling();
     }
