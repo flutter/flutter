@@ -24,8 +24,10 @@ class UnderlineTabIndicator extends Decoration {
   const UnderlineTabIndicator({
     this.borderSide = const BorderSide(width: 2.0, color: Colors.white),
     this.insets = EdgeInsets.zero,
-  }) : assert(borderSide != null),
-       assert(insets != null);
+    this.strokeCap = StrokeCap.square,
+  })  : assert(borderSide != null),
+        assert(insets != null),
+        assert(strokeCap != null);
 
   /// The color and weight of the horizontal line drawn below the selected tab.
   final BorderSide borderSide;
@@ -37,6 +39,9 @@ class UnderlineTabIndicator extends Decoration {
   /// [TabBarIndicatorSize.label], or the entire tab with
   /// [TabBarIndicatorSize.tab].
   final EdgeInsetsGeometry insets;
+
+  /// The styles to use for line endings of the horizontal line drawn below the selected tab.
+  final StrokeCap strokeCap;
 
   @override
   Decoration lerpFrom(Decoration a, double t) {
@@ -61,7 +66,7 @@ class UnderlineTabIndicator extends Decoration {
   }
 
   @override
-  _UnderlinePainter createBoxPainter([ VoidCallback onChanged ]) {
+  _UnderlinePainter createBoxPainter([VoidCallback onChanged]) {
     return _UnderlinePainter(this, onChanged);
   }
 
@@ -81,12 +86,14 @@ class UnderlineTabIndicator extends Decoration {
   Path getClipPath(Rect rect, TextDirection textDirection) {
     return Path()..addRect(_indicatorRectFor(rect, textDirection));
   }
+
+  Paint _borderSidePaint() => borderSide.toPaint()..strokeCap = strokeCap;
 }
 
 class _UnderlinePainter extends BoxPainter {
   _UnderlinePainter(this.decoration, VoidCallback onChanged)
-    : assert(decoration != null),
-      super(onChanged);
+      : assert(decoration != null),
+        super(onChanged);
 
   final UnderlineTabIndicator decoration;
 
@@ -96,8 +103,10 @@ class _UnderlinePainter extends BoxPainter {
     assert(configuration.size != null);
     final Rect rect = offset & configuration.size;
     final TextDirection textDirection = configuration.textDirection;
-    final Rect indicator = decoration._indicatorRectFor(rect, textDirection).deflate(decoration.borderSide.width / 2.0);
-    final Paint paint = decoration.borderSide.toPaint()..strokeCap = StrokeCap.square;
+    final Rect indicator = decoration
+        ._indicatorRectFor(rect, textDirection)
+        .deflate(decoration.borderSide.width / 2.0);
+    final Paint paint = decoration._borderSidePaint();
     canvas.drawLine(indicator.bottomLeft, indicator.bottomRight, paint);
   }
 }
