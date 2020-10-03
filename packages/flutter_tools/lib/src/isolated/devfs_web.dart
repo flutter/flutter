@@ -819,6 +819,7 @@ class WebDevFS implements DevFS {
     bool fullRestart = false,
     String projectRootPath,
     bool skipAssets = false,
+    bool androidReload = false,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
