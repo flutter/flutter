@@ -270,7 +270,7 @@ class AnimationController extends Animation<double>
     this.duration,
     this.reverseDuration,
     this.debugLabel,
-    required TickerProvider vsync,
+    @required TickerProvider vsync,
     this.animationBehavior = AnimationBehavior.preserve,
   }) : assert(value != null),
        assert(vsync != null),
