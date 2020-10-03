@@ -15,3 +15,4 @@
 /packages/flutter_test/lib/src/goldens.dart @Piinks
 /packages/flutter_tools/templates/module/ios/ @jmagman
 /packages/flutter_tools/templates/**/Podfile* @jmagman
+/packages/flutter_tools/templates/**/Podfile* @jmagman
