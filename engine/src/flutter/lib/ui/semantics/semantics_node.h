@@ -119,8 +119,8 @@ struct SemanticsNode {
   std::string decreasedValue;
   int32_t textDirection = 0;  // 0=unknown, 1=rtl, 2=ltr
 
-  SkRect rect = SkRect::MakeEmpty();
-  SkM44 transform = SkM44{};  // Identity
+  SkRect rect = SkRect::MakeEmpty();  // Local space, relative to parent.
+  SkM44 transform = SkM44{};          // Identity
   std::vector<int32_t> childrenInTraversalOrder;
   std::vector<int32_t> childrenInHitTestOrder;
   std::vector<int32_t> customAccessibilityActions;

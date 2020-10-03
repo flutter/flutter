@@ -479,6 +479,10 @@ class SemanticsFlag {
   /// the semantics tree altogether. Hidden elements are only included in the
   /// semantics tree to work around platform limitations and they are mainly
   /// used to implement accessibility scrolling on iOS.
+  ///
+  /// See also:
+  ///
+  /// * [RenderObject.describeSemanticsClip]
   static const SemanticsFlag isHidden = SemanticsFlag._(_kIsHiddenIndex);
 
   /// Whether the semantics node represents an image.
