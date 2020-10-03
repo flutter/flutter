@@ -597,14 +597,13 @@ class AndroidDevice extends Device {
     ProtocolDiscovery observatoryDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
-      // TODO(devoncarew): Remember the forwarding information (so we can later remove the
-      // port forwarding or set it up again when adb fails on us).
       observatoryDiscovery = ProtocolDiscovery.observatory(
         await getLogReader(),
         portForwarder: portForwarder,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
         ipv6: ipv6,
+        logger: _logger,
       );
     }
 
