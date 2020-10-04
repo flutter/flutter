@@ -63,6 +63,12 @@ Future<T> runInContext<T>(
   bool runningOnBot;
   FutureOr<T> runnerWrapper() async {
     runningOnBot = await globals.isRunningOnBot;
+    // Initialize the flutter root as early as possible.
+    Cache.flutterRoot = Cache.defaultFlutterRoot(
+      fileSystem: globals.fs,
+      platform: globals.platform,
+      userMessages: userMessages,
+    );
     return runner();
   }
 

@@ -6,7 +6,6 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../artifacts.dart';
@@ -24,8 +23,6 @@ import '../tester/flutter_tester.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
-const String kSnapshotFileName = 'flutter_tools.snapshot'; // in //flutter/bin/cache/
-const String kFlutterToolsScriptFileName = 'flutter_tools.dart'; // in //flutter/packages/flutter_tools/bin/
 const String kFlutterEnginePackageName = 'sky_engine';
 
 class FlutterCommandRunner extends CommandRunner<void> {
@@ -157,43 +154,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     return '$prefix\n\n$usageWithoutDescription';
   }
 
-  static String get defaultFlutterRoot {
-    if (globals.platform.environment.containsKey(kFlutterRootEnvironmentVariableName)) {
-      return globals.platform.environment[kFlutterRootEnvironmentVariableName];
-    }
-    try {
-      if (globals.platform.script.scheme == 'data') {
-        return '../..'; // we're running as a test
-      }
-
-      if (globals.platform.script.scheme == 'package') {
-        final String packageConfigPath = Uri.parse(globals.platform.packageConfig).toFilePath();
-        return globals.fs.path.dirname(globals.fs.path.dirname(globals.fs.path.dirname(packageConfigPath)));
-      }
-
-      final String script = globals.platform.script.toFilePath();
-      if (globals.fs.path.basename(script) == kSnapshotFileName) {
-        return globals.fs.path.dirname(globals.fs.path.dirname(globals.fs.path.dirname(script)));
-      }
-      if (globals.fs.path.basename(script) == kFlutterToolsScriptFileName) {
-        return globals.fs.path.dirname(globals.fs.path.dirname(globals.fs.path.dirname(globals.fs.path.dirname(script))));
-      }
-
-      // If run from a bare script within the repo.
-      if (script.contains('flutter/packages/')) {
-        return script.substring(0, script.indexOf('flutter/packages/') + 8);
-      }
-      if (script.contains('flutter/examples/')) {
-        return script.substring(0, script.indexOf('flutter/examples/') + 8);
-      }
-    } on Exception catch (error) {
-      // we don't have a logger at the time this is run
-      // (which is why we don't use printTrace here)
-      print(userMessages.runnerNoRoot('$error'));
-    }
-    return '.';
-  }
-
   @override
   ArgResults parse(Iterable<String> args) {
     try {
@@ -263,10 +223,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
       FlutterTesterDevices.showFlutterTesterDevice = true;
     }
 
-    // We must set Cache.flutterRoot early because other features use it (e.g.
-    // enginePath's initializer uses it).
-    final String flutterRoot = topLevelResults['flutter-root'] as String ?? defaultFlutterRoot;
-    Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(flutterRoot));
+    if (topLevelResults.wasParsed('flutter-root')) {
+      Cache.flutterRoot = globals.fs.path.normalize(
+        globals.fs.path.absolute(topLevelResults['flutter-root'] as String));
+    }
 
     // Set up the tooling configuration.
     final String enginePath = await _findEnginePath(topLevelResults);
@@ -419,11 +379,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
-  }
-
-  @visibleForTesting
-  static void initFlutterRoot() {
-    Cache.flutterRoot ??= defaultFlutterRoot;
   }
 
   /// Get the root directories of the repo - the directories containing Dart packages.

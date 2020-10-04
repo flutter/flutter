@@ -35,7 +35,7 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
-      Cache.flutterRoot = FlutterCommandRunner.defaultFlutterRoot;
+      Cache.flutterRoot = '';
     });
 
     setUp(() {
