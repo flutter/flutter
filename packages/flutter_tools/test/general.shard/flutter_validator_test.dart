@@ -29,6 +29,7 @@ void main() {
       userMessages: UserMessages(),
       artifacts: artifacts,
       fileSystem: fileSystem,
+      flutterRoot: () => 'sdk/flutter',
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['Artifact.genSnapshot'],
@@ -66,6 +67,7 @@ void main() {
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
+      flutterRoot: () => 'sdk/flutter',
     );
 
     // gen_snapshot is downloaded on demand, and the doctor should not
@@ -85,7 +87,8 @@ void main() {
       userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
-      processManager: FakeProcessManager.list(<FakeCommand>[])
+      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      flutterRoot: () => 'sdk/flutter',
     );
 
     when(flutterVersion.channel).thenReturn('unknown');
@@ -96,7 +99,7 @@ void main() {
       validationType: ValidationType.partial,
       statusInfo: 'Channel unknown, 0.0.0, on Windows, locale en_US.UTF-8',
       messages: const <ValidationMessage>[
-        ValidationMessage('Flutter version 0.0.0 at null'),
+        ValidationMessage('Flutter version 0.0.0 at sdk/flutter'),
         ValidationMessage.error('version error'),
       ]),
     );
@@ -121,6 +124,7 @@ void main() {
       artifacts: artifacts,
       fileSystem: fileSystem,
       processManager: FakeProcessManager.any(),
+      flutterRoot: () => 'sdk/flutter'
     );
 
     expect(await flutterValidator.validate(), matchDoctorValidation(

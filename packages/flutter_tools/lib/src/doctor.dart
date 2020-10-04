@@ -89,6 +89,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         processManager: globals.processManager,
         userMessages: userMessages,
         artifacts: globals.artifacts,
+        flutterRoot: () => Cache.flutterRoot,
       ),
       if (androidWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
@@ -671,16 +672,19 @@ class FlutterValidator extends DoctorValidator {
     @required FileSystem fileSystem,
     @required Artifacts artifacts,
     @required ProcessManager processManager,
+    @required String Function() flutterRoot,
   }) : _flutterVersion = flutterVersion,
        _platform = platform,
        _userMessages = userMessages,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _processManager = processManager,
+       _flutterRoot = flutterRoot,
        super('Flutter');
 
   final Platform _platform;
   final FlutterVersion Function() _flutterVersion;
+  final String Function() _flutterRoot;
   final UserMessages _userMessages;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
@@ -699,7 +703,7 @@ class FlutterValidator extends DoctorValidator {
       frameworkVersion = version.frameworkVersion;
       messages.add(ValidationMessage(_userMessages.flutterVersion(
         frameworkVersion,
-        Cache.flutterRoot,
+        _flutterRoot(),
       )));
       messages.add(ValidationMessage(_userMessages.flutterRevision(
         version.frameworkRevisionShort,
