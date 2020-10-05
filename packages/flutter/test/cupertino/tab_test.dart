@@ -97,6 +97,10 @@ void main() {
 
     expect(tester.takeException(), isFlutterError);
     expect(unknownForRouteCalled, '/');
+
+    // Work-around for https://github.com/flutter/flutter/issues/65655.
+    await tester.pumpWidget(Container());
+    expect(tester.takeException(), isAssertionError);
   });
 
   testWidgets('Can use navigatorKey to navigate', (WidgetTester tester) async {

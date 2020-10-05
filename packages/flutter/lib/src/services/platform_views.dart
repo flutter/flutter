@@ -568,27 +568,22 @@ class _AndroidMotionEventConverter {
     }
 
     int action;
-    switch (event.runtimeType) {
-      case PointerDownEvent:
-        action = numPointers == 1
-            ? AndroidViewController.kActionDown
-            : AndroidViewController.pointerAction(
-                pointerIdx, AndroidViewController.kActionPointerDown);
-        break;
-      case PointerUpEvent:
-        action = numPointers == 1
-            ? AndroidViewController.kActionUp
-            : AndroidViewController.pointerAction(
-                pointerIdx, AndroidViewController.kActionPointerUp);
-        break;
-      case PointerMoveEvent:
-        action = AndroidViewController.kActionMove;
-        break;
-      case PointerCancelEvent:
-        action = AndroidViewController.kActionCancel;
-        break;
-      default:
-        return null;
+    if (event is PointerDownEvent) {
+      action = numPointers == 1
+          ? AndroidViewController.kActionDown
+          : AndroidViewController.pointerAction(
+              pointerIdx, AndroidViewController.kActionPointerDown);
+    } else if (event is PointerUpEvent) {
+      action = numPointers == 1
+          ? AndroidViewController.kActionUp
+          : AndroidViewController.pointerAction(
+              pointerIdx, AndroidViewController.kActionPointerUp);
+    } else if (event is PointerMoveEvent) {
+      action = AndroidViewController.kActionMove;
+    } else if (event is PointerCancelEvent) {
+      action = AndroidViewController.kActionCancel;
+    } else {
+      return null;
     }
 
     return AndroidMotionEvent(

@@ -12,6 +12,7 @@ import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
+import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
@@ -94,6 +95,11 @@ class WebEntrypointTarget extends Target {
       environment.fileSystem.file(packageFile),
       logger: environment.logger,
     );
+    final FlutterProject flutterProject = FlutterProject.current();
+    final String languageVersion = determineLanguageVersion(
+      environment.fileSystem.file(targetFile),
+      packageConfig[flutterProject.manifest.appName],
+    ) ?? '';
 
     // Use the PackageConfig to find the correct package-scheme import path
     // for the user application. If the application has a mix of package-scheme
@@ -117,6 +123,8 @@ class WebEntrypointTarget extends Target {
       final String generatedImport = packageConfig.toPackageUri(generatedUri)?.toString()
         ?? generatedUri.toString();
       contents = '''
+$languageVersion
+
 import 'dart:ui' as ui;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -134,6 +142,8 @@ Future<void> main() async {
 ''';
     } else {
       contents = '''
+$languageVersion
+
 import 'dart:ui' as ui;
 
 import '$mainImport' as entrypoint;
