@@ -69,7 +69,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   /// This method should be prefered to checking if it exists and
   /// then deleting, because it handles the edge case where the file is
   /// deleted by a different program between the two calls.
-  static bool deleteFileIfExists(File file, {bool recursive = false}) {
+  static bool deleteIfExists(FileSystemEntity file, {bool recursive = false}) {
     if (!file.existsSync()) {
       return false;
     }
@@ -79,16 +79,18 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       // Certain error codes indicate the file could not be found. It could have
       // been deleted by a different program while the tool was running.
       // if it still exists, the file likely exists on a read-only volume.
-      // This error code is the same across linux, windows, and macOS.
+      //
+      // On windows this is error code 2: ERROR_FILE_NOT_FOUND, and on
+      // macOS/Linux it is error code 2/ENOENT: No such file or directory.
       const int kSystemCannotFindFile = 2;
       if (err?.osError?.errorCode != kSystemCannotFindFile || _noExitOnFailure) {
         rethrow;
       }
       if (file.existsSync()) {
         throwToolExit(
-          'The Flutter tool tried to delete the file ${file.path} but was unable to. '
-          'This may be due to the file and/or project\'s location on a read-only volume. '
-          'Consider relocating the project and trying again',
+          'The Flutter tool tried to delete the file or directory ${file.path} but was '
+          'unable to. This may be due to the file and/or project\'s location on a read-only '
+          'volume. Consider relocating the project and trying again',
         );
       }
     }

@@ -115,14 +115,14 @@ void main() {
     final File file = MockFile();
     when(file.existsSync()).thenReturn(false);
 
-    expect(ErrorHandlingFileSystem.deleteFileIfExists(file), false);
+    expect(ErrorHandlingFileSystem.deleteIfExists(file), false);
   });
 
   testWithoutContext('deleteIfExists deletes if file exists', () {
     final File file = MockFile();
     when(file.existsSync()).thenReturn(true);
 
-     expect(ErrorHandlingFileSystem.deleteFileIfExists(file), true);
+     expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
   });
 
   testWithoutContext('deleteIfExists handles separate program deleting file', () {
@@ -137,7 +137,7 @@ void main() {
     when(file.deleteSync(recursive: false))
       .thenThrow(const FileSystemException('', '', OSError('', 2)));
 
-    expect(ErrorHandlingFileSystem.deleteFileIfExists(file), true);
+    expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
   });
 
   testWithoutContext('deleteIfExists throws tool exit if file exists on read-only volume', () {
@@ -146,7 +146,7 @@ void main() {
     when(file.deleteSync(recursive: false))
       .thenThrow(const FileSystemException('', '', OSError('', 2)));
 
-    expect(() => ErrorHandlingFileSystem.deleteFileIfExists(file), throwsA(isA<ToolExit>()));
+    expect(() => ErrorHandlingFileSystem.deleteIfExists(file), throwsA(isA<ToolExit>()));
   });
 
   testWithoutContext('deleteIfExists does not tool exit if file exists on read-only '
@@ -158,7 +158,7 @@ void main() {
 
     expect(() {
       ErrorHandlingFileSystem.noExitOnFailure(() {
-        ErrorHandlingFileSystem.deleteFileIfExists(file);
+        ErrorHandlingFileSystem.deleteIfExists(file);
       });
     }, throwsA(isA<FileSystemException>()));
   });

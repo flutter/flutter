@@ -437,7 +437,7 @@ class Cache {
       getStampFileFor('flutter_tools').deleteSync();
       for (final ArtifactSet artifact in _artifacts) {
         final File file = getStampFileFor(artifact.stampName);
-        ErrorHandlingFileSystem.deleteFileIfExists(file);
+        ErrorHandlingFileSystem.deleteIfExists(file);
       }
     } on FileSystemException catch (err) {
       _logger.printError('Failed to delete some stamp files: $err');

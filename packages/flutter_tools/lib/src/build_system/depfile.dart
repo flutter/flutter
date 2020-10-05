@@ -27,7 +27,7 @@ class DepfileService {
   /// exist.
   void writeToFile(Depfile depfile, File output) {
     if (depfile.inputs.isEmpty || depfile.outputs.isEmpty) {
-      ErrorHandlingFileSystem.deleteFileIfExists(output);
+      ErrorHandlingFileSystem.deleteIfExists(output);
       return;
     }
     final StringBuffer buffer = StringBuffer();

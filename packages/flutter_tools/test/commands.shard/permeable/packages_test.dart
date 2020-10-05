@@ -183,7 +183,7 @@ void main() {
       ].expand<String>((List<String> list) => list);
       for (final String path in allFiles) {
         final File file = globals.fs.file(globals.fs.path.join(projectPath, path));
-        ErrorHandlingFileSystem.deleteFileIfExists(file);
+        ErrorHandlingFileSystem.deleteIfExists(file);
       }
     }
 

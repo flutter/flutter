@@ -242,7 +242,7 @@ flutter_project:lib/
         toolExit: true,
       );
     } finally {
-      ErrorHandlingFileSystem.deleteFileIfExists(optionsFile);
+      ErrorHandlingFileSystem.deleteIfExists(optionsFile);
     }
   });
 
