@@ -110,7 +110,7 @@ The `restart()` restarts the given application. It returns a Map of `{ int code,
 
 #### app.reloadMethod (Removed)
 
-This functionality was deperecated and removed after 1.23.0
+This functionality was deprecated and removed after Flutter version 1.23.0
 
 #### app.callServiceExtension
 
