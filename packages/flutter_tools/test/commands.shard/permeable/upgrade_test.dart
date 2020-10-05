@@ -122,16 +122,15 @@ void main() {
         const FakeCommand(command: <String>[
           'git', 'fetch', '--tags'
         ]),
-        FakeCommand(command: const <String>[
-          'git', 'rev-parse', '--verify', '@{u}',
-        ],
-            onRun: () {
-              throw const ProcessException(
-                'git',
-                <String>['rev-parse', '--verify', '@{u}'],
-                'fatal: HEAD does not point to a branch',
-              );
-            }
+        FakeCommand(
+          command: const <String>['git', 'rev-parse', '--verify', '@{u}'],
+          onRun: () {
+            throw const ProcessException(
+              'git',
+              <String>['rev-parse', '--verify', '@{u}'],
+              'fatal: HEAD does not point to a branch',
+            );
+          }
         ),
       ]);
 
@@ -150,16 +149,15 @@ void main() {
         const FakeCommand(command: <String>[
           'git', 'fetch', '--tags'
         ]),
-        FakeCommand(command: const <String>[
-          'git', 'rev-parse', '--verify', '@{u}',
-          ],
+        FakeCommand(
+          command: const <String>['git', 'rev-parse', '--verify', '@{u}'],
           onRun: () {
             throw const ProcessException(
               'git',
               <String>['rev-parse', '--verify', '@{u}'],
               'fatal: no upstream configured for branch',
             );
-          }
+          },
         ),
       ]);
 
@@ -179,15 +177,16 @@ void main() {
       const String revision = 'abc123';
       const String errorMessage = 'fatal: Could not parse object ´$revision´';
       processManager.addCommands(<FakeCommand>[
-        FakeCommand(command: const <String>[
-          'git', 'reset', '--hard', revision,
-        ], onRun: () {
-          throw const ProcessException(
-            'git',
-            <String>['reset', '--hard', revision],
-            errorMessage,
-          );
-        }),
+        FakeCommand(
+          command: const <String>['git', 'reset', '--hard', revision],
+          onRun: () {
+            throw const ProcessException(
+              'git',
+              <String>['reset', '--hard', revision],
+              errorMessage,
+            );
+          },
+        ),
       ]);
 
       await expectLater(
@@ -203,13 +202,13 @@ void main() {
     testUsingContext('flutterUpgradeContinue passes env variables to child process', () async {
       processManager.addCommand(
         FakeCommand(
-            command: <String>[
-              globals.fs.path.join('bin', 'flutter'),
-              'upgrade',
-              '--continue',
-              '--no-version-check',
-            ],
-            environment: <String, String>{'FLUTTER_ALREADY_LOCKED': 'true', ...fakePlatform.environment}
+          command: <String>[
+            globals.fs.path.join('bin', 'flutter'),
+            'upgrade',
+            '--continue',
+            '--no-version-check',
+          ],
+          environment: <String, String>{'FLUTTER_ALREADY_LOCKED': 'true', ...fakePlatform.environment}
         ),
       );
       await realCommandRunner.flutterUpgradeContinue();
