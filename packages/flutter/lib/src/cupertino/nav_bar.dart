@@ -344,7 +344,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   ///
   /// If a border is null, the navigation bar will not display a border.
   /// {@endtemplate}
-  final Border border;
+  final Border? border;
 
   /// {@template flutter.cupertino.navBar.actionsForegroundColor}
   /// Default color used for text and icons of the [leading] and [trailing]
@@ -652,7 +652,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   final EdgeInsetsDirectional? padding;
 
   /// {@macro flutter.cupertino.navBar.border}
-  final Border border;
+  final Border? border;
 
   /// {@macro flutter.cupertino.navBar.actionsForegroundColor}
   ///

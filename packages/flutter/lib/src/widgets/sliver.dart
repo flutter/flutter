@@ -213,6 +213,10 @@ class _SaltedValueKey extends ValueKey<Key>{
   const _SaltedValueKey(Key key): assert(key != null), super(key);
 }
 
+/// Called to find the new index of a child based on its key in case of
+/// reordering.
+///
+/// Used by [SliverChildBuilderDelegate.findChildIndexCallback].
 typedef ChildIndexGetter = int Function(Key key);
 
 /// A delegate that supplies children for slivers using a builder callback.
@@ -1103,7 +1107,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           if (childParentData != null)
             childParentData.layoutOffset = null;
 
-          newChildren[newIndex] = _childElements[index]!;
+          newChildren[newIndex] = _childElements[index];
           // We need to make sure the original index gets processed.
           newChildren.putIfAbsent(index, () => null);
           // We do not want the remapped child to get deactivated during processElement.

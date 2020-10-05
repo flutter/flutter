@@ -71,16 +71,17 @@ class Plugin {
     String name,
     String path,
     YamlMap pluginYaml,
-    List<String> dependencies,
-  ) {
+    List<String> dependencies, {
+    @required FileSystem fileSystem,
+  }) {
     final List<String> errors = validatePluginYaml(pluginYaml);
     if (errors.isNotEmpty) {
       throwToolExit('Invalid plugin specification $name.\n${errors.join('\n')}');
     }
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
-      return Plugin._fromMultiPlatformYaml(name, path, pluginYaml, dependencies);
+      return Plugin._fromMultiPlatformYaml(name, path, pluginYaml, dependencies, fileSystem);
     }
-    return Plugin._fromLegacyYaml(name, path, pluginYaml, dependencies);
+    return Plugin._fromLegacyYaml(name, path, pluginYaml, dependencies, fileSystem);
   }
 
   factory Plugin._fromMultiPlatformYaml(
@@ -88,6 +89,7 @@ class Plugin {
     String path,
     dynamic pluginYaml,
     List<String> dependencies,
+    FileSystem fileSystem,
   ) {
     assert (pluginYaml != null && pluginYaml['platforms'] != null,
             'Invalid multi-platform plugin specification $name.');
@@ -103,6 +105,7 @@ class Plugin {
         name,
         platformsYaml[AndroidPlugin.kConfigKey] as YamlMap,
         path,
+        fileSystem,
       );
     }
 
@@ -144,6 +147,7 @@ class Plugin {
     String path,
     dynamic pluginYaml,
     List<String> dependencies,
+    FileSystem fileSystem,
   ) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
     final String pluginClass = pluginYaml['pluginClass'] as String;
@@ -155,6 +159,7 @@ class Plugin {
           package: pluginYaml['androidPackage'] as String,
           pluginClass: pluginClass,
           pluginPath: path,
+          fileSystem: fileSystem,
         );
       }
 
@@ -335,6 +340,7 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
     packageRootPath,
     flutterConfig['plugin'] as YamlMap,
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
+    fileSystem: globals.fs,
   );
 }
 

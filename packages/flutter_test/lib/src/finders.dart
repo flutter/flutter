@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show Tooltip;
+import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
 import 'all_elements.dart';
@@ -196,7 +197,7 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byWidgetPredicate(WidgetPredicate predicate, { String description, bool skipOffstage = true }) {
+  Finder byWidgetPredicate(WidgetPredicate predicate, { String? description, bool skipOffstage = true }) {
     return _WidgetPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
   }
 
@@ -238,7 +239,7 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byElementPredicate(ElementPredicate predicate, { String description, bool skipOffstage = true }) {
+  Finder byElementPredicate(ElementPredicate predicate, { String? description, bool skipOffstage = true }) {
     return _ElementPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
   }
 
@@ -259,8 +260,8 @@ class CommonFinders {
   /// If the [skipOffstage] argument is true (the default), then nodes that are
   /// [Offstage] or that are from inactive [Route]s are skipped.
   Finder descendant({
-    @required Finder of,
-    @required Finder matching,
+    required Finder of,
+    required Finder matching,
     bool matchRoot = false,
     bool skipOffstage = true,
   }) {
@@ -289,8 +290,8 @@ class CommonFinders {
   /// If the [matchRoot] argument is true then the widget(s) specified by [of]
   /// will be matched along with the ancestors.
   Finder ancestor({
-    @required Finder of,
-    @required Finder matching,
+    required Finder of,
+    required Finder matching,
     bool matchRoot = false,
   }) {
     return _AncestorFinder(of, matching, matchRoot: matchRoot);
@@ -318,7 +319,7 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder bySemanticsLabel(Pattern label, { bool skipOffstage = true }) {
-    if (WidgetsBinding.instance.pipelineOwner.semanticsOwner == null)
+    if (WidgetsBinding.instance!.pipelineOwner.semanticsOwner == null)
       throw StateError('Semantics are not enabled. '
                        'Make sure to call tester.ensureSemantics() before using '
                        'this finder, and call dispose on its return value after.');
@@ -329,7 +330,7 @@ class CommonFinders {
         if (element is! RenderObjectElement) {
           return false;
         }
-        final String semanticsLabel = element.renderObject?.debugSemantics?.label;
+        final String? semanticsLabel = element.renderObject.debugSemantics?.label;
         if (semanticsLabel == null) {
           return false;
         }
@@ -375,12 +376,12 @@ abstract class Finder {
   @protected
   Iterable<Element> get allCandidates {
     return collectAllElementsFrom(
-      WidgetsBinding.instance.renderViewElement,
+      WidgetsBinding.instance!.renderViewElement!,
       skipOffstage: skipOffstage,
     );
   }
 
-  Iterable<Element> _cachedResult;
+  Iterable<Element>? _cachedResult;
 
   /// Returns the current result. If [precache] was called and returned true, this will
   /// cheaply return the result that was computed then. Otherwise, it creates a new
@@ -519,7 +520,7 @@ class _HitTestableFinder extends ChainedFinder {
       assert(box != null);
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = HitTestResult();
-      WidgetsBinding.instance.hitTest(hitResult, absoluteOffset);
+      WidgetsBinding.instance!.hitTest(hitResult, absoluteOffset);
       for (final HitTestEntry entry in hitResult.path) {
         if (entry.target == candidate.renderObject) {
           yield candidate;
@@ -562,7 +563,8 @@ class _TextFinder extends MatchFinder {
     if (widget is Text) {
       if (widget.data != null)
         return widget.data == text;
-      return widget.textSpan.toPlainText() == text;
+      assert(widget.textSpan != null);
+      return widget.textSpan!.toPlainText() == text;
     } else if (widget is EditableText) {
       return widget.controller.text == text;
     }
@@ -584,8 +586,9 @@ class _TextContainingFinder extends MatchFinder {
     final Widget widget = candidate.widget;
     if (widget is Text) {
       if (widget.data != null)
-        return widget.data.contains(pattern);
-      return widget.textSpan.toPlainText().contains(pattern);
+        return widget.data!.contains(pattern);
+      assert(widget.textSpan != null);
+      return widget.textSpan!.toPlainText().contains(pattern);
     } else if (widget is EditableText) {
       return widget.controller.text.contains(pattern);
     }
@@ -665,12 +668,12 @@ class _WidgetFinder extends MatchFinder {
 }
 
 class _WidgetPredicateFinder extends MatchFinder {
-  _WidgetPredicateFinder(this.predicate, { String description, bool skipOffstage = true })
+  _WidgetPredicateFinder(this.predicate, { String? description, bool skipOffstage = true })
     : _description = description,
       super(skipOffstage: skipOffstage);
 
   final WidgetPredicate predicate;
-  final String _description;
+  final String? _description;
 
   @override
   String get description => _description ?? 'widget matching predicate ($predicate)';
@@ -682,12 +685,12 @@ class _WidgetPredicateFinder extends MatchFinder {
 }
 
 class _ElementPredicateFinder extends MatchFinder {
-  _ElementPredicateFinder(this.predicate, { String description, bool skipOffstage = true })
+  _ElementPredicateFinder(this.predicate, { String? description, bool skipOffstage = true })
     : _description = description,
       super(skipOffstage: skipOffstage);
 
   final ElementPredicate predicate;
-  final String _description;
+  final String? _description;
 
   @override
   String get description => _description ?? 'element matching predicate ($predicate)';
