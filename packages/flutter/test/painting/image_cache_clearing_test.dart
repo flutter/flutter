@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -21,13 +19,13 @@ void main() {
     final MemoryImage memoryImage = MemoryImage(bytes);
     final ImageStream stream = memoryImage.resolve(ImageConfiguration.empty);
     final Completer<void> completer = Completer<void>();
-    FlutterError.onError = (FlutterErrorDetails error) { completer.completeError(error.exception, error.stack); };
+    FlutterError.onError = (FlutterErrorDetails error) { completer.completeError(error.exception as Object, error.stack); };
     stream.addListener(ImageStreamListener(
       (ImageInfo image, bool synchronousCall) {
         completer.complete();
       }
     ));
-    imageCache.clearLiveImages();
+    imageCache!.clearLiveImages();
     await completer.future;
   });
 }
