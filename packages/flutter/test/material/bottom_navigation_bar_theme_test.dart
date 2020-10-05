@@ -30,7 +30,7 @@ void main() {
     expect(themeData.showUnselectedLabels, null);
     expect(themeData.type, null);
 
-    const BottomNavigationBarTheme theme = BottomNavigationBarTheme(data: BottomNavigationBarThemeData());
+    const BottomNavigationBarTheme theme = BottomNavigationBarTheme(data: BottomNavigationBarThemeData(), child: SizedBox());
     expect(theme.data.backgroundColor, null);
     expect(theme.data.elevation, null);
     expect(theme.data.selectedIconTheme, null);
