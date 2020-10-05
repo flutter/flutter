@@ -59,9 +59,9 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56314
 
   test('AssetImageProvider - evicts on null load', () async {
-    final Completer<StateError> error = Completer<StateError>();
+    final Completer<Object> error = Completer<Object>();
     FlutterError.onError = (FlutterErrorDetails details) {
-      error.complete(details.exception as StateError);
+      error.complete(details.exception);
     };
 
     final ImageProvider provider = ExactAssetImage('does-not-exist', bundle: _TestAssetBundle());
