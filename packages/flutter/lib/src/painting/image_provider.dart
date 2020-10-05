@@ -22,7 +22,7 @@ import 'image_stream.dart';
 typedef _KeyAndErrorHandlerCallback<T> = void Function(T key, ImageErrorListener handleError);
 
 /// Signature used for error handling by [_createErrorHandlerAndKey].
-typedef _AsyncKeyErrorHandler<T> = Future<void> Function(T key, dynamic exception, StackTrace? stack);
+typedef _AsyncKeyErrorHandler<T> = Future<void> Function(T key, Object exception, StackTrace? stack);
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
 /// select a specific image.
@@ -335,7 +335,7 @@ abstract class ImageProvider<T extends Object> {
       (T key, ImageErrorListener errorHandler) {
         resolveStreamForKey(configuration, stream, key, errorHandler);
       },
-      (T? key, dynamic exception, StackTrace? stack) async {
+      (T? key, Object exception, StackTrace? stack) async {
         await null; // wait an event turn in case a listener has been added to the image stream.
         final _ErrorImageCompleter imageCompleter = _ErrorImageCompleter();
         stream.setCompleter(imageCompleter);
@@ -391,7 +391,7 @@ abstract class ImageProvider<T extends Object> {
       (T key, ImageErrorListener innerHandleError) {
         completer.complete(PaintingBinding.instance!.imageCache!.statusForKey(key));
       },
-      (T? key, dynamic exception, StackTrace? stack) async {
+      (T? key, Object exception, StackTrace? stack) async {
         if (handleError != null) {
           handleError(exception, stack);
         } else {
@@ -427,7 +427,7 @@ abstract class ImageProvider<T extends Object> {
   ) {
     T? obtainedKey;
     bool didError = false;
-    Future<void> handleError(dynamic exception, StackTrace? stack) async {
+    Future<void> handleError(Object exception, StackTrace? stack) async {
       if (didError) {
         return;
       }
@@ -1118,7 +1118,7 @@ class _ErrorImageCompleter extends ImageStreamCompleter {
 
   void setError({
     DiagnosticsNode? context,
-    dynamic exception,
+    required Object exception,
     StackTrace? stack,
     InformationCollector? informationCollector,
     bool silent = false,

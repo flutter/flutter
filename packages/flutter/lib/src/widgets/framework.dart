@@ -4507,7 +4507,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
       message = _stringify(details.exception) + '\nSee also: https://flutter.dev/docs/testing/errors';
       return true;
     }());
-    final dynamic exception = details.exception;
+    final Object exception = details.exception;
     return ErrorWidget.withDetails(message: message, error: exception is FlutterError ? exception : null);
   }
 
@@ -6293,7 +6293,7 @@ class DebugCreator {
 
 FlutterErrorDetails _debugReportException(
   DiagnosticsNode context,
-  dynamic exception,
+  Object exception,
   StackTrace? stack, {
   InformationCollector? informationCollector,
 }) {

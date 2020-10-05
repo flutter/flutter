@@ -390,7 +390,7 @@ class FlutterErrorDetails with Diagnosticable {
   /// their default values. (`throw null` results in a
   /// [NullThrownError] exception.)
   const FlutterErrorDetails({
-    this.exception,
+    required this.exception,
     this.stack,
     this.library = 'Flutter framework',
     this.context,
@@ -403,7 +403,7 @@ class FlutterErrorDetails with Diagnosticable {
   /// with new values.
   FlutterErrorDetails copyWith({
     DiagnosticsNode? context,
-    dynamic exception,
+    Object? exception,
     InformationCollector? informationCollector,
     String? library,
     bool? silent,
@@ -437,7 +437,7 @@ class FlutterErrorDetails with Diagnosticable {
 
   /// The exception. Often this will be an [AssertionError], maybe specifically
   /// a [FlutterError]. However, this could be any value at all.
-  final dynamic exception;
+  final Object exception;
 
   /// The stack trace from where the [exception] was thrown (as opposed to where
   /// it was caught).
@@ -552,7 +552,7 @@ class FlutterErrorDetails with Diagnosticable {
       // some code snippets. This leads to ugly messages. To avoid this, we move
       // the assertion message up to before the code snippets, separated by a
       // newline, if we recognize that format is being used.
-      final Object? message = exception.message;
+      final Object? message = (exception as AssertionError).message;
       final String fullMessage = exception.toString();
       if (message is String && message != fullMessage) {
         if (fullMessage.length > message.length) {
@@ -589,8 +589,11 @@ class FlutterErrorDetails with Diagnosticable {
     if (exception is FlutterError) {
       return exception as FlutterError;
     }
-    if (exception is AssertionError && exception.message is FlutterError) {
-      return exception.message as FlutterError;
+    if (exception is AssertionError) {
+      final AssertionError assertion = exception as AssertionError;
+      if (assertion.message is FlutterError) {
+        return assertion.message as FlutterError;
+      }
     }
     return null;
   }
