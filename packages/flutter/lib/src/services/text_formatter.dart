@@ -25,6 +25,9 @@ import 'text_input.dart';
 /// To create custom formatters, extend the [TextInputFormatter] class and
 /// implement the [formatEditUpdate] method.
 ///
+/// ## Handling emojis and other complex characters
+/// {@template flutter.widgets.editableText.complexCharacters}
+///
 /// See also:
 ///
 ///  * [EditableText] on which the formatting apply.
@@ -300,13 +303,19 @@ class WhitelistingTextInputFormatter extends FilteringTextInputFormatter {
 }
 
 /// A [TextInputFormatter] that prevents the insertion of more characters
-/// (currently defined as Unicode scalar values) than allowed.
+/// than allowed.
 ///
 /// Since this formatter only prevents new characters from being added to the
 /// text, it preserves the existing [TextEditingValue.selection].
 ///
+/// Characters are counted as user-perceived characters using the
+/// [characters](https://pub.dev/packages/characters) package, so even complex
+/// characters like extended grapheme clusters and surrogate pairs are counted
+/// as single characters.
+///
+/// See also:
 ///  * [maxLength], which discusses the precise meaning of "number of
-///    characters" and how it may differ from the intuitive meaning.
+///    characters".
 class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// Creates a formatter that prevents the insertion of more characters than a
   /// limit.
