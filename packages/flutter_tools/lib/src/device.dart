@@ -21,6 +21,7 @@ import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
@@ -42,6 +43,7 @@ import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
+import 'windows/windows_workflow.dart';
 
 DeviceManager get deviceManager => context.get<DeviceManager>();
 
@@ -77,7 +79,7 @@ class PlatformType {
   String toString() => value;
 }
 
-/// A class to get all available devices.
+/// A disovery mechanism for flutter-supported development devices.
 abstract class DeviceManager {
 
   /// Constructing DeviceManagers is cheap; they only do expensive work if some
@@ -210,6 +212,9 @@ abstract class DeviceManager {
   /// * If the user did not specify a device id and there is more than one
   /// device connected, then filter out unsupported devices and prioritize
   /// ephemeral devices.
+  ///
+  /// * If [flutterProject] is null, then assume the project supports all
+  /// device types.
   Future<List<Device>> findTargetDevices(FlutterProject flutterProject, { Duration timeout }) async {
     if (timeout != null) {
       // Reset the cache with the specified timeout.
@@ -310,8 +315,12 @@ abstract class DeviceManager {
 
   /// Returns whether the device is supported for the project.
   ///
-  /// This exists to allow the check to be overridden for google3 clients.
+  /// This exists to allow the check to be overridden for google3 clients. If
+  /// [flutterProject] is null then return true.
   bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
+    if (flutterProject == null) {
+      return true;
+    }
     return device.isSupportedForProject(flutterProject);
   }
 }
@@ -333,6 +342,8 @@ class FlutterDeviceManager extends DeviceManager {
     @required Config config,
     @required Artifacts artifacts,
     @required MacOSWorkflow macOSWorkflow,
+    @required OperatingSystemUtils operatingSystemUtils,
+    @required WindowsWorkflow windowsWorkflow,
   }) : deviceDiscoverers =  <DeviceDiscovery>[
     AndroidDevices(
       logger: logger,
@@ -369,6 +380,7 @@ class FlutterDeviceManager extends DeviceManager {
       logger: logger,
       platform: platform,
       fileSystem: fileSystem,
+      operatingSystemUtils: operatingSystemUtils,
     ),
     LinuxDevices(
       platform: platform,
@@ -376,8 +388,15 @@ class FlutterDeviceManager extends DeviceManager {
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
+      operatingSystemUtils: operatingSystemUtils,
     ),
-    WindowsDevices(),
+    WindowsDevices(
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      logger: logger,
+      fileSystem: fileSystem,
+      windowsWorkflow: windowsWorkflow,
+    ),
     WebDevices(
       featureFlags: featureFlags,
       fileSystem: fileSystem,
@@ -428,7 +447,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   Future<List<Device>> pollingGetDevices({ Duration timeout });
 
-  Future<void> startPolling() async {
+  void startPolling() {
     if (_timer == null) {
       deviceNotifier ??= ItemListNotifier<Device>();
       // Make initial population the default, fast polling timeout.
@@ -449,18 +468,18 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     });
   }
 
-  Future<void> stopPolling() async {
+  void stopPolling() {
     _timer?.cancel();
     _timer = null;
   }
 
   @override
-  Future<List<Device>> get devices async {
+  Future<List<Device>> get devices {
     return _populateDevices();
   }
 
   @override
-  Future<List<Device>> discoverDevices({ Duration timeout }) async {
+  Future<List<Device>> discoverDevices({ Duration timeout }) {
     deviceNotifier = null;
     return _populateDevices(timeout: timeout);
   }
@@ -480,7 +499,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     return deviceNotifier.onRemoved;
   }
 
-  Future<void> dispose() async => await stopPolling();
+  void dispose() => stopPolling();
 
   @override
   String toString() => '$name device discovery';
