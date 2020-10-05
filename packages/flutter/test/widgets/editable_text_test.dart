@@ -5778,6 +5778,8 @@ void main() {
   });
 
   group('callback errors', () {
+    const String errorText = 'Oh no!';
+
     testWidgets('onSelectionChanged can throw errors', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -5790,7 +5792,7 @@ void main() {
             cursorColor: cursorColor,
             selectionControls: materialTextSelectionControls,
             onSelectionChanged: (TextSelection selection, SelectionChangedCause cause) {
-              throw Exception('Oh no');
+              throw FlutterError(errorText);
             },
           ),
         ),
@@ -5807,7 +5809,9 @@ void main() {
         text: 'Foo bar',
         selection: TextSelection(baseOffset: 0, extentOffset: 3),
       ));
-      expect(tester.takeException(), isNotNull);
+      final dynamic error = tester.takeException();
+      expect(error, isFlutterError);
+      expect(error.toString(), contains(errorText));
     });
 
     testWidgets('onChanged can throw errors', (WidgetTester tester) async {
@@ -5824,14 +5828,16 @@ void main() {
           style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
           keyboardType: TextInputType.text,
           onChanged: (String text) {
-            throw Exception('Oh no');
+            throw FlutterError(errorText);
           },
         ),
       ));
 
       // Modify the text and expect an error from onChanged.
       await tester.enterText(find.byType(EditableText), '...');
-      expect(tester.takeException(), isNotNull);
+      final dynamic error = tester.takeException();
+      expect(error, isFlutterError);
+      expect(error.toString(), contains(errorText));
     });
 
     testWidgets('onEditingComplete can throw errors', (WidgetTester tester) async {
@@ -5848,7 +5854,7 @@ void main() {
           style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
           keyboardType: TextInputType.text,
           onEditingComplete: () {
-            throw Exception('Oh no');
+            throw FlutterError(errorText);
           },
         ),
       ));
@@ -5860,7 +5866,9 @@ void main() {
 
       // Submit and expect an error from onEditingComplete.
       await tester.testTextInput.receiveAction(TextInputAction.done);
-      expect(tester.takeException(), isNotNull);
+      final dynamic error = tester.takeException();
+      expect(error, isFlutterError);
+      expect(error.toString(), contains(errorText));
     });
 
     testWidgets('onSubmitted can throw errors', (WidgetTester tester) async {
@@ -5877,7 +5885,7 @@ void main() {
           style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
           keyboardType: TextInputType.text,
           onSubmitted: (String text) {
-            throw Exception('Oh no');
+            throw FlutterError(errorText);
           },
         ),
       ));
@@ -5889,7 +5897,9 @@ void main() {
 
       // Submit and expect an error from onSubmitted.
       await tester.testTextInput.receiveAction(TextInputAction.done);
-      expect(tester.takeException(), isNotNull);
+      final dynamic error = tester.takeException();
+      expect(error, isFlutterError);
+      expect(error.toString(), contains(errorText));
     });
   });
 }
