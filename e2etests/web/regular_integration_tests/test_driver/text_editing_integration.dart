@@ -143,6 +143,57 @@ void main() {
     expect(input2.value, 'Text2');
   });
 
+  testWidgets('Jump between TextFormFields with tab key after CapsLock is'
+      'activated',
+          (WidgetTester tester) async {
+    app.main();
+    await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
+
+    // Focus on a TextFormField.
+    final Finder finder = find.byKey(const Key('input'));
+    expect(finder, findsOneWidget);
+    await tester.tap(find.byKey(const Key('input')));
+
+    // A native input element will be appended to the DOM.
+    final List<Node> nodeList = document.getElementsByTagName('input');
+    expect(nodeList.length, equals(1));
+    final InputElement input =
+    document.getElementsByTagName('input')[0] as InputElement;
+
+    // Press and release CapsLock.
+    dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
+      'key': 'CapsLock',
+      'code': 'CapsLock',
+      'bubbles': true,
+      'cancelable': true,
+    });
+    dispatchKeyboardEvent(input, 'keyup', <String, dynamic>{
+      'key': 'CapsLock',
+      'code': 'CapsLock',
+      'bubbles': true,
+      'cancelable': true,
+    });
+
+    // Press Tab. The focus should move to the next TextFormField.
+    dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
+      'key': 'Tab',
+      'code': 'Tab',
+      'bubbles': true,
+      'cancelable': true,
+    });
+
+    await tester.pumpAndSettle();
+
+    // A native input element for the next TextField should be attached to the
+    // DOM.
+    final InputElement input2 =
+    document.getElementsByTagName('input')[0] as InputElement;
+    expect(input2.value, 'Text2');
+  });
+
   testWidgets('Read-only fields work', (WidgetTester tester) async {
     const String text = 'Lorem ipsum dolor sit amet';
     app.main();
