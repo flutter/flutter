@@ -515,7 +515,7 @@ void main() {
       expect(iosDevices.deviceNotifier.items, isEmpty);
       expect(eventStream.hasListener, isTrue);
 
-      await iosDevices.dispose();
+      iosDevices.dispose();
       expect(eventStream.hasListener, isFalse);
     });
 

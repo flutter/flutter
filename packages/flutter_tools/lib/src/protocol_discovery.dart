@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import 'base/io.dart';
+import 'base/logger.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
 
@@ -22,8 +23,9 @@ class ProtocolDiscovery {
     this.hostPort,
     this.devicePort,
     this.ipv6,
-  }) : assert(logReader != null)
-  {
+    Logger logger,
+  }) : _logger = logger,
+       assert(logReader != null) {
     _deviceLogSubscription = logReader.logLines.listen(
       _handleLine,
       onDone: _stopScrapingLogs,
@@ -39,6 +41,7 @@ class ProtocolDiscovery {
     @required int hostPort,
     @required int devicePort,
     @required bool ipv6,
+    Logger logger, // TODO(jonahwilliams): make required.
   }) {
     const String kObservatoryService = 'Observatory';
     return ProtocolDiscovery._(
@@ -50,6 +53,7 @@ class ProtocolDiscovery {
       hostPort: hostPort,
       devicePort: devicePort,
       ipv6: ipv6,
+      logger: logger ?? globals.logger,
     );
   }
 
@@ -59,6 +63,7 @@ class ProtocolDiscovery {
   final int hostPort;
   final int devicePort;
   final bool ipv6;
+  final Logger _logger;
 
   /// The time to wait before forwarding a new observatory URIs from [logReader].
   final Duration throttleDuration;
@@ -138,20 +143,20 @@ class ProtocolDiscovery {
       return;
     }
     if (devicePort != null && uri.port != devicePort) {
-      globals.printTrace('skipping potential observatory $uri due to device port mismatch');
+      _logger.printTrace('skipping potential observatory $uri due to device port mismatch');
       return;
     }
     _uriStreamController.add(uri);
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
-    globals.printTrace('$serviceName URL on device: $deviceUri');
+    _logger.printTrace('$serviceName URL on device: $deviceUri');
     Uri hostUri = deviceUri;
 
     if (portForwarder != null) {
       final int actualDevicePort = deviceUri.port;
       final int actualHostPort = await portForwarder.forward(actualDevicePort, hostPort: hostPort);
-      globals.printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
+      _logger.printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 

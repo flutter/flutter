@@ -144,10 +144,12 @@ Future<T> runInContext<T>(
         config: globals.config,
         fuchsiaWorkflow: fuchsiaWorkflow,
         xcDevice: globals.xcdevice,
+        windowsWorkflow: windowsWorkflow,
         macOSWorkflow: MacOSWorkflow(
           platform: globals.platform,
           featureFlags: featureFlags,
         ),
+        operatingSystemUtils: globals.os,
       ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
@@ -249,7 +251,10 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         platform: globals.platform,
       ),
-      WindowsWorkflow: () => const WindowsWorkflow(),
+      WindowsWorkflow: () => WindowsWorkflow(
+        featureFlags: featureFlags,
+        platform: globals.platform,
+      ),
       Xcode: () => Xcode(
         logger: globals.logger,
         processManager: globals.processManager,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -13,7 +11,7 @@ void main() {
   test('Element diagnostics json includes widgetRuntimeType', () async {
     final Element element = _TestElement();
 
-    final Map<String, Object> json = element.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate());
+    final Map<String, Object?> json = element.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate());
     expect(json['widgetRuntimeType'], 'Placeholder');
     expect(json['stateful'], isFalse);
   });
@@ -21,7 +19,7 @@ void main() {
   test('StatefulElement diagnostics are stateful', () {
     final Element element = StatefulElement(const Tooltip(message: 'foo'));
 
-    final Map<String, Object> json = element.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate());
+    final Map<String, Object?> json = element.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate());
     expect(json['widgetRuntimeType'], 'Tooltip');
     expect(json['stateful'], isTrue);
   });
@@ -70,13 +68,13 @@ void main() {
     );
 
     test('default', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate());
+      final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate());
       expect(result.containsKey('properties'), isFalse);
       expect(result.containsKey('children'), isFalse);
     });
 
     test('subtreeDepth 1', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate(subtreeDepth: 1));
+      final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate(subtreeDepth: 1));
       expect(result.containsKey('properties'), isFalse);
       final List<Map<String, Object>> children = result['children'] as List<Map<String, Object>>;
       expect(children[0].containsKey('children'), isFalse);
@@ -85,7 +83,7 @@ void main() {
     });
 
     test('subtreeDepth 5', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate(subtreeDepth: 5));
+      final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate(subtreeDepth: 5));
       expect(result.containsKey('properties'), isFalse);
       final List<Map<String, Object>> children = result['children'] as List<Map<String, Object>>;
       expect(children[0]['children'], hasLength(0));
@@ -94,13 +92,13 @@ void main() {
     });
 
     test('includeProperties', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate(includeProperties: true));
+      final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate(includeProperties: true));
       expect(result.containsKey('children'), isFalse);
       expect(result['properties'], hasLength(7));
     });
 
     test('includeProperties with subtreedepth 1', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate(
+      final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate(
         includeProperties: true,
         subtreeDepth: 1,
       ));
@@ -113,7 +111,7 @@ void main() {
     });
 
     test('additionalNodeProperties', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const TestDiagnosticsSerializationDelegate(
+      final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(const TestDiagnosticsSerializationDelegate(
         includeProperties: true,
         subtreeDepth: 1,
         additionalNodePropertiesMap: <String, Object>{
@@ -131,7 +129,7 @@ void main() {
     });
 
     test('filterProperties - sublist', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(TestDiagnosticsSerializationDelegate(
+      final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(TestDiagnosticsSerializationDelegate(
           includeProperties: true,
           propertyFilter: (List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
             return nodes.whereType<StringProperty>().toList();
@@ -144,7 +142,7 @@ void main() {
 
     test('filterProperties - replace', () {
       bool replaced = false;
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(TestDiagnosticsSerializationDelegate(
+      final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(TestDiagnosticsSerializationDelegate(
           includeProperties: true,
           propertyFilter: (List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
             if (replaced) {
@@ -162,7 +160,7 @@ void main() {
     });
 
     test('filterChildren - sublist', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(TestDiagnosticsSerializationDelegate(
+      final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(TestDiagnosticsSerializationDelegate(
           subtreeDepth: 1,
           childFilter: (List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
             return nodes.where((DiagnosticsNode node) => node.getProperties().isEmpty).toList();
@@ -173,7 +171,7 @@ void main() {
     });
 
     test('filterChildren - replace', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(TestDiagnosticsSerializationDelegate(
+      final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(TestDiagnosticsSerializationDelegate(
           subtreeDepth: 1,
           childFilter: (List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
             return nodes.expand((DiagnosticsNode node) => node.getChildren()).toList();
@@ -185,10 +183,10 @@ void main() {
     });
 
     test('nodeTruncator', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(TestDiagnosticsSerializationDelegate(
+      final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(TestDiagnosticsSerializationDelegate(
           subtreeDepth: 5,
           includeProperties: true,
-          nodeTruncator: (List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
+          nodeTruncator: (List<DiagnosticsNode> nodes, DiagnosticsNode? owner) {
             return nodes.take(2).toList();
           },
       ));
@@ -202,7 +200,7 @@ void main() {
     });
 
     test('delegateForAddingNodes', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(TestDiagnosticsSerializationDelegate(
+      final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(TestDiagnosticsSerializationDelegate(
           subtreeDepth: 5,
           includeProperties: true,
           nodeDelegator: (DiagnosticsNode node, DiagnosticsSerializationDelegate delegate) {
@@ -234,7 +232,7 @@ class _TestElement extends Element {
 
 class TestTree extends Object with DiagnosticableTreeMixin {
   TestTree({
-    this.name,
+    this.name = '',
     this.style,
     this.children = const <TestTree>[],
     this.properties = const <DiagnosticsNode>[],
@@ -243,7 +241,7 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   final String name;
   final List<TestTree> children;
   final List<DiagnosticsNode> properties;
-  final DiagnosticsTreeStyle style;
+  final DiagnosticsTreeStyle? style;
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
@@ -258,11 +256,15 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     if (style != null)
-      properties.defaultDiagnosticsTreeStyle = style;
+      properties.defaultDiagnosticsTreeStyle = style!;
 
     this.properties.forEach(properties.add);
   }
 }
+
+typedef NodeDelegator = DiagnosticsSerializationDelegate Function(DiagnosticsNode node, TestDiagnosticsSerializationDelegate delegate);
+typedef NodeTruncator = List<DiagnosticsNode> Function(List<DiagnosticsNode> nodes, DiagnosticsNode? owner);
+typedef NodeFilter = List<DiagnosticsNode> Function(List<DiagnosticsNode> nodes, DiagnosticsNode owner);
 
 class TestDiagnosticsSerializationDelegate implements DiagnosticsSerializationDelegate {
   const TestDiagnosticsSerializationDelegate({
@@ -276,10 +278,10 @@ class TestDiagnosticsSerializationDelegate implements DiagnosticsSerializationDe
   });
 
   final Map<String, Object> additionalNodePropertiesMap;
-  final List<DiagnosticsNode> Function(List<DiagnosticsNode> nodes, DiagnosticsNode owner) childFilter;
-  final List<DiagnosticsNode> Function(List<DiagnosticsNode> nodes, DiagnosticsNode owner) propertyFilter;
-  final List<DiagnosticsNode> Function(List<DiagnosticsNode> nodes, DiagnosticsNode owner) nodeTruncator;
-  final DiagnosticsSerializationDelegate Function(DiagnosticsNode node, TestDiagnosticsSerializationDelegate delegate) nodeDelegator;
+  final NodeFilter? childFilter;
+  final NodeFilter? propertyFilter;
+  final NodeTruncator? nodeTruncator;
+  final NodeDelegator? nodeDelegator;
 
   @override
   Map<String, Object> additionalNodeProperties(DiagnosticsNode node) {
@@ -289,7 +291,7 @@ class TestDiagnosticsSerializationDelegate implements DiagnosticsSerializationDe
   @override
   DiagnosticsSerializationDelegate delegateForNode(DiagnosticsNode node) {
     if (nodeDelegator != null) {
-      return nodeDelegator(node, this);
+      return nodeDelegator!(node, this);
     }
     return subtreeDepth > 0 ? copyWith(subtreeDepth: subtreeDepth - 1) : this;
   }
@@ -299,12 +301,12 @@ class TestDiagnosticsSerializationDelegate implements DiagnosticsSerializationDe
 
   @override
   List<DiagnosticsNode> filterChildren(List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
-    return childFilter != null ? childFilter(nodes, owner) : nodes;
+    return childFilter?.call(nodes, owner) ?? nodes;
   }
 
   @override
   List<DiagnosticsNode> filterProperties(List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
-    return propertyFilter != null ? propertyFilter(nodes, owner) : nodes;
+    return propertyFilter?.call(nodes, owner) ?? nodes;
   }
 
   @override
@@ -314,12 +316,12 @@ class TestDiagnosticsSerializationDelegate implements DiagnosticsSerializationDe
   final int subtreeDepth;
 
   @override
-  List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
-    return nodeTruncator != null ? nodeTruncator(nodes, owner) : nodes;
+  List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode? owner) {
+    return nodeTruncator?.call(nodes, owner) ?? nodes;
   }
 
   @override
-  DiagnosticsSerializationDelegate copyWith({int subtreeDepth, bool includeProperties}) {
+  DiagnosticsSerializationDelegate copyWith({int? subtreeDepth, bool? includeProperties}) {
     return TestDiagnosticsSerializationDelegate(
       includeProperties: includeProperties ?? this.includeProperties,
       subtreeDepth: subtreeDepth ?? this.subtreeDepth,
