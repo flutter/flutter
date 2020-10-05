@@ -35,21 +35,6 @@ if [[ "$OS" == "linux" ]]; then
     cd dev/integration_tests/flutter_gallery
     flutter build apk --release -t lib/main_publish.dart
   )
-  echo "Android Flutter Gallery built"
-  if [[ -z "$CIRRUS_PR" && "$CIRRUS_BRANCH" == "dev" && "$version" != *"pre"* ]]; then
-    echo "Deploying Flutter Gallery $version to Play Store..."
-    set +x # Don't echo back the below.
-    if [ -n "$ANDROID_GALLERY_UPLOAD_KEY" ]; then
-      echo "$ANDROID_GALLERY_UPLOAD_KEY" | base64 --decode > /root/.android/debug.keystore
-    fi
-    set -x
-    (
-      cd dev/integration_tests/flutter_gallery/android
-      bundle exec fastlane deploy_play_store
-    )
-  else
-    echo "(Not deploying; Flutter Gallery is only deployed to Play store for tagged dev branch commits.)"
-  fi
 elif [[ "$OS" == "darwin" ]]; then
   echo "Building Flutter Gallery $version for iOS..."
   export BUNDLE_GEMFILE="$FLUTTER_ROOT/dev/ci/mac/Gemfile"
