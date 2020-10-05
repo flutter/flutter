@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
@@ -30,6 +31,7 @@ void main() {
       artifacts: artifacts,
       fileSystem: fileSystem,
       flutterRoot: () => 'sdk/flutter',
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'linux'),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['Artifact.genSnapshot'],
@@ -66,6 +68,7 @@ void main() {
       userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'windows'),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       flutterRoot: () => 'sdk/flutter',
     );
@@ -87,6 +90,7 @@ void main() {
       userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'windows'),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       flutterRoot: () => 'sdk/flutter',
     );
@@ -124,6 +128,7 @@ void main() {
       artifacts: artifacts,
       fileSystem: fileSystem,
       processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'windows'),
       flutterRoot: () => 'sdk/flutter'
     );
 
@@ -139,3 +144,9 @@ void main() {
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
+class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
+  FakeOperatingSystemUtils({this.name});
+
+  @override
+  final String name;
+}

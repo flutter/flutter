@@ -12,6 +12,7 @@ import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
@@ -90,6 +91,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         userMessages: userMessages,
         artifacts: globals.artifacts,
         flutterRoot: () => Cache.flutterRoot,
+        operatingSystemUtils: globals.os,
       ),
       if (androidWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
@@ -673,6 +675,7 @@ class FlutterValidator extends DoctorValidator {
     @required Artifacts artifacts,
     @required ProcessManager processManager,
     @required String Function() flutterRoot,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _flutterVersion = flutterVersion,
        _platform = platform,
        _userMessages = userMessages,
@@ -680,6 +683,7 @@ class FlutterValidator extends DoctorValidator {
        _artifacts = artifacts,
        _processManager = processManager,
        _flutterRoot = flutterRoot,
+       _operatingSystemUtils = operatingSystemUtils,
        super('Flutter');
 
   final Platform _platform;
@@ -689,6 +693,7 @@ class FlutterValidator extends DoctorValidator {
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
   final ProcessManager _processManager;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   Future<ValidationResult> validate() async {
@@ -742,7 +747,7 @@ class FlutterValidator extends DoctorValidator {
       statusInfo: _userMessages.flutterStatusInfo(
         versionChannel,
         frameworkVersion,
-        _platform.name,
+        _operatingSystemUtils.name,
         _platform.localeName,
       ),
     );
