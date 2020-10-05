@@ -305,6 +305,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
+        '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.packages',
@@ -316,6 +317,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
+        '--no-source-maps',
         '-O4',
         '--no-minify',
         '--csp',
@@ -339,6 +341,7 @@ void main() {
         ...kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
         '-Ddart.vm.profile=true',
+        '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.packages',
@@ -351,6 +354,7 @@ void main() {
         ...kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
         '-Ddart.vm.profile=true',
+        '--no-source-maps',
         '-O4',
         '--no-minify',
         '-o',
@@ -370,6 +374,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
+        '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.packages',
@@ -381,6 +386,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
+        '--no-source-maps',
         '-O4',
         '--no-minify',
         '-o',
@@ -400,6 +406,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
+        '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.packages',
@@ -411,6 +418,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
+        '--no-source-maps',
         '-O4',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
@@ -430,6 +438,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
+        '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.packages',
@@ -441,6 +450,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
+        '--no-source-maps',
         '-O3',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
@@ -481,6 +491,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
+        '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.packages',
@@ -494,6 +505,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
+        '--no-source-maps',
         '-O4',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
@@ -506,6 +518,37 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
+  test('Dart2JSTarget can enable source maps', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kSourceMapsEnabled] = 'true';
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=.packages',
+       '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ]
+    ));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        '-O4',
+        '-o',
+        environment.buildDir.childFile('main.dart.js').absolute.path,
+        environment.buildDir.childFile('app.dill').absolute.path,
+      ]
+    ));
+
+    await const Dart2JSTarget().build(environment);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+  }));
+
+
   test('Dart2JSTarget calls dart2js with Dart defines in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
     environment.defines[kDartDefines] = 'FOO=bar,BAZ=qux';
@@ -515,6 +558,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
+        '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.packages',
@@ -528,6 +572,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
+        '--no-source-maps',
         '-O4',
         '--no-minify',
         '-o',

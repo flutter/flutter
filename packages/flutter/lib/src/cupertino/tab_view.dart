@@ -172,7 +172,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     WidgetBuilder? routeBuilder;
     String? title;
     if (name == Navigator.defaultRouteName && widget.builder != null) {
-      routeBuilder = widget.builder!;
+      routeBuilder = widget.builder;
       title = widget.defaultTitle;
     } else if (widget.routes != null) {
       routeBuilder = widget.routes![name];

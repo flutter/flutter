@@ -37,6 +37,7 @@ import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
+import 'runner/local_engine.dart';
 import 'version.dart';
 
 Artifacts get artifacts => context.get<Artifacts>();
@@ -61,6 +62,8 @@ FlutterProjectFactory get projectFactory {
 }
 
 CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
+
+LocalEngineLocator get localEngineLocator => context.get<LocalEngineLocator>();
 
 /// Currently active implementation of the file system.
 ///

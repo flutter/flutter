@@ -256,6 +256,52 @@ void main() {
     });
   });
 
+  group('Toggle from input entry mode validates dates', () {
+    setUp(() {
+      initialEntryMode = DatePickerEntryMode.input;
+    });
+
+    testWidgets('Invalid start date', (WidgetTester tester) async {
+      // Invalid start date should have neither a start nor end date selected in
+      // calendar mode
+      await preparePicker(tester, (Future<DateTimeRange> range) async {
+        await tester.enterText(find.byType(TextField).at(0), '12/27/1918');
+        await tester.enterText(find.byType(TextField).at(1), '12/25/2016');
+        await tester.tap(find.byIcon(Icons.calendar_today));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Start Date'), findsOneWidget);
+        expect(find.text('End Date'), findsOneWidget);
+      });
+    });
+
+    testWidgets('Invalid end date', (WidgetTester tester) async {
+      // Invalid end date should only have a start date selected
+      await preparePicker(tester, (Future<DateTimeRange> range) async {
+        await tester.enterText(find.byType(TextField).at(0), '12/24/2016');
+        await tester.enterText(find.byType(TextField).at(1), '12/25/2050');
+        await tester.tap(find.byIcon(Icons.calendar_today));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Dec 24'), findsOneWidget);
+        expect(find.text('End Date'), findsOneWidget);
+      });
+    });
+
+    testWidgets('Invalid range', (WidgetTester tester) async {
+      // Start date after end date should just use the start date
+      await preparePicker(tester, (Future<DateTimeRange> range) async {
+        await tester.enterText(find.byType(TextField).at(0), '12/25/2016');
+        await tester.enterText(find.byType(TextField).at(1), '12/24/2016');
+        await tester.tap(find.byIcon(Icons.calendar_today));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Dec 25'), findsOneWidget);
+        expect(find.text('End Date'), findsOneWidget);
+      });
+    });
+  });
+
   testWidgets('OK Cancel button layout', (WidgetTester tester) async {
      Widget buildFrame(TextDirection textDirection) {
        return MaterialApp(
