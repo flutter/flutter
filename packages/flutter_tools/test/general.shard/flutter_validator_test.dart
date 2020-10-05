@@ -31,7 +31,7 @@ void main() {
       artifacts: artifacts,
       fileSystem: fileSystem,
       flutterRoot: () => 'sdk/flutter',
-      operatingSystemUtils: FakeOperatingSystemUtils(name: 'linux'),
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['Artifact.genSnapshot'],
@@ -68,7 +68,7 @@ void main() {
       userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
-      operatingSystemUtils: FakeOperatingSystemUtils(name: 'windows'),
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       flutterRoot: () => 'sdk/flutter',
     );
@@ -90,7 +90,7 @@ void main() {
       userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
-      operatingSystemUtils: FakeOperatingSystemUtils(name: 'windows'),
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       flutterRoot: () => 'sdk/flutter',
     );
@@ -128,7 +128,7 @@ void main() {
       artifacts: artifacts,
       fileSystem: fileSystem,
       processManager: FakeProcessManager.any(),
-      operatingSystemUtils: FakeOperatingSystemUtils(name: 'windows'),
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
       flutterRoot: () => 'sdk/flutter'
     );
 
