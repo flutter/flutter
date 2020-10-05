@@ -270,7 +270,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void handlePointerEvent(PointerEvent event) {
     assert(!locked);
     HitTestResult? hitTestResult;
-    if (event is PointerDownEvent || event is PointerSignalEvent) {
+    if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent) {
       assert(!_hitTests.containsKey(event.pointer));
       hitTestResult = HitTestResult();
       hitTest(hitTestResult, event.position);
@@ -298,7 +298,6 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       return true;
     }());
     if (hitTestResult != null ||
-        event is PointerHoverEvent ||
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
       assert(event.position != null);
@@ -318,8 +317,8 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// null, the event is also sent to every [HitTestTarget] in the entries of the
   /// given [HitTestResult]. Any exceptions from the handlers are caught.
   ///
-  /// The `hitTestResult` argument may only be null for [PointerHoverEvent]s,
-  /// [PointerAddedEvent]s, or [PointerRemovedEvent]s.
+  /// The `hitTestResult` argument may only be null for [PointerAddedEvent]s or
+  /// [PointerRemovedEvent]s.
   @override // from HitTestDispatcher
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     assert(!locked);
@@ -327,7 +326,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     // [PointerAddedEvent], or [PointerRemovedEvent]. These events are specially
     // routed here; other events will be routed through the `handleEvent` below.
     if (hitTestResult == null) {
-      assert(event is PointerHoverEvent || event is PointerAddedEvent || event is PointerRemovedEvent);
+      assert(event is PointerAddedEvent || event is PointerRemovedEvent);
       try {
         pointerRouter.route(event);
       } catch (exception, stack) {

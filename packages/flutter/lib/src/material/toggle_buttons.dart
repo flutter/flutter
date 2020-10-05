@@ -144,7 +144,7 @@ import 'toggle_buttons_theme.dart';
 /// selected, while [disabledBorderColor] determines the border's color when
 /// the button is disabled. [borderColor] is used when the button is enabled.
 ///
-/// To remove the border, set [borderWidth] to null. Setting [borderWidth] to
+/// To remove the border, set [renderBorder] to false. Setting [borderWidth] to
 /// 0.0 results in a hairline border. For more information on hairline borders,
 /// see [BorderSide.width].
 ///

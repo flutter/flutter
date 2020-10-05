@@ -499,10 +499,13 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   }
 
   /// The [State] object that this property is registered with.
+  ///
+  /// Must only be called when [isRegistered] is true.
   @protected
-  State? get state {
+  State get state {
+    assert(isRegistered);
     assert(_debugAssertNotDisposed());
-    return _owner;
+    return _owner!;
   }
 
   /// Whether this property is currently registered with a [RestorationMixin].
@@ -609,13 +612,10 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 /// class RestorationExampleApp extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     // The [RootRestorationScope] can be removed once it is part of [MaterialApp].
-///     return RootRestorationScope(
-///       restorationId: 'root',
-///       child: MaterialApp(
-///         title: 'Restorable Counter',
-///         home: RestorableCounter(restorationId: 'counter'),
-///       ),
+///     return MaterialApp(
+///       restorationScopeId: 'app',
+///       title: 'Restorable Counter',
+///       home: RestorableCounter(restorationId: 'counter'),
 ///     );
 ///   }
 /// }

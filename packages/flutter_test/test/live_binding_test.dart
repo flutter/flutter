@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -24,7 +22,7 @@ void main() {
   });
 
   testWidgets('Input PointerHoverEvent', (WidgetTester tester) async {
-    PointerHoverEvent hoverEvent;
+    PointerHoverEvent? hoverEvent;
     await tester.pumpWidget(MaterialApp(home: MouseRegion(
       child: const Text('Test'),
       onHover: (PointerHoverEvent event){
@@ -37,7 +35,7 @@ void main() {
     // for mouse input without a down event, moveTo generates a hover event
     await gesture.moveTo(location);
     expect(hoverEvent, isNotNull);
-    expect(hoverEvent.position, location);
+    expect(hoverEvent!.position, location);
     await gesture.removePointer();
   });
 }

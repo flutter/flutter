@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @TestOn('!chrome') // web has different stack traces
 
 import 'package:flutter/foundation.dart';
@@ -41,13 +39,13 @@ Future<StackTrace> getSampleStack() async {
 }
 
 Future<void> main() async {
-  final List<String> console = <String>[];
+  final List<String?> console = <String?>[];
 
   final StackTrace sampleStack = await getSampleStack();
 
   setUp(() async {
     expect(debugPrint, equals(debugPrintThrottled));
-    debugPrint = (String message, { int wrapWidth }) {
+    debugPrint = (String? message, { int? wrapWidth }) {
       console.add(message);
     };
   });
@@ -160,7 +158,7 @@ Future<void> main() async {
 
   test('Error reporting - NoSuchMethodError', () async {
     expect(console, isEmpty);
-    final dynamic exception = NoSuchMethodError.withInvocation(5,
+    final Object exception = NoSuchMethodError.withInvocation(5,
         Invocation.method(#foo, <dynamic>[2, 4]));
 
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(

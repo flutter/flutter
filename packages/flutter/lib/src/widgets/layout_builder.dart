@@ -116,23 +116,21 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
 
   void _layout(ConstraintType constraints) {
     owner!.buildScope(this, () {
-      Widget? built;
-      if (widget.builder != null) {
-        try {
-          built = widget.builder(this, constraints);
-          debugWidgetBuilderValue(widget, built);
-        } catch (e, stack) {
-          built = ErrorWidget.builder(
-            _debugReportException(
-              ErrorDescription('building $widget'),
-              e,
-              stack,
-              informationCollector: () sync* {
-                yield DiagnosticsDebugCreator(DebugCreator(this));
-              },
-            ),
-          );
-        }
+      Widget built;
+      try {
+        built = widget.builder(this, constraints);
+        debugWidgetBuilderValue(widget, built);
+      } catch (e, stack) {
+        built = ErrorWidget.builder(
+          _debugReportException(
+            ErrorDescription('building $widget'),
+            e,
+            stack,
+            informationCollector: () sync* {
+              yield DiagnosticsDebugCreator(DebugCreator(this));
+            },
+          ),
+        );
       }
       try {
         _child = updateChild(_child, built, null);
