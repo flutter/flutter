@@ -46,9 +46,9 @@ String checkBaseHref(String baseHref) {
   return baseHref;
 }
 
-/// Prepends a slash to [path] if it doesn't start with a slash already.
+/// Prepends a forward slash to [path] if it doesn't start with one already.
 ///
-/// If the path already starts with a slash, it'll be returned unchanged.
+/// Returns [path] unchanged if it already starts with a forward slash.
 String ensureLeadingSlash(String path) {
   if (!path.startsWith('/')) {
     return '/$path';
@@ -56,7 +56,7 @@ String ensureLeadingSlash(String path) {
   return path;
 }
 
-/// Removes the trailing slash from [path] if any exists.
+/// Removes the trailing forward slash from [path] if any.
 String stripTrailingSlash(String path) {
   if (path.endsWith('/')) {
     return path.substring(0, path.length - 1);

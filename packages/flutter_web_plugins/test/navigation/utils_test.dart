@@ -5,7 +5,7 @@
 @TestOn('chrome') // Uses web-only Flutter SDK
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_web_plugins/src/history/utils.dart';
+import 'package:flutter_web_plugins/src/navigation/utils.dart';
 
 void main() {
   test('checks base href', () {
