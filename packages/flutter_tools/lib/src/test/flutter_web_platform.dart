@@ -888,7 +888,7 @@ class TestGoldenComparator {
     final TestGoldenComparatorProcess process = await _processForTestFile(testUri);
     process.sendCommand(imageFile, goldenKey, updateGoldens);
 
-    final Map<String, dynamic> result = await process.getResponse().timeout(const Duration(seconds: 20));
+    final Map<String, dynamic> result = await process.getResponse();
 
     if (result == null) {
       return 'unknown error';

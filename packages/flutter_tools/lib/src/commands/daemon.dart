@@ -423,7 +423,6 @@ typedef _RunOrAttach = Future<void> Function({
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('restart', restart);
-    registerHandler('reloadMethod', reloadMethod);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
     registerHandler('detach', detach);
@@ -634,28 +633,6 @@ class AppDomain extends Domain {
             fullRestart: fullRestart,
             pause: pauseAfterRestart,
             reason: restartReason);
-      },
-    );
-  }
-
-  Future<OperationResult> reloadMethod(Map<String, dynamic> args) async {
-    final String appId = _getStringArg(args, 'appId', required: true);
-    final String classId = _getStringArg(args, 'class', required: true);
-    final String libraryId = _getStringArg(args, 'library', required: true);
-    final bool debounce = _getBoolArg(args, 'debounce') ?? false;
-
-    final AppInstance app = _getApp(appId);
-    if (app == null) {
-      throw "app '$appId' not found";
-    }
-
-    return _queueAndDebounceReloadAction(
-      app,
-      OperationType.reloadMethod,
-      debounce,
-      null,
-      () {
-        return app.reloadMethod(classId: classId, libraryId: libraryId);
       },
     );
   }
@@ -1094,10 +1071,6 @@ class AppInstance {
     return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
   }
 
-  Future<OperationResult> reloadMethod({ String classId, String libraryId }) {
-    return runner.reloadMethod(classId: classId, libraryId: libraryId);
-  }
-
   Future<void> stop() => runner.exit();
   Future<void> detach() => runner.detach();
 
@@ -1353,7 +1326,6 @@ class LaunchMode {
 }
 
 enum OperationType {
-  reloadMethod,
   reload,
   restart
 }
