@@ -116,6 +116,17 @@ class Keyboard {
     }
 
     _lastMetaState = _getMetaState(event);
+    if (event.type == 'keydown') {
+      // For lock modifiers _getMetaState won't report a metaState at keydown.
+      // See https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/getModifierState.
+      if (event.key == 'CapsLock') {
+        _lastMetaState |= modifierCapsLock;
+      } else if (event.code == 'NumLock') {
+        _lastMetaState |= modifierNumLock;
+      } else if (event.key == 'ScrollLock') {
+        _lastMetaState |= modifierScrollLock;
+      }
+    }
     final Map<String, dynamic> eventData = <String, dynamic>{
       'type': event.type,
       'keymap': 'web',
@@ -132,7 +143,6 @@ class Keyboard {
     switch (event.key) {
       case 'Tab':
         return true;
-
       default:
         return false;
     }
@@ -157,6 +167,9 @@ const int _modifierShift = 0x01;
 const int _modifierAlt = 0x02;
 const int _modifierControl = 0x04;
 const int _modifierMeta = 0x08;
+const int modifierNumLock = 0x10;
+const int modifierCapsLock = 0x20;
+const int modifierScrollLock = 0x40;
 
 /// Creates a bitmask representing the meta state of the [event].
 int _getMetaState(html.KeyboardEvent event) {
@@ -173,8 +186,17 @@ int _getMetaState(html.KeyboardEvent event) {
   if (event.getModifierState('Meta')) {
     metaState |= _modifierMeta;
   }
-  // TODO: Re-enable lock key modifiers once there is support on Flutter
-  // Framework. https://github.com/flutter/flutter/issues/46718
+  // See https://github.com/flutter/flutter/issues/66601 for why we don't
+  // set the ones below based on persistent state.
+  // if (event.getModifierState("CapsLock")) {
+  //   metaState |= modifierCapsLock;
+  // }
+  // if (event.getModifierState("NumLock")) {
+  //   metaState |= modifierNumLock;
+  // }
+  // if (event.getModifierState("ScrollLock")) {
+  //   metaState |= modifierScrollLock;
+  // }
   return metaState;
 }
 
