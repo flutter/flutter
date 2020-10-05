@@ -212,11 +212,11 @@ void main() {
                     showTimePicker(
                       context: context,
                       initialTime: const TimeOfDay(hour: 7, minute: 0),
-                      builder: (BuildContext context, Widget child) {
+                      builder: (BuildContext context, Widget? child) {
                         return Directionality(
                           key: const Key('parent'),
                           textDirection: TextDirection.ltr,
-                          child: child,
+                          child: child!,
                         );
                       },
                     );
