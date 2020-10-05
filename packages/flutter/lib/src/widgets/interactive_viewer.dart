@@ -150,8 +150,8 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// ```dart
   ///   Widget build(BuildContext context) {
-  ///     const int _rowCount = 20;
-  ///     const int _columnCount = 3;
+  ///     const int _rowCount = 48;
+  ///     const int _columnCount = 6;
   ///
   ///     return InteractiveViewer(
   ///       alignPanAxis: true,
@@ -160,7 +160,7 @@ class InteractiveViewer extends StatefulWidget {
   ///       child: Table(
   ///         columnWidths: <int, TableColumnWidth>{
   ///           for (int column = 0; column < _columnCount; column += 1)
-  ///             column: const FixedColumnWidth(300.0),
+  ///             column: const FixedColumnWidth(200.0),
   ///         },
   ///         children: <TableRow>[
   ///           for (int row = 0; row < _rowCount; row += 1)
@@ -168,8 +168,14 @@ class InteractiveViewer extends StatefulWidget {
   ///               children: <Widget>[
   ///                 for (int column = 0; column < _columnCount; column += 1)
   ///                   Container(
-  ///                     height: 100,
-  ///                     color: row % 2 + column % 2 == 1 ? Colors.red : Colors.green,
+  ///                     height: 26,
+  ///                     color: row % 2 + column % 2 == 1
+  ///                         ? Colors.white
+  ///                         : Colors.grey.withOpacity(0.1),
+  ///                     child: Align(
+  ///                       alignment: Alignment.centerLeft,
+  ///                       child: Text('$row x $column'),
+  ///                     ),
   ///                   ),
   ///               ],
   ///             ),
