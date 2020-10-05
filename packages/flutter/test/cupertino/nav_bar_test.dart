@@ -871,6 +871,24 @@ void main() {
     expect(bottom.color, const Color(0xFFAABBCC));
   });
 
+  testWidgets('Default background is transparent when showing large title', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverNavigationBar(
+                largeTitle: Text('Large Title'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoSliverNavigationBar), paints..rect(color: const Color(0x00000000)));
+  });
+
   testWidgets(
     'Standard title golden',
     (WidgetTester tester) async {
