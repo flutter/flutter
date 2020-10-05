@@ -1519,7 +1519,7 @@ class Scaffold extends StatefulWidget {
   /// return value with the previous listenable, if it has changed, unregister
   /// the listener, and register a listener to the new [ScaffoldGeometry]
   /// listenable.
-  static ValueListenable<ScaffoldGeometry>? geometryOf(BuildContext context) {
+  static ValueListenable<ScaffoldGeometry> geometryOf(BuildContext context) {
     final _ScaffoldScope? scaffoldScope = context.dependOnInheritedWidgetOfExactType<_ScaffoldScope>();
     if (scaffoldScope == null)
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -1895,23 +1895,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       assert(bottomSheetKey.currentState != null);
       _showFloatingActionButton();
 
-      void _closed(void value) {
-        setState(() {
-          _currentBottomSheet = null;
-        });
+      bottomSheetKey.currentState!.close();
+      setState(() {
+        _currentBottomSheet = null;
+      });
 
-        if (animationController.status != AnimationStatus.dismissed) {
-          _dismissedBottomSheets.add(bottomSheet);
-        }
-        completer.complete();
+      if (animationController.status != AnimationStatus.dismissed) {
+        _dismissedBottomSheets.add(bottomSheet);
       }
-
-      final Future<void>? closing = bottomSheetKey.currentState?.close();
-      if (closing != null) {
-        closing.then(_closed);
-      } else {
-        _closed(null);
-      }
+      completer.complete();
     }
 
     final LocalHistoryEntry? entry = isPersistent
@@ -2144,7 +2136,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // INTERNALS
 
-  _ScaffoldGeometryNotifier? _geometryNotifier;
+  late _ScaffoldGeometryNotifier _geometryNotifier;
 
   // Backwards compatibility for deprecated resizeToAvoidBottomPadding property
   bool get _resizeToAvoidBottomInset {
@@ -2227,12 +2219,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _snackBarController?.dispose();
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
-    _geometryNotifier!.dispose();
+    _geometryNotifier.dispose();
     for (final _StandardBottomSheet bottomSheet in _dismissedBottomSheets) {
-      bottomSheet.animationController?.dispose();
+      bottomSheet.animationController.dispose();
     }
     if (_currentBottomSheet != null) {
-      _currentBottomSheet!._widget.animationController?.dispose();
+      _currentBottomSheet!._widget.animationController.dispose();
     }
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
@@ -2507,7 +2499,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         child: widget.floatingActionButton,
         fabMoveAnimation: _floatingActionButtonMoveController,
         fabMotionAnimator: _floatingActionButtonAnimator,
-        geometryNotifier: _geometryNotifier!,
+        geometryNotifier: _geometryNotifier,
         currentController: _floatingActionButtonVisibilityController,
       ),
       _ScaffoldSlot.floatingActionButton,
@@ -2582,7 +2574,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
                 floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
                 floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
-                geometryNotifier: _geometryNotifier!,
+                geometryNotifier: _geometryNotifier,
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
@@ -2687,7 +2679,7 @@ class _StandardBottomSheet extends StatefulWidget {
     this.clipBehavior,
   }) : super(key: key);
 
-  final AnimationController? animationController; // we control it, but it must be disposed by whoever created it.
+  final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
   final bool enableDrag;
   final VoidCallback? onClosing;
   final VoidCallback? onDismissed;
@@ -2709,9 +2701,9 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   void initState() {
     super.initState();
     assert(widget.animationController != null);
-    assert(widget.animationController!.status == AnimationStatus.forward
-        || widget.animationController!.status == AnimationStatus.completed);
-    widget.animationController!.addStatusListener(_handleStatusChange);
+    assert(widget.animationController.status == AnimationStatus.forward
+        || widget.animationController.status == AnimationStatus.completed);
+    widget.animationController.addStatusListener(_handleStatusChange);
   }
 
   @override
@@ -2720,9 +2712,9 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
     assert(widget.animationController == oldWidget.animationController);
   }
 
-  Future<void> close() async {
+  void close() {
     assert(widget.animationController != null);
-    widget.animationController!.reverse();
+    widget.animationController.reverse();
     widget.onClosing?.call();
   }
 
@@ -2734,7 +2726,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   void _handleDragEnd(DragEndDetails details, { bool? isClosing }) {
     // Allow the bottom sheet to animate smoothly from its current position.
     animationCurve = _BottomSheetSuspendedCurve(
-      widget.animationController!.value,
+      widget.animationController.value,
       curve: _standardBottomSheetCurve,
     );
   }
@@ -2780,11 +2772,11 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   Widget build(BuildContext context) {
     if (widget.animationController != null) {
       return AnimatedBuilder(
-        animation: widget.animationController!,
+        animation: widget.animationController,
         builder: (BuildContext context, Widget? child) {
           return Align(
             alignment: AlignmentDirectional.topStart,
-            heightFactor: animationCurve.transform(widget.animationController!.value),
+            heightFactor: animationCurve.transform(widget.animationController.value),
             child: child,
           );
         },
@@ -2845,7 +2837,7 @@ class _ScaffoldScope extends InheritedWidget {
        super(key: key, child: child);
 
   final bool hasDrawer;
-  final _ScaffoldGeometryNotifier? geometryNotifier;
+  final _ScaffoldGeometryNotifier geometryNotifier;
 
   @override
   bool updateShouldNotify(_ScaffoldScope oldWidget) {
