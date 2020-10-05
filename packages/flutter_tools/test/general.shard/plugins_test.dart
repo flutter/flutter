@@ -1418,8 +1418,7 @@ flutter:
     });
 
     testWithoutContext('Symlink failures give developer mode instructions on recent versions of Windows', () async {
-      final MockPlatform platform = MockPlatform();
-      when(platform.isWindows).thenReturn(true);
+      final Platform platform = FakePlatform(operatingSystem: 'windows');
       final MockOperatingSystemUtils os = MockOperatingSystemUtils();
       when(os.name).thenReturn('Microsoft Windows [Version 10.0.14972.1]');
 
@@ -1430,8 +1429,7 @@ flutter:
     });
 
     testWithoutContext('Symlink failures instruct developers to run as administrator on older versions of Windows', () async {
-      final MockPlatform platform = MockPlatform();
-      when(platform.isWindows).thenReturn(true);
+      final Platform platform = FakePlatform(operatingSystem: 'windows');
       final MockOperatingSystemUtils os = MockOperatingSystemUtils();
       when(os.name).thenReturn('Microsoft Windows [Version 10.0.14393]');
 
@@ -1442,15 +1440,13 @@ flutter:
     });
 
     testWithoutContext('Symlink failures only give instructions for specific errors', () async {
-      final MockPlatform platform = MockPlatform();
-      when(platform.isWindows).thenReturn(true);
+      final Platform platform = FakePlatform(operatingSystem: 'windows');
       final MockOperatingSystemUtils os = MockOperatingSystemUtils();
       when(os.name).thenReturn('Microsoft Windows [Version 10.0.14393]');
 
       const FileSystemException e = FileSystemException('', '', OSError('', 999));
 
-      // This should now throw.
-      handleSymlinkException(e, platform: platform, os: os);
+      expect(() => handleSymlinkException(e, platform: platform, os: os), returnsNormally);
     });
   });
 }
@@ -1464,5 +1460,4 @@ class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterprete
 class MockWebProject extends Mock implements WebProject {}
 class MockWindowsProject extends Mock implements WindowsProject {}
 class MockLinuxProject extends Mock implements LinuxProject {}
-class MockPlatform extends Mock implements Platform {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
