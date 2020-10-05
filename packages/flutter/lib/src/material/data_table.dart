@@ -16,7 +16,6 @@ import 'debug.dart';
 import 'divider.dart';
 import 'dropdown.dart';
 import 'icons.dart';
-import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_state.dart';
@@ -414,7 +413,6 @@ class DataTable extends StatelessWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
-    this.decoration,
     this.dataRowColor,
     this.dataRowHeight,
     this.dataTextStyle,
@@ -476,13 +474,6 @@ class DataTable extends StatelessWidget {
   /// [DataRow.onSelectChanged]. This callback is only relevant if any
   /// row is selectable.
   final ValueSetter<bool> onSelectAll;
-
-  /// {@template flutter.material.dataTable.decoration}
-  /// The background and border decoration for the table.
-  /// {@endtemplate}
-  ///
-  /// By default there is no decoration.
-  final BoxDecoration decoration;
 
   /// {@template flutter.material.dataTable.dataRowColor}
   /// The background color for the data rows.
@@ -620,7 +611,7 @@ class DataTable extends StatelessWidget {
   /// Whether a border at the bottom of the table is displayed.
   ///
   /// By default, a border is not shown at the bottom to allow for a border
-  /// around the table set with [DataTable.decoration].
+  /// around the table.
   final bool showBottomBorder;
 
   // Set by the constructor to the index of the only Column that is
@@ -984,12 +975,9 @@ class DataTable extends StatelessWidget {
       displayColumnIndex += 1;
     }
 
-    return Ink(
-      decoration: decoration ?? theme.dataTableTheme.decoration,
-      child: Table(
-        columnWidths: tableColumns.asMap(),
-        children: tableRows,
-      ),
+    return Table(
+      columnWidths: tableColumns.asMap(),
+      children: tableRows,
     );
   }
 }

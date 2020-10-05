@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import '../asset.dart';
@@ -112,10 +111,14 @@ class TestCommand extends FlutterCommand {
         help: 'Whether to build the assets bundle for testing.\n'
               'Consider using --no-test-assets if assets are not required.',
       )
+      // --platform is not supported to be used by Flutter developers. It only
+      // exists to test the Flutter framework itself and may be removed entirely
+      // in the future. Developers should either use plain `flutter test`, or
+      // `package:integration_test` instead.
       ..addOption('platform',
         allowed: const <String>['tester', 'chrome'],
+        hide: true,
         defaultsTo: 'tester',
-        help: 'The platform to run the unit tests on. Defaults to "tester".',
       )
       ..addOption('test-randomize-ordering-seed',
         help: 'The seed to randomize the execution order of test cases.\n'
@@ -132,6 +135,7 @@ class TestCommand extends FlutterCommand {
               'This flag is ignored if --start-paused or coverage are requested. '
               'The vmservice will be enabled no matter what in those cases.'
       );
+      addDdsOptions(verboseHelp: verboseHelp);
   }
 
   /// The interface for starting and configuring the tester.
@@ -275,6 +279,7 @@ class TestCommand extends FlutterCommand {
       enableObservatory: collector != null || startPaused || boolArg('enable-vmservice'),
       startPaused: startPaused,
       disableServiceAuthCodes: disableServiceAuthCodes,
+      disableDds: disableDds,
       ipv6: boolArg('ipv6'),
       machine: machine,
       buildMode: BuildMode.debug,

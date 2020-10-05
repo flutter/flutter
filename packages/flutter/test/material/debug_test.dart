@@ -142,6 +142,9 @@ void main() {
       '     PageStorage\n'
       '     Offstage\n'
       '     _ModalScopeStatus\n'
+      '     UnmanagedRestorationScope\n'
+      '     RestorationScope\n'
+      '     AnimatedBuilder\n'
       '     _ModalScope<dynamic>-[LabeledGlobalKey<_ModalScopeState<dynamic>>#00000]\n'
       '     Semantics\n'
       '     _EffectiveTickerMode\n'
@@ -149,6 +152,7 @@ void main() {
       '     _OverlayEntryWidget-[LabeledGlobalKey<_OverlayEntryWidgetState>#00000]\n'
       '     _Theatre\n'
       '     Overlay-[LabeledGlobalKey<OverlayState>#00000]\n'
+      '     UnmanagedRestorationScope\n'
       '     _FocusMarker\n'
       '     Semantics\n'
       '     FocusScope\n'
@@ -164,8 +168,6 @@ void main() {
       '     _InheritedTheme\n'
       '     Theme\n'
       '     AnimatedTheme\n'
-      '     _ScaffoldMessengerScope\n'
-      '     ScaffoldMessenger\n'
       '     Builder\n'
       '     DefaultTextStyle\n'
       '     CustomPaint\n'
@@ -189,6 +191,10 @@ void main() {
       '     _FocusMarker\n'
       '     Focus\n'
       '     Shortcuts\n'
+      '     UnmanagedRestorationScope\n'
+      '     RestorationScope\n'
+      '     UnmanagedRestorationScope\n'
+      '     RootRestorationScope\n'
       '     WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]\n'
       '     HeroControllerScope\n'
       '     ScrollConfiguration\n'
@@ -197,51 +203,5 @@ void main() {
       '   Typically, the Scaffold widget is introduced by the MaterialApp\n'
       '   or WidgetsApp widget at the top of your application widget tree.\n',
     ));
-  });
-
-  testWidgets('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: Scaffold(
-          key: _scaffoldKey,
-          body: Container(),
-        ),
-      ),
-    ));
-    FlutterError error;
-    try {
-      _scaffoldKey.currentState.showSnackBar(const SnackBar(content: Text('Something is missing here')));
-    } on FlutterError catch (e) {
-      error = e;
-    } finally {
-      expect(error.diagnostics.length, 5);
-      expect(error.diagnostics[2], isA<DiagnosticsProperty<Element>>());
-      expect(error.diagnostics[3], isA<DiagnosticsBlock>());
-      expect(error.diagnostics[4].level, DiagnosticLevel.hint);
-      expect(
-        error.diagnostics[4].toStringDeep(),
-        equalsIgnoringHashCodes(
-          'Typically, the ScaffoldMessenger widget is introduced by the\n'
-          'MaterialApp at the top of your application widget tree.\n',
-        ),
-      );
-      expect(error.toStringDeep(), equalsIgnoringHashCodes(
-        'FlutterError\n'
-          '   No ScaffoldMessenger widget found.\n'
-          '   Scaffold widgets require a ScaffoldMessenger widget ancestor.\n'
-          '   The specific widget that could not find a ScaffoldMessenger\n'
-          '   ancestor was:\n'
-          '     Scaffold-[LabeledGlobalKey<ScaffoldState>#d60fa]\n'
-          '   The ancestors of this widget were:\n'
-          '     MediaQuery\n'
-          '     Directionality\n'
-          '     [root]\n'
-          '   Typically, the ScaffoldMessenger widget is introduced by the\n'
-          '   MaterialApp at the top of your application widget tree.\n'
-      ));
-    }
   });
 }

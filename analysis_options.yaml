@@ -129,7 +129,7 @@ linter:
     # - only_throw_errors # https://github.com/flutter/flutter/issues/5792
     - overridden_fields
     - package_api_docs
-    - package_names
+    # - package_names # non conforming packages in sdk
     - package_prefixed_library_names
     # - parameter_assignments # we do this commonly
     - prefer_adjacent_string_concatenation
@@ -176,7 +176,7 @@ linter:
     - slash_for_doc_comments
     # - sort_child_properties_last # not yet tested
     - sort_constructors_first
-    - sort_pub_dependencies
+    # - sort_pub_dependencies # prevents separating pinned transitive dependencies
     - sort_unnamed_constructors_first
     - test_types_in_equals
     - throw_in_finally
@@ -192,6 +192,7 @@ linter:
     - unnecessary_new
     - unnecessary_null_aware_assignments
     - unnecessary_null_in_if_null_operators
+    - unnecessary_nullable_for_final_variable_declarations
     - unnecessary_overrides
     - unnecessary_parenthesis
     - unnecessary_statements

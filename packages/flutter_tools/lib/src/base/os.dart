@@ -208,21 +208,50 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   void zip(Directory data, File zipFile) {
-    _processUtils.runSync(
-      <String>['zip', '-r', '-q', zipFile.path, '.'],
-      workingDirectory: data.path,
-      throwOnError: true,
-    );
+    try {
+      _processUtils.runSync(
+        <String>['zip', '-r', '-q', zipFile.path, '.'],
+        workingDirectory: data.path,
+        throwOnError: true,
+        verboseExceptions: true,
+      );
+    } on ArgumentError {
+      // zip is not available. this error message is modeled after the download
+      // error in bin/internal/update_dart_sdk.sh
+      String message = 'Please install zip.';
+      if (_platform.isMacOS) {
+        message = 'Consider running "brew install zip".';
+      } else if (_platform.isLinux) {
+        message = 'Consider running "sudo apt-get install zip".';
+      }
+      throwToolExit(
+        'Missing "zip" tool. Unable to compress ${data.path}.\n$message'
+      );
+    }
   }
 
   // unzip -o -q zipfile -d dest
   @override
   void unzip(File file, Directory targetDirectory) {
-    _processUtils.runSync(
-      <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
-      throwOnError: true,
-      verboseExceptions: true,
-    );
+    try {
+      _processUtils.runSync(
+        <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
+        throwOnError: true,
+        verboseExceptions: true,
+      );
+    } on ArgumentError {
+      // unzip is not available. this error message is modeled after the download
+      // error in bin/internal/update_dart_sdk.sh
+      String message = 'Please install unzip.';
+      if (_platform.isMacOS) {
+        message = 'Consider running "brew install unzip".';
+      } else if (_platform.isLinux) {
+        message = 'Consider running "sudo apt-get install unzip".';
+      }
+      throwToolExit(
+        'Missing "unzip" tool. Unable to extract ${file.path}.\n$message'
+      );
+    }
   }
 
   // tar -xzf tarball -C dest
@@ -253,10 +282,11 @@ class _PosixUtils extends OperatingSystemUtils {
           _processUtils.runSync(<String>['sw_vers', '-productName']),
           _processUtils.runSync(<String>['sw_vers', '-productVersion']),
           _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
+          _processUtils.runSync(<String>['uname', '-m']),
         ];
         if (results.every((RunResult result) => result.exitCode == 0)) {
           _name = '${results[0].stdout.trim()} ${results[1].stdout
-              .trim()} ${results[2].stdout.trim()}';
+              .trim()} ${results[2].stdout.trim()} ${results[3].stdout.trim()}';
         }
       }
       _name ??= super.name;

@@ -206,9 +206,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // the currently dragging widget, such as when it first builds.
   static const double _defaultDropAreaExtent = 100.0;
 
-  // The additional margin to place around a computed drop area.
-  static const double _dropAreaMargin = 8.0;
-
   // How long an animation to reorder an element in the list takes.
   static const Duration _reorderAnimationDuration = Duration(milliseconds: 200);
 
@@ -264,7 +261,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         dropAreaWithoutMargin = _draggingFeedbackSize.height;
         break;
     }
-    return dropAreaWithoutMargin + _dropAreaMargin;
+    return dropAreaWithoutMargin;
   }
 
   @override
@@ -363,7 +360,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // Handles up the logic for dragging and reordering items in the list.
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
-    final GlobalObjectKey keyIndexGlobalKey = GlobalObjectKey(toWrap.key);
+    final _ReorderableListViewChildGlobalKey keyIndexGlobalKey = _ReorderableListViewChildGlobalKey(toWrap.key, this);
     // We pass the toWrapWithGlobalKey into the Draggable so that when a list
     // item gets dragged, the accessibility framework can preserve the selected
     // state of the dragging item.
@@ -595,4 +592,31 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       );
     });
   }
+}
+
+// A global key that takes its identity from the object and uses a value of a
+// particular type to identify itself.
+//
+// The difference with GlobalObjectKey is that it uses [==] instead of [identical]
+// of the objects used to generate widgets.
+@optionalTypeArgs
+class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
+
+  const _ReorderableListViewChildGlobalKey(this.subKey, this.state) : super(subKey);
+
+  final Key subKey;
+
+  final _ReorderableListContentState state;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _ReorderableListViewChildGlobalKey
+        && other.subKey == subKey
+        && other.state == state;
+  }
+
+  @override
+  int get hashCode => hashValues(subKey, state);
 }

@@ -39,20 +39,22 @@ void main() {
     AndroidSdk sdk;
     ProcessManager mockProcessManager;
     MemoryFileSystem fs;
-    Cache mockCache;
+    Cache cache;
     File gradle;
     final Map<Type, Generator> overrides = <Type, Generator>{
       AndroidSdk: () => sdk,
       ProcessManager: () => mockProcessManager,
       FileSystem: () => fs,
-      Cache: () => mockCache,
+      Cache: () => cache,
     };
 
     setUp(() async {
       sdk = MockitoAndroidSdk();
       mockProcessManager = MockitoProcessManager();
-      fs = MemoryFileSystem();
-      mockCache = MockCache();
+      fs = MemoryFileSystem.test();
+      cache = Cache.test(
+        processManager: FakeProcessManager.any()
+      );
       Cache.flutterRoot = '../..';
       when(sdk.licensesAvailable).thenReturn(true);
       when(mockProcessManager.canRun(any)).thenReturn(true);
@@ -108,13 +110,12 @@ void main() {
         .childFile('gradle.properties')
         .writeAsStringSync('irrelevant');
 
-      final Directory gradleWrapperDir = globals.fs.systemTempDirectory.createTempSync('flutter_application_package_test_gradle_wrapper.');
-      when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
+      final Directory gradleWrapperDir = cache.getArtifactDirectory('gradle_wrapper');
 
-      globals.fs.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))
+      gradleWrapperDir.fileSystem.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))
           .createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join(gradleWrapperDir.path, 'gradlew')).writeAsStringSync('irrelevant');
-      globals.fs.file(globals.fs.path.join(gradleWrapperDir.path, 'gradlew.bat')).writeAsStringSync('irrelevant');
+      gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
+      gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
@@ -217,7 +218,7 @@ void main() {
   group('PrebuiltIOSApp', () {
     MockOperatingSystemUtils os;
     final Map<Type, Generator> overrides = <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       PlistParser: () => MockPlistUtils(),
       Platform: _kNoColorTerminalPlatform,
@@ -365,7 +366,7 @@ void main() {
 
   group('FuchsiaApp', () {
     final Map<Type, Generator> overrides = <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       Platform: _kNoColorTerminalPlatform,
       OperatingSystemUtils: () => MockOperatingSystemUtils(),
@@ -691,5 +692,4 @@ const String plistData = '''
 {"CFBundleIdentifier": "fooBundleId"}
 ''';
 
-class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils { }

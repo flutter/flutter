@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -60,7 +59,7 @@ void main() {
     });
     expect(tested, isTrue);
     expect(events.length, 2);
-    expect(events[0].runtimeType, equals(PointerDownEvent));
-    expect(events[1].runtimeType, equals(PointerUpEvent));
+    expect(events[0], isA<PointerDownEvent>());
+    expect(events[1], isA<PointerUpEvent>());
   });
 }

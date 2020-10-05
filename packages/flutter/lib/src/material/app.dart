@@ -17,7 +17,6 @@ import 'floating_action_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
 import 'page.dart';
-import 'scaffold.dart';
 import 'theme.dart';
 
 /// [MaterialApp] uses this [TextStyle] as its [DefaultTextStyle] to encourage
@@ -169,7 +168,6 @@ class MaterialApp extends StatefulWidget {
   const MaterialApp({
     Key key,
     this.navigatorKey,
-    this.scaffoldMessengerKey,
     this.home,
     this.routes = const <String, WidgetBuilder>{},
     this.initialRoute,
@@ -199,6 +197,7 @@ class MaterialApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
     this.shortcuts,
     this.actions,
+    this.restorationScopeId,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -217,7 +216,6 @@ class MaterialApp extends StatefulWidget {
   /// Creates a [MaterialApp] that uses the [Router] instead of a [Navigator].
   const MaterialApp.router({
     Key key,
-    this.scaffoldMessengerKey,
     this.routeInformationProvider,
     @required this.routeInformationParser,
     @required this.routerDelegate,
@@ -244,6 +242,7 @@ class MaterialApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
     this.shortcuts,
     this.actions,
+    this.restorationScopeId,
   }) : assert(routeInformationParser != null),
        assert(routerDelegate != null),
        assert(title != null),
@@ -265,14 +264,6 @@ class MaterialApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.navigatorKey}
   final GlobalKey<NavigatorState> navigatorKey;
-
-  /// A key to use when building the [ScaffoldMessenger].
-  ///
-  /// If a [scaffoldMessengerKey] is specified, the [ScaffoldMessenger] can be
-  /// directly manipulated without first obtaining it from a [BuildContext] via
-  /// [ScaffoldMessenger.of]: from the [scaffoldMessengerKey], use the
-  /// [GlobalKey.currentState] getter.
-  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey;
 
   /// {@macro flutter.widgets.widgetsApp.home}
   final Widget home;
@@ -631,6 +622,9 @@ class MaterialApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.actions.seeAlso}
   final Map<Type, Action<Intent>> actions;
 
+  /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
+  final String restorationScopeId;
+
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps.
   ///
@@ -733,30 +727,27 @@ class _MaterialAppState extends State<MaterialApp> {
     }
     theme ??= widget.theme ?? ThemeData.light();
 
-    return ScaffoldMessenger(
-      key: widget.scaffoldMessengerKey,
-      child: AnimatedTheme(
-        data: theme,
-        isMaterialAppTheme: true,
-        child: widget.builder != null
-          ? Builder(
-              builder: (BuildContext context) {
-                // Why are we surrounding a builder with a builder?
-                //
-                // The widget.builder may contain code that invokes
-                // Theme.of(), which should return the theme we selected
-                // above in AnimatedTheme. However, if we invoke
-                // widget.builder() directly as the child of AnimatedTheme
-                // then there is no Context separating them, and the
-                // widget.builder() will not find the theme. Therefore, we
-                // surround widget.builder with yet another builder so that
-                // a context separates them and Theme.of() correctly
-                // resolves to the theme we passed to AnimatedTheme.
-                return widget.builder(context, child);
-              },
-            )
-          : child,
-      )
+    return AnimatedTheme(
+      data: theme,
+      isMaterialAppTheme: true,
+      child: widget.builder != null
+        ? Builder(
+            builder: (BuildContext context) {
+              // Why are we surrounding a builder with a builder?
+              //
+              // The widget.builder may contain code that invokes
+              // Theme.of(), which should return the theme we selected
+              // above in AnimatedTheme. However, if we invoke
+              // widget.builder() directly as the child of AnimatedTheme
+              // then there is no Context separating them, and the
+              // widget.builder() will not find the theme. Therefore, we
+              // surround widget.builder with yet another builder so that
+              // a context separates them and Theme.of() correctly
+              // resolves to the theme we passed to AnimatedTheme.
+              return widget.builder(context, child);
+            },
+          )
+        : child,
     );
   }
 
@@ -794,6 +785,7 @@ class _MaterialAppState extends State<MaterialApp> {
         inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
+        restorationScopeId: widget.restorationScopeId,
       );
     }
 
@@ -828,6 +820,7 @@ class _MaterialAppState extends State<MaterialApp> {
       inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
+      restorationScopeId: widget.restorationScopeId,
     );
   }
 

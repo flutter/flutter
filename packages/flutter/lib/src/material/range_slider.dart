@@ -33,6 +33,8 @@ typedef PaintRangeValueIndicator = void Function(PaintingContext context, Offset
 ///
 /// Used to select a range from a range of values.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
+///
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// ![A range slider widget, consisting of 5 divisions and showing the default
@@ -729,8 +731,10 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderRangeSlider renderObject) {
     renderObject
-      ..values = values
+      // We should update the `divisions` ahead of `values`, because the `values`
+      // setter dependent on the `divisions`.
       ..divisions = divisions
+      ..values = values
       ..labels = labels
       ..sliderTheme = sliderTheme
       ..theme = Theme.of(context)

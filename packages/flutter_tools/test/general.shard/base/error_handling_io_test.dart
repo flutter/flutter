@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -25,6 +26,11 @@ final Platform windowsPlatform = FakePlatform(
 
 final Platform linuxPlatform = FakePlatform(
   operatingSystem: 'linux',
+  environment: <String, String>{}
+);
+
+final Platform macOSPlatform = FakePlatform(
+  operatingSystem: 'macos',
   environment: <String, String>{}
 );
 
@@ -66,6 +72,18 @@ void setupWriteMocks({
   )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
+void setupReadMocks({
+  FileSystem mockFileSystem,
+  ErrorHandlingFileSystem fs,
+  int errorCode,
+}) {
+  final MockFile mockFile = MockFile();
+  when(mockFileSystem.file(any)).thenReturn(mockFile);
+  when(mockFile.readAsStringSync(
+    encoding: anyNamed('encoding'),
+  )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
+}
+
 void setupDirectoryMocks({
   FileSystem mockFileSystem,
   ErrorHandlingFileSystem fs,
@@ -79,6 +97,16 @@ void setupDirectoryMocks({
   when(mockDirectory.createTempSync(any))
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
   when(mockDirectory.createSync(recursive: anyNamed('recursive')))
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.create())
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.createSync())
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.delete())
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.deleteSync())
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockDirectory.existsSync())
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
@@ -97,6 +125,30 @@ void main() {
         platform: windowsPlatform,
       );
       when(mockFileSystem.path).thenReturn(MockPathContext());
+    });
+
+    testWithoutContext('bypasses error handling when withAllowedFailure is used', () {
+      setupWriteMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kUserPermissionDenied,
+      );
+
+      final File file = fs.file('file');
+
+      expect(() => ErrorHandlingFileSystem.noExitOnFailure(
+        () => file.writeAsStringSync('')), throwsA(isA<Exception>()));
+
+      // nesting does not unconditionally re-enable errors.
+      expect(() {
+        ErrorHandlingFileSystem.noExitOnFailure(() {
+          ErrorHandlingFileSystem.noExitOnFailure(() { });
+          file.writeAsStringSync('');
+        });
+      }, throwsA(isA<Exception>()));
+
+      // Check that state does not leak.
+      expect(() => file.writeAsStringSync(''), throwsA(isA<ToolExit>()));
     });
 
     testWithoutContext('when access is denied', () async {
@@ -190,10 +242,40 @@ void main() {
       expect(() => directory.createSync(recursive: true),
              throwsToolExit(message: expectedMessage));
     });
+
+    testWithoutContext('when checking for directory existence with permission issues', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kUserPermissionDenied,
+      );
+
+      final Directory directory = fs.directory('directory');
+
+      const String expectedMessage = 'Flutter failed to check for directory existence at';
+      expect(() => directory.existsSync(),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('When reading from a file without permission', () {
+      setupReadMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kUserPermissionDenied,
+      );
+
+      final File file = fs.file('file');
+
+      const String expectedMessage = 'Flutter failed to read a file at';
+      expect(() => file.readAsStringSync(),
+             throwsToolExit(message: expectedMessage));
+    });
   });
 
   group('throws ToolExit on Linux', () {
+    const int eperm = 1;
     const int enospc = 28;
+    const int eacces = 13;
     MockFileSystem mockFileSystem;
     ErrorHandlingFileSystem fs;
 
@@ -204,6 +286,48 @@ void main() {
         platform: linuxPlatform,
       );
       when(mockFileSystem.path).thenReturn(MockPathContext());
+    });
+
+    testWithoutContext('when access is denied', () async {
+      setupWriteMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eacces,
+      );
+
+      final File file = fs.file('file');
+
+      const String expectedMessage = 'The flutter tool cannot access the file or directory';
+      expect(() async => await file.writeAsBytes(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await file.writeAsString(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsStringSync(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when access is denied for directories', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eperm,
+      );
+
+      final Directory directory = fs.directory('file');
+
+      const String expectedMessage = 'The flutter tool cannot access the file or directory';
+      expect(() async => await directory.create(),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await directory.delete(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => directory.createSync(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => directory.deleteSync(),
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when writing to a full device', () async {
@@ -239,6 +363,143 @@ void main() {
       expect(() async => await directory.createTemp('prefix'),
              throwsToolExit(message: expectedMessage));
       expect(() => directory.createTempSync('prefix'),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when checking for directory existence with permission issues', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eacces,
+      );
+
+      final Directory directory = fs.directory('directory');
+
+      const String expectedMessage = 'Flutter failed to check for directory existence at';
+      expect(() => directory.existsSync(),
+             throwsToolExit(message: expectedMessage));
+    });
+  });
+
+  group('throws ToolExit on macOS', () {
+    const int eperm = 1;
+    const int enospc = 28;
+    const int eacces = 13;
+    MockFileSystem mockFileSystem;
+    ErrorHandlingFileSystem fs;
+
+    setUp(() {
+      mockFileSystem = MockFileSystem();
+      fs = ErrorHandlingFileSystem(
+        delegate: mockFileSystem,
+        platform: macOSPlatform,
+      );
+      when(mockFileSystem.path).thenReturn(MockPathContext());
+    });
+
+    testWithoutContext('when access is denied', () async {
+      setupWriteMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eacces,
+      );
+
+      final File file = fs.file('file');
+
+      const String expectedMessage = 'The flutter tool cannot access the file';
+      expect(() async => await file.writeAsBytes(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await file.writeAsString(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsStringSync(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when access is denied for directories', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eperm,
+      );
+
+      final Directory directory = fs.directory('file');
+
+      const String expectedMessage = 'The flutter tool cannot access the file or directory';
+      expect(() async => await directory.create(),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await directory.delete(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => directory.createSync(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => directory.deleteSync(),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when writing to a full device', () async {
+      setupWriteMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: enospc,
+      );
+
+      final File file = fs.file('file');
+
+      const String expectedMessage = 'The target device is full';
+      expect(() async => await file.writeAsBytes(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await file.writeAsString(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsStringSync(''),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when creating a temporary dir on a full device', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: enospc,
+      );
+
+      final Directory directory = fs.directory('directory');
+
+      const String expectedMessage = 'The target device is full';
+      expect(() async => await directory.createTemp('prefix'),
+             throwsToolExit(message: expectedMessage));
+      expect(() => directory.createTempSync('prefix'),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when checking for directory existence with permission issues', () async {
+      setupDirectoryMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eacces,
+      );
+
+      final Directory directory = fs.directory('directory');
+
+      const String expectedMessage = 'Flutter failed to check for directory existence at';
+      expect(() => directory.existsSync(),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('When reading from a file without permission', () {
+      setupReadMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: eacces,
+      );
+
+      final File file = fs.file('file');
+
+      const String expectedMessage = 'Flutter failed to read a file at';
+      expect(() => file.readAsStringSync(),
              throwsToolExit(message: expectedMessage));
     });
   });
@@ -291,6 +552,24 @@ void main() {
 
       expect(mockFile.toString(), isNotNull);
       expect(fs.file('file').toString(), equals(mockFile.toString()));
+    });
+
+    testWithoutContext('ErrorHandlingDirectory', () {
+      final MockFileSystem mockFileSystem = MockFileSystem();
+      final FileSystem fs = ErrorHandlingFileSystem(
+        delegate: mockFileSystem,
+        platform: const LocalPlatform(),
+      );
+      final MockDirectory mockDirectory = MockDirectory();
+      when(mockFileSystem.directory(any)).thenReturn(mockDirectory);
+
+      expect(mockDirectory.toString(), isNotNull);
+      expect(fs.directory('directory').toString(), equals(mockDirectory.toString()));
+
+      when(mockFileSystem.currentDirectory).thenReturn(mockDirectory);
+
+      expect(fs.currentDirectory.toString(), equals(mockDirectory.toString()));
+      expect(fs.currentDirectory, isA<ErrorHandlingDirectory>());
     });
   });
 
@@ -365,6 +644,7 @@ void main() {
 
   group('ProcessManager on linux throws tool exit', () {
     const int enospc = 28;
+    const int eacces = 13;
 
     test('when writing to a full device', () {
       final MockProcessManager mockProcessManager = MockProcessManager();
@@ -375,6 +655,74 @@ void main() {
       setupProcessManagerMocks(mockProcessManager, enospc);
 
       const String expectedMessage = 'The target device is full';
+      expect(() => processManager.canRun('foo'),
+             throwsToolExit(message: expectedMessage));
+      expect(() => processManager.killPid(1),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await processManager.start(<String>['foo']),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await processManager.run(<String>['foo']),
+             throwsToolExit(message: expectedMessage));
+      expect(() => processManager.runSync(<String>['foo']),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    test('when permissions are denied', () {
+      final MockProcessManager mockProcessManager = MockProcessManager();
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: mockProcessManager,
+        platform: linuxPlatform,
+      );
+      setupProcessManagerMocks(mockProcessManager, eacces);
+
+      const String expectedMessage = 'The flutter tool cannot access the file';
+      expect(() => processManager.canRun('foo'),
+             throwsToolExit(message: expectedMessage));
+      expect(() => processManager.killPid(1),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await processManager.start(<String>['foo']),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await processManager.run(<String>['foo']),
+             throwsToolExit(message: expectedMessage));
+      expect(() => processManager.runSync(<String>['foo']),
+             throwsToolExit(message: expectedMessage));
+    });
+  });
+
+  group('ProcessManager on macOS throws tool exit', () {
+    const int enospc = 28;
+    const int eacces = 13;
+
+    test('when writing to a full device', () {
+      final MockProcessManager mockProcessManager = MockProcessManager();
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: mockProcessManager,
+        platform: macOSPlatform,
+      );
+      setupProcessManagerMocks(mockProcessManager, enospc);
+
+      const String expectedMessage = 'The target device is full';
+      expect(() => processManager.canRun('foo'),
+             throwsToolExit(message: expectedMessage));
+      expect(() => processManager.killPid(1),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await processManager.start(<String>['foo']),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await processManager.run(<String>['foo']),
+             throwsToolExit(message: expectedMessage));
+      expect(() => processManager.runSync(<String>['foo']),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    test('when permissions are denied', () {
+      final MockProcessManager mockProcessManager = MockProcessManager();
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: mockProcessManager,
+        platform: linuxPlatform,
+      );
+      setupProcessManagerMocks(mockProcessManager, eacces);
+
+      const String expectedMessage = 'The flutter tool cannot access the file';
       expect(() => processManager.canRun('foo'),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.killPid(1),
