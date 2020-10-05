@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/intellij/intellij_validator.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:test/fake.dart';
 
-import '../../data/intellij_plugin_xml.dart';
 import '../../src/common.dart';
 
 final Platform macPlatform = FakePlatform(
@@ -127,3 +126,65 @@ class IntelliJValidatorTestTarget extends IntelliJValidator {
   @override
   String get version => 'test.test.test';
 }
+
+
+/// These file contents were derived from the META-INF/plugin.xml from an Intellij Flutter
+/// plugin installation.
+///
+/// The file is loacted in a plugin JAR, which can be located by looking at the plugin
+/// path for the Intellij and Android Studio validators.
+///
+/// If more XML contents are needed, prefer modifying these contents over checking
+/// in another JAR.
+const String kIntellijFlutterPluginXml = r'''
+<idea-plugin version="2">
+  <id>io.flutter</id>
+  <name>Flutter</name>
+  <description>Support for developing Flutter applications.</description>
+  <vendor url="https://github.com/flutter/flutter-intellij">flutter.io</vendor>
+
+  <category>Custom Languages</category>
+
+  <version>0.1.3</version>
+
+  <idea-version since-build="162.1" until-build="163.*"/>
+</idea-plugin>
+
+<idea-plugin version="2">
+  <name>Dart</name>
+  <version>162.2485</version>
+  <idea-version since-build="162.1121" until-build="162.*"/>
+
+  <description>Support for Dart programming language</description>
+  <vendor>JetBrains</vendor>
+  <depends>com.intellij.modules.xml</depends>
+  <depends optional="true" config-file="dartium-debugger-support.xml">JavaScriptDebugger</depends>
+  <depends optional="true" config-file="dart-yaml.xml">org.jetbrains.plugins.yaml</depends>
+  <depends optional="true" config-file="dart-copyright.xml">com.intellij.copyright</depends>
+  <depends optional="true" config-file="dart-coverage.xml">com.intellij.modules.coverage</depends>
+</idea-plugin>
+''';
+
+/// These file contents were derived from the META-INF/plugin.xml from an Intellij Dart
+/// plugin installation.
+///
+/// The file is loacted in a plugin JAR, which can be located by looking at the plugin
+/// path for the Intellij and Android Studio validators.
+///
+/// If more XML contents are needed, prefer modifying these contents over checking
+/// in another JAR.
+const String kIntellijDartPluginXml = r'''
+<idea-plugin version="2">
+  <name>Dart</name>
+  <version>162.2485</version>
+  <idea-version since-build="162.1121" until-build="162.*"/>
+
+  <description>Support for Dart programming language</description>
+  <vendor>JetBrains</vendor>
+  <depends>com.intellij.modules.xml</depends>
+  <depends optional="true" config-file="dartium-debugger-support.xml">JavaScriptDebugger</depends>
+  <depends optional="true" config-file="dart-yaml.xml">org.jetbrains.plugins.yaml</depends>
+  <depends optional="true" config-file="dart-copyright.xml">com.intellij.copyright</depends>
+  <depends optional="true" config-file="dart-coverage.xml">com.intellij.modules.coverage</depends>
+</idea-plugin>
+''';
