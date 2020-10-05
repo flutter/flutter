@@ -7,6 +7,8 @@ import 'dart:convert';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -1414,6 +1416,42 @@ flutter:
       });
 
     });
+
+    testWithoutContext('Symlink failures give developer mode instructions on recent versions of Windows', () async {
+      final MockPlatform platform = MockPlatform();
+      when(platform.isWindows).thenReturn(true);
+      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
+      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14972.1]');
+
+      const FileSystemException e = FileSystemException('', '', OSError('', 1314));
+
+      expect(() => handleSymlinkException(e, platform: platform, os: os),
+        throwsToolExit(message: 'start ms-settings:developers'));
+    });
+
+    testWithoutContext('Symlink failures instruct developers to run as administrator on older versions of Windows', () async {
+      final MockPlatform platform = MockPlatform();
+      when(platform.isWindows).thenReturn(true);
+      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
+      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14393]');
+
+      const FileSystemException e = FileSystemException('', '', OSError('', 1314));
+
+      expect(() => handleSymlinkException(e, platform: platform, os: os),
+        throwsToolExit(message: 'administrator'));
+    });
+
+    testWithoutContext('Symlink failures only give instructions for specific errors', () async {
+      final MockPlatform platform = MockPlatform();
+      when(platform.isWindows).thenReturn(true);
+      final MockOperatingSystemUtils os = MockOperatingSystemUtils();
+      when(os.name).thenReturn('Microsoft Windows [Version 10.0.14393]');
+
+      const FileSystemException e = FileSystemException('', '', OSError('', 999));
+
+      // This should now throw.
+      handleSymlinkException(e, platform: platform, os: os);
+    });
   });
 }
 
@@ -1426,3 +1464,5 @@ class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterprete
 class MockWebProject extends Mock implements WebProject {}
 class MockWindowsProject extends Mock implements WindowsProject {}
 class MockLinuxProject extends Mock implements LinuxProject {}
+class MockPlatform extends Mock implements Platform {}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
