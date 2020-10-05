@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection' show LinkedList, LinkedListEntry;
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -34,7 +35,7 @@ import './keyboard_key.dart';
 ///  * [HardwareKeyboardListener], a widget that listens for hardware key events.
 @immutable
 abstract class PhysicalKeyEvent with Diagnosticable {
-  const PhysicalKeyEvent({required this.physicalKey, required this.timestamp});
+  const PhysicalKeyEvent({required this.physicalKey, required this.timeStamp});
 
   /// Returns an object representing the physical location of this key.
   ///
@@ -65,14 +66,14 @@ abstract class PhysicalKeyEvent with Diagnosticable {
 
   /// Time of event, relative to an arbitrary start point.
   ///
-  /// All events share the same timestamp origin.
-  final Duration timestamp;
+  /// All events share the same timeStamp origin.
+  final Duration timeStamp;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<PhysicalKeyboardKey>('physicalKey', physicalKey));
-    properties.add(DiagnosticsProperty<Duration>('timestamp', timestamp));
+    properties.add(DiagnosticsProperty<Duration>('timeStamp', timeStamp));
   }
 }
 
@@ -84,9 +85,18 @@ abstract class PhysicalKeyEvent with Diagnosticable {
 class PhysicalKeyDownEvent extends PhysicalKeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const PhysicalKeyDownEvent({
-    required Duration timestamp,
+    required Duration timeStamp,
     required PhysicalKeyboardKey physicalKey,
-  }) : super(physicalKey: physicalKey, timestamp: timestamp);
+    this.repeated = false,
+  }) : super(physicalKey: physicalKey, timeStamp: timeStamp);
+
+  final bool repeated;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('repeated', repeated, defaultValue: false));
+  }
 }
 
 /// An event indicating that the user has released a key on the keyboard.
@@ -97,9 +107,9 @@ class PhysicalKeyDownEvent extends PhysicalKeyEvent {
 class PhysicalKeyUpEvent extends PhysicalKeyEvent {
   /// Creates a key event that represents the user releasing a key.
   const PhysicalKeyUpEvent({
-    required Duration timestamp,
+    required Duration timeStamp,
     required PhysicalKeyboardKey physicalKey,
-  }) : super(physicalKey: physicalKey, timestamp: timestamp);
+  }) : super(physicalKey: physicalKey, timeStamp: timeStamp);
 }
 
 /// The user has released a key on the keyboard after Flutter lost input focus.
@@ -118,9 +128,9 @@ class PhysicalKeyCancelEvent extends PhysicalKeyEvent {
   /// Creates a key event that represents the user releasing a key outside of
   /// the current focus.
   const PhysicalKeyCancelEvent({
-    required Duration timestamp,
+    required Duration timeStamp,
     required PhysicalKeyboardKey physicalKey,
-  }) : super(physicalKey: physicalKey, timestamp: timestamp);
+  }) : super(physicalKey: physicalKey, timeStamp: timeStamp);
 }
 
 /// The user has pressed a key on the keyboard before the current application
@@ -140,14 +150,14 @@ class PhysicalKeySyncEvent extends PhysicalKeyEvent {
   /// Creates a key event that represents the user releasing a key outside of
   /// the current focus.
   const PhysicalKeySyncEvent({
-    required Duration timestamp,
+    required Duration timeStamp,
     required PhysicalKeyboardKey physicalKey,
-  }) : super(physicalKey: physicalKey, timestamp: timestamp);
+  }) : super(physicalKey: physicalKey, timeStamp: timeStamp);
 }
 
 @immutable
 abstract class LogicalKeyEvent with Diagnosticable {
-  const LogicalKeyEvent({required this.logicalKey, required this.physicalEvent, this.character});
+  const LogicalKeyEvent({required this.logicalKey, required this.physicalEvent});
 
   /// Returns an object representing the logical key that was pressed.
   ///
@@ -166,6 +176,31 @@ abstract class LogicalKeyEvent with Diagnosticable {
   final LogicalKeyboardKey logicalKey;
 
   final PhysicalKeyEvent physicalEvent;
+
+  /// Time of event, relative to an arbitrary start point.
+  ///
+  /// All events share the same timeStamp origin.
+  Duration get timeStamp => physicalEvent.timeStamp;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<LogicalKeyboardKey>('logicalKey', logicalKey));
+    properties.add(DiagnosticsProperty<Duration>('timeStamp', timeStamp));
+    properties.add(DiagnosticsProperty<PhysicalKeyEvent>('physicalEvent', physicalEvent, level: DiagnosticLevel.debug));
+  }
+}
+
+class LogicalKeyDownEvent extends LogicalKeyEvent {
+  /// Creates a key event that represents the user pressing a key.
+  const LogicalKeyDownEvent({
+    required LogicalKeyboardKey logicalKey,
+    required PhysicalKeyEvent physicalEvent,
+    this.repeated = false,
+    this.character,
+  }) : super(logicalKey: logicalKey, physicalEvent: physicalEvent);
+
+  final bool repeated;
 
   /// Returns the Unicode character (grapheme cluster) completed by this
   /// keystroke, if any.
@@ -188,28 +223,12 @@ abstract class LogicalKeyEvent with Diagnosticable {
   /// Returns null if there is no character for this event.
   final String? character;
 
-  /// Time of event, relative to an arbitrary start point.
-  ///
-  /// All events share the same timestamp origin.
-  Duration get timestamp => physicalEvent.timestamp;
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<LogicalKeyboardKey>('logicalKey', logicalKey));
-    properties.add(DiagnosticsProperty<Duration>('timestamp', timestamp));
-    properties.add(DiagnosticsProperty<PhysicalKeyEvent>('physicalEvent', physicalEvent, level: DiagnosticLevel.debug));
     properties.add(StringProperty('character', character, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('repeated', repeated, defaultValue: false));
   }
-}
-
-class LogicalKeyDownEvent extends LogicalKeyEvent {
-  /// Creates a key event that represents the user pressing a key.
-  const LogicalKeyDownEvent({
-    required LogicalKeyboardKey logicalKey,
-    required PhysicalKeyEvent physicalEvent,
-    String? character,
-  }) : super(logicalKey: logicalKey, physicalEvent: physicalEvent, character: character);
 }
 
 class LogicalKeyUpEvent extends LogicalKeyEvent {
@@ -225,8 +244,35 @@ class LogicalKeySyncEvent extends LogicalKeyEvent {
   const LogicalKeySyncEvent({
     required LogicalKeyboardKey logicalKey,
     required PhysicalKeyEvent physicalEvent,
-    String? character,
-  }) : super(logicalKey: logicalKey, physicalEvent: physicalEvent, character: character);
+    this.character,
+  }) : super(logicalKey: logicalKey, physicalEvent: physicalEvent);
+
+  /// Returns the Unicode character (grapheme cluster) completed by this
+  /// keystroke, if any.
+  ///
+  /// This will only return a character if this keystroke, combined with any
+  /// preceding keystroke(s), generated a character. It will return null if no
+  /// character has been generated by the keystroke (e.g. a "dead" or
+  /// "combining" key), or if the corresponding key is a key without a visual
+  /// representation, such as a modifier key or a control key.
+  ///
+  /// This can return multiple Unicode code points, since some characters (more
+  /// accurately referred to as grapheme clusters) are made up of more than one
+  /// code point.
+  ///
+  /// The `character` doesn't take into account edits by an input method editor
+  /// (IME). For composing text, use the [TextField] or [CupertinoTextField]
+  /// widgets, since those automatically handle many of the complexities of
+  /// managing keyboard input.
+  ///
+  /// Returns null if there is no character for this event.
+  final String? character;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('character', character, defaultValue: null));
+  }
 }
 
 class LogicalKeyCancelEvent extends LogicalKeyEvent {
@@ -237,18 +283,38 @@ class LogicalKeyCancelEvent extends LogicalKeyEvent {
   }) : super(logicalKey: logicalKey, physicalEvent: physicalEvent);
 }
 
-abstract class _ValueDispatcher<T> {
-  LinkedList<_ListenerEntry>? _listeners = LinkedList<_ListenerEntry>();
+class _ListenerEntry<T> extends LinkedListEntry<_ListenerEntry<T>> {
+  _ListenerEntry(this.listener);
+  final ValueChanged<T> listener;
+}
 
-  /// Register a closure to be called when the object notifies its listeners.
-  void addListener(VoidCallback listener) {
-    assert(_debugAssertNotDisposed());
-    _listeners!.add(_ListenerEntry(listener));
+abstract class _ValueDispatcher<T> {
+  LinkedList<_ListenerEntry<T>>? _listeners = LinkedList<_ListenerEntry<T>>();
+
+  bool _debugAssertNotDisposed() {
+    assert(() {
+      if (_listeners == null) {
+        throw FlutterError(
+          'A $runtimeType was used after being disposed.\n'
+          'Once you have called dispose() on a $runtimeType, it can no longer be used.'
+        );
+      }
+      return true;
+    }());
+    return true;
   }
 
-  void removeListener(VoidCallback listener) {
+  /// Register a closure to be called when the object notifies its listeners.
+  void addListener(ValueChanged<T> listener) {
     assert(_debugAssertNotDisposed());
-    for (final _ListenerEntry entry in _listeners!) {
+    _listeners!.add(_ListenerEntry<T>(listener));
+  }
+
+  /// Remove a previously registered closure from the list of closures that the
+  /// object notifies.
+  void removeListener(ValueChanged<T> listener) {
+    assert(_debugAssertNotDisposed());
+    for (final _ListenerEntry<T> entry in _listeners!) {
       if (entry.listener == listener) {
         entry.unlink();
         return;
@@ -256,23 +322,157 @@ abstract class _ValueDispatcher<T> {
     }
   }
 
-  /// Remove a previously registered closure from the list of closures that the
-  /// object notifies.
-  void removeListener(VoidCallback listener);
+  @mustCallSuper
+  void dispose() {
+    assert(_debugAssertNotDisposed());
+    _listeners = null;
+  }
+
+  /// Call all the registered listeners.
+  ///
+  /// Call this method whenever the object changes, to notify any clients the
+  /// object may have changed. Listeners that are added during this iteration
+  /// will not be visited. Listeners that are removed during this iteration will
+  /// not be visited after they are removed.
+  ///
+  /// Exceptions thrown by listeners will be caught and reported using
+  /// [FlutterError.reportError].
+  ///
+  /// This method must not be called after [dispose] has been called.
+  ///
+  /// Surprising behavior can result when reentrantly removing a listener (i.e.
+  /// in response to a notification) that has been registered multiple times.
+  /// See the discussion at [removeListener].
+  @protected
+  @visibleForTesting
+  void notifyListeners(T value) {
+    assert(_debugAssertNotDisposed());
+    if (_listeners!.isEmpty)
+      return;
+
+    final List<_ListenerEntry<T>> localListeners = List<_ListenerEntry<T>>.from(_listeners!);
+
+    for (final _ListenerEntry<T> entry in localListeners) {
+      try {
+        if (entry.list != null)
+          entry.listener(value);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'services library',
+          context: ErrorDescription('while dispatching notifications for $runtimeType'),
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<_ValueDispatcher<T>>(
+              'The $runtimeType sending notification was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          },
+        ));
+      }
+    }
+  }
 }
 
-class PhysicalKeyboard {
+class PhysicalKeyboard extends _ValueDispatcher<PhysicalKeyEvent> {
   PhysicalKeyboard();
 }
 
-class LogicalKeyboard {
+class LogicalKeyboard extends _ValueDispatcher<LogicalKeyEvent> {
   LogicalKeyboard();
 }
 
 class HardwareKeyboard {
   HardwareKeyboard();
 
+  final PhysicalKeyboard physical = PhysicalKeyboard();
+
+  final LogicalKeyboard logical = LogicalKeyboard();
+
+  PhysicalKeyEvent _physicalEventFromData(ui.KeyData keyData) {
+    final PhysicalKeyboardKey physicalKey = PhysicalKeyboardKey.findKeyByCode(keyData.key)
+        ?? PhysicalKeyboardKey(keyData.key);
+    final Duration timeStamp = keyData.timeStamp;
+    switch (keyData.change) {
+      case ui.KeyChange.down:
+        return PhysicalKeyDownEvent(
+          physicalKey: physicalKey,
+          timeStamp: timeStamp,
+        );
+      case ui.KeyChange.repeatedDown:
+        return PhysicalKeyDownEvent(
+          physicalKey: physicalKey,
+          timeStamp: timeStamp,
+          repeated: true,
+        );
+      case ui.KeyChange.up:
+        return PhysicalKeyUpEvent(
+          physicalKey: physicalKey,
+          timeStamp: timeStamp,
+        );
+      case ui.KeyChange.synchronize:
+        return PhysicalKeySyncEvent(
+          physicalKey: physicalKey,
+          timeStamp: timeStamp,
+        );
+      case ui.KeyChange.cancel:
+        return PhysicalKeyCancelEvent(
+          physicalKey: physicalKey,
+          timeStamp: timeStamp,
+        );
+    }
+  }
+
+  LogicalKeyEvent _logicalEventFromData(ui.LogicalKeyData keyData, PhysicalKeyEvent physicalEvent) {
+    final LogicalKeyboardKey logicalKey = LogicalKeyboardKey.findKeyByKeyId(keyData.key)
+        ?? LogicalKeyboardKey(keyData.key);
+    switch (keyData.change) {
+      case ui.KeyChange.down:
+        return LogicalKeyDownEvent(
+          logicalKey: logicalKey,
+          physicalEvent: physicalEvent,
+          character: keyData.character,
+        );
+      case ui.KeyChange.repeatedDown:
+        return LogicalKeyDownEvent(
+          logicalKey: logicalKey,
+          physicalEvent: physicalEvent,
+          character: keyData.character,
+          repeated: true,
+        );
+      case ui.KeyChange.up:
+        return LogicalKeyUpEvent(
+          logicalKey: logicalKey,
+          physicalEvent: physicalEvent,
+        );
+      case ui.KeyChange.synchronize:
+        return LogicalKeySyncEvent(
+          logicalKey: logicalKey,
+          physicalEvent: physicalEvent,
+          character: keyData.character,
+        );
+      case ui.KeyChange.cancel:
+        return LogicalKeyCancelEvent(
+          logicalKey: logicalKey,
+          physicalEvent: physicalEvent,
+        );
+    }
+  }
+
   void handleKeyData(ui.KeyData keyData) {
-    print(keyData);
+    final PhysicalKeyEvent physicalEvent = _physicalEventFromData(keyData);
+    _dispatchPhysicalKeyEvent(physicalEvent);
+    for(final ui.LogicalKeyData logicalData in keyData.logicalEvents) {
+      _dispatchLogicalKeyEvent(_logicalEventFromData(logicalData, physicalEvent));
+    }
+  }
+
+  void _dispatchPhysicalKeyEvent(PhysicalKeyEvent event) {
+    physical.notifyListeners(event);
+  }
+
+  void _dispatchLogicalKeyEvent(LogicalKeyEvent event) {
+    logical.notifyListeners(event);
   }
 }

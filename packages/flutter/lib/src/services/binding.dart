@@ -33,6 +33,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     _hardwareKeyboard = HardwareKeyboard();
     window.onKeyData = _hardwareKeyboard.handleKeyData;
+    _hardwareKeyboard.logical.addListener(print);
     initLicenses();
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
