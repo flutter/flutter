@@ -1624,6 +1624,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _clipboardStatus?.removeListener(_onChangedClipboardStatus);
     _clipboardStatus?.dispose();
     super.dispose();
+    assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
   }
 
   // TextInputClient implementation:
@@ -1843,12 +1844,34 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.onSubmitted?.call(_value.text);
   }
 
-  // When this flag is true, calling [_updateRemoteEditingValueIfNeeded] does
-  // nothing. This can be used to mute [_updateRemoteEditingValueIfNeeded] calls
-  // triggered by the [_value] setter.
-  bool _muteRemoteUpdate = false;
+  int _batchEditDepth = 0;
+
+  /// Begins a new batch edit, within which new updates made to the text editing
+  /// value will not be sent to the platform text input plugin.
+  ///
+  /// Batch edits nest. When the outmost batch edit finishes, [endBatchEdit]
+  /// will attempt to send [currentTextEditingValue] to the text input plugin if
+  /// it detected a change.
+  void beginBatchEdit() {
+    _batchEditDepth += 1;
+  }
+
+  /// Ends the current batch edit started by the last call to [beginBatchEdit],
+  /// and send [currentTextEditingValue] to the text input plugin if needed.
+  ///
+  /// Throws an error in debug mode if this [EditableText] is not in a batch
+  /// edit.
+  void endBatchEdit() {
+    _batchEditDepth -= 1;
+    assert(
+      _batchEditDepth >= 0,
+      'Unbalanced call to endBatchEdit: beginBatchEdit must be called first.',
+    );
+    _updateRemoteEditingValueIfNeeded();
+  }
+
   void _updateRemoteEditingValueIfNeeded() {
-    if (_muteRemoteUpdate || !_hasInputConnection)
+    if (_batchEditDepth > 0 || !_hasInputConnection)
       return;
     final TextEditingValue localValue = _value;
     if (localValue == _lastKnownRemoteTextEditingValue)
@@ -2163,15 +2186,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // Before triggering the [_value] change notifier, we want to make sure
     // [_updateRemoteEditingValueIfNeeded] is muted, so we can consolidate the
     // changes and send them to the engine in one batch.
-    _muteRemoteUpdate = true;
-    _value = value;
+    beginBatchEdit();
 
+    _value = value;
     if (textChanged)
       widget.onChanged?.call(value.text);
 
-    _muteRemoteUpdate = false;
-    _updateRemoteEditingValueIfNeeded();
-    assert(!_muteRemoteUpdate);
+    endBatchEdit();
   }
 
   void _onCursorColorTick() {

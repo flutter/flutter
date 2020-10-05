@@ -4731,6 +4731,104 @@ void main() {
     );
   });
 
+  group('batch editing', () {
+    final TextEditingController controller = TextEditingController(text: testText);
+    final EditableText editableText = EditableText(
+      showSelectionHandles: true,
+      maxLines: 2,
+      controller: controller,
+      focusNode: FocusNode(),
+      cursorColor: Colors.red,
+      backgroundCursorColor: Colors.blue,
+      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+      keyboardType: TextInputType.text,
+    );
+
+    final Widget widget = MediaQuery(
+      data: const MediaQueryData(),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: editableText,
+      ),
+    );
+
+    testWidgets('batch editing works', (WidgetTester tester) async {
+      await tester.pumpWidget(widget);
+
+      // Connect.
+      await tester.showKeyboard(find.byType(EditableText));
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
+      state.updateEditingValue(const TextEditingValue(text: 'remote value'));
+      tester.testTextInput.log.clear();
+
+      state.beginBatchEdit();
+
+      controller.text = 'new change 1';
+      expect(state.currentTextEditingValue.text, 'new change 1');
+      expect(tester.testTextInput.log, isEmpty);
+
+      // Nesting.
+      state.beginBatchEdit();
+      controller.text = 'new change 2';
+      expect(state.currentTextEditingValue.text, 'new change 2');
+      expect(tester.testTextInput.log, isEmpty);
+
+      // End the innermost batch edit. Not yet.
+      state.endBatchEdit();
+      expect(tester.testTextInput.log, isEmpty);
+
+      controller.text = 'new change 3';
+      expect(state.currentTextEditingValue.text, 'new change 3');
+      expect(tester.testTextInput.log, isEmpty);
+
+      // Finish the outermost batch edit.
+      state.endBatchEdit();
+      expect(tester.testTextInput.log, hasLength(1));
+      expect(
+        tester.testTextInput.log,
+        contains(matchesMethodCall('TextInput.setEditingState', args: containsPair('text', 'new change 3'))),
+      );
+    });
+
+    testWidgets('batch edits need to be nested properly', (WidgetTester tester) async {
+      await tester.pumpWidget(widget);
+
+      // Connect.
+      await tester.showKeyboard(find.byType(EditableText));
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
+      state.updateEditingValue(const TextEditingValue(text: 'remote value'));
+      tester.testTextInput.log.clear();
+
+      String errorString;
+      try {
+        state.endBatchEdit();
+      } catch (e) {
+        errorString = e.toString();
+      }
+
+      expect(errorString, contains('Unbalanced call to endBatchEdit'));
+    });
+
+     testWidgets('catch unfinished batch edits on disposal', (WidgetTester tester) async {
+      await tester.pumpWidget(widget);
+
+      // Connect.
+      await tester.showKeyboard(find.byType(EditableText));
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
+      state.updateEditingValue(const TextEditingValue(text: 'remote value'));
+      tester.testTextInput.log.clear();
+
+      state.beginBatchEdit();
+      expect(tester.takeException(), isNull);
+
+      await tester.pumpWidget(Container());
+      expect(tester.takeException(), isNotNull);
+    });
+  });
+
   group('EditableText does not send editing values more than once', () {
     final TextEditingController controller = TextEditingController(text: testText);
     final EditableText editableText = EditableText(
