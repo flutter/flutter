@@ -827,8 +827,6 @@ class TestHotRunnerFactory extends HotRunnerFactory {
 }
 
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcess extends Mock implements Process {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
 class MockHttpHeaders extends Mock implements HttpHeaders {}
