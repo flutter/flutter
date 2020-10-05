@@ -159,7 +159,8 @@ source_set("flutter_framework_source") {
 }
 
 ios_test_flutter_path = rebase_path("$root_out_dir/libios_test_flutter.dylib")
-platform_frameworks_path = "$ios_sdk_path/../../Library/Frameworks/"
+platform_frameworks_path =
+    rebase_path("$ios_sdk_path/../../Library/Frameworks/")
 
 # For tests that rely on manual reference counting.
 source_set("ios_test_flutter_mrc") {
