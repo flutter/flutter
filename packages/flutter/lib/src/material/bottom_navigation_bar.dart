@@ -142,7 +142,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// Creates a bottom navigation bar which is typically used as a
   /// [Scaffold]'s [Scaffold.bottomNavigationBar] argument.
   ///
-  /// The length of [items] must be at least two and each item's icon and title
+  /// The length of [items] must be at least two and each item's icon and label
   /// must not be null.
   ///
   /// If [type] is null then [BottomNavigationBarType.fixed] is used when there
