@@ -761,6 +761,12 @@ abstract class WidgetController {
       kind: kind,
       buttons: buttons,
     );
+
+    final size = binding.window.physicalSize / binding.window.devicePixelRatio;
+    if (!size.contains(downLocation)) {
+      print('Trying to tap non-visible area.');
+    }
+
     await result.down(downLocation);
     return result;
   }
