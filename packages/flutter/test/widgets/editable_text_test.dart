@@ -5778,37 +5778,30 @@ void main() {
   });
 
   group('callback errors', () {
-    const String errorText = 'Oh no!';
+    const String errorText = 'Test EditableText callback error';
 
     testWidgets('onSelectionChanged can throw errors', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            readOnly: true,
-            controller: TextEditingController(text: 'Lorem ipsum dolor sit amet'),
-            backgroundCursorColor: Colors.grey,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
-            onSelectionChanged: (TextSelection selection, SelectionChangedCause cause) {
-              throw FlutterError(errorText);
-            },
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          showSelectionHandles: true,
+          maxLines: 2,
+          controller: TextEditingController(
+            text: 'flutter is the best!',
           ),
+          focusNode: FocusNode(),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.blue,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
+          keyboardType: TextInputType.text,
+          selectionControls: materialTextSelectionControls,
+          onSelectionChanged: (TextSelection selection, SelectionChangedCause cause) {
+            throw FlutterError(errorText);
+          },
         ),
-      );
+      ));
 
       // Interact with the field to establish the input connection.
-      final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
-      await tester.tapAt(topLeft + const Offset(0.0, 5.0));
-      await tester.pump();
-
-      // Modify the selection and expect an exception.
-      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-      state.updateEditingValue(const TextEditingValue(
-        text: 'Foo bar',
-        selection: TextSelection(baseOffset: 0, extentOffset: 3),
-      ));
+      await tester.tap(find.byType(EditableText));
       final dynamic error = tester.takeException();
       expect(error, isFlutterError);
       expect(error.toString(), contains(errorText));
