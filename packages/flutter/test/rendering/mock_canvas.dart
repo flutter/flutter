@@ -1313,7 +1313,7 @@ class _DrawImagePaintPredicate extends _DrawCommandPaintPredicate {
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
     final ui.Image imageArgument = arguments[0] as ui.Image;
-    if (image != null && !image.isCloneOf(imageArgument))
+    if (image != null && !image!.isCloneOf(imageArgument))
       throw 'It called $methodName with an image, $imageArgument, which was not exactly the expected image ($image).';
     final Offset pointArgument = arguments[0] as Offset;
     if (x != null && y != null) {
@@ -1357,7 +1357,7 @@ class _DrawImageRectPaintPredicate extends _DrawCommandPaintPredicate {
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
     final ui.Image imageArgument = arguments[0] as ui.Image;
-    if (image != null && !image.isCloneOf(imageArgument))
+    if (image != null && !image!.isCloneOf(imageArgument))
       throw 'It called $methodName with an image, $imageArgument, which was not exactly the expected image ($image).';
     final Rect sourceArgument = arguments[1] as Rect;
     if (source != null && sourceArgument != source)

@@ -691,15 +691,15 @@ void main() {
     stream.addListener(ImageStreamListener(_listener));
 
     final ImageInfo info = await infoCompleter.future;
-    final int baselineRefCount = info.image.debugGetOpenHandleStackTraces().length;
+    final int baselineRefCount = info.image.debugGetOpenHandleStackTraces()!.length;
 
     final DecorationImagePainter painter = DecorationImage(image: provider).createPainter(() {});
     final Canvas canvas = TestCanvas();
     painter.paint(canvas, Rect.zero, Path(), ImageConfiguration.empty);
 
-    expect(info.image.debugGetOpenHandleStackTraces().length, baselineRefCount + 1);
+    expect(info.image.debugGetOpenHandleStackTraces()!.length, baselineRefCount + 1);
     painter.dispose();
-    expect(info.image.debugGetOpenHandleStackTraces().length, baselineRefCount);
+    expect(info.image.debugGetOpenHandleStackTraces()!.length, baselineRefCount);
 
     info.dispose();
   });
