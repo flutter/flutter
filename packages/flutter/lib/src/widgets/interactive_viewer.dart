@@ -107,6 +107,10 @@ class InteractiveViewer extends StatefulWidget {
   /// single gesture begun along one axis cannot also cause panning along the
   /// other axis without stopping and beginning a new gesture. This is a common
   /// pattern in tables where data is displayed in columns and rows.
+  ///
+  /// See also:
+  ///  * [constrained], which has an example of creating a table that uses
+  ///    alignPanAxis.
   final bool alignPanAxis;
 
   /// A margin for the visible boundaries of the child.
@@ -149,31 +153,27 @@ class InteractiveViewer extends StatefulWidget {
   ///     const int _rowCount = 20;
   ///     const int _columnCount = 3;
   ///
-  ///     return Scaffold(
-  ///       appBar: AppBar(
-  ///         title: const Text('Pannable Table'),
-  ///       ),
-  ///       body: InteractiveViewer(
-  ///         constrained: false,
-  ///         scaleEnabled: false,
-  ///         child: Table(
-  ///           columnWidths: <int, TableColumnWidth>{
-  ///             for (int column = 0; column < _columnCount; column += 1)
-  ///               column: const FixedColumnWidth(300.0),
-  ///           },
-  ///           children: <TableRow>[
-  ///             for (int row = 0; row < _rowCount; row += 1)
-  ///               TableRow(
-  ///                 children: <Widget>[
-  ///                   for (int column = 0; column < _columnCount; column += 1)
-  ///                     Container(
-  ///                       height: 100,
-  ///                       color: row % 2 + column % 2 == 1 ? Colors.red : Colors.green,
-  ///                     ),
-  ///                 ],
-  ///               ),
-  ///           ],
-  ///         ),
+  ///     return InteractiveViewer(
+  ///       alignPanAxis: true,
+  ///       constrained: false,
+  ///       scaleEnabled: false,
+  ///       child: Table(
+  ///         columnWidths: <int, TableColumnWidth>{
+  ///           for (int column = 0; column < _columnCount; column += 1)
+  ///             column: const FixedColumnWidth(300.0),
+  ///         },
+  ///         children: <TableRow>[
+  ///           for (int row = 0; row < _rowCount; row += 1)
+  ///             TableRow(
+  ///               children: <Widget>[
+  ///                 for (int column = 0; column < _columnCount; column += 1)
+  ///                   Container(
+  ///                     height: 100,
+  ///                     color: row % 2 + column % 2 == 1 ? Colors.red : Colors.green,
+  ///                   ),
+  ///               ],
+  ///             ),
+  ///         ],
   ///       ),
   ///     );
   ///   }
