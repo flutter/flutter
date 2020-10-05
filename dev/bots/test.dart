@@ -620,7 +620,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata, options: nullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: nullSafetyOptions);
     await _runFlutterTest(
@@ -765,6 +765,16 @@ Future<void> _runWebIntegrationTests() async {
       '--dart-define=test.valueB=Value',
     ]
   );
+  await _runWebDebugTest('lib/sound_mode.dart', additionalArguments: <String>[
+    '--enable-experiment',
+    'non-nullable',
+    '--sound-null-safety',
+  ]);
+  await _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
+    '--enable-experiment',
+    'non-nullable',
+    '--sound-null-safety',
+  ]);
 }
 
 Future<void> _runWebStackTraceTest(String buildMode) async {

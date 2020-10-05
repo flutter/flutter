@@ -106,7 +106,7 @@ void main() {
     }
 
     setUp(() async {
-      fs = MemoryFileSystem();
+      fs = MemoryFileSystem.test();
       fsWindows = MemoryFileSystem(style: FileSystemStyle.windows);
       mockClock = MockClock();
       mockVersion = MockFlutterVersion();
@@ -841,8 +841,7 @@ dependencies:
       testUsingContext('Does not throw when AndroidManifest.xml is not found', () async {
         when(flutterProject.isModule).thenReturn(false);
 
-        final File manifest = MockFile();
-        when(manifest.existsSync()).thenReturn(false);
+        final File manifest = fs.file('AndroidManifest.xml');
         when(androidProject.appManifestFile).thenReturn(manifest);
 
         await injectPlugins(flutterProject);
@@ -1421,8 +1420,6 @@ flutter:
 class MockAndroidProject extends Mock implements AndroidProject {}
 class MockFeatureFlags extends Mock implements FeatureFlags {}
 class MockFlutterProject extends Mock implements FlutterProject {}
-class MockFile extends Mock implements File {}
-class MockFileSystem extends Mock implements FileSystem {}
 class MockIosProject extends Mock implements IosProject {}
 class MockMacOSProject extends Mock implements MacOSProject {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}

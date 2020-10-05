@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,7 +9,7 @@ void main() {
   testWidgets('IconTheme.of works', (WidgetTester tester) async {
     const IconThemeData data = IconThemeData(color: Color(0xAAAAAAAA), opacity: 0.5, size: 16.0);
 
-    IconThemeData retrieved;
+    late IconThemeData retrieved;
     await tester.pumpWidget(
       IconTheme(data: data, child: Builder(builder: (BuildContext context) {
         retrieved = IconTheme.of(context);
