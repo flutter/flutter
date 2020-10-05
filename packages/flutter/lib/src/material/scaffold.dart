@@ -213,8 +213,7 @@ class ScaffoldMessenger extends StatefulWidget {
     assert(nullOk != null);
     assert(context != null);
 
-    if (!nullOk)
-      assert(debugCheckHasScaffoldMessenger(context));
+    assert(nullOk || debugCheckHasScaffoldMessenger(context));
 
     final _ScaffoldMessengerScope? scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>();
     return scope?._scaffoldMessengerState;
