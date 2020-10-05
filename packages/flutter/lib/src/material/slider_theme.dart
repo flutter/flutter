@@ -926,7 +926,7 @@ abstract class SliderTickMarkShape {
   /// otherwise. When true, the slider will respond to input.
   /// {@endtemplate}
   Size getPreferredSize({
-    SliderThemeData sliderTheme,
+    required SliderThemeData sliderTheme,
     bool isEnabled,
   });
 
@@ -1178,8 +1178,8 @@ abstract class RangeSliderValueIndicatorShape {
   Size getPreferredSize(
     bool isEnabled,
     bool isDiscrete, {
-    TextPainter labelPainter,
-    double textScaleFactor,
+    required TextPainter labelPainter,
+    required double textScaleFactor,
   });
 
   /// Determines the best offset to keep this shape on the screen.
@@ -1278,7 +1278,7 @@ abstract class RangeSliderTickMarkShape {
   ///
   /// {@macro flutter.material.rangeSlider.shape.argument.isEnabled}
   Size getPreferredSize({
-    SliderThemeData sliderTheme,
+    required SliderThemeData sliderTheme,
     bool isEnabled,
   });
 
@@ -2011,16 +2011,16 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 
   @override
   Size getPreferredSize({
-    SliderThemeData? sliderTheme,
+    required SliderThemeData sliderTheme,
     bool isEnabled = false,
   }) {
     assert(sliderTheme != null);
-    assert(sliderTheme!.trackHeight != null);
+    assert(sliderTheme.trackHeight != null);
     assert(isEnabled != null);
     // The tick marks are tiny circles. If no radius is provided, then the
     // radius is defaulted to be a fraction of the
     // [SliderThemeData.trackHeight]. The fraction is 1/4.
-    return Size.fromRadius(tickMarkRadius ?? sliderTheme!.trackHeight! / 4);
+    return Size.fromRadius(tickMarkRadius ?? sliderTheme.trackHeight! / 4);
   }
 
   @override
@@ -2109,13 +2109,13 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
 
   @override
   Size getPreferredSize({
-    SliderThemeData? sliderTheme,
+    required SliderThemeData sliderTheme,
     bool isEnabled = false,
   }) {
     assert(sliderTheme != null);
-    assert(sliderTheme!.trackHeight != null);
+    assert(sliderTheme.trackHeight != null);
     assert(isEnabled != null);
-    return Size.fromRadius(tickMarkRadius ?? sliderTheme!.trackHeight! / 4);
+    return Size.fromRadius(tickMarkRadius ?? sliderTheme.trackHeight! / 4);
   }
 
   @override
@@ -2595,12 +2595,12 @@ class RectangularRangeSliderValueIndicatorShape
   Size getPreferredSize(
     bool isEnabled,
     bool isDiscrete, {
-    TextPainter? labelPainter,
-    double? textScaleFactor,
+    required TextPainter labelPainter,
+    required double textScaleFactor,
   }) {
     assert(labelPainter != null);
     assert(textScaleFactor != null && textScaleFactor >= 0);
-    return _pathPainter.getPreferredSize(labelPainter!, textScaleFactor!);
+    return _pathPainter.getPreferredSize(labelPainter, textScaleFactor);
   }
 
   @override
@@ -2872,12 +2872,12 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
   Size getPreferredSize(
     bool isEnabled,
     bool isDiscrete, {
-    TextPainter? labelPainter,
-    double? textScaleFactor,
+    required TextPainter labelPainter,
+    required double textScaleFactor,
   }) {
     assert(labelPainter != null);
     assert(textScaleFactor != null && textScaleFactor >= 0);
-    return _pathPainter.getPreferredSize(labelPainter!, textScaleFactor!);
+    return _pathPainter.getPreferredSize(labelPainter, textScaleFactor);
   }
 
   @override
