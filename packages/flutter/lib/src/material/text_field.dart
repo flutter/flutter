@@ -259,16 +259,13 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// Keep in mind you can also always read the current string from a TextField's
 /// [TextEditingController] using [TextEditingController.text].
 ///
-/// ### Handling emojis and other complex characters
-/// It's important to always use
-/// [characters](https://pub.dev/packages/characters) when dealing with user
-/// input text. This will ensure that extended grapheme clusters and surrogate
-/// pairs are treated as single characters, as they appear to the user.
+  /// ## Handling emojis and other complex characters
+/// {@macro flutter.widgets.editableText.complexCharacters}
 ///
-/// For example, in the live Dartpad example above, try typing the emoji
-/// 👨‍👩‍👦 into the field and submitting. Because the code measures
-/// the length with `value.characters.length` and NOT `value.length`, the emoji
-/// is correctly counted as a single character.
+/// In the live Dartpad example above, try typing the emoji 👨‍👩‍👦
+/// into the field and submitting. Because the example code measures the length
+/// with `value.characters.length`, the emoji is correctly counted as a single
+/// character.
 ///
 /// See also:
 ///
