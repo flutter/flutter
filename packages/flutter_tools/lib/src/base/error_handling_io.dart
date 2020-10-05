@@ -63,12 +63,12 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
     }
   }
 
-  /// Delete the file and return true if it exists, take no action and return
-  /// false if it does not.
+  /// Delete the file or directory and return true if it exists, take no
+  /// action and return false if it does not.
   ///
   /// This method should be prefered to checking if it exists and
-  /// then deleting, because it handles the edge case where the file is
-  /// deleted by a different program between the two calls.
+  /// then deleting, because it handles the edge case where the file or directory
+  /// is deleted by a different program between the two calls.
   static bool deleteIfExists(FileSystemEntity file, {bool recursive = false}) {
     if (!file.existsSync()) {
       return false;
