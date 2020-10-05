@@ -26,7 +26,7 @@ import 'text_input.dart';
 /// implement the [formatEditUpdate] method.
 ///
 /// ## Handling emojis and other complex characters
-/// {@template flutter.widgets.editableText.complexCharacters}
+/// {@macro flutter.widgets.editableText.complexCharacters}
 ///
 /// See also:
 ///
