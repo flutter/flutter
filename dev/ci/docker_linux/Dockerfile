@@ -113,6 +113,10 @@ RUN $GOBINARY get -u github.com/technosophos/dashing
 RUN locale-gen en_US "en_US.UTF-8" && dpkg-reconfigure locales
 ENV LANG en_US.UTF-8
 
+# Install fastlane via pinned Gemfile & Gemfile.lock
+# Skip all the documentation (-N) since it's just on CI.
+RUN gem install bundler -N
+
 # Gemfile last edited 1/6/2019 (update to trigger a rebuild of Docker image)
 COPY ci/docker_linux/Gemfile /Gemfile
 COPY ci/docker_linux/Gemfile.lock /Gemfile.lock
