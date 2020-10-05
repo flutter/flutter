@@ -459,13 +459,13 @@ class _ChangeAnimation extends Animation<double> with AnimationWithParentMixin<d
 
   @override
   void removeStatusListener(AnimationStatusListener listener) {
-    if (parent != null)
+    if (controller.animation != null)
       super.removeStatusListener(listener);
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    if (parent != null)
+    if (controller.animation != null)
       super.removeListener(listener);
   }
 
