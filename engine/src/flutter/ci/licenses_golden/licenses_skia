@@ -1,4 +1,4 @@
-Signature: 9530e6837857fac3f6639134bb4af52d
+Signature: ce2c929f2edebf7d13632caa0b1c2b59
 
 UNUSED LICENSES:
 
@@ -4008,6 +4008,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLInliner.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSampleUsage.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLTinyUnorderedMap.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLInlineMarker.h
 FILE: ../../../third_party/skia/src/utils/SkCustomTypeface.cpp
 ----------------------------------------------------------------------------------------------------
