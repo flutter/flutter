@@ -2067,7 +2067,6 @@ void main() {
   });
 
   testWidgets('ScaffoldMessenger.of will assert if !nullOk', (WidgetTester tester) async {
-    ScaffoldMessengerState scaffoldMessenger;
     const Key tapTarget = Key('tap-target');
 
     final List<dynamic> exceptions = <dynamic>[];
@@ -2085,7 +2084,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  scaffoldMessenger = ScaffoldMessenger.of(context);
+                  ScaffoldMessenger.of(context);
                 },
                 behavior: HitTestBehavior.opaque,
                 child: Container(
