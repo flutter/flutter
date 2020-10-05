@@ -211,8 +211,13 @@ class ScaffoldMessenger extends StatefulWidget {
   ///
   ///  * [debugCheckHasScaffoldMessenger], which asserts that the given context
   ///    has a [ScaffoldMessenger] ancestor.
-  static ScaffoldMessengerState of(BuildContext context) {
+  static ScaffoldMessengerState of(BuildContext context, { bool nullOk = false }) {
+    assert(nullOk != null);
     assert(context != null);
+
+    if (!nullOk)
+      assert(debugCheckHasScaffoldMessenger(context));
+
     final _ScaffoldMessengerScope scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>();
     return scope?._scaffoldMessengerState;
   }
@@ -2706,7 +2711,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   @override
   void didChangeDependencies() {
-    final ScaffoldMessengerState _currentScaffoldMessenger = ScaffoldMessenger.of(context);
+    // nullOk is valid here since  both the Scaffold and ScaffoldMessenger are
+    // currently available for managing SnackBars.
+    final ScaffoldMessengerState _currentScaffoldMessenger = ScaffoldMessenger.of(context, nullOk: true);
     // If our ScaffoldMessenger has changed, unregister with the old one first.
     if (_scaffoldMessenger != null &&
       (_currentScaffoldMessenger == null || _scaffoldMessenger != _currentScaffoldMessenger)) {

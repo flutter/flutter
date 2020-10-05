@@ -2034,6 +2034,118 @@ void main() {
       await tester.pumpAndSettle();
     });
   });
+
+  testWidgets('ScaffoldMessenger.of can return null', (WidgetTester tester) async {
+    ScaffoldMessengerState scaffoldMessenger;
+    const Key tapTarget = Key('tap-target');
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(),
+        child: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  scaffoldMessenger = ScaffoldMessenger.of(context, nullOk: true);
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  height: 100.0,
+                  width: 100.0,
+                  key: tapTarget,
+                ),
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pump();
+    expect(scaffoldMessenger, isNull);
+  });
+
+  testWidgets('ScaffoldMessenger.of will assert if !nullOk', (WidgetTester tester) async {
+    ScaffoldMessengerState scaffoldMessenger;
+    const Key tapTarget = Key('tap-target');
+
+    final List<dynamic> exceptions = <dynamic>[];
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exceptions.add(details.exception);
+    };
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(),
+        child: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  scaffoldMessenger = ScaffoldMessenger.of(context);
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  height: 100.0,
+                  width: 100.0,
+                  key: tapTarget,
+                ),
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.byKey(tapTarget));
+    FlutterError.onError = oldHandler;
+
+    expect(exceptions.length, 1);
+    expect(exceptions.single.runtimeType, FlutterError);
+    final FlutterError error = exceptions.first as FlutterError;
+    expect(error.diagnostics.length, 5);
+    expect(error.diagnostics[2], isA<DiagnosticsProperty<Element>>());
+    expect(error.diagnostics[3], isA<DiagnosticsBlock>());
+    expect(error.diagnostics[4].level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics[4].toStringDeep(),
+      equalsIgnoringHashCodes(
+        'Typically, the ScaffoldMessenger widget is introduced by the\n'
+        'MaterialApp at the top of your application widget tree.\n',
+      ),
+    );
+    expect(error.toStringDeep(), equalsIgnoringHashCodes(
+      'FlutterError\n'
+      '   No ScaffoldMessenger widget found.\n'
+      '   Builder widgets require a ScaffoldMessenger widget ancestor.\n'
+      '   The specific widget that could not find a ScaffoldMessenger\n'
+      '   ancestor was:\n'
+      '     Builder\n'
+      '   The ancestors of this widget were:\n'
+      '     _BodyBuilder\n'
+      '     MediaQuery\n'
+      '     LayoutId-[<_ScaffoldSlot.body>]\n'
+      '     CustomMultiChildLayout\n'
+      '     AnimatedBuilder\n'
+      '     DefaultTextStyle\n'
+      '     AnimatedDefaultTextStyle\n'
+      '     _InkFeatures-[GlobalKey#342d0 ink renderer]\n'
+      '     NotificationListener<LayoutChangedNotification>\n'
+      '     PhysicalModel\n'
+      '     AnimatedPhysicalModel\n'
+      '     Material\n'
+      '     PrimaryScrollController\n'
+      '     _ScaffoldScope\n'
+      '     Scaffold\n'
+      '     MediaQuery\n'
+      '     Directionality\n'
+      '     [root]\n'
+      '   Typically, the ScaffoldMessenger widget is introduced by the\n'
+      '   MaterialApp at the top of your application widget tree.\n'
+    ));
+  });
 }
 
 class _GeometryListener extends StatefulWidget {
