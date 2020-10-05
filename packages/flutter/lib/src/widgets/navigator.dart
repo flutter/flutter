@@ -4814,7 +4814,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
     if (entry.hasPage) {
-      if (widget.onPopPage!(entry.route, result))
+      if (widget.onPopPage!(entry.route, result)!)
         entry.currentState = _RouteLifecycle.pop;
     } else {
       entry.pop<T>(result);
