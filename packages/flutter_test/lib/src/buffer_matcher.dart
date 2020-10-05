@@ -19,10 +19,10 @@ class _BufferGoldenMatcher extends AsyncMatcher {
   final Uri key;
 
   /// The [version] of the golden image.
-  final int version;
+  final int? version;
 
   @override
-  Future<String> matchAsync(dynamic item) async {
+  Future<String?> matchAsync(dynamic item) async {
     Uint8List buffer;
     if (item is List<int>) {
       buffer = Uint8List.fromList(item);
@@ -69,6 +69,6 @@ class _BufferGoldenMatcher extends AsyncMatcher {
 /// );
 /// ```
 /// {@end-tool}
-AsyncMatcher bufferMatchesGoldenFile(String key, {int version}) {
+AsyncMatcher bufferMatchesGoldenFile(String key, {int? version}) {
    return _BufferGoldenMatcher(Uri.parse(key), version);
 }

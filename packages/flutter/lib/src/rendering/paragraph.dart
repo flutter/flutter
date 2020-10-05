@@ -435,7 +435,7 @@ class RenderParagraph extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     RenderBox? child = firstChild;
     while (child != null) {
-      final TextParentData textParentData = child.parentData as TextParentData;
+      final TextParentData textParentData = child.parentData! as TextParentData;
       final Matrix4 transform = Matrix4.translationValues(
         textParentData.offset.dx,
         textParentData.offset.dy,
@@ -574,7 +574,7 @@ class RenderParagraph extends RenderBox
     RenderBox? child = firstChild;
     int childIndex = 0;
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      final TextParentData textParentData = child.parentData as TextParentData;
+      final TextParentData textParentData = child.parentData! as TextParentData;
       textParentData.offset = Offset(
         _textPainter.inlinePlaceholderBoxes![childIndex].left,
         _textPainter.inlinePlaceholderBoxes![childIndex].top,
@@ -706,7 +706,7 @@ class RenderParagraph extends RenderBox
     // it until we finish layout, and RenderObject is in immutable state at
     // this point.
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      final TextParentData textParentData = child.parentData as TextParentData;
+      final TextParentData textParentData = child.parentData! as TextParentData;
 
       final double scale = textParentData.scale!;
       context.pushTransform(
@@ -891,6 +891,7 @@ class RenderParagraph extends RenderBox
         extentOffset: start + info.text.length,
       );
       final List<ui.TextBox> rects = getBoxesForSelection(selection);
+      start += info.text.length;
       if (rects.isEmpty) {
         continue;
       }
@@ -920,7 +921,7 @@ class RenderParagraph extends RenderBox
       if (info.isPlaceholder) {
         if (children.isNotEmpty) {
           final SemanticsNode childNode = children.elementAt(placeholderIndex++);
-          final TextParentData parentData = child!.parentData as TextParentData;
+          final TextParentData parentData = child!.parentData! as TextParentData;
           childNode.rect = Rect.fromLTWH(
             childNode.rect.left,
             childNode.rect.top,
@@ -958,7 +959,6 @@ class RenderParagraph extends RenderBox
         newChildCache.addLast(newChild);
         newChildren.add(newChild);
       }
-      start += info.text.length;
     }
     _cachedChildNodes = newChildCache;
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);

@@ -36,7 +36,15 @@ void main() {
     mockCache = MockCache();
   });
 
-  for (final String channel in FlutterVersion.officialChannels) {
+  testUsingContext('Channel enum and string transform to each other', () {
+    for (final Channel channel in Channel.values) {
+      expect(getNameForChannel(channel), kOfficialChannels.toList()[channel.index]);
+    }
+    expect(kOfficialChannels.toList().map((String str) => getChannelForName(str)).toList(),
+      Channel.values);
+  });
+
+  for (final String channel in kOfficialChannels) {
     DateTime getChannelUpToDateVersion() {
       return _testClock.ago(FlutterVersion.versionAgeConsideredUpToDate(channel) ~/ 2);
     }

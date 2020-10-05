@@ -56,7 +56,7 @@ void main() {
         defines: <String, String>{
           kTargetFile: globals.fs.path.join('foo', 'lib', 'main.dart'),
         },
-        artifacts: MockArtifacts(),
+        artifacts: Artifacts.test(),
         processManager: FakeProcessManager.any(),
         logger: globals.logger,
         fileSystem: globals.fs,
@@ -72,6 +72,10 @@ void main() {
   });
 
   test('WebEntrypointTarget generates an entrypoint with plugins and init platform', () => testbed.run(() async {
+    final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() {}');
+    environment.defines[kTargetFile] = mainFile.path;
     environment.defines[kHasWebPlugins] = 'true';
     environment.defines[kInitializePlatform] = 'true';
     await const WebEntrypointTarget().build(environment);
@@ -144,7 +148,10 @@ void main() {
   }));
 
   test('WebEntrypointTarget generates an entrypoint for a file outside of main', () => testbed.run(() async {
-    environment.defines[kTargetFile] = globals.fs.path.join('other', 'lib', 'main.dart');
+    final File mainFile = globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() {}');
+    environment.defines[kTargetFile] = mainFile.path;
     await const WebEntrypointTarget().build(environment);
 
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
@@ -154,7 +161,10 @@ void main() {
   }));
 
   test('WebEntrypointTarget generates a plugin registrant for a file outside of main', () => testbed.run(() async {
-    environment.defines[kTargetFile] = globals.fs.path.join('other', 'lib', 'main.dart');
+    final File mainFile = globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() {}');
+    environment.defines[kTargetFile] = mainFile.path;
     environment.defines[kHasWebPlugins] = 'true';
     await const WebEntrypointTarget().build(environment);
 
@@ -167,6 +177,11 @@ void main() {
 
 
   test('WebEntrypointTarget generates an entrypoint with plugins and init platform on windows', () => testbed.run(() async {
+    final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() {}');
+    environment.defines[kTargetFile] = mainFile.path;
+
     environment.defines[kHasWebPlugins] = 'true';
     environment.defines[kInitializePlatform] = 'true';
     await const WebEntrypointTarget().build(environment);
@@ -190,6 +205,10 @@ void main() {
   }));
 
   test('WebEntrypointTarget generates an entrypoint without plugins and init platform', () => testbed.run(() async {
+    final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() {}');
+    environment.defines[kTargetFile] = mainFile.path;
     environment.defines[kHasWebPlugins] = 'false';
     environment.defines[kInitializePlatform] = 'true';
     await const WebEntrypointTarget().build(environment);
@@ -208,6 +227,10 @@ void main() {
   }));
 
   test('WebEntrypointTarget generates an entrypoint with plugins and without init platform', () => testbed.run(() async {
+    final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() {}');
+    environment.defines[kTargetFile] = mainFile.path;
     environment.defines[kHasWebPlugins] = 'true';
     environment.defines[kInitializePlatform] = 'false';
     await const WebEntrypointTarget().build(environment);
@@ -225,7 +248,39 @@ void main() {
     expect(generated, contains('entrypoint.main();'));
   }));
 
+  test('WebEntrypointTarget generates an entrypoint with a language version', () => testbed.run(() async {
+    final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('// @dart=2.8\nvoid main() {}');
+    environment.defines[kTargetFile] = mainFile.path;
+    await const WebEntrypointTarget().build(environment);
+
+    final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
+
+    // Language version
+    expect(generated, contains('// @dart=2.8'));
+  }));
+
+  test('WebEntrypointTarget generates an entrypoint with a language version from a package config', () => testbed.run(() async {
+    final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() {}');
+    globals.fs.file(globals.fs.path.join('pubspec.yaml'))
+      .writeAsStringSync('name: foo\n');
+    environment.defines[kTargetFile] = mainFile.path;
+    await const WebEntrypointTarget().build(environment);
+
+    final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
+
+    // Language version
+    expect(generated, contains('// @dart = 2.7'));
+  }));
+
   test('WebEntrypointTarget generates an entrypoint without plugins and without init platform', () => testbed.run(() async {
+    final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() {}');
+    environment.defines[kTargetFile] = mainFile.path;
     environment.defines[kHasWebPlugins] = 'false';
     environment.defines[kInitializePlatform] = 'false';
     await const WebEntrypointTarget().build(environment);
@@ -557,4 +612,3 @@ void main() {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockArtifacts extends Mock implements Artifacts {}

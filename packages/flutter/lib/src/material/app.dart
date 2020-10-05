@@ -199,6 +199,7 @@ class MaterialApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
     this.shortcuts,
     this.actions,
+    this.restorationScopeId,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -244,6 +245,7 @@ class MaterialApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
     this.shortcuts,
     this.actions,
+    this.restorationScopeId,
   }) : assert(routeInformationParser != null),
        assert(routerDelegate != null),
        assert(title != null),
@@ -631,6 +633,9 @@ class MaterialApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.actions.seeAlso}
   final Map<Type, Action<Intent>> actions;
 
+  /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
+  final String restorationScopeId;
+
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps.
   ///
@@ -794,6 +799,7 @@ class _MaterialAppState extends State<MaterialApp> {
         inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
+        restorationScopeId: widget.restorationScopeId,
       );
     }
 
@@ -828,6 +834,7 @@ class _MaterialAppState extends State<MaterialApp> {
       inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
+      restorationScopeId: widget.restorationScopeId,
     );
   }
 

@@ -40,6 +40,24 @@
          "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
       },
       {
+         "name":"Linux firebase_abstract_method_smoke_test",
+         "repo":"flutter",
+         "task_name":"linux_firebase_abstract_method_smoke_test",
+         "enabled":true
+      },
+      {
+         "name":"Linux firebase_android_embedding_v2_smoke_test",
+         "repo":"flutter",
+         "task_name":"linux_firebase_android_embedding_v2_smoke_test",
+         "enabled":true
+      },
+      {
+         "name":"Linux firebase_release_smoke_test",
+         "repo":"flutter",
+         "task_name":"linux_firebase_release_smoke_test",
+         "enabled":true
+      },
+      {
          "name":"Linux fuchsia_precache",
          "repo":"flutter",
          "task_name":"linux_fuchsia_precache",

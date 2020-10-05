@@ -3427,17 +3427,22 @@ void main() {
     });
 
     testWidgets(
-      'does not throw when sending infinite Rect',
+      'zero matrix paint transform',
       (WidgetTester tester) async {
         controller.value = TextEditingValue(text: 'a' * 100, composing: const TextRange(start: 0, end: 10));
+        // Use a FittedBox with an zero-sized child to set the paint transform
+        // to the zero matrix.
         await tester.pumpWidget(FittedBox(child: SizedBox.fromSize(size: Size.zero, child: builder())));
         await tester.showKeyboard(find.byType(EditableText));
-        expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.setMarkedTextRect', args: <String, dynamic> {
-          'width': -1,
-          'height': -1,
-          'x': 0,
-          'y': 0,
-        })));
+        expect(tester.testTextInput.log, contains(matchesMethodCall(
+          'TextInput.setMarkedTextRect',
+          args: allOf(
+            containsPair('width', isNotNaN),
+            containsPair('height', isNotNaN),
+            containsPair('x', isNotNaN),
+            containsPair('y', isNotNaN),
+          ),
+        )));
     });
   });
 
@@ -4695,7 +4700,7 @@ void main() {
 
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     final Rect rect = state.renderEditable.getLocalRectForCaret(const TextPosition(offset: 0));
-    expect(rect.isFinite, false);
+    expect(rect.isFinite, true);
     expect(tester.takeException(), isNull);
   });
 
@@ -5731,6 +5736,43 @@ void main() {
 
     // After composing ends, formatter will update.
     state.updateEditingValue(const TextEditingValue(text: '123456'));
+    expect(state.currentTextEditingValue.text, '12345');
+    expect(state.currentTextEditingValue.composing, TextRange.empty);
+  });
+
+  testWidgets('Length formatter handles composing text correctly, continued', (WidgetTester tester) async {
+    final TextInputFormatter formatter = LengthLimitingTextInputFormatter(5);
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        inputFormatters: <TextInputFormatter>[formatter],
+        style: textStyle,
+        cursorColor: cursorColor,
+        selectionControls: materialTextSelectionControls,
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Initially we're at maxLength with no composing text.
+    controller.text = '12345' ;
+    assert(state.currentTextEditingValue == const TextEditingValue(text: '12345'));
+
+    // Should be able to change the editing value if the new value is still shorter
+    // than maxLength.
+    state.updateEditingValue(const TextEditingValue(text: '12345', composing: TextRange(start: 2, end: 4)));
+    expect(state.currentTextEditingValue.composing, const TextRange(start: 2, end: 4));
+
+    // Reset.
+    controller.text = '12345' ;
+    assert(state.currentTextEditingValue == const TextEditingValue(text: '12345'));
+
+    // The text should not change when trying to insert when the text is already
+    // at maxLength.
+    state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 5, end: 6)));
     expect(state.currentTextEditingValue.text, '12345');
     expect(state.currentTextEditingValue.composing, TextRange.empty);
   });

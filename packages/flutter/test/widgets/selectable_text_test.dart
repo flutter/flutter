@@ -2442,7 +2442,7 @@ void main() {
       );
 
       // But don't trigger the toolbar.
-      expect(find.byType(FlatButton), findsNothing);
+      expect(find.byType(TextButton), findsNothing);
     },
   );
 
@@ -2564,7 +2564,7 @@ void main() {
       );
 
       // Selected text shows 2 toolbar buttons: copy, select all
-      expect(find.byType(FlatButton), findsNWidgets(2));
+      expect(find.byType(TextButton), findsNWidgets(2));
     },
   );
 
@@ -2613,7 +2613,7 @@ void main() {
       );
 
       // Selected text shows 2 toolbar buttons: copy, select all
-      expect(find.byType(FlatButton), findsNWidgets(2));
+      expect(find.byType(TextButton), findsNWidgets(2));
     },
   );
 
@@ -2769,7 +2769,7 @@ void main() {
       );
 
       // Collapsed toolbar shows 2 buttons: copy, select all
-      expect(find.byType(FlatButton), findsNWidgets(2));
+      expect(find.byType(TextButton), findsNWidgets(2));
     },
   );
 
@@ -3175,7 +3175,7 @@ void main() {
 
     await gesture.up();
     await tester.pump();
-    expect(find.byType(FlatButton), findsNothing);
+    expect(find.byType(TextButton), findsNothing);
   });
 
   testWidgets('force press selects word', (WidgetTester tester) async {

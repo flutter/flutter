@@ -116,6 +116,20 @@ class ObjectKey extends LocalKey {
 /// You cannot simultaneously include two widgets in the tree with the same
 /// global key. Attempting to do so will assert at runtime.
 ///
+/// ## Pitfalls
+/// GlobalKeys should not be re-created on every build. They should usually be
+/// long-lived objects owned by a [State] object, for example.
+///
+/// Creating a new GlobalKey on every build will throw away the state of the
+/// subtree associated with the old key and create a new fresh subtree for the
+/// new key. Besides harming performance, this can also cause unexpected
+/// behavior in widgets in the subtree. For example, a [GestureDetector] in the
+/// subtree will be unable to track ongoing gestures since it will be recreated
+/// on each build.
+///
+/// Instead, a good practice is to let a State object own the GlobalKey, and
+/// instantiate it outside the build method, such as in [State.initState].
+///
 /// See also:
 ///
 ///  * The discussion at [Widget.key] for more information about how widgets use
@@ -269,7 +283,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
           assert(element != null);
           assert(element.widget != null);
           assert(element.widget.key != null);
-          final GlobalKey key = element.widget.key as GlobalKey;
+          final GlobalKey key = element.widget.key! as GlobalKey;
           assert(_registry.containsKey(key));
           duplicates ??= <GlobalKey, Set<Element>>{};
           // Uses ordered set to produce consistent error message.
@@ -1904,19 +1918,20 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// objects.
   MultiChildRenderObjectWidget({ Key? key, this.children = const <Widget>[] })
     : assert(children != null),
-      assert(() {
-        for (int index = 0; index < children.length; index++) {
-          // TODO(a14n): remove this check to have a lot more const widget
-          if (children[index] == null) { // ignore: dead_code
-            throw FlutterError(
+      super(key: key) {
+    assert(() {
+      for (int index = 0; index < children.length; index++) {
+        // TODO(a14n): remove this check to have a lot more const widget
+        if (children[index] == null) { // ignore: dead_code
+          throw FlutterError(
               "$runtimeType's children must not contain any null values, "
-              'but a null value was found at index $index'
-            );
-          }
+                  'but a null value was found at index $index'
+          );
         }
-        return true;
-      }()), // https://github.com/dart-lang/sdk/issues/29276
-      super(key: key);
+      }
+      return true;
+    }()); // https://github.com/dart-lang/sdk/issues/29276
+  }
 
   /// The widgets below this widget in the tree.
   ///
@@ -5452,8 +5467,8 @@ abstract class RenderObjectElement extends Element {
 
   /// The underlying [RenderObject] for this element.
   @override
-  RenderObject? get renderObject => _renderObject;
-  RenderObject? _renderObject;
+  RenderObject get renderObject => _renderObject;
+  late RenderObject _renderObject;
 
   bool _debugDoingBuild = false;
   @override
@@ -5461,11 +5476,11 @@ abstract class RenderObjectElement extends Element {
 
   RenderObjectElement? _ancestorRenderObjectElement;
 
-  RenderObjectElement _findAncestorRenderObjectElement() {
+  RenderObjectElement? _findAncestorRenderObjectElement() {
     Element? ancestor = _parent;
     while (ancestor != null && ancestor is! RenderObjectElement)
       ancestor = ancestor._parent;
-    return ancestor as RenderObjectElement;
+    return ancestor as RenderObjectElement?;
   }
 
   ParentDataElement<ParentData>? _findAncestorParentDataElement() {
@@ -5487,7 +5502,7 @@ abstract class RenderObjectElement extends Element {
       ancestor = ancestor!._parent;
       while (ancestor != null && ancestor is! RenderObjectElement) {
         if (ancestor is ParentDataElement<ParentData>) {
-          badAncestors.add(ancestor as ParentDataElement<ParentData>);
+          badAncestors.add(ancestor! as ParentDataElement<ParentData>);
         }
         ancestor = ancestor!._parent;
       }
@@ -5545,7 +5560,7 @@ abstract class RenderObjectElement extends Element {
       _debugDoingBuild = true;
       return true;
     }());
-    widget.updateRenderObject(this, renderObject!);
+    widget.updateRenderObject(this, renderObject);
     assert(() {
       _debugDoingBuild = false;
       return true;
@@ -5555,7 +5570,7 @@ abstract class RenderObjectElement extends Element {
 
   void _debugUpdateRenderObjectOwner() {
     assert(() {
-      _renderObject!.debugCreator = DebugCreator(this);
+      _renderObject.debugCreator = DebugCreator(this);
       return true;
     }());
   }
@@ -5566,7 +5581,7 @@ abstract class RenderObjectElement extends Element {
       _debugDoingBuild = true;
       return true;
     }());
-    widget.updateRenderObject(this, renderObject!);
+    widget.updateRenderObject(this, renderObject);
     assert(() {
       _debugDoingBuild = false;
       return true;
@@ -5778,7 +5793,7 @@ abstract class RenderObjectElement extends Element {
   @override
   void deactivate() {
     super.deactivate();
-    assert(!renderObject!.attached,
+    assert(!renderObject.attached,
       'A RenderObject was still attached when attempting to deactivate its '
       'RenderObjectElement: $renderObject');
   }
@@ -5786,22 +5801,22 @@ abstract class RenderObjectElement extends Element {
   @override
   void unmount() {
     super.unmount();
-    assert(!renderObject!.attached,
+    assert(!renderObject.attached,
       'A RenderObject was still attached when attempting to unmount its '
       'RenderObjectElement: $renderObject');
-    widget.didUnmountRenderObject(renderObject!);
+    widget.didUnmountRenderObject(renderObject);
   }
 
   void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
     bool applyParentData = true;
     assert(() {
       try {
-        if (!parentDataWidget.debugIsValidRenderObject(renderObject!)) {
+        if (!parentDataWidget.debugIsValidRenderObject(renderObject)) {
           applyParentData = false;
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Incorrect use of ParentDataWidget.'),
             ...parentDataWidget._debugDescribeIncorrectParentDataType(
-              parentData: renderObject!.parentData,
+              parentData: renderObject.parentData,
               parentDataCreator: _ancestorRenderObjectElement!.widget,
               ownershipChain: ErrorDescription(debugGetCreatorChain(10)),
             ),
@@ -5816,7 +5831,7 @@ abstract class RenderObjectElement extends Element {
       return true;
     }());
     if (applyParentData)
-      parentDataWidget.applyParentData(renderObject!);
+      parentDataWidget.applyParentData(renderObject);
   }
 
   @override
@@ -5825,7 +5840,7 @@ abstract class RenderObjectElement extends Element {
     assert(oldSlot != newSlot);
     super._updateSlot(newSlot);
     assert(slot == newSlot);
-    _ancestorRenderObjectElement!.moveRenderObjectChild(renderObject!, oldSlot, slot);
+    _ancestorRenderObjectElement!.moveRenderObjectChild(renderObject, oldSlot, slot);
   }
 
   @override
@@ -5833,7 +5848,7 @@ abstract class RenderObjectElement extends Element {
     assert(_ancestorRenderObjectElement == null);
     _slot = newSlot;
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
-    _ancestorRenderObjectElement?.insertRenderObjectChild(renderObject!, newSlot);
+    _ancestorRenderObjectElement?.insertRenderObjectChild(renderObject, newSlot);
     final ParentDataElement<ParentData>? parentDataElement = _findAncestorParentDataElement();
     if (parentDataElement != null)
       _updateParentData(parentDataElement.widget);
@@ -5842,7 +5857,7 @@ abstract class RenderObjectElement extends Element {
   @override
   void detachRenderObject() {
     if (_ancestorRenderObjectElement != null) {
-      _ancestorRenderObjectElement!.removeRenderObjectChild(renderObject!, slot);
+      _ancestorRenderObjectElement!.removeRenderObjectChild(renderObject, slot);
       _ancestorRenderObjectElement = null;
     }
     _slot = null;
