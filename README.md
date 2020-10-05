@@ -1,6 +1,12 @@
 # [![Flutter logo][]][flutter.dev]
 
 [![Build Status - Cirrus][]][Build status]
+[![GitHub license](https://img.shields.io/github/license/flutter/flutter)](https://github.com/flutter/flutter/blob/master/LICENSE)
+![Contributions](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)
+![Issues](https://img.shields.io/github/issues/flutter/flutter)
+[![All Contributors](https://img.shields.io/badge/all_contributors-1424-orange.svg?style=flat-square)](#contributors-)
+![Stars](https://img.shields.io/github/stars/flutter/flutter)
+![Stars](https://img.shields.io/github/forks/flutter/flutter)
 [![Gitter Channel][]][Gitter badge]
 [![Twitter handle][]][Twitter badge]
 
