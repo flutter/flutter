@@ -764,7 +764,7 @@ abstract class TextSelectionDelegate {
   ///
   /// See also:
   ///
-  /// * [EditableTextState.textEditingValue]: an implementation that appleis
+  /// * [EditableTextState.textEditingValue]: an implementation that applies
   ///   additional pre-processing to the specified [value], before updating the
   ///   text editing state.
   set textEditingValue(TextEditingValue value);
@@ -794,7 +794,6 @@ abstract class TextSelectionDelegate {
 /// See also:
 ///
 ///  * [TextInput.attach]
-///
 ///  * [EditableText], a [TextInputClient] implementation.
 abstract class TextInputClient {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -849,7 +848,6 @@ abstract class TextInputClient {
 ///
 ///  * [TextInput.attach], a method used to establish a [TextInputConnection]
 ///    between the system's text input and a [TextInputClient].
-///
 ///  * [EditableText], a [TextInputClient] that connects to and interacts with
 ///    the system's text input using a [TextInputConnection].
 class TextInputConnection {
@@ -1078,10 +1076,10 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
 ///
 /// * The [TextInput.attach] method allows a [TextInputClient] to establish a
 ///   connection to the text input. An optional field in its `configuration`
-///   parameter can be used to specify an initial value for the system text
-///   input's [TextEditingValue].
+///   parameter can be used to specify an initial value for the platform text
+///   input plugin's [TextEditingValue].
 ///
-/// * The [TextInputClient] sends its [TextEditingValue] to the system text
+/// * The [TextInputClient] sends its [TextEditingValue] to the platform text
 ///   input plugin using [TextInputConnection.setEditingState].
 ///
 /// * The platform text input plugin sends its [TextEditingValue] to the
@@ -1092,8 +1090,8 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
 ///   [TextInputClient]'s [AutofillScope], and the [AutofillScope] will further
 ///   relay the value to the correct [TextInputClient].
 ///
-/// When synchronizing the [TextEditingValue]s, the communication may stuck in
-/// an infinity loop when both parties are trying to send their own update. To
+/// When synchronizing the [TextEditingValue]s, the communication may get stuck
+/// in an infinite when both parties are trying to send their own update. To
 /// mitigate the problem, only [TextInputClient]s are allowed to alter the
 /// received [TextEditingValue]s while platform text input plugins are to accept
 /// the received [TextEditingValue]s unmodified. More specifically:
@@ -1111,7 +1109,6 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
 /// See also:
 ///
 ///  * [TextField], a widget in which the user may enter text.
-///
 ///  * [EditableText], a [TextInputClient] that connects to [TextInput] when it
 ///    wants to take user input from the keyboard.
 class TextInput {
