@@ -213,15 +213,15 @@ abstract class DesktopDevice extends Device {
   ///   * FLUTTER_ENGINE_SWITCHES to the number of switches.
   ///   * FLUTTER_ENGINE_SWITCH_<N> (indexing from 1) to the individual switches.
   Map<String, String> _computeEnvironment(DebuggingOptions debuggingOptions, bool traceStartup, String route) {
-    int flags = 1;
+    int flags = 0;
     final Map<String, String> environment = <String, String>{};
 
     void addFlag(String value) {
-      environment['FLUTTER_ENGINE_SWITCH_$flags'] = value;
       flags += 1;
+      environment['FLUTTER_ENGINE_SWITCH_$flags'] = value;
     }
     void finish() {
-      environment['FLUTTER_ENGINE_SWITCHES'] = (flags - 1).toString();
+      environment['FLUTTER_ENGINE_SWITCHES'] = flags.toString();
     }
 
     addFlag('enable-dart-profiling=true');
@@ -260,32 +260,32 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.purgePersistentCache) {
       addFlag('purge-persistent-cache=true');
     }
-    if (!debuggingOptions.debuggingEnabled) {
-      finish();
-      return environment;
-    }
-    if (debuggingOptions.deviceVmServicePort != null) {
-      addFlag('observatory-port=${debuggingOptions.deviceVmServicePort}');
-    }
-    if (debuggingOptions.buildInfo.isDebug) {
-      addFlag('enable-checked-mode=true');
-      addFlag('verify-entry-points=true');
-    }
-    if (debuggingOptions.startPaused) {
-      addFlag('start-paused=true');
-    }
-    if (debuggingOptions.disableServiceAuthCodes) {
-      addFlag('disable-service-auth-codes=true');
-    }
-    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
-    if (dartVmFlags.isNotEmpty) {
-      addFlag('dart-flags=$dartVmFlags');
-    }
-    if (debuggingOptions.useTestFonts) {
-      addFlag('use-test-fonts=true');
-    }
-    if (debuggingOptions.verboseSystemLogs) {
-      addFlag('verbose-logging=true');
+    // Options only supported when there is a VM Service connection between the
+    // tool and the device, usually in debug or profile mode.
+    if (debuggingOptions.debuggingEnabled) {
+      if (debuggingOptions.deviceVmServicePort != null) {
+        addFlag('observatory-port=${debuggingOptions.deviceVmServicePort}');
+      }
+      if (debuggingOptions.buildInfo.isDebug) {
+        addFlag('enable-checked-mode=true');
+        addFlag('verify-entry-points=true');
+      }
+      if (debuggingOptions.startPaused) {
+        addFlag('start-paused=true');
+      }
+      if (debuggingOptions.disableServiceAuthCodes) {
+        addFlag('disable-service-auth-codes=true');
+      }
+      final String dartVmFlags = computeDartVmFlags(debuggingOptions);
+      if (dartVmFlags.isNotEmpty) {
+        addFlag('dart-flags=$dartVmFlags');
+      }
+      if (debuggingOptions.useTestFonts) {
+        addFlag('use-test-fonts=true');
+      }
+      if (debuggingOptions.verboseSystemLogs) {
+        addFlag('verbose-logging=true');
+      }
     }
     finish();
     return environment;
