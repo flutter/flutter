@@ -963,7 +963,7 @@ void main() {
   testWidgets("Don't replace focus nodes for existing tabs when changing tab count", (WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
 
-    final List<FocusScopeNode> scopes = <FocusScopeNode>[];
+    final List<FocusScopeNode> scopes = List<FocusScopeNode>.filled(5, FocusScopeNode());
     await tester.pumpWidget(
         CupertinoApp(
           home: CupertinoTabScaffold(
@@ -972,7 +972,7 @@ void main() {
             ),
             controller: controller,
             tabBuilder: (BuildContext context, int index) {
-              scopes.add(FocusScope.of(context));
+              scopes[index] = FocusScope.of(context);
               return Container();
             },
           ),
