@@ -1107,7 +1107,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           if (childParentData != null)
             childParentData.layoutOffset = null;
 
-          newChildren[newIndex] = _childElements[index]!;
+          newChildren[newIndex] = _childElements[index];
           // We need to make sure the original index gets processed.
           newChildren.putIfAbsent(index, () => null);
           // We do not want the remapped child to get deactivated during processElement.
