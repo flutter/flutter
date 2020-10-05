@@ -144,6 +144,7 @@ Future<T> runInContext<T>(
         config: globals.config,
         fuchsiaWorkflow: fuchsiaWorkflow,
         xcDevice: globals.xcdevice,
+        userMessages: globals.userMessages,
         windowsWorkflow: windowsWorkflow,
         macOSWorkflow: MacOSWorkflow(
           platform: globals.platform,
