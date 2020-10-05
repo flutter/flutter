@@ -68,11 +68,13 @@ enum CocoaPodsStatus {
 
 /// Cocoapods is a depenency management solution for iOS and macOS applications.
 ///
-/// Cocoapods is generally installed via homebrew and interacted with via
+/// Cocoapods is generally installed via ruby gems and interacted with via
 /// the `pod` CLI command.
 ///
 /// See also:
-///   * https://cocoapods.org/ , the cocoapods website.
+///   * https://cocoapods.org/ - the cocoapods website.
+///   * https://flutter.dev/docs/get-started/install/macos#deploy-to-ios-devices - instructions for
+///     installing iOS/macOS dependencies.
 class CocoaPods {
   CocoaPods({
     @required FileSystem fileSystem,
