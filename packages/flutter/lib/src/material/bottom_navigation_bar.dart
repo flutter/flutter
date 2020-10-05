@@ -166,9 +166,8 @@ class BottomNavigationBar extends StatefulWidget {
   /// former is preferred, [fixedColor] only exists for the sake of
   /// backwards compatibility.
   ///
-  /// The [showSelectedLabels] argument must be non-null.
-  ///
-  /// The [showUnselectedLabels] argument defaults to `true` if [type] is
+  /// The [showSelectedLabels] argument defaults to `true`. The
+  /// [showUnselectedLabels] argument defaults to `true` if [type] is
   /// [BottomNavigationBarType.fixed] and `false` if [type] is
   /// [BottomNavigationBarType.shifting].
   BottomNavigationBar({
@@ -189,7 +188,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.unselectedFontSize = 12.0,
     this.selectedLabelStyle,
     this.unselectedLabelStyle,
-    this.showSelectedLabels = true,
+    this.showSelectedLabels,
     this.showUnselectedLabels,
     this.mouseCursor,
   }) : assert(items != null),
@@ -208,7 +207,6 @@ class BottomNavigationBar extends StatefulWidget {
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
-       assert(showSelectedLabels != null),
        selectedItemColor = selectedItemColor ?? fixedColor,
        super(key: key);
 
@@ -476,17 +474,17 @@ class _BottomNavigationTile extends StatelessWidget {
               iconSize: iconSize,
               selected: selected,
               item: item,
-              selectedIconTheme: selectedIconTheme ?? bottomTheme.selectedIconTheme,
-              unselectedIconTheme: unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
+              selectedIconTheme: selectedIconTheme,
+              unselectedIconTheme: unselectedIconTheme,
             ),
             _Label(
               colorTween: colorTween,
               animation: animation,
               item: item,
-              selectedLabelStyle: selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
-              unselectedLabelStyle: unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
-              showSelectedLabels: showSelectedLabels ?? bottomTheme.showUnselectedLabels,
-              showUnselectedLabels: showUnselectedLabels ?? bottomTheme.showUnselectedLabels,
+              selectedLabelStyle: selectedLabelStyle,
+              unselectedLabelStyle: unselectedLabelStyle,
+              showSelectedLabels: showSelectedLabels,
+              showUnselectedLabels: showUnselectedLabels,
             ),
           ],
         ),
@@ -898,7 +896,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         colorTween: colorTween,
         flex: _evaluateFlex(_animations[i]),
         selected: i == widget.currentIndex,
-        showSelectedLabels: widget.showSelectedLabels ?? bottomTheme.showSelectedLabels,
+        showSelectedLabels: widget.showSelectedLabels ?? bottomTheme.showSelectedLabels ?? true,
         showUnselectedLabels: widget.showUnselectedLabels ?? bottomTheme.showUnselectedLabels ?? _defaultShowUnselected,
         indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
         mouseCursor: effectiveMouseCursor,
