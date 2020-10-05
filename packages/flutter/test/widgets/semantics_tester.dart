@@ -349,7 +349,7 @@ class TestSemantics {
   String toString([ int indentAmount = 0 ]) {
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = StringBuffer();
-    buf.writeln('$indent$runtimeType(');
+    buf.writeln('$indent${objectRuntimeType(this, 'TestSemantics')}(');
     if (id != null)
       buf.writeln('$indent  id: $id,');
     if (flags is int && flags != 0 || flags is List<SemanticsFlag> && (flags as List<SemanticsFlag>).isNotEmpty)

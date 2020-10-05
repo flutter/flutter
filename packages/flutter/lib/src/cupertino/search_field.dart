@@ -136,7 +136,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.backgroundColor,
     this.borderRadius,
     this.padding = const EdgeInsetsDirectional.fromSTEB(3.8, 8, 5, 8),
-    Color this.itemColor = CupertinoColors.secondaryLabel,
+    this.itemColor = CupertinoColors.secondaryLabel,
     this.itemSize = 20.0,
     this.prefixInsets = const EdgeInsetsDirectional.fromSTEB(6, 0, 0, 4),
     this.suffixInsets = const EdgeInsetsDirectional.fromSTEB(0, 0, 5, 2),

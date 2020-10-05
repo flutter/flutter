@@ -1,8 +1,9 @@
-# Take our settings from the repo's main analysis_options.yaml file, but include
-# an additional rule to validate that public members are documented.
+# Take our settings from the repo's main analysis_options.yaml file, and include
+# additional rules that are specific to production code.
 
 include: ../analysis_options.yaml
 
 linter:
   rules:
-    - public_member_api_docs
+    - public_member_api_docs # see https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#documentation-dartdocs-javadocs-etc
+    - no_runtimeType_toString # use objectRuntimeType from package:foundation

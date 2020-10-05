@@ -375,7 +375,7 @@ class SystemMouseCursor extends MouseCursor {
   final String kind;
 
   @override
-  String get debugDescription => '$runtimeType($kind)';
+  String get debugDescription => '${objectRuntimeType(this, 'SystemMouseCursor')}($kind)';
 
   @override
   @protected

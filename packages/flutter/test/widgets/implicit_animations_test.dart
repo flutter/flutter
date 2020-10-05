@@ -374,7 +374,7 @@ class TestAnimatedWidget extends StatefulWidget {
   final State<StatefulWidget> state;
 
   @override
-  State<StatefulWidget> createState() => state;
+  State<StatefulWidget> createState() => state; // ignore: no_logic_in_create_state, this test predates the lint
 }
 
 abstract class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {

@@ -114,7 +114,7 @@ class CyclicDiagnostic extends DiagnosticableTree {
   final String name;
 
   @override
-  String toStringShort() => '$runtimeType-$name';
+  String toStringShort() => '${objectRuntimeType(this, 'CyclicDiagnistic')}-$name';
 
   // We have to override toString to avoid the toString call itself triggering a
   // stack overflow.
