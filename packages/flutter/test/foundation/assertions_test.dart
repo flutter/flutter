@@ -67,11 +67,11 @@ void main() {
           yield ErrorDescription('INFO');
         },
       ).toString(),
-        '══╡ EXCEPTION CAUGHT BY LIBRARY ╞════════════════════════════════\n'
-        'The null value was thrown CONTEXTING.\n'
-        '\n'
-        'INFO\n'
-        '═════════════════════════════════════════════════════════════════\n'
+      '══╡ EXCEPTION CAUGHT BY LIBRARY ╞════════════════════════════════\n'
+      'The null value was thrown CONTEXTING.\n'
+      '\n'
+      'INFO\n'
+      '═════════════════════════════════════════════════════════════════\n'
     );
     expect(
       FlutterErrorDetails(
