@@ -382,17 +382,11 @@ class _BottomNavigationTile extends StatelessWidget {
     // produce smooth animation. We do this by multiplying the flex value
     // (which is an integer) by a large number.
     int size;
-
-    final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
-
+    
     final double selectedFontSize = selectedLabelStyle.fontSize;
 
-    final double selectedIconSize = selectedIconTheme?.size
-      ?? bottomTheme?.selectedIconTheme?.size
-      ?? iconSize;
-    final double unselectedIconSize = unselectedIconTheme?.size
-      ?? bottomTheme?.unselectedIconTheme?.size
-      ?? iconSize;
+    final double selectedIconSize = selectedIconTheme?.size ?? iconSize;
+    final double unselectedIconSize = unselectedIconTheme?.size ?? iconSize;
 
     // The amount that the selected icon is bigger than the unselected icons,
     // (or zero if the selected icon is not bigger than the unselected icons).
