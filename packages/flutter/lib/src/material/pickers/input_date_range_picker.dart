@@ -64,10 +64,10 @@ class InputDateRangePicker extends StatefulWidget {
   final DateTime lastDate;
 
   /// Called when the user changes the start date of the selected range.
-  final ValueChanged<DateTime>? onStartDateChanged;
+  final ValueChanged<DateTime?>? onStartDateChanged;
 
   /// Called when the user changes the end date of the selected range.
-  final ValueChanged<DateTime>? onEndDateChanged;
+  final ValueChanged<DateTime?>? onEndDateChanged;
 
   /// The text that is displayed at the top of the header.
   ///
@@ -205,7 +205,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
     setState(() {
       _startInputText = text;
       _startDate = _parseDate(text);
-      widget.onStartDateChanged?.call(_startDate!);
+      widget.onStartDateChanged?.call(_startDate);
     });
     if (widget.autovalidate) {
       validate();
@@ -216,7 +216,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
     setState(() {
       _endInputText = text;
       _endDate = _parseDate(text);
-      widget.onEndDateChanged?.call(_endDate!);
+      widget.onEndDateChanged?.call(_endDate);
     });
     if (widget.autovalidate) {
       validate();
