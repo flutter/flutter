@@ -495,7 +495,7 @@ class TrainHoppingAnimation extends Animation<double>
       : assert(_currentTrain != null) {
     if (_nextTrain != null) {
       if (_currentTrain!.value == _nextTrain!.value) {
-        _currentTrain = _nextTrain!;
+        _currentTrain = _nextTrain;
         _nextTrain = null;
       } else if (_currentTrain!.value > _nextTrain!.value) {
         _mode = _TrainHoppingMode.maximize;
@@ -557,7 +557,7 @@ class TrainHoppingAnimation extends Animation<double>
         _currentTrain!
           ..removeStatusListener(_statusChangeHandler)
           ..removeListener(_valueChangeHandler);
-        _currentTrain = _nextTrain!;
+        _currentTrain = _nextTrain;
         _nextTrain = null;
         _currentTrain!.addStatusListener(_statusChangeHandler);
         _statusChangeHandler(_currentTrain!.status);
