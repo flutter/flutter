@@ -18,7 +18,7 @@ import 'package:mockito/mockito.dart';
 import '../src/common.dart';
 import '../src/mocks.dart';
 
-final Platform testPlatform = FakePlatform(environment: <String, String>{});
+final Platform testPlatform = FakePlatform(environment: const <String, String>{});
 
 void main() {
   testWithoutContext('ArtifactUpdater can download a zip archive', () async {
@@ -367,6 +367,7 @@ class MockHttpClientResponse extends Mock implements HttpClientResponse {
 
   @override
   Future<void> forEach(void Function(List<int> element) action) async {
+    action(<int>[0]);
     return;
   }
 }

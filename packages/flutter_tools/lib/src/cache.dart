@@ -1598,10 +1598,11 @@ class ArtifactUpdater {
       );
       try {
         _ensureExists(tempFile.parent);
-        final IOSink ioSink = tempFile.openWrite();
-        await _download(url, ioSink);
-        await ioSink.flush();
-        await ioSink.close();
+        if (tempFile.existsSync()) {
+          tempFile.deleteSync();
+        }
+        await _download(url, tempFile);
+
         if (!tempFile.existsSync()) {
           throw Exception('Did not find downloaded file ${tempFile.path}');
         }
@@ -1656,13 +1657,15 @@ class ArtifactUpdater {
   }
 
   /// Download bytes from [url], throwing non-200 responses as an exception.
-  Future<void> _download(Uri url, IOSink ioSink) async {
+  Future<void> _download(Uri url, File file) async {
     final HttpClientRequest request = await _httpClient.getUrl(url);
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok) {
       throw Exception(response.statusCode);
     }
-    await response.forEach(ioSink.add);
+    await response.forEach((List<int> chunk) {
+      file.writeAsBytesSync(chunk, mode: FileMode.append);
+    });
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
