@@ -397,7 +397,7 @@ class FlutterErrorDetails with Diagnosticable {
     this.stackFilter,
     this.informationCollector,
     this.silent = false,
-  });
+  }) : assert(exception != null);
 
   /// Creates a copy of the error details but with the given fields replaced
   /// with new values.
@@ -586,14 +586,12 @@ class FlutterErrorDetails with Diagnosticable {
   }
 
   Diagnosticable? _exceptionToDiagnosticable() {
+    final Object exception = this.exception;
     if (exception is FlutterError) {
-      return exception as FlutterError;
+      return exception;
     }
-    if (exception is AssertionError) {
-      final AssertionError assertion = exception as AssertionError;
-      if (assertion.message is FlutterError) {
-        return assertion.message as FlutterError;
-      }
+    if (exception is AssertionError && exception.message is FlutterError) {
+        return exception.message as FlutterError;
     }
     return null;
   }

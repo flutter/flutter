@@ -57,7 +57,21 @@ void main() {
         '\n'
         'INFO\n'
         '═════════════════════════════════════════════════════════════════\n',
-
+    );
+    expect(
+      FlutterErrorDetails(
+        exception: NullThrownError(),
+        library: 'LIBRARY',
+        context: ErrorDescription('CONTEXTING'),
+        informationCollector: () sync* {
+          yield ErrorDescription('INFO');
+        },
+      ).toString(),
+        '══╡ EXCEPTION CAUGHT BY LIBRARY ╞════════════════════════════════\n'
+        'The null value was thrown CONTEXTING.\n'
+        '\n'
+        'INFO\n'
+        '═════════════════════════════════════════════════════════════════\n'
     );
     expect(
       FlutterErrorDetails(
@@ -97,6 +111,12 @@ void main() {
       'The following message was thrown:\n'
       'MESSAGE\n'
       '═════════════════════════════════════════════════════════════════\n',
+    );
+    expect(
+      FlutterErrorDetails(exception: NullThrownError()).toString(),
+      '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
+      'The null value was thrown.\n'
+      '═════════════════════════════════════════════════════════════════\n'
     );
   });
 
