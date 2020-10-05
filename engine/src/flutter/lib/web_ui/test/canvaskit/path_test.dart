@@ -16,7 +16,7 @@ void main() {
 }
 
 void testMain() {
-  group('Path Metrics', () {
+  group('CkPath', () {
     setUpAll(() async {
       await ui.webOnlyInitializePlatform();
     });
@@ -71,6 +71,21 @@ void testMain() {
       expect(iter2.moveNext(), false);
       expect(() => iter1.current, throwsRangeError);
       expect(() => iter2.current, throwsRangeError);
+    });
+
+    test('CkPath.reset', () {
+      final ui.Path path = ui.Path();
+      expect(path, isA<CkPath>());
+      path.addRect(const ui.Rect.fromLTRB(0, 0, 10, 10));
+      expect(path.contains(const ui.Offset(5, 5)), isTrue);
+
+      expect(path.fillType, ui.PathFillType.nonZero);
+      path.fillType = ui.PathFillType.evenOdd;
+      expect(path.fillType, ui.PathFillType.evenOdd);
+
+      path.reset();
+      expect(path.fillType, ui.PathFillType.nonZero);
+      expect(path.contains(const ui.Offset(5, 5)), isFalse);
     });
   }, skip: isIosSafari); // TODO: https://github.com/flutter/flutter/issues/60040
 }

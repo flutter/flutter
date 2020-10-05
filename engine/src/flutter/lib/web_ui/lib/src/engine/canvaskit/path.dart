@@ -257,6 +257,8 @@ class CkPath implements ui.Path {
 
   @override
   void reset() {
+    // Only reset the local field. Skia will reset its internal state via
+    // SkPath.reset() below.
     _fillType = ui.PathFillType.nonZero;
     _skPath.reset();
   }
