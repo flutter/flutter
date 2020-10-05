@@ -729,7 +729,8 @@ class FlutterValidator extends DoctorValidator {
     }
 
     // Check that the binaries we downloaded for this platform actually run on it.
-    // this requires the doctor to uncondtionally download the android artifacts.
+    // If the binaries are not downloaded (because android is not enabled), then do
+    // not run this check.
     final String genSnapshotPath = _artifacts.getArtifactPath(Artifact.genSnapshot);
     if (_fileSystem.file(genSnapshotPath).existsSync() && !_genSnapshotRuns(genSnapshotPath)) {
       final StringBuffer buffer = StringBuffer();
