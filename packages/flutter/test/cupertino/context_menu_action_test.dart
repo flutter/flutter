@@ -50,7 +50,7 @@ void main() {
     );
     expect(finder, findsOneWidget);
     final DefaultTextStyle defaultStyle = tester.widget(finder);
-    return defaultStyle.style!;
+    return defaultStyle.style;
   }
 
   Icon _getIcon(WidgetTester tester) {

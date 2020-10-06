@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -107,10 +105,10 @@ class Radio<T> extends StatefulWidget {
   ///   selected.
   /// * [onChanged] is called when the user selects this radio button.
   const Radio({
-    Key key,
-    @required this.value,
-    @required this.groupValue,
-    @required this.onChanged,
+    Key? key,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
     this.mouseCursor,
     this.toggleable = false,
     this.activeColor,
@@ -159,7 +157,7 @@ class Radio<T> extends StatefulWidget {
   ///   },
   /// )
   /// ```
-  final ValueChanged<T> onChanged;
+  final ValueChanged<T?>? onChanged;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
@@ -173,7 +171,7 @@ class Radio<T> extends StatefulWidget {
   ///  * [MaterialState.disabled].
   ///
   /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
-  final MouseCursor mouseCursor;
+  final MouseCursor? mouseCursor;
 
   /// Set to true if this radio button is allowed to be returned to an
   /// indeterminate state by selecting it again when selected.
@@ -241,7 +239,7 @@ class Radio<T> extends StatefulWidget {
   /// The color to use when this radio button is selected.
   ///
   /// Defaults to [ThemeData.toggleableActiveColor].
-  final Color activeColor;
+  final Color? activeColor;
 
   /// Configures the minimum size of the tap target.
   ///
@@ -250,7 +248,7 @@ class Radio<T> extends StatefulWidget {
   /// See also:
   ///
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
-  final MaterialTapTargetSize materialTapTargetSize;
+  final MaterialTapTargetSize? materialTapTargetSize;
 
   /// Defines how compact the radio's layout will be.
   ///
@@ -260,16 +258,16 @@ class Radio<T> extends StatefulWidget {
   ///
   ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
   ///    widgets within a [Theme].
-  final VisualDensity visualDensity;
+  final VisualDensity? visualDensity;
 
   /// The color for the radio's [Material] when it has the input focus.
-  final Color focusColor;
+  final Color? focusColor;
 
   /// The color for the radio's [Material] when a pointer is hovering over it.
-  final Color hoverColor;
+  final Color? hoverColor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
-  final FocusNode focusNode;
+  final FocusNode? focusNode;
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
@@ -280,7 +278,7 @@ class Radio<T> extends StatefulWidget {
 
 class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
   bool get enabled => widget.onChanged != null;
-  Map<Type, Action<Intent>> _actionMap;
+  late Map<Type, Action<Intent>> _actionMap;
 
   @override
   void initState() {
@@ -294,9 +292,9 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
 
   void _actionHandler(ActivateIntent intent) {
     if (widget.onChanged != null) {
-      widget.onChanged(widget.value);
+      widget.onChanged!(widget.value);
     }
-    final RenderObject renderObject = context.findRenderObject();
+    final RenderObject renderObject = context.findRenderObject()!;
     renderObject.sendSemanticsEvent(const TapSemanticEvent());
   }
 
@@ -318,20 +316,20 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     return enabled ? themeData.unselectedWidgetColor : themeData.disabledColor;
   }
 
-  void _handleChanged(bool selected) {
+  void _handleChanged(bool? selected) {
     if (selected == null) {
-      widget.onChanged(null);
+      widget.onChanged!(null);
       return;
     }
     if (selected) {
-      widget.onChanged(widget.value);
+      widget.onChanged!(widget.value);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData themeData = Theme.of(context);
+    final ThemeData themeData = Theme.of(context)!;
     Size size;
     switch (widget.materialTapTargetSize ?? themeData.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
@@ -385,18 +383,18 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
 
 class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
   const _RadioRenderObjectWidget({
-    Key key,
-    @required this.selected,
-    @required this.activeColor,
-    @required this.inactiveColor,
-    @required this.focusColor,
-    @required this.hoverColor,
-    @required this.additionalConstraints,
+    Key? key,
+    required this.selected,
+    required this.activeColor,
+    required this.inactiveColor,
+    required this.focusColor,
+    required this.hoverColor,
+    required this.additionalConstraints,
     this.onChanged,
-    @required this.toggleable,
-    @required this.vsync,
-    @required this.hasFocus,
-    @required this.hovering,
+    required this.toggleable,
+    required this.vsync,
+    required this.hasFocus,
+    required this.hovering,
   }) : assert(selected != null),
        assert(activeColor != null),
        assert(inactiveColor != null),
@@ -411,7 +409,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
   final Color activeColor;
   final Color focusColor;
   final Color hoverColor;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool?>? onChanged;
   final bool toggleable;
   final TickerProvider vsync;
   final BoxConstraints additionalConstraints;
@@ -450,17 +448,17 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
 
 class _RenderRadio extends RenderToggleable {
   _RenderRadio({
-    bool value,
-    Color activeColor,
-    Color inactiveColor,
-    Color focusColor,
-    Color hoverColor,
-    ValueChanged<bool> onChanged,
-    bool tristate,
-    BoxConstraints additionalConstraints,
-    @required TickerProvider vsync,
-    bool hasFocus,
-    bool hovering,
+    required bool value,
+    required Color activeColor,
+    required Color inactiveColor,
+    required Color focusColor,
+    required Color hoverColor,
+    required ValueChanged<bool?>? onChanged,
+    required bool tristate,
+    required BoxConstraints additionalConstraints,
+    required TickerProvider vsync,
+    required bool hasFocus,
+    required bool hovering,
   }) : super(
          value: value,
          activeColor: activeColor,
@@ -486,7 +484,7 @@ class _RenderRadio extends RenderToggleable {
 
     // Outer circle
     final Paint paint = Paint()
-      ..color = Color.lerp(inactiveColor, radioColor, position.value)
+      ..color = Color.lerp(inactiveColor, radioColor, position.value)!
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawCircle(center, _kOuterRadius, paint);
