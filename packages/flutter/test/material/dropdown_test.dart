@@ -2612,4 +2612,120 @@ void main() {
     expect(value, equals('two'));
     expect(menuItemTapCounters, <int>[0, 2, 1, 0]);
   });
+
+  testWidgets('DropdownButton positioning inside nested Overlay', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    final List<DropdownMenuItem<String>> itemsWithDuplicateValues = <String>['a', 'b', 'c', 'd']
+      .map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          key: ValueKey<String>(value),
+          value: value,
+          child: Text(value),
+        );
+      }).toList();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Example')),
+          body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                OverlayEntry(
+                  builder: (_) => Center(
+                    child: DropdownButton<String>(
+                      key: buttonKey,
+                      value: 'c',
+                      isDense: true,
+                      onChanged: (String newValue) {},
+                      items: itemsWithDuplicateValues,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey).last;
+    final Finder popupFinder = find.byKey(const ValueKey<String>('c')).last;
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    final Offset buttonCenter = tester.getCenter(buttonFinder);
+    final Rect buttonRect = tester.getRect(buttonFinder);
+
+    final Offset popupCenter = tester.getCenter(popupFinder);
+    final Rect popupRect = tester.getRect(popupFinder);
+
+    expect(buttonRect.left, popupRect.left);
+    expect(buttonCenter.dy, popupCenter.dy);
+  });
+
+  testWidgets('DropdownButton positioning inside nested Navigator', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    final List<DropdownMenuItem<String>> itemsWithDuplicateValues = <String>['a', 'b', 'c', 'd']
+      .map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          key: ValueKey<String>(value),
+          value: value,
+          child: Text(value),
+        );
+      }).toList();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          // appBar: AppBar(title: const Text('Example')),
+          body: Padding(
+            padding: const EdgeInsets.all(80.0),
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<dynamic>(
+                  builder: (BuildContext context) {
+                    return Container(
+                      child: Column(
+                        children: <Widget>[
+                          const SizedBox(
+                            height: 300.0,
+                          ),
+                          Container(
+                            width: 100.0,
+                            child: DropdownButton<String>(
+                              isDense: true,
+                              key: buttonKey,
+                              value: 'c',
+                              onChanged: (String newValue) {},
+                              items: itemsWithDuplicateValues,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey).last;
+    final Finder popupFinder = find.byKey(const ValueKey<String>('c')).last;
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    final Offset buttonCenter = tester.getCenter(buttonFinder);
+    final Rect buttonRect = tester.getRect(buttonFinder);
+
+    final Offset popupCenter = tester.getCenter(popupFinder);
+    final Rect popupRect = tester.getRect(popupFinder);
+
+    expect(buttonRect.left, popupRect.left);
+    expect(buttonCenter.dy, popupCenter.dy);
+  });
 }
