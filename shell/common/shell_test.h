@@ -85,6 +85,13 @@ class ShellTest : public FixtureTest {
   static bool GetNeedsReportTimings(Shell* shell);
   static void SetNeedsReportTimings(Shell* shell, bool value);
 
+  // Declare |StorePersistentCache| inside |ShellTest| so |PersistentCache| can
+  // friend |ShellTest| and allow us to call private |PersistentCache::store| in
+  // unit tests.
+  static void StorePersistentCache(PersistentCache* cache,
+                                   const SkData& key,
+                                   const SkData& value);
+
   enum ServiceProtocolEnum {
     kGetSkSLs,
     kEstimateRasterCacheMemory,

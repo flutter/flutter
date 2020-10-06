@@ -15,6 +15,10 @@
 #include "flutter/fml/unique_fd.h"
 #include "third_party/skia/include/gpu/GrContextOptions.h"
 
+namespace testing {
+class ShellTest;
+}
+
 namespace flutter {
 
 /// A cache of SkData that gets stored to disk.
@@ -119,6 +123,8 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   void store(const SkData& key, const SkData& data) override;
 
   fml::RefPtr<fml::TaskRunner> GetWorkerTaskRunner() const;
+
+  friend class testing::ShellTest;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PersistentCache);
 };

@@ -273,5 +273,38 @@ TEST_F(ShellTest, CanPurgePersistentCache) {
   DestroyShell(std::move(shell));
 }
 
+TEST_F(ShellTest, PurgeAllowsFutureSkSLCache) {
+  sk_sp<SkData> shader_key = SkData::MakeWithCString("key");
+  sk_sp<SkData> shader_value = SkData::MakeWithCString("value");
+  std::string shader_filename = PersistentCache::SkKeyToFilePath(*shader_key);
+
+  fml::ScopedTemporaryDirectory base_dir;
+  ASSERT_TRUE(base_dir.fd().is_valid());
+  PersistentCache::SetCacheDirectoryPath(base_dir.path());
+  PersistentCache::ResetCacheForProcess();
+
+  // Run engine with purge_persistent_cache and cache_sksl.
+  auto settings = CreateSettingsForFixture();
+  settings.purge_persistent_cache = true;
+  settings.cache_sksl = true;
+  auto config = RunConfiguration::InferFromSettings(settings);
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+  RunEngine(shell.get(), std::move(config));
+  auto persistent_cache = PersistentCache::GetCacheForProcess();
+  ASSERT_EQ(persistent_cache->LoadSkSLs().size(), 0u);
+
+  // Store the cache and verify it's valid.
+  StorePersistentCache(persistent_cache, *shader_key, *shader_value);
+  std::promise<bool> io_flushed;
+  shell->GetTaskRunners().GetIOTaskRunner()->PostTask(
+      [&io_flushed]() { io_flushed.set_value(true); });
+  io_flushed.get_future().get();  // Wait for the IO thread to flush the file.
+  ASSERT_GT(persistent_cache->LoadSkSLs().size(), 0u);
+
+  // Cleanup
+  fml::RemoveFilesInDirectory(base_dir.fd());
+  DestroyShell(std::move(shell));
+}
+
 }  // namespace testing
 }  // namespace flutter
