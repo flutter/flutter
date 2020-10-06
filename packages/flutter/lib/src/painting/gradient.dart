@@ -366,7 +366,7 @@ class LinearGradient extends Gradient {
   const LinearGradient({
     this.begin = Alignment.centerLeft,
     this.end = Alignment.centerRight,
-    required List<Color> colors,
+    @required List<Color> colors,
     List<double>? stops,
     this.tileMode = TileMode.clamp,
     GradientTransform? transform,
