@@ -58,28 +58,6 @@ void main() {
     expect(imageCache!.pendingImageCount, 0);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56314
 
-  test('AssetImageProvider - evicts on null load', () async {
-    final Completer<void> error = Completer<void>();
-    FlutterError.onError = (FlutterErrorDetails details) {
-      error.complete();
-    };
-
-    final ImageProvider provider = ExactAssetImage('does-not-exist', bundle: _TestAssetBundle());
-    final Object key = await provider.obtainKey(ImageConfiguration.empty);
-    expect(imageCache!.statusForKey(provider).untracked, true);
-    expect(imageCache!.pendingImageCount, 0);
-
-    provider.resolve(ImageConfiguration.empty);
-
-    expect(imageCache!.statusForKey(key).pending, true);
-    expect(imageCache!.pendingImageCount, 1);
-
-    await error.future;
-
-    expect(imageCache!.statusForKey(provider).untracked, true);
-    expect(imageCache!.pendingImageCount, 0);
-  });
-
   test('ImageProvider can evict images', () async {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage imageProvider = MemoryImage(bytes);
@@ -137,6 +115,6 @@ void main() {
 class _TestAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
-    return ByteData(0);
+    throw 'foo';
   }
 }
