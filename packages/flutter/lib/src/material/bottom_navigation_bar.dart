@@ -164,9 +164,14 @@ class BottomNavigationBar extends StatefulWidget {
   /// former is preferred, [fixedColor] only exists for the sake of
   /// backwards compatibility.
   ///
-  /// The [showSelectedLabels] argument defaults to `true`. The
-  /// [showUnselectedLabels] argument defaults to `true` if [type] is
-  /// [BottomNavigationBarType.fixed] and `false` if [type] is
+  /// If [showSelectedLabels] is `null`, [BottomNavigationBarThemeData.showSelectedLabels]
+  /// is used. If [BottomNavigationBarThemeData.showSelectedLabels]  is null,
+  /// then [showSelectedLabels] defaults to `true`.argument defaults to `true`.
+  ///
+  /// If [showUnselectedLabels] is `null`, [BottomNavigationBarThemeData.showUnselectedLabels]
+  /// is used. If [BottomNavigationBarThemeData.showSelectedLabels]  is null,
+  /// then [showUnselectedLabels] defaults to `true` when [type] is
+  /// [BottomNavigationBarType.fixed] and `false` when [type] is
   /// [BottomNavigationBarType.shifting].
   BottomNavigationBar({
     Key? key,
