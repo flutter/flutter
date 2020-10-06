@@ -35,17 +35,20 @@ TextInputModel::TextInputModel()
 
 TextInputModel::~TextInputModel() = default;
 
-bool TextInputModel::SetEditingState(size_t selection_base,
-                                     size_t selection_extent,
-                                     const std::string& text) {
-  if (selection_base > text.size() || selection_extent > text.size()) {
-    return false;
-  }
+void TextInputModel::SetText(const std::string& text) {
   std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
       utf16_converter;
   text_ = utf16_converter.from_bytes(text);
-  selection_base_ = text_.begin() + selection_base;
-  selection_extent_ = text_.begin() + selection_extent;
+  selection_base_ = text_.begin();
+  selection_extent_ = selection_base_;
+}
+
+bool TextInputModel::SetSelection(size_t base, size_t extent) {
+  if (base > text_.size() || extent > text_.size()) {
+    return false;
+  }
+  selection_base_ = text_.begin() + base;
+  selection_extent_ = text_.begin() + extent;
   return true;
 }
 

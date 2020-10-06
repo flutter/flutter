@@ -218,7 +218,8 @@ static FlMethodResponse* set_editing_state(FlTextInputPlugin* self,
     selection_base = selection_extent = 0;
   }
 
-  self->text_model->SetEditingState(selection_base, selection_extent, text);
+  self->text_model->SetText(text);
+  self->text_model->SetSelection(selection_base, selection_extent);
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
