@@ -284,7 +284,7 @@ class BottomNavigationBar extends StatefulWidget {
   ///
   /// It this field is provided, it must contain non-null [IconThemeData.size]
   /// and [IconThemeData.color] properties. Also, if this field is supplied,
-  /// [unselectedIconTheme] must be provided.
+  /// [selectedIconTheme] must be provided.
   final IconThemeData? unselectedIconTheme;
 
   /// The [TextStyle] of the [BottomNavigationBarItem] labels when they are
