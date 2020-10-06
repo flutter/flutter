@@ -1492,7 +1492,10 @@ void main() {
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          assert(false); // the test shouldn't call this.
+          return true;
+        },
         transitionDelegate: detector,
       )
     );
@@ -1515,7 +1518,10 @@ void main() {
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          assert(false); // the test shouldn't call this.
+          return true;
+        },
         transitionDelegate: detector,
       )
     );
@@ -1540,7 +1546,10 @@ void main() {
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          assert(false); // the test shouldn't call this.
+          return true;
+        },
         transitionDelegate: detector,
       )
     );
@@ -1558,7 +1567,10 @@ void main() {
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          assert(false); // the test shouldn't call this.
+          return true;
+        },
         transitionDelegate: detector,
       )
     );
