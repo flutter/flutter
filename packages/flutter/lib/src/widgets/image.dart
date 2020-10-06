@@ -123,7 +123,7 @@ Future<void> precacheImage(
         stream.removeListener(listener!);
       });
     },
-    onError: (dynamic exception, StackTrace? stackTrace) {
+    onError: (Object exception, StackTrace? stackTrace) {
       if (!completer.isCompleted) {
         completer.complete();
       }
@@ -1249,8 +1249,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   ///
   /// If the listener from this state is the last listener on the stream, the
   /// stream will be disposed. To keep the stream alive, set `keepStreamAlive`
-  /// to true, which will add a passive listener on the stream and is compatible
-  /// with the [TickerMode] being off.
+  /// to true, which create [ImageStreamCompleterHandle] to keep the completer
+  /// alive and is compatible with the [TickerMode] being off.
   void _stopListeningToStream({bool keepStreamAlive = false}) {
     if (!_isListeningToStream)
       return;

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @TestOn('!chrome')
 import 'dart:async';
 import 'dart:typed_data';
@@ -19,13 +17,11 @@ import '../painting/mocks_for_image_cache.dart';
 import '../rendering/rendering_tester.dart';
 
 class TestCanvas implements Canvas {
-  TestCanvas([this.invocations]);
-
-  final List<Invocation> invocations;
+  final List<Invocation> invocations = <Invocation>[];
 
   @override
   void noSuchMethod(Invocation invocation) {
-    invocations?.add(invocation);
+    invocations.add(invocation);
   }
 }
 
@@ -245,7 +241,7 @@ void main() {
   // A reference test would be better.
   test('BoxDecoration backgroundImage clip', () async {
     final ui.Image image = await createTestImage(width: 100, height: 100);
-    void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius borderRadius, bool expectClip }) {
+    void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius? borderRadius, required bool expectClip }) {
       assert(shape != null);
       FakeAsync().run((FakeAsync async) async {
         final DelayedImageProvider imageProvider = DelayedImageProvider(image);
@@ -257,8 +253,7 @@ void main() {
           image: backgroundImage,
         );
 
-        final List<Invocation> invocations = <Invocation>[];
-        final TestCanvas canvas = TestCanvas(invocations);
+        final TestCanvas canvas = TestCanvas();
         const ImageConfiguration imageConfiguration = ImageConfiguration(
             size: Size(100.0, 100.0)
         );
@@ -312,7 +307,7 @@ void main() {
 
     final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
     final BoxPainter boxPainter = boxDecoration.createBoxPainter(() { assert(false); });
-    final TestCanvas canvas = TestCanvas(<Invocation>[]);
+    final TestCanvas canvas = TestCanvas();
     boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0)));
 
     final Invocation call = canvas.invocations.singleWhere((Invocation call) => call.memberName == #drawImageNine);
@@ -338,8 +333,8 @@ void main() {
     final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
       assert(false);
     });
-    final TestCanvas canvas = TestCanvas(<Invocation>[]);
-    FlutterError error;
+    final TestCanvas canvas = TestCanvas();
+    late FlutterError error;
     try {
       boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(
           size: Size(100.0, 100.0), textDirection: null));
@@ -365,10 +360,10 @@ void main() {
   });
 
   test('DecorationImage - error listener', () async {
-    String exception;
+    late String exception;
     final DecorationImage backgroundImage = DecorationImage(
       image: const SynchronousErrorTestImageProvider('threw'),
-      onError: (dynamic error, StackTrace stackTrace) {
+      onError: (dynamic error, StackTrace? stackTrace) {
         exception = error as String;
       }
     );
@@ -498,7 +493,7 @@ void main() {
 
   test('paintImage BoxFit.none scale test', () async {
     for (double scale = 1.0; scale <= 4.0; scale += 1.0) {
-      final TestCanvas canvas = TestCanvas(<Invocation>[]);
+      final TestCanvas canvas = TestCanvas();
 
       const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
       final ui.Image image = await createTestImage(width: 100, height: 100);
@@ -541,7 +536,7 @@ void main() {
 
   test('paintImage BoxFit.scaleDown scale test', () async {
     for (double scale = 1.0; scale <= 4.0; scale += 1.0) {
-      final TestCanvas canvas = TestCanvas(<Invocation>[]);
+      final TestCanvas canvas = TestCanvas();
 
       // container size > scaled image size
       const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
@@ -584,7 +579,7 @@ void main() {
   });
 
   test('paintImage BoxFit.scaleDown test', () async {
-    final TestCanvas canvas = TestCanvas(<Invocation>[]);
+    final TestCanvas canvas = TestCanvas();
 
     // container height (20 px) < scaled image height (50 px)
     const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 20.0);
@@ -637,7 +632,7 @@ void main() {
     ];
 
     for (final BoxFit boxFit in boxFits) {
-      final TestCanvas canvas = TestCanvas(<Invocation>[]);
+      final TestCanvas canvas = TestCanvas();
 
       const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
       final ui.Image image = await createTestImage(width: 100, height: 100);
@@ -663,18 +658,6 @@ void main() {
     }
   });
 
-  test('scale cannot be null in DecorationImage', () async {
-    final ui.Image image = await createTestImage(width: 100, height: 100);
-    try {
-      DecorationImage(scale: null, image: SynchronousTestImageProvider(image));
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('scale != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('DecorationImage did not throw AssertionError when scale was null');
-  });
-
   test('DecorationImage scale test', () async {
     final ui.Image image = await createTestImage(width: 100, height: 100);
     final DecorationImage backgroundImage = DecorationImage(
@@ -685,7 +668,7 @@ void main() {
 
     final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
     final BoxPainter boxPainter = boxDecoration.createBoxPainter(() { assert(false); });
-    final TestCanvas canvas = TestCanvas(<Invocation>[]);
+    final TestCanvas canvas = TestCanvas();
     boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0)));
 
     final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
@@ -708,15 +691,15 @@ void main() {
     stream.addListener(ImageStreamListener(_listener));
 
     final ImageInfo info = await infoCompleter.future;
-    final int baselineRefCount = info.image.debugGetOpenHandleStackTraces().length;
+    final int baselineRefCount = info.image.debugGetOpenHandleStackTraces()!.length;
 
     final DecorationImagePainter painter = DecorationImage(image: provider).createPainter(() {});
     final Canvas canvas = TestCanvas();
     painter.paint(canvas, Rect.zero, Path(), ImageConfiguration.empty);
 
-    expect(info.image.debugGetOpenHandleStackTraces().length, baselineRefCount + 1);
+    expect(info.image.debugGetOpenHandleStackTraces()!.length, baselineRefCount + 1);
     painter.dispose();
-    expect(info.image.debugGetOpenHandleStackTraces().length, baselineRefCount);
+    expect(info.image.debugGetOpenHandleStackTraces()!.length, baselineRefCount);
 
     info.dispose();
   });
