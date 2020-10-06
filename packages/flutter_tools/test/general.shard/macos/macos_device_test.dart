@@ -5,19 +5,16 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:flutter_tools/src/macos/macos_device.dart';
 import 'package:flutter_tools/src/macos/macos_workflow.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -37,6 +34,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       fileSystem: MemoryFileSystem.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final MockMacOSApp mockMacOSApp = MockMacOSApp();
 
@@ -54,7 +52,7 @@ void main() {
     expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
-  testUsingContext('Attaches to log reader when running in release mode', () async {
+  testWithoutContext('Attaches to log reader when running in release mode', () async {
     final Completer<void> completer = Completer<void>();
     final MacOSDevice device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
@@ -67,6 +65,7 @@ void main() {
         )
       ]),
       logger: BufferLogger.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final MockMacOSApp mockMacOSApp = MockMacOSApp();
     when(mockMacOSApp.executable(BuildMode.release)).thenReturn('Example.app');
@@ -83,9 +82,6 @@ void main() {
 
     expect(logReader.logLines, emits('Hello WorldGoodnight, Moon'));
     completer.complete();
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testWithoutContext('No devices listed if platform is unsupported', () async {
@@ -94,6 +90,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       platform: linux,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: linux,
@@ -107,6 +104,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       platform: macOS,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: false),
         platform: macOS,
@@ -122,6 +120,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       platform: macOS,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
@@ -137,6 +136,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       platform: macOS,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
@@ -149,38 +149,36 @@ void main() {
     expect(devices, hasLength(1));
   });
 
-  testUsingContext('isSupportedForProject is true with editable host app', () async {
+  testWithoutContext('isSupportedForProject is true with editable host app', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final MacOSDevice device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
-    globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
-    globals.fs.directory('macos').createSync();
-    final FlutterProject flutterProject = FlutterProject.current();
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('.packages').createSync();
+    fileSystem.directory('macos').createSync();
+    final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(device.isSupportedForProject(flutterProject), true);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('isSupportedForProject is false with no host app', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final MacOSDevice device = MacOSDevice(
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
-    globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
-    final FlutterProject flutterProject = FlutterProject.current();
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('.packages').createSync();
+    final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(device.isSupportedForProject(flutterProject), false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('executablePathForDevice uses the correct package executable', () async {
@@ -189,6 +187,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     const String debugPath = 'debug/executable';
     const String profilePath = 'profile/executable';
@@ -200,10 +199,15 @@ void main() {
     expect(device.executablePathForDevice(mockApp, BuildMode.debug), debugPath);
     expect(device.executablePathForDevice(mockApp, BuildMode.profile), profilePath);
     expect(device.executablePathForDevice(mockApp, BuildMode.release), releasePath);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
   });
+}
+
+FlutterProject setUpFlutterProject(Directory directory) {
+  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
+    fileSystem: directory.fileSystem,
+    logger: BufferLogger.test(),
+  );
+  return flutterProjectFactory.fromDirectory(directory);
 }
 
 class MockMacOSApp extends Mock implements MacOSApp {}

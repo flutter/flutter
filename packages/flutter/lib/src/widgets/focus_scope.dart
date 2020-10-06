@@ -527,9 +527,7 @@ class _FocusState extends State<Focus> {
       // _createNode is overridden in _FocusScopeState.
       _internalNode ??= _createNode();
     }
-    if (widget.descendantsAreFocusable != null) {
-      focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
-    }
+    focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
     if (widget.skipTraversal != null) {
       focusNode.skipTraversal = widget.skipTraversal!;
     }
@@ -615,9 +613,7 @@ class _FocusState extends State<Focus> {
       if (widget.canRequestFocus != null) {
         focusNode.canRequestFocus = widget.canRequestFocus!;
       }
-      if (widget.descendantsAreFocusable != null) {
-        focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
-      }
+      focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
     } else {
       _focusAttachment!.detach();
       focusNode.removeListener(_handleFocusChanged);

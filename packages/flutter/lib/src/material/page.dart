@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 
@@ -38,15 +36,16 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
   /// The values of [builder], [maintainState], and [PageRoute.fullscreenDialog]
   /// must not be null.
   MaterialPageRoute({
-    @required this.builder,
-    RouteSettings settings,
+    required this.builder,
+    RouteSettings? settings,
     this.maintainState = true,
     bool fullscreenDialog = false,
   }) : assert(builder != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
-       assert(opaque),
-       super(settings: settings, fullscreenDialog: fullscreenDialog);
+       super(settings: settings, fullscreenDialog: fullscreenDialog) {
+    assert(opaque);
+  }
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
@@ -87,10 +86,10 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
-  Color get barrierColor => null;
+  Color? get barrierColor => null;
 
   @override
-  String get barrierLabel => null;
+  String? get barrierLabel => null;
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
@@ -124,7 +123,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
+    final PageTransitionsTheme theme = Theme.of(context)!.pageTransitionsTheme;
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
@@ -152,12 +151,12 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 class MaterialPage<T> extends Page<T> {
   /// Creates a material page.
   const MaterialPage({
-    @required this.child,
+    required this.child,
     this.maintainState = true,
     this.fullscreenDialog = false,
-    LocalKey key,
-    String name,
-    Object arguments,
+    LocalKey? key,
+    String? name,
+    Object? arguments,
   }) : assert(child != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
@@ -184,10 +183,11 @@ class MaterialPage<T> extends Page<T> {
 // the content is up to date after page updates.
 class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
   _PageBasedMaterialPageRoute({
-    @required MaterialPage<T> page,
+    required MaterialPage<T> page,
   }) : assert(page != null),
-       assert(opaque),
-       super(settings: page);
+       super(settings: page) {
+    assert(opaque);
+  }
 
   MaterialPage<T> get _page => settings as MaterialPage<T>;
 

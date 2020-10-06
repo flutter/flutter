@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -35,20 +33,20 @@ const double _kToolbarContentDistance = 8.0;
 /// Manages a copy/paste text selection toolbar.
 class _TextSelectionToolbar extends StatefulWidget {
   const _TextSelectionToolbar({
-    this.clipboardStatus,
-    Key key,
-    this.handleCut,
-    this.handleCopy,
-    this.handlePaste,
-    this.handleSelectAll,
-    this.isAbove,
+    Key? key,
+    required this.clipboardStatus,
+    required this.handleCut,
+    required this.handleCopy,
+    required this.handlePaste,
+    required this.handleSelectAll,
+    required this.isAbove,
   }) : super(key: key);
 
-  final ClipboardStatusNotifier clipboardStatus;
-  final VoidCallback handleCut;
-  final VoidCallback handleCopy;
-  final VoidCallback handlePaste;
-  final VoidCallback handleSelectAll;
+  final ClipboardStatusNotifier? clipboardStatus;
+  final VoidCallback? handleCut;
+  final VoidCallback? handleCopy;
+  final VoidCallback? handlePaste;
+  final VoidCallback? handleSelectAll;
 
   // When true, the toolbar fits above its anchor and will be positioned there.
   final bool isAbove;
@@ -70,7 +68,7 @@ class _ItemData {
 }
 
 class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
-  ClipboardStatusNotifier _clipboardStatus;
+  late ClipboardStatusNotifier _clipboardStatus;
 
   // Whether or not the overflow menu is open. When it is closed, the menu
   // items that don't overflow are shown. When it is open, only the overflowing
@@ -85,7 +83,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
     assert(isLast != null);
 
     // TODO(hansmuller): Should be colorScheme.onSurface
-    final ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context)!;
     final bool isDark = theme.colorScheme.brightness == Brightness.dark;
     final Color primary = isDark ? Colors.white : Colors.black87;
 
@@ -147,16 +145,16 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
     if (oldWidget.clipboardStatus == null && widget.clipboardStatus != null) {
       _clipboardStatus.removeListener(_onChangedClipboardStatus);
       _clipboardStatus.dispose();
-      _clipboardStatus = widget.clipboardStatus;
+      _clipboardStatus = widget.clipboardStatus!;
     } else if (oldWidget.clipboardStatus != null) {
       if (widget.clipboardStatus == null) {
         _clipboardStatus = ClipboardStatusNotifier();
         _clipboardStatus.addListener(_onChangedClipboardStatus);
-        oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+        oldWidget.clipboardStatus!.removeListener(_onChangedClipboardStatus);
       } else if (widget.clipboardStatus != oldWidget.clipboardStatus) {
-        _clipboardStatus = widget.clipboardStatus;
+        _clipboardStatus = widget.clipboardStatus!;
         _clipboardStatus.addListener(_onChangedClipboardStatus);
-        oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+        oldWidget.clipboardStatus!.removeListener(_onChangedClipboardStatus);
       }
     }
     if (widget.handlePaste != null) {
@@ -185,17 +183,17 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
     final List<_ItemData> itemDatas = <_ItemData>[
       if (widget.handleCut != null)
-        _ItemData(widget.handleCut, localizations.cutButtonLabel),
+        _ItemData(widget.handleCut!, localizations.cutButtonLabel),
       if (widget.handleCopy != null)
-        _ItemData(widget.handleCopy, localizations.copyButtonLabel),
+        _ItemData(widget.handleCopy!, localizations.copyButtonLabel),
       if (widget.handlePaste != null
           && _clipboardStatus.value == ClipboardStatus.pasteable)
-        _ItemData(widget.handlePaste, localizations.pasteButtonLabel),
+        _ItemData(widget.handlePaste!, localizations.pasteButtonLabel),
       if (widget.handleSelectAll != null)
-        _ItemData(widget.handleSelectAll, localizations.selectAllButtonLabel),
+        _ItemData(widget.handleSelectAll!, localizations.selectAllButtonLabel),
     ];
 
     // If there is no option available, build an empty widget.
@@ -256,9 +254,9 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
 // maintaining the width of the closed menu and aligning the child to the right.
 class _TextSelectionToolbarContainer extends SingleChildRenderObjectWidget {
   const _TextSelectionToolbarContainer({
-    Key key,
-    @required Widget child,
-    @required this.overflowOpen,
+    Key? key,
+    required Widget child,
+    required this.overflowOpen,
   }) : assert(child != null),
        assert(overflowOpen != null),
        super(key: key, child: child);
@@ -278,7 +276,7 @@ class _TextSelectionToolbarContainer extends SingleChildRenderObjectWidget {
 
 class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
   _TextSelectionToolbarContainerRenderBox({
-    @required bool overflowOpen,
+    required bool overflowOpen,
   }) : assert(overflowOpen != null),
        _overflowOpen = overflowOpen,
        super();
@@ -286,7 +284,7 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
   // The width of the menu when it was closed. This is used to achieve the
   // behavior where the open menu aligns its right edge to the closed menu's
   // right edge.
-  double _closedWidth;
+  double? _closedWidth;
 
   bool _overflowOpen;
   bool get overflowOpen => _overflowOpen;
@@ -300,14 +298,14 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
 
   @override
   void performLayout() {
-    child.layout(constraints.loosen(), parentUsesSize: true);
+    child!.layout(constraints.loosen(), parentUsesSize: true);
 
     // Save the width when the menu is closed. If the menu changes, this width
     // is invalid, so it's important that this RenderBox be recreated in that
     // case. Currently, this is achieved by providing a new key to
     // _TextSelectionToolbarContainer.
     if (!overflowOpen && _closedWidth == null) {
-      _closedWidth = child.size.width;
+      _closedWidth = child!.size.width;
     }
 
     size = constraints.constrain(Size(
@@ -315,13 +313,13 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
       // and don't worry about aligning the right edges.
       // _closedWidth is used even when the menu is closed to allow it to
       // animate its size while keeping the same right alignment.
-      _closedWidth == null || child.size.width > _closedWidth ? child.size.width : _closedWidth,
-      child.size.height,
+      _closedWidth == null || child!.size.width > _closedWidth! ? child!.size.width : _closedWidth!,
+      child!.size.height,
     ));
 
-    final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+    final ToolbarItemsParentData childParentData = child!.parentData! as ToolbarItemsParentData;
     childParentData.offset = Offset(
-      size.width - child.size.width,
+      size.width - child!.size.width,
       0.0,
     );
   }
@@ -329,21 +327,21 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
   // Paint at the offset set in the parent data.
   @override
   void paint(PaintingContext context, Offset offset) {
-    final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
-    context.paintChild(child, childParentData.offset + offset);
+    final ToolbarItemsParentData childParentData = child!.parentData! as ToolbarItemsParentData;
+    context.paintChild(child!, childParentData.offset + offset);
   }
 
   // Include the parent data offset in the hit test.
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     // The x, y parameters have the top left of the node's box as the origin.
-    final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+    final ToolbarItemsParentData childParentData = child!.parentData! as ToolbarItemsParentData;
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
       hitTest: (BoxHitTestResult result, Offset transformed) {
         assert(transformed == position - childParentData.offset);
-        return child.hitTest(result, position: transformed);
+        return child!.hitTest(result, position: transformed);
       },
     );
   }
@@ -357,7 +355,7 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+    final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
     transform.translate(childParentData.offset.dx, childParentData.offset.dy);
     super.applyPaintTransform(child, transform);
   }
@@ -367,10 +365,10 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
 // submenu based on calculating which item would first overflow.
 class _TextSelectionToolbarItems extends MultiChildRenderObjectWidget {
   _TextSelectionToolbarItems({
-    Key key,
-    @required this.isAbove,
-    @required this.overflowOpen,
-    @required List<Widget> children,
+    Key? key,
+    required this.isAbove,
+    required this.overflowOpen,
+    required List<Widget> children,
   }) : assert(children != null),
        assert(isAbove != null),
        assert(overflowOpen != null),
@@ -404,7 +402,7 @@ class _TextSelectionToolbarItemsElement extends MultiChildRenderObjectElement {
   ) : super(widget);
 
   static bool _shouldPaint(Element child) {
-    return (child.renderObject.parentData as ToolbarItemsParentData).shouldPaint;
+    return (child.renderObject!.parentData! as ToolbarItemsParentData).shouldPaint;
   }
 
   @override
@@ -415,8 +413,8 @@ class _TextSelectionToolbarItemsElement extends MultiChildRenderObjectElement {
 
 class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData> {
   _TextSelectionToolbarItemsRenderBox({
-    @required bool isAbove,
-    @required bool overflowOpen,
+    required bool isAbove,
+    required bool overflowOpen,
   }) : assert(overflowOpen != null),
        assert(isAbove != null),
        _isAbove = isAbove,
@@ -481,7 +479,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
 
     // If the last child overflows, but only because of the width of the
     // overflow button, then just show it and hide the overflow button.
-    final RenderBox navButton = firstChild;
+    final RenderBox navButton = firstChild!;
     if (_lastIndexThatFits != -1
         && _lastIndexThatFits == childCount - 2
         && width - navButton.size.width <= sizedConstraints.maxWidth) {
@@ -514,13 +512,13 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     int i = -1;
     Size nextSize = const Size(0.0, 0.0);
     double fitWidth = 0.0;
-    final RenderBox navButton = firstChild;
+    final RenderBox navButton = firstChild!;
     double overflowHeight = overflowOpen && !isAbove ? navButton.size.height : 0.0;
     visitChildren((RenderObject renderObjectChild) {
       i++;
 
       final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
 
       // Handle placing the navigation button after iterating all children.
       if (renderObjectChild == navButton) {
@@ -553,7 +551,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
 
     // Place the navigation button if needed.
     final ToolbarItemsParentData navButtonParentData = navButton.parentData as ToolbarItemsParentData;
-    if (_shouldPaintChild(firstChild, 0)) {
+    if (_shouldPaintChild(firstChild!, 0)) {
       navButtonParentData.shouldPaint = true;
       if (overflowOpen) {
         navButtonParentData.offset = isAbove
@@ -607,9 +605,9 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     // The x, y parameters have the top left of the node's box as the origin.
-    RenderBox child = lastChild;
+    RenderBox? child = lastChild;
     while (child != null) {
       final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
 
@@ -624,7 +622,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
         position: position,
         hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(transformed == position - childParentData.offset);
-          return child.hitTest(result, position: transformed);
+          return child!.hitTest(result, position: transformed);
         },
       );
       if (isHit)
@@ -714,7 +712,7 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 
 /// Draws a single text selection handle which points up and to the left.
 class _TextSelectionHandlePainter extends CustomPainter {
-  _TextSelectionHandlePainter({ this.color });
+  _TextSelectionHandlePainter({ required this.color });
 
   final Color color;
 
@@ -762,7 +760,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     const double closedToolbarHeightNeeded = _kToolbarScreenPadding
       + _kToolbarHeight
       + _kToolbarContentDistance;
-    final double paddingTop = MediaQuery.of(context).padding.top;
+    final double paddingTop = MediaQuery.of(context)!.padding.top;
     final double availableHeight = globalEditableRegion.top
       + startTextSelectionPoint.point.dy
       - textLineHeight
@@ -799,7 +797,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style text selection handles.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
-    final ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context)!;
     final Color handleColor = TextSelectionTheme.of(context).selectionHandleColor ?? theme.colorScheme.primary;
     final Widget handle = SizedBox(
       width: _kHandleSize,
@@ -828,8 +826,6 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
           child: handle,
         );
     }
-    assert(type != null);
-    return null;
   }
 
   /// Gets anchor for material-style text selection handles.

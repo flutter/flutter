@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -211,7 +210,6 @@ class FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     int hostVmServicePort,
@@ -260,7 +258,6 @@ class FlutterDevice {
               reloadSources: reloadSources,
               restart: restart,
               compileExpression: compileExpression,
-              reloadMethod: reloadMethod,
               getSkSLMethod: getSkSLMethod,
               printStructuredErrorLogMethod: printStructuredErrorLogMethod,
               device: device,
@@ -952,22 +949,6 @@ abstract class ResidentRunner {
     return sharedSkSlWriter(device, data);
   }
 
-  /// The resident runner API for interaction with the reloadMethod vmservice
-  /// request.
-  ///
-  /// This API should only be called for UI only-changes spanning a single
-  /// library/Widget.
-  ///
-  /// The value [classId] should be the identifier of the StatelessWidget that
-  /// was invalidated, or the StatefulWidget for the corresponding State class
-  /// that was invalidated. This must be provided.
-  ///
-  /// The value [libraryId] should be the absolute file URI for the containing
-  /// library of the widget that was invalidated. This must be provided.
-  Future<OperationResult> reloadMethod({ String classId, String libraryId }) {
-    throw UnsupportedError('Method is not supported.');
-  }
-
   @protected
   void writeVmserviceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
@@ -1260,7 +1241,6 @@ abstract class ResidentRunner {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
@@ -1276,7 +1256,6 @@ abstract class ResidentRunner {
         disableDds: debuggingOptions.disableDds,
         ddsPort: debuggingOptions.ddsPort,
         hostVmServicePort: debuggingOptions.hostVmServicePort,
-        reloadMethod: reloadMethod,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
         ipv6: ipv6,
@@ -1703,43 +1682,15 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
   }
 }
 
-class DevtoolsLauncher {
-  io.HttpServer _devtoolsServer;
-  Future<void> launch(Uri observatoryAddress) async {
-    try {
-      await serve();
-      await devtools_server.launchDevTools(
-        <String, dynamic>{
-          'reuseWindows': true,
-        },
-        observatoryAddress,
-        'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
-        false,  // headless mode,
-        false,  // machine mode
-      );
-    } on Exception catch (e, st) {
-      globals.printTrace('Failed to launch DevTools: $e\n$st');
-    }
-  }
+/// A launcher for the devtools debugger and analysis tool.
+abstract class DevtoolsLauncher {
+  Future<void> launch(Uri observatoryAddress);
 
-  Future<DevToolsServerAddress> serve() async {
-    try {
-      _devtoolsServer ??= await devtools_server.serveDevTools(
-        enableStdinCommands: false,
-      );
-      return DevToolsServerAddress(_devtoolsServer.address.host, _devtoolsServer.port);
-    } on Exception catch (e, st) {
-      globals.printTrace('Failed to serve DevTools: $e\n$st');
-      return null;
-    }
-  }
+  Future<DevToolsServerAddress> serve();
 
-  Future<void> close() async {
-    await _devtoolsServer?.close();
-    _devtoolsServer = null;
-  }
+  Future<void> close();
 
-  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>() ?? DevtoolsLauncher();
+  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>();
 }
 
 class DevToolsServerAddress {
