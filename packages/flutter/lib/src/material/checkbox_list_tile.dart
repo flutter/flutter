@@ -274,6 +274,7 @@ class CheckboxListTile extends StatelessWidget {
     this.autofocus = false,
     this.contentPadding,
     this.tristate = false,
+    this.shape,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(isThreeLine != null),
@@ -382,6 +383,9 @@ class CheckboxListTile extends StatelessWidget {
   /// If tristate is false (the default), [value] must not be null.
   final bool tristate;
 
+  /// {@macro flutter.material.ListTile.shape}
+  final ShapeBorder shape;
+
   void _handleValueChange() {
     assert(onChanged != null);
     switch (value) {
@@ -435,6 +439,7 @@ class CheckboxListTile extends StatelessWidget {
           selected: selected,
           autofocus: autofocus,
           contentPadding: contentPadding,
+          shape: shape,
         ),
       ),
     );
