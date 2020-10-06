@@ -185,8 +185,12 @@ class VisualStudio {
 
   /// Workload ID for use with vswhere requirements.
   ///
+  /// Workload ID is different between Visual Studio IDE and Build Tools.
   /// See https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids
-  static const String _requiredWorkload = 'Microsoft.VisualStudio.Workload.NativeDesktop';
+  static const List<String> _requiredWorkloads = <String>[
+    'Microsoft.VisualStudio.Workload.NativeDesktop',
+    'Microsoft.VisualStudio.Workload.VCTools'
+  ];
 
   /// Components for use with vswhere requirements.
   ///
@@ -270,17 +274,19 @@ class VisualStudio {
   Map<String, dynamic> _visualStudioDetails({
       bool validateRequirements = false,
       List<String> additionalArguments,
+      String requiredWorkload
     }) {
     final List<String> requirementArguments = validateRequirements
         ? <String>[
             '-requires',
-            _requiredWorkload,
+            requiredWorkload,
             ..._requiredComponents(_minimumSupportedVersion).keys
           ]
         : <String>[];
     try {
       final List<String> defaultArguments = <String>[
         '-format', 'json',
+        '-products', '*',
         '-utf8',
         '-latest',
       ];
@@ -343,13 +349,18 @@ class VisualStudio {
       _vswhereMinVersionArgument,
       _minimumSupportedVersion.toString(),
     ];
-    Map<String, dynamic> visualStudioDetails = _visualStudioDetails(
-        validateRequirements: true,
-        additionalArguments: minimumVersionArguments);
-    // If a stable version is not found, try searching for a pre-release version.
-    visualStudioDetails ??= _visualStudioDetails(
-        validateRequirements: true,
-        additionalArguments: <String>[...minimumVersionArguments, _vswherePrereleaseArgument]);
+    Map<String, dynamic> visualStudioDetails;
+    // Check in the order of stable VS, stable BT, pre-release VS, pre-release BT
+    for (final bool checkForPrerelease in <bool>[false, true]) {
+      for (final String requiredWorkload in _requiredWorkloads) {
+        visualStudioDetails ??= _visualStudioDetails(
+          validateRequirements: true,
+          additionalArguments: checkForPrerelease
+              ? <String>[...minimumVersionArguments, _vswherePrereleaseArgument]
+              : minimumVersionArguments,
+          requiredWorkload: requiredWorkload);
+      }
+    }
 
     if (visualStudioDetails != null) {
       if (installationHasIssues(visualStudioDetails)) {

@@ -134,7 +134,7 @@ void main() {
     }
     expect(errors, isNotEmpty);
     expect(errors.first.exception, isFlutterError);
-    expect(errors.first.exception.toStringDeep(), equalsIgnoringHashCodes(
+    expect((errors.first.exception as FlutterError).toStringDeep(), equalsIgnoringHashCodes(
       'FlutterError\n'
       '   RenderListBody must have unlimited space along its main axis.\n'
       '   RenderListBody does not clip or resize its children, so it must\n'
@@ -183,7 +183,7 @@ void main() {
     }
     expect(errors, isNotEmpty);
     expect(errors.first.exception, isFlutterError);
-    expect(errors.first.exception.toStringDeep(), equalsIgnoringHashCodes(
+    expect((errors.first.exception as FlutterError).toStringDeep(), equalsIgnoringHashCodes(
       'FlutterError\n'
       '   RenderListBody must have a bounded constraint for its cross axis.\n'
       '   RenderListBody forces its children to expand to fit the\n'

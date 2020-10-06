@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/process.dart';
@@ -43,7 +41,7 @@ class FormatCommand extends FlutterCommand {
   List<String> get aliases => const <String>['dartfmt'];
 
   @override
-  final String description = 'Format one or more dart files.';
+  final String description = 'Format one or more Dart files.';
 
   @override
   String get invocation => '${runner.executableName} $name <one or more paths>';

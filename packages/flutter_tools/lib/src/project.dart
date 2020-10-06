@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
+import '../src/convert.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'artifacts.dart';
 import 'base/common.dart';
@@ -15,6 +14,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
+import 'dart/pub.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
@@ -83,11 +83,11 @@ class FlutterProject {
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject current() => fromDirectory(globals.fs.currentDirectory);
+  static FlutterProject current() => globals.projectFactory.fromDirectory(globals.fs.currentDirectory);
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject fromPath(String path) => fromDirectory(globals.fs.directory(path));
+  static FlutterProject fromPath(String path) => globals.projectFactory.fromDirectory(globals.fs.directory(path));
 
   /// The location of this project.
   final Directory directory;
@@ -262,6 +262,16 @@ class FlutterProject {
     }
     await injectPlugins(this, checkProjects: checkProjects);
   }
+
+  /// Returns a json encoded string containing the [appName], [version], and [buildNumber] that is used to generate version.json
+  String getVersionInfo()  {
+    final Map<String, String> versionFileJson = <String, String>{
+      'app_name': manifest.appName,
+      'version': manifest.buildName,
+      'build_number': manifest.buildNumber
+    };
+    return jsonEncode(versionFileJson);
+  }
 }
 
 /// Base class for projects per platform.
@@ -335,6 +345,9 @@ abstract class CmakeBasedProject {
 
   /// Includable CMake with rules and variables for plugin builds.
   File get generatedPluginCmakeFile;
+
+  /// The directory to write plugin symlinks.
+  Directory get pluginSymlinkDirectory;
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -657,7 +670,14 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
-    final Template template = await Template.fromName(path, fileSystem: globals.fs, templateManifest: null);
+    final Template template = await Template.fromName(
+      path,
+      fileSystem: globals.fs,
+      templateManifest: null,
+      logger: globals.logger,
+      templateRenderer: globals.templateRenderer,
+      pub: pub,
+    );
     template.render(
       target,
       <String, dynamic>{
@@ -756,6 +776,23 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
+    if (getEmbeddingVersion() == AndroidEmbeddingVersion.v1) {
+      globals.printStatus(
+"""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Warning
+──────────────────────────────────────────────────────────────────────────────
+Your Flutter application is created using an older version of the Android
+embedding. It's being deprecated in favor of Android embedding v2. Follow the
+steps at
+
+https://flutter.dev/go/android-project-migration
+
+to migrate your project.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"""
+      );
+    }
     if (isModule && _shouldRegenerateFromTemplate()) {
       await _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
@@ -793,7 +830,14 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
-    final Template template = await Template.fromName(path, fileSystem: globals.fs, templateManifest: null);
+    final Template template = await Template.fromName(
+      path,
+      fileSystem: globals.fs,
+      templateManifest: null,
+      logger: globals.logger,
+      templateRenderer: globals.templateRenderer,
+      pub: pub,
+    );
     template.render(
       target,
       <String, dynamic>{
@@ -1011,6 +1055,9 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   @override
   File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
 
+  @override
+  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
+
   Directory get _editableDirectory => parent.directory.childDirectory('windows');
 
   /// The directory in the project that is managed by Flutter. As much as
@@ -1022,9 +1069,6 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   /// generated on the fly. All generated files that are not intended to be
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
-
-  /// The directory to write plugin symlinks.
-  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
@@ -1065,7 +1109,7 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   @override
   File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
 
-  /// The directory to write plugin symlinks.
+  @override
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}

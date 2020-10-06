@@ -148,6 +148,14 @@ void main() {
       });
     });
 
+    testWithoutContext('isRunningOnAzure returns false when OsError is thrown', () async {
+      when(mockHttpClient.getUrl(any)).thenAnswer((_) {
+        throw const OSError('Connection Refused', 111);
+      });
+
+      expect(await azureDetector.isRunningOnAzure, isFalse);
+    });
+
     testWithoutContext('isRunningOnAzure returns true when azure metadata is reachable', () async {
       when(mockHttpClient.getUrl(any)).thenAnswer((_) {
         return Future<HttpClientRequest>.value(mockHttpClientRequest);

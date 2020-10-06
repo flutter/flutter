@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -25,7 +23,7 @@ import '../globals.dart' as globals;
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
-const int kAndroidSdkMinVersion = 28;
+const int kAndroidSdkMinVersion = 29;
 final Version kAndroidJavaMinVersion = Version(1, 8, 0);
 final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
@@ -58,15 +56,27 @@ class AndroidWorkflow implements Workflow {
   bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled;
 
   @override
-  bool get canListDevices => getAdbPath(_androidSdk) != null;
+  bool get canListDevices => _androidSdk != null
+    && _androidSdk.adbPath != null;
 
   @override
-  bool get canLaunchDevices => _androidSdk != null && _androidSdk.validateSdkWellFormed().isEmpty;
+  bool get canLaunchDevices => _androidSdk != null
+    && _androidSdk.adbPath != null
+    && _androidSdk.validateSdkWellFormed().isEmpty;
 
   @override
-  bool get canListEmulators => getEmulatorPath(_androidSdk) != null;
+  bool get canListEmulators => _androidSdk != null
+    && _androidSdk.adbPath != null
+    && _androidSdk.emulatorPath != null;
 }
 
+/// A validator that checks if the Android SDK and Java SDK are available and
+/// installed correctly.
+///
+/// Android development requires the Android SDK, and at least one Java SDK. While
+/// newer Java compilers can be used to compile the Java application code, the SDK
+/// tools themselves required JDK 1.8. This older JDK is normally bundled with
+/// Android Studio.
 class AndroidValidator extends DoctorValidator {
   AndroidValidator({
     @required AndroidSdk androidSdk,
@@ -164,7 +174,7 @@ class AndroidValidator extends DoctorValidator {
       } else {
         // Instruct user to set [kAndroidSdkRoot] and not deprecated [kAndroidHome]
         // See https://github.com/flutter/flutter/issues/39301
-        messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(kAndroidSdkRoot, _platform)));
+        messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(_platform)));
       }
       return ValidationResult(ValidationType.missing, messages);
     }
@@ -178,7 +188,7 @@ class AndroidValidator extends DoctorValidator {
 
     String sdkVersionText;
     if (_androidSdk.latestVersion != null) {
-      if (_androidSdk.latestVersion.sdkLevel < 28 || _androidSdk.latestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
+      if (_androidSdk.latestVersion.sdkLevel < kAndroidSdkMinVersion || _androidSdk.latestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
         messages.add(ValidationMessage.error(
           _userMessages.androidSdkBuildToolsOutdated(
             _androidSdk.sdkManagerPath,
@@ -195,7 +205,7 @@ class AndroidValidator extends DoctorValidator {
         _androidSdk.latestVersion.platformName,
         _androidSdk.latestVersion.buildToolsVersionName)));
     } else {
-      messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(kAndroidHome, _platform)));
+      messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(_platform)));
     }
 
     if (_platform.environment.containsKey(kAndroidHome)) {
@@ -241,6 +251,8 @@ class AndroidValidator extends DoctorValidator {
   }
 }
 
+/// A subvalidator that checks if the licenses within the detected Android
+/// SDK have been accepted.
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator() : super('Android license subvalidator',);
 

@@ -501,12 +501,12 @@ void main() {
         ),
       ),
     );
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
 
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -515,31 +515,73 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.3,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
 
     expect(forcePressStart, 0);
     expect(forcePressPeaked, 0);
     expect(forcePressUpdate, 0);
     expect(forcePressEnded, 0);
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
 
     expect(forcePressStart, 1);
     expect(forcePressPeaked, 0);
     expect(forcePressUpdate, 1);
     expect(forcePressEnded, 0);
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.6, pressureMin: 0, pressureMax: 1));
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.7, pressureMin: 0, pressureMax: 1));
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.2, pressureMin: 0, pressureMax: 1));
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.6,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.7,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.2,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.3,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
 
     expect(forcePressStart, 1);
     expect(forcePressPeaked, 0);
     expect(forcePressUpdate, 5);
     expect(forcePressEnded, 0);
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.9, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.9,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
 
     expect(forcePressStart, 1);
     expect(forcePressPeaked, 1);
@@ -573,14 +615,14 @@ void main() {
       ),
     );
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     const double maxPressure = 6.0;
 
     final TestGesture gesture = await tester.createGesture();
 
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -589,7 +631,13 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.3, pressureMin: 0, pressureMax: maxPressure));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(400.0, 50.0),
+      pressure: 0.3,
+      pressureMin: 0,
+      pressureMax: maxPressure
+    ));
 
     expect(forcePressStart, 0);
     expect(longPressTimes, 0);
@@ -601,7 +649,13 @@ void main() {
     expect(forcePressStart, 0);
 
     // Failed attempt to trigger the force press.
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.5, pressureMin: 0, pressureMax: maxPressure));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(400.0, 50.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: maxPressure
+    ));
 
     expect(longPressTimes, 1);
     expect(forcePressStart, 0);
@@ -626,13 +680,13 @@ void main() {
       ),
     );
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
 
     final TestGesture gesture = await tester.createGesture();
 
     await gesture.downWithCustomEvent(
       forcePressOffset,
-      const PointerDownEvent(
+      PointerDownEvent(
         pointer: pointerValue,
         position: forcePressOffset,
         pressure: 0.0,
@@ -641,7 +695,13 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.3,
+      pressureMin: 0,
+      pressureMax: 1
+    ));
 
     expect(forcePressStart, 0);
     expect(horizontalDragStart, 0);
@@ -653,7 +713,13 @@ void main() {
     expect(forcePressStart, 0);
 
     // Failed attempt to trigger the force press.
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: const Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
 
     expect(horizontalDragStart, 1);
     expect(forcePressStart, 0);

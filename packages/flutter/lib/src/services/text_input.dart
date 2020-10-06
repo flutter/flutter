@@ -9,6 +9,7 @@ import 'dart:ui' show
   FontWeight,
   Offset,
   Size,
+  Rect,
   TextAffinity,
   TextAlign,
   TextDirection,
@@ -447,6 +448,7 @@ class TextInputConfiguration {
   /// [actionLabel] may be null.
   const TextInputConfiguration({
     this.inputType = TextInputType.text,
+    this.readOnly = false,
     this.obscureText = false,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
@@ -469,6 +471,11 @@ class TextInputConfiguration {
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
+
+  /// Whether the text field can be edited or not.
+  ///
+  /// Defaults to false.
+  final bool readOnly;
 
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
@@ -580,6 +587,7 @@ class TextInputConfiguration {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'inputType': inputType.toJson(),
+      'readOnly': readOnly,
       'obscureText': obscureText,
       'autocorrect': autocorrect,
       'smartDashesType': smartDashesType.index.toString(),
@@ -782,7 +790,7 @@ abstract class TextInputClient {
   const TextInputClient();
 
   /// The current state of the [TextEditingValue] held by this client.
-  TextEditingValue get currentTextEditingValue;
+  TextEditingValue? get currentTextEditingValue;
 
   /// The [AutofillScope] this [TextInputClient] belongs to, if any.
   ///
@@ -832,6 +840,7 @@ class TextInputConnection {
 
   Size? _cachedSize;
   Matrix4? _cachedTransform;
+  Rect? _cachedRect;
 
   static int _nextId = 1;
   final int _id;
@@ -873,6 +882,13 @@ class TextInputConnection {
     TextInput._instance._requestAutofill();
   }
 
+  /// Requests that the text input control update itself according to the new
+  /// [TextInputConfiguration].
+  void updateConfig(TextInputConfiguration configuration) {
+    assert(attached);
+    TextInput._instance._updateConfig(configuration);
+  }
+
   /// Requests that the text input control change its internal state to match the given state.
   void setEditingState(TextEditingValue value) {
     assert(attached);
@@ -900,6 +916,29 @@ class TextInputConnection {
         },
       );
     }
+  }
+
+  /// Send the smallest rect that covers the text in the client that's currently
+  /// being composed.
+  ///
+  /// The given `rect` can not be null. If any of the 4 coordinates of the given
+  /// [Rect] is not finite, a [Rect] of size (-1, -1) will be sent instead.
+  ///
+  /// The information is currently only used on iOS, for positioning the IME bar.
+  void setComposingRect(Rect rect) {
+    assert(rect != null);
+    if (rect == _cachedRect)
+      return;
+    _cachedRect = rect;
+    final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
+    TextInput._instance._setComposingTextRect(
+      <String, dynamic>{
+        'width': validRect.width,
+        'height': validRect.height,
+        'x': validRect.left,
+        'y': validRect.top,
+      },
+    );
   }
 
   /// Send text styling information.
@@ -1125,7 +1164,7 @@ class TextInput {
     if (method == 'TextInputClient.requestExistingInputState') {
       assert(_currentConnection!._client != null);
       _attach(_currentConnection!, _currentConfiguration);
-      final TextEditingValue editingValue = _currentConnection!._client.currentTextEditingValue;
+      final TextEditingValue? editingValue = _currentConnection!._client.currentTextEditingValue;
       if (editingValue != null) {
         _setEditingState(editingValue);
       }
@@ -1204,6 +1243,14 @@ class TextInput {
     _scheduleHide();
   }
 
+  void _updateConfig(TextInputConfiguration configuration) {
+    assert(configuration != null);
+    _channel.invokeMethod<void>(
+      'TextInput.updateConfig',
+      configuration.toJson(),
+    );
+  }
+
   void _setEditingState(TextEditingValue value) {
     assert(value != null);
     _channel.invokeMethod<void>(
@@ -1223,6 +1270,13 @@ class TextInput {
   void _setEditableSizeAndTransform(Map<String, dynamic> args) {
     _channel.invokeMethod<void>(
       'TextInput.setEditableSizeAndTransform',
+      args,
+    );
+  }
+
+  void _setComposingTextRect(Map<String, dynamic> args) {
+    _channel.invokeMethod<void>(
+      'TextInput.setMarkedTextRect',
       args,
     );
   }

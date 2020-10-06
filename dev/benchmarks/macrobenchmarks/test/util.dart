@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/scheduler.dart';
@@ -45,11 +44,11 @@ void macroPerfTestE2E(
     expect(scrollable, findsOneWidget);
     final Finder button =
         find.byKey(ValueKey<String>(routeName), skipOffstage: false);
-    await tester.ensureVisible(button);
+    await tester.scrollUntilVisible(button, 50);
     expect(button, findsOneWidget);
     await tester.pumpAndSettle();
     await tester.tap(button);
-    // Cannot be pumpAndSettle because some tests have inifite animation.
+    // Cannot be pumpAndSettle because some tests have infinite animation.
     await tester.pump(const Duration(milliseconds: 20));
 
     if (pageDelay != null) {

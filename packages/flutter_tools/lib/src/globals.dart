@@ -10,7 +10,7 @@ import 'artifacts.dart';
 import 'base/bot_detector.dart';
 import 'base/config.dart';
 import 'base/context.dart';
-import 'base/error_handling_file_system.dart';
+import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -32,10 +32,12 @@ import 'ios/plist_parser.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
 import 'macos/cocoapods.dart';
+import 'macos/cocoapods_validator.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
+import 'runner/local_engine.dart';
 import 'version.dart';
 
 Artifacts get artifacts => context.get<Artifacts>();
@@ -58,6 +60,10 @@ FlutterProjectFactory get projectFactory {
     fileSystem: fs,
   );
 }
+
+CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
+
+LocalEngineLocator get localEngineLocator => context.get<LocalEngineLocator>();
 
 /// Currently active implementation of the file system.
 ///

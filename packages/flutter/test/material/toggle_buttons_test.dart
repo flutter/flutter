@@ -753,6 +753,7 @@ void main() {
     await hoverGesture.addPointer();
     await hoverGesture.moveTo(center);
     await tester.pumpAndSettle();
+    await hoverGesture.moveTo(const Offset(0, 0));
 
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
@@ -761,7 +762,6 @@ void main() {
       inkFeatures,
       paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.04)),
     );
-    await hoverGesture.removePointer();
 
     // focusColor
     focusNode.requestFocus();
@@ -770,6 +770,8 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+
+    await hoverGesture.removePointer();
   });
 
   testWidgets('Default InkWell colors - selected', (WidgetTester tester) async {
@@ -825,7 +827,7 @@ void main() {
       inkFeatures,
       paints..rect(color: theme.colorScheme.primary.withOpacity(0.04)),
     );
-    await hoverGesture.removePointer();
+    await hoverGesture.moveTo(const Offset(0, 0));
 
     // focusColor
     focusNode.requestFocus();
@@ -834,6 +836,8 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+
+    await hoverGesture.removePointer();
   });
 
   testWidgets('Custom InkWell colors', (WidgetTester tester) async {
@@ -894,7 +898,7 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: hoverColor));
-    await hoverGesture.removePointer();
+    await hoverGesture.moveTo(const Offset(0, 0));
 
     // focusColor
     focusNode.requestFocus();
@@ -903,6 +907,8 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: focusColor));
+
+    await hoverGesture.removePointer();
   });
 
   testWidgets(
@@ -1310,8 +1316,8 @@ void main() {
     final double textDy = tester.getBottomLeft(find.text('Text')).dy;
 
     expect(firstToggleButtonDy, secondToggleButtonDy);
-    expect(firstToggleButtonDy, closeTo(materialButtonDy - 2.0, 0.001));
-    expect(firstToggleButtonDy, closeTo(textDy - 4.0, 0.001));
+    expect(firstToggleButtonDy, moreOrLessEquals(materialButtonDy - 2.0, epsilon: 0.001));
+    expect(firstToggleButtonDy, moreOrLessEquals(textDy - 4.0, epsilon: 0.001));
   });
 
   testWidgets('Directionality test', (WidgetTester tester) async {

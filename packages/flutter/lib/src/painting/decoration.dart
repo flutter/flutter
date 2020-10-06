@@ -169,7 +169,18 @@ abstract class Decoration with Diagnosticable {
   BoxPainter createBoxPainter([ VoidCallback onChanged ]);
 
   /// Returns a closed [Path] that describes the outer edge of this decoration.
-  Path? getClipPath(Rect rect, TextDirection textDirection) => null;
+  ///
+  /// The default implementation throws. Subclasses must override this implementation
+  /// to describe the clip path that should be applied to the decoration when it is
+  /// used in a [Container] with an explicit [Clip] behavior.
+  ///
+  /// See also:
+  ///
+  ///  * [Container.clipBehavior], which, if set, uses this method to determine
+  ///    the clip path to use.
+  Path getClipPath(Rect rect, TextDirection textDirection) {
+    throw UnsupportedError('${objectRuntimeType(this, 'This Decoration subclass')} does not expect to be used for clipping.');
+  }
 }
 
 /// A stateful class that can paint a particular [Decoration].

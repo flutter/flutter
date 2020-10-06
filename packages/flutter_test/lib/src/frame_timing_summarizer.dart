@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui';
-import 'package:meta/meta.dart';
 
 /// The maximum amount of time considered safe to spend for a frame's build
 /// phase. Anything past that is in the danger of missing the frame as 60FPS.
@@ -31,12 +30,18 @@ class FrameTimingSummarizer {
     );
     final List<Duration> frameRasterizerTimeSorted =
         List<Duration>.from(frameRasterizerTime)..sort();
+    final List<Duration> vsyncOverhead = List<Duration>.unmodifiable(
+      data.map<Duration>((FrameTiming datum) => datum.vsyncOverhead),
+    );
+    final List<Duration> vsyncOverheadSorted =
+        List<Duration>.from(vsyncOverhead)..sort();
     final Duration Function(Duration, Duration) add =
         (Duration a, Duration b) => a + b;
     return FrameTimingSummarizer._(
       frameBuildTime: frameBuildTime,
       frameRasterizerTime: frameRasterizerTime,
-      // This avarage calculation is microsecond precision, which is fine
+      vsyncOverhead: vsyncOverhead,
+      // This average calculation is microsecond precision, which is fine
       // because typical values of these times are milliseconds.
       averageFrameBuildTime: frameBuildTime.reduce(add) ~/ data.length,
       p90FrameBuildTime: _findPercentile(frameBuildTimeSorted, 0.90),
@@ -50,22 +55,31 @@ class FrameTimingSummarizer {
       worstFrameRasterizerTime: frameRasterizerTimeSorted.last,
       missedFrameRasterizerBudget:
           _countExceed(frameRasterizerTimeSorted, kBuildBudget),
+      averageVsyncOverhead: vsyncOverhead.reduce(add) ~/ data.length,
+      p90VsyncOverhead: _findPercentile(vsyncOverheadSorted, 0.90),
+      p99VsyncOverhead: _findPercentile(vsyncOverheadSorted, 0.99),
+      worstVsyncOverhead: vsyncOverheadSorted.last,
     );
   }
 
   const FrameTimingSummarizer._({
-    @required this.frameBuildTime,
-    @required this.frameRasterizerTime,
-    @required this.averageFrameBuildTime,
-    @required this.p90FrameBuildTime,
-    @required this.p99FrameBuildTime,
-    @required this.worstFrameBuildTime,
-    @required this.missedFrameBuildBudget,
-    @required this.averageFrameRasterizerTime,
-    @required this.p90FrameRasterizerTime,
-    @required this.p99FrameRasterizerTime,
-    @required this.worstFrameRasterizerTime,
-    @required this.missedFrameRasterizerBudget,
+    required this.frameBuildTime,
+    required this.frameRasterizerTime,
+    required this.averageFrameBuildTime,
+    required this.p90FrameBuildTime,
+    required this.p99FrameBuildTime,
+    required this.worstFrameBuildTime,
+    required this.missedFrameBuildBudget,
+    required this.averageFrameRasterizerTime,
+    required this.p90FrameRasterizerTime,
+    required this.p99FrameRasterizerTime,
+    required this.worstFrameRasterizerTime,
+    required this.missedFrameRasterizerBudget,
+    required this.vsyncOverhead,
+    required this.averageVsyncOverhead,
+    required this.p90VsyncOverhead,
+    required this.p99VsyncOverhead,
+    required this.worstVsyncOverhead,
   });
 
   /// List of frame build time in microseconds
@@ -73,6 +87,10 @@ class FrameTimingSummarizer {
 
   /// List of frame rasterizer time in microseconds
   final List<Duration> frameRasterizerTime;
+
+  /// List of the time difference between vsync signal and frame building start
+  /// time
+  final List<Duration> vsyncOverhead;
 
   /// The average value of [frameBuildTime] in milliseconds.
   final Duration averageFrameBuildTime;
@@ -103,6 +121,18 @@ class FrameTimingSummarizer {
 
   /// Number of items in [frameRasterizerTime] that's greater than [kBuildBudget]
   final int missedFrameRasterizerBudget;
+
+  /// The average value of [vsyncOverhead];
+  final Duration averageVsyncOverhead;
+
+  /// The 90-th percentile value of [vsyncOverhead] in milliseconds
+  final Duration p90VsyncOverhead;
+
+  /// The 99-th percentile value of [vsyncOverhead] in milliseconds
+  final Duration p99VsyncOverhead;
+
+  /// The largest value of [vsyncOverhead] in milliseconds.
+  final Duration worstVsyncOverhead;
 
   /// Convert the summary result to a json object.
   ///

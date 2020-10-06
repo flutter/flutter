@@ -23,7 +23,7 @@ void main() {
   test('generateMainModule embeds urls correctly', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullSafety: false,
+      nullAssertions: false,
     );
     // bootstrap main module has correct defined module.
     expect(result, contains('define("main_module.bootstrap", ["foo/bar/main.js", "dart_sdk"], '
@@ -33,7 +33,7 @@ void main() {
   test('generateMainModule includes null safety switches', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullSafety: true,
+      nullAssertions: true,
     );
 
     expect(result, contains(

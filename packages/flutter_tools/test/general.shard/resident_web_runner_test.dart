@@ -15,8 +15,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_runner/devfs_web.dart';
-import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
+import 'package:flutter_tools/src/isolated/devfs_web.dart';
+import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -294,12 +294,6 @@ void main() {
 
     verify(mockAppConnection.runMain()).called(1);
     verify(status.stop()).called(1);
-    verify(pub.get(
-      context: PubContext.pubGet,
-      directory: anyNamed('directory'),
-      generateSyntheticPackage: false,
-    )).called(1);
-
     expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
   }, overrides: <Type, Generator>{
@@ -765,7 +759,6 @@ void main() {
     final WebAssetServer webAssetServer = WebAssetServer(null, null, null, null, null, null);
     when(mockWebDevFS.webAssetServer).thenReturn(webAssetServer);
 
-    expect(residentWebRunner.supportsCanvasKit, true);
     expect(webAssetServer.canvasKitRendering, false);
 
     final bool toggleResult = await residentWebRunner.toggleCanvaskit();

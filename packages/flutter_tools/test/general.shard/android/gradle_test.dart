@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
+import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
@@ -153,11 +152,25 @@ void main() {
       expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app.aab'));
     });
 
+    testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in release mode', () {
+      final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app.aab', fileSystem);
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo_Bar', treeShakeIcons: false));
+      expect(bundle, isNotNull);
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app.aab'));
+    });
+
     testWithoutContext("Finds app bundle when flavor doesn't contain underscores in release mode", () {
       final FlutterProject project = generateFakeAppBundle('fooRelease', 'app.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo', treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooRelease', 'app.aab'));
+    });
+
+    testWithoutContext("Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in release mode", () {
+      final FlutterProject project = generateFakeAppBundle('fooaRelease', 'app.aab', fileSystem);
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'fooA', treeShakeIcons: false));
+      expect(bundle, isNotNull);
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooaRelease', 'app.aab'));
     });
 
     testWithoutContext('Finds app bundle when no flavor is used in release mode', () {
@@ -174,11 +187,25 @@ void main() {
       expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barDebug', 'app.aab'));
     });
 
+    testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in debug mode', () {
+      final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app.aab', fileSystem);
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo_Bar', treeShakeIcons: false));
+      expect(bundle, isNotNull);
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barDebug', 'app.aab'));
+    });
+
     testWithoutContext("Finds app bundle when flavor doesn't contain underscores in debug mode", () {
       final FlutterProject project = generateFakeAppBundle('fooDebug', 'app.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo', treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooDebug', 'app.aab'));
+    });
+
+    testWithoutContext("Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in debug mode", () {
+      final FlutterProject project = generateFakeAppBundle('fooaDebug', 'app.aab', fileSystem);
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'fooA', treeShakeIcons: false));
+      expect(bundle, isNotNull);
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooaDebug', 'app.aab'));
     });
 
     testWithoutContext('Finds app bundle when no flavor is used in debug mode', () {
@@ -195,11 +222,25 @@ void main() {
       expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app.aab'));
     });
 
+    testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in profile mode', () {
+      final FlutterProject project = generateFakeAppBundle('foo_barProfile', 'app.aab', fileSystem);
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo_Bar', treeShakeIcons: false));
+      expect(bundle, isNotNull);
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app.aab'));
+    });
+
     testWithoutContext("Finds app bundle when flavor doesn't contain underscores in profile mode", () {
       final FlutterProject project = generateFakeAppBundle('fooProfile', 'app.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo', treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooProfile', 'app.aab'));
+    });
+
+    testWithoutContext("Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in profile mode", () {
+      final FlutterProject project = generateFakeAppBundle('fooaProfile', 'app.aab', fileSystem);
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'fooA', treeShakeIcons: false));
+      expect(bundle, isNotNull);
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooaProfile', 'app.aab'));
     });
 
     testWithoutContext('Finds app bundle when no flavor is used in profile mode', () {
@@ -237,6 +278,13 @@ void main() {
       expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app-foo_bar-release.aab'));
     });
 
+    testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in release mode - Gradle 3.5', () {
+      final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app-foo_bar-release.aab', fileSystem);
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo_Bar', treeShakeIcons: false));
+      expect(bundle, isNotNull);
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app-foo_bar-release.aab'));
+    });
+
     testWithoutContext('Finds app bundle when flavor contains underscores in profile mode - Gradle 3.5', () {
       final FlutterProject project = generateFakeAppBundle('foo_barProfile', 'app-foo_bar-profile.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo_bar', treeShakeIcons: false));
@@ -244,9 +292,9 @@ void main() {
       expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app-foo_bar-profile.aab'));
     });
 
-    testWithoutContext('Finds app bundle when flavor contains underscores in debug mode - Gradle 3.5', () {
+    testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in debug mode - Gradle 3.5', () {
       final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app-foo_bar-debug.aab', fileSystem);
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo_Bar', treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, fileSystem.path.join('irrelevant','app', 'outputs', 'bundle', 'foo_barDebug', 'app-foo_bar-debug.aab'));
     });
@@ -274,7 +322,7 @@ void main() {
         ),
       ).called(1);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       Usage: () => mockUsage,
     });
@@ -297,6 +345,14 @@ void main() {
       expect(apks, <String>['app-flavor1-release.apk']);
     });
 
+    testWithoutContext('Finds APK with flavor in release mode', () {
+      final Iterable<String> apks = listApkPaths(
+        const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavorA', treeShakeIcons: false)),
+      );
+
+      expect(apks, <String>['app-flavora-release.apk']);
+    });
+
     testWithoutContext('Finds APK with flavor in release mode - AGP v3', () {
       final Iterable<String> apks = listApkPaths(
         const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavor1', treeShakeIcons: false)),
@@ -316,6 +372,19 @@ void main() {
         'app-x86_64-flavor1-release.apk',
       ]));
     });
+
+    testWithoutContext('Finds APK with split-per-abi when flavor contains uppercase letters', () {
+      final Iterable<String> apks = listApkPaths(
+        const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavorA', treeShakeIcons: false), splitPerAbi: true),
+      );
+
+      expect(apks, unorderedEquals(<String>[
+        'app-armeabi-v7a-flavora-release.apk',
+        'app-arm64-v8a-flavora-release.apk',
+        'app-x86_64-flavora-release.apk',
+      ]));
+    });
+
   });
 
   group('gradle build', () {
@@ -403,7 +472,7 @@ include ':app'
       expect(tempDir.childFile('settings_aar.gradle').existsSync(), isTrue);
 
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -436,7 +505,7 @@ include ':app'
       expect(tempDir.childFile('settings_aar.gradle').existsSync(), isTrue);
 
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -448,7 +517,7 @@ include ':app'
     FileSystem fs;
 
     setUp(() {
-      fs = MemoryFileSystem();
+      fs = MemoryFileSystem.test();
       mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
       android = fakePlatform('android');
@@ -717,7 +786,7 @@ flutter:
     FileSystem fs;
 
     setUp(() {
-      fs = MemoryFileSystem();
+      fs = MemoryFileSystem.test();
     });
 
     testUsingContext('returns true when the project is using AndroidX', () async {
@@ -765,7 +834,7 @@ flutter:
     MockAndroidSdk mockAndroidSdk;
 
     setUp(() {
-      fs = MemoryFileSystem();
+      fs = MemoryFileSystem.test();
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
       mockAndroidSdk = MockAndroidSdk();
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
@@ -932,8 +1001,7 @@ plugin1=${plugin1.path}
   });
 
   group('gradle build', () {
-    final Usage mockUsage = MockUsage();
-
+    Usage mockUsage;
     MockAndroidSdk mockAndroidSdk;
     MockAndroidStudio mockAndroidStudio;
     MockLocalEngineArtifacts mockArtifacts;
@@ -944,7 +1012,8 @@ plugin1=${plugin1.path}
     Cache cache;
 
     setUp(() {
-      fileSystem = MemoryFileSystem();
+      mockUsage = MockUsage();
+      fileSystem = MemoryFileSystem.test();
       fileSystemUtils = MockFileSystemUtils();
       mockAndroidSdk = MockAndroidSdk();
       mockAndroidStudio = MockAndroidStudio();
@@ -1336,6 +1405,89 @@ plugin1=${plugin1.path}
         any,
         label: 'gradle-random-event-label-success',
         parameters: anyNamed('parameters'),
+      )).called(1);
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      Cache: () => cache,
+      FileSystem: () => fileSystem,
+      Platform: () => android,
+      ProcessManager: () => mockProcessManager,
+      Usage: () => mockUsage,
+    });
+
+    testUsingContext('performs code size analyis and sends analytics', () async {
+      when(mockProcessManager.start(any,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment')))
+      .thenAnswer((_) {
+        return Future<Process>.value(createMockProcess(
+          exitCode: 0,
+          stdout: 'irrelevant',
+        ));
+      });
+
+      fileSystem.directory('android')
+        .childFile('build.gradle')
+        .createSync(recursive: true);
+
+      fileSystem.directory('android')
+        .childFile('gradle.properties')
+        .createSync(recursive: true);
+
+      fileSystem.directory('android')
+        .childDirectory('app')
+        .childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+      final Archive archive = Archive()
+        ..addFile(ArchiveFile('AndroidManifest.xml', 100,  List<int>.filled(100, 0)))
+        ..addFile(ArchiveFile('META-INF/CERT.RSA', 10,  List<int>.filled(10, 0)))
+        ..addFile(ArchiveFile('META-INF/CERT.SF', 10,  List<int>.filled(10, 0)))
+        ..addFile(ArchiveFile('lib/arm64-v8a/libapp.so', 50,  List<int>.filled(50, 0)))
+        ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
+
+      fileSystem.directory('build')
+        .childDirectory('app')
+        .childDirectory('outputs')
+        .childDirectory('flutter-apk')
+        .childFile('app-release.apk')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(ZipEncoder().encode(archive));
+
+      fileSystem.file('foo/snapshot.arm64-v8a.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'''[
+{
+  "l": "dart:_internal",
+  "c": "SubListIterable",
+  "n": "[Optimized] skip",
+  "s": 2400
+}
+]''');
+      fileSystem.file('foo/trace.arm64-v8a.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{}');
+
+      await buildGradleApp(
+        project: FlutterProject.current(),
+        androidBuildInfo: const AndroidBuildInfo(
+          BuildInfo(
+            BuildMode.release,
+            null,
+            treeShakeIcons: false,
+            codeSizeDirectory: 'foo',
+          ),
+          targetArchs: <AndroidArch>[AndroidArch.arm64_v8a],
+        ),
+        target: 'lib/main.dart',
+        isBuildingBundle: false,
+        localGradleErrors: <GradleHandledError>[],
+      );
+
+      verify(mockUsage.sendEvent(
+        'code-size-analysis',
+        'apk',
       )).called(1);
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,

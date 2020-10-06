@@ -17,7 +17,7 @@ import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
-import 'package:flutter_tools/src/build_runner/mustache_template.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -248,7 +248,7 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject, { Duration timeout }) async {
     return devices;
   }
 }
@@ -313,13 +313,7 @@ class FakeOperatingSystemUtils implements OperatingSystemUtils {
   void unzip(File file, Directory targetDirectory) { }
 
   @override
-  bool verifyZip(File file) => true;
-
-  @override
   void unpack(File gzippedTarFile, Directory targetDirectory) { }
-
-  @override
-  bool verifyGzip(File gzippedFile) => true;
 
   @override
   Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) => stream;

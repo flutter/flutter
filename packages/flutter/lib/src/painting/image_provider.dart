@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -22,7 +21,7 @@ import 'image_stream.dart';
 typedef _KeyAndErrorHandlerCallback<T> = void Function(T key, ImageErrorListener handleError);
 
 /// Signature used for error handling by [_createErrorHandlerAndKey].
-typedef _AsyncKeyErrorHandler<T> = Future<void> Function(T key, dynamic exception, StackTrace? stack);
+typedef _AsyncKeyErrorHandler<T> = Future<void> Function(T key, Object exception, StackTrace? stack);
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
 /// select a specific image.
@@ -284,6 +283,7 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 ///   void _updateImage(ImageInfo imageInfo, bool synchronousCall) {
 ///     setState(() {
 ///       // Trigger a build whenever the image changes.
+///       _imageInfo?.dispose();
 ///       _imageInfo = imageInfo;
 ///     });
 ///   }
@@ -291,6 +291,8 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 ///   @override
 ///   void dispose() {
 ///     _imageStream.removeListener(ImageStreamListener(_updateImage));
+///     _imageInfo?.dispose();
+///     _imageInfo = null;
 ///     super.dispose();
 ///   }
 ///
@@ -332,7 +334,7 @@ abstract class ImageProvider<T extends Object> {
       (T key, ImageErrorListener errorHandler) {
         resolveStreamForKey(configuration, stream, key, errorHandler);
       },
-      (T? key, dynamic exception, StackTrace? stack) async {
+      (T? key, Object exception, StackTrace? stack) async {
         await null; // wait an event turn in case a listener has been added to the image stream.
         final _ErrorImageCompleter imageCompleter = _ErrorImageCompleter();
         stream.setCompleter(imageCompleter);
@@ -388,7 +390,7 @@ abstract class ImageProvider<T extends Object> {
       (T key, ImageErrorListener innerHandleError) {
         completer.complete(PaintingBinding.instance!.imageCache!.statusForKey(key));
       },
-      (T? key, dynamic exception, StackTrace? stack) async {
+      (T? key, Object exception, StackTrace? stack) async {
         if (handleError != null) {
           handleError(exception, stack);
         } else {
@@ -401,14 +403,12 @@ abstract class ImageProvider<T extends Object> {
             };
             return true;
           }());
-          if (FlutterError.onError != null) {
-            FlutterError.onError!(FlutterErrorDetails(
-              context: ErrorDescription('while checking the cache location of an image'),
-              informationCollector: collector,
-              exception: exception,
-              stack: stack,
-            ));
-          }
+          FlutterError.reportError(FlutterErrorDetails(
+            context: ErrorDescription('while checking the cache location of an image'),
+            informationCollector: collector,
+            exception: exception,
+            stack: stack,
+          ));
           completer.complete(null);
         }
       },
@@ -426,7 +426,7 @@ abstract class ImageProvider<T extends Object> {
   ) {
     T? obtainedKey;
     bool didError = false;
-    Future<void> handleError(dynamic exception, StackTrace? stack) async {
+    Future<void> handleError(Object exception, StackTrace? stack) async {
       if (didError) {
         return;
       }
@@ -1117,7 +1117,7 @@ class _ErrorImageCompleter extends ImageStreamCompleter {
 
   void setError({
     DiagnosticsNode? context,
-    dynamic exception,
+    required Object exception,
     StackTrace? stack,
     InformationCollector? informationCollector,
     bool silent = false,

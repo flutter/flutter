@@ -383,22 +383,22 @@ void main() {
       // It hits the boundary in the x direction first.
       await tester.pump(const Duration(milliseconds: 60));
       translation = transformationController.value.getTranslation();
-      expect(translation.x, closeTo(boundaryMargin, .000000001));
+      expect(translation.x, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
       expect(translation.y, lessThan(boundaryMargin));
       final double yWhenXHits = translation.y;
 
       // x is held to the boundary while y slides along.
       await tester.pump(const Duration(milliseconds: 50));
       translation = transformationController.value.getTranslation();
-      expect(translation.x, closeTo(boundaryMargin, .000000001));
+      expect(translation.x, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
       expect(translation.y, greaterThan(yWhenXHits));
       expect(translation.y, lessThan(boundaryMargin));
 
       // Eventually it ends up in the corner.
       await tester.pumpAndSettle();
       translation = transformationController.value.getTranslation();
-      expect(translation.x, closeTo(boundaryMargin, .000000001));
-      expect(translation.y, closeTo(boundaryMargin, .000000001));
+      expect(translation.x, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
+      expect(translation.y, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
     });
 
     testWidgets('Scaling automatically causes a centering translation', (WidgetTester tester) async {
@@ -430,8 +430,8 @@ void main() {
       await tester.flingFrom(childOffset, flingEnd, 1000.0);
       await tester.pumpAndSettle();
       translation = transformationController.value.getTranslation();
-      expect(translation.x, closeTo(boundaryMargin, .000000001));
-      expect(translation.y, closeTo(boundaryMargin, .000000001));
+      expect(translation.x, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
+      expect(translation.y, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
 
       // Zoom out so the entire child is visible. The child will also be
       // translated in order to keep it inside the boundaries.
@@ -457,7 +457,7 @@ void main() {
       expect(translation.y, lessThan(boundaryMargin));
       expect(translation.x, greaterThan(0.0));
       expect(translation.y, greaterThan(0.0));
-      expect(translation.x, closeTo(translation.y, .000000001));
+      expect(translation.x, moreOrLessEquals(translation.y, epsilon: 1e-9));
 
       // Zoom in on a point that's not the center, and see that it remains at
       // roughly the same location in the viewport after the zoom.
@@ -482,8 +482,8 @@ void main() {
       await gesture2.up();
       await tester.pumpAndSettle();
       final Offset newSceneFocalPoint = transformationController.toScene(viewportFocalPoint);
-      expect(newSceneFocalPoint.dx, closeTo(sceneFocalPoint.dx, 1.0));
-      expect(newSceneFocalPoint.dy, closeTo(sceneFocalPoint.dy, 1.0));
+      expect(newSceneFocalPoint.dx, moreOrLessEquals(sceneFocalPoint.dx, epsilon: 1.0));
+      expect(newSceneFocalPoint.dy, moreOrLessEquals(sceneFocalPoint.dy, epsilon: 1.0));
     });
 
     testWidgets('Scaling automatically causes a centering translation even when alignPanAxis is set', (WidgetTester tester) async {
@@ -522,8 +522,8 @@ void main() {
       await tester.flingFrom(childOffset2, flingEnd2, 1000.0);
       await tester.pumpAndSettle();
       translation = transformationController.value.getTranslation();
-      expect(translation.x, closeTo(boundaryMargin, .000000001));
-      expect(translation.y, closeTo(boundaryMargin, .000000001));
+      expect(translation.x, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
+      expect(translation.y, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
 
       // Zoom out so the entire child is visible. The child will also be
       // translated in order to keep it inside the boundaries.
@@ -549,7 +549,7 @@ void main() {
       expect(translation.y, lessThan(boundaryMargin));
       expect(translation.x, greaterThan(0.0));
       expect(translation.y, greaterThan(0.0));
-      expect(translation.x, closeTo(translation.y, .000000001));
+      expect(translation.x, moreOrLessEquals(translation.y, epsilon: 1e-9));
 
       // Zoom in on a point that's not the center, and see that it remains at
       // roughly the same location in the viewport after the zoom.
@@ -574,8 +574,8 @@ void main() {
       await gesture2.up();
       await tester.pumpAndSettle();
       final Offset newSceneFocalPoint = transformationController.toScene(viewportFocalPoint);
-      expect(newSceneFocalPoint.dx, closeTo(sceneFocalPoint.dx, 1.0));
-      expect(newSceneFocalPoint.dy, closeTo(sceneFocalPoint.dy, 1.0));
+      expect(newSceneFocalPoint.dx, moreOrLessEquals(sceneFocalPoint.dx, epsilon: 1.0));
+      expect(newSceneFocalPoint.dy, moreOrLessEquals(sceneFocalPoint.dy, epsilon: 1.0));
     });
 
     testWidgets('Can scale with mouse', (WidgetTester tester) async {
@@ -621,6 +621,112 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(transformationController.value.getMaxScaleOnAxis(), equals(1.0));
+    });
+
+    testWidgets('Scale with mouse returns onInteraction properties', (WidgetTester tester) async{
+      final TransformationController transformationController = TransformationController();
+      Offset focalPoint;
+      Offset localFocalPoint;
+      double scaleChange;
+      Velocity currentVelocity;
+      bool calledStart;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                transformationController: transformationController,
+                onInteractionStart: (ScaleStartDetails details){
+                  calledStart = true;
+                },
+                onInteractionUpdate: (ScaleUpdateDetails details){
+                  scaleChange = details.scale;
+                  focalPoint = details.focalPoint;
+                  localFocalPoint = details.localFocalPoint;
+                },
+                onInteractionEnd: (ScaleEndDetails details){
+                  currentVelocity = details.velocity;
+                },
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      await scrollAt(center, tester, const Offset(0.0, -20.0));
+      await tester.pumpAndSettle();
+      const Velocity noMovement = Velocity(pixelsPerSecond: Offset(0,0));
+      final double afterScaling = transformationController.value.getMaxScaleOnAxis();
+
+      expect(scaleChange, greaterThan(1.0));
+      expect(afterScaling, scaleChange);
+      expect(currentVelocity, equals(noMovement));
+      expect(calledStart, equals(true));
+      // Focal points are given in coordinates outside of InteractiveViewer,
+      // with local being in relation to the viewport.
+      expect(focalPoint, center);
+      expect(localFocalPoint, const Offset(100, 100));
+
+      // The scene point is the same as localFocalPoint because the center of
+      // the scene is at the center of the viewport.
+      final Offset scenePoint = transformationController.toScene(localFocalPoint);
+      expect(scenePoint, const Offset(100, 100));
+    });
+
+    testWidgets('onInteraction can be used to get scene point', (WidgetTester tester) async{
+      final TransformationController transformationController = TransformationController();
+      Offset focalPoint;
+      Offset localFocalPoint;
+      double scaleChange;
+      Velocity currentVelocity;
+      bool calledStart;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                transformationController: transformationController,
+                onInteractionStart: (ScaleStartDetails details){
+                  calledStart = true;
+                },
+                onInteractionUpdate: (ScaleUpdateDetails details){
+                  scaleChange = details.scale;
+                  focalPoint = details.focalPoint;
+                  localFocalPoint = details.localFocalPoint;
+                },
+                onInteractionEnd: (ScaleEndDetails details){
+                  currentVelocity = details.velocity;
+                },
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      final Offset offCenter = Offset(center.dx - 20.0, center.dy - 20.0);
+      await scrollAt(offCenter, tester, const Offset(0.0, -20.0));
+      await tester.pumpAndSettle();
+      const Velocity noMovement = Velocity(pixelsPerSecond: Offset(0,0));
+      final double afterScaling = transformationController.value.getMaxScaleOnAxis();
+
+      expect(scaleChange, greaterThan(1.0));
+      expect(afterScaling, scaleChange);
+      expect(currentVelocity, equals(noMovement));
+      expect(calledStart, equals(true));
+      // Focal points are given in coordinates outside of InteractiveViewer,
+      // with local being in relation to the viewport.
+      expect(focalPoint, offCenter);
+      expect(localFocalPoint, const Offset(80, 80));
+
+      // The top left corner of the viewport is not at the top left corner of
+      // the scene.
+      final Offset scenePoint = transformationController.toScene(Offset.zero);
+      expect(scenePoint.dx, greaterThan(0.0));
+      expect(scenePoint.dy, greaterThan(0.0));
     });
 
     testWidgets('viewport changes size', (WidgetTester tester) async {
@@ -729,6 +835,47 @@ void main() {
       await tester.pumpAndSettle();
       expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/65304
+    testWidgets('can view beyond boundary when necessary for a small child', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                constrained: false,
+                minScale: 1.0,
+                maxScale: 1.0,
+                transformationController: transformationController,
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value, equals(Matrix4.identity()));
+
+      // Pinch to zoom does nothing because minScale and maxScale are 1.0.
+      final Offset center = tester.getCenter(find.byType(SizedBox));
+      final Offset scaleStart1 = Offset(center.dx - 10.0, center.dy - 10.0);
+      final Offset scaleStart2 = Offset(center.dx + 10.0, center.dy + 10.0);
+      final Offset scaleEnd1 = Offset(center.dx - 20.0, center.dy - 20.0);
+      final Offset scaleEnd2 = Offset(center.dx + 20.0, center.dy + 20.0);
+      final TestGesture gesture = await tester.createGesture();
+      final TestGesture gesture2 = await tester.createGesture();
+      await gesture.down(scaleStart1);
+      await gesture2.down(scaleStart2);
+      await tester.pump();
+      await gesture.moveTo(scaleEnd1);
+      await gesture2.moveTo(scaleEnd2);
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value, equals(Matrix4.identity()));
+    });
   });
 
   group('getNearestPointOnLine', () {
@@ -784,8 +931,8 @@ void main() {
 
       final Vector3 closestPoint = InteractiveViewer.getNearestPointOnLine(point, a , b);
 
-      expect(closestPoint.x, closeTo(-356.8, 0.1));
-      expect(closestPoint.y, closeTo(205.8, 0.1));
+      expect(closestPoint.x, moreOrLessEquals(-356.8, epsilon: 0.1));
+      expect(closestPoint.y, moreOrLessEquals(205.8, epsilon: 0.1));
     });
   });
 
@@ -933,8 +1080,8 @@ void main() {
 
       final Vector3 nearestPoint = InteractiveViewer.getNearestPointInside(point, quad);
 
-      expect(nearestPoint.x, closeTo(5.8, 0.1));
-      expect(nearestPoint.y, closeTo(10.8, 0.1));
+      expect(nearestPoint.x, moreOrLessEquals(5.8, epsilon: 0.1));
+      expect(nearestPoint.y, moreOrLessEquals(10.8, epsilon: 0.1));
     });
   });
 }
