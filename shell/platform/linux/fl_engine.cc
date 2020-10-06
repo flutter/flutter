@@ -3,16 +3,18 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
-#include "flutter/shell/platform/linux/fl_engine_private.h"
+
+#include <gmodule.h>
+
+#include <cstring>
 
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
+#include "flutter/shell/platform/linux/fl_dart_project_private.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_renderer.h"
 #include "flutter/shell/platform/linux/fl_renderer_headless.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
-
-#include <gmodule.h>
-#include <cstring>
 
 static constexpr int kMicrosecondsPerNanosecond = 1000;
 
@@ -373,15 +375,11 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   custom_task_runners.platform_task_runner = &platform_task_runner;
 
   g_autoptr(GPtrArray) command_line_args =
-      g_ptr_array_new_with_free_func(g_free);
-  g_ptr_array_add(command_line_args, g_strdup("flutter"));
-  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-  gboolean enable_mirrors = fl_dart_project_get_enable_mirrors(self->project);
-  G_GNUC_END_IGNORE_DEPRECATIONS
-  if (enable_mirrors) {
-    g_ptr_array_add(command_line_args,
-                    g_strdup("--dart-flags=--enable_mirrors=true"));
-  }
+      fl_dart_project_get_switches(self->project);
+  // FlutterProjectArgs expects a full argv, so when processing it for flags
+  // the first item is treated as the executable and ignored. Add a dummy value
+  // so that all switches are used.
+  g_ptr_array_insert(command_line_args, 0, g_strdup("flutter"));
 
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
