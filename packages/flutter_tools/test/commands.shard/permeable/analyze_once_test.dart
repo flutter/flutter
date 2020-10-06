@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -246,9 +247,7 @@ flutter_project:lib/
         exitCode: 1,
       );
     } finally {
-      if (optionsFile.existsSync()) {
-        optionsFile.deleteSync();
-      }
+      ErrorHandlingFileSystem.deleteIfExists(optionsFile);
     }
   });
 

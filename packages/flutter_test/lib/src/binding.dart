@@ -686,7 +686,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     };
     final Completer<void> testCompleter = Completer<void>();
     final VoidCallback testCompletionHandler = _createTestCompletionHandler(description, testCompleter);
-    void handleUncaughtError(dynamic exception, StackTrace stack) {
+    void handleUncaughtError(Object exception, StackTrace stack) {
       if (testCompleter.isCompleted) {
         // Well this is not a good sign.
         // Ideally, once the test has failed we would stop getting errors from the test.
@@ -765,7 +765,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _parentZone!.run<void>(testCompletionHandler);
     }
     final ZoneSpecification errorHandlingZoneSpecification = ZoneSpecification(
-      handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone, dynamic exception, StackTrace stack) {
+      handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone, Object exception, StackTrace stack) {
         handleUncaughtError(exception, stack);
       }
     );
@@ -1013,7 +1013,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     return realAsyncZone.run<Future<T>>(() {
       _pendingAsyncTasks = Completer<void>();
-      return callback().catchError((dynamic exception, StackTrace stack) {
+      return callback().catchError((Object exception, StackTrace stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,

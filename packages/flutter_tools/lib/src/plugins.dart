@@ -9,6 +9,7 @@ import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
 import 'base/common.dart';
+import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
@@ -68,16 +69,17 @@ class Plugin {
     String name,
     String path,
     YamlMap pluginYaml,
-    List<String> dependencies,
-  ) {
+    List<String> dependencies, {
+    @required FileSystem fileSystem,
+  }) {
     final List<String> errors = validatePluginYaml(pluginYaml);
     if (errors.isNotEmpty) {
       throwToolExit('Invalid plugin specification $name.\n${errors.join('\n')}');
     }
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
-      return Plugin._fromMultiPlatformYaml(name, path, pluginYaml, dependencies);
+      return Plugin._fromMultiPlatformYaml(name, path, pluginYaml, dependencies, fileSystem);
     }
-    return Plugin._fromLegacyYaml(name, path, pluginYaml, dependencies);
+    return Plugin._fromLegacyYaml(name, path, pluginYaml, dependencies, fileSystem);
   }
 
   factory Plugin._fromMultiPlatformYaml(
@@ -85,6 +87,7 @@ class Plugin {
     String path,
     dynamic pluginYaml,
     List<String> dependencies,
+    FileSystem fileSystem,
   ) {
     assert (pluginYaml != null && pluginYaml['platforms'] != null,
             'Invalid multi-platform plugin specification $name.');
@@ -100,6 +103,7 @@ class Plugin {
         name,
         platformsYaml[AndroidPlugin.kConfigKey] as YamlMap,
         path,
+        fileSystem,
       );
     }
 
@@ -141,6 +145,7 @@ class Plugin {
     String path,
     dynamic pluginYaml,
     List<String> dependencies,
+    FileSystem fileSystem,
   ) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
     final String pluginClass = pluginYaml['pluginClass'] as String;
@@ -152,6 +157,7 @@ class Plugin {
           package: pluginYaml['androidPackage'] as String,
           pluginClass: pluginClass,
           pluginPath: path,
+          fileSystem: fileSystem,
         );
       }
 
@@ -332,6 +338,7 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
     packageRootPath,
     flutterConfig['plugin'] as YamlMap,
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
+    fileSystem: globals.fs,
   );
 }
 
@@ -429,11 +436,7 @@ const String _kFlutterPluginsDependenciesKey = 'dependencies';
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsDependenciesFile;
   if (plugins.isEmpty) {
-    if (pluginsFile.existsSync()) {
-      pluginsFile.deleteSync();
-      return true;
-    }
-    return false;
+    return ErrorHandlingFileSystem.deleteIfExists(pluginsFile);
   }
 
   final String iosKey = project.ios.pluginConfigKey;
@@ -500,11 +503,7 @@ List<dynamic> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
 bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsFile;
   if (plugins.isEmpty) {
-    if (pluginsFile.existsSync()) {
-      pluginsFile.deleteSync();
-      return true;
-    }
-    return false;
+    return ErrorHandlingFileSystem.deleteIfExists(pluginsFile);
   }
 
   const String info = 'This is a generated file; do not edit or check into version control.';
@@ -1045,9 +1044,7 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
   final String filePath = globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.dart');
   if (webPlugins.isEmpty) {
     final File file = globals.fs.file(filePath);
-    if (file.existsSync()) {
-      file.deleteSync();
-    }
+    return ErrorHandlingFileSystem.deleteIfExists(file);
   } else {
     _renderTemplateToFile(
       _dartPluginRegistryTemplate,

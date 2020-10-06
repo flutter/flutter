@@ -1627,7 +1627,7 @@ void main() {
       }
       expect(errors, isNotEmpty);
       expect(errors.first.exception, isFlutterError);
-      expect(errors.first.exception.toStringDeep(), message);
+      expect((errors.first.exception as FlutterError).toStringDeep(), message);
     }
 
     testWidgets('Horizontal viewport was given unbounded height', (WidgetTester tester) async {

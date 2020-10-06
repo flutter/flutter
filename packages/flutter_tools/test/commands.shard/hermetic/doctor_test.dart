@@ -6,10 +6,8 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -342,16 +340,6 @@ void main() {
   });
 
   group('doctor with fake validators', () {
-    Artifacts artifacts;
-    String genSnapshotPath;
-    FileSystem memoryFileSystem;
-
-    setUp(() {
-      memoryFileSystem = MemoryFileSystem.test();
-      artifacts = Artifacts.test();
-      genSnapshotPath = artifacts.getArtifactPath(Artifact.genSnapshot);
-    });
-
     testUsingContext('validate non-verbose output format for run without issues', () async {
       expect(await FakeQuietDoctor(logger).diagnose(verbose: false), isTrue);
       expect(logger.statusText, equals(
@@ -492,92 +480,6 @@ void main() {
               '! Doctor found issues in 4 categories.\n'
       ));
     }, overrides: noColorTerminalOverride);
-
-    testUsingContext('gen_snapshot does not work', () async {
-      memoryFileSystem.file(genSnapshotPath).createSync(recursive: true);
-      when(mockProcessManager.runSync(
-        <String>[genSnapshotPath],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenReturn(ProcessResult(101, 1, '', ''));
-
-      expect(await FlutterValidatorDoctor(logger).diagnose(verbose: false), isTrue);
-      final List<String> statusLines = logger.statusText.split('\n');
-      for (final String msg in userMessages.flutterBinariesDoNotRun.split('\n')) {
-        expect(statusLines, contains(contains(msg)));
-      }
-      if (globals.platform.isLinux) {
-        for (final String msg in userMessages.flutterBinariesLinuxRepairCommands.split('\n')) {
-          expect(statusLines, contains(contains(msg)));
-        }
-      }
-    }, overrides: <Type, Generator>{
-      Artifacts: () => artifacts,
-      FileSystem: () => memoryFileSystem,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
-      ProcessManager: () => mockProcessManager,
-      Platform: _kNoColorOutputPlatform,
-    });
-
-    testUsingContext('gen_snapshot binary not available', () async {
-      expect(await FlutterValidatorDoctor(logger).diagnose(verbose: false), isTrue);
-      // gen_snapshot is downloaded on demand, and the doctor should not
-      // fail if the gen_snapshot binary is not present.
-      expect(logger.statusText, contains('No issues found!'));
-    }, overrides: <Type, Generator>{
-      Artifacts: () => artifacts,
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-
-    testUsingContext('version checking does not work', () async {
-      memoryFileSystem.file(genSnapshotPath).createSync(recursive: true);
-      final VersionCheckError versionCheckError = VersionCheckError('version error');
-
-      when(mockFlutterVersion.channel).thenReturn('unknown');
-      when(mockFlutterVersion.frameworkVersion).thenReturn('0.0.0');
-      when(mockFlutterVersion.frameworkDate).thenThrow(versionCheckError);
-
-      when(mockProcessManager.runSync(
-        <String>[genSnapshotPath],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenReturn(ProcessResult(101, 255, '', ''));
-
-      expect(await FlutterValidatorDoctor(logger).diagnose(verbose: false), isTrue);
-
-      expect(logger.statusText, equals(
-        'Doctor summary (to see all details, run flutter doctor -v):\n'
-          '[!] Flutter (Channel unknown, 0.0.0, on fake OS name and version, locale en_US.UTF-8)\n'
-          '    ✗ version error\n\n'
-          '! Doctor found issues in 1 category.\n'
-      ));
-    }, overrides: <Type, Generator>{
-      Artifacts: () => artifacts,
-      FileSystem: () => memoryFileSystem,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
-      ProcessManager: () => mockProcessManager,
-      Platform: _kNoColorOutputPlatform,
-      FlutterVersion: () => mockFlutterVersion,
-    });
-
-    testUsingContext('shows mirrors', () async {
-      (globals.platform as FakePlatform).environment = <String, String>{
-        'PUB_HOSTED_URL': 'https://example.com/pub',
-        'FLUTTER_STORAGE_BASE_URL': 'https://example.com/flutter',
-      };
-
-      expect(await FlutterValidatorDoctor(logger).diagnose(verbose: true), isTrue);
-      expect(logger.statusText, contains('Pub download mirror https://example.com/pub'));
-      expect(logger.statusText, contains('Flutter download mirror https://example.com/flutter'));
-    }, overrides: <Type, Generator>{
-      Artifacts: () => artifacts,
-      FileSystem: () => memoryFileSystem,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
-      ProcessManager: () => mockProcessManager,
-      Platform: _kNoColorOutputPlatform,
-      FlutterVersion: () => mockFlutterVersion,
-    });
   });
 
   testUsingContext('validate non-verbose output wrapping', () async {
@@ -1097,18 +999,6 @@ class FakeGroupedDoctorWithStatus extends Doctor {
         PassingGroupedValidator('First validator title'),
         PassingGroupedValidatorWithStatus('Second validator title'),
       ]),
-    ];
-  }
-}
-
-class FlutterValidatorDoctor extends Doctor {
-  FlutterValidatorDoctor(Logger logger) : super(logger: logger);
-
-  List<DoctorValidator> _validators;
-  @override
-  List<DoctorValidator> get validators {
-    return _validators ??= <DoctorValidator>[
-      FlutterValidator(),
     ];
   }
 }

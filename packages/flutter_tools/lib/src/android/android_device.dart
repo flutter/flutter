@@ -26,33 +26,32 @@ import 'android.dart';
 import 'android_console.dart';
 import 'android_sdk.dart';
 
-// TODO(jonahwilliams): update google3 client after roll to remove export.
-export 'android_device_discovery.dart';
-
-enum _HardwareType { emulator, physical }
+/// Whether the [AndroidDevice] is believed to be a physical device or an emulator.
+enum HardwareType { emulator, physical }
 
 /// Map to help our `isLocalEmulator` detection.
-const Map<String, _HardwareType> _kKnownHardware = <String, _HardwareType>{
-  'goldfish': _HardwareType.emulator,
-  'qcom': _HardwareType.physical,
-  'ranchu': _HardwareType.emulator,
-  'samsungexynos7420': _HardwareType.physical,
-  'samsungexynos7580': _HardwareType.physical,
-  'samsungexynos7870': _HardwareType.physical,
-  'samsungexynos7880': _HardwareType.physical,
-  'samsungexynos8890': _HardwareType.physical,
-  'samsungexynos8895': _HardwareType.physical,
-  'samsungexynos9810': _HardwareType.physical,
-  'samsungexynos7570': _HardwareType.physical,
+///
+/// See [AndroidDevice] for more explanation of why this is needed.
+const Map<String, HardwareType> kKnownHardware = <String, HardwareType>{
+  'goldfish': HardwareType.emulator,
+  'qcom': HardwareType.physical,
+  'ranchu': HardwareType.emulator,
+  'samsungexynos7420': HardwareType.physical,
+  'samsungexynos7580': HardwareType.physical,
+  'samsungexynos7870': HardwareType.physical,
+  'samsungexynos7880': HardwareType.physical,
+  'samsungexynos8890': HardwareType.physical,
+  'samsungexynos8895': HardwareType.physical,
+  'samsungexynos9810': HardwareType.physical,
+  'samsungexynos7570': HardwareType.physical,
 };
 
-bool allowHeapCorruptionOnWindows(int exitCode, Platform platform) {
-  // In platform tools 29.0.0 adb.exe seems to be ending with this heap
-  // corruption error code on seemingly successful termination.
-  // So we ignore this error on Windows.
-  return exitCode == -1073740940 && platform.isWindows;
-}
-
+/// A physical Android device or emulator.
+///
+/// While [isEmulator] attempts to distinguish between the device categories,
+/// this is a best effort process and not a guarantee; certain phyiscal devices
+/// identify as emulators. These device identifiers may be added to the [kKnownHardware]
+/// map to specify that they are actually physical devices.
 class AndroidDevice extends Device {
   AndroidDevice(
     String id, {
@@ -113,7 +112,7 @@ class AndroidDevice extends Device {
           stdoutEncoding: latin1,
           stderrEncoding: latin1,
         );
-        if (result.exitCode == 0 || allowHeapCorruptionOnWindows(result.exitCode, _platform)) {
+        if (result.exitCode == 0 || _allowHeapCorruptionOnWindows(result.exitCode, _platform)) {
           _properties = parseAdbDeviceProperties(result.stdout as String);
         } else {
           _logger.printError('Error ${result.exitCode} retrieving device properties for $name:');
@@ -132,9 +131,9 @@ class AndroidDevice extends Device {
     if (_isLocalEmulator == null) {
       final String hardware = await _getProperty('ro.hardware');
       _logger.printTrace('ro.hardware = $hardware');
-      if (_kKnownHardware.containsKey(hardware)) {
+      if (kKnownHardware.containsKey(hardware)) {
         // Look for known hardware models.
-        _isLocalEmulator = _kKnownHardware[hardware] == _HardwareType.emulator;
+        _isLocalEmulator = kKnownHardware[hardware] == HardwareType.emulator;
       } else {
         // Fall back to a best-effort heuristic-based approach.
         final String characteristics = await _getProperty('ro.build.characteristics');
@@ -242,8 +241,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<String> get sdkNameAndVersion async =>
-      'Android ${await _sdkVersion} (API ${await apiVersion})';
+  Future<String> get sdkNameAndVersion async => 'Android ${await _sdkVersion} (API ${await apiVersion})';
 
   Future<String> get _sdkVersion => _getProperty('ro.build.version.release');
 
@@ -258,22 +256,6 @@ class AndroidDevice extends Device {
     return <String>[_androidSdk.adbPath, '-s', id, ...args];
   }
 
-  String runAdbCheckedSync(
-    List<String> params, {
-    String workingDirectory,
-    bool allowReentrantFlutter = false,
-    Map<String, String> environment,
-  }) {
-    return _processUtils.runSync(
-      adbCommandForDevice(params),
-      throwOnError: true,
-      workingDirectory: workingDirectory,
-      allowReentrantFlutter: allowReentrantFlutter,
-      environment: environment,
-      allowedFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
-    ).stdout.trim();
-  }
-
   Future<RunResult> runAdbCheckedAsync(
     List<String> params, {
     String workingDirectory,
@@ -284,7 +266,7 @@ class AndroidDevice extends Device {
       throwOnError: true,
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
-      allowedFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
+      allowedFailures: (int value) => _allowHeapCorruptionOnWindows(value, _platform),
     );
   }
 
@@ -738,7 +720,7 @@ class AndroidDevice extends Device {
       app.id,
     ]);
     return _processUtils.stream(command).then<bool>(
-        (int exitCode) => exitCode == 0 || allowHeapCorruptionOnWindows(exitCode, _platform));
+        (int exitCode) => exitCode == 0 || _allowHeapCorruptionOnWindows(exitCode, _platform));
   }
 
   @override
@@ -794,17 +776,18 @@ class AndroidDevice extends Device {
 
   /// Return the most recent timestamp in the Android log or [null] if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
-  String get lastLogcatTimestamp {
-    String output;
+  @visibleForTesting
+  Future<String> lastLogcatTimestamp() async {
+    RunResult output;
     try {
-      output = runAdbCheckedSync(<String>[
+      output = await runAdbCheckedAsync(<String>[
         'shell', '-x', 'logcat', '-v', 'time', '-t', '1'
       ]);
     } on Exception catch (error) {
       _logger.printError('Failed to extract the most recent timestamp from the Android log: $error.');
       return null;
     }
-    final Match timeMatch = _timeRegExp.firstMatch(output);
+    final Match timeMatch = _timeRegExp.firstMatch(output.stdout);
     return timeMatch?.group(0);
   }
 
@@ -1012,11 +995,9 @@ class AdbLogReader extends DeviceLogReader {
   /// Create a new [AdbLogReader] from an [AndroidDevice] instance.
   static Future<AdbLogReader> createLogReader(
     AndroidDevice device,
-    ProcessManager processManager,
-    {
-      bool includePastLogs = false,
-    }
-  ) async {
+    ProcessManager processManager, {
+    bool includePastLogs = false,
+  }) async {
     // logcat -T is not supported on Android releases before Lollipop.
     const int kLollipopVersionCode = 21;
     final int apiVersion = (String v) {
@@ -1034,17 +1015,20 @@ class AdbLogReader extends DeviceLogReader {
       'logcat',
       '-v',
       'time',
-      // If we include logs from the past, filter for 'flutter' logs only.
-      if (includePastLogs) ...<String>[
-        '-s',
-        'flutter',
-      ] else if (apiVersion != null && apiVersion >= kLollipopVersionCode) ...<String>[
-        // Otherwise, filter for logs appearing past the present.
-        // '-T 0` means the timestamp of the logcat command invocation.
-        '-T',
-        if (device.lastLogcatTimestamp != null) '\'${device.lastLogcatTimestamp}\'' else '0',
-      ],
     ];
+
+    // If past logs are included then filter for 'flutter' logs only.
+    if (includePastLogs) {
+      args.addAll(<String>['-s', 'flutter']);
+    } else if (apiVersion != null && apiVersion >= kLollipopVersionCode) {
+      // Otherwise, filter for logs appearing past the present.
+      // '-T 0` means the timestamp of the logcat command invocation.
+      final String lastLogcatTimestamp = await device.lastLogcatTimestamp();
+      args.addAll(<String>[
+        '-T',
+        if (lastLogcatTimestamp != null) '\'$lastLogcatTimestamp\'' else '0',
+      ]);
+    }
     final Process process = await processManager.start(device.adbCommandForDevice(args));
     return AdbLogReader._(process, device.name);
   }
@@ -1339,4 +1323,11 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
       await unforward(port);
     }
   }
+}
+
+// In platform tools 29.0.0 adb.exe seems to be ending with this heap
+// corruption error code on seemingly successful termination. Ignore
+// this error on windows.
+bool _allowHeapCorruptionOnWindows(int exitCode, Platform platform) {
+  return exitCode == -1073740940 && platform.isWindows;
 }
