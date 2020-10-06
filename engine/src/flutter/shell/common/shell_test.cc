@@ -231,6 +231,12 @@ bool ShellTest::GetNeedsReportTimings(Shell* shell) {
   return shell->needs_report_timings_;
 }
 
+void ShellTest::StorePersistentCache(PersistentCache* cache,
+                                     const SkData& key,
+                                     const SkData& value) {
+  cache->store(key, value);
+}
+
 void ShellTest::OnServiceProtocol(
     Shell* shell,
     ServiceProtocolEnum some_protocol,
