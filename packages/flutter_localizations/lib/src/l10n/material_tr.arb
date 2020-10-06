@@ -53,7 +53,7 @@
   "remainingTextFieldCharacterCountOther": "$remainingCount karakter kaldı",
   "refreshIndicatorSemanticLabel": "Yenile",
   "moreButtonTooltip": "Diğer",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "aa/gg/yyyy",
   "selectYearSemanticsLabel": "Yılı seçin",
   "unspecifiedDate": "Tarih",

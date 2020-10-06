@@ -59,7 +59,7 @@
   "remainingTextFieldCharacterCountOther": "Liko $remainingCount simbolių",
   "refreshIndicatorSemanticLabel": "Atnaujinti",
   "moreButtonTooltip": "Daugiau",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "mm/dd/yyyy",
   "selectYearSemanticsLabel": "Pasirinkite metus",
   "unspecifiedDate": "Data",

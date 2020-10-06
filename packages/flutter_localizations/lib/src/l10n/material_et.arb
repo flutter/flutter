@@ -53,7 +53,7 @@
   "remainingTextFieldCharacterCountOther": "Jäänud on $remainingCount tähemärki",
   "refreshIndicatorSemanticLabel": "Värskendamine",
   "moreButtonTooltip": "Rohkem",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "kk/pp/aaaa",
   "selectYearSemanticsLabel": "Valige aasta",
   "unspecifiedDate": "Kuupäev",

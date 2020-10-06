@@ -9,7 +9,7 @@
   "licensesPackageDetailTextFew": "$licenseCount licence",
   "dialModeButtonLabel": "Pređite na režim birača brojčanika",
   "inputTimeModeButtonLabel": "Pređite na režim unosa teksta",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateInputLabel": "Unesite datum",
   "calendarModeButtonLabel": "Pređite na kalendar",
   "dateRangePickerHelpText": "IZABERITE PERIOD",
