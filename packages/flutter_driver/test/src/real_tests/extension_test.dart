@@ -877,6 +877,39 @@ void main() {
     expect(children.single['children'], isEmpty);
   });
 
+  group('extension finders', () {
+    testWidgets('empty extensions list', (WidgetTester tester) async {
+      final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true, finders: []);
+
+      Future<GetTextResult> getText(SerializableFinder finder) async {
+        final Map<String, String> arguments = GetText(finder, timeout: const Duration(seconds: 1)).serialize();
+        final Map<String, dynamic> response = await extension.call(arguments);
+        return GetTextResult.fromJson(response);
+      }
+
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+              child: Column(
+                children: [
+                  Text('Foo', key: ValueKey<String>('Text1')),
+                  Text('Bar', key: ValueKey<String>('Text2')),
+                ],
+              )
+          ),
+        ),
+      );
+
+      // Widget
+      GetTextResult result = await getText(ByValueKey('Text1'));
+      expect(result.text, 'Foo');
+
+      result = await getText(ByValueKey('Text2'));
+      expect(result.text, 'Bar');
+    });
+  });
+
   group('waitUntilFrameSync', () {
     FlutterDriverExtension extension;
     Map<String, dynamic> result;
