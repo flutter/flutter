@@ -24,7 +24,6 @@ import '../common/health.dart';
 import '../common/message.dart';
 import 'common.dart';
 import 'driver.dart';
-import 'fuchsia_compat.dart';
 import 'timeline.dart';
 
 /// An implementation of the Flutter Driver over the vmservice protocol.

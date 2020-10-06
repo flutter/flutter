@@ -638,9 +638,9 @@ class FlutterDriverExtension with DeserializeFinderFactory {
         text = (richText.text as TextSpan).text;
       }
     } else if (widget.runtimeType == TextField) {
-      text = (widget as TextField).controller.text;
+      text = (widget as TextField).controller?.text;
     } else if (widget.runtimeType == TextFormField) {
-      text = (widget as TextFormField).controller.text;
+      text = (widget as TextFormField).controller?.text;
     } else if (widget.runtimeType == EditableText) {
       text = (widget as EditableText).controller.text;
     }
