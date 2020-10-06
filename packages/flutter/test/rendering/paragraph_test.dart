@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/gestures.dart';
@@ -22,9 +20,10 @@ const String _kText = "I polished up that handle so carefullee\nThat now I am th
 // which may return an empty list in some situations where Libtxt would return a list
 // containing an empty box.
 class RenderParagraphWithEmptySelectionBoxList extends RenderParagraph {
-  RenderParagraphWithEmptySelectionBoxList(InlineSpan text, {
-    TextDirection textDirection,
-    this.emptyListSelection,
+  RenderParagraphWithEmptySelectionBoxList(
+    InlineSpan text, {
+    required TextDirection textDirection,
+    required this.emptyListSelection,
   }) : super(text, textDirection: textDirection);
 
   TextSelection emptyListSelection;
@@ -65,7 +64,7 @@ void main() {
     );
     layout(paragraph);
 
-    final double height5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5));
+    final double height5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5))!;
     expect(height5, equals(10.0));
   });
 
@@ -136,7 +135,11 @@ void main() {
       softWrap: true,
     );
 
-    void relayoutWith({ int maxLines, bool softWrap, TextOverflow overflow }) {
+    void relayoutWith({
+      int? maxLines,
+      required bool softWrap,
+      required TextOverflow overflow,
+    }) {
       paragraph
         ..maxLines = maxLines
         ..softWrap = softWrap
@@ -211,7 +214,7 @@ void main() {
       textDirection: TextDirection.ltr,
     );
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
-    void layoutAt(int maxLines) {
+    void layoutAt(int? maxLines) {
       paragraph.maxLines = maxLines;
       pumpFrame();
     }
@@ -562,7 +565,7 @@ void main() {
     bool failed = false;
     try {
       paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
-    } catch(e) {
+    } on AssertionError catch(e) {
       failed = true;
       expect(e.message, 'MultiTapGestureRecognizer is not supported.');
     }
