@@ -11,7 +11,7 @@ import 'dart:io';
 
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart';
 
-import '../common/error.dart';
+import 'error.dart';
 
 class _DummyPortForwarder implements PortForwarder {
   _DummyPortForwarder(this._port, this._remotePort);
