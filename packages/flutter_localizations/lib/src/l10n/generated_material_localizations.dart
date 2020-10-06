@@ -1176,7 +1176,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
-  String get searchFieldLabel => 'Search';
+  String get searchFieldLabel => 'সন্ধান কৰক';
 
   @override
   String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
@@ -17007,7 +17007,7 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
-  String get searchFieldLabel => 'Search';
+  String get searchFieldLabel => 'തിരയുക';
 
   @override
   String get selectAllButtonLabel => 'എല്ലാം തിരഞ്ഞെടുക്കുക';
@@ -17619,7 +17619,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.dense;
 
   @override
-  String get searchFieldLabel => 'Search';
+  String get searchFieldLabel => 'शोध';
 
   @override
   String get selectAllButtonLabel => 'सर्व निवडा';
@@ -19761,7 +19761,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
-  String get searchFieldLabel => 'Search';
+  String get searchFieldLabel => 'ଖୋଜନ୍ତୁ';
 
   @override
   String get selectAllButtonLabel => 'ସବୁ ଚୟନ କରନ୍ତୁ';
@@ -24471,7 +24471,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.dense;
 
   @override
-  String get searchFieldLabel => 'Search';
+  String get searchFieldLabel => 'தேடல்';
 
   @override
   String get selectAllButtonLabel => 'அனைத்தையும் தேர்ந்தெடு';
