@@ -92,3 +92,7 @@ analyze \
   --packages="$FLUTTER_DIR/testing/scenario_app/.dart_tool/package_config.json" \
   --options "$FLUTTER_DIR/analysis_options.yaml" \
   "$FLUTTER_DIR/testing/scenario_app"
+
+# Check that dart libraries conform.
+(cd "$FLUTTER_DIR/web_sdk"; pub get)
+(cd "$FLUTTER_DIR"; dart "web_sdk/test/api_conform_test.dart")
