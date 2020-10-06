@@ -97,6 +97,10 @@ class RunCommand extends RunCommandBase {
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraFrontendOptions();
     addEnableExperimentation(hide: !verboseHelp);
+
+    // By default, the app should to publish the VM service port over mDNS.
+    // This will allow subsequent "flutter attach" commands to connect to the VM
+    // without needing to know the port.
     addPublishPort(enabledByDefault: true, verboseHelp: verboseHelp);
     argParser
       ..addFlag('start-paused',
