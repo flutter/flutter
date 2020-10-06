@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
@@ -46,7 +44,7 @@ class _StorageEntryIdentifier {
 
   @override
   String toString() {
-    return 'StorageEntryIdentifier(${keys?.join(":")})';
+    return 'StorageEntryIdentifier(${keys.join(":")})';
   }
 }
 
@@ -57,7 +55,7 @@ class _StorageEntryIdentifier {
 class PageStorageBucket {
   static bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys) {
     final Widget widget = context.widget;
-    final Key key = widget.key;
+    final Key? key = widget.key;
     if (key is PageStorageKey)
       keys.add(key);
     return widget is! PageStorage;
@@ -77,7 +75,7 @@ class PageStorageBucket {
     return _StorageEntryIdentifier(_allKeys(context));
   }
 
-  Map<Object, dynamic> _storage;
+  Map<Object, dynamic>? _storage;
 
   /// Write the given data into this page storage bucket using the
   /// specified identifier or an identifier computed from the given context.
@@ -87,14 +85,14 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then the `data` is not saved.
-  void writeState(BuildContext context, dynamic data, { Object identifier }) {
+  void writeState(BuildContext context, dynamic data, { Object? identifier }) {
     _storage ??= <Object, dynamic>{};
     if (identifier != null) {
-      _storage[identifier] = data;
+      _storage![identifier] = data;
     } else {
       final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
       if (contextIdentifier.isNotEmpty)
-        _storage[contextIdentifier] = data;
+        _storage![contextIdentifier] = data;
     }
   }
 
@@ -106,13 +104,13 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then null is returned.
-  dynamic readState(BuildContext context, { Object identifier }) {
+  dynamic readState(BuildContext context, { Object? identifier }) {
     if (_storage == null)
       return null;
     if (identifier != null)
-      return _storage[identifier];
+      return _storage![identifier];
     final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
-    return contextIdentifier.isNotEmpty ? _storage[contextIdentifier] : null;
+    return contextIdentifier.isNotEmpty ? _storage![contextIdentifier] : null;
   }
 }
 
@@ -130,8 +128,13 @@ class PageStorageBucket {
 /// Usually you don't need to explicitly use a [PageStorage], since it's already
 /// included in routes.
 ///
-/// [PageStorageKey] is used by [Scrollable] if
-/// `keepScrollOffset` is enabled to save their [ScrollPosition]s.
+/// [PageStorageKey] is used by [Scrollable] if [ScrollController.keepScrollOffset]
+/// is enabled to save their [ScrollPosition]s. When more than one
+/// scrollable ([ListView], [SingleChildScrollView], [TextField], etc.) appears
+/// within the widget's closest ancestor [PageStorage] (such as within the same route),
+/// if you want to save all of their positions independently,
+/// you should give each of them unique [PageStorageKey]s, or set some of their
+/// `keepScrollOffset` false to prevent saving.
 ///
 /// {@tool dartpad --template=freeform}
 ///
@@ -239,9 +242,9 @@ class PageStorage extends StatelessWidget {
   ///
   /// The [bucket] argument must not be null.
   const PageStorage({
-    Key key,
-    @required this.bucket,
-    @required this.child,
+    Key? key,
+    required this.bucket,
+    required this.child,
   }) : assert(bucket != null),
        super(key: key);
 
@@ -262,8 +265,8 @@ class PageStorage extends StatelessWidget {
   /// ```dart
   /// PageStorageBucket bucket = PageStorage.of(context);
   /// ```
-  static PageStorageBucket of(BuildContext context) {
-    final PageStorage widget = context.findAncestorWidgetOfExactType<PageStorage>();
+  static PageStorageBucket? of(BuildContext context) {
+    final PageStorage? widget = context.findAncestorWidgetOfExactType<PageStorage>();
     return widget?.bucket;
   }
 

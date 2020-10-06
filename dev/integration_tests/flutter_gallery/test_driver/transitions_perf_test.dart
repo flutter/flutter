@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert' show JsonEncoder, json;
 
 import 'package:file/file.dart';
@@ -204,6 +203,7 @@ void main([List<String> args = const <String>[]]) {
       // 'Start Transition' event when a demo is launched (see GalleryItem).
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeSummaryToFile('transitions', pretty: true);
+      await summary.writeTimelineToFile('transitions', pretty: true);
       final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
       await saveDurationsHistogram(
           List<Map<String, dynamic>>.from(timeline.json['traceEvents'] as List<dynamic>),
@@ -211,7 +211,7 @@ void main([List<String> args = const <String>[]]) {
 
       // Execute the remaining tests.
       if (hybrid) {
-        await driver.requestData('profileDemos');
+        await driver.requestData('restDemos');
       } else {
         final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
         await runDemos(unprofiledDemos.toList(), driver);

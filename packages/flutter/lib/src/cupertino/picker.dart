@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -70,7 +68,7 @@ class CupertinoPicker extends StatefulWidget {
   /// will loop the list back to the beginning.  If set to false, the list will
   /// stop scrolling when you reach the end or the beginning.
   CupertinoPicker({
-    Key key,
+    Key? key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor,
     this.offAxisFraction = 0.0,
@@ -78,9 +76,9 @@ class CupertinoPicker extends StatefulWidget {
     this.magnification = 1.0,
     this.scrollController,
     this.squeeze = _kSqueeze,
-    @required this.itemExtent,
-    @required this.onSelectedItemChanged,
-    @required List<Widget> children,
+    required this.itemExtent,
+    required this.onSelectedItemChanged,
+    required List<Widget> children,
     bool looping = false,
   }) : assert(children != null),
        assert(diameterRatio != null),
@@ -113,7 +111,7 @@ class CupertinoPicker extends StatefulWidget {
   /// (i.e. the picker is going to have a completely transparent background), to match
   /// the native UIPicker and UIDatePicker.
   CupertinoPicker.builder({
-    Key key,
+    Key? key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor,
     this.offAxisFraction = 0.0,
@@ -121,10 +119,10 @@ class CupertinoPicker extends StatefulWidget {
     this.magnification = 1.0,
     this.scrollController,
     this.squeeze = _kSqueeze,
-    @required this.itemExtent,
-    @required this.onSelectedItemChanged,
-    @required IndexedWidgetBuilder itemBuilder,
-    int childCount,
+    required this.itemExtent,
+    required this.onSelectedItemChanged,
+    required NullableIndexedWidgetBuilder itemBuilder,
+    int? childCount,
   }) : assert(itemBuilder != null),
        assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
@@ -153,7 +151,7 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// Any alpha value less 255 (fully opaque) will cause the removal of the
   /// wheel list edge fade gradient from rendering of the widget.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// {@macro flutter.rendering.wheelList.offAxisFraction}
   final double offAxisFraction;
@@ -168,7 +166,7 @@ class CupertinoPicker extends StatefulWidget {
   /// to set the initial item.
   ///
   /// If null, an implicit one will be created internally.
-  final FixedExtentScrollController scrollController;
+  final FixedExtentScrollController? scrollController;
 
   /// The uniform height of all children.
   ///
@@ -188,7 +186,7 @@ class CupertinoPicker extends StatefulWidget {
   /// This can be called during scrolls and during ballistic flings. To get the
   /// value only when the scrolling settles, use a [NotificationListener],
   /// listen for [ScrollEndNotification] and read its [FixedExtentMetrics].
-  final ValueChanged<int> onSelectedItemChanged;
+  final ValueChanged<int>? onSelectedItemChanged;
 
   /// A delegate that lazily instantiates children.
   final ListWheelChildDelegate childDelegate;
@@ -198,8 +196,8 @@ class CupertinoPicker extends StatefulWidget {
 }
 
 class _CupertinoPickerState extends State<CupertinoPicker> {
-  int _lastHapticIndex;
-  FixedExtentScrollController _controller;
+  int? _lastHapticIndex;
+  FixedExtentScrollController? _controller;
 
   @override
   void initState() {
@@ -249,13 +247,13 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     }
 
     if (widget.onSelectedItemChanged != null) {
-      widget.onSelectedItemChanged(index);
+      widget.onSelectedItemChanged!(index);
     }
   }
 
   /// Draws the magnifier borders.
   Widget _buildMagnifierScreen() {
-    final Color resolvedBorderColor = CupertinoDynamicColor.resolve(_kHighlighterBorder, context);
+    final Color resolvedBorderColor = CupertinoDynamicColor.resolve(_kHighlighterBorder, context)!;
 
     return IgnorePointer(
       child: Center(
@@ -276,7 +274,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final Color resolvedBackgroundColor = CupertinoDynamicColor.resolve(widget.backgroundColor, context);
+    final Color? resolvedBackgroundColor = CupertinoDynamicColor.resolve(widget.backgroundColor, context);
 
     final Widget result = DefaultTextStyle(
       style: CupertinoTheme.of(context).textTheme.pickerTextStyle,
@@ -284,7 +282,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         children: <Widget>[
           Positioned.fill(
             child: _CupertinoPickerSemantics(
-              scrollController: widget.scrollController ?? _controller,
+              scrollController: widget.scrollController ?? _controller!,
               child: ListWheelScrollView.useDelegate(
                 controller: widget.scrollController ?? _controller,
                 physics: const FixedExtentScrollPhysics(),
@@ -321,38 +319,45 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 // scroll controller.
 class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
   const _CupertinoPickerSemantics({
-    Key key,
-    Widget child,
-    @required this.scrollController,
+    Key? key,
+    Widget? child,
+    required this.scrollController,
   }) : super(key: key, child: child);
 
   final FixedExtentScrollController scrollController;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderCupertinoPickerSemantics(scrollController, Directionality.of(context));
+  RenderObject createRenderObject(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
+    return _RenderCupertinoPickerSemantics(scrollController, Directionality.of(context)!);
+  }
 
   @override
   void updateRenderObject(BuildContext context, covariant _RenderCupertinoPickerSemantics renderObject) {
+    assert(debugCheckHasDirectionality(context));
     renderObject
-      ..textDirection = Directionality.of(context)
+      ..textDirection = Directionality.of(context)!
       ..controller = scrollController;
   }
 }
 
 class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   _RenderCupertinoPickerSemantics(FixedExtentScrollController controller, this._textDirection) {
-    this.controller = controller;
+    _updateController(null, controller);
   }
 
   FixedExtentScrollController get controller => _controller;
-  FixedExtentScrollController _controller;
-  set controller(FixedExtentScrollController value) {
-    if (value == _controller)
+  late FixedExtentScrollController _controller;
+  set controller(FixedExtentScrollController value) => _updateController(_controller, value);
+
+  // This method exists to allow controller to be non-null. It is only called with a null oldValue from construtor.
+  void _updateController(FixedExtentScrollController? oldValue, FixedExtentScrollController value) {
+    if (value == oldValue)
       return;
-    if (_controller != null)
-      _controller.removeListener(_handleScrollUpdate);
+    if (oldValue != null)
+      oldValue.removeListener(_handleScrollUpdate);
     else
-      _currentIndex = value.initialItem ?? 0;
+      _currentIndex = value.initialItem;
     value.addListener(_handleScrollUpdate);
     _controller = value;
   }
@@ -399,15 +404,15 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     final Map<int, SemanticsNode> indexedChildren = <int, SemanticsNode>{};
     scrollable.visitChildren((SemanticsNode child) {
       assert(child.indexInParent != null);
-      indexedChildren[child.indexInParent] = child;
+      indexedChildren[child.indexInParent!] = child;
       return true;
     });
     if (indexedChildren[_currentIndex] == null) {
       return node.updateWith(config: config);
     }
-    config.value = indexedChildren[_currentIndex].label;
-    final SemanticsNode previousChild = indexedChildren[_currentIndex - 1];
-    final SemanticsNode nextChild = indexedChildren[_currentIndex + 1];
+    config.value = indexedChildren[_currentIndex]!.label;
+    final SemanticsNode? previousChild = indexedChildren[_currentIndex - 1];
+    final SemanticsNode? nextChild = indexedChildren[_currentIndex + 1];
     if (nextChild != null) {
       config.increasedValue = nextChild.label;
       config.onIncrease = _handleIncrease;

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
@@ -11,13 +9,7 @@ import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/template.dart';
-// The build_runner code generation is provided here to make it easier to
-// avoid introducing the dependency into google3. Not all build* packages
-// are synced internally.
 import 'src/base/terminal.dart';
-import 'src/build_runner/mustache_template.dart';
-import 'src/build_runner/resident_web_runner.dart';
-import 'src/build_runner/web_compilation_delegate.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
@@ -34,6 +26,7 @@ import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
 import 'src/commands/format.dart';
 import 'src/commands/generate.dart';
+import 'src/commands/generate_localizations.dart';
 import 'src/commands/ide_config.dart';
 import 'src/commands/inject_plugins.dart';
 import 'src/commands/install.dart';
@@ -52,6 +45,12 @@ import 'src/commands/upgrade.dart';
 import 'src/commands/version.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
+// Files in `isolated` are intentionally excluded from google3 tooling.
+import 'src/isolated/devtools_launcher.dart';
+import 'src/isolated/mustache_template.dart';
+import 'src/isolated/resident_web_runner.dart';
+import 'src/isolated/web_compilation_delegate.dart';
+import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/web/compile.dart';
 import 'src/web/web_runner.dart';
@@ -94,10 +93,13 @@ Future<void> main(List<String> args) async {
     DevicesCommand(),
     DoctorCommand(verbose: verbose),
     DowngradeCommand(),
-    DriveCommand(),
+    DriveCommand(verboseHelp: verboseHelp),
     EmulatorsCommand(),
     FormatCommand(),
     GenerateCommand(),
+    GenerateLocalizationsCommand(
+      fileSystem: globals.fs,
+    ),
     InstallCommand(),
     LogsCommand(),
     MakeHostAppEditableCommand(),
@@ -134,6 +136,9 @@ Future<void> main(List<String> args) async {
        WebRunnerFactory: () => DwdsWebRunnerFactory(),
        // The mustache dependency is different in google3
        TemplateRenderer: () => const MustacheTemplateRenderer(),
+       // The devtools launcher is not supported in google3 because it depends on
+       // devtools source code.
+       DevtoolsLauncher: () => DevtoolsServerLauncher(logger: globals.logger),
        Logger: () {
         final LoggerFactory loggerFactory = LoggerFactory(
           outputPreferences: globals.outputPreferences,
@@ -150,7 +155,6 @@ Future<void> main(List<String> args) async {
        }
      });
 }
-
 
 /// An abstraction for instantiation of the correct logger type.
 ///

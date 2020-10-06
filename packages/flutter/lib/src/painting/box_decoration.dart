@@ -215,18 +215,18 @@ class BoxDecoration extends Decoration {
   EdgeInsetsGeometry? get padding => border?.dimensions;
 
   @override
-  Path? getClipPath(Rect rect, TextDirection textDirection) {
-    Path? clipPath;
+  Path getClipPath(Rect rect, TextDirection textDirection) {
     switch (shape) {
       case BoxShape.circle:
-        clipPath = Path()..addOval(rect);
-        break;
+        final Offset center = rect.center;
+        final double radius = rect.shortestSide / 2.0;
+        final Rect square = Rect.fromCircle(center: center, radius: radius);
+        return Path()..addOval(square);
       case BoxShape.rectangle:
         if (borderRadius != null)
-          clipPath = Path()..addRRect(borderRadius!.resolve(textDirection).toRRect(rect));
-        break;
+          return Path()..addRRect(borderRadius!.resolve(textDirection).toRRect(rect));
+        return Path()..addRect(rect);
     }
-    return clipPath;
   }
 
   /// Returns a new box decoration that is scaled by the given factor.
@@ -251,7 +251,7 @@ class BoxDecoration extends Decoration {
       return scale(t);
     if (a is BoxDecoration)
       return BoxDecoration.lerp(a, this, t);
-    return super.lerpFrom(a, t) as BoxDecoration;
+    return super.lerpFrom(a, t) as BoxDecoration?;
   }
 
   @override
@@ -260,7 +260,7 @@ class BoxDecoration extends Decoration {
       return scale(1.0 - t);
     if (b is BoxDecoration)
       return BoxDecoration.lerp(this, b, t);
-    return super.lerpTo(b, t) as BoxDecoration;
+    return super.lerpTo(b, t) as BoxDecoration?;
   }
 
   /// Linearly interpolate between two box decorations.
@@ -452,7 +452,11 @@ class _BoxDecorationPainter extends BoxPainter {
     Path? clipPath;
     switch (_decoration.shape) {
       case BoxShape.circle:
-        clipPath = Path()..addOval(rect);
+        assert(_decoration.borderRadius == null);
+        final Offset center = rect.center;
+        final double radius = rect.shortestSide / 2.0;
+        final Rect square = Rect.fromCircle(center: center, radius: radius);
+        clipPath = Path()..addOval(square);
         break;
       case BoxShape.rectangle:
         if (_decoration.borderRadius != null)
@@ -482,7 +486,7 @@ class _BoxDecorationPainter extends BoxPainter {
       canvas,
       rect,
       shape: _decoration.shape,
-      borderRadius: _decoration.borderRadius as BorderRadius,
+      borderRadius: _decoration.borderRadius as BorderRadius?,
       textDirection: configuration.textDirection,
     );
   }

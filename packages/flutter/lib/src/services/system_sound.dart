@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 
-import 'dart:async';
-
 import 'system_channels.dart';
 
 /// A sound provided by the system.

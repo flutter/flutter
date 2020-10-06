@@ -87,6 +87,11 @@ the widgets library.
   `stateful_widget` template, with the addition of the `TickerProviderStateMixin`
   class, enabling easy generation of animated samples.
 
+- [`stateful_widget_restoration`](stateful_widget_restoration.tmpl) : Similar to
+  the `stateful_widget` template, but the widget also imports `RestorationMixin`
+  and has a `restorationId` field which it uses to implement the `restorationId`
+  getter on the `State`.
+
 - [`stateless_widget`](stateless_widget.tmpl) : Identical to the
   `stateful_widget` template, except that the default code block is
   inserted as a method (which should be the `build` method) in a

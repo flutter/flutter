@@ -234,6 +234,115 @@ void main() {
     expect(find.text('Another license'), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
+  testWidgets('_PackageLicensePage title style without AppBarTheme', (
+    WidgetTester tester,
+  ) async {
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
+      ]);
+    });
+
+    const TextStyle titleTextStyle = TextStyle(
+      fontSize: 20,
+      color: Colors.black,
+      inherit: false,
+    );
+    const TextStyle subtitleTextStyle = TextStyle(
+      fontSize: 15,
+      color: Colors.red,
+      inherit: false,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryTextTheme: const TextTheme(
+            headline6: titleTextStyle,
+            subtitle2: subtitleTextStyle,
+          ),
+        ),
+        home: const Center(
+          child: LicensePage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Check for packages.
+    expect(find.text('AAA'), findsOneWidget);
+
+    // Check license is displayed after entering into license page for 'AAA'.
+    await tester.tap(find.text('AAA'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+
+    // Check for titles style.
+    final Text title = tester.widget(find.text('AAA'));
+    expect(title.style, titleTextStyle);
+    final Text subtitle = tester.widget(find.text('1 license.'));
+    expect(subtitle.style, subtitleTextStyle);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
+
+  testWidgets('_PackageLicensePage title style with AppBarTheme', (
+    WidgetTester tester,
+  ) async {
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
+      ]);
+    });
+
+    const TextStyle titleTextStyle = TextStyle(
+      fontSize: 20,
+      color: Colors.black,
+    );
+    const TextStyle subtitleTextStyle = TextStyle(
+      fontSize: 15,
+      color: Colors.red,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          // Not used because appBarTheme is prioritized.
+          primaryTextTheme: const TextTheme(
+            headline6: TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+            ),
+            subtitle2: TextStyle(
+              fontSize: 10,
+              color: Colors.grey,
+            ),
+          ),
+          appBarTheme: const AppBarTheme(
+            textTheme: TextTheme(
+              headline6: titleTextStyle,
+              subtitle2: subtitleTextStyle,
+            ),
+          ),
+        ),
+        home: const Center(
+          child: LicensePage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Check for packages.
+    expect(find.text('AAA'), findsOneWidget);
+
+    // Check license is displayed after entering into license page for 'AAA'.
+    await tester.tap(find.text('AAA'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+
+    // Check for titles style.
+    final Text title = tester.widget(find.text('AAA'));
+    expect(title.style, titleTextStyle);
+    final Text subtitle = tester.widget(find.text('1 license.'));
+    expect(subtitle.style, subtitleTextStyle);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
+
   testWidgets('LicensePage respects the notch', (WidgetTester tester) async {
     const double safeareaPadding = 27.0;
 
@@ -554,6 +663,53 @@ void main() {
     await tester.drag(find.byKey(contentKey), const Offset(0.0, -20.0));
 
     expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -20.0)));
+  });
+
+  testWidgets("LicensePage's color must be same whether loading or done", (WidgetTester tester) async {
+    const Color scaffoldColor = Color(0xFF123456);
+    const Color cardColor = Color(0xFF654321);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData.light().copyWith(
+        scaffoldBackgroundColor: scaffoldColor,
+        cardColor: cardColor,
+      ),
+      home: Scaffold(
+        body: Center(
+          child: Builder(
+            builder: (BuildContext context) => GestureDetector(
+              child: const Text('Show licenses'),
+              onTap: () {
+                showLicensePage(
+                  context: context,
+                  applicationName: 'MyApp',
+                  applicationVersion: '1.0.0',
+                );
+              }
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('Show licenses'));
+    await tester.pump();
+    await tester.pump();
+
+    // Check color when loading.
+    final List<Material> materialLoadings = tester.widgetList<Material>(find.byType(Material)).toList();
+    expect(materialLoadings.length, equals(4));
+    expect(materialLoadings[1].color, scaffoldColor);
+    expect(materialLoadings[2].color, cardColor);
+
+    await tester.pumpAndSettle();
+
+    // Check color when done.
+    expect(find.byKey(const ValueKey<ConnectionState>(ConnectionState.done)), findsOneWidget);
+    final List<Material> materialDones = tester.widgetList<Material>(find.byType(Material)).toList();
+    expect(materialDones.length, equals(3));
+    expect(materialDones[0].color, scaffoldColor);
+    expect(materialDones[1].color, cardColor);
   });
 }
 

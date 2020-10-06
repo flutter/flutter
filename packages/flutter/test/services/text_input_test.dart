@@ -73,6 +73,7 @@ void main() {
     test('sets expected defaults', () {
       const TextInputConfiguration configuration = TextInputConfiguration();
       expect(configuration.inputType, TextInputType.text);
+      expect(configuration.readOnly, false);
       expect(configuration.obscureText, false);
       expect(configuration.autocorrect, true);
       expect(configuration.actionLabel, null);
@@ -83,6 +84,7 @@ void main() {
     test('text serializes to JSON', () async {
       const TextInputConfiguration configuration = TextInputConfiguration(
         inputType: TextInputType.text,
+        readOnly: true,
         obscureText: true,
         autocorrect: false,
         actionLabel: 'xyzzy',
@@ -93,6 +95,7 @@ void main() {
         'signed': null,
         'decimal': null,
       });
+      expect(json['readOnly'], true);
       expect(json['obscureText'], true);
       expect(json['autocorrect'], false);
       expect(json['actionLabel'], 'xyzzy');
@@ -111,6 +114,7 @@ void main() {
         'signed': false,
         'decimal': true,
       });
+      expect(json['readOnly'], false);
       expect(json['obscureText'], true);
       expect(json['autocorrect'], false);
       expect(json['actionLabel'], 'xyzzy');

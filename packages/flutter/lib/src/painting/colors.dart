@@ -207,10 +207,10 @@ class HSVColor {
     if (b == null)
       return a._scaleAlpha(1.0 - t);
     return HSVColor.fromAHSV(
-      lerpDouble(a.alpha, b.alpha, t)!.clamp(0.0, 1.0) as double,
+      lerpDouble(a.alpha, b.alpha, t)!.clamp(0.0, 1.0),
       lerpDouble(a.hue, b.hue, t)! % 360.0,
-      lerpDouble(a.saturation, b.saturation, t)!.clamp(0.0, 1.0) as double,
-      lerpDouble(a.value, b.value, t)!.clamp(0.0, 1.0) as double,
+      lerpDouble(a.saturation, b.saturation, t)!.clamp(0.0, 1.0),
+      lerpDouble(a.value, b.value, t)!.clamp(0.0, 1.0),
     );
   }
 
@@ -291,7 +291,7 @@ class HSLColor {
     // Saturation can exceed 1.0 with rounding errors, so clamp it.
     final double saturation = lightness == 1.0
       ? 0.0
-      : ((delta / (1.0 - (2.0 * lightness - 1.0).abs())).clamp(0.0, 1.0) as double);
+      : ((delta / (1.0 - (2.0 * lightness - 1.0).abs())).clamp(0.0, 1.0));
     return HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
@@ -391,10 +391,10 @@ class HSLColor {
     if (b == null)
       return a._scaleAlpha(1.0 - t);
     return HSLColor.fromAHSL(
-      lerpDouble(a.alpha, b.alpha, t)!.clamp(0.0, 1.0) as double,
+      lerpDouble(a.alpha, b.alpha, t)!.clamp(0.0, 1.0),
       lerpDouble(a.hue, b.hue, t)! % 360.0,
-      lerpDouble(a.saturation, b.saturation, t)!.clamp(0.0, 1.0) as double,
-      lerpDouble(a.lightness, b.lightness, t)!.clamp(0.0, 1.0) as double,
+      lerpDouble(a.saturation, b.saturation, t)!.clamp(0.0, 1.0),
+      lerpDouble(a.lightness, b.lightness, t)!.clamp(0.0, 1.0),
     );
   }
 

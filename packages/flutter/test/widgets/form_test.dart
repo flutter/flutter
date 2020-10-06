@@ -849,4 +849,124 @@ void main() {
     }
     expect(() => builder(), throwsAssertionError);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/65374.
+  testWidgets('Validate form should return correct validation if the value is composing', (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String fieldValue;
+
+    final Widget widget = MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Material(
+              child: Form(
+                key: formKey,
+                child: TextFormField(
+                  maxLength: 5,
+                  onSaved: (String value) { fieldValue = value; },
+                  validator: (String value) => value.length > 5 ? 'Exceeded' : null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    final EditableTextState editableText = tester.state<EditableTextState>(find.byType(EditableText));
+    editableText.updateEditingValue(const TextEditingValue(text: '123456', composing: TextRange(start: 2, end: 5)));
+    expect(editableText.currentTextEditingValue.composing, const TextRange(start: 2, end: 5));
+
+    formKey.currentState.save();
+    expect(fieldValue, '123456');
+    expect(formKey.currentState.validate(), isFalse);
+  });
+
+  testWidgets('FormField.autovalidate parameter is passed into class the property', (WidgetTester tester) async {
+    String errorText(String value) => '$value/error';
+    const ObjectKey widgetKey = ObjectKey('key');
+
+    Widget builder({@required bool autovalidate}) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: FormField<String>(
+                  key: widgetKey,
+                  initialValue: 'foo',
+                  autovalidate: autovalidate,
+                  builder: (FormFieldState<String> state) {
+                    return Container();
+                  },
+                  validator: errorText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // When autovalidate is true
+    await tester.pumpWidget(builder(autovalidate: true));
+
+    final Finder formFieldFinder = find.byKey(widgetKey);
+    FormField<String> formField = tester.widget(formFieldFinder);
+    expect(formField.autovalidate, isTrue);
+    expect(formField.autovalidateMode, equals(AutovalidateMode.always));
+
+    // When autovalidate is false
+    await tester.pumpWidget(builder(autovalidate: false));
+
+    formField = tester.widget(formFieldFinder);
+    expect(formField.autovalidate, isFalse);
+    expect(formField.autovalidateMode, equals(AutovalidateMode.disabled));
+  });
+
+  testWidgets('Form.autovalidate parameter is passed into class the property', (WidgetTester tester) async {
+    const ObjectKey widgetKey = ObjectKey('key');
+
+    Widget builder({@required bool autovalidate}) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: widgetKey,
+                  autovalidate: autovalidate,
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // When autovalidate is true
+    await tester.pumpWidget(builder(autovalidate: true));
+
+    final Finder formFinder = find.byKey(widgetKey);
+    Form formWidget = tester.widget(formFinder);
+    expect(formWidget.autovalidate, isTrue);
+    expect(formWidget.autovalidateMode, equals(AutovalidateMode.always));
+
+    // When autovalidate is false
+    await tester.pumpWidget(builder(autovalidate: false));
+
+    formWidget = tester.widget(formFinder);
+    expect(formWidget.autovalidate, isFalse);
+    expect(formWidget.autovalidateMode, equals(AutovalidateMode.disabled));
+  });
 }

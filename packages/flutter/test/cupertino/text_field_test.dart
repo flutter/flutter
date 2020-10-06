@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 
 import 'package:flutter/cupertino.dart';
@@ -26,7 +23,7 @@ class MockClipboard {
       case 'Clipboard.getData':
         return _clipboardData;
       case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments;
+        _clipboardData = methodCall.arguments! as Object;
         break;
     }
   }
@@ -41,23 +38,23 @@ class PathBoundsMatcher extends Matcher {
     this.bottomMatcher,
   }) : super();
 
-  final Matcher rectMatcher;
-  final Matcher topMatcher;
-  final Matcher leftMatcher;
-  final Matcher rightMatcher;
-  final Matcher bottomMatcher;
+  final Matcher? rectMatcher;
+  final Matcher? topMatcher;
+  final Matcher? leftMatcher;
+  final Matcher? rightMatcher;
+  final Matcher? bottomMatcher;
 
   @override
   bool matches(covariant Path item, Map<dynamic, dynamic> matchState) {
     final Rect bounds = item.getBounds();
 
-    final List<Matcher> matchers = <Matcher> [rectMatcher, topMatcher, leftMatcher, rightMatcher, bottomMatcher];
+    final List<Matcher?> matchers = <Matcher?> [rectMatcher, topMatcher, leftMatcher, rightMatcher, bottomMatcher];
     final List<dynamic> values = <dynamic> [bounds, bounds.top, bounds.left, bounds.right, bounds.bottom];
     final Map<Matcher, dynamic> failedMatcher = <Matcher, dynamic> {};
 
     for(int idx = 0; idx < matchers.length; idx++) {
       if (!(matchers[idx]?.matches(values[idx], matchState) != false)) {
-        failedMatcher[matchers[idx]] = values[idx];
+        failedMatcher[matchers[idx]!] = values[idx];
       }
     }
 
@@ -95,8 +92,8 @@ class PathPointsMatcher extends Matcher {
 
   @override
   bool matches(covariant Path item, Map<dynamic, dynamic> matchState) {
-    final Offset notIncluded = includes.firstWhere((Offset offset) => !item.contains(offset), orElse: () => null);
-    final Offset notExcluded = excludes.firstWhere(item.contains, orElse: () => null);
+    final Offset? notIncluded = includes.cast<Offset?>().firstWhere((Offset? offset) => !item.contains(offset!), orElse: () => null);
+    final Offset? notExcluded = excludes.cast<Offset?>().firstWhere((Offset? offset) => item.contains(offset!), orElse: () => null);
 
     matchState['notIncluded'] = notIncluded;
     matchState['notExcluded'] = notExcluded;
@@ -108,8 +105,8 @@ class PathPointsMatcher extends Matcher {
 
   @override
   Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    final Offset notIncluded = matchState['notIncluded'] as Offset;
-    final Offset notExcluded = matchState['notExcluded'] as Offset;
+    final Offset? notIncluded = matchState['notIncluded'] as Offset?;
+    final Offset? notExcluded = matchState['notExcluded'] as Offset?;
     final Description desc = super.describeMismatch(item, mismatchDescription, matchState, verbose);
 
     if ((notExcluded ?? notIncluded) != null) {
@@ -137,7 +134,7 @@ void main() {
     final RenderObject root = tester.renderObject(find.byType(EditableText));
     expect(root, isNotNull);
 
-    RenderEditable renderEditable;
+    RenderEditable? renderEditable;
     void recursiveFinder(RenderObject child) {
       if (child is RenderEditable) {
         renderEditable = child;
@@ -147,7 +144,7 @@ void main() {
     }
     root.visitChildren(recursiveFinder);
     expect(renderEditable, isNotNull);
-    return renderEditable;
+    return renderEditable!;
   }
 
   List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
@@ -345,7 +342,7 @@ void main() {
         BorderRadius.circular(5),
       );
       expect(
-        decoration.border.bottom.color.value,
+        decoration.border!.bottom.color.value,
         0x33000000,
       );
 
@@ -371,7 +368,7 @@ void main() {
         BorderRadius.circular(5),
       );
       expect(
-        decoration.border.bottom.color.value,
+        decoration.border!.bottom.color.value,
         0x33FFFFFF,
       );
     },
@@ -445,24 +442,24 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable.cursorColor!.alpha, 255);
 
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable.cursorColor!.alpha, 255);
 
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(renderEditable.cursorColor.alpha, 110);
+    expect(renderEditable.cursorColor!.alpha, 110);
 
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(renderEditable.cursorColor.alpha, 16);
+    expect(renderEditable.cursorColor!.alpha, 16);
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(renderEditable.cursorColor.alpha, 0);
+    expect(renderEditable.cursorColor!.alpha, 0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
@@ -529,7 +526,7 @@ void main() {
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile(
-        'text_field_cursor_test.cupertino_${describeEnum(debugDefaultTargetPlatformOverride).toLowerCase()}.1.png',
+        'text_field_cursor_test.cupertino_${describeEnum(debugDefaultTargetPlatformOverride!).toLowerCase()}.1.png',
       ),
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
@@ -600,7 +597,7 @@ void main() {
     );
 
     final Text placeholder = tester.widget(find.text('placeholder'));
-    expect(placeholder.style.color.value, CupertinoColors.placeholderText.darkColor.value);
+    expect(placeholder.style!.color!.value, CupertinoColors.placeholderText.darkColor.value);
   });
 
   testWidgets(
@@ -617,7 +614,7 @@ void main() {
       );
 
       final Text placeholder = tester.widget(find.text('placeholder'));
-      expect(placeholder.style.color.value, CupertinoColors.placeholderText.color.value);
+      expect(placeholder.style!.color!.value, CupertinoColors.placeholderText.color.value);
 
       await tester.enterText(find.byType(CupertinoTextField), 'input');
       await tester.pump();
@@ -647,8 +644,8 @@ void main() {
       );
 
       final Text placeholder = tester.widget(find.text('placeholder'));
-      expect(placeholder.style.color, const Color(0xAAFFFFFF));
-      expect(placeholder.style.fontWeight, FontWeight.w600);
+      expect(placeholder.style!.color, const Color(0xAAFFFFFF));
+      expect(placeholder.style!.fontWeight, FontWeight.w600);
 
       await tester.enterText(find.byType(CupertinoTextField), 'input');
       await tester.pump();
@@ -1286,10 +1283,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
 
     Text text = tester.widget<Text>(find.text('Paste'));
-    expect(text.style.color, CupertinoColors.white);
-    expect(text.style.fontSize, 14);
-    expect(text.style.letterSpacing, -0.15);
-    expect(text.style.fontWeight, FontWeight.w400);
+    expect(text.style!.color, CupertinoColors.white);
+    expect(text.style!.fontSize, 14);
+    expect(text.style!.letterSpacing, -0.15);
+    expect(text.style!.fontWeight, FontWeight.w400);
 
     // Change the theme.
     await tester.pumpWidget(
@@ -1318,10 +1315,10 @@ void main() {
 
     text = tester.widget<Text>(find.text('Paste'));
     // The toolbar buttons' text are still the same style.
-    expect(text.style.color, CupertinoColors.white);
-    expect(text.style.fontSize, 14);
-    expect(text.style.letterSpacing, -0.15);
-    expect(text.style.fontWeight, FontWeight.w400);
+    expect(text.style!.color, CupertinoColors.white);
+    expect(text.style!.fontSize, 14);
+    expect(text.style!.letterSpacing, -0.15);
+    expect(text.style!.fontWeight, FontWeight.w400);
   });
 
 
@@ -1989,7 +1986,7 @@ void main() {
     expect(lastCharEndpoint.length, 1);
     // Just testing the test and making sure that the last character is off
     // the right side of the screen.
-    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(1094.73486328125));
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(1094.73, epsilon: 0.01));
 
     final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
@@ -2042,14 +2039,14 @@ void main() {
 
     expect(lastCharEndpoint.length, 1);
     // The last character is now on screen.
-    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(786.73486328125));
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(786.73, epsilon: 0.01));
 
     final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 0), // First character's position.
     );
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-308.20499999821186));
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-308.20, epsilon: 0.01));
   });
 
   testWidgets(
@@ -2216,7 +2213,7 @@ void main() {
 
     final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
       textfieldStart + const Offset(150.0, 5.0),
@@ -2256,7 +2253,7 @@ void main() {
 
     final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-    const int pointerValue = 1;
+    final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
       textfieldStart + const Offset(150.0, 5.0),
@@ -2456,8 +2453,8 @@ void main() {
     await tester.pump();
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
-    expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
-    expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
+    expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
+    expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
   });
 
   testWidgets('Long press shows toolbar but not handles', (WidgetTester tester) async {
@@ -2480,8 +2477,8 @@ void main() {
     expect(controller.selection.isCollapsed, isTrue);
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
-    expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
-    expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+    expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
+    expect(editableText.selectionOverlay!.toolbarIsVisible, isTrue);
   });
 
   testWidgets(
@@ -2508,8 +2505,8 @@ void main() {
       await tester.pump();
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
-      expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
-      expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+      expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
+      expect(editableText.selectionOverlay!.toolbarIsVisible, isTrue);
     },
   );
 
@@ -2537,8 +2534,8 @@ void main() {
       await tester.pump();
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
-      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
-      expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+      expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay!.toolbarIsVisible, isTrue);
     },
   );
 
@@ -2569,8 +2566,8 @@ void main() {
       await tester.pump();
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
-      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
-      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
     },
   );
 
@@ -2606,8 +2603,8 @@ void main() {
       await gesture.up();
       await tester.pump();
 
-      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
-      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
 
       final Offset hPos = textOffsetToPosition(tester, 9); // Position of 'h'.
 
@@ -2621,8 +2618,8 @@ void main() {
       await gesture.up();
       await tester.pump();
 
-      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
-      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
     },
   );
 
@@ -2732,7 +2729,7 @@ void main() {
       ).decoration as BoxDecoration;
 
       expect(
-        decoration.border.bottom.color.value,
+        decoration.border!.bottom.color.value,
         0x33FFFFFF,
       );
 
@@ -2742,7 +2739,7 @@ void main() {
       expect(
         tester.renderObject<RenderEditable>(
           find.byElementPredicate((Element element) => element.renderObject is RenderEditable)
-        ).text.style.color,
+        ).text!.style!.color,
         isSameColorAs(CupertinoColors.white),
       );
     },
@@ -3131,7 +3128,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // -1 because we want to reach the end of the line, not the start of a new line.
-      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection.baseOffset - 1);
+      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection!.baseOffset - 1);
 
       expect(
         find.byType(CupertinoTextSelectionToolbar),
@@ -3191,7 +3188,7 @@ void main() {
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
 
-      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection.baseOffset);
+      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection!.baseOffset);
 
       expect(
         find.byType(CupertinoTextSelectionToolbar),
@@ -3217,8 +3214,8 @@ void main() {
         ),
       );
 
-      tester.binding.window.physicalSizeTestValue = null;
-      tester.binding.window.devicePixelRatioTestValue = null;
+      tester.binding.window.clearPhysicalSizeTestValue();
+      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets('selecting multiple words works', (WidgetTester tester) async {
@@ -3288,8 +3285,8 @@ void main() {
         ),
       );
 
-      tester.binding.window.physicalSizeTestValue = null;
-      tester.binding.window.devicePixelRatioTestValue = null;
+      tester.binding.window.clearPhysicalSizeTestValue();
+      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets('selecting multiline works', (WidgetTester tester) async {
@@ -3363,8 +3360,8 @@ void main() {
         ),
       );
 
-      tester.binding.window.physicalSizeTestValue = null;
-      tester.binding.window.devicePixelRatioTestValue = null;
+      tester.binding.window.clearPhysicalSizeTestValue();
+      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     // This is a regression test for
@@ -3462,8 +3459,8 @@ void main() {
         expect(focusNode.hasFocus, true);
 
         // The EditableText is at the top.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(206.0, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(206.0, epsilon: .0001));
       });
 
       testWidgets('align center', (WidgetTester tester) async {
@@ -3510,8 +3507,8 @@ void main() {
         expect(focusNode.hasFocus, true);
 
         // The EditableText is at the center.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(291.5, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(291.5, epsilon: .0001));
       });
 
       testWidgets('align bottom', (WidgetTester tester) async {
@@ -3558,8 +3555,8 @@ void main() {
         expect(focusNode.hasFocus, true);
 
         // The EditableText is at the bottom.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(377.0, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(377.0, epsilon: .0001));
       });
 
       testWidgets('align as a double', (WidgetTester tester) async {
@@ -3606,8 +3603,8 @@ void main() {
         expect(focusNode.hasFocus, true);
 
         // The EditableText is near the bottom.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(355.625, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(355.625, epsilon: .0001));
       });
     });
 
@@ -3660,8 +3657,8 @@ void main() {
         expect(focusNode.hasFocus, true);
 
         // The EditableText is at the center. Same as without prefix.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(291.5, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(291.5, epsilon: .0001));
       });
 
       testWidgets('align top', (WidgetTester tester) async {
@@ -3714,8 +3711,8 @@ void main() {
 
         // The prefix is at the top, and the EditableText is centered within its
         // height.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(241.5, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(241.5, epsilon: .0001));
       });
 
       testWidgets('align bottom', (WidgetTester tester) async {
@@ -3768,8 +3765,8 @@ void main() {
 
         // The prefix is at the bottom, and the EditableText is centered within
         // its height.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(341.5, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(341.5, epsilon: .0001));
       });
 
       testWidgets('align as a double', (WidgetTester tester) async {
@@ -3821,8 +3818,8 @@ void main() {
         expect(focusNode.hasFocus, true);
 
         // The EditableText is near the bottom.
-        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, closeTo(size.height, .0001));
-        expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(329.0, .0001));
+        expect(tester.getTopLeft(find.byType(CupertinoTextField)).dy, moreOrLessEquals(size.height, epsilon: .0001));
+        expect(tester.getTopLeft(find.byType(EditableText)).dy, moreOrLessEquals(329.0, epsilon: .0001));
       });
     });
 
