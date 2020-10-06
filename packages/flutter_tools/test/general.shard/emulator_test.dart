@@ -84,6 +84,28 @@ void main() {
         returnsNormally);
     });
 
+    testUsingContext('getEmulators with no Android SDK', () async {
+      // Test that EmulatorManager.getEmulators() doesn't throw when there's no Android SDK.
+      final EmulatorManager emulatorManager = EmulatorManager(
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['emulator', '-list-avds'],
+            stdout: 'existing-avd-1',
+          ),
+        ]),
+        androidSdk: null,
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: null,
+          featureFlags: TestFeatureFlags(),
+        ),
+      );
+
+      await expectLater(() async => await emulatorManager.getAllAvailableEmulators(),
+        returnsNormally);
+    });
+
     testWithoutContext('getEmulatorsById', () async {
       final TestEmulatorManager testEmulatorManager = TestEmulatorManager(emulators);
 

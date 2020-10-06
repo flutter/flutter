@@ -9,6 +9,7 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/doctor.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:path/path.dart' as path; // ignore: package_path_import
 
@@ -412,4 +413,16 @@ class ConfiguredFileSystem extends ForwardingFileSystem {
   Directory directory(dynamic path) {
     return (entities[path] as Directory) ?? super.directory(path);
   }
+}
+
+/// Matches a doctor validation result.
+Matcher matchDoctorValidation({
+  ValidationType validationType,
+  String statusInfo,
+  dynamic messages
+}) {
+  return const test_package.TypeMatcher<ValidationResult>()
+    .having((ValidationResult result) => result.type, 'type', validationType)
+    .having((ValidationResult result) => result.statusInfo, 'statusInfo', statusInfo)
+    .having((ValidationResult result) => result.messages, 'messages', messages);
 }
