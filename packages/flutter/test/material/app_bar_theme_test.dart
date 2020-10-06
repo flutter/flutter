@@ -246,7 +246,7 @@ void main() {
     expect(appBar.shadowColor, Colors.yellow);
   });
 
-  testWidgets('AppBar uses AppBar.titleSpacing', (WidgetTester tester) async {
+  testWidgets('AppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
@@ -277,7 +277,7 @@ void main() {
     expect(navToolBar.middleSpacing, 40);
   });
 
-  testWidgets('SliverAppBar uses AppBar.titleSpacing', (WidgetTester tester) async {
+  testWidgets('SliverAppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
@@ -285,13 +285,69 @@ void main() {
         slivers: <Widget>[
           SliverAppBar(
             title: Text('Title'),
-          )
+          ),
         ],
-      )
+      ),
     ));
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolBar.middleSpacing, kTitleSpacing);
+  });
+
+  testWidgets('SliverAppBar.titleSpacing takes priority over AppBarTheme.titleSpacing ', (WidgetTester tester) async {
+    const double kTitleSpacing = 10;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      home: const CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: Text('Title'),
+            titleSpacing: 40,
+          ),
+        ],
+      ),
+    ));
+
+    final NavigationToolbar navToolbar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolbar.middleSpacing, 40);
+  });
+
+  testWidgets('Default AppBarTheme debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const AppBarTheme().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('AppBarTheme implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const AppBarTheme(
+      brightness: Brightness.dark,
+      color: Color(0xff000001),
+      elevation: 8,
+      shadowColor: Color(0xff000002),
+      centerTitle: true,
+      titleSpacing: 40,
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[
+      'brightness: Brightness.dark',
+      'color: Color(0xff000001)',
+      'elevation: 8.0',
+      'shadowColor: Color(0xff000002)',
+      'centerTitle: true',
+      'titleSpacing: 40.0',
+    ]);
   });
 }
 

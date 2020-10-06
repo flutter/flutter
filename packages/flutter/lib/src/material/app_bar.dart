@@ -428,7 +428,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [title] to take all the space available, set this value to 0.0.
   ///
   /// Defaults to [NavigationToolbar.kMiddleSpacing].
-  final double titleSpacing;
+  final double? titleSpacing;
 
   /// How opaque the toolbar part of the app bar is.
   ///
@@ -852,7 +852,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool primary;
   final bool? centerTitle;
   final bool excludeHeaderSemantics;
-  final double titleSpacing;
+  final double? titleSpacing;
   final double? expandedHeight;
   final double collapsedHeight;
   final double topPadding;
@@ -1262,7 +1262,7 @@ class SliverAppBar extends StatefulWidget {
   /// [title] to take all the space available, set this value to 0.0.
   ///
   /// Defaults to [NavigationToolbar.kMiddleSpacing].
-  final double titleSpacing;
+  final double? titleSpacing;
 
   /// Defines the height of the app bar when it is collapsed.
   ///

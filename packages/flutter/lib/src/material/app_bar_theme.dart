@@ -85,7 +85,7 @@ class AppBarTheme with Diagnosticable {
   /// Default value for [AppBar.titleSpacing].
   ///
   /// If null, [AppBar] uses default value of [NavigationToolbar.kMiddleSpacing].
-  final double titleSpacing;
+  final double? titleSpacing;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
