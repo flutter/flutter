@@ -1544,6 +1544,12 @@ class Navigator extends StatefulWidget {
   ///
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
+  ///  * [RestorationMixin], which contains a runnable code sample showcasing
+  ///    state restoration in Flutter.
+  ///  * [Navigator], which explains under the heading "state restoration"
+  ///    how and under what conditions the navigator restores its state.
+  ///  * [Navigator.restorablePush], which includes an example showcasing how
+  ///    to push a restorable route unto the navigator.
   /// {@endtemplate}
   final String? restorationScopeId;
 
