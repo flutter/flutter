@@ -1670,7 +1670,7 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
 }
 
 // Return a Widget for the given Exception
-Widget _createErrorWidget(dynamic exception, StackTrace stackTrace) {
+Widget _createErrorWidget(Object exception, StackTrace stackTrace) {
   final FlutterErrorDetails details = FlutterErrorDetails(
     exception: exception,
     stack: stackTrace,
