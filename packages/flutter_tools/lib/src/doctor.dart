@@ -26,7 +26,6 @@ import 'intellij/intellij.dart';
 import 'ios/plist_parser.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
-import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
@@ -86,7 +85,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (androidWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
       if (globals.iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode, userMessages: userMessages), cocoapodsValidator]),
+        GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode, userMessages: userMessages), globals.cocoapodsValidator]),
       if (webWorkflow.appliesToHostPlatform)
         ChromeValidator(
           chromiumLauncher: ChromiumLauncher(
