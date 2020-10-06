@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -27,7 +25,7 @@ class ImageIcon extends StatelessWidget {
   /// The [size] and [color] default to the value given by the current [IconTheme].
   const ImageIcon(
     this.image, {
-    Key key,
+    Key? key,
     this.size,
     this.color,
     this.semanticLabel,
@@ -37,7 +35,7 @@ class ImageIcon extends StatelessWidget {
   ///
   /// The icon can be null, in which case the widget will render as an empty
   /// space of the specified [size].
-  final ImageProvider image;
+  final ImageProvider? image;
 
   /// The size of the icon in logical pixels.
   ///
@@ -46,7 +44,7 @@ class ImageIcon extends StatelessWidget {
   /// Defaults to the current [IconTheme] size, if any. If there is no
   /// [IconTheme], or it does not specify an explicit size, then it defaults to
   /// 24.0.
-  final double size;
+  final double? size;
 
   /// The color to use when drawing the icon.
   ///
@@ -55,7 +53,7 @@ class ImageIcon extends StatelessWidget {
   ///
   /// The image will additionally be adjusted by the opacity of the current
   /// [IconTheme], if any.
-  final Color color;
+  final Color? color;
 
   /// Semantic label for the icon.
   ///
@@ -64,12 +62,12 @@ class ImageIcon extends StatelessWidget {
   ///
   ///  * [SemanticsProperties.label], which is set to [semanticLabel] in the
   ///    underlying	 [Semantics] widget.
-  final String semanticLabel;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
-    final double iconSize = size ?? iconTheme.size;
+    final double? iconSize = size ?? iconTheme.size;
 
     if (image == null)
       return Semantics(
@@ -77,8 +75,8 @@ class ImageIcon extends StatelessWidget {
         child: SizedBox(width: iconSize, height: iconSize),
       );
 
-    final double iconOpacity = iconTheme.opacity;
-    Color iconColor = color ?? iconTheme.color;
+    final double? iconOpacity = iconTheme.opacity;
+    Color iconColor = color ?? iconTheme.color!;
 
     if (iconOpacity != null && iconOpacity != 1.0)
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
@@ -86,7 +84,7 @@ class ImageIcon extends StatelessWidget {
     return Semantics(
       label: semanticLabel,
       child: Image(
-        image: image,
+        image: image!,
         width: iconSize,
         height: iconSize,
         color: iconColor,

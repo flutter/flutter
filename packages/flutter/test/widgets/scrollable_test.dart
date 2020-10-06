@@ -290,11 +290,10 @@ void main() {
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
-    final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
     expect(getScrollOffset(tester), 20.0);
     // Pointer signals should not cause overscroll.
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)), result);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)));
     expect(getScrollOffset(tester), 0.0);
   });
 
@@ -308,11 +307,10 @@ void main() {
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
-    final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
     expect(getScrollOffset(tester, last: true), 20.0);
     // Pointer signals should not cause overscroll.
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)), result);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)));
     expect(getScrollOffset(tester, last: true), 0.0);
   });
 
@@ -322,8 +320,7 @@ void main() {
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
-    final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
     expect(getScrollOffset(tester), 0.0);
   });
 
@@ -334,8 +331,7 @@ void main() {
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
-    final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)), result);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)));
 
     expect(getScrollOffset(tester), 20.0);
   });
@@ -837,6 +833,89 @@ void main() {
 
     expect(expensiveWidgets, 0);
     expect(cheapWidgets, 58);
+  });
+
+  testWidgets('ensureVisible does not move PageViews', (WidgetTester tester) async {
+    final PageController controller = PageController();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          children: List<ListView>.generate(
+            3,
+            (int pageIndex) {
+              return ListView(
+                key: Key('list_$pageIndex'),
+                children: List<Widget>.generate(
+                  100,
+                  (int listIndex) {
+                    return Row(
+                      children: <Widget>[
+                        Container(
+                          key: Key('${pageIndex}_${listIndex}_0'),
+                          color: Colors.red,
+                          width: 200,
+                          height: 10,
+                        ),
+                        Container(
+                          key: Key('${pageIndex}_${listIndex}_1'),
+                          color: Colors.blue,
+                          width: 200,
+                          height: 10,
+                        ),
+                        Container(
+                          key: Key('${pageIndex}_${listIndex}_2'),
+                          color: Colors.green,
+                          width: 200,
+                          height: 10,
+                        ),
+                      ]
+                    );
+                  }
+                ),
+              );
+            }
+          )
+        ),
+      ),
+    );
+
+    final Finder targetMidRightPage0 = find.byKey(const Key('0_25_2'));
+    final Finder targetMidRightPage1 = find.byKey(const Key('1_25_2'));
+    final Finder targetMidLeftPage1 = find.byKey(const Key('1_25_0'));
+
+    expect(find.byKey(const Key('list_0')), findsOneWidget);
+    expect(find.byKey(const Key('list_1')), findsNothing);
+    expect(targetMidRightPage0, findsOneWidget);
+    expect(targetMidRightPage1, findsNothing);
+    expect(targetMidLeftPage1, findsNothing);
+
+    await tester.ensureVisible(targetMidRightPage0);
+    await tester.pumpAndSettle();
+    expect(targetMidRightPage0, findsOneWidget);
+    expect(targetMidRightPage1, findsNothing);
+    expect(targetMidLeftPage1, findsNothing);
+
+    controller.jumpToPage(1);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('list_0')), findsNothing);
+    expect(find.byKey(const Key('list_1')), findsOneWidget);
+    await tester.ensureVisible(targetMidRightPage1);
+    await tester.pumpAndSettle();
+
+    expect(targetMidRightPage0, findsNothing);
+    expect(targetMidRightPage1, findsOneWidget);
+    expect(targetMidLeftPage1, findsOneWidget);
+
+    await tester.ensureVisible(targetMidLeftPage1);
+    await tester.pumpAndSettle();
+
+    expect(targetMidRightPage0, findsNothing);
+    expect(targetMidRightPage1, findsOneWidget);
+    expect(targetMidLeftPage1, findsOneWidget);
   });
 }
 

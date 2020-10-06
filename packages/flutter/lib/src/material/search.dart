@@ -274,7 +274,7 @@ abstract class SearchDelegate<T> {
   /// If this value is set to null, the value of the ambient [Theme]'s
   /// [InputDecorationTheme.hintStyle] will be used instead.
   final TextStyle? searchFieldStyle;
-
+  
   /// The [InputDecorationTheme] for the search field, use
   /// this if you just want to customize the [TextField]
   ///

@@ -97,6 +97,25 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 ///  * [RestorationMixin], which uses [RestorationBucket]s behind the scenes
 ///    to make [State] objects of [StatefulWidget]s restorable.
 class RestorationManager extends ChangeNotifier {
+  /// Construct the restoration manager and set up the communications channels
+  /// with the engine to get restoration messages (by calling [initChannels]).
+  RestorationManager() {
+    initChannels();
+  }
+
+  /// Sets up the method call handler for [SystemChannels.restoration].
+  ///
+  /// This is called by the constructor to configure the communications channel
+  /// with the Flutter engine to get restoration messages.
+  ///
+  /// Subclasses (especially in tests) can override this to avoid setting up
+  /// that communications channel, or to set it up differently, as necessary.
+  @protected
+  void initChannels() {
+    assert(!SystemChannels.restoration.checkMethodCallHandler(_methodHandler));
+    SystemChannels.restoration.setMethodCallHandler(_methodHandler);
+  }
+
   /// The root of the [RestorationBucket] hierarchy containing the restoration
   /// data.
   ///
@@ -128,9 +147,6 @@ class RestorationManager extends ChangeNotifier {
   ///  * [RootRestorationScope], which makes the root bucket available in the
   ///    [Widget] tree.
   Future<RestorationBucket?> get rootBucket {
-    if (!SystemChannels.restoration.checkMethodCallHandler(_methodHandler)) {
-      SystemChannels.restoration.setMethodCallHandler(_methodHandler);
-    }
     if (_rootBucketIsValid) {
       return SynchronousFuture<RestorationBucket?>(_rootBucket);
     }

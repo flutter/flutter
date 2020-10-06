@@ -18,6 +18,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       'build',
       'apk',
       '--analyze-size',
@@ -42,6 +43,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+       ...getLocalEngineArguments(),
       'build',
       'ios',
       '--analyze-size',
@@ -65,6 +67,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+       ...getLocalEngineArguments(),
       'build',
       'apk',
       '--analyze-size',
@@ -75,6 +78,23 @@ void main() {
     print(result.stdout);
     print(result.stderr);
     expect(result.stderr.toString(), contains('--analyze-size can only be used on release builds'));
+
+    expect(result.exitCode, 1);
+  });
+
+  testWithoutContext('--analyze-size is not supported in combination with --split-debug-info', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+       ...getLocalEngineArguments(),
+      'build',
+      'apk',
+      '--analyze-size',
+      '--target-platform=android-arm64',
+      '--split-debug-info=infos'
+    ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
+
+    expect(result.stderr.toString(), contains('--analyze-size cannot be combined with --split-debug-info'));
 
     expect(result.exitCode, 1);
   });

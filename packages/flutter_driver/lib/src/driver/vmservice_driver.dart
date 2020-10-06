@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -12,17 +14,17 @@ import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:vm_service_client/vm_service_client.dart';
-import 'package:webdriver/async_io.dart' as async_io;
 import 'package:web_socket_channel/io.dart';
+import 'package:webdriver/async_io.dart' as async_io;
 
 import '../../flutter_driver.dart';
 import '../common/error.dart';
 import '../common/frame_sync.dart';
-import '../common/fuchsia_compat.dart';
 import '../common/health.dart';
 import '../common/message.dart';
 import 'common.dart';
 import 'driver.dart';
+import 'fuchsia_compat.dart';
 import 'timeline.dart';
 
 /// An implementation of the Flutter Driver over the vmservice protocol.
@@ -131,8 +133,22 @@ class VMServiceFlutterDriver extends FlutterDriver {
     // Attempts to resume the isolate, but does not crash if it fails because
     // the isolate is already resumed. There could be a race with other tools,
     // such as a debugger, any of which could have resumed the isolate.
-    Future<dynamic> resumeLeniently() {
+    Future<dynamic> resumeLeniently() async {
       _log('Attempting to resume isolate');
+      // Let subsequent isolates start automatically.
+      try {
+        final Map<String, dynamic> result =
+            await connection.peer.sendRequest('setFlag', <String, String>{
+          'name': 'pause_isolates_on_start',
+          'value': 'false',
+        }) as Map<String, dynamic>;
+        if (result == null || result['type'] != 'Success') {
+          _log('setFlag failure: $result');
+        }
+      } catch (e) {
+        _log('Failed to set pause_isolates_on_start=false, proceeding. Error: $e');
+      }
+
       return isolate.resume().catchError((dynamic e) {
         const int vmMustBePausedCode = 101;
         if (e is rpc.RpcException && e.code == vmMustBePausedCode) {

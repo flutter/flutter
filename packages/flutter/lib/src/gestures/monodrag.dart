@@ -24,15 +24,18 @@ enum _DragState {
 /// The velocity at which the pointer was moving when it stopped contacting
 /// the screen is available in the `details`.
 ///
-/// See [DragGestureRecognizer.onEnd].
+/// Used by [DragGestureRecognizer.onEnd].
 typedef GestureDragEndCallback = void Function(DragEndDetails details);
 
 /// Signature for when the pointer that previously triggered a
 /// [GestureDragDownCallback] did not complete.
 ///
-/// See [DragGestureRecognizer.onCancel].
+/// Used by [DragGestureRecognizer.onCancel].
 typedef GestureDragCancelCallback = void Function();
 
+/// Signature for a function that builds a [VelocityTracker].
+///
+/// Used by [DragGestureRecognizer.velocityTrackerBuilder].
 typedef GestureVelocityTrackerBuilder = VelocityTracker Function(PointerEvent event);
 
 /// Recognizes movement.
@@ -69,7 +72,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }) : assert(dragStartBehavior != null),
        super(debugOwner: debugOwner, kind: kind);
 
-  static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker(event.kind);
+  static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
   /// Configure the behavior of offsets sent to [onStart].
   ///
   /// If set to [DragStartBehavior.start], the [onStart] callback will be called

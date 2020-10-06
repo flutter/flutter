@@ -19,14 +19,7 @@ import 'package:shelf_packages_handler/shelf_packages_handler.dart';
 import 'package:shelf_static/shelf_static.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_api/src/backend/runtime.dart';
-import 'package:test_api/src/backend/suite_platform.dart';
-import 'package:test_core/src/runner/configuration.dart';
-import 'package:test_core/src/runner/environment.dart';
-import 'package:test_core/src/runner/platform.dart';
-import 'package:test_core/src/runner/plugin/platform_helpers.dart';
-import 'package:test_core/src/runner/runner_suite.dart';
-import 'package:test_core/src/runner/suite.dart';
+import 'package:test_core/src/platform.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
@@ -888,7 +881,7 @@ class TestGoldenComparator {
     final TestGoldenComparatorProcess process = await _processForTestFile(testUri);
     process.sendCommand(imageFile, goldenKey, updateGoldens);
 
-    final Map<String, dynamic> result = await process.getResponse().timeout(const Duration(seconds: 20));
+    final Map<String, dynamic> result = await process.getResponse();
 
     if (result == null) {
       return 'unknown error';

@@ -234,4 +234,83 @@ void main() {
       'timeToFrameworkInitMicros': 1,
     });
   });
+
+  testWithoutContext('downloadStartupTrace also downloads the timeline', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
+      ...vmServiceSetup,
+      FakeVmServiceRequest(
+        method: 'getVMTimeline',
+        jsonResponse: vm_service.Timeline(
+          timeExtentMicros: 4,
+          timeOriginMicros: 0,
+          traceEvents: <vm_service.TimelineEvent>[
+            vm_service.TimelineEvent.parse(<String, Object>{
+              'name': kFlutterEngineMainEnterEventName,
+              'ts': 0,
+            }),
+            vm_service.TimelineEvent.parse(<String, Object>{
+              'name': kFrameworkInitEventName,
+              'ts': 1,
+            }),
+            vm_service.TimelineEvent.parse(<String, Object>{
+              'name': kFirstFrameBuiltEventName,
+              'ts': 2,
+            }),
+            vm_service.TimelineEvent.parse(<String, Object>{
+              'name': kFirstFrameRasterizedEventName,
+              'ts': 3,
+            }),
+          ],
+        ).toJson(),
+      ),
+      const FakeVmServiceRequest(
+        method: 'setVMTimelineFlags',
+        args: <String, Object>{
+          'recordedStreams': <Object>[],
+        },
+      ),
+    ]);
+
+    // Validate that old tracing data is deleted.
+    final File timelineFile = fileSystem.currentDirectory.childFile('start_up_timeline.json')
+      ..writeAsStringSync('stale');
+
+    await downloadStartupTrace(fakeVmServiceHost.vmService,
+      output: fileSystem.currentDirectory,
+      logger: logger,
+    );
+
+    final Map<String, dynamic> expectedTimeline = <String, dynamic>{
+      'type': 'Timeline',
+      'traceEvents': <dynamic>[
+        <String, dynamic>{
+          'name': 'FlutterEngineMainEnter',
+          'ts': 0,
+          'type': 'TimelineEvent',
+        },
+        <String, dynamic>{
+          'name': 'Framework initialization',
+          'ts': 1,
+          'type': 'TimelineEvent',
+        },
+        <String, dynamic>{
+          'name': 'Widgets built first useful frame',
+          'ts': 2,
+          'type': 'TimelineEvent',
+        },
+        <String, dynamic>{
+          'name': 'Rasterized first useful frame',
+          'ts': 3,
+          'type': 'TimelineEvent',
+        },
+      ],
+      'timeOriginMicros': 0,
+      'timeExtentMicros': 4,
+    };
+
+    expect(timelineFile, exists);
+    expect(json.decode(timelineFile.readAsStringSync()), expectedTimeline);
+  });
 }

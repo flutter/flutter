@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
@@ -540,7 +539,7 @@ abstract class BindingBase {
         return Future<void>.delayed(Duration.zero);
       });
 
-      dynamic caughtException;
+      Object? caughtException;
       StackTrace? caughtStack;
       late Map<String, dynamic> result;
       try {
