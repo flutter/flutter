@@ -237,4 +237,55 @@ void main() {
       '   callback returned null. Such callbacks must never return null.\n'
     ));
   });
+
+  testWidgets('Navigator of CupertinoTabView restores state', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        restorationScopeId: 'app',
+        home: CupertinoTabView(
+          restorationScopeId: 'tab',
+          builder: (BuildContext context) => CupertinoButton(
+            child: const Text('home'),
+            onPressed: () {
+              Navigator.of(context).restorablePushNamed('/2');
+            },
+          ),
+          routes: <String, WidgetBuilder>{
+            '/2' : (BuildContext context) => const Text('second route'),
+          }
+        ),
+      ),
+    );
+
+    expect(find.text('home'), findsOneWidget);
+    await tester.tap(find.text('home'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('home'), findsNothing);
+    expect(find.text('second route'), findsOneWidget);
+
+    final TestRestorationData data = await tester.getRestorationData();
+
+    await tester.restartAndRestore();
+
+    expect(find.text('home'), findsNothing);
+    expect(find.text('second route'), findsOneWidget);
+
+    Navigator.of(tester.element(find.text('second route'))).pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('home'), findsOneWidget);
+    expect(find.text('second route'), findsNothing);
+
+    await tester.restoreFrom(data);
+
+    expect(find.text('home'), findsNothing);
+    expect(find.text('second route'), findsOneWidget);
+
+    Navigator.of(tester.element(find.text('second route'))).pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('home'), findsOneWidget);
+    expect(find.text('second route'), findsNothing);
+  });
 }
