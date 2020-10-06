@@ -168,6 +168,12 @@ class ChromiumLauncher {
     }
 
     final String chromeExecutable = _browserFinder(_platform, _fileSystem);
+
+    if (_logger.isVerbose) {
+      final ProcessResult versionResult = await _processManager.run(<String>[chromeExecutable, '--version']);
+      _logger.printTrace('Using ${versionResult.stdout}');
+    }
+
     final Directory userDataDir = _fileSystem.systemTempDirectory
       .createTempSync('flutter_tools_chrome_device.');
 
