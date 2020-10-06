@@ -949,10 +949,10 @@ class EditableText extends StatefulWidget {
   /// ## Handling emojis and other complex characters
   /// {@template flutter.widgets.editableText.complexCharacters}
   /// It's important to always use
-  /// [characters](https://pub.dev/packages/characters) when dealing with length
-  /// or indices in user input text. This will ensure that extended grapheme
-  /// clusters and surrogate pairs are treated as single characters, as they
-  /// appear to the user.
+  /// [characters](https://pub.dev/packages/characters) when dealing with user
+  /// input text that may contain complex characters. This will ensure that
+  /// extended grapheme clusters and surrogate pairs are treated as single
+  /// characters, as they appear to the user.
   ///
   /// For example, when finding the length of some user input, use
   /// `string.characters.length`. Do NOT use `string.length` or even
