@@ -250,7 +250,6 @@ void PlatformView::OnScenicEvent(
             }
             break;
           }
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
           case fuchsia::ui::gfx::Event::Tag::kViewConnected:
             OnChildViewConnected(event.gfx().view_connected().view_holder_id);
             break;
@@ -263,7 +262,6 @@ void PlatformView::OnScenicEvent(
                 event.gfx().view_state_changed().view_holder_id,
                 event.gfx().view_state_changed().state.is_rendering);
             break;
-#endif
           case fuchsia::ui::gfx::Event::Tag::Invalid:
             FML_DCHECK(false) << "Flutter PlatformView::OnScenicEvent: Got "
                                  "an invalid GFX event.";
@@ -321,26 +319,55 @@ void PlatformView::OnScenicEvent(
   }
 }
 
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
 void PlatformView::OnChildViewConnected(scenic::ResourceId view_holder_id) {
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
   task_runners_.GetUITaskRunner()->PostTask([view_holder_id]() {
     flutter::SceneHost::OnViewConnected(view_holder_id);
   });
+#endif  // LEGACY_FUCHSIA_EMBEDDER
+  std::string call = "{\"method\":\"View.viewConnected\",\"args\":null}";
+
+  fml::RefPtr<flutter::PlatformMessage> message =
+      fml::MakeRefCounted<flutter::PlatformMessage>(
+          "flutter/platform_views",
+          std::vector<uint8_t>(call.begin(), call.end()), nullptr);
+  DispatchPlatformMessage(message);
 }
 
 void PlatformView::OnChildViewDisconnected(scenic::ResourceId view_holder_id) {
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
   task_runners_.GetUITaskRunner()->PostTask([view_holder_id]() {
     flutter::SceneHost::OnViewDisconnected(view_holder_id);
   });
+#endif  // LEGACY_FUCHSIA_EMBEDDER
+  std::string call = "{\"method\":\"View.viewDisconnected\",\"args\":null}";
+
+  fml::RefPtr<flutter::PlatformMessage> message =
+      fml::MakeRefCounted<flutter::PlatformMessage>(
+          "flutter/platform_views",
+          std::vector<uint8_t>(call.begin(), call.end()), nullptr);
+  DispatchPlatformMessage(message);
 }
 
 void PlatformView::OnChildViewStateChanged(scenic::ResourceId view_holder_id,
                                            bool state) {
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
   task_runners_.GetUITaskRunner()->PostTask([view_holder_id, state]() {
     flutter::SceneHost::OnViewStateChanged(view_holder_id, state);
   });
+#endif  // LEGACY_FUCHSIA_EMBEDDER
+  std::ostringstream out;
+  std::string str_state = state ? "true" : "false";
+  out << "{\"method\":\"View.viewStateChanged\",\"args\":{\"state\":"
+      << str_state << "}}";
+  auto call = out.str();
+
+  fml::RefPtr<flutter::PlatformMessage> message =
+      fml::MakeRefCounted<flutter::PlatformMessage>(
+          "flutter/platform_views",
+          std::vector<uint8_t>(call.begin(), call.end()), nullptr);
+  DispatchPlatformMessage(message);
 }
-#endif
 
 static flutter::PointerData::Change GetChangeFromPointerEventPhase(
     fuchsia::ui::input::PointerEventPhase phase) {

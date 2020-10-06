@@ -85,7 +85,9 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
       const flutter::ViewportMetrics& metrics) {}
   // |flutter::PlatformView::Delegate|
   void OnPlatformViewDispatchPlatformMessage(
-      fml::RefPtr<flutter::PlatformMessage> message) {}
+      fml::RefPtr<flutter::PlatformMessage> message) {
+    message_ = std::move(message);
+  }
   // |flutter::PlatformView::Delegate|
   void OnPlatformViewDispatchPointerDataPacket(
       std::unique_ptr<flutter::PointerDataPacket> packet) {}
@@ -119,11 +121,13 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
   bool SemanticsEnabled() const { return semantics_enabled_; }
   int32_t SemanticsFeatures() const { return semantics_features_; }
   flutter::Surface* surface() const { return surface_.get(); }
+  fml::RefPtr<flutter::PlatformMessage>& message() { return message_; }
 
  private:
   std::unique_ptr<flutter::Surface> surface_;
   bool semantics_enabled_ = false;
   int32_t semantics_features_ = 0;
+  fml::RefPtr<flutter::PlatformMessage> message_;
 };
 
 class MockFocuser : public fuchsia::ui::views::Focuser {
@@ -637,6 +641,91 @@ TEST_F(PlatformViewTests, RequestFocusFailTest) {
              fuchsia::ui::views::Error::DENIED)
       << "]";
   EXPECT_EQ(out.str(), result);
+}
+
+// Test to make sure that PlatformView forward messages on the
+// "flutter/platform_views" channel, for viewConnected/viewDisconnected and
+// viewStateChanged events.
+TEST_F(PlatformViewTests, ViewEventsTest) {
+  MockPlatformViewDelegate delegate;
+
+  fuchsia::ui::scenic::SessionListenerPtr session_listener;
+  std::vector<fuchsia::ui::scenic::Event> events;
+  sys::testing::ServiceDirectoryProvider services_provider(dispatcher());
+
+  flutter::TaskRunners task_runners = flutter::TaskRunners(
+      "test_runners", nullptr, nullptr,
+      flutter_runner::CreateFMLTaskRunner(async_get_default_dispatcher()),
+      nullptr);
+
+  auto platform_view = flutter_runner::PlatformView(
+      delegate,                               // delegate
+      "test_platform_view",                   // label
+      fuchsia::ui::views::ViewRef{},          // view_ref
+      std::move(task_runners),                // task_runners
+      services_provider.service_directory(),  // runner_services
+      nullptr,  // parent_environment_service_provider_handle
+      session_listener.NewRequest(),  // session_listener_request
+      nullptr,                        // focuser,
+      nullptr,                        // on_session_listener_error_callback
+      nullptr,                        // on_enable_wireframe_callback,
+      nullptr,                        // on_create_view_callback,
+      nullptr,                        // on_update_view_callback,
+      nullptr,                        // on_destroy_view_callback,
+      nullptr,                        // on_create_surface_callback,
+      fml::TimeDelta::Zero(),         // vsync_offset
+      ZX_HANDLE_INVALID               // vsync_event_handle
+  );
+  RunLoopUntilIdle();
+
+  // ViewConnected event.
+  events.clear();
+  events.emplace_back(fuchsia::ui::scenic::Event::WithGfx(
+      fuchsia::ui::gfx::Event::WithViewConnected(
+          fuchsia::ui::gfx::ViewConnectedEvent{
+              .view_holder_id = 0,
+          })));
+  session_listener->OnScenicEvent(std::move(events));
+  RunLoopUntilIdle();
+
+  auto data = delegate.message()->data();
+  auto call = std::string(data.begin(), data.end());
+  std::string expected = "{\"method\":\"View.viewConnected\",\"args\":null}";
+  EXPECT_EQ(expected, call);
+
+  // ViewDisconnected event.
+  events.clear();
+  events.emplace_back(fuchsia::ui::scenic::Event::WithGfx(
+      fuchsia::ui::gfx::Event::WithViewDisconnected(
+          fuchsia::ui::gfx::ViewDisconnectedEvent{
+              .view_holder_id = 0,
+          })));
+  session_listener->OnScenicEvent(std::move(events));
+  RunLoopUntilIdle();
+
+  data = delegate.message()->data();
+  call = std::string(data.begin(), data.end());
+  expected = "{\"method\":\"View.viewDisconnected\",\"args\":null}";
+  EXPECT_EQ(expected, call);
+
+  // ViewStateChanged event.
+  events.clear();
+  events.emplace_back(fuchsia::ui::scenic::Event::WithGfx(
+      fuchsia::ui::gfx::Event::WithViewStateChanged(
+          fuchsia::ui::gfx::ViewStateChangedEvent{
+              .view_holder_id = 0,
+              .state =
+                  fuchsia::ui::gfx::ViewState{
+                      .is_rendering = true,
+                  },
+          })));
+  session_listener->OnScenicEvent(std::move(events));
+  RunLoopUntilIdle();
+
+  data = delegate.message()->data();
+  call = std::string(data.begin(), data.end());
+  expected = "{\"method\":\"View.viewStateChanged\",\"args\":{\"state\":true}}";
+  EXPECT_EQ(expected, call);
 }
 
 // Test to make sure that PlatformView correctly returns a Surface instance
