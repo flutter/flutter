@@ -2318,6 +2318,64 @@ void main() {
     await _testChildAnchorFeedbackPosition(tester: tester, left: 100.0, top: 100.0);
   });
 
+  testWidgets('Drag feedback is put on root overlay with [rootOverlay] flag', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+      final GlobalKey<NavigatorState> childNavigatorKey = GlobalKey<NavigatorState>();
+      // Create a [MaterialApp], with a nested [Navigator], which has the
+      // [Draggable].
+      await tester.pumpWidget(MaterialApp(
+        navigatorKey: rootNavigatorKey,
+        home: Column(
+          children: <Widget>[
+            Container(
+                height: 200.0,
+                child: Navigator(
+                    key: childNavigatorKey,
+                    onGenerateRoute: (RouteSettings settings) {
+                      if (settings.name == '/') {
+                        return MaterialPageRoute<void>(
+                          settings: settings,
+                          builder: (BuildContext context) => const Draggable<int>(
+                            data: 1,
+                            child: Text('Source'),
+                            feedback: Text('Dragging'),
+                            rootOverlay: true,
+                          ),
+                        );
+                      }
+                      throw UnsupportedError('Unsupported route: $settings');
+                    })),
+            DragTarget<int>(
+              builder:
+                  (BuildContext context, List<int> data, List<dynamic> rejects) {
+                return Container(
+                    height: 300.0, child: const Center(child: Text('Target 1')));
+              },
+            ),
+          ],
+        ),
+      ));
+
+      final Offset firstLocation = tester.getCenter(find.text('Source'));
+      final TestGesture gesture =
+          await tester.startGesture(firstLocation, pointer: 7);
+      await tester.pump();
+
+      final Offset secondLocation = tester.getCenter(find.text('Target 1'));
+      await gesture.moveTo(secondLocation);
+      await tester.pump();
+
+      // Expect that the feedback widget is a descendant of the root overlay,
+      // but not a descendant of the child overlay.
+      expect(
+          find.descendant(
+              of: find.byType(Overlay).first, matching: find.text('Dragging')),
+          findsOneWidget);
+      expect(
+          find.descendant(
+              of: find.byType(Overlay).last, matching: find.text('Dragging')),
+          findsNothing);
+    });
 
   testWidgets('Drag and drop can contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
