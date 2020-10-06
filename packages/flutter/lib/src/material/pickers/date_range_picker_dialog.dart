@@ -518,12 +518,9 @@ class _CalendarRangePickerDialog extends StatelessWidget {
           ),
           actions: <Widget>[
             if (orientation == Orientation.landscape) entryModeIcon,
-            ButtonTheme(
-              minWidth: 64,
-              child: TextButton(
-                onPressed: onConfirm,
-                child: Text(confirmText, style: saveButtonStyle),
-              ),
+            TextButton(
+              onPressed: onConfirm,
+              child: Text(confirmText, style: saveButtonStyle),
             ),
             const SizedBox(width: 8),
           ],
