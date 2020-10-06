@@ -323,7 +323,7 @@ void main() {
         home: CupertinoButton(
           onPressed: () { },
           child: Builder(builder: (BuildContext context) {
-            textStyle = DefaultTextStyle.of(context).style!;
+            textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
           }),
         ),
@@ -337,7 +337,7 @@ void main() {
         home: CupertinoButton.filled(
           onPressed: () { },
           child: Builder(builder: (BuildContext context) {
-            textStyle = DefaultTextStyle.of(context).style!;
+            textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
           }),
         ),
@@ -359,7 +359,7 @@ void main() {
         home: CupertinoButton(
           onPressed: () { },
           child: Builder(builder: (BuildContext context) {
-            textStyle = DefaultTextStyle.of(context).style!;
+            textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
           }),
         ),
@@ -373,7 +373,7 @@ void main() {
         home: CupertinoButton.filled(
           onPressed: () { },
           child: Builder(builder: (BuildContext context) {
-            textStyle = DefaultTextStyle.of(context).style!;
+            textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
           }),
         ),

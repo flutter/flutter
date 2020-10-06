@@ -3613,11 +3613,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         assert(previousOldPageRouteEntry != null);
         final List<_RouteEntry> pagelessRoutes = pageRouteToPagelessRoutes
           .putIfAbsent(
-            previousOldPageRouteEntry!,
+            previousOldPageRouteEntry,
             () => <_RouteEntry>[],
           );
         pagelessRoutes.add(potentialEntryToRemove);
-        if (previousOldPageRouteEntry.isWaitingForExitingDecision)
+        if (previousOldPageRouteEntry!.isWaitingForExitingDecision)
           potentialEntryToRemove.markNeedsExitingDecision();
         continue;
       }
@@ -3661,7 +3661,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         assert(previousOldPageRouteEntry != null);
         final List<_RouteEntry> pagelessRoutes = pageRouteToPagelessRoutes
           .putIfAbsent(
-          previousOldPageRouteEntry!,
+          previousOldPageRouteEntry,
             () => <_RouteEntry>[]
         );
         pagelessRoutes.add(oldEntry);

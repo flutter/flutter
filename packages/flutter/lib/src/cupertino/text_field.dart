@@ -705,10 +705,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     super.dispose();
   }
 
-  EditableTextState? get _editableText => editableTextKey.currentState;
+  EditableTextState get _editableText => editableTextKey.currentState!;
 
   void _requestKeyboard() {
-    _editableText?.requestKeyboard();
+    _editableText.requestKeyboard();
   }
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
@@ -732,7 +732,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     if (cause == SelectionChangedCause.longPress) {
-      _editableText?.bringIntoView(selection.base);
+      _editableText.bringIntoView(selection.base);
     }
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {

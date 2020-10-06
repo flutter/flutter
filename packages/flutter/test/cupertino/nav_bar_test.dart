@@ -1198,7 +1198,7 @@ class _ExpectStyles extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle style = DefaultTextStyle.of(context).style!;
+    final TextStyle style = DefaultTextStyle.of(context).style;
     expect(style.color, isSameColorAs(color));
     expect(style.fontFamily, '.SF Pro Text');
     expect(style.fontSize, 17.0);

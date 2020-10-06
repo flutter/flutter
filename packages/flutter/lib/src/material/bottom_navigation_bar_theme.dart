@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -50,78 +48,78 @@ class BottomNavigationBarThemeData with Diagnosticable {
   /// The color of the [BottomNavigationBar] itself.
   ///
   /// See [BottomNavigationBar.backgroundColor].
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// The z-coordinate of the [BottomNavigationBar].
   ///
   /// See [BottomNavigationBar.elevation].
-  final double elevation;
+  final double? elevation;
 
   /// The size, opacity, and color of the icon in the currently selected
   /// [BottomNavigationBarItem.icon].
   ///
   /// See [BottomNavigationBar.selectedIconTheme].
-  final IconThemeData selectedIconTheme;
+  final IconThemeData? selectedIconTheme;
 
   /// The size, opacity, and color of the icon in the currently unselected
   /// [BottomNavigationBarItem.icon]s.
   ///
   /// See [BottomNavigationBar.unselectedIconTheme].
-  final IconThemeData unselectedIconTheme;
+  final IconThemeData? unselectedIconTheme;
 
   /// The color of the selected [BottomNavigationBarItem.icon] and
   /// [BottomNavigationBarItem.title].
   ///
   /// See [BottomNavigationBar.selectedItemColor].
-  final Color selectedItemColor;
+  final Color? selectedItemColor;
 
   /// The color of the unselected [BottomNavigationBarItem.icon] and
   /// [BottomNavigationBarItem.title]s.
   ///
   /// See [BottomNavigationBar.unselectedItemColor].
-  final Color unselectedItemColor;
+  final Color? unselectedItemColor;
 
   /// The [TextStyle] of the [BottomNavigationBarItem] labels when they are
   /// selected.
   ///
   /// See [BottomNavigationBar.selectedLabelStyle].
-  final TextStyle selectedLabelStyle;
+  final TextStyle? selectedLabelStyle;
 
   /// The [TextStyle] of the [BottomNavigationBarItem] labels when they are not
   /// selected.
   ///
   /// See [BottomNavigationBar.unselectedLabelStyle].
-  final TextStyle unselectedLabelStyle;
+  final TextStyle? unselectedLabelStyle;
 
   /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
   ///
   /// See [BottomNavigationBar.showSelectedLabels].
-  final bool showSelectedLabels;
+  final bool? showSelectedLabels;
 
   /// Whether the labels are shown for the selected [BottomNavigationBarItem].
   ///
   /// See [BottomNavigationBar.showUnselectedLabels].
-  final bool showUnselectedLabels;
+  final bool? showUnselectedLabels;
 
   /// Defines the layout and behavior of a [BottomNavigationBar].
   ///
   /// See [BottomNavigationBar.type].
-  final BottomNavigationBarType type;
+  final BottomNavigationBarType? type;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   BottomNavigationBarThemeData copyWith({
-    Color backgroundColor,
-    double elevation,
-    IconThemeData selectedIconTheme,
-    IconThemeData unselectedIconTheme,
-    Color selectedItemColor,
-    Color unselectedItemColor,
-    TextStyle selectedLabelStyle,
-    TextStyle unselectedLabelStyle,
-    bool showSelectedLabels,
-    bool showUnselectedLabels,
-    BottomNavigationBarType type,
+    Color? backgroundColor,
+    double? elevation,
+    IconThemeData? selectedIconTheme,
+    IconThemeData? unselectedIconTheme,
+    Color? selectedItemColor,
+    Color? unselectedItemColor,
+    TextStyle? selectedLabelStyle,
+    TextStyle? unselectedLabelStyle,
+    bool? showSelectedLabels,
+    bool? showUnselectedLabels,
+    BottomNavigationBarType? type,
   }) {
     return BottomNavigationBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -143,7 +141,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BottomNavigationBarThemeData lerp(BottomNavigationBarThemeData a, BottomNavigationBarThemeData b, double t) {
+  static BottomNavigationBarThemeData lerp(BottomNavigationBarThemeData? a, BottomNavigationBarThemeData? b, double t) {
     assert(t != null);
     return BottomNavigationBarThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
@@ -235,9 +233,9 @@ class BottomNavigationBarTheme extends InheritedWidget {
   ///
   /// The [data] must not be null.
   const BottomNavigationBarTheme({
-    Key key,
-    @required this.data,
-    Widget child,
+    Key? key,
+    required this.data,
+    required Widget child,
   }) : assert(data != null), super(key: key, child: child);
 
   /// The properties used for all descendant [BottomNavigationBar] widgets.
@@ -254,8 +252,8 @@ class BottomNavigationBarTheme extends InheritedWidget {
   /// BottomNavigationBarThemeData theme = BottomNavigationBarTheme.of(context);
   /// ```
   static BottomNavigationBarThemeData of(BuildContext context) {
-    final BottomNavigationBarTheme bottomNavTheme = context.dependOnInheritedWidgetOfExactType<BottomNavigationBarTheme>();
-    return bottomNavTheme?.data ?? Theme.of(context).bottomNavigationBarTheme;
+    final BottomNavigationBarTheme? bottomNavTheme = context.dependOnInheritedWidgetOfExactType<BottomNavigationBarTheme>();
+    return bottomNavTheme?.data ?? Theme.of(context)!.bottomNavigationBarTheme;
   }
 
   @override
