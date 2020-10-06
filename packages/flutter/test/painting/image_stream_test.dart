@@ -2,15 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show timeDilation, SchedulerBinding;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 
 class FakeFrameInfo implements FrameInfo {
   const FakeFrameInfo(this._duration, this._image);
@@ -24,7 +21,7 @@ class FakeFrameInfo implements FrameInfo {
   @override
   Image get image => _image;
 
-  int get imageHandleCount => image.debugGetOpenHandleStackTraces().length;
+  int get imageHandleCount => image.debugGetOpenHandleStackTraces()!.length;
 
   FakeFrameInfo clone() {
     return FakeFrameInfo(
@@ -35,12 +32,11 @@ class FakeFrameInfo implements FrameInfo {
 }
 
 class MockCodec implements Codec {
+  @override
+  late int frameCount;
 
   @override
-  int frameCount;
-
-  @override
-  int repetitionCount;
+  late int repetitionCount;
 
   int numFramesAsked = 0;
 
@@ -67,7 +63,7 @@ class MockCodec implements Codec {
 }
 
 class FakeEventReportingImageStreamCompleter extends ImageStreamCompleter {
-  FakeEventReportingImageStreamCompleter({Stream<ImageChunkEvent> chunkEvents,}) {
+  FakeEventReportingImageStreamCompleter({Stream<ImageChunkEvent>? chunkEvents}) {
     if (chunkEvents != null) {
       chunkEvents.listen((ImageChunkEvent event) {
           reportImageChunkEvent(event);
@@ -78,8 +74,8 @@ class FakeEventReportingImageStreamCompleter extends ImageStreamCompleter {
 }
 
 void main() {
-  Image image20x10;
-  Image image200x100;
+  late Image image20x10;
+  late Image image200x100;
   setUp(() async {
     image20x10 = await createTestImage(width: 20, height: 10);
     image200x100 = await createTestImage(width: 200, height: 100);
@@ -602,7 +598,7 @@ void main() {
     );
 
     dynamic capturedException;
-    final ImageErrorListener errorListener = (dynamic exception, StackTrace stackTrace) {
+    final ImageErrorListener errorListener = (dynamic exception, StackTrace? stackTrace) {
       capturedException = exception;
     };
 
@@ -660,16 +656,16 @@ void main() {
   testWidgets('ImageStreamListener hashCode and equals', (WidgetTester tester) async {
     void handleImage(ImageInfo image, bool synchronousCall) { }
     void handleImageDifferently(ImageInfo image, bool synchronousCall) { }
-    void handleError(dynamic error, StackTrace stackTrace) { }
+    void handleError(dynamic error, StackTrace? stackTrace) { }
     void handleChunk(ImageChunkEvent event) { }
 
     void compare({
-      @required ImageListener onImage1,
-      @required ImageListener onImage2,
-      ImageChunkListener onChunk1,
-      ImageChunkListener onChunk2,
-      ImageErrorListener onError1,
-      ImageErrorListener onError2,
+      required ImageListener onImage1,
+      required ImageListener onImage2,
+      ImageChunkListener? onChunk1,
+      ImageChunkListener? onChunk2,
+      ImageErrorListener? onError1,
+      ImageErrorListener? onError2,
       bool areEqual = true,
     }) {
       final ImageStreamListener l1 = ImageStreamListener(onImage1, onChunk: onChunk1, onError: onError1);
@@ -690,7 +686,7 @@ void main() {
   });
 
   testWidgets('Keep alive handles do not drive frames or prevent last listener callbacks', (WidgetTester tester) async {
-    final Image image10x10 = await tester.runAsync(() => createTestImage(width: 10, height: 10));
+    final Image image10x10 = (await tester.runAsync(() => createTestImage(width: 10, height: 10)))!;
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
@@ -713,7 +709,7 @@ void main() {
     expect(lastListenerDropped, false);
     final ImageStreamCompleterHandle handle = imageStream.keepAlive();
     expect(lastListenerDropped, false);
-    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Only passive listeners');
+    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Only passive listeners');
 
     codecCompleter.complete(mockCodec);
     await tester.idle();
@@ -723,7 +719,7 @@ void main() {
     final FakeFrameInfo frame1 = FakeFrameInfo(Duration.zero, image20x10);
     mockCodec.completeNextFrame(frame1);
     await tester.idle();
-    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Only passive listeners');
+    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Only passive listeners');
     await tester.pump();
     expect(onImageCount, 0);
 
@@ -732,7 +728,7 @@ void main() {
     final FakeFrameInfo frame2 = FakeFrameInfo(Duration.zero, image10x10);
     mockCodec.completeNextFrame(frame2);
     await tester.idle();
-    expect(SchedulerBinding.instance.transientCallbackCount, 1);
+    expect(SchedulerBinding.instance!.transientCallbackCount, 1);
     await tester.pump();
 
     expect(onImageCount, 1);
@@ -742,16 +738,16 @@ void main() {
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle();
-    expect(SchedulerBinding.instance.transientCallbackCount, 1);
+    expect(SchedulerBinding.instance!.transientCallbackCount, 1);
     await tester.pump();
 
     expect(onImageCount, 1);
 
-    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Only passive listeners');
+    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Only passive listeners');
 
     mockCodec.completeNextFrame(frame2);
     await tester.idle();
-    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Only passive listeners');
+    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Only passive listeners');
     await tester.pump();
 
     expect(onImageCount, 1);
