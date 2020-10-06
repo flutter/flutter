@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
@@ -110,11 +109,4 @@ void main() {
     }));
     expect(await caughtError.future, true);
   });
-}
-
-class _TestAssetBundle extends CachingAssetBundle {
-  @override
-  Future<ByteData> load(String key) async {
-    throw 'foo';
-  }
 }
