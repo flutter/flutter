@@ -121,10 +121,10 @@ abstract class SearchDelegate<T> {
   SearchDelegate({
     this.searchFieldLabel,
     this.searchFieldStyle,
-    this.searchFieldDecoration,
+    this.searchFieldDecorationTheme,
     this.keyboardType,
     this.textInputAction = TextInputAction.search,
-  });
+  }) : assert(searchFieldStyle == null || searchFieldDecorationTheme == null);
 
   /// Suggestions shown in the body of the search page while the user types a
   /// query into the search field.
@@ -201,7 +201,7 @@ abstract class SearchDelegate<T> {
       primaryIconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
       primaryColorBrightness: Brightness.light,
       primaryTextTheme: theme.textTheme,
-      inputDecorationTheme: searchFieldDecoration ??
+      inputDecorationTheme: searchFieldDecorationTheme ??
           InputDecorationTheme(
             hintStyle: searchFieldStyle ?? theme.inputDecorationTheme.hintStyle,
             border: InputBorder.none,
@@ -250,8 +250,7 @@ abstract class SearchDelegate<T> {
   ///
   ///  * [showResults] to show the search results.
   void showSuggestions(BuildContext context) {
-    assert(_focusNode != null,
-        '_focusNode must be set by route before showSuggestions is called.');
+    assert(_focusNode != null, '_focusNode must be set by route before showSuggestions is called.');
     _focusNode.requestFocus();
     _currentBody = _SearchBody.suggestions;
   }
@@ -280,12 +279,12 @@ abstract class SearchDelegate<T> {
   /// [InputDecorationTheme.hintStyle] will be used instead.
   final TextStyle searchFieldStyle;
 
-  /// The [InputDecoration] for the search field, use
+  /// The [InputDecorationTheme] for the search field, use
   /// this if you just want to customize the [TextField]
   ///
   /// If this value is not null, [searchFieldStyle]
   /// will be ignored so this can be used.
-  final InputDecorationTheme searchFieldDecoration;
+  final InputDecorationTheme searchFieldDecorationTheme;
 
   /// The type of action button to use for the keyboard.
   ///
@@ -312,11 +311,9 @@ abstract class SearchDelegate<T> {
 
   final TextEditingController _queryTextController = TextEditingController();
 
-  final ProxyAnimation _proxyAnimation =
-      ProxyAnimation(kAlwaysDismissedAnimation);
+  final ProxyAnimation _proxyAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
 
-  final ValueNotifier<_SearchBody> _currentBodyNotifier =
-      ValueNotifier<_SearchBody>(null);
+  final ValueNotifier<_SearchBody> _currentBodyNotifier = ValueNotifier<_SearchBody>(null);
 
   _SearchBody get _currentBody => _currentBodyNotifier.value;
   set _currentBody(_SearchBody value) {
@@ -462,8 +459,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     if (widget.delegate != oldWidget.delegate) {
       oldWidget.delegate._queryTextController.removeListener(_onQueryChanged);
       widget.delegate._queryTextController.addListener(_onQueryChanged);
-      oldWidget.delegate._currentBodyNotifier
-          .removeListener(_onSearchBodyChanged);
+      oldWidget.delegate._currentBodyNotifier.removeListener(_onSearchBodyChanged);
       widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
       oldWidget.delegate._focusNode = null;
       widget.delegate._focusNode = focusNode;
@@ -471,8 +467,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   }
 
   void _onFocusChanged() {
-    if (focusNode.hasFocus &&
-        widget.delegate._currentBody != _SearchBody.suggestions) {
+    if (focusNode.hasFocus && widget.delegate._currentBody != _SearchBody.suggestions) {
       widget.delegate.showSuggestions(context);
     }
   }
@@ -493,8 +488,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
-    final String searchFieldLabel = widget.delegate.searchFieldLabel ??
-        MaterialLocalizations.of(context).searchFieldLabel;
+    final String searchFieldLabel = widget.delegate.searchFieldLabel ?? MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
     switch (widget.delegate._currentBody) {
       case _SearchBody.suggestions:
