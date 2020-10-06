@@ -70,6 +70,13 @@ class AndroidWorkflow implements Workflow {
     && _androidSdk.emulatorPath != null;
 }
 
+/// A validator that checks if the Android SDK and Java SDK are available and
+/// installed correctly.
+///
+/// Android development requires the Android SDK, and at least one Java SDK. While
+/// newer Java compilers can be used to compile the Java application code, the SDK
+/// tools themselves required JDK 1.8. This older JDK is normally bundled with
+/// Android Studio.
 class AndroidValidator extends DoctorValidator {
   AndroidValidator({
     @required AndroidSdk androidSdk,
@@ -244,6 +251,8 @@ class AndroidValidator extends DoctorValidator {
   }
 }
 
+/// A subvalidator that checks if the licenses within the detected Android
+/// SDK have been accepted.
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator() : super('Android license subvalidator',);
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -44,10 +42,10 @@ class ElevatedButtonThemeData with Diagnosticable {
   /// [ElevatedButton.defaultStyleOf].
   ///
   /// If [style] is null, then this theme doesn't override anything.
-  final ButtonStyle style;
+  final ButtonStyle? style;
 
   /// Linearly interpolate between two elevated button themes.
-  static ElevatedButtonThemeData lerp(ElevatedButtonThemeData a, ElevatedButtonThemeData b, double t) {
+  static ElevatedButtonThemeData? lerp(ElevatedButtonThemeData? a, ElevatedButtonThemeData? b, double t) {
     assert (t != null);
     if (a == null && b == null)
       return null;
@@ -93,9 +91,9 @@ class ElevatedButtonTheme extends InheritedTheme {
   ///
   /// The [data] parameter must not be null.
   const ElevatedButtonTheme({
-    Key key,
-    @required this.data,
-    Widget child,
+    Key? key,
+    required this.data,
+    required Widget child,
   }) : assert(data != null), super(key: key, child: child);
 
   /// The configuration of this theme.
@@ -112,13 +110,13 @@ class ElevatedButtonTheme extends InheritedTheme {
   /// ElevatedButtonTheme theme = ElevatedButtonTheme.of(context);
   /// ```
   static ElevatedButtonThemeData of(BuildContext context) {
-    final ElevatedButtonTheme buttonTheme = context.dependOnInheritedWidgetOfExactType<ElevatedButtonTheme>();
-    return buttonTheme?.data ?? Theme.of(context).elevatedButtonTheme;
+    final ElevatedButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<ElevatedButtonTheme>();
+    return buttonTheme?.data ?? Theme.of(context)!.elevatedButtonTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ElevatedButtonTheme ancestorTheme = context.findAncestorWidgetOfExactType<ElevatedButtonTheme>();
+    final ElevatedButtonTheme? ancestorTheme = context.findAncestorWidgetOfExactType<ElevatedButtonTheme>();
     return identical(this, ancestorTheme) ? child : ElevatedButtonTheme(data: data, child: child);
   }
 
