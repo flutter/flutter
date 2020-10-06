@@ -437,7 +437,7 @@ class SwitchListTile extends StatelessWidget {
   /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform].
   final ListTileControlAffinity controlAffinity;
 
-  /// {@macro flutter.widgets.Focus.autofocus}
+  /// {@macro flutter.material.ListTile.shape}
   final ShapeBorder? shape;
 
   @override
