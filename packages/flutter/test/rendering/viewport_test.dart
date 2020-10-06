@@ -1703,15 +1703,14 @@ void main() {
     final RenderViewport renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.right, offset: ViewportOffset.zero()
     );
-    FlutterError? error;
+    late FlutterError error;
     try {
       renderViewport.computeMinIntrinsicHeight(0);
     } on FlutterError catch (e) {
       error = e;
     }
-    expect(error, isNotNull);
     expect(
-      error!.toStringDeep(),
+      error.toStringDeep(),
       'FlutterError\n'
       '   RenderViewport does not support returning intrinsic dimensions.\n'
       '   Calculating the intrinsic dimensions would require instantiating\n'
@@ -1726,7 +1725,6 @@ void main() {
     final RenderShrinkWrappingViewport renderShrinkWrappingViewport = RenderShrinkWrappingViewport(
       crossAxisDirection: AxisDirection.right, offset: ViewportOffset.zero()
     );
-    error = null;
     try {
       renderShrinkWrappingViewport.computeMinIntrinsicHeight(0);
     } on FlutterError catch (e) {
@@ -1734,7 +1732,7 @@ void main() {
     }
     expect(error, isNotNull);
     expect(
-      error!.toStringDeep(),
+      error.toStringDeep(),
       'FlutterError\n'
       '   RenderShrinkWrappingViewport does not support returning intrinsic\n'
       '   dimensions.\n'

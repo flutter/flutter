@@ -87,7 +87,7 @@ void main() {
       );
 
       {
-        FlutterError? error;
+        late FlutterError error;
         try {
           node.updateWith(
             config: config,
@@ -96,7 +96,6 @@ void main() {
         } on FlutterError catch (e) {
           error = e;
         }
-        expect(error, isNotNull);
         expect(error.toString(), equalsIgnoringHashCodes(
           'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
           'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
@@ -104,13 +103,13 @@ void main() {
           "The list's length has changed from 1 to 2."
         ));
         expect(
-          error!.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+          error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
           'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.',
         );
       }
 
       {
-        FlutterError? error;
+        late FlutterError error;
         final List<SemanticsNode> modifiedChildren = <SemanticsNode>[
           SemanticsNode()
             ..isMergedIntoParent = true
@@ -137,8 +136,7 @@ void main() {
         } on FlutterError catch (e) {
           error = e;
         }
-        expect(error, isNotNull);
-        expect(error!.toStringDeep(), equalsIgnoringHashCodes(
+        expect(error.toStringDeep(), equalsIgnoringHashCodes(
           'FlutterError\n'
           '   Failed to replace child semantics nodes because the list of\n'
           '   `SemanticsNode`s was mutated.\n'

@@ -325,14 +325,13 @@ void main() {
     (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(Container(key: key));
-    FlutterError? error;
+    late FlutterError error;
     try {
       AnimatedList.of(key.currentContext!);
     } on FlutterError catch (e) {
       error = e;
     }
-    expect(error, isNotNull);
-    expect(error!.diagnostics.length, 4);
+    expect(error.diagnostics.length, 4);
     expect(error.diagnostics[2].level, DiagnosticLevel.hint);
     expect(
       error.diagnostics[2].toStringDeep(),
