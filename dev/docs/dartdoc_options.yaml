@@ -1,0 +1,3 @@
+dartdoc:
+  ignore:
+    - no-documentable-libraries
