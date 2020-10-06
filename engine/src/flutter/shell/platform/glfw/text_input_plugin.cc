@@ -194,7 +194,8 @@ void TextInputPlugin::HandleMethodCall(
     if (base == -1 && extent == -1) {
       base = extent = 0;
     }
-    active_model_->SetEditingState(base, extent, text->value.GetString());
+    active_model_->SetText(text->value.GetString());
+    active_model_->SetSelection(base, extent);
   } else {
     result->NotImplemented();
     return;
