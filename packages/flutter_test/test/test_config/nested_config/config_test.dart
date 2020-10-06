@@ -4,7 +4,7 @@
 
 import '../config_test_utils.dart';
 
-void main() {
+void testExecutable() {
   testConfig(
     'cwd config takes precedence over parent config',
     '/test_config/nested_config',

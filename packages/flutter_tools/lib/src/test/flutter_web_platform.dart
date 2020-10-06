@@ -963,7 +963,7 @@ void main() async {
   LocalFileComparator comparator = LocalFileComparator(Uri.parse('$testUri'));
   goldenFileComparator = comparator;
 
-  ${testConfigFile != null ? 'test_config.main(() async {' : ''}
+  ${testConfigFile != null ? 'test_config.testExecutable(() async {' : ''}
   final commands = stdin
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())

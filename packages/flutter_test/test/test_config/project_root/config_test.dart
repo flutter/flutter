@@ -4,6 +4,6 @@
 
 import '../config_test_utils.dart';
 
-void main() {
+void testExecutable() {
   testConfig('pubspec.yaml causes config scanning to stop', null);
 }
