@@ -55,7 +55,7 @@ class DriveCommand extends RunCommandBase {
   }) {
     requiresPubspecYaml();
     addEnableExperimentation(hide: !verboseHelp);
-    addPublishObservatoryPort(enabledByDefault: false, verboseHelp: verboseHelp);
+    addPublishPort(enabledByDefault: false, verboseHelp: verboseHelp);
     argParser
       ..addFlag('keep-app-running',
         defaultsTo: null,
@@ -217,7 +217,7 @@ class DriveCommand extends RunCommandBase {
             : DebuggingOptions.enabled(
               getBuildInfo(),
               port: stringArg('web-port'),
-              disableObservatoryPublication: disableObservatoryPublication,
+              disablePortPublication: disablePortPublication,
             ),
           stayResident: false,
           urlTunneller: null,
@@ -503,7 +503,7 @@ Future<LaunchResult> _startApp(
       command.getBuildInfo(),
       startPaused: true,
       hostVmServicePort: webUri != null ? command.hostVmservicePort : 0,
-      disableObservatoryPublication: command.disableObservatoryPublication,
+      disablePortPublication: command.disablePortPublication,
       ddsPort: command.ddsPort,
       verboseSystemLogs: command.verboseSystemLogs,
       cacheSkSL: command.cacheSkSL,

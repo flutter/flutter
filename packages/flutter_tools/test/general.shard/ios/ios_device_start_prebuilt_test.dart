@@ -387,7 +387,7 @@ void main() {
         BuildInfo.debug,
         startPaused: true,
         disableServiceAuthCodes: true,
-        disableObservatoryPublication: true,
+        disablePortPublication: true,
         dartFlags: '--foo',
         enableSoftwareRendering: true,
         skiaDeterministicRendering: true,

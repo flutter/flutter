@@ -711,7 +711,7 @@ void main() {
 
       testOptionThatDefaultsToFalse(
         '--publish-observatory-port',
-            () => !debuggingOptions.disableObservatoryPublication,
+            () => !debuggingOptions.disablePortPublication,
       );
     });
   });
