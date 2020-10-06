@@ -98,7 +98,7 @@ class AppBarTheme with Diagnosticable {
     IconThemeData? iconTheme,
     TextTheme? textTheme,
     bool? centerTitle,
-    double? titleSpacing,    
+    double? titleSpacing,
   }) {
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
