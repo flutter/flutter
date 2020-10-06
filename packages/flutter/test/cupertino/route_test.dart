@@ -1493,7 +1493,7 @@ void main() {
       buildNavigator(
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
-          assert(false); // the test shouldn't call this.
+          assert(false); // The test shouldn't call this.
           return true;
         },
         transitionDelegate: detector,
@@ -1519,7 +1519,7 @@ void main() {
       buildNavigator(
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
-          assert(false); // the test shouldn't call this.
+          assert(false); // The test shouldn't call this.
           return true;
         },
         transitionDelegate: detector,
@@ -1547,7 +1547,7 @@ void main() {
       buildNavigator(
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
-          assert(false); // the test shouldn't call this.
+          assert(false); // The test shouldn't call this.
           return true;
         },
         transitionDelegate: detector,
@@ -1568,7 +1568,7 @@ void main() {
       buildNavigator(
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
-          assert(false); // the test shouldn't call this.
+          assert(false); // The test shouldn't call this.
           return true;
         },
         transitionDelegate: detector,
