@@ -1731,7 +1731,7 @@ void main() {
     expect(right('title'), 744.0); // horizontalTitleGap: 0
   });
 
-  testWidgets('ListTile horizontalTitleGap = (default)', (WidgetTester tester) async {
+  testWidgets('ListTile horizontalTitleGap = (default) && ListTile minLeadingWidth = (default)', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
         data: const MediaQueryData(
@@ -1806,47 +1806,6 @@ void main() {
     // minVerticalPadding: 80.0
     // 80 + 80 + 16(Title) = 176
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
-  });
-
-  testWidgets('ListTile minLeadingWidth = (default)', (WidgetTester tester) async {
-    Widget buildFrame(TextDirection textDirection) {
-      return MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
-        ),
-        child: Directionality(
-          textDirection: textDirection,
-          child: Material(
-            child: Container(
-              alignment: Alignment.topLeft,
-              child: const ListTile(
-                leading: Text('L'),
-                title: Text('title'),
-                trailing: Text('T'),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    double left(String text) => tester.getTopLeft(find.text(text)).dx;
-    double right(String text) => tester.getTopRight(find.text(text)).dx;
-
-    await tester.pumpWidget(buildFrame(TextDirection.ltr));
-
-    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
-    // minLeadingWidth: ListTileDefaultValue.minLeadingWidth (40.0)
-    // 72.0 = 16.0(Default contentPadding) + 16.0(Default horizontalTitleGap) + 40.0
-    expect(left('title'), 72.0);
-
-    await tester.pumpWidget(buildFrame(TextDirection.rtl));
-
-    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
-    // minLeadingWidth: ListTileDefaultValue.minLeadingWidth (40.0)
-    // 728.0 = 800.0 - (16.0(Default contentPadding) + 16.0(Default horizontalTitleGap) + 40.0)
-    expect(right('title'), 728.0);
   });
 
   testWidgets('ListTile minLeadingWidth = 60.0', (WidgetTester tester) async {
