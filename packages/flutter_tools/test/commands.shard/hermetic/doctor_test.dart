@@ -49,12 +49,10 @@ final Platform macPlatform = FakePlatform(
 );
 
 void main() {
-  MockProcessManager mockProcessManager;
   MockFlutterVersion mockFlutterVersion;
   BufferLogger logger;
 
   setUp(() {
-    mockProcessManager = MockProcessManager();
     mockFlutterVersion = MockFlutterVersion();
     logger = BufferLogger.test();
   });
