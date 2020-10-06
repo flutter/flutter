@@ -608,4 +608,44 @@ void main() {
     await tester.pump();
     expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
   });
+
+  testWidgets('RadioListTile contentPadding test', (WidgetTester tester) async {
+    final Type radioType = const Radio<bool>(
+      groupValue: true,
+      value: true,
+      onChanged: null,
+    ).runtimeType;
+
+    await tester.pumpWidget(
+      wrap(
+        child: Center(
+          child: RadioListTile<bool>(
+            groupValue: true,
+            value: true,
+            title: const Text('Title'),
+            onChanged: (_){},
+            contentPadding: const EdgeInsets.fromLTRB(8, 10, 15, 20),
+          )
+        )
+      )
+    );
+    
+    final Rect paddingRect = tester.getRect(find.byType(Padding));
+    final Rect radioRect = tester.getRect(find.byType(radioType));
+    final Rect titleRect = tester.getRect(find.text('Title'));
+
+    // Get the taller Rect of the Radio and Text widgets
+    final Rect tallerRect = radioRect.height > titleRect.height ? radioRect : titleRect;
+
+    // Get the extra height between the tallerRect and ListTile height
+    final double extraHeight = 56 - tallerRect.height;
+
+    // Check for correct top and bottom padding
+    expect(paddingRect.top, tallerRect.top - extraHeight / 2 - 10); //top padding
+    expect(paddingRect.bottom, tallerRect.bottom + extraHeight / 2 + 20); //bottom padding
+
+    // Check for correct left and right padding
+    expect(paddingRect.left, radioRect.left - 8); //left padding
+    expect(paddingRect.right, titleRect.right + 15); //right padding
+  });
 }
