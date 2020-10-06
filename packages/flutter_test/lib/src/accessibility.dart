@@ -244,7 +244,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
         if (widget is Text) {
           final TextStyle effectiveTextStyle = widget.style == null || widget.style!.inherit
-              ? defaultTextStyle.style!.merge(widget.style)
+              ? defaultTextStyle.style.merge(widget.style)
               : widget.style!;
           fontSize = effectiveTextStyle.fontSize;
           isBold = effectiveTextStyle.fontWeight == FontWeight.bold;

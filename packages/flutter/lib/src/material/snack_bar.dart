@@ -137,7 +137,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 
     return TextButton(
       style: ButtonStyle(
-        foregroundColor: MaterialStateProperty.resolveWith<Color>(resolveForegroundColor),
+        foregroundColor: MaterialStateProperty.resolveWith<Color?>(resolveForegroundColor),
       ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
@@ -444,7 +444,7 @@ class _SnackBarState extends State<SnackBar> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding),
               child: DefaultTextStyle(
-                style: contentTextStyle,
+                style: contentTextStyle!,
                 child: widget.content,
               ),
             ),
@@ -457,7 +457,7 @@ class _SnackBarState extends State<SnackBar> {
                   padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                 ),
               ),
-              child: widget.action,
+              child: widget.action!,
             ),
         ],
       ),

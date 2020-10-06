@@ -370,7 +370,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
       selectedIndex = (widget.groupValue == currentKey) ? index : selectedIndex;
       pressedIndex = (_pressedKey == currentKey) ? index : pressedIndex;
 
-      final TextStyle textStyle = DefaultTextStyle.of(context).style!.copyWith(
+      final TextStyle textStyle = DefaultTextStyle.of(context).style.copyWith(
         color: getTextColor(index, currentKey),
       );
       final IconThemeData iconTheme = IconThemeData(
